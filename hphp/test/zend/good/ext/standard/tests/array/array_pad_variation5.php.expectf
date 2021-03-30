@@ -1,32 +1,32 @@
 *** Testing array_pad() : Passing 2-d array to $pad_value argument ***
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
-  varray(3) {
-    varray(1) {
+  vec(3) {
+    vec(1) {
       int(1)
     }
-    varray(2) {
+    vec(2) {
       string(5) "hello"
       string(5) "world"
     }
-    darray(2) {
+    dict(2) {
       ["one"]=>
       int(1)
       ["two"]=>
       int(2)
     }
   }
-  varray(3) {
-    varray(1) {
+  vec(3) {
+    vec(1) {
       int(1)
     }
-    varray(2) {
+    vec(2) {
       string(5) "hello"
       string(5) "world"
     }
-    darray(2) {
+    dict(2) {
       ["one"]=>
       int(1)
       ["two"]=>
@@ -34,31 +34,31 @@ varray(5) {
     }
   }
 }
-varray(5) {
-  varray(3) {
-    varray(1) {
+vec(5) {
+  vec(3) {
+    vec(1) {
       int(1)
     }
-    varray(2) {
+    vec(2) {
       string(5) "hello"
       string(5) "world"
     }
-    darray(2) {
+    dict(2) {
       ["one"]=>
       int(1)
       ["two"]=>
       int(2)
     }
   }
-  varray(3) {
-    varray(1) {
+  vec(3) {
+    vec(1) {
       int(1)
     }
-    varray(2) {
+    vec(2) {
       string(5) "hello"
       string(5) "world"
     }
-    darray(2) {
+    dict(2) {
       ["one"]=>
       int(1)
       ["two"]=>

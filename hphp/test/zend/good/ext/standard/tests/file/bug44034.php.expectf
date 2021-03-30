@@ -1,16 +1,16 @@
 data://text/plain,foo\r\nbar\r\n
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(3) "bar"
 }
 data://text/plain,\r\nfoo\r\nbar\r\n
-varray(3) {
+vec(3) {
   string(0) ""
   string(3) "foo"
   string(3) "bar"
 }
 data://text/plain,foo\r\nbar
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(3) "bar"
 }

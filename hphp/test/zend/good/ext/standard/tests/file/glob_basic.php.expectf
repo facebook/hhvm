@@ -1,22 +1,22 @@
 *** Testing glob() : basic functions ***
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_basic/file.text"
   string(%d) "%s/glob_basic/wonder.txt"
   string(%d) "%s/glob_basic/wonder12345"
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_basic/wonder.txt"
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_basic/wonder.txt"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_basic/file.text"
   string(%d) "%s/glob_basic/wonder.txt"
 }
-varray(0) {
+vec(0) {
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_basic/file.text"
   string(%d) "%s/glob_basic/wonder.txt"
 }

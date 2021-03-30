@@ -1,62 +1,62 @@
-darray(1) {
+dict(1) {
   ["en_US"]=>
-  varray(3) {
+  vec(3) {
     string(1) "1"
     string(2) "10"
     string(1) "2"
   }
 }
-darray(1) {
+dict(1) {
   ["en_US numeric"]=>
-  varray(3) {
+  vec(3) {
     string(1) "1"
     string(1) "2"
     string(2) "10"
   }
 }
-darray(1) {
+dict(1) {
   ["lt_LT"]=>
-  varray(3) {
+  vec(3) {
     string(1) "1"
     string(2) "10"
     string(1) "2"
   }
 }
-darray(1) {
+dict(1) {
   ["lt_LT numeric"]=>
-  varray(3) {
+  vec(3) {
     string(1) "1"
     string(1) "2"
     string(2) "10"
   }
 }
-darray(1) {
+dict(1) {
   ["en_US"]=>
-  varray(3) {
+  vec(3) {
     string(1) "i"
     string(1) "k"
     string(1) "y"
   }
 }
-darray(1) {
+dict(1) {
   ["en_US numeric"]=>
-  varray(3) {
+  vec(3) {
     string(1) "i"
     string(1) "k"
     string(1) "y"
   }
 }
-darray(1) {
+dict(1) {
   ["lt_LT"]=>
-  varray(3) {
+  vec(3) {
     string(1) "i"
     string(1) "y"
     string(1) "k"
   }
 }
-darray(1) {
+dict(1) {
   ["lt_LT numeric"]=>
-  varray(3) {
+  vec(3) {
     string(1) "i"
     string(1) "y"
     string(1) "k"

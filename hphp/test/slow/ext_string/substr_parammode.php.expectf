@@ -1,1 +1,1 @@
-Warning: substr() expects parameter 1 to be string, %rv?%rarray given in %s/test/slow/ext_string/substr_parammode.php on line 5
+Warning: substr() expects parameter 1 to be string, vec given in %s/test/slow/ext_string/substr_parammode.php on line 5

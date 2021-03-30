@@ -2,14 +2,14 @@
 
 -- Testing date_parse() function with zero arguments --
 
-Warning: date_parse() expects exactly 1 parameter, 0 given in %s/date_parse_error.php on line 13
+Warning: date_parse() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/date/tests/date_parse_error.php on line 13
 
 -- Testing date_parse() function with more than expected no. of arguments --
 
-Warning: date_parse() expects exactly 1 parameter, 2 given in %s/date_parse_error.php on line 18
+Warning: date_parse() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/date/tests/date_parse_error.php on line 18
 
 -- Testing date_parse() function with unexpected characters in $date argument --
-darray(13) {
+dict(13) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -27,14 +27,14 @@ darray(13) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  darray(1) {
+  dict(1) {
     [4]=>
     string(29) "Double timezone specification"
   }
   ["error_count"]=>
   int(7)
   ["errors"]=>
-  darray(7) {
+  dict(7) {
     [0]=>
     string(20) "Unexpected character"
     [1]=>

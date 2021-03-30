@@ -1,5 +1,5 @@
 Basic test of POSIX times function
-darray(5) {
+dict(5) {
   ["ticks"]=>
   int(%i)
   ["utime"]=>

@@ -2,7 +2,7 @@
 
 -- Call natcasesort() --
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
   string(4) "img1"
   [2]=>

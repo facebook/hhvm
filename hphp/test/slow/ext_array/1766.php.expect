@@ -1,21 +1,21 @@
-varray(1) {
+vec(1) {
   int(0)
 }
-varray(1) {
+vec(1) {
   int(0)
 }
-varray(2) {
+vec(2) {
   int(9)
   int(10)
 }
-varray(2) {
+vec(2) {
   int(9)
   int(10)
 }
 bool(false)
 bool(false)
 bool(false)
-varray(3) {
+vec(3) {
   int(9223372036854775807)
   int(9223372036854775806)
   int(9223372036854775805)
@@ -24,27 +24,27 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-varray(2) {
+vec(2) {
   int(9)
   int(10)
 }
 bool(false)
 bool(false)
 bool(false)
-varray(3) {
+vec(3) {
   int(9223372036854775807)
   int(9223372036854775806)
   int(9223372036854775805)
 }
 bool(false)
 bool(false)
-varray(1) {
+vec(1) {
   float(0)
 }
-varray(1) {
+vec(1) {
   float(0)
 }
-varray(1) {
+vec(1) {
   int(0)
 }
 bool(false)

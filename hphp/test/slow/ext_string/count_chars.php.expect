@@ -1,7 +1,7 @@
 mode 0
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [104]=>
   int(2)
   [109]=>
@@ -12,9 +12,9 @@ darray(3) {
 string(60) "count_chars() expects parameter 1 to be string, object given"
 
 mode 1
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [104]=>
   int(2)
   [109]=>
@@ -25,7 +25,7 @@ darray(3) {
 string(60) "count_chars() expects parameter 1 to be string, object given"
 
 mode 2
-darray(256) {
+dict(256) {
   [0]=>
   int(0)
   [1]=>
@@ -539,7 +539,7 @@ darray(256) {
   [255]=>
   int(0)
 }
-darray(253) {
+dict(253) {
   [0]=>
   int(0)
   [1]=>

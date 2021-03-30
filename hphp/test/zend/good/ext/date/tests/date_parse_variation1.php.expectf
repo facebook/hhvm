@@ -2,137 +2,137 @@
 
 -- int 0 --
 
-Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- int 1 --
 
-Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- int 12345 --
 
-Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- int -12345 --
 
-Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- float 10.5 --
 
-Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- float -10.5 --
 
-Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- float .5 --
 
-Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- empty array --
 
-Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- int indexed array --
 
-Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- associative array --
 
-Warning: date_parse() expects parameter 1 to be string, darray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- nested arrays --
 
-Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- uppercase NULL --
 
-Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- lowercase null --
 
-Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- lowercase true --
 
-Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- lowercase false --
 
-Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- empty string DQ --
-darray(1) {
+dict(1) {
   [0]=>
   string(12) "Empty string"
 }
 
 -- empty string SQ --
-darray(1) {
+dict(1) {
   [0]=>
   string(12) "Empty string"
 }
 
 -- string DQ --
-darray(1) {
+dict(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- string SQ --
-darray(1) {
+dict(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- mixed case string --
-darray(1) {
+dict(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- heredoc --
-darray(1) {
+dict(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- instance of classWithToString --
 
-Warning: date_parse() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_parse() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 
 -- resource --
 
-Warning: date_parse() expects parameter 1 to be string, resource given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line %d
+Warning: date_parse() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/date/tests/date_parse_variation1.php on line 90
 bool(false)
 ===DONE===

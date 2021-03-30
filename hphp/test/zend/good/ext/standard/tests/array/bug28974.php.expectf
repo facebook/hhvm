@@ -1,4 +1,4 @@
-Array
+Vec
 (
     [0] => 0
     [1] => 1
@@ -7,14 +7,14 @@ Array
     [4] => 4
     [5] => 5
 )
-Array
+Vec
 (
     [0] => 2
     [1] => 3
     [2] => 4
     [3] => 5
 )
-Array
+Vec
 (
     [0] => 2
     [1] => 3
@@ -22,11 +22,11 @@ Array
     [3] => 5
 )
 print_r(array_splice($a,2,1));
-Array
+Dict
 (
     [0] => 2
 )
-$a is :Array
+$a is :Dict
 (
     [0] => 0
     [1] => 1
@@ -35,27 +35,27 @@ $a is :Array
     [4] => 5
 )
 print_r(array_splice($b,2,2147483645));
-Array
+Dict
 (
     [0] => 2
     [1] => 3
     [2] => 4
     [3] => 5
 )
-$b is :Array
+$b is :Dict
 (
     [0] => 0
     [1] => 1
 )
 print_r(array_splice($c,2,2147483646));
-Array
+Dict
 (
     [0] => 2
     [1] => 3
     [2] => 4
     [3] => 5
 )
-$c is :Array
+$c is :Dict
 (
     [0] => 0
     [1] => 1

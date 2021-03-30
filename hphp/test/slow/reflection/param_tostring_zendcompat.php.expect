@@ -1,4 +1,4 @@
-darray(9) {
+dict(9) {
   [0]=>
   string(36) "Parameter #0 [ <required> $untyped ]"
   [1]=>

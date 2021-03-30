@@ -1,12 +1,12 @@
 TypeAlias [ MyType : HH\Vector<HH\int> ]
-darray(4) {
+dict(4) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(9) "HH\Vector"
   ["generic_types"]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -15,28 +15,28 @@ darray(4) {
   string(6) "MyType"
 }
 TypeAlias [ MyOpaqueType : (function (HH\string, HH\Set<HH\int>): HH\void) ]
-darray(4) {
+dict(4) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(1) {
+  dict(1) {
     ["kind"]=>
     int(0)
   }
   ["param_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(6) "HH\Set"
       ["generic_types"]=>
-      varray(1) {
-        darray(1) {
+      vec(1) {
+        dict(1) {
           ["kind"]=>
           int(1)
         }

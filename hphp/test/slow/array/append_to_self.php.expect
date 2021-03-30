@@ -1,64 +1,64 @@
 ---- profiling ----
-varray(4) {
-  varray(0) {
+vec(4) {
+  vec(0) {
   }
-  varray(1) {
-    varray(0) {
+  vec(1) {
+    vec(0) {
     }
   }
-  varray(2) {
-    varray(0) {
+  vec(2) {
+    vec(0) {
     }
-    varray(1) {
-      varray(0) {
+    vec(1) {
+      vec(0) {
       }
     }
   }
-  varray(3) {
-    varray(0) {
+  vec(3) {
+    vec(0) {
     }
-    varray(1) {
-      varray(0) {
+    vec(1) {
+      vec(0) {
       }
     }
-    varray(2) {
-      varray(0) {
+    vec(2) {
+      vec(0) {
       }
-      varray(1) {
-        varray(0) {
+      vec(1) {
+        vec(0) {
         }
       }
     }
   }
 }
 ---- pgo ----
-varray(4) {
-  varray(0) {
+vec(4) {
+  vec(0) {
   }
-  varray(1) {
-    varray(0) {
+  vec(1) {
+    vec(0) {
     }
   }
-  varray(2) {
-    varray(0) {
+  vec(2) {
+    vec(0) {
     }
-    varray(1) {
-      varray(0) {
+    vec(1) {
+      vec(0) {
       }
     }
   }
-  varray(3) {
-    varray(0) {
+  vec(3) {
+    vec(0) {
     }
-    varray(1) {
-      varray(0) {
+    vec(1) {
+      vec(0) {
       }
     }
-    varray(2) {
-      varray(0) {
+    vec(2) {
+      vec(0) {
       }
-      varray(1) {
-        varray(0) {
+      vec(1) {
+        vec(0) {
         }
       }
     }

@@ -1,14 +1,14 @@
 Not in APC
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
 In APC
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }

@@ -1,32 +1,32 @@
 *** Testing array_fill_keys() : parameter variations ***
 
 -- Testing array_fill_keys() function with float --
-darray(1) {
+dict(1) {
   ["one"]=>
   float(2.4)
 }
 
 -- Testing array_fill_keys() function with null --
-darray(1) {
+dict(1) {
   ["one"]=>
   NULL
 }
 
 -- Testing array_fill_keys() function with object --
-darray(1) {
+dict(1) {
   ["one"]=>
   object(classA) (0) {
   }
 }
 
 -- Testing array_fill_keys() function with boolean --
-darray(1) {
+dict(1) {
   ["one"]=>
   bool(false)
 }
 
 -- Testing array_fill_keys() function with resource --
-darray(1) {
+dict(1) {
   ["one"]=>
   resource(4) of type (stream)
 }

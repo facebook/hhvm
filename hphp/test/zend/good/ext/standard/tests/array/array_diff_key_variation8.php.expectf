@@ -1,16 +1,16 @@
 *** Testing array_diff_key() : usage variation ***
 
 -- Testing array_diff_key() function with multi dimensional array --
-darray(1) {
+dict(1) {
   ["third"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(4) "zero"
   }
 }
-darray(1) {
+dict(1) {
   ["fourth"]=>
-  darray(1) {
+  dict(1) {
     [2]=>
     string(3) "two"
   }

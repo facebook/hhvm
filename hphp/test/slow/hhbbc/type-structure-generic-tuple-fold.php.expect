@@ -1,16 +1,16 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(3) {
-    darray(3) {
+  vec(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>
@@ -18,14 +18,14 @@ darray(2) {
         }
       }
     }
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>
@@ -33,14 +33,14 @@ darray(2) {
         }
       }
     }
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>

@@ -1,8 +1,8 @@
-darray(1) {
+dict(1) {
   [1]=>
   string(3) "bar"
 }
-darray(2) {
+dict(2) {
   [1]=>
   int(42)
   ["1"]=>

@@ -57,7 +57,7 @@ resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Call to readdir() --
-varray(16) {
+vec(16) {
   string(9) "-10.5.tmp"
   string(9) "-2345.tmp"
   string(1) "."

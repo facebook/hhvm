@@ -1,7 +1,7 @@
 *** Testing array_rand() : with associative array ***
 
 -- with all default and optional arguments --
-varray(6) {
+vec(6) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"

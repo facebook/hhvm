@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(1)
   ["opaque"]=>
@@ -6,7 +6,7 @@ darray(3) {
   ["alias"]=>
   string(4) "FBID"
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }

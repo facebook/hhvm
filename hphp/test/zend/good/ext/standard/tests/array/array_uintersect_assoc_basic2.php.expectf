@@ -1,5 +1,5 @@
 *** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "one"
 }

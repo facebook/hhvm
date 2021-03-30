@@ -20,15 +20,7 @@ Warning: Property 'A::p11' declared as type HH\dict, HH\vec assigned in %s/initi
 
 Warning: Property 'A::p12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
-Warning: Property 'A::p13' declared as type HH\vec_or_dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
 Warning: Property 'A::p14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Property 'A::p15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Property 'A::p16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Property 'A::p17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Property 'A::p20' declared as type Enum1, int assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
@@ -75,8 +67,6 @@ Warning: Property 'A::p42' declared as type string, int assigned in %s/initial-v
 Warning: Property 'A::p45' declared as type arraykey, bool assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Property 'A::p46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Property 'A::p47' declared as type HH\dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Property 'A::p49' declared as type Enum1, int assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
@@ -188,15 +178,7 @@ Warning: Static property 'A::s11' declared as type HH\dict, HH\vec assigned in %
 
 Warning: Static property 'A::s12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
-Warning: Static property 'A::s13' declared as type HH\vec_or_dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
 Warning: Static property 'A::s14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Static property 'A::s15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Static property 'A::s16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Static property 'A::s17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Static property 'A::s20' declared as type Enum1, int assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
@@ -241,8 +223,6 @@ Warning: Static property 'A::s41' declared as type int, string assigned in %s/in
 Warning: Static property 'A::s42' declared as type string, int assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Static property 'A::s46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad-repo-classes.inc on line 202
-
-Warning: Static property 'A::s47' declared as type HH\dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo-classes.inc on line 202
 
 Warning: Static property 'A::s49' declared as type Enum1, int assigned in %s/initial-value-bad-repo-classes.inc on line 202
 

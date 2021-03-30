@@ -1,6 +1,6 @@
 object(SimpleXMLElement) (3) {
   ["@attributes"]=>
-  darray(1) {
+  dict(1) {
     ["id"]=>
     string(5) "elem1"
   }

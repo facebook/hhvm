@@ -41,7 +41,7 @@ object(DOMProcessingInstruction) (18) {
 Warning: Attempted to serialize unserializable builtin class DOMProcessingInstruction in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(11) "appendChild"
@@ -108,7 +108,7 @@ object(A_DOMProcessingInstruction) (19) {
 Warning: Attempted to serialize unserializable builtin class A_DOMProcessingInstruction in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(11) "appendChild"

@@ -1,7 +1,9 @@
 bool(true)
 dict(0) {
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(0) {
+}
 bool(true)
 dict(3) {
   [1]=>
@@ -11,7 +13,15 @@ dict(3) {
   [3]=>
   string(1) "c"
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(3) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
 bool(true)
 dict(3) {
   ["a"]=>
@@ -21,7 +31,15 @@ dict(3) {
   ["c"]=>
   int(3)
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
 bool(true)
 dict(4) {
   ["first"]=>
@@ -41,7 +59,31 @@ dict(4) {
   ["fourth"]=>
   string(3) "abc"
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(4) {
+  ["first"]=>
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["second"]=>
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  ["third"]=>
+  int(100)
+  ["fourth"]=>
+  string(3) "abc"
+}
 bool(true)
 dict(4) {
   [123]=>
@@ -67,7 +109,50 @@ dict(4) {
   [987]=>
   string(3) "abc"
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(4) {
+  [123]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(3) "def"
+    [3]=>
+    string(3) "ghi"
+  }
+  [456]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  [789]=>
+  int(100)
+  [987]=>
+  string(3) "abc"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["b"]=>
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  ["c"]=>
+  int(100)
+  ["d"]=>
+  string(3) "abc"
+}
 bool(true)
 dict(4) {
   ["a"]=>
@@ -93,7 +178,6 @@ dict(4) {
   ["d"]=>
   string(3) "abc"
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
 bool(true)
 dict(2) {
   ["1"]=>
@@ -101,7 +185,11 @@ dict(2) {
   [1]=>
   int(200)
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(1) {
+  [1]=>
+  int(200)
+}
 bool(true)
 dict(5) {
   ["a"]=>
@@ -130,4 +218,31 @@ dict(5) {
   dict(0) {
   }
 }
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  ["d"]=>
+  dict(3) {
+    [1]=>
+    string(1) "a"
+    [2]=>
+    string(1) "b"
+    [3]=>
+    string(1) "c"
+  }
+  ["e"]=>
+  dict(0) {
+  }
+}

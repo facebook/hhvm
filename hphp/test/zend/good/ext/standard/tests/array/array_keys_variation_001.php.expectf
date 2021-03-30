@@ -1,30 +1,30 @@
 *** Testing array_keys() on various arrays ***
 -- Iteration 0 --
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 1 --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- Iteration 2 --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- Iteration 3 --
-varray(1) {
+vec(1) {
   string(5) "Hello"
 }
 
 -- Iteration 4 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 
 -- Iteration 5 --
-varray(4) {
+vec(4) {
   int(0)
   int(1)
   int(2)
@@ -32,7 +32,7 @@ varray(4) {
 }
 
 -- Iteration 6 --
-varray(4) {
+vec(4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -40,7 +40,7 @@ varray(4) {
 }
 
 -- Iteration 7 --
-varray(4) {
+vec(4) {
   int(0)
   int(1)
   int(2)
@@ -48,7 +48,7 @@ varray(4) {
 }
 
 -- Iteration 8 --
-varray(5) {
+vec(5) {
   int(0)
   int(1)
   string(1) "a"
@@ -57,7 +57,7 @@ varray(5) {
 }
 
 -- Iteration 9 --
-varray(5) {
+vec(5) {
   int(1)
   int(0)
   string(0) ""
@@ -66,14 +66,14 @@ varray(5) {
 }
 
 -- Iteration 10 --
-varray(3) {
+vec(3) {
   string(1) "a"
   string(2) "ab"
   string(2) "cd"
 }
 
 -- Iteration 11 --
-varray(4) {
+vec(4) {
   int(0)
   int(1)
   int(2)

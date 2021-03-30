@@ -1,7 +1,7 @@
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -13,7 +13,7 @@ darray(4) {
 }
 
 -- Iteration 2 --
-darray(5) {
+dict(5) {
   [0]=>
   float(10.5)
   [1]=>
@@ -27,7 +27,7 @@ darray(5) {
 }
 
 -- Iteration 3 --
-darray(2) {
+dict(2) {
   [0]=>
   NULL
   [1]=>
@@ -35,7 +35,7 @@ darray(2) {
 }
 
 -- Iteration 4 --
-darray(3) {
+dict(3) {
   [1]=>
   bool(false)
   [2]=>
@@ -45,7 +45,7 @@ darray(3) {
 }
 
 -- Iteration 5 --
-darray(2) {
+dict(2) {
   [0]=>
   string(0) ""
   [1]=>
@@ -53,7 +53,7 @@ darray(2) {
 }
 
 -- Iteration 6 --
-darray(3) {
+dict(3) {
   [0]=>
   string(6) "string"
   [1]=>
@@ -63,7 +63,7 @@ darray(3) {
 }
 
 -- Iteration 7 --
-darray(2) {
+dict(2) {
   [0]=>
   string(6) "binary"
   [1]=>
@@ -71,7 +71,7 @@ darray(2) {
 }
 
 -- Iteration 8 --
-darray(1) {
+dict(1) {
   [0]=>
   object(classA) (0) {
   }

@@ -1,7 +1,7 @@
 string(4) "test"
 string(1) "X"
 string(7) "X::test"
-varray(3) {
+vec(3) {
   string(21) "this_is_function_test"
   string(15) "this_is_class_x"
   string(22) "this_is_method_test::x"

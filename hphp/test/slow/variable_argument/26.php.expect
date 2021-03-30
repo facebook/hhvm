@@ -1,10 +1,10 @@
-varray(4) {
+vec(4) {
   int(10)
   int(20)
   int(30)
   int(40)
 }
-varray(4) {
+vec(4) {
   int(10)
   int(20)
   int(30)

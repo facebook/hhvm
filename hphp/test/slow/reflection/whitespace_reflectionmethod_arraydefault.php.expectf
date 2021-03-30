@@ -18,11 +18,11 @@ string(%d) "Class [ <user> class Herp ] {
       @@ %s/test/slow/reflection/whitespace_reflectionmethod_arraydefault.php 4 - 4
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $derp = array (
-        0 => 1,
-        1 => 2,
-        2 => 3,
-      ) ]
+        Parameter #0 [ <optional> $derp = vec [
+        1,
+        2,
+        3,
+      ] ]
       }
     }
   }

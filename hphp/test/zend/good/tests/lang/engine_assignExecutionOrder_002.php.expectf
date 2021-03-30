@@ -1,13 +1,13 @@
 A=hello B=bye
-varray(2) {
+vec(2) {
   int(10)
   int(10)
 }
-varray(2) {
+vec(2) {
   int(30)
   int(30)
 }
-varray(3) {
+vec(3) {
   int(1000)
   int(2000)
   int(3000)
@@ -15,6 +15,6 @@ varray(3) {
 L=100 M=200 N=300
 O= and P=
 10 20 40 50 60 70 80
-Out of bounds varray access: invalid index 1
-Out of bounds varray access: invalid index 1
+Out of bounds vec access: invalid index 1
+Out of bounds vec access: invalid index 1
 CC=10 DD=30

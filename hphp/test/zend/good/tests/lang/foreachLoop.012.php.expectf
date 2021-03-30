@@ -1,19 +1,19 @@
 Popping elements off end of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -23,12 +23,12 @@ darray(2) {
      iteration 0:  $k=0; $v=v.0
      iteration 1:  $k=1; $v=v.1
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -41,12 +41,12 @@ darray(3) {
      iteration 1:  $k=1; $v=v.1
      iteration 2:  $k=2; $v=v.2
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -62,7 +62,7 @@ darray(4) {
      iteration 2:  $k=2; $v=v.2
      iteration 3:  $k=3; $v=v.3
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 
@@ -70,19 +70,19 @@ darray(0) {
 Shift elements off start of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -92,12 +92,12 @@ darray(2) {
      iteration 0:  $k=0; $v=v.0
      iteration 1:  $k=1; $v=v.1
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -110,12 +110,12 @@ darray(3) {
      iteration 1:  $k=1; $v=v.1
      iteration 2:  $k=2; $v=v.2
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -131,7 +131,7 @@ darray(4) {
      iteration 2:  $k=2; $v=v.2
      iteration 3:  $k=3; $v=v.3
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 
@@ -139,19 +139,19 @@ darray(0) {
 Remove current element of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -161,12 +161,12 @@ darray(2) {
      iteration 0:  $k=0; $v=v.0
      iteration 1:  $k=1; $v=v.1
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -179,12 +179,12 @@ darray(3) {
      iteration 1:  $k=1; $v=v.1
      iteration 2:  $k=2; $v=v.2
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -200,7 +200,7 @@ darray(4) {
      iteration 2:  $k=2; $v=v.2
      iteration 3:  $k=3; $v=v.3
 --> State of array after loop:
-darray(0) {
+dict(0) {
 }
 
 
@@ -208,14 +208,14 @@ darray(0) {
 Adding elements to the end of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -224,7 +224,7 @@ darray(2) {
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -234,7 +234,7 @@ darray(2) {
      iteration 0:  $k=0; $v=v.0
      iteration 1:  $k=1; $v=v.1
 --> State of array after loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -247,7 +247,7 @@ darray(4) {
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -260,7 +260,7 @@ darray(3) {
      iteration 1:  $k=1; $v=v.1
      iteration 2:  $k=2; $v=v.2
 --> State of array after loop:
-darray(6) {
+dict(6) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -277,7 +277,7 @@ darray(6) {
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -293,7 +293,7 @@ darray(4) {
      iteration 2:  $k=2; $v=v.2
      iteration 3:  $k=3; $v=v.3
 --> State of array after loop:
-darray(8) {
+dict(8) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -317,14 +317,14 @@ darray(8) {
 Adding elements to the start of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "new.0"
   [1]=>
@@ -333,7 +333,7 @@ darray(2) {
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -343,7 +343,7 @@ darray(2) {
      iteration 0:  $k=0; $v=v.0
      iteration 1:  $k=1; $v=v.1
 --> State of array after loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "new.1"
   [1]=>
@@ -356,7 +356,7 @@ darray(4) {
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -369,7 +369,7 @@ darray(3) {
      iteration 1:  $k=1; $v=v.1
      iteration 2:  $k=2; $v=v.2
 --> State of array after loop:
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "new.2"
   [1]=>
@@ -386,7 +386,7 @@ darray(6) {
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "v.0"
   [1]=>
@@ -402,7 +402,7 @@ darray(4) {
      iteration 2:  $k=2; $v=v.2
      iteration 3:  $k=3; $v=v.3
 --> State of array after loop:
-darray(8) {
+dict(8) {
   [0]=>
   string(5) "new.3"
   [1]=>

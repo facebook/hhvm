@@ -1,5 +1,5 @@
 resource(1) of type (stream)
-varray(2) {
+vec(2) {
   resource(1) of type (stream)
   resource(1) of type (stream)
 }

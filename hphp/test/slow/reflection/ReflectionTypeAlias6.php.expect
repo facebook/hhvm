@@ -1,12 +1,12 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["value"]=>
-      darray(2) {
+      dict(2) {
         ["kind"]=>
         int(101)
         ["classname"]=>

@@ -1,11 +1,7 @@
 bool(true)
 bool(true)
-
-Warning: array_mark_legacy() called on vec in %s/pre-migration.php on line %d
-vec(0) {
+varray(0) {
 }
-
-Warning: array_mark_legacy() called on dict in %s/pre-migration.php on line %d
-dict(0) {
+darray(0) {
 }
 bool(false)

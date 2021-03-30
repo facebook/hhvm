@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["x"]=>
   int(4)
 }
-darray(0) {
+dict(0) {
 }

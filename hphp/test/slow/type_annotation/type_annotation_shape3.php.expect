@@ -1,16 +1,16 @@
 string(41) "HH\shape(D::F1=>HH\int, D::F2=>HH\string)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     [42]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
     ["bar"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }

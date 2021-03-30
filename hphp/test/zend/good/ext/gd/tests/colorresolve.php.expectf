@@ -1,19 +1,19 @@
 FF00FF
-Array
+Dict
 (
     [red] => 255
     [green] => 0
     [blue] => 255
     [alpha] => 0
 )
-Array
+Dict
 (
     [red] => 255
     [green] => 0
     [blue] => 0
     [alpha] => 0
 )
-Array
+Dict
 (
     [red] => 246
     [green] => 10
@@ -21,21 +21,21 @@ Array
     [alpha] => 0
 )
 64FF00FF
-Array
+Dict
 (
     [red] => 255
     [green] => 0
     [blue] => 255
     [alpha] => 100
 )
-Array
+Dict
 (
     [red] => 255
     [green] => 0
     [blue] => 0
     [alpha] => 1
 )
-Array
+Dict
 (
     [red] => 246
     [green] => 10

@@ -8,10 +8,10 @@ bool(true)
 ----------------------------------
 bool(true)
 ----------------------------------
-Array
+Vec
 (
-    [0] => %s/expressions/source_file_inclusion/require_once.php
-    [1] => %s/expressions/source_file_inclusion/Positions.inc
-    [2] => %s/expressions/source_file_inclusion/Point.inc
-    [3] => %s/expressions/source_file_inclusion/Circle.inc
+    [0] => %s/test/slow/spec/tests/expressions/source_file_inclusion/require_once.php
+    [1] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Positions.inc
+    [2] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Point.inc
+    [3] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Circle.inc
 )

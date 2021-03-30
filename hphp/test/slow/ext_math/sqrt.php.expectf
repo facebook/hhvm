@@ -1,6 +1,5 @@
-
 Warning: sqrt() expects parameter 1 to be double, string given in %s/test/slow/ext_math/sqrt.php on line 7
 
 Warning: sqrt() expects parameter 1 to be double, string given in %s/test/slow/ext_math/sqrt.php on line 8
 
-Warning: sqrt() expects parameter 1 to be double, %rv?%rarray given in %s/test/slow/ext_math/sqrt.php on line 9
+Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/ext_math/sqrt.php on line 9

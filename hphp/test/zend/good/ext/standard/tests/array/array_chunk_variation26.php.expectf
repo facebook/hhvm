@@ -1,4 +1,4 @@
-varray(1) {
+vec(1) {
   int(0)
 }
 [0]
@@ -7,20 +7,20 @@ NULL
 NULL
 
 [1]
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     [0]=>
     int(0)
   }
 }
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     [0]=>
     int(0)
   }
 }
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     [0]=>
     int(0)
   }

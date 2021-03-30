@@ -1,16 +1,16 @@
-darray(3) {
+dict(3) {
   ["a1"]=>
   int(1)
   ["a2"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
   ["a3"]=>
-  darray(2) {
+  dict(2) {
     ["a"]=>
-    varray(3) {
+    vec(3) {
       int(10)
       int(20)
       int(30)
@@ -19,19 +19,19 @@ darray(3) {
     string(1) "b"
   }
 }
-darray(3) {
+dict(3) {
   ["a1"]=>
   int(1)
   ["a2"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
   ["a3"]=>
-  darray(2) {
+  dict(2) {
     ["a"]=>
-    varray(3) {
+    vec(3) {
       int(10)
       int(20)
       int(30)

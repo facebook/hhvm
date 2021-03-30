@@ -1,7 +1,0 @@
-bool(false)
-bool(false)
-bool(true)
-dict(1) {
-  ["x"]=>
-  int(3)
-}

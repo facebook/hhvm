@@ -6,7 +6,7 @@ Point $p = ID:1(2,5)
 
 Inside Point::serialize, ID:1(2,5)
 
-string(47) "C:5:"Point":30:{a:2:{s:1:"y";i:5;s:1:"x";i:2;}}"
+string(47) "C:5:"Point":30:{D:2:{s:1:"y";i:5;s:1:"x";i:2;}}"
 ------
 
 Inside Point::unserialize, ID:2(2,5)
@@ -34,7 +34,7 @@ Inside ColoredPoint::serialize, ID:3(9,8)2
 
 Inside Point::serialize, ID:3(9,8)2
 
-string(100) "C:12:"ColoredPoint":75:{a:2:{s:5:"color";i:2;s:8:"baseData";s:30:"a:2:{s:1:"y";i:8;s:1:"x";i:9;}";}}"
+string(100) "C:12:"ColoredPoint":75:{D:2:{s:5:"color";i:2;s:8:"baseData";s:30:"D:2:{s:1:"y";i:8;s:1:"x";i:9;}";}}"
 
 Inside Point::unserialize, ID:4(9,8)2
 

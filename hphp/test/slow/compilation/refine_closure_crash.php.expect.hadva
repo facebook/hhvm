@@ -1,6 +1,0 @@
-dict(2) {
-  ["thing1_id"]=>
-  string(1) "x"
-  ["thing2_id"]=>
-  NULL
-}

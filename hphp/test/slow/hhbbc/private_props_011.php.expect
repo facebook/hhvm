@@ -1,6 +1,6 @@
 object(A) (2) {
   ["x":"A":private]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(0)
   }
@@ -8,7 +8,7 @@ object(A) (2) {
   string(6) "string"
 }
 string(6) "string"
-darray(1) {
+dict(1) {
   [0]=>
   int(0)
 }

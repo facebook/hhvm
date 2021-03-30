@@ -1,7 +1,7 @@
-varray(3) {
-  darray(7) {
+vec(3) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
     int(11)
     ["function"]=>
@@ -18,9 +18,9 @@ varray(3) {
       int(1)
     }
   }
-  darray(7) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
     int(18)
     ["function"]=>
@@ -37,7 +37,7 @@ varray(3) {
       int(1)
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -45,10 +45,10 @@ varray(3) {
     }
   }
 }
-varray(3) {
-  darray(7) {
+vec(3) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
     int(11)
     ["function"]=>
@@ -65,9 +65,9 @@ varray(3) {
       int(65537)
     }
   }
-  darray(8) {
+  dict(8) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
     int(19)
     ["function"]=>
@@ -86,7 +86,7 @@ varray(3) {
     ["metadata"]=>
     string(8) "I am foo"
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>

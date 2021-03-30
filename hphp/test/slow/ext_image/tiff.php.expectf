@@ -1,4 +1,4 @@
-darray(25) {
+dict(25) {
   ["FileName"]=>
   string(11) "gh1193.tiff"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ darray(25) {
   ["SectionsFound"]=>
   string(13) "ANY_TAG, IFD0"
   ["COMPUTED"]=>
-  darray(5) {
+  dict(5) {
     ["html"]=>
     string(22) "width="20" height="20""
     ["Height"]=>
@@ -31,7 +31,7 @@ darray(25) {
   ["ImageLength"]=>
   int(20)
   ["BitsPerSample"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(8)
     [1]=>

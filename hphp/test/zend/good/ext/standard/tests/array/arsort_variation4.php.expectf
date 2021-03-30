@@ -2,7 +2,7 @@
 
 -- Testing arsort() 'flag' value is defualt --
 bool(true)
-darray(3) {
+dict(3) {
   [3]=>
   int(555)
   [1]=>
@@ -13,7 +13,7 @@ darray(3) {
 
 -- Testing arsort() 'flag' = SORT_REGULAR --
 bool(true)
-darray(3) {
+dict(3) {
   [3]=>
   int(555)
   [1]=>
@@ -24,7 +24,7 @@ darray(3) {
 
 -- Testing arsort() 'flag' = SORT_NUMERIC --
 bool(true)
-darray(3) {
+dict(3) {
   [3]=>
   int(555)
   [1]=>

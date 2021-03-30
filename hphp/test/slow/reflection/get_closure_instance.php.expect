@@ -1,6 +1,6 @@
 bool(true)
 int(42)
-varray(0) {
+vec(0) {
 }
 string(6) "static"
 ReflectionException: Given object is not an instance of the class this method was declared in

@@ -1,52 +1,52 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
   }
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(4)
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(10)
       ["elem_types"]=>
-      varray(2) {
-        darray(2) {
+      vec(2) {
+        dict(2) {
           ["kind"]=>
           int(10)
           ["elem_types"]=>
-          varray(2) {
-            darray(1) {
+          vec(2) {
+            dict(1) {
               ["kind"]=>
               int(1)
             }
-            darray(1) {
+            dict(1) {
               ["kind"]=>
               int(4)
             }
           }
         }
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }
@@ -54,16 +54,16 @@ darray(2) {
     }
   }
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }

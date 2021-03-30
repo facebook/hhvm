@@ -1,6 +1,5 @@
+Warning: imageistruecolor() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imageistruecolor_error1.php on line 5
 
-Warning: imageistruecolor() expects parameter 1 to be resource, string given in %s/imageistruecolor_error1.php on line 5
+Warning: supplied resource is not a valid Image resource in %s/test/zend/good/ext/gd/tests/imageistruecolor_error1.php on line 6
 
-Warning: supplied resource is not a valid Image resource in %s/imageistruecolor_error1.php on line 6
-
-Warning: imageistruecolor() expects parameter 1 to be resource, %rv?%rarray given in %s/imageistruecolor_error1.php on line 7
+Warning: imageistruecolor() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imageistruecolor_error1.php on line 7

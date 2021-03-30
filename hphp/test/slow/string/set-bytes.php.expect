@@ -27,7 +27,7 @@ float(128.25)
 float(256.125)
 >>> End of primitive types <<<
 >>> Testing vecs <<<
-darray(6) {
+dict(6) {
   [1]=>
   int(0)
   [2]=>
@@ -41,7 +41,7 @@ darray(6) {
   [6]=>
   int(45)
 }
-darray(6) {
+dict(6) {
   [1]=>
   int(1)
   [2]=>

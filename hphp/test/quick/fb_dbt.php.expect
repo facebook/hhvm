@@ -1,4 +1,4 @@
-varray(4) {
+vec(4) {
   string(27) "test/quick/fb_dbt.php@11@h@"
   string(30) "test/quick/fb_dbt.php@85@C::f@"
   string(27) "test/quick/fb_dbt.php@90@g@"

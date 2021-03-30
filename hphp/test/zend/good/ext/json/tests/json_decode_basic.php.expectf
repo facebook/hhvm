@@ -41,12 +41,12 @@ string(13) "Hello World
 string(13) "Hello World
 "
 -- Iteration 14 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 15 --
-darray(5) {
+dict(5) {
   [0]=>
   int(1)
   [1]=>
@@ -58,7 +58,7 @@ darray(5) {
   [4]=>
   int(5)
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(1)
   [1]=>
@@ -83,7 +83,7 @@ object(stdClass) (5) {
   ["myString"]=>
   string(11) "Hello World"
 }
-darray(5) {
+dict(5) {
   ["myInt"]=>
   int(99)
   ["myFloat"]=>
@@ -110,7 +110,7 @@ object(stdClass) (6) {
   ["June"]=>
   int(30)
 }
-darray(6) {
+dict(6) {
   ["Jan"]=>
   int(31)
   ["Feb"]=>
@@ -130,6 +130,6 @@ string(0) ""
 -- Iteration 19 --
 object(stdClass) (0) {
 }
-darray(0) {
+dict(0) {
 }
 ===Done===

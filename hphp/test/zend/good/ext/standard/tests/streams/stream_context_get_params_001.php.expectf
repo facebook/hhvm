@@ -1,89 +1,89 @@
 resource(4) of type (stream-context)
-darray(1) {
+dict(1) {
   ["options"]=>
-  darray(0) {
+  dict(0) {
   }
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["bar"]=>
       string(3) "baz"
     }
   }
 }
 bool(true)
-darray(2) {
+dict(2) {
   ["notification"]=>
   string(28) "stream_notification_callback"
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["bar"]=>
       string(3) "baz"
     }
   }
 }
 bool(true)
-darray(2) {
+dict(2) {
   ["notification"]=>
-  varray(2) {
+  vec(2) {
     string(6) "stream"
     string(21) "notification_callback"
   }
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["bar"]=>
       string(3) "baz"
     }
   }
 }
-darray(2) {
+dict(2) {
   ["notification"]=>
-  varray(2) {
+  vec(2) {
     string(6) "stream"
     string(21) "notification_callback"
   }
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["bar"]=>
       string(3) "baz"
     }
   }
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
-  darray(1) {
+  dict(1) {
     ["bar"]=>
     string(3) "baz"
   }
 }
-darray(2) {
+dict(2) {
   ["notification"]=>
-  varray(2) {
+  vec(2) {
     string(6) "stream"
     string(21) "notification_callback"
   }
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["bar"]=>
       string(3) "baz"
     }
   }
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
-  darray(1) {
+  dict(1) {
     ["bar"]=>
     string(3) "baz"
   }

@@ -1,31 +1,31 @@
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["http"]=>
-  darray(1) {
+  dict(1) {
     ["header"]=>
     string(14) "X-Hello: world"
   }
 }
-darray(1) {
+dict(1) {
   ["http"]=>
-  darray(1) {
+  dict(1) {
     ["header"]=>
     string(14) "X-Hello: world"
   }
 }
-darray(1) {
+dict(1) {
   ["http"]=>
-  darray(2) {
+  dict(2) {
     ["header"]=>
     string(14) "X-Hello: world"
     ["method"]=>
     string(4) "POST"
   }
 }
-darray(1) {
+dict(1) {
   ["http"]=>
-  darray(2) {
+  dict(2) {
     ["header"]=>
     string(14) "X-Hello: world"
     ["method"]=>

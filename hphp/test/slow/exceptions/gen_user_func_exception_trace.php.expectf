@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   string(4) "args"
   string(2) "go"
   string(4) "here"

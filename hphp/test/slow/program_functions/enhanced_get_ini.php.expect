@@ -1,9 +1,9 @@
 string(1) "2"
-varray(2) {
+vec(2) {
   string(2) "ls"
   string(2) "cp"
 }
-darray(3) {
+dict(3) {
   ["MYBOOL"]=>
   string(1) "1"
   ["MYINT"]=>
@@ -11,7 +11,7 @@ darray(3) {
   ["MYSTR"]=>
   string(13) "Custom String"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(30) "Key will be next available int"
   [1]=>

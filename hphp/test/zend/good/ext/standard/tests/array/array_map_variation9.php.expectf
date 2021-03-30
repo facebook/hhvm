@@ -1,6 +1,6 @@
 *** Testing array_map() : array with binary data for 'arr1' argument ***
 -- checking binary safe array with one parameter callback function --
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "hello"
   [1]=>

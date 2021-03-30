@@ -1,1 +1,1 @@
-Out of bounds darray access: invalid index "bogus"
+Out of bounds dict access: invalid index "bogus"

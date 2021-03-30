@@ -37,7 +37,7 @@ object(DOMDocumentFragment) (16) {
 Warning: Attempted to serialize unserializable builtin class DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(20) {
+vec(20) {
   string(11) "__construct"
   string(9) "appendXML"
   string(11) "appendChild"
@@ -101,7 +101,7 @@ object(A_DOMDocumentFragment) (17) {
 Warning: Attempted to serialize unserializable builtin class A_DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(20) {
+vec(20) {
   string(11) "__construct"
   string(9) "appendXML"
   string(11) "appendChild"

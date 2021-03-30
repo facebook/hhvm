@@ -1,13 +1,13 @@
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     int(0)
     int(1)
     int(2)
   }
 }
 string(3) "abc"
-Out of bounds varray access: invalid index 0
-varray(1) {
+Out of bounds vec access: invalid index 0
+vec(1) {
   int(10)
 }
 int(10)

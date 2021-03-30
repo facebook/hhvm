@@ -75,7 +75,7 @@ object(DOMDocument) (35) {
 Warning: Attempted to serialize unserializable builtin class DOMDocument in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(49) {
+vec(49) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(15) "createAttribute"
@@ -206,7 +206,7 @@ object(A_DOMDocument) (36) {
 Warning: Attempted to serialize unserializable builtin class A_DOMDocument in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(49) {
+vec(49) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(15) "createAttribute"

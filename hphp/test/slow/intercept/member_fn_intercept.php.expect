@@ -1,7 +1,7 @@
-varray(5) {
+vec(5) {
   string(6) "A::foo"
   string(1) "A"
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -10,10 +10,10 @@ varray(5) {
 }
 object(lol) (0) {
 }
-varray(5) {
+vec(5) {
   string(6) "A::foo"
   string(1) "A"
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }

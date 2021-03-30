@@ -1,7 +1,7 @@
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "c"
 }
-varray(1) {
+vec(1) {
   string(1) "c"
 }

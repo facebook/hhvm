@@ -1,83 +1,83 @@
 Function provider ...$fns
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 Function provider (function (int...):void) ...$fns
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 Function provider lambda1
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 Function provider lambda2
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)

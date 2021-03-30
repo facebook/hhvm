@@ -1,12 +1,12 @@
 *** Testing array_diff_key() : usage variation ***
 
 -- Testing array_diff_key() function with float indexed array --
-darray(2) {
+dict(2) {
   [20]=>
   string(2) "20"
   [-20]=>
   string(3) "-20"
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

@@ -1,11 +1,11 @@
-darray(1) {
+dict(1) {
   [0]=>
-  darray(0) {
+  dict(0) {
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
-  darray(0) {
+  dict(0) {
   }
   [1]=>
   int(99)

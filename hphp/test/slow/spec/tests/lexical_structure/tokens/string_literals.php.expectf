@@ -48,15 +48,15 @@ string(23) "Undefined variable: zz_"
 string(24) "Undefined variable: zzz3"
 string(9) "5.67E+14+"
 >$1|$&<
-Array to string conversion
-Invalid varray key: expected a key of type int, string given
-Array to string conversion
-Invalid varray key: expected a key of type int, string given
-Invalid varray key: expected a key of type int, string given
-Invalid varray key: expected a key of type int, string given
-Invalid varray key: expected a key of type int, string given
+Vec to string conversion
+Invalid vec key: expected a key of type int, string given
+Vec to string conversion
+Invalid vec key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
 $colors[2] contains >blue<
-Array to string conversion
+Vec to string conversion
 $myC->p1 = >2<
 >-34X|-34 X|ABC_|ABC _|13|1 3|5.67E+14+|5.67E+14 +<
 >{}|{q}|}|{<

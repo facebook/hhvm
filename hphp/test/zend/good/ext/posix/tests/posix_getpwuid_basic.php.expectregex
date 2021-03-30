@@ -1,5 +1,5 @@
 Basic test of POSIX getpwuid
-Array
+Dict
 \(
     \[name\] => [^\r\n]+
     \[passwd\] => [^\r\n]+

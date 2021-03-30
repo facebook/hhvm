@@ -1,14 +1,14 @@
 Testing glob() with relative paths:
-varray(1) {
+vec(1) {
   string(11) "./file.text"
 }
-varray(1) {
+vec(1) {
   string(22) "../glob_test/file.text"
 }
-varray(1) {
+vec(1) {
   string(19) "glob_test/file.text"
 }
-varray(1) {
+vec(1) {
   string(9) "glob_test"
 }
 Done

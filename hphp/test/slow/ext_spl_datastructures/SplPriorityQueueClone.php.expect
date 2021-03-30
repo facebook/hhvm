@@ -9,14 +9,14 @@ Second in rank with SplPriorityQueue::EXTR_PRIORITY:
 2
 
 Get top with SplPriorityQueue::EXTR_BOTH:
-Array
+Dict
 (
     [data] => centurion
     [priority] => 2
 )
 
 Second in rank with SplPriorityQueue::EXTR_BOTH:
-Array
+Dict
 (
     [data] => munifex
     [priority] => 1
@@ -34,14 +34,14 @@ Second in rank with SplPriorityQueue::EXTR_PRIORITY:
 2
 
 Get top with SplPriorityQueue::EXTR_BOTH:
-Array
+Dict
 (
     [data] => centurion
     [priority] => 2
 )
 
 Second in rank with SplPriorityQueue::EXTR_BOTH:
-Array
+Dict
 (
     [data] => munifex
     [priority] => 1

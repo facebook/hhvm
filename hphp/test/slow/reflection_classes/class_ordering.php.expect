@@ -1,12 +1,12 @@
 interfaces:hhvm differs slightly from PHP5 slightly here
-Array
+Vec
 (
     [0] => J
     [1] => X
     [2] => I
 )
 constants:
-Array
+Dict
 (
     [ABS] => const from Abs
     [J] => const from J

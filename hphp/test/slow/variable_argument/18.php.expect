@@ -1,10 +1,10 @@
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   string(4) "test"
 }
 int(3)
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

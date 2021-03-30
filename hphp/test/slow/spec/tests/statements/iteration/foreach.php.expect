@@ -15,7 +15,7 @@ white
 black
 blue
 black
-varray(3) {
+vec(3) {
   string(3) "red"
   string(5) "white"
   string(4) "blue"
@@ -24,19 +24,19 @@ varray(3) {
   mnop  xyz
 ------
 int(0)
-varray(2) {
+vec(2) {
   int(10)
   int(20)
 }
 ------
 int(1)
-varray(2) {
+vec(2) {
   float(1.2)
   float(4.5)
 }
 ------
 int(2)
-varray(2) {
+vec(2) {
   bool(true)
   string(3) "abc"
 }

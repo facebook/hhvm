@@ -1,4 +1,4 @@
-darray(28) {
+dict(28) {
   ["FileName"]=>
   string(12) "image010.jpg"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ darray(28) {
   ["SectionsFound"]=>
   string(19) "ANY_TAG, IFD0, EXIF"
   ["COMPUTED"]=>
-  darray(9) {
+  dict(9) {
     ["html"]=>
     string(20) "width="1" height="1""
     ["Height"]=>

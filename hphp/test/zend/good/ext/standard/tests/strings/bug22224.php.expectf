@@ -1,5 +1,5 @@
 string(13) "Object,Object"
-darray(2) {
+dict(2) {
   [0]=>
   object(foo) (0) {
   }

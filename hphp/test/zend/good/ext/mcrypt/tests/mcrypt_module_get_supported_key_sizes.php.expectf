@@ -1,7 +1,7 @@
-varray(3) {
+vec(3) {
   int(16)
   int(24)
   int(32)
 }
-varray(0) {
+vec(0) {
 }

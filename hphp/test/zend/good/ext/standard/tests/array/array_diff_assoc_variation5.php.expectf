@@ -1,24 +1,24 @@
 *** Testing array_diff_assoc() : usage variations ***
 -- Result of comparing integers and floating point numbers: --
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "a"
 }
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "b"
 }
 -- Result of comparing integers and strings containing an integers : --
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "a"
 }
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "c"
 }
 -- Result of comparing integers and strings containing floating points : --
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -28,7 +28,7 @@ darray(4) {
   [3]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
@@ -39,16 +39,16 @@ darray(4) {
   string(1) "d"
 }
 -- Result of comparing floating points and strings containing integers : --
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "b"
 }
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "c"
 }
 -- Result of comparing floating points and strings containing floating point: --
-darray(4) {
+dict(4) {
   [0]=>
   float(1)
   [1]=>
@@ -58,7 +58,7 @@ darray(4) {
   [3]=>
   string(1) "b"
 }
-darray(4) {
+dict(4) {
   ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
@@ -69,7 +69,7 @@ darray(4) {
   string(1) "d"
 }
 -- Result of comparing strings containing integers and strings containing floating points : --
-darray(4) {
+dict(4) {
   [0]=>
   string(1) "1"
   [1]=>
@@ -79,7 +79,7 @@ darray(4) {
   [3]=>
   string(1) "c"
 }
-darray(4) {
+dict(4) {
   ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
@@ -90,7 +90,7 @@ darray(4) {
   string(1) "d"
 }
 -- Result of comparing more than two arrays: --
-darray(1) {
+dict(1) {
   [3]=>
   string(1) "a"
 }

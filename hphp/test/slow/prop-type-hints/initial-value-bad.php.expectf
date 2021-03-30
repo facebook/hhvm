@@ -20,15 +20,7 @@ Warning: Property 'A::p11' declared as type HH\dict, HH\vec assigned in %s/initi
 
 Warning: Property 'A::p12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Property 'A::p13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
-
 Warning: Property 'A::p14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Property 'A::p15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Property 'A::p16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Property 'A::p17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Property 'A::p20' declared as type Enum1, int assigned in %s/initial-value-bad.inc on line 204
 
@@ -87,8 +79,6 @@ Warning: Property 'A::p44' declared as type HH\Map, HH\Vector assigned in %s/ini
 Warning: Property 'A::p45' declared as type arraykey, bool assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Property 'A::p46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.inc on line 206
-
-Warning: Property 'A::p47' declared as type HH\dict, %rd?%rarray assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Property 'A::p49' declared as type Enum1, int assigned in %s/initial-value-bad.inc on line 206
 
@@ -188,15 +178,7 @@ Warning: Static property 'A::s11' declared as type HH\dict, HH\vec assigned in %
 
 Warning: Static property 'A::s12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Static property 'A::s13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
-
 Warning: Static property 'A::s14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Static property 'A::s15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Static property 'A::s16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad.inc on line 204
-
-Warning: Static property 'A::s17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Static property 'A::s20' declared as type Enum1, int assigned in %s/initial-value-bad.inc on line 204
 
@@ -253,8 +235,6 @@ Warning: Static property 'A::s43' declared as type HH\Vector, HH\Map assigned in
 Warning: Static property 'A::s44' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Static property 'A::s46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.inc on line 206
-
-Warning: Static property 'A::s47' declared as type HH\dict, %rd?%rarray assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Static property 'A::s49' declared as type Enum1, int assigned in %s/initial-value-bad.inc on line 206
 

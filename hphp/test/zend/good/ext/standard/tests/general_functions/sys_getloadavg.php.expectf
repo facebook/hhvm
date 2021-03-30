@@ -1,5 +1,5 @@
 Warning: sys_getloadavg() expects exactly 0 parameters, 1 given in %s/sys_getloadavg.php on line 3
-varray(3) {
+vec(3) {
   float(%f)
   float(%f)
   float(%f)

@@ -1,5 +1,5 @@
 *** Testing array_flip() : 'input' array with repeatitive keys/values ***
-darray(3) {
+dict(3) {
   ["VaLuE"]=>
   int(1)
   ["VALUE"]=>
@@ -7,7 +7,7 @@ darray(3) {
   [5]=>
   int(3)
 }
-darray(3) {
+dict(3) {
   ["FOUR"]=>
   string(3) "key"
   ["TWO"]=>
@@ -15,13 +15,13 @@ darray(3) {
   [3]=>
   string(5) "three"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(5) "index"
   [2]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   ["value1"]=>
   string(4) "key3"
   [2]=>

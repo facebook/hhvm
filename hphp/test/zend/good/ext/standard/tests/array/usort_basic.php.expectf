@@ -2,7 +2,7 @@
 
 -- Numeric array with default keys --
 bool(true)
-varray(7) {
+vec(7) {
   int(1)
   int(2)
   int(3)
@@ -14,7 +14,7 @@ varray(7) {
 
 -- String array with default keys --
 bool(true)
-varray(4) {
+vec(4) {
   string(4) "This"
   string(1) "a"
   string(2) "is"
@@ -23,7 +23,7 @@ varray(4) {
 
 -- Associative array with numeric keys --
 bool(true)
-darray(5) {
+dict(5) {
   [0]=>
   int(1)
   [1]=>
@@ -38,7 +38,7 @@ darray(5) {
 
 -- Associative array with string keys --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>

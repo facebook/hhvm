@@ -2,171 +2,171 @@
 
 --int 0--
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --int 1--
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --int 12345--
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --int -12345--
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --empty array--
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --int indexed array--
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --associative array--
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --nested arrays--
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --uppercase NULL--
 string(5) "00:29"
-float(0.495%d)
+float(0.49504901273349)
 int(1218175182)
 
 --lowercase null--
 string(5) "00:29"
-float(0.495%d)
+float(0.49504901273349)
 int(1218175182)
 
 --lowercase true--
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --lowercase false--
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --uppercase TRUE--
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --uppercase FALSE--
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --empty string DQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --empty string SQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --string DQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --string SQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --mixed case string--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --heredoc--
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --instance of classWithToString--
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 
 --instance of classWithoutToString--
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 84
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 85
 
-Warning: date_sunrise() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation3.php on line %d
+Warning: date_sunrise() expects parameter 3 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunrise_variation3.php on line 86
 ===DONE===

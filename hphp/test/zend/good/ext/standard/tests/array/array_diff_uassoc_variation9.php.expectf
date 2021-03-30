@@ -1,31 +1,31 @@
 *** Testing array_diff_uassoc() : usage variation ***
 
 --decimal indexed--
-darray(1) {
+dict(1) {
   [12]=>
   int(12)
 }
-darray(1) {
+dict(1) {
   [-17]=>
   int(-17)
 }
 
 --octal indexed--
-darray(1) {
+dict(1) {
   [12]=>
   int(12)
 }
-darray(1) {
+dict(1) {
   [-9]=>
   int(-9)
 }
 
 --hexa  indexed--
-darray(1) {
+dict(1) {
   [12]=>
   int(12)
 }
-darray(1) {
+dict(1) {
   [-7]=>
   int(-7)
 }

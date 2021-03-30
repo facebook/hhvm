@@ -4,7 +4,7 @@ object(EuropeanMeals) (2) {
     ["pos":"EnglishMealIterator":private]=>
     int(0)
     ["myContent":"EnglishMealIterator":private]=>
-    varray(3) {
+    vec(3) {
       string(9) "breakfast"
       string(6) "dinner"
       string(3) "tea"
@@ -15,7 +15,7 @@ object(EuropeanMeals) (2) {
     ["pos":"FrenchMealIterator":private]=>
     int(0)
     ["myContent":"FrenchMealIterator":private]=>
-    varray(4) {
+    vec(4) {
       string(14) "petit dejeuner"
       string(8) "dejeuner"
       string(6) "gouter"

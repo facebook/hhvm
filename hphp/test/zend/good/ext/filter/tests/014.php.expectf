@@ -1,7 +1,7 @@
 bool(false)
 bool(false)
 bool(false)
-darray(5) {
+dict(5) {
   [0]=>
   bool(true)
   [1]=>
@@ -11,7 +11,7 @@ darray(5) {
   [3]=>
   bool(false)
   [4]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     bool(false)
     [1]=>

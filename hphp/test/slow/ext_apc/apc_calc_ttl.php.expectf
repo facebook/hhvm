@@ -1,168 +1,168 @@
 dict(28) {
   ["foo_-1_-1"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_0"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_10"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_100000000000"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_100000000001"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_20"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_-1_5"]=>
-  varray(3) {
+  vec(3) {
     int(-1)
     int(-1)
     int(0)
   }
   ["foo_0_-1"]=>
-  varray(3) {
+  vec(3) {
     int(0)
     int(0)
     int(0)
   }
   ["foo_0_0"]=>
-  varray(3) {
+  vec(3) {
     int(0)
     int(0)
     int(0)
   }
   ["foo_0_10"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(0)
     int(10)
   }
   ["foo_0_100000000000"]=>
-  varray(3) {
+  vec(3) {
     int(65535)
     int(0)
     int(65535)
   }
   ["foo_0_100000000001"]=>
-  varray(3) {
+  vec(3) {
     int(65535)
     int(0)
     int(65535)
   }
   ["foo_0_20"]=>
-  varray(3) {
+  vec(3) {
     int(20)
     int(0)
     int(20)
   }
   ["foo_0_5"]=>
-  varray(3) {
+  vec(3) {
     int(5)
     int(0)
     int(5)
   }
   ["foo_100000000000_-1"]=>
-  varray(3) {
+  vec(3) {
     int(1215752192)
     int(1215752192)
     int(0)
   }
   ["foo_100000000000_0"]=>
-  varray(3) {
+  vec(3) {
     int(1215752192)
     int(1215752192)
     int(0)
   }
   ["foo_100000000000_10"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(1215752192)
     int(10)
   }
   ["foo_100000000000_100000000000"]=>
-  varray(3) {
+  vec(3) {
     int(1215752192)
     int(1215752192)
     int(0)
   }
   ["foo_100000000000_100000000001"]=>
-  varray(3) {
+  vec(3) {
     int(1215752192)
     int(1215752192)
     int(0)
   }
   ["foo_100000000000_20"]=>
-  varray(3) {
+  vec(3) {
     int(20)
     int(1215752192)
     int(20)
   }
   ["foo_100000000000_5"]=>
-  varray(3) {
+  vec(3) {
     int(5)
     int(1215752192)
     int(5)
   }
   ["foo_10_-1"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_0"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_10"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_100000000000"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_100000000001"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_20"]=>
-  varray(3) {
+  vec(3) {
     int(10)
     int(10)
     int(0)
   }
   ["foo_10_5"]=>
-  varray(3) {
+  vec(3) {
     int(5)
     int(10)
     int(5)

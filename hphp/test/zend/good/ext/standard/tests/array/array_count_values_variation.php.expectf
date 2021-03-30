@@ -1,5 +1,5 @@
 *** Testing array_count_values() : parameter variations ***
-darray(3) {
+dict(3) {
   ["bobv"]=>
   int(1)
   ["val"]=>

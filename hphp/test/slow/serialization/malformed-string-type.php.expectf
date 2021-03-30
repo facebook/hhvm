@@ -2,13 +2,13 @@ string(5) "Hello"
 string(5) "Hello"
 string(5) "Hello"
 string(5) "Hello"
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "hello"
   [1]=>

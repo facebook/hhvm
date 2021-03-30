@@ -1,37 +1,37 @@
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
     ["line"]=>
     int(9)
     ["function"]=>
     string(3) "bar"
   }
-  darray(3) {
+  dict(3) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
     ["line"]=>
     int(14)
     ["function"]=>
     string(3) "foo"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }
 }
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
     ["line"]=>
     int(9)
     ["function"]=>
     string(3) "bar"
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -39,7 +39,7 @@ varray(3) {
     ["metadata"]=>
     string(8) "I am foo"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }

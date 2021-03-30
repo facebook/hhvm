@@ -48,7 +48,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "a"
   int(0)
 }

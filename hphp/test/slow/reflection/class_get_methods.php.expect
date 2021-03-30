@@ -1,11 +1,11 @@
-darray(1) {
+dict(1) {
   [0]=>
   string(11) "A::fetchAll"
 }
-varray(1) {
+vec(1) {
   string(8) "fetchAll"
 }
-darray(24) {
+dict(24) {
   [0]=>
   string(21) "PDOStatement::execute"
   [1]=>
@@ -55,7 +55,7 @@ darray(24) {
   [23]=>
   string(21) "PDOStatement::__sleep"
 }
-varray(24) {
+vec(24) {
   string(7) "execute"
   string(5) "fetch"
   string(11) "fetchObject"

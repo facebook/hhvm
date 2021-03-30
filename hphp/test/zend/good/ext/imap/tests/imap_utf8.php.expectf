@@ -1,6 +1,6 @@
 string(0) ""
 string(1) "1"
 
-Warning: imap_utf8() expects parameter 1 to be string, %rv?%rarray given in %s/imap_utf8.php on line 5
+Warning: imap_utf8() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/imap/tests/imap_utf8.php on line 5
 string(4) "test"
 Done

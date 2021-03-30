@@ -4,12 +4,12 @@ string(12) "\PHP_VERSION"
 string(1) "c"
 string(4) "\A\B"
 string(4) "\A\B"
-varray(1) {
+vec(1) {
   string(11) "5.6.99-hhvm"
 }
 string(20) "varray[\PHP_VERSION]"
 NULL
-varray(1) {
+vec(1) {
   string(1) "c"
 }
 string(12) "varray[\A\B]"
@@ -20,12 +20,12 @@ string(12) "\PHP_VERSION"
 string(1) "c"
 string(4) "\A\B"
 string(4) "\A\B"
-varray(1) {
+vec(1) {
   string(11) "5.6.99-hhvm"
 }
 string(20) "varray[\PHP_VERSION]"
 NULL
-varray(1) {
+vec(1) {
   string(1) "c"
 }
 string(12) "varray[\A\B]"

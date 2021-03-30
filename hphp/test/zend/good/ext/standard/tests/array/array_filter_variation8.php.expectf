@@ -1,6 +1,6 @@
 *** Testing array_filter() : usage variations - callback function with different return values***
 callback function with int return value
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>
@@ -21,7 +21,7 @@ darray(9) {
   bool(true)
 }
 callback function with float return value
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>
@@ -42,7 +42,7 @@ darray(9) {
   bool(true)
 }
 callback function with string return value
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>
@@ -63,10 +63,10 @@ darray(9) {
   bool(true)
 }
 callback function with null return value
-darray(0) {
+dict(0) {
 }
 callback function with array as return value
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>

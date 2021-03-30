@@ -2,93 +2,93 @@
 
 --float 10.5--
 
-Warning: date_sunset() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --float -10.5--
 
-Warning: date_sunset() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --float 12.3456789000e10--
 
-Warning: date_sunset() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --float -12.3456789000e10--
 
-Warning: date_sunset() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --float .5--
 
-Warning: date_sunset() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --empty array--
 
-Warning: date_sunset() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --associative array--
 
-Warning: date_sunset() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --uppercase NULL--
 
-Warning: date_sunset() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --lowercase null--
 
-Warning: date_sunset() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --lowercase true--
 
-Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --lowercase false--
 
-Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --uppercase TRUE--
 
-Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --uppercase FALSE--
 
-Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --instance of classWithToString--
 
-Warning: date_sunset() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 
 --instance of classWithoutToString--
 
-Warning: date_sunset() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/date_sunset_variation2.php on line %d
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation2.php on line 87
 ===DONE===

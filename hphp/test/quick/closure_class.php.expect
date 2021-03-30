@@ -1,8 +1,8 @@
-varray(2) {
+vec(2) {
   string(1) "C"
   string(1) "C"
 }
-varray(2) {
+vec(2) {
   string(1) "C"
   string(1) "C"
 }

@@ -36,11 +36,11 @@ string(0) ""
 int(4)
 2 or 4: 4
 --------------------------------
-varray(0) {
+vec(0) {
 }
 default
 --------------------------------
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(4) "floo"
 }

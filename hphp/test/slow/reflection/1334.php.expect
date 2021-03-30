@@ -1,18 +1,18 @@
-varray(5) {
+vec(5) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
   string(1) "d"
   string(1) "e"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "d"
   string(1) "e"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }

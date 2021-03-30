@@ -1,29 +1,29 @@
-darray(1) {
+dict(1) {
   ["ONE"]=>
   NULL
 }
-darray(1) {
+dict(1) {
   ["TWO"]=>
   string(3) "TWO"
 }
-darray(1) {
+dict(1) {
   ["TFoo"]=>
   string(4) "TFoo"
 }
-varray(1) {
+vec(1) {
   object(ReflectionTypeConstant) (0) {
   }
 }
-darray(2) {
+dict(2) {
   ["prop"]=>
   NULL
   ["static_prop"]=>
   NULL
 }
-varray(1) {
+vec(1) {
   string(3) "Foo"
 }
-darray(1) {
+dict(1) {
   ["Foo"]=>
   object(ReflectionClass) (2) {
     ["name"]=>
@@ -32,14 +32,14 @@ darray(1) {
     NULL
   }
 }
-darray(1) {
+dict(1) {
   ["__Attr1"]=>
-  varray(2) {
+  vec(2) {
     int(3)
     int(4)
   }
 }
-varray(2) {
+vec(2) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(3) "baz"
@@ -53,7 +53,7 @@ varray(2) {
     string(3) "Foo"
   }
 }
-varray(2) {
+vec(2) {
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(4) "prop"
@@ -71,7 +71,7 @@ varray(2) {
     bool(false)
   }
 }
-darray(1) {
+dict(1) {
   ["static_prop"]=>
   NULL
 }
@@ -79,12 +79,12 @@ object(B) (1) {
   ["prop":protected]=>
   NULL
 }
-darray(0) {
+dict(0) {
 }
-varray(1) {
+vec(1) {
   string(5) "TBing"
 }
-darray(1) {
+dict(1) {
   ["TBing"]=>
   object(ReflectionClass) (2) {
     ["name"]=>
@@ -93,10 +93,10 @@ darray(1) {
     NULL
   }
 }
-varray(1) {
+vec(1) {
   string(1) "A"
 }
-darray(1) {
+dict(1) {
   ["A"]=>
   object(ReflectionClass) (2) {
     ["name"]=>

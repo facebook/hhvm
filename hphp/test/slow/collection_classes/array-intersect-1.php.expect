@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -8,7 +8,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(1) "0"
   [1]=>
@@ -18,7 +18,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -28,7 +28,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -38,7 +38,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(1) "0"
   [1]=>
@@ -48,7 +48,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -58,7 +58,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -68,7 +68,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(1) "0"
   [1]=>
@@ -78,7 +78,7 @@ darray(4) {
   [5]=>
   string(1) "a"
 }
-darray(4) {
+dict(4) {
   [42]=>
   string(1) "0"
   [73]=>
@@ -89,163 +89,163 @@ darray(4) {
   string(1) "a"
 }
 ========
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "0"
   [1]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [42]=>
   string(1) "0"
   [73]=>

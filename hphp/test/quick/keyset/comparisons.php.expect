@@ -391,7 +391,7 @@ keyset(0) {
 Comparing:
 keyset(0) {
 }
-varray(0) {
+vec(0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -403,19 +403,19 @@ varray(0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
-varray(0) {
+vec(0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 Comparing:
 keyset(0) {
 }

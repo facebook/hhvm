@@ -1,4 +1,4 @@
-varray(2) {
+vec(2) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(1) "i"
@@ -12,7 +12,7 @@ varray(2) {
     string(1) "I"
   }
 }
-varray(1) {
+vec(1) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(1) "s"

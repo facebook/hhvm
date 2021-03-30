@@ -9,7 +9,7 @@ string(3) "bar"
 string(8) "C::snoot"
 object(C) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)

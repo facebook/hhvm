@@ -2,84 +2,84 @@
 
 -- Iteration 1 --
 
-Warning: chdir() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 2 --
 
-Warning: chdir() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 3 --
 
-Warning: chdir() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 4 --
 
-Warning: chdir() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 5 --
 
-Warning: chdir() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 6 --
 
-Warning: chdir() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 7 --
 
-Warning: chdir() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 8 --
 
-Warning: chdir() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 9 --
 
-Warning: chdir() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 10 --
 
-Warning: chdir() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 11 --
 
-Warning: chdir() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 12 --
 
-Warning: chdir() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 13 --
 
-Warning: chdir() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 14 --
 
-Warning: chdir() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 15 --
 
-Warning: chdir() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 16 --
 
-Warning: chdir(): No such file or directory (errno 2) in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir(): No such file or directory (errno 2) in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 91
 bool(false)
 
 -- Iteration 17 --
 
-Warning: chdir(): No such file or directory (errno 2) in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir(): No such file or directory (errno 2) in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 91
 bool(false)
 
 -- Iteration 18 --
 
-Warning: chdir() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 19 --
 bool(true)
 
 -- Iteration 20 --
 
-Warning: chdir(): No such file or directory (errno 2) in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir(): No such file or directory (errno 2) in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 91
 bool(false)
 
 -- Iteration 21 --
@@ -87,9 +87,9 @@ bool(true)
 
 -- Iteration 22 --
 
-Warning: chdir() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 
 -- Iteration 23 --
 
-Warning: chdir() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line %d
+Warning: chdir() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 93
 ===DONE===

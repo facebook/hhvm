@@ -1,5 +1,5 @@
 *** Testing getdate() : basic functionality ***
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(10)
   ["minutes"]=>
@@ -23,7 +23,7 @@ darray(11) {
   [0]=>
   int(10)
 }
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(%d)
   ["minutes"]=>

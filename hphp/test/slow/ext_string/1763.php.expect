@@ -10,29 +10,29 @@ string(19) "bobBCDEFGH:/MNRPQR/"
 string(17) "ABCDEFGH:/MNRPQR/"
 string(17) "ABCDEFGH:/MNRPQR/"
 string(17) "ABCDEFGH:/MNRPQR/"
-darray(1) {
+dict(1) {
   [0]=>
   string(14) "DEFGH:/MNRPQR/"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(17) "bobDEFGH:/MNRPQR/"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "bob"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "bob"
 }
 string(6) "abcxyz"
-darray(1) {
+dict(1) {
   [0]=>
   int(2350001)
 }
 NULL
-darray(1) {
+dict(1) {
   [0]=>
   int(30)
 }

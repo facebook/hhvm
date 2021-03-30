@@ -1,7 +1,7 @@
 *** Testing fgetcsv() : reading the blank line ***
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -11,7 +11,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -21,7 +21,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -31,7 +31,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -41,7 +41,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -51,7 +51,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -61,7 +61,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -71,7 +71,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -81,7 +81,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -91,7 +91,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -101,7 +101,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -111,7 +111,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -121,7 +121,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -131,7 +131,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)
@@ -141,7 +141,7 @@ int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(1) {
+vec(1) {
   NULL
 }
 int(1)

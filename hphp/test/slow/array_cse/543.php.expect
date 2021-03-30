@@ -6,21 +6,21 @@ int(10)
 int(10)
 int(10)
 int(10)
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 int(0)
 int(1)
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 int(1)
 int(2)
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
@@ -29,6 +29,6 @@ int(2)
 int(3)
 bool(false)
 bool(true)
-varray(1) {
+vec(1) {
   bool(true)
 }

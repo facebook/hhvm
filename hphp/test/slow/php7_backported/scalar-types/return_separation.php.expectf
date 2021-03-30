@@ -1,4 +1,4 @@
-varray(0) {
+vec(0) {
 }
 
 Catchable fatal error: Value returned from function test2() must be of type string, int given in %s/test/slow/php7_backported/scalar-types/return_separation.php on line 14

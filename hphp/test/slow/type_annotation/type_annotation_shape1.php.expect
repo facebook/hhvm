@@ -1,45 +1,45 @@
 string(70) "?HH\shape('field1'=>?HH\bool, 'field2'=>HH\int, 'field3'=>HH\arraykey)"
-darray(3) {
+dict(3) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(3) {
+  dict(3) {
     ["field1"]=>
-    darray(2) {
+    dict(2) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
       int(2)
     }
     ["field2"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
     ["field3"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(7)
     }
   }
 }
 string(37) "HH\Set<HH\shape('field1'=>HH\string)>"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      darray(1) {
+      dict(1) {
         ["field1"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }
@@ -48,13 +48,13 @@ darray(3) {
   }
 }
 string(117) "HH\shape('array'=>?HH\Vector<HH\string>, 'shape'=>HH\shape('HH\float'=>HH\float, 'HH\num'=>HH\num), 'HH\int'=>HH\int)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(3) {
+  dict(3) {
     ["array"]=>
-    darray(4) {
+    dict(4) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
@@ -62,62 +62,62 @@ darray(2) {
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      varray(1) {
-        darray(1) {
+      vec(1) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }
       }
     }
     ["shape"]=>
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      darray(2) {
+      dict(2) {
         ["HH\float"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(3)
         }
         ["HH\num"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(6)
         }
       }
     }
     ["HH\int"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
   }
 }
 string(60) "HH\Map<HH\int, HH\shape('foo'=>HH\AnyArray, 'bar'=>HH\bool)>"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      darray(2) {
+      dict(2) {
         ["foo"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(27)
         }
         ["bar"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(2)
         }

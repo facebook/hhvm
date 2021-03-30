@@ -2,77 +2,77 @@
 
 --int 0--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --int 1--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --int 12345--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --int -12345--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --float 10.5--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --float -10.5--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --float 12.3456789000e10--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --float .5--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, double given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --empty array--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --int indexed array--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --associative array--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, dict given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --nested arrays--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --uppercase NULL--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, null given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --lowercase null--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, null given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --lowercase true--
@@ -89,46 +89,46 @@ string(8) "5f76616c"
 
 --empty string DQ--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --empty string SQ--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --string DQ--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --string SQ--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --mixed case string--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --heredoc--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --instance of classWithToString--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 
 --resource--
 
-Warning: mb_strstr() expects parameter 3 to be boolean, resource given in %s/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line %d
+Warning: mb_strstr() expects parameter 3 to be boolean, resource given in %s/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 108
 bool(false)
 ===DONE===

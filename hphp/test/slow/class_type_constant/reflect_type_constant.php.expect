@@ -1,11 +1,11 @@
 === get_class_constants ===
-darray(0) {
+dict(0) {
 }
 === ReflectionClass::getConstants ===
-darray(0) {
+dict(0) {
 }
 === ReflectionClass::getAbstractConstantsNames ===
-darray(0) {
+dict(0) {
 }
 === ReflectionClass::hasConstant('T') ===
 bool(false)
@@ -16,7 +16,7 @@ bool(false)
 === ReflectionClass::getConstant('X') ===
 bool(false)
 === ReflectionClass::getTypeConstants ===
-darray(4) {
+dict(4) {
   [0]=>
   string(40) "TypeConstant [ const type TypeI = C::T]
 "

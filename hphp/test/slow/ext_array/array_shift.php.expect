@@ -1,16 +1,16 @@
-darray(1) {
+dict(1) {
   ["b"]=>
   int(2)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(2)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(2)
 }
-varray(3) {
+vec(3) {
   string(6) "banana"
   string(5) "apple"
   string(9) "raspberry"

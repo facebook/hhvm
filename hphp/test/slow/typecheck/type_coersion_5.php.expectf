@@ -14,9 +14,9 @@ WARNING: sha1() expects parameter 2 to be boolean, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, string given
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, %rv?%rarray given
+WARNING: sha1() expects parameter 2 to be boolean, vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, %rv?%rarray given
+WARNING: Argument 1 to {closure}() must be of type @boolean, HH\vec given
 Builtin:
 WARNING: sha1() expects parameter 2 to be boolean, null given
 User:
@@ -38,9 +38,9 @@ WARNING: str_pad() expects parameter 2 to be integer, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, string given
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, %rv?%rarray given
+WARNING: str_pad() expects parameter 2 to be integer, vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, %rv?%rarray given
+WARNING: Argument 1 to {closure}() must be of type @integer, HH\vec given
 Builtin:
 WARNING: str_pad() expects parameter 2 to be integer, null given
 User:
@@ -62,9 +62,9 @@ WARNING: number_format() expects parameter 1 to be double, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @float, string given
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, %rv?%rarray given
+WARNING: number_format() expects parameter 1 to be double, vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, %rv?%rarray given
+WARNING: Argument 1 to {closure}() must be of type @float, HH\vec given
 Builtin:
 WARNING: number_format() expects parameter 1 to be double, null given
 User:
@@ -86,9 +86,9 @@ WARNING: Argument 1 to {closure}() must be of type @string, float given
 Builtin:
 User:
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, %rv?%rarray given
+WARNING: rtrim() expects parameter 1 to be string, vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, %rv?%rarray given
+WARNING: Argument 1 to {closure}() must be of type @string, HH\vec given
 Builtin:
 WARNING: rtrim() expects parameter 1 to be string, null given
 User:
@@ -96,25 +96,25 @@ WARNING: Argument 1 to {closure}() must be of type @string, null given
 
 varray
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, boolean given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, boolean given
 User:
 WARNING: Argument 1 to {closure}() must be of type @HH\varray, boolean given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, integer given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, integer given
 User:
 WARNING: Argument 1 to {closure}() must be of type @HH\varray, integer given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, double given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, double given
 User:
 WARNING: Argument 1 to {closure}() must be of type @HH\varray, float given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, string given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @HH\varray, string given
 Builtin:
 User:
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, null given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, null given
 User:
 WARNING: Argument 1 to {closure}() must be of type @HH\varray, null given
 
@@ -136,9 +136,9 @@ WARNING: get_object_vars() expects parameter 1 to be object, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @object, string given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, %rv?%rarray given
+WARNING: get_object_vars() expects parameter 1 to be object, vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, %rv?%rarray given
+WARNING: Argument 1 to {closure}() must be of type @object, HH\vec given
 Builtin:
 WARNING: get_object_vars() expects parameter 1 to be object, null given
 User:

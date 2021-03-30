@@ -1,21 +1,21 @@
-varray(4) {
-  darray(2) {
+vec(4) {
+  dict(2) {
     ["b"]=>
     string(5) "brown"
     ["c"]=>
     string(4) "blue"
   }
-  darray(2) {
+  dict(2) {
     ["b"]=>
     string(5) "brown"
     ["c"]=>
     string(4) "blue"
   }
-  darray(1) {
+  dict(1) {
     [2]=>
     bool(true)
   }
-  darray(2) {
+  dict(2) {
     ["b"]=>
     string(5) "brown"
     ["c"]=>

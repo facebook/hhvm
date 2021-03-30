@@ -1,24 +1,24 @@
 *** Testing str_split() : single quoted strings for 'str' ***
 -- Iteration 1 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 -- Iteration 2 --
-varray(1) {
+vec(1) {
   string(1) " "
 }
 -- Iteration 3 --
-varray(1) {
+vec(1) {
   string(4) "1234"
 }
 -- Iteration 4 --
-varray(3) {
+vec(3) {
   string(5) "simpl"
   string(5) "e str"
   string(3) "ing"
 }
 -- Iteration 5 --
-varray(5) {
+vec(5) {
   string(5) "It's "
   string(5) "strin"
   string(5) "g wit"
@@ -26,7 +26,7 @@ varray(5) {
   string(2) "te"
 }
 -- Iteration 6 --
-varray(8) {
+vec(8) {
   string(5) "strin"
   string(5) "g\tco"
   string(5) "ntain"
@@ -37,7 +37,7 @@ varray(8) {
   string(1) "s"
 }
 -- Iteration 7 --
-varray(6) {
+vec(6) {
   string(5) "conta"
   string(5) "ining"
   string(5) " @ # "
@@ -46,14 +46,14 @@ varray(6) {
   string(3) "ars"
 }
 -- Iteration 8 --
-varray(4) {
+vec(4) {
   string(5) "with "
   string(5) "1234 "
   string(5) "numbe"
   string(2) "rs"
 }
 -- Iteration 9 --
-varray(7) {
+vec(7) {
   string(5) "with "
   string(5) "\0 an"
   string(5) "d ".c"
@@ -63,7 +63,7 @@ varray(7) {
   string(2) "rs"
 }
 -- Iteration 10 --
-varray(7) {
+vec(7) {
   string(5) "with "
   string(5) "   mu"
   string(5) "ltipl"
@@ -73,7 +73,7 @@ varray(7) {
   string(1) "r"
 }
 -- Iteration 11 --
-varray(8) {
+vec(8) {
   string(5) "Testi"
   string(5) "ng in"
   string(5) "valid"
@@ -84,7 +84,7 @@ varray(8) {
   string(2) "ar"
 }
 -- Iteration 12 --
-varray(5) {
+vec(5) {
   string(5) "to ch"
   string(5) "eck w"
   string(5) "ith \"

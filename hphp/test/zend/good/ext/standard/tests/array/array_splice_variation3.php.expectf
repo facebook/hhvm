@@ -1,13 +1,13 @@
 *** array_splice() function : usage variations - lengths and offsets
 absolute offset - absolute length - cut from beginning
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(2)
   [1]=>
@@ -18,13 +18,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -42,13 +42,13 @@ darray(7) {
 }
 absolute offset - absolute length - cut from middle
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -59,13 +59,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -83,13 +83,13 @@ darray(7) {
 }
 absolute offset - absolute length - cut from end
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -100,13 +100,13 @@ darray(4) {
   int(3)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -124,13 +124,13 @@ darray(7) {
 }
 absolute offset - absolute length - attempt to cut past end
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -141,13 +141,13 @@ darray(4) {
   int(3)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -165,7 +165,7 @@ darray(7) {
 }
 absolute offset - absolute length - cut everything
   - No replacement
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -179,10 +179,10 @@ darray(6) {
   [5]=>
   int(5)
 }
-darray(0) {
+dict(0) {
 }
   - With replacement
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -196,7 +196,7 @@ darray(6) {
   [5]=>
   int(5)
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -206,9 +206,9 @@ darray(3) {
 }
 absolute offset - absolute length - cut nothing
   - No replacement
-darray(0) {
+dict(0) {
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -223,9 +223,9 @@ darray(6) {
   int(5)
 }
   - With replacement
-darray(0) {
+dict(0) {
 }
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>
@@ -247,13 +247,13 @@ darray(9) {
 }
 absolute offset - relative length - cut from beginning
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(2)
   [1]=>
@@ -264,13 +264,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -288,13 +288,13 @@ darray(7) {
 }
 absolute offset - relative length - cut from middle
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -305,13 +305,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -329,9 +329,9 @@ darray(7) {
 }
 absolute offset - relative length - attempt to cut form before beginning 
   - No replacement
-darray(0) {
+dict(0) {
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -346,9 +346,9 @@ darray(6) {
   int(5)
 }
   - With replacement
-darray(0) {
+dict(0) {
 }
-darray(9) {
+dict(9) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -370,9 +370,9 @@ darray(9) {
 }
 absolute offset - relative length - cut nothing
   - No replacement
-darray(0) {
+dict(0) {
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -387,9 +387,9 @@ darray(6) {
   int(5)
 }
   - With replacement
-darray(0) {
+dict(0) {
 }
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>
@@ -411,13 +411,13 @@ darray(9) {
 }
 relative offset - absolute length - cut from beginning
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(2)
   [1]=>
@@ -428,13 +428,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -452,13 +452,13 @@ darray(7) {
 }
 relative offset - absolute length - cut from middle
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -469,13 +469,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -493,13 +493,13 @@ darray(7) {
 }
 relative offset - absolute length - cut from end
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -510,13 +510,13 @@ darray(4) {
   int(3)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -534,13 +534,13 @@ darray(7) {
 }
 relative offset - absolute length - attempt to cut past end
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -551,13 +551,13 @@ darray(4) {
   int(3)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(4)
   [1]=>
   int(5)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -575,7 +575,7 @@ darray(7) {
 }
 relative offset - absolute length - cut everything
   - No replacement
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -589,10 +589,10 @@ darray(6) {
   [5]=>
   int(5)
 }
-darray(0) {
+dict(0) {
 }
   - With replacement
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -606,7 +606,7 @@ darray(6) {
   [5]=>
   int(5)
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -616,9 +616,9 @@ darray(3) {
 }
 relative offset - absolute length - cut nothing
   - No replacement
-darray(0) {
+dict(0) {
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -633,9 +633,9 @@ darray(6) {
   int(5)
 }
   - With replacement
-darray(0) {
+dict(0) {
 }
-darray(9) {
+dict(9) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -657,13 +657,13 @@ darray(9) {
 }
 relative offset - relative length - cut from beginning
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(2)
   [1]=>
@@ -674,13 +674,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -698,13 +698,13 @@ darray(7) {
 }
 relative offset - relative length - cut from middle
   - No replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -715,13 +715,13 @@ darray(4) {
   int(5)
 }
   - With replacement
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -739,9 +739,9 @@ darray(7) {
 }
 relative offset - relative length - cut nothing
   - No replacement
-darray(0) {
+dict(0) {
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -756,9 +756,9 @@ darray(6) {
   int(5)
 }
   - With replacement
-darray(0) {
+dict(0) {
 }
-darray(9) {
+dict(9) {
   [0]=>
   int(0)
   [1]=>

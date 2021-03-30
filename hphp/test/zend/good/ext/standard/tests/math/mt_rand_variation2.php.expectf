@@ -67,7 +67,7 @@ Warning: mt_rand() expects parameter 2 to be integer, string given in %s/zend/go
 
 -- Iteration 19 --
 
-Warning: mt_rand() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/mt_rand_variation2.php on line %d
+Warning: mt_rand() expects parameter 2 to be integer, vec given in %s/zend/good/ext/standard/tests/math/mt_rand_variation2.php on line %d
 
 -- Iteration 20 --
 

@@ -1,6 +1,6 @@
-darray(3) {
+dict(3) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(5) "green"
     string(3) "red"
   }
@@ -9,9 +9,9 @@ darray(3) {
   [2]=>
   string(3) "php"
 }
-darray(3) {
+dict(3) {
   [2]=>
-  varray(2) {
+  vec(2) {
     string(5) "green"
     string(3) "red"
   }
@@ -20,7 +20,7 @@ darray(3) {
   [0]=>
   string(3) "php"
 }
-darray(3) {
+dict(3) {
   ["blab"]=>
   string(1) "b"
   [0]=>

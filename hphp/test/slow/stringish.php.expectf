@@ -36,15 +36,15 @@ Handled 2: Argument 1 to f2() must be of type @Stringish, null given
 false, false, NULL
 
 ********** array **********
-Handled 2: Argument 1 to f1() must be of type @?Stringish, varray given
-false, false, varray(3) {
+Handled 2: Argument 1 to f1() must be of type @?Stringish, HH\vec given
+false, false, vec(3) {
   int(1)
   int(2)
   int(3)
 }
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, varray given
-false, false, varray(3) {
+Handled 2: Argument 1 to f2() must be of type @Stringish, HH\vec given
+false, false, vec(3) {
   int(1)
   int(2)
   int(3)
@@ -71,31 +71,31 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-varray(2) {
+vec(2) {
   string(9) "Stringish"
   string(8) "XHPChild"
 }
 bool(true)
 bool(true)
-varray(2) {
+vec(2) {
   string(9) "Stringish"
   string(8) "XHPChild"
 }
 bool(true)
 bool(true)
-varray(2) {
+vec(2) {
   string(9) "Stringish"
   string(8) "XHPChild"
 }
 bool(true)
 bool(true)
-varray(2) {
+vec(2) {
   string(9) "Stringish"
   string(8) "XHPChild"
 }
 bool(false)
 bool(false)
-varray(2) {
+vec(2) {
   string(9) "Stringish"
   string(8) "XHPChild"
 }

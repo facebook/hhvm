@@ -1,50 +1,50 @@
-darray(1) {
+dict(1) {
   ["Dog"]=>
-  varray(1) {
+  vec(1) {
     int(3)
   }
 }
-varray(1) {
+vec(1) {
   int(3)
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["Hippo"]=>
-  varray(1) {
+  vec(1) {
     int(7)
   }
 }
-varray(1) {
+vec(1) {
   int(7)
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["Cat"]=>
-  varray(1) {
+  vec(1) {
     int(4)
   }
 }
-varray(1) {
+vec(1) {
   int(4)
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["Dolphin"]=>
-  varray(1) {
+  vec(1) {
     int(5)
   }
 }
-varray(1) {
+vec(1) {
   int(5)
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["Baboon"]=>
-  varray(1) {
+  vec(1) {
     int(6)
   }
 }
-varray(1) {
+vec(1) {
   int(6)
 }
 bool(true)

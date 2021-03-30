@@ -1,23 +1,23 @@
 *** Testing array_unique() : assoc. array with diff. values to $input argument ***
 -- Iteration 1 --
-darray(1) {
+dict(1) {
   [0]=>
   int(0)
 }
 -- Iteration 2 --
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
 -- Iteration 3 --
-darray(1) {
+dict(1) {
   ["float1"]=>
   float(2.3333)
 }
 -- Iteration 4 --
-darray(3) {
+dict(3) {
   ["f1"]=>
   float(1.2)
   ["f2"]=>
@@ -26,7 +26,7 @@ darray(3) {
   float(4.8999992284)
 }
 -- Iteration 5 --
-darray(3) {
+dict(3) {
   [111]=>
   string(6) "	Hello"
   ["red"]=>
@@ -35,7 +35,7 @@ darray(3) {
   string(7) "world"
 }
 -- Iteration 6 --
-darray(3) {
+dict(3) {
   [111]=>
   string(7) "\tHello"
   ["red"]=>
@@ -44,14 +44,14 @@ darray(3) {
   string(9) "\v\fworld"
 }
 -- Iteration 7 --
-darray(2) {
+dict(2) {
   [1]=>
   string(5) "hello"
   ["heredoc"]=>
   string(11) "Hello world"
 }
 -- Iteration 8 --
-darray(2) {
+dict(2) {
   [11]=>
   object(classA) (0) {
   }

@@ -1,6 +1,6 @@
 object(A) (2) {
   ["x":"A":private]=>
-  varray(3) {
+  vec(3) {
     int(0)
     int(2)
     int(3)

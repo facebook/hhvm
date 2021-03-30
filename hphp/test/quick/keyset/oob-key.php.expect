@@ -21,7 +21,7 @@ keyset(6) {
 }
 int(1)
 Caught Out of bounds keyset access: invalid index 2
-darray(1) {
+dict(1) {
   ["foo"]=>
   keyset(4) {
     int(1)

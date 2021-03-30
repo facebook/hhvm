@@ -4,7 +4,7 @@
   goes to:2.0bool(true)
   goes to:foobool(false)
   goes to:0NULL
-  goes to:{empty str}varray(0) {
+  goes to:{empty str}vec(0) {
 }
   goes to:defaultfloat(3.212)
   goes to:3.212int(0)

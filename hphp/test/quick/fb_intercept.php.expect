@@ -3,7 +3,7 @@ frap claptrap
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "claptrap"
 }
 string(4) "data"
@@ -12,7 +12,7 @@ bool(true)
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 string(4) "data"
@@ -21,7 +21,7 @@ bool(true)
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "claptrap"
 }
 NULL
@@ -31,7 +31,7 @@ frap claptrap
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 NULL
@@ -41,13 +41,13 @@ frap callfunc
 Closure! wooooo
 frap claptrap
 ---------- test_variadic_function ----------
-var_frap claptrap varray(1) {
+var_frap claptrap vec(1) {
   string(4) "blah"
 }
 ----HANDLER----
 string(8) "var_frap"
 NULL
-varray(2) {
+vec(2) {
   string(8) "claptrap"
   string(4) "blah"
 }
@@ -57,7 +57,7 @@ bool(true)
 ----HANDLER----
 string(8) "var_frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 string(4) "data"
@@ -66,29 +66,29 @@ bool(true)
 ----HANDLER----
 string(8) "var_frap"
 NULL
-varray(2) {
+vec(2) {
   string(8) "claptrap"
   string(4) "blah"
 }
 NULL
 bool(true)
 ---------------
-var_frap claptrap varray(1) {
+var_frap claptrap vec(1) {
   string(4) "blah"
 }
 ----HANDLER----
 string(8) "var_frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 NULL
 bool(true)
 ---------------
-var_frap callfunc varray(0) {
+var_frap callfunc vec(0) {
 }
 Closure! wooooo
-var_frap claptrap varray(1) {
+var_frap claptrap vec(1) {
   string(4) "blah"
 }
 ---------- test_methods ----------
@@ -101,7 +101,7 @@ static frap SubBlark2
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -109,7 +109,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -117,7 +117,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(8) "SubBlark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -125,7 +125,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(8) "SubBlark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -133,7 +133,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(9) "SubBlark2"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -141,7 +141,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(9) "SubBlark2"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -149,7 +149,7 @@ bool(true)
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -158,7 +158,7 @@ static frap Blark
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -168,7 +168,7 @@ static frap Blark
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -177,7 +177,7 @@ bool(true)
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -186,7 +186,7 @@ bool(true)
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -196,7 +196,7 @@ non-static frap
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -205,10 +205,10 @@ non-static frap
 ----HANDLER----
 string(7) "handler"
 NULL
-varray(5) {
+vec(5) {
   string(4) "frap"
   NULL
-  varray(1) {
+  vec(1) {
     string(8) "claptrap"
   }
   NULL
@@ -220,7 +220,7 @@ bool(true)
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "claptrap"
 }
 NULL

@@ -1,7 +1,7 @@
 *** Testing shuffle() : with arrays having default keys ***
 
 -- input array of integers before shuffle() function is applied --
-varray(9) {
+vec(9) {
   int(0)
   int(10)
   int(20)
@@ -17,7 +17,7 @@ varray(9) {
 bool(true)
 
 -- resultant array after shuffle() function is applied --
-varray(9) {
+vec(9) {
   int(%d)
   int(%d)
   int(%d)
@@ -30,7 +30,7 @@ varray(9) {
 }
 
 -- input array of strings before shuffle() function is applied --
-varray(9) {
+vec(9) {
   string(3) "one"
   string(3) "two"
   string(5) "three"
@@ -46,7 +46,7 @@ varray(9) {
 bool(true)
 
 -- resultant array after shuffle() function is applied --
-varray(9) {
+vec(9) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"

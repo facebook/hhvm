@@ -1,10 +1,10 @@
 object(HH\Pair) (2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(123)
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     int(456)
   }
 }

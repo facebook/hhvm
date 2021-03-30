@@ -1,6 +1,6 @@
 object(A) (0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

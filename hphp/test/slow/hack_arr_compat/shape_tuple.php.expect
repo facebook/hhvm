@@ -12,7 +12,7 @@ keyset: bool(false)
 Using matching tuple:
 varray: bool(true)
 darray: bool(false)
-vec:    (Notice: Hack Array Compat: vec is tuple) bool(false)
+vec:    bool(true)
 dict:   bool(false)
 keyset: bool(false)
 
@@ -30,7 +30,7 @@ Using matching shape:
 varray: bool(false)
 darray: bool(true)
 vec:    bool(false)
-dict:   (Notice: Hack Array Compat: dict is shape) bool(false)
+dict:   bool(true)
 keyset: bool(false)
 
 ===================================
@@ -40,5 +40,5 @@ Using empty shape:
 varray: bool(false)
 darray: bool(true)
 vec:    bool(false)
-dict:   (Notice: Hack Array Compat: dict is shape) bool(false)
+dict:   bool(true)
 keyset: bool(false)

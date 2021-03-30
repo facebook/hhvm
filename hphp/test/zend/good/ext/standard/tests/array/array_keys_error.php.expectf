@@ -11,7 +11,7 @@ NULL
 Warning: array_keys() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 7
 
 Warning: array_keys() expects exactly 1 parameter, 4 given in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 8
-varray(3) {
+vec(3) {
   int(0)
   int(1)
   int(2)

@@ -1,7 +1,7 @@
 *** Testing array_values() : usage variations ***
 
 -- Call array_values() --
-varray(3) {
+vec(3) {
   string(2) "un"
   string(4) "deux"
   string(5) "trois"

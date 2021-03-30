@@ -1,58 +1,58 @@
 int(1)
-darray(2) {
+dict(2) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(2) "xa"
     int(4)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(1) "a"
     int(5)
   }
 }
 int(1)
-darray(2) {
+dict(2) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(2) "ax"
     int(5)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(1) "a"
     int(5)
   }
 }
 int(1)
-darray(6) {
+dict(6) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(4) "zxax"
     int(3)
   }
   ["capt1"]=>
-  varray(2) {
+  vec(2) {
     string(1) "z"
     int(3)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(1) "z"
     int(3)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(1) "x"
     int(4)
   }
   ["letsmix"]=>
-  varray(2) {
+  vec(2) {
     string(2) "ax"
     int(5)
   }
   [3]=>
-  varray(2) {
+  vec(2) {
     string(2) "ax"
     int(5)
   }

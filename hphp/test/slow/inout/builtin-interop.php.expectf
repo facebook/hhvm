@@ -1,12 +1,12 @@
-Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/builtin-interop.php on line 9
-varray(5) {
+Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 9
+vec(5) {
   int(8)
   int(17)
   int(19)
   int(23)
   int(32)
 }
-darray(5) {
+dict(5) {
   [1]=>
   int(8)
   [3]=>
@@ -18,7 +18,7 @@ darray(5) {
   [0]=>
   int(32)
 }
-varray(5) {
+vec(5) {
   int(32)
   int(23)
   int(19)
@@ -26,8 +26,8 @@ varray(5) {
   int(8)
 }
 
-Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/builtin-interop.php on line 14
-darray(3) {
+Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 14
+dict(3) {
   ["apple"]=>
   int(0)
   ["banana"]=>
@@ -35,7 +35,7 @@ darray(3) {
   ["orange"]=>
   int(12)
 }
-darray(3) {
+dict(3) {
   ["apple"]=>
   int(0)
   ["banana"]=>
@@ -43,7 +43,7 @@ darray(3) {
   ["orange"]=>
   int(12)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(12)
   [1]=>

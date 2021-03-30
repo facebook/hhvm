@@ -1,16 +1,16 @@
-darray(2) {
+dict(2) {
   [0]=>
   string(15) "Closure$testOne"
   [1]=>
   string(4) "main"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(17) "Closure$testTwo#2"
   [1]=>
   string(4) "main"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(18) "Closure$testNested"
   [1]=>
@@ -18,7 +18,7 @@ darray(3) {
   [2]=>
   string(4) "main"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(23) "Closure$testTwoNested#3"
   [1]=>
@@ -26,13 +26,13 @@ darray(3) {
   [2]=>
   string(4) "main"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(24) "Closure$Test::testStatic"
   [1]=>
   string(4) "main"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(24) "Closure$Test::testMethod"
   [1]=>

@@ -4,7 +4,7 @@ Accessing <<__LateInit>> property 'A::y' before initialization
 Accessing <<__LateInit>> property 'A::y' before initialization
 ============= test_obj_prop_array ===============
 Accessing <<__LateInit>> property 'A::y' before initialization
-darray(3) {
+dict(3) {
   ["x"]=>
   int(123)
   ["y"]=>

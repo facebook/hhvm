@@ -18,9 +18,9 @@ dict(4) {
   ["2"]=>
   string(3) "bar"
 }
-darray(1) {
+dict(1) {
   ["TestAttr"]=>
-  varray(1) {
+  vec(1) {
     dict(2) {
       [1]=>
       string(1) "a"

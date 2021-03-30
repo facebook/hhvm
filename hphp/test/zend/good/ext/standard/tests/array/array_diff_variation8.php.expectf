@@ -1,6 +1,6 @@
 *** Testing array_diff() : usage variations ***
 -- Iteration 1 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -8,21 +8,21 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(2) {
+dict(2) {
   ["0"]=>
   int(0)
   ["1"]=>
   int(0)
 }
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   ["c"]=>
   string(1) "3"
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 3 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -30,14 +30,14 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(2) {
+dict(2) {
   ["float1"]=>
   float(2.3333)
   ["float2"]=>
   float(2.3333)
 }
 -- Iteration 4 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -45,7 +45,7 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(4) {
+dict(4) {
   ["f1"]=>
   float(1.2)
   ["f2"]=>
@@ -56,7 +56,7 @@ darray(4) {
   float(1.2)
 }
 -- Iteration 5 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -64,18 +64,18 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(4) {
+dict(4) {
   [111]=>
-  string(6) "%r\x09%rHello"
+  string(6) "	Hello"
   ["red"]=>
-  string(6) "col%r\x09%ror"
+  string(6) "col	or"
   [2]=>
-  string(7) "%r\x0b\x0c%rworld"
+  string(7) "world"
   [3]=>
-  string(6) "%r\x09%rHello"
+  string(6) "	Hello"
 }
 -- Iteration 6 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -83,7 +83,7 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(4) {
+dict(4) {
   [111]=>
   string(7) "\tHello"
   ["red"]=>
@@ -94,7 +94,7 @@ darray(4) {
   string(7) "\tHello"
 }
 -- Iteration 7 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -102,7 +102,7 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(3) {
+dict(3) {
   [1]=>
   string(5) "hello"
   ["heredoc"]=>
@@ -111,7 +111,7 @@ darray(3) {
   string(11) "Hello world"
 }
 -- Iteration 8 --
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -119,16 +119,16 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(4) {
+dict(4) {
   [11]=>
   object(classA) (0) {
   }
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
   [12]=>
   object(classA) (0) {
   }
   [13]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 Done

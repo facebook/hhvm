@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -8,7 +8,7 @@ darray(4) {
   ["pass"]=>
   string(4) "pass"
 }
-darray(3) {
+dict(3) {
   ["host"]=>
   string(4) "host"
   ["user"]=>
@@ -16,7 +16,7 @@ darray(3) {
   ["pass"]=>
   string(4) "pass"
 }
-darray(2) {
+dict(2) {
   ["host"]=>
   string(4) "host"
   ["user"]=>

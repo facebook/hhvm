@@ -3,7 +3,7 @@ Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)
 Stats for first capture:
-darray(5) {
+dict(5) {
   ["nodes"]=>
   int(%d)
   ["edges"]=>

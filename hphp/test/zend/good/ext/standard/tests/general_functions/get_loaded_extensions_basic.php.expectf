@@ -1,6 +1,6 @@
 *** Testing get_loaded_extensions() : basic functionality ***
 Get loaded extensions
-varray(%d) {
+vec(%d) {
 %a
 }
 ===DONE===

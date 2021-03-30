@@ -1,8 +1,8 @@
-varray(2) {
+vec(2) {
   int(2003)
   int(2004)
 }
-varray(26) {
+vec(26) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -30,7 +30,7 @@ varray(26) {
   string(1) "y"
   string(1) "z"
 }
-varray(10) {
+vec(10) {
   int(1)
   int(2)
   int(3)

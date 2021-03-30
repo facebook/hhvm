@@ -1,12 +1,11 @@
+Warning: constant() expects exactly 1 parameter, 0 given in %s/test/zend/good/Zend/tests/018.php on line 7
 
-Warning: constant() expects exactly 1 parameter, 0 given in %s/018.php on line 7
+Warning: constant() expects exactly 1 parameter, 2 given in %s/test/zend/good/Zend/tests/018.php on line 8
 
-Warning: constant() expects exactly 1 parameter, 2 given in %s/018.php on line 8
-
-Warning: constant(): Couldn't find constant  in %s/018.php on line 9
+Warning: constant(): Couldn't find constant  in %s/test/zend/good/Zend/tests/018.php on line 9
 NULL
 
-Warning: constant() expects parameter 1 to be string, %rv?%rarray given in %s/018.php on line 11
+Warning: constant() expects parameter 1 to be string, vec given in %s/test/zend/good/Zend/tests/018.php on line 11
 int(1)
 string(4) "test"
 Done

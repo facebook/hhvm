@@ -1,18 +1,18 @@
 fubar
-varray(3) {
+vec(3) {
   string(3) "foo"
   string(3) "bar"
   string(6) "foobar"
 }
 fubar
-darray(2) {
+dict(2) {
   ["3"]=>
   string(3) "foo"
   ["4"]=>
   string(3) "bar"
 }
 fubar
-darray(2) {
+dict(2) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>

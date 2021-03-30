@@ -1,6 +1,0 @@
-vec(2) {
-  string(4) "test"
-  vec(1) {
-    int(0)
-  }
-}

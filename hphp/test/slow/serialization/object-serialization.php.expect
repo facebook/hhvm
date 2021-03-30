@@ -9,22 +9,22 @@ Objects match!
 Serializations match!
 
 ============================================
-y:1:{O:7:"NoProps":0:{}}
+v:1:{O:7:"NoProps":0:{}}
 Objects match!
 Serializations match!
 
 ============================================
-y:1:{O:7:"OneProp":1:{s:1:"x";N;}}
+v:1:{O:7:"OneProp":1:{s:1:"x";N;}}
 Objects match!
 Serializations match!
 
 ============================================
-O:7:"OneProp":1:{s:1:"x";y:1:{O:7:"NoProps":0:{}}}
+O:7:"OneProp":1:{s:1:"x";v:1:{O:7:"NoProps":0:{}}}
 Objects match!
 Serializations match!
 
 ============================================
-y:1:{O:7:"OneProp":1:{s:1:"x";y:1:{O:7:"NoProps":0:{}}}}
+v:1:{O:7:"OneProp":1:{s:1:"x";v:1:{O:7:"NoProps":0:{}}}}
 Objects match!
 Serializations match!
 

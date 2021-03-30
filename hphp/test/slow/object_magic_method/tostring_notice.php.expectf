@@ -130,14 +130,14 @@ string(5) "spall"
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 74
 __toString called
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "int"
 }
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 75
 __toString called
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "int"
 }
@@ -145,14 +145,14 @@ darray(1) {
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 78
 __toString called
-darray(1) {
+dict(1) {
   [1]=>
   string(6) "string"
 }
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 79
 __toString called
-darray(1) {
+dict(1) {
   [1]=>
   object(C) (0) {
   }

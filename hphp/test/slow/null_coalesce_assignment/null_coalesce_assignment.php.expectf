@@ -34,7 +34,7 @@ bool(true)
 bool(true)
 test_array_get() $arr:
 n_dump from line %d:
-darray(8) {
+dict(8) {
   [0]=>
   int(42)
   [1]=>
@@ -61,7 +61,7 @@ test_object_get() CounterArray $obj:
 n_dump from line %d:
 object(CounterArray) (5) {
   ["container":"CounterArray":private]=>
-  varray(0) {
+  vec(0) {
   }
   ["counter"]=>
   int(0)
@@ -82,11 +82,11 @@ bool(true)
 test_multi_dim_basic()
 bool(true)
 n_dump from line %d:
-darray(1) {
+dict(1) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       ["I am a constant"]=>
       int(42)
     }
@@ -136,11 +136,11 @@ bool(true)
 test_multi_dim_lvars()
 bool(true)
 n_dump from line %d:
-darray(1) {
+dict(1) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(2)
     }
@@ -148,19 +148,19 @@ darray(1) {
 }
 bool(true)
 n_dump from line %d:
-darray(2) {
+dict(2) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [1]=>
       int(3)
     }
@@ -168,19 +168,19 @@ darray(2) {
 }
 bool(true)
 n_dump from line %d:
-darray(2) {
+dict(2) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(2) {
+    dict(2) {
       [1]=>
       int(3)
       [3]=>
@@ -190,19 +190,19 @@ darray(2) {
 }
 bool(true)
 n_dump from line %d:
-darray(2) {
+dict(2) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(3) {
+    dict(3) {
       [1]=>
       int(3)
       [3]=>
@@ -214,19 +214,19 @@ darray(2) {
 }
 bool(true)
 n_dump from line %d:
-darray(2) {
+dict(2) {
   [4]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [2]=>
-    darray(4) {
+    dict(4) {
       [1]=>
       int(3)
       [3]=>
@@ -266,11 +266,11 @@ a
 c
 bool(true)
 n_dump from line %d:
-darray(1) {
+dict(1) {
   ["a"]=>
   object(Shoo) (1) {
     ["b"]=>
-    darray(1) {
+    dict(1) {
       ["c"]=>
       int(42)
     }

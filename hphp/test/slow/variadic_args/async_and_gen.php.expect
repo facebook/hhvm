@@ -1,26 +1,26 @@
 * eager async *
 eager execution
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
 * blocking async *
 before blocking
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
 after blocking
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
 * generator *
 string(1) "a"
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"

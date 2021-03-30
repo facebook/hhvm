@@ -1,199 +1,199 @@
 *** Testing array_pad() : possible values for $pad_value argument ***
 -- Iteration 1 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(0)
   int(0)
 }
-varray(4) {
+vec(4) {
   int(0)
   int(0)
   int(1)
   int(2)
 }
 -- Iteration 2 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(1)
   int(1)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(1)
   int(1)
   int(2)
 }
 -- Iteration 3 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(12345)
   int(12345)
 }
-varray(4) {
+vec(4) {
   int(12345)
   int(12345)
   int(1)
   int(2)
 }
 -- Iteration 4 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(-2345)
   int(-2345)
 }
-varray(4) {
+vec(4) {
   int(-2345)
   int(-2345)
   int(1)
   int(2)
 }
 -- Iteration 5 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   float(10.5)
   float(10.5)
 }
-varray(4) {
+vec(4) {
   float(10.5)
   float(10.5)
   int(1)
   int(2)
 }
 -- Iteration 6 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   float(-10.5)
   float(-10.5)
 }
-varray(4) {
+vec(4) {
   float(-10.5)
   float(-10.5)
   int(1)
   int(2)
 }
 -- Iteration 7 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   float(123456789000)
   float(123456789000)
 }
-varray(4) {
+vec(4) {
   float(123456789000)
   float(123456789000)
   int(1)
   int(2)
 }
 -- Iteration 8 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   float(1.23456789E-9)
   float(1.23456789E-9)
 }
-varray(4) {
+vec(4) {
   float(1.23456789E-9)
   float(1.23456789E-9)
   int(1)
   int(2)
 }
 -- Iteration 9 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   float(0.5)
   float(0.5)
 }
-varray(4) {
+vec(4) {
   float(0.5)
   float(0.5)
   int(1)
   int(2)
 }
 -- Iteration 10 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  varray(0) {
+  vec(0) {
   }
-  varray(0) {
+  vec(0) {
   }
 }
-varray(4) {
-  varray(0) {
+vec(4) {
+  vec(0) {
   }
-  varray(0) {
+  vec(0) {
   }
   int(1)
   int(2)
 }
 -- Iteration 11 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  varray(1) {
+  vec(1) {
     int(0)
   }
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }
-varray(4) {
-  varray(1) {
+vec(4) {
+  vec(1) {
     int(0)
   }
-  varray(1) {
+  vec(1) {
     int(0)
   }
   int(1)
   int(2)
 }
 -- Iteration 12 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  varray(1) {
+  vec(1) {
     int(1)
   }
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
-varray(4) {
-  varray(1) {
+vec(4) {
+  vec(1) {
     int(1)
   }
-  varray(1) {
+  vec(1) {
     int(1)
   }
   int(1)
   int(2)
 }
 -- Iteration 13 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
 }
-varray(4) {
-  varray(2) {
+vec(4) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -201,30 +201,30 @@ varray(4) {
   int(2)
 }
 -- Iteration 14 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
     string(3) "pen"
   }
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
     string(3) "pen"
   }
 }
-varray(4) {
-  darray(2) {
+vec(4) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
     string(3) "pen"
   }
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -234,184 +234,184 @@ varray(4) {
   int(2)
 }
 -- Iteration 15 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   NULL
   NULL
 }
-varray(4) {
+vec(4) {
   NULL
   NULL
   int(1)
   int(2)
 }
 -- Iteration 16 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   NULL
   NULL
 }
-varray(4) {
+vec(4) {
   NULL
   NULL
   int(1)
   int(2)
 }
 -- Iteration 17 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   bool(true)
   bool(true)
 }
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   int(1)
   int(2)
 }
 -- Iteration 18 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   bool(false)
   bool(false)
 }
-varray(4) {
+vec(4) {
   bool(false)
   bool(false)
   int(1)
   int(2)
 }
 -- Iteration 19 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   bool(true)
   bool(true)
 }
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   int(1)
   int(2)
 }
 -- Iteration 20 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   bool(false)
   bool(false)
 }
-varray(4) {
+vec(4) {
   bool(false)
   bool(false)
   int(1)
   int(2)
 }
 -- Iteration 21 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(0) ""
   string(0) ""
 }
-varray(4) {
+vec(4) {
   string(0) ""
   string(0) ""
   int(1)
   int(2)
 }
 -- Iteration 22 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(0) ""
   string(0) ""
 }
-varray(4) {
+vec(4) {
   string(0) ""
   string(0) ""
   int(1)
   int(2)
 }
 -- Iteration 23 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(6) "string"
   string(6) "string"
 }
-varray(4) {
+vec(4) {
   string(6) "string"
   string(6) "string"
   int(1)
   int(2)
 }
 -- Iteration 24 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(6) "string"
   string(6) "string"
 }
-varray(4) {
+vec(4) {
   string(6) "string"
   string(6) "string"
   int(1)
   int(2)
 }
 -- Iteration 25 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(11) "hello world"
   string(11) "hello world"
 }
-varray(4) {
+vec(4) {
   string(11) "hello world"
   string(11) "hello world"
   int(1)
   int(2)
 }
 -- Iteration 26 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
+  string(24) "Hello	 world!!
 string
 "
-  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
+  string(24) "Hello	 world!!
 string
 "
 }
-varray(4) {
-  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
+vec(4) {
+  string(24) "Hello	 world!!
 string
 "
-  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
+  string(24) "Hello	 world!!
 string
 "
   int(1)
   int(2)
 }
 -- Iteration 27 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   string(29) "\v\fHello\t world!!\rstring\n"
   string(29) "\v\fHello\t world!!\rstring\n"
 }
-varray(4) {
+vec(4) {
   string(29) "\v\fHello\t world!!\rstring\n"
   string(29) "\v\fHello\t world!!\rstring\n"
   int(1)
   int(2)
 }
 -- Iteration 28 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   object(classA) (0) {
@@ -419,7 +419,7 @@ varray(4) {
   object(classA) (0) {
   }
 }
-varray(4) {
+vec(4) {
   object(classA) (0) {
   }
   object(classA) (0) {
@@ -428,15 +428,15 @@ varray(4) {
   int(2)
 }
 -- Iteration 29 --
-varray(4) {
+vec(4) {
   int(1)
   int(2)
-  resource(%d) of type (stream)
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
+  resource(4) of type (stream)
 }
-varray(4) {
-  resource(%d) of type (stream)
-  resource(%d) of type (stream)
+vec(4) {
+  resource(4) of type (stream)
+  resource(4) of type (stream)
   int(1)
   int(2)
 }

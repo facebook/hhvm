@@ -5,7 +5,7 @@ object(DOMNode) (0) {
 Warning: Attempted to serialize unserializable builtin class DOMNode in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"
@@ -36,7 +36,7 @@ object(A_DOMNode) (1) {
 Warning: Attempted to serialize unserializable builtin class A_DOMNode in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"

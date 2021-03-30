@@ -1,4 +1,4 @@
-Array
+Vec
 (
     [0] => 1
     [1] => 2
@@ -10,7 +10,7 @@ row=3
 row=1
 row=2
 row=3
-Array
+Vec
 (
     [0] => 1
     [1] => 2

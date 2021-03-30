@@ -1,8 +1,0 @@
-string(46) "dict [
-  'output' => 'herp',
-  'flags' => 3,
-]"
-string(47) "dict [
-  'output' => 'derp',
-  'flags' => 11,
-]"

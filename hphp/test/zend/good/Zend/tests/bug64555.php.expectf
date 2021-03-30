@@ -1,9 +1,9 @@
 Unsetting: unsetme
 Changing: keepme
-darray(1) {
+dict(1) {
   ["keepme"]=>
   int(43)
 }
-varray(1) {
+vec(1) {
   string(6) "keepme"
 }

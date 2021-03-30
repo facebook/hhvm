@@ -2,7 +2,7 @@ string(74) "Got Invalid keyset key: expected a key of type int or string, double
 string(72) "Got Invalid keyset key: expected a key of type int or string, bool given"
 string(72) "Got Invalid keyset key: expected a key of type int or string, bool given"
 string(72) "Got Invalid keyset key: expected a key of type int or string, null given"
-string(73) "Got Invalid keyset key: expected a key of type int or string, array given"
+string(71) "Got Invalid keyset key: expected a key of type int or string, vec given"
 string(76) "Got Invalid keyset key: expected a key of type int or string, stdClass given"
 string(72) "Got Invalid keyset key: expected a key of type int or string, bool given"
 string(71) "Got Invalid keyset key: expected a key of type int or string, vec given"

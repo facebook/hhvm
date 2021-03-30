@@ -1,5 +1,5 @@
 ---- profiling ----
-varray(3) {
+vec(3) {
   vec(6) {
     int(1)
     int(2)
@@ -24,7 +24,7 @@ varray(3) {
   }
 }
 ---- pgo ----
-varray(3) {
+vec(3) {
   vec(6) {
     int(1)
     int(2)

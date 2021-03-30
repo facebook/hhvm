@@ -1,7 +1,7 @@
 *** Testing date_sun_info() : usage variations ***
 
 -- Iteration 1 --
-darray(9) {
+dict(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -23,7 +23,7 @@ darray(9) {
 }
 
 -- Iteration 2 --
-darray(9) {
+dict(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -45,7 +45,7 @@ darray(9) {
 }
 
 -- Iteration 3 --
-darray(9) {
+dict(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -67,7 +67,7 @@ darray(9) {
 }
 
 -- Iteration 4 --
-darray(9) {
+dict(9) {
   ["sunrise"]=>
   int(-69665)
   ["sunset"]=>
@@ -90,73 +90,73 @@ darray(9) {
 
 -- Iteration 5 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 6 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 7 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 8 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 9 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 10 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 11 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 12 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 13 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 14 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 15 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, varray given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 
 -- Iteration 22 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, resource given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line %d
+Warning: date_sun_info() expects parameter 1 to be integer, resource given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
 ===Done===

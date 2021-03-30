@@ -1,19 +1,19 @@
 Accessing I from global scope:
-varray(1) {
+vec(1) {
   string(4) "pubI"
 }
 Accessing C from global scope:
-varray(3) {
+vec(3) {
   string(4) "pubI"
   string(4) "pubC"
   string(9) "testFromC"
 }
 Accessing I from C:
-varray(1) {
+vec(1) {
   string(4) "pubI"
 }
 Accessing C from C:
-varray(5) {
+vec(5) {
   string(4) "pubI"
   string(5) "privC"
   string(5) "protC"

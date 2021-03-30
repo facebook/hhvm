@@ -1,6 +1,6 @@
 object(Closure%s) (1) {
   ["static"]=>
-  darray(1) {
+  dict(1) {
     ["c"]=>
     object(D) (0) {
     }

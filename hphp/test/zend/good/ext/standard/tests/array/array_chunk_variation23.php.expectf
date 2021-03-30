@@ -1,4 +1,4 @@
-darray(6) {
+dict(6) {
   ["p"]=>
   int(1)
   ["q"]=>
@@ -18,140 +18,140 @@ NULL
 NULL
 
 [1]
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     [0]=>
     int(1)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(2)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(3)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(4)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(6)
   }
 }
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     ["p"]=>
     int(1)
   }
-  darray(1) {
+  dict(1) {
     ["q"]=>
     int(2)
   }
-  darray(1) {
+  dict(1) {
     ["r"]=>
     int(3)
   }
-  darray(1) {
+  dict(1) {
     ["s"]=>
     int(4)
   }
-  darray(1) {
+  dict(1) {
     ["u"]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     ["v"]=>
     int(6)
   }
 }
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     [0]=>
     int(1)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(2)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(3)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(4)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(6)
   }
 }
 
 [2]
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(5)
     [1]=>
     int(6)
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     ["p"]=>
     int(1)
     ["q"]=>
     int(2)
   }
-  darray(2) {
+  dict(2) {
     ["r"]=>
     int(3)
     ["s"]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     ["u"]=>
     int(5)
     ["v"]=>
     int(6)
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(5)
     [1]=>
@@ -160,8 +160,8 @@ varray(3) {
 }
 
 [3]
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     [0]=>
     int(1)
     [1]=>
@@ -169,7 +169,7 @@ varray(2) {
     [2]=>
     int(3)
   }
-  darray(3) {
+  dict(3) {
     [0]=>
     int(4)
     [1]=>
@@ -178,8 +178,8 @@ varray(2) {
     int(6)
   }
 }
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     ["p"]=>
     int(1)
     ["q"]=>
@@ -187,7 +187,7 @@ varray(2) {
     ["r"]=>
     int(3)
   }
-  darray(3) {
+  dict(3) {
     ["s"]=>
     int(4)
     ["u"]=>
@@ -196,8 +196,8 @@ varray(2) {
     int(6)
   }
 }
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     [0]=>
     int(1)
     [1]=>
@@ -205,7 +205,7 @@ varray(2) {
     [2]=>
     int(3)
   }
-  darray(3) {
+  dict(3) {
     [0]=>
     int(4)
     [1]=>
@@ -216,8 +216,8 @@ varray(2) {
 }
 
 [4]
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     [0]=>
     int(1)
     [1]=>
@@ -227,15 +227,15 @@ varray(2) {
     [3]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(5)
     [1]=>
     int(6)
   }
 }
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     ["p"]=>
     int(1)
     ["q"]=>
@@ -245,15 +245,15 @@ varray(2) {
     ["s"]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     ["u"]=>
     int(5)
     ["v"]=>
     int(6)
   }
 }
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     [0]=>
     int(1)
     [1]=>
@@ -263,7 +263,7 @@ varray(2) {
     [3]=>
     int(4)
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     int(5)
     [1]=>
@@ -272,8 +272,8 @@ varray(2) {
 }
 
 [5]
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     [0]=>
     int(1)
     [1]=>
@@ -285,13 +285,13 @@ varray(2) {
     [4]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(6)
   }
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     ["p"]=>
     int(1)
     ["q"]=>
@@ -303,13 +303,13 @@ varray(2) {
     ["u"]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     ["v"]=>
     int(6)
   }
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     [0]=>
     int(1)
     [1]=>
@@ -321,15 +321,15 @@ varray(2) {
     [4]=>
     int(5)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(6)
   }
 }
 
 [6]
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     [0]=>
     int(1)
     [1]=>
@@ -344,8 +344,8 @@ varray(1) {
     int(6)
   }
 }
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     ["p"]=>
     int(1)
     ["q"]=>
@@ -360,8 +360,8 @@ varray(1) {
     int(6)
   }
 }
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     [0]=>
     int(1)
     [1]=>

@@ -1,6 +1,6 @@
-Array
+Vec
 (
-    [0] => Array
+    [0] => Dict
         (
             [b] => brown
             [c] => blue
@@ -8,14 +8,14 @@ Array
             [1] => 
         )
 
-    [1] => Array
+    [1] => Dict
         (
             [a] => green
             [b] => brown
             [c] => blue
         )
 
-    [2] => Array
+    [2] => Dict
         (
             [a] => green
             [0] => yellow
@@ -23,7 +23,7 @@ Array
             [2] => 1
         )
 
-    [3] => Array
+    [3] => Dict
         (
             [b] => brown
             [c] => blue

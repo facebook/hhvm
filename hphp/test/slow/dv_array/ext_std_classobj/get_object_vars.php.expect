@@ -1,12 +1,12 @@
 string(4) "Base"
-darray(2) {
+dict(2) {
   ["aaa"]=>
   int(1)
   ["bbb"]=>
   int(2)
 }
 string(4) "Base"
-darray(3) {
+dict(3) {
   ["aaa"]=>
   int(1)
   ["bbb"]=>
@@ -15,7 +15,7 @@ darray(3) {
   int(3)
 }
 string(5) "Child"
-darray(5) {
+dict(5) {
   ["ddd"]=>
   int(4)
   ["eee"]=>

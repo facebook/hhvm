@@ -1,29 +1,29 @@
-varray(3) {
+vec(3) {
   string(5) "final"
   string(6) "public"
   string(6) "static"
 }
-varray(1) {
+vec(1) {
   string(6) "public"
 }
-varray(2) {
+vec(2) {
   string(8) "abstract"
   string(7) "private"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(2) {
+vec(2) {
   string(6) "public"
   string(7) "private"
 }
-varray(2) {
+vec(2) {
   string(8) "abstract"
   string(5) "final"
 }
-varray(1) {
+vec(1) {
   string(5) "final"
 }

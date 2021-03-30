@@ -1,21 +1,21 @@
-varray(3) {
+vec(3) {
   string(1) "0"
   string(0) ""
   string(1) "2"
 }
-varray(3) {
+vec(3) {
   string(1) "0"
   string(1) " "
   string(1) "2"
 }
-varray(5) {
+vec(5) {
   string(0) ""
   string(0) ""
   string(0) ""
   string(0) ""
   string(0) ""
 }
-varray(5) {
+vec(5) {
   string(1) " "
   string(2) "  "
   string(0) ""

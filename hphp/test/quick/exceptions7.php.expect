@@ -1,7 +1,7 @@
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 string(4) "data"
@@ -11,7 +11,7 @@ caught call user func 1
 ----HANDLER----
 string(4) "frap"
 NULL
-varray(1) {
+vec(1) {
   string(8) "callfunc"
 }
 NULL
@@ -23,7 +23,7 @@ caught closure 1
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -32,7 +32,7 @@ caught static call 1
 ----HANDLER----
 string(12) "Blark::sfrap"
 string(5) "Blark"
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -42,7 +42,7 @@ caught static call 2
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -52,7 +52,7 @@ caught non-static call 1
 string(11) "Blark::frap"
 object(Blark) (0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 bool(true)
@@ -61,10 +61,10 @@ caught non-static call 2
 ----HANDLER----
 string(7) "handler"
 NULL
-varray(5) {
+vec(5) {
   string(4) "frap"
   NULL
-  varray(1) {
+  vec(1) {
     string(8) "claptrap"
   }
   NULL

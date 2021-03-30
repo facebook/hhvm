@@ -1,13 +1,13 @@
 NULL
 int(0)
-Invalid varray key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
 string(1) "a"
 HI
 string(1) "a"
 HI
 NULL
 int(0)
-Invalid varray key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
 string(1) "a"
 HI
 string(1) "a"

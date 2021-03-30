@@ -1,6 +1,6 @@
 bool(true)
 
-Warning: supplied key param cannot be coerced into a private key in %s/018.php on line %d
+Warning: supplied key param cannot be coerced into a private key in %s/test/zend/good/ext/openssl/tests/018.php on line 8
 bool(false)
 
-Warning: openssl_sign() expects parameter 1 to be string, %rv?%rarray given in %s/018.php on line %d
+Warning: openssl_sign() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/openssl/tests/018.php on line 9

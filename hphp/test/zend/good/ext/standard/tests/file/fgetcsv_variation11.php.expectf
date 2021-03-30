@@ -1,7 +1,7 @@
 *** Testing fgetcsv() : with different enclosure but same delimiter char ***
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -9,7 +9,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -17,7 +17,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -25,7 +25,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -33,7 +33,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -41,7 +41,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -49,7 +49,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -57,7 +57,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -65,7 +65,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -73,7 +73,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -81,7 +81,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -89,7 +89,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -97,7 +97,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -105,7 +105,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -113,7 +113,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(5) "fruit"
 }
@@ -121,7 +121,7 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -129,7 +129,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -137,7 +137,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -145,7 +145,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -153,7 +153,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -161,7 +161,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -169,7 +169,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -177,7 +177,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -185,7 +185,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -193,7 +193,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -201,7 +201,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -209,7 +209,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -217,7 +217,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -225,7 +225,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -233,7 +233,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(2) {
+vec(2) {
   string(7) ""water""
   string(7) ""fruit""
 }
@@ -241,7 +241,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -249,7 +249,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -257,7 +257,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -265,7 +265,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -273,7 +273,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -281,7 +281,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -289,7 +289,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -297,7 +297,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -305,7 +305,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -313,7 +313,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -321,7 +321,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -329,7 +329,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -337,7 +337,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -345,7 +345,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -353,7 +353,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(2) {
+vec(2) {
   string(7) "^water^"
   string(7) "^fruit^"
 }
@@ -361,7 +361,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -369,7 +369,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -377,7 +377,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -385,7 +385,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -393,7 +393,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -401,7 +401,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -409,7 +409,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -417,7 +417,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -425,7 +425,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -433,7 +433,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -441,7 +441,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -449,7 +449,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -457,7 +457,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -465,7 +465,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -473,7 +473,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(2) {
+vec(2) {
   string(7) "&water&"
   string(7) "&fruit&"
 }
@@ -481,7 +481,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -493,7 +493,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -505,7 +505,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -517,7 +517,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -529,7 +529,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -541,7 +541,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -553,7 +553,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -565,7 +565,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -577,7 +577,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -589,7 +589,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -601,7 +601,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -613,7 +613,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -625,7 +625,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -637,7 +637,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -649,7 +649,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(6) {
+vec(6) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -661,7 +661,7 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -672,7 +672,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -683,7 +683,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -694,7 +694,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -705,7 +705,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -716,7 +716,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -727,7 +727,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -738,7 +738,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -749,7 +749,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -760,7 +760,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -771,7 +771,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -782,7 +782,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -793,7 +793,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -804,7 +804,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -815,7 +815,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(5) {
+vec(5) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -826,7 +826,7 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -841,7 +841,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -856,7 +856,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -871,7 +871,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -886,7 +886,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -901,7 +901,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -916,7 +916,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -931,7 +931,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -946,7 +946,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -961,7 +961,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -976,7 +976,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -991,7 +991,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -1006,7 +1006,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -1021,7 +1021,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -1036,7 +1036,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(9) {
+vec(9) {
   string(0) ""
   string(5) "water"
   string(0) ""
@@ -1051,7 +1051,7 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1063,7 +1063,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1075,7 +1075,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1087,7 +1087,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1099,7 +1099,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1111,7 +1111,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1123,7 +1123,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1135,7 +1135,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1147,7 +1147,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1159,7 +1159,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1171,7 +1171,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1183,7 +1183,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1195,7 +1195,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1207,7 +1207,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","
@@ -1219,7 +1219,7 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(6) {
+vec(6) {
   string(6) "&""""&"
   string(3) "&"&"
   string(1) ","

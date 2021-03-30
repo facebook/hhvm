@@ -1,5 +1,5 @@
 Standard sorting
-Array
+Vec
 (
     [0] => img1.png
     [1] => img10.png
@@ -8,7 +8,7 @@ Array
 )
 
 Natural order sorting
-Array
+Dict
 (
     [3] => img1.png
     [2] => img2.png

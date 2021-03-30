@@ -1,15 +1,15 @@
-darray(2) {
+dict(2) {
   ["color"]=>
-  darray(1) {
+  dict(1) {
     ["favoritte"]=>
     string(3) "red"
   }
   [0]=>
-  varray(2) {
+  vec(2) {
     int(10)
-    darray(1) {
+    dict(1) {
       ["color"]=>
-      darray(2) {
+      dict(2) {
         ["favorite"]=>
         string(5) "green"
         [0]=>

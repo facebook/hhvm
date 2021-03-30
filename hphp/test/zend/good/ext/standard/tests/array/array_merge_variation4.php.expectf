@@ -1,7 +1,7 @@
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1: int data --
-darray(6) {
+dict(6) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -15,7 +15,7 @@ darray(6) {
   ["two"]=>
   int(2)
 }
-darray(6) {
+dict(6) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -31,7 +31,7 @@ darray(6) {
 }
 
 -- Iteration 2: empty double quotes data --
-darray(3) {
+dict(3) {
   [""]=>
   string(6) "emptyd"
   ["one"]=>
@@ -39,7 +39,7 @@ darray(3) {
   ["two"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -49,7 +49,7 @@ darray(3) {
 }
 
 -- Iteration 3: empty single quotes data --
-darray(3) {
+dict(3) {
   [""]=>
   string(6) "emptys"
   ["one"]=>
@@ -57,7 +57,7 @@ darray(3) {
   ["two"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -67,7 +67,7 @@ darray(3) {
 }
 
 -- Iteration 4: string data --
-darray(5) {
+dict(5) {
   ["stringd"]=>
   string(7) "stringd"
   ["strings"]=>
@@ -79,7 +79,7 @@ darray(5) {
   ["two"]=>
   int(2)
 }
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   ["two"]=>

@@ -1,90 +1,90 @@
-Warning: Invalid argument: size: 0 in %s/array_chunk2.php on line 3
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk2.php on line 3
 NULL
 
-Warning: Invalid argument: size: 0 in %s/array_chunk2.php on line 4
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk2.php on line 4
 NULL
-varray(5) {
-  darray(1) {
+vec(5) {
+  dict(1) {
     [0]=>
     string(1) "a"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "b"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "c"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
-varray(5) {
-  darray(1) {
+vec(5) {
+  dict(1) {
     [0]=>
     string(1) "a"
   }
-  darray(1) {
+  dict(1) {
     [1]=>
     string(1) "b"
   }
-  darray(1) {
+  dict(1) {
     [2]=>
     string(1) "c"
   }
-  darray(1) {
+  dict(1) {
     [3]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [4]=>
     string(1) "e"
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [2]=>
     string(1) "c"
     [3]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [4]=>
     string(1) "e"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     [0]=>
     string(1) "a"
     [1]=>
@@ -97,8 +97,8 @@ varray(1) {
     string(1) "e"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     [0]=>
     string(1) "a"
     [1]=>

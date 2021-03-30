@@ -1,6 +1,6 @@
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(0)
   [1]=>
@@ -8,9 +8,9 @@ darray(3) {
   [2]=>
   int(2)
 }
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(0)
   [1]=>
@@ -18,9 +18,9 @@ darray(3) {
   [2]=>
   float(2.1)
 }
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(0)
   [1]=>
@@ -28,9 +28,9 @@ darray(3) {
   [2]=>
   bool(true)
 }
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(0)
   [1]=>

@@ -2,79 +2,79 @@
 
 --int 0--
 
-Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --int 1--
 
-Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --int 12345--
 
-Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --int -12345--
 
-Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --float 10.5--
 
-Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --float -10.5--
 
-Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --float 12.3456789000e10--
 
-Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --float -12.3456789000e10--
 
-Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --float .5--
 
-Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --empty array--
 
-Warning: mb_strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --int indexed array--
 
-Warning: mb_strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --associative array--
 
-Warning: mb_strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --nested arrays--
 
-Warning: mb_strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --uppercase NULL--
 
-Warning: mb_strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, null given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --lowercase null--
 
-Warning: mb_strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, null given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --lowercase true--
 
-Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --lowercase false--
 
-Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --uppercase TRUE--
 
-Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --uppercase FALSE--
 
-Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --empty string DQ--
 bool(false)
@@ -84,13 +84,13 @@ bool(false)
 
 --instance of classWithToString--
 
-Warning: mb_strrchr() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --instance of classWithoutToString--
 
-Warning: mb_strrchr() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 
 --resource--
 
-Warning: mb_strrchr() expects parameter 1 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line %d
+Warning: mb_strrchr() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/mbstring/tests/mb_strrchr_variation1.php on line 101
 ===DONE===

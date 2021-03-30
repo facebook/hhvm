@@ -1,5 +1,5 @@
 int(2)
-darray(2) {
+dict(2) {
   ["a"]=>
   string(1) "a"
   [""]=>

@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   [0]=>
   int(4)
   [1]=>
@@ -8,11 +8,11 @@ darray(4) {
   [10]=>
   int(5)
 }
-Out of bounds darray access: invalid index "0"
-Out of bounds darray access: invalid index "1"
-Out of bounds darray access: invalid index "7"
-Out of bounds darray access: invalid index "10"
-Out of bounds darray access: invalid index "01"
-Out of bounds darray access: invalid index "007"
-Out of bounds darray access: invalid index "08"
-Out of bounds darray access: invalid index "0xa"
+Out of bounds dict access: invalid index "0"
+Out of bounds dict access: invalid index "1"
+Out of bounds dict access: invalid index "7"
+Out of bounds dict access: invalid index "10"
+Out of bounds dict access: invalid index "01"
+Out of bounds dict access: invalid index "007"
+Out of bounds dict access: invalid index "08"
+Out of bounds dict access: invalid index "0xa"

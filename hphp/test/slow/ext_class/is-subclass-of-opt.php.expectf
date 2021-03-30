@@ -1,19 +1,19 @@
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
-varray(10) {
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
+vec(10) {
   bool(true)
   bool(false)
   bool(false)

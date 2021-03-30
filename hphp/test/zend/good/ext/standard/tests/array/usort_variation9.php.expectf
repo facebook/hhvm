@@ -2,7 +2,7 @@
 
 -- Sorting $array_arg containing different references --
 bool(true)
-darray(5) {
+dict(5) {
   [0]=>
   int(-5)
   [1]=>

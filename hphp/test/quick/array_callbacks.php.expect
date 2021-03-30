@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [2]=>
@@ -9,7 +9,7 @@ darray(4) {
   int(7)
 }
 8 times
-darray(6) {
+dict(6) {
   [0]=>
   int(1)
   [1]=>

@@ -18,11 +18,11 @@ vec(0) {
 }
 vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 NULL
@@ -96,11 +96,11 @@ vec(0) {
 }
 vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 NULL

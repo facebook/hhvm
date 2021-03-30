@@ -1,5 +1,5 @@
 *** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -13,7 +13,7 @@ darray(6) {
   [5]=>
   int(1000)
 }
-darray(8) {
+dict(8) {
   [0]=>
   int(0)
   [1]=>

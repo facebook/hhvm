@@ -1,98 +1,98 @@
 *** Testing class_uses() : variation ***
 
 --int 0--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --int 1--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --int 12345--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --int -12345--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --float 10.5--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --float -10.5--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --float 12.3456789000e10--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --float -12.3456789000e10--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --float .5--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --empty array--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --int indexed array--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --associative array--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --nested arrays--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --lowercase null--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --lowercase true--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --lowercase false--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --uppercase TRUE--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --empty string DQ--
-Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
+Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --empty string SQ--
-Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
+Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 
 --instance of classWithToString--
-darray(0) {
+dict(0) {
 }
 
 --instance of classWithoutToString--
-darray(0) {
+dict(0) {
 }
 
 --resource--
-Error: 2 - class_uses(): object or string expected, %s(%d)
+Error: 2 - class_uses(): object or string expected, %s/test/zend/good/ext/spl/tests/class_uses_variation1.php(95)
 bool(false)
 ===DONE===

@@ -1,4 +1,4 @@
-varray(4) {
+vec(4) {
   string(59) "StartSessionResponse StartSession(StartSession $parameters)"
   string(62) "VerifySessionResponse VerifySession(VerifySession $parameters)"
   string(41) "LogoutResponse Logout(Logout $parameters)"

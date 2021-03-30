@@ -4,7 +4,7 @@
 bool\(true\)
 
 The output array is:
-varray\(6\) {
+vec\(6\) {
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
@@ -17,7 +17,7 @@ varray\(6\) {
 bool\(true\)
 
 The output array is:
-darray\(6\) {
+dict\(6\) {
   \[0\]=>
   string\(8\) "[heredoc 1-5]*"
   \[1\]=>

@@ -1,20 +1,20 @@
 *** Testing Error Conditions ***
 
-Warning: array_shift() expects exactly 1 parameter, 0 given in %s/005.php on line 33
+Warning: array_shift() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/005.php on line 33
 
-Warning: array_shift() expects parameter 1 to be an array or mutable collection in %s/005.php on line 36
+Warning: array_shift() expects parameter 1 to be an array or mutable collection in %s/test/zend/good/ext/standard/tests/array/005.php on line 36
 NULL
 
-Warning: array_shift() expects parameter 1 to be an array or mutable collection in %s/005.php on line 39
+Warning: array_shift() expects parameter 1 to be an array or mutable collection in %s/test/zend/good/ext/standard/tests/array/005.php on line 39
 NULL
 
-Warning: array_shift() expects exactly 1 parameter, 2 given in %s/005.php on line 42
+Warning: array_shift() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/array/005.php on line 42
 NULL
 
 *** Testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
-Array
+Vec
 (
 )
 
@@ -22,7 +22,7 @@ Output after shift is :
 NULL
 
 -- Input Array for Iteration 2 is --
-Array
+Vec
 (
     [0] => 1
     [1] => 2
@@ -39,7 +39,7 @@ Output after shift is :
 int(1)
 
 -- Input Array for Iteration 3 is --
-Array
+Vec
 (
     [0] => One
     [1] => _Two
@@ -52,7 +52,7 @@ Output after shift is :
 string(3) "One"
 
 -- Input Array for Iteration 4 is --
-Array
+Vec
 (
     [0] => 6
     [1] => six
@@ -68,7 +68,7 @@ Output after shift is :
 int(6)
 
 -- Input Array for Iteration 5 is --
-Array
+Dict
 (
     [a] => aaa
     [A] => AAA
@@ -81,7 +81,7 @@ Output after shift is :
 string(3) "aaa"
 
 -- Input Array for Iteration 6 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -94,7 +94,7 @@ Output after shift is :
 string(3) "one"
 
 -- Input Array for Iteration 7 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -107,7 +107,7 @@ Output after shift is :
 string(3) "one"
 
 -- Input Array for Iteration 8 is --
-Array
+Dict
 (
     [f] => fff
     [1] => one
@@ -128,7 +128,7 @@ Output after shift is :
 string(3) "fff"
 
 -- Input Array for Iteration 9 is --
-Array
+Vec
 (
     [0] => 12
     [1] => name
@@ -140,16 +140,16 @@ Output after shift is :
 int(12)
 
 -- Input Array for Iteration 10 is --
-Array
+Vec
 (
-    [0] => Array
+    [0] => Vec
         (
             [0] => oNe
             [1] => tWo
             [2] => 4
         )
 
-    [1] => Array
+    [1] => Vec
         (
             [0] => 10
             [1] => 20
@@ -158,21 +158,21 @@ Array
             [4] => 50
         )
 
-    [2] => Array
+    [2] => Vec
         (
         )
 
 )
 
 Output after shift is :
-varray(3) {
+vec(3) {
   string(3) "oNe"
   string(3) "tWo"
   int(4)
 }
 
 -- Input Array for Iteration 11 is --
-Array
+Dict
 (
     [one] => 2
     [three] => 3

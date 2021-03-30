@@ -1,31 +1,31 @@
-darray(1) {
+dict(1) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(3) "A£"
     [1]=>
     string(2) "BC"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(3) "A£"
     [1]=>
     string(2) "BC"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(4) "€ "
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(4) "€ "
   }

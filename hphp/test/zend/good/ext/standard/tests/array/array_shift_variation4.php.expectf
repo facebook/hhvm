@@ -2,8 +2,8 @@
 
 -- Before shift: --
 ---- $stack_first:
-varray(3) {
-  varray(3) {
+vec(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
@@ -12,10 +12,10 @@ varray(3) {
   string(3) "two"
 }
 ---- $stack_last:
-varray(3) {
+vec(3) {
   string(4) "zero"
   string(3) "one"
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
@@ -24,23 +24,23 @@ varray(3) {
 
 -- After shift: --
 ---- Pop array from array:
-Returned value:	varray(3) {
+Returned value:	vec(3) {
   int(1)
   int(2)
   int(3)
 }
 New array:
-varray(2) {
+vec(2) {
   string(3) "one"
   string(3) "two"
 }
 ---- Pop element from array within array:
 Returned value:	int(1)
 New array:
-varray(3) {
+vec(3) {
   string(4) "zero"
   string(3) "one"
-  varray(2) {
+  vec(2) {
     int(2)
     int(3)
   }

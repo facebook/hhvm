@@ -1,6 +1,6 @@
-Warning: class_parents(): Class A does not exist in %s
+Warning: class_parents(): Class A does not exist in %s/test/slow/eval_order/1531.php on line 16
 bool(false)
-darray(1) {
+dict(1) {
   ["B"]=>
   string(1) "B"
 }

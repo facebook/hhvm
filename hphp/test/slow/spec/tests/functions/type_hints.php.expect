@@ -1,6 +1,6 @@
 --------------- test type hint array ---------------------
 Inside f1
-varray(2) {
+vec(2) {
   int(10)
   int(20)
 }

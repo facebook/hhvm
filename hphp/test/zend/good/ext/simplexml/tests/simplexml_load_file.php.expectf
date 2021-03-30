@@ -1,6 +1,6 @@
 object(SimpleXMLElement) (1) {
   ["book"]=>
-  varray(2) {
+  vec(2) {
     object(SimpleXMLElement) (2) {
       ["title"]=>
       string(19) "The Grapes of Wrath"

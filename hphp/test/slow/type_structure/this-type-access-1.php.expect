@@ -1,9 +1,9 @@
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
 bool(false)
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(4)
 }

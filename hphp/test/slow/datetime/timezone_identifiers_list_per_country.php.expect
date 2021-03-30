@@ -1,4 +1,4 @@
-varray(29) {
+vec(29) {
   string(12) "America/Adak"
   string(17) "America/Anchorage"
   string(13) "America/Boise"
@@ -29,17 +29,17 @@ varray(29) {
   string(15) "America/Yakutat"
   string(16) "Pacific/Honolulu"
 }
-varray(3) {
+vec(3) {
   string(15) "Atlantic/Azores"
   string(16) "Atlantic/Madeira"
   string(13) "Europe/Lisbon"
 }
-varray(1) {
+vec(1) {
   string(13) "Europe/Athens"
 }
-varray(1) {
+vec(1) {
   string(14) "Asia/Jerusalem"
 }
-varray(1) {
+vec(1) {
   string(14) "America/Belize"
 }

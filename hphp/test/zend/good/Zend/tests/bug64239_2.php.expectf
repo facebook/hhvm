@@ -1,21 +1,21 @@
-Array
+Vec
 (
-    [0] => Array
+    [0] => Dict
         (
-            [file] => %sbug64239_2.php
-            [line] => %d
+            [file] => %s/test/zend/good/Zend/tests/bug64239_2.php
+            [line] => 17
             [function] => Bmethod
             [class] => B
             [type] => ->
         )
 
 )
-Array
+Vec
 (
-    [0] => Array
+    [0] => Dict
         (
-            [file] => %sbug64239_2.php
-            [line] => %d
+            [file] => %s/test/zend/good/Zend/tests/bug64239_2.php
+            [line] => 17
             [function] => Bmethod
             [class] => B
             [type] => ->

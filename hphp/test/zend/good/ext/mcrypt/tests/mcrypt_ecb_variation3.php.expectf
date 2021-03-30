@@ -2,79 +2,79 @@
 
 --int 0--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --int 1--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --int 12345--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --int -12345--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --float 10.5--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --float -10.5--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --float 12.3456789000e10--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --float -12.3456789000e10--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --float .5--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --empty array--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --int indexed array--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --associative array--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, dict given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --nested arrays--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --uppercase NULL--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, null given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --lowercase null--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, null given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --lowercase true--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --lowercase false--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --uppercase TRUE--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --uppercase FALSE--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --empty string DQ--
 string(16) "6ece228c41457539"
@@ -84,13 +84,13 @@ string(16) "6ece228c41457539"
 
 --instance of classWithToString--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, object given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --instance of classWithoutToString--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, object given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 
 --resource--
 
-Warning: mcrypt_ecb() expects parameter 3 to be string, resource given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line %d
+Warning: mcrypt_ecb() expects parameter 3 to be string, resource given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 104
 ===DONE===

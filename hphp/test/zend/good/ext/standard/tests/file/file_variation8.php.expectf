@@ -1,22 +1,22 @@
 *** Testing file() : variation ***
 
 -- Iteration 1 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 2 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 3 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 4 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
@@ -31,22 +31,22 @@ Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/
 bool(false)
 
 -- Iteration 7 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 8 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 9 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 
 -- Iteration 10 --
-varray(1) {
+vec(1) {
   string(13) "contents read"
 }
 

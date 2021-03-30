@@ -1,6 +1,6 @@
 *** Testing natcasesort() : usage variation ***
 bool(true)
-darray(11) {
+dict(11) {
   [8]=>
   int(-255)
   [10]=>

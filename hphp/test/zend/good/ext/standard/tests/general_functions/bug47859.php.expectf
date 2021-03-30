@@ -1,28 +1,28 @@
-darray(1) {
+dict(1) {
   ["*key"]=>
   string(6) "*value"
 }
-darray(1) {
+dict(1) {
   ["-key"]=>
   string(6) "-value"
 }
-darray(1) {
+dict(1) {
   ["_key"]=>
   string(6) "_value"
 }
-darray(1) {
+dict(1) {
   ["key*"]=>
   string(6) "value*"
 }
-darray(1) {
+dict(1) {
   ["key.*.*"]=>
   string(9) "value.*.*"
 }
-darray(1) {
+dict(1) {
   ["*.*.key"]=>
   string(9) "*.*.value"
 }
-darray(1) {
+dict(1) {
   ["k*e*y"]=>
   string(7) "v*a*lue"
 }

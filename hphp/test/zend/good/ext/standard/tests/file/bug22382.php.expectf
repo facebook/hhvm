@@ -1,4 +1,4 @@
-varray(6) {
+vec(6) {
   string(3) "One"
   string(7) "\"Two\""
   string(7) "Three\""

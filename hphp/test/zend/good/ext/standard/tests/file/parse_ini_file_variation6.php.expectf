@@ -1,25 +1,25 @@
 *** Testing parse_ini_file() : variation ***
 
 -- Iteration 1 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 3 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 4 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
@@ -35,25 +35,25 @@ Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/
 bool(false)
 
 -- Iteration 7 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 8 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 9 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 10 --
-darray(1) {
+dict(1) {
   ["a"]=>
   string(4) "test"
 }

@@ -1,6 +1,6 @@
 *** Testing array_unshift() : basic functionality with associative array ***
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(10)
   ["f"]=>
@@ -13,7 +13,7 @@ darray(5) {
   string(3) "two"
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(222)
   [1]=>

@@ -14,5 +14,5 @@ bool(false)
 string(5) "base1"
 bool(true)
 bool(false)
-darray(0) {
+dict(0) {
 }

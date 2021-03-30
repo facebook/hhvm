@@ -1,6 +1,6 @@
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   object(Foo) (0) {
   }

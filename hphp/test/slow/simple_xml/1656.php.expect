@@ -1,6 +1,6 @@
 object(SimpleXMLElement) (1) {
   ["@attributes"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     string(1) "b"
   }
@@ -12,7 +12,7 @@ string(4) "test"
 string(1) "v"
 object(SimpleXMLElement) (1) {
   ["@attributes"]=>
-  darray(2) {
+  dict(2) {
     ["attr1"]=>
     string(6) "value1"
     ["attr2"]=>
@@ -30,7 +30,7 @@ string(224) "<?xml version="1.0" encoding="utf-8"?>
 "
 object(SimpleXMLElement) (1) {
   ["@attributes"]=>
-  darray(2) {
+  dict(2) {
     ["a"]=>
     string(1) "b"
     ["newattr"]=>

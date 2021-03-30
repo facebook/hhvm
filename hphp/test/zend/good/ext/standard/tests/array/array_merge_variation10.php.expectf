@@ -1,7 +1,7 @@
 *** Testing array_merge() : usage variations ***
 
 -- Call array_merge() --
-darray(9) {
+dict(9) {
   [0]=>
   string(4) "zero"
   [1]=>

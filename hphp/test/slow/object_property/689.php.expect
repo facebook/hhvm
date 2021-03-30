@@ -1,6 +1,6 @@
 object(A) (1) {
   ["a":"A":private]=>
-  varray(1) {
+  vec(1) {
     string(5) "apple"
   }
 }

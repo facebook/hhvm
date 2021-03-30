@@ -1,7 +1,0 @@
-string(4) "Base"
-dict(2) {
-  ["aaa"]=>
-  int(1)
-  ["bbb"]=>
-  int(2)
-}

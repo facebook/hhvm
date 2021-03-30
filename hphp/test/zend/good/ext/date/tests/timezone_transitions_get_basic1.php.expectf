@@ -1,12 +1,12 @@
 *** Testing timezone_transitions_get() : basic functionality ***
 
 -- Get all transitions --
-string(5) "array"
+string(3) "vec"
 
 -- Total number of transitions: 242 --
 
 -- Format a sample entry pfor Spring 1963 --
-darray(5) {
+dict(5) {
   ["ts"]=>
   int(-213228000)
   ["time"]=>

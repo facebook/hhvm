@@ -4,16 +4,16 @@ bool(true)
 bool(true)
 bool(false)
 Traversable Array
-varray(0) {
+vec(0) {
 }
 KeyedTraversable Array
-varray(0) {
+vec(0) {
 }
 Container Array
-varray(0) {
+vec(0) {
 }
 KeyedContainer Array
-varray(0) {
+vec(0) {
 }
 
-Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, varray given in %s/test/slow/array_iterator/array-traversable.php on line 36
+Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, HH\vec given in %s/test/slow/array_iterator/array-traversable.php on line 36

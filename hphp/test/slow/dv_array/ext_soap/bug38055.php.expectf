@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   string(26) "int Test(Test $parameters)"
 }
-varray(1) {
+vec(1) {
   string(47) "struct Test {
  boolean boolA;
  boolean boolB;

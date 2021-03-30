@@ -1,7 +1,7 @@
 *** Testing get_declared_traits() : basic functionality ***
 
 -- Testing get_declared_traits() function with Zero arguments --
-varray(8) {
+vec(8) {
   string(24) "ReflectionTypedAttribute"
   string(19) "StrictKeyedIterable"
   string(14) "StrictIterable"

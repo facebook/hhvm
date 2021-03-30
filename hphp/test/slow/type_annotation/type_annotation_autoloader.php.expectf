@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -6,7 +6,7 @@ darray(3) {
   ["exact"]=>
   bool(true)
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(16)
   ["classname"]=>
@@ -14,7 +14,7 @@ darray(3) {
   ["alias"]=>
   string(12) "BuiltinClass"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -22,7 +22,7 @@ darray(3) {
   ["alias"]=>
   string(11) "LoadedClass"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -30,7 +30,7 @@ darray(3) {
   ["alias"]=>
   string(14) "AutoloadClass1"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -38,7 +38,7 @@ darray(3) {
   ["alias"]=>
   string(14) "AutoloadClass2"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -46,13 +46,13 @@ darray(3) {
   ["alias"]=>
   string(13) "AutoloadType1"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(7)
   ["alias"]=>
   string(13) "AutoloadType2"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(1)
   ["alias"]=>

@@ -1,6 +1,6 @@
-darray(2) {
+dict(2) {
   ["a1"]=>
-  darray(4) {
+  dict(4) {
     ["x"]=>
     string(1) "y"
     [0]=>
@@ -11,7 +11,7 @@ darray(2) {
     int(3)
   }
   ["a2"]=>
-  darray(4) {
+  dict(4) {
     ["x"]=>
     string(1) "y"
     [0]=>

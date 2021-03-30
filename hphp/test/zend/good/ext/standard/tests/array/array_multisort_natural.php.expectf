@@ -1,5 +1,5 @@
 *** Testing array_multisort() : natural sorting
-darray(5) {
+dict(5) {
   [0]=>
   string(5) "First"
   [1]=>
@@ -11,7 +11,7 @@ darray(5) {
   [4]=>
   string(9) "Twentieth"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(3) "1 b"
   [1]=>

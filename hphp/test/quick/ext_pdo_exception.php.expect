@@ -1,5 +1,5 @@
 NULL
-varray(3) {
+vec(3) {
   string(5) "HY000"
   int(1)
   string(31) "table test_table already exists"

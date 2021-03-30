@@ -1,15 +1,15 @@
-varray(3) {
+vec(3) {
   int(1)
   string(5) "hello"
   float(3.5)
 }
-varray(4) {
+vec(4) {
   int(1)
   string(5) "hello"
   float(3.5)
   string(5) "world"
 }
-varray(3) {
+vec(3) {
   int(1)
   string(5) "hello"
   float(3.5)

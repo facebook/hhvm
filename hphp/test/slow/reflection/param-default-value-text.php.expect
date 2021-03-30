@@ -1,10 +1,10 @@
-darray(4) {
+dict(4) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
   [2]=>
-  string(25) "varray [
+  string(22) "vec [
   1,
   2,
   3,
@@ -13,13 +13,13 @@ darray(4) {
   string(7) "vec [
 ]"
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
   [2]=>
-  string(25) "varray [
+  string(22) "vec [
   1,
   2,
   3,

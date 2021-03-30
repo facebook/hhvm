@@ -1,20 +1,20 @@
-darray(1) {
+dict(1) {
   ["VAL"]=>
   int(42)
 }
-darray(1) {
+dict(1) {
   ["VAL"]=>
   int(43)
 }
-darray(1) {
+dict(1) {
   ["VAL"]=>
   int(44)
 }
-darray(1) {
+dict(1) {
   ["VAL"]=>
   int(45)
 }
-darray(1) {
+dict(1) {
   ["VAL"]=>
   int(46)
 }

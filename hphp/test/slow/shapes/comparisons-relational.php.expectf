@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays' in %s/comparisons-relational.php:6
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts' in %s/comparisons-relational.php:6
 %A

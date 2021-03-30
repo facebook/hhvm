@@ -1,19 +1,19 @@
-varray(3) {
+vec(3) {
   string(5) "opera"
   string(2) "12"
   string(2) "16"
 }
-varray(3) {
+vec(3) {
   string(17) "foo.browser.opera"
   string(20) "foo.browser.opera.12"
   string(23) "foo.browser.opera.12-16"
 }
-varray(3) {
+vec(3) {
   string(5) "opera"
   string(2) "12"
   string(2) "16"
 }
-varray(3) {
+vec(3) {
   int(1)
   int(13)
   int(29)

@@ -1,7 +1,7 @@
 string(2) "28"
 string(2) "14"
 string(10) "2010-08-02"
-darray(4) {
+dict(4) {
   ["country_code"]=>
   string(2) "CZ"
   ["latitude"]=>

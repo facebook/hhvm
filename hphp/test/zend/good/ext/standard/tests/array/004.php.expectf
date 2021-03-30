@@ -1,4 +1,4 @@
-darray(5) {
+dict(5) {
   [0]=>
   string(5) "Test1"
   ["teST2"]=>
@@ -10,7 +10,7 @@ darray(5) {
   [6]=>
   string(6) "test21"
 }
-darray(5) {
+dict(5) {
   ["teST2"]=>
   int(0)
   [0]=>
@@ -22,7 +22,7 @@ darray(5) {
   [6]=>
   string(6) "test21"
 }
-darray(5) {
+dict(5) {
   ["teST2"]=>
   int(0)
   [0]=>

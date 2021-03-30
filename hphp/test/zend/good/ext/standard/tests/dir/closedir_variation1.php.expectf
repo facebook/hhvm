@@ -2,91 +2,91 @@
 
 -- Iteration 1 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 2 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 3 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 4 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 5 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 6 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 7 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 8 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 9 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 10 --
 
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line %d
+Warning: no Directory resource supplied in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 NULL
 
 -- Iteration 11 --
 
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line %d
+Warning: no Directory resource supplied in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 NULL
 
 -- Iteration 12 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 13 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 14 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 15 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 16 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 17 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 18 --
 
-Warning: closedir() expects parameter 1 to be resource, %rv?%rarray given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 19 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 20 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 21 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 
 -- Iteration 22 --
 
-Warning: closedir() expects parameter 1 to be resource, object given in %s/closedir_variation1.php on line %d
+Warning: closedir() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/dir/closedir_variation1.php on line 74
 ===DONE===

@@ -1,7 +1,7 @@
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)
-darray(5) {
+dict(5) {
   [2]=>
   int(-70)
   [1]=>
@@ -15,7 +15,7 @@ darray(5) {
 }
 -- Anonymous 'cmp_function' with parameters passed by reference --
 bool(true)
-darray(4) {
+dict(4) {
   ["a"]=>
   string(5) "Apple"
   ["b"]=>

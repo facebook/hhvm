@@ -2,7 +2,7 @@
 
 -- Iteration 1 : key type is int --
 $preserve_keys = TRUE
-darray(4) {
+dict(4) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -13,7 +13,7 @@ darray(4) {
   string(8) "negative"
 }
 $preserve_keys = FALSE
-darray(4) {
+dict(4) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -26,31 +26,31 @@ darray(4) {
 
 -- Iteration 2 : key type is empty double quotes --
 $preserve_keys = TRUE
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptyd"
 }
 $preserve_keys = FALSE
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptyd"
 }
 
 -- Iteration 3 : key type is empty single quotes --
 $preserve_keys = TRUE
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptys"
 }
 $preserve_keys = FALSE
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptys"
 }
 
 -- Iteration 4 : key type is string --
 $preserve_keys = TRUE
-darray(3) {
+dict(3) {
   ["stringd"]=>
   string(7) "stringd"
   ["strings"]=>
@@ -59,7 +59,7 @@ darray(3) {
   string(7) "stringh"
 }
 $preserve_keys = FALSE
-darray(3) {
+dict(3) {
   ["stringd"]=>
   string(7) "stringd"
   ["strings"]=>

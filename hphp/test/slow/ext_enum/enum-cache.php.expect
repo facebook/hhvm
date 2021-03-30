@@ -1,8 +1,8 @@
-darray(1) {
+dict(1) {
   ["VALUE"]=>
   int(42)
 }
-darray(1) {
+dict(1) {
   ["VALUE"]=>
   int(24)
 }

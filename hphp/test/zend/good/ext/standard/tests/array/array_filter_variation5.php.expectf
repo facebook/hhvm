@@ -1,7 +1,7 @@
 *** Testing array_filter() : usage variations - different false elements in 'input' ***
-darray(0) {
+dict(0) {
 }
-darray(14) {
+dict(14) {
   [0]=>
   bool(false)
   [1]=>
@@ -23,7 +23,7 @@ darray(14) {
   [9]=>
   string(1) "0"
   [10]=>
-  varray(0) {
+  vec(0) {
   }
   [11]=>
   bool(false)
@@ -32,6 +32,6 @@ darray(14) {
   [13]=>
   string(0) ""
 }
-darray(0) {
+dict(0) {
 }
 Done

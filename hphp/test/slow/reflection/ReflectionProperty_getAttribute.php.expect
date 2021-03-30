@@ -1,14 +1,14 @@
-varray(3) {
+vec(3) {
   int(1)
   string(3) "two"
-  varray(1) {
+  vec(1) {
     int(3)
   }
 }
 bool(true)
 NULL
 bool(false)
-varray(2) {
+vec(2) {
   string(1) "a"
   dict(1) {
     ["b"]=>
@@ -18,7 +18,7 @@ varray(2) {
 bool(true)
 NULL
 bool(false)
-varray(2) {
+vec(2) {
   string(7) "promote"
   vec(1) {
     string(2) "me"

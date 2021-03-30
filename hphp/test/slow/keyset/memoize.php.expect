@@ -86,11 +86,11 @@ keyset(2) {
   string(6) "value2"
 }
 get() called....
-varray(2) {
+vec(2) {
   string(5) "value"
   string(6) "value2"
 }
-varray(2) {
+vec(2) {
   string(5) "value"
   string(6) "value2"
 }

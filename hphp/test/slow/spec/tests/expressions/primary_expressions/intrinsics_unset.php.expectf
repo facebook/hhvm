@@ -55,23 +55,23 @@ object(C) (1) {
 }
 bool(true)
 ---------- unsetting array elements ------------
-Array
+Dict
 (
     [0] => 10
     [1] => 20
     [xx] => 30
 )
-Array
+Dict
 (
     [0] => 10
     [xx] => 30
 )
-Array
+Dict
 (
     [0] => 10
     [xx] => 30
 )
-Array
+Dict
 (
     [0] => 10
     [xx] => 30

@@ -1,4 +1,4 @@
-varray(6) {
+vec(6) {
   string(36) "When you're taught through feelings
 "
   string(26) "Destiny flying high above
@@ -12,7 +12,7 @@ varray(6) {
   string(39) "and I know that it descends down on me
 "
 }
-varray(6) {
+vec(6) {
   string(36) "When you're taught through feelings
 "
   string(26) "Destiny flying high above
@@ -26,7 +26,7 @@ varray(6) {
   string(39) "and I know that it descends down on me
 "
 }
-varray(6) {
+vec(6) {
   string(36) "When you're taught through feelings
 "
   string(26) "Destiny flying high above
@@ -40,7 +40,7 @@ varray(6) {
   string(39) "and I know that it descends down on me
 "
 }
-varray(6) {
+vec(6) {
   string(36) "When you're taught through feelings
 "
   string(26) "Destiny flying high above

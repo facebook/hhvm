@@ -5,7 +5,7 @@ object(SoapServer) (0) {
 Warning: Attempted to serialize unserializable builtin class SoapServer in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(9) {
+vec(9) {
   string(11) "__construct"
   string(8) "setClass"
   string(9) "setobject"
@@ -26,7 +26,7 @@ object(A_SoapServer) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SoapServer in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(9) {
+vec(9) {
   string(11) "__construct"
   string(8) "setClass"
   string(9) "setobject"

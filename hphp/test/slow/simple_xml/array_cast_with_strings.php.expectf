@@ -1,4 +1,4 @@
-darray(5) {
+dict(5) {
   ["hello"]=>
   object(SimpleXMLElement) (1) {
     [0]=>
@@ -21,7 +21,7 @@ darray(5) {
     string(4) "best"
   }
 }
-darray(1) {
+dict(1) {
   ["world"]=>
   int(1)
 }

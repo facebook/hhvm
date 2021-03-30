@@ -1,7 +1,7 @@
-darray(1) {
+dict(1) {
   ["w"]=>
   int(3)
 }
 Done
 
-Fatal error: Class undefined: NonExistentClass in %s on line 24
+Fatal error: Class undefined: NonExistentClass in %s/test/quick/properties4.php on line 24

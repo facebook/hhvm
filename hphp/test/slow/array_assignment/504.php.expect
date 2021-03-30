@@ -1,15 +1,15 @@
-varray(3) {
+vec(3) {
   float(1.5)
   float(2.5)
   float(3.5)
 }
-varray(4) {
+vec(4) {
   float(1.5)
   float(2.5)
   float(3.5)
   float(4.5)
 }
-varray(3) {
+vec(3) {
   float(1.5)
   float(2.5)
   float(3.5)

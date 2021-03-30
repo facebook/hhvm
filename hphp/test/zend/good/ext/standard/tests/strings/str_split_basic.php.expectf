@@ -1,6 +1,6 @@
 *** Testing str_split() : basic functionality ***
 -- With all possible arguments --
-varray(5) {
+vec(5) {
   string(5) "This "
   string(5) "is ba"
   string(5) "sic t"
@@ -8,7 +8,7 @@ varray(5) {
   string(2) "se"
 }
 -- With split_length as default argument --
-varray(22) {
+vec(22) {
   string(1) "T"
   string(1) "h"
   string(1) "i"

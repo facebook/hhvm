@@ -1,5 +1,5 @@
 Array containing same object twice:
-darray(2) {
+dict(2) {
   [0]=>
   object(stdClass) (0) {
   }
@@ -7,8 +7,8 @@ darray(2) {
   object(stdClass) (0) {
   }
 }
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
-darray(2) {
+string(37) "D:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+dict(2) {
   [0]=>
   object(stdClass) (0) {
   }
@@ -16,7 +16,7 @@ darray(2) {
   object(stdClass) (0) {
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
   object(stdClass) (1) {
     ["a"]=>
@@ -28,7 +28,7 @@ darray(2) {
     string(7) "newProp"
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(10) "a0.changed"
   [1]=>

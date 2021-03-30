@@ -5,7 +5,7 @@ object(DateInterval) (0) {
 Warning: Attempted to serialize unserializable builtin class DateInterval in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(3) {
+vec(3) {
   string(11) "__construct"
   string(20) "createFromDateString"
   string(6) "format"
@@ -20,7 +20,7 @@ object(A_DateInterval) (1) {
 Warning: Attempted to serialize unserializable builtin class A_DateInterval in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(3) {
+vec(3) {
   string(11) "__construct"
   string(20) "createFromDateString"
   string(6) "format"

@@ -2,79 +2,79 @@
 
 --int 0--
 
-Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --int 1--
 
-Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --int 12345--
 
-Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --int -12345--
 
-Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --float 10.5--
 
-Warning: get_class_vars() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --float -10.5--
 
-Warning: get_class_vars() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --float 12.3456789000e10--
 
-Warning: get_class_vars() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --float -12.3456789000e10--
 
-Warning: get_class_vars() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --float .5--
 
-Warning: get_class_vars() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --empty array--
 
-Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --int indexed array--
 
-Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --associative array--
 
-Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --nested arrays--
 
-Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --uppercase NULL--
 
-Warning: get_class_vars() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --lowercase null--
 
-Warning: get_class_vars() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --lowercase true--
 
-Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --lowercase false--
 
-Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --uppercase TRUE--
 
-Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --uppercase FALSE--
 
-Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --empty string DQ--
 bool(false)
@@ -84,9 +84,9 @@ bool(false)
 
 --instance of classWithToString--
 
-Warning: get_class_vars() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 
 --instance of classWithoutToString--
 
-Warning: get_class_vars() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 79
 ===DONE===

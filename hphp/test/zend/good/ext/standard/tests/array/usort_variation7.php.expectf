@@ -2,7 +2,7 @@
 
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)
-darray(5) {
+dict(5) {
   [0]=>
   int(-70)
   [1]=>
@@ -17,7 +17,7 @@ darray(5) {
 
 -- Anonymous 'cmp_function' with parameters passed by reference --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "Apple"
   [1]=>

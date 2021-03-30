@@ -6,7 +6,7 @@ State 3: valid()
 State 4: current()
 State 5: key()
 State 6: next()
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>

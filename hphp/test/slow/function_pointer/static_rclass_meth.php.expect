@@ -1,20 +1,20 @@
 TestBase::bar
 TestBase::foo
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(4)
 }
 TestBase::bar
 Test::foo
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(4)
 }

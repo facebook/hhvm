@@ -1,4 +1,4 @@
-Array
+Dict
 (
     [tag] => query
     [type] => complete
@@ -12,7 +12,7 @@ e
     g
     h
 )
-Array
+Dict
 (
     [tag] => query
     [type] => complete

@@ -1,39 +1,39 @@
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(1) {
+vec(1) {
   string(1) "a"
 }
-varray(2) {
-  string(1) "a"
-  string(1) "b"
-}
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
-varray(2) {
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+vec(2) {
   string(1) "a"
   string(1) "b"
 }

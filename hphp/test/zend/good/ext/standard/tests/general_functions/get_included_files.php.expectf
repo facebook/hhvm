@@ -1,18 +1,18 @@
 *** Testing get_included_files()
 
 -- List included files at start --
-varray(1) {
+vec(1) {
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
 }
 
 -- List included files atfter including inc1 -
-varray(2) {
+vec(2) {
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc1.inc"
 }
 
 -- List included files atfter including inc2 which will include inc3 which includes inc1 --
-varray(4) {
+vec(4) {
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc1.inc"
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc2.inc"

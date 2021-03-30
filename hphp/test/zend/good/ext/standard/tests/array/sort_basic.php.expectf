@@ -2,7 +2,7 @@
 
 -- Testing sort() by supplying string array, 'flag' value is defualt --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "Orange"
   [1]=>
@@ -23,7 +23,7 @@ darray(8) {
 
 -- Testing sort() by supplying numeric array, 'flag' value is defualt --
 bool(true)
-varray(4) {
+vec(4) {
   int(22)
   int(33)
   int(100)
@@ -32,7 +32,7 @@ varray(4) {
 
 -- Testing sort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "Orange"
   [1]=>
@@ -53,7 +53,7 @@ darray(8) {
 
 -- Testing sort() by supplying numeric array, 'flag' = SORT_REGULAR --
 bool(true)
-varray(4) {
+vec(4) {
   int(22)
   int(33)
   int(100)
@@ -62,7 +62,7 @@ varray(4) {
 
 -- Testing sort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "Orange"
   [1]=>
@@ -83,7 +83,7 @@ darray(8) {
 
 -- Testing sort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "banana"
   [1]=>
@@ -104,7 +104,7 @@ darray(8) {
 
 -- Testing sort() by supplying string array (natural), 'flag' = SORT_NATURAL --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "Orange"
   [1]=>
@@ -125,7 +125,7 @@ darray(8) {
 
 -- Testing sort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --
 bool(true)
-darray(8) {
+dict(8) {
   [0]=>
   string(6) "banana"
   [1]=>
@@ -146,7 +146,7 @@ darray(8) {
 
 -- Testing sort() by supplying numeric array, 'flag' = SORT_NUMERIC --
 bool(true)
-varray(4) {
+vec(4) {
   int(22)
   int(33)
   int(100)

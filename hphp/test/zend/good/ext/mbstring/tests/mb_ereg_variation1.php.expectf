@@ -46,13 +46,13 @@ NULL
 
 -- Iteration 12 --
 int(6)
-varray(1) {
+vec(1) {
   string(6) "string"
 }
 
 -- Iteration 13 --
 int(6)
-varray(1) {
+vec(1) {
   string(6) "string"
 }
 

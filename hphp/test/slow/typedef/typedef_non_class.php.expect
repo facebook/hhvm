@@ -5,7 +5,7 @@ bool(false)
 double
 float(1.2)
 array:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)

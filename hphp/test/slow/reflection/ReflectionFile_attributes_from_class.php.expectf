@@ -1,6 +1,6 @@
 bool(true)
-darray(1) {
+dict(1) {
   ["MyFileAttribute"]=>
-  varray(0) {
+  vec(0) {
   }
 }

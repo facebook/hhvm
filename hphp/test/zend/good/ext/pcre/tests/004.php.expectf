@@ -1,7 +1,7 @@
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
-  darray(7) {
+  dict(7) {
     [0]=>
     string(24) "unsigned int xpto = 124;"
     [1]=>
@@ -18,7 +18,7 @@ darray(2) {
     string(0) ""
   }
   [1]=>
-  darray(7) {
+  dict(7) {
     [0]=>
     string(11) "short a, b;"
     [1]=>
@@ -36,9 +36,9 @@ darray(2) {
   }
 }
 int(3)
-darray(3) {
+dict(3) {
   [0]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     string(3) "&a,"
     [1]=>
@@ -49,7 +49,7 @@ darray(3) {
     string(0) ""
   }
   [1]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     string(2) "b,"
     [1]=>
@@ -60,7 +60,7 @@ darray(3) {
     string(0) ""
   }
   [2]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     string(2) "&c"
     [1]=>
@@ -72,39 +72,39 @@ darray(3) {
   }
 }
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
-  darray(3) {
+  dict(3) {
     [0]=>
-    varray(2) {
+    vec(2) {
       string(46) "zend_parse_parameters( 0, "addd|s/", a, b, &c)"
       int(0)
     }
     [1]=>
-    varray(2) {
+    vec(2) {
       string(7) "addd|s/"
       int(27)
     }
     [2]=>
-    varray(2) {
+    vec(2) {
       string(9) "a, b, &c)"
       int(37)
     }
   }
 }
-darray(3) {
+dict(3) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(0)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(13) "s, preg_match"
     int(13)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(9) "
 {
 lalala"

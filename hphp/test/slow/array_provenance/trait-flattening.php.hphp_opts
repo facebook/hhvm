@@ -1,4 +1,0 @@
--vRuntime.Eval.ArrayProvenance=1
---ffile=hphp/test/slow/array_provenance/trait-flattening.inc
---ffile=test/slow/array_provenance/trait-flattening.inc
---ffile=slow/array_provenance/trait-flattening.inc

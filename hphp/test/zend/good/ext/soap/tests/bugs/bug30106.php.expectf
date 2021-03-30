@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   string(71) "getContinentListResponse getContinentList(getContinentList $parameters)"
 }
-varray(3) {
+vec(3) {
   string(64) "struct getContinentList {
  int AFFILIATE_ID;
  string PASSWORD;

@@ -1,7 +1,7 @@
 *** Testing array_intersect_ukey() : usage variation ***
 
 -- Result of strings containing integers intersection --
-darray(2) {
+dict(2) {
   ["0"]=>
   string(1) "1"
   ["1"]=>
@@ -9,7 +9,7 @@ darray(2) {
 }
 
 -- Result of strings containing floating points intersection --
-darray(2) {
+dict(2) {
   ["0.00"]=>
   string(4) "1.00"
   ["1.00"]=>
@@ -17,7 +17,7 @@ darray(2) {
 }
 
 -- Result of strings containing integers and strings containing floating points intersection --
-darray(2) {
+dict(2) {
   ["0"]=>
   string(1) "1"
   ["1"]=>

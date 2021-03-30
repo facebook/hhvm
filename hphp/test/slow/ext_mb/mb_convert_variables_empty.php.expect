@@ -4,13 +4,13 @@ object(A) (4) {
   ["test2"]=>
   string(0) ""
   ["test3"]=>
-  darray(0) {
+  dict(0) {
   }
   ["_"]=>
   bool(false)
 }
-darray(1) {
+dict(1) {
   ["test"]=>
-  darray(0) {
+  dict(0) {
   }
 }

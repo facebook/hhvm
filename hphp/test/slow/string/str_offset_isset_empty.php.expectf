@@ -111,15 +111,15 @@ string(4) " 1e1"
 string(1) "B"
 bool(false)
 
-varray(0) {
+vec(0) {
 }
-InvalidArgumentException: Invalid string key: expected a key of type int or string, varray given
+InvalidArgumentException: Invalid string key: expected a key of type int or string, HH\vec given
 bool(false)
 
-varray(1) {
+vec(1) {
   int(1)
 }
-InvalidArgumentException: Invalid string key: expected a key of type int or string, varray given
+InvalidArgumentException: Invalid string key: expected a key of type int or string, HH\vec given
 bool(false)
 
 object(stdClass) (0) {

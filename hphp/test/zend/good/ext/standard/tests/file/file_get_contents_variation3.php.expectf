@@ -2,63 +2,63 @@
 
 --int 0--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --int 1--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --int 12345--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --int -12345--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --float 10.5--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --float -10.5--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --float 12.3456789000e10--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --float -12.3456789000e10--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --float .5--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --empty array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --int indexed array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --associative array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, dict given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --nested arrays--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --uppercase NULL--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --lowercase null--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --lowercase true--
 string(13) "contents read"
@@ -74,33 +74,33 @@ string(13) "contents read"
 
 --empty string DQ--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --empty string SQ--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --string DQ--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --string SQ--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --mixed case string--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --heredoc--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --instance of classWithToString--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 
 --instance of classWithoutToString--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line %d
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 104
 ===DONE===

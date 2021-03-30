@@ -1,4 +1,4 @@
 Warning: sort() expects at most 2 parameters, 9 given in %s/test/slow/bad_function_calls/1716.php on line 6
-varray(1) {
+vec(1) {
   NULL
 }

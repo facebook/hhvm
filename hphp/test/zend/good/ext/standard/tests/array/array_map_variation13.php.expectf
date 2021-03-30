@@ -1,24 +1,24 @@
 *** Testing array_map() : callback with diff return value ***
 -- with integer return value --
-varray(3) {
+vec(3) {
   int(4)
   int(6)
   int(8)
 }
 -- with string return value --
-varray(3) {
+vec(3) {
   string(2) "13"
   string(2) "24"
   string(2) "35"
 }
 -- with bool return value --
-varray(3) {
+vec(3) {
   bool(true)
   bool(true)
   bool(true)
 }
 -- with null return value --
-darray(3) {
+dict(3) {
   [0]=>
   NULL
   [1]=>
@@ -30,7 +30,7 @@ darray(3) {
 callback_without_ret called
 callback_without_ret called
 callback_without_ret called
-darray(3) {
+dict(3) {
   [0]=>
   NULL
   [1]=>

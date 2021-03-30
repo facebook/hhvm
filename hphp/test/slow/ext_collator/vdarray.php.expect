@@ -1,11 +1,11 @@
-darray(2) {
+dict(2) {
   ["y"]=>
   string(5) "apple"
   ["x"]=>
   string(4) "pear"
 }
 bool(true)
-varray(2) {
+vec(2) {
   string(5) "apple"
   string(4) "pear"
 }

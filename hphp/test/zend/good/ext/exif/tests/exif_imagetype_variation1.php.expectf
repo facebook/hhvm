@@ -3,77 +3,77 @@
 --- Testing exif_imagetype() by supplying different values for 'filename' argument ---
 -- Iteration 1 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 2 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 3 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 4 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 5 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 6 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 7 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 8 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 9 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 10 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 11 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 12 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 13 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 14 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 15 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 16 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 17 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 18 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 19 --
 
-Warning: No such file or directory in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: No such file or directory in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 bool(false)
 -- Iteration 20 --
 
-Warning: No such file or directory in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: No such file or directory in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 bool(false)
 -- Iteration 21 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, object given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, object given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 22 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, resource given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 23 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, null given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, null given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 -- Iteration 24 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, null given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line %d
+Warning: exif_imagetype() expects parameter 1 to be string, null given in %s/test/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 73
 Done
 ===Done===

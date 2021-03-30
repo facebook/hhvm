@@ -6,7 +6,7 @@
 bool(true)
 
 The output array is:
-varray(4) {
+vec(4) {
   int(%d)
   int(%d)
   int(%d)
@@ -17,7 +17,7 @@ varray(4) {
 bool(true)
 
 The output array is:
-varray(3) {
+vec(3) {
   int(-%d)
   int(-%d)
   int(-%d)
@@ -27,7 +27,7 @@ varray(3) {
 bool(true)
 
 The output array is:
-varray(7) {
+vec(7) {
   float(%f)
   float(%f)
   float(%f)
@@ -41,7 +41,7 @@ varray(7) {
 bool(true)
 
 The output array is:
-varray(6) {
+vec(6) {
   float(-%f)
   float(-%f)
   float(-%f)
@@ -54,7 +54,7 @@ varray(6) {
 bool(true)
 
 The output array is:
-varray(5) {
+vec(5) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"
@@ -66,7 +66,7 @@ varray(5) {
 bool(true)
 
 The output array is:
-varray(4) {
+vec(4) {
   bool(%s)
   bool(%s)
   bool(%s)
@@ -77,7 +77,7 @@ varray(4) {
 bool(true)
 
 The output array is:
-varray(6) {
+vec(6) {
   int(%d)
   int(%d)
   int(%d)
@@ -90,7 +90,7 @@ varray(6) {
 bool(true)
 
 The output array is:
-varray(5) {
+vec(5) {
   int(-%d)
   int(-%d)
   int(-%d)
@@ -102,7 +102,7 @@ varray(5) {
 bool(true)
 
 The output array is:
-varray(4) {
+vec(4) {
   int(%d)
   int(%d)
   int(%d)
@@ -113,7 +113,7 @@ varray(4) {
 bool(true)
 
 The output array is:
-varray(3) {
+vec(3) {
   int(-%d)
   int(-%d)
   int(-%d)

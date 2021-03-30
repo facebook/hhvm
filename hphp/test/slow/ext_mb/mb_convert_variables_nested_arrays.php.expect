@@ -1,8 +1,8 @@
-darray(1) {
+dict(1) {
   ["test"]=>
-  darray(1) {
+  dict(1) {
     ["sub_test"]=>
-    darray(0) {
+    dict(0) {
     }
   }
 }

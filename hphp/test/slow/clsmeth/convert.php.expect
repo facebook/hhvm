@@ -1,406 +1,406 @@
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
   int(42)
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
   int(42)
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
   int(42)
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
   int(42)
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
   int(42)
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>

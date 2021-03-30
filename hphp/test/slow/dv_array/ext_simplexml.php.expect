@@ -1,10 +1,10 @@
-varray(1) {
+vec(1) {
   object(SimpleXMLElement) (1) {
     [0]=>
     string(7) "content"
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }

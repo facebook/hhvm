@@ -1,28 +1,28 @@
 *** Testing array_intersect_key() : usage variation ***
-darray(2) {
+dict(2) {
   ["first"]=>
-  darray(2) {
+  dict(2) {
     ["blue"]=>
     int(1)
     ["red"]=>
     int(2)
   }
   ["second"]=>
-  darray(1) {
+  dict(1) {
     ["yellow"]=>
     int(7)
   }
 }
-darray(2) {
+dict(2) {
   ["first"]=>
-  darray(2) {
+  dict(2) {
     ["blue"]=>
     int(1)
     ["red"]=>
     int(2)
   }
   ["second"]=>
-  darray(1) {
+  dict(1) {
     ["cyan"]=>
     int(8)
   }

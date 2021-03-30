@@ -1,24 +1,24 @@
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 9
-string(34) "a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}"
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 9
+string(26) "v:2:{s:3:"Foo";s:3:"bar";}"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 10
-string(76) "a:2:{s:1:"a";D:1:{s:1:"r";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}s:1:"b";i:123;}"
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 10
+string(68) "D:2:{s:1:"a";D:1:{s:1:"r";v:2:{s:3:"Foo";s:3:"bar";}}s:1:"b";i:123;}"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 11
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 11
 string(13) "["Foo","bar"]"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 12
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 12
 string(33) "{"a":{"r":["Foo","bar"]},"b":123}"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 16
-string(34) "a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}"
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 16
+string(26) "v:2:{s:3:"Foo";s:3:"bar";}"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 17
-string(76) "a:2:{s:1:"a";D:1:{s:1:"r";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}s:1:"b";i:123;}"
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 17
+string(68) "D:2:{s:1:"a";D:1:{s:1:"r";v:2:{s:3:"Foo";s:3:"bar";}}s:1:"b";i:123;}"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 18
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 18
 string(13) "["Foo","bar"]"
 
-Notice: Implicit clsmeth to varray conversion in %s/clsmeth-log.php on line 19
+Notice: Implicit clsmeth to vec conversion in %s/clsmeth-log.php on line 19
 string(33) "{"a":{"r":["Foo","bar"]},"b":123}"

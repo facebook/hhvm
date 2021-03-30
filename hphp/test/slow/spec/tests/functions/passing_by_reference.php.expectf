@@ -1,10 +1,10 @@
 float(1.23E+27)
-varray(3) {
+vec(3) {
   int(10)
   bool(true)
   NULL
 }
-varray(3) {
+vec(3) {
   int(10)
   bool(true)
   NULL

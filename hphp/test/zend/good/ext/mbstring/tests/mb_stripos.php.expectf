@@ -48,14 +48,14 @@ OK_STR
 OK_NEWLINE
 == INVALID PARAMETER TEST ==
 
-Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/mb_stripos.php on line 103
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_stripos.php on line 103
 OK_NULL
 
-Warning: mb_stripos() expects parameter 2 to be string, %rd?%rarray given in %s/mb_stripos.php on line 105
+Warning: mb_stripos() expects parameter 2 to be string, dict given in %s/test/zend/good/ext/mbstring/tests/mb_stripos.php on line 105
 OK_ARRAY
 
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s/mb_stripos.php on line 107
+Warning: mb_stripos() expects parameter 2 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_stripos.php on line 107
 OK_OBJECT
 
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s/mb_stripos.php on line 109
+Warning: mb_stripos() expects parameter 2 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_stripos.php on line 109
 OK_BAD_ENCODING

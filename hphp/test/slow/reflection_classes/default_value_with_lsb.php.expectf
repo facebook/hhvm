@@ -1,10 +1,10 @@
 hello
 
 Warning: Failed to eval default value of JJTest::test()'s $answer argument for reflection, assigning NULL instead in %s/test/slow/reflection_classes/default_value_with_lsb.php on line 11
-varray(1) {
+vec(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -26,7 +26,7 @@ varray(1) {
       ["defaultText"]=>
       string(15) "\static::ANSWER"
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -34,7 +34,7 @@ varray(1) {
     ["name"]=>
     string(6) "answer"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(6) "HH\int"
       ["nullable"]=>

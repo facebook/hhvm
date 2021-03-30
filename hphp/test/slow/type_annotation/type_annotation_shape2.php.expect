@@ -1,16 +1,16 @@
 string(18) "HH\Set<HH\shape()>"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      darray(0) {
+      dict(0) {
       }
     }
   }

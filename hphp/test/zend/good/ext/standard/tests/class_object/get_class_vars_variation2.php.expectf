@@ -1,7 +1,7 @@
 *** Testing get_class_vars() : testing visibility
 
 -- From global context --
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(10) "public var"
   ["pubs"]=>
@@ -9,7 +9,7 @@ darray(2) {
 }
 
 -- From inside an object instance --
-darray(6) {
+dict(6) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>
@@ -25,7 +25,7 @@ darray(6) {
 }
 
 -- From  a static context --
-darray(6) {
+dict(6) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>
@@ -41,7 +41,7 @@ darray(6) {
 }
 
 -- From inside an  parent object instance --
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>
@@ -53,7 +53,7 @@ darray(4) {
 }
 
 -- From a parents static context --
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>
@@ -65,7 +65,7 @@ darray(4) {
 }
 
 -- From inside a child object instance --
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>
@@ -77,7 +77,7 @@ darray(4) {
 }
 
 -- From a child's static context --
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(10) "public var"
   ["prot"]=>

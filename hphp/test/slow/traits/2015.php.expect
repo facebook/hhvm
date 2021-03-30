@@ -1,19 +1,19 @@
 class C1:
-darray(0) {
+dict(0) {
 }
 
 class C2:
-darray(0) {
+dict(0) {
 }
 
 class C3:
-darray(1) {
+dict(1) {
   ["a1"]=>
   string(6) "T1::m1"
 }
 
 class C4:
-darray(2) {
+dict(2) {
   ["a1"]=>
   string(6) "T1::m1"
   ["a2"]=>

@@ -1,5 +1,5 @@
 Int provider ...$x
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -7,7 +7,7 @@ varray(5) {
   int(5)
 }
 Int provider int...$x
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -15,7 +15,7 @@ varray(5) {
   int(5)
 }
 Int provider ...
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -23,7 +23,7 @@ varray(5) {
   int(5)
 }
 Int provider long closure: int...$x
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -31,7 +31,7 @@ varray(5) {
   int(5)
 }
 Int provider long closure: ...$x
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -39,7 +39,7 @@ varray(5) {
   int(5)
 }
 Int provider lambda1
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -47,7 +47,7 @@ varray(5) {
   int(5)
 }
 Int provider lambda2
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)

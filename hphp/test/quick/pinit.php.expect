@@ -1,12 +1,12 @@
-darray(1) {
+dict(1) {
   ["flub"]=>
-  varray(1) {
+  vec(1) {
     int(123)
   }
 }
-darray(1) {
+dict(1) {
   ["flub"]=>
-  varray(1) {
+  vec(1) {
     int(123)
   }
 }

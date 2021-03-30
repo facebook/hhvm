@@ -1,8 +1,7 @@
+Warning: supplied resource is not a valid Image resource in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error1.php on line 4
 
-Warning: supplied resource is not a valid Image resource in %s/imagecolorallocatealpha_error1.php on line 4
+Warning: imagecolorallocatealpha() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error1.php on line 5
 
-Warning: imagecolorallocatealpha() expects parameter 1 to be resource, string given in %s/imagecolorallocatealpha_error1.php on line 5
+Warning: imagecolorallocatealpha() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error1.php on line 6
 
-Warning: imagecolorallocatealpha() expects parameter 1 to be resource, %rv?%rarray given in %s/imagecolorallocatealpha_error1.php on line 6
-
-Warning: imagecolorallocatealpha() expects parameter 1 to be resource, null given in %s/imagecolorallocatealpha_error1.php on line 7
+Warning: imagecolorallocatealpha() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error1.php on line 7

@@ -1,8 +1,0 @@
-dict(3) {
-  ["a"]=>
-  string(5) "green"
-  ["b"]=>
-  string(5) "brown"
-  [0]=>
-  string(3) "red"
-}

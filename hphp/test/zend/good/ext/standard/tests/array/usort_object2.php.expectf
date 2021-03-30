@@ -1,7 +1,7 @@
 *** Testing usort() : object functionality ***
 -- Testing usort() with StaticClass objects --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   object(StaticClass) (0) {
   }
@@ -17,7 +17,7 @@ darray(4) {
 }
 -- Testing usort() with EmptyClass objects --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   object(EmptyClass) (0) {
   }
@@ -33,7 +33,7 @@ darray(4) {
 }
 -- Testing usort() with ChildClass objects --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   object(ChildClass) (2) {
     ["child_value"]=>

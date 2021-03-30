@@ -7,7 +7,7 @@ string(1) "f"
 bool(false)
 string(1) "f"
 string(1) "f"
-Out of bounds varray access: invalid index 0
+Out of bounds vec access: invalid index 0
 bool(false)
 bool(false)
 int(32)

@@ -1,6 +1,6 @@
 *** Testing array_filter() : usage variation - different 'callback' functions***
 -- Callback function without parameter and with return --
-darray(8) {
+dict(8) {
   [0]=>
   int(0)
   [1]=>
@@ -19,13 +19,13 @@ darray(8) {
   NULL
 }
 -- Callback funciton with parameter and without return --
-darray(0) {
+dict(0) {
 }
 -- Callback function without parameter and return --
-darray(0) {
+dict(0) {
 }
 -- Callback function with parameter and return --
-darray(3) {
+dict(3) {
   [2]=>
   int(2)
   [3]=>

@@ -1,7 +1,7 @@
 *** Testing uasort() : 'array_arg' with elements as reference ***
 -- Sorting 'array_arg' containing different references --
 bool(true)
-darray(5) {
+dict(5) {
   [1]=>
   int(-5)
   [4]=>

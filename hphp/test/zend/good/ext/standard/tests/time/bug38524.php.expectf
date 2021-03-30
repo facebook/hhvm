@@ -1,4 +1,4 @@
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>

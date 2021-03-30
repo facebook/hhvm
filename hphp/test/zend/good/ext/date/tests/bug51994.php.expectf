@@ -1,4 +1,4 @@
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2010)
   ["month"]=>
@@ -16,12 +16,12 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)

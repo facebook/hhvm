@@ -1,26 +1,26 @@
-darray(3) {
+dict(3) {
   ["file"]=>
-  string(%d) "%s/hphp_debug_caller_info.php"
+  string(%d) "%s/test/slow/ext_std/hphp_debug_caller_info.php"
   ["function"]=>
   string(3) "bar"
   ["line"]=>
   int(8)
 }
-darray(4) {
+dict(4) {
   ["class"]=>
   string(3) "Baz"
   ["file"]=>
-  string(%d) "%s/hphp_debug_caller_info.php"
+  string(%d) "%s/test/slow/ext_std/hphp_debug_caller_info.php"
   ["function"]=>
   string(5) "smeth"
   ["line"]=>
   int(13)
 }
-darray(4) {
+dict(4) {
   ["class"]=>
   string(3) "Baz"
   ["file"]=>
-  string(%d) "%s/hphp_debug_caller_info.php"
+  string(%d) "%s/test/slow/ext_std/hphp_debug_caller_info.php"
   ["function"]=>
   string(5) "imeth"
   ["line"]=>

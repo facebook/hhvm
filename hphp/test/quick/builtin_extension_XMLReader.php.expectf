@@ -2,10 +2,10 @@ XMLReader
 object(XMLReader) (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class XMLReader in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class XMLReader in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(26) {
+vec(26) {
   string(11) "__construct"
   string(4) "open"
   string(3) "XML"
@@ -40,10 +40,10 @@ object(A_XMLReader) (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_XMLReader in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_XMLReader in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(26) {
+vec(26) {
   string(11) "__construct"
   string(4) "open"
   string(3) "XML"

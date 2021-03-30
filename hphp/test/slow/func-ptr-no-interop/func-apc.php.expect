@@ -1,11 +1,11 @@
 function(main)
-varray(3) {
+vec(3) {
   int(1)
   function(main)
   string(3) "foo"
 }
 function(array_map)
-varray(3) {
+vec(3) {
   int(10)
   function(apc_fetch)
   string(3) "foo"

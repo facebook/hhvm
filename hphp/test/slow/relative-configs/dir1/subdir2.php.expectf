@@ -1,5 +1,5 @@
 string(1) "3"
-darray(4) {
+dict(4) {
   ["names"]=>
   string(4) "dir2"
   ["values1"]=>
@@ -9,6 +9,6 @@ darray(4) {
   ["values3"]=>
   string(3) "hij"
 }
-varray(1) {
-  string(%d) "%s/relative-configs/dir2/dir2.ini"
+vec(1) {
+  string(%d) "%s/test/slow/relative-configs/dir2/dir2.ini"
 }

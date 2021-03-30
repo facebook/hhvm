@@ -1,6 +1,6 @@
 NULL
 string(4) "woof"
-Out of bounds varray access: invalid index 2
+Out of bounds vec access: invalid index 2
 NULL
 string(4) "meow"
-Out of bounds varray access: invalid index 2
+Out of bounds vec access: invalid index 2

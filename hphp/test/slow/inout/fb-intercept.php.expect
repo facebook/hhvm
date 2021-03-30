@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   int(1)
   bool(true)
   string(1) "c"
@@ -7,7 +7,7 @@ bool(true)
 int(1)
 string(5) "green"
 string(4) "blue"
-varray(3) {
+vec(3) {
   int(1)
   bool(true)
   string(1) "c"

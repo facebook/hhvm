@@ -1,4 +1,4 @@
 %s
-varray(1) {
+vec(1) {
   int(%d)
 }

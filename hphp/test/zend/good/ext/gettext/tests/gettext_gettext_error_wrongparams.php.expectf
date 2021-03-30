@@ -1,2 +1,1 @@
-
-Warning: gettext() expects parameter 1 to be string, %rv?%rarray given in %s/gettext_gettext_error_wrongparams.php on line 2
+Warning: gettext() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/gettext/tests/gettext_gettext_error_wrongparams.php on line 2

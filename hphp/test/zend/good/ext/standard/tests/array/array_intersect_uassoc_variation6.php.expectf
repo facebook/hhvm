@@ -1,7 +1,7 @@
 *** Testing array_intersect_uassoc() : usage variation ***
 
 -- Result of floating points and strings containing integers intersection --
-darray(2) {
+dict(2) {
   [0]=>
   float(1)
   [1]=>
@@ -9,6 +9,6 @@ darray(2) {
 }
 
 -- Result of floating points and strings containing floating point intersection --
-darray(0) {
+dict(0) {
 }
 ===DONE===

@@ -1,7 +1,7 @@
 ----HANDLER----
 string(3) "foo"
 NULL
-varray(1) {
+vec(1) {
   string(4) "Hey!"
 }
 ---------------

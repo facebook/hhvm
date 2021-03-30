@@ -1,5 +1,5 @@
 string(4) "Base"
-darray(3) {
+dict(3) {
   ["aaa"]=>
   int(1)
   ["bbb"]=>

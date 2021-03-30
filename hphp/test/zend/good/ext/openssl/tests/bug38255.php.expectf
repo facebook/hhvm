@@ -1,17 +1,17 @@
-Warning: supplied key param cannot be coerced into a public key in %s/zend/good/ext/openssl/tests/bug38255.php on line 13
+Warning: supplied key param cannot be coerced into a public key in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 13
 
-Warning: supplied key param cannot be coerced into a public key in %s/zend/good/ext/openssl/tests/bug38255.php on line 17
+Warning: supplied key param cannot be coerced into a public key in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 17
 bool(false)
 
-Warning: openssl_verify() expects parameter 2 to be string, object given in %s/zend/good/ext/openssl/tests/bug38255.php on line 18
+Warning: openssl_verify() expects parameter 2 to be string, object given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 18
 
-Warning: openssl_verify() expects parameter 2 to be string, object given in %s/zend/good/ext/openssl/tests/bug38255.php on line 19
+Warning: openssl_verify() expects parameter 2 to be string, object given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 19
 
-Warning: openssl_verify() expects parameter 2 to be string, object given in %s/zend/good/ext/openssl/tests/bug38255.php on line 20
+Warning: openssl_verify() expects parameter 2 to be string, object given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 20
 
-Warning: openssl_verify() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/openssl/tests/bug38255.php on line 21
+Warning: openssl_verify() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 21
 
-Warning: openssl_verify() expects at least 3 parameters, 0 given in %s/zend/good/ext/openssl/tests/bug38255.php on line 22
+Warning: openssl_verify() expects at least 3 parameters, 0 given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 22
 
-Warning: openssl_verify() expects parameter 1 to be string, object given in %s/zend/good/ext/openssl/tests/bug38255.php on line 23
+Warning: openssl_verify() expects parameter 1 to be string, object given in %s/test/zend/good/ext/openssl/tests/bug38255.php on line 23
 Done

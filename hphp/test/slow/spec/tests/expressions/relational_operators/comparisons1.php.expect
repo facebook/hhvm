@@ -183,44 +183,44 @@ bool(true)
       'abc' >        NULL  result: bool(true)
 (bool)'abc' >        NULL  result: bool(true)
 =======
-      NULL >        array()  result: cannot be compared
-      NULL >  (bool)array()  result: bool(false)
-      array() <=       NULL  result: cannot be compared
-(bool)array() <=       NULL  result: bool(true)
+      NULL >        vec[]  result: cannot be compared
+      NULL >  (bool)vec[]  result: bool(false)
+      vec[] <=       NULL  result: cannot be compared
+(bool)vec[] <=       NULL  result: bool(true)
 ---
-      NULL >=       array()  result: cannot be compared
-      NULL >= (bool)array()  result: bool(true)
-      array() <        NULL  result: cannot be compared
-(bool)array() <        NULL  result: bool(false)
+      NULL >=       vec[]  result: cannot be compared
+      NULL >= (bool)vec[]  result: bool(true)
+      vec[] <        NULL  result: cannot be compared
+(bool)vec[] <        NULL  result: bool(false)
 ---
-      NULL <        array()  result: cannot be compared
-      NULL <  (bool)array()  result: bool(false)
-      array() >=       NULL  result: cannot be compared
-(bool)array() >=       NULL  result: bool(true)
+      NULL <        vec[]  result: cannot be compared
+      NULL <  (bool)vec[]  result: bool(false)
+      vec[] >=       NULL  result: cannot be compared
+(bool)vec[] >=       NULL  result: bool(true)
 ---
-      NULL <=       array()  result: cannot be compared
-      NULL <= (bool)array()  result: bool(true)
-      array() >        NULL  result: cannot be compared
-(bool)array() >        NULL  result: bool(false)
+      NULL <=       vec[]  result: cannot be compared
+      NULL <= (bool)vec[]  result: bool(true)
+      vec[] >        NULL  result: cannot be compared
+(bool)vec[] >        NULL  result: bool(false)
 =======
-      NULL >        array(0=>10,1=>2.3)  result: cannot be compared
-      NULL >  (bool)array(0=>10,1=>2.3)  result: bool(false)
-      array(0=>10,1=>2.3) <=       NULL  result: cannot be compared
-(bool)array(0=>10,1=>2.3) <=       NULL  result: bool(false)
+      NULL >        vec[10,2.3,]  result: cannot be compared
+      NULL >  (bool)vec[10,2.3,]  result: bool(false)
+      vec[10,2.3,] <=       NULL  result: cannot be compared
+(bool)vec[10,2.3,] <=       NULL  result: bool(false)
 ---
-      NULL >=       array(0=>10,1=>2.3)  result: cannot be compared
-      NULL >= (bool)array(0=>10,1=>2.3)  result: bool(false)
-      array(0=>10,1=>2.3) <        NULL  result: cannot be compared
-(bool)array(0=>10,1=>2.3) <        NULL  result: bool(false)
+      NULL >=       vec[10,2.3,]  result: cannot be compared
+      NULL >= (bool)vec[10,2.3,]  result: bool(false)
+      vec[10,2.3,] <        NULL  result: cannot be compared
+(bool)vec[10,2.3,] <        NULL  result: bool(false)
 ---
-      NULL <        array(0=>10,1=>2.3)  result: cannot be compared
-      NULL <  (bool)array(0=>10,1=>2.3)  result: bool(true)
-      array(0=>10,1=>2.3) >=       NULL  result: cannot be compared
-(bool)array(0=>10,1=>2.3) >=       NULL  result: bool(true)
+      NULL <        vec[10,2.3,]  result: cannot be compared
+      NULL <  (bool)vec[10,2.3,]  result: bool(true)
+      vec[10,2.3,] >=       NULL  result: cannot be compared
+(bool)vec[10,2.3,] >=       NULL  result: bool(true)
 ---
-      NULL <=       array(0=>10,1=>2.3)  result: cannot be compared
-      NULL <= (bool)array(0=>10,1=>2.3)  result: bool(true)
-      array(0=>10,1=>2.3) >        NULL  result: cannot be compared
-(bool)array(0=>10,1=>2.3) >        NULL  result: bool(true)
+      NULL <=       vec[10,2.3,]  result: cannot be compared
+      NULL <= (bool)vec[10,2.3,]  result: bool(true)
+      vec[10,2.3,] >        NULL  result: cannot be compared
+(bool)vec[10,2.3,] >        NULL  result: bool(true)
 =======
 -------------------------------------

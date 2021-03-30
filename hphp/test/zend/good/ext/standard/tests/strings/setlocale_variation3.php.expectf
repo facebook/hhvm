@@ -1,6 +1,6 @@
 *** Testing setlocale() : usage variations - setting system locale = 0 ***
 Locale info, before setting the locale
-darray(18) {
+dict(18) {
   ["decimal_point"]=>
   string(1) "."
   ["thousands_sep"]=>
@@ -34,14 +34,14 @@ darray(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>
     int(3)
   }
   ["mon_grouping"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>
@@ -50,7 +50,7 @@ darray(18) {
 }
 Setting system locale, category = LC_ALL and locale = 0
 Locale info, after setting the locale
-darray(18) {
+dict(18) {
   ["decimal_point"]=>
   string(1) "."
   ["thousands_sep"]=>
@@ -84,14 +84,14 @@ darray(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>
     int(3)
   }
   ["mon_grouping"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(3)
     [1]=>

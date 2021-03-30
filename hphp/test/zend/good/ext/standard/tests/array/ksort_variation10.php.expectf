@@ -2,7 +2,7 @@
 
 -- Testing ksort() by supplying octal value array, 'flag' value is defualt  --
 bool(true)
-darray(9) {
+dict(9) {
   [-229]=>
   int(-2)
   [-54]=>
@@ -25,7 +25,7 @@ darray(9) {
 
 -- Testing ksort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
 bool(true)
-darray(9) {
+dict(9) {
   [-229]=>
   int(-2)
   [-54]=>
@@ -48,7 +48,7 @@ darray(9) {
 
 -- Testing ksort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
 bool(true)
-darray(9) {
+dict(9) {
   [-229]=>
   int(-2)
   [-54]=>

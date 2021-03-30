@@ -1,22 +1,22 @@
 *** Testing array_map() : string keys ***
-darray(1) {
+dict(1) {
   ["stringkey"]=>
-  varray(1) {
+  vec(1) {
     string(5) "value"
   }
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(5) "value"
     string(5) "value"
   }
 }
-darray(1) {
+dict(1) {
   ["stringkey"]=>
   string(5) "value"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(5) "value"
     string(5) "value"
   }

@@ -1,6 +1,6 @@
 *** Testing get_html_translation_table() : basic functionality ***
 -- with table = HTML_ENTITIES --
-darray(252) {
+dict(252) {
   ["Æ"]=>
   string(7) "&AElig;"
   ["Á"]=>
@@ -507,7 +507,7 @@ darray(252) {
   string(6) "&zwnj;"
 }
 -- with table = HTML_SPECIALCHARS --
-darray(4) {
+dict(4) {
   ["&"]=>
   string(5) "&amp;"
   [">"]=>

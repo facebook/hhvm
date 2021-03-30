@@ -1,52 +1,52 @@
 *** Testing array_combine() : Passing different types of arrays to both $keys and $values argument ***
 -- Iteration 1 --
-darray(2) {
+dict(2) {
   [1]=>
   int(1)
   [2]=>
   int(2)
 }
 -- Iteration 2 --
-darray(2) {
+dict(2) {
   ["1.1"]=>
   float(1.1)
   ["2.2"]=>
   float(2.2)
 }
 -- Iteration 3 --
-darray(2) {
+dict(2) {
   [""]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(1) {
+dict(1) {
   [""]=>
   NULL
 }
 -- Iteration 6 --
-darray(6) {
-  ["a%r\x0b\x0c%r"]=>
-  string(3) "a%r\x0b\x0c%r"
+dict(6) {
+  ["a"]=>
+  string(3) "a"
   ["aaaa
 "]=>
   string(5) "aaaa
 "
   ["b"]=>
   string(1) "b"
-  ["b%r\x09%rbbb"]=>
-  string(5) "b%r\x09%rbbb"
+  ["b	bbb"]=>
+  string(5) "b	bbb"
   ["c"]=>
   string(1) "c"
   ["\[\]\!\@\#$\%\^\&\*\(\)\{\}"]=>
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
-darray(6) {
+dict(6) {
   ["a\v\f"]=>
   string(5) "a\v\f"
   ["aaaa\r"]=>
@@ -61,7 +61,7 @@ darray(6) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
-darray(4) {
+dict(4) {
   ["
 "]=>
   string(1) "
@@ -75,28 +75,28 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"]=>
+double quoted string. withdifferentwhitespaces"]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   ["11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
 }
 -- Iteration 9 --
-darray(3) {
+dict(3) {
   ["one"]=>
   string(3) "one"
   ["two"]=>
@@ -105,7 +105,7 @@ darray(3) {
   string(5) "three"
 }
 -- Iteration 10 --
-darray(3) {
+dict(3) {
   [1]=>
   int(1)
   [2]=>
@@ -114,7 +114,7 @@ darray(3) {
   int(3)
 }
 -- Iteration 11 --
-darray(4) {
+dict(4) {
   [10]=>
   int(10)
   [20]=>
@@ -125,7 +125,7 @@ darray(4) {
   int(30)
 }
 -- Iteration 12 --
-darray(3) {
+dict(3) {
   ["ten"]=>
   string(3) "ten"
   ["twenty"]=>
@@ -134,7 +134,7 @@ darray(3) {
   string(6) "thirty"
 }
 -- Iteration 13 --
-darray(3) {
+dict(3) {
   [1]=>
   int(1)
   ["two"]=>
@@ -143,7 +143,7 @@ darray(3) {
   string(4) "four"
 }
 -- Iteration 14 --
-darray(3) {
+dict(3) {
   [10]=>
   int(10)
   [20]=>

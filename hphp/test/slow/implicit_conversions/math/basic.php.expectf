@@ -166,7 +166,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 96
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i int(0)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -457,7 +457,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 96
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i int(-10)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -766,7 +766,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 96
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i float(1.234)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -1075,7 +1075,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 96
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i float(INF)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -1375,7 +1375,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 96
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i float(NAN)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -1888,7 +1888,7 @@ Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i bool(true)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -2465,7 +2465,7 @@ Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i bool(false)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -3016,7 +3016,7 @@ Notice: Implicit null to int conversion for math in %s/basic.php on line 97
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i NULL
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -3567,7 +3567,7 @@ Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i resource(1) of type (stream)
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -4144,7 +4144,7 @@ Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
 $i string(6) "string"
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -4323,7 +4323,7 @@ Notice: Object of class Foo could not be converted to int in %s/basic.php on lin
 
 Notice: Implicit string to int conversion for math in %s/basic.php on line 97
 1>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j int(0)
@@ -4332,7 +4332,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j int(-10)
@@ -4346,7 +4346,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j float(1.234)
@@ -4360,7 +4360,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j float(INF)
@@ -4369,7 +4369,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j float(NAN)
@@ -4383,7 +4383,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j bool(true)
@@ -4401,7 +4401,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j bool(false)
@@ -4410,7 +4410,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j NULL
@@ -4419,7 +4419,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j resource(1) of type (stream)
@@ -4437,7 +4437,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j string(6) "string"
@@ -4446,10 +4446,10 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<
@@ -4466,7 +4466,7 @@ Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 9
 
 Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
 0>
-$i varray(1) {
+$i vec(1) {
   int(42)
 }
 $j dict(1) {
@@ -4671,7 +4671,7 @@ $i dict(1) {
   ["foobar"]=>
   bool(false)
 }
-$j varray(1) {
+$j vec(1) {
   int(42)
 }
 mod<

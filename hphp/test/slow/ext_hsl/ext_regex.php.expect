@@ -3,12 +3,12 @@ Matches Only:
 RE: /foo(bar)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -18,12 +18,12 @@ darray(2) {
 RE: /foo(?<bar>bar)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "foo"
   ["bar"]=>
@@ -35,12 +35,12 @@ darray(3) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "foo"
   ["bar"]=>
@@ -54,7 +54,7 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobar
 PHP:
-darray(3) {
+dict(3) {
   [0]=>
   string(6) "foobar"
   ["bar"]=>
@@ -63,7 +63,7 @@ darray(3) {
   string(3) "bar"
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
   string(6) "foobar"
   ["bar"]=>
@@ -77,7 +77,7 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobaz
 PHP:
-darray(4) {
+dict(4) {
   [0]=>
   string(6) "foobaz"
   ["bar"]=>
@@ -88,7 +88,7 @@ darray(4) {
   string(3) "baz"
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
   string(6) "foobaz"
   ["bar"]=>
@@ -102,7 +102,7 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobarbaz
 PHP:
-darray(4) {
+dict(4) {
   [0]=>
   string(9) "foobarbaz"
   ["bar"]=>
@@ -113,7 +113,7 @@ darray(4) {
   string(3) "baz"
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
   string(9) "foobarbaz"
   ["bar"]=>
@@ -128,22 +128,22 @@ Matches with Offsets:
 RE: /foo(bar)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
 }
 HSL:
-darray(2) {
+dict(2) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
@@ -152,27 +152,27 @@ darray(2) {
 RE: /foo(?<bar>bar)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
 }
 HSL:
-darray(3) {
+dict(3) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
@@ -181,32 +181,32 @@ darray(3) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foo
 PHP:
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "foo"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
@@ -215,42 +215,42 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobar
 PHP:
-darray(3) {
+dict(3) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(6) "foobar"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(6) "foobar"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
@@ -259,47 +259,47 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobaz
 PHP:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(6) "foobaz"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(3) "baz"
     int(3)
   }
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(6) "foobaz"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(0) ""
     int(-1)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(3) "baz"
     int(3)
   }
@@ -308,47 +308,47 @@ darray(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobarbaz
 PHP:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(9) "foobarbaz"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(3) "baz"
     int(6)
   }
 }
 HSL:
-darray(4) {
+dict(4) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(9) "foobarbaz"
     int(0)
   }
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     string(3) "bar"
     int(3)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(3) "baz"
     int(6)
   }

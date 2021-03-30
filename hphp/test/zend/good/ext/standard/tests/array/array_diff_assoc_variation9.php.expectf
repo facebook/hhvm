@@ -1,28 +1,28 @@
 *** Testing array_diff_assoc() : usage variations ***
 -- Compare two 2-D arrays --
-darray(2) {
+dict(2) {
   ["sub_array1"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
   ["sub_array2"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
   }
 }
-darray(2) {
+dict(2) {
   ["sub_arraya"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     int(3)
     int(5)
   }
   ["sub_arrayb"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "z"
     string(1) "y"
@@ -30,25 +30,25 @@ darray(2) {
 }
 
 -- Compare subarrays from two 2-D arrays --
-darray(2) {
+dict(2) {
   [1]=>
   int(2)
   [2]=>
   int(3)
 }
-darray(2) {
+dict(2) {
   [1]=>
   int(3)
   [2]=>
   int(5)
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -58,7 +58,7 @@ darray(3) {
 }
 
 -- Compare a subarray from one 2-D array and one 2-D array --
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -66,15 +66,15 @@ darray(3) {
   [2]=>
   int(3)
 }
-darray(2) {
+dict(2) {
   ["sub_array1"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
   ["sub_array2"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"

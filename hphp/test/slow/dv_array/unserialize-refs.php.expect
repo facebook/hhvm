@@ -1,13 +1,13 @@
-varray(3) {
-  varray(1) {
+vec(3) {
+  vec(1) {
     int(987)
   }
   int(456)
-  varray(1) {
+  vec(1) {
     int(987)
   }
 }
-darray(2) {
+dict(2) {
   [1]=>
   int(123)
   [2]=>

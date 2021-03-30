@@ -1,5 +1,5 @@
 *** Testing getimagesize() : variation ***
-darray(5) {
+dict(5) {
   [0]=>
   int(550)
   [1]=>
@@ -11,6 +11,6 @@ darray(5) {
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

@@ -106,32 +106,32 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 9
 bool(false)
@@ -151,17 +151,17 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec 
 Test 10
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 11
 bool(false)
@@ -302,32 +302,32 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 9
 bool(false)
@@ -347,17 +347,17 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec 
 Test 10
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 11
 bool(false)

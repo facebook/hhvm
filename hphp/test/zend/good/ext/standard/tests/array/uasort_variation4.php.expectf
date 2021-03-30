@@ -1,7 +1,7 @@
 *** Testing uasort() : different numeric arrays as 'array_arg' ***
 -- Sorting Integer array --
 bool(true)
-darray(9) {
+dict(9) {
   [9]=>
   int(-1200)
   [8]=>
@@ -23,7 +23,7 @@ darray(9) {
 }
 -- Sorting Octal array --
 bool(true)
-darray(7) {
+dict(7) {
   [4]=>
   int(-37)
   [6]=>
@@ -41,7 +41,7 @@ darray(7) {
 }
 -- Sorting Hex array --
 bool(true)
-darray(6) {
+dict(6) {
   [5]=>
   int(-242)
   [3]=>
@@ -57,7 +57,7 @@ darray(6) {
 }
 -- Sorting Float array --
 bool(true)
-darray(7) {
+dict(7) {
   [2]=>
   float(-3.4)
   [6]=>
@@ -75,6 +75,6 @@ darray(7) {
 }
 -- Sorting empty array --
 bool(true)
-darray(0) {
+dict(0) {
 }
 Done

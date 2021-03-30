@@ -1,5 +1,5 @@
 *** Testing array_pad() : Passing binary values to $pad_value argument ***
-varray(6) {
+vec(6) {
   int(1)
   int(2)
   int(3)
@@ -7,7 +7,7 @@ varray(6) {
   string(5) "hello"
   string(5) "hello"
 }
-varray(6) {
+vec(6) {
   string(5) "hello"
   string(5) "hello"
   string(5) "hello"

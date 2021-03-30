@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With Defualt sort flag -
 bool(true)
-varray(9) {
+vec(9) {
   int(-41)
   int(-31)
   int(-21)
@@ -18,7 +18,7 @@ varray(9) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(9) {
+vec(9) {
   int(-41)
   int(-31)
   int(-21)
@@ -31,7 +31,7 @@ varray(9) {
 }
 - Sort flag = SORT_NUMERIC -
 bool(true)
-varray(9) {
+vec(9) {
   int(-41)
   int(-31)
   int(-21)
@@ -46,7 +46,7 @@ varray(9) {
 -- Iteration 2 --
 - With Defualt sort flag -
 bool(true)
-varray(7) {
+vec(7) {
   float(-10.5)
   float(-0.1)
   float(0.01)
@@ -57,7 +57,7 @@ varray(7) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(7) {
+vec(7) {
   float(-10.5)
   float(-0.1)
   float(0.01)
@@ -68,7 +68,7 @@ varray(7) {
 }
 - Sort flag = SORT_NUMERIC -
 bool(true)
-varray(7) {
+vec(7) {
   float(-10.5)
   float(-0.1)
   float(0.01)
@@ -81,7 +81,7 @@ varray(7) {
 -- Iteration 3 --
 - With Defualt sort flag -
 bool(true)
-varray(11) {
+vec(11) {
   int(-1)
   float(-0.9)
   float(-0.106)
@@ -96,7 +96,7 @@ varray(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(11) {
+vec(11) {
   int(-1)
   float(-0.9)
   float(-0.106)
@@ -111,7 +111,7 @@ varray(11) {
 }
 - Sort flag = SORT_NUMERIC -
 bool(true)
-varray(11) {
+vec(11) {
   int(-1)
   float(-0.9)
   float(-0.106)
@@ -128,7 +128,7 @@ varray(11) {
 -- Iteration 4 --
 - With Defualt sort flag -
 bool(true)
-varray(7) {
+vec(7) {
   int(-2147483649)
   int(-2147483648)
   int(-2147483647)
@@ -139,7 +139,7 @@ varray(7) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(7) {
+vec(7) {
   int(-2147483649)
   int(-2147483648)
   int(-2147483647)
@@ -150,7 +150,7 @@ varray(7) {
 }
 - Sort flag = SORT_NUMERIC -
 bool(true)
-varray(7) {
+vec(7) {
   int(-2147483649)
   int(-2147483648)
   int(-2147483647)

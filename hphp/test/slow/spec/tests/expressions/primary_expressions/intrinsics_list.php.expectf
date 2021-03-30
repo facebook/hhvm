@@ -1,13 +1,13 @@
 --------- test with full and omitted LHS vars -------------
 $min: 0, $max: 100, $avg: 67
-Array
+Vec
 (
     [0] => 0
     [1] => 100
     [2] => 67
 )
 $min: 0, $max: 100, $avg: 67
-Array
+Dict
 (
     [2] => 67
     [1] => 100
@@ -22,7 +22,7 @@ $min: 0, ,
 $min: 0
 --------- test with more array elements than variables -------------
 $min: 0, $max: 100, $avg: 67
-Array
+Vec
 (
     [0] => 0
     [1] => 100
@@ -37,9 +37,9 @@ bool(true)
 int(100)
 bool(true)
 int(67)
-Out of bounds varray access: invalid index 2
+Out of bounds vec access: invalid index 2
 $min: 0, $max: 100, $avg: 67
-Array
+Vec
 (
     [0] => 100
     [1] => 500
@@ -51,9 +51,9 @@ int(100)
 bool(true)
 int(67)
 --------- test with sufficient array elements but not consecutive keys -------------
-Out of bounds darray access: invalid index 1
+Out of bounds dict access: invalid index 1
 $min: 0, $max: 100, $avg: 100
-Array
+Dict
 (
     [0] => 0
     [2] => 100
@@ -69,7 +69,7 @@ int(100)
 bool(false)
 --------- test with mixed array -------------
 $min: 10, $max: 30, $avg: 50
-Array
+Dict
 (
     [0] => 10
     [a] => 20
@@ -78,9 +78,9 @@ Array
     [2] => 50
 )
 --------- test with non-numeric array -------------
-Out of bounds darray access: invalid index 2
+Out of bounds dict access: invalid index 2
 $min: 10, $max: 30, $avg: 50
-Array
+Dict
 (
     [x] => 10
     [a] => 20
@@ -90,11 +90,11 @@ bool(true)
 bool(true)
 bool(true)
 --------- test with array element being an array -------------
-Out of bounds varray access: invalid index 2
-Array
+Out of bounds vec access: invalid index 2
+Vec
 (
     [0] => 0
-    [1] => Array
+    [1] => Vec
         (
             [0] => 100
             [1] => 67
@@ -109,10 +109,10 @@ bool(true)
 int(50)
 --------- test with nested lists -------------
 $min: 0, $max: 100, $avg: 67
-Array
+Vec
 (
     [0] => 0
-    [1] => Array
+    [1] => Dict
         (
             [1] => 67
             [2] => 99
@@ -122,32 +122,32 @@ Array
     [2] => 33
 )
 --------- test with target vars being array elements -------------
-Array
+Dict
 (
     [4] => 67
     [2] => 100
     [0] => 0
 )
-Array
+Vec
 (
     [0] => 0
     [1] => 100
     [2] => 67
 )
 --------- test with no variables -------------
-Array
+Vec
 (
     [0] => 0
     [1] => 100
     [2] => 67
 )
-Array
+Vec
 (
     [0] => 0
     [1] => 100
     [2] => 67
 )
-Array
+Vec
 (
     [0] => 0
     [1] => 100

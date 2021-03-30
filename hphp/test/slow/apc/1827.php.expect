@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   object(X) (0) {
   }
   object(X) (0) {
@@ -6,7 +6,7 @@ varray(3) {
   object(X) (0) {
   }
 }
-varray(3) {
+vec(3) {
   object(X) (0) {
   }
   object(X) (0) {

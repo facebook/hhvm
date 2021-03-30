@@ -2,7 +2,7 @@
 
 -- Testing array_multisort() function with all normal arguments --
 bool(true)
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -10,7 +10,7 @@ darray(3) {
   ["strkey"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(2) "aa"
   [1]=>

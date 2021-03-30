@@ -1,5 +1,5 @@
 *** Testing array_multisort() : case-sensitive
-darray(7) {
+dict(7) {
   [0]=>
   string(7) "First.3"
   [1]=>
@@ -15,7 +15,7 @@ darray(7) {
   [6]=>
   string(5) "Third"
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(6) "1 BB 3"
   [1]=>

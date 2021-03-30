@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["a0"]=>
   NULL
   ["a1"]=>
@@ -6,7 +6,7 @@ darray(3) {
   ["a2"]=>
   int(2)
 }
-darray(6) {
+dict(6) {
   ["a0"]=>
   NULL
   ["a1"]=>
@@ -20,7 +20,7 @@ darray(6) {
   ["b2"]=>
   int(5)
 }
-darray(3) {
+dict(3) {
   ["c0"]=>
   NULL
   ["c1"]=>
@@ -28,7 +28,7 @@ darray(3) {
   ["c2"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   ["x0"]=>
   NULL
   ["x1"]=>
@@ -36,7 +36,7 @@ darray(3) {
   ["x2"]=>
   int(2)
 }
-darray(6) {
+dict(6) {
   ["x0"]=>
   NULL
   ["x1"]=>
@@ -50,7 +50,7 @@ darray(6) {
   ["y2"]=>
   int(5)
 }
-darray(3) {
+dict(3) {
   ["z0"]=>
   NULL
   ["z1"]=>

@@ -5,7 +5,7 @@ string(4) "test"
 bool(true)
 
 *** array serialize-and-unserialize ***
-darray(1) {
+dict(1) {
   [0]=>
   string(4) "test"
 }
@@ -13,8 +13,7 @@ bool(true)
 bool(true)
 
 * array with flag on serialize and unserialize *
-dict(1) {
-  [0]=>
+vec(1) {
   string(4) "test"
 }
 bool(true)
@@ -27,19 +26,19 @@ dict(1) {
 bool(true)
 
 * array with flag on only serialize *
-darray(1) {
+dict(1) {
   [0]=>
   string(4) "test"
 }
 bool(true)
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "test"
   [1]=>
   int(42)
 }
 bool(true)
-darray(2) {
+dict(2) {
   ["test"]=>
   string(7) "testval"
   [42]=>
@@ -51,7 +50,13 @@ bool(true)
 bool(false)
 
 *** vec serialize-and-unserialize ***
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+dict(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  int(42)
+}
+bool(true)
 vec(2) {
   string(3) "foo"
   int(42)
@@ -59,7 +64,13 @@ vec(2) {
 bool(true)
 
 *** dict serialize-and-unserialize ***
-string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+dict(2) {
+  ["foo"]=>
+  string(1) "f"
+  [42]=>
+  string(5) "42val"
+}
+bool(true)
 dict(2) {
   ["foo"]=>
   string(1) "f"

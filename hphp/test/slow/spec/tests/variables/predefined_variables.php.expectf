@@ -1,5 +1,5 @@
 int(1)
-varray(1) {
+vec(1) {
   string(%d) "%s/variables/predefined_variables.php"
 }
-darray(%d) {%a}
+dict(%d) {%a}

@@ -1,94 +1,94 @@
 *** Testing array_intersect() : assoc array with diff values to $arr2 argument ***
 -- Iterator 1 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iterator 2 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iterator 3 --
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
 -- Iterator 4 --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- Iterator 5 --
-darray(1) {
+dict(1) {
   [3]=>
   float(2.3333)
 }
-darray(1) {
+dict(1) {
   [3]=>
   float(2.3333)
 }
 -- Iterator 6 --
-darray(1) {
+dict(1) {
   [2]=>
   float(1.2)
 }
-darray(1) {
+dict(1) {
   [2]=>
   float(1.2)
 }
 -- Iterator 7 --
-darray(1) {
+dict(1) {
   [4]=>
   string(6) "col	or"
 }
-darray(1) {
+dict(1) {
   [4]=>
   string(6) "col	or"
 }
 -- Iterator 8 --
-darray(1) {
+dict(1) {
   [5]=>
   string(9) "\v\fworld"
 }
-darray(1) {
+dict(1) {
   [5]=>
   string(9) "\v\fworld"
 }
 -- Iterator 9 --
-darray(2) {
+dict(2) {
   [7]=>
   string(11) "Hello world"
   [8]=>
   string(11) "Hello world"
 }
-darray(2) {
+dict(2) {
   [7]=>
   string(11) "Hello world"
   [8]=>
   string(11) "Hello world"
 }
 -- Iterator 10 --
-darray(2) {
+dict(2) {
   [6]=>
   resource(4) of type (stream)
   [9]=>
   object(classA) (0) {
   }
 }
-darray(2) {
+dict(2) {
   [6]=>
   resource(4) of type (stream)
   [9]=>
@@ -96,7 +96,7 @@ darray(2) {
   }
 }
 -- Iterator 11 --
-darray(6) {
+dict(6) {
   [6]=>
   resource(4) of type (stream)
   [7]=>
@@ -111,7 +111,7 @@ darray(6) {
   [11]=>
   string(5) "fruit"
 }
-darray(6) {
+dict(6) {
   [6]=>
   resource(4) of type (stream)
   [7]=>

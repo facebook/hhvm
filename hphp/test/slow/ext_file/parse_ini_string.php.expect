@@ -1,6 +1,6 @@
 string(25) "general_ini_with_sections"
 ===
-darray(5) {
+dict(5) {
   ["Version"]=>
   string(1) "0"
   ["Released"]=>
@@ -13,16 +13,16 @@ darray(5) {
   string(0) ""
 }
 ===
-darray(2) {
+dict(2) {
   ["GJK_Browscap_Version"]=>
-  darray(2) {
+  dict(2) {
     ["Version"]=>
     string(4) "4520"
     ["Released"]=>
     string(31) "Tue, 27 Oct 2009 12:01:07 -0000"
   }
   ["DefaultProperties"]=>
-  darray(4) {
+  dict(4) {
     ["Browser"]=>
     string(17) "DefaultProperties"
     ["Version"]=>
@@ -36,19 +36,19 @@ darray(2) {
 ===
 string(20) "comment_on_last_line"
 ===
-darray(1) {
+dict(1) {
   ["key"]=>
   string(5) "value"
 }
 ===
-darray(1) {
+dict(1) {
   ["key"]=>
   string(5) "value"
 }
 ===
 string(19) "double_quote_escape"
 ===
-darray(5) {
+dict(5) {
   ["key1"]=>
   string(5) "value"
   ["key2"]=>
@@ -61,7 +61,7 @@ darray(5) {
   string(18) "value"inner value""
 }
 ===
-darray(5) {
+dict(5) {
   ["key1"]=>
   string(5) "value"
   ["key2"]=>
@@ -76,19 +76,19 @@ darray(5) {
 ===
 string(10) "joomla_bug"
 ===
-darray(1) {
+dict(1) {
   ["JERROR_COULD_NOT_FIND_TEMPLATE"]=>
   string(29) "Could not find template "%s\."
 }
 ===
-darray(1) {
+dict(1) {
   ["JERROR_COULD_NOT_FIND_TEMPLATE"]=>
   string(29) "Could not find template "%s\."
 }
 ===
 string(12) "slash_in_key"
 ===
-darray(3) {
+dict(3) {
   ["key1"]=>
   string(6) "value1"
   ["path.a.b.c.key2"]=>
@@ -97,9 +97,9 @@ darray(3) {
   string(6) "value3"
 }
 ===
-darray(1) {
+dict(1) {
   ["global"]=>
-  darray(3) {
+  dict(3) {
     ["key1"]=>
     string(6) "value1"
     ["path.a.b.c.key2"]=>
@@ -111,7 +111,7 @@ darray(1) {
 ===
 string(18) "dollar_sign_at_end"
 ===
-darray(4) {
+dict(4) {
   ["fonts.trackingUrl"]=>
   string(56) "https://fast.fonts.com/t/1.css?apiType=css&projectid=123"
   ["serviceCache.1.cacheable"]=>
@@ -122,9 +122,9 @@ darray(4) {
   string(6) "value$"
 }
 ===
-darray(1) {
+dict(1) {
   ["global"]=>
-  darray(4) {
+  dict(4) {
     ["fonts.trackingUrl"]=>
     string(56) "https://fast.fonts.com/t/1.css?apiType=css&projectid=123"
     ["serviceCache.1.cacheable"]=>
@@ -138,14 +138,14 @@ darray(1) {
 ===
 string(22) "negative_number_as_key"
 ===
-darray(1) {
+dict(1) {
   ["-1"]=>
   string(11) "SimpleError"
 }
 ===
-darray(1) {
+dict(1) {
   ["FORMERRORCODES"]=>
-  darray(1) {
+  dict(1) {
     ["-1"]=>
     string(11) "SimpleError"
   }
@@ -153,7 +153,7 @@ darray(1) {
 ===
 string(12) "double slash"
 ===
-darray(3) {
+dict(3) {
   ["key1"]=>
   string(6) "start\"
   ["key2"]=>
@@ -162,7 +162,7 @@ darray(3) {
   string(9) "start\end"
 }
 ===
-darray(3) {
+dict(3) {
   ["key1"]=>
   string(6) "start\"
   ["key2"]=>

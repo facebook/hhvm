@@ -1,10 +1,10 @@
-varray(4) {
+vec(4) {
   string(5) "apple"
   string(6) "banana"
   string(5) "lemon"
   string(6) "orange"
 }
-varray(4) {
+vec(4) {
   string(6) "orange"
   string(5) "lemon"
   string(6) "banana"

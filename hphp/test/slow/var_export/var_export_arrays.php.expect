@@ -1,29 +1,29 @@
 ** array **
-array (
-)
+vec [
+]
 
-array (
-  0 => 'foo',
-)
+vec [
+  'foo',
+]
 
-array (
-  0 => 'foo',
-  1 => 'bar',
-)
+vec [
+  'foo',
+  'bar',
+]
 
-array (
+dict [
   'foo' => 'fooval',
-)
+]
 
-array (
+dict [
   'foo' => 'fooval',
   'bar' => 'barval',
-)
+]
 
-array (
+dict [
   '4' => 'zuckval',
   '4bar' => 'barval',
-)
+]
 
 ** vec **
 vec [

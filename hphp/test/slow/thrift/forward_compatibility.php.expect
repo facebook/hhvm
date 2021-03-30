@@ -1,6 +1,6 @@
 object(NewStruct) (1) {
   ["features"]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     float(314)
     [2]=>
@@ -9,7 +9,7 @@ object(NewStruct) (1) {
 }
 object(OldStruct) (1) {
   ["features"]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     float(314)
     [2]=>
@@ -18,7 +18,7 @@ object(OldStruct) (1) {
 }
 object(NewStruct) (1) {
   ["features"]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     float(314)
     [2]=>
@@ -27,7 +27,7 @@ object(NewStruct) (1) {
 }
 object(OldStruct) (1) {
   ["features"]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     float(314)
     [2]=>

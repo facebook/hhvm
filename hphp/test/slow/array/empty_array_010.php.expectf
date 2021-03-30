@@ -1,12 +1,12 @@
-darray(2) {
+dict(2) {
   [42]=>
   int(2)
   [43]=>
   int(3)
 }
 
-Warning: Cannot add element to the array as the next element is already occupied in %s on line 11
-darray(1) {
+Warning: Cannot add element to the array as the next element is already occupied in %s/test/slow/array/empty_array_010.php on line 11
+dict(1) {
   [9223372036854775807]=>
   int(2)
 }

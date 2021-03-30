@@ -1,6 +1,6 @@
 *** Testing array_filter() : usage variations - different types of array for 'input' argument***
 -- Iteration 1 --
-darray(5) {
+dict(5) {
   [1]=>
   int(1)
   [2]=>
@@ -12,7 +12,7 @@ darray(5) {
   [5]=>
   int(74)
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -26,10 +26,10 @@ darray(6) {
   [5]=>
   int(74)
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 2 --
-darray(3) {
+dict(3) {
   [1]=>
   float(1.2)
   [2]=>
@@ -37,7 +37,7 @@ darray(3) {
   [3]=>
   float(0.0012)
 }
-darray(4) {
+dict(4) {
   [0]=>
   float(0)
   [1]=>
@@ -47,10 +47,10 @@ darray(4) {
   [3]=>
   float(0.0012)
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 3 --
-darray(3) {
+dict(3) {
   [0]=>
   string(6) "value1"
   [1]=>
@@ -58,7 +58,7 @@ darray(3) {
   [3]=>
   string(1) " "
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(6) "value1"
   [1]=>
@@ -70,16 +70,16 @@ darray(5) {
   [4]=>
   string(0) ""
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 4 --
-darray(2) {
+dict(2) {
   [0]=>
   bool(true)
   [2]=>
   bool(true)
 }
-darray(4) {
+dict(4) {
   [0]=>
   bool(true)
   [1]=>
@@ -89,27 +89,27 @@ darray(4) {
   [3]=>
   bool(false)
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [0]=>
   NULL
   [1]=>
   NULL
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 6 --
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [-2]=>
   string(5) "value"
 }
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "one"
   ["zero"]=>
@@ -117,10 +117,10 @@ darray(3) {
   [-2]=>
   string(5) "value"
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 7 --
-darray(4) {
+dict(4) {
   ["one"]=>
   int(1)
   [""]=>
@@ -130,7 +130,7 @@ darray(4) {
   [1]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   ["one"]=>
   int(1)
   [""]=>
@@ -140,10 +140,10 @@ darray(4) {
   [1]=>
   int(1)
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 8 --
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "one"
   [2]=>
@@ -151,7 +151,7 @@ darray(3) {
   ["key"]=>
   string(5) "value"
 }
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "one"
   [2]=>
@@ -159,6 +159,6 @@ darray(3) {
   ["key"]=>
   string(5) "value"
 }
-darray(0) {
+dict(0) {
 }
 Done

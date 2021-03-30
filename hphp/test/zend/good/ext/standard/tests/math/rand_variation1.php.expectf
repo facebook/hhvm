@@ -69,7 +69,7 @@ Warning: rand() expects parameter 1 to be integer, string given in %s/zend/good/
 
 -- Iteration 19 --
 
-Warning: rand() expects parameter 1 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/rand_variation1.php on line %d
+Warning: rand() expects parameter 1 to be integer, vec given in %s/zend/good/ext/standard/tests/math/rand_variation1.php on line %d
 
 -- Iteration 20 --
 

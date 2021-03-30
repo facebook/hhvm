@@ -2,7 +2,7 @@
 
 -- Iteration 1: int data --
 int(0)
-varray(3) {
+vec(3) {
   int(1)
   int(12345)
   int(-2345)
@@ -10,7 +10,7 @@ varray(3) {
 
 -- Iteration 2: float data --
 float(10.5)
-varray(4) {
+vec(4) {
   float(-10.5)
   float(123456789000)
   float(1.23456789E-9)
@@ -19,13 +19,13 @@ varray(4) {
 
 -- Iteration 3: null data --
 NULL
-varray(1) {
+vec(1) {
   NULL
 }
 
 -- Iteration 4: bool data --
 bool(true)
-varray(3) {
+vec(3) {
   bool(false)
   bool(true)
   bool(false)
@@ -33,18 +33,18 @@ varray(3) {
 
 -- Iteration 5: empty string data --
 string(0) ""
-varray(1) {
+vec(1) {
   string(0) ""
 }
 
 -- Iteration 6: empty array data --
 NULL
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 7: string data --
 string(6) "string"
-varray(2) {
+vec(2) {
   string(6) "string"
   string(11) "hello world"
 }
@@ -52,11 +52,11 @@ varray(2) {
 -- Iteration 8: object data --
 object(classA) (0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 9: resource data --
 resource(4) of type (stream)
-varray(0) {
+vec(0) {
 }
 Done

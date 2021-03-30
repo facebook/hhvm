@@ -1,54 +1,54 @@
 *** Testing array_reverse() : usage variations ***
 -- Iteration 1 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 2 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 3 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 4 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 5 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 6 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 7 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 8 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 9 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 10 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, varray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 11 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, varray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 12 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, varray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 13 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, varray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 14 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, darray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, dict given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 15 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, null given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 16 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, null given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 17 --
-darray(6) {
+dict(6) {
   [4]=>
   string(4) "pink"
   [3]=>
@@ -63,7 +63,7 @@ darray(6) {
   string(5) "green"
 }
 -- Iteration 18 --
-darray(6) {
+dict(6) {
   [0]=>
   string(4) "pink"
   [1]=>
@@ -78,7 +78,7 @@ darray(6) {
   string(5) "green"
 }
 -- Iteration 19 --
-darray(6) {
+dict(6) {
   [4]=>
   string(4) "pink"
   [3]=>
@@ -93,7 +93,7 @@ darray(6) {
   string(5) "green"
 }
 -- Iteration 20 --
-darray(6) {
+dict(6) {
   [0]=>
   string(4) "pink"
   [1]=>
@@ -109,14 +109,14 @@ darray(6) {
 }
 -- Iteration 21 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 22 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 23 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, object given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 -- Iteration 24 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, resource given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line %d
+Warning: array_reverse() expects parameter 2 to be boolean, resource given in %s/test/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 80
 Done

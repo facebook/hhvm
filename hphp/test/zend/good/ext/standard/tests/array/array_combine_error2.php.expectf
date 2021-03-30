@@ -1,21 +1,21 @@
 *** Testing array_combine() : error conditions specific to array_combine() ***
 
 -- Testing array_combine() function with empty arrays --
-darray(0) {
+dict(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --
 
-Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 16
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/zend/good/ext/standard/tests/array/array_combine_error2.php on line 16
 bool(false)
 
 -- Testing array_combine() function with empty array for $values argument --
 
-Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 20
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/zend/good/ext/standard/tests/array/array_combine_error2.php on line 20
 bool(false)
 
 -- Testing array_combine() function by passing array with unequal number of elements --
 
-Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 24
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/zend/good/ext/standard/tests/array/array_combine_error2.php on line 24
 bool(false)
 Done

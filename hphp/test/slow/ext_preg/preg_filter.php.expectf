@@ -1,4 +1,4 @@
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "A:C:1"
   [1]=>
@@ -12,7 +12,7 @@ darray(6) {
   [7]=>
   string(3) "A:4"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "A:C:1"
   [1]=>
@@ -26,7 +26,7 @@ darray(6) {
   [7]=>
   string(3) "A:4"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "A:C:1"
   [1]=>
@@ -45,7 +45,7 @@ string(14) "A:C:1A:0A:2A:4"
 int(5)
 NULL
 int(0)
-darray(5) {
+dict(5) {
   [0]=>
   string(3) "A:0"
   [1]=>

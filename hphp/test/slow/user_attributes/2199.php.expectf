@@ -1,10 +1,10 @@
-varray(1) {
+vec(1) {
   int(1)
 }
 NULL
-darray(1) {
+dict(1) {
   ["A"]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }

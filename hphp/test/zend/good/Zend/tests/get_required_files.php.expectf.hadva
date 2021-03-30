@@ -1,3 +1,0 @@
-vec(1) {
-  string(%d) "%s/get_required_files.php"
-}

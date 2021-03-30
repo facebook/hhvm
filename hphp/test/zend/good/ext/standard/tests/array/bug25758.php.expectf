@@ -1,6 +1,6 @@
-array (
+dict [
   'quote\'' => 
-  array (
-    0 => 'quote\'',
-  ),
-)
+  vec [
+    'quote\'',
+  ],
+]

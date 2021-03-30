@@ -1,5 +1,5 @@
 *** Testing getimagesize() : xbm format ***
-darray(5) {
+dict(5) {
   [0]=>
   int(75)
   [1]=>
@@ -11,6 +11,6 @@ darray(5) {
   ["mime"]=>
   string(9) "image/xbm"
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

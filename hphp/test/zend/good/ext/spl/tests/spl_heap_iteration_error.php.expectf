@@ -1,19 +1,19 @@
 object(ext_heap) (4) {
-  [%u|b%"fail"]=>
+  ["fail"]=>
   bool(true)
-  [%u|b%"flags":%u|b%"SplHeap":private]=>
+  ["flags":"SplHeap":private]=>
   int(0)
-  [%u|b%"isCorrupted":%u|b%"SplHeap":private]=>
+  ["isCorrupted":"SplHeap":private]=>
   bool(true)
-  [%u|b%"heap":%u|b%"SplHeap":private]=>
-  darray(2) {
+  ["heap":"SplHeap":private]=>
+  dict(2) {
     [0]=>
-    varray(1) {
-      %unicode|string%(7) "foobar2"
+    vec(1) {
+      string(7) "foobar2"
     }
     [1]=>
-    varray(1) {
-      %unicode|string%(7) "foobar1"
+    vec(1) {
+      string(7) "foobar1"
     }
   }
 }

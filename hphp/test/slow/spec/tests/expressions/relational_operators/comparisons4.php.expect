@@ -106,29 +106,29 @@ NULL >        '10'  result: bool(false)
 '10' <=       'abc'  result: bool(true)
 'abc' >        '10'  result: bool(true)
 =======
-'10' >        array()  result: cannot be compared
-array() <=       '10'  result: cannot be compared
+'10' >        vec[]  result: cannot be compared
+vec[] <=       '10'  result: cannot be compared
 ---
-'10' >=       array()  result: cannot be compared
-array() <        '10'  result: cannot be compared
+'10' >=       vec[]  result: cannot be compared
+vec[] <        '10'  result: cannot be compared
 ---
-'10' <        array()  result: cannot be compared
-array() >=       '10'  result: cannot be compared
+'10' <        vec[]  result: cannot be compared
+vec[] >=       '10'  result: cannot be compared
 ---
-'10' <=       array()  result: cannot be compared
-array() >        '10'  result: cannot be compared
+'10' <=       vec[]  result: cannot be compared
+vec[] >        '10'  result: cannot be compared
 =======
-'10' >        array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) <=       '10'  result: cannot be compared
+'10' >        vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] <=       '10'  result: cannot be compared
 ---
-'10' >=       array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) <        '10'  result: cannot be compared
+'10' >=       vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] <        '10'  result: cannot be compared
 ---
-'10' <        array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) >=       '10'  result: cannot be compared
+'10' <        vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] >=       '10'  result: cannot be compared
 ---
-'10' <=       array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) >        '10'  result: cannot be compared
+'10' <=       vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] >        '10'  result: cannot be compared
 =======
 -------------------------------------
 '-5.1' >        0  result: bool(false)
@@ -239,28 +239,28 @@ NULL >        '-5.1'  result: bool(false)
 '-5.1' <=       'abc'  result: bool(true)
 'abc' >        '-5.1'  result: bool(true)
 =======
-'-5.1' >        array()  result: cannot be compared
-array() <=       '-5.1'  result: cannot be compared
+'-5.1' >        vec[]  result: cannot be compared
+vec[] <=       '-5.1'  result: cannot be compared
 ---
-'-5.1' >=       array()  result: cannot be compared
-array() <        '-5.1'  result: cannot be compared
+'-5.1' >=       vec[]  result: cannot be compared
+vec[] <        '-5.1'  result: cannot be compared
 ---
-'-5.1' <        array()  result: cannot be compared
-array() >=       '-5.1'  result: cannot be compared
+'-5.1' <        vec[]  result: cannot be compared
+vec[] >=       '-5.1'  result: cannot be compared
 ---
-'-5.1' <=       array()  result: cannot be compared
-array() >        '-5.1'  result: cannot be compared
+'-5.1' <=       vec[]  result: cannot be compared
+vec[] >        '-5.1'  result: cannot be compared
 =======
-'-5.1' >        array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) <=       '-5.1'  result: cannot be compared
+'-5.1' >        vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] <=       '-5.1'  result: cannot be compared
 ---
-'-5.1' >=       array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) <        '-5.1'  result: cannot be compared
+'-5.1' >=       vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] <        '-5.1'  result: cannot be compared
 ---
-'-5.1' <        array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) >=       '-5.1'  result: cannot be compared
+'-5.1' <        vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] >=       '-5.1'  result: cannot be compared
 ---
-'-5.1' <=       array(0=>10,1=>2.3)  result: cannot be compared
-array(0=>10,1=>2.3) >        '-5.1'  result: cannot be compared
+'-5.1' <=       vec[10,2.3,]  result: cannot be compared
+vec[10,2.3,] >        '-5.1'  result: cannot be compared
 =======
 -------------------------------------

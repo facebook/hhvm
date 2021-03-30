@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["bar"]=>
-  darray(1) {
+  dict(1) {
     ["baz"]=>
     int(1)
   }

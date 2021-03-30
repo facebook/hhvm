@@ -1,6 +1,6 @@
 int(1)
 int(2)
-darray(1) {
+dict(1) {
   [1]=>
   int(2)
 }

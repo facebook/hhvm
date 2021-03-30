@@ -2,101 +2,101 @@
 
 -- Iteration 1 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 2 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 3 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 4 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 5 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 6 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 7 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 8 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 9 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 10 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 11 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 12 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 13 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 14 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 15 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 16 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 17 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 18 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 19 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 20 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 21 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 22 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 23 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, dict given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 24 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 
 -- Iteration 25 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, object given in %s/imap_fetchheader_variation1.php on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/imap/tests/imap_fetchheader_variation1.php on line 89
 ===DONE===

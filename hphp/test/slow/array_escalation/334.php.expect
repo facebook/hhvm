@@ -1,8 +1,8 @@
-darray(2) {
+dict(2) {
   ["a"]=>
   int(10)
   [2]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }

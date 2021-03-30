@@ -1,13 +1,13 @@
 bool(true)
 bool(true)
-varray(2) {
+vec(2) {
   int(0)
   int(2)
 }
-varray(1) {
+vec(1) {
   int(1)
 }
-darray(3) {
+dict(3) {
   ["tag"]=>
   string(4) "PARA"
   ["type"]=>
@@ -15,7 +15,7 @@ darray(3) {
   ["level"]=>
   int(1)
 }
-darray(5) {
+dict(5) {
   ["tag"]=>
   string(4) "NOTE"
   ["type"]=>
@@ -23,14 +23,14 @@ darray(5) {
   ["level"]=>
   int(2)
   ["attributes"]=>
-  darray(1) {
+  dict(1) {
     ["ATTRIB1"]=>
     string(3) "foo"
   }
   ["value"]=>
   string(11) "simple&note"
 }
-darray(3) {
+dict(3) {
   ["tag"]=>
   string(4) "PARA"
   ["type"]=>

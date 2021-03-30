@@ -2,7 +2,7 @@ object(PDOStatement) (1) {
   ["queryString"]=>
   string(17) "SELECT * FROM foo"
 }
-varray(3) {
+vec(3) {
   string(5) "00000"
   NULL
   NULL

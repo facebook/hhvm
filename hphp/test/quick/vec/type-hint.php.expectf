@@ -9,10 +9,6 @@ ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\vec give
 ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\vec given"
 ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\vec given"
 ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\vec given"
@@ -37,10 +33,6 @@ ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\vec give
 ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\vec given"
 ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\vec given"
 ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\vec given"
 ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\vec given"
@@ -143,41 +135,17 @@ ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of 
 object(stdClass) (0) {
 }
 ====================================================
-varray(0) {
+vec(0) {
 }
-ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, %rv?%rarray given"
-varray(0) {
+vec(0) {
 }
 ====================================================
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, %rv?%rarray given"
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)

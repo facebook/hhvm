@@ -7,7 +7,7 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-varray(0) {
+vec(0) {
 }
 int(0)
 int(1)

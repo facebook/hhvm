@@ -1,5 +1,5 @@
 int(2)
 string(2) "ok"
-varray(1) {
+vec(1) {
   int(1)
 }

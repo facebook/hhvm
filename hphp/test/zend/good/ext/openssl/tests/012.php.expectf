@@ -1,7 +1,7 @@
 
 Warning: not a public key (2th member of pubkeys) in %s/012.php on line %d
 
-Warning: openssl_seal() expects parameter 4 to be %rv?%rarray, string given in %s/012.php on line %d
+Warning: openssl_seal() expects parameter 4 to be vec, string given in %s/012.php on line %d
 
 Warning: Fourth argument to openssl_seal() must be a non-empty array in %s/012.php on line %d
 

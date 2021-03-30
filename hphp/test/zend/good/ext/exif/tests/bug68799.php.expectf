@@ -1,4 +1,4 @@
-Array
+Dict
 (
     [FileName] => bug68799.jpg
     [FileDateTime] => %d
@@ -6,7 +6,7 @@ Array
     [FileType] => 2
     [MimeType] => image/jpeg
     [SectionsFound] => ANY_TAG, IFD0, WINXP
-    [COMPUTED] => Array
+    [COMPUTED] => Dict
         (
             [html] => width="1" height="1"
             [Height] => 1

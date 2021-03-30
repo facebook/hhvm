@@ -1,11 +1,11 @@
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "bcd"
 }
 bool(true)
-darray(1) {
+dict(1) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(3) "bcd"
     [1]=>
@@ -14,9 +14,9 @@ darray(1) {
 }
 bool(true)
 bool(true)
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "def"
     int(3)
   }

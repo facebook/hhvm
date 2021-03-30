@@ -1,7 +1,7 @@
 *** Testing iconv_mime_decode_headers() : usage variations ***
 
 -- Iteration 1 --
-darray(5) {
+dict(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -11,14 +11,14 @@ darray(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  varray(2) {
+  vec(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 2 --
-darray(5) {
+dict(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -28,14 +28,14 @@ darray(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  varray(2) {
+  vec(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 3 --
-darray(5) {
+dict(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -45,14 +45,14 @@ darray(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  varray(2) {
+  vec(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 4 --
-darray(5) {
+dict(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -62,7 +62,7 @@ darray(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  varray(2) {
+  vec(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
@@ -70,73 +70,73 @@ darray(5) {
 
 -- Iteration 5 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 6 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 7 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 8 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 9 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 10 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 11 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 12 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 13 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 14 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 15 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 16 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 17 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 18 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 19 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 20 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 21 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, object given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 
 -- Iteration 22 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, resource given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, resource given in %s/test/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 96
 Done

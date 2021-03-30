@@ -1,5 +1,5 @@
 *** Testing array_merge() : basic functionality ***
-darray(6) {
+dict(6) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -13,7 +13,7 @@ darray(6) {
   ["c"]=>
   int(3)
 }
-darray(6) {
+dict(6) {
   ["a"]=>
   int(1)
   ["b"]=>

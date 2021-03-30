@@ -1,5 +1,5 @@
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -7,7 +7,7 @@ varray(3) {
     ["type"]=>
     string(2) "->"
   }
-  darray(3) {
+  dict(3) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -15,14 +15,14 @@ varray(3) {
     ["type"]=>
     string(2) "->"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }
 }
 ------------------------
-varray(3) {
-  darray(4) {
+vec(3) {
+  dict(4) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -33,7 +33,7 @@ varray(3) {
     ["type"]=>
     string(2) "->"
   }
-  darray(4) {
+  dict(4) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -44,7 +44,7 @@ varray(3) {
     ["type"]=>
     string(2) "->"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }

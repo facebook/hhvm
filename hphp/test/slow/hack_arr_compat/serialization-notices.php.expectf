@@ -1,79 +1,9 @@
 
 ============================================================
 Testing varray[]:
-gettype:              
-Notice: Hack Array Compat: Observing static empty varray in gettype with provenance disabled in %s/serialization-notices.php on line 36
-string(5) "array"
-is_php_array:         
-Notice: Hack Array Compat: Observing static empty varray in is_array with provenance disabled in %s/serialization-notices.php on line 37
-bool(true)
-is_varray:            bool(true)
-is_darray:            bool(false)
-is_vec:               
-Notice: Hack Array Compat: Observing static empty varray in is_vec with provenance disabled in %s/serialization-notices.php on line 40
-bool(false)
-is_vec_fn:            
-Notice: Hack Array Compat: Observing static empty varray in is_vec with provenance disabled in %s/serialization-notices.php on line 41
-bool(false)
-is_dict:              bool(false)
-is_dict_fn:           bool(false)
-json_encode:          string(2) "[]"
-json_hack_arrays:     string(2) "[]"
-json_php_arrays:      string(2) "[]"
-serialize:            
-Notice: Hack Array Compat: Observing static empty varray in serialize with provenance disabled in %s/serialization-notices.php on line 47
-string(6) "a:0:{}"
-fb_compact_serialize: 
-Notice: Hack Array Compat: Observing static empty varray in fb_compact_serialize with provenance disabled in %s/serialization-notices.php on line 12
-string(4) "fbfc"
-fb_serialize_0:       string(4) "0a01"
-fb_serialize_2:       
-Notice: Hack Array Compat: Observing static empty varray in fb_serialize with provenance disabled in %s/serialization-notices.php on line 17
-string(4) "0a01"
-fb_serialize_4:       string(8) "13020001"
-fb_serialize_8:       
-Notice: Hack Array Compat: Observing static empty varray in fb_serialize with provenance disabled in %s/serialization-notices.php on line 17
-string(4) "0a01"
-
-============================================================
-Testing darray[]:
-gettype:              
-Notice: Hack Array Compat: Observing static empty darray in gettype with provenance disabled in %s/serialization-notices.php on line 36
-string(5) "array"
-is_php_array:         
-Notice: Hack Array Compat: Observing static empty darray in is_array with provenance disabled in %s/serialization-notices.php on line 37
-bool(true)
-is_varray:            bool(false)
-is_darray:            bool(true)
-is_vec:               bool(false)
-is_vec_fn:            bool(false)
-is_dict:              
-Notice: Hack Array Compat: Observing static empty darray in is_dict with provenance disabled in %s/serialization-notices.php on line 42
-bool(false)
-is_dict_fn:           
-Notice: Hack Array Compat: Observing static empty darray in is_dict with provenance disabled in %s/serialization-notices.php on line 43
-bool(false)
-json_encode:          
-Notice: Hack Array Compat: Observing static empty darray in json_encode with provenance disabled in %s/serialization-notices.php on line 44
-string(2) "[]"
-json_hack_arrays:     string(2) "{}"
-json_php_arrays:      string(2) "[]"
-serialize:            
-Notice: Hack Array Compat: Observing static empty darray in serialize with provenance disabled in %s/serialization-notices.php on line 47
-string(6) "a:0:{}"
-fb_compact_serialize: 
-Notice: Hack Array Compat: Observing static empty darray in fb_compact_serialize with provenance disabled in %s/serialization-notices.php on line 12
-string(4) "fbfc"
-fb_serialize_0:       string(4) "0a01"
-fb_serialize_2:       string(4) "0a01"
-fb_serialize_4:       string(4) "0a01"
-fb_serialize_8:       string(4) "0a01"
-
-============================================================
-Testing vec[]:
 gettype:              string(3) "vec"
 is_php_array:         bool(false)
-is_varray:            bool(false)
+is_varray:            bool(true)
 is_darray:            bool(false)
 is_vec:               bool(true)
 is_vec_fn:            bool(true)
@@ -84,17 +14,17 @@ json_hack_arrays:     string(2) "[]"
 json_php_arrays:      string(2) "[]"
 serialize:            string(6) "v:0:{}"
 fb_compact_serialize: string(4) "fafc"
-fb_serialize_0:       string(9) "<failure>"
+fb_serialize_0:       string(4) "0a01"
 fb_serialize_2:       string(8) "13020001"
-fb_serialize_4:       string(9) "<failure>"
+fb_serialize_4:       string(8) "13020001"
 fb_serialize_8:       string(8) "13020001"
 
 ============================================================
-Testing dict[]:
+Testing darray[]:
 gettype:              string(4) "dict"
 is_php_array:         bool(false)
 is_varray:            bool(false)
-is_darray:            bool(false)
+is_darray:            bool(true)
 is_vec:               bool(false)
 is_vec_fn:            bool(false)
 is_dict:              bool(true)
@@ -104,9 +34,49 @@ json_hack_arrays:     string(2) "{}"
 json_php_arrays:      string(2) "[]"
 serialize:            string(6) "D:0:{}"
 fb_compact_serialize: string(4) "fbfc"
-fb_serialize_0:       string(9) "<failure>"
+fb_serialize_0:       string(4) "0a01"
 fb_serialize_2:       string(4) "0a01"
-fb_serialize_4:       string(9) "<failure>"
+fb_serialize_4:       string(4) "0a01"
+fb_serialize_8:       string(4) "0a01"
+
+============================================================
+Testing vec[]:
+gettype:              string(3) "vec"
+is_php_array:         bool(false)
+is_varray:            bool(true)
+is_darray:            bool(false)
+is_vec:               bool(true)
+is_vec_fn:            bool(true)
+is_dict:              bool(false)
+is_dict_fn:           bool(false)
+json_encode:          string(2) "[]"
+json_hack_arrays:     string(2) "[]"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "v:0:{}"
+fb_compact_serialize: string(4) "fafc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(8) "13020001"
+fb_serialize_4:       string(8) "13020001"
+fb_serialize_8:       string(8) "13020001"
+
+============================================================
+Testing dict[]:
+gettype:              string(4) "dict"
+is_php_array:         bool(false)
+is_varray:            bool(false)
+is_darray:            bool(true)
+is_vec:               bool(false)
+is_vec_fn:            bool(false)
+is_dict:              bool(true)
+is_dict_fn:           bool(true)
+json_encode:          string(2) "{}"
+json_hack_arrays:     string(2) "{}"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "D:0:{}"
+fb_compact_serialize: string(4) "fbfc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(4) "0a01"
+fb_serialize_4:       string(4) "0a01"
 fb_serialize_8:       string(4) "0a01"
 
 ============================================================

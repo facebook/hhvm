@@ -1,20 +1,20 @@
-varray(2) {
+vec(2) {
   resource(4) of type (xml)
   string(5) "CHILD"
 }
-varray(2) {
+vec(2) {
   resource(4) of type (xml)
   string(3) "TAG"
 }
-varray(3) {
+vec(3) {
   resource(5) of type (xml)
   string(3) "TAG"
-  darray(0) {
+  dict(0) {
   }
 }
-varray(3) {
+vec(3) {
   resource(5) of type (xml)
   string(5) "CHILD"
-  darray(0) {
+  dict(0) {
   }
 }

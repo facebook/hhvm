@@ -1,13 +1,13 @@
 *** Testing array_unshift() : different arrays for $array argument ***
 -- Iteration 1 --
 int(3)
-varray(3) {
+vec(3) {
   int(10)
   int(1)
   int(2)
 }
 int(5)
-varray(5) {
+vec(5) {
   int(10)
   string(5) "hello"
   string(5) "world"
@@ -16,13 +16,13 @@ varray(5) {
 }
 -- Iteration 2 --
 int(3)
-varray(3) {
+vec(3) {
   int(10)
   float(1.1)
   float(2.2)
 }
 int(5)
-varray(5) {
+vec(5) {
   int(10)
   string(5) "hello"
   string(5) "world"
@@ -31,36 +31,36 @@ varray(5) {
 }
 -- Iteration 3 --
 int(3)
-varray(3) {
+vec(3) {
   int(10)
-  varray(1) {
+  vec(1) {
     int(2)
   }
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
 int(5)
-varray(5) {
+vec(5) {
   int(10)
   string(5) "hello"
   string(5) "world"
-  varray(1) {
+  vec(1) {
     int(2)
   }
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
 -- Iteration 4 --
 int(3)
-varray(3) {
+vec(3) {
   int(10)
   bool(false)
   bool(true)
 }
 int(5)
-varray(5) {
+vec(5) {
   int(10)
   string(5) "hello"
   string(5) "world"
@@ -69,23 +69,23 @@ varray(5) {
 }
 -- Iteration 5 --
 int(1)
-varray(1) {
+vec(1) {
   int(10)
 }
 int(3)
-varray(3) {
+vec(3) {
   int(10)
   string(5) "hello"
   string(5) "world"
 }
 -- Iteration 6 --
 int(2)
-varray(2) {
+vec(2) {
   int(10)
   NULL
 }
 int(4)
-varray(4) {
+vec(4) {
   int(10)
   string(5) "hello"
   string(5) "world"
@@ -93,7 +93,7 @@ varray(4) {
 }
 -- Iteration 7 --
 int(7)
-varray(7) {
+vec(7) {
   int(10)
   string(1) "a"
   string(4) "aaaa"
@@ -103,7 +103,7 @@ varray(7) {
   string(5) "ccccc"
 }
 int(9)
-varray(9) {
+vec(9) {
   int(10)
   string(5) "hello"
   string(5) "world"
@@ -116,7 +116,7 @@ varray(9) {
 }
 -- Iteration 8 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   [1]=>
@@ -127,7 +127,7 @@ darray(4) {
   string(5) "three"
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -143,7 +143,7 @@ darray(6) {
 }
 -- Iteration 9 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -154,7 +154,7 @@ darray(4) {
   int(3)
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -170,7 +170,7 @@ darray(6) {
 }
 -- Iteration 10 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(10)
   [1]=>
@@ -183,7 +183,7 @@ darray(5) {
   int(30)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(10)
   [1]=>
@@ -201,7 +201,7 @@ darray(7) {
 }
 -- Iteration 11 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -212,7 +212,7 @@ darray(4) {
   string(6) "thirty"
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -228,7 +228,7 @@ darray(6) {
 }
 -- Iteration 12 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -239,7 +239,7 @@ darray(4) {
   string(4) "four"
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -255,7 +255,7 @@ darray(6) {
 }
 -- Iteration 13 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   [""]=>
@@ -266,7 +266,7 @@ darray(4) {
   NULL
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -282,7 +282,7 @@ darray(6) {
 }
 -- Iteration 14 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(10)
   [1]=>
@@ -295,7 +295,7 @@ darray(5) {
   bool(true)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(10)
   [1]=>
@@ -313,7 +313,7 @@ darray(7) {
 }
 -- Iteration 15 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   [""]=>
@@ -324,7 +324,7 @@ darray(4) {
   string(0) ""
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -340,7 +340,7 @@ darray(6) {
 }
 -- Iteration 16 --
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(10)
   [1]=>
@@ -357,7 +357,7 @@ darray(7) {
   bool(true)
 }
 int(9)
-darray(9) {
+dict(9) {
   [0]=>
   int(10)
   [1]=>
@@ -379,7 +379,7 @@ darray(9) {
 }
 -- Iteration 17 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   [""]=>
@@ -390,7 +390,7 @@ darray(4) {
   int(6)
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>
@@ -406,7 +406,7 @@ darray(6) {
 }
 -- Iteration 18 --
 int(4)
-darray(4) {
+dict(4) {
   [0]=>
   int(10)
   ["One"]=>
@@ -417,7 +417,7 @@ darray(4) {
   int(3)
 }
 int(6)
-darray(6) {
+dict(6) {
   [0]=>
   int(10)
   [1]=>

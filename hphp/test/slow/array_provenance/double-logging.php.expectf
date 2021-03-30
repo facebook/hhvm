@@ -1,6 +1,0 @@
-
-Notice: Observing static list-like varray in serialize from %s/double-logging.php:5 in %s/double-logging.php on line 6
-string(30) "a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}"
-
-Notice: Observing static list-like varray in serialize from %s/double-logging.php:5 in %s/double-logging.php on line 7
-string(30) "a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}"

@@ -1,6 +1,6 @@
 *** Testing array_column() : basic functionality ***
 -- first_name column from recordset --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "John"
   [1]=>
@@ -9,7 +9,7 @@ darray(3) {
   string(4) "Jane"
 }
 -- id column from recordset --
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -18,7 +18,7 @@ darray(3) {
   int(3)
 }
 -- last_name column from recordset, keyed by value from id column --
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "Doe"
   [2]=>
@@ -27,7 +27,7 @@ darray(3) {
   string(5) "Jones"
 }
 -- last_name column from recordset, keyed by value from first_name column --
-darray(3) {
+dict(3) {
   ["John"]=>
   string(3) "Doe"
   ["Sally"]=>
@@ -37,7 +37,7 @@ darray(3) {
 }
 
 *** Testing multiple data types ***
-darray(8) {
+dict(8) {
   [0]=>
   object(stdClass) (0) {
   }
@@ -56,7 +56,7 @@ darray(8) {
   [7]=>
   resource(%d) of type (stream)
 }
-darray(8) {
+dict(8) {
   [1]=>
   object(stdClass) (0) {
   }
@@ -77,7 +77,7 @@ darray(8) {
 }
 
 *** Testing numeric column keys ***
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "111"
   [1]=>
@@ -85,7 +85,7 @@ darray(3) {
   [2]=>
   string(3) "333"
 }
-darray(3) {
+dict(3) {
   ["aaa"]=>
   string(3) "111"
   ["bbb"]=>
@@ -93,7 +93,7 @@ darray(3) {
   ["ccc"]=>
   string(3) "333"
 }
-darray(3) {
+dict(3) {
   ["aaa"]=>
   string(3) "111"
   ["bbb"]=>
@@ -101,7 +101,7 @@ darray(3) {
   ["ccc"]=>
   string(3) "333"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "111"
   [1]=>
@@ -111,11 +111,11 @@ darray(3) {
 }
 
 *** Testing failure to find specified column ***
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "aaa"
   [1]=>
@@ -123,23 +123,23 @@ darray(3) {
   [2]=>
   string(3) "ccc"
 }
-darray(0) {
+dict(0) {
 }
 
 *** Testing single dimensional array ***
-darray(0) {
+dict(0) {
 }
 
 *** Testing columns not present in all rows ***
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "qux"
 }
-darray(1) {
+dict(1) {
   ["baz"]=>
   string(3) "qux"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "foo"
   ["aaa"]=>
@@ -147,7 +147,7 @@ darray(3) {
   [1]=>
   string(3) "eee"
 }
-darray(3) {
+dict(3) {
   ["bbb"]=>
   string(3) "foo"
   [0]=>
@@ -155,13 +155,13 @@ darray(3) {
   ["ggg"]=>
   string(3) "eee"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "bar"
   [1]=>
   string(3) "fff"
 }
-darray(2) {
+dict(2) {
   ["foo"]=>
   string(3) "bar"
   ["eee"]=>
@@ -169,7 +169,7 @@ darray(2) {
 }
 
 *** Testing use of object converted to string ***
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "Doe"
   [1]=>
@@ -177,7 +177,7 @@ darray(3) {
   [2]=>
   string(5) "Jones"
 }
-darray(3) {
+dict(3) {
   ["John"]=>
   string(3) "Doe"
   ["Sally"]=>

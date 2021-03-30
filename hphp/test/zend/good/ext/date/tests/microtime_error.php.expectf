@@ -1,38 +1,38 @@
 -- Too many arguments --
 
-Warning: microtime() expects at most 1 parameter, 2 given in %s/zend/good/ext/date/tests/microtime_error.php on line 11
+Warning: microtime() expects at most 1 parameter, 2 given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 11
 
 -- Bad Arg types --
 
 --> bad arg: NULL
 
-Warning: microtime() expects parameter 1 to be boolean, null given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, null given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: float(1.5)
 
-Warning: microtime() expects parameter 1 to be boolean, double given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, double given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: string(5) "hello"
 
-Warning: microtime() expects parameter 1 to be boolean, string given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, string given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 
---> bad arg: darray(2) {
+--> bad arg: dict(2) {
   ["k"]=>
   string(1) "v"
   [0]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }
 
-Warning: microtime() expects parameter 1 to be boolean, darray given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, dict given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: object(stdClass) (0) {
 }
 
-Warning: microtime() expects parameter 1 to be boolean, object given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, object given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: int(1)
 
-Warning: microtime() expects parameter 1 to be boolean, integer given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, integer given in %s/test/zend/good/ext/date/tests/microtime_error.php on line 25
 ===DONE===

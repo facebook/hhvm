@@ -1,14 +1,14 @@
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     ["function"]=>
     string(8) "profiler"
     ["args"]=>
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(13)
     ["function"]=>
@@ -17,7 +17,7 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -25,10 +25,10 @@ varray(3) {
     }
   }
 }
-varray(3) {
-  darray(4) {
+vec(3) {
+  dict(4) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(8)
     ["function"]=>
@@ -37,9 +37,9 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(7) {
+  dict(7) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -55,7 +55,7 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -63,10 +63,10 @@ varray(3) {
     }
   }
 }
-varray(3) {
-  darray(4) {
+vec(3) {
+  dict(4) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(8)
     ["function"]=>
@@ -75,9 +75,9 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(6) {
+  dict(6) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -90,7 +90,7 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -98,10 +98,10 @@ varray(3) {
     }
   }
 }
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     ["file"]=>
-    %s
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
     ["line"]=>
     int(16)
     ["function"]=>
@@ -110,7 +110,7 @@ varray(2) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>

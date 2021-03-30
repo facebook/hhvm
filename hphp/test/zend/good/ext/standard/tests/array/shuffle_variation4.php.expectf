@@ -6,7 +6,7 @@
 bool(true)
 
 The output array is:
-darray(4) {
+dict(4) {
   [0]=>
   int(%d)
   [1]=>
@@ -21,7 +21,7 @@ darray(4) {
 bool(true)
 
 The output array is:
-darray(3) {
+dict(3) {
   [0]=>
   int(-%d)
   [1]=>
@@ -34,7 +34,7 @@ darray(3) {
 bool(true)
 
 The output array is:
-darray(5) {
+dict(5) {
   [0]=>
   float(%f)
   [1]=>
@@ -51,7 +51,7 @@ darray(5) {
 bool(true)
 
 The output array is:
-darray(5) {
+dict(5) {
   [0]=>
   float(-%f)
   [1]=>
@@ -68,7 +68,7 @@ darray(5) {
 bool(true)
 
 The output array is:
-darray(4) {
+dict(4) {
   [0]=>
   string(%d) "%s"
   [1]=>
@@ -83,7 +83,7 @@ darray(4) {
 bool(true)
 
 The output array is:
-darray(2) {
+dict(2) {
   [0]=>
   bool(%s)
   [1]=>
@@ -94,7 +94,7 @@ darray(2) {
 bool(true)
 
 The output array is:
-darray(4) {
+dict(4) {
   [0]=>
   int(%d)
   [1]=>
@@ -109,7 +109,7 @@ darray(4) {
 bool(true)
 
 The output array is:
-darray(4) {
+dict(4) {
   [0]=>
   int(-%d)
   [1]=>
@@ -124,7 +124,7 @@ darray(4) {
 bool(true)
 
 The output array is:
-darray(4) {
+dict(4) {
   [0]=>
   int(%d)
   [1]=>
@@ -139,7 +139,7 @@ darray(4) {
 bool(true)
 
 The output array is:
-darray(3) {
+dict(3) {
   [0]=>
   int(-%d)
   [1]=>
@@ -152,7 +152,7 @@ darray(3) {
 bool(true)
 
 The output array is:
-darray(3) {
+dict(3) {
   [0]=>
   NULL
   [1]=>

@@ -1,9 +1,8 @@
+Warning: fstat() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fstat_variation1.php on line 14
 
-Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
+Warning: fstat() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fstat_variation1.php on line 14
 
-Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
+Warning: fstat() expects parameter 1 to be resource, dict given in %s/test/zend/good/ext/standard/tests/file/fstat_variation1.php on line 14
 
-Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
-
-Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
+Warning: fstat() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fstat_variation1.php on line 14
 ===DONE===

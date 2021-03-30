@@ -4,7 +4,7 @@
 string(49) "callback2() expects exactly 2 parameters, 1 given"
 
 -- Testing array_map() function with more no. of arrays than callback function arguments --
-varray(2) {
+vec(2) {
   int(3)
   int(8)
 }

@@ -1,14 +1,14 @@
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 
-Notice: Object of class classWithToString could not be converted to float in %s/array_multisort_variation9.php on line 32
+Notice: Object of class classWithToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
 
-Notice: Object of class classWithoutToString could not be converted to float in %s/array_multisort_variation9.php on line 32
+Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
 
-Notice: Object of class classWithoutToString could not be converted to float in %s/array_multisort_variation9.php on line 32
+Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
 
-Notice: Object of class classWithoutToString could not be converted to float in %s/array_multisort_variation9.php on line 32
+Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
 bool(true)
-darray(9) {
+dict(9) {
   ["float -10.5"]=>
   float(-10.5)
   ["empty string DQ"]=>
@@ -20,7 +20,7 @@ darray(9) {
   ["uppercase NULL"]=>
   NULL
   [0]=>
-  varray(0) {
+  vec(0) {
   }
   ["instance of classWithoutToString"]=>
   object(classWithoutToString) (0) {

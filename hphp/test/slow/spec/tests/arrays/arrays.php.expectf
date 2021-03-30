@@ -1,84 +1,84 @@
 ================= array of zero elements is possible =================
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 ================= array of 1 element is possible =================
-varray(1) {
+vec(1) {
   bool(true)
 }
-varray(1) {
+vec(1) {
   bool(true)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
 ================= array of 2 elements each having the same type =================
-varray(2) {
+vec(2) {
   int(123)
   int(-56)
 }
-varray(2) {
+vec(2) {
   int(123)
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
 ================= array of 5 elements each having different type =================
-varray(5) {
+vec(5) {
   NULL
   bool(false)
   int(123)
   float(34000000000000)
   string(5) "Hello"
 }
-varray(5) {
+vec(5) {
   NULL
   bool(false)
   int(123)
   float(34000000000000)
   string(5) "Hello"
 }
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   [1]=>
@@ -90,7 +90,7 @@ darray(5) {
   [4]=>
   string(5) "Hello"
 }
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   [1]=>
@@ -102,7 +102,7 @@ darray(5) {
   [4]=>
   string(5) "Hello"
 }
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   [1]=>
@@ -114,7 +114,7 @@ darray(5) {
   [4]=>
   string(5) "Hello"
 }
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   [1]=>
@@ -127,42 +127,42 @@ darray(5) {
   string(5) "Hello"
 }
 ================= trailing comma permitted if list has at least one entry =================
-varray(1) {
+vec(1) {
   bool(true)
 }
-varray(1) {
+vec(1) {
   bool(true)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
-varray(2) {
+vec(2) {
   int(123)
   int(-56)
 }
-varray(2) {
+vec(2) {
   int(123)
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
 ================= specify keys in arbitrary order, initial values of runtime expressions, leave gaps =================
-darray(3) {
+dict(3) {
   [7]=>
   int(123)
   [3]=>
@@ -170,7 +170,7 @@ darray(3) {
   [6]=>
   int(13)
 }
-darray(3) {
+dict(3) {
   [7]=>
   int(123)
   [3]=>
@@ -179,11 +179,11 @@ darray(3) {
   int(13)
 }
 123,6,13,
-Out of bounds darray access: invalid index 1
+Out of bounds dict access: invalid index 1
 Undefined variable: v1
-Out of bounds darray access: invalid index 4
+Out of bounds dict access: invalid index 4
 Undefined variable: v1
-darray(5) {
+dict(5) {
   [7]=>
   int(123)
   [3]=>
@@ -197,55 +197,55 @@ darray(5) {
 }
 123,6,13,1,99,
 ================= duplicate keys allowed, but lexically final one used =================
-darray(1) {
+dict(1) {
   [2]=>
   int(6)
 }
 ================= string keys can be expressions too =================
-darray(2) {
+dict(2) {
   ["color"]=>
   string(3) "red"
   ["shape"]=>
   string(6) "square"
 }
 ================= arrays some of whose elements are arrays, and so on =================
-varray(4) {
+vec(4) {
   int(10)
-  varray(3) {
+  vec(3) {
     string(3) "red"
     string(5) "white"
     string(4) "blue"
   }
   NULL
-  varray(3) {
+  vec(3) {
     bool(false)
     NULL
-    varray(3) {
+    vec(3) {
       string(3) "red"
       string(5) "white"
       string(4) "blue"
     }
   }
 }
-varray(3) {
-  varray(4) {
+vec(3) {
+  vec(4) {
     int(2)
     int(4)
     int(6)
     int(8)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(10)
   }
-  varray(3) {
+  vec(3) {
     int(100)
     int(200)
     int(300)
   }
 }
 ================= see if int keys can be specified in any base. =================
-darray(4) {
+dict(4) {
   [12]=>
   int(10)
   [16]=>
@@ -256,7 +256,7 @@ darray(4) {
   int(2)
 }
 ================= what about int-looking strings? It appears not. =================
-darray(4) {
+dict(4) {
   ["12"]=>
   int(10)
   ["0x10"]=>
@@ -267,7 +267,7 @@ darray(4) {
   int(2)
 }
 ================= iterate using foreach and compare with for loop =================
-darray(4) {
+dict(4) {
   [2]=>
   bool(true)
   [0]=>
@@ -280,7 +280,7 @@ darray(4) {
 1,123,34.5,red,
 red,123,34.5,1,
 ================= remove some elements from an array =================
-darray(4) {
+dict(4) {
   ["red"]=>
   bool(true)
   [0]=>
@@ -290,7 +290,7 @@ darray(4) {
   [10]=>
   string(5) "Hello"
 }
-darray(2) {
+dict(2) {
   [9]=>
   float(34000000000000)
   [10]=>

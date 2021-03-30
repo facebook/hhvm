@@ -1,7 +1,7 @@
 T1 abstract
 T2 not abstract
 T3 not abstract
-darray(1) {
+dict(1) {
   ["V2"]=>
   int(1)
 }

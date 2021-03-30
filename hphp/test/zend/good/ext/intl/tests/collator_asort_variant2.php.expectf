@@ -1,105 +1,105 @@
-Test 1.162b81ac12878b817fc39063097e45b5:
-array (
+Test 1.3997c9cd67c2029771306c6f29f669cd:
+dict [
   'c' => 'i',
   'a' => 'k',
   'd' => 'y',
-)
+]
  Result: true
 
-Test 2.93d96e22f692d8a281b0a389f01f8d1e:
-array (
+Test 2.33b96030389be117f1f3232b1fd9316c:
+dict [
   'a' => 'a',
   'c' => 'aa',
   'b' => 'aaa',
-)
+]
  Result: true
 
-Test 3.9f25de4482bc7b58de508e278113317c:
-array (
+Test 3.49dac753e7ba85751a90fe1579b635d7:
+dict [
   'aa' => 'a',
   'aaa' => 'a',
   'a' => 'a',
-)
+]
  Result: true
 
-Test 4.a053a7559d5aa4510bdb22d87aece31e:
-array (
+Test 4.f2e4e91cbecdce6dd5e22ff5fd5d9613:
+dict [
   '7' => '',
   '2' => NULL,
   '5' => '!',
   '1' => 'abc',
-)
+]
  Result: true
 
-Test 5.e47c72919429698285fa33d0f1da29bd:
-array (
+Test 5.32ec9311617fc0075f6ae4c7c81b67cd:
+dict [
   '2' => '25',
   '3' => '36',
   '1' => '100',
-)
+]
  Result: true
 
-Test 6.229a0cb6fe7924033b482f820d627643:
-array (
+Test 6.6dde383f1da221f48c0555ca65b47b50:
+dict [
   '3' => 2,
   '1' => 5,
   '2' => '30',
-)
+]
  Result: true
 
-Test 7.38071f1abfc721d5efb210f2e6835cec:
-array (
+Test 7.f0abff44df2812d54bf54e26e0297c73:
+dict [
   '1' => '100',
   '2' => '25',
   '3' => '36',
-)
+]
  Result: true
 
-Test 8.cf580913f6f2e2e50b7f5058902e382f:
-array (
+Test 8.9ba3543a48c8fd783774b5da8b6dfec4:
+dict [
   '3' => 2,
   '2' => '30',
   '1' => 5,
-)
+]
  Result: true
 
-Test 9.e221a15f45e4ccf57b506336c7357c9f:
-array (
+Test 9.be89775fb05e083b78ca2ae8363ad00d:
+dict [
   '2' => '',
   '3' => ' a',
   '1' => 'd',
-)
+]
  Result: true
 
-Test 10.75c201c940cceda1609eed96e8c4c6a1:
-array (
+Test 10.e256eb0198d61355223f8e9e2c8e961d:
+dict [
   '3' => 'i',
   '2' => 'k',
   '1' => 'y',
-)
+]
  Result: true
 
-Test 11.153d9b11d1e5936afc917a94a4e11f34:
-array (
+Test 11.a057b90d0565c39ee886c412f1b561b3:
+dict [
   'е' => 'а',
   'б' => 'в',
   'п' => 'у',
-)
+]
  Result: true
 
-Test 12.2292e701f6ebaf92659b48b913606902:
-array (
+Test 12.ebd6bedc2382b0dc82d666a28efede2c:
+dict [
   '4' => '',
   '1' => 'п',
   '2' => 'пп',
   '7' => 'd',
-)
+]
  Result: true
 
-Test 13.8800d48abb960a59002eef77f1d73ae0:
-array (
+Test 13.0adf7a0fe9745aa650d286491f95e039:
+dict [
   'c' => 'i',
   'd' => 'y',
   'a' => 'k',
-)
+]
  Result: true

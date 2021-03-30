@@ -3,10 +3,9 @@ A::__set_state(darray[
   'c' => 'c',
   'd' => 'd',
   'e' => 
-  array (
-    0 => 
-    array (
-      0 => 'e',
-    ),
-  ),
+  vec [
+    vec [
+      'e',
+    ],
+  ],
 ])

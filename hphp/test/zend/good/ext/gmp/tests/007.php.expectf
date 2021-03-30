@@ -1,7 +1,7 @@
-Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/007.php on line 3
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/gmp/tests/007.php on line 3
 
-Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/007.php on line 4
-varray(2) {
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/gmp/tests/007.php on line 4
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
@@ -12,9 +12,9 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Zero operand not allowed in %s/007.php on line 7
+Warning: gmp_div_qr(): Zero operand not allowed in %s/test/zend/good/ext/gmp/tests/007.php on line 7
 bool(false)
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
@@ -25,9 +25,9 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Invalid rounding mode in %s/007.php on line 9
+Warning: gmp_div_qr(): Invalid rounding mode in %s/test/zend/good/ext/gmp/tests/007.php on line 9
 bool(false)
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -37,7 +37,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
@@ -47,7 +47,7 @@ varray(2) {
     string(4) "-113"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -57,7 +57,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -67,7 +67,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
@@ -77,7 +77,7 @@ varray(2) {
     string(4) "-113"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -88,9 +88,9 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/007.php on line 19
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/007.php on line 19
 bool(false)
 
-Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/007.php on line 20
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/007.php on line 20
 bool(false)
 Done

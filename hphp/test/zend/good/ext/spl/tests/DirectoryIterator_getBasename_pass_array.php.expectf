@@ -1,2 +1,1 @@
-
-Warning: basename() expects parameter 2 to be string, %rv?%rarray given in %s/DirectoryIterator_getBasename_pass_array.php on line 10
+Warning: basename() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/spl/tests/DirectoryIterator_getBasename_pass_array.php on line 10

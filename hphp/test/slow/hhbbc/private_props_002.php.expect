@@ -1,9 +1,6 @@
-darray(3) {
-  [0]=>
+vec(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(13) "one two three"

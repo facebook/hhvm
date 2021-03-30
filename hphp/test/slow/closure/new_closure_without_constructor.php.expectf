@@ -1,6 +1,6 @@
 object(Closure$test;%d) (1) {
   ["static"]=>
-  darray(1) {
+  dict(1) {
     ["x"]=>
     dict(1) {
       ["a"]=>

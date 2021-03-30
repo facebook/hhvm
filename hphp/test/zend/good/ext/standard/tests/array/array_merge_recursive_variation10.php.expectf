@@ -1,16 +1,16 @@
 *** Testing array_merge_recursive() : two dimensional array for $arr1 argument ***
 -- Passing the entire 2-d array --
 -- With default argument --
-darray(4) {
+dict(4) {
   [0]=>
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
     int(1)
   }
   ["array"]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -21,7 +21,7 @@ darray(4) {
     string(5) "world"
   }
   [1]=>
-  darray(4) {
+  dict(4) {
     [1]=>
     string(3) "one"
     [2]=>
@@ -32,7 +32,7 @@ darray(4) {
     string(3) "two"
   }
   [2]=>
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
@@ -40,16 +40,16 @@ darray(4) {
   }
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
     int(1)
   }
   ["array"]=>
-  darray(6) {
+  dict(6) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -64,7 +64,7 @@ darray(6) {
     string(5) "world"
   }
   [1]=>
-  darray(4) {
+  dict(4) {
     [1]=>
     string(3) "one"
     [2]=>
@@ -75,7 +75,7 @@ darray(6) {
     string(3) "two"
   }
   [2]=>
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
@@ -88,7 +88,7 @@ darray(6) {
 }
 -- Passing the sub-array --
 -- With default argument --
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -99,7 +99,7 @@ darray(4) {
   string(5) "world"
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "hello"
   [1]=>

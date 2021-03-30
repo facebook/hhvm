@@ -1,40 +1,40 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(29)
   ["alias"]=>
   string(1) "T"
 }
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(29)
 }
-darray(2) {
+dict(2) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
   int(29)
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["kind"]=>
       int(29)
     }
   }
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(29)
     }

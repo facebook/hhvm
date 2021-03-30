@@ -1,6 +1,6 @@
 *** Testing fscanf(): for its return type without third argument ***
 bool(true)
-darray(1) {
+dict(1) {
   [0]=>
   string(11) "hello_world"
 }

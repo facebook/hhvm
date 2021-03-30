@@ -13,9 +13,9 @@ keyset(4) {
 keyset(1) {
   string(3) "bar"
 }
-darray(1) {
+dict(1) {
   ["TestAttr"]=>
-  varray(1) {
+  vec(1) {
     keyset(2) {
       int(1)
       string(1) "1"

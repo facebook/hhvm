@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- $sort argument is -5 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -11,7 +11,7 @@ darray(3) {
 }
 
 -- $sort argument is -4 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -21,7 +21,7 @@ darray(3) {
 }
 
 -- $sort argument is -3 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -31,7 +31,7 @@ darray(3) {
 }
 
 -- $sort argument is -2 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -41,7 +41,7 @@ darray(3) {
 }
 
 -- $sort argument is -1 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -51,7 +51,7 @@ darray(3) {
 }
 
 -- $sort argument is 0 --
-darray(3) {
+dict(3) {
   ["one"]=>
   string(2) "un"
   ["two"]=>
@@ -61,7 +61,7 @@ darray(3) {
 }
 
 -- $sort argument is 1 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -71,7 +71,7 @@ darray(3) {
 }
 
 -- $sort argument is 2 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -81,7 +81,7 @@ darray(3) {
 }
 
 -- $sort argument is 3 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -91,7 +91,7 @@ darray(3) {
 }
 
 -- $sort argument is 4 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -101,7 +101,7 @@ darray(3) {
 }
 
 -- $sort argument is 5 --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>

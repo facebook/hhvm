@@ -2,7 +2,7 @@ i1
 i2
 i3
 i4
-varray(6) {
+vec(6) {
   int(10)
   int(11)
   int(0)

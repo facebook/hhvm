@@ -1,5 +1,5 @@
-varray(3) {
-  %unicode|string%(1) ","
-  %unicode|string%(1) """
-  %unicode|string%(1) "\"
+vec(3) {
+  string(1) ","
+  string(1) """
+  string(1) "\"
 }

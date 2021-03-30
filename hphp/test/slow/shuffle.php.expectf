@@ -1,8 +1,8 @@
 bool(true)
-varray(0) {
+vec(0) {
 }
 bool(true)
-varray(5) {
+vec(5) {
   int(3)
   int(4)
   int(5)
@@ -10,7 +10,7 @@ varray(5) {
   int(2)
 }
 bool(true)
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "c"
   [1]=>

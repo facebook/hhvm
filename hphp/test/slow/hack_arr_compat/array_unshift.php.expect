@@ -8,7 +8,7 @@ dict(2) {
 }
 Unshift darray
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
@@ -23,7 +23,7 @@ vec(2) {
 }
 Unshift varray
 int(2)
-varray(2) {
+vec(2) {
   int(2)
   int(42)
 }

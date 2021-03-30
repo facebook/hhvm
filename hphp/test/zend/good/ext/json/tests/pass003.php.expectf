@@ -17,9 +17,9 @@ object(stdClass) (1) {
   }
 }
 DECODE: AS ARRAY
-darray(1) {
+dict(1) {
   ["JSON Test Pattern pass3"]=>
-  darray(2) {
+  dict(2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>
@@ -41,9 +41,9 @@ object(stdClass) (1) {
   }
 }
 DECODE AGAIN: AS ARRAY
-darray(1) {
+dict(1) {
   ["JSON Test Pattern pass3"]=>
-  darray(2) {
+  dict(2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>

@@ -4,7 +4,7 @@ Warning: file() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/s
 Warning: file() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/file/file_error.php on line 13
 
 Warning: file() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/file/file_error.php on line 15
-varray(0) {
+vec(0) {
 }
 
 Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_error.php on line 18

@@ -1,7 +1,7 @@
-Warning: bcscale() expects parameter 1 to be integer, %rv?%rarray given in %s/test/slow/types/builtin_coerce_param_mode.php on line 4
+Warning: bcscale() expects parameter 1 to be integer, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 4
 
-Warning: bcscale() expects parameter 1 to be integer, %rv?%rarray given in %s/test/slow/types/builtin_coerce_param_mode.php on line 6
+Warning: bcscale() expects parameter 1 to be integer, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 6
 
-Warning: sqrt() expects parameter 1 to be double, %rv?%rarray given in %s/test/slow/types/builtin_coerce_param_mode.php on line 9
+Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 9
 
-Warning: sqrt() expects parameter 1 to be double, %rv?%rarray given in %s/test/slow/types/builtin_coerce_param_mode.php on line 11
+Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 11

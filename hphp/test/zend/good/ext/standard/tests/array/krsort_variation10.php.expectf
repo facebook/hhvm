@@ -2,7 +2,7 @@
 
 -- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --
 bool(true)
-darray(3) {
+dict(3) {
   ["heredoc string	with!@# and 123
 Test this!!!"]=>
   string(43) "heredoc string	with!@# and 123
@@ -15,7 +15,7 @@ Test this!!!"
 
 -- Testing krsort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
 bool(true)
-darray(3) {
+dict(3) {
   ["heredoc string	with!@# and 123
 Test this!!!"]=>
   string(43) "heredoc string	with!@# and 123
@@ -28,7 +28,7 @@ Test this!!!"
 
 -- Testing krsort() by supplying heredoc string array, 'flag' = SORT_STRING --
 bool(true)
-darray(3) {
+dict(3) {
   ["heredoc string	with!@# and 123
 Test this!!!"]=>
   string(43) "heredoc string	with!@# and 123

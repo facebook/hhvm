@@ -1,15 +1,15 @@
-Out of bounds darray access: invalid index "baz"
-darray(1) {
+Out of bounds dict access: invalid index "baz"
+dict(1) {
   ["e"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
     int(30)
   }
 }
 NULL
-darray(1) {
+dict(1) {
   ["e"]=>
-  darray(2) {
+  dict(2) {
     ["baz"]=>
     int(40)
     ["foo"]=>
@@ -17,25 +17,25 @@ darray(1) {
   }
 }
 int(40)
-Out of bounds darray access: invalid index "baz"
-darray(1) {
+Out of bounds dict access: invalid index "baz"
+dict(1) {
   ["y"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
     int(30)
   }
 }
 NULL
 NULL
-Out of bounds darray access: invalid index "baz"
-darray(1) {
+Out of bounds dict access: invalid index "baz"
+dict(1) {
   ["y"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
     int(30)
   }
 }
 NULL
 NULL
-Out of bounds darray access: invalid index 0
+Out of bounds dict access: invalid index 0
 int(30)

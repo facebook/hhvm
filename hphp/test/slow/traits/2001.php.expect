@@ -1,62 +1,62 @@
 T1:
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 T3:
-darray(1) {
+dict(1) {
   ["T2"]=>
   string(2) "T2"
 }
-varray(1) {
+vec(1) {
   string(2) "T2"
 }
 
 C1:
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 C2:
-darray(1) {
+dict(1) {
   ["T1"]=>
   string(2) "T1"
 }
-varray(1) {
+vec(1) {
   string(2) "T1"
 }
 
 C3:
-darray(2) {
+dict(2) {
   ["T1"]=>
   string(2) "T1"
   ["T2"]=>
   string(2) "T2"
 }
-varray(2) {
+vec(2) {
   string(2) "T1"
   string(2) "T2"
 }
 
 C4:
-darray(1) {
+dict(1) {
   ["T3"]=>
   string(2) "T3"
 }
-varray(1) {
+vec(1) {
   string(2) "T3"
 }
 
 C5:
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 I1:
-darray(0) {
+dict(0) {
 }
-varray(0) {
+vec(0) {
 }

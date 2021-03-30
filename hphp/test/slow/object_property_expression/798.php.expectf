@@ -3,7 +3,7 @@ string(23) "Undefined variable: foo"
 string(3) "foo"
 object(X) (4) {
   ["a"]=>
-  darray(1) {
+  dict(1) {
     ["x"]=>
     object(Y) (1) {
       ["y"]=>
@@ -20,6 +20,6 @@ object(X) (4) {
   ["y"]=>
   NULL
 }
-varray(0) {
+vec(0) {
 }
 bool(false)

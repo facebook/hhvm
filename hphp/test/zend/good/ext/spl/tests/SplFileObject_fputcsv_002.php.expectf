@@ -1,4 +1,4 @@
-varray(6) {
+vec(6) {
   int(1)
   int(2)
   string(3) "foo"

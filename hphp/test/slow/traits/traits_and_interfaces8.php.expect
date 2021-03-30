@@ -1,4 +1,4 @@
-varray(2) {
+vec(2) {
   string(6) "IChild"
   string(7) "IParent"
 }

@@ -4,7 +4,7 @@ bool(false)
 bool(true)
 string(%d) "%d.%d.%d%S"
 string(7) "Foo Bar"
-varray(4) {
+vec(4) {
   string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload.php"
   string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload-2.inc"
   string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload-3.inc"

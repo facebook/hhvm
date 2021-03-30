@@ -1,19 +1,19 @@
 *** Testing array_map() : associative array with diff. values for 'arr1' argument ***
 -- Iteration 1 --
-darray(0) {
+dict(0) {
 }
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   ["0"]=>
   int(0)
 }
 -- Iteration 3 --
-darray(1) {
+dict(1) {
   ["1"]=>
   int(1)
 }
 -- Iteration 4 --
-darray(4) {
+dict(4) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -24,12 +24,12 @@ darray(4) {
   int(4)
 }
 -- Iteration 5 --
-darray(1) {
+dict(1) {
   ["float"]=>
   float(2.3333)
 }
 -- Iteration 6 --
-darray(4) {
+dict(4) {
   ["f1"]=>
   float(1.2)
   ["f2"]=>
@@ -40,7 +40,7 @@ darray(4) {
   float(33333333.3333)
 }
 -- Iteration 7 --
-darray(4) {
+dict(4) {
   [111]=>
   string(6) "	Hello"
   ["red"]=>
@@ -52,7 +52,7 @@ darray(4) {
 "
 }
 -- Iteration 8 --
-darray(4) {
+dict(4) {
   [111]=>
   string(7) "\tHello"
   ["red"]=>
@@ -63,14 +63,14 @@ darray(4) {
   string(5) "pen\n"
 }
 -- Iteration 9 --
-darray(2) {
+dict(2) {
   [1]=>
   string(5) "hello"
   ["heredoc"]=>
   string(11) "Hello world"
 }
 -- Iteration 10 --
-darray(2) {
+dict(2) {
   [11]=>
   object(classA) (0) {
   }
@@ -78,7 +78,7 @@ darray(2) {
   resource(4) of type (stream)
 }
 -- Iteration 11 --
-darray(7) {
+dict(7) {
   [1]=>
   string(5) "hello"
   [2]=>

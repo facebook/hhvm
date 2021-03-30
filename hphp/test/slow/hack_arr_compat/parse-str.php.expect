@@ -1,13 +1,13 @@
-darray(3) {
+dict(3) {
   [123]=>
   string(5) "value"
   [456]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(7) "foo bar"
   }
   [789]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(3) "baz"
   }

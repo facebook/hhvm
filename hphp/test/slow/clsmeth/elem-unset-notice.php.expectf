@@ -1,85 +1,85 @@
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-varray(0) {
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
 }
-varray(1) {
-  varray(0) {
+vec(1) {
+  vec(0) {
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-varray(0) {
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
 }
-varray(1) {
-  varray(0) {
+vec(1) {
+  vec(0) {
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-varray(0) {
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
 }
-varray(1) {
-  varray(0) {
+vec(1) {
+  vec(0) {
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-[NOTICE] Implicit clsmeth to varray conversion
-varray(0) {
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
 }
-varray(1) {
-  varray(0) {
+vec(1) {
+  vec(0) {
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-[NOTICE] Implicit clsmeth to varray conversion
-varray(2) {
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }

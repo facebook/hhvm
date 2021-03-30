@@ -18,7 +18,7 @@ dict(11) {
   object(stdClass) (0) {
   }
   [6]=>
-  varray(3) {
+  vec(3) {
     int(300)
     int(200)
     int(100)
@@ -61,7 +61,7 @@ Set to bool key value failed: "Invalid dict key: expected a key of type int or s
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -98,7 +98,7 @@ Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type 
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
 Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -149,7 +149,7 @@ Unset of false key value failed: "Invalid dict key: expected a key of type int o
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -201,7 +201,7 @@ dict(15) {
   object(stdClass) (0) {
   }
   [10]=>
-  varray(3) {
+  vec(3) {
     int(300)
     int(200)
     int(100)
@@ -244,7 +244,7 @@ Set to bool key value failed: "Invalid dict key: expected a key of type int or s
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -293,7 +293,7 @@ Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type 
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
 Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -404,7 +404,7 @@ Unset of false key value failed: "Invalid dict key: expected a key of type int o
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -484,7 +484,7 @@ dict(17) {
   object(stdClass) (0) {
   }
   [6]=>
-  varray(3) {
+  vec(3) {
     int(300)
     int(200)
     int(100)
@@ -527,7 +527,7 @@ Set to bool key value failed: "Invalid dict key: expected a key of type int or s
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -584,7 +584,7 @@ Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type 
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
 Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
 Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
 Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
@@ -731,7 +731,7 @@ Unset of false key value failed: "Invalid dict key: expected a key of type int o
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
 Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
 Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
 Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"

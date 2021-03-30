@@ -1,5 +1,5 @@
 Basic test of POSIX uname function
-Array
+Dict
 (
     [sysname] => %s
     [nodename] => %s

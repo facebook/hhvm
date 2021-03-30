@@ -1,19 +1,19 @@
 *** Testing array_combine() : assoc array with diff values to both $keys and $values argument ***
 -- Iteration 1 --
-darray(0) {
+dict(0) {
 }
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   [0]=>
   int(0)
 }
 -- Iteration 3 --
-darray(1) {
+dict(1) {
   [1]=>
   int(1)
 }
 -- Iteration 4 --
-darray(4) {
+dict(4) {
   [1]=>
   int(1)
   [2]=>
@@ -24,12 +24,12 @@ darray(4) {
   int(4)
 }
 -- Iteration 5 --
-darray(1) {
+dict(1) {
   ["2.3333"]=>
   float(2.3333)
 }
 -- Iteration 6 --
-darray(4) {
+dict(4) {
   ["1.2"]=>
   float(1.2)
   ["3.33"]=>
@@ -40,20 +40,20 @@ darray(4) {
   float(33333333.333)
 }
 -- Iteration 7 --
-darray(4) {
-  ["%r\x09%rHello"]=>
-  string(6) "%r\x09%rHello"
-  ["col%r\x09%ror"]=>
-  string(6) "col%r\x09%ror"
-  ["%r\x0b\x0c%rworld"]=>
-  string(7) "%r\x0b\x0c%rworld"
+dict(4) {
+  ["	Hello"]=>
+  string(6) "	Hello"
+  ["col	or"]=>
+  string(6) "col	or"
+  ["world"]=>
+  string(7) "world"
   ["pen
 "]=>
   string(4) "pen
 "
 }
 -- Iteration 8 --
-darray(4) {
+dict(4) {
   ["\tHello"]=>
   string(7) "\tHello"
   ["col\tor"]=>
@@ -64,22 +64,22 @@ darray(4) {
   string(5) "pen\n"
 }
 -- Iteration 9 --
-darray(2) {
+dict(2) {
   ["hello"]=>
   string(5) "hello"
   ["Hello world"]=>
   string(11) "Hello world"
 }
 -- Iteration 10 --
-darray(2) {
+dict(2) {
   ["Class A object"]=>
   object(classA) (0) {
   }
-  ["Resource id #%d"]=>
-  resource(%d) of type (stream)
+  ["Resource id #4"]=>
+  resource(4) of type (stream)
 }
 -- Iteration 11 --
-darray(7) {
+dict(7) {
   ["hello"]=>
   string(5) "hello"
   ["Class A object"]=>
@@ -87,8 +87,8 @@ darray(7) {
   }
   ["fruit"]=>
   string(5) "fruit"
-  ["Resource id #%d"]=>
-  resource(%d) of type (stream)
+  ["Resource id #4"]=>
+  resource(4) of type (stream)
   [133]=>
   int(133)
   ["444.432"]=>

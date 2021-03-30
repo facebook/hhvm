@@ -1,7 +1,7 @@
 *** Testing array_merge() : usage variations ***
 
 -- Merge a two-dimensional and a one-dimensional array --
-darray(7) {
+dict(7) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -9,7 +9,7 @@ darray(7) {
   [2]=>
   string(3) "two"
   [3]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
   [4]=>
@@ -21,7 +21,7 @@ darray(7) {
 }
 
 -- Merge an array and a sub-array --
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -31,7 +31,7 @@ darray(4) {
   [3]=>
   int(3)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>

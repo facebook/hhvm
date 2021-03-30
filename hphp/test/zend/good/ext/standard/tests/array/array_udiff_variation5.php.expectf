@@ -1,7 +1,7 @@
 *** Testing array_udiff() : usage variation ***
 
 -- comparison function with an incorrect return value --
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
@@ -10,6 +10,6 @@ darray(1) {
 string(59) "too_many_parameters() expects exactly 3 parameters, 2 given"
 
 -- comparison function taking too few parameters --
-darray(0) {
+dict(0) {
 }
 ===DONE===

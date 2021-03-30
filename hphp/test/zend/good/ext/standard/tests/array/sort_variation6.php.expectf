@@ -2,7 +2,7 @@
 
 -- Testing sort() by supplying hexadecimal value array, 'flag' value is defualt  --
 bool(true)
-varray(11) {
+vec(11) {
   int(-682)
   int(-255)
   int(0)
@@ -18,7 +18,7 @@ varray(11) {
 
 -- Testing sort() by supplying hexadecimal value array, 'flag' value is SORT_REGULAR  --
 bool(true)
-varray(11) {
+vec(11) {
   int(-682)
   int(-255)
   int(0)
@@ -34,7 +34,7 @@ varray(11) {
 
 -- Testing sort() by supplying hexadecimal value array, 'flag' value is SORT_NUMERIC  --
 bool(true)
-varray(11) {
+vec(11) {
   int(-682)
   int(-255)
   int(0)

@@ -1,11 +1,11 @@
 *** Testing array_slice() : usage variations ***
 
 -- Slice a two-dimensional array --
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "one"
   [1]=>
-  varray(3) {
+  vec(3) {
     string(4) "zero"
     string(2) "un"
     string(4) "deux"
@@ -15,7 +15,7 @@ darray(3) {
 }
 
 -- $input is a sub-array --
-varray(2) {
+vec(2) {
   string(2) "un"
   string(4) "deux"
 }

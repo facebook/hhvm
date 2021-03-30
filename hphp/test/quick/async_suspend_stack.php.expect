@@ -1,6 +1,6 @@
 In gen
 string(3) "bar"
 Finished in gen
-varray(1) {
+vec(1) {
   int(42)
 }

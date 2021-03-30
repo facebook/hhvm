@@ -1,6 +1,29 @@
 basic test of gd_info() function
-darray(12) {
-%a
+dict(12) {
+  ["GD Version"]=>
+  string(27) "bundled (2.0.34 compatible)"
+  ["FreeType Support"]=>
+  bool(true)
+  ["FreeType Linkage"]=>
+  string(13) "with freetype"
+  ["T1Lib_Support"]=>
+  bool(false)
+  ["GIF Read Support"]=>
+  bool(true)
+  ["GIF Create Support"]=>
+  bool(true)
+  ["JPEG Support"]=>
+  bool(true)
+  ["PNG Support"]=>
+  bool(true)
+  ["WBMP Support"]=>
+  bool(true)
+  ["XPM Support"]=>
+  bool(false)
+  ["XBM Support"]=>
+  bool(true)
+  ["JIS-mapped Japanese Font Support"]=>
+  bool(false)
 }
 
 Done

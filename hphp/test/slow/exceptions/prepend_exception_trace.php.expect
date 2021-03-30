@@ -1,4 +1,4 @@
-darray(1) {
+dict(1) {
   ["prepended_key"]=>
   string(15) "prepended_value"
 }

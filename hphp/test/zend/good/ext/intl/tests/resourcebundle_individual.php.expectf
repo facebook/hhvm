@@ -1,7 +1,7 @@
 length: 6
 teststring: Hello World!
 testint: 2
-Array
+Vec
 (
     [0] => 1
     [1] => 2

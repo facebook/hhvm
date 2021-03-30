@@ -1,10 +1,10 @@
 -- (1)
 
-Warning: filter_var_array() expects parameter 1 to be array, NULL given in %s/039.php on line 4
+Warning: filter_var_array() expects parameter 1 to be array, NULL given in %s/test/zend/good/ext/filter/tests/039.php on line 4
 NULL
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "1"
   ["blah"]=>
@@ -23,41 +23,41 @@ bool(false)
 bool(false)
 -- (4)
 bool(false)
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["var_name"]=>
   NULL
 }
-darray(1) {
+dict(1) {
   ["var_name"]=>
   NULL
 }
-darray(1) {
+dict(1) {
   ["var_name"]=>
   string(0) ""
 }
 -- (5)
 
-Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s/039.php on line 29
+Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s/test/zend/good/ext/filter/tests/039.php on line 29
 bool(false)
 
-Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s/039.php on line 30
+Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s/test/zend/good/ext/filter/tests/039.php on line 30
 bool(false)
 bool(false)
-darray(1) {
+dict(1) {
   [""]=>
   string(0) ""
 }
 int(-1)
 bool(false)
-darray(1) {
+dict(1) {
   [""]=>
   string(0) ""
 }
 int(100000)
 bool(false)
-darray(1) {
+dict(1) {
   [""]=>
   string(0) ""
 }

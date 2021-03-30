@@ -1,7 +1,7 @@
 *** Testing array_unshift() : single quoted strings for $var argument ***
 -- Iteration 1 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(54) "\$ -> This represents the dollar sign. hello dollar!!!"
   ["f"]=>
@@ -14,7 +14,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(54) "\$ -> This represents the dollar sign. hello dollar!!!"
   [1]=>
@@ -32,7 +32,7 @@ darray(7) {
 }
 -- Iteration 2 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(53) "\t\r\v The quick brown fo\fx jumped over the lazy dog"
   ["f"]=>
@@ -45,7 +45,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(53) "\t\r\v The quick brown fo\fx jumped over the lazy dog"
   [1]=>
@@ -63,7 +63,7 @@ darray(7) {
 }
 -- Iteration 3 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(56) "This is a text with special chars: \!\@\#\$\%\^\&\*\(\)\"
   ["f"]=>
@@ -76,7 +76,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(56) "This is a text with special chars: \!\@\#\$\%\^\&\*\(\)\"
   [1]=>
@@ -94,7 +94,7 @@ darray(7) {
 }
 -- Iteration 4 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(13) "hello world\t"
   ["f"]=>
@@ -107,7 +107,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(13) "hello world\t"
   [1]=>
@@ -125,7 +125,7 @@ darray(7) {
 }
 -- Iteration 5 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(74) "This is \ta text in bold letters\r\s\malong with slashes\n : HELLO WORLD\t"
   ["f"]=>
@@ -138,7 +138,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(74) "This is \ta text in bold letters\r\s\malong with slashes\n : HELLO WORLD\t"
   [1]=>

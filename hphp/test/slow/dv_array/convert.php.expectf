@@ -1,24 +1,24 @@
 ============== test_varray =========================
-Exception: Null to varray conversion
+Exception: Null to vec conversion
 ============== test_varray =========================
-Exception: Bool to varray conversion
+Exception: Bool to vec conversion
 ============== test_varray =========================
-Exception: Bool to varray conversion
+Exception: Bool to vec conversion
 ============== test_varray =========================
-Exception: String to varray conversion
+Exception: String to vec conversion
 ============== test_varray =========================
-Exception: Int to varray conversion
+Exception: Int to vec conversion
 ============== test_varray =========================
-Exception: String to varray conversion
+Exception: String to vec conversion
 ============== test_varray =========================
-Exception: Double to varray conversion
+Exception: Double to vec conversion
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
@@ -27,7 +27,7 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   int(100)
   int(200)
   int(300)
@@ -35,12 +35,12 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
@@ -49,24 +49,24 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   int(100)
   string(3) "abc"
   int(200)
@@ -74,11 +74,11 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-Exception: Resource to varray conversion
+Exception: Resource to vec conversion
 ============== test_varray =========================
-Exception: Non-iterable object to varray conversion
+Exception: Non-iterable object to vec conversion
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   string(3) "abc"
   string(3) "def"
   string(3) "ghi"
@@ -88,7 +88,7 @@ bool(false)
 ============== test_varray =========================
 Exception: ThrowIterableObj
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   string(3) "abc"
   string(3) "def"
   string(3) "ghi"
@@ -96,21 +96,21 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(2) {
+vec(2) {
   string(3) "abc"
   string(3) "def"
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(2) {
+vec(2) {
   int(100)
   string(3) "100"
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   int(100)
   int(200)
   int(300)
@@ -118,7 +118,7 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(4) {
+vec(4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -127,7 +127,7 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -135,19 +135,19 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(2) {
+vec(2) {
   string(1) "a"
   int(100)
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -155,12 +155,12 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(3) {
+vec(3) {
   string(1) "x"
   string(1) "y"
   string(1) "z"
@@ -168,33 +168,33 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_varray =========================
-varray(2) {
+vec(2) {
   int(111)
   int(222)
 }
 bool(true)
 bool(false)
 ============== test_darray =========================
-Exception: Null to darray conversion
+Exception: Null to dict conversion
 ============== test_darray =========================
-Exception: Bool to darray conversion
+Exception: Bool to dict conversion
 ============== test_darray =========================
-Exception: Bool to darray conversion
+Exception: Bool to dict conversion
 ============== test_darray =========================
-Exception: String to darray conversion
+Exception: String to dict conversion
 ============== test_darray =========================
-Exception: Int to darray conversion
+Exception: Int to dict conversion
 ============== test_darray =========================
-Exception: String to darray conversion
+Exception: String to dict conversion
 ============== test_darray =========================
-Exception: Double to darray conversion
+Exception: Double to dict conversion
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -207,7 +207,7 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -218,12 +218,12 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -236,12 +236,12 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -250,12 +250,12 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [100]=>
   int(100)
   ["abc"]=>
@@ -266,11 +266,11 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-Exception: Resource to darray conversion
+Exception: Resource to dict conversion
 ============== test_darray =========================
-Exception: Non-iterable object to darray conversion
+Exception: Non-iterable object to dict conversion
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -283,7 +283,7 @@ bool(true)
 ============== test_darray =========================
 Exception: ThrowIterableObj
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -294,7 +294,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(2) {
+dict(2) {
   [100]=>
   string(3) "abc"
   ["100"]=>
@@ -303,7 +303,7 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(2) {
+dict(2) {
   [100]=>
   int(100)
   ["100"]=>
@@ -312,7 +312,7 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [0]=>
   int(100)
   [1]=>
@@ -323,7 +323,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(4) {
+dict(4) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -336,7 +336,7 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [100]=>
   string(1) "a"
   [200]=>
@@ -347,7 +347,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -356,12 +356,12 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -372,12 +372,12 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "x"
   [1]=>
@@ -388,7 +388,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-darray(2) {
+dict(2) {
   ["key1"]=>
   int(111)
   ["key2"]=>
@@ -397,26 +397,26 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\varray) ==================
-Exception: Null to varray conversion
+Exception: Null to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: Bool to varray conversion
+Exception: Bool to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: Bool to varray conversion
+Exception: Bool to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: String to varray conversion
+Exception: String to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: Int to varray conversion
+Exception: Int to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: String to varray conversion
+Exception: String to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: Double to varray conversion
+Exception: Double to vec conversion
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
@@ -425,7 +425,7 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   int(100)
   int(200)
   int(300)
@@ -433,12 +433,12 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
@@ -447,24 +447,24 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   int(100)
   string(3) "abc"
   int(200)
@@ -472,11 +472,11 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-Exception: Resource to varray conversion
+Exception: Resource to vec conversion
 ============== test_indirect (HH\varray) ==================
-Exception: Non-iterable object to varray conversion
+Exception: Non-iterable object to vec conversion
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   string(3) "abc"
   string(3) "def"
   string(3) "ghi"
@@ -486,7 +486,7 @@ bool(false)
 ============== test_indirect (HH\varray) ==================
 Exception: ThrowIterableObj
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   string(3) "abc"
   string(3) "def"
   string(3) "ghi"
@@ -494,21 +494,21 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(2) {
+vec(2) {
   string(3) "abc"
   string(3) "def"
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(2) {
+vec(2) {
   int(100)
   string(3) "100"
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   int(100)
   int(200)
   int(300)
@@ -516,7 +516,7 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(4) {
+vec(4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -525,7 +525,7 @@ varray(4) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -533,19 +533,19 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(2) {
+vec(2) {
   string(1) "a"
   int(100)
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -553,12 +553,12 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(3) {
+vec(3) {
   string(1) "x"
   string(1) "y"
   string(1) "z"
@@ -566,33 +566,33 @@ varray(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-varray(2) {
+vec(2) {
   int(111)
   int(222)
 }
 bool(true)
 bool(false)
 ============== test_indirect (HH\darray) ==================
-Exception: Null to darray conversion
+Exception: Null to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: Bool to darray conversion
+Exception: Bool to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: Bool to darray conversion
+Exception: Bool to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: String to darray conversion
+Exception: String to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: Int to darray conversion
+Exception: Int to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: String to darray conversion
+Exception: String to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: Double to darray conversion
+Exception: Double to dict conversion
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -605,7 +605,7 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -616,12 +616,12 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -634,12 +634,12 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -648,12 +648,12 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [100]=>
   int(100)
   ["abc"]=>
@@ -664,11 +664,11 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-Exception: Resource to darray conversion
+Exception: Resource to dict conversion
 ============== test_indirect (HH\darray) ==================
-Exception: Non-iterable object to darray conversion
+Exception: Non-iterable object to dict conversion
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -681,7 +681,7 @@ bool(true)
 ============== test_indirect (HH\darray) ==================
 Exception: ThrowIterableObj
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -692,7 +692,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(2) {
+dict(2) {
   [100]=>
   string(3) "abc"
   ["100"]=>
@@ -701,7 +701,7 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(2) {
+dict(2) {
   [100]=>
   int(100)
   ["100"]=>
@@ -710,7 +710,7 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [0]=>
   int(100)
   [1]=>
@@ -721,7 +721,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(4) {
+dict(4) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -734,7 +734,7 @@ darray(4) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [100]=>
   string(1) "a"
   [200]=>
@@ -745,7 +745,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -754,12 +754,12 @@ darray(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -770,12 +770,12 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(0) {
+dict(0) {
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(3) {
+dict(3) {
   [0]=>
   string(1) "x"
   [1]=>
@@ -786,7 +786,7 @@ darray(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-darray(2) {
+dict(2) {
   ["key1"]=>
   int(111)
   ["key2"]=>

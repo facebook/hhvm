@@ -1,8 +1,8 @@
-string(26) "Array to string conversion"
+string(24) "Vec to string conversion"
 bool(true)
 float(1)
 int(1)
-varray(2) {
+vec(2) {
   string(1) "A"
   string(4) "meth"
 }
@@ -10,7 +10,7 @@ vec(2) {
   string(1) "A"
   string(4) "meth"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -35,8 +35,8 @@ float(1)
 Notice: Implicit clsmeth to int conversion in %s/test/slow/global_func/class_meth/cast.php on line 16
 int(1)
 
-Notice: Implicit clsmeth to varray conversion in %s/test/slow/global_func/class_meth/cast.php on line 17
-varray(2) {
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cast.php on line 17
+vec(2) {
   string(1) "A"
   string(4) "meth"
 }
@@ -47,8 +47,8 @@ vec(2) {
   string(4) "meth"
 }
 
-Notice: Implicit clsmeth to darray conversion in %s/test/slow/global_func/class_meth/cast.php on line 19
-darray(2) {
+Notice: Implicit clsmeth to dict conversion in %s/test/slow/global_func/class_meth/cast.php on line 19
+dict(2) {
   [0]=>
   string(1) "A"
   [1]=>

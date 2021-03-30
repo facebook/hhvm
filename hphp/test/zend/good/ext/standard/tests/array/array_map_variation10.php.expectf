@@ -1,15 +1,15 @@
 *** Testing array_map() : anonymous callback function ***
 -- anonymous function with all parameters and body --
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(2)
     int(4)
   }
-  varray(2) {
+  vec(2) {
     int(3)
     int(5)
   }
@@ -17,7 +17,7 @@ varray(3) {
 -- anonymous function with two parameters and passing one array --
 string(48) "__invoke() expects exactly 2 parameters, 1 given"
 -- anonymous function with NULL parameter --
-darray(3) {
+dict(3) {
   [0]=>
   NULL
   [1]=>
@@ -26,7 +26,7 @@ darray(3) {
   NULL
 }
 -- anonymous function with NULL body --
-darray(3) {
+dict(3) {
   [0]=>
   NULL
   [1]=>
@@ -36,6 +36,6 @@ darray(3) {
 }
 -- passing NULL as 'arr1' --
 
-Warning: array_map(): Argument #2 should be an array or collection in %s/array_map_variation10.php on line 29
+Warning: array_map(): Argument #2 should be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_map_variation10.php on line 29
 NULL
 Done

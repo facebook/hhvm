@@ -1,9 +1,9 @@
 bool(false)
-darray(0) {
+dict(0) {
 }
 bool(true)
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   string(28) " uma string utf8 bem formada"
 }

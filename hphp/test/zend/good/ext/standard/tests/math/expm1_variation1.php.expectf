@@ -2,19 +2,19 @@
 
 -- Iteration 1 --
 
-Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 2 --
 
-Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 3 --
 
-Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 4 --
 
-Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 5 --
 float(36314.502674247)
@@ -33,65 +33,65 @@ float(0.64872127070013)
 
 -- Iteration 10 --
 
-Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, null given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 11 --
 
-Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, null given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 12 --
 
-Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 13 --
 
-Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 14 --
 
-Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 15 --
 
-Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 16 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 17 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 18 --
 
-Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, vec given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 19 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 20 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 21 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 22 --
 
-Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, vec given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 23 --
 
-Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, vec given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 24 --
 
-Warning: expm1() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, object given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 
 -- Iteration 25 --
 
-Warning: expm1() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line %d
+Warning: expm1() expects parameter 1 to be double, resource given in %s/test/zend/good/ext/standard/tests/math/expm1_variation1.php on line 78
 ===Done===

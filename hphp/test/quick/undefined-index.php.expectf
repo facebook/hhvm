@@ -1,4 +1,4 @@
-Out of bounds varray access: invalid index 123
+Out of bounds vec access: invalid index 123
 
 Fatal error: Uncaught exception 'UndefinedPropertyException' with message 'Undefined property: stdClass::$flubb' in %s/undefined-index.php:10
 Stack trace:

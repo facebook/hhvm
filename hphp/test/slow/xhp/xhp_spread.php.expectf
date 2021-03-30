@@ -1,18 +1,18 @@
 string(7) "xhp_bar"
-darray(2) {
+dict(2) {
   ["name"]=>
   string(4) "test"
   ["age"]=>
   int(21)
 }
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_foo"
-darray(2) {
+dict(2) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
@@ -20,7 +20,7 @@ darray(2) {
   string(4) "foo2"
 }
 string(7) "xhp_foo"
-darray(3) {
+dict(3) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
@@ -31,20 +31,20 @@ darray(3) {
   }
 }
 string(7) "xhp_bar"
-darray(2) {
+dict(2) {
   ["name"]=>
   string(4) "test"
   ["age"]=>
   int(21)
 }
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_bar"
-darray(3) {
+dict(3) {
   ["name"]=>
   string(4) "test"
   ["...$0"]=>
@@ -54,16 +54,16 @@ darray(3) {
   int(21)
 }
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_bar"
-darray(0) {
+dict(0) {
 }
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["...$0"]=>
   object(xhp_bar) (0) {
   }

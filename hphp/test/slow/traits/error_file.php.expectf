@@ -1,6 +1,6 @@
 string(21) "Undefined variable: x"
 string(21) "Undefined variable: x"
-darray(4) {
+dict(4) {
   ["class"]=>
   string(1) "X"
   ["file"]=>

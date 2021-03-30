@@ -1,15 +1,15 @@
-darray(1) {
+dict(1) {
   ["bar"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(5) "fubar"
     [1]=>
     string(5) "barfu"
   }
 }
-darray(1) {
+dict(1) {
   ["bar"]=>
-  varray(2) {
+  vec(2) {
     string(13) "fu<script>bar"
     string(13) "bar<script>fu"
   }

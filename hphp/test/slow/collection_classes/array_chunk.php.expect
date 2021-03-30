@@ -11,39 +11,39 @@ object(HH\Vector) (5) {
   [4]=>
   string(1) "e"
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [2]=>
     string(1) "c"
     [3]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [4]=>
     string(1) "e"
   }
@@ -57,39 +57,39 @@ object(HH\Set) (5) {
   string(1) "d"
   string(1) "e"
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     ["a"]=>
     string(1) "a"
     ["b"]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     ["c"]=>
     string(1) "c"
     ["d"]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     ["e"]=>
     string(1) "e"
   }
@@ -108,39 +108,39 @@ object(HH\Map) (5) {
   [5]=>
   string(1) "e"
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [1]=>
     string(1) "a"
     [2]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [3]=>
     string(1) "c"
     [4]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [5]=>
     string(1) "e"
   }
@@ -159,39 +159,39 @@ object(HH\Map) (5) {
   ["e"]=>
   string(1) "e"
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     ["a"]=>
     string(1) "a"
     ["b"]=>
     string(1) "b"
   }
-  darray(2) {
+  dict(2) {
     ["c"]=>
     string(1) "c"
     ["d"]=>
     string(1) "d"
   }
-  darray(1) {
+  dict(1) {
     ["e"]=>
     string(1) "e"
   }

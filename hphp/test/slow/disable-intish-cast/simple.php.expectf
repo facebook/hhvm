@@ -1,16 +1,16 @@
-darray(1) {
+dict(1) {
   ["42"]=>
   int(10)
 }
-darray(2) {
+dict(2) {
   ["42"]=>
   int(10)
   ["10"]=>
   int(5)
 }
-Out of bounds darray access: invalid index 42
+Out of bounds dict access: invalid index 42
 int(10)
-darray(2) {
+dict(2) {
   ["42"]=>
   string(6) "string"
   [42]=>

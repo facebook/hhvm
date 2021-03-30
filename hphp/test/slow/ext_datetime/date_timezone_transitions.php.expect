@@ -1,5 +1,5 @@
 bool(true)
-darray(5) {
+dict(5) {
   ["ts"]=>
   int(1000000)
   ["time"]=>
@@ -12,7 +12,7 @@ darray(5) {
   string(3) "BST"
 }
 bool(true)
-darray(5) {
+dict(5) {
   ["ts"]=>
   int(89172000)
   ["time"]=>
@@ -24,7 +24,7 @@ darray(5) {
   ["abbr"]=>
   string(3) "GMT"
 }
-darray(5) {
+dict(5) {
   ["ts"]=>
   int(985482000)
   ["time"]=>
@@ -36,8 +36,8 @@ darray(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(1383176624)
     ["time"]=>
@@ -50,8 +50,8 @@ varray(1) {
     string(3) "IST"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-2147483648)
     ["time"]=>
@@ -64,8 +64,8 @@ varray(1) {
     string(3) "MMT"
   }
 }
-varray(6) {
-  darray(5) {
+vec(6) {
+  dict(5) {
     ["ts"]=>
     int(-2147483648)
     ["time"]=>
@@ -77,7 +77,7 @@ varray(6) {
     ["abbr"]=>
     string(3) "MMT"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-2019705670)
     ["time"]=>
@@ -89,7 +89,7 @@ varray(6) {
     ["abbr"]=>
     string(3) "IST"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-891581400)
     ["time"]=>
@@ -101,7 +101,7 @@ varray(6) {
     ["abbr"]=>
     string(5) "+0630"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -113,7 +113,7 @@ varray(6) {
     ["abbr"]=>
     string(3) "IST"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -125,7 +125,7 @@ varray(6) {
     ["abbr"]=>
     string(5) "+0630"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-764145000)
     ["time"]=>
@@ -138,8 +138,8 @@ varray(6) {
     string(3) "IST"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -152,8 +152,8 @@ varray(1) {
     string(3) "IST"
   }
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -165,7 +165,7 @@ varray(2) {
     ["abbr"]=>
     string(3) "IST"
   }
-  darray(5) {
+  dict(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -178,8 +178,8 @@ varray(2) {
     string(5) "+0630"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-872058599)
     ["time"]=>
@@ -192,8 +192,8 @@ varray(1) {
     string(3) "IST"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -206,8 +206,8 @@ varray(1) {
     string(5) "+0630"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-862637399)
     ["time"]=>
@@ -220,8 +220,8 @@ varray(1) {
     string(5) "+0630"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-862637399)
     ["time"]=>
@@ -234,8 +234,8 @@ varray(1) {
     string(5) "+0630"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(1000000)
     ["time"]=>
@@ -248,8 +248,8 @@ varray(1) {
     string(3) "UTC"
   }
 }
-varray(1) {
-  darray(5) {
+vec(1) {
+  dict(5) {
     ["ts"]=>
     int(-9223372036854775808)
     ["time"]=>

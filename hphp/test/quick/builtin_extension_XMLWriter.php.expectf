@@ -2,10 +2,10 @@ XMLWriter
 object(XMLWriter) (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class XMLWriter in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class XMLWriter in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(43) {
+vec(43) {
   string(11) "__construct"
   string(10) "openMemory"
   string(7) "openURI"
@@ -57,10 +57,10 @@ object(A_XMLWriter) (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_XMLWriter in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_XMLWriter in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(43) {
+vec(43) {
   string(11) "__construct"
   string(10) "openMemory"
   string(7) "openURI"

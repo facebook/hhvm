@@ -21,57 +21,57 @@ Warning: Invalid operand type was used: array_slice expects an array or collecti
 *** Iteration 1 ***
 
 *** Variation with first two Arguments ***
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first three Arguments ***
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 2 ***
 
 *** Variation with first two Arguments ***
-varray(8) {
+vec(8) {
   int(2)
   int(3)
   int(4)
@@ -81,7 +81,7 @@ varray(8) {
   int(8)
   int(9)
 }
-varray(9) {
+vec(9) {
   int(1)
   int(2)
   int(3)
@@ -92,52 +92,52 @@ varray(9) {
   int(8)
   int(9)
 }
-varray(2) {
+vec(2) {
   int(8)
   int(9)
 }
 
 *** Variation with first three Arguments ***
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
-darray(0) {
+dict(0) {
 }
-varray(5) {
-  int(2)
-  int(3)
-  int(4)
-  int(5)
-  int(6)
-}
-varray(3) {
-  int(1)
-  int(2)
-  int(3)
-}
-darray(0) {
-}
-varray(6) {
-  int(1)
+vec(5) {
   int(2)
   int(3)
   int(4)
   int(5)
   int(6)
 }
-varray(2) {
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(0) {
+}
+vec(6) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+}
+vec(2) {
   int(8)
   int(9)
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   [1]=>
   int(2)
   [2]=>
@@ -145,9 +145,9 @@ darray(3) {
   [3]=>
   int(4)
 }
-darray(0) {
+dict(0) {
 }
-darray(5) {
+dict(5) {
   [1]=>
   int(2)
   [2]=>
@@ -159,14 +159,14 @@ darray(5) {
   [5]=>
   int(6)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-darray(0) {
+dict(0) {
 }
-varray(6) {
+vec(6) {
   int(1)
   int(2)
   int(3)
@@ -174,71 +174,71 @@ varray(6) {
   int(5)
   int(6)
 }
-darray(2) {
+dict(2) {
   [7]=>
   int(8)
   [8]=>
   int(9)
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 3 ***
 
 *** Variation with first two Arguments ***
-varray(4) {
+vec(4) {
   string(3) "Two"
   string(5) "Three"
   string(4) "Four"
   string(4) "Five"
 }
-varray(5) {
+vec(5) {
   string(3) "One"
   string(3) "Two"
   string(5) "Three"
   string(4) "Four"
   string(4) "Five"
 }
-varray(2) {
+vec(2) {
   string(4) "Four"
   string(4) "Five"
 }
 
 *** Variation with first three Arguments ***
-varray(3) {
+vec(3) {
   string(3) "Two"
   string(5) "Three"
   string(4) "Four"
 }
-darray(0) {
+dict(0) {
 }
-varray(1) {
+vec(1) {
   string(3) "Two"
 }
-varray(3) {
+vec(3) {
   string(3) "One"
   string(3) "Two"
   string(5) "Three"
 }
-darray(0) {
+dict(0) {
 }
-varray(2) {
+vec(2) {
   string(3) "One"
   string(3) "Two"
 }
-varray(2) {
+vec(2) {
   string(4) "Four"
   string(4) "Five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "Two"
   [2]=>
@@ -246,38 +246,38 @@ darray(3) {
   [3]=>
   string(4) "Four"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(3) "Two"
 }
-varray(3) {
+vec(3) {
   string(3) "One"
   string(3) "Two"
   string(5) "Three"
 }
-darray(0) {
+dict(0) {
 }
-varray(2) {
+vec(2) {
   string(3) "One"
   string(3) "Two"
 }
-darray(2) {
+dict(2) {
   [3]=>
   string(4) "Four"
   [4]=>
   string(4) "Five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 4 ***
 
 *** Variation with first two Arguments ***
-varray(7) {
+vec(7) {
   string(3) "six"
   int(7)
   string(5) "seven"
@@ -286,7 +286,7 @@ varray(7) {
   int(9)
   string(4) "nine"
 }
-varray(8) {
+vec(8) {
   int(6)
   string(3) "six"
   int(7)
@@ -296,50 +296,50 @@ varray(8) {
   int(9)
   string(4) "nine"
 }
-varray(2) {
+vec(2) {
   int(9)
   string(4) "nine"
 }
 
 *** Variation with first three Arguments ***
-varray(3) {
+vec(3) {
   string(3) "six"
   int(7)
   string(5) "seven"
 }
-darray(0) {
+dict(0) {
 }
-varray(4) {
-  string(3) "six"
-  int(7)
-  string(5) "seven"
-  int(8)
-}
-varray(3) {
-  int(6)
-  string(3) "six"
-  int(7)
-}
-darray(0) {
-}
-varray(5) {
-  int(6)
+vec(4) {
   string(3) "six"
   int(7)
   string(5) "seven"
   int(8)
 }
-varray(2) {
+vec(3) {
+  int(6)
+  string(3) "six"
+  int(7)
+}
+dict(0) {
+}
+vec(5) {
+  int(6)
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+}
+vec(2) {
   int(9)
   string(4) "nine"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "six"
   [2]=>
@@ -347,9 +347,9 @@ darray(3) {
   [3]=>
   string(5) "seven"
 }
-darray(0) {
+dict(0) {
 }
-darray(4) {
+dict(4) {
   [1]=>
   string(3) "six"
   [2]=>
@@ -359,35 +359,35 @@ darray(4) {
   [4]=>
   int(8)
 }
-varray(3) {
+vec(3) {
   int(6)
   string(3) "six"
   int(7)
 }
-darray(0) {
+dict(0) {
 }
-varray(5) {
+vec(5) {
   int(6)
   string(3) "six"
   int(7)
   string(5) "seven"
   int(8)
 }
-darray(2) {
+dict(2) {
   [6]=>
   int(9)
   [7]=>
   string(4) "nine"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 5 ***
 
 *** Variation with first two Arguments ***
-darray(4) {
+dict(4) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -397,7 +397,7 @@ darray(4) {
   ["e"]=>
   string(3) "eee"
 }
-darray(5) {
+dict(5) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -409,7 +409,7 @@ darray(5) {
   ["e"]=>
   string(3) "eee"
 }
-darray(2) {
+dict(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
@@ -417,7 +417,7 @@ darray(2) {
 }
 
 *** Variation with first three Arguments ***
-darray(3) {
+dict(3) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -425,13 +425,13 @@ darray(3) {
   ["d"]=>
   string(3) "ddd"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["A"]=>
   string(3) "AAA"
 }
-darray(3) {
+dict(3) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -439,27 +439,27 @@ darray(3) {
   ["c"]=>
   string(3) "ccc"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
   string(3) "AAA"
 }
-darray(2) {
+dict(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
   string(3) "eee"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -467,13 +467,13 @@ darray(3) {
   ["d"]=>
   string(3) "ddd"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["A"]=>
   string(3) "AAA"
 }
-darray(3) {
+dict(3) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -481,29 +481,29 @@ darray(3) {
   ["c"]=>
   string(3) "ccc"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
   string(3) "AAA"
 }
-darray(2) {
+dict(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
   string(3) "eee"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 6 ***
 
 *** Variation with first two Arguments ***
-darray(4) {
+dict(4) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -513,7 +513,7 @@ darray(4) {
   ["5"]=>
   string(4) "five"
 }
-darray(5) {
+dict(5) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -525,7 +525,7 @@ darray(5) {
   ["5"]=>
   string(4) "five"
 }
-darray(2) {
+dict(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
@@ -533,7 +533,7 @@ darray(2) {
 }
 
 *** Variation with first three Arguments ***
-darray(3) {
+dict(3) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -541,13 +541,13 @@ darray(3) {
   ["4"]=>
   string(4) "four"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["2"]=>
   string(3) "two"
 }
-darray(3) {
+dict(3) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -555,27 +555,27 @@ darray(3) {
   ["3"]=>
   string(5) "three"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
   string(4) "five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -583,13 +583,13 @@ darray(3) {
   ["4"]=>
   string(4) "four"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["2"]=>
   string(3) "two"
 }
-darray(3) {
+dict(3) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -597,29 +597,29 @@ darray(3) {
   ["3"]=>
   string(5) "three"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
   string(4) "five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 7 ***
 
 *** Variation with first two Arguments ***
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -629,7 +629,7 @@ darray(4) {
   [3]=>
   string(4) "five"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -641,7 +641,7 @@ darray(5) {
   [4]=>
   string(4) "five"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "four"
   [1]=>
@@ -649,7 +649,7 @@ darray(2) {
 }
 
 *** Variation with first three Arguments ***
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -657,13 +657,13 @@ darray(3) {
   [2]=>
   string(4) "four"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "two"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -671,27 +671,27 @@ darray(3) {
   [2]=>
   int(7)
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "one"
   [1]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "four"
   [1]=>
   string(4) "five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   [2]=>
   string(3) "two"
   [3]=>
@@ -699,13 +699,13 @@ darray(3) {
   [4]=>
   string(4) "four"
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(3) "two"
 }
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "one"
   [2]=>
@@ -713,29 +713,29 @@ darray(3) {
   [3]=>
   int(7)
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   [4]=>
   string(4) "four"
   [5]=>
   string(4) "five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 8 ***
 
 *** Variation with first two Arguments ***
-darray(10) {
+dict(10) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -757,7 +757,7 @@ darray(10) {
   ["5"]=>
   string(4) "Five"
 }
-darray(11) {
+dict(11) {
   ["f"]=>
   string(3) "fff"
   ["1"]=>
@@ -781,7 +781,7 @@ darray(11) {
   ["5"]=>
   string(4) "Five"
 }
-darray(2) {
+dict(2) {
   [0]=>
   float(8.6)
   ["5"]=>
@@ -789,7 +789,7 @@ darray(2) {
 }
 
 *** Variation with first three Arguments ***
-darray(3) {
+dict(3) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -797,37 +797,9 @@ darray(3) {
   [""]=>
   string(5) "blank"
 }
-darray(0) {
+dict(0) {
 }
-darray(7) {
-  ["1"]=>
-  string(3) "one"
-  [0]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [1]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-  [2]=>
-  float(3.7)
-}
-darray(3) {
-  ["f"]=>
-  string(3) "fff"
-  ["1"]=>
-  string(3) "one"
-  [0]=>
-  int(6)
-}
-darray(0) {
-}
-darray(8) {
-  ["f"]=>
-  string(3) "fff"
+dict(7) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -843,19 +815,47 @@ darray(8) {
   [2]=>
   float(3.7)
 }
-darray(2) {
+dict(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+}
+dict(0) {
+}
+dict(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+}
+dict(2) {
   [0]=>
   float(8.6)
   ["5"]=>
   string(4) "Five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   ["1"]=>
   string(3) "one"
   [4]=>
@@ -863,37 +863,9 @@ darray(3) {
   [""]=>
   string(5) "blank"
 }
-darray(0) {
+dict(0) {
 }
-darray(7) {
-  ["1"]=>
-  string(3) "one"
-  [4]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [2]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-  [3]=>
-  float(3.7)
-}
-darray(3) {
-  ["f"]=>
-  string(3) "fff"
-  ["1"]=>
-  string(3) "one"
-  [4]=>
-  int(6)
-}
-darray(0) {
-}
-darray(8) {
-  ["f"]=>
-  string(3) "fff"
+dict(7) {
   ["1"]=>
   string(3) "one"
   [4]=>
@@ -909,67 +881,95 @@ darray(8) {
   [3]=>
   float(3.7)
 }
-darray(2) {
+dict(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+}
+dict(0) {
+}
+dict(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [2]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [3]=>
+  float(3.7)
+}
+dict(2) {
   [6]=>
   float(8.6)
   ["5"]=>
   string(4) "Five"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 9 ***
 
 *** Variation with first two Arguments ***
-varray(3) {
+vec(3) {
   string(4) "name"
   string(3) "age"
   string(2) "45"
 }
-varray(4) {
+vec(4) {
   int(12)
   string(4) "name"
   string(3) "age"
   string(2) "45"
 }
-varray(2) {
+vec(2) {
   string(3) "age"
   string(2) "45"
 }
 
 *** Variation with first three Arguments ***
-varray(3) {
+vec(3) {
   string(4) "name"
   string(3) "age"
   string(2) "45"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(3) {
+vec(3) {
   int(12)
   string(4) "name"
   string(3) "age"
 }
-darray(0) {
+dict(0) {
 }
-varray(1) {
+vec(1) {
   int(12)
 }
-varray(2) {
+vec(2) {
   string(3) "age"
   string(2) "45"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(3) {
+dict(3) {
   [1]=>
   string(4) "name"
   [2]=>
@@ -977,129 +977,129 @@ darray(3) {
   [3]=>
   string(2) "45"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(3) {
+vec(3) {
   int(12)
   string(4) "name"
   string(3) "age"
 }
-darray(0) {
+dict(0) {
 }
-varray(1) {
+vec(1) {
   int(12)
 }
-darray(2) {
+dict(2) {
   [2]=>
   string(3) "age"
   [3]=>
   string(2) "45"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Iteration 10 ***
 
 *** Variation with first two Arguments ***
-varray(2) {
-  varray(5) {
+vec(2) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-varray(3) {
-  varray(3) {
+vec(3) {
+  vec(3) {
     string(3) "oNe"
     string(3) "tWo"
     int(4)
   }
-  varray(5) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-varray(2) {
-  varray(5) {
+vec(2) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
 
 *** Variation with first three Arguments ***
-varray(2) {
-  varray(5) {
+vec(2) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(3) {
-  varray(3) {
+vec(3) {
+  vec(3) {
     string(3) "oNe"
     string(3) "tWo"
     int(4)
   }
-  varray(5) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(2) {
-  varray(5) {
+vec(2) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-darray(2) {
+dict(2) {
   [1]=>
-  varray(5) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
@@ -1107,36 +1107,36 @@ darray(2) {
     int(50)
   }
   [2]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-varray(3) {
-  varray(3) {
+vec(3) {
+  vec(3) {
     string(3) "oNe"
     string(3) "tWo"
     int(4)
   }
-  varray(5) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
     int(40)
     int(50)
   }
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [1]=>
-  varray(5) {
+  vec(5) {
     int(10)
     int(20)
     int(30)
@@ -1144,26 +1144,26 @@ darray(2) {
     int(50)
   }
   [2]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 *** Typical Variation of offset and length  Arguments ***
-darray(1) {
+dict(1) {
   [1]=>
   string(3) "Two"
 }
-varray(1) {
+vec(1) {
   string(3) "Two"
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(5) "Three"
 }
-varray(1) {
+vec(1) {
   string(5) "Three"
 }

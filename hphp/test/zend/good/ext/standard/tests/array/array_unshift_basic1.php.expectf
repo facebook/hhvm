@@ -1,12 +1,12 @@
 *** Testing array_unshift() : basic functionality with default key array ***
 int(3)
-varray(3) {
+vec(3) {
   int(10)
   int(1)
   int(2)
 }
 int(5)
-varray(5) {
+vec(5) {
   int(222)
   string(5) "hello"
   float(12.33)

@@ -1,18 +1,18 @@
-Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 8
+Warning: Cannot access property on non-object in %s/test/slow/hhbbc/array_019.php on line 8
 
-Notice: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 9
+Notice: Cannot access property on non-object in %s/test/slow/hhbbc/array_019.php on line 9
 NULL
-darray(1) {
+dict(1) {
   ["x"]=>
-  darray(1) {
+  dict(1) {
     ["y"]=>
     int(2)
   }
 }
 int(42)
-darray(1) {
+dict(1) {
   ["x"]=>
-  darray(1) {
+  dict(1) {
     ["y"]=>
     object(stdClass) (1) {
       ["x"]=>

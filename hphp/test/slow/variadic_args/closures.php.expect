@@ -1,27 +1,27 @@
 basic closure
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 eager async closure
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 blocking async closure
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 CWithClosures::{closure}
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 string(1) "a"
 string(6) "prop-a"
 CWithClosures::variadic
-varray(3) {
+vec(3) {
   string(1) "a"
   string(6) "prop-a"
   string(1) "a"

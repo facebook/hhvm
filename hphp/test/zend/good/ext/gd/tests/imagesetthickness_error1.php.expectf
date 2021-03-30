@@ -1,6 +1,5 @@
+Warning: imagesetthickness() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagesetthickness_error1.php on line 4
 
-Warning: imagesetthickness() expects parameter 1 to be resource, string given in %s/imagesetthickness_error1.php on line 4
+Warning: imagesetthickness() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imagesetthickness_error1.php on line 5
 
-Warning: imagesetthickness() expects parameter 1 to be resource, %rv?%rarray given in %s/imagesetthickness_error1.php on line 5
-
-Warning: supplied resource is not a valid Image resource in %s/imagesetthickness_error1.php on line 6
+Warning: supplied resource is not a valid Image resource in %s/test/zend/good/ext/gd/tests/imagesetthickness_error1.php on line 6

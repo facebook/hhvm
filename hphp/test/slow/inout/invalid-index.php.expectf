@@ -1,25 +1,25 @@
-Out of bounds darray access: invalid index 10
-Out of bounds darray access: invalid index "banana"
+Out of bounds dict access: invalid index 10
+Out of bounds dict access: invalid index "banana"
 int(5)
-string(45) "Out of bounds darray access: invalid index 50"
-Caught: Out of bounds darray access: invalid index 10
-Caught: Out of bounds darray access: invalid index "banana"
+string(43) "Out of bounds dict access: invalid index 50"
+Caught: Out of bounds dict access: invalid index 10
+Caught: Out of bounds dict access: invalid index "banana"
 int(5)
-Caught: Out of bounds darray access: invalid index 50
-darray(1) {
+Caught: Out of bounds dict access: invalid index 50
+dict(1) {
   ["apple"]=>
-  darray(1) {
+  dict(1) {
     ["orange"]=>
     int(12)
   }
 }
 Caught: Out of bounds dict access: invalid index 10
-Caught: Out of bounds darray access: invalid index "banana"
+Caught: Out of bounds dict access: invalid index "banana"
 int(5)
 Caught: Out of bounds dict access: invalid index 50
 dict(1) {
   ["apple"]=>
-  darray(1) {
+  dict(1) {
     ["orange"]=>
     int(12)
   }

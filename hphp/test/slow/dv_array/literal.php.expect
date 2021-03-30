@@ -1,17 +1,17 @@
-varray(0) {
+vec(0) {
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-varray(12) {
+vec(12) {
   NULL
   bool(true)
   bool(false)
@@ -21,7 +21,7 @@ varray(12) {
   object(stdClass) (0) {
   }
   resource(4) of type (xml)
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -37,28 +37,28 @@ varray(12) {
     string(3) "abc"
   }
 }
-varray(2) {
-  varray(0) {
+vec(2) {
+  vec(0) {
   }
-  varray(3) {
+  vec(3) {
     string(1) "a"
     int(100)
     bool(false)
   }
 }
-varray(2) {
-  darray(0) {
+vec(2) {
+  dict(0) {
   }
-  darray(2) {
+  dict(2) {
     [100]=>
     string(1) "a"
     ["b"]=>
     int(200)
   }
 }
-darray(0) {
+dict(0) {
 }
-darray(4) {
+dict(4) {
   [100]=>
   int(1)
   [200]=>
@@ -68,7 +68,7 @@ darray(4) {
   [400]=>
   int(4)
 }
-darray(3) {
+dict(3) {
   ["key1"]=>
   string(1) "a"
   ["key2"]=>
@@ -76,7 +76,7 @@ darray(3) {
   ["key3"]=>
   string(1) "c"
 }
-darray(12) {
+dict(12) {
   [10]=>
   NULL
   [20]=>
@@ -95,7 +95,7 @@ darray(12) {
   [50]=>
   resource(5) of type (xml)
   [60]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -114,30 +114,30 @@ darray(12) {
     string(3) "abc"
   }
 }
-darray(2) {
+dict(2) {
   ["123"]=>
   string(3) "abc"
   [123]=>
   string(3) "def"
 }
-darray(2) {
+dict(2) {
   [123]=>
-  darray(0) {
+  dict(0) {
   }
   [456]=>
-  darray(2) {
+  dict(2) {
     ["a"]=>
     int(100)
     [200]=>
     string(1) "b"
   }
 }
-darray(2) {
+dict(2) {
   ["abc"]=>
-  varray(0) {
+  vec(0) {
   }
   ["def"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     int(100)
     bool(false)

@@ -1,62 +1,62 @@
 *** Testing function_exists() function: with unexpected inputs for 'str' argument ***
 -- Iteration 1 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 2 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 3 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 4 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 5 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 6 --
 
-Warning: function_exists() expects parameter 1 to be string, integer given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, integer given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 7 --
 
-Warning: function_exists() expects parameter 1 to be string, double given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, double given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 8 --
 
-Warning: function_exists() expects parameter 1 to be string, double given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, double given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 9 --
 
-Warning: function_exists() expects parameter 1 to be string, double given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, double given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 10 --
 
-Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, vec given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 11 --
 
-Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, vec given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 12 --
 
-Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, vec given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 13 --
 
-Warning: function_exists() expects parameter 1 to be string, boolean given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, boolean given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 14 --
 
-Warning: function_exists() expects parameter 1 to be string, boolean given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, boolean given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 15 --
 
-Warning: function_exists() expects parameter 1 to be string, boolean given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, boolean given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 16 --
 
-Warning: function_exists() expects parameter 1 to be string, boolean given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, boolean given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 17 --
 
-Warning: function_exists() expects parameter 1 to be string, null given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, null given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 18 --
 
-Warning: function_exists() expects parameter 1 to be string, null given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, null given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 19 --
 
-Warning: function_exists() expects parameter 1 to be string, object given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, object given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 -- Iteration 20 --
 
-Warning: function_exists() expects parameter 1 to be string, resource given in %s/zend/good/Zend/tests/function_exists_variation1.php on line %d
+Warning: function_exists() expects parameter 1 to be string, resource given in %s/test/zend/good/Zend/tests/function_exists_variation1.php on line 64
 ===Done===

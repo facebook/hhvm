@@ -1,8 +1,8 @@
-darray(3) {
+dict(3) {
   ["%s/ext_factparse.php"]=>
-  darray(7) {
+  dict(7) {
     ["constants"]=>
-    varray(6) {
+    vec(6) {
       string(3) "CO0"
       string(3) "CO1"
       string(3) "CO2"
@@ -11,7 +11,7 @@ darray(3) {
       string(3) "CO5"
     }
     ["functions"]=>
-    varray(4) {
+    vec(4) {
       string(2) "f1"
       string(2) "f2"
       string(2) "f6"
@@ -24,16 +24,16 @@ darray(3) {
     ["sha1sum"]=>
     string(40) "23d40ffb3df9ff27db9f778e7c056f2f984fd2a1"
     ["typeAliases"]=>
-    varray(3) {
+    vec(3) {
       string(3) "TA0"
       string(3) "TA1"
       string(3) "TA2"
     }
     ["types"]=>
-    varray(13) {
-      darray(4) {
+    vec(13) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -42,9 +42,9 @@ darray(3) {
         ["name"]=>
         string(3) "CL0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -53,9 +53,9 @@ darray(3) {
         ["name"]=>
         string(3) "CL1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(5) {
+        vec(5) {
           string(3) "CL0"
           string(2) "I0"
           string(2) "I1"
@@ -69,9 +69,9 @@ darray(3) {
         ["name"]=>
         string(3) "CL2"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(1) {
+        vec(1) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
@@ -81,9 +81,9 @@ darray(3) {
         ["name"]=>
         string(2) "E0"
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -92,12 +92,12 @@ darray(3) {
         ["name"]=>
         string(2) "I0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -106,12 +106,12 @@ darray(3) {
         ["name"]=>
         string(2) "I1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(2) {
+        vec(2) {
           string(2) "I0"
           string(2) "I1"
         }
@@ -122,13 +122,13 @@ darray(3) {
         ["name"]=>
         string(2) "I2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(3) "CL1"
         }
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -137,9 +137,9 @@ darray(3) {
         ["name"]=>
         string(3) "TA0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -148,9 +148,9 @@ darray(3) {
         ["name"]=>
         string(3) "TA1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -159,9 +159,9 @@ darray(3) {
         ["name"]=>
         string(3) "TA2"
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -170,15 +170,15 @@ darray(3) {
         ["name"]=>
         string(3) "TR0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -187,15 +187,15 @@ darray(3) {
         ["name"]=>
         string(3) "TR1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(4) {
+        vec(4) {
           string(2) "I0"
           string(2) "I1"
           string(3) "TR0"
@@ -208,20 +208,20 @@ darray(3) {
         ["name"]=>
         string(3) "TR2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(3) "CL1"
         }
         ["requireImplements"]=>
-        varray(1) {
+        vec(1) {
           string(2) "I2"
         }
       }
     }
   }
   ["%s"]=>
-  darray(7) {
+  dict(7) {
     ["constants"]=>
-    varray(6) {
+    vec(6) {
       string(6) "NS\CO0"
       string(6) "NS\CO1"
       string(6) "NS\CO2"
@@ -230,7 +230,7 @@ darray(3) {
       string(6) "NS\CO5"
     }
     ["functions"]=>
-    varray(4) {
+    vec(4) {
       string(5) "NS\f1"
       string(5) "NS\f2"
       string(5) "NS\f6"
@@ -243,16 +243,16 @@ darray(3) {
     ["sha1sum"]=>
     string(40) "da6ce821d377beef33677e0fca041e6856e24a7e"
     ["typeAliases"]=>
-    varray(3) {
+    vec(3) {
       string(6) "NS\TA0"
       string(6) "NS\TA1"
       string(6) "NS\TA2"
     }
     ["types"]=>
-    varray(13) {
-      darray(4) {
+    vec(13) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -261,9 +261,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\CL0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -272,9 +272,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\CL1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(5) {
+        vec(5) {
           string(6) "NS\CL0"
           string(5) "NS\I0"
           string(5) "NS\I1"
@@ -288,9 +288,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\CL2"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(1) {
+        vec(1) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
@@ -300,9 +300,9 @@ darray(3) {
         ["name"]=>
         string(5) "NS\E0"
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -311,12 +311,12 @@ darray(3) {
         ["name"]=>
         string(5) "NS\I0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -325,12 +325,12 @@ darray(3) {
         ["name"]=>
         string(5) "NS\I1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(2) {
+        vec(2) {
           string(5) "NS\I0"
           string(5) "NS\I1"
         }
@@ -341,13 +341,13 @@ darray(3) {
         ["name"]=>
         string(5) "NS\I2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(6) "NS\CL1"
         }
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -356,9 +356,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TA0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -367,9 +367,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TA1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -378,9 +378,9 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TA2"
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -389,15 +389,15 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TR0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -406,15 +406,15 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TR1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(4) {
+        vec(4) {
           string(5) "NS\I0"
           string(5) "NS\I1"
           string(6) "NS\TR0"
@@ -427,20 +427,20 @@ darray(3) {
         ["name"]=>
         string(6) "NS\TR2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(6) "NS\CL1"
         }
         ["requireImplements"]=>
-        varray(1) {
+        vec(1) {
           string(5) "NS\I2"
         }
       }
     }
   }
   ["%s"]=>
-  darray(7) {
+  dict(7) {
     ["constants"]=>
-    varray(6) {
+    vec(6) {
       string(9) "NS\NS\CO0"
       string(9) "NS\NS\CO1"
       string(9) "NS\NS\CO2"
@@ -449,7 +449,7 @@ darray(3) {
       string(9) "NS\NS\CO5"
     }
     ["functions"]=>
-    varray(4) {
+    vec(4) {
       string(8) "NS\NS\f1"
       string(8) "NS\NS\f2"
       string(8) "NS\NS\f6"
@@ -462,16 +462,16 @@ darray(3) {
     ["sha1sum"]=>
     string(40) "a05caae75017bdbc97e658b39da3a64ec81bc7fb"
     ["typeAliases"]=>
-    varray(3) {
+    vec(3) {
       string(9) "NS\NS\TA0"
       string(9) "NS\NS\TA1"
       string(9) "NS\NS\TA2"
     }
     ["types"]=>
-    varray(13) {
-      darray(4) {
+    vec(13) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -480,9 +480,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\CL0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -491,9 +491,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\CL1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(5) {
+        vec(5) {
           string(9) "NS\NS\CL0"
           string(8) "NS\NS\I0"
           string(8) "NS\NS\I1"
@@ -507,9 +507,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\CL2"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(1) {
+        vec(1) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
@@ -519,9 +519,9 @@ darray(3) {
         ["name"]=>
         string(8) "NS\NS\E0"
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -530,12 +530,12 @@ darray(3) {
         ["name"]=>
         string(8) "NS\NS\I0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -544,12 +544,12 @@ darray(3) {
         ["name"]=>
         string(8) "NS\NS\I1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(5) {
+      dict(5) {
         ["baseTypes"]=>
-        varray(2) {
+        vec(2) {
           string(8) "NS\NS\I0"
           string(8) "NS\NS\I1"
         }
@@ -560,13 +560,13 @@ darray(3) {
         ["name"]=>
         string(8) "NS\NS\I2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(9) "NS\NS\CL1"
         }
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -575,9 +575,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TA0"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -586,9 +586,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TA1"
       }
-      darray(4) {
+      dict(4) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(0)
@@ -597,9 +597,9 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TA2"
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -608,15 +608,15 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TR0"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(0) {
+        vec(0) {
         }
         ["flags"]=>
         int(1)
@@ -625,15 +625,15 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TR1"
         ["requireExtends"]=>
-        varray(0) {
+        vec(0) {
         }
         ["requireImplements"]=>
-        varray(0) {
+        vec(0) {
         }
       }
-      darray(6) {
+      dict(6) {
         ["baseTypes"]=>
-        varray(4) {
+        vec(4) {
           string(8) "NS\NS\I0"
           string(8) "NS\NS\I1"
           string(9) "NS\NS\TR0"
@@ -646,11 +646,11 @@ darray(3) {
         ["name"]=>
         string(9) "NS\NS\TR2"
         ["requireExtends"]=>
-        varray(1) {
+        vec(1) {
           string(9) "NS\NS\CL1"
         }
         ["requireImplements"]=>
-        varray(1) {
+        vec(1) {
           string(8) "NS\NS\I2"
         }
       }
@@ -658,7 +658,7 @@ darray(3) {
   }
 }
 PASSED md5sum
-darray(3) {
+dict(3) {
   ["%s"]=>
   NULL
   ["garbage_filename"]=>
@@ -670,6 +670,6 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-string(%d) "HH\facts_parse() expects parameter 2 to be %rv?%rarray, null given"
+string(%d) "HH\facts_parse() expects parameter 2 to be vec, null given"
 string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"
 string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"

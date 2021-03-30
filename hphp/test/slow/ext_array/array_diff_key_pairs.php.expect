@@ -7,7 +7,7 @@ dict(3) {
   ["2"]=>
   string(1) "z"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -22,7 +22,7 @@ dict(3) {
   [2]=>
   string(1) "z"
 }
-darray(0) {
+dict(0) {
 }
 -- left pair
 object(HH\Map) (3) {
@@ -33,7 +33,7 @@ object(HH\Map) (3) {
   ["2"]=>
   string(1) "z"
 }
-darray(0) {
+dict(0) {
 }
 -- left pair
 object(HH\Map) (3) {
@@ -44,7 +44,7 @@ object(HH\Map) (3) {
   [2]=>
   string(1) "z"
 }
-darray(0) {
+dict(0) {
 }
 -- right pair
 dict(3) {
@@ -55,7 +55,7 @@ dict(3) {
   ["2"]=>
   string(1) "z"
 }
-darray(3) {
+dict(3) {
   ["0"]=>
   string(1) "x"
   ["1"]=>
@@ -72,7 +72,7 @@ dict(3) {
   [2]=>
   string(1) "z"
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(1) "z"
 }
@@ -85,7 +85,7 @@ object(HH\Map) (3) {
   ["2"]=>
   string(1) "z"
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(1) "z"
 }
@@ -98,7 +98,7 @@ object(HH\Map) (3) {
   [2]=>
   string(1) "z"
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(1) "z"
 }

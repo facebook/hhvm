@@ -2,38 +2,38 @@
 bool(true)
 
 The output array is:
-varray(7) {
-  varray(3) {
+vec(7) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)
   }
-  varray(3) {
+  vec(3) {
     int(%d)
     int(%d)
     int(%d)

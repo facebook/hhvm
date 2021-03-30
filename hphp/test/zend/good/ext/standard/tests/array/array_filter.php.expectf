@@ -1,5 +1,5 @@
 Odd :
-darray(3) {
+dict(3) {
   ["a"]=>
   int(1)
   ["c"]=>
@@ -7,7 +7,7 @@ darray(3) {
   ["e"]=>
   int(5)
 }
-darray(3) {
+dict(3) {
   [1]=>
   int(7)
   [3]=>
@@ -15,18 +15,18 @@ darray(3) {
   [5]=>
   int(11)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
 Even:
-darray(2) {
+dict(2) {
   ["b"]=>
   int(2)
   ["d"]=>
   int(4)
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(6)
   [2]=>
@@ -38,18 +38,18 @@ darray(5) {
   [7]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   [1]=>
   bool(false)
   [2]=>
   NULL
 }
-darray(0) {
+dict(0) {
 }
 
-Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 26
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter.php on line 26
 NULL
 
-Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 27
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter.php on line 27
 NULL
 == DONE ==

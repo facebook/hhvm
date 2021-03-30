@@ -1,11 +1,11 @@
 *** Testing Error Conditions ***
 
-Warning: array_push() expects at least 2 parameters, 0 given in %s/array_push.php on line 36
+Warning: array_push() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 36
 
-Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 39
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 39
 NULL
 
-Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 42
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 42
 NULL
 int(11)
 int(1)
@@ -13,7 +13,7 @@ int(1)
 *** Testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
-Array
+Vec
 (
 )
 
@@ -21,7 +21,7 @@ Output after push is :
 int(2)
 
 -- Input Array for Iteration 2 is --
-Array
+Vec
 (
     [0] => 1
     [1] => 2
@@ -40,7 +40,7 @@ Output after push is :
 int(13)
 
 -- Input Array for Iteration 3 is --
-Array
+Vec
 (
     [0] => One
     [1] => _Two
@@ -53,7 +53,7 @@ Output after push is :
 int(7)
 
 -- Input Array for Iteration 4 is --
-Array
+Vec
 (
     [0] => 6
     [1] => six
@@ -69,7 +69,7 @@ Output after push is :
 int(10)
 
 -- Input Array for Iteration 5 is --
-Array
+Dict
 (
     [a] => aaa
     [A] => AAA
@@ -82,7 +82,7 @@ Output after push is :
 int(7)
 
 -- Input Array for Iteration 6 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -95,7 +95,7 @@ Output after push is :
 int(7)
 
 -- Input Array for Iteration 7 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -108,7 +108,7 @@ Output after push is :
 int(7)
 
 -- Input Array for Iteration 8 is --
-Array
+Dict
 (
     [f] => fff
     [1] => one
@@ -129,7 +129,7 @@ Output after push is :
 int(15)
 
 -- Input Array for Iteration 9 is --
-Array
+Vec
 (
     [0] => 12
     [1] => name
@@ -141,16 +141,16 @@ Output after push is :
 int(6)
 
 -- Input Array for Iteration 10 is --
-Array
+Vec
 (
-    [0] => Array
+    [0] => Vec
         (
             [0] => oNe
             [1] => tWo
             [2] => 4
         )
 
-    [1] => Array
+    [1] => Vec
         (
             [0] => 10
             [1] => 20
@@ -159,7 +159,7 @@ Array
             [4] => 50
         )
 
-    [2] => Array
+    [2] => Vec
         (
         )
 
@@ -169,7 +169,7 @@ Output after push is :
 int(5)
 
 -- Input Array for Iteration 11 is --
-Array
+Dict
 (
     [one] => 2
     [three] => 3
@@ -188,7 +188,7 @@ int(12)
 
 *** Checking for return value and the new array formed from push operation ***
 int(8)
-varray(8) {
+vec(8) {
   string(3) "One"
   string(4) "_Two"
   string(5) "Three"

@@ -59,7 +59,7 @@ f(10, 12) * g(15) = 220
 Inside f: $a = 10, $b = 12
 Inside g: $a = 15
 f(10, 12) / g(15) = 2.2
-varray(7) {
+vec(7) {
   int(0)
   int(1)
   int(2)
@@ -72,7 +72,7 @@ Inside f1
 Inside f2
 Inside f3
 Inside f4
-varray(7) {
+vec(7) {
   int(0)
   int(1)
   int(6)
@@ -85,7 +85,7 @@ Inside f1
 Inside f2
 Inside f3
 Inside f4
-varray(7) {
+vec(7) {
   int(0)
   int(1)
   int(2)

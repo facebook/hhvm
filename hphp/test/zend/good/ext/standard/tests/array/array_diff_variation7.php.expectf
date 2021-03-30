@@ -1,6 +1,6 @@
 *** Testing array_diff() : usage variations ***
 -- Basic Comparison --
-darray(3) {
+dict(3) {
   [0]=>
   string(2) "&a"
   [1]=>
@@ -8,7 +8,7 @@ darray(3) {
   [2]=>
   string(1) "c"
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -17,7 +17,7 @@ darray(3) {
   int(3)
 }
 -- $a changed --
-darray(3) {
+dict(3) {
   [0]=>
   string(2) "&a"
   [1]=>
@@ -25,7 +25,7 @@ darray(3) {
   [2]=>
   string(1) "c"
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

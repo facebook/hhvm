@@ -1,5 +1,5 @@
 *** Testing array_merge() : usage variations ***
-darray(7) {
+dict(7) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -15,7 +15,7 @@ darray(7) {
   [6]=>
   string(6) "thirty"
 }
-darray(7) {
+dict(7) {
   [0]=>
   string(3) "one"
   [1]=>

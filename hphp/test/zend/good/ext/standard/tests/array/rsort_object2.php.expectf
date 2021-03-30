@@ -2,7 +2,7 @@
 
 -- Sort flag = default --
 bool(true)
-varray(4) {
+vec(4) {
   object(for_integer_rsort) (3) {
     ["public_class_value"]=>
     int(66)
@@ -37,7 +37,7 @@ varray(4) {
   }
 }
 bool(true)
-varray(4) {
+vec(4) {
   object(for_string_rsort) (3) {
     ["public_class_value"]=>
     string(1) "w"
@@ -74,7 +74,7 @@ varray(4) {
 
 -- Sort flag = SORT_REGULAR --
 bool(true)
-varray(4) {
+vec(4) {
   object(for_integer_rsort) (3) {
     ["public_class_value"]=>
     int(66)
@@ -109,7 +109,7 @@ varray(4) {
   }
 }
 bool(true)
-varray(4) {
+vec(4) {
   object(for_string_rsort) (3) {
     ["public_class_value"]=>
     string(1) "w"

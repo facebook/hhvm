@@ -9,7 +9,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
   object(Closure$main;%d) (1) {
     ["parameter"]=>
-    darray(3) {
+    dict(3) {
       ["$o"]=>
       string(10) "<required>"
       ["$m"]=>

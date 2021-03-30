@@ -1,8 +1,8 @@
 bool(true)
 bool(true)
-darray(1) {
+dict(1) {
   ["http"]=>
-  darray(3) {
+  dict(3) {
     ["method"]=>
     string(4) "POST"
     ["protocol_version"]=>

@@ -2,41 +2,41 @@ Boolean
 WARNING: sha1() expects parameter 2 to be boolean, integer given
 WARNING: sha1() expects parameter 2 to be boolean, double given
 WARNING: sha1() expects parameter 2 to be boolean, string given
-WARNING: sha1() expects parameter 2 to be boolean, %rv?%rarray given
+WARNING: sha1() expects parameter 2 to be boolean, %rvarray|vec%r given
 WARNING: sha1() expects parameter 2 to be boolean, null given
 
 Int64
 WARNING: str_pad() expects parameter 2 to be integer, boolean given
 WARNING: str_pad() expects parameter 2 to be integer, double given
 WARNING: str_pad() expects parameter 2 to be integer, string given
-WARNING: str_pad() expects parameter 2 to be integer, %rv?%rarray given
+WARNING: str_pad() expects parameter 2 to be integer, %rvarray|vec%r given
 WARNING: str_pad() expects parameter 2 to be integer, null given
 
 Double
 WARNING: number_format() expects parameter 1 to be double, boolean given
 WARNING: number_format() expects parameter 1 to be double, integer given
 WARNING: number_format() expects parameter 1 to be double, string given
-WARNING: number_format() expects parameter 1 to be double, %rv?%rarray given
+WARNING: number_format() expects parameter 1 to be double, %rvarray|vec%r given
 WARNING: number_format() expects parameter 1 to be double, null given
 
 String
 WARNING: rtrim() expects parameter 1 to be string, boolean given
 WARNING: rtrim() expects parameter 1 to be string, integer given
 WARNING: rtrim() expects parameter 1 to be string, double given
-WARNING: rtrim() expects parameter 1 to be string, %rv?%rarray given
+WARNING: rtrim() expects parameter 1 to be string, %rvarray|vec%r given
 WARNING: rtrim() expects parameter 1 to be string, null given
 
 varray
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, boolean given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, integer given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, double given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, string given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, null given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rvarray|vec%r, boolean given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rvarray|vec%r, integer given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rvarray|vec%r, double given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rvarray|vec%r, string given
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rvarray|vec%r, null given
 
 Object
 WARNING: get_object_vars() expects parameter 1 to be object, boolean given
 WARNING: get_object_vars() expects parameter 1 to be object, integer given
 WARNING: get_object_vars() expects parameter 1 to be object, double given
 WARNING: get_object_vars() expects parameter 1 to be object, string given
-WARNING: get_object_vars() expects parameter 1 to be object, %rv?%rarray given
+WARNING: get_object_vars() expects parameter 1 to be object, %rvarray|vec%r given
 WARNING: get_object_vars() expects parameter 1 to be object, null given

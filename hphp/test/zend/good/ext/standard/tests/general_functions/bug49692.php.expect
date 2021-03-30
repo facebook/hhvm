@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["sitemap"]=>
-  darray(2) {
+  dict(2) {
     ["/home"]=>
     string(13) "default:index"
     ["/info"]=>

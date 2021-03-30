@@ -2,7 +2,7 @@
 
 -- Testing arsort() by supplying string array, 'flag' value is default --
 bool(true)
-darray(8) {
+dict(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -23,7 +23,7 @@ darray(8) {
 
 -- Testing arsort() by supplying numeric array, 'flag' value is default --
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
   int(555)
   [1]=>
@@ -36,7 +36,7 @@ darray(4) {
 
 -- Testing arsort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
-darray(8) {
+dict(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -57,7 +57,7 @@ darray(8) {
 
 -- Testing arsort() by supplying numeric array, 'flag' = SORT_REGULAR --
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
   int(555)
   [1]=>
@@ -70,7 +70,7 @@ darray(4) {
 
 -- Testing arsort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
-darray(8) {
+dict(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -91,7 +91,7 @@ darray(8) {
 
 -- Testing arsort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --
 bool(true)
-darray(8) {
+dict(8) {
   ["O3"]=>
   string(7) "Orange3"
   ["o20"]=>
@@ -112,7 +112,7 @@ darray(8) {
 
 -- Testing arsort() by supplying string array (natural), 'flag' = SORT_NATURAL --
 bool(true)
-darray(8) {
+dict(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -133,7 +133,7 @@ darray(8) {
 
 -- Testing arsort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --
 bool(true)
-darray(8) {
+dict(8) {
   ["o20"]=>
   string(8) "orange20"
   ["O3"]=>
@@ -154,7 +154,7 @@ darray(8) {
 
 -- Testing arsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
   int(555)
   [1]=>

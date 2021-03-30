@@ -3,19 +3,19 @@ bool(true)
 int(823)
 string(0) ""
 string(3) "foo"
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "12"
 }
-darray(2) {
+dict(2) {
   [0]=>
-  darray(0) {
+  dict(0) {
   }
   [1]=>
-  darray(0) {
+  dict(0) {
   }
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "foo"
   [1]=>

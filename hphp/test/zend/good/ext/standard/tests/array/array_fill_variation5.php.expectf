@@ -1,21 +1,21 @@
 *** Testing array_fill() : usage variations ***
 --- Testing array_fill() with different types of array values for 'val' argument ---
 -- Iteration 1 --
-varray(2) {
-  varray(0) {
+vec(2) {
+  vec(0) {
   }
-  varray(0) {
+  vec(0) {
   }
 }
 -- Iteration 2 --
-varray(2) {
-  varray(4) {
+vec(2) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
     int(4)
   }
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
@@ -23,14 +23,14 @@ varray(2) {
   }
 }
 -- Iteration 3 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [1]=>
     string(2) "Hi"
     [2]=>
     string(5) "Hello"
   }
-  darray(2) {
+  dict(2) {
     [1]=>
     string(2) "Hi"
     [2]=>
@@ -38,27 +38,27 @@ varray(2) {
   }
 }
 -- Iteration 4 --
-varray(2) {
-  varray(3) {
+vec(2) {
+  vec(3) {
     string(7) "Saffron"
     string(5) "White"
     string(5) "Green"
   }
-  varray(3) {
+  vec(3) {
     string(7) "Saffron"
     string(5) "White"
     string(5) "Green"
   }
 }
 -- Iteration 5 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
     string(3) "pen"
   }
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -66,14 +66,14 @@ varray(2) {
   }
 }
 -- Iteration 6 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     [2]=>
     string(6) "green "
   }
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     [2]=>
@@ -81,14 +81,14 @@ varray(2) {
   }
 }
 -- Iteration 7 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     ["colour"]=>
     string(3) "red"
     ["item"]=>
     string(3) "pen"
   }
-  darray(2) {
+  dict(2) {
     ["colour"]=>
     string(3) "red"
     ["item"]=>
@@ -96,14 +96,14 @@ varray(2) {
   }
 }
 -- Iteration 8 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [1]=>
     string(3) "red"
     [0]=>
     string(5) "green"
   }
-  darray(2) {
+  dict(2) {
     [1]=>
     string(3) "red"
     [0]=>
@@ -111,14 +111,14 @@ varray(2) {
   }
 }
 -- Iteration 9 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [1]=>
     string(3) "red"
     [0]=>
     string(5) "green"
   }
-  darray(2) {
+  dict(2) {
     [1]=>
     string(3) "red"
     [0]=>
@@ -126,8 +126,8 @@ varray(2) {
   }
 }
 -- Iteration 10 --
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     [1]=>
     string(2) "Hi"
     ["color"]=>
@@ -135,7 +135,7 @@ varray(2) {
     ["item"]=>
     string(3) "pen"
   }
-  darray(3) {
+  dict(3) {
     [1]=>
     string(2) "Hi"
     ["color"]=>
@@ -145,14 +145,14 @@ varray(2) {
   }
 }
 -- Iteration 11 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [""]=>
     string(2) "Hi"
     ["1"]=>
     string(5) "Green"
   }
-  darray(2) {
+  dict(2) {
     [""]=>
     string(2) "Hi"
     ["1"]=>
@@ -160,14 +160,14 @@ varray(2) {
   }
 }
 -- Iteration 12 --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [""]=>
     int(1)
     ["color"]=>
     string(5) "green"
   }
-  darray(2) {
+  dict(2) {
     [""]=>
     int(1)
     ["color"]=>
@@ -175,13 +175,13 @@ varray(2) {
   }
 }
 -- Iteration 13 --
-varray(2) {
-  varray(3) {
+vec(2) {
+  vec(3) {
     string(7) "Saffron"
     string(5) "White"
     string(5) "Green"
   }
-  varray(3) {
+  vec(3) {
     string(7) "Saffron"
     string(5) "White"
     string(5) "Green"

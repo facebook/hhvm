@@ -30,7 +30,7 @@ vec(8) {
   bool(false)
   bool(true)
   float(7.89)
-  varray(0) {
+  vec(0) {
   }
   vec(0) {
   }
@@ -92,7 +92,7 @@ vec(4) {
 vec(4) {
   object(stdClass) (0) {
   }
-  varray(0) {
+  vec(0) {
   }
   vec(3) {
     int(1)

@@ -1,5 +1,5 @@
 *** Testing gethostbynamel() : basic functionality ***
-varray(2) {
+vec(2) {
   string(9) "127.0.0.1"
   string(9) "127.0.0.1"
 }

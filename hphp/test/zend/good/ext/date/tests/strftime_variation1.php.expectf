@@ -2,117 +2,117 @@
 
 --int 0--
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --int 1--
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --int 12345--
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --int -12345--
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --float 10.5--
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --float -10.5--
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --float 12.3456789000e10--
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --float -12.3456789000e10--
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --float .5--
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --empty array--
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --int indexed array--
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --associative array--
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --nested arrays--
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --uppercase NULL--
 
-Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --lowercase null--
 
-Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --lowercase true--
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --lowercase false--
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --uppercase TRUE--
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --uppercase FALSE--
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --empty string DQ--
 bool(false)
@@ -124,13 +124,13 @@ bool(false)
 
 --instance of classWithToString--
 
-Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 
 --instance of classWithoutToString--
 
-Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 84
 
-Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line %d
+Warning: strftime() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/strftime_variation1.php on line 85
 ===DONE===

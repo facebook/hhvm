@@ -1,6 +1,6 @@
 === A ===
 string(7) "~HH\int"
-darray(2) {
+dict(2) {
   ["like"]=>
   bool(true)
   ["kind"]=>
@@ -8,12 +8,12 @@ darray(2) {
 }
 === B ===
 string(15) "HH\vec<~HH\int>"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["like"]=>
       bool(true)
       ["kind"]=>
@@ -23,18 +23,18 @@ darray(2) {
 }
 === C ===
 string(27) "~HH\dict<HH\string, HH\int>"
-darray(3) {
+dict(3) {
   ["like"]=>
   bool(true)
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -42,22 +42,22 @@ darray(3) {
 }
 === D ===
 string(28) "(HH\int, ~HH\float, HH\bool)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(3) {
-    darray(1) {
+  vec(3) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(2) {
+    dict(2) {
       ["like"]=>
       bool(true)
       ["kind"]=>
       int(3)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(2)
     }
@@ -65,23 +65,23 @@ darray(2) {
 }
 === E ===
 string(46) "HH\shape('x'=>HH\string, 'y'=>HH\vec<~HH\int>)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     ["x"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
     ["y"]=>
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(20)
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["like"]=>
           bool(true)
           ["kind"]=>
@@ -93,41 +93,41 @@ darray(2) {
 }
 === F ===
 string(22) "(function (): ~HH\int)"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(2) {
+  dict(2) {
     ["like"]=>
     bool(true)
     ["kind"]=>
     int(1)
   }
   ["param_types"]=>
-  varray(0) {
+  vec(0) {
   }
 }
 === G ===
 string(11) "~HH\this::F"
-darray(4) {
+dict(4) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(2) {
+  dict(2) {
     ["like"]=>
     bool(true)
     ["kind"]=>
     int(1)
   }
   ["param_types"]=>
-  varray(0) {
+  vec(0) {
   }
   ["like"]=>
   bool(true)
 }
 === H ===
 string(8) "~?HH\int"
-darray(3) {
+dict(3) {
   ["nullable"]=>
   bool(true)
   ["like"]=>
@@ -137,7 +137,7 @@ darray(3) {
 }
 === I ===
 string(2) "~C"
-darray(3) {
+dict(3) {
   ["like"]=>
   bool(true)
   ["kind"]=>
@@ -147,7 +147,7 @@ darray(3) {
 }
 === J ===
 string(7) "~HH\int"
-darray(2) {
+dict(2) {
   ["like"]=>
   bool(true)
   ["kind"]=>

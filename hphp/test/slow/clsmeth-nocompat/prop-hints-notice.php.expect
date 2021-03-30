@@ -143,65 +143,65 @@
 [TYPE VIOLATION] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 [TYPE VIOLATION] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 NULL
-varray(0) {
+vec(0) {
 }
-varray(0) {
-}
-NULL
-NULL
-NULL
-NULL
-varray(0) {
-}
-varray(0) {
+vec(0) {
 }
 NULL
 NULL
 NULL
 NULL
-varray(0) {
+vec(0) {
 }
-varray(0) {
-}
-NULL
-NULL
-NULL
-NULL
-varray(0) {
-}
-varray(0) {
+vec(0) {
 }
 NULL
 NULL
 NULL
 NULL
-varray(0) {
+vec(0) {
 }
-varray(0) {
-}
-NULL
-NULL
-NULL
-NULL
-varray(0) {
-}
-varray(0) {
+vec(0) {
 }
 NULL
 NULL
 NULL
 NULL
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 NULL
 NULL
 NULL
 NULL
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
 }
 NULL
 NULL

@@ -1,6 +1,6 @@
 *** Testing array_filter() : usage variations - Anonymous callback functions ***
 Anonymous callback function with regular parameter and statement
-darray(3) {
+dict(3) {
   [3]=>
   int(10)
   [4]=>
@@ -9,7 +9,7 @@ darray(3) {
   int(1000)
 }
 Anonymous callback funciton with null argument
-darray(8) {
+dict(8) {
   [0]=>
   int(0)
   [1]=>
@@ -28,6 +28,6 @@ darray(8) {
   NULL
 }
 Anonymous callback function with regular argument and null statement
-darray(0) {
+dict(0) {
 }
 Done

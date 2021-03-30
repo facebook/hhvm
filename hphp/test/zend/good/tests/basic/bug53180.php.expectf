@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["email"]=>
   string(3) "foo"
   ["password"]=>

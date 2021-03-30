@@ -4,7 +4,7 @@ object(SplMaxHeap) (3) {
   ["isCorrupted":"SplHeap":private]=>
   bool(false)
   ["heap":"SplHeap":private]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     int(5)
     [1]=>

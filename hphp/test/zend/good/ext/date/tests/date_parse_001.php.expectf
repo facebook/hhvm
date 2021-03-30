@@ -1,4 +1,4 @@
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -16,17 +16,17 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -44,17 +44,17 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-darray(15) {
+dict(15) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -72,12 +72,12 @@ darray(15) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  darray(1) {
+  dict(1) {
     [7]=>
     string(20) "Unexpected character"
   }
@@ -90,7 +90,7 @@ darray(15) {
   ["is_dst"]=>
   bool(false)
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -108,19 +108,19 @@ darray(12) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  darray(1) {
+  dict(1) {
     [11]=>
     string(27) "The parsed date was invalid"
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -138,17 +138,17 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   int(2006)
   ["month"]=>
@@ -166,17 +166,17 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-darray(15) {
+dict(15) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -194,12 +194,12 @@ darray(15) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(2)
   ["errors"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(20) "Unexpected character"
     [1]=>
@@ -214,7 +214,7 @@ darray(15) {
   ["is_dst"]=>
   bool(false)
 }
-darray(15) {
+dict(15) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -232,12 +232,12 @@ darray(15) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(20) "Unexpected character"
   }
@@ -250,7 +250,7 @@ darray(15) {
   ["is_dst"]=>
   bool(false)
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -268,12 +268,12 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(12) "Empty string"
   }
@@ -281,5 +281,5 @@ darray(12) {
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/date/tests/date_parse_001.php on line 12
+Warning: date_parse() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_parse_001.php on line 12
 Done

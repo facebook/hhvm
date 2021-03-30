@@ -27,19 +27,19 @@ object(HH\ImmMap) (1) {
 }
 object(HH\ImmMap) (1) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
 object(HH\ImmMap) (1) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
 object(HH\ImmMap) (1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(1)
   }

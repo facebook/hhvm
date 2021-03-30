@@ -1,9 +1,0 @@
-enter test: $info: param 2 of handler at %s/interception.php:5
-enter test: $info["args"]: param 2 of handler at %s/interception.php:5
-enter test: $info["args"][0]: %s/interception.php:23
-exit test: $info: param 2 of handler at %s/interception.php:5
-enter test: $info: param 2 of handler at %s/interception.php:5
-enter test: $info["args"]: param 2 of handler at %s/interception.php:5
-enter test: $info["args"][0]: <none>
-exit test: $info: param 2 of handler at %s/interception.php:5
-exit main: $info: param 2 of handler at %s/interception.php:5

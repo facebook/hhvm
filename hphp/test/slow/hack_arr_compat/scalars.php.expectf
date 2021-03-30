@@ -1,51 +1,36 @@
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 5
 bool(false)
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 6
+bool(true)
+bool(false)
 bool(true)
 
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 7
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 9
 
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 8
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 10
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 11
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 12
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 13
+bool(false)
+bool(true)
+bool(false)
 bool(true)
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 9
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 19
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 10
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 20
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 11
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 21
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 12
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 22
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 13
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 15
-bool(false)
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 16
-bool(true)
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 17
-bool(false)
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 18
-bool(true)
-
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 19
-
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 20
-
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 21
-
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 22
-
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 23
-darray(1) {
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 23
+dict(1) {
   ["0"]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   ["0"]=>
   int(1)
   [1]=>
@@ -55,7 +40,7 @@ darray(4) {
   [3]=>
   int(4)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -65,7 +50,7 @@ darray(4) {
   [3]=>
   int(4)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -75,11 +60,11 @@ darray(4) {
   ["3"]=>
   int(4)
 }
-darray(1) {
+dict(1) {
   ["10"]=>
   int(10)
 }
-darray(3) {
+dict(3) {
   ["10"]=>
   int(10)
   [20]=>
@@ -87,7 +72,7 @@ darray(3) {
   [30]=>
   int(30)
 }
-darray(3) {
+dict(3) {
   [10]=>
   int(10)
   ["20"]=>
@@ -95,7 +80,7 @@ darray(3) {
   [30]=>
   int(30)
 }
-darray(3) {
+dict(3) {
   [10]=>
   int(10)
   [20]=>

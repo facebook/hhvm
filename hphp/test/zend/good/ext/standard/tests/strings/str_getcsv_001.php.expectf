@@ -1,55 +1,55 @@
-varray(3) {
+vec(3) {
   string(1) "f"
   string(1) "o"
   string(0) ""
 }
 -----
-varray(3) {
+vec(3) {
   string(3) "foo"
   string(0) ""
   string(3) "bar"
 }
 -----
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(3) "bar"
 }
 -----
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(3) "bar"
 }
 -----
-varray(3) {
+vec(3) {
   string(2) "f."
   string(3) "bar"
   string(4) "-|-."
 }
 -----
-varray(1) {
+vec(1) {
   string(7) "foo.bar"
 }
 -----
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(3) "bar"
 }
 -----
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(4) "bar1"
 }
 -----
-varray(2) {
+vec(2) {
   string(5) "foo  "
   string(7) "  bar  "
 }
 -----
-varray(1) {
+vec(1) {
   string(3) " " "
 }
 -----
-varray(1) {
+vec(1) {
   NULL
 }
 -----

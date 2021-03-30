@@ -4,7 +4,7 @@ object(SplMaxHeap) (3) {
   ["isCorrupted":"SplHeap":private]=>
   bool(false)
   ["heap":"SplHeap":private]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     *RECURSION*
   }

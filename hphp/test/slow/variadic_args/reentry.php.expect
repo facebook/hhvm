@@ -1,36 +1,36 @@
 = Single-arg array_map =
 * f_variadic
-varray(1) {
+vec(1) {
   int(1)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(2)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(3)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(4)
 }
 bool(true)
 bool(true)
 * f_variadic
-varray(1) {
+vec(1) {
   int(1)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(2)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(3)
 }
 * f_variadic
-varray(1) {
+vec(1) {
   int(4)
 }
 bool(true)
@@ -39,22 +39,22 @@ bool(true)
 
  = Multi-arg ArrayMap =
 * f_variadic
-varray(2) {
+vec(2) {
   int(1)
   string(1) "a"
 }
 * f_variadic
-varray(2) {
+vec(2) {
   int(2)
   string(1) "b"
 }
 * f_variadic
-varray(2) {
+vec(2) {
   int(3)
   string(1) "c"
 }
 * f_variadic
-varray(2) {
+vec(2) {
   int(4)
   string(1) "d"
 }

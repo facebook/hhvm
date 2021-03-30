@@ -1,24 +1,24 @@
 *** Testing str_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 -- Iteration 2 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 -- Iteration 3 --
-varray(1) {
+vec(1) {
   string(1) "a"
 }
 -- Iteration 4 --
-varray(3) {
+vec(3) {
   string(10) "This is si"
   string(10) "mple hered"
   string(9) "oc string"
 }
 -- Iteration 5 --
-varray(6) {
+vec(6) {
   string(10) "This is to"
   string(10) " check str"
   string(10) "_split
@@ -29,22 +29,23 @@ fun"
 heredoc"
 }
 -- Iteration 6 --
-varray(4) {
+vec(4) {
   string(10) "This check"
   string(10) "s heredoc "
   string(10) "with $, %,"
   string(9) " &, chars"
 }
 -- Iteration 7 --
-varray(4) {
+vec(4) {
   string(10) "This check"
   string(10) "s	 str_spl"
   string(10) "it()
 Escap"
-  string(7) "echars"
+  string(7) "e
+chars"
 }
 -- Iteration 8 --
-varray(8) {
+vec(8) {
   string(10) ""To check "
   string(10) "" in hered"
   string(10) "oc"

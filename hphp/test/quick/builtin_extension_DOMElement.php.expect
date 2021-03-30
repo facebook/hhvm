@@ -40,7 +40,7 @@ object(DOMElement) (18) {
 string(22) "O:10:"DOMElement":0:{}"
 object(DOMElement) (0) {
 }
-varray(37) {
+vec(37) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(12) "getAttribute"
@@ -126,7 +126,7 @@ object(A_DOMElement) (1) {
   ["___x"]=>
   NULL
 }
-varray(37) {
+vec(37) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(12) "getAttribute"

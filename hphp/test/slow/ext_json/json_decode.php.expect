@@ -1,15 +1,15 @@
-darray(1) {
+dict(1) {
   ["fbid"]=>
   int(101501853510151001)
 }
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     ["00"]=>
     int(0)
   }
 }
-darray(3) {
+dict(3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -17,7 +17,7 @@ darray(3) {
   [3]=>
   string(4) "test"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -29,7 +29,7 @@ darray(5) {
   [4]=>
   NULL
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -42,22 +42,22 @@ darray(5) {
   NULL
 }
 NULL
-darray(1) {
+dict(1) {
   ["z"]=>
   int(1)
 }
 NULL
-darray(1) {
+dict(1) {
   ["z"]=>
   string(1) "z"
 }
 NULL
-darray(1) {
+dict(1) {
   ["x"]=>
   int(1)
 }
 NULL
-darray(1) {
+dict(1) {
   ["y"]=>
   int(1)
 }
@@ -70,7 +70,7 @@ NULL
 NULL
 NULL
 NULL
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -80,44 +80,44 @@ darray(3) {
 }
 NULL
 NULL
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   [0]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     string(5) "apple"
   }
   [1]=>
-  darray(1) {
+  dict(1) {
     ["b"]=>
     string(6) "banana"
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         ["n"]=>
         string(3) "1st"
       }
     }
   }
   [1]=>
-  darray(1) {
+  dict(1) {
     ["b"]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         ["n"]=>
         string(3) "2nd"
       }

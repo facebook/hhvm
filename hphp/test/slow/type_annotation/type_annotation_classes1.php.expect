@@ -1,35 +1,35 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(16)
   ["classname"]=>
   string(11) "MyInterface"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(17)
   ["classname"]=>
   string(7) "MyTrait"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(18)
   ["classname"]=>
   string(6) "MyEnum"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(18)
       ["classname"]=>
@@ -37,14 +37,14 @@ darray(3) {
     }
   }
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
   ["generic_types"]=>
-  varray(1) {
-    darray(3) {
+  vec(1) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>

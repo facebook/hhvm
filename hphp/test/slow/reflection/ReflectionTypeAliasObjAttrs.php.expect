@@ -1,32 +1,32 @@
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["Attr1"]=>
-  varray(1) {
+  vec(1) {
     int(1337)
   }
 }
-darray(2) {
+dict(2) {
   ["Attr2"]=>
-  varray(0) {
+  vec(0) {
   }
   ["Attr3"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(2) {
+dict(2) {
   ["Attr2"]=>
-  varray(0) {
+  vec(0) {
   }
   ["Attr3"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(2) {
+dict(2) {
   ["Attr2"]=>
-  varray(0) {
+  vec(0) {
   }
   ["Attr3"]=>
-  varray(0) {
+  vec(0) {
   }
 }

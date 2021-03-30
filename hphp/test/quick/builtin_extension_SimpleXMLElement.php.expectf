@@ -5,7 +5,7 @@ object(SimpleXMLElement) (0) {
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(12) "offsetExists"
   string(9) "offsetGet"
@@ -34,7 +34,7 @@ object(A_SimpleXMLElement) (0) {
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(12) "offsetExists"
   string(9) "offsetGet"

@@ -1,4 +1,4 @@
-varray(11) {
+vec(11) {
   int(16)
   int(8)
   int(99)
@@ -15,7 +15,7 @@ int(16)
 int(8)
 int(99)
 string(5) "green"
-varray(7) {
+vec(7) {
   int(42)
   string(5) "apple"
   int(200)

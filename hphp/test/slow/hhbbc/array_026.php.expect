@@ -1,7 +1,7 @@
 bool(false)
 bool(false)
 bool(true)
-darray(1) {
+dict(1) {
   ["x"]=>
   int(3)
 }

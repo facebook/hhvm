@@ -1,4 +1,4 @@
-varray(5) {
+vec(5) {
   string(3) "dir"
   string(5) "empty"
   string(4) "file"

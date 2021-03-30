@@ -1,60 +1,60 @@
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "test"
   [1]=>
   string(5) "apple"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "test"
   [1]=>
   string(5) "apple"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "test"
   ["0"]=>
   string(5) "apple"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "test"
   ["1"]=>
   string(5) "apple"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "red"
   [1]=>
   string(5) "green"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "red"
   [1]=>
   string(5) "green"
 }
-varray(2) {
+vec(2) {
   string(3) "red"
   string(5) "green"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "red"
   [1]=>
   string(6) "yellow"
 }
-varray(2) {
+vec(2) {
   string(3) "red"
   string(6) "yellow"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "red"
   [1]=>
   string(6) "orange"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(3) "red"
   [1]=>
@@ -66,7 +66,7 @@ darray(5) {
   [4]=>
   string(6) "maroon"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(3) "red"
   [1]=>

@@ -1,8 +1,8 @@
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >11< with namespace ><
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >11< with namespace ><
 bool(true)
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >29< with namespace ><
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >29< with namespace ><
 bool(true)
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >37< with namespace ><
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >37< with namespace ><
 ----------------------------------
 MY_MIN is not defined
 ----------------------------------
@@ -11,22 +11,22 @@ bool(true)
 bool(true)
 ----------------------------------
 ----------------------------------
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >84<
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >84<
 ----------------------------------
 bool(true)
 ----------------------------------
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >93<
-Inside test() in %s/expressions/source_file_inclusion/test.php
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >93<
+Inside test() in %s/test/slow/spec/tests/expressions/source_file_inclusion/test.php
 string(22) "Undefined variable: v1"
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >96<
+Inside file >%s/test/slow/spec/tests/expressions/source_file_inclusion/require.php< at line >96<
 ----------------------------------
-Array
+Vec
 (
-    [0] => %s/expressions/source_file_inclusion/require.php
-    [1] => %s/expressions/source_file_inclusion/limits.php
-    [2] => %s/expressions/source_file_inclusion/mycolors.php
-    [3] => %s/expressions/source_file_inclusion/return_none.php
-    [4] => %s/expressions/source_file_inclusion/return_without_value.php
-    [5] => %s/expressions/source_file_inclusion/return_with_value.php
-    [6] => %s/expressions/source_file_inclusion/test.php
+    [0] => %s/test/slow/spec/tests/expressions/source_file_inclusion/require.php
+    [1] => %s/test/slow/spec/tests/expressions/source_file_inclusion/limits.php
+    [2] => %s/test/slow/spec/tests/expressions/source_file_inclusion/mycolors.php
+    [3] => %s/test/slow/spec/tests/expressions/source_file_inclusion/return_none.php
+    [4] => %s/test/slow/spec/tests/expressions/source_file_inclusion/return_without_value.php
+    [5] => %s/test/slow/spec/tests/expressions/source_file_inclusion/return_with_value.php
+    [6] => %s/test/slow/spec/tests/expressions/source_file_inclusion/test.php
 )

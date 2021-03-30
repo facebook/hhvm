@@ -1,11 +1,11 @@
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     ["test_field"]=>
     string(5) "text1"
     [0]=>
     string(5) "text1"
   }
-  darray(2) {
+  dict(2) {
     ["test_field"]=>
     string(5) "text2"
     [0]=>

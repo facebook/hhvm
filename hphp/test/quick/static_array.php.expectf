@@ -1,105 +1,105 @@
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   NULL
 }
-varray(1) {
+vec(1) {
   bool(true)
 }
-varray(1) {
+vec(1) {
   int(42)
 }
-varray(1) {
+vec(1) {
   float(12.34)
 }
-varray(1) {
+vec(1) {
   string(5) "hello"
 }
-varray(1) {
-  varray(0) {
+vec(1) {
+  vec(0) {
   }
 }
-varray(6) {
+vec(6) {
   NULL
   bool(true)
   int(42)
   float(12.34)
   string(5) "hello"
-  varray(2) {
+  vec(2) {
     int(1)
-    varray(2) {
+    vec(2) {
       int(2)
-      varray(1) {
+      vec(1) {
         int(3)
       }
     }
   }
 }
-varray(6) {
+vec(6) {
   NULL
   bool(true)
   int(42)
   float(12.34)
   string(5) "hello"
-  varray(2) {
+  vec(2) {
     int(1)
-    varray(2) {
+    vec(2) {
       int(2)
-      varray(1) {
+      vec(1) {
         int(3)
       }
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   [42]=>
   string(2) "42"
 }
-darray(1) {
+dict(1) {
   ["hello"]=>
   string(5) "world"
 }
-varray(1) {
+vec(1) {
   NULL
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   ["hello"]=>
   string(5) "world"
 }
-darray(1) {
+dict(1) {
   ["hello"]=>
   string(5) "world"
 }
-varray(1) {
-  varray(1) {
+vec(1) {
+  vec(1) {
     int(0)
   }
 }
-varray(2) {
-  varray(1) {
+vec(2) {
+  vec(1) {
     int(0)
   }
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }
-varray(2) {
-  varray(1) {
+vec(2) {
+  vec(1) {
     int(0)
   }
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }

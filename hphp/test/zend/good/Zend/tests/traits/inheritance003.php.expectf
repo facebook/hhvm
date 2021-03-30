@@ -1,3 +1,3 @@
 World!
 
-Catchable fatal error: Argument 1 passed to MyHelloWorld::sayHello() must be an instance of Base, %rv?%rarray given in %s/inheritance003.php on line 32
+Catchable fatal error: Argument 1 passed to MyHelloWorld::sayHello() must be an instance of Base, HH\vec given in %s/test/zend/good/Zend/tests/traits/inheritance003.php on line 32

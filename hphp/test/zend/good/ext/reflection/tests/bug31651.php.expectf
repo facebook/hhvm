@@ -1,6 +1,6 @@
-Array
+Dict
 (
-    [a] => Array
+    [a] => Dict
         (
             [a] => 1
         )

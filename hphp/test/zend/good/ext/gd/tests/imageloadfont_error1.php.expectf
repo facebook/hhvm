@@ -1,2 +1,1 @@
-
-Warning: imageloadfont() expects parameter 1 to be string, %rv?%rarray given in %s/imageloadfont_error1.php on line 2
+Warning: imageloadfont() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/gd/tests/imageloadfont_error1.php on line 2

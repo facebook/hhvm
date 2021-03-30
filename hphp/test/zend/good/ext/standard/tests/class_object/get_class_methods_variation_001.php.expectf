@@ -59,6 +59,6 @@ NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(62)
 
 Arg value  
-varray(0) {
+vec(0) {
 }
 Done

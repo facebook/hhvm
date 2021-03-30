@@ -4,7 +4,7 @@ bool(true)
 bool(true)
 bool(true)
 resource(%d) of type (OpenSSL key)
-darray(1) {
+dict(1) {
   ["d"]=>
   string(32) "%a"
 }

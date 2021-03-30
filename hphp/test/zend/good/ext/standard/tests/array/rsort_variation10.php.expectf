@@ -2,7 +2,7 @@
 
 -- Sort flag = default  --
 bool(true)
-varray(9) {
+vec(9) {
   int(669)
   int(506)
   int(229)
@@ -16,7 +16,7 @@ varray(9) {
 
 -- Sort flag = SORT_REGULAR  --
 bool(true)
-varray(9) {
+vec(9) {
   int(669)
   int(506)
   int(229)
@@ -30,7 +30,7 @@ varray(9) {
 
 -- Sort flag = SORT_NUMERIC  --
 bool(true)
-varray(9) {
+vec(9) {
   int(669)
   int(506)
   int(229)

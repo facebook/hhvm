@@ -1,12 +1,12 @@
 launder()
 launder()
 foo()
-darray(1) {
+dict(1) {
   ["alpha"]=>
   vec(4) {
     dict(1) {
       ["beta"]=>
-      darray(2) {
+      dict(2) {
         ["one"]=>
         string(5) "FOO:A"
         ["two"]=>

@@ -1,9 +1,9 @@
-darray(0) {
+dict(0) {
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["unittest"]=>
-  darray(4) {
+  dict(4) {
     ["size"]=>
     int(10)
     ["connGetTimeout"]=>
@@ -11,7 +11,7 @@ darray(1) {
     ["reuseLimit"]=>
     int(30)
     ["stats"]=>
-    darray(3) {
+    dict(3) {
       ["fetches"]=>
       int(0)
       ["empty"]=>
@@ -23,6 +23,6 @@ darray(1) {
 }
 bool(true)
 bool(true)
-darray(0) {
+dict(0) {
 }
 bool(true)

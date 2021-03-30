@@ -1,30 +1,30 @@
 *** Testing parse_ini_file() : variation ***
-darray(2) {
+dict(2) {
   ["section1"]=>
-  darray(2) {
+  dict(2) {
     ["value1"]=>
     string(8) "original"
     ["value2"]=>
     string(8) "original"
   }
   ["section2"]=>
-  darray(2) {
+  dict(2) {
     ["value1"]=>
     string(8) "original"
     ["value2"]=>
     string(9) "different"
   }
 }
-darray(2) {
+dict(2) {
   ["section1"]=>
-  darray(2) {
+  dict(2) {
     ["value1"]=>
     string(7) "changed"
     ["value2"]=>
     string(8) "original"
   }
   ["section2"]=>
-  darray(2) {
+  dict(2) {
     ["value1"]=>
     string(8) "original"
     ["value2"]=>

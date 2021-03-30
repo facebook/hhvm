@@ -6,28 +6,28 @@ string(4) "I::Y"
 string(10) "I::Y via Z"
 
 == reflect ==
-darray(2) {
+dict(2) {
   ["Y"]=>
   string(4) "I::Y"
   ["Z"]=>
   string(10) "I::Y via Z"
 }
-darray(2) {
+dict(2) {
   ["Y"]=>
   string(4) "I::Y"
   ["Z"]=>
   string(10) "I::Y via Z"
 }
-darray(1) {
+dict(1) {
   ["X"]=>
   string(1) "X"
 }
 bool(false)
-darray(1) {
+dict(1) {
   ["X"]=>
   string(4) "C::X"
 }
-darray(3) {
+dict(3) {
   ["X"]=>
   string(4) "C::X"
   ["Y"]=>
@@ -35,14 +35,14 @@ darray(3) {
   ["Z"]=>
   string(10) "I::Y via Z"
 }
-darray(0) {
+dict(0) {
 }
 bool(true)
-darray(1) {
+dict(1) {
   ["X"]=>
   string(4) "J::X"
 }
-darray(3) {
+dict(3) {
   ["X"]=>
   string(4) "J::X"
   ["Y"]=>
@@ -50,6 +50,6 @@ darray(3) {
   ["Z"]=>
   string(10) "I::Y via Z"
 }
-darray(0) {
+dict(0) {
 }
 bool(true)

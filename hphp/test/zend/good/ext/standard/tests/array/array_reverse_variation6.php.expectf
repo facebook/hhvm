@@ -1,8 +1,8 @@
 *** Testing array_reverse() : usage variations ***
 -- with default argument --
-darray(3) {
+dict(3) {
   [0]=>
-  darray(7) {
+  dict(7) {
     ["a"]=>
     string(5) "green"
     [0]=>
@@ -19,7 +19,7 @@ darray(3) {
     string(4) "ball"
   }
   [1]=>
-  varray(5) {
+  vec(5) {
     int(1)
     int(2)
     int(3)
@@ -27,7 +27,7 @@ darray(3) {
     int(5)
   }
   [2]=>
-  darray(3) {
+  dict(3) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -36,7 +36,7 @@ darray(3) {
     string(2) "LA"
   }
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(5)
   [1]=>
@@ -49,9 +49,9 @@ darray(5) {
   int(1)
 }
 -- with all possible arguments --
-darray(3) {
+dict(3) {
   [2]=>
-  darray(7) {
+  dict(7) {
     ["a"]=>
     string(5) "green"
     [0]=>
@@ -68,7 +68,7 @@ darray(3) {
     string(4) "ball"
   }
   [1]=>
-  varray(5) {
+  vec(5) {
     int(1)
     int(2)
     int(3)
@@ -76,7 +76,7 @@ darray(3) {
     int(5)
   }
   [0]=>
-  darray(3) {
+  dict(3) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -85,9 +85,9 @@ darray(3) {
     string(2) "LA"
   }
 }
-darray(3) {
+dict(3) {
   [0]=>
-  darray(7) {
+  dict(7) {
     ["a"]=>
     string(5) "green"
     [0]=>
@@ -104,7 +104,7 @@ darray(3) {
     string(4) "ball"
   }
   [1]=>
-  varray(5) {
+  vec(5) {
     int(1)
     int(2)
     int(3)
@@ -112,7 +112,7 @@ darray(3) {
     int(5)
   }
   [2]=>
-  darray(3) {
+  dict(3) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -121,7 +121,7 @@ darray(3) {
     string(2) "LA"
   }
 }
-darray(5) {
+dict(5) {
   [4]=>
   int(5)
   [3]=>
@@ -133,7 +133,7 @@ darray(5) {
   [0]=>
   int(1)
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(5)
   [1]=>

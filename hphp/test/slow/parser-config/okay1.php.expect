@@ -1,5 +1,5 @@
 function(main)
-varray(2) {
+vec(2) {
   object(C2) (0) {
   }
   function(C2::inner)

@@ -1,14 +1,14 @@
-darray(1) {
+dict(1) {
   [""]=>
   string(5) "value"
 }
-darray(2) {
+dict(2) {
   [""]=>
   string(5) "value"
   ["key"]=>
   string(5) "value"
 }
-darray(2) {
+dict(2) {
   ["key"]=>
   string(5) "value"
   [""]=>

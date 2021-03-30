@@ -1,7 +1,7 @@
 *** Testing getdate() : usage variation ***
 
 --01 Jan 1970--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -27,7 +27,7 @@ darray(11) {
 }
 
 --01 Jan 1971--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -53,7 +53,7 @@ darray(11) {
 }
 
 --01 Jan 1972--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -79,7 +79,7 @@ darray(11) {
 }
 
 --01 Jan 1973--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>

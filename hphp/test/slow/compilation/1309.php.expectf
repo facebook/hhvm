@@ -1,5 +1,5 @@
-Out of bounds varray access: invalid index 3
-varray(3) {
+Out of bounds vec access: invalid index 3
+vec(3) {
   int(1)
   int(2)
   int(3)

@@ -9,7 +9,7 @@
 ::
 bool(false)
 bool(false)
-darray(1) {
+dict(1) {
   ["127.0.0.1"]=>
   NULL
 }

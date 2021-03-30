@@ -4,7 +4,7 @@ not vec
 not vec
 not vec
 not vec
-not vec
+vec
 vec
 not vec
 not vec
@@ -37,7 +37,7 @@ not vec_or_dict
 not vec_or_dict
 not vec_or_dict
 not vec_or_dict
-not vec_or_dict
+vec_or_dict
 vec_or_dict
 vec_or_dict
 not vec_or_dict

@@ -1,10 +1,10 @@
-Array
+Dict
 (
     [a] => green
     [b] => brown
     [0] => red
 )
-Array
+Dict
 (
     [a] => green
 )

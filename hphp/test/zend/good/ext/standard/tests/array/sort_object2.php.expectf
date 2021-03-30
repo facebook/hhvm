@@ -2,7 +2,7 @@
 
 -- Testing sort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
-varray(4) {
+vec(4) {
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(-88)
@@ -37,7 +37,7 @@ varray(4) {
   }
 }
 bool(true)
-varray(4) {
+vec(4) {
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(3) "axx"
@@ -74,7 +74,7 @@ varray(4) {
 
 -- Testing sort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
 bool(true)
-varray(4) {
+vec(4) {
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(-88)
@@ -109,7 +109,7 @@ varray(4) {
   }
 }
 bool(true)
-varray(4) {
+vec(4) {
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(3) "axx"

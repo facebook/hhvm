@@ -1,5 +1,5 @@
 string(31) "xxx bbb ccc ddd eee ccc xxx bbb"
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "aaa"
 }

@@ -1,19 +1,19 @@
 *** Testing explode() function: positive and negative limits ***
 
 -- positive limit --
-varray(2) {
+vec(2) {
   string(3) "one"
   string(16) "two||three||four"
 }
 
 -- negative limit (since PHP 5.1) --
-varray(3) {
+vec(3) {
   string(3) "one"
   string(3) "two"
   string(5) "three"
 }
 
 -- negative limit (since PHP 5.1) with null string -- 
-varray(0) {
+vec(0) {
 }
 ===DONE===

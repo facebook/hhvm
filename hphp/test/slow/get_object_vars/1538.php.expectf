@@ -1,4 +1,4 @@
-darray(0) {
+dict(0) {
 }
 
 Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 6

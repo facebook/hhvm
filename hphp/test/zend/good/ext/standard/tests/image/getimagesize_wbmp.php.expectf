@@ -1,5 +1,5 @@
 *** Testing getimagesize() : wbmp format ***
-darray(5) {
+dict(5) {
   [0]=>
   int(75)
   [1]=>
@@ -11,6 +11,6 @@ darray(5) {
   ["mime"]=>
   string(18) "image/vnd.wap.wbmp"
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

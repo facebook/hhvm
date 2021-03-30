@@ -2,91 +2,91 @@
 
 -- Iteration 1 --
 
-Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 2 --
 
-Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 3 --
 
-Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 4 --
 
-Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 5 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 6 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 7 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 8 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 9 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 10 --
 
-Warning: no Directory resource supplied in %s/rewinddir_variation1.php on line %d
+Warning: no Directory resource supplied in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 NULL
 
 -- Iteration 11 --
 
-Warning: no Directory resource supplied in %s/rewinddir_variation1.php on line %d
+Warning: no Directory resource supplied in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 NULL
 
 -- Iteration 12 --
 
-Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 13 --
 
-Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 14 --
 
-Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 15 --
 
-Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 16 --
 
-Warning: rewinddir() expects parameter 1 to be resource, string given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 17 --
 
-Warning: rewinddir() expects parameter 1 to be resource, string given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 18 --
 
-Warning: rewinddir() expects parameter 1 to be resource, %rv?%rarray given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 19 --
 
-Warning: rewinddir() expects parameter 1 to be resource, string given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 20 --
 
-Warning: rewinddir() expects parameter 1 to be resource, string given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 21 --
 
-Warning: rewinddir() expects parameter 1 to be resource, string given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 
 -- Iteration 22 --
 
-Warning: rewinddir() expects parameter 1 to be resource, object given in %s/rewinddir_variation1.php on line %d
+Warning: rewinddir() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/dir/rewinddir_variation1.php on line 74
 ===DONE===

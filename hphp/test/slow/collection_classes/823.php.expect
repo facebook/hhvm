@@ -36,13 +36,13 @@ object(stdClass) (0) {
 int(73)
 NULL
 ------------------------
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "foo"
   [1]=>
   int(42)
 }
-darray(2) {
+dict(2) {
   [0]=>
   object(stdClass) (0) {
   }
@@ -85,24 +85,24 @@ object(stdClass) (0) {
 int(1)
 int(73)
 ------------------------
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "foo"
   [1]=>
   int(42)
 }
-darray(2) {
+dict(2) {
   [0]=>
   object(stdClass) (0) {
   }
   [1]=>
   int(73)
 }
-varray(2) {
+vec(2) {
   string(3) "foo"
   int(42)
 }
-varray(2) {
+vec(2) {
   object(stdClass) (0) {
   }
   int(73)

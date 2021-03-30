@@ -1,5 +1,5 @@
 Successfully called D::prot().
-Array
+Vec
 (
     [0] => prot
     [1] => test

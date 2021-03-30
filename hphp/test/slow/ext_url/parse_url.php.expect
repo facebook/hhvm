@@ -1,10 +1,10 @@
-darray(2) {
+dict(2) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(16) "www.facebook.com"
 }
-darray(6) {
+dict(6) {
   ["scheme"]=>
   string(5) "https"
   ["host"]=>
@@ -18,7 +18,7 @@ darray(6) {
   ["path"]=>
   string(9) "/hhvmabcd"
 }
-darray(4) {
+dict(4) {
   ["scheme"]=>
   string(3) "irc"
   ["host"]=>
@@ -28,11 +28,11 @@ darray(4) {
   ["fragment"]=>
   string(4) "hhvm"
 }
-darray(1) {
+dict(1) {
   ["path"]=>
   string(12) "content/:/\*"
 }
-darray(3) {
+dict(3) {
   ["host"]=>
   string(11) "example.org"
   ["port"]=>
@@ -40,7 +40,7 @@ darray(3) {
   ["path"]=>
   string(30) "/sites/default/files/drums.mp3"
 }
-darray(6) {
+dict(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -54,11 +54,11 @@ darray(6) {
   ["path"]=>
   string(4) "/dir"
 }
-darray(1) {
+dict(1) {
   ["path"]=>
   string(9) "127.0.0.1"
 }
-darray(2) {
+dict(2) {
   ["host"]=>
   string(9) "127.0.0.1"
   ["port"]=>

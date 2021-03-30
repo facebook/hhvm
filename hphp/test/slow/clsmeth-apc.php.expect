@@ -2,7 +2,7 @@ classMeth{
   class(C)
   function(f)
 }
-varray(3) {
+vec(3) {
   int(1)
   classMeth{
     class(C)
@@ -14,7 +14,7 @@ classMeth{
   class(HH\Map)
   function(fromItems)
 }
-varray(3) {
+vec(3) {
   int(10)
   classMeth{
     class(HH\Map)

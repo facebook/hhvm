@@ -1,7 +1,7 @@
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Testing array_diff_key() function with float indexed array --
-darray(5) {
+dict(5) {
   [0]=>
   string(1) "0"
   [10]=>
@@ -13,7 +13,7 @@ darray(5) {
   [-20]=>
   string(3) "-20"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "0.5"
   [10]=>

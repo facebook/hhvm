@@ -1,170 +1,170 @@
 *** Testing glob() : usage variations ***
 
 -- Iteration 1 --
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder/"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
 
 -- Iteration 2 --
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder/"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
 
 -- Iteration 3 --
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s"
   string(%d) "%s"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(2) {
+vec(2) {
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
 
 -- Iteration 4 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/*der5"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 5 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/??onder*"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 6 --
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder/"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s"
   string(%d) "%s"
   string(%d) "%s"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
-varray(3) {
+vec(3) {
   string(%d) "%s/glob_variation/wonder"
   string(%d) "%s/glob_variation/wonder12345"
   string(%d) "%s/glob_variation/wonder;123456"
 }
 
 -- Iteration 7 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/++onder*"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 8 --
@@ -188,111 +188,111 @@ Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_
 NULL
 
 -- Iteration 9 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(16) "$dirname/wonder5"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 10 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/?wonder?"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 11 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder?"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 12 --
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   string(1) "1"
 }
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
 
 *** Testing glob() with pattern within braces ***
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder12345"
 }
 
 *** Testing glob() on directories ***
 -- Iteration 1 --
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 2 --
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 3 --
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 4 --
-varray(0) {
+vec(0) {
 }
 -- Iteration 5 --
-varray(0) {
+vec(0) {
 }
 -- Iteration 6 --
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 7 --
-varray(0) {
+vec(0) {
 }
 -- Iteration 8 --
 
 Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 66
 NULL
 -- Iteration 9 --
-varray(0) {
+vec(0) {
 }
 -- Iteration 10 --
-varray(0) {
+vec(0) {
 }
 -- Iteration 11 --
-varray(1) {
+vec(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 12 --
-varray(0) {
+vec(0) {
 }
 Done

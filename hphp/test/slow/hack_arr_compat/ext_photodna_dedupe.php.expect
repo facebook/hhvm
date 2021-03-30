@@ -1,8 +1,8 @@
 ---- empty array
-darray(0) {
+dict(0) {
 }
 ---- norm2 = 1
-darray(5) {
+dict(5) {
   ["abc"]=>
   string(144) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   ["def"]=>
@@ -15,7 +15,7 @@ darray(5) {
   string(144) "888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
 }
 ---- norm2 = 10
-darray(5) {
+dict(5) {
   ["abc"]=>
   string(144) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   ["def"]=>
@@ -28,7 +28,7 @@ darray(5) {
   string(144) "888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
 }
 ---- norm2 = 100
-darray(5) {
+dict(5) {
   ["abc"]=>
   string(144) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   ["def"]=>
@@ -41,7 +41,7 @@ darray(5) {
   string(144) "888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
 }
 ---- norm2 = 1000
-darray(3) {
+dict(3) {
   ["abc"]=>
   string(144) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   [123]=>
@@ -50,7 +50,7 @@ darray(3) {
   string(144) "888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
 }
 ---- norm2 = 10000
-darray(3) {
+dict(3) {
   ["abc"]=>
   string(144) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   ["zxc"]=>

@@ -14,31 +14,31 @@ string(26) "December 31, 1969, 9:34 pm"
 
 -- float 10.5 --
 
-Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- float -10.5 --
 
-Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- float .5 --
 
-Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- empty array --
 
-Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- int indexed array --
 
-Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- associative array --
 
-Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- nested arrays --
 
-Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- uppercase NULL --
 bool(true)
@@ -48,53 +48,53 @@ bool(true)
 
 -- lowercase true --
 
-Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- lowercase false --
 
-Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- uppercase TRUE --
 
-Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- uppercase FALSE --
 
-Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- empty string DQ --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- empty string SQ --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- string DQ --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- string SQ --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- mixed case string --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- heredoc --
 
-Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- instance of classWithToString --
 
-Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- instance of classWithoutToString --
 
-Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 
 -- resource --
 
-Warning: date() expects parameter 2 to be integer, resource given in %s/date_variation2.php on line %d
+Warning: date() expects parameter 2 to be integer, resource given in %s/test/zend/good/ext/date/tests/date_variation2.php on line 101
 ===DONE===

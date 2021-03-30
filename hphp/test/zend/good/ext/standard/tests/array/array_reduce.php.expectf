@@ -11,7 +11,7 @@ string(23) "quuxfoofoobarquxquxquux"
 string(4) "quux"
 
 *** Testing array_reduce() to array ***
-darray(4) {
+dict(4) {
   ["foo"]=>
   int(44)
   ["bar"]=>
@@ -21,7 +21,7 @@ darray(4) {
   ["quux"]=>
   int(1)
 }
-darray(4) {
+dict(4) {
   ["foo"]=>
   int(42)
   ["bar"]=>

@@ -1,4 +1,4 @@
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(0)
   ["errstr"]=>
@@ -6,7 +6,7 @@ darray(2) {
 }
 string(2) "OK"
 int(0)
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(0)
   ["errstr"]=>
@@ -15,7 +15,7 @@ darray(2) {
 string(2) "OK"
 int(0)
 string(0) ""
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(-5)
   ["errstr"]=>
@@ -24,7 +24,7 @@ darray(2) {
 string(16) "DATA_ERROR_MAGIC"
 int(-5)
 string(0) ""
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(-4)
   ["errstr"]=>
@@ -33,7 +33,7 @@ darray(2) {
 string(10) "DATA_ERROR"
 int(-4)
 string(0) ""
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(-5)
   ["errstr"]=>
@@ -42,7 +42,7 @@ darray(2) {
 string(16) "DATA_ERROR_MAGIC"
 int(-5)
 string(0) ""
-darray(2) {
+dict(2) {
   ["errno"]=>
   int(-4)
   ["errstr"]=>
@@ -51,15 +51,15 @@ darray(2) {
 string(10) "DATA_ERROR"
 int(-4)
 
-Warning: Not a valid stream resource in %s/004.php on line 34
+Warning: Not a valid stream resource in %s/test/zend/good/ext/bz2/tests/004.php on line 34
 bool(false)
 
-Warning: Not a valid stream resource in %s/004.php on line 35
+Warning: Not a valid stream resource in %s/test/zend/good/ext/bz2/tests/004.php on line 35
 bool(false)
 
-Warning: Not a valid stream resource in %s/004.php on line 36
+Warning: Not a valid stream resource in %s/test/zend/good/ext/bz2/tests/004.php on line 36
 bool(false)
 
-Warning: Not a valid stream resource in %s/004.php on line 37
+Warning: Not a valid stream resource in %s/test/zend/good/ext/bz2/tests/004.php on line 37
 bool(false)
 Done

@@ -2,7 +2,7 @@ object(MealIterator) (2) {
   ["pos":"MealIterator":private]=>
   int(0)
   ["myContent":"MealIterator":private]=>
-  varray(3) {
+  vec(3) {
     string(9) "breakfast"
     string(5) "lunch"
     string(6) "dinner"
@@ -56,6 +56,6 @@ meal 0 => breakfast
      --> MealIterator::next (2)
      --> MealIterator::valid (3)
  --> MealIterator::next (3)
-%s
+Out of bounds vec access: invalid index 3
  --> MealIterator::valid (4)
 ===DONE===

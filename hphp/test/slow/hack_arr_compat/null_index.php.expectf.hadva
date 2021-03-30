@@ -1,3 +1,0 @@
-=== indexing into a boolean ===
-=== indexing into invalid keys ===
-Out of bounds dict access: invalid index "invalid key"

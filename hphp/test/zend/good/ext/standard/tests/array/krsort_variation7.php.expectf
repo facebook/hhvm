@@ -5,37 +5,37 @@
 -- Iteration 1 --
 - With defualt sort flag -
 bool(true)
-darray(0) {
+dict(0) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 2 --
 - With defualt sort flag -
 bool(true)
-darray(1) {
+dict(1) {
   [1]=>
-  varray(0) {
+  vec(0) {
   }
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(1) {
+dict(1) {
   [1]=>
-  varray(0) {
+  vec(0) {
   }
 }
 
 -- Iteration 3 --
 - With defualt sort flag -
 bool(true)
-darray(3) {
+dict(3) {
   [4]=>
   int(44)
   [3]=>
-  varray(2) {
+  vec(2) {
     int(64)
     int(61)
   }
@@ -44,11 +44,11 @@ darray(3) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(3) {
+dict(3) {
   [4]=>
   int(44)
   [3]=>
-  varray(2) {
+  vec(2) {
     int(64)
     int(61)
   }
@@ -59,46 +59,46 @@ darray(3) {
 -- Iteration 4 --
 - With defualt sort flag -
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
-  varray(3) {
+  vec(3) {
     int(33)
     int(-5)
     int(6)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     int(22)
     int(-55)
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     int(11)
   }
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(4) {
+dict(4) {
   [3]=>
-  varray(3) {
+  vec(3) {
     int(33)
     int(-5)
     int(6)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     int(22)
     int(-55)
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     int(11)
   }
   [0]=>
-  varray(0) {
+  vec(0) {
   }
 }
 Done

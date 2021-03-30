@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With Default sort flag -
 bool(true)
-varray(12) {
+vec(12) {
   NULL
   NULL
   string(1) "	"
@@ -13,7 +13,8 @@ varray(12) {
 "
   string(1) ""
   string(1) ""
-  string(1) ""
+  string(1) "
+"
   string(1) ""
   string(2) "\a"
   string(3) "\cx"
@@ -22,7 +23,7 @@ varray(12) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(12) {
+vec(12) {
   NULL
   NULL
   string(1) "	"
@@ -30,7 +31,8 @@ varray(12) {
 "
   string(1) ""
   string(1) ""
-  string(1) ""
+  string(1) "
+"
   string(1) ""
   string(2) "\a"
   string(3) "\cx"
@@ -39,7 +41,7 @@ varray(12) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-varray(12) {
+vec(12) {
   NULL
   NULL
   string(1) "	"
@@ -47,7 +49,8 @@ varray(12) {
 "
   string(1) ""
   string(1) ""
-  string(1) ""
+  string(1) "
+"
   string(1) ""
   string(2) "\a"
   string(3) "\cx"
@@ -58,7 +61,7 @@ varray(12) {
 -- Iteration 2 --
 - With Default sort flag -
 bool(true)
-varray(12) {
+vec(12) {
   string(6) "BANANA"
   string(6) "Orange"
   string(4) "TTTT"
@@ -74,7 +77,7 @@ varray(12) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-varray(12) {
+vec(12) {
   string(6) "BANANA"
   string(6) "Orange"
   string(4) "TTTT"
@@ -90,7 +93,7 @@ varray(12) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-varray(12) {
+vec(12) {
   string(6) "BANANA"
   string(6) "Orange"
   string(4) "TTTT"

@@ -1,11 +1,11 @@
-1, varray(4) {
+1, vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 
-1, varray(4) {
+1, vec(4) {
   int(1)
   int(2)
   int(3)

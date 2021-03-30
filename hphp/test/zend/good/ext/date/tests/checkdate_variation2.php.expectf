@@ -2,89 +2,89 @@
 
 -- float 10.5 --
 
-Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- float -10.5 --
 
-Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- float .5 --
 
-Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- empty array --
 
-Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- int indexed array --
 
-Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- associative array --
 
-Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- nested arrays --
 
-Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- uppercase NULL --
 
-Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- lowercase null --
 
-Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- lowercase true --
 
-Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- lowercase false --
 
-Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- uppercase TRUE --
 
-Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- uppercase FALSE --
 
-Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- empty string DQ --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- empty string SQ --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- string DQ --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- string SQ --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- mixed case string --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- heredoc --
 
-Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- instance of classWithToString --
 
-Warning: checkdate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- instance of classWithoutToString --
 
-Warning: checkdate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 
 -- resource --
 
-Warning: checkdate() expects parameter 2 to be integer, resource given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line %d
+Warning: checkdate() expects parameter 2 to be integer, resource given in %s/test/zend/good/ext/date/tests/checkdate_variation2.php on line 83
 ===DONE===

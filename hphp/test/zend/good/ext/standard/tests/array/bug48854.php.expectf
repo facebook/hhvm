@@ -1,17 +1,17 @@
-darray(2) {
+dict(2) {
   ["friends"]=>
   int(5)
   ["children"]=>
-  darray(1) {
+  dict(1) {
     ["dogs"]=>
     int(0)
   }
 }
-darray(2) {
+dict(2) {
   ["friends"]=>
   int(10)
   ["children"]=>
-  darray(1) {
+  dict(1) {
     ["cats"]=>
     int(5)
   }

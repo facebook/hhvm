@@ -25,16 +25,16 @@ string(5) "hello"
 bool(true)
 int(-1)
 bool(true)
-varray(3) {
-  varray(1) {
+vec(3) {
+  vec(1) {
     int(2)
   }
   int(4)
   int(8)
 }
 bool(true)
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     int(2)
     int(5)
     int(1)

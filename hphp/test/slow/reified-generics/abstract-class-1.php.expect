@@ -1,5 +1,5 @@
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     ["kind"]=>
     int(1)
   }

@@ -1,16 +1,16 @@
-darray(1) {
+dict(1) {
   ["x"]=>
   int(1)
 }
 int(1)
-darray(1) {
+dict(1) {
   ["x"]=>
   int(1)
 }
 int(1)
-varray(2) {
+vec(2) {
   bool(true)
   bool(false)
 }
 
-Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, varray given in %s/idx_arr_compat.php on line 14
+Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\%rdarray|dict%r, HH\vec given in %s/idx_arr_compat.php on line 14

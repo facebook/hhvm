@@ -1,10 +1,10 @@
-varray(4) {
+vec(4) {
   string(5) "apple"
   string(9) "raspberry"
   string(6) "orange"
   string(6) "banana"
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "apple"
   [1]=>

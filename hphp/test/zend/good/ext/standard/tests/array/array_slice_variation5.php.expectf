@@ -1,7 +1,7 @@
 *** Testing array_slice() : usage variations ***
 
 -- $offset is -7 --
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   [0]=>
@@ -15,7 +15,7 @@ darray(5) {
 }
 
 -- $offset is -6 --
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   [0]=>
@@ -29,7 +29,7 @@ darray(5) {
 }
 
 -- $offset is -5 --
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   [0]=>
@@ -43,7 +43,7 @@ darray(5) {
 }
 
 -- $offset is -4 --
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -55,7 +55,7 @@ darray(4) {
 }
 
 -- $offset is -3 --
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "three"
   [1]=>
@@ -65,7 +65,7 @@ darray(3) {
 }
 
 -- $offset is -2 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "nine"
   ["ten"]=>
@@ -73,13 +73,13 @@ darray(2) {
 }
 
 -- $offset is -1 --
-darray(1) {
+dict(1) {
   ["ten"]=>
   int(10)
 }
 
 -- $offset is 0 --
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   [0]=>
@@ -93,7 +93,7 @@ darray(5) {
 }
 
 -- $offset is 1 --
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -105,7 +105,7 @@ darray(4) {
 }
 
 -- $offset is 2 --
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "three"
   [1]=>
@@ -115,7 +115,7 @@ darray(3) {
 }
 
 -- $offset is 3 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "nine"
   ["ten"]=>
@@ -123,29 +123,29 @@ darray(2) {
 }
 
 -- $offset is 4 --
-darray(1) {
+dict(1) {
   ["ten"]=>
   int(10)
 }
 
 -- $offset is 5 --
-darray(0) {
+dict(0) {
 }
 
 -- $offset is 6 --
-darray(0) {
+dict(0) {
 }
 
 -- $offset is 7 --
-darray(0) {
+dict(0) {
 }
 
 -- $offset is maximum integer value --
-darray(0) {
+dict(0) {
 }
 
 -- $offset is minimum integer value --
-darray(5) {
+dict(5) {
   ["one"]=>
   int(1)
   [0]=>

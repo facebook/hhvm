@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   ["foo:a"]=>
   int(2)
   ["foo:b"]=>

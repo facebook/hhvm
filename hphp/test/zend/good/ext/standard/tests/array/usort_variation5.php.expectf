@@ -2,7 +2,7 @@
 
 -- Sorting Single Quoted String values --
 bool(true)
-darray(10) {
+dict(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -27,7 +27,7 @@ darray(10) {
 
 -- Sorting Double Quoted String values --
 bool(true)
-darray(10) {
+dict(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -52,7 +52,7 @@ darray(10) {
 
 -- Sorting Heredoc String values --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   string(0) ""
   [1]=>

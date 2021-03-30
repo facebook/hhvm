@@ -1,7 +1,7 @@
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1: int data --
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -15,7 +15,7 @@ darray(6) {
   [5]=>
   int(2)
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(1)
   [1]=>
@@ -31,7 +31,7 @@ darray(6) {
 }
 
 -- Iteration 2: float data --
-darray(7) {
+dict(7) {
   [0]=>
   float(10.5)
   [1]=>
@@ -47,7 +47,7 @@ darray(7) {
   [6]=>
   int(2)
 }
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [1]=>
@@ -65,7 +65,7 @@ darray(7) {
 }
 
 -- Iteration 3: null data --
-darray(4) {
+dict(4) {
   [0]=>
   NULL
   [1]=>
@@ -75,7 +75,7 @@ darray(4) {
   [3]=>
   int(2)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -87,7 +87,7 @@ darray(4) {
 }
 
 -- Iteration 4: bool data --
-darray(6) {
+dict(6) {
   [0]=>
   bool(true)
   [1]=>
@@ -101,7 +101,7 @@ darray(6) {
   [5]=>
   int(2)
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(1)
   [1]=>
@@ -117,7 +117,7 @@ darray(6) {
 }
 
 -- Iteration 5: empty string data --
-darray(4) {
+dict(4) {
   [0]=>
   string(0) ""
   [1]=>
@@ -127,7 +127,7 @@ darray(4) {
   [3]=>
   int(2)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -139,13 +139,13 @@ darray(4) {
 }
 
 -- Iteration 6: empty array data --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -153,7 +153,7 @@ darray(2) {
 }
 
 -- Iteration 7: string data --
-darray(5) {
+dict(5) {
   [0]=>
   string(6) "string"
   [1]=>
@@ -165,7 +165,7 @@ darray(5) {
   [4]=>
   int(2)
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(1)
   [1]=>
@@ -179,7 +179,7 @@ darray(5) {
 }
 
 -- Iteration 8: object data --
-darray(3) {
+dict(3) {
   [0]=>
   object(classA) (0) {
   }
@@ -188,7 +188,7 @@ darray(3) {
   [2]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -199,7 +199,7 @@ darray(3) {
 }
 
 -- Iteration 9: resource data --
-darray(3) {
+dict(3) {
   [0]=>
   resource(4) of type (stream)
   [1]=>
@@ -207,7 +207,7 @@ darray(3) {
   [2]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

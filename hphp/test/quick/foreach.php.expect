@@ -1,13 +1,13 @@
 0 1
 1 2
 2 3
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(400)
 }
-varray(4) {
+vec(4) {
   string(4) "fub1"
   string(4) "fub2"
   string(4) "fub3"

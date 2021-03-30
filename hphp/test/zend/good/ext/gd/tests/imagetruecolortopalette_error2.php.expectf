@@ -1,4 +1,3 @@
+Warning: imagetruecolortopalette() expects parameter 2 to be boolean, resource given in %s/test/zend/good/ext/gd/tests/imagetruecolortopalette_error2.php on line 5
 
-Warning: imagetruecolortopalette() expects parameter 2 to be boolean, resource given in %s/imagetruecolortopalette_error2.php on line 5
-
-Warning: imagetruecolortopalette() expects parameter 2 to be boolean, %rv?%rarray given in %s/imagetruecolortopalette_error2.php on line 6
+Warning: imagetruecolortopalette() expects parameter 2 to be boolean, vec given in %s/test/zend/good/ext/gd/tests/imagetruecolortopalette_error2.php on line 6

@@ -1,6 +1,6 @@
 int(1)
 int(10)
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -8,7 +8,7 @@ darray(2) {
 }
 int(1)
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -16,7 +16,7 @@ darray(2) {
 }
 int(1)
 int(2)
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

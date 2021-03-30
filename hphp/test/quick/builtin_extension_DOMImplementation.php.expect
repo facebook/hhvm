@@ -4,7 +4,7 @@ object(DOMImplementation) (0) {
 string(29) "O:17:"DOMImplementation":0:{}"
 object(DOMImplementation) (0) {
 }
-varray(4) {
+vec(4) {
   string(11) "__construct"
   string(14) "createDocument"
   string(18) "createDocumentType"
@@ -21,7 +21,7 @@ object(A_DOMImplementation) (1) {
   ["___x"]=>
   NULL
 }
-varray(4) {
+vec(4) {
   string(11) "__construct"
   string(14) "createDocument"
   string(18) "createDocumentType"

@@ -1,10 +1,10 @@
-Out of bounds varray access: invalid index 8589934592
-varray(1) {
+Out of bounds vec access: invalid index 8589934592
+vec(1) {
   string(5) "value"
 }
-varray(1) {
+vec(1) {
   string(5) "value"
 }
-varray(1) {
+vec(1) {
   string(5) "value"
 }

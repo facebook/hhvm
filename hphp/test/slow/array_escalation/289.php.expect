@@ -1,16 +1,16 @@
-darray(2) {
+dict(2) {
   [0]=>
   int(10)
   [2]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(10)
   [2]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }

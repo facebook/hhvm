@@ -1,22 +1,22 @@
 string(3) "   "
 vec(5) {
-  varray(2) {
+  vec(2) {
     string(10) "T_VARIABLE"
     string(2) "$a"
   }
-  varray(2) {
+  vec(2) {
     string(8) "T_ASSIGN"
     string(1) "="
   }
-  varray(2) {
+  vec(2) {
     string(5) "T_NUM"
     string(1) "3"
   }
-  varray(2) {
+  vec(2) {
     string(16) "T_TERMINATE_STMT"
     string(1) ";"
   }
-  varray(2) {
+  vec(2) {
     string(9) "T_COMMENT"
     string(26) "// variable initialisation"
   }

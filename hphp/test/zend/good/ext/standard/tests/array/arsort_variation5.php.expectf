@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With default sort_flag -
 bool(true)
-darray(12) {
+dict(12) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -16,8 +16,10 @@ darray(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   [""]=>
@@ -35,7 +37,7 @@ darray(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-darray(12) {
+dict(12) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -46,8 +48,10 @@ darray(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   [""]=>
@@ -65,7 +69,7 @@ darray(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-darray(12) {
+dict(12) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -76,8 +80,10 @@ darray(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   [""]=>
@@ -97,7 +103,7 @@ darray(12) {
 -- Iteration 2 --
 - With default sort_flag -
 bool(true)
-darray(12) {
+dict(12) {
   ["x"]=>
   string(1) "x"
   ["w"]=>
@@ -125,7 +131,7 @@ darray(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-darray(12) {
+dict(12) {
   ["x"]=>
   string(1) "x"
   ["w"]=>
@@ -153,7 +159,7 @@ darray(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-darray(12) {
+dict(12) {
   ["x"]=>
   string(1) "x"
   ["w"]=>

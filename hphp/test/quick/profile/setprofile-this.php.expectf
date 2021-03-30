@@ -1,43 +1,43 @@
-exit fb_setprofile: a:1:{s:6:"return";N;}
+exit fb_setprofile: D:1:{s:6:"return";N;}
 
-  enter main: a:1:{s:4:"args";a:0:{}}
+  enter main: D:1:{s:4:"args";v:0:{}}
 
-    enter C::__construct: a:1:{s:4:"args";a:0:{}}
+    enter C::__construct: D:1:{s:4:"args";v:0:{}}
 
 C constructing
 
-    exit C::__construct: a:1:{s:6:"return";N;}
+    exit C::__construct: D:1:{s:6:"return";N;}
 
-    enter Exception::getMessage: a:1:{s:4:"args";a:0:{}}
+    enter Exception::getMessage: D:1:{s:4:"args";v:0:{}}
 
-    exit Exception::getMessage: a:1:{s:6:"return";s:14:"C::__construct";}
+    exit Exception::getMessage: D:1:{s:6:"return";s:14:"C::__construct";}
 
 Caught C::__construct
 
-    enter C::__construct: a:1:{s:4:"args";a:0:{}}
+    enter C::__construct: D:1:{s:4:"args";v:0:{}}
 
 C constructing
 
-    exit C::__construct: a:1:{s:6:"return";N;}
+    exit C::__construct: D:1:{s:6:"return";N;}
 
-    enter C::method: a:1:{s:4:"args";a:0:{}}
+    enter C::method: D:1:{s:4:"args";v:0:{}}
 
 C method
 
-      enter A::__construct: a:1:{s:4:"args";a:0:{}}
+      enter A::__construct: D:1:{s:4:"args";v:0:{}}
 
 A constructing
 
-      exit A::__construct: a:1:{s:6:"return";N;}
+      exit A::__construct: D:1:{s:6:"return";N;}
 
-    exit C::method: a:1:{s:6:"return";O:1:"A":0:{}}
+    exit C::method: D:1:{s:6:"return";O:1:"A":0:{}}
 
-    enter Exception::getMessage: a:1:{s:4:"args";a:0:{}}
+    enter Exception::getMessage: D:1:{s:4:"args";v:0:{}}
 
-    exit Exception::getMessage: a:1:{s:6:"return";s:9:"C::method";}
+    exit Exception::getMessage: D:1:{s:6:"return";s:9:"C::method";}
 
 Caught C::method
 
-  exit main: a:1:{s:6:"return";N;}
+  exit main: D:1:{s:6:"return";N;}
 
-exit entrypoint_setprofilethis: a:1:{s:6:"return";N;}
+exit entrypoint_setprofilethis: D:1:{s:6:"return";N;}

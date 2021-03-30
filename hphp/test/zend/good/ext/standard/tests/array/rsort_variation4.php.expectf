@@ -2,7 +2,7 @@
 
 -- 'flag' value is defualt --
 bool(true)
-varray(3) {
+vec(3) {
   int(555)
   int(100)
   int(33)
@@ -10,7 +10,7 @@ varray(3) {
 
 -- 'flag' = SORT_REGULAR --
 bool(true)
-varray(3) {
+vec(3) {
   int(555)
   int(100)
   int(33)

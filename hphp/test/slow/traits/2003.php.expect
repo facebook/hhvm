@@ -1,4 +1,4 @@
-darray(2) {
+dict(2) {
   ["Hello1"]=>
   string(6) "Hello1"
   ["Hello2"]=>

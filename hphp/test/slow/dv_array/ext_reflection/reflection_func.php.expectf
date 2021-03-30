@@ -1,17 +1,17 @@
-darray(2) {
+dict(2) {
   ["A"]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
   ["B"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-varray(3) {
+vec(3) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(10) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -29,7 +29,7 @@ varray(3) {
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -37,7 +37,7 @@ varray(3) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -48,7 +48,7 @@ varray(3) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -70,7 +70,7 @@ varray(3) {
       ["defaultText"]=>
       string(4) "NULL"
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -78,7 +78,7 @@ varray(3) {
     ["name"]=>
     string(1) "b"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -89,7 +89,7 @@ varray(3) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -111,7 +111,7 @@ varray(3) {
       ["defaultText"]=>
       string(4) "NULL"
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -119,7 +119,7 @@ varray(3) {
     ["name"]=>
     string(1) "c"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -131,7 +131,7 @@ varray(3) {
 }
 object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(7) "HH\void"
     ["nullable"]=>
@@ -140,18 +140,18 @@ object(ReflectionType) (1) {
     bool(false)
   }
 }
-varray(1) {
+vec(1) {
   int(1)
 }
-darray(1) {
+dict(1) {
   ["Bing"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-varray(1) {
+vec(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(11) {
+    dict(11) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -171,7 +171,7 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -179,7 +179,7 @@ varray(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>

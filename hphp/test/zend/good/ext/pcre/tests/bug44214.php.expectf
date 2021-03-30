@@ -1,10 +1,10 @@
 string(31) "xxx bbb ccc ddd eee ccc xxx bbb"
-varray(2) {
-  darray(1) {
+vec(2) {
+  dict(1) {
     [0]=>
     string(3) "aaa"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(3) "aaa"
   }

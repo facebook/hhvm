@@ -1,7 +1,7 @@
 *** Testing array_unshift() : Passing object to $var argument ***
 -- Iteration 1 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(SimpleClass) (1) {
     ["var1"]=>
@@ -17,7 +17,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(SimpleClass) (1) {
     ["var1"]=>
@@ -38,7 +38,7 @@ darray(7) {
 }
 -- Iteration 2 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(EmptyClass) (0) {
   }
@@ -52,7 +52,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(EmptyClass) (0) {
   }
@@ -71,7 +71,7 @@ darray(7) {
 }
 -- Iteration 3 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(ChildClass) (2) {
     ["var3":"ChildClass":private]=>
@@ -89,7 +89,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(ChildClass) (2) {
     ["var3":"ChildClass":private]=>
@@ -112,7 +112,7 @@ darray(7) {
 }
 -- Iteration 4 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(FinalClass) (1) {
     ["var4":"FinalClass":private]=>
@@ -128,7 +128,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(FinalClass) (1) {
     ["var4":"FinalClass":private]=>
@@ -149,7 +149,7 @@ darray(7) {
 }
 -- Iteration 5 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(StaticClass) (0) {
   }
@@ -163,7 +163,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(StaticClass) (0) {
   }

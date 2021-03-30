@@ -1,9 +1,9 @@
 *** Testing class_implements() : basic ***
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "foo"
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "foo"
 }

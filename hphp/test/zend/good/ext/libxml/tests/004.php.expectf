@@ -1,19 +1,18 @@
+Warning: options should have the form ["wrappername"]["optionname"] = $value in %s/test/zend/good/ext/libxml/tests/004.php on line 10
 
-Warning: options should have the form ["wrappername"]["optionname"] = $value in %s/004.php on line 10
-
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, null given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/libxml/tests/004.php on line 16
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, string given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/libxml/tests/004.php on line 16
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, integer given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/libxml/tests/004.php on line 16
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, object given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/libxml/tests/004.php on line 16
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, %rv?%rarray given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/libxml/tests/004.php on line 16
 bool(true)
 NULL
 bool(true)

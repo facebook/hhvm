@@ -1,5 +1,5 @@
 string(5) "Child"
-darray(5) {
+dict(5) {
   ["ddd"]=>
   int(4)
   ["eee"]=>

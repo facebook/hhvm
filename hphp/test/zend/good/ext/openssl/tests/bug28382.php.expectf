@@ -1,4 +1,4 @@
-darray(11) {
+dict(11) {
   ["basicConstraints"]=>
   string(8) "CA:FALSE"
   ["nsComment"]=>

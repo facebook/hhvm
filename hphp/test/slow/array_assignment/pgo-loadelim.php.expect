@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -8,7 +8,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -18,7 +18,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -28,7 +28,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -38,7 +38,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -48,7 +48,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -58,7 +58,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -68,7 +68,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -78,7 +78,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>
@@ -88,7 +88,7 @@ darray(4) {
   ["d"]=>
   string(1) "0"
 }
-darray(4) {
+dict(4) {
   ["a"]=>
   int(12)
   ["b"]=>

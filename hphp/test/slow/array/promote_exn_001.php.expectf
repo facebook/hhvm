@@ -1,10 +1,10 @@
 ----
 after a throw:
-string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
-darray(0) {
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
+dict(0) {
 }
 ----
 after a throw:
-string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
-darray(0) {
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
+dict(0) {
 }

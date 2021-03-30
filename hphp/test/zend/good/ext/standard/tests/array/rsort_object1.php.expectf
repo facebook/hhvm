@@ -2,7 +2,7 @@
 
 -- Sort flag = default --
 bool(true)
-varray(6) {
+vec(6) {
   object(for_integer_rsort) (1) {
     ["class_value"]=>
     int(66)
@@ -29,7 +29,7 @@ varray(6) {
   }
 }
 bool(true)
-varray(8) {
+vec(8) {
   object(for_string_rsort) (1) {
     ["class_value"]=>
     string(1) "w"
@@ -66,7 +66,7 @@ varray(8) {
 
 -- Sort flag = SORT_REGULAR --
 bool(true)
-varray(6) {
+vec(6) {
   object(for_integer_rsort) (1) {
     ["class_value"]=>
     int(66)
@@ -93,7 +93,7 @@ varray(6) {
   }
 }
 bool(true)
-varray(8) {
+vec(8) {
   object(for_string_rsort) (1) {
     ["class_value"]=>
     string(1) "w"

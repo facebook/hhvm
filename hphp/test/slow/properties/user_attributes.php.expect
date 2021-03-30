@@ -1,26 +1,26 @@
-darray(1) {
+dict(1) {
   ["A"]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
-darray(1) {
+dict(1) {
   ["B"]=>
-  varray(1) {
+  vec(1) {
     string(3) "two"
   }
 }
-darray(1) {
+dict(1) {
   ["C"]=>
-  varray(1) {
+  vec(1) {
     vec(1) {
       int(3)
     }
   }
 }
-darray(1) {
+dict(1) {
   ["D"]=>
-  varray(1) {
+  vec(1) {
     vec(1) {
       string(4) "four"
     }

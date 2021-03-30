@@ -1,10 +1,10 @@
 --------------------
-input: varray(3) {
+input: vec(3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
 }
-flip: darray(3) {
+flip: dict(3) {
   ["foo"]=>
   int(0)
   ["bar"]=>
@@ -13,7 +13,7 @@ flip: darray(3) {
   int(2)
 }
 --------------------
-input: darray(3) {
+input: dict(3) {
   ["a"]=>
   int(10)
   ["b"]=>
@@ -21,7 +21,7 @@ input: darray(3) {
   ["c"]=>
   int(30)
 }
-flip: darray(3) {
+flip: dict(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -38,7 +38,7 @@ input: object(HH\Vector) (3) {
   [2]=>
   string(3) "baz"
 }
-flip: darray(3) {
+flip: dict(3) {
   ["foo"]=>
   int(0)
   ["bar"]=>
@@ -52,7 +52,7 @@ input: object(HH\Set) (3) {
   string(3) "bar"
   string(3) "baz"
 }
-flip: darray(3) {
+flip: dict(3) {
   ["foo"]=>
   string(3) "foo"
   ["bar"]=>
@@ -69,7 +69,7 @@ input: object(HH\Map) (3) {
   ["c"]=>
   int(30)
 }
-flip: darray(3) {
+flip: dict(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -86,7 +86,7 @@ input: object(HH\ImmVector) (3) {
   [2]=>
   string(3) "baz"
 }
-flip: darray(3) {
+flip: dict(3) {
   ["foo"]=>
   int(0)
   ["bar"]=>
@@ -100,7 +100,7 @@ input: object(HH\ImmSet) (3) {
   string(3) "bar"
   string(3) "baz"
 }
-flip: darray(3) {
+flip: dict(3) {
   ["foo"]=>
   string(3) "foo"
   ["bar"]=>
@@ -117,7 +117,7 @@ input: object(HH\ImmMap) (3) {
   ["c"]=>
   int(30)
 }
-flip: darray(3) {
+flip: dict(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -139,7 +139,7 @@ input: object(HH\Vector) (4) {
 }
 flip: 
 Warning: Can only flip STRING and INTEGER values! in %s/test/slow/collection_classes/array_flip.php on line 8
-darray(3) {
+dict(3) {
   [10]=>
   int(1)
   [20]=>

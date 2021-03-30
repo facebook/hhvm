@@ -1,11 +1,11 @@
 dict(2) {
   ["a"]=>
-  varray(2) {
+  vec(2) {
     string(2) "?X"
     bool(false)
   }
   ["b"]=>
-  varray(2) {
+  vec(2) {
     string(28) "(function (): Awaitable<?Y>)"
     bool(true)
   }

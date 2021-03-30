@@ -2,21 +2,21 @@
 
 -- Testing ezmlm_hash() function with fewer than expected no. of arguments --
 
-Warning: ezmlm_hash() expects exactly 1 parameter, 0 given in %s/ezmlm_hash_error.php on line 14
+Warning: ezmlm_hash() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/mail/ezmlm_hash_error.php on line 14
 
 -- Testing ezmlm_hash() function with more than expected no. of arguments --
 
-Warning: ezmlm_hash() expects exactly 1 parameter, 2 given in %s/ezmlm_hash_error.php on line 18
+Warning: ezmlm_hash() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/mail/ezmlm_hash_error.php on line 18
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, %rv?%rarray given in %s/ezmlm_hash_error.php on line 23
+Warning: ezmlm_hash() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/mail/ezmlm_hash_error.php on line 23
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, object given in %s/ezmlm_hash_error.php on line 28
+Warning: ezmlm_hash() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/mail/ezmlm_hash_error.php on line 28
 
 -- Testing ezmlm_hash() function with invalid input - RESOURCE --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, resource given in %s/ezmlm_hash_error.php on line 33
+Warning: ezmlm_hash() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/mail/ezmlm_hash_error.php on line 33
 ===DONE===

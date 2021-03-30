@@ -1,5 +1,5 @@
 string(19) "03/10/2004 15:54:19"
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(19)
   ["tm_min"]=>

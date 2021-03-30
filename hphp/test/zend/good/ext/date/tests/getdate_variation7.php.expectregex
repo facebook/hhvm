@@ -1,7 +1,7 @@
 \*\*\* Testing getdate\(\) : usage variation \*\*\*
 
 -- Testing getdate\(\) function by passing int 123456789000 value to timestamp --
-darray\(11\) {
+dict\(11\) {
   \["seconds"\]=>
   int\((.+)\)
   \["minutes"\]=>
@@ -27,7 +27,7 @@ darray\(11\) {
 }
 
 -- Testing getdate\(\) function by passing int -123456789000 value to timestamp --
-darray\(11\) {
+dict\(11\) {
   \["seconds"\]=>
   int\((.+)\)
   \["minutes"\]=>

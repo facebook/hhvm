@@ -1,2 +1,1 @@
-
-Warning: socket_set_block() expects parameter 1 to be resource, %rv?%rarray given in %s/socket_set_block-wrongparams.php on line 2
+Warning: socket_set_block() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/sockets/tests/socket_set_block-wrongparams.php on line 2

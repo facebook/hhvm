@@ -11,7 +11,7 @@ Line 2
 >< is FALSE	NULL
 >xx< is TRUE	string(2) "xx"
 >< is FALSE	string(0) ""
->Array< is TRUE	varray(3) {
+>Array< is TRUE	vec(3) {
   string(3) "red"
   string(5) "white"
   string(4) "blue"

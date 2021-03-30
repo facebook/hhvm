@@ -1,7 +1,7 @@
 *** Testing array_shift() : basic functionality ***
 
 -- Before shift: --
-darray(4) {
+dict(4) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -15,7 +15,7 @@ darray(4) {
 -- After shift: --
 Returned value:	string(4) "zero"
 New array:
-darray(3) {
+dict(3) {
   [0]=>
   string(3) "one"
   ["3"]=>

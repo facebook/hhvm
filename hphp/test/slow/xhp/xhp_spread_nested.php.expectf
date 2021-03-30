@@ -1,15 +1,15 @@
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["age"]=>
   int(3)
 }
 string(7) "xhp_foo"
-darray(1) {
+dict(1) {
   ["age"]=>
   int(1)
 }
 string(7) "xhp_foo"
-darray(2) {
+dict(2) {
   ["...$0"]=>
   object(xhp_foo) (0) {
   }
@@ -17,7 +17,7 @@ darray(2) {
   int(2)
 }
 string(7) "xhp_foo"
-darray(3) {
+dict(3) {
   ["...$0"]=>
   object(xhp_foo) (0) {
   }
@@ -28,7 +28,7 @@ darray(3) {
   int(4)
 }
 string(7) "xhp_foo"
-darray(2) {
+dict(2) {
   ["...$0"]=>
   object(xhp_foo) (0) {
   }

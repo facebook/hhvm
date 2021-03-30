@@ -1,19 +1,19 @@
 *** Testing array_diff() : usage variations ***
 
  Iteration: 1
-varray(2) {
+vec(2) {
   int(1)
   int(2)
 }
 
  Iteration: 2
-darray(1) {
+dict(1) {
   [1]=>
   int(2)
 }
 
  Iteration: 3
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -21,7 +21,7 @@ darray(2) {
 }
 
  Iteration: 4
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -29,13 +29,13 @@ darray(2) {
 }
 
  Iteration: 5
-darray(1) {
+dict(1) {
   [1]=>
   int(2)
 }
 
  Iteration: 6
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -43,7 +43,7 @@ darray(2) {
 }
 
  Iteration: 7
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -51,7 +51,7 @@ darray(2) {
 }
 
  Iteration: 8
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>

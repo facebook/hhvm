@@ -1,5 +1,5 @@
 0112
 
-Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds varray access: invalid index 3' in %s/quick/GetElem.php:16
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds vec access: invalid index 3' in %s/quick/GetElem.php:16
 Stack trace:
 %A

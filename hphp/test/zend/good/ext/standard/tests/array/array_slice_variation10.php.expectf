@@ -1,7 +1,7 @@
 *** Testing array_slice() : usage variations ***
 
 -- Call array_slice() --
-darray(2) {
+dict(2) {
   [0]=>
   string(12) "twenty-three"
   [1]=>

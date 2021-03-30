@@ -1,96 +1,96 @@
-Test 1.e8f1cd28133d79ecd660002f1c660d0e:
-array (
-  0 => 'aaa',
-  1 => 'abc',
-  2 => 'abd',
-)
+Test 1.4c4e270d56c36a4af3ae75a8ca4403f2:
+vec [
+  'aaa',
+  'abc',
+  'abd',
+]
  Result: true
 
-Test 2.c2ded12173dd2996927378cae37eb275:
-array (
-  0 => '_',
-  1 => '1',
-  2 => 'm',
-)
+Test 2.c9cbf285979fdf3cb078d5852f739f45:
+vec [
+  '_',
+  '1',
+  'm',
+]
  Result: true
 
-Test 3.54071c968d71cb98c5d379145f8d7d38:
-array (
-  0 => 'a',
-  1 => 'aa',
-  2 => 'aaa',
-)
+Test 3.1ab9c7eec494cf3ca5e1dce81bc54b87:
+vec [
+  'a',
+  'aa',
+  'aaa',
+]
  Result: true
 
-Test 4.19abe63d6f6dfef65b0e3c9ab4826b07:
-array (
-  0 => 'ab',
-  1 => 'b',
-  2 => 'ba',
-)
+Test 4.8c015f033e63ec77bbd338b437932ef3:
+vec [
+  'ab',
+  'b',
+  'ba',
+]
  Result: true
 
-Test 5.9a8dc0a9bc771368c2f1fc3d02754610:
-array (
-  0 => 'a',
-  1 => 'c',
-  2 => 'e',
-)
+Test 5.e85df79912ccf40db467a3d41e5945e4:
+vec [
+  'a',
+  'c',
+  'e',
+]
  Result: true
 
-Test 6.923d65739c5219c634616ffd100a50e4:
-array (
-  0 => '',
-  1 => ' a',
-  2 => 'd',
-)
+Test 6.6e8b96676ae67c86db1660b0ce70ce45:
+vec [
+  '',
+  ' a',
+  'd',
+]
  Result: true
 
-Test 7.289bc2f28e87d3201ec9d7e8477ae1b0:
-array (
-  0 => ' a',
-  1 => 'd ',
-  2 => 'f ',
-)
+Test 7.4e3a927e92fef57dcba48f88517ea8e4:
+vec [
+  ' a',
+  'd ',
+  'f ',
+]
  Result: true
 
-Test 8.de0fd958484f2377a645835d7fbcf124:
-array (
-  0 => NULL,
-  1 => '3',
-  2 => 'a',
-)
+Test 8.fafc77ca66955b539693d68becac29f6:
+vec [
+  NULL,
+  '3',
+  'a',
+]
  Result: true
 
-Test 9.dd2b8f0adb37c45d528cad1a0cc0f361:
-array (
-  0 => 'i',
-  1 => 'k',
-  2 => 'y',
-)
+Test 9.9fe68c05033cdd06abb380826afbb058:
+vec [
+  'i',
+  'k',
+  'y',
+]
  Result: true
 
-Test 10.49056308afb2b800363c5baa735ed247:
-array (
-  0 => 'ааа',
-  1 => 'абв',
-  2 => 'абг',
-  3 => 'abc',
-)
+Test 10.6a356206232f5cbf71028611c88859f0:
+vec [
+  'ааа',
+  'абв',
+  'абг',
+  'abc',
+]
  Result: true
 
-Test 11.91480b10473a0c96a4cd6d88c23c577a:
-array (
-  0 => 'а',
-  1 => 'аа',
-  2 => 'ааа',
-)
+Test 11.5d27a145952612b4e10782f74f3eeea3:
+vec [
+  'а',
+  'аа',
+  'ааа',
+]
  Result: true
 
-Test 12.fdd3fe3981476039164aa000bf9177f2:
-array (
-  0 => 'i',
-  1 => 'y',
-  2 => 'k',
-)
+Test 12.9ec4e88c7d969a27847c3b1b44abbb5f:
+vec [
+  'i',
+  'y',
+  'k',
+]
  Result: true

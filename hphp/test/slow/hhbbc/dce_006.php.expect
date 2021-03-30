@@ -1,4 +1,4 @@
-darray(1) {
+dict(1) {
   ["id"]=>
   string(2) "42"
 }

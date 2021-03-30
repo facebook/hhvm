@@ -1,32 +1,32 @@
 bool(false)
-darray(4) {
+dict(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  darray(1) {
+  dict(1) {
     [6]=>
     string(29) "Double timezone specification"
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(47) "The timezone could not be found in the database"
   }
 }
-darray(4) {
+dict(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  darray(1) {
+  dict(1) {
     [6]=>
     string(29) "Double timezone specification"
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(47) "The timezone could not be found in the database"
   }

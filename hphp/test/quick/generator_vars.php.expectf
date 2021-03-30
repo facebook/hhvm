@@ -3,7 +3,7 @@ string(3) "foo"
 int(1234)
 int(1234)
 logger 0 constructing
-darray(2) {
+dict(2) {
   ["x"]=>
   object(logger) (1) {
     ["idx":"logger":private]=>
@@ -13,13 +13,13 @@ darray(2) {
   int(5)
 }
 string(12) "almost there"
-darray(2) {
+dict(2) {
   ["foo"]=>
   string(10) "inside foo"
   ["s"]=>
   string(3) "foo"
 }
-darray(4) {
+dict(4) {
   ["x"]=>
   object(logger) (1) {
     ["idx":"logger":private]=>
@@ -33,7 +33,7 @@ darray(4) {
   int(5)
 }
 int(3735928559)
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
@@ -42,7 +42,7 @@ varray(5) {
 }
 int(4)
 string(29) "Generator is already finished"
-darray(12) {
+dict(12) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -68,7 +68,7 @@ darray(12) {
   ["l"]=>
   int(12)
 }
-darray(12) {
+dict(12) {
   ["a"]=>
   object(stdClass) (0) {
   }
@@ -95,7 +95,7 @@ darray(12) {
   ["l"]=>
   int(12)
 }
-darray(12) {
+dict(12) {
   ["a"]=>
   object(stdClass) (0) {
   }

@@ -1,15 +1,15 @@
-darray(1) {
+dict(1) {
   ["options"]=>
-  darray(1) {
+  dict(1) {
     ["http"]=>
-    darray(2) {
+    dict(2) {
       ["header"]=>
-      varray(2) {
+      vec(2) {
         string(21) "Accept-Encoding: gzip"
         string(39) "User-Agent: Composer/source PHP 5.5.99)"
       }
       ["tls"]=>
-      darray(1) {
+      dict(1) {
         ["verify_peer_name"]=>
         bool(true)
       }

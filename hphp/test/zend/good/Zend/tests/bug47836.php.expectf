@@ -1,5 +1,5 @@
-Warning: Cannot add element to the array as the next element is already occupied in %s/bug47836.php on line 4
-darray(1) {
-  [%d]=>
+Warning: Cannot add element to the array as the next element is already occupied in %s/test/zend/good/Zend/tests/bug47836.php on line 4
+dict(1) {
+  [9223372036854775807]=>
   int(1)
 }

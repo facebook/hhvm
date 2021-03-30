@@ -23,10 +23,10 @@ int(4)
 int(2)
 
 --- getParameters("f") ---
-varray(4) {
+vec(4) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(10) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -44,7 +44,7 @@ varray(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -52,7 +52,7 @@ varray(4) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -63,7 +63,7 @@ varray(4) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(11) {
+    dict(11) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -83,7 +83,7 @@ varray(4) {
       ["inout"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -91,7 +91,7 @@ varray(4) {
     ["name"]=>
     string(1) "b"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -102,7 +102,7 @@ varray(4) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -124,7 +124,7 @@ varray(4) {
       ["defaultText"]=>
       string(4) "NULL"
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -132,7 +132,7 @@ varray(4) {
     ["name"]=>
     string(1) "c"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -143,7 +143,7 @@ varray(4) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -161,7 +161,7 @@ varray(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      varray(3) {
+      vec(3) {
         int(1)
         int(2)
         string(11) "some string"
@@ -169,7 +169,7 @@ varray(4) {
       ["defaultText"]=>
       string(27) "varray[1, 2, SOME_CONSTANT]"
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -177,7 +177,7 @@ varray(4) {
     ["name"]=>
     string(1) "d"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -205,11 +205,11 @@ Function [ <user> function f ] {
     Parameter #0 [ <required> $a ]
     Parameter #1 [ <required> inout $b ]
     Parameter #2 [ <optional> $c = NULL ]
-    Parameter #3 [ <optional> $d = array (
-    0 => 1,
-    1 => 2,
-    2 => 'some string',
-  ) ]
+    Parameter #3 [ <optional> $d = vec [
+    1,
+    2,
+    'some string',
+  ] ]
   }
 }
 "
@@ -229,11 +229,11 @@ Function [ <user> function g ] {
 
   - Parameters [3] {
     Parameter #0 [ <optional> $a = NULL ]
-    Parameter #1 [ <optional> $b = array (
-    0 => 1,
-    1 => 2,
-    2 => 3,
-  ) ]
+    Parameter #1 [ <optional> $b = vec [
+    1,
+    2,
+    3,
+  ] ]
     Parameter #2 [ <optional> $c = 'some string' ]
   }
 }
@@ -301,7 +301,7 @@ string(5) "B::C0"
 string(5) "B::C1"
 
 --- getConstants() ---
-darray(2) {
+dict(2) {
   ["C0"]=>
   string(5) "B::C0"
   ["C1"]=>
@@ -326,7 +326,7 @@ int(80)
 string(%d) "%s/test/slow/lang/reflection.php"
 
 --- getInterfaceNames() ---
-varray(4) {
+vec(4) {
   string(1) "I"
   string(1) "K"
   string(1) "H"
@@ -437,7 +437,7 @@ object(B) (4) {
 }
 
 --- get_defined_functions() ---
-varray(3) {
+vec(3) {
   string(21) "entrypoint_reflection"
   string(1) "f"
   string(1) "g"

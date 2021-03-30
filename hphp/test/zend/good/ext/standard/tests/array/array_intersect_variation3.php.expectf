@@ -1,142 +1,144 @@
 *** Testing array_intersect() : Passing different types of arrays to $arr1 argument ***
 -- Iterator 1 --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- Iterator 2 --
-darray(1) {
+dict(1) {
   [0]=>
   float(1.1)
 }
-darray(1) {
+dict(1) {
   [0]=>
   float(1.1)
 }
 -- Iterator 3 --
-darray(2) {
+dict(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
-darray(2) {
+dict(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iterator 4 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iterator 5 --
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 -- Iterator 6 --
-darray(1) {
+dict(1) {
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
-darray(1) {
+dict(1) {
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
 -- Iterator 7 --
-darray(1) {
+dict(1) {
   [1]=>
   string(6) "aaaa\r"
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(6) "aaaa\r"
 }
 -- Iterator 8 --
-darray(2) {
+dict(2) {
   [2]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   [3]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
 }
-darray(2) {
+dict(2) {
   [2]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   [3]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
 }
 -- Iterator 9 --
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
 -- Iterator 10 --
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
 -- Iterator 11 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iterator 12 --
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
 -- Iterator 13 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [2]=>
@@ -144,7 +146,7 @@ darray(3) {
   [4]=>
   string(4) "four"
 }
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [2]=>
@@ -153,33 +155,33 @@ darray(3) {
   string(4) "four"
 }
 -- Iterator 14 --
-darray(2) {
+dict(2) {
   ["NULL"]=>
   NULL
   ["null"]=>
   NULL
 }
-darray(2) {
+dict(2) {
   ["NULL"]=>
   NULL
   ["null"]=>
   NULL
 }
 -- Iterator 15 --
-darray(2) {
+dict(2) {
   ["false"]=>
   bool(false)
   ["true"]=>
   bool(true)
 }
-darray(2) {
+dict(2) {
   ["false"]=>
   bool(false)
   ["true"]=>
   bool(true)
 }
 -- Iterator 16 --
-darray(3) {
+dict(3) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -187,7 +189,7 @@ darray(3) {
   ["emptys"]=>
   string(0) ""
 }
-darray(3) {
+dict(3) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -196,7 +198,7 @@ darray(3) {
   string(0) ""
 }
 -- Iterator 17 --
-darray(6) {
+dict(6) {
   [1]=>
   string(0) ""
   [2]=>
@@ -210,7 +212,7 @@ darray(6) {
   [6]=>
   bool(true)
 }
-darray(6) {
+dict(6) {
   [1]=>
   string(0) ""
   [2]=>
@@ -225,17 +227,17 @@ darray(6) {
   bool(true)
 }
 -- Iterator 18 --
-darray(1) {
+dict(1) {
   [0]=>
   int(5)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(5)
 }
 -- Iterator 19 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 Done

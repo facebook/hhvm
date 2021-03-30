@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   int(2)
 }
-varray(2) {
+vec(2) {
   int(2)
   int(2)
 }

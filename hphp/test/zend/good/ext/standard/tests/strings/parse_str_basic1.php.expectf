@@ -2,7 +2,7 @@
 
 Basic test WITH undefined var for result arg
 NULL
-darray(3) {
+dict(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>
@@ -13,7 +13,7 @@ darray(3) {
 
 Basic test WITH existing non-array var for result arg
 NULL
-darray(3) {
+dict(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>
@@ -24,7 +24,7 @@ darray(3) {
 
 Basic test with an existing array as results array
 NULL
-darray(3) {
+dict(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>

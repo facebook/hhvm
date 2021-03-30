@@ -1,75 +1,75 @@
 [TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
-array
-array
+vec
+vec
 [TYPE VIOLATION] Props::priv_prop_foo_static (wanted: Foo, got: clsmeth)
 clsmeth
 clsmeth
@@ -143,146 +143,146 @@ clsmeth
 clsmeth
 clsmeth
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-NULL
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 NULL
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+NULL
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }

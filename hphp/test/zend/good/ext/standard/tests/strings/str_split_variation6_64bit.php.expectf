@@ -4,7 +4,7 @@
 Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/zend/good/ext/standard/tests/strings/str_split_variation6_64bit.php on line 33
 bool(false)
 -- Iteration 2 --
-varray(42) {
+vec(42) {
   string(1) "T"
   string(1) "h"
   string(1) "i"
@@ -53,20 +53,20 @@ varray(42) {
 Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/zend/good/ext/standard/tests/strings/str_split_variation6_64bit.php on line 33
 bool(false)
 -- Iteration 4 --
-varray(1) {
+vec(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 5 --
-varray(2) {
+vec(2) {
   string(26) "This is a string with 123 "
   string(16) "& escape char \t"
 }
 -- Iteration 6 --
-varray(1) {
+vec(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-varray(1) {
+vec(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 8 --

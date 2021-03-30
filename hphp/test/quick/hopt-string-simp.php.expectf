@@ -9,6 +9,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-string(%d) "strlen() expects parameter 1 to be string, %rv?%rarray given"
-string(%d) "strlen() expects parameter 1 to be string, object given"
-string(%d) "strlen() expects parameter 1 to be string, object given"
+string(52) "strlen() expects parameter 1 to be string, vec given"
+string(55) "strlen() expects parameter 1 to be string, object given"
+string(55) "strlen() expects parameter 1 to be string, object given"

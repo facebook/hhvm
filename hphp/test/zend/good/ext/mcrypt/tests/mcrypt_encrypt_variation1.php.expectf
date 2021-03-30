@@ -2,97 +2,97 @@
 
 --int 0--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --int 1--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --int 12345--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --int -12345--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --float 10.5--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --float -10.5--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --float 12.3456789000e10--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --float -12.3456789000e10--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --float .5--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, double given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --empty array--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --int indexed array--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --associative array--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --nested arrays--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --uppercase NULL--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, null given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --lowercase null--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, null given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --lowercase true--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --lowercase false--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --uppercase TRUE--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --uppercase FALSE--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --empty string DQ--
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php(102)
+Error: 2 - mcrypt_encrypt(): Module initialization failed, %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php(102)
 bool(false)
 
 --empty string SQ--
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php(102)
+Error: 2 - mcrypt_encrypt(): Module initialization failed, %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php(102)
 bool(false)
 
 --instance of classWithToString--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, object given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --instance of classWithoutToString--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, object given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 
 --resource--
 
-Warning: mcrypt_encrypt() expects parameter 1 to be string, resource given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line %d
+Warning: mcrypt_encrypt() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation1.php on line 102
 ===DONE===

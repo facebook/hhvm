@@ -1,15 +1,15 @@
 -----
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(true)
 -----
-darray(0) {
+dict(0) {
 }
 bool(true)
 bool(true)
 -----
-varray(0) {
+vec(0) {
 }
 bool(true)
 bool(true)

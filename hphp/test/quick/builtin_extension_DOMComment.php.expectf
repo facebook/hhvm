@@ -41,7 +41,7 @@ object(DOMComment) (18) {
 Warning: Attempted to serialize unserializable builtin class DOMComment in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(24) {
+vec(24) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(10) "appendData"
@@ -113,7 +113,7 @@ object(A_DOMComment) (19) {
 Warning: Attempted to serialize unserializable builtin class A_DOMComment in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(24) {
+vec(24) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(10) "appendData"

@@ -1,38 +1,38 @@
 string(16) "varray[\C::A, 1]"
-string(25) "varray [
+string(22) "vec [
   2,
   1,
   3,
 ]"
-string(25) "varray [
+string(22) "vec [
   1,
   2,
   3,
 ]"
-string(146) "varray [
-  varray [
+string(128) "vec [
+  vec [
   ],
-  varray [
-    varray [
+  vec [
+    vec [
       1,
       2,
       3,
     ],
-    varray [
+    vec [
     ],
   ],
-  varray [
+  vec [
     1,
     2,
     3,
   ],
 ]"
 string(72) "varray[varray[], varray[varray[1, \C::A, 3], varray[]], varray[1, 2, 3]]"
-string(137) "varray [
-  varray [
+string(128) "vec [
+  vec [
   ],
   vec [
-    varray [
+    vec [
       1,
       2,
       3,
@@ -47,68 +47,32 @@ string(137) "varray [
   ],
 ]"
 string(63) "varray[varray[], vec[varray[1, \C::A, 3], vec[]], vec[1, 2, 3]]"
-string(25) "varray [
+string(22) "vec [
   1,
   2,
   3,
 ]"
 string(19) "varray[\C::A, 1, 2]"
 ======================================================
-varray(2) {
+vec(2) {
   int(1)
   int(1)
 }
-varray(3) {
+vec(3) {
   int(2)
   int(1)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
-  varray(0) {
-  }
-  varray(2) {
-    varray(3) {
-      int(1)
-      int(2)
-      int(3)
-    }
-    varray(0) {
-    }
-  }
-  varray(3) {
-    int(1)
-    int(2)
-    int(3)
-  }
-}
-varray(3) {
-  varray(0) {
-  }
-  varray(2) {
-    varray(3) {
-      int(1)
-      int(1)
-      int(3)
-    }
-    varray(0) {
-    }
-  }
-  varray(3) {
-    int(1)
-    int(2)
-    int(3)
-  }
-}
-varray(3) {
-  varray(0) {
+vec(3) {
+  vec(0) {
   }
   vec(2) {
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
@@ -122,11 +86,11 @@ varray(3) {
     int(3)
   }
 }
-varray(3) {
-  varray(0) {
+vec(3) {
+  vec(0) {
   }
   vec(2) {
-    varray(3) {
+    vec(3) {
       int(1)
       int(1)
       int(3)
@@ -140,12 +104,48 @@ varray(3) {
     int(3)
   }
 }
-varray(3) {
+vec(3) {
+  vec(0) {
+  }
+  vec(2) {
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    vec(0) {
+    }
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+vec(3) {
+  vec(0) {
+  }
+  vec(2) {
+    vec(3) {
+      int(1)
+      int(1)
+      int(3)
+    }
+    vec(0) {
+    }
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(1)
   int(2)
@@ -190,43 +190,43 @@ string(9) "HH\varray"
 string(9) "HH\varray"
 ======================================================
 string(26) "darray[1 => \C::A, 2 => 1]"
-string(40) "darray [
+string(38) "dict [
   1 => 2,
   4 => 1,
   3 => 3,
 ]"
-string(43) "darray [
+string(41) "dict [
   1 => 1,
   "hi" => 2,
   5 => 3,
 ]"
-string(176) "darray [
+string(163) "dict [
   1 => 
-  darray [
+  dict [
   ],
   "hi" => 
-  varray [
-    darray [
+  vec [
+    dict [
       "key1" => 123,
       "key2" => 
-      darray [
+      dict [
       ],
     ],
     456,
   ],
   5 => 
-  darray [
+  dict [
   ],
 ]"
 string(102) "darray[1 => darray[], "hi" => varray[darray["key1" => \C::A, "key2" => darray[]], 456], 5 => darray[]]"
-string(185) "darray [
+string(179) "dict [
   1 => 
-  darray [
+  dict [
   ],
   "hi" => 
   dict [
     2 => 
-    darray [
+    dict [
       "key1" => 123,
       "key2" => 
       dict [
@@ -239,19 +239,19 @@ string(185) "darray [
   ],
 ]"
 string(106) "darray[1 => darray[], "hi" => dict[2 => darray["key1" => \C::A, "key2" => dict[]], 3 => 456], 5 => dict[]]"
-string(34) "darray [
+string(32) "dict [
   "a" => 1,
   "b" => 2,
 ]"
 string(30) "darray["a" => \C::A, "b" => 2]"
 ======================================================
-darray(2) {
+dict(2) {
   [1]=>
   int(1)
   [2]=>
   int(1)
 }
-darray(3) {
+dict(3) {
   [1]=>
   int(2)
   [4]=>
@@ -259,7 +259,7 @@ darray(3) {
   [3]=>
   int(3)
 }
-darray(3) {
+dict(3) {
   [1]=>
   int(1)
   ["hi"]=>
@@ -267,52 +267,52 @@ darray(3) {
   [5]=>
   int(3)
 }
-darray(3) {
+dict(3) {
   [1]=>
-  darray(0) {
+  dict(0) {
   }
   ["hi"]=>
-  varray(2) {
-    darray(2) {
+  vec(2) {
+    dict(2) {
       ["key1"]=>
       int(123)
       ["key2"]=>
-      darray(0) {
+      dict(0) {
       }
     }
     int(456)
   }
   [5]=>
-  darray(0) {
+  dict(0) {
   }
 }
-darray(3) {
+dict(3) {
   [1]=>
-  darray(0) {
+  dict(0) {
   }
   ["hi"]=>
-  varray(2) {
-    darray(2) {
+  vec(2) {
+    dict(2) {
       ["key1"]=>
       int(1)
       ["key2"]=>
-      darray(0) {
+      dict(0) {
       }
     }
     int(456)
   }
   [5]=>
-  darray(0) {
+  dict(0) {
   }
 }
-darray(3) {
+dict(3) {
   [1]=>
-  darray(0) {
+  dict(0) {
   }
   ["hi"]=>
   dict(2) {
     [2]=>
-    darray(2) {
+    dict(2) {
       ["key1"]=>
       int(123)
       ["key2"]=>
@@ -326,14 +326,14 @@ darray(3) {
   dict(0) {
   }
 }
-darray(3) {
+dict(3) {
   [1]=>
-  darray(0) {
+  dict(0) {
   }
   ["hi"]=>
   dict(2) {
     [2]=>
-    darray(2) {
+    dict(2) {
       ["key1"]=>
       int(1)
       ["key2"]=>
@@ -347,13 +347,13 @@ darray(3) {
   dict(0) {
   }
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -398,20 +398,20 @@ string(9) "HH\darray"
 string(9) "HH\darray"
 string(9) "HH\darray"
 ======================================================
-varray(3) {
+vec(3) {
   int(2)
   int(1)
   int(3)
 }
 bool(true)
 string(9) "HH\varray"
-varray(2) {
+vec(2) {
   int(1)
   int(1)
 }
 bool(true)
 string(17) "HH\varray<HH\int>"
-darray(3) {
+dict(3) {
   ["a"]=>
   int(2)
   ["b"]=>
@@ -421,7 +421,7 @@ darray(3) {
 }
 bool(true)
 string(9) "HH\darray"
-darray(2) {
+dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>

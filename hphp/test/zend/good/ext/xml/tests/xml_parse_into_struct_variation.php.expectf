@@ -1,14 +1,14 @@
 *** Testing xml_parse_into_struct() : variation ***
 Index array
-Array
+Dict
 (
-    [MAIN] => Array
+    [MAIN] => Vec
         (
             [0] => 0
             [1] => 7
         )
 
-    [PARA] => Array
+    [PARA] => Vec
         (
             [0] => 1
             [1] => 3
@@ -16,7 +16,7 @@ Array
             [3] => 6
         )
 
-    [NOTE] => Array
+    [NOTE] => Vec
         (
             [0] => 2
             [1] => 5
@@ -25,23 +25,23 @@ Array
 )
 
 Vals array
-Array
+Vec
 (
-    [0] => Array
+    [0] => Dict
         (
             [tag] => MAIN
             [type] => open
             [level] => 1
         )
 
-    [1] => Array
+    [1] => Dict
         (
             [tag] => PARA
             [type] => open
             [level] => 2
         )
 
-    [2] => Array
+    [2] => Dict
         (
             [tag] => NOTE
             [type] => complete
@@ -49,21 +49,21 @@ Array
             [value] => simple note
         )
 
-    [3] => Array
+    [3] => Dict
         (
             [tag] => PARA
             [type] => close
             [level] => 2
         )
 
-    [4] => Array
+    [4] => Dict
         (
             [tag] => PARA
             [type] => open
             [level] => 2
         )
 
-    [5] => Array
+    [5] => Dict
         (
             [tag] => NOTE
             [type] => complete
@@ -71,14 +71,14 @@ Array
             [value] => simple note
         )
 
-    [6] => Array
+    [6] => Dict
         (
             [tag] => PARA
             [type] => close
             [level] => 2
         )
 
-    [7] => Array
+    [7] => Dict
         (
             [tag] => MAIN
             [type] => close

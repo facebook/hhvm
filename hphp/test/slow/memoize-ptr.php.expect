@@ -16,12 +16,12 @@ classMeth{
   function(b)
 }
 A::b(4)
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }
 A::b(3)
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }

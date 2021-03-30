@@ -1,5 +1,5 @@
 f: $p1 = 0, $p2 = 1, $p3 = 1, $p4 = 12, $p5 = 11
-varray(3) {
+vec(3) {
   string(1) "f"
   string(1) "g"
   string(1) "h"

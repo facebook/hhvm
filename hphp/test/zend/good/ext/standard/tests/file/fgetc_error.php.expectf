@@ -1,27 +1,27 @@
 *** Testing error conditions ***
 -- Testing fgetc() with zero argument --
 
-Warning: fgetc() expects exactly 1 parameter, 0 given in %s/fgetc_error.php on line 10
+Warning: fgetc() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 10
 -- Testing fgetc() with more than expected number of arguments --
 
-Warning: fgetc() expects exactly 1 parameter, 2 given in %s/fgetc_error.php on line 15
+Warning: fgetc() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 15
 -- Testing fgetc() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetc() expects parameter 1 to be resource, string given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 -- Iteration 2 --
 
-Warning: fgetc() expects parameter 1 to be resource, integer given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 -- Iteration 3 --
 
-Warning: fgetc() expects parameter 1 to be resource, double given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 -- Iteration 4 --
 
-Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 -- Iteration 5 --
 
-Warning: fgetc() expects parameter 1 to be resource, %rv?%rarray given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 -- Iteration 6 --
 
-Warning: fgetc() expects parameter 1 to be resource, object given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/file/fgetc_error.php on line 31
 Done

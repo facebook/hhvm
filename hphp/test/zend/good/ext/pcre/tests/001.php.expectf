@@ -1,5 +1,5 @@
 int(1)
-darray(10) {
+dict(10) {
   [0]=>
   string(10) "2006-05-13"
   ["date"]=>
@@ -22,7 +22,7 @@ darray(10) {
   string(2) "13"
 }
 int(1)
-darray(10) {
+dict(10) {
   [0]=>
   string(8) "06-12-12"
   ["date"]=>
@@ -45,7 +45,7 @@ darray(10) {
   string(2) "12"
 }
 int(1)
-darray(10) {
+dict(10) {
   [0]=>
   string(8) "12-Aug-8"
   ["date"]=>

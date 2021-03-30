@@ -2,10 +2,10 @@ Memcache
 object(Memcache) (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class Memcache in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class Memcache in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(20) {
+vec(20) {
   string(11) "__construct"
   string(7) "connect"
   string(8) "pconnect"
@@ -34,10 +34,10 @@ object(A_Memcache) (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_Memcache in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_Memcache in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(20) {
+vec(20) {
   string(11) "__construct"
   string(7) "connect"
   string(8) "pconnect"

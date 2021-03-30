@@ -14,145 +14,145 @@ foo\C
 foo\foo::C
 1
 1
-Array
+Dict
 (
     [11] => 0
 )
-Array
+Dict
 (
     [12] => 0
 )
-Array
+Dict
 (
     [32] => 0
 )
-Array
+Dict
 (
     [11] => 0
 )
-Array
+Dict
 (
     [22] => 0
 )
-Array
+Dict
 (
     [1] => 0
 )
-Array
+Dict
 (
     [1] => 0
 )
-Array
+Dict
 (
     [11] => 11
 )
-Array
+Dict
 (
     [12] => 11
 )
-Array
+Dict
 (
     [32] => 11
 )
-Array
+Dict
 (
     [11] => 11
 )
-Array
+Dict
 (
     [22] => 11
 )
-Array
+Dict
 (
     [1] => 11
 )
-Array
+Dict
 (
     [1] => 11
 )
-Array
+Dict
 (
     [11] => 12
 )
-Array
+Dict
 (
     [12] => 12
 )
-Array
+Dict
 (
     [32] => 12
 )
-Array
+Dict
 (
     [11] => 12
 )
-Array
+Dict
 (
     [22] => 12
 )
-Array
+Dict
 (
     [1] => 12
 )
-Array
+Dict
 (
     [1] => 12
 )
-Array
+Dict
 (
     [11] => 1
 )
-Array
+Dict
 (
     [12] => 1
 )
-Array
+Dict
 (
     [32] => 1
 )
-Array
+Dict
 (
     [11] => 1
 )
-Array
+Dict
 (
     [22] => 1
 )
-Array
+Dict
 (
     [1] => 1
 )
-Array
+Dict
 (
     [1] => 1
 )
-Array
+Dict
 (
     [11] => 1
 )
-Array
+Dict
 (
     [12] => 1
 )
-Array
+Dict
 (
     [32] => 1
 )
-Array
+Dict
 (
     [11] => 1
 )
-Array
+Dict
 (
     [22] => 1
 )
-Array
+Dict
 (
     [1] => 1
 )
-Array
+Dict
 (
     [1] => 1
 )
 
-Fatal error: Undefined constant 'foo\foo\unknown' in %s/bug42819.php on line 80
+Fatal error: Undefined constant 'foo\foo\unknown' in %s/test/zend/good/Zend/tests/bug42819.php on line 80

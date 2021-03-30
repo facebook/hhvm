@@ -1,28 +1,28 @@
 int(0)
-varray(0) {
+vec(0) {
 }
 bool(false)
 int(0)
-varray(1) {
+vec(1) {
   int(1)
 }
 bool(false)
 int(0)
-varray(1) {
+vec(1) {
   int(1)
 }
 bool(true)
 int(0)
-varray(0) {
+vec(0) {
 }
 bool(false)
 int(0)
-varray(1) {
+vec(1) {
   int(1)
 }
 bool(false)
 int(0)
-varray(1) {
+vec(1) {
   int(1)
 }
 bool(true)

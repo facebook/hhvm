@@ -1,5 +1,5 @@
 string(1) "2"
-darray(3) {
+dict(3) {
   ["names"]=>
   string(5) "root2"
   ["values1"]=>
@@ -7,7 +7,7 @@ darray(3) {
   ["values2"]=>
   string(1) "5"
 }
-varray(2) {
-  string(%d) "%s/relative-configs/root1.ini"
-  string(%d) "%s/relative-configs/root2.ini"
+vec(2) {
+  string(%d) "%s/test/slow/relative-configs/root1.ini"
+  string(%d) "%s/test/slow/relative-configs/root2.ini"
 }

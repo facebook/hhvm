@@ -1,6 +1,6 @@
 *** Testing array_map() : class methods as callback function ***
 -- accessing parent method from child class --
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -13,7 +13,7 @@ darray(3) {
 Warning: array_map() expects parameter 1 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_map_object3.php on line 51
 NULL
 -- accessing parent method using child class object --
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

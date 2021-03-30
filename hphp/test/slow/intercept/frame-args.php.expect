@@ -1,66 +1,66 @@
 Regular with default args
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(2) {
+vec(2) {
   int(1)
   int(2)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 
 Variadic
-varray(1) {
+vec(1) {
   int(1)
 }
 int(1)
-varray(0) {
+vec(0) {
 }
-varray(2) {
+vec(2) {
   int(1)
   int(2)
 }
 int(1)
-varray(1) {
+vec(1) {
   int(2)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 int(1)
-varray(2) {
+vec(2) {
   int(2)
   int(3)
 }
 
 Variadic and default args
-varray(1) {
+vec(1) {
   int(1)
 }
 int(1)
 int(20)
-varray(0) {
+vec(0) {
 }
-varray(2) {
+vec(2) {
   int(1)
   int(2)
 }
 int(1)
 int(2)
-varray(0) {
+vec(0) {
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 int(1)
 int(2)
-varray(1) {
+vec(1) {
   int(3)
 }

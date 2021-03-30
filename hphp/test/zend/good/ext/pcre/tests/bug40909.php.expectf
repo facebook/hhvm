@@ -1,17 +1,17 @@
 int(1)
-darray(3) {
+dict(3) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(33) " an_attribute="simpleValueInside""
   }
   [1]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(12) "an_attribute"
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(19) ""simpleValueInside""
   }

@@ -1,4 +1,4 @@
-darray(7) {
+dict(7) {
   ["int"]=>
   string(3) "123"
   ["constant"]=>

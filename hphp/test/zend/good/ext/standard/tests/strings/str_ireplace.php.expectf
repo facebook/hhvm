@@ -22,19 +22,19 @@ string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 string(22) "aaaaaaaaaaaaaaaaaaaaaT"
-darray(2) {
+dict(2) {
   [0]=>
   string(22) "aaaaaaaaaaaaaaaaaaaaaT"
   [1]=>
   string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
-darray(2) {
+dict(2) {
   ["key"]=>
   string(22) "aaaaaaaaaaaaaaaaaaaaaT"
   ["test"]=>
   string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
-darray(2) {
+dict(2) {
   ["key"]=>
   string(22) "aaaaaaaaaaaaaaaaaaaaaT"
   ["test"]=>

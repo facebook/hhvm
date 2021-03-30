@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   [0]=>
   int(0)
   [1]=>
@@ -8,7 +8,7 @@ darray(4) {
   [3]=>
   int(100)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(4)
   [1]=>
@@ -18,8 +18,8 @@ darray(4) {
   [3]=>
   int(3)
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     [0]=>
     string(2) "10"
     [1]=>
@@ -31,7 +31,7 @@ varray(2) {
     [4]=>
     string(1) "a"
   }
-  darray(5) {
+  dict(5) {
     [0]=>
     int(1)
     [1]=>
@@ -44,7 +44,7 @@ varray(2) {
     int(1)
   }
 }
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "Alpha"
   [1]=>

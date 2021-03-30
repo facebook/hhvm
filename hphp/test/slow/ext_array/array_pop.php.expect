@@ -1,9 +1,9 @@
-varray(3) {
+vec(3) {
   string(6) "orange"
   string(6) "banana"
   string(5) "apple"
 }
-varray(1) {
+vec(1) {
   string(6) "banana"
 }
 string(6) "orange"

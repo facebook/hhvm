@@ -13,7 +13,7 @@ float(12.3)
 int(12)
 float(12)
 float(0)
-darray(3) {
+dict(3) {
   [0]=>
   int(12)
   [1]=>
@@ -27,7 +27,7 @@ object(stdClass) (2) {
   ["integer"]=>
   int(12)
 }
-darray(2) {
+dict(2) {
   ["float"]=>
   float(12)
   ["integer"]=>

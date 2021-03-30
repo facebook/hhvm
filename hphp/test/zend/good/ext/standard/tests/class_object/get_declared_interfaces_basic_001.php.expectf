@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-varray(73) {
+vec(73) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(24) "HH\Rx\AsyncKeyedIterator"

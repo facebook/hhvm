@@ -1,14 +1,14 @@
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(2) "zx"
     [1]=>
     string(2) "ax"
   }
   [1]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "z"
     [1]=>
@@ -16,16 +16,16 @@ darray(2) {
   }
 }
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(2) "zx"
     [1]=>
     string(1) "z"
   }
   [1]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(2) "yx"
     [1]=>
@@ -33,58 +33,58 @@ darray(2) {
   }
 }
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
-    varray(2) {
+    vec(2) {
       string(2) "zx"
       int(0)
     }
     [1]=>
-    varray(2) {
+    vec(2) {
       string(2) "yx"
       int(2)
     }
   }
   [1]=>
-  darray(2) {
+  dict(2) {
     [0]=>
-    varray(2) {
+    vec(2) {
       string(1) "z"
       int(0)
     }
     [1]=>
-    varray(2) {
+    vec(2) {
       string(1) "y"
       int(2)
     }
   }
 }
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
-    varray(2) {
+    vec(2) {
       string(2) "zx"
       int(0)
     }
     [1]=>
-    varray(2) {
+    vec(2) {
       string(1) "z"
       int(0)
     }
   }
   [1]=>
-  darray(2) {
+  dict(2) {
     [0]=>
-    varray(2) {
+    vec(2) {
       string(2) "yx"
       int(2)
     }
     [1]=>
-    varray(2) {
+    vec(2) {
       string(1) "y"
       int(2)
     }

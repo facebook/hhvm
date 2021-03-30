@@ -1,4 +1,4 @@
 Warning: array_push() expects at least 2 parameters, 1 given in %s/test/slow/bad_function_calls/1713.php on line 6
-varray(1) {
+vec(1) {
   int(1)
 }

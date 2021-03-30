@@ -1,22 +1,22 @@
-darray(2) {
+dict(2) {
   ["A"]=>
-  varray(0) {
+  vec(0) {
   }
   ["B"]=>
-  varray(3) {
+  vec(3) {
     int(1)
     string(3) "two"
-    varray(1) {
+    vec(1) {
       int(3)
     }
   }
 }
-darray(2) {
+dict(2) {
   ["C"]=>
-  varray(0) {
+  vec(0) {
   }
   ["D"]=>
-  varray(2) {
+  vec(2) {
     string(1) "a"
     dict(1) {
       ["b"]=>
@@ -24,17 +24,17 @@ darray(2) {
     }
   }
 }
-darray(2) {
+dict(2) {
   ["E"]=>
-  varray(0) {
+  vec(0) {
   }
   ["F"]=>
-  varray(2) {
+  vec(2) {
     string(7) "promote"
     vec(1) {
       string(2) "me"
     }
   }
 }
-darray(0) {
+dict(0) {
 }

@@ -1,17 +1,17 @@
 *** Testing array_intersect_assoc() : binary safe checking ***
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(5) "hello"
   [1]=>

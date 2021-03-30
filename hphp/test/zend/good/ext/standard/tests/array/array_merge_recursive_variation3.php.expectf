@@ -1,14 +1,14 @@
 *** Testing array_merge_recursive() : Passing different arrays to $arr1 argument ***
 -- Iteration 1 --
 -- With default argument --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   int(1)
   [1]=>
@@ -20,7 +20,7 @@ darray(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -28,14 +28,14 @@ darray(6) {
 }
 -- Iteration 2 --
 -- With default argument --
-darray(2) {
+dict(2) {
   [0]=>
   float(1.1)
   [1]=>
   float(2.2)
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   float(1.1)
   [1]=>
@@ -47,7 +47,7 @@ darray(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -55,14 +55,14 @@ darray(6) {
 }
 -- Iteration 3 --
 -- With default argument --
-darray(2) {
+dict(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   bool(false)
   [1]=>
@@ -74,7 +74,7 @@ darray(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -82,10 +82,10 @@ darray(6) {
 }
 -- Iteration 4 --
 -- With default argument --
-darray(0) {
+dict(0) {
 }
 -- With more arguments --
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -93,7 +93,7 @@ darray(4) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -101,12 +101,12 @@ darray(4) {
 }
 -- Iteration 5 --
 -- With default argument --
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 -- With more arguments --
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   [1]=>
@@ -116,7 +116,7 @@ darray(5) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -124,9 +124,9 @@ darray(5) {
 }
 -- Iteration 6 --
 -- With default argument --
-darray(4) {
+dict(4) {
   [0]=>
-  string(3) "a%r\x0b\x0c%r"
+  string(3) "a"
   [1]=>
   string(5) "aaaa
 "
@@ -136,9 +136,9 @@ darray(4) {
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
-darray(8) {
+dict(8) {
   [0]=>
-  string(3) "a%r\x0b\x0c%r"
+  string(3) "a"
   [1]=>
   string(5) "aaaa
 "
@@ -153,7 +153,7 @@ darray(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -161,7 +161,7 @@ darray(8) {
 }
 -- Iteration 7 --
 -- With default argument --
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
@@ -172,7 +172,7 @@ darray(4) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
-darray(8) {
+dict(8) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
@@ -188,7 +188,7 @@ darray(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -196,7 +196,7 @@ darray(8) {
 }
 -- Iteration 8 --
 -- With default argument --
-darray(3) {
+dict(3) {
   ["h1"]=>
   string(1) "
 "
@@ -207,13 +207,13 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   ["h1"]=>
   string(1) "
 "
@@ -224,10 +224,10 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   [0]=>
   string(3) "one"
   [1]=>
@@ -235,7 +235,7 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -243,14 +243,14 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 -- Iteration 9 --
 -- With default argument --
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "one"
   [1]=>
   string(3) "two"
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -262,7 +262,7 @@ darray(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -270,7 +270,7 @@ darray(6) {
 }
 -- Iteration 10 --
 -- With default argument --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -279,7 +279,7 @@ darray(3) {
   int(1)
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -293,7 +293,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -301,7 +301,7 @@ darray(7) {
 }
 -- Iteration 11 --
 -- With default argument --
-darray(3) {
+dict(3) {
   [0]=>
   int(10)
   [1]=>
@@ -310,7 +310,7 @@ darray(3) {
   int(40)
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   [0]=>
   int(10)
   [1]=>
@@ -324,7 +324,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -332,14 +332,14 @@ darray(7) {
 }
 -- Iteration 12 --
 -- With default argument --
-darray(2) {
+dict(2) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
   string(6) "twenty"
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
@@ -351,7 +351,7 @@ darray(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -359,7 +359,7 @@ darray(6) {
 }
 -- Iteration 13 --
 -- With default argument --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -368,7 +368,7 @@ darray(3) {
   string(4) "four"
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   ["one"]=>
   int(1)
   [0]=>
@@ -382,7 +382,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -390,7 +390,7 @@ darray(7) {
 }
 -- Iteration 14 --
 -- With default argument --
-darray(3) {
+dict(3) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
@@ -399,7 +399,7 @@ darray(3) {
   NULL
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
@@ -413,7 +413,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -421,7 +421,7 @@ darray(7) {
 }
 -- Iteration 15 --
 -- With default argument --
-darray(4) {
+dict(4) {
   [0]=>
   string(4) "true"
   [1]=>
@@ -432,7 +432,7 @@ darray(4) {
   bool(true)
 }
 -- With more arguments --
-darray(8) {
+dict(8) {
   [0]=>
   string(4) "true"
   [1]=>
@@ -448,7 +448,7 @@ darray(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -456,7 +456,7 @@ darray(8) {
 }
 -- Iteration 16 --
 -- With default argument --
-darray(3) {
+dict(3) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -465,7 +465,7 @@ darray(3) {
   string(0) ""
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -479,7 +479,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -487,7 +487,7 @@ darray(7) {
 }
 -- Iteration 17 --
 -- With default argument --
-darray(6) {
+dict(6) {
   [0]=>
   string(0) ""
   [1]=>
@@ -502,7 +502,7 @@ darray(6) {
   bool(true)
 }
 -- With more arguments --
-darray(10) {
+dict(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -522,7 +522,7 @@ darray(10) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -530,7 +530,7 @@ darray(10) {
 }
 -- Iteration 18 --
 -- With default argument --
-darray(3) {
+dict(3) {
   [""]=>
   int(4)
   [0]=>
@@ -539,7 +539,7 @@ darray(3) {
   int(6)
 }
 -- With more arguments --
-darray(7) {
+dict(7) {
   [""]=>
   int(4)
   [0]=>
@@ -553,7 +553,7 @@ darray(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  varray(3) {
+  vec(3) {
     string(1) "a"
     string(1) "b"
     string(1) "c"
@@ -561,26 +561,26 @@ darray(7) {
 }
 -- Iteration 19 --
 -- With default argument --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "str1"
   ["array"]=>
-  varray(2) {
+  vec(2) {
     string(5) "hello"
     string(5) "world"
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
 }
 -- With more arguments --
-darray(6) {
+dict(6) {
   [0]=>
   string(4) "str1"
   ["array"]=>
-  darray(5) {
+  dict(5) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -593,7 +593,7 @@ darray(6) {
     string(1) "c"
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }

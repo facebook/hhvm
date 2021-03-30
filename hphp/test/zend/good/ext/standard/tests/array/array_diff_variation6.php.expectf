@@ -1,9 +1,9 @@
 *** Testing array_diff() : usage variations ***
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "d"
 }
-darray(3) {
+dict(3) {
   ["0"]=>
   string(1) "a"
   ["b"]=>

@@ -2,31 +2,31 @@
 
 --float 10.5--
 
-Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --float -10.5--
 
-Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --float .5--
 
-Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --empty array--
 
-Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --int indexed array--
 
-Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --associative array--
 
-Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --nested arrays--
 
-Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --uppercase NULL--
 bool(true)
@@ -36,49 +36,49 @@ bool(true)
 
 --lowercase true--
 
-Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --lowercase false--
 
-Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --uppercase TRUE--
 
-Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --uppercase FALSE--
 
-Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --empty string DQ--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --empty string SQ--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --string DQ--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --string SQ--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --mixed case string--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --heredoc--
 
-Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --instance of classWithToString--
 
-Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 
 --instance of classWithoutToString--
 
-Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line %d
+Warning: strftime() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/strftime_variation2.php on line 91
 ===DONE===

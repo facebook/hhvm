@@ -1,4 +1,4 @@
-varray(6) {
+vec(6) {
   int(1)
   int(54)
   int(3)
@@ -6,7 +6,7 @@ varray(6) {
   int(5)
   int(2)
 }
-varray(6) {
+vec(6) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -14,7 +14,7 @@ varray(6) {
   string(1) "e"
   string(1) "f"
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(1)
   [1]=>
@@ -28,7 +28,7 @@ darray(6) {
   [5]=>
   int(54)
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -42,7 +42,7 @@ darray(6) {
   [5]=>
   string(1) "b"
 }
-darray(6) {
+dict(6) {
   [0]=>
   int(54)
   [1]=>
@@ -56,7 +56,7 @@ darray(6) {
   [5]=>
   int(1)
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(1) "b"
   [1]=>

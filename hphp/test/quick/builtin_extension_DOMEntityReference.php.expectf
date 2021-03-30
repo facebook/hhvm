@@ -37,7 +37,7 @@ object(DOMEntityReference) (16) {
 Warning: Attempted to serialize unserializable builtin class DOMEntityReference in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"
@@ -100,7 +100,7 @@ object(A_DOMEntityReference) (17) {
 Warning: Attempted to serialize unserializable builtin class A_DOMEntityReference in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(19) {
+vec(19) {
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"

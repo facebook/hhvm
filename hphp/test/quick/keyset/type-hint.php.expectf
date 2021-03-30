@@ -1,155 +1,155 @@
 ====================================================
 keyset(0) {
 }
-ERROR: string(%d) "Argument 1 to takes_vec() must be of type @HH\vec, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_vec() must be of type HH\vec, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_dict() must be of type @HH\dict, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_dict() must be of type HH\dict, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_null() must be of type @null, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_null() must be of type null, HH\keyset given"
+ERROR: string(66) "Argument 1 to takes_vec() must be of type @HH\vec, HH\keyset given"
+ERROR: string(80) "Value returned from function takes_vec() must be of type HH\vec, HH\keyset given"
+ERROR: string(68) "Argument 1 to takes_dict() must be of type @HH\dict, HH\keyset given"
+ERROR: string(82) "Value returned from function takes_dict() must be of type HH\dict, HH\keyset given"
+ERROR: string(65) "Argument 1 to takes_bool() must be of type @bool, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_bool() must be of type bool, HH\keyset given"
+ERROR: string(69) "Argument 1 to takes_string() must be of type @string, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_string() must be of type string, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_array1() must be of type @HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_array1() must be of type HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_array2() must be of type ?HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(63) "Argument 1 to takes_foo() must be of type @Foo, HH\keyset given"
+ERROR: string(77) "Value returned from function takes_foo() must be of type Foo, HH\keyset given"
+ERROR: string(82) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\keyset given"
+ERROR: string(96) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
+ERROR: string(76) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\keyset given"
+ERROR: string(90) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
+ERROR: string(65) "Argument 1 to takes_null() must be of type @null, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_null() must be of type null, HH\keyset given"
 keyset(0) {
 }
 ====================================================
 keyset(4) {
   int(1)
-  string(%d) "a"
+  string(1) "a"
   int(2)
-  string(%d) "b"
+  string(1) "b"
 }
-ERROR: string(%d) "Argument 1 to takes_vec() must be of type @HH\vec, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_vec() must be of type HH\vec, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_dict() must be of type @HH\dict, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_dict() must be of type HH\dict, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
-ERROR: string(%d) "Argument 1 to takes_null() must be of type @null, HH\keyset given"
-ERROR: string(%d) "Value returned from function takes_null() must be of type null, HH\keyset given"
+ERROR: string(66) "Argument 1 to takes_vec() must be of type @HH\vec, HH\keyset given"
+ERROR: string(80) "Value returned from function takes_vec() must be of type HH\vec, HH\keyset given"
+ERROR: string(68) "Argument 1 to takes_dict() must be of type @HH\dict, HH\keyset given"
+ERROR: string(82) "Value returned from function takes_dict() must be of type HH\dict, HH\keyset given"
+ERROR: string(65) "Argument 1 to takes_bool() must be of type @bool, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_bool() must be of type bool, HH\keyset given"
+ERROR: string(69) "Argument 1 to takes_string() must be of type @string, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_string() must be of type string, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_array1() must be of type @HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_array1() must be of type HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_array2() must be of type ?HH\%rvarray|vec%r, HH\keyset given"
+ERROR: string(63) "Argument 1 to takes_foo() must be of type @Foo, HH\keyset given"
+ERROR: string(77) "Value returned from function takes_foo() must be of type Foo, HH\keyset given"
+ERROR: string(82) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\keyset given"
+ERROR: string(96) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
+ERROR: string(76) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\keyset given"
+ERROR: string(90) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
+ERROR: string(65) "Argument 1 to takes_null() must be of type @null, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_null() must be of type null, HH\keyset given"
 keyset(4) {
   int(1)
-  string(%d) "a"
+  string(1) "a"
   int(2)
-  string(%d) "b"
+  string(1) "b"
 }
 ====================================================
 NULL
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, null given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, null given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, null given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, null given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, null given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, null given"
+ERROR: string(68) "Argument 1 to takes_keyset1() must be of type @HH\keyset, null given"
+ERROR: string(82) "Value returned from function takes_keyset1() must be of type HH\keyset, null given"
+ERROR: string(68) "Argument 1 to takes_keyset2() must be of type @HH\keyset, null given"
+ERROR: string(82) "Value returned from function takes_keyset2() must be of type HH\keyset, null given"
+ERROR: string(68) "Argument 1 to takes_keyset3() must be of type @HH\keyset, null given"
+ERROR: string(82) "Value returned from function takes_keyset3() must be of type HH\keyset, null given"
 NULL
 ====================================================
 bool(false)
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, bool given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, bool given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, bool given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, bool given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, bool given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, bool given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, bool given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, bool given"
+ERROR: string(68) "Argument 1 to takes_keyset1() must be of type @HH\keyset, bool given"
+ERROR: string(82) "Value returned from function takes_keyset1() must be of type HH\keyset, bool given"
+ERROR: string(68) "Argument 1 to takes_keyset2() must be of type @HH\keyset, bool given"
+ERROR: string(82) "Value returned from function takes_keyset2() must be of type HH\keyset, bool given"
+ERROR: string(68) "Argument 1 to takes_keyset3() must be of type @HH\keyset, bool given"
+ERROR: string(82) "Value returned from function takes_keyset3() must be of type HH\keyset, bool given"
+ERROR: string(69) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, bool given"
+ERROR: string(83) "Value returned from function takes_keyset4() must be of type ?HH\keyset, bool given"
 bool(false)
 ====================================================
 int(717)
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, int given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, int given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, int given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, int given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, int given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, int given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, int given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, int given"
+ERROR: string(67) "Argument 1 to takes_keyset1() must be of type @HH\keyset, int given"
+ERROR: string(81) "Value returned from function takes_keyset1() must be of type HH\keyset, int given"
+ERROR: string(67) "Argument 1 to takes_keyset2() must be of type @HH\keyset, int given"
+ERROR: string(81) "Value returned from function takes_keyset2() must be of type HH\keyset, int given"
+ERROR: string(67) "Argument 1 to takes_keyset3() must be of type @HH\keyset, int given"
+ERROR: string(81) "Value returned from function takes_keyset3() must be of type HH\keyset, int given"
+ERROR: string(68) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, int given"
+ERROR: string(82) "Value returned from function takes_keyset4() must be of type ?HH\keyset, int given"
 int(717)
 ====================================================
 float(1.234)
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, float given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, float given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, float given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, float given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, float given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, float given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, float given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, float given"
+ERROR: string(69) "Argument 1 to takes_keyset1() must be of type @HH\keyset, float given"
+ERROR: string(83) "Value returned from function takes_keyset1() must be of type HH\keyset, float given"
+ERROR: string(69) "Argument 1 to takes_keyset2() must be of type @HH\keyset, float given"
+ERROR: string(83) "Value returned from function takes_keyset2() must be of type HH\keyset, float given"
+ERROR: string(69) "Argument 1 to takes_keyset3() must be of type @HH\keyset, float given"
+ERROR: string(83) "Value returned from function takes_keyset3() must be of type HH\keyset, float given"
+ERROR: string(70) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, float given"
+ERROR: string(84) "Value returned from function takes_keyset4() must be of type ?HH\keyset, float given"
 float(1.234)
 ====================================================
-string(%d) "string"
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, string given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, string given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, string given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, string given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, string given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, string given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, string given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, string given"
-string(%d) "string"
+string(6) "string"
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, string given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, string given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, string given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, string given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, string given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, string given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, string given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, string given"
+string(6) "string"
 ====================================================
 object(stdClass) (0) {
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, stdClass given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, stdClass given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, stdClass given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, stdClass given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, stdClass given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, stdClass given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, stdClass given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, stdClass given"
+ERROR: string(72) "Argument 1 to takes_keyset1() must be of type @HH\keyset, stdClass given"
+ERROR: string(86) "Value returned from function takes_keyset1() must be of type HH\keyset, stdClass given"
+ERROR: string(72) "Argument 1 to takes_keyset2() must be of type @HH\keyset, stdClass given"
+ERROR: string(86) "Value returned from function takes_keyset2() must be of type HH\keyset, stdClass given"
+ERROR: string(72) "Argument 1 to takes_keyset3() must be of type @HH\keyset, stdClass given"
+ERROR: string(86) "Value returned from function takes_keyset3() must be of type HH\keyset, stdClass given"
+ERROR: string(73) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, stdClass given"
+ERROR: string(87) "Value returned from function takes_keyset4() must be of type ?HH\keyset, stdClass given"
 object(stdClass) (0) {
 }
 ====================================================
-varray(0) {
+vec(0) {
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, %rv?%rarray given"
-varray(0) {
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
+vec(0) {
 }
 ====================================================
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, %rv?%rarray given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, %rv?%rarray given"
-varray(3) {
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
+vec(3) {
   int(1)
   int(2)
   int(3)
@@ -157,48 +157,48 @@ varray(3) {
 ====================================================
 vec(0) {
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
 vec(0) {
 }
 ====================================================
 vec(4) {
   int(1)
-  string(%d) "a"
+  string(1) "a"
   int(2)
-  string(%d) "b"
+  string(1) "b"
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\vec given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\vec given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\vec given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\vec given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\vec given"
 vec(4) {
   int(1)
-  string(%d) "a"
+  string(1) "a"
   int(2)
-  string(%d) "b"
+  string(1) "b"
 }
 ====================================================
 dict(0) {
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\dict given"
+ERROR: string(72) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\dict given"
+ERROR: string(86) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\dict given"
 dict(0) {
 }
 ====================================================
@@ -206,14 +206,14 @@ dict(1) {
   ["a"]=>
   int(1)
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\dict given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\dict given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\dict given"
+ERROR: string(71) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\dict given"
+ERROR: string(85) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\dict given"
+ERROR: string(72) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\dict given"
+ERROR: string(86) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\dict given"
 dict(1) {
   ["a"]=>
   int(1)
@@ -227,14 +227,14 @@ object(HH\Vector) (3) {
   [2]=>
   int(3)
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\Vector given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\Vector given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\Vector given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\Vector given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\Vector given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Vector given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\Vector given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Vector given"
+ERROR: string(73) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\Vector given"
+ERROR: string(87) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\Vector given"
+ERROR: string(73) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\Vector given"
+ERROR: string(87) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\Vector given"
+ERROR: string(73) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\Vector given"
+ERROR: string(87) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Vector given"
+ERROR: string(74) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\Vector given"
+ERROR: string(88) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Vector given"
 object(HH\Vector) (3) {
   [0]=>
   int(1)
@@ -246,21 +246,21 @@ object(HH\Vector) (3) {
 ====================================================
 object(HH\Map) (2) {
   [1]=>
-  string(%d) "a"
+  string(1) "a"
   [2]=>
-  string(%d) "b"
+  string(1) "b"
 }
-ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\Map given"
-ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\Map given"
-ERROR: string(%d) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\Map given"
-ERROR: string(%d) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\Map given"
-ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\Map given"
-ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Map given"
-ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\Map given"
-ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Map given"
+ERROR: string(70) "Argument 1 to takes_keyset1() must be of type @HH\keyset, HH\Map given"
+ERROR: string(84) "Value returned from function takes_keyset1() must be of type HH\keyset, HH\Map given"
+ERROR: string(70) "Argument 1 to takes_keyset2() must be of type @HH\keyset, HH\Map given"
+ERROR: string(84) "Value returned from function takes_keyset2() must be of type HH\keyset, HH\Map given"
+ERROR: string(70) "Argument 1 to takes_keyset3() must be of type @HH\keyset, HH\Map given"
+ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Map given"
+ERROR: string(71) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, HH\Map given"
+ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Map given"
 object(HH\Map) (2) {
   [1]=>
-  string(%d) "a"
+  string(1) "a"
   [2]=>
-  string(%d) "b"
+  string(1) "b"
 }

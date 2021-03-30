@@ -1,5 +1,5 @@
 *** Testing array_keys() on range of values ***
-varray(6) {
+vec(6) {
   int(2147483647)
   int(2147483648)
   int(-2147483647)
@@ -9,11 +9,11 @@ varray(6) {
 }
 
 *** Testing array_keys() on an array created on the fly ***
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-varray(0) {
+vec(0) {
 }
 Done

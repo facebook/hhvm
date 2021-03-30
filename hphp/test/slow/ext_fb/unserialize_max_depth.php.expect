@@ -73,25 +73,25 @@ vec(1) {
   }
 }
 bool(true)
-darray(1) {
+dict(1) {
   [1]=>
-  darray(1) {
+  dict(1) {
     [1]=>
-    darray(1) {
+    dict(1) {
       [1]=>
-      darray(1) {
+      dict(1) {
         [1]=>
-        darray(1) {
+        dict(1) {
           [1]=>
-          darray(1) {
+          dict(1) {
             [1]=>
-            darray(1) {
+            dict(1) {
               [1]=>
-              darray(1) {
+              dict(1) {
                 [1]=>
-                darray(1) {
+                dict(1) {
                   [1]=>
-                  darray(0) {
+                  dict(0) {
                   }
                 }
               }
@@ -103,25 +103,25 @@ darray(1) {
   }
 }
 bool(true)
-darray(1) {
+dict(1) {
   [1]=>
-  darray(1) {
+  dict(1) {
     [1]=>
-    darray(1) {
+    dict(1) {
       [1]=>
-      darray(1) {
+      dict(1) {
         [1]=>
-        darray(1) {
+        dict(1) {
           [1]=>
-          darray(1) {
+          dict(1) {
             [1]=>
-            darray(1) {
+            dict(1) {
               [1]=>
-              darray(1) {
+              dict(1) {
                 [1]=>
-                darray(1) {
+                dict(1) {
                   [1]=>
-                  darray(1) {
+                  dict(1) {
                     [1]=>
                     int(1)
                   }
@@ -135,16 +135,16 @@ darray(1) {
   }
 }
 bool(true)
-varray(1) {
-  varray(1) {
-    varray(1) {
-      varray(1) {
-        varray(1) {
-          varray(1) {
-            varray(1) {
-              varray(1) {
-                varray(1) {
-                  varray(0) {
+vec(1) {
+  vec(1) {
+    vec(1) {
+      vec(1) {
+        vec(1) {
+          vec(1) {
+            vec(1) {
+              vec(1) {
+                vec(1) {
+                  vec(0) {
                   }
                 }
               }

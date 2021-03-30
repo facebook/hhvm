@@ -1,4 +1,4 @@
-varray(0) {
+vec(0) {
 }
 
 Warning: Tried to set a non existent class (NotExistingClass) in %s/test/slow/soap/crash.php on line 8

@@ -1,7 +1,7 @@
 *** Testing array_unshift() : heredoc strings for $var argument ***
 -- Iteration 1 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(0) ""
   ["f"]=>
@@ -14,7 +14,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(0) ""
   [1]=>
@@ -32,7 +32,7 @@ darray(7) {
 }
 -- Iteration 2 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(1) "
 "
@@ -46,7 +46,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(1) "
 "
@@ -65,7 +65,7 @@ darray(7) {
 }
 -- Iteration 3 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(86) "hello world
 The big brown fox jumped over;
@@ -81,7 +81,7 @@ This is a double quoted string"
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(86) "hello world
 The big brown fox jumped over;
@@ -102,7 +102,7 @@ This is a double quoted string"
 }
 -- Iteration 4 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(88) "hello world	
 1111		 != 2222
@@ -118,7 +118,7 @@ double quoted string. withdifferentwhitespaces"
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(88) "hello world	
 1111		 != 2222
@@ -139,7 +139,7 @@ double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 5 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(44) "11 < 12. 123 >22
 2222 != 1111.	 0000 = 0000
@@ -154,7 +154,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(44) "11 < 12. 123 >22
 2222 != 1111.	 0000 = 0000
@@ -174,7 +174,7 @@ darray(7) {
 }
 -- Iteration 6 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(123) "This's a string with quotes:
 "strings in double quote";
@@ -190,7 +190,7 @@ this\line is single quoted /with\slashes"
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(123) "This's a string with quotes:
 "strings in double quote";

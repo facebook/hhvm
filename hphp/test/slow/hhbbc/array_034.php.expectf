@@ -1,11 +1,11 @@
-Out of bounds darray access: invalid index "z"
+Out of bounds dict access: invalid index "z"
 bool(false)
 bool(true)
 bool(true)
 bool(false)
 bool(true)
-darray(1) {
+dict(1) {
   ["z"]=>
-  darray(0) {
+  dict(0) {
   }
 }

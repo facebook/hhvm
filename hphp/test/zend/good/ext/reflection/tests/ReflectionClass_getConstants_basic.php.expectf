@@ -1,23 +1,23 @@
 Constants from class C: 
-darray(1) {
+dict(1) {
   ["a"]=>
   string(12) "hello from C"
 }
 Constants from class D: 
-darray(1) {
+dict(1) {
   ["a"]=>
   string(12) "hello from C"
 }
 Constants from class E: 
-darray(1) {
+dict(1) {
   ["a"]=>
   string(12) "hello from C"
 }
 Constants from class F: 
-darray(1) {
+dict(1) {
   ["a"]=>
   string(12) "hello from F"
 }
 Constants from class X: 
-darray(0) {
+dict(0) {
 }

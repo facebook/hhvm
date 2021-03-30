@@ -1,4 +1,4 @@
 
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Invalid operand type was used: cannot perform this operation with arrays' in %s/sub_001.php:6
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Invalid operand type was used: cannot perform this operation with vecs' in %s/sub_001.php:6
 Stack trace:
 %A

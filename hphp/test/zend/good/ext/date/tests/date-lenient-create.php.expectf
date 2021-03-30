@@ -1,13 +1,13 @@
 ==
-Array
+Dict
 (
     [warning_count] => 0
-    [warnings] => Array
+    [warnings] => Dict
         (
         )
 
     [error_count] => 1
-    [errors] => Array
+    [errors] => Dict
         (
             [8] => Trailing data
         )
@@ -20,16 +20,16 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
+Dict
 (
     [warning_count] => 1
-    [warnings] => Array
+    [warnings] => Dict
         (
             [8] => Trailing data
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 
@@ -41,16 +41,16 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
+Dict
 (
     [warning_count] => 1
-    [warnings] => Array
+    [warnings] => Dict
         (
             [8] => Trailing data
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 
@@ -62,16 +62,16 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
+Dict
 (
     [warning_count] => 1
-    [warnings] => Array
+    [warnings] => Dict
         (
             [8] => Trailing data
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 
@@ -83,15 +83,15 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
+Dict
 (
     [warning_count] => 0
-    [warnings] => Array
+    [warnings] => Dict
         (
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 
@@ -103,15 +103,15 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
+Dict
 (
     [warning_count] => 0
-    [warnings] => Array
+    [warnings] => Dict
         (
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 

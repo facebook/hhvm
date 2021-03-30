@@ -1,74 +1,74 @@
 Tuple provider ...$x
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(6)
   }
 }
 Tuple provider (int, int)...$x
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(6)
   }
 }
 Tuple provider ...
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(6)
   }
 }
 Tuple provider lambda1
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(6)
   }
 }
 Tuple provider lambda2
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     int(2)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     int(5)
     int(6)
   }

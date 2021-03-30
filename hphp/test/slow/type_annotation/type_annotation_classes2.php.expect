@@ -1,16 +1,16 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "D"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>

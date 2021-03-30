@@ -6,7 +6,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(9) "HH\string"
     ["nullable"]=>
@@ -37,7 +37,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(6) "HH\int"
     ["nullable"]=>
@@ -68,7 +68,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(8) "HH\float"
     ["nullable"]=>
@@ -99,7 +99,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(7) "HH\bool"
     ["nullable"]=>
@@ -130,7 +130,7 @@ isInOut: bool(true)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(9) "Exception"
     ["nullable"]=>
@@ -161,7 +161,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(8) "callable"
     ["nullable"]=>
@@ -192,7 +192,7 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(11) "HH\resource"
     ["nullable"]=>

@@ -1,15 +1,14 @@
-
-Warning: Unknown cipher algorithm in %s/openssl_encrypt_error.php on line 9
+Warning: Unknown cipher algorithm in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 9
 bool(false)
 
-Warning: openssl_encrypt() expects parameter 1 to be string, object given in %s/openssl_encrypt_error.php on line 10
+Warning: openssl_encrypt() expects parameter 1 to be string, object given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 10
 
-Warning: openssl_encrypt() expects parameter 2 to be string, object given in %s/openssl_encrypt_error.php on line 11
+Warning: openssl_encrypt() expects parameter 2 to be string, object given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 11
 
-Warning: openssl_encrypt() expects parameter 3 to be string, object given in %s/openssl_encrypt_error.php on line 12
+Warning: openssl_encrypt() expects parameter 3 to be string, object given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 12
 
-Warning: openssl_encrypt() expects parameter 1 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 13
+Warning: openssl_encrypt() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 13
 
-Warning: openssl_encrypt() expects parameter 2 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 14
+Warning: openssl_encrypt() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 14
 
-Warning: openssl_encrypt() expects parameter 3 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 15
+Warning: openssl_encrypt() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_encrypt_error.php on line 15

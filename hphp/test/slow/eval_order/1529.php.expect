@@ -1,4 +1,4 @@
-darray(1) {
+dict(1) {
   ["foo"]=>
   int(5)
 }

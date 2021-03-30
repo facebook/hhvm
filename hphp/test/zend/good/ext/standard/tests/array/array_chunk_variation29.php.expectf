@@ -1,4 +1,4 @@
-varray(2) {
+vec(2) {
   int(0)
   int(2)
 }
@@ -8,56 +8,56 @@ NULL
 NULL
 
 [1]
-varray(2) {
-  darray(1) {
+vec(2) {
+  dict(1) {
     [0]=>
     int(0)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(2)
   }
 }
-varray(2) {
-  darray(1) {
+vec(2) {
+  dict(1) {
     [0]=>
     int(0)
   }
-  darray(1) {
+  dict(1) {
     [1]=>
     int(2)
   }
 }
-varray(2) {
-  darray(1) {
+vec(2) {
+  dict(1) {
     [0]=>
     int(0)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     int(2)
   }
 }
 
 [2]
-varray(1) {
-  darray(2) {
+vec(1) {
+  dict(2) {
     [0]=>
     int(0)
     [1]=>
     int(2)
   }
 }
-varray(1) {
-  darray(2) {
+vec(1) {
+  dict(2) {
     [0]=>
     int(0)
     [1]=>
     int(2)
   }
 }
-varray(1) {
-  darray(2) {
+vec(1) {
+  dict(2) {
     [0]=>
     int(0)
     [1]=>

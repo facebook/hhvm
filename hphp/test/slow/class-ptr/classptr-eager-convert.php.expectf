@@ -97,11 +97,11 @@ object(HH\Vector) (3) {
 }
 ===dvarray:===
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 81
-varray(2) {
+vec(2) {
   class(Baz)
   string(4) "Fizz"
 }
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
@@ -111,7 +111,7 @@ Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "Baz"
 }
@@ -121,7 +121,7 @@ Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 94
-darray(3) {
+dict(3) {
   ["Foo"]=>
   int(3)
   ["Bar"]=>

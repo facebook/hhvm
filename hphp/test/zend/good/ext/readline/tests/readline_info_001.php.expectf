@@ -1,4 +1,4 @@
-darray(11) {
+dict(11) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
@@ -16,7 +16,7 @@ darray(11) {
   ["terminal_name"]=>
   string(0) ""
   ["library_version"]=>
-  string(%d) "%s"
+  string(3) "8.0"
   ["readline_name"]=>
   string(5) "other"
   ["attempted_completion_over"]=>

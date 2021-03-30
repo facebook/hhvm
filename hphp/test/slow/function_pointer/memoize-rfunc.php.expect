@@ -1,10 +1,10 @@
 foo(1)
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }
 foo(2)
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(1)
 }

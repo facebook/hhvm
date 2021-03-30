@@ -1,4 +1,4 @@
-darray(0) {
+dict(0) {
 }
 genva 1
 unset a
@@ -6,6 +6,6 @@ unset b
 genva 2
 genva 3
 done
-darray(0) {
+dict(0) {
 }
 exit

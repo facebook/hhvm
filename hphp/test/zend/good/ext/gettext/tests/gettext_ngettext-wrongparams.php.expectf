@@ -1,12 +1,11 @@
+Warning: ngettext() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 2
 
-Warning: ngettext() expects parameter 1 to be string, %rv?%rarray given in %s/gettext_ngettext-wrongparams.php on line 2
+Warning: ngettext() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 3
 
-Warning: ngettext() expects parameter 2 to be string, %rv?%rarray given in %s/gettext_ngettext-wrongparams.php on line 3
+Warning: ngettext() expects parameter 3 to be integer, vec given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 4
 
-Warning: ngettext() expects parameter 3 to be integer, %rv?%rarray given in %s/gettext_ngettext-wrongparams.php on line 4
+Warning: ngettext() expects exactly 3 parameters, 0 given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 5
 
-Warning: ngettext() expects exactly 3 parameters, 0 given in %s/gettext_ngettext-wrongparams.php on line 5
+Warning: ngettext() expects exactly 3 parameters, 1 given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 6
 
-Warning: ngettext() expects exactly 3 parameters, 1 given in %s/gettext_ngettext-wrongparams.php on line 6
-
-Warning: ngettext() expects exactly 3 parameters, 2 given in %s/gettext_ngettext-wrongparams.php on line 7
+Warning: ngettext() expects exactly 3 parameters, 2 given in %s/test/zend/good/ext/gettext/tests/gettext_ngettext-wrongparams.php on line 7

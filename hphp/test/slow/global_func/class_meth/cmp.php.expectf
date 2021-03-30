@@ -1,122 +1,122 @@
 Test 0
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 1
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 2
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 3
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 4
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 5
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 6
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 7
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 8
 bool(false)
@@ -128,25 +128,25 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 10
 bool(true)
@@ -164,42 +164,42 @@ bool(false)
 bool(true)
 
 Test 11
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 13
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
@@ -211,10 +211,10 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Test 14
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 bool(false)
 bool(false)
@@ -227,152 +227,152 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Test 0
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 1
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 2
 bool(false)
-bool(true)
 bool(false)
-bool(true)
-bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
-bool(true)
 bool(false)
-bool(true)
-bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 3
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 4
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 5
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 6
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 7
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
 
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 10
 bool(true)
@@ -390,34 +390,34 @@ bool(false)
 bool(true)
 
 Test 11
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 13
 bool(false)
@@ -429,10 +429,10 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 Test 14
 bool(false)
@@ -444,7 +444,7 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth

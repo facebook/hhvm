@@ -2,91 +2,91 @@
 
 -- Testing with first argument value: int(0)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: int(1)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: int(12345)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: int(-2345)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: float(10.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: float(-10.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: float(123456789000)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: float(1.23456789E-9)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: float(0.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: NULL
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, null given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: NULL
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, null given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: string(0) ""
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: string(0) ""
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
--- Testing with first argument value: varray(0) {
+-- Testing with first argument value: vec(0) {
 }
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, varray given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: string(6) "string"
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: string(6) "string"
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: string(11) "hello world"
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 
 -- Testing with first argument value: object(classA) (0) {
 }
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, object given in %s/imap_fetch_overview_variation1.php on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/imap/tests/imap_fetch_overview_variation1.php on line 78
 ===DONE===

@@ -7,34 +7,34 @@ bool(true)
 bool(true)
 bool(true)
 int(0)
-darray(2) {
+dict(2) {
   ["bar"]=>
   string(3) "ABC"
   [0]=>
   string(3) "ABC"
 }
 int(1)
-darray(2) {
+dict(2) {
   ["bar"]=>
   string(3) "DEF"
   [0]=>
   string(3) "DEF"
 }
 int(0)
-darray(2) {
+dict(2) {
   ["bar"]=>
   string(3) "ABC"
   [0]=>
   string(3) "ABC"
 }
 int(1)
-darray(2) {
+dict(2) {
   ["bar"]=>
   string(3) "DEF"
   [0]=>
   string(3) "DEF"
 }
-varray(2) {
+vec(2) {
   string(3) "ABC"
   string(3) "DEF"
 }
@@ -46,12 +46,12 @@ object(MyShadyObject) (1) {
   ["bar"]=>
   string(3) "DEF"
 }
-varray(2) {
+vec(2) {
   string(10) "ABC_foobar"
   string(10) "DEF_foobar"
 }
 
-Warning: SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %s/ext_pdo/ext_pdo.php on line %d
+Warning: SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %s/test/slow/dv_array/ext_pdo/ext_pdo.php on line 128
 string(39) "Invalid argument supplied for foreach()"
 bool(true)
 string(11) "MyStatement"

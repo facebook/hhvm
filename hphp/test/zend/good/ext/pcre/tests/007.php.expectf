@@ -1,24 +1,24 @@
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "o"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "l"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "a"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "1"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "2"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "3"
 }

@@ -1,6 +1,6 @@
 *** Testing array_map() : array with references for 'arr1' argument ***
 -- with one array --
-darray(6) {
+dict(6) {
   [0]=>
   int(0)
   [1]=>
@@ -15,7 +15,7 @@ darray(6) {
   string(5) "hello"
 }
 -- with two arrays --
-varray(6) {
+vec(6) {
   string(2) "00"
   string(10) "hellohello"
   string(10) "hellohello"

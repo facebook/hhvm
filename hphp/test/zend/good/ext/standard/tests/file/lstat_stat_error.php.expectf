@@ -1,33 +1,33 @@
 *** Testing lstat() for error conditions ***
 
-Warning: lstat() expects exactly 1 parameter, 0 given in %s/lstat_stat_error.php on line 11
+Warning: lstat() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 11
 
-Warning: lstat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 12
+Warning: lstat() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 12
 
-Warning: lstat(): No such file or directory in %s/lstat_stat_error.php on line 13
+Warning: lstat(): No such file or directory in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 13
 bool(false)
 
-Warning: lstat(): No such file or directory in %s/lstat_stat_error.php on line 14
+Warning: lstat(): No such file or directory in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 14
 bool(false)
 
-Warning: lstat() expects parameter 1 to be string, %rv?%rarray given in %s/lstat_stat_error.php on line 16
+Warning: lstat() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 16
 
 *** Testing stat() for error conditions ***
 
-Warning: stat() expects exactly 1 parameter, 0 given in %s/lstat_stat_error.php on line 19
+Warning: stat() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 19
 
-Warning: stat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 20
+Warning: stat() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 20
 
-Warning: stat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 21
+Warning: stat() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 21
 
-Warning: stat(): stat failed for %s/temp.tmp in %s/lstat_stat_error.php on line 23
+Warning: stat(): stat failed for %s/test/zend/good/ext/standard/tests/file/temp.tmp in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 23
 bool(false)
 
-Warning: stat(): stat failed for %s/temp/ in %s/lstat_stat_error.php on line 24
+Warning: stat(): stat failed for %s/test/zend/good/ext/standard/tests/file/temp/ in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 24
 bool(false)
 
-Warning: stat(): stat failed for 22 in %s/lstat_stat_error.php on line 25
+Warning: stat(): stat failed for 22 in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 25
 bool(false)
 
-Warning: stat() expects parameter 1 to be string, %rv?%rarray given in %s/lstat_stat_error.php on line 26
+Warning: stat() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/lstat_stat_error.php on line 26
 Done

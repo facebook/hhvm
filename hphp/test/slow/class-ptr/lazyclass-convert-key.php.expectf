@@ -91,11 +91,11 @@ class(Baz)
   [2]=>
   class(Foo)
 }
-===dvarray:===varray(2) {
+===dvarray:===vec(2) {
   class(Baz)
   class(Fizz)
 }
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
@@ -103,7 +103,7 @@ varray(2) {
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 84
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "Baz"
 }
@@ -113,7 +113,7 @@ Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 94
-darray(3) {
+dict(3) {
   ["Foo"]=>
   int(3)
   ["Bar"]=>

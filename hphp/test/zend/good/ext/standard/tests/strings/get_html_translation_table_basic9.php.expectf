@@ -2,7 +2,7 @@
 *** Only basic entities supported! ***
 -- with table = HTML_ENTITIES, ENT_QUOTES --
 int(5)
-Array
+Dict
 (
     [&] => &amp;
     ['] => &apos;
@@ -16,7 +16,7 @@ int(4)
 int(3)
 -- with table = HTML_SPECIALCHARS, ENT_COMPAT --
 int(4)
-Array
+Dict
 (
     [&] => &amp;
     [>] => &gt;
@@ -24,7 +24,7 @@ Array
     ["] => &quot;
 )
 -- with table = HTML_SPECIALCHARS, ENT_QUOTES --
-darray(5) {
+dict(5) {
   ["&"]=>
   string(5) "&amp;"
   ["'"]=>
@@ -37,7 +37,7 @@ darray(5) {
   string(6) "&quot;"
 }
 -- with table = HTML_SPECIALCHARS, ENT_NOQUOTES --
-darray(3) {
+dict(3) {
   ["&"]=>
   string(5) "&amp;"
   [">"]=>

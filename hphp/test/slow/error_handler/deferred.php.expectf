@@ -10,42 +10,42 @@ vec(1) {
     ["error-string"]=>
     string(36) "Cannot access property on non-object"
     ["error-file"]=>
-    string(%d) "%s/deferred.php"
+    string(%d) "%s/test/slow/error_handler/deferred.php"
     ["error-line"]=>
     int(6)
     ["error-backtrace"]=>
-    varray(5) {
-      darray(2) {
+    vec(5) {
+      dict(2) {
         ["file"]=>
-        string(%d) "%s/deferred.php"
+        string(%d) "%s/test/slow/error_handler/deferred.php"
         ["line"]=>
         int(6)
       }
-      darray(3) {
+      dict(3) {
         ["file"]=>
-        string(%d) "%s/deferred.php"
+        string(%d) "%s/test/slow/error_handler/deferred.php"
         ["line"]=>
         int(12)
         ["function"]=>
         string(10) "make_error"
       }
-      darray(3) {
+      dict(3) {
         ["file"]=>
-        string(%d) "%s/deferred.php"
+        string(%d) "%s/test/slow/error_handler/deferred.php"
         ["line"]=>
         int(6)
         ["function"]=>
         string(14) "error_handler1"
       }
-      darray(3) {
+      dict(3) {
         ["file"]=>
-        string(%d) "%s/deferred.php"
+        string(%d) "%s/test/slow/error_handler/deferred.php"
         ["line"]=>
         int(44)
         ["function"]=>
         string(10) "make_error"
       }
-      darray(1) {
+      dict(1) {
         ["function"]=>
         string(4) "main"
       }

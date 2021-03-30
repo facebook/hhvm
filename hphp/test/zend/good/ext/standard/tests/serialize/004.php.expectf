@@ -1,11 +1,9 @@
-Serialized array: a:1:{i:0;i:4;}
-Unserialized array: darray(1) {
-  [0]=>
+Serialized array: v:1:{i:4;}
+Unserialized array: vec(1) {
   int(4)
 }
 
-Serialized array: a:1:{i:0;d:4.5;}
-Unserialized array: darray(1) {
-  [0]=>
+Serialized array: v:1:{d:4.5;}
+Unserialized array: vec(1) {
   float(4.5)
 }

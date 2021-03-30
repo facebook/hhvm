@@ -1,9 +1,9 @@
-varray(3) {
+vec(3) {
   string(16) "Aaafaaba BbaCZbx"
   string(35) "34wad3423 basd3z34qwe &&$#7723ABaac"
   string(38) "kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "f CZx"
   [1]=>
@@ -12,10 +12,10 @@ darray(3) {
   string(34) "kjklsdfjkldsiu3dklj12kl dsf;s4;s s"
 }
 int(17)
-varray(1) {
+vec(1) {
   string(38) "kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(34) "kjklsdfjkldsiu3dklj12kl dsf;s4;s s"
 }

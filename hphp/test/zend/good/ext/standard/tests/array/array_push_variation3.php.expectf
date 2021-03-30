@@ -2,11 +2,11 @@
 
 -- Pass array as $var argument --
 int(4)
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
-  varray(2) {
+  vec(2) {
     string(3) "one"
     string(3) "two"
   }

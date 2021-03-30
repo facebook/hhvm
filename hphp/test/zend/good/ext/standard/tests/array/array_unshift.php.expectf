@@ -1,16 +1,16 @@
 int(1)
-varray(1) {
+vec(1) {
   string(0) ""
 }
 
 Warning: array_unshift() expects parameter 1 to be an array, Vector, or Set in %s/test/zend/good/ext/standard/tests/array/array_unshift.php on line 7
 NULL
-varray(1) {
+vec(1) {
   string(0) ""
 }
 int(2)
-varray(2) {
-  varray(1) {
+vec(2) {
+  vec(1) {
     string(0) ""
   }
   string(0) ""

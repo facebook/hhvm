@@ -7,7 +7,7 @@ object(DOMXPath) (1) {
 Warning: Attempted to serialize unserializable builtin class DOMXPath in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(6) {
+vec(6) {
   string(11) "__construct"
   string(8) "evaluate"
   string(5) "query"
@@ -27,7 +27,7 @@ object(A_DOMXPath) (2) {
 Warning: Attempted to serialize unserializable builtin class A_DOMXPath in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(6) {
+vec(6) {
   string(11) "__construct"
   string(8) "evaluate"
   string(5) "query"

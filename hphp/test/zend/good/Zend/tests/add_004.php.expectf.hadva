@@ -1,4 +1,0 @@
-
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Invalid operand type was used: cannot perform this operation with vecs' in %s/add_004.php:5
-Stack trace:
-%A

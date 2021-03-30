@@ -1,27 +1,26 @@
-
-Warning: Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s/openssl_decrypt_error.php on line 8
-string(%d) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
-string(%d) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
+Warning: Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 8
+string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
+string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/openssl_decrypt_error.php on line 12
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 12
 bool(false)
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/openssl_decrypt_error.php on line 14
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 14
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/openssl_decrypt_error.php on line 15
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 15
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/openssl_decrypt_error.php on line 16
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 16
 bool(false)
 
-Warning: openssl_decrypt() expects parameter 1 to be string, %rv?%rarray given in %s/openssl_decrypt_error.php on line 17
+Warning: openssl_decrypt() expects parameter 1 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 17
 
-Warning: openssl_decrypt() expects parameter 2 to be string, %rv?%rarray given in %s/openssl_decrypt_error.php on line 18
+Warning: openssl_decrypt() expects parameter 2 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 18
 
-Warning: openssl_decrypt() expects parameter 3 to be string, %rv?%rarray given in %s/openssl_decrypt_error.php on line 19
+Warning: openssl_decrypt() expects parameter 3 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 19
 
-Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/openssl_decrypt_error.php on line 22
-string(%d) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
+Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 22
+string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="

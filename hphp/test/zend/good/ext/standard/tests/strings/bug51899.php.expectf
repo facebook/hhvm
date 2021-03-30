@@ -1,20 +1,20 @@
-darray(1) {
+dict(1) {
   ["a"]=>
   string(0) ""
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   string(0) ""
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   string(0) ""
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   string(2) "b "
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }

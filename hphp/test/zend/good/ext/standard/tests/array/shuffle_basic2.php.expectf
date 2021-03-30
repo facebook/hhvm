@@ -1,7 +1,7 @@
 *** Testing shuffle() : with associative array ***
 
 -- input array before shuffle() function is applied --
-darray(9) {
+dict(9) {
   ["one"]=>
   int(1)
   [2]=>
@@ -26,7 +26,7 @@ darray(9) {
 bool(true)
 
 -- resultant array after shuffle() function is applied --
-darray(9) {
+dict(9) {
   [0]=>
   int(%d)
   [1]=>

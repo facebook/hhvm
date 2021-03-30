@@ -1,7 +1,7 @@
 *** Testing get_defined_constants() : basic functionality ***
-string(5) "array"
-string(5) "array"
-darray(0) {
+string(4) "dict"
+string(4) "dict"
+dict(0) {
 }
 TEST PASSED
 ===DONE===

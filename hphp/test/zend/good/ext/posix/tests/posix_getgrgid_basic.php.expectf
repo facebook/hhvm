@@ -1,9 +1,9 @@
 Basic test of POSIX getgid and getgrid fucntions
-Array
+Dict
 (
     [name] => %s
     [passwd] => %a
-    [members] => Array
+    [members] => Vec
 %a
 
     [gid] => %d

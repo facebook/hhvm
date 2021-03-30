@@ -1,22 +1,22 @@
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(3)
     }
     ["bar"]=>
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      varray(1) {
-        darray(1) {
+      vec(1) {
+        dict(1) {
           ["kind"]=>
           int(2)
         }

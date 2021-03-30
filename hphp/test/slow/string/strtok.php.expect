@@ -1,20 +1,20 @@
-varray(1) {
+vec(1) {
   string(6) "barbaz"
 }
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(1) "z"
 }
-varray(2) {
+vec(2) {
   string(3) "foo"
   string(1) "r"
 }
-varray(1) {
+vec(1) {
   string(1) "z"
 }
-varray(1) {
+vec(1) {
   string(3) "foo"
 }
-varray(1) {
+vec(1) {
   string(1) "r"
 }

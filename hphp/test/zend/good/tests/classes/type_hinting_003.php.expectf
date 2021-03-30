@@ -1,5 +1,5 @@
 Test::f1()
-varray(1) {
+vec(1) {
   int(42)
 }
 Test::f2()
@@ -7,11 +7,11 @@ NULL
 Test::f2()
 NULL
 Test::f3()
-varray(0) {
+vec(0) {
 }
 Test::f4()
-varray(1) {
+vec(1) {
   int(25)
 }
 
-Catchable fatal error: Argument 1 passed to Test::f1() must be an instance of HH\varray, int given in %s/type_hinting_003.php on line 35
+Catchable fatal error: Argument 1 passed to Test::f1() must be an instance of HH\%rvarray|vec%r, int given in %s/test/zend/good/tests/classes/type_hinting_003.php on line 35

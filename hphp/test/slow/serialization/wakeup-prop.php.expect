@@ -1,8 +1,8 @@
-darray(3) {
+dict(3) {
   [0]=>
   object(stdClass) (1) {
     ["0"]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       int(1)
     }
@@ -13,7 +13,7 @@ darray(3) {
     string(5) "awake"
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(1)
   }

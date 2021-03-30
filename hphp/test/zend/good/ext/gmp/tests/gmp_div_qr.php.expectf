@@ -1,7 +1,7 @@
-Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/gmp_div_qr.php on line 3
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 3
 
-Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/gmp_div_qr.php on line 4
-varray(2) {
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 4
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
@@ -12,12 +12,12 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Zero operand not allowed in %s/gmp_div_qr.php on line 7
+Warning: gmp_div_qr(): Zero operand not allowed in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 7
 bool(false)
 
-Warning: gmp_div_qr(): Zero operand not allowed in %s/gmp_div_qr.php on line 8
+Warning: gmp_div_qr(): Zero operand not allowed in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 8
 bool(false)
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
@@ -28,9 +28,9 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Invalid rounding mode in %s/gmp_div_qr.php on line 10
+Warning: gmp_div_qr(): Invalid rounding mode in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 10
 bool(false)
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -40,7 +40,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
@@ -50,7 +50,7 @@ varray(2) {
     string(4) "-113"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -60,7 +60,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -70,7 +70,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -80,7 +80,7 @@ varray(2) {
     string(2) "10"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
@@ -90,7 +90,7 @@ varray(2) {
     string(4) "-113"
   }
 }
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
@@ -101,9 +101,9 @@ varray(2) {
   }
 }
 
-Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/gmp_div_qr.php on line 21
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 21
 bool(false)
 
-Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/gmp_div_qr.php on line 22
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/gmp_div_qr.php on line 22
 bool(false)
 Done

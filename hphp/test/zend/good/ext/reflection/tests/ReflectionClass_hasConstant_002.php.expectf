@@ -1,17 +1,17 @@
 Check invalid params:
 
-Warning: ReflectionClass::hasConstant() expects exactly 1 parameter, 0 given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 8
+Warning: ReflectionClass::hasConstant() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 8
 
-Warning: ReflectionClass::hasConstant() expects exactly 1 parameter, 2 given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 9
+Warning: ReflectionClass::hasConstant() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 9
 
-Warning: hasConstant() expects parameter 1 to be string, null given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 10
+Warning: hasConstant() expects parameter 1 to be string, null given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 10
 
-Warning: hasConstant() expects parameter 1 to be string, integer given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 11
+Warning: hasConstant() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 11
 
-Warning: hasConstant() expects parameter 1 to be string, double given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 12
+Warning: hasConstant() expects parameter 1 to be string, double given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 12
 
-Warning: hasConstant() expects parameter 1 to be string, boolean given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 13
+Warning: hasConstant() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 13
 
-Warning: hasConstant() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 14
+Warning: hasConstant() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 14
 
-Warning: hasConstant() expects parameter 1 to be string, object given in %s/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 15
+Warning: hasConstant() expects parameter 1 to be string, object given in %s/test/zend/good/ext/reflection/tests/ReflectionClass_hasConstant_002.php on line 15

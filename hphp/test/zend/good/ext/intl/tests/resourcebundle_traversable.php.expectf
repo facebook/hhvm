@@ -1,5 +1,5 @@
 bool(true)
-darray(3) {
+dict(3) {
   [0]=>
   string(8) "cadena 1"
   [1]=>

@@ -1,30 +1,30 @@
 Test string with badly formed strings
 NULL
-darray(2) {
+dict(2) {
   ["arr_1"]=>
   string(3) "sid"
   ["arr"]=>
-  darray(1) {
+  dict(1) {
     [4]=>
     string(4) "fred"
   }
 }
 NULL
-darray(2) {
+dict(2) {
   ["arr1]"]=>
   string(3) "sid"
   ["arr"]=>
-  darray(1) {
+  dict(1) {
     [4]=>
     string(4) "fred"
   }
 }
 NULL
-darray(2) {
+dict(2) {
   ["arr_one"]=>
   string(3) "sid"
   ["arr"]=>
-  darray(1) {
+  dict(1) {
     [4]=>
     string(4) "fred"
   }
@@ -32,7 +32,7 @@ darray(2) {
 
 Test string with badly formed % numbers
 NULL
-darray(3) {
+dict(3) {
   ["first"]=>
   string(1) "A"
   ["second"]=>
@@ -43,13 +43,13 @@ darray(3) {
 
 Test string with non-binary safe name
 NULL
-darray(1) {
+dict(1) {
   ["arr_test"]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     string(3) "sid"
     [4]=>
-    darray(1) {
+    dict(1) {
       ["two"]=>
       string(4) "fred"
     }

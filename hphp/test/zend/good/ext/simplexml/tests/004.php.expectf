@@ -1,13 +1,13 @@
 object(SimpleXMLElement) (2) {
   ["@attributes"]=>
-  darray(1) {
+  dict(1) {
     ["id"]=>
     string(5) "elem1"
   }
   ["elem1"]=>
   object(SimpleXMLElement) (3) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr1"]=>
       string(5) "first"
     }

@@ -1,28 +1,28 @@
 *** Testing array_flip() : different invalid values in 'input' array argument ***
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
 
-Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
-darray(0) {
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip_variation4.php on line 52
+dict(0) {
 }
 Done

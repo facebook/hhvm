@@ -1,15 +1,15 @@
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)

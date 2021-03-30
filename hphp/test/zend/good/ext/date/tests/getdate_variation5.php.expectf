@@ -1,7 +1,7 @@
 *** Testing getdate() : usage variation ***
 
 --Pacific/Samoa--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -27,7 +27,7 @@ darray(11) {
 }
 
 --US/Alaska--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -53,7 +53,7 @@ darray(11) {
 }
 
 --Africa/Casablanca--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -79,7 +79,7 @@ darray(11) {
 }
 
 --Europe/Moscow--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -105,7 +105,7 @@ darray(11) {
 }
 
 --Asia/Hong_Kong--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -131,7 +131,7 @@ darray(11) {
 }
 
 --Australia/Brisbane--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -157,7 +157,7 @@ darray(11) {
 }
 
 --Pacific/Wallis--
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>

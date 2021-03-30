@@ -1,5 +1,5 @@
 *** Testing explode() function: match longer string ***
-varray(7) {
+vec(7) {
   string(6) "piece1"
   string(5) "iece2"
   string(5) "iece3"

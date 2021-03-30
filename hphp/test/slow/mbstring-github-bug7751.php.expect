@@ -1,4 +1,4 @@
-darray(2) {
+dict(2) {
   ["preds"]=>
   string(20) "status|=|3;id|>|1000"
   ["limit"]=>

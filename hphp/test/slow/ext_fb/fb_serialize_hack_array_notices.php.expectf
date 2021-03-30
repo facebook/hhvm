@@ -1,8 +1,4 @@
-
-Notice: Hack Array Compat: attempted to fb_serialize vec without FB_SERIALIZE_HACK_ARRAYS flag in %s on line 10
-
-Notice: Hack Array Compat: attempted to fb_serialize dict without FB_SERIALIZE_HACK_ARRAYS flag in %s on line 14
-
-Notice: Hack Array Compat: attempted to fb_serialize vec without FB_SERIALIZE_HACK_ARRAYS flag in %s on line 26
-
-Notice: Hack Array Compat: attempted to fb_serialize dict without FB_SERIALIZE_HACK_ARRAYS flag in %s on line 30
+Serialized: vec
+Serialized: dict
+Serialized: vec (dvarrays)
+Serialized: dict (dvarrays)

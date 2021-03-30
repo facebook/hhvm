@@ -1,15 +1,15 @@
-Exception: Func to darray conversion
-Exception: Func to varray conversion
+Exception: Func to dict conversion
+Exception: Func to vec conversion
 Exception: Func to dict conversion
 Exception: Func to vec conversion
 Exception: Func to keyset conversion
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "A"
   [1]=>
   string(4) "meth"
 }
-varray(2) {
+vec(2) {
   string(1) "A"
   string(4) "meth"
 }
@@ -28,9 +28,9 @@ keyset(2) {
   string(4) "meth"
 }
 
-Fatal error: Cannot convert record to darray in %s/arrayish-casts.php on line 19
+Fatal error: Cannot convert record to dict in %s/arrayish-casts.php on line 19
 
-Fatal error: Cannot convert record to varray in %s/arrayish-casts.php on line 15
+Fatal error: Cannot convert record to vec in %s/arrayish-casts.php on line 15
 
 Fatal error: Cannot convert record to dict in %s/arrayish-casts.php on line 23
 

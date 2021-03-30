@@ -1,63 +1,24 @@
 ================== variadic ======================
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
 bool(true)
 ================== variadic ======================
-varray(1) {
+vec(1) {
   int(2)
 }
 bool(true)
 ================== variadic ======================
-varray(3) {
-  int(2)
-  int(3)
-  int(4)
-}
-bool(true)
-================== variadic ======================
-varray(4) {
-  int(2)
-  int(3)
-  int(4)
-  int(5)
-}
-bool(true)
-================== variadic ======================
-varray(2) {
-  int(4)
-  int(5)
-}
-bool(true)
-================== variadic ======================
-varray(2) {
-  int(4)
-  int(5)
-}
-bool(true)
-================== variadic ======================
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
 bool(true)
 ================== variadic ======================
-varray(1) {
-  int(2)
-}
-bool(true)
-================== variadic ======================
-varray(3) {
-  int(2)
-  int(3)
-  int(4)
-}
-bool(true)
-================== variadic ======================
-varray(4) {
+vec(4) {
   int(2)
   int(3)
   int(4)
@@ -65,53 +26,38 @@ varray(4) {
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
   int(4)
   int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
   int(4)
   int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
 bool(true)
 ================== variadic ======================
-varray(4) {
+vec(1) {
   int(2)
-  int(3)
-  int(4)
-  int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
-  int(4)
-  int(5)
-}
-bool(true)
-================== variadic ======================
-varray(2) {
-  int(4)
-  int(5)
-}
-bool(true)
-================== variadic ======================
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
 bool(true)
 ================== variadic ======================
-varray(4) {
+vec(4) {
   int(2)
   int(3)
   int(4)
@@ -119,26 +65,26 @@ varray(4) {
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
   int(4)
   int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
   int(4)
   int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(3) {
+vec(3) {
   int(2)
   int(3)
   int(4)
 }
 bool(true)
 ================== variadic ======================
-varray(4) {
+vec(4) {
   int(2)
   int(3)
   int(4)
@@ -146,13 +92,67 @@ varray(4) {
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
   int(4)
   int(5)
 }
 bool(true)
 ================== variadic ======================
-varray(2) {
+vec(2) {
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(3) {
+  int(2)
+  int(3)
+  int(4)
+}
+bool(true)
+================== variadic ======================
+vec(4) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(2) {
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(2) {
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(3) {
+  int(2)
+  int(3)
+  int(4)
+}
+bool(true)
+================== variadic ======================
+vec(4) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(2) {
+  int(4)
+  int(5)
+}
+bool(true)
+================== variadic ======================
+vec(2) {
   int(4)
   int(5)
 }

@@ -1,25 +1,25 @@
-darray(2) {
+dict(2) {
   ["width"]=>
-  int(%d)
+  int(100)
   ["height"]=>
-  int(%d)
+  int(100)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
-  int(%d)
+  int(640)
   ["height"]=>
-  int(%d)
+  int(480)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
-  int(%d)
+  int(640)
   ["height"]=>
-  int(%d)
+  int(480)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
-  int(%d)
+  int(70)
   ["height"]=>
-  int(%d)
+  int(46)
 }
 fail

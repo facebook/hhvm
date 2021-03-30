@@ -1,9 +1,9 @@
 Warning: get_class() called without object from outside a class in %s/test/quick/extension_null_check.php on line 4
-darray(1) {
+dict(1) {
   [0]=>
   bool(false)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(false)
 }

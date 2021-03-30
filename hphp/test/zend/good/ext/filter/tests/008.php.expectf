@@ -1,4 +1,4 @@
-darray(19) {
+dict(19) {
   [0]=>
   string(3) "int"
   [1]=>
@@ -39,5 +39,5 @@ darray(19) {
   string(12) "magic_quotes"
 }
 
-Warning: filter_list() expects exactly 0 parameters, 1 given in %s/008.php on line 4
+Warning: filter_list() expects exactly 0 parameters, 1 given in %s/test/zend/good/ext/filter/tests/008.php on line 4
 Done

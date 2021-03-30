@@ -1,12 +1,12 @@
 Original
 object(test) (2) {
   ["b"]=>
-  varray(2) {
+  vec(2) {
     int(3)
     int(4)
   }
   ["a"]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -14,12 +14,12 @@ object(test) (2) {
 Clone
 object(test) (2) {
   ["b"]=>
-  varray(2) {
+  vec(2) {
     int(3)
     int(4)
   }
   ["a"]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }

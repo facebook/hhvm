@@ -1,9 +1,9 @@
-Array
+Dict
 (
     [0] => 1
     [1] => 2
     [2] => 3
-    [foo] => Array
+    [foo] => Dict
         (
             [0] => 4
             [1] => 5
@@ -11,12 +11,12 @@ Array
         )
 
 )
-Array
+Dict
 (
     [0] => 1
     [1] => 2
     [2] => 3
-    [foo] => Array
+    [foo] => Dict
         (
             [1] => 5
             [2] => 6

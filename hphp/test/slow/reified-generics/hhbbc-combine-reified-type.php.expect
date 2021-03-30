@@ -1,13 +1,13 @@
 bool(true)
 bool(true)
 bool(false)
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(1)
   ["nullable"]=>
   bool(true)
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(1)
   ["nullable"]=>

@@ -1,6 +1,6 @@
 object(stdClass) (1) {
   ["testItem"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(17)
     [1]=>
@@ -9,7 +9,7 @@ object(stdClass) (1) {
 }
 object(stdClass) (1) {
   ["testItem"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(34)
     [1]=>
@@ -18,7 +18,7 @@ object(stdClass) (1) {
 }
 object(stdClass) (1) {
   ["testItem"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(51)
     [1]=>
@@ -27,7 +27,7 @@ object(stdClass) (1) {
 }
 object(stdClass) (1) {
   ["testItem"]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     int(68)
     [1]=>

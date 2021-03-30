@@ -1,6 +1,6 @@
 *** Testing gettimeofday() : basic functionality ***
 float(%f)
-darray(4) {
+dict(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>
@@ -10,7 +10,7 @@ darray(4) {
   ["dsttime"]=>
   int(0)
 }
-darray(4) {
+dict(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>

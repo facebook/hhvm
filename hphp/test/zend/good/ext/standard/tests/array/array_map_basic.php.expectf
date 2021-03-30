@@ -1,12 +1,12 @@
 *** Testing array_map() : basic functionality ***
 -- With two integer array --
-varray(3) {
+vec(3) {
   int(4)
   int(10)
   int(18)
 }
 -- With single integer array --
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -15,7 +15,7 @@ darray(3) {
   int(9)
 }
 -- With string array --
-varray(2) {
+vec(2) {
   string(12) "one = single"
   string(12) "two = double"
 }

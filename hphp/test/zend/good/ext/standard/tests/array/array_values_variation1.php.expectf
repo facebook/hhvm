@@ -2,115 +2,115 @@
 
 -- Iteration 1 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 2 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 3 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 4 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 5 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 6 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 7 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 8 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 9 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 10 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 11 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 12 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 13 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 14 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 15 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 16 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 17 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 18 --
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 19 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 20 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 21 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 22 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 
 -- Iteration 23 --
 
-Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line %d
+Warning: array_values() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_values_variation1.php on line 79
 NULL
 Done

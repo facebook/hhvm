@@ -1,5 +1,5 @@
 *** Testing array_multisort() : Testing  all array sort specifiers ***
-darray(3) {
+dict(3) {
   [0]=>
   int(2)
   [1]=>
@@ -7,7 +7,7 @@ darray(3) {
   [2]=>
   string(1) "1"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(2) "aa"
   [1]=>
@@ -15,7 +15,7 @@ darray(3) {
   [2]=>
   string(1) "1"
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(2)
   [1]=>

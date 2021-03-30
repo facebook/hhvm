@@ -1,18 +1,18 @@
-Array
+Dict
 (
     [1] => bar
     [2] => baz
 )
-Array
+Dict
 (
     [0] => foo
 )
-Array
+Dict
 (
     [bar] => 2
     [baz] => 3
 )
-Array
+Dict
 (
     [foo] => 1
 )

@@ -1,5 +1,5 @@
 *** Testing getimagesize() : tiff_mm format ***
-darray(5) {
+dict(5) {
   [0]=>
   int(2)
   [1]=>
@@ -11,6 +11,6 @@ darray(5) {
   ["mime"]=>
   string(10) "image/tiff"
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

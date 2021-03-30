@@ -1,4 +1,4 @@
-Array
+Dict
 (
     [FileName] => test2.jpg
     [FileDateTime] => %d
@@ -6,7 +6,7 @@ Array
     [FileType] => 2
     [MimeType] => image/jpeg
     [SectionsFound] => ANY_TAG, IFD0, THUMBNAIL, COMMENT
-    [COMPUTED] => Array
+    [COMPUTED] => Dict
         (
             [html] => width="1" height="1"
             [Height] => 1
@@ -24,13 +24,13 @@ Array
 
     [Copyright] => Photo (c) M.Boerger
     [UserComment] => ASCII
-    [THUMBNAIL] => Array
+    [THUMBNAIL] => Dict
         (
             [JPEGInterchangeFormat] => 134
             [JPEGInterchangeFormatLength] => 523
         )
 
-    [COMMENT] => Array
+    [COMMENT] => Dict
         (
             [0] => Comment #1.
             [1] => Comment #2.

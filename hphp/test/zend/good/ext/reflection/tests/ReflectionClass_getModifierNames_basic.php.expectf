@@ -1,61 +1,61 @@
 string(1) "a"
-varray(0) {
+vec(0) {
 }
 string(1) "b"
-varray(1) {
+vec(1) {
   string(8) "abstract"
 }
 string(1) "c"
-varray(1) {
+vec(1) {
   string(5) "final"
 }
 string(14) "x::__construct"
-varray(1) {
+vec(1) {
   string(6) "public"
 }
 string(4) "x::a"
-varray(1) {
+vec(1) {
   string(7) "private"
 }
 string(4) "x::b"
-varray(2) {
+vec(2) {
   string(7) "private"
   string(6) "static"
 }
 string(4) "x::c"
-varray(1) {
+vec(1) {
   string(9) "protected"
 }
 string(4) "x::d"
-varray(2) {
+vec(2) {
   string(9) "protected"
   string(6) "static"
 }
 string(4) "x::e"
-varray(1) {
+vec(1) {
   string(6) "public"
 }
 string(4) "x::f"
-varray(2) {
+vec(2) {
   string(6) "public"
   string(6) "static"
 }
 string(4) "x::g"
-varray(2) {
+vec(2) {
   string(5) "final"
   string(6) "public"
 }
 string(4) "x::h"
-varray(1) {
+vec(1) {
   string(6) "public"
 }
 string(4) "y::a"
-varray(2) {
+vec(2) {
   string(8) "abstract"
   string(6) "public"
 }
 string(4) "y::b"
-varray(2) {
+vec(2) {
   string(8) "abstract"
   string(9) "protected"
 }

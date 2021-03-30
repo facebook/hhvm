@@ -4,7 +4,7 @@ object(SoapHeader) (4) {
   ["name"]=>
   string(7) "header1"
   ["data"]=>
-  darray(1) {
+  dict(1) {
     ["foo"]=>
     string(3) "bar"
   }
@@ -13,7 +13,7 @@ object(SoapHeader) (4) {
 }
 string(3) "env"
 string(7) "header1"
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "bar"
 }
@@ -24,7 +24,7 @@ object(SoapHeader) (4) {
   ["name"]=>
   string(4) "name"
   ["data"]=>
-  darray(1) {
+  dict(1) {
     ["hello"]=>
     string(5) "world"
   }

@@ -1,4 +1,4 @@
-varray(2) {
+vec(2) {
   object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(5) of type (WandResource)
@@ -9,7 +9,7 @@ varray(2) {
   }
   float(0)
 }
-varray(2) {
+vec(2) {
   object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(5) of type (WandResource)
@@ -24,7 +24,7 @@ Unable to distort the image
 
 Deprecated: Imagick::recolorImage method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 25
 Unable to sparse color image
-darray(2) {
+dict(2) {
   ["x"]=>
   float(0.15000000596046)
   ["y"]=>
@@ -32,33 +32,33 @@ darray(2) {
 }
 
 Deprecated: Imagick::getImageChannelExtrema method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 35
-darray(2) {
+dict(2) {
   ["minima"]=>
   int(9352)
   ["maxima"]=>
   int(9352)
 }
-darray(2) {
+dict(2) {
   ["kurtosis"]=>
   float(0)
   ["skewness"]=>
   float(0)
 }
-darray(2) {
+dict(2) {
   ["mean"]=>
   float(9352)
   ["standardDeviation"]=>
   float(0)
 }
-darray(2) {
+dict(2) {
   ["minima"]=>
   float(9352)
   ["maxima"]=>
   float(9352)
 }
-darray(6) {
+dict(6) {
   [0]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -71,7 +71,7 @@ darray(6) {
     int(1)
   }
   [1]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -84,7 +84,7 @@ darray(6) {
     int(14)
   }
   [2]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -97,7 +97,7 @@ darray(6) {
     int(14)
   }
   [4]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -110,7 +110,7 @@ darray(6) {
     int(14)
   }
   [8]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -123,7 +123,7 @@ darray(6) {
     int(1)
   }
   [32]=>
-  darray(5) {
+  dict(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -138,25 +138,25 @@ darray(6) {
 }
 
 Deprecated: Imagick::getImageExtrema method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 40
-darray(2) {
+dict(2) {
   ["min"]=>
   int(9352)
   ["max"]=>
   int(9352)
 }
-darray(2) {
+dict(2) {
   ["x"]=>
   float(0.30000001192093)
   ["y"]=>
   float(0.60000002384186)
 }
-varray(1) {
+vec(1) {
   object(ImagickPixel) (1) {
     ["wand":"ImagickPixel":private]=>
     resource(7) of type (WandResource)
   }
 }
-darray(4) {
+dict(4) {
   ["width"]=>
   int(0)
   ["height"]=>
@@ -166,31 +166,31 @@ darray(4) {
   ["y"]=>
   int(0)
 }
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["distortion"]=>
   string(1) "0"
 }
-darray(2) {
+dict(2) {
   ["x"]=>
   float(0.63999998569489)
   ["y"]=>
   float(0.33000001311302)
 }
-darray(2) {
+dict(2) {
   ["x"]=>
   float(0)
   ["y"]=>
   float(0)
 }
-darray(2) {
+dict(2) {
   ["x"]=>
   float(0.31270000338554)
   ["y"]=>
   float(0.3289999961853)
 }
-darray(4) {
+dict(4) {
   ["width"]=>
   int(0)
   ["height"]=>
@@ -200,49 +200,49 @@ darray(4) {
   ["y"]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   ["quantumDepthLong"]=>
   int(16)
   ["quantumDepthString"]=>
   string(3) "Q16"
 }
-darray(2) {
+dict(2) {
   ["quantumRangeLong"]=>
   int(65535)
   ["quantumRangeString"]=>
   string(5) "65535"
 }
-varray(3) {
+vec(3) {
   float(1)
   float(1)
   float(1)
 }
-darray(2) {
+dict(2) {
   ["columns"]=>
   int(0)
   ["rows"]=>
   int(0)
 }
-darray(2) {
+dict(2) {
   ["versionNumber"]=>
   int(%d)
   ["versionString"]=>
   string(%d) "ImageMagick %d.%d.%d-%d Q16 %s %d-%d-%d https://www.imagemagick.org"
 }
-darray(5) {
+dict(5) {
   ["imageName"]=>
   string(0) ""
   ["mimetype"]=>
   string(7) "unknown"
   ["geometry"]=>
-  darray(2) {
+  dict(2) {
     ["width"]=>
     int(100)
     ["height"]=>
     int(100)
   }
   ["resolution"]=>
-  darray(2) {
+  dict(2) {
     ["x"]=>
     float(0)
     ["y"]=>
@@ -252,7 +252,7 @@ darray(5) {
   string(64) "23c7c842938a4b437992269d593583a0f852571f0191bc55108830cc808eab61"
 }
 bool(true)
-varray(233) {
+vec(233) {
   string(3) "3FR"
   string(3) "3G2"
   string(3) "3GP"

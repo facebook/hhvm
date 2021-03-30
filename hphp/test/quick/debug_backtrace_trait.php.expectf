@@ -1,7 +1,7 @@
-varray(3) {
-  darray(4) {
+vec(3) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s/debug_backtrace_trait_helper.inc"
+    string(%d) "%s/test/quick/debug_backtrace_trait_helper.inc"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -10,9 +10,9 @@ varray(3) {
     vec(0) {
     }
   }
-  darray(7) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s/debug_backtrace_trait.php"
+    string(%d) "%s/test/quick/debug_backtrace_trait.php"
     ["line"]=>
     int(6)
     ["function"]=>
@@ -30,7 +30,7 @@ varray(3) {
       }
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(32) "entrypoint_debug_backtrace_trait"
     ["args"]=>
@@ -39,4 +39,4 @@ varray(3) {
   }
 }
 
-Catchable fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %s/debug_backtrace_trait.php on line 7
+Catchable fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %s/test/quick/debug_backtrace_trait.php on line 7

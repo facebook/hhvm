@@ -1,4 +1,4 @@
-varray(8) {
+vec(8) {
   string(3) "cbc"
   string(3) "cfb"
   string(3) "ctr"

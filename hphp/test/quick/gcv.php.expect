@@ -1,18 +1,18 @@
 >>> testing instance variables from global scope
 accessing C
-darray(1) {
+dict(1) {
   ["pub"]=>
   string(7) "C::$pub"
 }
 accessing D
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(7) "C::$pub"
   ["pub_from_d"]=>
   string(14) "D::$pub_from_d"
 }
 accessing E
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(7) "C::$pub"
   ["pub_from_d"]=>
@@ -20,7 +20,7 @@ darray(2) {
 }
 >>> testing instance variables from class scope
 in C: accessing C
-darray(3) {
+dict(3) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -29,7 +29,7 @@ darray(3) {
   string(8) "C::$priv"
 }
 in C: accessing D
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -42,7 +42,7 @@ darray(5) {
   string(15) "D::$prot_from_d"
 }
 in C: accessing E
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -55,14 +55,14 @@ darray(5) {
   string(15) "D::$prot_from_d"
 }
 in D: accessing C
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
   string(8) "C::$prot"
 }
 in D: accessing D
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -75,7 +75,7 @@ darray(5) {
   string(15) "D::$priv_from_d"
 }
 in D: accessing E
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -88,14 +88,14 @@ darray(5) {
   string(15) "D::$priv_from_d"
 }
 in E: accessing C
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
   string(8) "C::$prot"
 }
 in E: accessing D
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -106,7 +106,7 @@ darray(4) {
   string(15) "D::$prot_from_d"
 }
 in E: accessing E
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(7) "C::$pub"
   ["prot"]=>
@@ -120,19 +120,19 @@ darray(5) {
 }
 >>> testing static variables from global scope
 accessing SC
-darray(1) {
+dict(1) {
   ["pub"]=>
   string(8) "SC::$pub"
 }
 accessing SD
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["pub_from_d"]=>
   string(15) "SD::$pub_from_d"
 }
 accessing SE
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["pub_from_d"]=>
@@ -140,7 +140,7 @@ darray(2) {
 }
 >>> testing static variables from class scope
 in SC: accessing SC
-darray(3) {
+dict(3) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -149,7 +149,7 @@ darray(3) {
   string(9) "SC::$priv"
 }
 in SC: accessing SD
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -160,7 +160,7 @@ darray(4) {
   string(16) "SD::$prot_from_d"
 }
 in SC: accessing SE
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -171,14 +171,14 @@ darray(4) {
   string(16) "SD::$prot_from_d"
 }
 in SD: accessing SC
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
   string(9) "SC::$prot"
 }
 in SD: accessing SD
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -191,7 +191,7 @@ darray(5) {
   string(16) "SD::$priv_from_d"
 }
 in SD: accessing SE
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -202,14 +202,14 @@ darray(4) {
   string(16) "SD::$prot_from_d"
 }
 in SE: accessing SC
-darray(2) {
+dict(2) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
   string(9) "SC::$prot"
 }
 in SE: accessing SD
-darray(4) {
+dict(4) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>
@@ -220,7 +220,7 @@ darray(4) {
   string(16) "SD::$prot_from_d"
 }
 in SE: accessing SE
-darray(5) {
+dict(5) {
   ["pub"]=>
   string(8) "SC::$pub"
   ["prot"]=>

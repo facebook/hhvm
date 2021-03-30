@@ -1,4 +1,4 @@
-varray(6) {
+vec(6) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
@@ -12,7 +12,7 @@ varray(6) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
 "
 }
-varray(6) {
+vec(6) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
@@ -26,7 +26,7 @@ varray(6) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
 "
 }
-varray(5) {
+vec(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
@@ -38,7 +38,7 @@ varray(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
 "
 }
-varray(5) {
+vec(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
@@ -50,7 +50,7 @@ varray(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
 "
 }
-varray(10) {
+vec(10) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty

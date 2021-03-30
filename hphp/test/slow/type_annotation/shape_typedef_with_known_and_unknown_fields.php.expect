@@ -1,13 +1,13 @@
 string(26) "HH\shape('a'=>HH\int, ...)"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["allows_unknown_fields"]=>
   bool(true)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }

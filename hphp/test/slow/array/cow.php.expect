@@ -1,6 +1,6 @@
 ---- profiling ----
-varray(3) {
-  varray(6) {
+vec(3) {
+  vec(6) {
     int(1)
     int(2)
     int(3)
@@ -8,7 +8,7 @@ varray(3) {
     int(5)
     int(6)
   }
-  varray(6) {
+  vec(6) {
     int(1)
     int(2)
     int(3)
@@ -16,7 +16,7 @@ varray(3) {
     int(7)
     int(8)
   }
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)
@@ -24,8 +24,8 @@ varray(3) {
   }
 }
 ---- pgo ----
-varray(3) {
-  varray(6) {
+vec(3) {
+  vec(6) {
     int(1)
     int(2)
     int(3)
@@ -33,7 +33,7 @@ varray(3) {
     int(5)
     int(6)
   }
-  varray(6) {
+  vec(6) {
     int(1)
     int(2)
     int(3)
@@ -41,7 +41,7 @@ varray(3) {
     int(7)
     int(8)
   }
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     int(3)

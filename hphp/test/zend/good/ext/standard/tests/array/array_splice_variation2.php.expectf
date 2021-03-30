@@ -1,5 +1,5 @@
-Warning: array_splice() expects at most 4 parameters, 10 given in %s/array_splice_variation2.php on line 8
-varray(3) {
+Warning: array_splice() expects at most 4 parameters, 10 given in %s/test/zend/good/ext/standard/tests/array/array_splice_variation2.php on line 8
+vec(3) {
   int(0)
   int(1)
   int(2)

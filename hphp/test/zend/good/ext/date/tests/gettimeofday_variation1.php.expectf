@@ -38,19 +38,19 @@ Warning: gettimeofday() expects parameter 1 to be boolean, double given in %s/ze
 
 --empty array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean, vec given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
 
 --int indexed array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean, vec given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
 
 --associative array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, darray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean, dict given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
 
 --nested arrays--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean, vec given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line %d
 
 --uppercase NULL--
 
@@ -64,7 +64,7 @@ Warning: gettimeofday() expects parameter 1 to be boolean, null given in %s/zend
 float(%f)
 
 --lowercase false--
-darray(4) {
+dict(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>
@@ -79,7 +79,7 @@ darray(4) {
 float(%f)
 
 --uppercase FALSE--
-darray(4) {
+dict(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>

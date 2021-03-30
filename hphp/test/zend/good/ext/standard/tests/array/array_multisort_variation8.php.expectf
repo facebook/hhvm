@@ -1,6 +1,6 @@
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
-darray(9) {
+dict(9) {
   ["uppercase NULL"]=>
   NULL
   ["empty string DQ"]=>

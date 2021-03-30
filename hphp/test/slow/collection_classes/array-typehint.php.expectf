@@ -1,95 +1,95 @@
 ==== array ====
 f1:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f2:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f3:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f4:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f5:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f6:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f7:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 f8:
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-varray(4) {
+vec(4) {
   int(1)
   int(2)
   int(3)
@@ -121,7 +121,7 @@ object(HH\Vector) (4) {
   int(4)
 }
 f4:
-Triggered E_WARNING with message "Argument 1 to f4() must be of type @?%r(HH\\v)?%rarray, HH\Vector given"
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Vector given"
 object(HH\Vector) (3) {
   [0]=>
   int(1)
@@ -166,7 +166,7 @@ object(HH\Vector) (4) {
 }
 Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Vector given"
 f8:
-Triggered E_WARNING with message "Argument 1 to f8() must be of type @?%r(HH\\v)?%rarray, HH\Vector given"
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Vector given"
 object(HH\Vector) (3) {
   [0]=>
   int(1)
@@ -185,7 +185,7 @@ object(HH\Vector) (4) {
   [3]=>
   int(4)
 }
-Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?%r(HH\\v)?%rarray, HH\Vector given"
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Vector given"
 ==== Map ====
 f1:
 f1() threw an exception
@@ -212,7 +212,7 @@ object(HH\Map) (4) {
   int(4)
 }
 f4:
-Triggered E_WARNING with message "Argument 1 to f4() must be of type @?%r(HH\\v)?%rarray, HH\Map given"
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Map given"
 object(HH\Map) (3) {
   ["a"]=>
   int(1)
@@ -257,7 +257,7 @@ object(HH\Map) (4) {
 }
 Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Map given"
 f8:
-Triggered E_WARNING with message "Argument 1 to f8() must be of type @?%r(HH\\v)?%rarray, HH\Map given"
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Map given"
 object(HH\Map) (3) {
   ["a"]=>
   int(1)
@@ -276,7 +276,7 @@ object(HH\Map) (4) {
   ["z"]=>
   int(4)
 }
-Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?%r(HH\\v)?%rarray, HH\Map given"
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Map given"
 ==== Set ====
 f1:
 f1() threw an exception
@@ -296,7 +296,7 @@ object(HH\Set) (4) {
   int(4)
 }
 f4:
-Triggered E_WARNING with message "Argument 1 to f4() must be of type @?%r(HH\\v)?%rarray, HH\Set given"
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Set given"
 object(HH\Set) (3) {
   int(1)
   int(2)
@@ -327,7 +327,7 @@ object(HH\Set) (4) {
 }
 Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Set given"
 f8:
-Triggered E_WARNING with message "Argument 1 to f8() must be of type @?%r(HH\\v)?%rarray, HH\Set given"
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Set given"
 object(HH\Set) (3) {
   int(1)
   int(2)
@@ -339,7 +339,7 @@ object(HH\Set) (4) {
   int(3)
   int(4)
 }
-Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?%r(HH\\v)?%rarray, HH\Set given"
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Set given"
 ==== stdClass ====
 f1:
 f1() threw an exception
@@ -350,7 +350,7 @@ Triggered E_WARNING with message "Argument 1 to f3() must be of type @HH\varray,
 object(stdClass) (0) {
 }
 f4:
-Triggered E_WARNING with message "Argument 1 to f4() must be of type @?%r(HH\\v)?%rarray, stdClass given"
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, stdClass given"
 object(stdClass) (0) {
 }
 f5:
@@ -363,7 +363,7 @@ object(stdClass) (0) {
 }
 Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, stdClass given"
 f8:
-Triggered E_WARNING with message "Argument 1 to f8() must be of type @?%r(HH\\v)?%rarray, stdClass given"
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, stdClass given"
 object(stdClass) (0) {
 }
-Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?%r(HH\\v)?%rarray, stdClass given"
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, stdClass given"

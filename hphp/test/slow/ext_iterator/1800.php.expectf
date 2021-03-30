@@ -1,5 +1,5 @@
-varray(5) {
-  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir => %d
+vec(5) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir => 0
 "
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty => 0
 "
@@ -10,4 +10,4 @@ varray(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink => 3
 "
 }
-Total: 5 files, %d bytes
+Total: 5 files, 495 bytes

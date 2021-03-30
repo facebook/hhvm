@@ -2,7 +2,7 @@
 
 -- Sorting Integer array --
 bool(true)
-darray(9) {
+dict(9) {
   [0]=>
   int(-1200)
   [1]=>
@@ -25,7 +25,7 @@ darray(9) {
 
 -- Sorting Octal array --
 bool(true)
-darray(7) {
+dict(7) {
   [0]=>
   int(-37)
   [1]=>
@@ -44,7 +44,7 @@ darray(7) {
 
 -- Sorting Hex array --
 bool(true)
-darray(6) {
+dict(6) {
   [0]=>
   int(-242)
   [1]=>
@@ -61,7 +61,7 @@ darray(6) {
 
 -- Sorting Float array --
 bool(true)
-darray(7) {
+dict(7) {
   [0]=>
   float(-3.4)
   [1]=>
@@ -80,6 +80,6 @@ darray(7) {
 
 -- Sorting empty array --
 bool(true)
-varray(0) {
+vec(0) {
 }
 ===DONE===

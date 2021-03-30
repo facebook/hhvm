@@ -1,15 +1,15 @@
-varray(2) {
+vec(2) {
   int(1)
   int(1)
 }
-varray(1) {
+vec(1) {
   int(1)
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   ["a"]=>
   int(1)
 }

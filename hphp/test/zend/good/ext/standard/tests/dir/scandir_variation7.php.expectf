@@ -2,70 +2,70 @@
 
 -- Iteration 1 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 2 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 3 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 4 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 5 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 6 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 7 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 8 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 9 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }
 
 -- Iteration 10 --
 bool(true)
-varray(2) {
+vec(2) {
   string(1) "."
   string(2) ".."
 }

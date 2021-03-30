@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   object(stdClass) (1) {
     ["a"]=>
     int(1)

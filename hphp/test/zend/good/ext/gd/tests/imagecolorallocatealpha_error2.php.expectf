@@ -1,6 +1,5 @@
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error2.php on line 4
 
-Warning: imagecolorallocatealpha() expects parameter 2 to be integer, string given in %s/imagecolorallocatealpha_error2.php on line 4
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error2.php on line 5
 
-Warning: imagecolorallocatealpha() expects parameter 2 to be integer, %rv?%rarray given in %s/imagecolorallocatealpha_error2.php on line 5
-
-Warning: imagecolorallocatealpha() expects parameter 2 to be integer, resource given in %s/imagecolorallocatealpha_error2.php on line 6
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, resource given in %s/test/zend/good/ext/gd/tests/imagecolorallocatealpha_error2.php on line 6

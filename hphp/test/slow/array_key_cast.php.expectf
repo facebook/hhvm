@@ -6,7 +6,7 @@ int(789)
 string(3) "abc"
 int(456)
 int(%d)
-Exception: Arrays cannot be cast to an array-key
+Exception: Vecs cannot be cast to an array-key
 Exception: Vecs cannot be cast to an array-key
 Exception: Dicts cannot be cast to an array-key
 Exception: Keysets cannot be cast to an array-key
@@ -19,7 +19,7 @@ int(789)
 string(3) "abc"
 int(456)
 int(%d)
-Exception: Arrays cannot be cast to an array-key
+Exception: Vecs cannot be cast to an array-key
 Exception: Vecs cannot be cast to an array-key
 Exception: Dicts cannot be cast to an array-key
 Exception: Keysets cannot be cast to an array-key

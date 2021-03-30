@@ -1,5 +1,5 @@
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
@@ -10,7 +10,7 @@ varray(2) {
     vec(0) {
     }
   }
-  darray(3) {
+  dict(3) {
     ["function"]=>
     string(4) "main"
     ["args"]=>

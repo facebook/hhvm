@@ -37,14 +37,14 @@ object(HH\Pair) (2) {
 
 object(HH\ImmVector) (2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(1)
     }
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(2)
@@ -53,14 +53,14 @@ object(HH\ImmVector) (2) {
 }
 object(HH\ImmMap) (2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(1)
     }
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(2)
@@ -69,14 +69,14 @@ object(HH\ImmMap) (2) {
 }
 object(HH\Pair) (2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(1)
     }
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     object(HH\Vector) (1) {
       [0]=>
       int(2)

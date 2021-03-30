@@ -1,32 +1,32 @@
-darray(1) {
+dict(1) {
   [1]=>
   string(1) "2"
 }
-darray(1) {
+dict(1) {
   [5]=>
   string(1) "6"
 }
-darray(1) {
+dict(1) {
   [5]=>
   int(2)
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "5"
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(1) "2"
 }
-darray(1) {
+dict(1) {
   [5]=>
   string(1) "6"
 }
-darray(1) {
+dict(1) {
   [5]=>
   int(2)
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "5"
 }

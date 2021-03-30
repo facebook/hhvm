@@ -1,13 +1,13 @@
 object(SimpleXMLElement) (1) {
   ["@attributes"]=>
-  darray(1) {
+  dict(1) {
     ["kind"]=>
     string(3) "dir"
   }
 }
 object(SimpleXMLElement) (1) {
   ["@attributes"]=>
-  darray(1) {
+  dict(1) {
     ["kind"]=>
     string(4) "file"
   }

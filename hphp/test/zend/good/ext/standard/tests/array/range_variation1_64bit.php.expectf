@@ -1,22 +1,22 @@
 *** Testing max/outof range values ***
-varray(2) {
+vec(2) {
   int(2147483645)
   int(2147483646)
 }
-varray(3) {
+vec(3) {
   int(2147483646)
   int(2147483647)
   int(2147483648)
 }
-varray(2) {
+vec(2) {
   int(-2147483647)
   int(-2147483646)
 }
-varray(2) {
+vec(2) {
   int(-2147483648)
   int(-2147483647)
 }
-varray(3) {
+vec(3) {
   int(-2147483649)
   int(-2147483648)
   int(-2147483647)

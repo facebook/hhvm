@@ -1,5 +1,5 @@
 string(73) "get_html_translation_table() expects parameter 3 to be string, null given"
-darray(4) {
+dict(4) {
   ["""]=>
   string(6) "&quot;"
   ["&"]=>

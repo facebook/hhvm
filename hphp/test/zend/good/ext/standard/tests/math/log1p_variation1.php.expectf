@@ -2,27 +2,27 @@
 
 -- Iteration 1 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 2 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 3 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 4 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 5 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 6 --
 
-Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, integer given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 7 --
 float(2.4423470353692)
@@ -41,57 +41,57 @@ float(0.40546510810816)
 
 -- Iteration 12 --
 
-Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, null given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 13 --
 
-Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, null given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 14 --
 
-Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 15 --
 
-Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 16 --
 
-Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 17 --
 
-Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 18 --
 
-Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 19 --
 
-Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 20 --
 
-Warning: log1p() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, vec given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 21 --
 
-Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 22 --
 
-Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 23 --
 
-Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, string given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 24 --
 
-Warning: log1p() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, object given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 
 -- Iteration 25 --
 
-Warning: log1p() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line %d
+Warning: log1p() expects parameter 1 to be double, resource given in %s/test/zend/good/ext/standard/tests/math/log1p_variation1.php on line 74
 ===Done===

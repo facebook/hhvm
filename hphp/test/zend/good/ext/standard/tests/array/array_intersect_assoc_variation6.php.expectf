@@ -1,64 +1,64 @@
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr2 argument ***
 -- Iteration 1 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   [0]=>
   int(0)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(0)
 }
 -- Iteration 3 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(1) {
+dict(1) {
   [2]=>
   string(5) "float"
 }
-darray(1) {
+dict(1) {
   [2]=>
   string(5) "float"
 }
 -- Iteration 6 --
-darray(2) {
+dict(2) {
   [4]=>
   string(2) "f3"
   [33333333]=>
   string(2) "f4"
 }
-darray(2) {
+dict(2) {
   [4]=>
   string(2) "f3"
   [33333333]=>
   string(2) "f4"
 }
 -- Iteration 7 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 8 --
-darray(2) {
+dict(2) {
   ["	Hello"]=>
   int(111)
   ["pen
 "]=>
   int(33)
 }
-darray(2) {
+dict(2) {
   ["	Hello"]=>
   int(111)
   ["pen
@@ -66,25 +66,25 @@ darray(2) {
   int(33)
 }
 -- Iteration 9 --
-darray(1) {
+dict(1) {
   ["Hello world"]=>
   string(6) "string"
 }
-darray(1) {
+dict(1) {
   ["Hello world"]=>
   string(6) "string"
 }
 -- Iteration 10 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 11 --
-darray(1) {
+dict(1) {
   [133]=>
   string(3) "int"
 }
-darray(1) {
+dict(1) {
   [133]=>
   string(3) "int"
 }

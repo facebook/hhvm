@@ -13,14 +13,14 @@ Exception: "Invalid dict key: expected a key of type int or string, bool given"
 ======= base_define ================================
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(200)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -28,28 +28,28 @@ dict(3) {
 Exception: "Out of bounds dict access: invalid index 3"
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
 }
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(200)
   }
@@ -57,14 +57,14 @@ dict(3) {
 Exception: "Out of bounds dict access: invalid index "foo""
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -72,14 +72,14 @@ dict(3) {
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -87,52 +87,52 @@ dict(3) {
 ======= base_unset =================================
 dict(3) {
   [1]=>
-  darray(0) {
+  dict(0) {
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
 }
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
 }
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(0) {
+  dict(0) {
   }
 }
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -140,14 +140,14 @@ dict(3) {
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -156,21 +156,21 @@ dict(3) {
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
 ======= base_prop_get ==============================
 
-Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 78
 NULL
 ======= base_prop_set ==============================
 
-Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
+Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 86
 dict(3) {
   [1]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(100)
   }
   [2]=>
   string(0) ""
   ["1"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
     int(500)
   }
@@ -188,172 +188,172 @@ int(500)
 string(7) "MISSING"
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
 ======= dim_define =================================
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(200)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
 Exception: "Out of bounds dict access: invalid index 3"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(200)
     }
   }
 }
 Exception: "Out of bounds dict access: invalid index "foo""
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
 ======= dim_unset ==================================
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(0) {
+    dict(0) {
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(0) {
+    dict(0) {
     }
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
@@ -363,23 +363,23 @@ varray(2) {
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
 ======= dim_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 167
 NULL
 ======= dim_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
-varray(2) {
+Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 175
+vec(2) {
   NULL
   dict(3) {
     [1]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(100)
     }
     [2]=>
     string(0) ""
     ["1"]=>
-    darray(1) {
+    dict(1) {
       ["a"]=>
       int(500)
     }
@@ -410,7 +410,7 @@ bool(true)
 bool(false)
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
 ======= fini_set ===================================
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -421,7 +421,7 @@ varray(2) {
     string(3) "def"
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(4) {
     [1]=>
@@ -434,7 +434,7 @@ varray(2) {
     int(123)
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -445,7 +445,7 @@ varray(2) {
     int(123)
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(4) {
     [1]=>
@@ -459,7 +459,7 @@ varray(2) {
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -471,7 +471,7 @@ varray(2) {
   }
 }
 ======= fini_set_new_elem ==========================
-varray(2) {
+vec(2) {
   NULL
   dict(4) {
     [1]=>
@@ -486,8 +486,8 @@ varray(2) {
 }
 ======= fini_incdec ================================
 
-Notice: Increment on string 'abc' in %s/test/quick/dict/member-ops.php on line %d
-varray(2) {
+Notice: Increment on string 'abc' in %s/test/quick/dict/member-ops.php on line 226
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -499,7 +499,7 @@ varray(2) {
   }
 }
 Exception: "Out of bounds dict access: invalid index 3"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -511,8 +511,8 @@ varray(2) {
   }
 }
 
-Notice: Increment on string 'def' in %s/test/quick/dict/member-ops.php on line %d
-varray(2) {
+Notice: Increment on string 'def' in %s/test/quick/dict/member-ops.php on line 226
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -524,7 +524,7 @@ varray(2) {
   }
 }
 Exception: "Out of bounds dict access: invalid index "foo""
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -536,7 +536,7 @@ varray(2) {
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -550,7 +550,7 @@ varray(2) {
 ======= fini_incdec_new_elem =======================
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
 ======= fini_setop =================================
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -562,7 +562,7 @@ varray(2) {
   }
 }
 Exception: "Out of bounds dict access: invalid index 3"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -573,7 +573,7 @@ varray(2) {
     string(3) "def"
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -585,7 +585,7 @@ varray(2) {
   }
 }
 Exception: "Out of bounds dict access: invalid index "foo""
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -597,7 +597,7 @@ varray(2) {
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -611,7 +611,7 @@ varray(2) {
 ======= fini_setop_new_elem =======================
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
 ======= fini_unset =================================
-varray(2) {
+vec(2) {
   NULL
   dict(2) {
     [2]=>
@@ -620,7 +620,7 @@ varray(2) {
     string(3) "def"
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -631,7 +631,7 @@ varray(2) {
     string(3) "def"
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(2) {
     [1]=>
@@ -640,7 +640,7 @@ varray(2) {
     string(0) ""
   }
 }
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -652,7 +652,7 @@ varray(2) {
   }
 }
 Exception: "Invalid dict key: expected a key of type int or string, bool given"
-varray(2) {
+vec(2) {
   NULL
   dict(3) {
     [1]=>
@@ -665,12 +665,12 @@ varray(2) {
 }
 ======= fini_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 337
 NULL
 ======= fini_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
-varray(2) {
+Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line 345
+vec(2) {
   NULL
   dict(3) {
     [1]=>

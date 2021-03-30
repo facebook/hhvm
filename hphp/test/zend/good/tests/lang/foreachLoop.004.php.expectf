@@ -1,47 +1,47 @@
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "a"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "b"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "c"
 }
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "c"
 }
 
 int(0)
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "a"
 }
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "b"
 }
 int(2)
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "c"
 }
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
 int(2)
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "c"
 }

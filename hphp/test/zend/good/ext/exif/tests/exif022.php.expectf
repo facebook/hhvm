@@ -1,4 +1,4 @@
-darray(45) {
+dict(45) {
   ["FileName"]=>
   string(13) "image022.tiff"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ darray(45) {
   ["SectionsFound"]=>
   string(24) "ANY_TAG, IFD0, EXIF, GPS"
   ["COMPUTED"]=>
-  darray(9) {
+  dict(9) {
     ["html"]=>
     string(20) "width="1" height="1""
     ["Height"]=>
@@ -67,7 +67,7 @@ darray(45) {
   ["Artist"]=>
   string(12) "Eric Stewart"
   ["ColorMap"]=>
-  darray(768) {
+  dict(768) {
     [0]=>
     int(0)
     [1]=>
@@ -1634,7 +1634,7 @@ darray(45) {
   ["GPSLatitudeRef"]=>
   string(1) "N"
   ["GPSLatitude"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(4) "33/1"
     [1]=>
@@ -1645,7 +1645,7 @@ darray(45) {
   ["GPSLongitudeRef"]=>
   string(1) "W"
   ["GPSLongitude"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(4) "84/1"
     [1]=>
@@ -1658,7 +1658,7 @@ darray(45) {
   ["GPSAltitude"]=>
   string(5) "295/1"
   ["GPSTimeStamp"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(3) "1/1"
     [1]=>

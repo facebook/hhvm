@@ -5,7 +5,7 @@ object(SQLite3Stmt) (0) {
 Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(7) {
+vec(7) {
   string(11) "__construct"
   string(10) "paramcount"
   string(5) "close"
@@ -24,7 +24,7 @@ object(A_SQLite3Stmt) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(7) {
+vec(7) {
   string(11) "__construct"
   string(10) "paramcount"
   string(5) "close"

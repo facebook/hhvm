@@ -1,63 +1,63 @@
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
-    varray(0) {
+    vec(0) {
     }
     [1]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
-  darray(1) {
+  dict(1) {
     [0]=>
-    varray(1) {
+    vec(1) {
       int(1)
     }
   }
 }
 
 -- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = true --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     ["array1"]=>
-    varray(0) {
+    vec(0) {
     }
     ["array2"]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
-  darray(1) {
+  dict(1) {
     ["array3"]=>
-    varray(1) {
+    vec(1) {
       int(1)
     }
   }
 }
 
 -- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = false --
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
-    varray(0) {
+    vec(0) {
     }
     [1]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
-  darray(1) {
+  dict(1) {
     [0]=>
-    varray(1) {
+    vec(1) {
       int(1)
     }
   }

@@ -167,11 +167,11 @@ dict(1) {
   [1]=>
   object(stdClass) (1) {
     ["val"]=>
-    darray(1) {
+    dict(1) {
       [1]=>
       object(stdClass) (1) {
         ["val"]=>
-        darray(1) {
+        dict(1) {
           [1]=>
           *RECURSION*
         }
@@ -240,18 +240,18 @@ dict(2) {
 ====================================================
 string(15) "D:1:{b:0;i:123}"
 
-Notice: Unable to unserialize: [D:1:{b:0;i:123}]. Invalid key. in %s/test/quick/dict/serialize.php on line %d
+Notice: Unable to unserialize: [D:1:{b:0;i:123}]. Invalid key. in %s/test/quick/dict/serialize.php on line 50
 bool(false)
 ====================================================
 string(18) "D:1:{a:0:{};i:123}"
 
-Notice: Unable to unserialize: [D:1:{a:0:{};i:123}]. Invalid key. in %s/test/quick/dict/serialize.php on line %d
+Notice: Unable to unserialize: [D:1:{a:0:{};i:123}]. Invalid key. in %s/test/quick/dict/serialize.php on line 50
 bool(false)
 ====================================================
 string(42) "D:2:{i:123;a:1:{i:0;s:3:"abc";}R:3;i:456;}"
 dict(2) {
   [123]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(3) "abc"
   }
@@ -261,12 +261,12 @@ dict(2) {
 ====================================================
 string(36) "D:2:{i:123;a:1:{i:0;b:1;}r:3;i:456;}"
 
-Notice: Unable to unserialize: [D:2:{i:123;a:1:{i:0;b:1;}r:3;i:456;}]. Invalid key. in %s/test/quick/dict/serialize.php on line %d
+Notice: Unable to unserialize: [D:2:{i:123;a:1:{i:0;b:1;}r:3;i:456;}]. Invalid key. in %s/test/quick/dict/serialize.php on line 50
 bool(false)
 ====================================================
 string(21) "D:2:{i:1;i:2;i:3;R:2}"
 
-Notice: Unable to unserialize: [D:2:{i:1;i:2;i:3;R:2}]. Expected ';' but got '}'. in %s/test/quick/dict/serialize.php on line %d
+Notice: Unable to unserialize: [D:2:{i:1;i:2;i:3;R:2}]. Expected ';' but got '}'. in %s/test/quick/dict/serialize.php on line 50
 bool(false)
 ====================================================
 string(36) "D:2:{i:1;i:789;i:2;a:1:{i:123;R:2;}}"
@@ -274,7 +274,7 @@ dict(2) {
   [1]=>
   int(789)
   [2]=>
-  darray(1) {
+  dict(1) {
     [123]=>
     int(789)
   }
@@ -283,12 +283,12 @@ dict(2) {
 string(44) "D:2:{i:1;a:1:{i:0;i:123;}i:2;a:1:{i:0;R:3;}}"
 dict(2) {
   [1]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(123)
   }
   [2]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(123)
   }

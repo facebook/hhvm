@@ -12,7 +12,7 @@ HH\Asio\v() => object(HH\Vector) (7) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -30,7 +30,7 @@ HH\Asio\vw() => object(HH\Vector) (7) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -44,7 +44,7 @@ HH\Asio\vf() => object(HH\Vector) (5) {
   [3]=>
   string(11) "Hello World"
   [4]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -58,7 +58,7 @@ HH\Asio\vfw() => object(HH\Vector) (5) {
   [3]=>
   string(11) "Hello World"
   [4]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -76,9 +76,9 @@ HH\Asio\vm() => object(HH\Vector) (7) {
   [5]=>
   string(13) "'Hello World'"
   [6]=>
-  string(22) "array (
-  0 => 3.14,
-)"
+  string(15) "vec [
+  3.14,
+]"
 }
 HH\Asio\vmw() => object(HH\Vector) (7) {
   [0]=>
@@ -94,9 +94,9 @@ HH\Asio\vmw() => object(HH\Vector) (7) {
   [5]=>
   string(13) "'Hello World'"
   [6]=>
-  string(22) "array (
-  0 => 3.14,
-)"
+  string(15) "vec [
+  3.14,
+]"
 }
 HH\Asio\vfk() => object(HH\Vector) (5) {
   [0]=>
@@ -108,7 +108,7 @@ HH\Asio\vfk() => object(HH\Vector) (5) {
   [3]=>
   string(11) "Hello World"
   [4]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -122,75 +122,75 @@ HH\Asio\vfkw() => object(HH\Vector) (5) {
   [3]=>
   string(11) "Hello World"
   [4]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
 HH\Asio\vmk() => object(HH\Vector) (7) {
   [0]=>
-  string(22) "array (
+  string(21) "dict [
   0 => NULL,
-)"
+]"
   [1]=>
-  string(22) "array (
+  string(21) "dict [
   1 => true,
-)"
+]"
   [2]=>
-  string(23) "array (
+  string(22) "dict [
   2 => false,
-)"
+]"
   [3]=>
-  string(19) "array (
+  string(18) "dict [
   3 => 1,
-)"
+]"
   [4]=>
-  string(19) "array (
+  string(18) "dict [
   4 => 2,
-)"
+]"
   [5]=>
-  string(31) "array (
+  string(30) "dict [
   5 => 'Hello World',
-)"
+]"
   [6]=>
-  string(47) "array (
+  string(39) "dict [
   6 => 
-  array (
-    0 => 3.14,
-  ),
-)"
+  vec [
+    3.14,
+  ],
+]"
 }
 HH\Asio\vmkw() => object(HH\Vector) (7) {
   [0]=>
-  string(22) "array (
+  string(21) "dict [
   0 => NULL,
-)"
+]"
   [1]=>
-  string(22) "array (
+  string(21) "dict [
   1 => true,
-)"
+]"
   [2]=>
-  string(23) "array (
+  string(22) "dict [
   2 => false,
-)"
+]"
   [3]=>
-  string(19) "array (
+  string(18) "dict [
   3 => 1,
-)"
+]"
   [4]=>
-  string(19) "array (
+  string(18) "dict [
   4 => 2,
-)"
+]"
   [5]=>
-  string(31) "array (
+  string(30) "dict [
   5 => 'Hello World',
-)"
+]"
   [6]=>
-  string(47) "array (
+  string(39) "dict [
   6 => 
-  array (
-    0 => 3.14,
-  ),
-)"
+  vec [
+    3.14,
+  ],
+]"
 }
 HH\Asio\m() => object(HH\Map) (7) {
   [0]=>
@@ -206,7 +206,7 @@ HH\Asio\m() => object(HH\Map) (7) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -224,7 +224,7 @@ HH\Asio\mw() => object(HH\Map) (7) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -238,7 +238,7 @@ HH\Asio\mf() => object(HH\Map) (5) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -252,7 +252,7 @@ HH\Asio\mfw() => object(HH\Map) (5) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -270,9 +270,9 @@ HH\Asio\mm() => object(HH\Map) (7) {
   [5]=>
   string(13) "'Hello World'"
   [6]=>
-  string(22) "array (
-  0 => 3.14,
-)"
+  string(15) "vec [
+  3.14,
+]"
 }
 HH\Asio\mmw() => object(HH\Map) (7) {
   [0]=>
@@ -288,9 +288,9 @@ HH\Asio\mmw() => object(HH\Map) (7) {
   [5]=>
   string(13) "'Hello World'"
   [6]=>
-  string(22) "array (
-  0 => 3.14,
-)"
+  string(15) "vec [
+  3.14,
+]"
 }
 HH\Asio\mfk() => object(HH\Map) (5) {
   [1]=>
@@ -302,7 +302,7 @@ HH\Asio\mfk() => object(HH\Map) (5) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
@@ -316,73 +316,73 @@ HH\Asio\mfkw() => object(HH\Map) (5) {
   [5]=>
   string(11) "Hello World"
   [6]=>
-  varray(1) {
+  vec(1) {
     float(3.14)
   }
 }
 HH\Asio\mmk() => object(HH\Map) (7) {
   [0]=>
-  string(22) "array (
+  string(21) "dict [
   0 => NULL,
-)"
+]"
   [1]=>
-  string(22) "array (
+  string(21) "dict [
   1 => true,
-)"
+]"
   [2]=>
-  string(23) "array (
+  string(22) "dict [
   2 => false,
-)"
+]"
   [3]=>
-  string(19) "array (
+  string(18) "dict [
   3 => 1,
-)"
+]"
   [4]=>
-  string(19) "array (
+  string(18) "dict [
   4 => 2,
-)"
+]"
   [5]=>
-  string(31) "array (
+  string(30) "dict [
   5 => 'Hello World',
-)"
+]"
   [6]=>
-  string(47) "array (
+  string(39) "dict [
   6 => 
-  array (
-    0 => 3.14,
-  ),
-)"
+  vec [
+    3.14,
+  ],
+]"
 }
 HH\Asio\mmkw() => object(HH\Map) (7) {
   [0]=>
-  string(22) "array (
+  string(21) "dict [
   0 => NULL,
-)"
+]"
   [1]=>
-  string(22) "array (
+  string(21) "dict [
   1 => true,
-)"
+]"
   [2]=>
-  string(23) "array (
+  string(22) "dict [
   2 => false,
-)"
+]"
   [3]=>
-  string(19) "array (
+  string(18) "dict [
   3 => 1,
-)"
+]"
   [4]=>
-  string(19) "array (
+  string(18) "dict [
   4 => 2,
-)"
+]"
   [5]=>
-  string(31) "array (
+  string(30) "dict [
   5 => 'Hello World',
-)"
+]"
   [6]=>
-  string(47) "array (
+  string(39) "dict [
   6 => 
-  array (
-    0 => 3.14,
-  ),
-)"
+  vec [
+    3.14,
+  ],
+]"
 }

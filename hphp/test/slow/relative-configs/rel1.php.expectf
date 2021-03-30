@@ -1,10 +1,10 @@
 string(1) "1"
-darray(2) {
+dict(2) {
   ["names"]=>
   string(5) "root1"
   ["values1"]=>
   string(1) "x"
 }
-varray(1) {
-  string(%d) "%s/relative-configs/root1.ini"
+vec(1) {
+  string(%d) "%s/test/slow/relative-configs/root1.ini"
 }

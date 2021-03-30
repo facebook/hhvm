@@ -1,7 +1,7 @@
-resource(%d) of type (process)
-darray(2) {
+resource(4) of type (process)
+dict(2) {
   [0]=>
-  resource(%d) of type (stream)
+  resource(5) of type (stream)
   [1]=>
-  resource(%d) of type (stream)
+  resource(6) of type (stream)
 }

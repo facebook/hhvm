@@ -1,4 +1,3 @@
+Warning: socket_create_listen() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/sockets/tests/socket_create_listen-wrongparams.php on line 2
 
-Warning: socket_create_listen() expects parameter 1 to be integer, %rv?%rarray given in %s/socket_create_listen-wrongparams.php on line 2
-
-Warning: socket_create_listen() expects parameter 2 to be integer, %rv?%rarray given in %s/socket_create_listen-wrongparams.php on line 3
+Warning: socket_create_listen() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/sockets/tests/socket_create_listen-wrongparams.php on line 3

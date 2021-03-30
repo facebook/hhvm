@@ -1,12 +1,12 @@
 int(1)
 int(3)
-varray(3) {
+vec(3) {
   string(1) "b"
   string(1) "c"
   int(1)
 }
 int(5)
-varray(5) {
+vec(5) {
   string(1) "e"
   string(1) "f"
   int(2)

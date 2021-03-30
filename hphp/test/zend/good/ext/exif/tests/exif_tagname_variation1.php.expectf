@@ -11,63 +11,63 @@ bool(false)
 bool(false)
 -- Iteration 5 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 6 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 7 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 8 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 9 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 10 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 11 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 12 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 13 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 14 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, dict given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 15 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 16 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 17 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 18 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 19 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 20 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 21 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, object given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, object given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 22 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, resource given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, resource given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 23 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, null given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 -- Iteration 24 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, null given in %s/zend/good/ext/exif/tests/exif_tagname_variation1.php on line %d
+Warning: exif_tagname() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/exif/tests/exif_tagname_variation1.php on line 73
 Done
 ===Done===

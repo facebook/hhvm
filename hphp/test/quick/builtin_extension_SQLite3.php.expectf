@@ -5,7 +5,7 @@ object(SQLite3) (0) {
 Warning: Attempted to serialize unserializable builtin class SQLite3 in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(18) {
+vec(18) {
   string(11) "__construct"
   string(4) "open"
   string(11) "busytimeout"
@@ -35,7 +35,7 @@ object(A_SQLite3) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SQLite3 in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(18) {
+vec(18) {
   string(11) "__construct"
   string(4) "open"
   string(11) "busytimeout"

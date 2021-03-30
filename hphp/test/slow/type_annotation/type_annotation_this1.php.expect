@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -6,7 +6,7 @@ darray(3) {
   ["exact"]=>
   bool(true)
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -14,11 +14,11 @@ darray(3) {
   ["exact"]=>
   bool(true)
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -27,8 +27,8 @@ darray(3) {
     bool(true)
   }
   ["param_types"]=>
-  varray(1) {
-    darray(3) {
+  vec(1) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -38,11 +38,11 @@ darray(3) {
     }
   }
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -51,8 +51,8 @@ darray(3) {
     bool(true)
   }
   ["param_types"]=>
-  varray(1) {
-    darray(3) {
+  vec(1) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -62,11 +62,11 @@ darray(3) {
     }
   }
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -75,8 +75,8 @@ darray(3) {
     bool(true)
   }
   ["param_types"]=>
-  varray(1) {
-    darray(3) {
+  vec(1) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -86,13 +86,13 @@ darray(3) {
     }
   }
 }
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     ["foo"]=>
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -101,18 +101,18 @@ darray(2) {
       bool(true)
     }
     ["bar"]=>
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(6) "HH\Map"
       ["generic_types"]=>
-      varray(2) {
-        darray(1) {
+      vec(2) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }
-        darray(3) {
+        dict(3) {
           ["kind"]=>
           int(15)
           ["classname"]=>

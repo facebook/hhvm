@@ -1,18 +1,18 @@
 string(56) "HH\shape('foo'=>HH\Vector<MyAlias3>, 'bar'=>MyAlias3::U)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     ["foo"]=>
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      varray(1) {
-        darray(3) {
+      vec(1) {
+        dict(3) {
           ["kind"]=>
           int(15)
           ["classname"]=>
@@ -23,13 +23,13 @@ darray(2) {
       }
     }
     ["bar"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(2)
     }
   }
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -37,7 +37,7 @@ darray(3) {
   ["alias"]=>
   string(8) "MyAlias1"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -45,7 +45,7 @@ darray(3) {
   ["alias"]=>
   string(8) "MyAlias2"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>

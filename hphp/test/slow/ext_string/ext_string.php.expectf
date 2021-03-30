@@ -65,7 +65,7 @@ CD
 string(8) "AB
 CD
 "
-varray(3) {
+vec(3) {
   string(4) "This"
   string(2) "is"
   string(2) "an"
@@ -143,7 +143,7 @@ string(2) "09"
 string(17) "(foo%r\x00%rbar-bar%r\x00%rfoo)"
 string(5) "[a%r\x00%rb]"
 string(9) "AtestB10C"
-darray(1) {
+dict(1) {
   [0]=>
   int(2350001)
 }
@@ -232,11 +232,11 @@ int(0)
 int(4)
 int(2)
 int(5)
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 int(1)
 int(6)

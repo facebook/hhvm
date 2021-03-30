@@ -1,21 +1,21 @@
---> : darray(1) {
+--> : dict(1) {
   ["path"]=>
   string(0) ""
 }
 
---> 64.246.30.37: darray(1) {
+--> 64.246.30.37: dict(1) {
   ["path"]=>
   string(12) "64.246.30.37"
 }
 
---> http://64.246.30.37: darray(2) {
+--> http://64.246.30.37: dict(2) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(12) "64.246.30.37"
 }
 
---> http://64.246.30.37/: darray(3) {
+--> http://64.246.30.37/: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -24,12 +24,12 @@
   string(1) "/"
 }
 
---> 64.246.30.37/: darray(1) {
+--> 64.246.30.37/: dict(1) {
   ["path"]=>
   string(13) "64.246.30.37/"
 }
 
---> 64.246.30.37:80/: darray(3) {
+--> 64.246.30.37:80/: dict(3) {
   ["host"]=>
   string(12) "64.246.30.37"
   ["port"]=>
@@ -38,24 +38,24 @@
   string(1) "/"
 }
 
---> php.net: darray(1) {
+--> php.net: dict(1) {
   ["path"]=>
   string(7) "php.net"
 }
 
---> php.net/: darray(1) {
+--> php.net/: dict(1) {
   ["path"]=>
   string(8) "php.net/"
 }
 
---> http://php.net: darray(2) {
+--> http://php.net: dict(2) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(7) "php.net"
 }
 
---> http://php.net/: darray(3) {
+--> http://php.net/: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -64,24 +64,24 @@
   string(1) "/"
 }
 
---> www.php.net: darray(1) {
+--> www.php.net: dict(1) {
   ["path"]=>
   string(11) "www.php.net"
 }
 
---> www.php.net/: darray(1) {
+--> www.php.net/: dict(1) {
   ["path"]=>
   string(12) "www.php.net/"
 }
 
---> http://www.php.net: darray(2) {
+--> http://www.php.net: dict(2) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
 }
 
---> http://www.php.net/: darray(3) {
+--> http://www.php.net/: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -90,14 +90,14 @@
   string(1) "/"
 }
 
---> www.php.net:80: darray(2) {
+--> www.php.net:80: dict(2) {
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
   int(80)
 }
 
---> http://www.php.net:80: darray(3) {
+--> http://www.php.net:80: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -106,7 +106,7 @@
   int(80)
 }
 
---> http://www.php.net:80/: darray(4) {
+--> http://www.php.net:80/: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -117,7 +117,7 @@
   string(1) "/"
 }
 
---> http://www.php.net/index.php: darray(3) {
+--> http://www.php.net/index.php: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -126,12 +126,12 @@
   string(10) "/index.php"
 }
 
---> www.php.net/?: darray(1) {
+--> www.php.net/?: dict(1) {
   ["path"]=>
   string(12) "www.php.net/"
 }
 
---> www.php.net:80/?: darray(3) {
+--> www.php.net:80/?: dict(3) {
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
@@ -140,7 +140,7 @@
   string(1) "/"
 }
 
---> http://www.php.net/?: darray(3) {
+--> http://www.php.net/?: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -149,7 +149,7 @@
   string(1) "/"
 }
 
---> http://www.php.net:80/?: darray(4) {
+--> http://www.php.net:80/?: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -160,7 +160,7 @@
   string(1) "/"
 }
 
---> http://www.php.net:80/index.php: darray(4) {
+--> http://www.php.net:80/index.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -171,7 +171,7 @@
   string(10) "/index.php"
 }
 
---> http://www.php.net:80/foo/bar/index.php: darray(4) {
+--> http://www.php.net:80/foo/bar/index.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -182,7 +182,7 @@
   string(18) "/foo/bar/index.php"
 }
 
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php: darray(4) {
+--> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -193,7 +193,7 @@
   string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
 }
 
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5: darray(5) {
+--> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -206,7 +206,7 @@
   string(37) "lots=1&of=2&parameters=3&too=4&here=5"
 }
 
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/: darray(4) {
+--> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -217,7 +217,7 @@
   string(45) "/this/is/a/very/deep/directory/structure/and/"
 }
 
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php: darray(4) {
+--> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -228,7 +228,7 @@
   string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
 }
 
---> http://www.php.net:80/this/../a/../deep/directory: darray(4) {
+--> http://www.php.net:80/this/../a/../deep/directory: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -239,7 +239,7 @@
   string(28) "/this/../a/../deep/directory"
 }
 
---> http://www.php.net:80/this/../a/../deep/directory/: darray(4) {
+--> http://www.php.net:80/this/../a/../deep/directory/: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -250,7 +250,7 @@
   string(29) "/this/../a/../deep/directory/"
 }
 
---> http://www.php.net:80/this/is/a/very/deep/directory/../file.php: darray(4) {
+--> http://www.php.net:80/this/is/a/very/deep/directory/../file.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -261,7 +261,7 @@
   string(42) "/this/is/a/very/deep/directory/../file.php"
 }
 
---> http://www.php.net:80/index.php: darray(4) {
+--> http://www.php.net:80/index.php: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -272,7 +272,7 @@
   string(10) "/index.php"
 }
 
---> http://www.php.net:80/index.php?: darray(4) {
+--> http://www.php.net:80/index.php?: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -283,7 +283,7 @@
   string(10) "/index.php"
 }
 
---> http://www.php.net:80/#foo: darray(5) {
+--> http://www.php.net:80/#foo: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -296,7 +296,7 @@
   string(3) "foo"
 }
 
---> http://www.php.net:80/?#: darray(4) {
+--> http://www.php.net:80/?#: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -307,7 +307,7 @@
   string(1) "/"
 }
 
---> http://www.php.net:80/?test=1: darray(5) {
+--> http://www.php.net:80/?test=1: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -320,7 +320,7 @@
   string(6) "test=1"
 }
 
---> http://www.php.net/?test=1&: darray(4) {
+--> http://www.php.net/?test=1&: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -331,7 +331,7 @@
   string(7) "test=1&"
 }
 
---> http://www.php.net:80/?&: darray(5) {
+--> http://www.php.net:80/?&: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -344,7 +344,7 @@
   string(1) "&"
 }
 
---> http://www.php.net:80/index.php?test=1&: darray(5) {
+--> http://www.php.net:80/index.php?test=1&: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -357,7 +357,7 @@
   string(7) "test=1&"
 }
 
---> http://www.php.net/index.php?&: darray(4) {
+--> http://www.php.net/index.php?&: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -368,7 +368,7 @@
   string(1) "&"
 }
 
---> http://www.php.net:80/index.php?foo&: darray(5) {
+--> http://www.php.net:80/index.php?foo&: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -381,7 +381,7 @@
   string(4) "foo&"
 }
 
---> http://www.php.net/index.php?&foo: darray(4) {
+--> http://www.php.net/index.php?&foo: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -392,7 +392,7 @@
   string(4) "&foo"
 }
 
---> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI: darray(5) {
+--> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI: dict(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -405,7 +405,7 @@
   string(31) "test=1&test2=char&test3=mixesCI"
 }
 
---> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(5) {
+--> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(5) {
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
@@ -418,7 +418,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(7) {
+--> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -435,7 +435,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(7) {
+--> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -452,7 +452,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(8) {
+--> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(8) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -471,7 +471,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(7) {
+--> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -488,7 +488,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(7) {
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -505,7 +505,7 @@
   string(16) "some_page_ref123"
 }
 
---> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: darray(8) {
+--> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: dict(8) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -524,14 +524,14 @@
   string(16) "some_page_ref123"
 }
 
---> nntp://news.php.net: darray(2) {
+--> nntp://news.php.net: dict(2) {
   ["scheme"]=>
   string(4) "nntp"
   ["host"]=>
   string(12) "news.php.net"
 }
 
---> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz: darray(3) {
+--> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz: dict(3) {
   ["scheme"]=>
   string(3) "ftp"
   ["host"]=>
@@ -540,28 +540,28 @@
   string(22) "/gnu/glic/glibc.tar.gz"
 }
 
---> zlib:http://foo@bar: darray(2) {
+--> zlib:http://foo@bar: dict(2) {
   ["scheme"]=>
   string(4) "zlib"
   ["path"]=>
   string(14) "http://foo@bar"
 }
 
---> zlib:filename.txt: darray(2) {
+--> zlib:filename.txt: dict(2) {
   ["scheme"]=>
   string(4) "zlib"
   ["path"]=>
   string(12) "filename.txt"
 }
 
---> zlib:/path/to/my/file/file.txt: darray(2) {
+--> zlib:/path/to/my/file/file.txt: dict(2) {
   ["scheme"]=>
   string(4) "zlib"
   ["path"]=>
   string(25) "/path/to/my/file/file.txt"
 }
 
---> foo://foo@bar: darray(3) {
+--> foo://foo@bar: dict(3) {
   ["scheme"]=>
   string(3) "foo"
   ["host"]=>
@@ -570,28 +570,28 @@
   string(3) "foo"
 }
 
---> mailto:me@mydomain.com: darray(2) {
+--> mailto:me@mydomain.com: dict(2) {
   ["scheme"]=>
   string(6) "mailto"
   ["path"]=>
   string(15) "me@mydomain.com"
 }
 
---> /foo.php?a=b&c=d: darray(2) {
+--> /foo.php?a=b&c=d: dict(2) {
   ["path"]=>
   string(8) "/foo.php"
   ["query"]=>
   string(7) "a=b&c=d"
 }
 
---> foo.php?a=b&c=d: darray(2) {
+--> foo.php?a=b&c=d: dict(2) {
   ["path"]=>
   string(7) "foo.php"
   ["query"]=>
   string(7) "a=b&c=d"
 }
 
---> http://user:passwd@www.example.com:8080?bar=1&boom=0: darray(6) {
+--> http://user:passwd@www.example.com:8080?bar=1&boom=0: dict(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -606,14 +606,14 @@
   string(12) "bar=1&boom=0"
 }
 
---> file:///path/to/file: darray(2) {
+--> file:///path/to/file: dict(2) {
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
   string(13) "/path/to/file"
 }
 
---> file://path/to/file: darray(3) {
+--> file://path/to/file: dict(3) {
   ["scheme"]=>
   string(4) "file"
   ["host"]=>
@@ -622,14 +622,14 @@
   string(8) "/to/file"
 }
 
---> file:/path/to/file: darray(2) {
+--> file:/path/to/file: dict(2) {
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
   string(13) "/path/to/file"
 }
 
---> http://1.2.3.4:/abc.asp?a=1&b=2: darray(4) {
+--> http://1.2.3.4:/abc.asp?a=1&b=2: dict(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -640,7 +640,7 @@
   string(7) "a=1&b=2"
 }
 
---> http://foo.com#bar: darray(3) {
+--> http://foo.com#bar: dict(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -649,12 +649,12 @@
   string(3) "bar"
 }
 
---> scheme:: darray(1) {
+--> scheme:: dict(1) {
   ["scheme"]=>
   string(6) "scheme"
 }
 
---> foo+bar://baz@bang/bla: darray(4) {
+--> foo+bar://baz@bang/bla: dict(4) {
   ["scheme"]=>
   string(7) "foo+bar"
   ["host"]=>
@@ -665,14 +665,14 @@
   string(4) "/bla"
 }
 
---> gg:9130731: darray(2) {
+--> gg:9130731: dict(2) {
   ["scheme"]=>
   string(2) "gg"
   ["path"]=>
   string(7) "9130731"
 }
 
---> http://user:@pass@host/path?argument?value#etc: darray(7) {
+--> http://user:@pass@host/path?argument?value#etc: dict(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>

@@ -2,7 +2,7 @@
 
 -- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --
 bool(true)
-darray(3) {
+dict(3) {
   ["HEREDOC"]=>
   string(7) "HEREDOC"
   ["Heredoc"]=>
@@ -15,7 +15,7 @@ Test this!!!"
 
 -- Testing ksort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
 bool(true)
-darray(3) {
+dict(3) {
   ["HEREDOC"]=>
   string(7) "HEREDOC"
   ["Heredoc"]=>
@@ -28,7 +28,7 @@ Test this!!!"
 
 -- Testing ksort() by supplying heredoc string array, 'flag' = SORT_STRING --
 bool(true)
-darray(3) {
+dict(3) {
   ["HEREDOC"]=>
   string(7) "HEREDOC"
   ["Heredoc"]=>

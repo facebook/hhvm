@@ -2,5 +2,5 @@ string(8) "function"
 string(17) "Method - instance"
 string(15) "Method - static"
 string(6) "Lambda"
-varray(0) {
+vec(0) {
 }

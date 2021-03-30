@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   string(3) "foo"
 }
-varray(2) {
+vec(2) {
   string(3) "bar"
   string(3) "foo"
 }

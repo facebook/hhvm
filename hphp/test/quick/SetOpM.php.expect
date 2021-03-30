@@ -1,5 +1,5 @@
 Test begin
-varray(1) {
+vec(1) {
   int(23)
 }
 object(T) (2) {
@@ -8,8 +8,8 @@ object(T) (2) {
   ["int"]=>
   int(3)
 }
-varray(1) {
+vec(1) {
   int(6)
 }
-OutOfBoundsException: Out of bounds varray access: invalid index 17
+OutOfBoundsException: Out of bounds vec access: invalid index 17
 Test end

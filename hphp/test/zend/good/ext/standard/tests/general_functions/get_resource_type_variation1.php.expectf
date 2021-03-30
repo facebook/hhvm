@@ -2,29 +2,29 @@
 
 -- bool --
 
-Warning: get_resource_type() expects parameter 1 to be resource, boolean given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- int 10 --
 
-Warning: get_resource_type() expects parameter 1 to be resource, integer given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- float 10.5 --
 
-Warning: get_resource_type() expects parameter 1 to be resource, double given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- string --
 
-Warning: get_resource_type() expects parameter 1 to be resource, string given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- array --
 
-Warning: get_resource_type() expects parameter 1 to be resource, %rv?%rarray given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- NULL --
 
-Warning: get_resource_type() expects parameter 1 to be resource, null given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 
 -- Object --
 
-Warning: get_resource_type() expects parameter 1 to be resource, object given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/general_functions/get_resource_type_variation1.php on line 29
 ===DONE===

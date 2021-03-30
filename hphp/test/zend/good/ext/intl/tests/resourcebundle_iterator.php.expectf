@@ -18,7 +18,7 @@ ResourceBundle Object
 )
 
 Here comes testvector:
-Array
+Vec
 (
     [0] => 1
     [1] => 2

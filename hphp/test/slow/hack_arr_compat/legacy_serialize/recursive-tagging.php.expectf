@@ -2,22 +2,22 @@
 test_marking_nested_arrays($recursive=true):
 
 Printing marking for $x:
-varray(3) {
+vec(3) {
   vec(1) {
     object(C) (0) {
     }
   }
-  varray(1) {
+  vec(1) {
     object(C) (0) {
     }
   }
   vec(3) {
-    darray(2) {
+    dict(2) {
       ["c"]=>
       object(C) (0) {
       }
       ["v"]=>
-      varray(1) {
+      vec(1) {
         object(C) (0) {
         }
       }
@@ -26,7 +26,7 @@ varray(3) {
       object(C) (0) {
       }
     }
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }
@@ -47,11 +47,9 @@ $x[2][1][0]: <not an array>
 $x[2][2]: unmarked
 $x[2][2][0]: <not an array>
 
-Warning: array_mark_legacy() called on vec in %s/recursive-tagging.php on line 38
-
 Printing marking for $y:
 varray(3) {
-  vec(1) {
+  varray(1) {
     object(C) (0) {
     }
   }
@@ -59,7 +57,7 @@ varray(3) {
     object(C) (0) {
     }
   }
-  vec(3) {
+  varray(3) {
     darray(2) {
       ["c"]=>
       object(C) (0) {
@@ -70,7 +68,7 @@ varray(3) {
         }
       }
     }
-    vec(1) {
+    varray(1) {
       object(C) (0) {
       }
     }
@@ -81,16 +79,16 @@ varray(3) {
   }
 }
 $y: marked
-$y[0]: unmarked
+$y[0]: marked
 $y[0][0]: <not an array>
 $y[1]: marked
 $y[1][0]: <not an array>
-$y[2]: unmarked
+$y[2]: marked
 $y[2][0]: marked
 $y[2][0][c]: <not an array>
 $y[2][0][v]: marked
 $y[2][0][v][0]: <not an array>
-$y[2][1]: unmarked
+$y[2][1]: marked
 $y[2][1][0]: <not an array>
 $y[2][2]: marked
 $y[2][2][0]: <not an array>
@@ -113,11 +111,11 @@ $x[0][0]: <not an array>
 test_unable_to_cow($recursive=true):
 
 Printing marking for $x:
-darray(1) {
+dict(1) {
   ["a"]=>
-  darray(1) {
+  dict(1) {
     ["b"]=>
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }
@@ -147,22 +145,22 @@ $y[0][b][0]: <not an array>
 test_marking_nested_arrays($recursive=false):
 
 Printing marking for $x:
-varray(3) {
+vec(3) {
   vec(1) {
     object(C) (0) {
     }
   }
-  varray(1) {
+  vec(1) {
     object(C) (0) {
     }
   }
   vec(3) {
-    darray(2) {
+    dict(2) {
       ["c"]=>
       object(C) (0) {
       }
       ["v"]=>
-      varray(1) {
+      vec(1) {
         object(C) (0) {
         }
       }
@@ -171,7 +169,7 @@ varray(3) {
       object(C) (0) {
       }
     }
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }
@@ -198,17 +196,17 @@ varray(3) {
     object(C) (0) {
     }
   }
-  varray(1) {
+  vec(1) {
     object(C) (0) {
     }
   }
   vec(3) {
-    darray(2) {
+    dict(2) {
       ["c"]=>
       object(C) (0) {
       }
       ["v"]=>
-      varray(1) {
+      vec(1) {
         object(C) (0) {
         }
       }
@@ -217,7 +215,7 @@ varray(3) {
       object(C) (0) {
       }
     }
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }
@@ -243,7 +241,7 @@ test_cow_optimizations($recursive=false):
 
 Printing marking for $x:
 varray(1) {
-  varray(1) {
+  vec(1) {
     object(C) (0) {
     }
   }
@@ -256,11 +254,11 @@ $x[0][0]: <not an array>
 test_unable_to_cow($recursive=false):
 
 Printing marking for $x:
-darray(1) {
+dict(1) {
   ["a"]=>
-  darray(1) {
+  dict(1) {
     ["b"]=>
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }
@@ -273,9 +271,9 @@ $x[a][b][0]: <not an array>
 
 Printing marking for $y:
 varray(1) {
-  darray(1) {
+  dict(1) {
     ["b"]=>
-    varray(1) {
+    vec(1) {
       object(C) (0) {
       }
     }

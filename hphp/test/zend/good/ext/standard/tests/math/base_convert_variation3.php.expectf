@@ -2,94 +2,94 @@
 
 -- Iteration 1 --
 
-Warning: Invalid argument: Invalid tobase: 0 in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: Invalid argument: Invalid tobase: 0 in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 bool(false)
 
 -- Iteration 2 --
 
-Warning: Invalid argument: Invalid tobase: 1 in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: Invalid argument: Invalid tobase: 1 in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 bool(false)
 
 -- Iteration 3 --
 
-Warning: Invalid argument: Invalid tobase: -1 in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: Invalid argument: Invalid tobase: -1 in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 bool(false)
 
 -- Iteration 4 --
 
-Warning: Invalid argument: Invalid tobase: -12 in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: Invalid argument: Invalid tobase: -12 in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 bool(false)
 
 -- Iteration 5 --
 
-Warning: Invalid argument: Invalid tobase: 2147483647 in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: Invalid argument: Invalid tobase: 2147483647 in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 bool(false)
 
 -- Iteration 6 --
 
-Warning: base_convert() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 7 --
 
-Warning: base_convert() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 8 --
 
-Warning: base_convert() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 9 --
 
-Warning: base_convert() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 10 --
 
-Warning: base_convert() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 11 --
 
-Warning: base_convert() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, null given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 12 --
 
-Warning: base_convert() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, null given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 13 --
 
-Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 14 --
 
-Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 15 --
 
-Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 16 --
 
-Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 17 --
 
-Warning: base_convert() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 18 --
 
-Warning: base_convert() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 19 --
 
-Warning: base_convert() expects parameter 3 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, vec given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 20 --
 
-Warning: base_convert() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 21 --
 
-Warning: base_convert() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 
 -- Iteration 22 --
 
-Warning: base_convert() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/math/base_convert_variation3.php on line %d
+Warning: base_convert() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/standard/tests/math/base_convert_variation3.php on line 58
 ===Done===

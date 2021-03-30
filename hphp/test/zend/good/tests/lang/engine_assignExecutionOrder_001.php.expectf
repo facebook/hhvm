@@ -1,28 +1,28 @@
 Order with array assignment:
 in f()
 in g()
-darray(1) {
-  [%u|b%"name"]=>
-  %string|unicode%(14) "assigned value"
+dict(1) {
+  ["name"]=>
+  string(14) "assigned value"
 }
 
 
 Order with static array property assignment:
 in f()
 in g()
-darray(1) {
-  [%u|b%"name"]=>
-  %string|unicode%(14) "assigned value"
+dict(1) {
+  ["name"]=>
+  string(14) "assigned value"
 }
 
 
 Order with indexed string assignment:
 in getOffset()
 in newChar()
-%string|unicode%(5) "jello"
+string(5) "jello"
 
 
 Order with static string property assignment:
 in getOffset()
 in newChar()
-%string|unicode%(5) "jello"
+string(5) "jello"

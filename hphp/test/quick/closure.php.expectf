@@ -11,12 +11,12 @@ Args: 888 500
 #3  main()
 object(Closure%s) (2) {
   ["static"]=>
-  darray(1) {
+  dict(1) {
     ["use_by_val"]=>
     int(123)
   }
   ["parameter"]=>
-  darray(2) {
+  dict(2) {
     ["$arg"]=>
     string(10) "<required>"
     ["$dv"]=>

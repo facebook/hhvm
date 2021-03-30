@@ -1,8 +1,8 @@
-varray(1) {
+vec(1) {
   string(%d) "  %s/test/slow/ext_iterator/../../sample_dir/dir/empty
 "
 }
-varray(5) {
+vec(5) {
   string(%d) " %s/test/slow/ext_iterator/../../sample_dir/dir
 "
   string(%d) " %s/test/slow/ext_iterator/../../sample_dir/empty

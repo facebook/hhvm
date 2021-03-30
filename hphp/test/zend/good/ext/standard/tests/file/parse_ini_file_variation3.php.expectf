@@ -1,6 +1,6 @@
 *** Testing parse_ini_file() : variation ***
 New include path is : dir1:dir2:dir3:
-darray(11) {
+dict(11) {
   ["error_reporting"]=>
   string(5) "32767"
   ["display_errors"]=>

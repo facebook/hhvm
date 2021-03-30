@@ -1,31 +1,31 @@
 *** Testing array_diff_key() : usage variation ***
 
 --decimal indexed--
-darray(1) {
+dict(1) {
   [-7]=>
   string(3) "-07"
 }
-darray(1) {
+dict(1) {
   ["-17"]=>
   string(3) "-17"
 }
 
 --octal indexed--
-darray(1) {
+dict(1) {
   [-7]=>
   string(3) "-07"
 }
-darray(1) {
+dict(1) {
   [-9]=>
   string(4) "-011"
 }
 
 --hexa  indexed--
-darray(1) {
+dict(1) {
   [10]=>
   string(3) "0xA"
 }
-darray(1) {
+dict(1) {
   [18]=>
   string(4) "0x12"
 }

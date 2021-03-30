@@ -5,7 +5,7 @@ int\(0\)
  goes to: defaultbool\(true\)
  goes to: 5bool\(false\)
  goes to: 0NULL
- goes to: 0varray\(0\) \{
+ goes to: 0vec\(0\) \{
 \}
  goes to: defaultfloat\(1\)
  goes to: 1string\(4\) "1abc"

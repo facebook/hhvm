@@ -5,7 +5,7 @@ object(SoapClient) (0) {
 Warning: Attempted to serialize unserializable builtin class SoapClient in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(13) {
+vec(13) {
   string(11) "__construct"
   string(6) "call__"
   string(10) "__soapcall"
@@ -30,7 +30,7 @@ object(A_SoapClient) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SoapClient in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(13) {
+vec(13) {
   string(11) "__construct"
   string(6) "call__"
   string(10) "__soapcall"

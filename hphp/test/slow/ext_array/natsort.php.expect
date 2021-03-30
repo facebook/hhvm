@@ -1,10 +1,10 @@
-varray(4) {
+vec(4) {
   string(8) "img1.png"
   string(9) "img10.png"
   string(9) "img12.png"
   string(8) "img2.png"
 }
-darray(4) {
+dict(4) {
   [3]=>
   string(8) "img1.png"
   [2]=>

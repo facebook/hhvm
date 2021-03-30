@@ -10,12 +10,12 @@ bool(false)
 string(20) "HH\keyset<HH\string>"
 bool(false)
 string(22) "HH\keyset<HH\arraykey>"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(21)
   ["generic_types"]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }

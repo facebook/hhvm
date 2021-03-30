@@ -1,6 +1,6 @@
 string(5) "hello"
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
@@ -8,7 +8,7 @@ varray(3) {
     ["function"]=>
     string(7) "profile"
   }
-  darray(5) {
+  dict(5) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
@@ -20,7 +20,7 @@ varray(3) {
     ["type"]=>
     string(2) "::"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }

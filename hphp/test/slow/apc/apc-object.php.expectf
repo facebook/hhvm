@@ -5,7 +5,7 @@ object(X) (1) {
 Adding 1 and 2
 object(WithStuff) (7) {
   ["arr":"WithStuff":private]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   ["vec":"WithStuff":private]=>
@@ -22,7 +22,7 @@ object(WithStuff) (7) {
   ["prot":protected]=>
   string(5) "blorp"
   ["arr":"ParentClass":private]=>
-  varray(1) {
+  vec(1) {
     string(5) "hello"
   }
   ["str":"ParentClass":private]=>
@@ -32,7 +32,7 @@ object(WithStuff) (7) {
 }
 object(WithStuff) (7) {
   ["arr":"WithStuff":private]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   ["vec":"WithStuff":private]=>
@@ -49,7 +49,7 @@ object(WithStuff) (7) {
   ["prot":protected]=>
   string(5) "blorp"
   ["arr":"ParentClass":private]=>
-  varray(1) {
+  vec(1) {
     string(5) "hello"
   }
   ["str":"ParentClass":private]=>
@@ -60,7 +60,7 @@ object(WithStuff) (7) {
 Adding 1 and 2
 object(WithStuff) (7) {
   ["arr":"WithStuff":private]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   ["vec":"WithStuff":private]=>
@@ -77,7 +77,7 @@ object(WithStuff) (7) {
   ["prot":protected]=>
   string(5) "blorp"
   ["arr":"ParentClass":private]=>
-  varray(1) {
+  vec(1) {
     string(5) "hello"
   }
   ["str":"ParentClass":private]=>

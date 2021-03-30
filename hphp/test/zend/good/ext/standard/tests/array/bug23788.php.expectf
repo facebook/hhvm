@@ -1,8 +1,8 @@
-varray(2) {
+vec(2) {
   int(123)
   bool(true)
 }
-varray(2) {
+vec(2) {
   int(123)
   bool(true)
 }

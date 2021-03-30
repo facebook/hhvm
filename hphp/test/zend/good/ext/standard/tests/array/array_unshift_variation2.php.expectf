@@ -1,7 +1,7 @@
 *** Testing array_unshift() : all possible values for $var argument ***
 -- Iteration 1 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(0)
   ["f"]=>
@@ -14,7 +14,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(0)
   [1]=>
@@ -32,7 +32,7 @@ darray(7) {
 }
 -- Iteration 2 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(1)
   ["f"]=>
@@ -45,7 +45,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [1]=>
@@ -63,7 +63,7 @@ darray(7) {
 }
 -- Iteration 3 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(12345)
   ["f"]=>
@@ -76,7 +76,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(12345)
   [1]=>
@@ -94,7 +94,7 @@ darray(7) {
 }
 -- Iteration 4 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   int(-2345)
   ["f"]=>
@@ -107,7 +107,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   int(-2345)
   [1]=>
@@ -125,7 +125,7 @@ darray(7) {
 }
 -- Iteration 5 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   float(10.5)
   ["f"]=>
@@ -138,7 +138,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   float(10.5)
   [1]=>
@@ -156,7 +156,7 @@ darray(7) {
 }
 -- Iteration 6 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   float(-10.5)
   ["f"]=>
@@ -169,7 +169,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   float(-10.5)
   [1]=>
@@ -187,7 +187,7 @@ darray(7) {
 }
 -- Iteration 7 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   float(123456789000)
   ["f"]=>
@@ -200,7 +200,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   float(123456789000)
   [1]=>
@@ -218,7 +218,7 @@ darray(7) {
 }
 -- Iteration 8 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   float(1.23456789E-9)
   ["f"]=>
@@ -231,7 +231,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   float(1.23456789E-9)
   [1]=>
@@ -249,7 +249,7 @@ darray(7) {
 }
 -- Iteration 9 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   float(0.5)
   ["f"]=>
@@ -262,7 +262,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   float(0.5)
   [1]=>
@@ -280,9 +280,9 @@ darray(7) {
 }
 -- Iteration 10 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
   ["f"]=>
   string(5) "first"
@@ -294,9 +294,9 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
   [1]=>
   string(5) "hello"
@@ -313,9 +313,9 @@ darray(7) {
 }
 -- Iteration 11 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
   ["f"]=>
@@ -328,9 +328,9 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
   [1]=>
@@ -348,9 +348,9 @@ darray(7) {
 }
 -- Iteration 12 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   ["f"]=>
@@ -363,9 +363,9 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [1]=>
@@ -383,9 +383,9 @@ darray(7) {
 }
 -- Iteration 13 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -399,9 +399,9 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
@@ -420,9 +420,9 @@ darray(7) {
 }
 -- Iteration 14 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -438,9 +438,9 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
-  darray(2) {
+  dict(2) {
     ["color"]=>
     string(3) "red"
     ["item"]=>
@@ -461,7 +461,7 @@ darray(7) {
 }
 -- Iteration 15 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   ["f"]=>
@@ -474,7 +474,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   NULL
   [1]=>
@@ -492,7 +492,7 @@ darray(7) {
 }
 -- Iteration 16 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   NULL
   ["f"]=>
@@ -505,7 +505,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   NULL
   [1]=>
@@ -523,7 +523,7 @@ darray(7) {
 }
 -- Iteration 17 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   bool(true)
   ["f"]=>
@@ -536,7 +536,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   bool(true)
   [1]=>
@@ -554,7 +554,7 @@ darray(7) {
 }
 -- Iteration 18 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   bool(false)
   ["f"]=>
@@ -567,7 +567,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   bool(false)
   [1]=>
@@ -585,7 +585,7 @@ darray(7) {
 }
 -- Iteration 19 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   bool(true)
   ["f"]=>
@@ -598,7 +598,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   bool(true)
   [1]=>
@@ -616,7 +616,7 @@ darray(7) {
 }
 -- Iteration 20 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   bool(false)
   ["f"]=>
@@ -629,7 +629,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   bool(false)
   [1]=>
@@ -647,7 +647,7 @@ darray(7) {
 }
 -- Iteration 21 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(0) ""
   ["f"]=>
@@ -660,7 +660,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(0) ""
   [1]=>
@@ -678,7 +678,7 @@ darray(7) {
 }
 -- Iteration 22 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(0) ""
   ["f"]=>
@@ -691,7 +691,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(0) ""
   [1]=>
@@ -709,7 +709,7 @@ darray(7) {
 }
 -- Iteration 23 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(6) "string"
   ["f"]=>
@@ -722,7 +722,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(6) "string"
   [1]=>
@@ -740,7 +740,7 @@ darray(7) {
 }
 -- Iteration 24 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(6) "string"
   ["f"]=>
@@ -753,7 +753,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(6) "string"
   [1]=>
@@ -771,7 +771,7 @@ darray(7) {
 }
 -- Iteration 25 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   string(11) "hello world"
   ["f"]=>
@@ -784,7 +784,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   string(11) "hello world"
   [1]=>
@@ -802,7 +802,7 @@ darray(7) {
 }
 -- Iteration 26 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   object(classA) (0) {
   }
@@ -816,7 +816,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   object(classA) (0) {
   }
@@ -835,7 +835,7 @@ darray(7) {
 }
 -- Iteration 27 --
 int(5)
-darray(5) {
+dict(5) {
   [0]=>
   resource(4) of type (stream)
   ["f"]=>
@@ -848,7 +848,7 @@ darray(5) {
   float(2.222)
 }
 int(7)
-darray(7) {
+dict(7) {
   [0]=>
   resource(4) of type (stream)
   [1]=>

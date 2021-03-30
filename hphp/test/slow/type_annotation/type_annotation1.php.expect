@@ -1,16 +1,16 @@
 string(28) "?HH\darray<HH\int, @HH\bool>"
-darray(3) {
+dict(3) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
   int(24)
   ["generic_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(2) {
+    dict(2) {
       ["soft"]=>
       bool(true)
       ["kind"]=>
@@ -19,30 +19,30 @@ darray(3) {
   }
 }
 string(49) "HH\Map<HH\arraykey, HH\Vector<HH\varray<HH\int>>>"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(7)
     }
-    darray(3) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["kind"]=>
           int(25)
           ["generic_types"]=>
-          varray(1) {
-            darray(1) {
+          vec(1) {
+            dict(1) {
               ["kind"]=>
               int(1)
             }
@@ -53,56 +53,56 @@ darray(3) {
   }
 }
 string(28) "(HH\int, ?HH\float, HH\bool)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  varray(3) {
-    darray(1) {
+  vec(3) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
-    darray(2) {
+    dict(2) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
       int(3)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(2)
     }
   }
 }
 string(22) "(function (): HH\void)"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(1) {
+  dict(1) {
     ["kind"]=>
     int(0)
   }
   ["param_types"]=>
-  varray(0) {
+  vec(0) {
   }
 }
 string(47) "(function (HH\mixed, HH\resource): HH\AnyArray)"
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(1) {
+  dict(1) {
     ["kind"]=>
     int(27)
   }
   ["param_types"]=>
-  varray(2) {
-    darray(1) {
+  vec(2) {
+    dict(1) {
       ["kind"]=>
       int(9)
     }
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(5)
     }

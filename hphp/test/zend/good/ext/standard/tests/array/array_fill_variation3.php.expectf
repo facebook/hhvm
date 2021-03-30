@@ -1,17 +1,17 @@
 *** Testing array_fill() : usage variations ***
 --- Testing array_fill() with different values for 'val' argument ---
 -- Iteration 1 --
-varray(2) {
+vec(2) {
   string(0) ""
   string(0) ""
 }
 -- Iteration 2 --
-varray(2) {
+vec(2) {
   string(0) ""
   string(0) ""
 }
 -- Iteration 3 --
-varray(2) {
+vec(2) {
   object(test) (1) {
     ["t"]=>
     int(10)

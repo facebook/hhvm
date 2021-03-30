@@ -1,7 +1,7 @@
 \*\*\* Testing localtime\(\) : usage variation \*\*\*
 
 -- Testing localtime\(\) function with int 123456789000 to timestamp --
-varray\(9\) {
+vec\(9\) {
   int\((16|0)\)
   int\((50|30)\)
   int\((4|0)\)
@@ -12,7 +12,7 @@ varray\(9\) {
   int\((84|69)\)
   int\(0\)
 }
-darray\(9\) {
+dict\(9\) {
   \["tm_sec"\]=>
   int\((16|0)\)
   \["tm_min"\]=>
@@ -34,7 +34,7 @@ darray\(9\) {
 }
 
 -- Testing localtime\(\) function with int -123456789000 to timestamp --
-varray\(9\) {
+vec\(9\) {
   int\((44|52|0)\)
   int\((9|45|30)\)
   int\((19|20|23)\)
@@ -45,7 +45,7 @@ varray\(9\) {
   int\((281|346|294)\)
   int\(0\)
 }
-darray\(9\) {
+dict\(9\) {
   \["tm_sec"\]=>
   int\((44|52|0)\)
   \["tm_min"\]=>

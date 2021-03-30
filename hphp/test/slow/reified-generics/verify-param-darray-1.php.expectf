@@ -1,4 +1,3 @@
 yes
 yes
-
-Catchable fatal error: Argument 1 passed to f() must be an instance of HH\darray<int, int>, HH\dict given in %s on line 7
+yes

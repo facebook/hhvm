@@ -1,7 +1,7 @@
 int(1)
 int(2)
 int(3)
-darray(3) {
+dict(3) {
   [2]=>
   int(3)
   [1]=>
@@ -13,7 +13,7 @@ f
 int(4)
 int(5)
 int(6)
-Out of bounds varray access: invalid index 1
+Out of bounds vec access: invalid index 1
 int(4)
 int(5)
 int(1)

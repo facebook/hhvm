@@ -5,7 +5,7 @@ object(DOMCharacterData) (0) {
 Warning: Attempted to serialize unserializable builtin class DOMCharacterData in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(24) {
+vec(24) {
   string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"
@@ -41,7 +41,7 @@ object(A_DOMCharacterData) (1) {
 Warning: Attempted to serialize unserializable builtin class A_DOMCharacterData in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(24) {
+vec(24) {
   string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"

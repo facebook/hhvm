@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   ["kind"]=>
   int(13)
   ["name"]=>
@@ -8,7 +8,7 @@ darray(4) {
   ["alias"]=>
   string(3) "Bar"
 }
-darray(4) {
+dict(4) {
   ["kind"]=>
   int(13)
   ["name"]=>

@@ -6,7 +6,7 @@ object(HH\Vector) (4) {
   [2]=>
   string(4) "blah"
   [3]=>
-  varray(3) {
+  vec(3) {
     int(3)
     int(5)
     int(7)

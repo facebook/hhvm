@@ -1,6 +1,6 @@
-darray(2) {
+dict(2) {
   ["LeafClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -11,7 +11,7 @@ darray(2) {
     NULL
   }
   ["NodeClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -22,9 +22,9 @@ darray(2) {
     NULL
   }
 }
-darray(2) {
+dict(2) {
   ["LeafClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -32,16 +32,16 @@ darray(2) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    darray(1) {
+    dict(1) {
       ["Object:NodeClass->Property:child->Object:LeafClass"]=>
-      darray(1) {
+      dict(1) {
         ["refs"]=>
         int(1)
       }
     }
   }
   ["NodeClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -49,13 +49,13 @@ darray(2) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    darray(0) {
+    dict(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   ["NodeClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -66,9 +66,9 @@ darray(1) {
     NULL
   }
 }
-darray(1) {
+dict(1) {
   ["NodeClass"]=>
-  darray(4) {
+  dict(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -76,13 +76,13 @@ darray(1) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    darray(0) {
+    dict(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   ["%d"]=>
-  darray(4) {
+  dict(4) {
     ["dups"]=>
     int(1)
     ["refs"]=>

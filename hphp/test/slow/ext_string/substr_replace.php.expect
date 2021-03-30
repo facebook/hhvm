@@ -1,46 +1,46 @@
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "x"
   [1]=>
   string(1) "y"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "x"
   [1]=>
   string(1) "y"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(2) "zx"
   [1]=>
   string(2) "zy"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "z"
   [1]=>
   string(1) "z"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "z"
   [1]=>
   string(1) "z"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(2) "zx"
   [1]=>

@@ -2,79 +2,79 @@
 
 --int 0--
 
-Warning: fwrite() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --int 1--
 
-Warning: fwrite() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --int 12345--
 
-Warning: fwrite() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --int -12345--
 
-Warning: fwrite() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --float 10.5--
 
-Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --float -10.5--
 
-Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --float 12.3456789000e10--
 
-Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --float -12.3456789000e10--
 
-Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --float .5--
 
-Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --empty array--
 
-Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --int indexed array--
 
-Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --associative array--
 
-Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, dict given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --nested arrays--
 
-Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --uppercase NULL--
 
-Warning: fwrite() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --lowercase null--
 
-Warning: fwrite() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --lowercase true--
 
-Warning: fwrite() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --lowercase false--
 
-Warning: fwrite() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --uppercase TRUE--
 
-Warning: fwrite() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --uppercase FALSE--
 
-Warning: fwrite() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --empty string DQ--
 
@@ -82,9 +82,9 @@ Warning: fwrite() expects parameter 2 to be string, boolean given in %s/zend/goo
 
 --instance of classWithToString--
 
-Warning: fwrite() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, object given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 
 --instance of classWithoutToString--
 
-Warning: fwrite() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line %d
+Warning: fwrite() expects parameter 2 to be string, object given in %s/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 95
 ===DONE===

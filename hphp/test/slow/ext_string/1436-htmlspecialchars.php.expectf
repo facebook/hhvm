@@ -1,16 +1,16 @@
-string(%d) "foo<>bar"
-string(%d) "foo&lt;&gt;bar"
-string(%d) ""
-string(%d) ""
+string(8) "foo<>bar"
+string(14) "foo&lt;&gt;bar"
+string(0) ""
+string(0) ""
 NULL
 
 Warning: htmlspecialchars() expects parameter 1 to be string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
-darray(1) {
+dict(1) {
   ["str"]=>
-  string(%d) "aaa"
+  string(3) "aaa"
 }
 
-Warning: htmlspecialchars() expects parameter 1 to be string, %rd?%rarray given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+Warning: htmlspecialchars() expects parameter 1 to be string, dict given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 int(42)
 
 Warning: htmlspecialchars() expects parameter 1 to be string, integer given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20

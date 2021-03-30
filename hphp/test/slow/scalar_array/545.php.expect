@@ -1,42 +1,42 @@
-varray(0) {
+vec(0) {
 }
-varray(1) {
+vec(1) {
   NULL
 }
-varray(1) {
+vec(1) {
   bool(true)
 }
-varray(1) {
+vec(1) {
   bool(false)
 }
-varray(1) {
+vec(1) {
   int(0)
 }
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(1) {
+vec(1) {
   float(1)
 }
-varray(1) {
+vec(1) {
   string(3) "1.0"
 }
-varray(1) {
+vec(1) {
   float(1.23456789E+34)
 }
-varray(1) {
+vec(1) {
   float(INF)
 }
-varray(1) {
+vec(1) {
   float(NAN)
 }
-varray(1) {
+vec(1) {
   string(4) "a bc"
 }
-varray(1) {
+vec(1) {
   string(4) "Á bc"
 }
-varray(13) {
+vec(13) {
   NULL
   bool(true)
   bool(false)
@@ -51,7 +51,7 @@ varray(13) {
   string(4) "a bc"
   string(4) "Á bc"
 }
-darray(6) {
+dict(6) {
   [""]=>
   bool(true)
   [1]=>
@@ -65,7 +65,7 @@ darray(6) {
   [2]=>
   string(4) "Á bc"
 }
-darray(7) {
+dict(7) {
   [""]=>
   bool(true)
   [1]=>
@@ -79,7 +79,7 @@ darray(7) {
   [2]=>
   string(4) "Á bc"
   [3]=>
-  darray(6) {
+  dict(6) {
     [""]=>
     bool(true)
     [0]=>

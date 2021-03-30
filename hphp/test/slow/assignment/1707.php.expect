@@ -1,11 +1,11 @@
-darray(2) {
+dict(2) {
   ["old"]=>
-  darray(1) {
+  dict(1) {
     ["key"]=>
     string(18) "should_be_modified"
   }
   ["new"]=>
-  darray(1) {
+  dict(1) {
     ["key"]=>
     string(18) "should_be_modified"
   }

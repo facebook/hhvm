@@ -1,15 +1,15 @@
 *** Testing array_map() : built-in function ***
 -- with built-in function 'pow' and two parameters --
-varray(3) {
+vec(3) {
   int(1)
   int(16)
   int(243)
 }
 -- with built-in function 'pow' and one parameter --
 
-Warning: pow() expects exactly 2 parameters, 1 given in %s/array_map_variation12.php on line 20
+Warning: pow() expects exactly 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/array/array_map_variation12.php on line 20
 -- with language construct --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation12.php on line 23
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_map_variation12.php on line 23
 NULL
 Done

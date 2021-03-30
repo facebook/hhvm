@@ -1,13 +1,13 @@
 *** Testing array_intersect_ukey() : usage variation ***
 
 -- Testing array_intersect_ukey() function using class with static method as callback --
-darray(2) {
+dict(2) {
   ["blue"]=>
   int(1)
   ["green"]=>
   int(3)
 }
-darray(2) {
+dict(2) {
   ["blue"]=>
   int(1)
   ["green"]=>
@@ -15,7 +15,7 @@ darray(2) {
 }
 
 -- Testing array_intersect_uassoc() function using class with regular method as callback --
-darray(2) {
+dict(2) {
   ["blue"]=>
   int(1)
   ["green"]=>

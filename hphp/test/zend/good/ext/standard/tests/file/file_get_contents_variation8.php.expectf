@@ -1,38 +1,38 @@
 *** Testing file_get_contents() : variation ***
 -- Iteration 0 --
 
-Warning: file_get_contents() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 1 --
 
-Warning: file_get_contents() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 2 --
 
-Warning: file_get_contents() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 3 --
 
-Warning: file_get_contents() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 4 --
 
-Warning: Filename cannot be empty in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: Filename cannot be empty in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 bool(false)
 -- Iteration 5 --
 
-Warning: No such file or directory in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 bool(false)
 -- Iteration 6 --
 
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 NULL
 -- Iteration 7 --
 
-Warning: file_get_contents() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 8 --
 
-Warning: No such file or directory in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 bool(false)
 -- Iteration 9 --
 
-Warning: No such file or directory in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 bool(false)
 
 *** Done ***

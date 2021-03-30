@@ -1,15 +1,15 @@
 *** Testing class_implements() : variation ***
 --- testing no interfaces ---
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 --- testing autoload ---
 
-Warning: class_implements(): Class non_existent does not exist and could not be loaded in %s/class_implements_variation.php on line 16
+Warning: class_implements(): Class non_existent does not exist and could not be loaded in %s/test/zend/good/ext/spl/tests/class_implements_variation.php on line 16
 bool(false)
 
-Warning: class_implements(): Class non_existent2 does not exist in %s/class_implements_variation.php on line 17
+Warning: class_implements(): Class non_existent2 does not exist in %s/test/zend/good/ext/spl/tests/class_implements_variation.php on line 17
 bool(false)
 ===DONE===

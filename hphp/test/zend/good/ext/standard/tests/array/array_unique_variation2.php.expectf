@@ -1,46 +1,47 @@
 *** Testing array_unique() : Passing different arrays to $input argument ***
 -- Iteration 1 --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- Iteration 2 --
-darray(2) {
+dict(2) {
   [0]=>
   float(1.1)
   [1]=>
   float(2.2)
 }
 -- Iteration 3 --
-darray(2) {
+dict(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 -- Iteration 6 --
-darray(4) {
+dict(4) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [2]=>
   string(1) "b"
   [4]=>
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
@@ -51,7 +52,7 @@ darray(4) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
-darray(3) {
+dict(3) {
   ["h1"]=>
   string(1) "
 "
@@ -61,27 +62,28 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 9 --
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
 -- Iteration 10 --
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
 -- Iteration 11 --
-darray(3) {
+dict(3) {
   [1]=>
   int(10)
   [2]=>
@@ -90,14 +92,14 @@ darray(3) {
   int(40)
 }
 -- Iteration 12 --
-darray(2) {
+dict(2) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
   string(6) "twenty"
 }
 -- Iteration 13 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [2]=>
@@ -106,14 +108,14 @@ darray(3) {
   string(4) "four"
 }
 -- Iteration 14 --
-darray(2) {
+dict(2) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
   NULL
 }
 -- Iteration 15 --
-darray(4) {
+dict(4) {
   [1]=>
   string(4) "true"
   [0]=>
@@ -124,21 +126,21 @@ darray(4) {
   bool(true)
 }
 -- Iteration 16 --
-darray(2) {
+dict(2) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
   string(0) ""
 }
 -- Iteration 17 --
-darray(2) {
+dict(2) {
   [1]=>
   string(0) ""
   [6]=>
   bool(true)
 }
 -- Iteration 18 --
-darray(3) {
+dict(3) {
   [""]=>
   int(4)
   [0]=>

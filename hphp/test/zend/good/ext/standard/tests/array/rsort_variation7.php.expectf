@@ -2,7 +2,7 @@
 
 -- 'flag' value is defualt --
 bool(true)
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   bool(false)
@@ -11,7 +11,7 @@ varray(4) {
 
 -- 'flag' value is SORT_REGULAR --
 bool(true)
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   bool(false)
@@ -20,7 +20,7 @@ varray(4) {
 
 -- 'flag' value is SORT_NUMERIC  --
 bool(true)
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   bool(false)
@@ -29,7 +29,7 @@ varray(4) {
 
 -- 'flag' value is SORT_STRING --
 bool(true)
-varray(4) {
+vec(4) {
   bool(true)
   bool(true)
   bool(false)

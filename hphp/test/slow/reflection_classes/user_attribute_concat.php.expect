@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["a"]=>
-  varray(1) {
+  vec(1) {
     string(5) "abcde"
   }
 }

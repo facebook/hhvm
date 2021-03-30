@@ -1,19 +1,19 @@
-varray(6) {
+vec(6) {
   int(0)
   float(0)
   bool(false)
   string(0) ""
-  varray(0) {
+  vec(0) {
   }
   object(X) (0) {
   }
 }
-varray(6) {
+vec(6) {
   int(1)
   float(1)
   bool(true)
   string(5) "hello"
-  varray(2) {
+  vec(2) {
     int(0)
     int(1)
   }

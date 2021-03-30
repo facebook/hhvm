@@ -1,16 +1,16 @@
-darray(1) {
+dict(1) {
   [0]=>
   float(2,1)
 }
-darray(1) {
+dict(1) {
   [0]=>
   float(0,15)
 }
-darray(1) {
+dict(1) {
   [0]=>
   float(123,13452345)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(123)
   [1]=>

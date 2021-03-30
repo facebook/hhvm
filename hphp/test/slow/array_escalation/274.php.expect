@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   [2]=>
-  varray(1) {
+  vec(1) {
     int(0)
   }
 }

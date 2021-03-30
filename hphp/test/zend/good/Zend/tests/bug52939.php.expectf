@@ -1,20 +1,20 @@
 bool(true)
-darray(2) {
+dict(2) {
   ["row2"]=>
   int(1)
   ["row1"]=>
   int(2)
 }
 bool(true)
-darray(2) {
+dict(2) {
   ["row2"]=>
   int(1)
   ["row1"]=>
   int(2)
 }
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'array_multisort1() expects parameter 1 to be inout, but the call was not annotated with 'inout'' in %s/bug52939.php:12
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'array_multisort1() expects parameter 1 to be inout, but the call was not annotated with 'inout'' in %s/test/zend/good/Zend/tests/bug52939.php:12
 Stack trace:
-#0 %s/bug52939.php(12): call_user_func_array()
+#0 %s/test/zend/good/Zend/tests/bug52939.php(12): call_user_func_array()
 #1 (): main()
 #2 {main}

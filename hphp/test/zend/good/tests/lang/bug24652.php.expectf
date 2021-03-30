@@ -1,11 +1,11 @@
-darray(1) {
+dict(1) {
   ["7"]=>
   int(0)
 }
 bool(false)
 bool(true)
 ----------
-darray(1) {
+dict(1) {
   [7]=>
   int(0)
 }

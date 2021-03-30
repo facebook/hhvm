@@ -5,11 +5,11 @@ InvalidArgumentException: Invalid operand type was used: array_fill_keys expects
 NULL
 
 -- Testing array_fill_keys() function with unusual second arguments --
-darray(2) {
+dict(2) {
   ["one"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
   ["two"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 
 -- Testing array_fill_keys() function with mixed array --

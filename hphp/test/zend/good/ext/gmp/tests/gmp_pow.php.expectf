@@ -4,27 +4,27 @@ string(5) "-2048"
 string(4) "1024"
 string(1) "1"
 
-Warning: gmp_pow(): Exponent must not be negative in %s/gmp_pow.php on line 8
+Warning: gmp_pow(): Exponent must not be negative in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 8
 string(1) "0"
 string(4) "1024"
 string(14) "10240000000000"
 string(17) "97656250000000000"
 
-Warning: gmp_pow(): Exponent must not be negative in %s/gmp_pow.php on line 12
+Warning: gmp_pow(): Exponent must not be negative in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 12
 string(1) "0"
 string(14) "10240000000000"
 string(14) "10240000000000"
 
-Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s/gmp_pow.php on line 19
+Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 19
 
-Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s/gmp_pow.php on line 20
+Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 20
 
-Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s/gmp_pow.php on line 21
+Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 21
 
-Warning: gmp_pow() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_pow.php on line 22
+Warning: gmp_pow() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 22
 
-Warning: gmp_pow() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_pow.php on line 23
+Warning: gmp_pow() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 23
 
-Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s/gmp_pow.php on line 24
+Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/gmp_pow.php on line 24
 bool(false)
 Done

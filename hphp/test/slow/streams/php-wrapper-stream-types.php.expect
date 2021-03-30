@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   ["target"]=>
   string(11) "php://stdin"
   ["wrapper"]=>
@@ -6,7 +6,7 @@ darray(3) {
   ["stream"]=>
   string(5) "STDIO"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(12) "php://stdout"
   ["wrapper"]=>
@@ -14,7 +14,7 @@ darray(3) {
   ["stream"]=>
   string(5) "STDIO"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(12) "php://stderr"
   ["wrapper"]=>
@@ -22,7 +22,7 @@ darray(3) {
   ["stream"]=>
   string(5) "STDIO"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(10) "php://fd/1"
   ["wrapper"]=>
@@ -30,7 +30,7 @@ darray(3) {
   ["stream"]=>
   string(5) "STDIO"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(10) "php://temp"
   ["wrapper"]=>
@@ -38,7 +38,7 @@ darray(3) {
   ["stream"]=>
   string(4) "TEMP"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(12) "php://memory"
   ["wrapper"]=>
@@ -46,7 +46,7 @@ darray(3) {
   ["stream"]=>
   string(6) "MEMORY"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(11) "php://input"
   ["wrapper"]=>
@@ -54,7 +54,7 @@ darray(3) {
   ["stream"]=>
   string(5) "Input"
 }
-darray(3) {
+dict(3) {
   ["target"]=>
   string(12) "php://output"
   ["wrapper"]=>

@@ -1,9 +1,9 @@
 object(X) (6) {
   ["prop10":"X":private]=>
-  varray(0) {
+  vec(0) {
   }
   ["prop11":"X":private]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(10)
     ["a"]=>
@@ -12,19 +12,19 @@ object(X) (6) {
     bool(true)
   }
   ["prop12":"X":private]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(10)
     [1]=>
     string(3) "red"
     ["xx"]=>
-    darray(3) {
+    dict(3) {
       [0]=>
       float(2.3)
       [1]=>
       NULL
       ["zz"]=>
-      varray(3) {
+      vec(3) {
         int(12)
         bool(false)
         string(3) "zzz"
@@ -32,10 +32,10 @@ object(X) (6) {
     }
   }
   ["prop20":"X":private]=>
-  darray(0) {
+  dict(0) {
   }
   ["prop21":"X":private]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(10)
     ["a"]=>
@@ -44,19 +44,19 @@ object(X) (6) {
     bool(true)
   }
   ["prop22":"X":private]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(10)
     [1]=>
     string(3) "red"
     ["xx"]=>
-    darray(3) {
+    dict(3) {
       [0]=>
       float(2.3)
       [1]=>
       NULL
       ["zz"]=>
-      varray(3) {
+      vec(3) {
         int(12)
         bool(false)
         string(3) "zzz"

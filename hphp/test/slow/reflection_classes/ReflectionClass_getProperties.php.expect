@@ -1,4 +1,4 @@
-darray(6) {
+dict(6) {
   [0]=>
   string(15) "privateProperty"
   [1]=>
@@ -12,7 +12,7 @@ darray(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(17) "protectedProperty"
   [1]=>
@@ -26,7 +26,7 @@ darray(6) {
   [5]=>
   string(21) "privateStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(17) "protectedProperty"
   [1]=>
@@ -40,7 +40,7 @@ darray(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(15) "privateProperty"
   [1]=>
@@ -54,7 +54,7 @@ darray(6) {
   [5]=>
   string(23) "protectedStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(14) "publicProperty"
   [1]=>
@@ -68,7 +68,7 @@ darray(6) {
   [5]=>
   string(23) "protectedStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(15) "privateProperty"
   [1]=>
@@ -82,7 +82,7 @@ darray(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(15) "privateProperty"
   [1]=>
@@ -96,7 +96,7 @@ darray(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
-darray(6) {
+dict(6) {
   [0]=>
   string(15) "privateProperty"
   [1]=>
@@ -110,7 +110,7 @@ darray(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
-darray(12) {
+dict(12) {
   [0]=>
   string(11) "cls1Private"
   [1]=>
@@ -136,7 +136,7 @@ darray(12) {
   [11]=>
   string(14) "t1PublicStatic"
 }
-darray(22) {
+dict(22) {
   [0]=>
   string(11) "cls1Private"
   [1]=>
@@ -182,7 +182,7 @@ darray(22) {
   [21]=>
   string(14) "t1PublicStatic"
 }
-darray(30) {
+dict(30) {
   [0]=>
   string(11) "cls3Private"
   [1]=>

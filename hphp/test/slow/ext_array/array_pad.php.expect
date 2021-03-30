@@ -1,11 +1,11 @@
-varray(5) {
+vec(5) {
   int(12)
   int(10)
   int(9)
   int(0)
   int(0)
 }
-varray(7) {
+vec(7) {
   int(-1)
   int(-1)
   int(-1)
@@ -14,12 +14,12 @@ varray(7) {
   int(10)
   int(9)
 }
-varray(3) {
+vec(3) {
   int(12)
   int(10)
   int(9)
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "test"
   [1]=>

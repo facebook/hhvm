@@ -1,9 +1,9 @@
-Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values2.php on line 15
 
-Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values2.php on line 15
 
-Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
-darray(8) {
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values2.php on line 15
+dict(8) {
   [1]=>
   int(2)
   ["hello"]=>

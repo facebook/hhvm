@@ -1,14 +1,14 @@
 *** Testing array_intersect_assoc() : passing two dimensional array to both $arr1 and $arr2 arguments ***
 -- Passing the sub-array to $arr1 and $arr2 --
 - With default arguments -
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 - With more arguments -
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>

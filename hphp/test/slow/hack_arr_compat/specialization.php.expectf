@@ -1,33 +1,33 @@
 =====================================
 as/is shape/tuple:
 
-varray as shape: Expected shape('a' => int, 'b' => bool), got varray
-varray is shape: false
-darray as shape: {"a":17,"b":false}
-darray is shape: true
+vec as shape: Expected shape('a' => int, 'b' => bool), got HH\vec
+vec is shape: false
+dict as shape: {"a":17,"b":false}
+dict is shape: true
 
-varray as tuple: ["a",false]
-varray is tuple: true
-darray as tuple: Expected (string, bool), got darray
-darray is tuple: false
+vec as tuple: ["a",false]
+vec is tuple: true
+dict as tuple: Expected (string, bool), got HH\dict
+dict is tuple: false
 
 =====================================
 Builtin errors:
-Passing boolean to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, boolean given
-Passing darray to boolean: json_decode() expects parameter 2 to be boolean, darray given
+Passing boolean to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, boolean given
+Passing darray to boolean: json_decode() expects parameter 2 to be boolean, dict given
 
 =====================================
 Builtins:
-Passing varray to varray: []
-Passing varray to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, varray given
-Passing darray to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be varray, darray given
-Passing darray to darray: []
+Passing vec to varray: []
+Passing vec to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given
+Passing dict to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given
+Passing dict to darray: {}
 Passing clsmeth to varray: ["ClsMethTest","fn"]
-Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, clsmeth given
+Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, clsmeth given
 
 =====================================
 Comparisons:
-  Comparing varray and varray:
+  Comparing vec and vec:
     === true
     !== false
     <   false
@@ -35,71 +35,7 @@ Comparisons:
     <=  true
     >=  true
     <=> 0
-  Comparing varray and darray:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-  Comparing varray and vec:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing varray and dict:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing darray and varray:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-  Comparing darray and darray:
-    === true
-    !== false
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-  Comparing darray and vec:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing darray and dict:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing vec and varray:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing vec and darray:
+  Comparing vec and dict:
     === false
     !== true
     <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
@@ -123,7 +59,7 @@ Comparisons:
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
     >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing dict and varray:
+  Comparing dict and vec:
     === false
     !== true
     <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -131,9 +67,73 @@ Comparisons:
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing dict and darray:
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing dict and vec:
     === false
     !== true
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+  Comparing dict and vec:
+    === false
+    !== true
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing dict and dict:
+    === true
+    !== false
     <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -158,58 +158,58 @@ Comparisons:
 
 =====================================
 Implicit append:
-Out of bounds varray access: invalid index 0
+Out of bounds vec access: invalid index 0
 
 =====================================
 Test 0:
 [2,3]
 [2,3]
 [2,3,"appended"]
-Out of bounds varray access: invalid index 3
-Invalid varray key: expected a key of type int, string given
+Out of bounds vec access: invalid index 3
+Invalid vec key: expected a key of type int, string given
 
 =====================================
 Test 1:
 [2,3,5]
 [2,3]
 [2,3,"appended"]
-Out of bounds varray access: invalid index 3
-Invalid varray key: expected a key of type int, string given
+Out of bounds vec access: invalid index 3
+Invalid vec key: expected a key of type int, string given
 
 =====================================
 Test 2:
 [2,3,5,7]
-varrays do not support unsetting non-end elements
-varrays do not support unsetting non-end elements
+Vecs do not support unsetting non-end elements
+Vecs do not support unsetting non-end elements
 [2,3,5,"oh no"]
-Invalid varray key: expected a key of type int, string given
+Invalid vec key: expected a key of type int, string given
 
 =====================================
 Typehints:
 "varray to varray: OK!"
 
-Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, varray given in %s/specialization.php on line %d
+Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given in %s/specialization.php on line %d
 
-Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, darray given in %s/specialization.php on line %d
+Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given in %s/specialization.php on line %d
 "darray to darray: OK!"
 "varray to varray: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given in %s/specialization.php on line %d
 []
 
-Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, varray given in %s/specialization.php on line %d
+Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, HH\vec given in %s/specialization.php on line %d
 
-Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, darray given in %s/specialization.php on line %d
-[]
+Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, HH\dict given in %s/specialization.php on line %d
+{}
 ["ClsMethTest","fn"]
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, clsmeth given in %s/specialization.php on line %d
 []
 
-Catchable fatal error: Property 'C::d' declared as type ?HH\darray, varray assigned in %s/specialization.php on line %d
+Catchable fatal error: Property 'C::d' declared as type ?HH\darray, HH\vec assigned in %s/specialization.php on line %d
 
-Catchable fatal error: Property 'C::v' declared as type ?HH\varray, darray assigned in %s/specialization.php on line %d
-[]
+Catchable fatal error: Property 'C::v' declared as type ?HH\varray, HH\dict assigned in %s/specialization.php on line %d
+{}
 ["ClsMethTest","fn"]
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, clsmeth assigned in %s/specialization.php on line %d

@@ -1,11 +1,11 @@
 *** Testing range() with various low and high values ***
 -- creating an array with low = 'ABCD' and high = 'ABCD' --
-varray(1) {
+vec(1) {
   string(1) "A"
 }
 
 -- creating an array with low = 'ABCD' and high = '-10.5555' --
-varray(11) {
+vec(11) {
   float(0)
   float(-1)
   float(-2)
@@ -20,34 +20,34 @@ varray(11) {
 }
 
 -- creating an array with low = 'ABCD' and high = '1' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = 'ABCD' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = 'ABCD' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = 'ABCD' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = 'ABCD' and high = 'Array' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '-10.5555' and high = 'ABCD' --
-varray(11) {
+vec(11) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -62,12 +62,12 @@ varray(11) {
 }
 
 -- creating an array with low = '-10.5555' and high = '-10.5555' --
-varray(1) {
+vec(1) {
   float(-10.5555)
 }
 
 -- creating an array with low = '-10.5555' and high = '1' --
-varray(12) {
+vec(12) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -83,7 +83,7 @@ varray(12) {
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
-varray(11) {
+vec(11) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -98,7 +98,7 @@ varray(11) {
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
-varray(11) {
+vec(11) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -113,7 +113,7 @@ varray(11) {
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
-varray(11) {
+vec(11) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -128,7 +128,7 @@ varray(11) {
 }
 
 -- creating an array with low = '-10.5555' and high = 'Array' --
-varray(12) {
+vec(12) {
   float(-10.5555)
   float(-9.5555)
   float(-8.5555)
@@ -144,13 +144,13 @@ varray(12) {
 }
 
 -- creating an array with low = '1' and high = 'ABCD' --
-varray(2) {
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = '1' and high = '-10.5555' --
-varray(12) {
+vec(12) {
   float(1)
   float(0)
   float(-1)
@@ -166,40 +166,40 @@ varray(12) {
 }
 
 -- creating an array with low = '1' and high = '1' --
-varray(1) {
+vec(1) {
   int(1)
 }
 
 -- creating an array with low = '1' and high = '' --
-varray(2) {
-  int(1)
-  int(0)
-}
-
--- creating an array with low = '1' and high = '' --
-varray(2) {
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = '1' and high = '' --
-varray(2) {
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = '1' and high = 'Array' --
-varray(1) {
+vec(1) {
   int(1)
 }
 
 -- creating an array with low = '' and high = 'ABCD' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '-10.5555' --
-varray(11) {
+vec(11) {
   float(0)
   float(-1)
   float(-2)
@@ -214,39 +214,39 @@ varray(11) {
 }
 
 -- creating an array with low = '' and high = '1' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = 'Array' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '' and high = 'ABCD' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '-10.5555' --
-varray(11) {
+vec(11) {
   float(0)
   float(-1)
   float(-2)
@@ -261,39 +261,39 @@ varray(11) {
 }
 
 -- creating an array with low = '' and high = '1' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = 'Array' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '' and high = 'ABCD' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '-10.5555' --
-varray(11) {
+vec(11) {
   float(0)
   float(-1)
   float(-2)
@@ -308,40 +308,40 @@ varray(11) {
 }
 
 -- creating an array with low = '' and high = '1' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = '' --
-varray(1) {
+vec(1) {
   int(0)
 }
 
 -- creating an array with low = '' and high = 'Array' --
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
 
 -- creating an array with low = 'Array' and high = 'ABCD' --
-varray(2) {
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = 'Array' and high = '-10.5555' --
-varray(12) {
+vec(12) {
   float(1)
   float(0)
   float(-1)
@@ -357,42 +357,42 @@ varray(12) {
 }
 
 -- creating an array with low = 'Array' and high = '1' --
-varray(1) {
+vec(1) {
   int(1)
 }
 
 -- creating an array with low = 'Array' and high = '' --
-varray(2) {
-  int(1)
-  int(0)
-}
-
--- creating an array with low = 'Array' and high = '' --
-varray(2) {
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = 'Array' and high = '' --
-varray(2) {
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+vec(2) {
   int(1)
   int(0)
 }
 
 -- creating an array with low = 'Array' and high = 'Array' --
-varray(1) {
+vec(1) {
   int(1)
 }
 
 *** Possible variatins with steps ***
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)
   int(4)
   int(5)
 }
-varray(5) {
+vec(5) {
   int(1)
   int(2)
   int(3)

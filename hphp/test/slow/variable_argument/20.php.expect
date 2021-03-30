@@ -1,15 +1,15 @@
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   int(10)
 }
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
 int(2)
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>

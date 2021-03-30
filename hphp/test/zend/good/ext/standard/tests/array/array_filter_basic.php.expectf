@@ -1,11 +1,11 @@
 *** Testing array_filter() : basic functionality ***
-darray(2) {
+dict(2) {
   [1]=>
   int(2)
   [3]=>
   int(0)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>

@@ -1,9 +1,9 @@
 string(1) "A"
-varray(1) {
+vec(1) {
   int(123)
 }
 string(1) "B"
-varray(2) {
+vec(2) {
   int(123)
   int(456)
 }

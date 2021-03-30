@@ -1,31 +1,31 @@
 *** Testing array_intersect_key() : usage variation ***
 
 --decimal indexed--
-darray(1) {
+dict(1) {
   [10]=>
   string(3) "0xA"
 }
-darray(1) {
+dict(1) {
   [10]=>
   string(2) "10"
 }
 
 --octal indexed--
-darray(1) {
+dict(1) {
   [10]=>
   string(3) "0xA"
 }
-darray(1) {
+dict(1) {
   [10]=>
   string(3) "012"
 }
 
 --hexa  indexed--
-darray(1) {
+dict(1) {
   [-7]=>
   string(3) "-07"
 }
-darray(1) {
+dict(1) {
   [-7]=>
   string(4) "-0x7"
 }

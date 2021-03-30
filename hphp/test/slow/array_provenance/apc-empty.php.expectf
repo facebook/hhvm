@@ -1,4 +1,0 @@
-bool(false)
-%s/apc-empty.php:5
-bool(true)
-<none>

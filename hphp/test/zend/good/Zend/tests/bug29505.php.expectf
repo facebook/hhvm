@@ -1,15 +1,15 @@
-darray(2) {
+dict(2) {
   ["empty"]=>
-  varray(0) {
+  vec(0) {
   }
   ["three"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     int(1)
     ["b"]=>
     string(1) "c"
     [3]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }

@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
@@ -7,7 +7,7 @@ object(Closure%s) (1) {
   ["this"]=>
   object(Foo) (1) {
     ["prop":"Foo":private]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)

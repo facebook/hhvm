@@ -1,11 +1,11 @@
 bool(true)
 
-Warning: Invalid argument: apc key: (empty string) in %s on line 9
+Warning: Invalid argument: apc key: (empty string) in %s/test/slow/apc_empty.php on line 9
 bool(false)
-darray(1) {
+dict(1) {
   ["abc"]=>
   int(-1)
 }
 
-Warning: Invalid argument: apc key: (empty string) in %s on line 9
+Warning: Invalid argument: apc key: (empty string) in %s/test/slow/apc_empty.php on line 9
 bool(false)

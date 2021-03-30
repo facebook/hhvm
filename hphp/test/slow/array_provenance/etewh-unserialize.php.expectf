@@ -1,7 +1,0 @@
-darray(2) {
-  ["foo"]=>
-  string(3) "bar"
-  ["baz"]=>
-  string(4) "quux"
-}
-string(%d) "%s/etewh-unserialize.php:10"

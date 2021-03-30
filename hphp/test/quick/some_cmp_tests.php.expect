@@ -4,15 +4,15 @@ bool(false)
 bool(false)
 bool(false)
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 ======
 bool(true)
 bool(true)

@@ -1,7 +1,7 @@
-darray(1) {
+dict(1) {
   [0]=>
-  varray(1) {
-    darray(0) {
+  vec(1) {
+    dict(0) {
     }
   }
 }

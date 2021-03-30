@@ -1,17 +1,17 @@
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 3 --
-darray(2) {
+dict(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -19,11 +19,11 @@ darray(2) {
 }
 
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 5 --
-darray(2) {
+dict(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -31,11 +31,11 @@ darray(2) {
 }
 
 -- Iteration 6 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 7 --
-darray(2) {
+dict(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -43,15 +43,15 @@ darray(2) {
 }
 
 -- Iteration 8 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 9 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 10 --
-darray(2) {
+dict(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -59,7 +59,7 @@ darray(2) {
 }
 
 -- Iteration 11 --
-darray(2) {
+dict(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -67,46 +67,46 @@ darray(2) {
 }
 
 -- Iteration 12 --
-darray(1) {
+dict(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 13 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 14 --
-darray(1) {
+dict(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 15 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 16 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 17 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 18 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 19 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 20 --
-darray(0) {
+dict(0) {
 }
 
 -- Iteration 21 --
-darray(0) {
+dict(0) {
 }
 Done

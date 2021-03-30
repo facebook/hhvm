@@ -1,5 +1,5 @@
 *** Testing get_class_methods() : usage variations ***
-varray(1) {
+vec(1) {
   string(8) "MyMeThOd"
 }
 Done

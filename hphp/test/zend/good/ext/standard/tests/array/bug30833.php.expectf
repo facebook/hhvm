@@ -1,14 +1,14 @@
-varray(2) {
+vec(2) {
   string(3) "abc"
   string(4) "0000"
 }
-darray(2) {
+dict(2) {
   ["abc"]=>
   int(1)
   ["0000"]=>
   int(1)
 }
-varray(2) {
+vec(2) {
   string(3) "abc"
   string(4) "0000"
 }

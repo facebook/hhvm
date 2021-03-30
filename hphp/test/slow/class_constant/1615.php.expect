@@ -1,5 +1,5 @@
 string(3) "new"
-darray(1) {
+dict(1) {
   ["X"]=>
   string(3) "new"
 }

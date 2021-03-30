@@ -1,2 +1,1 @@
-
-Warning: textdomain() expects parameter 1 to be string, %rv?%rarray given in %s/gettext_textdomain-wrongparams.php on line 6
+Warning: textdomain() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/gettext/tests/gettext_textdomain-wrongparams.php on line 6

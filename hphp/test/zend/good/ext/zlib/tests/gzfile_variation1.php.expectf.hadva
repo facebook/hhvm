@@ -1,8 +1,0 @@
-Warning: gzfile() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/zlib/tests/gzfile_variation1.php on line 19
-
-Warning: gzfile() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/zlib/tests/gzfile_variation1.php on line 19
-
-Warning: gzfile() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/zlib/tests/gzfile_variation1.php on line 19
-
-Warning: gzfile() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/zlib/tests/gzfile_variation1.php on line 19
-===DONE===

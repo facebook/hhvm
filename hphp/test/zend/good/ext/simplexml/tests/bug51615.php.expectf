@@ -3,7 +3,7 @@ Warning: error parsing attribute name in Entity, line: 1 in %s/test/zend/good/ex
 Warning: error parsing attribute name in Entity, line: 1 in %s/test/zend/good/ext/simplexml/tests/bug51615.php on line 4
 object(SimpleXMLElement) (3) {
   ["@attributes"]=>
-  darray(2) {
+  dict(2) {
     ["title"]=>
     string(0) ""
     ["y"]=>

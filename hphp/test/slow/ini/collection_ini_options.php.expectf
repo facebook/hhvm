@@ -1,21 +1,21 @@
-varray(2) {
+vec(2) {
   string(9) "/baz/quux"
   string(8) "/foo/bar"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(4) ".txt"
   [1]=>
   string(4) ".doc"
 }
-varray(1) {
+vec(1) {
   string(4) ".bat"
 }
-varray(2) {
+vec(2) {
   string(9) "index.php"
   string(8) "test.php"
 }
-darray(2) {
+dict(2) {
   ["PHP_ROOT"]=>
   string(8) "/var/www"
   ["TFBENV"]=>

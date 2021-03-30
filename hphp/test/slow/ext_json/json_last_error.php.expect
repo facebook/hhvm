@@ -4,7 +4,7 @@ NULL
 
 Decoding: {'Organization': 'PHP Documentation Team'}
 4: Syntax error
-varray(2) {
+vec(2) {
   int(4)
   string(12) "Syntax error"
 }
@@ -23,7 +23,7 @@ NULL
 
 Encoding: Ÿ
 5: Malformed UTF-8 characters, possibly incorrectly encoded
-varray(2) {
+vec(2) {
   int(5)
   string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
 }

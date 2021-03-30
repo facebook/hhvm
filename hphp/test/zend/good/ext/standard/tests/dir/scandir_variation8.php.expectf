@@ -43,7 +43,7 @@ resource(4) of type (stream)
 resource(4) of type (stream)
 
 -- Call to scandir() --
-varray(16) {
+vec(16) {
   string(9) "-10.5.tmp"
   string(9) "-2345.tmp"
   string(1) "."

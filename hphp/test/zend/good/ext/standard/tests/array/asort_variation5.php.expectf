@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With default sort_flag -
 bool(true)
-darray(12) {
+dict(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -20,8 +20,10 @@ darray(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -35,7 +37,7 @@ darray(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-darray(12) {
+dict(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -50,8 +52,10 @@ darray(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -65,7 +69,7 @@ darray(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-darray(12) {
+dict(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -80,8 +84,10 @@ darray(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -97,7 +103,7 @@ darray(12) {
 -- Iteration 2 --
 - With default sort_flag -
 bool(true)
-darray(12) {
+dict(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>
@@ -125,7 +131,7 @@ darray(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-darray(12) {
+dict(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>
@@ -153,7 +159,7 @@ darray(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-darray(12) {
+dict(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>

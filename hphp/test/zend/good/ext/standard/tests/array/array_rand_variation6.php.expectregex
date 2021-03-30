@@ -7,14 +7,14 @@ string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 
 -- with num_req = 3 --
-varray\(3\) {
+vec\(3\) {
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 }
 
 -- with num_req = 6 --
-varray\(6\) {
+vec\(6\) {
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"

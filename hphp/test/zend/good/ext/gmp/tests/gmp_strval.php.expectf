@@ -1,42 +1,41 @@
+Warning: gmp_strval() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 3
 
-Warning: gmp_strval() expects at least 1 parameter, 0 given in %s/gmp_strval.php on line 3
-
-Warning: gmp_strval(): Unable to convert variable to GMP - string is not an integer in %s/gmp_strval.php on line 4
+Warning: gmp_strval(): Unable to convert variable to GMP - string is not an integer in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 4
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be integer, string given in %s/gmp_strval.php on line 5
+Warning: gmp_strval() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 5
 
-Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/gmp_strval.php on line 6
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 6
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be integer, string given in %s/gmp_strval.php on line 7
+Warning: gmp_strval() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 7
 
-Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_strval.php on line 10
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 10
 bool(false)
 string(7) "9765456"
 
-Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/gmp_strval.php on line 14
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 14
 bool(false)
 
-Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s/gmp_strval.php on line 15
+Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 15
 bool(false)
 string(7) "9765456"
 string(8) "-3373333"
 
-Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/gmp_strval.php on line 20
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 20
 bool(false)
 
-Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s/gmp_strval.php on line 21
+Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 21
 bool(false)
 string(8) "-3373333"
 
-Warning: gmp_strval() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_strval.php on line 24
+Warning: gmp_strval() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 24
 
-Warning: gmp_strval() expects parameter 2 to be integer, object given in %s/gmp_strval.php on line 25
+Warning: gmp_strval() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 25
 
-Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_strval.php on line 26
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 26
 bool(false)
 
-Warning: gmp_strval(): supplied object is not a valid GMP object in %s/gmp_strval.php on line 27
+Warning: gmp_strval(): supplied object is not a valid GMP object in %s/test/zend/good/ext/gmp/tests/gmp_strval.php on line 27
 bool(false)
 Done

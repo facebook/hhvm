@@ -15,9 +15,9 @@
 101
 == WRONG PARAMETERS ==
 
-Warning: strlen() expects parameter 1 to be string, %rd?%rarray given in %s/mb_strlen.php on line 58
+Warning: strlen() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/mbstring/tests/mb_strlen.php on line 58
 
 
-Warning: strlen() expects parameter 1 to be string, object given in %s/mb_strlen.php on line 63
+Warning: strlen() expects parameter 1 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_strlen.php on line 63
 
 ERR: Warning

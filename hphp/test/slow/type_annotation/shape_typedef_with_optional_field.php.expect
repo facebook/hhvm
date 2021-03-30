@@ -1,11 +1,11 @@
 string(22) "HH\shape(?'a'=>HH\int)"
-darray(2) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["a"]=>
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(1)
       ["optional_shape_field"]=>

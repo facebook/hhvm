@@ -2,7 +2,7 @@
 
 -- Testing asort() by supplying various object arrays, 'flag' value is default --
 bool(true)
-darray(4) {
+dict(4) {
   [4]=>
   object(for_integer_asort) (3) {
     ["public_class_value"]=>
@@ -41,7 +41,7 @@ darray(4) {
   }
 }
 bool(true)
-darray(4) {
+dict(4) {
   ["d"]=>
   object(for_string_asort) (3) {
     ["public_class_value"]=>
@@ -82,7 +82,7 @@ darray(4) {
 
 -- Testing asort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
 bool(true)
-darray(4) {
+dict(4) {
   [4]=>
   object(for_integer_asort) (3) {
     ["public_class_value"]=>
@@ -121,7 +121,7 @@ darray(4) {
   }
 }
 bool(true)
-darray(4) {
+dict(4) {
   ["d"]=>
   object(for_string_asort) (3) {
     ["public_class_value"]=>

@@ -1,10 +1,10 @@
-darray(2) {
+dict(2) {
   [1]=>
   resource(4) of type (stream)
   ["myindex"]=>
   resource(4) of type (stream)
 }
-darray(2) {
+dict(2) {
   [1]=>
   resource(4) of type (stream)
   ["myindex"]=>

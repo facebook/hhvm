@@ -1,11 +1,11 @@
 string(3) "sub"
-Array
+Dict
 (
     [1] => main
     [2] => sub
 )
 string(4) "main"
-Array
+Dict
 (
     [1] => main
     [2] => sub

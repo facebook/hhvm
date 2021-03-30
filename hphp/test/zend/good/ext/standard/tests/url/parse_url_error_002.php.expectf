@@ -1,5 +1,5 @@
 *** Testing parse_url() : error conditions: url component specifier out of range ***
---> Below range:darray(8) {
+--> Below range:dict(8) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -20,6 +20,6 @@
 
 
 --> Above range:
-Warning: parse_url(): Invalid URL component identifier 99 in %s/parse_url_error_002.php on line 15
+Warning: parse_url(): Invalid URL component identifier 99 in %s/test/zend/good/ext/standard/tests/url/parse_url_error_002.php on line 15
 bool(false)
 Done

@@ -1,11 +1,8 @@
 bool(true)
 int(5)
-darray(3) {
-  [0]=>
+vec(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(7) "goodbye"
@@ -15,12 +12,9 @@ object(X) (4) {
   ["i":"X":private]=>
   int(5)
   ["a":"X":private]=>
-  darray(3) {
-    [0]=>
+  vec(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   ["s":"X":private]=>

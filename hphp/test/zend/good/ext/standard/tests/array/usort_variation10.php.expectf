@@ -2,7 +2,7 @@
 
 -- Array with duplicate keys --
 bool(true)
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [1]=>
@@ -21,7 +21,7 @@ darray(7) {
 
 -- Array with default/assigned keys --
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   string(5) "Apple"
   [1]=>

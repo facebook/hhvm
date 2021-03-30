@@ -1,5 +1,5 @@
 interfaces of Base:
-darray(2) {
+dict(2) {
   ["IA"]=>
   string(2) "IA"
   ["IB"]=>
@@ -7,7 +7,7 @@ darray(2) {
 }
 
 interfaces of Derived:
-darray(2) {
+dict(2) {
   ["IA"]=>
   string(2) "IA"
   ["IB"]=>
@@ -15,7 +15,7 @@ darray(2) {
 }
 
 interfaces of DerivedDerived:
-darray(3) {
+dict(3) {
   ["IA"]=>
   string(2) "IA"
   ["IB"]=>
@@ -25,7 +25,7 @@ darray(3) {
 }
 
 interfaces of LotsOfInterfaces:
-darray(3) {
+dict(3) {
   ["IA"]=>
   string(2) "IA"
   ["ID"]=>
@@ -35,7 +35,7 @@ darray(3) {
 }
 
 interfaces of MostOfTheInterfaces:
-darray(5) {
+dict(5) {
   ["IA"]=>
   string(2) "IA"
   ["IB"]=>
@@ -49,7 +49,7 @@ darray(5) {
 }
 
 interfaces of AllTheInterfaces:
-darray(6) {
+dict(6) {
   ["IA"]=>
   string(2) "IA"
   ["IB"]=>

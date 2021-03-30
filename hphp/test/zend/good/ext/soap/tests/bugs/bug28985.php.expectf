@@ -1,4 +1,4 @@
-varray(42) {
+vec(42) {
   string(100) "struct LoginMGDIS {
  string iUserLogin;
  string iUserId;

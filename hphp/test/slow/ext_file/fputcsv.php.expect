@@ -1,5 +1,5 @@
 apple,"""banana"""
-varray(2) {
+vec(2) {
   string(5) "apple"
   string(8) ""banana""
 }

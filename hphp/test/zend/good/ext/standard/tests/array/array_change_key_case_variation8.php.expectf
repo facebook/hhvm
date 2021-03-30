@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- $case = default --
-darray(10) {
+dict(10) {
   [""]=>
   int(2)
   ["\a"]=>
@@ -25,7 +25,7 @@ darray(10) {
   int(11)
 }
 -- $case = upper --
-darray(10) {
+dict(10) {
   [""]=>
   int(2)
   ["\A"]=>
@@ -50,7 +50,7 @@ darray(10) {
 }
 
 -- $case = default --
-darray(9) {
+dict(9) {
   ["lemon"]=>
   int(1)
   ["orange"]=>
@@ -71,7 +71,7 @@ darray(9) {
   int(10)
 }
 -- $case = upper --
-darray(9) {
+dict(9) {
   ["LEMON"]=>
   int(1)
   ["ORANGE"]=>

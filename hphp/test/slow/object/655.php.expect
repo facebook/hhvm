@@ -1,13 +1,13 @@
 object(g) (1) {
   ["v"]=>
-  darray(1) {
+  dict(1) {
     ["x"]=>
     int(1)
   }
 }
 object(g) (1) {
   ["v"]=>
-  darray(1) {
+  dict(1) {
     ["x"]=>
     int(1)
   }

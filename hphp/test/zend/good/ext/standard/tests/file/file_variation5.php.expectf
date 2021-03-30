@@ -1,5 +1,5 @@
 file() on a path containing .. and .
-varray(3) {
+vec(3) {
   string(7) "Line 1
 "
   string(7) "Line 2
@@ -8,7 +8,7 @@ varray(3) {
 }
 
 file() on a path containing .. with invalid directories
-varray(3) {
+vec(3) {
   string(7) "Line 1
 "
   string(7) "Line 2
@@ -18,7 +18,7 @@ varray(3) {
 
 file() on a linked file
 bool(true)
-varray(3) {
+vec(3) {
   string(7) "Line 1
 "
   string(7) "Line 2
@@ -28,7 +28,7 @@ varray(3) {
 bool(true)
 
 file() on a relative path from a different working directory
-varray(3) {
+vec(3) {
   string(7) "Line 1
 "
   string(7) "Line 2

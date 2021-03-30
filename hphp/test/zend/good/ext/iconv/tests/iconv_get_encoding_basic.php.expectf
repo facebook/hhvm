@@ -1,7 +1,7 @@
 string(5) "UTF-8"
 string(5) "UTF-8"
 string(5) "UTF-8"
-darray(3) {
+dict(3) {
   ["input_encoding"]=>
   string(5) "UTF-8"
   ["output_encoding"]=>
@@ -10,7 +10,7 @@ darray(3) {
   string(5) "UTF-8"
 }
 bool(false)
-darray(3) {
+dict(3) {
   ["input_encoding"]=>
   string(5) "UTF-8"
   ["output_encoding"]=>
@@ -21,7 +21,7 @@ darray(3) {
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
-darray(3) {
+dict(3) {
   ["input_encoding"]=>
   string(10) "ISO-8859-1"
   ["output_encoding"]=>
@@ -30,7 +30,7 @@ darray(3) {
   string(10) "ISO-8859-1"
 }
 bool(false)
-darray(3) {
+dict(3) {
   ["input_encoding"]=>
   string(10) "ISO-8859-1"
   ["output_encoding"]=>

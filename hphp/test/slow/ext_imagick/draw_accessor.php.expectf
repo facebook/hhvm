@@ -1,6 +1,6 @@
 bool(true)
 int(10)
-darray(4) {
+dict(4) {
   ["r"]=>
   int(255)
   ["g"]=>
@@ -14,7 +14,7 @@ darray(4) {
 bool(true)
 bool(true)
 bool(false)
-darray(4) {
+dict(4) {
   ["r"]=>
   int(240)
   ["g"]=>
@@ -24,7 +24,7 @@ darray(4) {
   ["a"]=>
   float(1)
 }
-varray(3) {
+vec(3) {
   float(1)
   float(2)
   float(3)
@@ -39,7 +39,7 @@ bool(true)
 bool(false)
 bool(true)
 string(5) "UTF-8"
-darray(4) {
+dict(4) {
   ["r"]=>
   int(0)
   ["g"]=>

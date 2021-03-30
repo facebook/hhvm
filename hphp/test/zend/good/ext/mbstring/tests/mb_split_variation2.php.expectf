@@ -2,94 +2,94 @@
 
 -- Iteration 1 --
 
-Warning: mb_split() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 2 --
 
-Warning: mb_split() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 3 --
 
-Warning: mb_split() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 4 --
 
-Warning: mb_split() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 5 --
 
-Warning: mb_split() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 6 --
 
-Warning: mb_split() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 7 --
 
-Warning: mb_split() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 8 --
 
-Warning: mb_split() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 9 --
 
-Warning: mb_split() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 10 --
 
-Warning: mb_split() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, null given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 11 --
 
-Warning: mb_split() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, null given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 12 --
 
-Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 13 --
 
-Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 14 --
 
-Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 15 --
 
-Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 16 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 
 -- Iteration 17 --
-varray(1) {
+vec(1) {
   string(0) ""
 }
 
 -- Iteration 18 --
-varray(1) {
+vec(1) {
   string(5) "UTF-8"
 }
 
 -- Iteration 19 --
-varray(1) {
+vec(1) {
   string(5) "UTF-8"
 }
 
 -- Iteration 20 --
-varray(1) {
+vec(1) {
   string(5) "UTF-8"
 }
 
 -- Iteration 21 --
 
-Warning: mb_split() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, object given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 
 -- Iteration 22 --
 
-Warning: mb_split() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line %d
+Warning: mb_split() expects parameter 2 to be string, resource given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 81
 Done

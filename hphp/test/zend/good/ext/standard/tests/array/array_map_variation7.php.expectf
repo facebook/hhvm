@@ -1,70 +1,70 @@
 *** Testing array_map() : arrays with diff. size ***
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     NULL
   }
-  varray(2) {
+  vec(2) {
     int(2)
     NULL
   }
-  varray(2) {
+  vec(2) {
     int(3)
     NULL
   }
 }
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     NULL
     string(1) "a"
   }
-  varray(2) {
+  vec(2) {
     NULL
     string(1) "b"
   }
-  varray(2) {
+  vec(2) {
     NULL
     string(1) "c"
   }
 }
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(1)
     string(1) "a"
   }
-  varray(2) {
+  vec(2) {
     int(2)
     string(1) "b"
   }
-  varray(2) {
+  vec(2) {
     int(3)
     NULL
   }
 }
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     int(10)
     float(2.3)
   }
-  varray(2) {
+  vec(2) {
     int(47)
     float(1240)
   }
-  varray(2) {
+  vec(2) {
     int(26)
     NULL
   }
 }
-varray(3) {
-  varray(2) {
+vec(3) {
+  vec(2) {
     NULL
     int(1)
   }
-  varray(2) {
+  vec(2) {
     NULL
     int(2)
   }
-  varray(2) {
+  vec(2) {
     NULL
     int(3)
   }

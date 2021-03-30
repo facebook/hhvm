@@ -1,6 +1,6 @@
 *** Testing array_intersect() : Passing different types of arrays to $arr2 argument ***
 -- Iteration 1 --
-darray(3) {
+dict(3) {
   [5]=>
   int(2)
   [7]=>
@@ -8,7 +8,7 @@ darray(3) {
   ["two"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   [5]=>
   int(2)
   [7]=>
@@ -17,16 +17,16 @@ darray(3) {
   int(2)
 }
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   [1]=>
   float(1.1)
 }
-darray(1) {
+dict(1) {
   [1]=>
   float(1.1)
 }
 -- Iteration 3 --
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -34,7 +34,7 @@ darray(3) {
   [13]=>
   string(0) ""
 }
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -43,85 +43,87 @@ darray(3) {
   string(0) ""
 }
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(2) {
+dict(2) {
   [8]=>
   bool(false)
   [13]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   [8]=>
   bool(false)
   [13]=>
   string(0) ""
 }
 -- Iteration 6 --
-darray(1) {
+dict(1) {
   [10]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
-darray(1) {
+dict(1) {
   [10]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
 -- Iteration 7 --
-darray(1) {
+dict(1) {
   [9]=>
   string(6) "aaaa\r"
 }
-darray(1) {
+dict(1) {
   [9]=>
   string(6) "aaaa\r"
 }
 -- Iteration 8 --
-darray(2) {
+dict(2) {
   [11]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
   [12]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
 }
-darray(2) {
+dict(2) {
   [11]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
   [12]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 9 --
-darray(2) {
+dict(2) {
   [2]=>
   string(3) "two"
   [3]=>
   string(3) "one"
 }
-darray(2) {
+dict(2) {
   [2]=>
   string(3) "two"
   [3]=>
   string(3) "one"
 }
 -- Iteration 10 --
-darray(3) {
+dict(3) {
   [5]=>
   int(2)
   [7]=>
@@ -129,7 +131,7 @@ darray(3) {
   ["two"]=>
   int(2)
 }
-darray(3) {
+dict(3) {
   [5]=>
   int(2)
   [7]=>
@@ -138,21 +140,21 @@ darray(3) {
   int(2)
 }
 -- Iteration 11 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 12 --
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
 -- Iteration 13 --
-darray(3) {
+dict(3) {
   [2]=>
   string(3) "two"
   [4]=>
@@ -160,7 +162,7 @@ darray(3) {
   [7]=>
   bool(true)
 }
-darray(3) {
+dict(3) {
   [2]=>
   string(3) "two"
   [4]=>
@@ -169,20 +171,20 @@ darray(3) {
   bool(true)
 }
 -- Iteration 14 --
-darray(2) {
+dict(2) {
   [8]=>
   bool(false)
   [13]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   [8]=>
   bool(false)
   [13]=>
   string(0) ""
 }
 -- Iteration 15 --
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -190,7 +192,7 @@ darray(3) {
   [13]=>
   string(0) ""
 }
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -199,7 +201,7 @@ darray(3) {
   string(0) ""
 }
 -- Iteration 16 --
-darray(3) {
+dict(3) {
   [8]=>
   bool(false)
   [13]=>
@@ -207,7 +209,7 @@ darray(3) {
   [""]=>
   string(6) "emptys"
 }
-darray(3) {
+dict(3) {
   [8]=>
   bool(false)
   [13]=>
@@ -216,7 +218,7 @@ darray(3) {
   string(6) "emptys"
 }
 -- Iteration 17 --
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -224,7 +226,7 @@ darray(3) {
   [13]=>
   string(0) ""
 }
-darray(3) {
+dict(3) {
   [7]=>
   bool(true)
   [8]=>
@@ -233,17 +235,17 @@ darray(3) {
   string(0) ""
 }
 -- Iteration 18 --
-darray(1) {
+dict(1) {
   [0]=>
   int(5)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(5)
 }
 -- Iteration 19 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 Done

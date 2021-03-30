@@ -1,4 +1,4 @@
-matchedArray
+matchedDict
 (
     [0] => SELECT * FROM #__components
     [1] => SELECT

@@ -1,4 +1,4 @@
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [1]=>
@@ -12,10 +12,10 @@ darray(7) {
   [5]=>
   bool(false)
   [6]=>
-  darray(0) {
+  dict(0) {
   }
 }
-darray(7) {
+dict(7) {
   [0]=>
   float(1.2)
   [1]=>
@@ -29,11 +29,11 @@ darray(7) {
   [5]=>
   bool(false)
   [6]=>
-  darray(0) {
+  dict(0) {
   }
 }
 
-Warning: filter_var() expects parameter 2 to be integer, varray given in %s/010.php on line 5
+Warning: filter_var() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/filter/tests/010.php on line 5
 string(1) "1"
 string(1) "1"
 string(1) "1"

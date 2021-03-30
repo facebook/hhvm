@@ -1,5 +1,5 @@
 No filters, Add empty
-darray(7) {
+dict(7) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -16,7 +16,7 @@ darray(7) {
   NULL
 }
 No filters
-darray(6) {
+dict(6) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -31,7 +31,7 @@ darray(6) {
   string(6) "string"
 }
 Require Scalar, Add empty
-darray(7) {
+dict(7) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -48,7 +48,7 @@ darray(7) {
   NULL
 }
 Require Scalar
-darray(6) {
+dict(6) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -63,14 +63,14 @@ darray(6) {
   string(6) "string"
 }
 Require Array, Add empty
-darray(7) {
+dict(7) {
   ["null"]=>
   bool(false)
   ["empty_array"]=>
-  darray(0) {
+  dict(0) {
   }
   ["filled_array"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(1) "1"
     [1]=>
@@ -88,14 +88,14 @@ darray(7) {
   NULL
 }
 Require Array
-darray(6) {
+dict(6) {
   ["null"]=>
   bool(false)
   ["empty_array"]=>
-  darray(0) {
+  dict(0) {
   }
   ["filled_array"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(1) "1"
     [1]=>

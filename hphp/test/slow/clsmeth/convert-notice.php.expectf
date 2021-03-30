@@ -2,29 +2,29 @@
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -32,48 +32,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
@@ -83,29 +83,29 @@ darray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -113,48 +113,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
@@ -164,29 +164,29 @@ darray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -194,48 +194,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
@@ -245,29 +245,29 @@ darray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -275,48 +275,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
@@ -326,29 +326,29 @@ darray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -356,48 +356,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>
@@ -407,29 +407,29 @@ darray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
@@ -437,48 +437,48 @@ varray(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-varray(2) {
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> v%s
-varray(2) {
+** CAST: clsmeth -> vec
+vec(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> v%s
+** CAST: clsmeth -> vec
 string(3) "Foo"
 string(3) "bar"
-darray(2) {
+dict(2) {
   [0]=>
   int(42)
   [1]=>

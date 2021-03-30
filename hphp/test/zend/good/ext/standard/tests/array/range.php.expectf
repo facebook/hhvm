@@ -2,7 +2,7 @@
 
 -- Integers as Low and High --
 -- An array of elements from low to high --
-varray(10) {
+vec(10) {
   int(1)
   int(2)
   int(3)
@@ -16,7 +16,7 @@ varray(10) {
 }
 
 -- An array of elements from high to low --
-varray(10) {
+vec(10) {
   int(10)
   int(9)
   int(8)
@@ -31,7 +31,7 @@ varray(10) {
 
 -- Numeric Strings as Low and High --
 -- An array of elements from low to high --
-varray(10) {
+vec(10) {
   int(1)
   int(2)
   int(3)
@@ -45,7 +45,7 @@ varray(10) {
 }
 
 -- An array of elements from high to low --
-varray(10) {
+vec(10) {
   int(10)
   int(9)
   int(8)
@@ -60,7 +60,7 @@ varray(10) {
 
 -- Chars as Low and High --
 -- An array of elements from low to high --
-varray(26) {
+vec(26) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -90,7 +90,7 @@ varray(26) {
 }
 
 -- An array of elements from high to low --
-varray(26) {
+vec(26) {
   string(1) "z"
   string(1) "y"
   string(1) "x"
@@ -120,15 +120,15 @@ varray(26) {
 }
 
 -- Low and High are equal --
-varray(1) {
+vec(1) {
   int(5)
 }
-varray(1) {
+vec(1) {
   string(1) "q"
 }
 
 -- floats as Low and High --
-varray(6) {
+vec(6) {
   float(5.1)
   float(6.1)
   float(7.1)
@@ -136,7 +136,7 @@ varray(6) {
   float(9.1)
   float(10.1)
 }
-varray(6) {
+vec(6) {
   float(10.1)
   float(9.1)
   float(8.1)
@@ -144,7 +144,7 @@ varray(6) {
   float(6.1)
   float(5.1)
 }
-varray(6) {
+vec(6) {
   float(5.1)
   float(6.1)
   float(7.1)
@@ -152,7 +152,7 @@ varray(6) {
   float(9.1)
   float(10.1)
 }
-varray(6) {
+vec(6) {
   float(10.1)
   float(9.1)
   float(8.1)
@@ -162,7 +162,7 @@ varray(6) {
 }
 
 -- Passing step with Low and High --
-varray(11) {
+vec(11) {
   float(1)
   float(1.1)
   float(1.2)
@@ -175,7 +175,7 @@ varray(11) {
   float(1.9)
   float(2)
 }
-varray(11) {
+vec(11) {
   float(2)
   float(1.9)
   float(1.8)
@@ -188,7 +188,7 @@ varray(11) {
   float(1.1)
   float(1)
 }
-varray(11) {
+vec(11) {
   float(1)
   float(1.1)
   float(1.2)
@@ -201,7 +201,7 @@ varray(11) {
   float(1.9)
   float(2)
 }
-varray(11) {
+vec(11) {
   float(1)
   float(1.1)
   float(1.2)
@@ -216,7 +216,7 @@ varray(11) {
 }
 
 -- Testing basic string with step --
-varray(7) {
+vec(7) {
   string(1) "a"
   string(1) "c"
   string(1) "e"

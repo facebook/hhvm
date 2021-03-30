@@ -1,32 +1,32 @@
 *** Testing ftell() : error conditions ***
 -- Testing ftell() with zero argument --
 
-Warning: ftell() expects exactly 1 parameter, 0 given in %s/fseek_ftell_rewind_error2.php on line 16
+Warning: ftell() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 16
 -- Testing ftell() with more than expected number of arguments --
 
-Warning: ftell() expects exactly 1 parameter, 2 given in %s/fseek_ftell_rewind_error2.php on line 21
+Warning: ftell() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 21
 -- Testing ftell() with invalid arguments --
 -- Iteration 1 --
 
-Warning: ftell() expects parameter 1 to be resource, string given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 2 --
 
-Warning: ftell() expects parameter 1 to be resource, integer given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 3 --
 
-Warning: ftell() expects parameter 1 to be resource, double given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 4 --
 
-Warning: ftell() expects parameter 1 to be resource, boolean given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 5 --
 
-Warning: ftell() expects parameter 1 to be resource, %rv?%rarray given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 6 --
 
-Warning: ftell() expects parameter 1 to be resource, object given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 36
 -- Testing ftell with closed/unset file handle --
-Warning: Not a valid stream resource in %s/fseek_ftell_rewind_error2.php on line 42
+Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 42
 bool(false)
 
-Warning: Undefined variable: file_handle in %s/fseek_ftell_rewind_error2.php on line 47
+Warning: Undefined variable: file_handle in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 47
 Done

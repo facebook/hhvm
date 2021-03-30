@@ -1,24 +1,24 @@
 square
-a:Array
+a:Vec
 (
     [0] => x2
     [1] => buggy
     [2] => unfold
     [3] => __construct
 )
-b:Array
+b:Vec
 (
     [0] => x2
     [1] => buggy
     [2] => unfold
     [3] => __construct
 )
-Array
+Vec
 (
     [0] => buggy
     [1] => __construct
 )
-Array
+Vec
 (
     [0] => buggy
     [1] => __construct

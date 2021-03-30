@@ -1,9 +1,9 @@
 *** Test substituting argument 1 with array values ***
 
-Warning: getservbyname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/getservbyname_variation1.php on line 21
+Warning: getservbyname() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/getservbyname_variation1.php on line 21
 
-Warning: getservbyname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/getservbyname_variation1.php on line 21
+Warning: getservbyname() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/getservbyname_variation1.php on line 21
 
-Warning: getservbyname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/getservbyname_variation1.php on line 21
+Warning: getservbyname() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/standard/tests/general_functions/getservbyname_variation1.php on line 21
 
-Warning: getservbyname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/getservbyname_variation1.php on line 21
+Warning: getservbyname() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/getservbyname_variation1.php on line 21

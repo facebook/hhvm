@@ -1,15 +1,15 @@
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(2) {
+  dict(2) {
     ["a"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
     ["b"]=>
-    darray(2) {
+    dict(2) {
       ["kind"]=>
       int(4)
       ["optional_shape_field"]=>

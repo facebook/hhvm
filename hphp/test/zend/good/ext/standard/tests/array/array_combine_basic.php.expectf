@@ -1,17 +1,17 @@
 *** Testing array_combine() : basic functionality ***
-darray(2) {
+dict(2) {
   [1]=>
   int(3)
   [2]=>
   int(4)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   string(1) "c"
   ["b"]=>
   string(1) "d"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "c"
   ["b"]=>

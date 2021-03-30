@@ -6,7 +6,7 @@ bar(0): n = 5
 bar(10): n = 6
 bar(20): n = 7
 bar(2): n = 8
-darray(4) {
+dict(4) {
   [3]=>
   string(9) "S2: n = 7"
   [2]=>

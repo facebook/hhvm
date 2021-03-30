@@ -1,8 +1,8 @@
-darray(17) {
+dict(17) {
   ["Return-Path"]=>
   string(57) "<internals-return-5651-***=***.example.com@lists.php.net>"
   ["Received"]=>
-  varray(3) {
+  vec(3) {
     string(259) "from pb1.pair.com (pb1.pair.com [16.92.131.4]) by ***.example.com (8.12.10/8.12.10/1970-09-30) with SMTP id hALLmpea023899 for <***@***.example.com>; Sat, 22 Jan 1970 06:48:51 +0900 (JST) (envelope-from internals-return-5651-***=***.example.com@lists.php.net)"
     string(59) "(qmail 63472 invoked by uid 1010); 1 Jan 1970 0:00:00 -0000"
     string(59) "(qmail 63459 invoked by uid 1010); 1 Jan 1970 0:00:00 -0000"
@@ -18,7 +18,7 @@ darray(17) {
   ["List-Post"]=>
   string(32) "<mailto:internals@lists.php.net>"
   ["Delivered-To"]=>
-  varray(3) {
+  vec(3) {
     string(36) "mailing list internals@lists.php.net"
     string(34) "ezmlm-scan-internals@lists.php.net"
     string(29) "ezmlm-internals@lists.php.net"

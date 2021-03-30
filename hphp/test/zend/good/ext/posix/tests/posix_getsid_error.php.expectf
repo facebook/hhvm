@@ -1,6 +1,5 @@
+Warning: posix_getsid() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/posix/tests/posix_getsid_error.php on line 2
 
-Warning: posix_getsid() expects exactly 1 parameter, 0 given in %s/posix_getsid_error.php on line 2
-
-Warning: posix_getsid() expects parameter 1 to be integer, %rv?%rarray given in %s/posix_getsid_error.php on line 3
+Warning: posix_getsid() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/posix/tests/posix_getsid_error.php on line 3
 bool(false)
 ===DONE===

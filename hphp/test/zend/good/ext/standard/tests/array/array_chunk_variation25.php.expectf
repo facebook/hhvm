@@ -1,4 +1,4 @@
-darray(6) {
+dict(6) {
   ["p"]=>
   string(1) "A"
   ["q"]=>
@@ -18,140 +18,140 @@ NULL
 NULL
 
 [1]
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     [0]=>
     string(1) "A"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "B"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "C"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "D"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "F"
   }
 }
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     ["p"]=>
     string(1) "A"
   }
-  darray(1) {
+  dict(1) {
     ["q"]=>
     string(1) "B"
   }
-  darray(1) {
+  dict(1) {
     ["r"]=>
     string(1) "C"
   }
-  darray(1) {
+  dict(1) {
     ["s"]=>
     string(1) "D"
   }
-  darray(1) {
+  dict(1) {
     ["u"]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     ["v"]=>
     string(1) "F"
   }
 }
-varray(6) {
-  darray(1) {
+vec(6) {
+  dict(1) {
     [0]=>
     string(1) "A"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "B"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "C"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "D"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "F"
   }
 }
 
 [2]
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "A"
     [1]=>
     string(1) "B"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "C"
     [1]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "E"
     [1]=>
     string(1) "F"
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
     string(1) "B"
   }
-  darray(2) {
+  dict(2) {
     ["r"]=>
     string(1) "C"
     ["s"]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     ["u"]=>
     string(1) "E"
     ["v"]=>
     string(1) "F"
   }
 }
-varray(3) {
-  darray(2) {
+vec(3) {
+  dict(2) {
     [0]=>
     string(1) "A"
     [1]=>
     string(1) "B"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "C"
     [1]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "E"
     [1]=>
@@ -160,8 +160,8 @@ varray(3) {
 }
 
 [3]
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -169,7 +169,7 @@ varray(2) {
     [2]=>
     string(1) "C"
   }
-  darray(3) {
+  dict(3) {
     [0]=>
     string(1) "D"
     [1]=>
@@ -178,8 +178,8 @@ varray(2) {
     string(1) "F"
   }
 }
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -187,7 +187,7 @@ varray(2) {
     ["r"]=>
     string(1) "C"
   }
-  darray(3) {
+  dict(3) {
     ["s"]=>
     string(1) "D"
     ["u"]=>
@@ -196,8 +196,8 @@ varray(2) {
     string(1) "F"
   }
 }
-varray(2) {
-  darray(3) {
+vec(2) {
+  dict(3) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -205,7 +205,7 @@ varray(2) {
     [2]=>
     string(1) "C"
   }
-  darray(3) {
+  dict(3) {
     [0]=>
     string(1) "D"
     [1]=>
@@ -216,8 +216,8 @@ varray(2) {
 }
 
 [4]
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -227,15 +227,15 @@ varray(2) {
     [3]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "E"
     [1]=>
     string(1) "F"
   }
 }
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -245,15 +245,15 @@ varray(2) {
     ["s"]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     ["u"]=>
     string(1) "E"
     ["v"]=>
     string(1) "F"
   }
 }
-varray(2) {
-  darray(4) {
+vec(2) {
+  dict(4) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -263,7 +263,7 @@ varray(2) {
     [3]=>
     string(1) "D"
   }
-  darray(2) {
+  dict(2) {
     [0]=>
     string(1) "E"
     [1]=>
@@ -272,8 +272,8 @@ varray(2) {
 }
 
 [5]
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -285,13 +285,13 @@ varray(2) {
     [4]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "F"
   }
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -303,13 +303,13 @@ varray(2) {
     ["u"]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     ["v"]=>
     string(1) "F"
   }
 }
-varray(2) {
-  darray(5) {
+vec(2) {
+  dict(5) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -321,15 +321,15 @@ varray(2) {
     [4]=>
     string(1) "E"
   }
-  darray(1) {
+  dict(1) {
     [0]=>
     string(1) "F"
   }
 }
 
 [6]
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -344,8 +344,8 @@ varray(1) {
     string(1) "F"
   }
 }
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -360,8 +360,8 @@ varray(1) {
     string(1) "F"
   }
 }
-varray(1) {
-  darray(6) {
+vec(1) {
+  dict(6) {
     [0]=>
     string(1) "A"
     [1]=>

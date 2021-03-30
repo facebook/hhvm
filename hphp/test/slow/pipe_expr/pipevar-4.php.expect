@@ -16,7 +16,7 @@ string(12) "Make wrapper"
 string(15) "beep: <Wrapper>"
 string(13) "beep: <array>"
 string(6) "Hello!"
-darray(4) {
+dict(4) {
   [0]=>
   string(8) "STR: 120"
   [1]=>

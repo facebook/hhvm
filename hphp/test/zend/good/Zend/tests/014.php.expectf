@@ -1,20 +1,20 @@
-varray(1) {
-  string(%d) "%s/014.php"
+vec(1) {
+  string(%d) "%s/test/zend/good/Zend/tests/014.php"
 }
-varray(2) {
-  string(%d) "%s/014.php"
-  string(%d) "%s/014.inc"
-}
-
-Warning: get_included_files() expects exactly 0 parameters, 2 given in %s/014.php on line 10
-varray(2) {
-  string(%d) "%s/014.php"
-  string(%d) "%s/014.inc"
+vec(2) {
+  string(%d) "%s/test/zend/good/Zend/tests/014.php"
+  string(%d) "%s/test/zend/good/Zend/tests/014.inc"
 }
 
-Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/014.php on line 15
-varray(2) {
-  string(%d) "%s/014.php"
-  string(%d) "%s/014.inc"
+Warning: get_included_files() expects exactly 0 parameters, 2 given in %s/test/zend/good/Zend/tests/014.php on line 10
+vec(2) {
+  string(%d) "%s/test/zend/good/Zend/tests/014.php"
+  string(%d) "%s/test/zend/good/Zend/tests/014.inc"
+}
+
+Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/test/zend/good/Zend/tests/014.php on line 15
+vec(2) {
+  string(%d) "%s/test/zend/good/Zend/tests/014.php"
+  string(%d) "%s/test/zend/good/Zend/tests/014.inc"
 }
 Done

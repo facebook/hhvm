@@ -1,6 +1,6 @@
 object(Closure$%S;%d) (1) {
   ["parameter"]=>
-  darray(1) {
+  dict(1) {
     ["$x"]=>
     string(10) "<required>"
   }
@@ -9,7 +9,7 @@ object(stdClass) (0) {
 }
 object(Closure$%s#2;%d) (1) {
   ["parameter"]=>
-  darray(1) {
+  dict(1) {
     ["$x"]=>
     string(10) "<required>"
   }

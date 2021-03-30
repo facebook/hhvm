@@ -1,30 +1,30 @@
 vec(6) {
-  varray(3) {
+  vec(3) {
     string(5) "N1\C2"
     string(5) "N1\C3"
     string(29) "yes_officer_this_method_here1"
   }
-  varray(3) {
+  vec(3) {
     string(12) "N1\Something"
     string(5) "N1\C4"
     string(29) "yes_officer_this_method_here2"
   }
-  varray(3) {
+  vec(3) {
     string(14) "\SomethingElse"
     string(5) "N1\C5"
     string(29) "yes_officer_this_method_here3"
   }
-  varray(3) {
+  vec(3) {
     string(25) "N2\N3\CompletelyDifferent"
     string(8) "N2\N3\C6"
     string(29) "yes_officer_this_method_here4"
   }
-  varray(3) {
+  vec(3) {
     string(2) "C8"
     string(2) "C9"
     string(29) "yes_officer_this_method_here5"
   }
-  varray(3) {
+  vec(3) {
     string(12) "AnotherThing"
     string(3) "C10"
     string(29) "yes_officer_this_method_here6"

@@ -9,7 +9,7 @@ Breakpoint 1 reached at main() on line 23 of %s/print1.php
   24 }
 
 = $a
-Array
+Dict
 (
     [0] => 0
     [1] => 1
@@ -25,10 +25,10 @@ Array
     [11] => 11
     [12] => 12
     [13] => 13
-  
+   
 There are more characters. Continue? [y/N]n
 = $a
-Array
+Dict
 (
     [0] => 0
     [1] => 1
@@ -44,9 +44,9 @@ Array
     [11] => 11
     [12] => 12
     [13] => 13
-  
+   
 There are more characters. Continue? [y/N]y
-  [14] => 14
+ [14] => 14
     [15] => 15
     [16] => 16
     [17] => 17
@@ -57,7 +57,7 @@ There are more characters. Continue? [y/N]y
 set cc 100
 ShortPrintCharCount(cc) is set to 100
 = $a
-Array
+Dict
 (
     [0] => 0
     [1] => 1
@@ -66,9 +66,9 @@ Array
     [4] => 4
     [5] => 5
     [6] => 6
- 
+  
 There are more characters. Continue? [y/N]y
-   [7] => 7
+  [7] => 7
     [8] => 8
     [9] => 9
     [10] => 10
@@ -86,7 +86,7 @@ There are more characters. Continue? [y/N]y
 set cc -1
 ShortPrintCharCount(cc) is set to -1
 = $a
-Array
+Dict
 (
     [0] => 0
     [1] => 1
@@ -111,7 +111,7 @@ Array
 )
 
 p $a
-Array
+Dict
 (
     [0] => 0
     [1] => 1
@@ -152,7 +152,7 @@ resource(4) of type (curl)
 p $c
 some custom string
 = $d
-Array
+Dict
 (
     [c] => some custom string
 )

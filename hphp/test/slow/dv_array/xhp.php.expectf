@@ -1,7 +1,7 @@
 ====================================================
-darray(1) {
+dict(1) {
   ["checkme"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
@@ -12,18 +12,18 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-darray(2) {
+dict(2) {
   ["e"]=>
-  varray(4) {
+  vec(4) {
     int(5)
     string(9) "Exception"
     NULL
     int(0)
   }
   ["checkme"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
@@ -34,32 +34,32 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-darray(4) {
+dict(4) {
   ["num"]=>
-  varray(4) {
+  vec(4) {
     int(3)
     NULL
     NULL
     int(0)
   }
   ["checkme"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
     int(0)
   }
   ["beans"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
     int(0)
   }
   ["cheese"]=>
-  varray(4) {
+  vec(4) {
     int(1)
     NULL
     NULL
@@ -70,32 +70,32 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-darray(4) {
+dict(4) {
   ["num"]=>
-  varray(4) {
+  vec(4) {
     int(3)
     NULL
     int(2)
     int(0)
   }
   ["checkme"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
     int(0)
   }
   ["beans"]=>
-  varray(4) {
+  vec(4) {
     int(6)
     NULL
     NULL
     int(0)
   }
   ["cheese"]=>
-  varray(4) {
+  vec(4) {
     int(1)
     NULL
     string(2) "hi"
@@ -106,4 +106,4 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+bool(true)

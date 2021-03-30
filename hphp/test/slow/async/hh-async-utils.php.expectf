@@ -26,15 +26,15 @@ object(HH\Map) (2) {
   ["herp"]=>
   string(4) "derp"
 }
-varray(3) {
+vec(3) {
   int(123)
   int(456)
   int(789)
 }
-varray(3) {
+vec(3) {
   int(123)
   string(3) "foo"
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }

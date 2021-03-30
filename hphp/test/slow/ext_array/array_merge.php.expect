@@ -1,4 +1,4 @@
-darray(4) {
+dict(4) {
   ["color"]=>
   string(3) "red"
   [0]=>
@@ -6,7 +6,7 @@ darray(4) {
   [1]=>
   int(4)
   [2]=>
-  darray(5) {
+  dict(5) {
     [0]=>
     string(1) "a"
     [1]=>
@@ -19,40 +19,40 @@ darray(4) {
     int(4)
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [1]=>
     string(4) "data"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(4) "data"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "foo"
   [1]=>
-  darray(1) {
+  dict(1) {
     [1]=>
     string(3) "bar"
   }
 }
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   [0]=>
-  darray(1) {
+  dict(1) {
     ["two"]=>
     int(2)
   }
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
-  darray(1) {
+  dict(1) {
     [100000000000022]=>
     int(2)
   }

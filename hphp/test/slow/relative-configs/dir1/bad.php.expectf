@@ -1,7 +1,7 @@
 RelativeConfigs node was modified while loading configs from [dir1/relbad.ini] to [BADBADBAD]
 string(2) "12"
-darray(0) {
+dict(0) {
 }
-varray(1) {
-  string(%d) "%s/relative-configs/dir1/relbad.ini"
+vec(1) {
+  string(%d) "%s/test/slow/relative-configs/dir1/relbad.ini"
 }

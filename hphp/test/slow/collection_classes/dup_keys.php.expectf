@@ -4,7 +4,7 @@ object(HH\Map) (2) {
   [42]=>
   int(65)
 }
-darray(2) {
+dict(2) {
   ["42"]=>
   string(2) "65"
   [42]=>
@@ -14,7 +14,7 @@ object(HH\Set) (2) {
   string(2) "42"
   int(42)
 }
-darray(2) {
+dict(2) {
   ["42"]=>
   string(2) "42"
   [42]=>

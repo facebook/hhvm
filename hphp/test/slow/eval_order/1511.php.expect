@@ -1,14 +1,14 @@
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     int(1)
     int(1)
   }
-  varray(2) {
+  vec(2) {
     int(2)
     int(2)
   }
 }
-varray(10) {
+vec(10) {
   int(1)
   int(1)
   int(-2)

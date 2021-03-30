@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["cases"]=>
-  darray(5) {
+  dict(5) {
     ["Case.a"]=>
     string(6) "avalue"
     ["Case.b"]=>
@@ -13,9 +13,9 @@ darray(1) {
     string(2) "10"
   }
 }
-darray(1) {
+dict(1) {
   ["cases"]=>
-  darray(5) {
+  dict(5) {
     ["Case.a"]=>
     string(6) "avalue"
     ["Case.b"]=>

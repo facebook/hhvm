@@ -1,4 +1,4 @@
 Simple testcase for get_extension_funcs() function
-string(5) "array"
+string(3) "vec"
 bool(true)
 ===DONE===

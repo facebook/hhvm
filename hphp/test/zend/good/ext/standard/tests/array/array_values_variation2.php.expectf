@@ -1,7 +1,7 @@
 *** Testing array_values() : usage variations ***
 
 -- Iteration 1: int data --
-varray(4) {
+vec(4) {
   int(0)
   int(1)
   int(12345)
@@ -9,7 +9,7 @@ varray(4) {
 }
 
 -- Iteration 2: float data --
-varray(5) {
+vec(5) {
   float(10.5)
   float(-10.5)
   float(123456789000)
@@ -18,13 +18,13 @@ varray(5) {
 }
 
 -- Iteration 3: null data --
-varray(2) {
+vec(2) {
   NULL
   NULL
 }
 
 -- Iteration 4: bool data --
-varray(4) {
+vec(4) {
   bool(true)
   bool(false)
   bool(true)
@@ -32,30 +32,30 @@ varray(4) {
 }
 
 -- Iteration 5: empty string data --
-varray(2) {
+vec(2) {
   string(0) ""
   string(0) ""
 }
 
 -- Iteration 6: empty array data --
-varray(0) {
+vec(0) {
 }
 
 -- Iteration 7: string data --
-varray(3) {
+vec(3) {
   string(6) "string"
   string(6) "string"
   string(11) "hello world"
 }
 
 -- Iteration 8: object data --
-varray(1) {
+vec(1) {
   object(classA) (0) {
   }
 }
 
 -- Iteration 9: resource data --
-varray(1) {
+vec(1) {
   resource(4) of type (stream)
 }
 Done

@@ -12,27 +12,27 @@ dict(2) {
 }
 
 ---- A alone ----
-darray(1) {
+dict(1) {
   [0]=>
   string(5) "int_A"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(5) "int_A"
 }
 
 ---- B alone ----
-darray(1) {
+dict(1) {
   [0]=>
   string(8) "string_B"
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(8) "string_B"
 }
 
 ---- A first ----
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "int_A"
   [1]=>
@@ -40,7 +40,7 @@ darray(3) {
   ["10"]=>
   string(8) "string_B"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "int_A"
   [1]=>
@@ -50,7 +50,7 @@ darray(3) {
 }
 
 ---- B first ----
-darray(3) {
+dict(3) {
   [0]=>
   string(8) "string_B"
   ["10"]=>
@@ -58,7 +58,7 @@ darray(3) {
   [1]=>
   string(5) "int_A"
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(8) "string_B"
   ["10"]=>

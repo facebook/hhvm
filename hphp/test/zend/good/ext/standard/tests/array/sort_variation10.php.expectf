@@ -2,7 +2,7 @@
 
 -- Testing sort() by supplying octal value array, 'flag' value is defualt  --
 bool(true)
-varray(9) {
+vec(9) {
   int(-229)
   int(-54)
   int(0)
@@ -16,7 +16,7 @@ varray(9) {
 
 -- Testing sort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
 bool(true)
-varray(9) {
+vec(9) {
   int(-229)
   int(-54)
   int(0)
@@ -30,7 +30,7 @@ varray(9) {
 
 -- Testing sort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
 bool(true)
-varray(9) {
+vec(9) {
   int(-229)
   int(-54)
   int(0)

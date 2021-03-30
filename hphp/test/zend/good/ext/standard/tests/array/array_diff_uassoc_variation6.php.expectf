@@ -1,19 +1,19 @@
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Result of comparing floating points and strings containing integers --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 
 -- Result of comparing floating points and strings containing floating point --
-darray(2) {
+dict(2) {
   [0]=>
   float(1)
   [1]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   ["0"]=>
   string(4) "1.00"
   ["1.00"]=>

@@ -1,14 +1,14 @@
 InvalidArgumentException: Invalid operand type was used: array_fill_keys expects an array or collection
 NULL
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["foo"]=>
   NULL
   ["bar"]=>
   NULL
 }
-darray(4) {
+dict(4) {
   [5]=>
   int(123)
   ["foo"]=>
@@ -18,7 +18,7 @@ darray(4) {
   ["1.23"]=>
   int(123)
 }
-darray(3) {
+dict(3) {
   ["test"]=>
   string(0) ""
   [10]=>

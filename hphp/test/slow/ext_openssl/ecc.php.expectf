@@ -13,7 +13,7 @@ resource(5) of type (OpenSSL key)
 Testing openssl_csr_new with existing ecc key
 resource(7) of type (OpenSSL X.509 CSR)
 bool(false)
-darray(1) {
+dict(1) {
   ["d"]=>
   string(%d) "%a"
 }

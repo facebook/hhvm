@@ -3,8 +3,8 @@ vec(1) {
     class(Bar)
     function(baz)
     ["reified_generics"]=>
-    varray(1) {
-      darray(1) {
+    vec(1) {
+      dict(1) {
         ["kind"]=>
         int(1)
       }
@@ -16,9 +16,9 @@ Vec
     [0] => reifiedClassMeth{
         class(Bar)
         function(baz)
-        ["reified_generics"] => Array
+        ["reified_generics"] => Vec
             (
-                [0] => Array
+                [0] => Dict
                     (
                         [kind] => 1
                     )

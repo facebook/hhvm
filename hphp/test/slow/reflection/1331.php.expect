@@ -6,7 +6,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-darray(1) {
+dict(1) {
   ["p"]=>
   string(1) "g"
 }

@@ -1,16 +1,16 @@
 === serialize ===
-string(6) "y:0:{}"
-string(18) "y:3:{i:1;i:2;i:3;}"
-string(6) "Y:0:{}"
-string(22) "Y:2:{i:1;i:1;i:2;i:2;}"
+string(6) "v:0:{}"
+string(18) "v:3:{i:1;i:2;i:3;}"
+string(6) "D:0:{}"
+string(22) "D:2:{i:1;i:1;i:2;i:2;}"
 string(6) "v:0:{}"
 string(18) "v:3:{i:1;i:2;i:3;}"
 string(6) "D:0:{}"
 string(22) "D:2:{i:1;i:1;i:2;i:2;}"
 === unserialize ===
-darray darray(0) {
+darray dict(0) {
 }
-darray darray(3) {
+darray dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -18,25 +18,25 @@ darray darray(3) {
   [2]=>
   int(3)
 }
-varray varray(0) {
+varray vec(0) {
 }
-varray varray(3) {
+varray vec(3) {
   int(1)
   int(2)
   int(3)
 }
-darray darray(0) {
+darray dict(0) {
 }
-darray darray(2) {
+darray dict(2) {
   [1]=>
   int(1)
   [2]=>
   int(2)
 }
 === unserialize (force_darrays) ===
-darray darray(0) {
+darray dict(0) {
 }
-darray darray(3) {
+darray dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -44,9 +44,9 @@ darray darray(3) {
   [2]=>
   int(3)
 }
-darray darray(0) {
+darray dict(0) {
 }
-darray darray(3) {
+darray dict(3) {
   [0]=>
   int(1)
   [1]=>
@@ -54,9 +54,9 @@ darray darray(3) {
   [2]=>
   int(3)
 }
-darray darray(0) {
+darray dict(0) {
 }
-darray darray(2) {
+darray dict(2) {
   [1]=>
   int(1)
   [2]=>

@@ -1,1 +1,57 @@
+Two values not equal
+Should be
+dict(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "4"
+  [2]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    dict(0) {
+    }
+  }
+}
+But found
+dict(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "4"
+  [2]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    dict(0) {
+    }
+  }
+}
+
+** final comparison #16**
+Should be
+dict(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "4"
+  [2]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    dict(0) {
+    }
+  }
+}
+But found
+dict(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "4"
+  [2]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    dict(0) {
+    }
+  }
+}
+
 Done

@@ -1,14 +1,13 @@
+Warning: Property 'B::p1' declared as type int, string assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'B::p1' declared as type int, string assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p2' declared as type string, int assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'A::p2' declared as type string, int assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p3' declared as type nonnull, null assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'A::p3' declared as type nonnull, null assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p5' declared as type bool, int assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'A::p5' declared as type bool, int assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p6' declared as type HH\vec, HH\keyset assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'A::p6' declared as type HH\vec, HH\keyset assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p7' declared as type HH\Traversable, null assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26
 
-Warning: Property 'A::p7' declared as type HH\Traversable, null assigned in %s/deserialization.php on line 26
-
-%r(Notice|Warning)%r: %r(Hack Array Compat: )?%rProperty 'A::p8' declared as type HH\varray, darray assigned in %s/deserialization.php on line 26
+Warning: Property 'A::p8' declared as type HH\varray, HH\dict assigned in %s/test/slow/prop-type-hints/deserialization.php on line 26

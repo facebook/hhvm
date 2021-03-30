@@ -1,17 +1,17 @@
 *** Testing array_unique() : basic functionality ***
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "one"
   [0]=>

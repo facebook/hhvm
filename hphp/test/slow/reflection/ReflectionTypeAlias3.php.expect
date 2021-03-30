@@ -1,5 +1,5 @@
 TypeAlias [ Matrix : ?HH\Vector<HH\Vector<T>> ]
-darray(6) {
+dict(6) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
@@ -7,15 +7,15 @@ darray(6) {
   ["classname"]=>
   string(9) "HH\Vector"
   ["generic_types"]=>
-  varray(1) {
-    darray(3) {
+  vec(1) {
+    dict(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      varray(1) {
-        darray(2) {
+      vec(1) {
+        dict(2) {
           ["kind"]=>
           int(13)
           ["name"]=>

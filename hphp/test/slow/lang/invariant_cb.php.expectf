@@ -1,4 +1,4 @@
-varray(2) {
+vec(2) {
   string(1) "a"
   string(1) "b"
 }

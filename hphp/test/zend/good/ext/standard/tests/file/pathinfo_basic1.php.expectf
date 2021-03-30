@@ -4,7 +4,7 @@ string(0) ""
 string(0) ""
 string(0) ""
 string(0) ""
-darray(2) {
+dict(2) {
   ["basename"]=>
   string(0) ""
   ["filename"]=>
@@ -15,7 +15,7 @@ string(1) "."
 string(1) " "
 string(0) ""
 string(1) " "
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -28,7 +28,7 @@ string(1) "."
 string(2) "c:"
 string(0) ""
 string(2) "c:"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -41,7 +41,7 @@ string(1) "."
 string(3) "c:\"
 string(0) ""
 string(3) "c:\"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -54,7 +54,7 @@ string(1) "."
 string(2) "c:"
 string(0) ""
 string(2) "c:"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -67,7 +67,7 @@ string(1) "."
 string(5) "afile"
 string(0) ""
 string(5) "afile"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -80,7 +80,7 @@ string(1) "."
 string(12) "c:\test\adir"
 string(0) ""
 string(12) "c:\test\adir"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -93,7 +93,7 @@ string(1) "."
 string(13) "c:\test\adir\"
 string(0) ""
 string(13) "c:\test\adir\"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -106,7 +106,7 @@ string(12) "/usr/include"
 string(4) "arpa"
 string(0) ""
 string(4) "arpa"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(12) "/usr/include"
   ["basename"]=>
@@ -119,7 +119,7 @@ string(12) "/usr/include"
 string(4) "arpa"
 string(0) ""
 string(4) "arpa"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(12) "/usr/include"
   ["basename"]=>
@@ -132,7 +132,7 @@ string(11) "usr/include"
 string(4) "arpa"
 string(0) ""
 string(4) "arpa"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(11) "usr/include"
   ["basename"]=>
@@ -145,7 +145,7 @@ string(11) "usr/include"
 string(4) "arpa"
 string(0) ""
 string(4) "arpa"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(11) "usr/include"
   ["basename"]=>
@@ -158,7 +158,7 @@ string(1) "."
 string(13) "c:\test\afile"
 string(0) ""
 string(13) "c:\test\afile"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -171,7 +171,7 @@ string(1) "."
 string(13) "c:\test\afile"
 string(0) ""
 string(13) "c:\test\afile"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -184,7 +184,7 @@ string(8) "c://test"
 string(5) "afile"
 string(0) ""
 string(5) "afile"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(8) "c://test"
   ["basename"]=>
@@ -197,7 +197,7 @@ string(1) "."
 string(14) "c:\test\afile\"
 string(0) ""
 string(14) "c:\test\afile\"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -210,7 +210,7 @@ string(1) "."
 string(16) "c:\test\prog.exe"
 string(3) "exe"
 string(12) "c:\test\prog"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -225,7 +225,7 @@ string(1) "."
 string(16) "c:\test\prog.exe"
 string(3) "exe"
 string(12) "c:\test\prog"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -240,7 +240,7 @@ string(7) "c:/test"
 string(8) "prog.exe"
 string(3) "exe"
 string(4) "prog"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(7) "c:/test"
   ["basename"]=>
@@ -255,7 +255,7 @@ string(17) "/usr/include/arpa"
 string(6) "inet.h"
 string(1) "h"
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(17) "/usr/include/arpa"
   ["basename"]=>
@@ -270,7 +270,7 @@ string(19) "//usr/include//arpa"
 string(6) "inet.h"
 string(1) "h"
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(19) "//usr/include//arpa"
   ["basename"]=>
@@ -285,7 +285,7 @@ string(1) "."
 string(1) "\"
 string(0) ""
 string(1) "\"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -298,7 +298,7 @@ string(1) "."
 string(2) "\\"
 string(0) ""
 string(2) "\\"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -311,7 +311,7 @@ string(1) "/"
 string(0) ""
 string(0) ""
 string(0) ""
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
@@ -324,7 +324,7 @@ string(1) "/"
 string(0) ""
 string(0) ""
 string(0) ""
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
@@ -337,7 +337,7 @@ string(1) "/"
 string(0) ""
 string(0) ""
 string(0) ""
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
@@ -350,7 +350,7 @@ string(17) "/usr/include/arpa"
 string(6) "inet.h"
 string(1) "h"
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(17) "/usr/include/arpa"
   ["basename"]=>
@@ -365,7 +365,7 @@ string(27) "c:\windows/system32\drivers"
 string(9) "etc\hosts"
 string(0) ""
 string(9) "etc\hosts"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(27) "c:\windows/system32\drivers"
   ["basename"]=>
@@ -378,7 +378,7 @@ string(12) "/usr\include"
 string(11) "arpa\inet.h"
 string(1) "h"
 string(9) "arpa\inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(12) "/usr\include"
   ["basename"]=>
@@ -393,7 +393,7 @@ string(1) "."
 string(25) "   c:\test\adir\afile.txt"
 string(3) "txt"
 string(21) "   c:\test\adir\afile"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -408,7 +408,7 @@ string(1) "."
 string(25) "c:\test\adir\afile.txt   "
 string(6) "txt   "
 string(18) "c:\test\adir\afile"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -423,7 +423,7 @@ string(1) "."
 string(28) "   c:\test\adir\afile.txt   "
 string(6) "txt   "
 string(21) "   c:\test\adir\afile"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -438,7 +438,7 @@ string(20) "   /usr/include/arpa"
 string(6) "inet.h"
 string(1) "h"
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(20) "   /usr/include/arpa"
   ["basename"]=>
@@ -453,7 +453,7 @@ string(17) "/usr/include/arpa"
 string(9) "inet.h   "
 string(4) "h   "
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(17) "/usr/include/arpa"
   ["basename"]=>
@@ -468,7 +468,7 @@ string(20) "   /usr/include/arpa"
 string(9) "inet.h   "
 string(4) "h   "
 string(4) "inet"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(20) "   /usr/include/arpa"
   ["basename"]=>
@@ -483,7 +483,7 @@ string(1) "."
 string(3) " c:"
 string(0) ""
 string(3) " c:"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -496,7 +496,7 @@ string(1) "."
 string(24) "		c:\test\adir\afile.txt"
 string(3) "txt"
 string(20) "		c:\test\adir\afile"
-darray(4) {
+dict(4) {
   ["dirname"]=>
   string(1) "."
   ["basename"]=>
@@ -511,7 +511,7 @@ string(1) "/"
 string(3) "usr"
 string(0) ""
 string(3) "usr"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
@@ -524,7 +524,7 @@ string(1) "/"
 string(3) "usr"
 string(0) ""
 string(3) "usr"
-darray(3) {
+dict(3) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>

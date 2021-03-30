@@ -1,5 +1,5 @@
-varray(6) {
-  darray(3) {
+vec(6) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -7,7 +7,7 @@ varray(6) {
     ["function"]=>
     string(3) "bar"
   }
-  darray(3) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -15,25 +15,25 @@ varray(6) {
     ["function"]=>
     string(3) "foo"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
   }
 }
-varray(6) {
-  darray(3) {
+vec(6) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -41,7 +41,7 @@ varray(6) {
     ["function"]=>
     string(3) "bar"
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -51,19 +51,19 @@ varray(6) {
     ["metadata"]=>
     string(8) "I am foo"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
   }
-  darray(1) {
+  dict(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
   }

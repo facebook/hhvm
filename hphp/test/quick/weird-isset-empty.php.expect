@@ -2,7 +2,7 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -11,7 +11,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -21,14 +21,14 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-varray(1) {
+vec(1) {
   NULL
 }
 bool(false)
 bool(true)
 bool(false)
 bool(true)
-varray(1) {
+vec(1) {
   NULL
 }
 **************************

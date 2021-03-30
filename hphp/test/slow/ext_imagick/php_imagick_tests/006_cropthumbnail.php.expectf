@@ -1,34 +1,34 @@
-darray(2) {
+dict(2) {
   ["width"]=>
   int(200)
   ["height"]=>
   int(200)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
   int(170)
   ["height"]=>
   int(120)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
   int(50)
   ["height"]=>
   int(50)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
   int(60)
   ["height"]=>
   int(120)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
   int(100)
   ["height"]=>
   int(100)
 }
-darray(2) {
+dict(2) {
   ["width"]=>
   int(200)
   ["height"]=>

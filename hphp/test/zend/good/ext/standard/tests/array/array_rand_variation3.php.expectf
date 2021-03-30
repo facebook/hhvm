@@ -1,5 +1,5 @@
 *** Testing array_rand() : with multi-dimensional array ***
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -9,7 +9,7 @@ varray(3) {
 
 -- Iteration 1 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -17,7 +17,7 @@ varray(3) {
 
 -- Iteration 2 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -25,7 +25,7 @@ varray(3) {
 
 -- Iteration 3 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -33,7 +33,7 @@ varray(3) {
 
 -- Iteration 4 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -41,7 +41,7 @@ varray(3) {
 
 -- Iteration 5 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -49,7 +49,7 @@ varray(3) {
 
 -- Iteration 6 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)
@@ -57,7 +57,7 @@ varray(3) {
 
 -- Iteration 7 --
 int(%d)
-varray(3) {
+vec(3) {
   int(%d)
   int(%d)
   int(%d)

@@ -1,8 +1,8 @@
-Array
+Vec
 (
     [0] => Ref Object
         (
-            [a] => Array
+            [a] => Vec
                 (
                     [0] => Ref Object
                         (

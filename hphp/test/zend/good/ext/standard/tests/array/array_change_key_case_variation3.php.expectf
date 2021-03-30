@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- Iteration 1 : int data --
-darray(4) {
+dict(4) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -13,19 +13,19 @@ darray(4) {
 }
 
 -- Iteration 2 : empty double quotes data --
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptyd"
 }
 
 -- Iteration 3 : empty single quotes data --
-darray(1) {
+dict(1) {
   [""]=>
   string(6) "emptys"
 }
 
 -- Iteration 4 : string data --
-darray(3) {
+dict(3) {
   ["STRINGD"]=>
   string(7) "stringd"
   ["STRINGS"]=>

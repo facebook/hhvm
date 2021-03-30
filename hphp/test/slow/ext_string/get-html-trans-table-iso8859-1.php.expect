@@ -1,5 +1,5 @@
 bool(true)
-darray(100) {
+dict(100) {
   ["""]=>
   string(6) "&quot;"
   ["&"]=>

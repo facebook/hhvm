@@ -1,24 +1,24 @@
-darray(1) {
+dict(1) {
   ["1"]=>
   string(1) "1"
 }
-darray(1) {
+dict(1) {
   ["100"]=>
   string(3) "100"
 }
-darray(2) {
+dict(2) {
   ["123"]=>
   string(3) "123"
   [123]=>
   int(123)
 }
-darray(2) {
+dict(2) {
   [123]=>
   int(123)
   ["123"]=>
   string(3) "123"
 }
-darray(4) {
+dict(4) {
   [123]=>
   int(123)
   ["456"]=>

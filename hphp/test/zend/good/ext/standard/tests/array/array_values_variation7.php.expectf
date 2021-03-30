@@ -1,7 +1,7 @@
 *** Testing array_values() : usage variations ***
 
 -- $input argument: --
-darray(4) {
+dict(4) {
   [3]=>
   string(5) "three"
   [2]=>
@@ -13,7 +13,7 @@ darray(4) {
 }
 
 -- Result of array_values() --
-varray(4) {
+vec(4) {
   string(5) "three"
   string(3) "two"
   string(3) "one"

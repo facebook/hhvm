@@ -2,7 +2,7 @@ int(17)
 string(24) "image/vnd.microsoft.icon"
 string(4) ".ico"
 string(3) "ico"
-darray(5) {
+dict(5) {
   [0]=>
   int(48)
   [1]=>
@@ -14,7 +14,7 @@ darray(5) {
   ["mime"]=>
   string(24) "image/vnd.microsoft.icon"
 }
-darray(5) {
+dict(5) {
   [0]=>
   int(32)
   [1]=>

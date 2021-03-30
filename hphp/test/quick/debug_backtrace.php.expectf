@@ -1,7 +1,7 @@
-varray(7) {
-  darray(6) {
+vec(7) {
+  dict(6) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(9)
     ["function"]=>
@@ -14,9 +14,9 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(7) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -32,23 +32,23 @@ varray(7) {
     vec(3) {
       int(1)
       string(3) "str"
-      varray(3) {
+      vec(3) {
         int(1)
         int(2)
         int(3)
       }
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(20)
     ["function"]=>
@@ -58,9 +58,9 @@ varray(7) {
       string(3) "bar"
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(29)
     ["function"]=>
@@ -69,9 +69,9 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(35)
     ["function"]=>
@@ -80,7 +80,7 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>
@@ -88,10 +88,10 @@ varray(7) {
     }
   }
 }
-varray(7) {
-  darray(6) {
+vec(7) {
+  dict(6) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(9)
     ["function"]=>
@@ -104,7 +104,7 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(5) {
+  dict(5) {
     ["function"]=>
     string(3) "bar"
     ["class"]=>
@@ -121,16 +121,16 @@ varray(7) {
       NULL
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(20)
     ["function"]=>
@@ -140,9 +140,9 @@ varray(7) {
       string(3) "bar"
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(29)
     ["function"]=>
@@ -151,9 +151,9 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(35)
     ["function"]=>
@@ -162,7 +162,7 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>
@@ -170,10 +170,10 @@ varray(7) {
     }
   }
 }
-varray(7) {
-  darray(6) {
+vec(7) {
+  dict(6) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(9)
     ["function"]=>
@@ -186,7 +186,7 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(5) {
+  dict(5) {
     ["function"]=>
     string(3) "bar"
     ["class"]=>
@@ -203,16 +203,16 @@ varray(7) {
       NULL
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(20)
     ["function"]=>
@@ -222,9 +222,9 @@ varray(7) {
       string(3) "bar"
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(29)
     ["function"]=>
@@ -233,9 +233,9 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s"
+    string(%d) "%s/test/quick/debug_backtrace.php"
     ["line"]=>
     int(35)
     ["function"]=>
@@ -244,7 +244,7 @@ varray(7) {
     vec(0) {
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>

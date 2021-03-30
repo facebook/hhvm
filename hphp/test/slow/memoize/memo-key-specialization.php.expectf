@@ -172,7 +172,7 @@ string(8) "a-string"
 takes_anything
 string(0) ""
 takes_anything
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
@@ -380,7 +380,7 @@ bool(false)
 int(500)
 string(8) "a-string"
 string(0) ""
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)

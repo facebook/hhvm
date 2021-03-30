@@ -1,5 +1,5 @@
 -=-=-=-=-=-=-=-=-=-= TEST 1 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-$a=array (
+$a=dict [
   0 => 1,
   'big' => 2,
   1 => 2,
@@ -19,43 +19,43 @@ $a=array (
   15 => 3,
   16 => 3,
   17 => 17,
-);
-$b=array (
-  0 => 2,
-  1 => 2,
-  2 => 3,
-  3 => 3,
-  4 => 3,
-  5 => 3,
-  6 => 3,
-  7 => 3,
-  8 => 3,
-  9 => 3,
-  10 => 3,
-  11 => 3,
-  12 => 3,
-  13 => 3,
-  14 => 3,
-  15 => 17,
-  16 => 25,
-  17 => 'some_string',
-  18 => 7,
-  19 => 8,
-  20 => 9,
-  21 => 109,
-  22 => 78,
-  23 => 17,
-);
-$c=array (
-  0 => -1,
-  1 => 2,
-  2 => 1,
-  3 => 15,
-  4 => 25,
-  5 => 17,
-);
+];
+$b=vec [
+  2,
+  2,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  17,
+  25,
+  'some_string',
+  7,
+  8,
+  9,
+  109,
+  78,
+  17,
+];
+$c=vec [
+  -1,
+  2,
+  1,
+  15,
+  25,
+  17,
+];
 array_intersect($a,$b,$c);
-darray(3) {
+dict(3) {
   ["big"]=>
   int(2)
   [1]=>
@@ -64,12 +64,12 @@ darray(3) {
   int(17)
 }
 array_intersect_assoc($a,$b,$c);
-darray(1) {
+dict(1) {
   [1]=>
   int(2)
 }
 array_intersect($a,$b);
-darray(15) {
+dict(15) {
   ["big"]=>
   int(2)
   [1]=>
@@ -102,7 +102,7 @@ darray(15) {
   int(17)
 }
 array_intersect_assoc($a,$b);
-darray(10) {
+dict(10) {
   [1]=>
   int(2)
   [3]=>
@@ -125,7 +125,7 @@ darray(10) {
   int(3)
 }
 -=-=-=-=-=-=-=-=-=-= TEST 2 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-$a=array (
+$a=dict [
   'a' => 2,
   'b' => 'some',
   'c' => 'done',
@@ -143,8 +143,8 @@ $a=array (
   95 => 'some',
   'som3' => 'some',
   'want' => 'wanna',
-);
-$b=array (
+];
+$b=dict [
   'a' => 7,
   7 => 18,
   9 => 13,
@@ -156,18 +156,18 @@ $b=array (
   'f' => 5,
   'z' => 'equal',
   'gate' => 'web',
-);
-$c=array (
+];
+$c=dict [
   'gate' => 'web',
   73 => 'foo',
   95 => 'some',
-);
+];
 
 
 Results:
 
 array_intersect($a,$b,$c);
-darray(6) {
+dict(6) {
   ["b"]=>
   string(4) "some"
   ["z"]=>
@@ -182,12 +182,12 @@ darray(6) {
   string(4) "some"
 }
 array_intersect_assoc($a,$b,$c);
-darray(1) {
+dict(1) {
   ["gate"]=>
   string(3) "web"
 }
 array_intersect($a,$b);
-darray(11) {
+dict(11) {
   ["b"]=>
   string(4) "some"
   ["z"]=>
@@ -212,7 +212,7 @@ darray(11) {
   string(4) "some"
 }
 array_intersect_assoc($a,$b);
-darray(5) {
+dict(5) {
   ["f"]=>
   int(5)
   ["gate"]=>

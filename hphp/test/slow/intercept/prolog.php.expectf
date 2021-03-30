@@ -1,8 +1,8 @@
 intercept1 DONE
-varray(4) {
-  darray(6) {
+vec(4) {
+  dict(6) {
     ["file"]=>
-    string(%d) "%s/intercept/prolog.php"
+    string(%d) "%s/test/slow/intercept/prolog.php"
     ["line"]=>
     int(5)
     ["function"]=>
@@ -16,15 +16,15 @@ varray(4) {
       string(9) "Cls::func"
       object(Cls) (0) {
       }
-      varray(0) {
+      vec(0) {
       }
       NULL
       bool(true)
     }
   }
-  darray(7) {
+  dict(7) {
     ["file"]=>
-    string(%d) "%s/intercept/prolog.php"
+    string(%d) "%s/test/slow/intercept/prolog.php"
     ["line"]=>
     int(19)
     ["function"]=>
@@ -40,9 +40,9 @@ varray(4) {
     vec(0) {
     }
   }
-  darray(4) {
+  dict(4) {
     ["file"]=>
-    string(%d) "%s/intercept/prolog.php"
+    string(%d) "%s/test/slow/intercept/prolog.php"
     ["line"]=>
     int(27)
     ["function"]=>
@@ -52,7 +52,7 @@ varray(4) {
       string(10) "intercept2"
     }
   }
-  darray(2) {
+  dict(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>

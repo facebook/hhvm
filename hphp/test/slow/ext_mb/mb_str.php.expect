@@ -1,14 +1,14 @@
 bool(true)
 string(5) "value"
 string(3) "baz"
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 string(2) "04"
 string(2) "30"
 string(4) "1973"
-varray(2) {
+vec(2) {
   string(2) "04"
   string(7) "30/1973"
 }

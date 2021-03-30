@@ -1,5 +1,5 @@
 *** Testing array_unique() : array with duplicate keys for $input argument ***
-darray(3) {
+dict(3) {
   [1]=>
   string(1) "1"
   [2]=>

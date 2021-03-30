@@ -1,81 +1,81 @@
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(0) ""
   string(0) ""
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(0) ""
 }
-varray(2) {
+vec(2) {
   string(0) ""
   string(3) "aaa"
 }
-varray(2) {
+vec(2) {
   string(0) ""
   string(0) ""
 }
-varray(2) {
+vec(2) {
   string(2) "\""
   string(3) "aaa"
 }
-varray(2) {
+vec(2) {
   string(2) """"
   string(0) ""
 }
-varray(1) {
+vec(1) {
   string(7) """,aaa
 "
 }
-varray(1) {
+vec(1) {
   string(8) "\"",aaa
 "
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(10) "\"bbb,ccc
 "
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(6) "bbb   "
 }
-varray(2) {
+vec(2) {
   string(3) "aaa"
   string(6) "bbb   "
 }
-varray(2) {
+vec(2) {
   string(8) "aaa"aaa""
   string(6) "bbbbbb"
 }
-varray(2) {
+vec(2) {
   string(10) "aaa"aaa""""
   string(3) "bbb"
 }
-varray(2) {
+vec(2) {
   string(8) "aaa"\"a""
   string(3) "bbb"
 }

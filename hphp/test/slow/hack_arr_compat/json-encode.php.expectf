@@ -1,8 +1,8 @@
 ================== literals ==================
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 9
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 9
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 13
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 13
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 25
 
@@ -12,33 +12,31 @@ Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/js
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 37
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 42
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 42
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 50
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 55
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 55
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 55
-
-Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 55
 ==================== normal =========================
-string(2) "[]"
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== force PHP =========================
 string(2) "[]"
@@ -79,8 +77,12 @@ string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,
 string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== dict warn =========================
-string(2) "[]"
-string(9) "[1,2,3,4]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 60
+string(2) "{}"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 61
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 
@@ -92,200 +94,160 @@ string(19) "{"a":1,"b":2,"c":3}"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 66
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 67
+string(2) "{}"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 68
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 69
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 73
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 78
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== keyset warn =========================
-string(2) "[]"
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 70
 string(2) "[]"
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 71
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
 
 Notice: Hack Array Compat: Serializing keyset in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== PHP warn =========================
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 60
-string(2) "[]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 61
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 67
-string(2) "[]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 69
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 73
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== empty darrays =========================
-
-Notice: Hack Array Compat: JSON encoding empty darray in %s/json-encode.php on line 60
-string(2) "[]"
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-
-Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 67
-string(2) "[]"
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== vec-like darrays =========================
-string(2) "[]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 61
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 69
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 73
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== dict-like darrays =========================
-string(2) "[]"
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
-
-Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== all darrays =========================
-
-Notice: Hack Array Compat: JSON encoding empty darray in %s/json-encode.php on line 60
-string(2) "[]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 61
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-
-Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 67
-string(2) "[]"
-
-Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 69
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 73
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== warn both =========================
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 60
-string(2) "[]"
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 60
+string(2) "{}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 61
-string(9) "[1,2,3,4]"
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 61
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 
@@ -298,36 +260,36 @@ string(19) "{"a":1,"b":2,"c":3}"
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 66
 string(25) "{"0":"a","1":"b","2":"c"}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 67
-string(2) "[]"
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 67
+string(2) "{}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 68
 string(19) "{"a":1,"b":2,"c":3}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 69
-string(13) "["a","b","c"]"
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 69
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 73
-string(13) "[[1,2],[3,4]]"
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 73
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 78
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== force + dict warn =========================
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 60
 string(2) "[]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 61
 string(9) "[1,2,3,4]"
 string(2) "[]"
 string(9) "[1,2,3,4]"
@@ -340,11 +302,19 @@ string(19) "{"a":1,"b":2,"c":3}"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 66
 string(13) "["a","b","c"]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 67
 string(2) "[]"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 68
 string(19) "{"a":1,"b":2,"c":3}"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 69
 string(13) "["a","b","c"]"
 string(2) "[]"
 string(25) "{"a":"a","b":"b","c":"c"}"
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 73
 string(13) "[[1,2],[3,4]]"
 string(13) "[[1,2],[3,4]]"
 
@@ -358,46 +328,30 @@ Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json
 string(73) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":{"a":"a","b":"b","c":"c"}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== force + PHP warn =========================
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 60
 string(2) "[]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 61
 string(9) "[1,2,3,4]"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "[]"
 string(19) "{"a":1,"b":2,"c":3}"
 string(13) "["a","b","c"]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 67
 string(2) "[]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 68
 string(19) "{"a":1,"b":2,"c":3}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 69
 string(13) "["a","b","c"]"
 string(2) "[]"
 string(25) "{"a":"a","b":"b","c":"c"}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 73
 string(13) "[[1,2],[3,4]]"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 83
 string(57) "[1,[2,3,4],[5,6,7],{"8":8,"9":9,"10":10},{"a":11,"b":12}]"
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 90
 string(73) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":{"a":"a","b":"b","c":"c"}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== everything =========================
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 60
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 60
 string(2) "[]"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 61
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 61
 string(9) "[1,2,3,4]"
 string(2) "[]"
 string(9) "[1,2,3,4]"
@@ -411,65 +365,53 @@ string(19) "{"a":1,"b":2,"c":3}"
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 66
 string(13) "["a","b","c"]"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 67
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 67
 string(2) "[]"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 68
 string(19) "{"a":1,"b":2,"c":3}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 69
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 69
 string(13) "["a","b","c"]"
 string(2) "[]"
 string(25) "{"a":"a","b":"b","c":"c"}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 73
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 73
 string(13) "[[1,2],[3,4]]"
 string(13) "[[1,2],[3,4]]"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 78
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 83
-
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 83
 string(57) "[1,[2,3,4],[5,6,7],{"8":8,"9":9,"10":10},{"a":11,"b":12}]"
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 90
-
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 90
 string(73) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":{"a":"a","b":"b","c":"c"}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== ignore lateinit =========================
-string(2) "[]"
-string(9) "[1,2,3,4]"
+string(2) "{}"
+string(25) "{"0":1,"1":2,"2":3,"3":4}"
 string(2) "[]"
 string(9) "[1,2,3,4]"
 string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
 string(25) "{"0":"a","1":"b","2":"c"}"
-string(2) "[]"
+string(2) "{}"
 string(19) "{"a":1,"b":2,"c":3}"
-string(13) "["a","b","c"]"
+string(25) "{"0":"a","1":"b","2":"c"}"
 string(2) "[]"
 string(13) "["a","b","c"]"
-string(13) "[[1,2],[3,4]]"
+string(37) "{"0":{"0":1,"1":2},"1":{"0":3,"1":4}}"
 string(13) "[[1,2],[3,4]]"
 string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
-string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
-string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+string(76) "{"0":1,"1":[2,3,4],"2":{"0":5,"1":6,"2":7},"3":[8,9,10],"4":{"a":11,"b":12}}"
+string(73) "{"a":{"0":1,"1":2,"2":3},"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 string(2) "{}"
 ==================== no repeated warnings =========================
 
-Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 140
-
-Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 140
-
-Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 140
-
-Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 140
-
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 140
-string(59) "[[],[],["a"],["a"],{"1":"a"},{"1":"a"},{"0":"a"},{"0":"a"}]"
+string(67) "[{},{},{"0":"a"},{"0":"a"},{"1":"a"},{"1":"a"},{"0":"a"},{"0":"a"}]"
 =============== force Hack arrays ignores structure ===============
 string(2) "[]"
 string(2) "{}"

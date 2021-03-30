@@ -1,6 +1,6 @@
 *** Testing usort() : object functionality ***
 bool(true)
-darray(4) {
+dict(4) {
   [0]=>
   object(SimpleClass1) (1) {
     ["int_value":"SimpleClass1":private]=>
@@ -23,7 +23,7 @@ darray(4) {
   }
 }
 bool(true)
-darray(3) {
+dict(3) {
   [0]=>
   object(SimpleClass2) (3) {
     ["int_value":"SimpleClass2":private]=>

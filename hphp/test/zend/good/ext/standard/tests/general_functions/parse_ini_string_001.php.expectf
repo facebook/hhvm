@@ -1,6 +1,6 @@
 *** Test parse_ini_string() function:  with various keys and values given in string ***
 -- ini string without process_sections optional arg --
-Array
+Dict
 (
     [one] => 1
     [five] => 5
@@ -109,9 +109,9 @@ Hello, world
 )
 
 -- ini string with process_sections as TRUE --
-Array
+Dict
 (
-    [Constans] => Array
+    [Constans] => Dict
         (
             [one] => 1
             [five] => 5
@@ -122,19 +122,19 @@ Array
             [HELLO] => HELLO
         )
 
-    [date] => Array
+    [date] => Dict
         (
             [date] => 
             [time] => 
         )
 
-    [paths] => Array
+    [paths] => Dict
         (
             [path] => /usr/local/bin
             [URL] => http://www.php.net
         )
 
-    [Decimal] => Array
+    [Decimal] => Dict
         (
             [Decimal_value1] => 100
             [Decimal_value2] => -100
@@ -144,18 +144,18 @@ Array
             [Decimal_value6] => 2147483648
         )
 
-    [Octal] => Array
+    [Octal] => Dict
         (
             [Octal_value] => 0100
         )
 
-    [Hex] => Array
+    [Hex] => Dict
         (
             [Hex_value1] => 0x101
             [Hex_Value2] => 0x103
         )
 
-    [Non-alphanumerics_as_values] => Array
+    [Non-alphanumerics_as_values] => Dict
         (
             [Non_alpha1] => 
             [Non_alpha2] => +
@@ -190,12 +190,12 @@ Array
             [Non_alpha21_quotes] => ()
         )
 
-    [Non-alpha numerics in strings] => Array
+    [Non-alpha numerics in strings] => Dict
         (
             [Non_alpha_string1] => Hello@world
         )
 
-    [Non-alpha numerics in strings -with quotes] => Array
+    [Non-alpha numerics in strings -with quotes] => Dict
         (
             [Non_alpha_string1_quotes] => Hello@world
             [Non_alpha_string2_quotes] => Hello!world
@@ -220,7 +220,7 @@ Array
             [Non_alpha_string21_quotes] => Hello(world)
         )
 
-    [Newlines_in_Values] => Array
+    [Newlines_in_Values] => Dict
         (
             [String1] => Hello, world
 Good Morning
@@ -237,7 +237,7 @@ Hello, world
             [String6] => Hello, world	Good Morning
         )
 
-    [ReservedKeys_as_Values] => Array
+    [ReservedKeys_as_Values] => Dict
         (
             [Key1] => 1
             [Key2] => 1
@@ -259,7 +259,7 @@ Hello, world
             [Key18] => 
         )
 
-    [ReservedKeys_as_Keys] => Array
+    [ReservedKeys_as_Keys] => Dict
         (
         )
 

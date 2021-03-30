@@ -1,13 +1,13 @@
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
   float(2)
 }
-darray(3) {
+dict(3) {
   [0]=>
   string(16) "2.00000000000001"
   [2]=>
@@ -17,11 +17,11 @@ darray(3) {
 }
 
 -- Iteration 2 --
-darray(1) {
+dict(1) {
   ["two"]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   [2]=>
   string(16) "2.00000000000001"
   [3]=>
@@ -29,7 +29,7 @@ darray(2) {
 }
 
 -- Iteration 3 --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -37,7 +37,7 @@ darray(3) {
   ["two"]=>
   float(2)
 }
-darray(4) {
+dict(4) {
   ["2"]=>
   string(16) "2.00000000000001"
   ["1"]=>
@@ -49,13 +49,13 @@ darray(4) {
 }
 
 -- Iteration 4 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [2]=>
@@ -63,13 +63,13 @@ darray(2) {
 }
 
 -- Iteration 5 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   [2]=>
   int(2)
   [0]=>
@@ -77,13 +77,13 @@ darray(2) {
 }
 
 -- Iteration 6 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   [1]=>
   int(1)
 }
-darray(2) {
+dict(2) {
   ["1"]=>
   int(1)
   ["0"]=>
@@ -91,13 +91,13 @@ darray(2) {
 }
 
 -- Iteration 7 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   float(2)
   [2]=>
@@ -105,13 +105,13 @@ darray(2) {
 }
 
 -- Iteration 8 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
   float(2)
 }
-darray(2) {
+dict(2) {
   [2]=>
   float(2)
   [0]=>
@@ -119,13 +119,13 @@ darray(2) {
 }
 
 -- Iteration 9 --
-darray(2) {
+dict(2) {
   [0]=>
   string(4) "zero"
   [1]=>
   int(1)
 }
-darray(2) {
+dict(2) {
   ["1"]=>
   float(1)
   ["0"]=>

@@ -1,6 +1,6 @@
 2005-11-20T08:00:00+0000
 2005-11-20T08:00:00+0000
-darray(16) {
+dict(16) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -18,12 +18,12 @@ darray(16) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(true)
@@ -36,7 +36,7 @@ darray(16) {
   ["tz_abbr"]=>
   string(1) "A"
 }
-darray(12) {
+dict(12) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -54,12 +54,12 @@ darray(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  darray(0) {
+  dict(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  darray(0) {
+  dict(0) {
   }
   ["is_localtime"]=>
   bool(false)

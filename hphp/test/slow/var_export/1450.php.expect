@@ -1,55 +1,55 @@
-array (
+dict [
   '' . "\0" . '' => 1,
-)array (
+]dict [
   '' . "\0" . '' => '' . "\0" . '',
-)array (
+]dict [
   '' . "\0" . '' => '\\',
-)array (
+]dict [
   '' . "\0" . '' => '\\\'',
-)array (
+]dict [
   '\\' => 1,
-)array (
+]dict [
   '\\' => '' . "\0" . '',
-)array (
+]dict [
   '\\' => '\\',
-)array (
+]dict [
   '\\' => '\\\'',
-)array (
+]dict [
   '\\\'' => 1,
-)array (
+]dict [
   '\\\'' => '' . "\0" . '',
-)array (
+]dict [
   '\\\'' => '\\',
-)array (
+]dict [
   '\\\'' => '\\\'',
-)array (
+]dict [
   '\\a' => '\\a',
-)falsearray (
+]falsedict [
   '' . "\0" . '' => '' . "\0" . '',
-)11truetrue111'0x10''' . "\0" . ''array (
+]11truetrue111'0x10''' . "\0" . ''dict [
   '' . "\0" . '' => 1,
-)array (
+]dict [
   '' . "\0" . '' => '' . "\0" . '',
-)array (
+]dict [
   '' . "\0" . '' => '\\',
-)array (
+]dict [
   '' . "\0" . '' => '\\\'',
-)array (
+]dict [
   '\\' => 1,
-)array (
+]dict [
   '\\' => '' . "\0" . '',
-)array (
+]dict [
   '\\' => '\\',
-)array (
+]dict [
   '\\' => '\\\'',
-)array (
+]dict [
   '\\\'' => 1,
-)array (
+]dict [
   '\\\'' => '' . "\0" . '',
-)array (
+]dict [
   '\\\'' => '\\',
-)array (
+]dict [
   '\\\'' => '\\\'',
-)array (
+]dict [
   '\\a' => '\\a',
-)
+]

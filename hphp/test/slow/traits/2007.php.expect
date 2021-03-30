@@ -1,26 +1,26 @@
 *** Testing class_uses() : basic ***
-darray(2) {
+dict(2) {
   ["foo"]=>
   string(3) "foo"
   ["bar"]=>
   string(3) "bar"
 }
-darray(2) {
+dict(2) {
   ["foo"]=>
   string(3) "foo"
   ["bar"]=>
   string(3) "bar"
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "foo"
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "foo"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

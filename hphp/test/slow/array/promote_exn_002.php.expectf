@@ -1,16 +1,16 @@
 ----
 after a throw:
-string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
 object(bar) (1) {
   ["x"]=>
-  darray(0) {
+  dict(0) {
   }
 }
 ----
 after a throw:
-string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
 object(bar) (1) {
   ["x"]=>
-  darray(0) {
+  dict(0) {
   }
 }

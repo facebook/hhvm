@@ -1,11 +1,11 @@
 2
 2
 int(2)
-darray(1) {
+dict(1) {
   ["other"]=>
-  darray(2) {
+  dict(2) {
     ["foo"]=>
-    darray(1) {
+    dict(1) {
       ["heh"]=>
       int(2)
     }

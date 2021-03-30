@@ -1,28 +1,28 @@
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-varray(2) {
+vec(2) {
   int(100)
   string(5) "value"
 }
-varray(1) {
+vec(1) {
   resource(1) of type (stream)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(100)
   ["b"]=>
   int(200)
 }
-darray(2) {
+dict(2) {
   [100]=>
   int(300)
   [500]=>
   int(800)
 }
-darray(1) {
+dict(1) {
   [100]=>
   resource(1) of type (stream)
 }

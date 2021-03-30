@@ -1,10 +1,10 @@
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["Herp"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(4)
     }
@@ -12,7 +12,7 @@ darray(3) {
   ["alias"]=>
   string(12) "MyNS\MyShape"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(18)
   ["classname"]=>
@@ -20,13 +20,13 @@ darray(3) {
   ["alias"]=>
   string(6) "MyNS\T"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["SomeNS\Foo"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -34,13 +34,13 @@ darray(3) {
   ["alias"]=>
   string(12) "MyNS\UsesFoo"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["SomeNS\Bar"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -48,13 +48,13 @@ darray(3) {
   ["alias"]=>
   string(12) "MyNS\UsesBar"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["SomeNS\Baz"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -62,13 +62,13 @@ darray(3) {
   ["alias"]=>
   string(12) "MyNS\UsesBaz"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["Herp"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -76,13 +76,13 @@ darray(3) {
   ["alias"]=>
   string(21) "MyNS\ExplicitRelative"
 }
-darray(3) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  darray(1) {
+  dict(1) {
     ["Herp"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }

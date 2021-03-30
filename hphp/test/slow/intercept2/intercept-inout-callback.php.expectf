@@ -1,12 +1,14 @@
 ----HANDLER----
 string(3) "foo"
 NULL
-varray(2) {
+vec(2) {
   string(4) "Hey!"
   int(1)
 }
 ---------------
 
-Fatal error: Uncaught exception 'RuntimeException' with message 'The callback for fb_intercept2 cannot have inout parameters' in %s:17
+Fatal error: Uncaught exception 'RuntimeException' with message 'The callback for fb_intercept2 cannot have inout parameters' in %s/test/slow/intercept2/intercept-inout-callback.php:17
 Stack trace:
-%A
+#0 %s/test/slow/intercept2/intercept-inout-callback.php(26): foo()
+#1 (): main()
+#2 {main}

@@ -1,8 +1,0 @@
-dict(1) {
-  ["test"]=>
-  dict(1) {
-    ["sub_test"]=>
-    dict(0) {
-    }
-  }
-}

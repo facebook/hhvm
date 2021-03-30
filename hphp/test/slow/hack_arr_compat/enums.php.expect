@@ -1,4 +1,4 @@
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -6,7 +6,7 @@ darray(3) {
   [3]=>
   string(5) "THREE"
 }
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(1) "1"
   ["TWO"]=>
@@ -20,14 +20,14 @@ string(1) "1"
 string(1) "1"
 string(1) "1"
 string(1) "1"
-varray(1) {
+vec(1) {
   string(1) "1"
 }
-varray(1) {
+vec(1) {
   string(1) "1"
 }
 ==============================================
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -35,7 +35,7 @@ darray(3) {
   [3]=>
   string(5) "THREE"
 }
-darray(3) {
+dict(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -49,14 +49,14 @@ int(1)
 int(1)
 int(1)
 int(1)
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(1) {
+vec(1) {
   int(1)
 }
 ==============================================
-darray(3) {
+dict(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -64,7 +64,7 @@ darray(3) {
   [3]=>
   string(5) "THREE"
 }
-darray(3) {
+dict(3) {
   ["ONE"]=>
   string(1) "1"
   ["TWO"]=>
@@ -78,9 +78,9 @@ string(1) "1"
 int(1)
 string(1) "1"
 int(1)
-varray(1) {
+vec(1) {
   string(1) "1"
 }
-varray(1) {
+vec(1) {
   int(1)
 }

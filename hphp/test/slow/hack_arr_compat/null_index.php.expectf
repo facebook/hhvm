@@ -1,3 +1,3 @@
 === indexing into a boolean ===
 === indexing into invalid keys ===
-Out of bounds darray access: invalid index "invalid key"
+Out of bounds dict access: invalid index "invalid key"

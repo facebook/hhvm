@@ -1,9 +1,9 @@
-varray(3) {
+vec(3) {
   string(1) "b"
   string(1) "c"
   string(1) "a"
 }
-darray(3) {
+dict(3) {
   ["b"]=>
   int(2)
   ["c"]=>

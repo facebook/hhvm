@@ -1,78 +1,78 @@
 *** Testing array_fill() : variation ***
 *** Filling 2 dimensional array with all basic valid values ***
 -- Iteration 1 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     NULL
     NULL
   }
-  varray(2) {
+  vec(2) {
     NULL
     NULL
   }
 }
 -- Iteration 2 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     int(0)
     int(0)
   }
-  varray(2) {
+  vec(2) {
     int(0)
     int(0)
   }
 }
 -- Iteration 3 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     int(1)
     int(1)
   }
-  varray(2) {
+  vec(2) {
     int(1)
     int(1)
   }
 }
 -- Iteration 4 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     float(1)
     float(1)
   }
-  varray(2) {
+  vec(2) {
     float(1)
     float(1)
   }
 }
 -- Iteration 5 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     string(2) "hi"
     string(2) "hi"
   }
-  varray(2) {
+  vec(2) {
     string(2) "hi"
     string(2) "hi"
   }
 }
 -- Iteration 6 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     string(2) "hi"
     string(2) "hi"
   }
-  varray(2) {
+  vec(2) {
     string(2) "hi"
     string(2) "hi"
   }
 }
 -- Iteration 7 --
-varray(2) {
-  varray(2) {
+vec(2) {
+  vec(2) {
     string(5) "Hello"
     string(5) "Hello"
   }
-  varray(2) {
+  vec(2) {
     string(5) "Hello"
     string(5) "Hello"
   }

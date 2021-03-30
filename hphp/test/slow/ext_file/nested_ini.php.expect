@@ -1,8 +1,8 @@
-darray(3) {
+dict(3) {
   ["b"]=>
   string(1) "c"
   ["d"]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(1) "e"
     [1]=>
@@ -11,15 +11,15 @@ darray(3) {
     string(1) "h"
   }
   ["i"]=>
-  darray(1) {
+  dict(1) {
     [1]=>
-    darray(1) {
+    dict(1) {
       [2]=>
-      darray(2) {
+      dict(2) {
         [34]=>
         string(1) "j"
         [5]=>
-        darray(1) {
+        dict(1) {
           [6]=>
           string(1) "k"
         }

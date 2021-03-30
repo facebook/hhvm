@@ -1,4 +1,4 @@
-darray(5) {
+dict(5) {
   [1]=>
   int(0)
   [2]=>
@@ -11,7 +11,7 @@ darray(5) {
   object(HH\Vector) (0) {
   }
 }
-darray(5) {
+dict(5) {
   [22]=>
   int(0)
   [33]=>
@@ -24,29 +24,29 @@ darray(5) {
   object(HH\Vector) (0) {
   }
 }
-darray(1) {
+dict(1) {
   [22]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   ["0"]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(0) ""
 }
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "0"
 }
-darray(1) {
+dict(1) {
   [0]=>
   object(HH\Vector) (0) {
   }
 }
 ========
-darray(4) {
+dict(4) {
   [0]=>
   int(7)
   [4]=>
@@ -59,7 +59,7 @@ darray(4) {
     int(1)
   }
 }
-darray(4) {
+dict(4) {
   [11]=>
   int(7)
   [55]=>
@@ -72,27 +72,27 @@ darray(4) {
     int(1)
   }
 }
-darray(1) {
+dict(1) {
   [11]=>
   int(7)
 }
-darray(1) {
+dict(1) {
   [7]=>
   int(7)
 }
-darray(1) {
+dict(1) {
   ["foo"]=>
   string(3) "foo"
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(7)
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(3) "foo"
 }
-darray(1) {
+dict(1) {
   [1]=>
   object(HH\Vector) (1) {
     [0]=>

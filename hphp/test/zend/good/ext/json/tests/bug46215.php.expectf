@@ -1,6 +1,6 @@
 foo Object
 (
-    [a:protected] => Array
+    [a:protected] => Vec
         (
         )
 

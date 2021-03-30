@@ -4,8 +4,8 @@ int(518)
 int(257)
 bool(false)
 
-Warning: filter_id() expects parameter 1 to be string, %rv?%rarray given in %s/009.php on line 8
+Warning: filter_id() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/filter/tests/009.php on line 8
 bool(false)
 
-Warning: filter_id() expects exactly 1 parameter, 3 given in %s/009.php on line 10
+Warning: filter_id() expects exactly 1 parameter, 3 given in %s/test/zend/good/ext/filter/tests/009.php on line 10
 Done

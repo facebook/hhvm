@@ -1,119 +1,119 @@
 ======================== get =================================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== null coalesce =======================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== idx =================================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== isset ===============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== array key exists ====================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== empty ===============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== set =================================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== set-op ==============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== unset ===============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== base-elem ===========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== base-elem no-warn ===================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== base-define =========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== base-unset ==========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== dim-elem ============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== dim-elem no-warn ====================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== dim-define ==========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== dim-unset ===========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-get ============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-get no-warn ====================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-isset ==========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-empty ==========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-set ============================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-set-op =========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
 ======================== fini-unset ==========================
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, null given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid darray key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given

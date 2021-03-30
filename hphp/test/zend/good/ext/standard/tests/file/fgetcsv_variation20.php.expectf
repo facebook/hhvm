@@ -1,105 +1,105 @@
 *** Testing fgetcsv() : with default enclosure, line without any csv fields ***
 
 -- Testing fgetcsv() with file opened using r mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-varray(1) {
+vec(1) {
   string(39) "This is line of text without csv fields"
 }
 int(40)

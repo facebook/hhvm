@@ -1,6 +1,6 @@
-varray(2) {
+vec(2) {
   string(4) "afoo"
-  varray(1) {
+  vec(1) {
     string(3) "foo"
   }
 }

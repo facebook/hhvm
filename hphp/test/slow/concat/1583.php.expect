@@ -1,18 +1,18 @@
-varray(2) {
+vec(2) {
   int(1)
-  varray(2) {
+  vec(2) {
     int(1)
-    varray(2) {
+    vec(2) {
       int(1)
       int(3)
     }
   }
 }
-varray(2) {
+vec(2) {
   int(1)
-  varray(2) {
+  vec(2) {
     int(1)
-    varray(2) {
+    vec(2) {
       int(1)
       string(5) "12345"
     }

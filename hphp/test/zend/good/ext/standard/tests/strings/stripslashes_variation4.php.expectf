@@ -1,33 +1,33 @@
 *** Testing stripslashes() : with double dimensional arrays ***
 
 -- Iteration 1 --
-darray(2) {
+dict(2) {
   [0]=>
   string(0) ""
   [1]=>
-  darray(0) {
+  dict(0) {
   }
 }
 
 -- Iteration 2 --
-darray(2) {
+dict(2) {
   [0]=>
   string(0) ""
   [1]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(0) ""
   }
 }
 
 -- Iteration 3 --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "f'oo"
   [1]=>
   string(4) "b'ar"
   [2]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(4) "fo'o"
     [1]=>
@@ -36,32 +36,32 @@ darray(3) {
 }
 
 -- Iteration 4 --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "f'oo"
   [1]=>
   string(4) "b'ar"
   [2]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     string(0) ""
   }
 }
 
 -- Iteration 5 --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "f'oo"
   [1]=>
   string(4) "b'ar"
   [2]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(4) "fo'o"
     [1]=>
     string(4) "b'ar"
     [2]=>
-    darray(1) {
+    dict(1) {
       [0]=>
       string(0) ""
     }
@@ -69,19 +69,19 @@ darray(3) {
 }
 
 -- Iteration 6 --
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "f'oo"
   [1]=>
   string(4) "b'ar"
   [2]=>
-  darray(3) {
+  dict(3) {
     [0]=>
     string(4) "fo'o"
     [1]=>
     string(4) "b'ar"
     [2]=>
-    darray(2) {
+    dict(2) {
       [0]=>
       string(4) "fo'o"
       [1]=>

@@ -1,22 +1,22 @@
-varray(3) {
+vec(3) {
   string(1) "c"
   string(1) "d"
   string(1) "e"
 }
-varray(3) {
+vec(3) {
   string(1) "c"
   string(1) "d"
   string(1) "e"
 }
-varray(1) {
+vec(1) {
   string(1) "d"
 }
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-darray(5) {
+dict(5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -28,103 +28,103 @@ darray(5) {
   [4]=>
   string(1) "e"
 }
-varray(2) {
+vec(2) {
   string(1) "c"
   string(1) "d"
 }
-darray(2) {
+dict(2) {
   [2]=>
   string(1) "c"
   [3]=>
   string(1) "d"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-varray(2) {
+vec(2) {
   string(1) "b"
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "b"
   [1]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(1) "b"
   [1]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-varray(2) {
+vec(2) {
   string(1) "b"
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   ["b"]=>
   string(1) "b"
   ["c"]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   ["b"]=>
   string(1) "b"
   ["c"]=>
   string(1) "c"
 }
-darray(2) {
+dict(2) {
   [12]=>
   int(1)
   [6]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   ["12"]=>
   int(1)
   ["6"]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   ["12"]=>
   int(1)
   ["6"]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [6]=>
   int(1)
   ["6"]=>
   int(2)
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   ["6"]=>

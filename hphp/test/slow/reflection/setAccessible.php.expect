@@ -1,31 +1,31 @@
-darray(6) {
+dict(6) {
   ["b"]=>
-  varray(2) {
+  vec(2) {
     string(1) "b"
     string(6) "newval"
   }
   ["c"]=>
-  varray(2) {
+  vec(2) {
     string(1) "c"
     string(6) "newval"
   }
   ["d"]=>
-  varray(2) {
+  vec(2) {
     string(1) "d"
     string(6) "newval"
   }
   ["f"]=>
-  varray(2) {
+  vec(2) {
     string(1) "f"
     string(6) "newval"
   }
   ["g"]=>
-  varray(2) {
+  vec(2) {
     string(1) "g"
     string(6) "newval"
   }
   ["h"]=>
-  varray(2) {
+  vec(2) {
     string(1) "h"
     string(6) "newval"
   }

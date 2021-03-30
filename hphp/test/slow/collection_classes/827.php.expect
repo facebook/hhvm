@@ -4,7 +4,7 @@ object(HH\Map) (3) {
   [2]=>
   string(1) "b"
   ["c"]=>
-  varray(0) {
+  vec(0) {
   }
 }
 object(HH\Map) (3) {
@@ -13,6 +13,6 @@ object(HH\Map) (3) {
   [2]=>
   string(1) "b"
   ["c"]=>
-  varray(0) {
+  vec(0) {
   }
 }

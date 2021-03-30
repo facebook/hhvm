@@ -1,25 +1,25 @@
-varray(2) {
+vec(2) {
   string(0) ""
   int(1)
 }
-varray(2) {
+vec(2) {
   string(0) ""
   int(1)
 }
-varray(2) {
+vec(2) {
   string(0) ""
   int(2)
 }
-varray(2) {
+vec(2) {
   string(2) "xx"
   int(2)
 }
-varray(2) {
+vec(2) {
   string(2) "xx"
   int(4)
 }
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
     string(0) ""
     [1]=>
@@ -27,8 +27,8 @@ varray(2) {
   }
   int(2)
 }
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
     string(0) ""
     [1]=>
@@ -36,8 +36,8 @@ varray(2) {
   }
   int(1)
 }
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
     string(1) "x"
     [1]=>
@@ -45,8 +45,8 @@ varray(2) {
   }
   int(1)
 }
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
     string(3) "xxx"
     [1]=>
@@ -54,15 +54,15 @@ varray(2) {
   }
   int(4)
 }
-varray(2) {
+vec(2) {
   string(0) ""
   int(1)
 }
-varray(2) {
+vec(2) {
   string(1) "x"
   int(0)
 }
-varray(2) {
+vec(2) {
   string(3) "xxx"
   int(2)
 }

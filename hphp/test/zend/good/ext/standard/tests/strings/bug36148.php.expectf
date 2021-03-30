@@ -1,16 +1,16 @@
-a: darray(1) {
+a: dict(1) {
   [1]=>
   string(2) "a0"
 }
-aa: darray(1) {
+aa: dict(1) {
   [1]=>
   string(2) "aa"
 }
-aaa: darray(1) {
+aaa: dict(1) {
   [1]=>
   string(4) "aaa0"
 }
-aaaa: darray(1) {
+aaaa: dict(1) {
   [1]=>
   string(4) "aaaa"
 }

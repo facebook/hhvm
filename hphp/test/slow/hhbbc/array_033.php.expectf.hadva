@@ -1,6 +1,0 @@
-Out of bounds dict access: invalid index "z"
-bool(true)
-bool(false)
-bool(true)
-dict(0) {
-}

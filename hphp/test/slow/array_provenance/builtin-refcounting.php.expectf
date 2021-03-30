@@ -1,4 +1,0 @@
-legacy($x) = 0
-legacy($y) = 1
-provenance($x) = %s/builtin-refcounting.php:12
-provenance($y) = %s/builtin-refcounting.php:13

@@ -3,19 +3,19 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-varray(0) {
+vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-Out of bounds varray access: invalid index 0
+Out of bounds vec access: invalid index 0
 string(0) ""
 string(0) ""
 NULL
-varrays do not support unsetting non-end elements
-varrays do not support unsetting non-end elements
-darray(1) {
+Vecs do not support unsetting non-end elements
+Vecs do not support unsetting non-end elements
+dict(1) {
   ["foo"]=>
-  varray(3) {
+  vec(3) {
     int(0)
     int(1)
     int(2)
@@ -23,6 +23,6 @@ darray(1) {
 }
 object(stdClass) (0) {
 }
-Out of bounds darray access: invalid index 1
+Out of bounds dict access: invalid index 1
 string(32) "8fa14cdd754f91cc6554c9e71929cce7"
 string(1) "f"

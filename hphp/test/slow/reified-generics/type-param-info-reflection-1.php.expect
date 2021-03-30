@@ -1,7 +1,7 @@
-varray(0) {
+vec(0) {
 }
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -9,7 +9,7 @@ varray(3) {
     ["is_warn"]=>
     bool(false)
   }
-  darray(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(false)
     ["is_soft"]=>
@@ -17,7 +17,7 @@ varray(3) {
     ["is_warn"]=>
     bool(false)
   }
-  darray(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -26,8 +26,8 @@ varray(3) {
     bool(true)
   }
 }
-varray(3) {
-  darray(3) {
+vec(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -35,7 +35,7 @@ varray(3) {
     ["is_warn"]=>
     bool(false)
   }
-  darray(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(false)
     ["is_soft"]=>
@@ -43,7 +43,7 @@ varray(3) {
     ["is_warn"]=>
     bool(false)
   }
-  darray(3) {
+  dict(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>

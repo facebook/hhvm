@@ -10,20 +10,20 @@ object(TestStruct) (10) {
   ["anInt64"]=>
   int(8589934592)
   ["aList"]=>
-  varray(3) {
+  vec(3) {
     float(13.3)
     float(23.4)
     float(3576.2)
   }
   ["aMap"]=>
-  darray(2) {
+  dict(2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  darray(2) {
+  dict(2) {
     [10]=>
     bool(true)
     [11]=>
@@ -47,20 +47,20 @@ object(TestStruct) (10) {
   ["anInt64"]=>
   int(8589934592)
   ["aList"]=>
-  varray(3) {
+  vec(3) {
     float(13.3)
     float(23.4)
     float(3576.2)
   }
   ["aMap"]=>
-  darray(2) {
+  dict(2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  darray(2) {
+  dict(2) {
     [10]=>
     bool(true)
     [11]=>

@@ -2,15 +2,15 @@
 
 Arg value is: this is a string
 
-Warning: preg_grep() expects parameter 2 to be varray_or_darray, string given in %s/preg_grep_error2.php on line 15
+Warning: preg_grep() expects parameter 2 to be vec_or_dict, string given in %s/preg_grep_error2.php on line 15
 
 Arg value is: Array
-darray(2) {
+dict(2) {
   [0]=>
   string(7) "this is"
   [1]=>
   string(10) "a subarray"
 }
 
-Warning: preg_grep() expects parameter 2 to be varray_or_darray, object given in %s/preg_grep_error2.php on line 18
+Warning: preg_grep() expects parameter 2 to be vec_or_dict, object given in %s/preg_grep_error2.php on line 18
 Done

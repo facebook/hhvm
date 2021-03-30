@@ -1,135 +1,135 @@
-varray(2) {
+vec(2) {
   string(5) "Apple"
   string(4) "list"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     object(stdClass) (0) {
     }
     bool(false)
   }
 }
-varray(2) {
+vec(2) {
   string(5) "Apple"
   string(4) "list"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     object(stdClass) (0) {
     }
     bool(false)
   }
 }
-varray(2) {
+vec(2) {
   string(5) "Apple"
   string(4) "list"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     object(stdClass) (0) {
     }
     bool(false)
   }
 }
-varray(2) {
+vec(2) {
   string(5) "Apple"
   string(4) "list"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       int(3)
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     object(stdClass) (0) {
     }
     bool(false)
   }
 }
-varray(3) {
+vec(3) {
   string(3) "Foo"
   string(3) "bar"
   string(3) "XYZ"
 }
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
-    varray(0) {
+    vec(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     int(99)
@@ -137,28 +137,28 @@ darray(1) {
 }
 object(P) (1) {
   ["m"]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     bool(false)
   }
 }
-varray(3) {
+vec(3) {
   string(3) "Foo"
   string(3) "bar"
   string(3) "XYZ"
 }
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
-    varray(0) {
+    vec(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     int(99)
@@ -166,28 +166,28 @@ darray(1) {
 }
 object(P) (1) {
   ["m"]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     bool(false)
   }
 }
-varray(3) {
+vec(3) {
   string(3) "Foo"
   string(3) "bar"
   string(3) "XYZ"
 }
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
-    varray(0) {
+    vec(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     int(99)
@@ -195,28 +195,28 @@ darray(1) {
 }
 object(P) (1) {
   ["m"]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     bool(false)
   }
 }
-varray(3) {
+vec(3) {
   string(3) "Foo"
   string(3) "bar"
   string(3) "XYZ"
 }
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
-    varray(0) {
+    vec(0) {
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     int(99)
@@ -224,104 +224,104 @@ darray(1) {
 }
 object(P) (1) {
   ["m"]=>
-  varray(3) {
+  vec(3) {
     string(3) "Foo"
     string(3) "bar"
     bool(false)
   }
 }
-varray(2) {
+vec(2) {
   string(8) "Foo-ext1"
   string(7) "bar-xyz"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
     string(3) "=>-"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     int(0)
     int(0)
   }
 }
-varray(2) {
+vec(2) {
   string(8) "Foo-ext1"
   string(7) "bar-xyz"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
     string(3) "=>-"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     int(0)
     int(0)
   }
 }
-varray(2) {
+vec(2) {
   string(8) "Foo-ext1"
   string(7) "bar-xyz"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
     string(3) "=>-"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     int(0)
     int(0)
   }
 }
-varray(2) {
+vec(2) {
   string(8) "Foo-ext1"
   string(7) "bar-xyz"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     NULL
     string(3) "=>-"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     int(12)
     float(1.2)
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     int(0)
     int(0)
   }
@@ -334,26 +334,26 @@ object(P) (1) {
 [NOTICE] Decrement on string 'bar'
 [NOTICE] Increment on string 'bar'
 [NOTICE] Decrement on string 'Foo'
-varray(2) {
+vec(2) {
   string(3) "Fop"
   string(3) "bas"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(3) "Fop"
     string(3) "bar"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bar"
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bas"
   }
@@ -366,26 +366,26 @@ object(P) (1) {
 [NOTICE] Decrement on string 'bar'
 [NOTICE] Increment on string 'bar'
 [NOTICE] Decrement on string 'Foo'
-varray(2) {
+vec(2) {
   string(3) "Fop"
   string(3) "bas"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(3) "Fop"
     string(3) "bar"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bar"
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bas"
   }
@@ -398,26 +398,26 @@ object(P) (1) {
 [NOTICE] Decrement on string 'bar'
 [NOTICE] Increment on string 'bar'
 [NOTICE] Decrement on string 'Foo'
-varray(2) {
+vec(2) {
   string(3) "Fop"
   string(3) "bas"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(3) "Fop"
     string(3) "bar"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bar"
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bas"
   }
@@ -430,26 +430,26 @@ object(P) (1) {
 [NOTICE] Decrement on string 'bar'
 [NOTICE] Increment on string 'bar'
 [NOTICE] Decrement on string 'Foo'
-varray(2) {
+vec(2) {
   string(3) "Fop"
   string(3) "bas"
 }
-varray(1) {
-  varray(2) {
+vec(1) {
+  vec(2) {
     string(3) "Fop"
     string(3) "bar"
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bar"
   }
 }
 object(P) (1) {
   ["m"]=>
-  varray(2) {
+  vec(2) {
     string(3) "Foo"
     string(3) "bas"
   }

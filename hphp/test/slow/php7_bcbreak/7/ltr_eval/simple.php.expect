@@ -1,17 +1,17 @@
 int(1)
 int(2)
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
 int(1)
 int(2)
-varray(2) {
+vec(2) {
   int(10)
   int(11)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(2)
 }

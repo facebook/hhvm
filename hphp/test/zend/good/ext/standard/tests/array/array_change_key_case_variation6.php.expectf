@@ -1,9 +1,9 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- Pass a two-dimensional array as $input argument --
-darray(3) {
+dict(3) {
   ["ENGLISH"]=>
-  darray(3) {
+  dict(3) {
     ["one"]=>
     int(1)
     ["two"]=>
@@ -12,7 +12,7 @@ darray(3) {
     int(3)
   }
   ["FRENCH"]=>
-  darray(3) {
+  dict(3) {
     ["un"]=>
     int(1)
     ["deux"]=>
@@ -21,7 +21,7 @@ darray(3) {
     int(3)
   }
   ["GERMAN"]=>
-  darray(3) {
+  dict(3) {
     ["eins"]=>
     int(1)
     ["zwei"]=>
@@ -32,7 +32,7 @@ darray(3) {
 }
 
 -- Pass a sub-arry as $input argument --
-darray(3) {
+dict(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>

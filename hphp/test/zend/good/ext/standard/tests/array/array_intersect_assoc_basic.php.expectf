@@ -1,5 +1,5 @@
 *** Testing array_intersect_assoc() : basic functionality ***
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>
@@ -9,18 +9,18 @@ darray(4) {
   [3]=>
   string(5) "world"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 Done

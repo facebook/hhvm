@@ -1,5 +1,5 @@
 *** Testing strptime() : basic functionality ***
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>
@@ -19,7 +19,7 @@ darray(9) {
   ["unparsed"]=>
   string(4) " GMT"
 }
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>
@@ -39,7 +39,7 @@ darray(9) {
   ["unparsed"]=>
   string(0) ""
 }
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>

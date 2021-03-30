@@ -2,7 +2,7 @@
 
 -- Testing natcasesort() by supplying various object arrays --
 bool(true)
-darray(8) {
+dict(8) {
   [4]=>
   object(for_string_natcasesort) (1) {
     ["class_value"]=>

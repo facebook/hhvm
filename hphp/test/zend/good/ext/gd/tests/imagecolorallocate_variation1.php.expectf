@@ -2,114 +2,114 @@
 
 -- int 0 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- int 1 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- int 12345 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- int -12345 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- float 10.5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- float -10.5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- float 10.1234567e10 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- float 10.7654321E-10 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- float .5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- empty array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- int indexed array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- associative array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, dict given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- nested arrays --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- uppercase NULL --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- lowercase null --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- lowercase true --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- lowercase false --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- uppercase TRUE --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- uppercase FALSE --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- empty string DQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- empty string SQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- string DQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- string SQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- mixed case string --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- heredoc --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- instance of classWithToString --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- instance of classWithoutToString --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/imagecolorallocate_variation1.php on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 
 -- file resource --
 
-Warning: supplied resource is not a valid Image resource in %s/imagecolorallocate_variation1.php on line %d
+Warning: supplied resource is not a valid Image resource in %s/test/zend/good/ext/gd/tests/imagecolorallocate_variation1.php on line 97
 bool(false)
 ===DONE===

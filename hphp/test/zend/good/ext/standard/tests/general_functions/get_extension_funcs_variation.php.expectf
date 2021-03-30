@@ -1,62 +1,62 @@
 *** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***
 -- Iteration 1 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 2 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 3 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 4 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 5 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 6 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 7 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 8 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 9 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 10 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 11 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 12 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 13 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 14 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 15 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 16 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 17 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 18 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 19 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 -- Iteration 20 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 65
 ===DONE===

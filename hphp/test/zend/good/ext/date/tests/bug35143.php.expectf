@@ -1,5 +1,5 @@
 string(3) "UTC"
-darray(4) {
+dict(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>

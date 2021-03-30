@@ -1,6 +1,6 @@
-resource(%d) of type (gd)
-resource(%d) of type (gd)
-Array
+resource(5) of type (gd)
+resource(5) of type (gd)
+Dict
 (
     [x] => a
     [y] => 12b
@@ -9,11 +9,11 @@ Array
 )
 
 Warning: gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
- in %s/bug66356.php on line 12
+ in %s/test/zend/good/ext/gd/tests/bug66356.php on line 12
 bool(false)
-resource(%d) of type (gd)
-resource(%d) of type (gd)
+resource(5) of type (gd)
+resource(5) of type (gd)
 
 Warning: gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
- in %s/bug66356.php on line 21
+ in %s/test/zend/good/ext/gd/tests/bug66356.php on line 21
 bool(false)

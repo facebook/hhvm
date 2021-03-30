@@ -1,5 +1,5 @@
 int(5)
-darray(7) {
+dict(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foo"
   ["index"]=>
@@ -15,7 +15,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobar"
   ["index"]=>
@@ -31,7 +31,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobaz"
   ["index"]=>
@@ -47,7 +47,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(4) "bing"
   ["index"]=>
@@ -63,7 +63,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(4) "bong"
   ["index"]=>
@@ -79,7 +79,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(4) "bing"
   ["index"]=>
@@ -95,7 +95,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-darray(7) {
+dict(7) {
   ["name"]=>
   string(4) "bong"
   ["index"]=>
@@ -111,7 +111,7 @@ darray(7) {
   ["comp_method"]=>
   int(0)
 }
-varray(4) {
+vec(4) {
   string(1) "."
   string(2) ".."
   string(4) "bing"

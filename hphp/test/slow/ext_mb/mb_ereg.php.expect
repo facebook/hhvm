@@ -10,18 +10,18 @@ bool(true)
 int(10)
 bool(true)
 bool(true)
-varray(2) {
+vec(2) {
   int(11)
   int(3)
 }
 bool(true)
-varray(1) {
+vec(1) {
   string(3) "abc"
 }
 bool(true)
 bool(true)
 bool(true)
-varray(1) {
+vec(1) {
   string(3) "abc"
 }
 bool(true)
@@ -33,6 +33,6 @@ string(43) ">whatever<span class="search">suffix</span>"
 string(43) ">whatever<span class="search">suffix</span>"
 int(1)
 int(1)
-varray(1) {
+vec(1) {
   string(1) "Z"
 }

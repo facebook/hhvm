@@ -12,7 +12,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
   object(Closure$main;%d) (1) {
     ["parameter"]=>
-    darray(3) {
+    dict(3) {
       ["$o"]=>
       string(10) "<required>"
       ["$m"]=>
@@ -30,7 +30,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
   object(Closure$main#2;%d) (1) {
     ["parameter"]=>
-    darray(3) {
+    dict(3) {
       ["$o"]=>
       string(10) "<required>"
       ["$m"]=>
@@ -48,7 +48,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
   object(Closure$main#3;%d) (1) {
     ["parameter"]=>
-    darray(3) {
+    dict(3) {
       ["$o"]=>
       string(10) "<required>"
       ["$m"]=>
@@ -66,7 +66,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
   object(Closure$main#4;%d) (1) {
     ["parameter"]=>
-    darray(3) {
+    dict(3) {
       ["$o"]=>
       string(10) "<required>"
       ["$m"]=>

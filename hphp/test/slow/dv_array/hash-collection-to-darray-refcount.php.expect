@@ -1,4 +1,4 @@
-darray(2) {
+dict(2) {
   [42]=>
   int(42)
   ["hello"]=>

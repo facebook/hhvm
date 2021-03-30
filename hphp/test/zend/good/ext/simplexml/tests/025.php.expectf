@@ -1,8 +1,8 @@
-darray(1) {
+dict(1) {
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
 }
-darray(3) {
+dict(3) {
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
   ["html"]=>
@@ -10,13 +10,13 @@ darray(3) {
   ["foo"]=>
   string(6) "foobar"
 }
-darray(2) {
+dict(2) {
   ["html"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
 }
-darray(4) {
+dict(4) {
   ["html"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["xhtml"]=>
@@ -26,16 +26,16 @@ darray(4) {
   ["baz"]=>
   string(9) "foobarbaz"
 }
-darray(1) {
+dict(1) {
   [""]=>
   string(28) "http://www.w3.org/1999/xhtml"
 }
-darray(1) {
+dict(1) {
   [""]=>
   string(28) "http://www.w3.org/1999/xhtml"
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 ===DONE===

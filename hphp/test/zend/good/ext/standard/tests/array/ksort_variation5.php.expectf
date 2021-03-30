@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With defualt sort flag -
 bool(true)
-darray(11) {
+dict(11) {
   [""]=>
   NULL
   ["	"]=>
@@ -18,8 +18,10 @@ darray(11) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -33,7 +35,7 @@ darray(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(11) {
+dict(11) {
   [""]=>
   NULL
   ["	"]=>
@@ -46,8 +48,10 @@ darray(11) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -61,7 +65,7 @@ darray(11) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-darray(11) {
+dict(11) {
   [""]=>
   NULL
   ["	"]=>
@@ -74,8 +78,10 @@ darray(11) {
   string(1) ""
   [""]=>
   string(1) ""
-  [""]=>
-  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
   [""]=>
   string(1) ""
   ["\a"]=>
@@ -91,7 +97,7 @@ darray(11) {
 -- Iteration 2 --
 - With defualt sort flag -
 bool(true)
-darray(11) {
+dict(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>
@@ -117,7 +123,7 @@ darray(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-darray(11) {
+dict(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>
@@ -143,7 +149,7 @@ darray(11) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-darray(11) {
+dict(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>

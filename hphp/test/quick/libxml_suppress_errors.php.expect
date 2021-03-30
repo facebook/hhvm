@@ -1,9 +1,9 @@
 bool(false)
 suppressing
-varray(0) {
+vec(0) {
 }
 unsuppressing
-varray(1) {
+vec(1) {
   object(LibXMLError) (6) {
     ["level"]=>
     int(3)

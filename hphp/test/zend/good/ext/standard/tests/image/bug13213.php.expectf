@@ -1,5 +1,5 @@
 Warning: corrupt JPEG data: 2 extraneous bytes before marker in %s/test/zend/good/ext/standard/tests/image/bug13213.php on line 3
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [1]=>

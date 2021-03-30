@@ -1,9 +1,9 @@
-varray(3) {
+vec(3) {
   int(42)
   int(1)
   int(2)
 }
-varray(24) {
+vec(24) {
   int(42)
   int(1)
   int(1)
@@ -29,7 +29,7 @@ varray(24) {
   int(1)
   int(1)
 }
-varray(8) {
+vec(8) {
   int(0)
   int(42)
   int(0)
@@ -39,7 +39,7 @@ varray(8) {
   int(0)
   int(8)
 }
-varray(11) {
+vec(11) {
   int(0)
   int(42)
   int(0)
@@ -52,7 +52,7 @@ varray(11) {
   int(0)
   int(11)
 }
-varray(12) {
+vec(12) {
   int(0)
   int(42)
   int(0)
@@ -66,7 +66,7 @@ varray(12) {
   int(0)
   int(12)
 }
-darray(4) {
+dict(4) {
   [0]=>
   int(1)
   [1]=>

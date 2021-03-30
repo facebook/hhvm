@@ -6,7 +6,7 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 Prototype: my_class::my_other_override
 1: my_child_method
@@ -17,7 +17,7 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 ReflectionException: Method my_child::my_child_method does not have a prototype
 2: my_method
@@ -28,7 +28,7 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 ReflectionException: Method my_child::my_method does not have a prototype
 3: my_override_method
@@ -39,7 +39,7 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 Prototype: my_base::my_override_method
 4: my_base_method
@@ -50,7 +50,7 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 ReflectionException: Method my_child::my_base_method does not have a prototype
 5: my_trait_method
@@ -61,12 +61,12 @@ isPublic: bool(true)
 isProtected: bool(false)
 isPrivate: bool(false)
 isStatic: bool(false)
-varray(0) {
+vec(0) {
 }
 ReflectionException: Method my_child::my_trait_method does not have a prototype
 object(ReflectionParameter) (3) {
   ["info"]=>
-  darray(10) {
+  dict(10) {
     ["index"]=>
     int(0)
     ["name"]=>
@@ -84,7 +84,7 @@ object(ReflectionParameter) (3) {
     ["type_hint_nullable"]=>
     bool(false)
     ["attributes"]=>
-    darray(0) {
+    dict(0) {
     }
     ["is_optional"]=>
     bool(false)
@@ -92,7 +92,7 @@ object(ReflectionParameter) (3) {
   ["name"]=>
   string(1) "c"
   ["paramTypeInfo"]=>
-  darray(3) {
+  dict(3) {
     ["name"]=>
     string(7) "MyClass"
     ["nullable"]=>

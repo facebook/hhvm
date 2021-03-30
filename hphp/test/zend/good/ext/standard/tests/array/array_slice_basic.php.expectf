@@ -1,7 +1,7 @@
 *** Testing array_slice() : basic functionality ***
 
 -- All arguments --
-darray(2) {
+dict(2) {
   [0]=>
   int(3)
   [23]=>
@@ -9,7 +9,7 @@ darray(2) {
 }
 
 -- Mandatory arguments --
-darray(2) {
+dict(2) {
   [0]=>
   int(3)
   [1]=>

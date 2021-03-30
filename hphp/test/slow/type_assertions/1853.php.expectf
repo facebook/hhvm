@@ -1,28 +1,28 @@
-varray(0) {
+vec(0) {
 }
-Out of bounds varray access: invalid index 0
-varray(2) {
+Out of bounds vec access: invalid index 0
+vec(2) {
   int(0)
   int(1)
 }
 int(0)
-varray(2) {
+vec(2) {
   int(0)
   int(1)
 }
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     [1]=>
     int(1)
   }
 }
-darray(1) {
+dict(1) {
   [1]=>
   int(1)
 }
 int(1)
-varray(1) {
-  darray(1) {
+vec(1) {
+  dict(1) {
     [1]=>
     int(1)
   }

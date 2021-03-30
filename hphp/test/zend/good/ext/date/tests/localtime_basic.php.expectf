@@ -1,5 +1,5 @@
 *** Testing localtime() : basic functionality ***
-darray(9) {
+dict(9) {
   ["tm_sec"]=>
   int(10)
   ["tm_min"]=>
@@ -19,7 +19,7 @@ darray(9) {
   ["tm_isdst"]=>
   int(0)
 }
-varray(9) {
+vec(9) {
   int(10)
   int(0)
   int(0)
@@ -30,7 +30,7 @@ varray(9) {
   int(0)
   int(0)
 }
-varray(9) {
+vec(9) {
   int(%d)
   int(%d)
   int(%d)

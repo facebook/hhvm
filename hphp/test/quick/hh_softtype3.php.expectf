@@ -1,2 +1,1 @@
-
-Warning: Argument 1 to foo() must be of type @?xhp_url, %rv?%rarray given in %s on line 7
+Warning: Argument 1 to foo() must be of type @?xhp_url, HH\vec given in %s/test/quick/hh_softtype3.php on line 7

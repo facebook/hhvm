@@ -2,73 +2,73 @@
 
 -- Iteration 1 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 2 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 3 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 4 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 5 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 6 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 7 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, dict given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 8 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 9 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 10 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 11 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 12 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 13 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 14 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 15 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 16 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 17 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 
 -- Iteration 18 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, object given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, object given in %s/test/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 60
 ===DONE===

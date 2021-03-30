@@ -1,4 +1,4 @@
-varray(3) {
+vec(3) {
   int(7)
   int(4)
   int(1776)
@@ -9,13 +9,13 @@ int(1776)
 int(7)
 int(4)
 int(1776)
-varray(4) {
+vec(4) {
   int(7)
   int(4)
   int(1776)
   string(16) "new varray entry"
 }
-varray(2) {
+vec(2) {
   string(3) "sv0"
   string(3) "sv1"
 }
@@ -23,12 +23,12 @@ string(3) "sv0"
 string(3) "sv1"
 string(3) "sv0"
 string(3) "sv1"
-varray(3) {
+vec(3) {
   string(3) "sv0"
   string(3) "sv1"
   string(16) "new varray entry"
 }
-darray(2) {
+dict(2) {
   ["sk0"]=>
   string(3) "sv0"
   ["sk1"]=>
@@ -38,28 +38,28 @@ string(3) "sv0"
 string(3) "sv1"
 string(3) "sv0"
 string(3) "sv1"
-darray(3) {
+dict(3) {
   ["sk0"]=>
   string(3) "sv0"
   ["sk1"]=>
   string(3) "sv1"
   ["newKey"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(0) {
+dict(0) {
 }
 string(1) "A"
 string(3) "two"
-Out of bounds darray access: invalid index 3
-Out of bounds darray access: invalid index "2"
+Out of bounds dict access: invalid index 3
+Out of bounds dict access: invalid index "2"
 string(5) "three"
 
-Warning: Invalid argument: apc key: (contains invalid characters)%S
+Warning: Invalid argument: apc key: (contains invalid characters) in %s/test/quick/apc.php on line 73
 
-Warning: Invalid argument: apc key: (contains invalid characters)%S
+Warning: Invalid argument: apc key: (contains invalid characters) in %s/test/quick/apc.php on line 74
 
-Warning: Invalid argument: apc key: (contains invalid characters)%S
+Warning: Invalid argument: apc key: (contains invalid characters) in %s/test/quick/apc.php on line 75
 bool(false)
 bool(false)
 string(10) "validvalue"

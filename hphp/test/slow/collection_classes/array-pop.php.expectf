@@ -1,5 +1,5 @@
 int(33)
-varray(2) {
+vec(2) {
   int(11)
   int(22)
 }
@@ -23,7 +23,7 @@ object(HH\Set) (2) {
   int(22)
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmVector) (3) {
   [0]=>
@@ -34,7 +34,7 @@ object(HH\ImmVector) (3) {
   int(33)
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmMap) (3) {
   ["a"]=>
@@ -45,7 +45,7 @@ object(HH\ImmMap) (3) {
   int(33)
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmSet) (3) {
   int(11)
@@ -53,7 +53,7 @@ object(HH\ImmSet) (3) {
   int(33)
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\Pair) (2) {
   [0]=>
@@ -62,7 +62,7 @@ object(HH\Pair) (2) {
   int(22)
 }
 NULL
-varray(0) {
+vec(0) {
 }
 NULL
 object(HH\Vector) (0) {
@@ -74,17 +74,17 @@ NULL
 object(HH\Set) (0) {
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmVector) (0) {
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmMap) (0) {
 }
 
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
 NULL
 object(HH\ImmSet) (0) {
 }

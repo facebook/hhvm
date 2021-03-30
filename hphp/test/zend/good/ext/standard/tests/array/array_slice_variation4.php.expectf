@@ -2,50 +2,50 @@
 
 -- Iteration 1 --
 
-Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 2 --
 
-Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 3 --
 
-Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 4 --
 
-Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, integer given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 5 --
 
-Warning: array_slice() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 6 --
 
-Warning: array_slice() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 7 --
 
-Warning: array_slice() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 8 --
 
-Warning: array_slice() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 9 --
 
-Warning: array_slice() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, double given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 10 --
 
-Warning: array_slice() expects parameter 4 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, null given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 11 --
 
-Warning: array_slice() expects parameter 4 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, null given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 12 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -55,7 +55,7 @@ darray(3) {
 }
 
 -- Iteration 13 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -65,7 +65,7 @@ darray(3) {
 }
 
 -- Iteration 14 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -75,7 +75,7 @@ darray(3) {
 }
 
 -- Iteration 15 --
-darray(3) {
+dict(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -86,29 +86,29 @@ darray(3) {
 
 -- Iteration 16 --
 
-Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 17 --
 
-Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 18 --
 
-Warning: array_slice() expects parameter 4 to be boolean, %rv?%rarray given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, vec given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 19 --
 
-Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 20 --
 
-Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 21 --
 
-Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, string given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 
 -- Iteration 22 --
 
-Warning: array_slice() expects parameter 4 to be boolean, object given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line %d
+Warning: array_slice() expects parameter 4 to be boolean, object given in %s/test/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 78
 Done

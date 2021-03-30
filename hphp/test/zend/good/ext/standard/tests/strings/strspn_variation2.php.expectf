@@ -2,163 +2,163 @@
 
 -- Iteration with mask value as "0" --
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "1" --
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "12345" --
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "-2345" --
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "10.5" --
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "-10.5" --
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "101234567000" --
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "1.07654321E-9" --
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "0.5" --
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
--- Iteration with mask value as "Array" --
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
--- Iteration with mask value as "Array" --
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
-
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
+
+-- Iteration with mask value as "Array" --
+
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
+
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
+
+Warning: strspn() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
+
+-- Iteration with mask value as "Array" --
+
+Warning: strspn() expects parameter 2 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
+
+Warning: strspn() expects parameter 2 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
+
+Warning: strspn() expects parameter 2 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "" --
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "" --
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "1" --
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "" --
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "1" --
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "" --
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "" --
 int(0)
@@ -172,17 +172,17 @@ int(0)
 
 -- Iteration with mask value as "object" --
 
-Warning: strspn() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 
 -- Iteration with mask value as "Resource id #4" --
 
-Warning: strspn() expects parameter 2 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 84
 
-Warning: strspn() expects parameter 2 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 85
 
-Warning: strspn() expects parameter 2 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation2.php on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/strspn_variation2.php on line 86
 Done

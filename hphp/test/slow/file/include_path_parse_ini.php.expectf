@@ -1,6 +1,6 @@
 Warning: Invalid argument: Filename cannot be empty! in %s/test/slow/file/include_path_parse_ini.php on line 16
 bool(false)
-darray(2) {
+dict(2) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
   ["hhvm.php7.all"]=>
@@ -9,43 +9,43 @@ darray(2) {
 
 Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 22
 bool(false)
-darray(2) {
+dict(2) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
   ["hhvm.php7.all"]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
   ["hhvm.php7.all"]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   ["include_path_parse_nested_dir"]=>
   string(1) "1"
   ["hhvm.php7.all"]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   ["include_path_parse_nested_dir"]=>
   string(1) "1"
   ["hhvm.php7.all"]=>
   string(0) ""
 }
-darray(1) {
+dict(1) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
 }
-darray(1) {
+dict(1) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
 }
-darray(1) {
+dict(1) {
   ["include_path_parse_nested_dir"]=>
   string(1) "1"
 }
-darray(1) {
+dict(1) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
 }

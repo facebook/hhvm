@@ -1,18 +1,18 @@
 int(12)
 bool(false)
-varray(1) {
+vec(1) {
   int(12)
 }
 bool(false)
-darray(1) {
+dict(1) {
   [0]=>
   int(12)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(12)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(12)
 }

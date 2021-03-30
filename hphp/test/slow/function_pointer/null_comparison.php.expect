@@ -22,17 +22,17 @@ null x rfunc_ptr: >   :Cannot use relational comparison operators (<, <=, >, >=,
 null x rfunc_ptr: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 null x rfunc_ptr: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 
-clsmeth x null <   :bool(false)
-clsmeth x null <=  :bool(false)
-clsmeth x null >   :bool(true)
-clsmeth x null >=  :bool(true)
-clsmeth x null <=> :int(1)
+clsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+clsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+clsmeth x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+clsmeth x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+clsmeth x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
-null x clsmeth: <   :bool(true)
-null x clsmeth: <=  :bool(true)
-null x clsmeth: >   :bool(false)
-null x clsmeth: >=  :bool(false)
-null x clsmeth: <=> :int(-1)
+null x clsmeth: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+null x clsmeth: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+null x clsmeth: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+null x clsmeth: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+null x clsmeth: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 
 rclsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 rclsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth

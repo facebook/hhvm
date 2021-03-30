@@ -3,46 +3,36 @@
 Testing: varray[]
 bool(false)
 bool(true)
-
-Notice: Hack Array Compat: Casting marked varray to Hack array in %s/cast_marked.php on line 10
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 
 =============================
 Testing: varray[new C()]
 bool(false)
 bool(true)
-
-Notice: Hack Array Compat: Casting marked varray to Hack array in %s/cast_marked.php on line 10
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 
 =============================
 Testing: darray[]
 bool(false)
 bool(true)
-
-Notice: Hack Array Compat: Casting marked darray to Hack array in %s/cast_marked.php on line 21
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 
 =============================
 Testing: darray[17 => new C()]
 bool(false)
 bool(true)
-
-Notice: Hack Array Compat: Casting marked darray to Hack array in %s/cast_marked.php on line 21
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 
 =============================
 Testing: static marked varray
 bool(true)
 bool(true)
 bool(false)
-
-Notice: Hack Array Compat: Casting marked varray to Hack array in %s/cast_marked.php on line 39
-bool(false)
+bool(true)
 bool(false)
 
 =============================
@@ -51,6 +41,4 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-
-Notice: Hack Array Compat: Casting marked darray to Hack array in %s/cast_marked.php on line 48
-bool(false)
+bool(true)

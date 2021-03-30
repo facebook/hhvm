@@ -1,4 +1,4 @@
-darray(2) {
+dict(2) {
   [17]=>
   object(HH\Vector) (2) {
     [0]=>
@@ -9,7 +9,7 @@ darray(2) {
   [34]=>
   int(51)
 }
-darray(2) {
+dict(2) {
   [0]=>
   object(HH\Vector) (2) {
     [0]=>

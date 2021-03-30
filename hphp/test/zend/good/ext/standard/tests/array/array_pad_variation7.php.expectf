@@ -1,16 +1,16 @@
 *** Testing array_pad() : Passing 2-D array to $input argument ***
 -- Entire 2-d array for $input argument --
-varray(5) {
-  varray(3) {
+vec(5) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     string(5) "hello"
     string(5) "world"
   }
-  darray(2) {
+  dict(2) {
     ["one"]=>
     int(1)
     ["two"]=>
@@ -19,19 +19,19 @@ varray(5) {
   string(5) "HELLO"
   string(5) "HELLO"
 }
-varray(5) {
+vec(5) {
   string(5) "HELLO"
   string(5) "HELLO"
-  varray(3) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
-  varray(2) {
+  vec(2) {
     string(5) "hello"
     string(5) "world"
   }
-  darray(2) {
+  dict(2) {
     ["one"]=>
     int(1)
     ["two"]=>
@@ -39,14 +39,14 @@ varray(5) {
   }
 }
 -- Sub array for $input argument --
-varray(5) {
+vec(5) {
   string(5) "hello"
   string(5) "world"
   string(5) "HELLO"
   string(5) "HELLO"
   string(5) "HELLO"
 }
-varray(5) {
+vec(5) {
   string(5) "HELLO"
   string(5) "HELLO"
   string(5) "HELLO"

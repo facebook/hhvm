@@ -1,11 +1,11 @@
 class(bar)
-varray(3) {
+vec(3) {
   int(1)
   class(bar)
   string(3) "foo"
 }
 class(foobar)
-varray(3) {
+vec(3) {
   int(10)
   class(fizz)
   string(3) "foo"

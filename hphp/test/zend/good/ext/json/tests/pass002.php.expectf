@@ -1,42 +1,42 @@
 Testing: [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
 DECODE: AS OBJECT
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         [0]=>
-        darray(1) {
+        dict(1) {
           [0]=>
-          darray(1) {
+          dict(1) {
             [0]=>
-            darray(1) {
+            dict(1) {
               [0]=>
-              darray(1) {
+              dict(1) {
                 [0]=>
-                darray(1) {
+                dict(1) {
                   [0]=>
-                  darray(1) {
+                  dict(1) {
                     [0]=>
-                    darray(1) {
+                    dict(1) {
                       [0]=>
-                      darray(1) {
+                      dict(1) {
                         [0]=>
-                        darray(1) {
+                        dict(1) {
                           [0]=>
-                          darray(1) {
+                          dict(1) {
                             [0]=>
-                            darray(1) {
+                            dict(1) {
                               [0]=>
-                              darray(1) {
+                              dict(1) {
                                 [0]=>
-                                darray(1) {
+                                dict(1) {
                                   [0]=>
-                                  darray(1) {
+                                  dict(1) {
                                     [0]=>
-                                    darray(1) {
+                                    dict(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }
@@ -59,43 +59,43 @@ darray(1) {
   }
 }
 DECODE: AS ARRAY
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         [0]=>
-        darray(1) {
+        dict(1) {
           [0]=>
-          darray(1) {
+          dict(1) {
             [0]=>
-            darray(1) {
+            dict(1) {
               [0]=>
-              darray(1) {
+              dict(1) {
                 [0]=>
-                darray(1) {
+                dict(1) {
                   [0]=>
-                  darray(1) {
+                  dict(1) {
                     [0]=>
-                    darray(1) {
+                    dict(1) {
                       [0]=>
-                      darray(1) {
+                      dict(1) {
                         [0]=>
-                        darray(1) {
+                        dict(1) {
                           [0]=>
-                          darray(1) {
+                          dict(1) {
                             [0]=>
-                            darray(1) {
+                            dict(1) {
                               [0]=>
-                              darray(1) {
+                              dict(1) {
                                 [0]=>
-                                darray(1) {
+                                dict(1) {
                                   [0]=>
-                                  darray(1) {
+                                  dict(1) {
                                     [0]=>
-                                    darray(1) {
+                                    dict(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }
@@ -118,48 +118,48 @@ darray(1) {
   }
 }
 ENCODE: FROM OBJECT
-[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":"Not too deep"}}}}}}}}}}}}}}}}}}}
 ENCODE: FROM ARRAY
-[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":"Not too deep"}}}}}}}}}}}}}}}}}}}
 DECODE AGAIN: AS OBJECT
-darray(1) {
-  [0]=>
-  darray(1) {
-    [0]=>
-    darray(1) {
-      [0]=>
-      darray(1) {
-        [0]=>
-        darray(1) {
-          [0]=>
-          darray(1) {
-            [0]=>
-            darray(1) {
-              [0]=>
-              darray(1) {
-                [0]=>
-                darray(1) {
-                  [0]=>
-                  darray(1) {
-                    [0]=>
-                    darray(1) {
-                      [0]=>
-                      darray(1) {
-                        [0]=>
-                        darray(1) {
-                          [0]=>
-                          darray(1) {
-                            [0]=>
-                            darray(1) {
-                              [0]=>
-                              darray(1) {
-                                [0]=>
-                                darray(1) {
-                                  [0]=>
-                                  darray(1) {
-                                    [0]=>
-                                    darray(1) {
-                                      [0]=>
+object(stdClass) (1) {
+  ["0"]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    object(stdClass) (1) {
+      ["0"]=>
+      object(stdClass) (1) {
+        ["0"]=>
+        object(stdClass) (1) {
+          ["0"]=>
+          object(stdClass) (1) {
+            ["0"]=>
+            object(stdClass) (1) {
+              ["0"]=>
+              object(stdClass) (1) {
+                ["0"]=>
+                object(stdClass) (1) {
+                  ["0"]=>
+                  object(stdClass) (1) {
+                    ["0"]=>
+                    object(stdClass) (1) {
+                      ["0"]=>
+                      object(stdClass) (1) {
+                        ["0"]=>
+                        object(stdClass) (1) {
+                          ["0"]=>
+                          object(stdClass) (1) {
+                            ["0"]=>
+                            object(stdClass) (1) {
+                              ["0"]=>
+                              object(stdClass) (1) {
+                                ["0"]=>
+                                object(stdClass) (1) {
+                                  ["0"]=>
+                                  object(stdClass) (1) {
+                                    ["0"]=>
+                                    object(stdClass) (1) {
+                                      ["0"]=>
                                       string(12) "Not too deep"
                                     }
                                   }
@@ -181,43 +181,43 @@ darray(1) {
   }
 }
 DECODE AGAIN: AS ARRAY
-darray(1) {
+dict(1) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [0]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         [0]=>
-        darray(1) {
+        dict(1) {
           [0]=>
-          darray(1) {
+          dict(1) {
             [0]=>
-            darray(1) {
+            dict(1) {
               [0]=>
-              darray(1) {
+              dict(1) {
                 [0]=>
-                darray(1) {
+                dict(1) {
                   [0]=>
-                  darray(1) {
+                  dict(1) {
                     [0]=>
-                    darray(1) {
+                    dict(1) {
                       [0]=>
-                      darray(1) {
+                      dict(1) {
                         [0]=>
-                        darray(1) {
+                        dict(1) {
                           [0]=>
-                          darray(1) {
+                          dict(1) {
                             [0]=>
-                            darray(1) {
+                            dict(1) {
                               [0]=>
-                              darray(1) {
+                              dict(1) {
                                 [0]=>
-                                darray(1) {
+                                dict(1) {
                                   [0]=>
-                                  darray(1) {
+                                  dict(1) {
                                     [0]=>
-                                    darray(1) {
+                                    dict(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }

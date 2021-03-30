@@ -3,7 +3,7 @@ value: b
 EXTR_PRIORITY
 priority: 2
 EXTR_BOTH
-Array
+Dict
 (
     [data] => b
     [priority] => 2

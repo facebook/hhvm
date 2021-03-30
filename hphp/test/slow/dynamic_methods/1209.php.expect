@@ -47,7 +47,7 @@ int(10)
 int(11)
 int(12)
 int(2)
-varray(10) {
+vec(10) {
   string(3) "one"
   int(2)
   float(3.333)
@@ -59,33 +59,7 @@ varray(10) {
   int(9)
   int(10)
 }
-varray(12) {
-  string(3) "one"
-  int(2)
-  float(3.333)
-  int(4)
-  int(5)
-  int(6)
-  int(7)
-  int(8)
-  int(9)
-  int(10)
-  int(11)
-  int(12)
-}
-varray(10) {
-  string(3) "one"
-  int(2)
-  float(3.333)
-  int(4)
-  int(5)
-  int(6)
-  int(7)
-  int(8)
-  int(9)
-  int(10)
-}
-varray(12) {
+vec(12) {
   string(3) "one"
   int(2)
   float(3.333)
@@ -99,7 +73,33 @@ varray(12) {
   int(11)
   int(12)
 }
-darray(10) {
+vec(10) {
+  string(3) "one"
+  int(2)
+  float(3.333)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+  int(8)
+  int(9)
+  int(10)
+}
+vec(12) {
+  string(3) "one"
+  int(2)
+  float(3.333)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+  int(8)
+  int(9)
+  int(10)
+  int(11)
+  int(12)
+}
+dict(10) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -121,7 +121,7 @@ darray(10) {
   [9]=>
   int(10)
 }
-darray(12) {
+dict(12) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -147,7 +147,7 @@ darray(12) {
   [11]=>
   int(12)
 }
-darray(10) {
+dict(10) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -169,7 +169,7 @@ darray(10) {
   [9]=>
   int(10)
 }
-darray(12) {
+dict(12) {
   [0]=>
   string(3) "one"
   [1]=>

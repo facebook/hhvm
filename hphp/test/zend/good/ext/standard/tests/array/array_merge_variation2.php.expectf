@@ -2,91 +2,91 @@
 
 -- Iteration 1 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 2 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 3 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 4 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 5 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 6 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 7 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 8 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 9 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 10 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 11 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 12 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 13 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 14 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 15 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 16 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 17 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 18 --
-darray(2) {
+dict(2) {
   [0]=>
   int(1)
   [1]=>
@@ -95,26 +95,26 @@ darray(2) {
 
 -- Iteration 19 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 20 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 21 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 22 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 
 -- Iteration 23 --
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/%S_variation2.php on line %d
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge_variation2.php on line 82
 NULL
 Done

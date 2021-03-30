@@ -1,20 +1,19 @@
+Warning: trigger_error() expects at least 1 parameter, 0 given in %s/test/zend/good/Zend/tests/015.php on line 3
 
-Warning: trigger_error() expects at least 1 parameter, 0 given in %s/015.php on line 3
-
-Notice: error in %s/015.php on line 4
+Notice: error in %s/test/zend/good/Zend/tests/015.php on line 4
 bool(true)
 
-Warning: trigger_error() expects parameter 1 to be string, %rv?%rarray given in %s/015.php on line 5
+Warning: trigger_error() expects parameter 1 to be string, vec given in %s/test/zend/good/Zend/tests/015.php on line 5
 
-Warning: Invalid error type specified in %s/015.php on line 6
+Warning: Invalid error type specified in %s/test/zend/good/Zend/tests/015.php on line 6
 bool(false)
 
-Warning: Invalid error type specified in %s/015.php on line 7
+Warning: Invalid error type specified in %s/test/zend/good/Zend/tests/015.php on line 7
 bool(false)
 
-Warning: error in %s/015.php on line 8
+Warning: error in %s/test/zend/good/Zend/tests/015.php on line 8
 bool(true)
 
-Deprecated: error in %s/015.php on line 9
+Deprecated: error in %s/test/zend/good/Zend/tests/015.php on line 9
 bool(true)
 Done

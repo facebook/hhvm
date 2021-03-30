@@ -1,25 +1,25 @@
-darray(4) {
+dict(4) {
   ["country_code"]=>
   string(2) "US"
   ["latitude"]=>
-  float(%f)
+  float(40.71416)
   ["longitude"]=>
-  float(%f)
+  float(-74.00639)
   ["comments"]=>
   string(20) "Eastern (most areas)"
 }
-darray(4) {
+dict(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  darray(1) {
+  dict(1) {
     [4]=>
     string(29) "Double timezone specification"
   }
   ["error_count"]=>
   int(7)
   ["errors"]=>
-  darray(7) {
+  dict(7) {
     [0]=>
     string(20) "Unexpected character"
     [1]=>

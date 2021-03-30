@@ -1,10 +1,10 @@
-darray(0) {
+dict(0) {
 }
-darray(1) {
+dict(1) {
   ["val"]=>
   string(10) "original.a"
 }
-darray(1) {
+dict(1) {
   ["val"]=>
   string(11) "changed.val"
 }

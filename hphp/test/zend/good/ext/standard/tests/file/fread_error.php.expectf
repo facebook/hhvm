@@ -1,42 +1,42 @@
 *** Testing error conditions ***
 -- Testing fread() with zero argument --
 
-Warning: fread() expects exactly 2 parameters, 0 given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 16
+Warning: fread() expects exactly 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 16
 -- Testing fread() with more than expected number of arguments --
 
-Warning: fread() expects exactly 2 parameters, 3 given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 20
+Warning: fread() expects exactly 2 parameters, 3 given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 20
 -- Testing fread() with invalid length arguments --
 
-Warning: fread(): Length parameter must be greater than 0 in %s/zend/good/ext/standard/tests/file/fread_error.php on line 25
+Warning: fread(): Length parameter must be greater than 0 in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 25
 bool(false)
 
-Warning: fread(): Length parameter must be greater than 0 in %s/zend/good/ext/standard/tests/file/fread_error.php on line 27
+Warning: fread(): Length parameter must be greater than 0 in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 27
 bool(false)
 -- Testing fread() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fread() expects parameter 1 to be resource, string given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 2 --
 
-Warning: fread() expects parameter 1 to be resource, integer given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, integer given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 3 --
 
-Warning: fread() expects parameter 1 to be resource, double given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, double given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 4 --
 
-Warning: fread() expects parameter 1 to be resource, boolean given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, boolean given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 5 --
 
-Warning: fread() expects parameter 1 to be resource, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, vec given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 6 --
 
-Warning: fread() expects parameter 1 to be resource, object given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, object given in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Testing fwrite() with closed/unset file handle --
 
-Warning: Not a valid stream resource in %s/zend/good/ext/standard/tests/file/fread_error.php on line 48
+Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 48
 bool(false)
 
-Warning: Undefined variable: fp in %s/fread_error.php on line 53
+Warning: Undefined variable: fp in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 53
 
-Warning: Undefined variable: fp in %s/fread_error.php on line 54
+Warning: Undefined variable: fp in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 54
 Done

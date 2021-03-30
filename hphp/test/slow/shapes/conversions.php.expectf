@@ -1,18 +1,18 @@
-varray(1) {
-  darray(2) {
+vec(1) {
+  dict(2) {
     ["a"]=>
     int(2)
     ["b"]=>
     int(3)
   }
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(2)
   ["b"]=>
   int(3)
 }
-varray(2) {
+vec(2) {
   int(2)
   int(3)
 }
@@ -32,7 +32,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 bool(false)
 bool(true)
 bool(true)

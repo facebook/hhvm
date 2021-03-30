@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(10) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -19,7 +19,7 @@ varray(1) {
       ["inout"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -27,7 +27,7 @@ varray(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
@@ -37,10 +37,10 @@ varray(1) {
     }
   }
 }
-varray(2) {
+vec(2) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(10) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -58,7 +58,7 @@ varray(2) {
       ["inout"]=>
       bool(true)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -66,7 +66,7 @@ varray(2) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
@@ -77,7 +77,7 @@ varray(2) {
   }
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(9) {
+    dict(9) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -93,7 +93,7 @@ varray(2) {
       ["type_hint_nullable"]=>
       bool(false)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -101,7 +101,7 @@ varray(2) {
     ["name"]=>
     string(9) "not_inout"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
@@ -111,10 +111,10 @@ varray(2) {
     }
   }
 }
-varray(1) {
+vec(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(9) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -130,7 +130,7 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(false)
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -138,7 +138,7 @@ varray(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
@@ -148,17 +148,17 @@ varray(1) {
     }
   }
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(true)
 }
-darray(2) {
+dict(2) {
   [0]=>
   bool(true)
   [1]=>
   bool(false)
 }
-darray(1) {
+dict(1) {
   [0]=>
   bool(false)
 }

@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["kind"]=>
   int(4)
 }
 
-Catchable fatal error: Value returned from function Test::f() must be of type C<string>, C<int> given in %s on line %d
+Catchable fatal error: Value returned from function Test::f() must be of type C<string>, C<int> given in %s/test/slow/function_pointer/rcls_meth_type_verification3.php on line 24

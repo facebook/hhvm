@@ -1,7 +1,7 @@
 *** Testing uasort() : 'cmp_function' with reference arguments ***
 -- Passing integer values to 'cmp_function' --
 bool(true)
-darray(7) {
+dict(7) {
   [0]=>
   int(1)
   [4]=>
@@ -19,7 +19,7 @@ darray(7) {
 }
 -- Passing string values to 'cmp_function' --
 bool(true)
-darray(4) {
+dict(4) {
   [1]=>
   string(5) "Apple"
   [3]=>

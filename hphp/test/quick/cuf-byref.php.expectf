@@ -1,28 +1,28 @@
 string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(1) {
-  int(1)
-}
-string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
-varray(1) {
-  int(1)
-}
-varray(1) {
+vec(1) {
   int(1)
 }
 string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(1) {
+vec(1) {
   int(1)
 }
 string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
-varray(1) {
+vec(1) {
   int(1)
 }
-varray(1) {
+vec(1) {
+  int(1)
+}
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
+vec(1) {
+  int(1)
+}
+vec(1) {
   int(1)
 }

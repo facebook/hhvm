@@ -1,3 +1,5 @@
-Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds darray access: invalid index 1' in %s/slow/hack_arr_compat/array_merge_recursive.php:8
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds dict access: invalid index 1' in %s/test/slow/hack_arr_compat/array_merge_recursive.php:8
 Stack trace:
-%A
+#0 %s/test/slow/hack_arr_compat/array_merge_recursive.php(8): array_merge_recursive()
+#1 (): main()
+#2 {main}

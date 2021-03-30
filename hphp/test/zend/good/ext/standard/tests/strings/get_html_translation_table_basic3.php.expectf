@@ -1,6 +1,6 @@
 *** Testing get_html_translation_table() : basic functionality ***
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_COMPAT --
-darray(4) {
+dict(4) {
   ["&"]=>
   string(5) "&amp;"
   [">"]=>
@@ -11,7 +11,7 @@ darray(4) {
   string(6) "&quot;"
 }
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_QUOTES --
-darray(5) {
+dict(5) {
   ["'"]=>
   string(6) "&#039;"
   ["&"]=>
@@ -24,7 +24,7 @@ darray(5) {
   string(6) "&quot;"
 }
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_NOQUOTES --
-darray(3) {
+dict(3) {
   ["&"]=>
   string(5) "&amp;"
   [">"]=>

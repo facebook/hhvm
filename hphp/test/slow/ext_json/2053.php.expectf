@@ -1,4 +1,4 @@
-darray(1) {
+dict(1) {
   ["num"]=>
-  float(2%c75)
+  float(2,75)
 }

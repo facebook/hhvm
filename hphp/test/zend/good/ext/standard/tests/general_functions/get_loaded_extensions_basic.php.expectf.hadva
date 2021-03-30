@@ -1,6 +1,0 @@
-*** Testing get_loaded_extensions() : basic functionality ***
-Get loaded extensions
-vec(%d) {
-%a
-}
-===DONE===

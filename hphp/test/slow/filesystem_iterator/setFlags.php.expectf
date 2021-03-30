@@ -1,5 +1,5 @@
 Key as Pathname:
-varray(7) {
+vec(7) {
   string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/."
   string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/.."
   string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/dir"
@@ -10,7 +10,7 @@ varray(7) {
 }
 
 Key as Filename:
-varray(7) {
+vec(7) {
   string(1) "."
   string(2) ".."
   string(3) "dir"

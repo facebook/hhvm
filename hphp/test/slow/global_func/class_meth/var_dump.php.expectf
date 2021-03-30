@@ -1,8 +1,8 @@
-array (
-  0 => 'A',
-  1 => 'f1',
-)
-varray(2) {
+vec [
+  'A',
+  'f1',
+]
+vec(2) {
   string(1) "A"
   string(2) "f1"
 }

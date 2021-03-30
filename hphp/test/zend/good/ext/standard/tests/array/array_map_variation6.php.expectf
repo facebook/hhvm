@@ -1,27 +1,27 @@
 *** Testing array_map() : array having subarrays ***
-darray(5) {
+dict(5) {
   [0]=>
-  varray(0) {
+  vec(0) {
   }
   [1]=>
-  varray(2) {
+  vec(2) {
     int(1)
     int(2)
   }
   [2]=>
-  varray(2) {
+  vec(2) {
     string(1) "a"
     string(1) "b"
   }
   [3]=>
-  varray(4) {
+  vec(4) {
     int(1)
     int(2)
     string(1) "a"
     string(1) "b"
   }
   [4]=>
-  darray(2) {
+  dict(2) {
     [1]=>
     string(1) "a"
     ["b"]=>

@@ -1,5 +1,5 @@
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation.php on line 6
-darray(4) {
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/array/array_change_key_case_variation.php on line 6
+dict(4) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -9,17 +9,17 @@ darray(4) {
   ["FOUR"]=>
   string(4) "four"
 }
-darray(1) {
+dict(1) {
   ["one"]=>
   int(4)
 }
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation.php on line 12
-darray(1) {
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/array/array_change_key_case_variation.php on line 12
+dict(1) {
   ["ONE"]=>
   int(3)
 }
-darray(1) {
+dict(1) {
   ["ONE"]=>
   int(2)
 }

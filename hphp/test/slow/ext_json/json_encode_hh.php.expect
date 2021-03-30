@@ -6,7 +6,7 @@ string(37) "{"fookey":"fooval","barkey":"barval"}"
 string(19) "{"fookey":"fooval"}"
 
 ** array int keys**
-string(13) "["foo","bar"]"
+string(21) "{"0":"foo","1":"bar"}"
 string(23) "{"10":"foo","11":"bar"}"
 
 ** vec **

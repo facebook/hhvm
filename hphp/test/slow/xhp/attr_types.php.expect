@@ -1,4 +1,4 @@
-darray(10) {
+dict(10) {
   ["some_callable"]=>
   int(9)
   ["some_float"]=>

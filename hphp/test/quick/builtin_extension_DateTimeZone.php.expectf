@@ -9,7 +9,7 @@ object(DateTimeZone) (2) {
 Warning: Attempted to serialize unserializable builtin class DateTimeZone in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(8) {
+vec(8) {
   string(11) "__construct"
   string(11) "getLocation"
   string(7) "getName"
@@ -31,7 +31,7 @@ object(A_DateTimeZone) (2) {
 Warning: Attempted to serialize unserializable builtin class A_DateTimeZone in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(8) {
+vec(8) {
   string(11) "__construct"
   string(11) "getLocation"
   string(7) "getName"

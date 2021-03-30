@@ -1,9 +1,9 @@
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>

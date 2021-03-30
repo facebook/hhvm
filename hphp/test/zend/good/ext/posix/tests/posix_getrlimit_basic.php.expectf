@@ -1,5 +1,5 @@
 Basic test of POSIX posix_getrlimit function
-darray(20) {
+dict(20) {
 %a
 }
 ===DONE====

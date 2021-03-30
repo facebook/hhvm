@@ -2,107 +2,107 @@
 
 -- int 0 --
 
-Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, integer given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- int 1 --
 
-Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, integer given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- int 12345 --
 
-Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, integer given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- int -12345 --
 
-Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, integer given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- float 10.5 --
 
-Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, double given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- float -10.5 --
 
-Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, double given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- float .5 --
 
-Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, double given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- empty array --
 
-Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, vec given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- int indexed array --
 
-Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, vec given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- associative array --
 
-Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, dict given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- nested arrays --
 
-Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, vec given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- uppercase NULL --
 
-Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, null given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- lowercase null --
 
-Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, null given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- lowercase true --
 
-Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- lowercase false --
 
-Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- uppercase TRUE --
 
-Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- uppercase FALSE --
 
-Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- empty string DQ --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- empty string SQ --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- string DQ --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- string SQ --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- mixed case string --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- heredoc --
 
-Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, string given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 
 -- instance of classWithToString --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithToString given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithToString given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithoutToString given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithoutToString given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 bool(false)
 
 -- resource --
 
-Warning: date_format() expects parameter 1 to be object, resource given in %s/date_format_variation1.php on line %d
+Warning: date_format() expects parameter 1 to be object, resource given in %s/test/zend/good/ext/date/tests/date_format_variation1.php on line 92
 ===DONE===

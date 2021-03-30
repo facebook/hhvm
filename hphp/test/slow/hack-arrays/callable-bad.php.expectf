@@ -149,7 +149,7 @@ Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/
 NULL
 ===== call3/13 =====
 string(7) "A::meth"
-darray(1) {
+dict(1) {
   [0]=>
   int(42)
 }

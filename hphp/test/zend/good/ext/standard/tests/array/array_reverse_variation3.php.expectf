@@ -1,21 +1,21 @@
 *** Testing array_reverse() : usage variations ***
 -- Iteration 1 --
 - with default argument -
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
   int(1)
 }
 - with $preserve keys = true -
-darray(2) {
+dict(2) {
   [1]=>
   int(2)
   [0]=>
   int(1)
 }
 - with $preserve_keys = false -
-darray(2) {
+dict(2) {
   [0]=>
   int(2)
   [1]=>
@@ -23,21 +23,21 @@ darray(2) {
 }
 -- Iteration 2 --
 - with default argument -
-darray(2) {
+dict(2) {
   [0]=>
   float(2.2)
   [1]=>
   float(1.1)
 }
 - with $preserve keys = true -
-darray(2) {
+dict(2) {
   [1]=>
   float(2.2)
   [0]=>
   float(1.1)
 }
 - with $preserve_keys = false -
-darray(2) {
+dict(2) {
   [0]=>
   float(2.2)
   [1]=>
@@ -45,55 +45,55 @@ darray(2) {
 }
 -- Iteration 3 --
 - with default argument -
-darray(2) {
+dict(2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     int(2)
   }
 }
 - with $preserve keys = true -
-darray(2) {
+dict(2) {
   [1]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [0]=>
-  varray(1) {
+  vec(1) {
     int(2)
   }
 }
 - with $preserve_keys = false -
-darray(2) {
+dict(2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [1]=>
-  varray(1) {
+  vec(1) {
     int(2)
   }
 }
 -- Iteration 4 --
 - with default argument -
-darray(2) {
+dict(2) {
   [0]=>
   bool(true)
   [1]=>
   bool(false)
 }
 - with $preserve keys = true -
-darray(2) {
+dict(2) {
   [1]=>
   bool(true)
   [0]=>
   bool(false)
 }
 - with $preserve_keys = false -
-darray(2) {
+dict(2) {
   [0]=>
   bool(true)
   [1]=>
@@ -101,33 +101,33 @@ darray(2) {
 }
 -- Iteration 5 --
 - with default argument -
-darray(0) {
+dict(0) {
 }
 - with $preserve keys = true -
-darray(0) {
+dict(0) {
 }
 - with $preserve_keys = false -
-darray(0) {
+dict(0) {
 }
 -- Iteration 6 --
 - with default argument -
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 - with $preserve keys = true -
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 - with $preserve_keys = false -
-darray(1) {
+dict(1) {
   [0]=>
   NULL
 }
 -- Iteration 7 --
 - with default argument -
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "ccccc"
   [1]=>
@@ -142,7 +142,7 @@ darray(6) {
   string(1) "a"
 }
 - with $preserve keys = true -
-darray(6) {
+dict(6) {
   [5]=>
   string(5) "ccccc"
   [4]=>
@@ -157,7 +157,7 @@ darray(6) {
   string(1) "a"
 }
 - with $preserve_keys = false -
-darray(6) {
+dict(6) {
   [0]=>
   string(5) "ccccc"
   [1]=>
@@ -173,7 +173,7 @@ darray(6) {
 }
 -- Iteration 8 --
 - with default argument -
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "three"
   [1]=>
@@ -182,7 +182,7 @@ darray(3) {
   string(3) "one"
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   [3]=>
   string(5) "three"
   [2]=>
@@ -191,7 +191,7 @@ darray(3) {
   string(3) "one"
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   [0]=>
   string(5) "three"
   [1]=>
@@ -201,7 +201,7 @@ darray(3) {
 }
 -- Iteration 9 --
 - with default argument -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>
@@ -210,7 +210,7 @@ darray(3) {
   int(1)
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>
@@ -219,7 +219,7 @@ darray(3) {
   int(1)
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>
@@ -229,7 +229,7 @@ darray(3) {
 }
 -- Iteration 10 --
 - with default argument -
-darray(4) {
+dict(4) {
   [0]=>
   int(30)
   [1]=>
@@ -240,7 +240,7 @@ darray(4) {
   int(10)
 }
 - with $preserve keys = true -
-darray(4) {
+dict(4) {
   [3]=>
   int(30)
   [4]=>
@@ -251,7 +251,7 @@ darray(4) {
   int(10)
 }
 - with $preserve_keys = false -
-darray(4) {
+dict(4) {
   [0]=>
   int(30)
   [1]=>
@@ -263,7 +263,7 @@ darray(4) {
 }
 -- Iteration 11 --
 - with default argument -
-darray(3) {
+dict(3) {
   ["three"]=>
   string(6) "thirty"
   ["two"]=>
@@ -272,7 +272,7 @@ darray(3) {
   string(3) "ten"
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   ["three"]=>
   string(6) "thirty"
   ["two"]=>
@@ -281,7 +281,7 @@ darray(3) {
   string(3) "ten"
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   ["three"]=>
   string(6) "thirty"
   ["two"]=>
@@ -291,7 +291,7 @@ darray(3) {
 }
 -- Iteration 12 --
 - with default argument -
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "four"
   [1]=>
@@ -300,7 +300,7 @@ darray(3) {
   int(1)
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   [4]=>
   string(4) "four"
   [2]=>
@@ -309,7 +309,7 @@ darray(3) {
   int(1)
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   [0]=>
   string(4) "four"
   [1]=>
@@ -319,7 +319,7 @@ darray(3) {
 }
 -- Iteration 13 --
 - with default argument -
-darray(3) {
+dict(3) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -328,7 +328,7 @@ darray(3) {
   string(4) "null"
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -337,7 +337,7 @@ darray(3) {
   string(4) "null"
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   ["null"]=>
   NULL
   ["NULL"]=>
@@ -347,7 +347,7 @@ darray(3) {
 }
 -- Iteration 14 --
 - with default argument -
-darray(4) {
+dict(4) {
   ["true"]=>
   bool(true)
   ["false"]=>
@@ -358,7 +358,7 @@ darray(4) {
   string(4) "true"
 }
 - with $preserve keys = true -
-darray(4) {
+dict(4) {
   ["true"]=>
   bool(true)
   ["false"]=>
@@ -369,7 +369,7 @@ darray(4) {
   string(4) "true"
 }
 - with $preserve_keys = false -
-darray(4) {
+dict(4) {
   ["true"]=>
   bool(true)
   ["false"]=>
@@ -381,7 +381,7 @@ darray(4) {
 }
 -- Iteration 15 --
 - with default argument -
-darray(3) {
+dict(3) {
   ["emptys"]=>
   string(0) ""
   ["emptyd"]=>
@@ -390,7 +390,7 @@ darray(3) {
   string(6) "emptys"
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   ["emptys"]=>
   string(0) ""
   ["emptyd"]=>
@@ -399,7 +399,7 @@ darray(3) {
   string(6) "emptys"
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   ["emptys"]=>
   string(0) ""
   ["emptyd"]=>
@@ -409,7 +409,7 @@ darray(3) {
 }
 -- Iteration 16 --
 - with default argument -
-darray(6) {
+dict(6) {
   [0]=>
   bool(true)
   [1]=>
@@ -424,7 +424,7 @@ darray(6) {
   string(0) ""
 }
 - with $preserve keys = true -
-darray(6) {
+dict(6) {
   [6]=>
   bool(true)
   [5]=>
@@ -439,7 +439,7 @@ darray(6) {
   string(0) ""
 }
 - with $preserve_keys = false -
-darray(6) {
+dict(6) {
   [0]=>
   bool(true)
   [1]=>
@@ -455,7 +455,7 @@ darray(6) {
 }
 -- Iteration 17 --
 - with default argument -
-darray(3) {
+dict(3) {
   [0]=>
   int(6)
   [1]=>
@@ -464,7 +464,7 @@ darray(3) {
   int(4)
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   [1]=>
   int(6)
   [0]=>
@@ -473,7 +473,7 @@ darray(3) {
   int(4)
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   [0]=>
   int(6)
   [1]=>
@@ -483,7 +483,7 @@ darray(3) {
 }
 -- Iteration 18 --
 - with default argument -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>
@@ -492,7 +492,7 @@ darray(3) {
   int(10)
 }
 - with $preserve keys = true -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>
@@ -501,7 +501,7 @@ darray(3) {
   int(10)
 }
 - with $preserve_keys = false -
-darray(3) {
+dict(3) {
   ["three"]=>
   int(3)
   ["two"]=>

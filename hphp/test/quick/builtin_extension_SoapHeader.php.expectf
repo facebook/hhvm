@@ -13,7 +13,7 @@ object(SoapHeader) (4) {
 Warning: Attempted to serialize unserializable builtin class SoapHeader in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(1) {
+vec(1) {
   string(11) "__construct"
 }
 ================
@@ -34,6 +34,6 @@ object(A_SoapHeader) (5) {
 Warning: Attempted to serialize unserializable builtin class A_SoapHeader in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(1) {
+vec(1) {
   string(11) "__construct"
 }

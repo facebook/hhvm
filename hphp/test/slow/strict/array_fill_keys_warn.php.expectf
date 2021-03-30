@@ -1,5 +1,5 @@
 Warning: (hhvm.hack.strict_array_fill_keys=warn) keys must be ints or strings in %s/test/slow/strict/array_fill_keys_warn.php on line 9
-darray(3) {
+dict(3) {
   [1234]=>
   string(3) "foo"
   ["foo"]=>

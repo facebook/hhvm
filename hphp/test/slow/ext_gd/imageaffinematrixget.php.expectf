@@ -1,4 +1,4 @@
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -12,7 +12,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -26,7 +26,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -40,7 +40,7 @@ darray(6) {
   ["5"]=>
   float(-20)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -54,7 +54,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -69,12 +69,12 @@ darray(6) {
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 17
+Warning: imageaffinematrixget(): Missing x position in %s/test/slow/ext_gd/imageaffinematrixget.php on line 17
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 19
+Warning: imageaffinematrixget(): Missing x position in %s/test/slow/ext_gd/imageaffinematrixget.php on line 19
 bool(false)
-darray(6) {
+dict(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -88,7 +88,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -102,7 +102,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(-20)
   ["1"]=>
@@ -116,7 +116,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(2147483392)
   ["1"]=>
@@ -130,7 +130,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -145,12 +145,12 @@ darray(6) {
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 31
+Warning: imageaffinematrixget(): Missing x position in %s/test/slow/ext_gd/imageaffinematrixget.php on line 31
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 33
+Warning: imageaffinematrixget(): Missing x position in %s/test/slow/ext_gd/imageaffinematrixget.php on line 33
 bool(false)
-darray(6) {
+dict(6) {
   ["0"]=>
   float(0.99984769515639)
   ["1"]=>
@@ -164,7 +164,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -178,7 +178,7 @@ darray(6) {
   ["5"]=>
   float(0)
 }
-darray(6) {
+dict(6) {
   ["0"]=>
   float(1)
   ["1"]=>

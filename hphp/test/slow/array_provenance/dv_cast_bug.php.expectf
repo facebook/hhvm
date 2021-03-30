@@ -1,8 +1,0 @@
-
-Notice: Observing static empty darray in json_encode from %s/dv_cast_bug.php:5 in %s/array_provenance/dv_cast_bug.php on line 5
-string(2) "[]"
-darray(0) {
-}
-
-Notice: Observing static empty darray in json_encode from %s/dv_cast_bug.php:7 in %s/array_provenance/dv_cast_bug.php on line 7
-string(2) "[]"

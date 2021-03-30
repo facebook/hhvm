@@ -1,6 +1,6 @@
-Warning: class_uses(): Class A does not exist in %s on line %d
+Warning: class_uses(): Class A does not exist in %s/test/slow/eval_order/1532.php on line 16
 bool(false)
-darray(1) {
+dict(1) {
   ["T"]=>
   string(1) "T"
 }

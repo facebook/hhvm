@@ -1,122 +1,122 @@
 ===elem/@attr2===
-varray(3) {
+vec(3) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
 }
 ===//@attr2===
-varray(3) {
+vec(3) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
 }
 ===//@*===
-varray(9) {
+vec(9) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr1"]=>
       string(2) "11"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr3"]=>
       string(2) "13"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr1"]=>
       string(2) "21"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr3"]=>
       string(2) "23"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr1"]=>
       string(2) "31"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr3"]=>
       string(2) "33"
     }
   }
 }
 ===elem[2]/@attr2===
-varray(1) {
+vec(1) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    darray(1) {
+    dict(1) {
       ["attr2"]=>
       string(2) "22"
     }

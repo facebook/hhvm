@@ -1,6 +1,6 @@
 object(C) (3) {
   ["foo"]=>
-  darray(1) {
+  dict(1) {
     [0]=>
     int(42)
   }

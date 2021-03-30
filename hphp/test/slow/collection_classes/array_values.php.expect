@@ -3,7 +3,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -14,7 +14,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -25,7 +25,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -36,7 +36,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -47,7 +47,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -58,7 +58,7 @@ int(0)
 int(1)
 int(2)
 int(3)
-varray(4) {
+vec(4) {
   int(11)
   int(22)
   int(33)
@@ -67,14 +67,14 @@ varray(4) {
 bool(true)
 int(0)
 int(1)
-varray(2) {
+vec(2) {
   int(22)
   string(2) "22"
 }
 bool(true)
 int(0)
 int(1)
-varray(2) {
+vec(2) {
   int(22)
   string(2) "22"
 }

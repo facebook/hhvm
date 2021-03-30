@@ -2,7 +2,7 @@
 Warning: File not supported in %s/test/slow/ext_image/1794.php on line 7
 
 Warning: File not supported in %s/test/slow/ext_image/1794.php on line 11
-Array
+Dict
 (
     [FileName] => simpletext.jpg
     [FileDateTime] => %d
@@ -10,7 +10,7 @@ Array
     [FileType] => 2
     [MimeType] => image/jpeg
     [SectionsFound] => COMMENT
-    [COMPUTED] => Array
+    [COMPUTED] => Dict
         (
             [html] => width="120" height="20"
             [Height] => 20
@@ -18,7 +18,7 @@ Array
             [IsColor] => 1
         )
 
-    [COMMENT] => Array
+    [COMMENT] => Dict
         (
             [0] => CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), default quality
 
@@ -27,7 +27,7 @@ Array
 )
 
 Warning: File not supported in %s/test/slow/ext_image/1794.php on line 19
-Array
+Dict
 (
     [FileName] => test1pix.jpg
     [FileDateTime] => %d
@@ -35,7 +35,7 @@ Array
     [FileType] => 2
     [MimeType] => image/jpeg
     [SectionsFound] => 
-    [COMPUTED] => Array
+    [COMPUTED] => Dict
         (
             [html] => width="1" height="1"
             [Height] => 1
@@ -44,7 +44,7 @@ Array
         )
 
 )
-Array
+Dict
 (
     [FileName] => test2.jpg
     [FileDateTime] => %d
@@ -52,7 +52,7 @@ Array
     [FileType] => 2
     [MimeType] => image/jpeg
     [SectionsFound] => ANY_TAG, IFD0, EXIF, GPS
-    [COMPUTED] => Array
+    [COMPUTED] => Dict
         (
             [html] => width="800" height="600"
             [Height] => 600
@@ -93,7 +93,7 @@ Array
     [WhiteBalance] => 0
     [Sharpness] => 1
     [GPSLatitudeRef] => N
-    [GPSLatitude] => Array
+    [GPSLatitude] => Dict
         (
             [0] => 37/1
             [1] => 2498/100
@@ -101,14 +101,14 @@ Array
         )
 
     [GPSLongitudeRef] => W
-    [GPSLongitude] => Array
+    [GPSLongitude] => Dict
         (
             [0] => 122/1
             [1] => 912/100
             [2] => 0/1
         )
 
-    [GPSTimeStamp] => Array
+    [GPSTimeStamp] => Dict
         (
             [0] => 13/1
             [1] => 52/1

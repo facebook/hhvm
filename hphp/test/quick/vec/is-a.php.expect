@@ -86,12 +86,12 @@ Testing for is_vec: object(stdClass) (0) {
 }
 NO
 ====================================================
-Testing for is_vec: varray(3) {
+Testing for is_vec: vec(3) {
   int(1)
   int(2)
   int(3)
 }
-NO
+YES
 ====================================================
 Testing for is_vec: object(HH\Vector) (3) {
   [0]=>

@@ -1,61 +1,61 @@
-darray(3) {
+dict(3) {
   ["10"]=>
   int(100)
   [10]=>
   int(1)
   [11]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
-darray(2) {
+dict(2) {
   ["10"]=>
   int(100)
   [11]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(1)
   [1]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [2]=>
   int(10)
 }
-darray(4) {
+dict(4) {
   ["10"]=>
   int(100)
   [0]=>
   int(1)
   [1]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [2]=>
   int(10)
 }
-darray(2) {
+dict(2) {
   [0]=>
-  varray(1) {
+  vec(1) {
     int(1)
   }
   [1]=>
   int(1)
 }
-varray(2) {
-  darray(2) {
+vec(2) {
+  dict(2) {
     [0]=>
     int(100)
     [1]=>
     int(1)
   }
-  darray(1) {
+  dict(1) {
     [0]=>
-    varray(1) {
+    vec(1) {
       int(1)
     }
   }

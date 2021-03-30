@@ -7,12 +7,12 @@ int(3)
 ====================================================
 int(4)
 ====================================================
-darray(1) {
+dict(1) {
   [0]=>
   int(5)
 }
 ====================================================
-darray(1) {
+dict(1) {
   [0]=>
   int(6)
 }
@@ -25,23 +25,23 @@ int(9)
 ====================================================
 int(10)
 ====================================================
-darray(1) {
+dict(1) {
   [0]=>
   int(11)
 }
 ====================================================
-darray(1) {
+dict(1) {
   [0]=>
   int(12)
 }
 ====================================================
 
-Fatal error: Invalid callable (array) in %s on line 9
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable.php on line 9
 ====================================================
 
-Warning: Invalid argument: function: not a valid callback array in %s on line 10
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable.php on line 10
 NULL
 ====================================================
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s on line 11
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable.php on line 11
 NULL

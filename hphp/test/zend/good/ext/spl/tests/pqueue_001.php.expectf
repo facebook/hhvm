@@ -3,19 +3,19 @@ Exception: Can't extract from an empty heap
 1=>a
 0=>c
 EXTR_BOTH
-2=>Array
+2=>Dict
 (
     [data] => b
     [priority] => 2
 )
 
-1=>Array
+1=>Dict
 (
     [data] => a
     [priority] => 1
 )
 
-0=>Array
+0=>Dict
 (
     [data] => c
     [priority] => 0

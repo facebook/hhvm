@@ -27,7 +27,7 @@ string(8) "05:16:18"
 string(8) "19550310"
 string(31) "Tue, 23 Jul 1811 07:06:40 -0800"
 int(1259308800)
-darray(11) {
+dict(11) {
   ["seconds"]=>
   int(56)
   ["minutes"]=>

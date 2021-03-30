@@ -12,7 +12,7 @@ empty:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -30,7 +30,7 @@ empty:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -48,7 +48,7 @@ empty:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -66,7 +66,7 @@ empty:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -84,7 +84,7 @@ empty:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -102,7 +102,7 @@ empty:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -124,7 +124,7 @@ foreach with key:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -143,7 +143,7 @@ foreach with key:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -162,7 +162,7 @@ foreach with key:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -180,7 +180,7 @@ foreach with key:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -198,7 +198,7 @@ foreach with key:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -216,7 +216,7 @@ foreach with key:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -252,7 +252,7 @@ foreach with key:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -270,7 +270,7 @@ foreach with key:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -288,7 +288,7 @@ foreach with key:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -306,7 +306,7 @@ foreach with key:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -324,7 +324,7 @@ foreach with key:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -342,7 +342,7 @@ foreach with key:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -375,7 +375,7 @@ foreach with key:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -393,7 +393,7 @@ foreach with key:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -411,7 +411,7 @@ foreach with key:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -429,7 +429,7 @@ foreach with key:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -447,7 +447,7 @@ foreach with key:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -465,7 +465,7 @@ foreach with key:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -498,7 +498,7 @@ foreach with key:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -516,7 +516,7 @@ foreach with key:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -534,7 +534,7 @@ foreach with key:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -552,7 +552,7 @@ foreach with key:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -570,7 +570,7 @@ foreach with key:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -588,7 +588,7 @@ foreach with key:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -618,7 +618,7 @@ foreach with key:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -636,7 +636,7 @@ foreach with key:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -654,7 +654,7 @@ foreach with key:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -672,7 +672,7 @@ foreach with key:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -690,7 +690,7 @@ foreach with key:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -708,7 +708,7 @@ foreach with key:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -744,7 +744,7 @@ int/string mix:
    $dict[false] => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -762,7 +762,7 @@ int/string mix:
    $dict[false] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    $dict[object] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    $dict[null] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   $dict[array] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[vec] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    $dict[dict] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    $dict[keyset] ?? "NOT FOUND" => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -780,7 +780,7 @@ int/string mix:
    idx($dict, false, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    idx($dict, object, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    idx($dict, null, "NOT FOUND") => string(9) "NOT FOUND"
-   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   idx($dict, array, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, vec, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    idx($dict, dict, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    idx($dict, keyset, "NOT FOUND") => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -798,7 +798,7 @@ int/string mix:
    isset($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    isset($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    isset($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   isset($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    isset($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    isset($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -816,7 +816,7 @@ int/string mix:
    array_key_exists($dict, false) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    array_key_exists($dict, object) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    array_key_exists($dict, null) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   array_key_exists($dict, array) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, vec) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    array_key_exists($dict, dict) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    array_key_exists($dict, keyset) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">
@@ -834,7 +834,7 @@ int/string mix:
    empty($dict[false]) => <Exception: "Invalid dict key: expected a key of type int or string, bool given">
    empty($dict[object]) => <Exception: "Invalid dict key: expected a key of type int or string, ToStringObj given">
    empty($dict[null]) => <Exception: "Invalid dict key: expected a key of type int or string, null given">
-   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, array given">
+   empty($dict[array]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[vec]) => <Exception: "Invalid dict key: expected a key of type int or string, vec given">
    empty($dict[dict]) => <Exception: "Invalid dict key: expected a key of type int or string, dict given">
    empty($dict[keyset]) => <Exception: "Invalid dict key: expected a key of type int or string, keyset given">

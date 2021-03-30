@@ -2,13 +2,13 @@
 
 -- Testing uniqid() function with more than expected no. of arguments --
 
-Warning: uniqid() expects at most 2 parameters, 3 given in %s/uniqid_error.php on line 12
+Warning: uniqid() expects at most 2 parameters, 3 given in %s/test/zend/good/ext/standard/tests/general_functions/uniqid_error.php on line 12
 
 -- Testing uniqid() function with invalid values for $prefix --
 
-Warning: uniqid() expects parameter 1 to be string, %rv?%rarray given in %s/uniqid_error.php on line 20
+Warning: uniqid() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/general_functions/uniqid_error.php on line 20
 
-Warning: uniqid() expects parameter 1 to be string, resource given in %s/uniqid_error.php on line 21
+Warning: uniqid() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/general_functions/uniqid_error.php on line 21
 
-Warning: uniqid() expects parameter 1 to be string, object given in %s/uniqid_error.php on line 22
+Warning: uniqid() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/general_functions/uniqid_error.php on line 22
 ===DONE===

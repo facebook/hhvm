@@ -1,31 +1,31 @@
 *** testing array_shuffle  
 bool(true)
-varray(0) {
+vec(0) {
 }
 bool(true)
-varray(1) {
+vec(1) {
   int(1)
 }
 bool(true)
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
 bool(true)
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
 bool(true)
-varray(1) {
-  varray(3) {
+vec(1) {
+  vec(3) {
     int(1)
     int(2)
     int(3)
   }
 }
 bool(true)
-varray(4) {
+vec(4) {
   int(1)
   int(1)
   int(1)

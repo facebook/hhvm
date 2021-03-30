@@ -1,4 +1,4 @@
-Array
+Dict
 (
     [year] => 2004
     [month] => 6
@@ -8,18 +8,18 @@ Array
     [second] => 0
     [fraction] => 0
     [warning_count] => 0
-    [warnings] => Array
+    [warnings] => Dict
         (
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 
     [is_localtime] => 
 )
-Array
+Dict
 (
     [year] => 2004
     [month] => 6
@@ -29,12 +29,12 @@ Array
     [second] => 0
     [fraction] => 0
     [warning_count] => 0
-    [warnings] => Array
+    [warnings] => Dict
         (
         )
 
     [error_count] => 0
-    [errors] => Array
+    [errors] => Dict
         (
         )
 

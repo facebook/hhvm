@@ -2,9 +2,9 @@ About to enable
 Going to enable
 Enabled
 Done enabling
-darray(1) {
+dict(1) {
   ["%s"]=>
-  darray(%d) {
+  dict(%d) {
     [4]=>
     int(4)
     [5]=>

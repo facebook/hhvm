@@ -2,14 +2,14 @@ string(6) "value1"
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-darray(2) {
+dict(2) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [12]=>
-    varray(1) {
-      darray(1) {
+    vec(1) {
+      dict(1) {
         ["bar"]=>
-        darray(1) {
+        dict(1) {
           ["x"]=>
           string(6) "fuzzed"
         }
@@ -17,10 +17,10 @@ darray(2) {
     }
   }
   [18]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["hello"]=>
-      darray(1) {
+      dict(1) {
         ["y"]=>
         string(6) "value2"
       }
@@ -31,14 +31,14 @@ string(6) "value2"
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-darray(2) {
+dict(2) {
   [0]=>
-  darray(1) {
+  dict(1) {
     [12]=>
-    varray(1) {
-      darray(1) {
+    vec(1) {
+      dict(1) {
         ["bar"]=>
-        darray(1) {
+        dict(1) {
           ["x"]=>
           string(6) "fuzzed"
         }
@@ -46,10 +46,10 @@ darray(2) {
     }
   }
   [18]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["hello"]=>
-      darray(1) {
+      dict(1) {
         ["y"]=>
         string(6) "fuzzed"
       }
@@ -65,10 +65,10 @@ object(HH\Vector) (2) {
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-varray(1) {
+vec(1) {
   string(6) "fuzzed"
 }
-varray(1) {
+vec(1) {
   object(HH\Vector) (2) {
     [0]=>
     int(1)
@@ -89,7 +89,7 @@ object(HH\Vector) (2) {
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-varray(1) {
+vec(1) {
   vec(1) {
     string(6) "fuzzed"
   }

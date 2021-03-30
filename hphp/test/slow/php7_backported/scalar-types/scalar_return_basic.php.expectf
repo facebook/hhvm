@@ -23,9 +23,9 @@ int(9223372036854775807)
 *** Caught Return value of {closure}() must be of the type integer, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 6
 *** Trying NULL
 *** Caught Return value of {closure}() must be of the type integer, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 6
-*** Trying varray(0) {
+*** Trying vec(0) {
 }
-*** Caught Return value of {closure}() must be of the type integer, varray given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 6
+*** Caught Return value of {closure}() must be of the type integer, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 6
 *** Trying object(stdClass) (0) {
 }
 *** Caught Return value of {closure}() must be of the type integer, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 6
@@ -60,9 +60,9 @@ float(NAN)
 *** Caught Return value of {closure}() must be of the type float, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 7
 *** Trying NULL
 *** Caught Return value of {closure}() must be of the type float, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 7
-*** Trying varray(0) {
+*** Trying vec(0) {
 }
-*** Caught Return value of {closure}() must be of the type float, varray given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 7
+*** Caught Return value of {closure}() must be of the type float, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 7
 *** Trying object(stdClass) (0) {
 }
 *** Caught Return value of {closure}() must be of the type float, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 7
@@ -97,9 +97,9 @@ string(0) ""
 *** Caught Return value of {closure}() must be of the type string, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 8
 *** Trying NULL
 *** Caught Return value of {closure}() must be of the type string, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 8
-*** Trying varray(0) {
+*** Trying vec(0) {
 }
-*** Caught Return value of {closure}() must be of the type string, varray given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 8
+*** Caught Return value of {closure}() must be of the type string, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 8
 *** Trying object(stdClass) (0) {
 }
 *** Caught Return value of {closure}() must be of the type string, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 8
@@ -134,9 +134,9 @@ bool(true)
 bool(false)
 *** Trying NULL
 *** Caught Return value of {closure}() must be of the type boolean, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 9
-*** Trying varray(0) {
+*** Trying vec(0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, varray given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 9
+*** Caught Return value of {closure}() must be of the type boolean, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 9
 *** Trying object(stdClass) (0) {
 }
 *** Caught Return value of {closure}() must be of the type boolean, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic.php on line 9

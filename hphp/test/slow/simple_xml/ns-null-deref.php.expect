@@ -1,5 +1,5 @@
 Entity: line 1: parser error : Start tag expected, '<' not found
 X
 ^
-darray(0) {
+dict(0) {
 }

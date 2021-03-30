@@ -1,4 +1,4 @@
-varray(7) {
+vec(7) {
   string(3) "bar"
   string(3) "foo"
   string(4) "foo2"
@@ -7,7 +7,7 @@ varray(7) {
   string(5) "ifoo4"
   string(5) "ifoo3"
 }
-varray(7) {
+vec(7) {
   string(3) "bar"
   string(3) "foo"
   string(4) "foo2"

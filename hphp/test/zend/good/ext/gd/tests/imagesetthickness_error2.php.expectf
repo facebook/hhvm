@@ -1,6 +1,5 @@
+Warning: imagesetthickness() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/gd/tests/imagesetthickness_error2.php on line 4
 
-Warning: imagesetthickness() expects parameter 2 to be integer, string given in %s/imagesetthickness_error2.php on line 4
+Warning: imagesetthickness() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gd/tests/imagesetthickness_error2.php on line 5
 
-Warning: imagesetthickness() expects parameter 2 to be integer, %rv?%rarray given in %s/imagesetthickness_error2.php on line 5
-
-Warning: imagesetthickness() expects parameter 2 to be integer, resource given in %s/imagesetthickness_error2.php on line 6
+Warning: imagesetthickness() expects parameter 2 to be integer, resource given in %s/test/zend/good/ext/gd/tests/imagesetthickness_error2.php on line 6

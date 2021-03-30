@@ -61,7 +61,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "lo"
 }
@@ -71,7 +71,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "lol"
 }
@@ -81,7 +81,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 1
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ol"
 }
@@ -91,7 +91,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 1
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "o"
 }
@@ -101,7 +101,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }
@@ -111,7 +111,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 4
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }
@@ -121,7 +121,7 @@ p_l_e before: 0
 p_l_e after: 0
 error: NULL
 offset: 11
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }
@@ -134,7 +134,7 @@ offset: 13
 NULL
 == using preg_match to make preg_last_error non-zero ==
 
-Warning: REGEXERR: preg_match_impl/%d: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/.*\\p{N}/', subject='0123456789', repl='', limits=(1, 100000), extra=(0, 0, 0, 0) in %s/ext_hsl/regex_match.php on line %d
+Warning: REGEXERR: preg_match_impl/1298: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/.*\\p{N}/', subject='0123456789', repl='', limits=(1, 100000), extra=(0, 0, 0, 0) in %s/test/slow/ext_hsl/regex_match.php on line 59
 -- invalid pattern 1 --
 args: lol, whut, 0
 p_l_e before: 2
@@ -197,7 +197,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "lo"
 }
@@ -207,7 +207,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "lol"
 }
@@ -217,7 +217,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 1
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ol"
 }
@@ -227,7 +227,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 1
-darray(1) {
+dict(1) {
   [0]=>
   string(1) "o"
 }
@@ -237,7 +237,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 0
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }
@@ -247,7 +247,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 4
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }
@@ -257,7 +257,7 @@ p_l_e before: 2
 p_l_e after: 2
 error: NULL
 offset: 11
-darray(1) {
+dict(1) {
   [0]=>
   string(2) "ab"
 }

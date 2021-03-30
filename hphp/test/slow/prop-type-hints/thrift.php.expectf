@@ -54,11 +54,7 @@ Warning: Property 'TestStruct5::_type' declared as type string, int assigned in 
 ==============================================================
 ===================== binary deserializing ==================
 
-Warning: Property 'TestStruct7::p1' declared as type HH\dict, %rd?%rarray assigned in %s/thrift.php on line 8
-
-Warning: Property 'TestStruct7::p2' declared as type HH\vec, %rv?%rarray assigned in %s/thrift.php on line 8
-
-Warning: Property 'TestStruct7::p3' declared as type HH\keyset, %rd?%rarray assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p3' declared as type HH\keyset, HH\dict assigned in %s/thrift.php on line 8
 
 Warning: Property 'TestStruct7::p4' declared as type HH\Map, HH\dict assigned in %s/thrift.php on line 8
 
@@ -74,11 +70,7 @@ Warning: Property 'TestStruct7::p9' declared as type %r(HH\\d)?%rarray, HH\Set a
 =============================================================
 ===================== compact deserializing ==================
 
-Warning: Property 'TestStruct7::p1' declared as type HH\dict, %rd?%rarray assigned in %s/thrift.php on line 16
-
-Warning: Property 'TestStruct7::p2' declared as type HH\vec, %rv?%rarray assigned in %s/thrift.php on line 16
-
-Warning: Property 'TestStruct7::p3' declared as type HH\keyset, %rd?%rarray assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p3' declared as type HH\keyset, HH\dict assigned in %s/thrift.php on line 16
 
 Warning: Property 'TestStruct7::p4' declared as type HH\Map, HH\dict assigned in %s/thrift.php on line 16
 

@@ -1,4 +1,4 @@
-darray(44) {
+dict(44) {
   ["FileName"]=>
   string(12) "bug50845.jpg"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ darray(44) {
   ["SectionsFound"]=>
   string(30) "ANY_TAG, IFD0, THUMBNAIL, EXIF"
   ["COMPUTED"]=>
-  darray(9) {
+  dict(9) {
     ["html"]=>
     string(26) "width="5472" height="3648""
     ["Height"]=>
@@ -53,7 +53,7 @@ darray(44) {
   ["Exif_IFD_Pointer"]=>
   int(12572)
   ["THUMBNAIL"]=>
-  darray(6) {
+  dict(6) {
     ["Compression"]=>
     int(6)
     ["XResolution"]=>
@@ -114,7 +114,7 @@ darray(44) {
   ["UndefinedTag:0xA431"]=>
   string(12) "002099000358"
   ["UndefinedTag:0xA432"]=>
-  darray(4) {
+  dict(4) {
     [0]=>
     string(4) "24/1"
     [1]=>

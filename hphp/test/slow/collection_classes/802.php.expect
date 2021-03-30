@@ -154,7 +154,7 @@ string(3) "foo"
 bool(true)
 bool(false)
 
-darray(14) {
+dict(14) {
   [0]=>
   NULL
   [1]=>

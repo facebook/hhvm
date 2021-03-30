@@ -1,7 +1,7 @@
-varray(1) {
+vec(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    darray(12) {
+    dict(12) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -21,7 +21,7 @@ varray(1) {
       ["default"]=>
       object(Closure$%s;%s) (1) {
         ["parameter"]=>
-        darray(1) {
+        dict(1) {
           ["$x"]=>
           string(10) "<required>"
         }
@@ -31,7 +31,7 @@ varray(1) {
 }
 "
       ["attributes"]=>
-      darray(0) {
+      dict(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -39,7 +39,7 @@ varray(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    darray(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>

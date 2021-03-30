@@ -1,126 +1,126 @@
 *** Testing array_intersect_assoc() : Passing different types of arrays to $arr1 argument ***
 -- Iteration 1 --
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
-darray(1) {
+dict(1) {
   [0]=>
   int(1)
 }
 -- Iteration 2 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 3 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 4 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 5 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 6 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 7 --
-darray(1) {
+dict(1) {
   [1]=>
   string(6) "aaaa\r"
 }
-darray(1) {
+dict(1) {
   [1]=>
   string(6) "aaaa\r"
 }
 -- Iteration 8 --
-darray(1) {
+dict(1) {
   ["h3"]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
 }
-darray(1) {
+dict(1) {
   ["h3"]=>
   string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+ world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 9 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 10 --
-darray(1) {
+dict(1) {
   ["two"]=>
   int(2)
 }
-darray(1) {
+dict(1) {
   ["two"]=>
   int(2)
 }
 -- Iteration 11 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 -- Iteration 12 --
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
-darray(1) {
+dict(1) {
   ["one"]=>
   string(3) "ten"
 }
 -- Iteration 13 --
-darray(1) {
+dict(1) {
   [4]=>
   string(4) "four"
 }
-darray(1) {
+dict(1) {
   [4]=>
   string(4) "four"
 }
 -- Iteration 14 --
-darray(2) {
+dict(2) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
   string(0) ""
 }
-darray(2) {
+dict(2) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
   string(0) ""
 }
 -- Iteration 15 --
-darray(1) {
+dict(1) {
   [5]=>
   bool(false)
 }
-darray(1) {
+dict(1) {
   [5]=>
   bool(false)
 }
 -- Iteration 16 --
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 Done

@@ -1,11 +1,11 @@
-darray(5) {
+dict(5) {
   ["kind"]=>
   int(101)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(13)
       ["name"]=>
@@ -17,14 +17,14 @@ darray(5) {
   ["opaque"]=>
   bool(true)
 }
-darray(5) {
+dict(5) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(13)
       ["name"]=>
@@ -36,24 +36,24 @@ darray(5) {
   ["alias"]=>
   string(7) "MyAlias"
 }
-darray(5) {
+dict(5) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(101)
     ["classname"]=>
     string(6) "HH\Map"
     ["generic_types"]=>
-    varray(2) {
-      darray(2) {
+    vec(2) {
+      dict(2) {
         ["kind"]=>
         int(13)
         ["name"]=>
         string(2) "Tk"
       }
-      darray(2) {
+      dict(2) {
         ["kind"]=>
         int(13)
         ["name"]=>
@@ -62,8 +62,8 @@ darray(5) {
     }
   }
   ["param_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(13)
       ["name"]=>
@@ -75,24 +75,24 @@ darray(5) {
   ["opaque"]=>
   bool(true)
 }
-darray(5) {
+dict(5) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
     string(6) "HH\Map"
     ["generic_types"]=>
-    varray(2) {
-      darray(2) {
+    vec(2) {
+      dict(2) {
         ["kind"]=>
         int(13)
         ["name"]=>
         string(2) "Tk"
       }
-      darray(2) {
+      dict(2) {
         ["kind"]=>
         int(13)
         ["name"]=>
@@ -101,8 +101,8 @@ darray(5) {
     }
   }
   ["param_types"]=>
-  varray(1) {
-    darray(2) {
+  vec(1) {
+    dict(2) {
       ["kind"]=>
       int(13)
       ["name"]=>
@@ -114,29 +114,29 @@ darray(5) {
   ["alias"]=>
   string(8) "MyAlias2"
 }
-darray(5) {
+dict(5) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  darray(3) {
+  dict(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
     string(6) "HH\Map"
     ["generic_types"]=>
-    varray(2) {
-      darray(1) {
+    vec(2) {
+      dict(1) {
         ["kind"]=>
         int(1)
       }
-      darray(5) {
+      dict(5) {
         ["kind"]=>
         int(15)
         ["classname"]=>
         string(6) "HH\Set"
         ["generic_types"]=>
-        varray(1) {
-          darray(1) {
+        vec(1) {
+          dict(1) {
             ["kind"]=>
             int(4)
           }
@@ -144,9 +144,9 @@ darray(5) {
         ["alias"]=>
         string(7) "MyAlias"
         ["typevar_types"]=>
-        darray(1) {
+        dict(1) {
           ["T"]=>
-          darray(1) {
+          dict(1) {
             ["kind"]=>
             int(4)
           }
@@ -155,8 +155,8 @@ darray(5) {
     }
   }
   ["param_types"]=>
-  varray(1) {
-    darray(1) {
+  vec(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
@@ -164,21 +164,21 @@ darray(5) {
   ["alias"]=>
   string(8) "MyAlias2"
   ["typevar_types"]=>
-  darray(2) {
+  dict(2) {
     ["Tk"]=>
-    darray(1) {
+    dict(1) {
       ["kind"]=>
       int(1)
     }
     ["Tv"]=>
-    darray(5) {
+    dict(5) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(6) "HH\Set"
       ["generic_types"]=>
-      varray(1) {
-        darray(1) {
+      vec(1) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }
@@ -186,9 +186,9 @@ darray(5) {
       ["alias"]=>
       string(7) "MyAlias"
       ["typevar_types"]=>
-      darray(1) {
+      dict(1) {
         ["T"]=>
-        darray(1) {
+        dict(1) {
           ["kind"]=>
           int(4)
         }

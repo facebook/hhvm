@@ -5,12 +5,12 @@ bool(false)
 resource(4) of type (stream)
 object(stdClass) (0) {
 }
-varray(3) {
+vec(3) {
   int(1)
   int(2)
   int(3)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>

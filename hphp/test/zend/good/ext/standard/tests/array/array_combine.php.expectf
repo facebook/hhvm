@@ -1,91 +1,91 @@
-Array
+Dict
 (
     [green] => green
     [red] => red
     [yellow] => yellow
 )
-Array
+Dict
 (
     [green] => 1
     [red] => 2
     [yellow] => 3
 )
-Array
+Dict
 (
     [green] => 0
     [red] => 1
     [yellow] => 2
 )
-Array
+Dict
 (
     [green] => 1
     [red] => 
     [yellow] => 
 )
-Array
+Dict
 (
     [1] => green
     [2] => red
     [3] => yellow
 )
-Array
+Dict
 (
     [1] => 1
     [2] => 2
     [3] => 3
 )
-Array
+Dict
 (
     [1] => 0
     [2] => 1
     [3] => 2
 )
-Array
+Dict
 (
     [1] => 1
     [2] => 
     [3] => 
 )
-Array
+Dict
 (
     [0] => green
     [1] => red
     [2] => yellow
 )
-Array
+Dict
 (
     [0] => 1
     [1] => 2
     [2] => 3
 )
-Array
+Dict
 (
     [0] => 0
     [1] => 1
     [2] => 2
 )
-Array
+Dict
 (
     [0] => 1
     [1] => 
     [2] => 
 )
-Array
+Dict
 (
     [1] => green
     [] => yellow
 )
-Array
+Dict
 (
     [1] => 1
     [] => 3
 )
-Array
+Dict
 (
     [1] => 0
     [] => 2
 )
-Array
+Dict
 (
     [1] => 1
     [] => 

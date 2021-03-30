@@ -1,19 +1,19 @@
-Warning: Empty regular expression in %s/match_flags3.php on line %d
+Warning: Empty regular expression in %s/test/zend/good/ext/pcre/tests/match_flags3.php on line 4
 bool(false)
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "789"
 }
 int(1)
-darray(1) {
+dict(1) {
   [0]=>
   string(3) "123"
 }
 int(2)
-darray(1) {
+dict(1) {
   [0]=>
-  darray(2) {
+  dict(2) {
     [0]=>
     string(3) "789"
     [1]=>
@@ -21,5 +21,5 @@ darray(1) {
   }
 }
 
-Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/match_flags3.php on line %d
+Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/test/zend/good/ext/pcre/tests/match_flags3.php on line 19
 bool(false)

@@ -2,7 +2,7 @@ string(1) "t"
 Warning: Implicit Class to string conversion for type-hint
 class(X)
 Warning: class_meth Compat: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be of type HH\varray, clsmeth given
-varray(2) {
+vec(2) {
   string(1) "X"
   string(1) "y"
 }

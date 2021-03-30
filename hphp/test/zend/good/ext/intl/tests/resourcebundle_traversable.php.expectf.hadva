@@ -1,9 +1,0 @@
-bool(true)
-dict(3) {
-  [0]=>
-  string(8) "cadena 1"
-  [1]=>
-  string(8) "cadena 2"
-  [2]=>
-  string(8) "cadena 3"
-}

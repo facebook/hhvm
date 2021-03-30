@@ -5,7 +5,7 @@ object(DOMNamedNodeMap) (0) {
 Warning: Attempted to serialize unserializable builtin class DOMNamedNodeMap in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(5) {
+vec(5) {
   string(11) "__construct"
   string(12) "getNamedItem"
   string(14) "getNamedItemNS"
@@ -22,7 +22,7 @@ object(A_DOMNamedNodeMap) (1) {
 Warning: Attempted to serialize unserializable builtin class A_DOMNamedNodeMap in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(5) {
+vec(5) {
   string(11) "__construct"
   string(12) "getNamedItem"
   string(14) "getNamedItemNS"

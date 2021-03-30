@@ -1,64 +1,64 @@
 ====================================================
-varray(0) {
+vec(0) {
 }
-darray(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-varray(0) {
-}
-darray(0) {
+dict(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(0) {
+vec(0) {
 }
-darray(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-varray(0) {
-}
-darray(0) {
+dict(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(0) {
+vec(0) {
 }
-darray(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-varray(0) {
-}
-darray(0) {
+dict(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(3) {
+vec(0) {
+}
+dict(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+dict(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+dict(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+vec(3) {
   int(100)
   int(200)
   int(300)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(100)
   [1]=>
@@ -71,11 +71,11 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(2) {
+vec(2) {
   int(100)
   int(200)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -86,12 +86,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -104,11 +104,11 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(2) {
+vec(2) {
   string(3) "abc"
   string(3) "def"
 }
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -119,12 +119,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(3) {
+vec(3) {
   int(100)
   int(200)
   int(300)
 }
-darray(3) {
+dict(3) {
   [0]=>
   int(100)
   [1]=>
@@ -137,11 +137,11 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(2) {
+vec(2) {
   int(100)
   int(200)
 }
-darray(2) {
+dict(2) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -152,12 +152,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-varray(3) {
+vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-darray(3) {
+dict(3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>

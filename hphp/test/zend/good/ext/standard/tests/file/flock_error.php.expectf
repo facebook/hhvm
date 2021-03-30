@@ -1,43 +1,43 @@
 *** Testing error conditions ***
 
 --- Iteration 0 ---
-Warning: Invalid argument: operation: 0 in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: Invalid argument: operation: 0 in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 bool(false)
 
 --- Iteration 1 ---
-Warning: Invalid argument: operation: 4 in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: Invalid argument: operation: 4 in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 bool(false)
 
 --- Iteration 2 ---
-Warning: flock() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 3 ---
-Warning: flock() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, null given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 4 ---
-Warning: flock() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 5 ---
-Warning: flock() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 6 ---
-Warning: flock() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 7 ---
-Warning: flock() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
 --- Iteration 8 ---
-Warning: flock() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 30
 
-Warning: Not a valid stream resource in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 39
 bool(false)
 
-Warning: flock() expects parameter 1 to be resource, string given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 1 to be resource, string given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 42
 
-Warning: flock() expects exactly 3 parameters, 0 given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects exactly 3 parameters, 0 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 45
 
-Warning: flock() expects exactly 3 parameters, 1 given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects exactly 3 parameters, 1 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 46
 
-Warning: flock() expects exactly 3 parameters, 4 given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects exactly 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 49
 
 *** Done ***

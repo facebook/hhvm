@@ -24,7 +24,7 @@ int(44)
 int(45)
 baz(41, 41)
 baz(42, 41)
-darray(2) {
+dict(2) {
   [0]=>
   string(3) "baz"
   [1]=>

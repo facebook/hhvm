@@ -2,171 +2,171 @@
 
 --int 0--
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --int 1--
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --int 12345--
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --int -12345--
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --empty array--
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --associative array--
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, dict given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --uppercase NULL--
 string(5) "17:40"
-float(17.681%d)
+float(17.68160375644)
 int(1218199253)
 
 --lowercase null--
 string(5) "17:40"
-float(17.681%d)
+float(17.68160375644)
 int(1218199253)
 
 --lowercase true--
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --lowercase false--
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --uppercase TRUE--
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --uppercase FALSE--
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --instance of classWithToString--
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 
 --instance of classWithoutToString--
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 85
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 86
 
-Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line %d
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/test/zend/good/ext/date/tests/date_sunset_variation6.php on line 87
 ===DONE===

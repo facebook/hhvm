@@ -1,15 +1,15 @@
-darray(2) {
+dict(2) {
   ["a_ids"]=>
-  darray(3) {
+  dict(3) {
     ["aaa"]=>
     bool(true)
     ["ccc"]=>
-    varray(2) {
-      varray(2) {
+    vec(2) {
+      vec(2) {
         string(4) "tcks"
         string(4) "none"
       }
-      varray(2) {
+      vec(2) {
         string(4) "tcks"
         string(3) "ids"
       }
@@ -18,16 +18,16 @@ darray(2) {
     string(4) "aaaa"
   }
   ["user_id"]=>
-  darray(3) {
+  dict(3) {
     ["aaa"]=>
     bool(true)
     ["ccc"]=>
-    varray(2) {
-      varray(2) {
+    vec(2) {
+      vec(2) {
         string(4) "tcks"
         string(4) "none"
       }
-      varray(2) {
+      vec(2) {
         string(4) "tcks"
         string(2) "id"
       }

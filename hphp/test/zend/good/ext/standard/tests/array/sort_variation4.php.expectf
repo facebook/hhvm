@@ -2,7 +2,7 @@
 
 -- Testing sort() by supplying reference variable array, 'flag' value is defualt --
 bool(true)
-varray(3) {
+vec(3) {
   int(33)
   int(100)
   int(555)
@@ -10,7 +10,7 @@ varray(3) {
 
 -- Testing sort() by supplying reference variable array, 'flag' = SORT_REGULAR --
 bool(true)
-varray(3) {
+vec(3) {
   int(33)
   int(100)
   int(555)
@@ -18,7 +18,7 @@ varray(3) {
 
 -- Testing sort() by supplying reference variable array, 'flag' = SORT_NUMERIC --
 bool(true)
-varray(3) {
+vec(3) {
   int(33)
   int(100)
   int(555)

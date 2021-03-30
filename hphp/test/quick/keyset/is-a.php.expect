@@ -88,7 +88,7 @@ Testing for is_keyset: object(stdClass) (0) {
 }
 NO
 ====================================================
-Testing for is_keyset: varray(3) {
+Testing for is_keyset: vec(3) {
   int(1)
   int(2)
   int(3)

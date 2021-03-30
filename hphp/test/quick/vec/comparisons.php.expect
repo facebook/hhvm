@@ -479,31 +479,31 @@ vec(0) {
 Comparing:
 vec(0) {
 }
-varray(0) {
+vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	==  : bool(false)
-	!=  : bool(true)
-	=== : bool(false)
-	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : bool(false)
+	<=  : bool(true)
+	>   : bool(false)
+	>=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : int(0)
 Comparing:
-varray(0) {
+vec(0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	==  : bool(false)
-	!=  : bool(true)
-	=== : bool(false)
-	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : bool(false)
+	<=  : bool(true)
+	>   : bool(false)
+	>=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : int(0)
 Comparing:
 vec(0) {
 }

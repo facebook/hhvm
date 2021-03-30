@@ -43,7 +43,7 @@ object(DOMCdataSection) (19) {
 Warning: Attempted to serialize unserializable builtin class DOMCdataSection in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-varray(27) {
+vec(27) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(28) "isWhitespaceInElementContent"
@@ -120,7 +120,7 @@ object(A_DOMCdataSection) (20) {
 Warning: Attempted to serialize unserializable builtin class A_DOMCdataSection in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-varray(27) {
+vec(27) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(28) "isWhitespaceInElementContent"

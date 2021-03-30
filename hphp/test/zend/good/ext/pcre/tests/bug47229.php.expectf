@@ -1,15 +1,15 @@
 string(13) "\-oh really\?"
-darray(1) {
+dict(1) {
   [0]=>
-  %string|unicode%(4) "a---"
+  string(4) "a---"
 }
-darray(1) {
+dict(1) {
   [0]=>
-  %string|unicode%(1) "a"
+  string(1) "a"
 }
-darray(1) {
+dict(1) {
   [0]=>
-  %string|unicode%(5) "a----"
+  string(5) "a----"
 }
-darray(0) {
+dict(0) {
 }

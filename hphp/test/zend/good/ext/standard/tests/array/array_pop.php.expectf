@@ -1,7 +1,7 @@
 *** Normal testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
-Array
+Vec
 (
 )
 
@@ -9,7 +9,7 @@ Output after Pop is :
 NULL
 
 -- Input Array for Iteration 2 is --
-Array
+Vec
 (
     [0] => 1
     [1] => 2
@@ -26,7 +26,7 @@ Output after Pop is :
 int(9)
 
 -- Input Array for Iteration 3 is --
-Array
+Vec
 (
     [0] => One
     [1] => _Two
@@ -39,7 +39,7 @@ Output after Pop is :
 string(4) "Five"
 
 -- Input Array for Iteration 4 is --
-Array
+Vec
 (
     [0] => 6
     [1] => six
@@ -55,7 +55,7 @@ Output after Pop is :
 string(4) "nine"
 
 -- Input Array for Iteration 5 is --
-Array
+Dict
 (
     [a] => aaa
     [A] => AAA
@@ -68,7 +68,7 @@ Output after Pop is :
 string(3) "eee"
 
 -- Input Array for Iteration 6 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -81,7 +81,7 @@ Output after Pop is :
 string(4) "five"
 
 -- Input Array for Iteration 7 is --
-Array
+Dict
 (
     [1] => one
     [2] => two
@@ -94,7 +94,7 @@ Output after Pop is :
 string(4) "five"
 
 -- Input Array for Iteration 8 is --
-Array
+Dict
 (
     [f] => fff
     [1] => one
@@ -115,7 +115,7 @@ Output after Pop is :
 NULL
 
 -- Input Array for Iteration 9 is --
-Array
+Vec
 (
     [0] => 12
     [1] => name
@@ -127,16 +127,16 @@ Output after Pop is :
 string(2) "45"
 
 -- Input Array for Iteration 10 is --
-Array
+Vec
 (
-    [0] => Array
+    [0] => Vec
         (
             [0] => oNe
             [1] => tWo
             [2] => 4
         )
 
-    [1] => Array
+    [1] => Vec
         (
             [0] => 10
             [1] => 20
@@ -145,18 +145,18 @@ Array
             [4] => 50
         )
 
-    [2] => Array
+    [2] => Vec
         (
         )
 
 )
 
 Output after Pop is :
-varray(0) {
+vec(0) {
 }
 
 -- Input Array for Iteration 11 is --
-Array
+Dict
 (
     [one] => 2
     [three] => 3

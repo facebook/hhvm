@@ -86,7 +86,7 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   Relative_path.Map.iter
     fast
     ~f:(fun (name : Relative_path.t) (info : FileInfo.names) ->
-      Naming_global.ndecl_file_fast
+      Naming_global.ndecl_file_skip_if_already_bound
         ctx
         name
         ~funs:info.FileInfo.n_funs

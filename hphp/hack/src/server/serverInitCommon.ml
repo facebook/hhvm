@@ -114,7 +114,9 @@ let naming
       ~f:
         begin
           fun k v env ->
-          let (errorl, failed_naming) = Naming_global.ndecl_file ctx k v in
+          let (errorl, failed_naming) =
+            Naming_global.ndecl_file_error_if_already_bound ctx k v
+          in
           {
             env with
             errorl = Errors.merge errorl env.errorl;

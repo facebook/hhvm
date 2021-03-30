@@ -43,7 +43,7 @@ end
  * two files define the same function).
  * It all the entities passed as parameters and adds them to the shared heap.
  *)
-val make_env :
+val make_env_error_if_already_bound :
   Provider_context.t ->
   funs:FileInfo.id list ->
   classes:FileInfo.id list ->
@@ -62,7 +62,7 @@ val remove_decls :
   consts:string list ->
   unit
 
-val ndecl_file_fast :
+val ndecl_file_skip_if_already_bound :
   Provider_context.t ->
   Relative_path.t ->
   funs:SSet.t ->
@@ -72,7 +72,7 @@ val ndecl_file_fast :
   consts:SSet.t ->
   unit
 
-val ndecl_file :
+val ndecl_file_error_if_already_bound :
   Provider_context.t ->
   Relative_path.t ->
   FileInfo.t ->

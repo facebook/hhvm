@@ -745,7 +745,7 @@ let update
         remove_fun_batch backend (strip_positions old_file_info.funs);
         remove_const_batch backend (strip_positions old_file_info.consts));
     (* Add new entries. Note: the caller is expected to have a solution
-    for duplicate names. Note: can't use [Naming_global.ndecl_file_fast]
+    for duplicate names. Note: can't use [Naming_global.ndecl_file_skip_if_already_bound]
     because it attempts to look up the symbol by doing a file parse, but
     we have to use the file_info we're given to avoid races. *)
     Option.iter new_file_info ~f:(fun new_file_info ->

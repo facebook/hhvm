@@ -1093,7 +1093,7 @@ let parse_and_name ctx files_contents =
           let { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
             fileinfo
           in
-          Naming_global.make_env
+          Naming_global.make_env_error_if_already_bound
             ctx
             ~funs
             ~classes

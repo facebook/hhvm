@@ -150,7 +150,7 @@ module Env = struct
       true
 
   (* Dont check for errors, just add to canonical heap *)
-  let new_fun_fast ctx fn name =
+  let new_fun_skip_if_already_bound ctx fn name =
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some _ -> ()
@@ -158,7 +158,7 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_cid_fast ctx fn name cid_kind =
+  let new_cid_skip_if_already_bound ctx fn name cid_kind =
     let name_key = canon_key name in
     let mode =
       match cid_kind with
@@ -174,18 +174,19 @@ module Env = struct
       (* Full position, we don't store the kind, so this is necessary *)
       Naming_provider.add_type backend name (FileInfo.File (mode, fn)) cid_kind
 
-  let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_types.TClass
+  let new_class_skip_if_already_bound ctx fn name =
+    new_cid_skip_if_already_bound ctx fn name Naming_types.TClass
 
-  let new_record_decl_fast ctx fn name =
-    new_cid_fast ctx fn name Naming_types.TRecordDef
+  let new_record_decl_skip_if_already_bound ctx fn name =
+    new_cid_skip_if_already_bound ctx fn name Naming_types.TRecordDef
 
-  let new_typedef_fast ctx fn name =
-    new_cid_fast ctx fn name Naming_types.TTypedef
+  let new_typedef_skip_if_already_bound ctx fn name =
+    new_cid_skip_if_already_bound ctx fn name Naming_types.TTypedef
 
-  let new_global_const_fast backend fn name =
+  let new_global_const_skip_if_already_bound backend fn name =
     Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
 
-  let new_fun ctx (p, name) =
+  let new_fun_error_if_already_bound ctx (p, name) =
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some canonical ->
@@ -198,7 +199,7 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name p
 
-  let new_cid ctx cid_kind (p, name) =
+  let new_cid_error_if_already_bound ctx cid_kind (p, name) =
     if not (check_type_not_typehint ctx (p, name)) then
       ()
     else
@@ -216,13 +217,16 @@ module Env = struct
         let backend = Provider_context.get_backend ctx in
         Naming_provider.add_type backend name p cid_kind
 
-  let new_class ctx = new_cid ctx Naming_types.TClass
+  let new_class_error_if_already_bound ctx =
+    new_cid_error_if_already_bound ctx Naming_types.TClass
 
-  let new_record_decl ctx = new_cid ctx Naming_types.TRecordDef
+  let new_record_decl_error_if_already_bound ctx =
+    new_cid_error_if_already_bound ctx Naming_types.TRecordDef
 
-  let new_typedef ctx = new_cid ctx Naming_types.TTypedef
+  let new_typedef_error_if_already_bound ctx =
+    new_cid_error_if_already_bound ctx Naming_types.TTypedef
 
-  let new_global_const ctx (p, x) =
+  let new_global_const_error_if_already_bound ctx (p, x) =
     match Naming_provider.get_const_pos ctx x with
     | Some p' ->
       if not @@ GEnv.compare_pos ctx p' p x then
@@ -246,20 +250,24 @@ let remove_decls ~backend ~funs ~classes ~record_defs ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts =
-  List.iter funs (Env.new_fun ctx);
-  List.iter classes (Env.new_class ctx);
-  List.iter record_defs (Env.new_record_decl ctx);
-  List.iter typedefs (Env.new_typedef ctx);
-  List.iter consts (Env.new_global_const ctx)
+let make_env_error_if_already_bound
+    ctx ~funs ~classes ~record_defs ~typedefs ~consts =
+  List.iter funs (Env.new_fun_error_if_already_bound ctx);
+  List.iter classes (Env.new_class_error_if_already_bound ctx);
+  List.iter record_defs (Env.new_record_decl_error_if_already_bound ctx);
+  List.iter typedefs (Env.new_typedef_error_if_already_bound ctx);
+  List.iter consts (Env.new_global_const_error_if_already_bound ctx)
 
-let make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  SSet.iter (Env.new_fun_fast ctx fn) funs;
-  SSet.iter (Env.new_class_fast ctx fn) classes;
-  SSet.iter (Env.new_record_decl_fast ctx fn) record_defs;
-  SSet.iter (Env.new_typedef_fast ctx fn) typedefs;
+let make_env_skip_if_already_bound
+    ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
+  SSet.iter (Env.new_fun_skip_if_already_bound ctx fn) funs;
+  SSet.iter (Env.new_class_skip_if_already_bound ctx fn) classes;
+  SSet.iter (Env.new_record_decl_skip_if_already_bound ctx fn) record_defs;
+  SSet.iter (Env.new_typedef_skip_if_already_bound ctx fn) typedefs;
   SSet.iter
-    (Env.new_global_const_fast (Provider_context.get_backend ctx) fn)
+    (Env.new_global_const_skip_if_already_bound
+       (Provider_context.get_backend ctx)
+       fn)
     consts
 
 (*****************************************************************************)
@@ -280,10 +288,18 @@ let add_files_to_rename failed defl defs_in_env =
     ~init:failed
     defl
 
-let ndecl_file_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts
+let ndecl_file_skip_if_already_bound
+    ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
+  make_env_skip_if_already_bound
+    ctx
+    fn
+    ~funs
+    ~classes
+    ~record_defs
+    ~typedefs
+    ~consts
 
-let ndecl_file
+let ndecl_file_error_if_already_bound
     ctx
     fn
     {
@@ -302,7 +318,13 @@ let ndecl_file
           ~category
           "Naming decl: %s"
           (Relative_path.to_absolute fn);
-        make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts)
+        make_env_error_if_already_bound
+          ctx
+          ~funs
+          ~classes
+          ~record_defs
+          ~typedefs
+          ~consts)
   in
   if Errors.is_empty errors then
     (errors, Relative_path.Set.empty)

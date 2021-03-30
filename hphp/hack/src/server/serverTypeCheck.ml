@@ -389,7 +389,9 @@ let declare_names env fast_parsed =
       ~f:
         begin
           fun k v (errorl, failed) ->
-          let (errorl', failed') = Naming_global.ndecl_file ctx k v in
+          let (errorl', failed') =
+            Naming_global.ndecl_file_error_if_already_bound ctx k v
+          in
           let errorl = Errors.merge errorl' errorl in
           let failed = Relative_path.Set.union failed' failed in
           (errorl, failed)

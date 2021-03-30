@@ -470,7 +470,7 @@ let naming_with_fast
       } =
         info
       in
-      Naming_global.ndecl_file_fast
+      Naming_global.ndecl_file_skip_if_already_bound
         ctx
         k
         ~funs

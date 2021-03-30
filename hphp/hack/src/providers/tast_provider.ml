@@ -89,7 +89,7 @@ let compute_tast_and_errors_unquarantined_internal
               ~entry
           in
           let (reverse_naming_table_errors, _failed_naming) =
-            Naming_global.ndecl_file ctx path file_info
+            Naming_global.ndecl_file_error_if_already_bound ctx path file_info
           in
           let (nast_errors, nast) =
             Errors.do_with_context path Errors.Naming (fun () ->

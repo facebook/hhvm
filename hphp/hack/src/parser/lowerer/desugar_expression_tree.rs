@@ -863,8 +863,12 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
                 vec![pos, rewrite_expr(env, &e)?],
                 &s.0,
             )),
-            // Convert `return;` to `$v->visitReturn(new ExprPos(...), null)`.
-            None => Some(v_meth_call("visitReturn", vec![pos, null_literal()], &s.0)),
+            None => {
+                return Err((
+                    s.0.clone(),
+                    "Unsupported expression tree syntax: empty return after void virtualization. Please file a bug.".into(),
+                ));
+            }
         },
         // Convert `if (...) {...} else {...}` to
         // `$v->visitIf(new ExprPos(...), $v->..., vec[...], vec[...])`.

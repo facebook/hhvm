@@ -115,7 +115,7 @@ class Code {
   }
   public function visitReturn(
     ?ExprPos $_,
-    ?Code::TAst $_,
+    Code::TAst $_,
   ): Code::TAst {
     throw new Exception();
   }

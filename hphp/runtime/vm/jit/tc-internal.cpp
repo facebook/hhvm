@@ -633,8 +633,8 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
     }
     CGMeta fixups;
     TransLocMaker maker{*view};
-    maker.markStart();
     try {
+      maker.markStart();
       emitVunit(*vunit, unit.get(), *view, fixups,
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
                                               : nullptr);
@@ -647,7 +647,8 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
         fixups.clear();
         continue;
       }
-      auto const range = maker.markEnd();
+      // Rollback so the area can be used by something else.
+      auto const range = maker.rollback();
       auto const bytes = range.main.size() + range.cold.size() +
                          range.frozen.size();
       // There should be few of these.  They mean there is wasted work
@@ -711,9 +712,9 @@ void Translator::relocate() {
       auto dstView = crb.getMaybeReusedView(finalView, range);
       auto& srcView = transMeta->view;
       TransLocMaker maker{dstView};
-      maker.markStart();
 
       try {
+        maker.markStart();
         auto origin = range.data;
         if (!origin.empty()) {
           dstView.data().bytes(origin.size(),
@@ -744,6 +745,8 @@ void Translator::relocate() {
           code().disableHot();
           continue;
         }
+        // Rollback so the area can be used by something else.
+        maker.rollback();
         auto const bytes = range.main.size() + range.cold.size() +
                            range.frozen.size();
         // There should be few of these.  They mean there is wasted work

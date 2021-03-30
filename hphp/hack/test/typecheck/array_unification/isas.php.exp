@@ -1,0 +1,30 @@
+File "isas.php", line 5, characters 5-15:
+  varray<_>
+File "isas.php", line 7, characters 5-15:
+  darray<_, _>
+File "isas.php", line 9, characters 5-15:
+  varray<_>
+File "isas.php", line 11, characters 5-15:
+  darray<_, _>
+File "isas.php", line 13, characters 5-15:
+  varray_or_darray<arraykey, _>
+File "isas.php", line 4, characters 13-21:
+Invalid `is` expression hint (Typing[4195])
+  File "isas.php", line 4, characters 13-21:
+  The `is` operator cannot be used with an array type
+File "isas.php", line 6, characters 20-31:
+Invalid `is` expression hint (Typing[4195])
+  File "isas.php", line 6, characters 20-31:
+  The `is` operator cannot be used with an array type
+File "isas.php", line 8, characters 20-28:
+Invalid `is` expression hint (Typing[4195])
+  File "isas.php", line 8, characters 20-28:
+  The `is` operator cannot be used with an array type
+File "isas.php", line 10, characters 20-31:
+Invalid `is` expression hint (Typing[4195])
+  File "isas.php", line 10, characters 20-31:
+  The `is` operator cannot be used with an array type
+File "isas.php", line 12, characters 20-38:
+Invalid `is` expression hint (Typing[4195])
+  File "isas.php", line 12, characters 20-38:
+  The `is` operator cannot be used with an array type

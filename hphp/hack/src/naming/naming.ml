@@ -337,6 +337,7 @@ let rec hint
     ?(allow_wildcard = false)
     ?(allow_like = false)
     ?(in_where_clause = false)
+    ?(ignore_hack_arr = false)
     ?(tp_depth = 0)
     env
     (hh : Aast.hint) =
@@ -348,6 +349,7 @@ let rec hint
       ~allow_wildcard
       ~allow_like
       ~in_where_clause
+      ~ignore_hack_arr
       ~tp_depth
       env
       (p, h) )
@@ -390,6 +392,7 @@ and hint_
     ~allow_wildcard
     ~allow_like
     ~in_where_clause
+    ~ignore_hack_arr
     ?(tp_depth = 0)
     env
     (p, x) =
@@ -428,7 +431,15 @@ and hint_
     hfun env hl il variadic_hint ctxs h readonly_ret
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
-      hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
+      hint_id
+        ~forbid_this
+        ~allow_retonly
+        ~allow_wildcard
+        ~ignore_hack_arr
+        ~tp_depth
+        env
+        id
+        hl
     in
     (match hint_id with
     | N.Hprim _
@@ -461,6 +472,7 @@ and hint_
             ~forbid_this
             ~allow_retonly
             ~allow_wildcard:false
+            ~ignore_hack_arr:false
             ~tp_depth
             env
             root
@@ -520,13 +532,29 @@ and hint_
     N.Herr
 
 and hint_id
-    ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env ((p, x) as id) hl
-    =
+    ~forbid_this
+    ~allow_retonly
+    ~allow_wildcard
+    ~ignore_hack_arr
+    ~tp_depth
+    env
+    ((p, x) as id)
+    hl =
   let params = (fst env).type_params in
   (* some common Xhp screw ups *)
   if String.equal x "Xhp" || String.equal x ":Xhp" || String.equal x "XHP" then
     Errors.disallowed_xhp_type p x;
-  match try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
+  match
+    try_castable_hint
+      ~forbid_this
+      ~allow_wildcard
+      ~ignore_hack_arr
+      ~tp_depth
+      env
+      p
+      x
+      hl
+  with
   | Some h -> h
   | None ->
     begin
@@ -634,7 +662,14 @@ and hint_id
  * instance, 'object' is not a valid annotation.  Thus callers will
  * have to handle the remaining cases. *)
 and try_castable_hint
-    ?(forbid_this = false) ?(allow_wildcard = false) ~tp_depth env p x hl =
+    ?(forbid_this = false)
+    ?(allow_wildcard = false)
+    ~ignore_hack_arr
+    ~tp_depth
+    env
+    p
+    x
+    hl =
   let hint =
     hint
       ~forbid_this
@@ -643,8 +678,9 @@ and try_castable_hint
       ~allow_retonly:false
   in
   let unif env =
-    TypecheckerOptions.hack_arr_dv_arrs
-      (Provider_context.get_tcopt (fst env).ctx)
+    (not ignore_hack_arr)
+    && TypecheckerOptions.hack_arr_dv_arrs
+         (Provider_context.get_tcopt (fst env).ctx)
   in
   let canon = String.lowercase x in
   let opt_hint =
@@ -2050,7 +2086,7 @@ and expr_ env p (e : Nast.expr_) =
       | _ -> assert false
     in
     let ty =
-      match try_castable_hint ~tp_depth:1 env p x hl with
+      match try_castable_hint ~tp_depth:1 ~ignore_hack_arr:false env p x hl with
       | Some ty -> (p, ty)
       | None ->
         let h = hint env ty in
@@ -2092,9 +2128,15 @@ and expr_ env p (e : Nast.expr_) =
     in
     N.Eif (e1, e2opt, e3)
   | Aast.Is (e, h) ->
-    N.Is (expr env e, hint ~allow_wildcard:true ~allow_like:true env h)
+    N.Is
+      ( expr env e,
+        hint ~allow_wildcard:true ~allow_like:true ~ignore_hack_arr:true env h
+      )
   | Aast.As (e, h, b) ->
-    N.As (expr env e, hint ~allow_wildcard:true ~allow_like:true env h, b)
+    N.As
+      ( expr env e,
+        hint ~allow_wildcard:true ~allow_like:true ~ignore_hack_arr:true env h,
+        b )
   | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, unpacked_element, _) ->
     N.New
       ( make_class_id env x,

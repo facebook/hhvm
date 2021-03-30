@@ -35,3 +35,12 @@ HHVM_DEFINE_EXTENSION("hsl_regex"
   SYSTEMLIB
     ext_hsl_regex.php
 )
+
+HHVM_DEFINE_EXTENSION("hsl_systemlib"
+  SOURCES
+    ext_hsl_systemlib.cpp
+  HACK_SYSTEMLIB_DIR
+    # Relative paths also work if you wanted the lib source to be in
+    # hphp/runtime/ext
+    "${CMAKE_SOURCE_DIR}/hphp/hsl/src"
+) 

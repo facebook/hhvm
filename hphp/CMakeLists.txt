@@ -34,6 +34,7 @@ endif()
 include(HHVMProject)
 
 include(HHVMExtensionConfig)
+add_custom_target(generated_systemlib)
 # Before we do anything else, we'll configure the extensions,
 # so that the defines take effect globally.
 file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/runtime/ext/*)

@@ -128,6 +128,10 @@ include(Options)
 # [SYSTEMLIB ...]
 # The PHP API of the extension.
 #
+# [HACK_SYSTEMLIB_DIR ...]
+# A directory containing a Hack library that should be part of the
+# extension.
+#
 # [DEPENDS ...]
 # The dependencies of the extension. Extensions are prefixed
 # with "ext_", and external libaries with "lib".
@@ -213,6 +217,8 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
       set(argumentState 5)
     elseif ("x${arg}" STREQUAL "xDEPENDS")
       set(argumentState 7)
+    elseif ("x${arg}" STREQUAL "xHACK_SYSTEMLIB_DIR")
+      set(argumentState 8)
     elseif ("x${arg}" STREQUAL "xREQUIRED")
       if (NOT ${argumentState} EQUAL 0)
         message(FATAL_ERROR "The REQUIRED modifier should only be placed immediately after the extension's name! (while processing the '${extensionPrettyName}' extension)")
@@ -282,6 +288,30 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
       endif()
       list(APPEND extensionDependencies ${arg})
       list(APPEND extensionDependenciesOptional OFF)
+    elseif (${argumentState} EQUAL 8)
+      # HACK_SYSTEMLIB_DIR
+      set(singleFilePath "${CMAKE_CURRENT_BINARY_DIR}/ext_${extensionName}.hack")
+      if(IS_ABSOLUTE ${arg})
+        set(sourceDir ${arg})
+      else()
+        set(sourceDir "${HRE_CURRENT_EXT_PATH}/${arg}")
+      endif()
+      add_custom_command(
+        OUTPUT "${singleFilePath}"
+        COMMAND
+        "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/concatenate_all.sh"
+        "--install_dir=${CMAKE_CURRENT_BINARY_DIR}"
+        "--root=${sourceDir}"
+        "--output_file=${singleFilePath}"
+        VERBATIM
+      )
+      add_custom_target(
+        "ext_${extensionName}_generated_systemlib"
+        DEPENDS
+        "${singleFilePath}"
+      )
+      add_dependencies(generated_systemlib "ext_${extensionName}_generated_systemlib")
+      list(APPEND extensionLibrary "${singleFilePath}")
     else()
       message(FATAL_ERROR "An error occurred while processing the arguments of the '${extensionPrettyName}' extension!")
     endif()
@@ -423,6 +453,11 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
       endif()
     elseif (${fileExtension} STREQUAL ".php")
       list(APPEND PHP_SOURCES "${rootDir}/${fileName}")
+    elseif (${fileExtension} STREQUAL ".hack")
+      # .hack files are used by typechecked systemlib; there's a directory,
+      # and the actual .hack file is generated. As such, it's in the build
+      # directory instead, so we have an absolute path
+      list(APPEND PHP_SOURCES "${fileName}")
     else()
       message(FATAL_ERROR "Unknown file extension '${fileExtension}'!")
     endif()

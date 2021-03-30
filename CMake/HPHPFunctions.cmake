@@ -197,6 +197,7 @@ macro(embed_systemlib_byname TARGET SLIB)
 endmacro()
 
 function(embed_all_systemlibs TARGET ROOT DEST)
+  add_dependencies(${TARGET} systemlib)
   append_systemlib(${TARGET} ${ROOT}/system/systemlib.php systemlib)
   foreach(SLIB ${EXTENSION_SYSTEMLIB_SOURCES} ${EZC_SYSTEMLIB_SOURCES})
     embed_systemlib_byname(${TARGET} ${SLIB})

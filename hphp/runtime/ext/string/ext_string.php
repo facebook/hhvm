@@ -113,7 +113,7 @@ function bin2hex(string $str)[]: string;
  */
 // Not __IsFoldable since it uses isdigit() which depends on the current locale
 <<__Native>>
-function hex2bin(string $str): mixed;
+function hex2bin(string $str)[]: mixed;
 
 /**
  * Returns string with '<br />' or '<br>' inserted before all newlines.

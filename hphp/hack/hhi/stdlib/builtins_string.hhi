@@ -42,7 +42,7 @@ function stripslashes(string $str)[];
 <<__PHPStdLib>>
 function bin2hex(string $str)[];
 <<__PHPStdLib>>
-function hex2bin(string $str);
+function hex2bin(string $str)[];
 <<__PHPStdLib>>
 function nl2br(string $str)[];
 <<__PHPStdLib>>

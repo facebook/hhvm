@@ -10,11 +10,11 @@
 (* Ppxlib based PPX, used by DUNE *)
 open Ppxlib
 
-(* Turn the (name, contents) list into a PPX ast (string * string) array
- * expression *)
-let contents hhi_dir =
+(* This is identical to the version in ppx_gen_hhi_direct, however it needs to
+ * be duplicated as the types are different between ppxlib and ast_mapper *)
+let get_hhi_contents hhi_dir hsl_dir =
   let open Ast_helper in
-  Ppx_gen_hhi_common.get_hhis hhi_dir
+  Ppx_gen_hhi_common.get_hhis hhi_dir hsl_dir
   |> List.map (fun (name, contents) ->
          Exp.tuple
            [
@@ -25,6 +25,8 @@ let contents hhi_dir =
 
 let hhi_dir : string option ref = ref None
 
+let hsl_dir : string option ref = ref None
+
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)
 let expand_function ~loc:_ ~path:_ =
   let hhi_dir =
@@ -32,7 +34,12 @@ let expand_function ~loc:_ ~path:_ =
     | None -> raise (Arg.Bad "-hhi-dir is mandatory")
     | Some dir -> dir
   in
-  contents hhi_dir
+  let hsl_dir =
+    match !hsl_dir with
+    | None -> raise (Arg.Bad "-hsl-dir is mandatory")
+    | Some dir -> dir
+  in
+  get_hhi_contents hhi_dir hsl_dir
 
 let extension =
   Extension.declare
@@ -45,9 +52,15 @@ let rule = Context_free.Rule.extension extension
 
 let set_hhi_dir dir = hhi_dir := Some dir
 
+let set_hsl_dir dir = hsl_dir := Some dir
+
 let () =
   Driver.add_arg
     "-hhi-dir"
     (Arg.String set_hhi_dir)
     ~doc:"<dir> directory of the hhis sources";
+  Driver.add_arg
+    "-hsl-dir"
+    (Arg.String set_hsl_dir)
+    ~doc:"<dir> directory of the generated HHIs for the HSL";
   Driver.register_transformation ~rules:[rule] "ppx_gen_hhi"

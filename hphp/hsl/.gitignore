@@ -1,0 +1,7 @@
+# Dune aggressivly cleans its' build directory, so the generated HHIs have to
+# be outside of Dune's build directory
+#
+# If you're doing a Hack+HHVM out-of-source build (recommended), it'll still put
+# them in the main build directory, but if you're doing an in-source build,
+# the files will be here.
+hhi/

@@ -70,7 +70,7 @@ let get_recursive_files root =
   in
   loop [root] []
 
-let get_hhis dir =
+let get_hhis_in_dir dir =
   (* Chop off the trailing slash, since the full filename from the recursive
    * walk will always join paths *)
   let dir = normalize_dir dir in
@@ -88,3 +88,11 @@ let get_hhis dir =
            in
            (file, contents) :: acc)
        []
+
+let get_hhis hhi_dir hsl_dir =
+  let handwritten_hhis = get_hhis_in_dir hhi_dir in
+  let generated_hsl_hhis =
+    get_hhis_in_dir hsl_dir
+    |> List.map (fun (name, contents) -> ("hsl_generated/" ^ name, contents))
+  in
+  handwritten_hhis @ generated_hsl_hhis

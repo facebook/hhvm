@@ -12,12 +12,10 @@
 open Asttypes
 open Parsetree
 open Ast_mapper
-open Ast_helper
 
-(* Turn the (name, contents) list into a PPX ast (string * string) array
- * expression *)
-let contents hhi_dir =
-  Ppx_gen_hhi_common.get_hhis hhi_dir
+let get_hhi_contents hhi_dir hsl_dir =
+  let open Ast_helper in
+  Ppx_gen_hhi_common.get_hhis hhi_dir hsl_dir
   |> List.map (fun (name, contents) ->
          Exp.tuple
            [
@@ -27,7 +25,7 @@ let contents hhi_dir =
   |> Exp.array
 
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)
-let ppx_gen_hhi_mapper hhi_dir =
+let ppx_gen_hhi_mapper hhi_dir hsl_dir =
   {
     default_mapper with
     expr =
@@ -37,13 +35,14 @@ let ppx_gen_hhi_mapper hhi_dir =
          pexp_desc = Pexp_extension ({ txt = "hhi_contents"; _ }, PStr []);
          _;
         } ->
-          contents hhi_dir
+          get_hhi_contents hhi_dir hsl_dir
         | other -> default_mapper.expr mapper other);
   }
 
 let register () =
   register "ppx_gen_hhi" (fun _argv ->
       let hhi_dir = Sys.argv.(1) in
-      ppx_gen_hhi_mapper hhi_dir)
+      let hsl_dir = Sys.argv.(2) in
+      ppx_gen_hhi_mapper hhi_dir hsl_dir)
 
 let () = register ()

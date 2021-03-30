@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/disasm.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
@@ -638,8 +639,8 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
                                               : nullptr);
     } catch (const DataBlockFull& dbFull) {
-      always_assert(!view->isLocal());
       if (dbFull.name == "hot") {
+        always_assert(!view->isLocal());
         code().disableHot();
         // Rollback tags and try again.
         maker.rollback();
@@ -657,6 +658,7 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
         e.setStr("data_block", dbFull.name);
         e.setInt("bytes_dropped", bytes);
       });
+      Logger::Warning(dbFull.name);
       reset();
       return;
     }

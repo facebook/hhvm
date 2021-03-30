@@ -58,7 +58,7 @@ let is_super_num env t =
  *    (2) Solve to float if it's a type variable with float as lower bound
  *    (3) Check if it's dynamic
  *)
-let check_dynamic_or_enforce_num env p t r =
+let check_dynamic_or_enforce_num env p t r err =
   let env =
     Typing_coercion.coerce_type
       p
@@ -66,7 +66,7 @@ let check_dynamic_or_enforce_num env p t r =
       env
       t
       { et_type = MakeType.num r; et_enforced = Enforced }
-      Errors.unify_error
+      err
   in
   let widen_for_arithmetic env ty =
     match get_node ty with
@@ -82,7 +82,7 @@ let check_dynamic_or_enforce_num env p t r =
       widen_for_arithmetic
       p
       t
-      Errors.unify_error
+      err
   in
   (env, Typing_utils.is_dynamic env t)
 
@@ -143,10 +143,20 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Star
     when not contains_any ->
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1)
+      check_dynamic_or_enforce_num
+        env
+        p
+        ty1
+        (Reason.Rarith p1)
+        Errors.unify_error
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2)
+      check_dynamic_or_enforce_num
+        env
+        p
+        ty2
+        (Reason.Rarith p2)
+        Errors.unify_error
     in
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
      * result if *either* operand is dynamic
@@ -237,10 +247,20 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Starstar
     when not contains_any ->
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1)
+      check_dynamic_or_enforce_num
+        env
+        p
+        ty1
+        (Reason.Rarith p1)
+        Errors.unify_error
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2)
+      check_dynamic_or_enforce_num
+        env
+        p
+        ty2
+        (Reason.Rarith p2)
+        Errors.unify_error
     in
     let (env, result_ty) =
       if is_float_or_like_float env ty1 then
@@ -470,9 +490,15 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te ty
     else
+      let err =
+        if TypecheckerOptions.inc_dec_new_code (Env.get_tcopt env) then
+          Errors.inc_dec_invalid_argument
+        else
+          Errors.unify_error
+      in
       (* args isn't any or a variant thereof so can actually do stuff *)
       let (env, is_dynamic) =
-        check_dynamic_or_enforce_num env p ty (Reason.Rarith p)
+        check_dynamic_or_enforce_num env p ty (Reason.Rarith p) err
       in
       let result_ty =
         if is_dynamic then
@@ -492,7 +518,14 @@ let unop p env uop te ty =
       make_result env te ty
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, _) = check_dynamic_or_enforce_num env p ty (Reason.Rarith p) in
+      let (env, _) =
+        check_dynamic_or_enforce_num
+          env
+          p
+          ty
+          (Reason.Rarith p)
+          Errors.unify_error
+      in
       let (env, ty) = expand_type_and_narrow_to_int env p ty in
       let result_ty =
         if is_float env ty then

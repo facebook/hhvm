@@ -3413,6 +3413,8 @@ let strict_str_interp_type_mismatch =
 let bitwise_math_invalid_argument =
   maybe_unify_error Typing.BitwiseMathInvalidArgument
 
+let inc_dec_invalid_argument = maybe_unify_error Typing.IncDecInvalidArgument
+
 let using_error pos has_await ?code:_ msg _list =
   let (note, cls) =
     if has_await then

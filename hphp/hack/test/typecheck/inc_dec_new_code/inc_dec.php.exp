@@ -1,0 +1,24 @@
+File "inc_dec.php", line 11, characters 3-6:
+Typing error (Typing[4427])
+  File "inc_dec.php", line 11, characters 3-6:
+  Expected `num` because this is used in an arithmetic operation
+  File "inc_dec.php", line 10, characters 22-27:
+  But got `string`
+File "inc_dec.php", line 12, characters 3-6:
+Typing error (Typing[4427])
+  File "inc_dec.php", line 12, characters 3-6:
+  Expected `num` because this is used in an arithmetic operation
+  File "inc_dec.php", line 10, characters 22-27:
+  But got `string`
+File "inc_dec.php", line 13, characters 3-6:
+Typing error (Typing[4427])
+  File "inc_dec.php", line 13, characters 3-6:
+  Expected `num` because this is used in an arithmetic operation
+  File "inc_dec.php", line 10, characters 33-40:
+  But got `arraykey`
+File "inc_dec.php", line 14, characters 3-6:
+Typing error (Typing[4427])
+  File "inc_dec.php", line 14, characters 3-6:
+  Expected `num` because this is used in an arithmetic operation
+  File "inc_dec.php", line 10, characters 46-49:
+  But got `bool`

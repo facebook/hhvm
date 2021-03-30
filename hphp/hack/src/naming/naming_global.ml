@@ -149,7 +149,6 @@ module Env = struct
     ) else
       true
 
-  (* Dont check for errors, just add to canonical heap *)
   let new_fun_skip_if_already_bound ctx fn name =
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with

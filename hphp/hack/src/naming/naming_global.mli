@@ -37,21 +37,6 @@ module GEnv : sig
   val gconst_pos : Provider_context.t -> string -> Pos.t option
 end
 
-(* Function building the original naming environment.
- * This pass "declares" all the global names. The only checks done
- * here are whether an entity name was already bound (e.g. when
- * two files define the same function).
- * It all the entities passed as parameters and adds them to the shared heap.
- *)
-val make_env_error_if_already_bound :
-  Provider_context.t ->
-  funs:FileInfo.id list ->
-  classes:FileInfo.id list ->
-  record_defs:FileInfo.id list ->
-  typedefs:FileInfo.id list ->
-  consts:FileInfo.id list ->
-  unit
-
 (* Removing declarations *)
 val remove_decls :
   backend:Provider_backend.t ->
@@ -62,6 +47,21 @@ val remove_decls :
   consts:string list ->
   unit
 
+(** This function "declares" top-level names, i.e. adds
+them into the naming-table provider. The only checks done
+here are whether an entity name was already in the naming-table (e.g. when
+two files define the same function, up to case insensitivity). *)
+val ndecl_file_error_if_already_bound :
+  Provider_context.t ->
+  Relative_path.t ->
+  FileInfo.t ->
+  Errors.t * Relative_path.Set.t
+
+(** This function "declares" top-level names, i.e. adds them into
+the naming-table provider. If a name was already bound (up to case
+insensitivy) then this function just skips them, trusting that
+they're already okay, or that we wouldn't even be called in that
+situation in first place. *)
 val ndecl_file_skip_if_already_bound :
   Provider_context.t ->
   Relative_path.t ->
@@ -71,9 +71,3 @@ val ndecl_file_skip_if_already_bound :
   typedefs:SSet.t ->
   consts:SSet.t ->
   unit
-
-val ndecl_file_error_if_already_bound :
-  Provider_context.t ->
-  Relative_path.t ->
-  FileInfo.t ->
-  Errors.t * Relative_path.Set.t

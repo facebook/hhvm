@@ -1089,17 +1089,10 @@ let parse_and_name ctx files_contents =
       parsed_files
   in
   Relative_path.Map.iter files_info (fun fn fileinfo ->
-      Errors.run_in_context fn Errors.Naming (fun () ->
-          let { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
-            fileinfo
-          in
-          Naming_global.make_env_error_if_already_bound
-            ctx
-            ~funs
-            ~classes
-            ~record_defs
-            ~typedefs
-            ~consts));
+      let (errors, _failed_naming_fns) =
+        Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+      in
+      Errors.merge_into_current errors);
   (parsed_files, files_info)
 
 let parse_name_and_skip_decl ctx files_contents =

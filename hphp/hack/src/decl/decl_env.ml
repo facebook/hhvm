@@ -22,13 +22,11 @@ let root_decl_reference env =
 
 let make_decl_pos env pos =
   (* TODO: fail if root_decl_reference returns None *)
-  Option.fold (root_decl_reference env) ~init:pos ~f:(fun pos decl ->
-      Pos_or_decl.make_decl_pos pos decl)
+  Pos_or_decl.make_decl_pos_of_option pos (root_decl_reference env)
 
-let make_decl_posed env pos =
+let make_decl_posed env posed =
   (* TODO: fail if root_decl_reference returns None *)
-  Option.fold (root_decl_reference env) ~init:pos ~f:(fun pos decl ->
-      Positioned.make_for_decl pos decl)
+  Positioned.make_for_decl_of_option posed (root_decl_reference env)
 
 let tcopt env = Provider_context.get_tcopt env.ctx
 

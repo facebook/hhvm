@@ -25,7 +25,7 @@ type t = {
 
 (** Figures out if a class needs to be treated like an enum. *)
 val enum_kind :
-  Nast.sid ->
+  Typing_defs.pos_id ->
   Typing_defs.enum_type option ->
   Typing_defs.decl_ty option ->
   get_ancestor:(string -> Typing_defs.decl_phase Typing_defs.ty option) ->
@@ -35,7 +35,7 @@ val enum_kind :
     of the Enum. We don't do this for Enum<mixed> and Enum<arraykey>, since
     that could *lose* type information. *)
 val rewrite_class :
-  Nast.sid ->
+  Typing_defs.pos_id ->
   Typing_defs.enum_type option ->
   Typing_defs.decl_ty option ->
   get_ancestor:(string -> Typing_defs.decl_phase Typing_defs.ty option) ->

@@ -79,7 +79,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
-      ( Reason.Rwitness_from_decl (fst f.f_name),
+      ( Reason.Rwitness_from_decl fe_pos,
         Tfun
           {
             ft_arity = arity;

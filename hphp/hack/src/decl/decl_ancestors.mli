@@ -24,6 +24,6 @@ val req_ancestor_names :
 
 val all_requirements :
   lin_members:Decl_defs.linearization ->
-  (Pos.t * Typing_defs.decl_ty) Sequence.t
+  (Pos_or_decl.t * Typing_defs.decl_ty) Sequence.t
 
 val is_disposable : lin_members:Decl_defs.linearization -> bool Lazy.t

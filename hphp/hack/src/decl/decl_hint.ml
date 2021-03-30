@@ -72,14 +72,20 @@ and hint_ p env = function
     let t1 =
       match h1 with
       | Some h -> hint env h
-      | None -> mk (Typing_reason.Rvarray_or_darray_key p, Tprim Aast.Tarraykey)
+      | None ->
+        mk
+          ( Typing_reason.Rvarray_or_darray_key (Decl_env.make_decl_pos env p),
+            Tprim Aast.Tarraykey )
     in
     Tvarray_or_darray (t1, hint env h2)
   | Hvec_or_dict (h1, h2) ->
     let t1 =
       match h1 with
       | Some h -> hint env h
-      | None -> mk (Typing_reason.Rvec_or_dict_key p, Tprim Aast.Tarraykey)
+      | None ->
+        mk
+          ( Typing_reason.Rvec_or_dict_key (Decl_env.make_decl_pos env p),
+            Tprim Aast.Tarraykey )
     in
     Tvec_or_dict (t1, hint env h2)
   | Hprim p -> Tprim p

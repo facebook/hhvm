@@ -436,6 +436,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
            (string_list_opt "allowed_expression_tree_visitors" config)
            ~f:(fun l -> List.map l ~f:Utils.add_ns))
       ?tco_bitwise_math_new_code:(bool_opt "bitwise_math_new_code" config)
+      ?tco_inc_dec_new_code:(bool_opt "inc_dec_new_code" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

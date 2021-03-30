@@ -58,3 +58,5 @@ let assert_is_in_current_decl :
 let get_raw_pos_or_decl_reference :
     t -> [> `Raw of Pos.t | `Decl_ref of Decl_reference.t ] =
  (fun p -> `Raw p)
+
+let to_span p = Pos.set_file () p

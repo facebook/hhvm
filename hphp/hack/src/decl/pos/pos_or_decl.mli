@@ -67,3 +67,5 @@ val assert_is_in_current_decl :
     that this position belongs to. *)
 val get_raw_pos_or_decl_reference :
   t -> [> `Raw of Pos.t | `Decl_ref of Decl_reference.t ]
+
+val to_span : t -> unit Pos.pos

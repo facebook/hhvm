@@ -44,6 +44,7 @@ struct
     | Rwitness_from_decl p -> Rwitness_from_decl (pos_or_decl p)
     | Ridx (p, r) -> Ridx (pos p, reason r)
     | Ridx_vector p -> Ridx_vector (pos p)
+    | Ridx_vector_from_decl p -> Ridx_vector_from_decl (pos_or_decl p)
     | Rforeach p -> Rforeach (pos p)
     | Rasyncforeach p -> Rasyncforeach (pos p)
     | Rarith p -> Rarith (pos p)
@@ -73,17 +74,17 @@ struct
     | Runknown_class p -> Runknown_class (pos p)
     | Rvar_param p -> Rvar_param (pos p)
     | Rvar_param_from_decl p -> Rvar_param_from_decl (pos_or_decl p)
-    | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos p2, i)
-    | Rinout_param p -> Rinout_param (pos p)
+    | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos_or_decl p2, i)
+    | Rinout_param p -> Rinout_param (pos_or_decl p)
     | Rinstantiate (r1, x, r2) -> Rinstantiate (reason r1, x, reason r2)
     | Rarray_filter (p, r) -> Rarray_filter (pos p, reason r)
     | Rtypeconst (r1, (p, s1), s2, r2) ->
-      Rtypeconst (reason r1, (pos p, s1), s2, reason r2)
+      Rtypeconst (reason r1, (pos_or_decl p, s1), s2, reason r2)
     | Rtype_access (r1, ls) ->
       Rtype_access (reason r1, List.map ls ~f:(fun (r, s) -> (reason r, s)))
     | Rexpr_dep_type (r, p, n) -> Rexpr_dep_type (reason r, pos_or_decl p, n)
     | Rnullsafe_op p -> Rnullsafe_op (pos p)
-    | Rtconst_no_cstr id -> Rtconst_no_cstr (string_id id)
+    | Rtconst_no_cstr id -> Rtconst_no_cstr (positioned_id id)
     | Rpredicated (p, f) -> Rpredicated (pos p, f)
     | Ris p -> Ris (pos p)
     | Ras p -> Ras (pos p)
@@ -110,8 +111,11 @@ struct
     | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
     | Rtype_variable p -> Rtype_variable (pos p)
     | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
+    | Rglobal_type_variable_generics (p, t, s) ->
+      Rglobal_type_variable_generics (pos_or_decl p, t, s)
     | Rsolve_fail p -> Rsolve_fail (pos_or_decl p)
-    | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
+    | Rcstr_on_generics (p, sid) ->
+      Rcstr_on_generics (pos_or_decl p, positioned_id sid)
     | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
     | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
     | Renforceable p -> Renforceable (pos_or_decl p)
@@ -127,7 +131,7 @@ struct
     | Rconcat_operand p -> Rconcat_operand (pos p)
     | Rinterp_operand p -> Rinterp_operand (pos p)
     | Rdynamic_coercion r -> Rdynamic_coercion (reason r)
-    | Rsound_dynamic_callable p -> Rsound_dynamic_callable (pos p)
+    | Rsound_dynamic_callable p -> Rsound_dynamic_callable (pos_or_decl p)
 
   let rec ty t =
     let (p, x) = deref t in

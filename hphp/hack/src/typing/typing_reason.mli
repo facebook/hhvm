@@ -44,6 +44,12 @@ type decl_phase = private DeclPhase [@@deriving eq, show]
 
 type locl_phase = private LoclPhase [@@deriving eq, show]
 
+(* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
+ * To enforce that, any reason taking a Pos.t should be a locl_phase t_
+ * to prevent a decl ty from using it.
+ * Reasons used for decl types should be 'phase t_ so that they can be localized
+ * to be used in the localized version of the type. *)
+
 (** The reason why something is expected to have a certain type *)
 type _ t_ =
   | Rnone : 'phase t_
@@ -54,6 +60,7 @@ type _ t_ =
           array or string. Position of indexing,
           reason for the indexed type *)
   | Ridx_vector : Pos.t -> locl_phase t_
+  | Ridx_vector_from_decl : Pos_or_decl.t -> 'phase t_
       (** Used as an index, in the Vector case *)
   | Rforeach : Pos.t -> locl_phase t_
       (** Because it is iterated in a foreach loop *)
@@ -92,14 +99,14 @@ type _ t_ =
   | Runknown_class : Pos.t -> locl_phase t_
   | Rvar_param : Pos.t -> locl_phase t_
   | Rvar_param_from_decl : Pos_or_decl.t -> 'phase t_
-  | Runpack_param : Pos.t * Pos.t * int -> locl_phase t_
+  | Runpack_param : Pos.t * Pos_or_decl.t * int -> locl_phase t_
       (** splat pos, fun def pos, number of args before splat *)
-  | Rinout_param : Pos.t -> locl_phase t_
+  | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
   | Rarray_filter : Pos.t * locl_phase t_ -> locl_phase t_
   | Rtypeconst :
-      locl_phase t_ * (Pos.t * string) * string * locl_phase t_
-      -> locl_phase t_
+      'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
+      -> 'phase t_
   | Rtype_access :
       locl_phase t_ * (locl_phase t_ * string) list
       -> locl_phase t_
@@ -127,8 +134,11 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rglobal_type_variable_generics :
+      Pos_or_decl.t * string * string
+      -> 'phase t_
   | Rsolve_fail : Pos_or_decl.t -> 'phase t_
-  | Rcstr_on_generics : Pos.t * Aast.sid -> locl_phase t_
+  | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
   | Renforceable : Pos_or_decl.t -> 'phase t_
@@ -144,7 +154,7 @@ type _ t_ =
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
-  | Rsound_dynamic_callable : Pos.t -> 'phase t_
+  | Rsound_dynamic_callable : Pos_or_decl.t -> 'phase t_
 
 type t = locl_phase t_
 

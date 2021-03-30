@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0b523e683a481a47a9d2ce54dd8df7d6>>
+// @generated SignedSource<<d5fbb8bfdb14a0dcd2d72658d012f51a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -131,8 +131,9 @@ pub enum T_<'a> {
     /// array or string. Position of indexing,
     /// reason for the indexed type
     Ridx(&'a (&'a pos::Pos<'a>, T_<'a>)),
-    /// Used as an index, in the Vector case
     RidxVector(&'a pos::Pos<'a>),
+    /// Used as an index, in the Vector case
+    RidxVectorFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
     /// Because it is iterated in a foreach loop
     Rforeach(&'a pos::Pos<'a>),
     /// Because it is iterated "await as" in foreach
@@ -171,11 +172,18 @@ pub enum T_<'a> {
     RvarParam(&'a pos::Pos<'a>),
     RvarParamFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
     /// splat pos, fun def pos, number of args before splat
-    RunpackParam(&'a (&'a pos::Pos<'a>, &'a pos::Pos<'a>, isize)),
-    RinoutParam(&'a pos::Pos<'a>),
+    RunpackParam(&'a (&'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>, isize)),
+    RinoutParam(&'a pos_or_decl::PosOrDecl<'a>),
     Rinstantiate(&'a (T_<'a>, &'a str, T_<'a>)),
     RarrayFilter(&'a (&'a pos::Pos<'a>, T_<'a>)),
-    Rtypeconst(&'a (T_<'a>, (&'a pos::Pos<'a>, &'a str), &'a str, T_<'a>)),
+    Rtypeconst(
+        &'a (
+            T_<'a>,
+            (&'a pos_or_decl::PosOrDecl<'a>, &'a str),
+            &'a str,
+            T_<'a>,
+        ),
+    ),
     RtypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a str)])),
     RexprDepType(
         &'a (
@@ -206,8 +214,9 @@ pub enum T_<'a> {
     RimplicitUpperBound(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
     RtypeVariable(&'a pos::Pos<'a>),
     RtypeVariableGenerics(&'a (&'a pos::Pos<'a>, &'a str, &'a str)),
+    RglobalTypeVariableGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, &'a str)),
     RsolveFail(&'a pos_or_decl::PosOrDecl<'a>),
-    RcstrOnGenerics(&'a (&'a pos::Pos<'a>, aast::Sid<'a>)),
+    RcstrOnGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, PosId<'a>)),
     RlambdaParam(&'a (&'a pos::Pos<'a>, T_<'a>)),
     Rshape(&'a (&'a pos::Pos<'a>, &'a str)),
     Renforceable(&'a pos_or_decl::PosOrDecl<'a>),
@@ -223,7 +232,7 @@ pub enum T_<'a> {
     RconcatOperand(&'a pos::Pos<'a>),
     RinterpOperand(&'a pos::Pos<'a>),
     RdynamicCoercion(&'a T_<'a>),
-    RsoundDynamicCallable(&'a pos::Pos<'a>),
+    RsoundDynamicCallable(&'a pos_or_decl::PosOrDecl<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 

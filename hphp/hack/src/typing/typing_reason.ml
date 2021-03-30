@@ -39,6 +39,12 @@ type decl_phase = private DeclPhase [@@deriving eq, show]
 
 type locl_phase = private LoclPhase [@@deriving eq, show]
 
+(* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
+ * To enforce that, any reason taking a Pos.t should be a locl_phase t_
+ * to prevent a decl ty from using it.
+ * Reasons used for decl types should be 'phase t_ so that they can be localized
+ * to be used in the localized version of the type. *)
+
 (** The reason why something is expected to have a certain type *)
 type _ t_ =
   | Rnone : 'phase t_
@@ -49,6 +55,7 @@ type _ t_ =
           array or string. Position of indexing,
           reason for the indexed type *)
   | Ridx_vector : Pos.t -> locl_phase t_
+  | Ridx_vector_from_decl : Pos_or_decl.t -> 'phase t_
       (** Used as an index, in the Vector case *)
   | Rforeach : Pos.t -> locl_phase t_
       (** Because it is iterated in a foreach loop *)
@@ -87,14 +94,14 @@ type _ t_ =
   | Runknown_class : Pos.t -> locl_phase t_
   | Rvar_param : Pos.t -> locl_phase t_
   | Rvar_param_from_decl : Pos_or_decl.t -> 'phase t_
-  | Runpack_param : Pos.t * Pos.t * int -> locl_phase t_
+  | Runpack_param : Pos.t * Pos_or_decl.t * int -> locl_phase t_
       (** splat pos, fun def pos, number of args before splat *)
-  | Rinout_param : Pos.t -> locl_phase t_
+  | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
   | Rarray_filter : Pos.t * locl_phase t_ -> locl_phase t_
   | Rtypeconst :
-      locl_phase t_ * (Pos.t * string) * string * locl_phase t_
-      -> locl_phase t_
+      'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
+      -> 'phase t_
   | Rtype_access :
       locl_phase t_ * (locl_phase t_ * string) list
       -> locl_phase t_
@@ -122,8 +129,11 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rglobal_type_variable_generics :
+      Pos_or_decl.t * string * string
+      -> 'phase t_
   | Rsolve_fail : Pos_or_decl.t -> 'phase t_
-  | Rcstr_on_generics : Pos.t * Aast.sid -> locl_phase t_
+  | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
   | Renforceable : Pos_or_decl.t -> 'phase t_
@@ -139,7 +149,7 @@ type _ t_ =
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
-  | Rsound_dynamic_callable : Pos.t -> 'phase t_
+  | Rsound_dynamic_callable : Pos_or_decl.t -> 'phase t_
 
 type t = locl_phase t_
 
@@ -151,6 +161,10 @@ let is_none = function
 
 let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rnone -> Rnone
+  | Ridx_vector_from_decl p -> Ridx_vector_from_decl p
+  | Rinout_param p -> Rinout_param p
+  | Rtypeconst (r1, p, q, r2) -> Rtypeconst (localize r1, p, q, localize r2)
+  | Rcstr_on_generics (a, b) -> Rcstr_on_generics (a, b)
   | Rwitness_from_decl p -> Rwitness_from_decl p
   | Rret_fun_kind_from_decl (p, r) -> Rret_fun_kind_from_decl (p, r)
   | Rclass_class (p, r) -> Rclass_class (p, r)
@@ -170,7 +184,9 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rtconst_no_cstr id -> Rtconst_no_cstr id
   | Rdefault_capability p -> Rdefault_capability p
   | Rdynamic_coercion r -> Rdynamic_coercion r
-  | Rsound_dynamic_callable r -> Rsound_dynamic_callable r
+  | Rsound_dynamic_callable p -> Rsound_dynamic_callable p
+  | Rglobal_type_variable_generics (p, tp, n) ->
+    Rglobal_type_variable_generics (p, tp, n)
 
 let arg_pos_str ap =
   match ap with
@@ -196,7 +212,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
           | _ -> to_pos r2),
           "This can only be indexed with integers" );
       ]
-  | Ridx_vector _ ->
+  | Ridx_vector _
+  | Ridx_vector_from_decl _ ->
     [
       ( p,
         prefix
@@ -382,7 +399,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         r_inst
   | Rtype_variable _ ->
     [(p, prefix ^ " because a type could not be determined here")]
-  | Rtype_variable_generics (_, tp_name, s) ->
+  | Rtype_variable_generics (_, tp_name, s)
+  | Rglobal_type_variable_generics (_, tp_name, s) ->
     [
       ( p,
         prefix
@@ -411,7 +429,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         prefix ^ "\n  "
     in
     [
-      ( Pos_or_decl.of_raw_pos pos,
+      ( pos,
         sprintf
           "%sby accessing the type constant %s"
           prefix
@@ -421,8 +439,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
     to_string prefix r_orig
     @ [
-        ( Pos_or_decl.of_raw_pos pos,
-          sprintf "  resulting from accessing the type constant '%s'" tconst );
+        (pos, sprintf "  resulting from accessing the type constant '%s'" tconst);
       ]
     @ to_string ("  on " ^ ty_str) r_root
   | Rtype_access (Rtypeconst (Rnone, _, _, _), (r, _) :: l) ->
@@ -573,7 +590,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
   | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
   | Rdynamic_coercion r -> to_string prefix r
-  | Rsound_dynamic_callable p ->
+  | Rsound_dynamic_callable _ ->
     [(p, prefix ^ " because method must be callable in a dynamic context")]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -601,6 +618,13 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rvarray_or_darray_key p
   | Rvec_or_dict_key p
   | Rdefault_capability p
+  | Rtconst_no_cstr (p, _)
+  | Rtypeconst (Rnone, (p, _), _, _)
+  | Rcstr_on_generics (p, _)
+  | Rglobal_type_variable_generics (p, _, _)
+  | Ridx_vector_from_decl p
+  | Rinout_param p
+  | Rsound_dynamic_callable p
   | Rglobal_class_prop p ->
     p
   | Rwitness p
@@ -630,11 +654,8 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Runknown_class p
   | Rvar_param p
   | Runpack_param (p, _, _)
-  | Rinout_param p
-  | Rtypeconst (Rnone, (p, _), _, _)
   | Rarray_filter (p, _)
   | Rnullsafe_op p
-  | Rtconst_no_cstr (p, _)
   | Rpredicated (p, _)
   | Ris p
   | Ras p
@@ -653,7 +674,6 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rincdec_dynamic p
   | Rtype_variable p
   | Rtype_variable_generics (p, _, _)
-  | Rcstr_on_generics (p, _)
   | Rlambda_param (p, _)
   | Rshape (p, _)
   | Rdestructure p
@@ -662,17 +682,16 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ret_boolean p
   | Rhack_arr_dv_arrs p
   | Rconcat_operand p
-  | Rinterp_operand p
-  | Rsound_dynamic_callable p ->
+  | Rinterp_operand p ->
     Pos_or_decl.of_raw_pos p
   | Rinvariant_generic (r, _)
   | Rcontravariant_generic (r, _)
   | Rtype_access (r, _)
-  | Rlost_info (_, r, _)
-  | Rtypeconst (r, _, _, _) ->
+  | Rlost_info (_, r, _) ->
     to_raw_pos r
   | Rinstantiate (_, _, r)
-  | Rexpr_dep_type (r, _, _) ->
+  | Rexpr_dep_type (r, _, _)
+  | Rtypeconst (r, _, _, _) ->
     to_raw_pos r
   | Rdynamic_coercion r -> to_raw_pos r
 
@@ -721,6 +740,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rwitness_from_decl _ -> "Rwitness_from_decl"
   | Ridx _ -> "Ridx"
   | Ridx_vector _ -> "Ridx_vector"
+  | Ridx_vector_from_decl _ -> "Ridx_vector_from_decl"
   | Rforeach _ -> "Rforeach"
   | Rasyncforeach _ -> "Rasyncforeach"
   | Rarith _ -> "Rarith"
@@ -782,6 +802,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"
   | Rtype_variable_generics _ -> "Rtype_variable_generics"
+  | Rglobal_type_variable_generics _ -> "Rglobal_type_variable_generics"
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"

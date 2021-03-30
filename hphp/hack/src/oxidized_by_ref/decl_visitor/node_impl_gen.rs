@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5661820e1a8ed026f9259ad1b602cc24>>
+// @generated SignedSource<<818c988502579bceff20743df01d00ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -357,21 +357,6 @@ impl<'a> Node<'a> for FunType<'a> {
                     __binding_6.accept(v)
                 }
                 { __binding_7.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Id<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_id(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Id(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
             }
         }
     }
@@ -768,6 +753,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RwitnessFromDecl(ref __binding_0) => __binding_0.accept(v),
             T_::Ridx(ref __binding_0) => __binding_0.accept(v),
             T_::RidxVector(ref __binding_0) => __binding_0.accept(v),
+            T_::RidxVectorFromDecl(ref __binding_0) => __binding_0.accept(v),
             T_::Rforeach(ref __binding_0) => __binding_0.accept(v),
             T_::Rasyncforeach(ref __binding_0) => __binding_0.accept(v),
             T_::Rarith(ref __binding_0) => __binding_0.accept(v),
@@ -829,6 +815,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RimplicitUpperBound(ref __binding_0) => __binding_0.accept(v),
             T_::RtypeVariable(ref __binding_0) => __binding_0.accept(v),
             T_::RtypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
+            T_::RglobalTypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
             T_::RsolveFail(ref __binding_0) => __binding_0.accept(v),
             T_::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
             T_::RlambdaParam(ref __binding_0) => __binding_0.accept(v),

@@ -491,22 +491,22 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
     fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), (Pos, String)> {
         use aast::Expr_::*;
 
-        let pos = e.0.clone();
-
-        let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
+        let mk_splice = |e: Expr| -> Expr { Expr::new(e.0.clone(), Expr_::ETSplice(Box::new(e))) };
 
         match &mut e.1 {
             // Convert `foo(...)` to `${ Visitor::liftSymbol(foo<>) }(...)`
             Call(ref mut call) => {
-                let (ref recv, ref targs, ref mut args, ref variadic) = **call;
+                let (ref recv, ref mut targs, ref mut args, ref variadic) = **call;
 
-                if variadic.is_some() {
+                if let Some(variadic) = variadic {
                     return Err((
-                        pos,
+                        variadic.0.clone(),
                         "Expression trees do not support variadic calls.".into(),
                     ));
                 }
-                if !targs.is_empty() {
+
+                if let Some(targ) = targs.pop() {
+                    let pos = (targ.1).0;
                     return Err((
                         pos,
                         "Expression trees do not support function calls with generics.".into(),
@@ -515,6 +515,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
 
                 match &recv.1 {
                     Id(sid) => {
+                        let pos = sid.0.clone();
                         let fp = Expr::new(
                             pos.clone(),
                             Expr_::FunctionPointer(Box::new((
@@ -535,6 +536,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
                     }
                     // Convert `Foo::bar(...)` to `${ Visitor::liftSymbol(Foo::bar<>) }(...)`
                     ClassConst(cc) => {
+                        let pos = recv.0.clone();
                         let (ref cid, ref s) = **cc;
                         if let ClassId_::CIexpr(Expr(_, Id(sid))) = &cid.1 {
                             if sid.1 == classes::PARENT

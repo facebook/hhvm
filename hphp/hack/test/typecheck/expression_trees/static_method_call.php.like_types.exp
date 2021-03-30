@@ -1,4 +1,4 @@
-File "static_method_call.php", line 14, characters 20-38:
+File "static_method_call.php", line 14, characters 20-31:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "expr_tree.hhi", line 48, characters 6-34:
   But got `dynamic` because it is an unenforceable type

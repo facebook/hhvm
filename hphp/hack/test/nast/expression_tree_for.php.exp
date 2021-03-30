@@ -37,13 +37,13 @@
                                      ([4:45-46],
                                       (Binop ((Eq None), ([4:45-46], (Lvar ([4:45-46], $0splice2))),
                                          ([4:45-46], (Call (([4:45-46], (Class_const (([4:45-46], (CI ([4:45-46], "\\Code"))), ([4:45-46], "liftInt")))), [], [([4:45-46], (Int "1"))], None))))))));
-                                 ([4:50-55],
+                                 ([4:50-53],
                                   (Expr
-                                     ([4:50-55],
-                                      (Binop ((Eq None), ([4:50-55], (Lvar ([4:50-55], $0splice3))),
-                                         ([4:50-55],
-                                          (Call (([4:50-55], (Class_const (([4:50-55], (CI ([4:50-55], "\\Code"))), ([4:50-55], "liftSymbol")))), 
-                                             [], [([4:50-55], (FunctionPointer ((FP_id ([4:50-53], "\\foo")), [])))], None)))
+                                     ([4:50-53],
+                                      (Binop ((Eq None), ([4:50-53], (Lvar ([4:50-53], $0splice3))),
+                                         ([4:50-53],
+                                          (Call (([4:50-53], (Class_const (([4:50-53], (CI ([4:50-53], "\\Code"))), ([4:50-53], "liftSymbol")))), 
+                                             [], [([4:50-53], (FunctionPointer ((FP_id ([4:50-53], "\\foo")), [])))], None)))
                                          )))));
                                  ([4:8-60],
                                   (Expr
@@ -295,21 +295,21 @@
                                                                     [Pos.none], (Int "49")); (
                                                                     [Pos.none], (Int "4")); (
                                                                     [Pos.none], (Int "54"))], None, [4:50-55])));
-                                                                    ([4:50-55],
+                                                                    ([4:50-53],
                                                                     (Call ((
-                                                                    [4:50-55], (Obj_get (([4:50-55], (Lvar ([4:50-55], $v))), ([4:50-55], (Id ([4:50-55], "splice"))), OG_nullthrows, false))), 
+                                                                    [4:50-53], (Obj_get (([4:50-53], (Lvar ([4:50-53], $v))), ([4:50-53], (Id ([4:50-53], "splice"))), OG_nullthrows, false))), 
                                                                     [],
-                                                                    [([4:50-55],
+                                                                    [([4:50-53],
                                                                     (New ((
-                                                                    [4:50-55], (CI ([4:50-55], "\\ExprPos"))), 
+                                                                    [4:50-53], (CI ([4:50-53], "\\ExprPos"))), 
                                                                     [],
                                                                     [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
                                                                     [Pos.none], (Int "4")); (
                                                                     [Pos.none], (Int "49")); (
                                                                     [Pos.none], (Int "4")); (
-                                                                    [Pos.none], (Int "54"))], None, [4:50-55]))); (
+                                                                    [Pos.none], (Int "52"))], None, [4:50-53]))); (
                                                                     [Pos.none], (String "$0splice3")); (
-                                                                    [4:50-55], (Lvar ([4:50-55], $0splice3)))], None))); (
+                                                                    [4:50-53], (Lvar ([4:50-53], $0splice3)))], None))); (
                                                                     [Pos.none], (ValCollection (Vec, None, [])))], None)))])))], None)));
                                                                     ([4:8-60],
                                                                     (Call ((
@@ -358,7 +358,7 @@
                                                          ns_is_codegen = false; 
                                                          ns_disable_xhp_element_mangling = false };
                                                        f_doc_comment = None },
-                                                     [([4:8-60], $0splice4); ([4:50-55], $0splice3); ([4:45-46], $0splice2); ([4:29-33], $0splice1); ([4:26-27], $0splice0)])));
+                                                     [([4:8-60], $0splice4); ([4:50-53], $0splice3); ([4:45-46], $0splice2); ([4:29-33], $0splice1); ([4:26-27], $0splice0)])));
                                                  ([4:8-60],
                                                   (Efun (
                                                      { f_span = [4:8-60]; 
@@ -417,7 +417,7 @@
                                                                     [4:40-46], (Obj_get (([4:40-42], (Lvar ([4:40-42], $i))), ([4:40-46], (Id ([4:40-46], "__plus"))), OG_nullthrows, false))), 
                                                                     [], 
                                                                     [([4:45-46], (ET_Splice ([4:45-46], (Lvar ([4:45-46], $0splice2)))))], None))))))],
-                                                                    [([4:50-56], (Expr ([4:50-55], (Call (([4:50-55], (ET_Splice ([4:50-55], (Lvar ([4:50-55], $0splice3))))), [], [], None)))))])));
+                                                                    [([4:50-56], (Expr ([4:50-55], (Call (([4:50-53], (ET_Splice ([4:50-53], (Lvar ([4:50-53], $0splice3))))), [], [], None)))))])));
                                                                     ([4:8-60], (Return (Some ([4:8-60], (ET_Splice ([4:8-60], (Lvar ([4:8-60], $0splice4))))))))]; 
                                                                     fb_annotation = Named };
                                                                    f_fun_kind = FSync; 
@@ -435,7 +435,7 @@
                                                                     ns_is_codegen = false; 
                                                                     ns_disable_xhp_element_mangling = false };
                                                                    f_doc_comment = None },
-                                                                 [([4:8-60], $0splice4); ([4:45-46], $0splice2); ([4:50-55], $0splice3); ([4:29-33], $0splice1); ([4:26-27], $0splice0)]))))))
+                                                                 [([4:8-60], $0splice4); ([4:45-46], $0splice2); ([4:50-53], $0splice3); ([4:29-33], $0splice1); ([4:26-27], $0splice0)]))))))
                                                            ];
                                                          fb_annotation = Named };
                                                        f_fun_kind = FSync; 

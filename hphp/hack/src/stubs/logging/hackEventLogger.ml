@@ -261,7 +261,7 @@ let run_search_end _ = ()
 
 let update_search_end _ = ()
 
-let fast_naming_end _ = ()
+let naming_from_saved_state_end _ = ()
 
 let type_decl_end _ = ()
 

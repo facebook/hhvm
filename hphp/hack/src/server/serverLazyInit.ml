@@ -452,18 +452,10 @@ let use_precomputed_state_exn
     naming_table_manifold_path = None;
   }
 
-(* Run naming from a fast generated from saved state.
- * No errors are generated because we assume the fast is directly from
- * a clean state.
- *)
-let naming_with_fast
-    (ctx : Provider_context.t) (fast : Naming_table.t) (t : float) : float =
-  Naming_table.fold fast ~init:() ~f:(fun k info () ->
-      Naming_global.ndecl_file_skip_if_already_bound ctx k info);
-  HackEventLogger.fast_naming_end t;
-  hh_log_heap ();
-  Hh_logger.log_duration "Naming fast" t
-
+(** This function ensures the naming-table is ready for us to do "naming" on the dirty files
+("parsing_files"), i.e. check all the symbols in them, add them to the naming table, and report
+errors if any of the dirty files had duplicate names.
+*)
 let naming_from_saved_state
     (ctx : Provider_context.t)
     (old_naming_table : Naming_table.t)
@@ -475,43 +467,48 @@ let naming_from_saved_state
     ~profiling
     ~stage:"naming from saved state"
   @@ fun () ->
-  (* If we're falling back to SQLite we don't need to explicitly do a naming
-     pass, but if we're not then we do. *)
-  match naming_table_fallback_fn with
-  | Some _ ->
-    (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
+  begin
+    match naming_table_fallback_fn with
+    | Some _ ->
+      (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)
-    Relative_path.Set.iter parsing_files (fun k ->
-        match Naming_table.get_file_info old_naming_table k with
-        | None ->
-          (* If we can't find the file in [old_naming_table] we don't consider that an error, since
-           * it could be a new file that was added. *)
-          ()
-        | Some v ->
-          let backend = Provider_context.get_backend ctx in
-          Naming_provider.remove_type_batch
-            backend
-            (v.FileInfo.classes |> List.map ~f:snd);
-          Naming_provider.remove_type_batch
-            backend
-            (v.FileInfo.typedefs |> List.map ~f:snd);
-          Naming_provider.remove_type_batch
-            backend
-            (v.FileInfo.record_defs |> List.map ~f:snd);
-          Naming_provider.remove_fun_batch
-            backend
-            (v.FileInfo.funs |> List.map ~f:snd);
-          Naming_provider.remove_const_batch
-            backend
-            (v.FileInfo.consts |> List.map ~f:snd));
-    Unix.gettimeofday ()
-  | None ->
-    (* Name all the files from the old fast (except the new ones we parsed) *)
-    let old_hack_names =
-      Naming_table.filter old_naming_table (fun k _v ->
-          not (Relative_path.Set.mem parsing_files k))
-    in
-    naming_with_fast ctx old_hack_names t
+      Relative_path.Set.iter parsing_files (fun k ->
+          match Naming_table.get_file_info old_naming_table k with
+          | None ->
+            (* If we can't find the file in [old_naming_table] we don't consider that an error, since
+             * it could be a new file that was added. *)
+            ()
+          | Some v ->
+            let backend = Provider_context.get_backend ctx in
+            Naming_provider.remove_type_batch
+              backend
+              (v.FileInfo.classes |> List.map ~f:snd);
+            Naming_provider.remove_type_batch
+              backend
+              (v.FileInfo.typedefs |> List.map ~f:snd);
+            Naming_provider.remove_type_batch
+              backend
+              (v.FileInfo.record_defs |> List.map ~f:snd);
+            Naming_provider.remove_fun_batch
+              backend
+              (v.FileInfo.funs |> List.map ~f:snd);
+            Naming_provider.remove_const_batch
+              backend
+              (v.FileInfo.consts |> List.map ~f:snd))
+    | None ->
+      (* Name all the files from the old naming-table (except the new ones we parsed since
+    they'll be named by our caller, next). We assume the old naming-table came from a clean
+    state, which is why we skip checking for "already bound" conditions. *)
+      let old_hack_names =
+        Naming_table.filter old_naming_table (fun k _v ->
+            not (Relative_path.Set.mem parsing_files k))
+      in
+      Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
+          Naming_global.ndecl_file_skip_if_already_bound ctx k info);
+      hh_log_heap ()
+  end;
+  HackEventLogger.naming_from_saved_state_end t;
+  Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t
 
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)

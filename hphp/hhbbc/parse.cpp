@@ -249,13 +249,13 @@ template<class T> void decode(PC& pc, T& val) {
 MKey make_mkey(const php::Func& /*func*/, MemberKey mk) {
   switch (mk.mcode) {
     case MEL: case MPL:
-      return MKey{mk.mcode, mk.local};
+      return MKey{mk.mcode, mk.local, mk.rop};
     case MEC: case MPC:
-      return MKey{mk.mcode, mk.iva};
+      return MKey{mk.mcode, mk.iva, mk.rop};
     case MET: case MPT: case MQT:
-      return MKey{mk.mcode, mk.litstr};
+      return MKey{mk.mcode, mk.litstr, mk.rop};
     case MEI:
-      return MKey{mk.mcode, mk.int64};
+      return MKey{mk.mcode, mk.int64, mk.rop};
     case MW:
       return MKey{};
   }

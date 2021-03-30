@@ -79,30 +79,36 @@ inline bool operator!=(NamedLocal a, NamedLocal b) {
 struct MKey {
   MKey()
     : mcode{MW}
+    , rop{ReadOnlyOp::Any}
     , int64{0}
   {}
 
-  MKey(MemberCode mcode, NamedLocal local)
+  MKey(MemberCode mcode, NamedLocal local, ReadOnlyOp rop)
     : mcode{mcode}
+    , rop{rop}
     , local{local}
   {}
 
-  MKey(MemberCode mcode, int32_t idx)
+  MKey(MemberCode mcode, int32_t idx, ReadOnlyOp rop)
     : mcode{mcode}
+    , rop{rop}
     , idx{idx}
   {}
 
-  MKey(MemberCode mcode, int64_t int64)
+  MKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop)
     : mcode{mcode}
+    , rop{rop}
     , int64{int64}
   {}
 
-  MKey(MemberCode mcode, SString litstr)
+  MKey(MemberCode mcode, SString litstr, ReadOnlyOp rop)
     : mcode{mcode}
+    , rop{rop}
     , litstr{litstr}
   {}
 
   MemberCode mcode;
+  ReadOnlyOp rop;
   union {
     SString litstr;
     int64_t int64;
@@ -112,7 +118,7 @@ struct MKey {
 };
 
 inline bool operator==(MKey a, MKey b) {
-  return a.mcode == b.mcode && a.int64 == b.int64;
+  return a.mcode == b.mcode && a.int64 == b.int64 && a.rop == b.rop;
 }
 
 inline bool operator!=(MKey a, MKey b) {
@@ -592,7 +598,8 @@ struct hasher_impl {
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
 
   static size_t hash(MKey mkey) {
-    return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
+    auto hash = HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
+    return HPHP::hash_int64_pair(hash, (uint64_t)mkey.rop);
   }
 
   template<class T>

@@ -121,10 +121,20 @@ T decode(const Buffer& buffer, size_t& pos) {
   if constexpr (std::is_same<T, MKey>::value) {
     auto const mcode = DECODE_MEMBER(mcode);
     switch (mcode) {
-      case MET: case MPT: case MQT: return T(mcode, DECODE_MEMBER(litstr));
-      case MEI: case MEC: case MPC: return T(mcode, DECODE_MEMBER(int64));
-      case MEL: case MPL:           return T(mcode, DECODE_MEMBER(local));
-      case MW:                      return T();
+      case MET: case MPT: case MQT: {
+        auto const litstr = DECODE_MEMBER(litstr);
+        return T(mcode, litstr, DECODE_MEMBER(rop));
+      }
+      case MEI: case MEC: case MPC: {
+        auto const iva = DECODE_MEMBER(int64);
+        return T(mcode, iva, DECODE_MEMBER(rop));
+      }
+      case MEL: case MPL: {
+        auto const local = DECODE_MEMBER(local); 
+        return T(mcode, local, DECODE_MEMBER(rop));
+      }
+      case MW:                      
+        return T();
     }
   }
 
@@ -210,10 +220,20 @@ void encode(Buffer& buffer, const T& data) {
   } else if constexpr (std::is_same<T, MKey>::value) {
     encode(buffer, data.mcode);
     switch (data.mcode) {
-      case MET: case MPT: case MQT: encode(buffer, data.litstr); break;
-      case MEI: case MEC: case MPC: encode(buffer, data.int64);  break;
-      case MEL: case MPL:           encode(buffer, data.local);  break;
-      case MW:                                                   break;
+      case MET: case MPT: case MQT:
+        encode(buffer, data.litstr);
+        encode(buffer, data.rop);
+        break;
+      case MEI: case MEC: case MPC:
+        encode(buffer, data.int64);
+        encode(buffer, data.rop);
+        break;
+      case MEL: case MPL:
+        encode(buffer, data.local);
+        encode(buffer, data.rop);
+        break;
+      case MW:                                               
+        break;
     }
 
   } else if constexpr (std::is_same<T, NamedLocal>::value) {

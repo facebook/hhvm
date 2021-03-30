@@ -678,4 +678,3 @@ void vectorSetImplS(c_Vector* vector, StringData* key, TypedValue value) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

@@ -130,22 +130,23 @@ int immSize(Op op, ArgType type, PC immPC) {
   }
 
   if (type == KA) {
+    // 1 byte for member code, 1 byte for readonly op
     switch (decode_raw<MemberCode>(pc)) {
       case MW:
         return 1;
       case MEC: case MPC:
-        return 1 + encoded_iva_size(decode_raw<uint8_t>(pc));
+        return 2 + encoded_iva_size(decode_raw<uint8_t>(pc));
       case MEL: case MPL: {
         auto nextPC = pc;
         auto const nameSize = encoded_iva_size(decode_raw<uint8_t>(pc));
         nextPC += nameSize;
         auto const locSize = encoded_iva_size(decode_raw<uint8_t>(nextPC));
-        return 1 + nameSize + locSize;
+        return 2 + nameSize + locSize;
       }
       case MEI:
-        return 1 + sizeof(int64_t);
+        return 2 + sizeof(int64_t);
       case MET: case MPT: case MQT:
-        return 1 + sizeof(Id);
+        return 2 + sizeof(Id);
     }
     not_reached();
   }

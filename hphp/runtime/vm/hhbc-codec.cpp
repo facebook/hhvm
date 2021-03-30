@@ -46,17 +46,21 @@ MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
   auto const mcode = static_cast<MemberCode>(decode_byte(pc));
 
   switch (mcode) {
-    case MEC: case MPC:
-      return MemberKey{mcode, static_cast<int32_t>(decode_iva(pc))};
-
-    case MEL: case MPL:
-      return MemberKey{mcode, decode_named_local(pc)};
-
-    case MEI:
-      return MemberKey{mcode, decode_raw<int64_t>(pc)};
-
+    case MEC: case MPC: {
+      auto const iva = static_cast<int32_t>(decode_iva(pc));
+      return MemberKey{mcode, iva, decode_oa<ReadOnlyOp>(pc)};
+    }
+    case MEL: case MPL: {
+      auto const local = decode_named_local(pc);
+      return MemberKey{mcode, local, decode_oa<ReadOnlyOp>(pc)};
+    }
+    case MEI: {
+      auto const i64 = decode_raw<int64_t>(pc);
+      return MemberKey{mcode, i64, decode_oa<ReadOnlyOp>(pc)};
+    }
     case MET: case MPT: case MQT: {
-      return MemberKey{mcode, decode_string(pc, u)};
+      auto const str = decode_string(pc, u);
+      return MemberKey{mcode, str, decode_oa<ReadOnlyOp>(pc)};
     }
 
     case MW:
@@ -71,18 +75,22 @@ void encode_member_key(MemberKey mk, FuncEmitter& fe) {
   switch (mk.mcode) {
     case MEC: case MPC:
       fe.emitIVA(mk.iva);
+      fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 
     case MEL: case MPL:
       fe.emitNamedLocal(mk.local);
+      fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 
     case MEI:
       fe.emitInt64(mk.int64);
+      fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 
     case MET: case MPT: case MQT:
       fe.emitInt32(fe.ue().mergeLitstr(mk.litstr));
+      fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 
     case MW:

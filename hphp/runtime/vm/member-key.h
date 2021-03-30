@@ -99,25 +99,25 @@ struct MemberKey {
     , int64{0}
   {}
 
-  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , local{loc}
   {}
 
-  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , iva{iva}
   {}
 
-  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , int64{int64}
   {}
 
-  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , litstr{litstr}
@@ -134,7 +134,7 @@ struct MemberKey {
 };
 
 inline bool operator==(MemberKey a, MemberKey b) {
-  return a.mcode == b.mcode && a.int64 == b.int64;
+  return a.mcode == b.mcode && a.int64 == b.int64 && a.rop == b.rop;
 }
 inline bool operator!=(MemberKey a, MemberKey b) {
   return !(a == b);

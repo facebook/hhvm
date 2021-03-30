@@ -625,17 +625,21 @@ bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
       decode_iva(pc);
       auto const loc = decode_iva(pc);
       ok &= checkLocal(pc, loc);
+      decode_oa<ReadOnlyOp>(pc);
       break;
     }
     case MEC: case MPC:
       decode_iva(pc);
+      decode_oa<ReadOnlyOp>(pc);
       break;
     case MEI:
       pc += sizeof(int64_t);
+      decode_oa<ReadOnlyOp>(pc);
       break;
     case MET: case MPT: case MQT:
       auto const id = decode_raw<Id>(pc);
       ok &= checkString(pc, id);
+      decode_oa<ReadOnlyOp>(pc);
       break;
   }
 
@@ -869,6 +873,8 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
   }
 
   uint32_t iva = 0;
+  ReadOnlyOp rop = ReadOnlyOp::Any;
+  
   switch (mcode) {
     case MET: case MPT: case MQT: {
       auto const id = decode_raw<Id>(pc);
@@ -877,18 +883,30 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
               opcodeToName(op));
         return false;
       }
+      rop = decode_oa<ReadOnlyOp>(pc);
       break;
     }
 
-    case MEC: case MPC: iva = decode_iva(pc); break;
-    case MEL: case MPL: decode_iva(pc); decode_iva(pc); break;
-    case MEI:                               decode_raw<int64_t>(pc); break;
-    case MW:                                break;
+    case MEC: case MPC:
+      iva = decode_iva(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
+      break;
+    case MEL: case MPL:
+      decode_iva(pc);
+      decode_iva(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
+      break;
+    case MEI:                               
+      decode_raw<int64_t>(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
+      break;
+    case MW:                                
+      break;
   }
 
   if ((mcode == MemberCode::MEC || mcode == MemberCode::MPC) &&
       iva + 1 > cur->stklen) {
-    MemberKey key{mcode, static_cast<int32_t>(iva)};
+    MemberKey key{mcode, static_cast<int32_t>(iva), rop};
     error("Member Key %s in op %s has stack offset greater than stack"
           " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
     return false;

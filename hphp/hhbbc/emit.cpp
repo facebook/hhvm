@@ -317,13 +317,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
   auto make_member_key = [&] (MKey mkey) {
     switch (mkey.mcode) {
       case MEC: case MPC:
-        return MemberKey{mkey.mcode, static_cast<int32_t>(mkey.idx)};
+        return MemberKey{mkey.mcode, static_cast<int32_t>(mkey.idx), mkey.rop};
       case MEL: case MPL:
-        return MemberKey{mkey.mcode, map_local_name(mkey.local)};
+        return MemberKey{mkey.mcode, map_local_name(mkey.local), mkey.rop};
       case MET: case MPT: case MQT:
-        return MemberKey{mkey.mcode, mkey.litstr};
+        return MemberKey{mkey.mcode, mkey.litstr, mkey.rop};
       case MEI:
-        return MemberKey{mkey.mcode, mkey.int64};
+        return MemberKey{mkey.mcode, mkey.int64, mkey.rop};
       case MW:
         return MemberKey{};
     }

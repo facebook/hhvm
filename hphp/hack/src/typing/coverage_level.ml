@@ -58,11 +58,11 @@ let merge_pos_stats_samples l1 l2 =
 
 let add_sample_pos p samples = merge_pos_stats_samples samples [p]
 
-let incr_reason_stats r p reason_stats =
+let incr_reason_stats (ctx : Provider_context.t) r p reason_stats =
   if sample_rate = 0 || Random.int sample_rate <> 0 then
     reason_stats
   else
-    let reason_pos = Reason.to_pos r in
+    let reason_pos = Reason.to_pos r |> Naming_provider.resolve_position ctx in
     let string_key = Reason.to_constructor_string r in
     let pos_stats_map =
       match SMap.find_opt string_key reason_stats with
@@ -85,11 +85,14 @@ let incr_reason_stats r p reason_stats =
       (Pos.Map.add reason_pos pos_stats pos_stats_map)
       reason_stats
 
-let incr_counter k (r, p, c) =
+let incr_counter (ctx : Provider_context.t) k (r, p, c) =
   let v = CLMap.find k c in
   CLMap.add
     k
-    { count = v.count + 1; reason_stats = incr_reason_stats r p v.reason_stats }
+    {
+      count = v.count + 1;
+      reason_stats = incr_reason_stats ctx r p v.reason_stats;
+    }
     c
 
 let merge_pos_stats p1 p2 =

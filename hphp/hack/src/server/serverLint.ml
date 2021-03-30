@@ -132,7 +132,9 @@ let lint_single_xcontroller ctx name =
   match Decl_provider.get_class ctx name with
   | Some class_ ->
     if Cls.extends class_ "\\XControllerBase" && not (Cls.abstract class_) then
-      Linting_service.lint_xcontroller ctx Cls.(pos class_, name class_)
+      Linting_service.lint_xcontroller
+        ctx
+        Cls.(pos class_ |> Naming_provider.resolve_position ctx, name class_)
   | None -> Lint.internal_error Pos.none ("Could not find class: " ^ name)
 
 let lint_xcontroller tcopt acc classes =

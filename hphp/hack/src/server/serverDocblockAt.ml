@@ -38,7 +38,10 @@ let get_docblock_for_member ctx class_info member_name =
   Cls.get_method class_info member_name >>= fun member ->
   match Typing_defs.get_node @@ Lazy.force member.Typing_defs.ce_type with
   | Typing_defs.Tfun _ ->
-    let pos = Lazy.force member.Typing_defs.ce_pos in
+    let pos =
+      Lazy.force member.Typing_defs.ce_pos
+      |> Naming_provider.resolve_position ctx
+    in
     let path = Pos.filename pos in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     ServerSymbolDefinition.get_definition_cst_node_ctx

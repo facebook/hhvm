@@ -403,8 +403,10 @@ let resolve_ty
   in
   let pos =
     match x.ty with
-    | LoclTy loclt -> loclt |> Typing_defs.get_pos |> Pos.to_absolute
-    | DeclTy declt -> declt |> Typing_defs.get_pos |> Pos.to_absolute
+    | LoclTy loclt ->
+      loclt |> Typing_defs.get_pos |> ServerPos.resolve env |> Pos.to_absolute
+    | DeclTy declt ->
+      declt |> Typing_defs.get_pos |> ServerPos.resolve env |> Pos.to_absolute
   in
   {
     res_pos = pos;
@@ -799,7 +801,10 @@ let find_global_results
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> absolute_none
-            | Some fe -> Typing_defs.get_pos fe.fe_type |> Pos.to_absolute
+            | Some fe ->
+              Typing_defs.get_pos fe.fe_type
+              |> ServerPos.resolve tast_env
+              |> Pos.to_absolute
           else
             absolute_none
         in

@@ -193,24 +193,32 @@ end = struct
 
   let get_fun_pos ctx name =
     Decl_provider.get_fun ctx name
-    |> Option.map ~f:Typing_defs.((fun decl -> decl.fe_pos))
+    |> Option.map
+         ~f:
+           Typing_defs.(
+             (fun decl -> decl.fe_pos |> Naming_provider.resolve_position ctx))
 
   let get_fun_pos_exn ctx name = value_or_not_found name (get_fun_pos ctx name)
 
   let get_class_pos ctx name =
     Decl_provider.get_class ctx name
-    |> Option.map ~f:(fun decl -> Class.pos decl)
+    |> Option.map ~f:(fun decl ->
+           Class.pos decl |> Naming_provider.resolve_position ctx)
 
   let get_class_pos_exn ctx name =
     value_or_not_found name (get_class_pos ctx name)
 
   let get_typedef_pos ctx name =
     Decl_provider.get_typedef ctx name
-    |> Option.map ~f:Typing_defs.((fun decl -> decl.td_pos))
+    |> Option.map
+         ~f:
+           Typing_defs.(
+             (fun decl -> decl.td_pos |> Naming_provider.resolve_position ctx))
 
   let get_gconst_pos ctx name =
     Decl_provider.get_gconst ctx name
-    |> Option.map ~f:(fun const -> const.Typing_defs.cd_pos)
+    |> Option.map ~f:(fun const ->
+           const.Typing_defs.cd_pos |> Naming_provider.resolve_position ctx)
 
   let get_class_or_typedef_pos ctx name =
     Option.first_some (get_class_pos ctx name) (get_typedef_pos ctx name)

@@ -406,6 +406,10 @@ let get_severity (error : ('pp, 'p) error_) = get_code_severity (get_code error)
 let to_list : ('p, 'p) error_ -> 'p message list =
  (fun { claim; reasons; _ } -> claim :: reasons)
 
+let to_list_ : error -> Pos_or_decl.t message list =
+ fun { claim = (pos, claim); reasons; _ } ->
+  (Pos_or_decl.of_raw_pos pos, claim) :: reasons
+
 let get_messages = to_list
 
 let to_absolute : error -> finalized_error =

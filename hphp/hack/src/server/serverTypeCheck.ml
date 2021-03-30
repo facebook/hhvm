@@ -220,7 +220,8 @@ let get_files_with_stale_errors
     ~(* Consider errors only coming from those phases *)
     phases
     ~(* Current global error list *)
-    errors =
+    errors
+    ~ctx =
   let fold =
     match filter with
     | None ->
@@ -242,8 +243,10 @@ let get_files_with_stale_errors
   List.fold phases ~init:Relative_path.Set.empty ~f:(fun acc phase ->
       fold phase acc (fun source error acc ->
           if
-            List.exists (Errors.to_list error) ~f:(fun e ->
-                Relative_path.Set.mem reparsed (fst e |> Pos.filename))
+            List.exists (Errors.to_list_ error) ~f:(fun e ->
+                Relative_path.Set.mem
+                  reparsed
+                  (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))
           then
             Relative_path.Set.add acc source
           else
@@ -426,7 +429,10 @@ module type CheckKindType = sig
   (* files to parse, should we stop if there are parsing errors *)
 
   val get_defs_to_redecl :
-    reparsed:Relative_path.Set.t -> env:ServerEnv.env -> Relative_path.Set.t
+    reparsed:Relative_path.Set.t ->
+    env:ServerEnv.env ->
+    ctx:Provider_context.t ->
+    Relative_path.Set.t
 
   (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
@@ -449,6 +455,7 @@ module type CheckKindType = sig
     phase_2_decl_defs:Naming_table.fast ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
+    ctx:Provider_context.t ->
     enable_type_check_filter_files:bool ->
     Relative_path.Set.t * Relative_path.Set.t
 
@@ -478,7 +485,7 @@ module FullCheckKind : CheckKindType = struct
     in
     (files_to_parse, false)
 
-  let get_defs_to_redecl ~reparsed ~env =
+  let get_defs_to_redecl ~reparsed ~(env : env) ~ctx =
     (* Besides the files that actually changed, we want to also redeclare
      * those that have decl errors referring to files that were
      * reparsed, since positions in those errors can be now stale *)
@@ -487,6 +494,7 @@ module FullCheckKind : CheckKindType = struct
       ~filter:None
       ~phases:[Errors.Decl]
       ~errors:env.errorl
+      ~ctx
 
   let get_defs_to_redecl_phase2
       genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
@@ -505,6 +513,7 @@ module FullCheckKind : CheckKindType = struct
       ~phase_2_decl_defs
       ~to_recheck
       ~env
+      ~ctx
       ~enable_type_check_filter_files =
     (* If the user has enabled a custom file filter, we want to only
      * type check files that pass the filter *)
@@ -527,6 +536,7 @@ module FullCheckKind : CheckKindType = struct
         ~filter:None
         ~phases:[Errors.Decl; Errors.Typing]
         ~errors:env.errorl
+        ~ctx
     in
     let to_recheck = Relative_path.Set.union stale_errors to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
@@ -593,7 +603,7 @@ module LazyCheckKind : CheckKindType = struct
     Relative_path.Set.mem (ide_error_sources env) x
     || Relative_path.Set.mem env.editor_open_files x
 
-  let get_defs_to_redecl ~reparsed ~env =
+  let get_defs_to_redecl ~reparsed ~env ~ctx =
     (* Same as FullCheckKind.get_defs_to_redecl, but we limit returned set only
      * to files that are relevant to IDE *)
     get_files_with_stale_errors
@@ -601,6 +611,7 @@ module LazyCheckKind : CheckKindType = struct
       ~filter:(Some (ide_error_sources env))
       ~phases:[Errors.Decl]
       ~errors:env.errorl
+      ~ctx
 
   let get_defs_to_redecl_phase2
       genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
@@ -640,6 +651,7 @@ module LazyCheckKind : CheckKindType = struct
       ~phase_2_decl_defs
       ~to_recheck
       ~env
+      ~ctx
       ~enable_type_check_filter_files =
     (* If the user has enabled a custom file filter, we want to only
      * type check files that pass the filter. As such, we don't want
@@ -657,6 +669,7 @@ module LazyCheckKind : CheckKindType = struct
      * to files that are relevant to IDE *)
     let stale_errors =
       get_files_with_stale_errors
+        ~ctx
         ~reparsed
         ~filter:(Some (ide_error_sources env))
         ~phases:[Errors.Decl; Errors.Typing]
@@ -799,6 +812,7 @@ functor
     let do_naming
         (genv : genv)
         (env : env)
+        (ctx : Provider_context.t)
         ~(errors : Errors.t)
         ~(fast_parsed : FileInfo.t Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
@@ -815,7 +829,9 @@ functor
          * Naming_global.ndecl_file *)
         let fast = extend_fast genv fast naming_table failed_naming in
         (* COMPUTES WHAT MUST BE REDECLARED  *)
-        let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
+        let failed_decl =
+          CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
+        in
         let fast = extend_fast genv fast naming_table failed_decl in
         let fast = add_old_decls env.naming_table fast in
         (errors, failed_naming, fast)
@@ -1188,6 +1204,7 @@ functor
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
+      let ctx = Provider_utils.ctx_from_server_env env in
       (* Run Naming_global, updating the reverse naming table (which maps the names
        of toplevel symbols to the files in which they were declared) in shared
        memory. Does not run Naming itself (which converts an AST to a NAST by
@@ -1198,6 +1215,7 @@ functor
         do_naming
           genv
           env
+          ctx
           ~errors
           ~fast_parsed
           ~naming_table
@@ -1280,7 +1298,6 @@ functor
        redeclare definitions in files with parse errors.
 
        When shallow_class_decl is enabled, there is no need to do phase 2. *)
-      let ctx = Provider_utils.ctx_from_server_env env in
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
       in
@@ -1451,6 +1468,7 @@ functor
           ~phase_2_decl_defs:fast
           ~to_recheck
           ~env
+          ~ctx
           ~enable_type_check_filter_files:
             genv.ServerEnv.local_config
               .ServerLocalConfig.enable_type_check_filter_files

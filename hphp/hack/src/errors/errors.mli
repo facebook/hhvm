@@ -102,6 +102,8 @@ val get_hh_fixme_pos : (Pos.t -> int -> Pos_or_decl.t option) ref
 
 val to_list : ('p, 'p) error_ -> ('p * string) list
 
+val to_list_ : error -> (Pos_or_decl.t * string) list
+
 val get_messages : ('p, 'p) error_ -> 'p message list
 
 val get_code : ('pp, 'p) error_ -> int

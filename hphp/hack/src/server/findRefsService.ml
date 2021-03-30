@@ -317,7 +317,11 @@ let parallel_find_refs workers files target ctx =
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers files)
 
-let get_definitions ctx = function
+let get_definitions ctx action =
+  List.map ~f:(fun (name, pos) ->
+      (name, Naming_provider.resolve_position ctx pos))
+  @@
+  match action with
   | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:(fun class_name acc ->
         match Decl_provider.get_class ctx class_name with

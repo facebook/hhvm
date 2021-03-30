@@ -54,7 +54,8 @@ class count_getter fixme_map =
           | Some counter -> counter
           | None -> empty_counter
         in
-        SMap.add acc ~key:kind ~data:(incr_counter lvl (r, pos, counter))
+        let ctx = Tast_env.get_ctx env in
+        SMap.add acc ~key:kind ~data:(incr_counter ctx lvl (r, pos, counter))
   end
 
 (* This should likely take in tasts made with type checker options that were

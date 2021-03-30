@@ -36,7 +36,9 @@ let go_common
           match get_node ret_type with
           | Tprim _ ->
             (* default to function definition *)
-            (get_pos ty, Tast_env.print_ty env ty) :: acc
+            ( Naming_provider.resolve_position ctx @@ get_pos ty,
+              Tast_env.print_ty env ty )
+            :: acc
           | _ -> handle_type acc ret_type
         end
       | _ -> acc

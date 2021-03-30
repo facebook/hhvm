@@ -1,4 +1,14 @@
 (library
+  (name server_pos)
+  (wrapped false)
+  (modules
+    serverPos)
+  (libraries
+    naming_provider
+    tast)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name server_env)
   (wrapped false)
   (modules
@@ -120,7 +130,7 @@
     server_command_types
     server_utils
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) 
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server_services)
@@ -160,6 +170,7 @@
     search
     server_command_types
     server_env
+    server_pos
     sys_utils
     tast_check
     tast_provider
@@ -169,7 +180,7 @@
     typing_check
     typing_deps
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) 
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server_api)

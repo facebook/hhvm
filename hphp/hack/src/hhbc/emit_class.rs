@@ -377,7 +377,7 @@ fn emit_reified_init_body<'a>(
             instr::checkthis(),
             instr::cgetl(local::Type::Named(INIT_METH_PARAM_NAME.into())),
             instr::baseh(),
-            instr::setm_pt(0, prop::from_raw_string(PROP_NAME), ReadOnlyOp::Mutable),
+            instr::setm_pt(0, prop::from_raw_string(PROP_NAME), ReadOnlyOp::Any),
             instr::popc(),
         ])
     };

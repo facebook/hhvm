@@ -39,6 +39,5 @@ instruction_sequence = { path = "../instruction_sequence" }
 label_rust = { path = "../label" }
 local = { path = "../local" }
 naming_special_names_rust = { path = "../../../naming" }
-options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }

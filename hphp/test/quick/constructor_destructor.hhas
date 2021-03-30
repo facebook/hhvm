@@ -8,14 +8,14 @@
   .method [public] <"" N  > get() {
     CheckThis
     BaseH
-    QueryM 0 CGet PT:"attre" Mutable
+    QueryM 0 CGet PT:"attre" Any
     RetC
   }
   .method [public] <"" N  > set($x) {
     CheckThis
     CGetL $x
     BaseH
-    SetM 0 PT:"attre" Mutable
+    SetM 0 PT:"attre" Any
     PopC
     Null
     RetC
@@ -23,7 +23,7 @@
   .method [public static] <"" N  > __construct($attre) {
     CGetL $attre
     BaseH
-    SetM 0 PT:"attre" Mutable
+    SetM 0 PT:"attre" Any
     PopC
     Null
     RetC
@@ -34,7 +34,7 @@
   .method [public] <"" N  > __construct() isClosureBody {
     String ""
     BaseH
-    SetM 0 PT:"attre" Mutable
+    SetM 0 PT:"attre" Any
     PopC
     Null
     RetC

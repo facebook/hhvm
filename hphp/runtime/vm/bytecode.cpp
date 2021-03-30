@@ -2540,9 +2540,8 @@ OPTBLD_INLINE void iopCGetS(ReadOnlyOp op) {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  if (ss.readonly && op != ReadOnlyOp::ReadOnly){
-    throw_must_be_mutable(ss.cls->name()->data(),
-      ss.name->data());
+  if (ss.readonly && op == ReadOnlyOp::Mutable){
+    throw_must_be_mutable(ss.cls->name()->data(), ss.name->data());
   }
   tvDup(*ss.val, *ss.output);
 }
@@ -2607,7 +2606,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
     throw_cannot_modify_static_const_prop(class_->name()->data(),
       name->data());
   }
-  if (lookup.readonly && (writeMode || op != ReadOnlyOp::ReadOnly)) {
+  if (lookup.readonly && op == ReadOnlyOp::Mutable) {
     throw_must_be_mutable(class_->name()->data(), name->data());
   }
   mstate.base = tv_lval(lookup.val);
@@ -2663,7 +2662,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
 static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
-
+  
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
   mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
@@ -2674,7 +2673,7 @@ static OPTBLD_INLINE
 void elemDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto const b = mstate.base;
-
+  
   auto const baseValueToLval = [&](TypedValue base) {
     mstate.tvTempBase = base;
     return tv_lval { &mstate.tvTempBase };
@@ -3401,7 +3400,7 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
                accessible, constant, readonly, true);
 
   SCOPE_EXIT { decRefStr(name); };
-  if (!readonly && op != ReadOnlyOp::Mutable) {
+  if (!readonly && op == ReadOnlyOp::ReadOnly) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (!(visible && accessible)) {

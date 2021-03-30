@@ -30,7 +30,7 @@
   ClassGetC
   .srcloc 16:11,16:15;
   BaseL $a Warn
-  QueryM 0 CGet PT:"b" ReadOnly
+  QueryM 0 CGet PT:"b" Any
   .srcloc 16:3,16:7;
   SetS ReadOnly
   .srcloc 16:3,16:16;
@@ -41,7 +41,7 @@
   ClassGetC
   .srcloc 17:12,17:16;
   BaseL $a Warn
-  QueryM 0 CGet PT:"b" Mutable
+  QueryM 0 CGet PT:"b" Any
   .srcloc 17:3,17:8;
   SetS ReadOnly
   .srcloc 17:3,17:17;

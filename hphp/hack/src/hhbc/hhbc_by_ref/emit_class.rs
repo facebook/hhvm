@@ -412,7 +412,7 @@ fn emit_reified_init_body<'a, 'arena>(
                     alloc,
                     0,
                     prop::from_raw_string(alloc, PROP_NAME),
-                    ReadOnlyOp::Mutable,
+                    ReadOnlyOp::Any,
                 ),
                 instr::popc(alloc),
             ],

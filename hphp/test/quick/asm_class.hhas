@@ -81,7 +81,7 @@
 
     This
     BaseC 0 Warn
-    QueryM 1 CGet PL:$name Mutable
+    QueryM 1 CGet PL:$name Any
     String "\n"
     Concat
     Print
@@ -95,7 +95,7 @@
   .method [public] print_defaulted {
     This
     BaseC 0 Warn
-    QueryM 1 CGet PT:"defaulted" Mutable
+    QueryM 1 CGet PT:"defaulted" Any
     String "\n"
     Concat
     Print
@@ -103,7 +103,7 @@
 
     This
     BaseC 0 Warn
-    QueryM 1 CGet PT:"badstring" Mutable
+    QueryM 1 CGet PT:"badstring" Any
     String "bad string\"\"\"has triple quotes"
     Eq
     JmpZ broken
@@ -129,7 +129,7 @@
   String "funk"
   String "value of funk"
   BaseL $obj Define
-  SetM 1 PC:1 Mutable
+  SetM 1 PC:1 Any
   PopC
 
   CGetL $obj

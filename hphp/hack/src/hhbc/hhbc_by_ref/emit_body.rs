@@ -774,7 +774,7 @@ fn atom_instrs<'a, 'arena>(
                                                         QueryOp::CGetQuiet,
                                                         MemberKey::ET(
                                                             "classname".into(),
-                                                            ReadOnlyOp::Mutable,
+                                                            ReadOnlyOp::Any,
                                                         ),
                                                     ),
                                                     instr::dup(alloc),
@@ -818,7 +818,7 @@ fn atom_instrs<'a, 'arena>(
                                                         )?,
                                                         instr::combine_and_resolve_type_struct(alloc, 1),
                                                         instr::basec(alloc, 0, MemberOpMode::ModeNone),
-                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET("classname", ReadOnlyOp::Mutable)),
+                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET("classname", ReadOnlyOp::Any)),
                                                         instr::dup(alloc),
                                                         instr::istypec(alloc, IstypeOp::OpNull),
                                                         instr::jmpnz(alloc, label_not_a_class.clone()),

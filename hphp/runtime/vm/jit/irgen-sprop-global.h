@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/member-key.h"
 
 namespace HPHP {
 
@@ -42,14 +43,8 @@ struct ClsPropLookup {
   Slot slot;
 };
 
-enum class ReadOnlyCheck {
-  mustBeMutable,
-  mustBeReadOnly,
-  Any
-};
-
 struct LdClsPropOptions {
-  const ReadOnlyCheck readOnlyCheck;
+  const ReadOnlyOp readOnlyCheck;
   bool raise;
   bool ignoreLateInit;
   bool disallowConst;

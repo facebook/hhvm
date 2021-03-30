@@ -704,7 +704,7 @@ fn atom_instrs(
                                                         QueryOp::CGetQuiet,
                                                         MemberKey::ET(
                                                             "classname".into(),
-                                                            ReadOnlyOp::Mutable,
+                                                            ReadOnlyOp::Any,
                                                         ),
                                                     ),
                                                     instr::dup(),
@@ -745,7 +745,7 @@ fn atom_instrs(
                                                         )?,
                                                         instr::combine_and_resolve_type_struct(1),
                                                         instr::basec(0, MemberOpMode::ModeNone),
-                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into(), ReadOnlyOp::Mutable)),
+                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into(), ReadOnlyOp::Any)),
                                                         instr::dup(),
                                                         instr::istypec(IstypeOp::OpNull),
                                                         instr::jmpnz(label_not_a_class.clone()),

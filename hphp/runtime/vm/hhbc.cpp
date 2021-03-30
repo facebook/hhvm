@@ -1068,7 +1068,7 @@ X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
-X(ReadOnlyOp,     static_cast<int>(ReadOnlyOp::Mutable))
+X(ReadOnlyOp,     static_cast<int>(ReadOnlyOp::Any))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

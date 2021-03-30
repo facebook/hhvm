@@ -119,11 +119,7 @@ pub fn from_ast<'a>(
                             instr::empty(),
                             emit_pos::emit_pos_then(
                                 &class.span,
-                                instr::initprop(
-                                    pid.clone(),
-                                    InitpropOp::Static,
-                                    ReadOnlyOp::Mutable,
-                                ),
+                                instr::initprop(pid.clone(), InitpropOp::Static, ReadOnlyOp::Any),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -134,7 +130,7 @@ pub fn from_ast<'a>(
                                 instr::initprop(
                                     pid.clone(),
                                     InitpropOp::NonStatic,
-                                    ReadOnlyOp::Mutable,
+                                    ReadOnlyOp::Any,
                                 ),
                             ),
                         )
@@ -150,7 +146,7 @@ pub fn from_ast<'a>(
                                 instr::initprop(
                                     pid.clone(),
                                     InitpropOp::NonStatic,
-                                    ReadOnlyOp::Mutable,
+                                    ReadOnlyOp::Any,
                                 ),
                                 instr::label(label),
                             ]),

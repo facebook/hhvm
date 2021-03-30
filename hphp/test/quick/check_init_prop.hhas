@@ -3,7 +3,7 @@
 
   .method [static public] 86sinit() {
     String "default ::foo value"
-    InitProp "foo" Static Mutable
+    InitProp "foo" Static Any
 
     Null
     RetC
@@ -12,7 +12,7 @@
   .method [static public] 86pinit() {
     CheckProp "bar"
     String "string"
-    InitProp "baz" Static Mutable
+    InitProp "baz" Static Any
 
     RetC
   }
@@ -27,7 +27,7 @@
   LockObj
 
   CheckProp "foo"
-  InitProp "bar" NonStatic Mutable
+  InitProp "bar" NonStatic Any
 
   RetC
 }

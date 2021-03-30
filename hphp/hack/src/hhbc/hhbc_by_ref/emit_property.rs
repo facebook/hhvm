@@ -120,12 +120,7 @@ pub fn from_ast<'ast, 'arena>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(
-                                    alloc,
-                                    pid,
-                                    InitpropOp::Static,
-                                    ReadOnlyOp::Mutable,
-                                ),
+                                instr::initprop(alloc, pid, InitpropOp::Static, ReadOnlyOp::Any),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -134,12 +129,7 @@ pub fn from_ast<'ast, 'arena>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(
-                                    alloc,
-                                    pid,
-                                    InitpropOp::NonStatic,
-                                    ReadOnlyOp::Mutable,
-                                ),
+                                instr::initprop(alloc, pid, InitpropOp::NonStatic, ReadOnlyOp::Any),
                             ),
                         )
                     } else {
@@ -160,7 +150,7 @@ pub fn from_ast<'ast, 'arena>(
                                         alloc,
                                         pid,
                                         InitpropOp::NonStatic,
-                                        ReadOnlyOp::Mutable,
+                                        ReadOnlyOp::Any,
                                     ),
                                     instr::label(alloc, label),
                                 ],

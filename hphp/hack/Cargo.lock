@@ -776,7 +776,6 @@ dependencies = [
  "label_rust",
  "local",
  "naming_special_names_rust",
- "options",
  "oxidized",
  "runtime",
 ]
@@ -1855,7 +1854,6 @@ dependencies = [
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_label",
  "hhbc_by_ref_local",
- "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
  "naming_special_names_rust",
  "oxidized",

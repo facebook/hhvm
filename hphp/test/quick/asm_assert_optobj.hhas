@@ -19,7 +19,7 @@
     Print
     PopC
     BaseL $x Warn
-    QueryM 0 CGet PT:"x" Mutable 
+    QueryM 0 CGet PT:"x" Any 
     PopC
     Int 1
     RetC

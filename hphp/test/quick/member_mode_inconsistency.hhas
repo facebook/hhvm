@@ -12,14 +12,14 @@
   SetL $t
   PopC
   BaseL $baz Unset
-  QueryM 0 CGet EL:$t Mutable
+  QueryM 0 CGet EL:$t Any
   Int 12
   BaseL $foo Define
-  Dim Warn ET:"x" Mutable
-  Dim Unset ET:"y" Mutable
-  Dim None PT:"bar" Mutable
-  Dim Define ET:"q" Mutable
-  SetM 1 PC:1 Mutable
+  Dim Warn ET:"x" Any
+  Dim Unset ET:"y" Any
+  Dim None PT:"bar" Any
+  Dim Define ET:"q" Any
+  SetM 1 PC:1 Any
   PopC
   NullUninit
   NullUninit

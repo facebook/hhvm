@@ -1584,10 +1584,8 @@ void emitBaseSC(IRGS& env,
 
   assertx(mode != MOpMode::InOut);
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
-  auto const readonlyCheck = writeMode || op != ReadOnlyOp::ReadOnly ?
-    ReadOnlyCheck::mustBeMutable : ReadOnlyCheck::Any;
 
-  const LdClsPropOptions opts { readonlyCheck, true, false, writeMode };
+  const LdClsPropOptions opts { op, true, false, writeMode };
   auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);
 }

@@ -726,9 +726,17 @@ instruction ends with a different location descriptor (for example, Set*). Each
 instruction in the group perform similar actions but take different kinds of
 inputs to specify the location to access.
 
+There are numerous instructions which incorporate a readonly immediate.
+These opcodes can be Mutable, Any, or ReadOnly, and specify the
+readonlyness constraint on the property read/written by the instruction.
+The Any immediate is equivalent to no runtime check. The ReadOnly immediate 
+specifies this property must be readonly. The Mutable immediate specifies
+this property must be mutable.
+
 The member instructions provide functionality to operate on elements and
-properties. Many of these instructions incorporate an immediate argument which
-specifies a one of the following member descriptors:
+properties. Many of these instructions incorporate a readonly immediate
+argument, as well as an immediate argument which specifies one of the 
+following member descriptors.
 
   EC       - consume a cell from the evaluation stack as an element
   EL:<id>  - consume a local given by an immediate id as an element
@@ -1356,7 +1364,7 @@ CGetG    [C]  ->  [C]
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack.
 
-CGetS    [C C:Class]  ->  [C]
+CGetS <readonly op>    [C C:Class]  ->  [C]
 
   Get static property as cell. This instruction first checks if class $1 has a
   visible and accessible static property named (string)$2. If it doesn't, this
@@ -1491,7 +1499,7 @@ SetG    [C C]  ->  [C]
   defined, assigns the value $1 to the global variable, and then pushes $1 onto
   the stack.
 
-SetS    [C C:Class C]  ->  [C]
+SetS <readonly op>   [C C:Class C]  ->  [C]
 
   Set static property. First this instruction checks if the class $2 has an
   accessible static property named (string)$3. If it doesn't, this instruction
@@ -1521,7 +1529,7 @@ SetOpG <op>    [C C]  ->  [C]
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
-SetOpS <op>    [C C:Class C]  ->  [C]
+SetOpS <op> <readonly op>    [C C:Class C]  ->  [C]
 
   Set op static property. This instruction first computes x = (string)$3. Next
   it checks if class $2 has an accessible static property named x. If it
@@ -1571,7 +1579,7 @@ IncDecG <op>    [C]  ->  [C]
   If op is PostDec, this instruction pushes v onto the stack and then it
   executes --v.
 
-IncDecS <op>    [C C:Class]  ->  [C]
+IncDecS <op> <readonly op>    [C C:Class]  ->  [C]
 
   Increment/decrement static property. This instruction first computes x =
   (string)$2. Next it checks if class $1 has an accessible static property
@@ -1608,7 +1616,7 @@ CheckProp <propName> [] -> [C:Bool]
   initializer for property named %1 in the context class, and pushes
   true on the stack if it is initialized, and false otherwise.
 
-InitProp <propName> <op> [C] -> []
+InitProp <propName> <op> <readonly op> [C] -> []
 
   Initialize non-scalar property. If %2 is 'NonStatic', this instruction sets
   the initializer for the property named %1 in the context class to $1. If %2
@@ -2615,7 +2623,7 @@ BaseGL <local id>    <member op mode>    []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <stack index> <member op mode>    []  ->  []
+BaseSC <stack index> <stack index> <member op mode> <readonly op>    []  ->  []
 
   BaseSC member operation. %1 gives the location of the static property name,
   and %2 gives the location of the class.
@@ -2656,7 +2664,7 @@ SetM <stack count> <member key>    [... C]  ->  [C]
 
   Set{Prop,Elem} or SetNewElem member operation.
 
-SetRangeM <stack count> <op> <elem size> [... C C C]  ->  []
+SetRangeM <stack count> <op> <elem size> <readonly op> [... C C C]  ->  []
 
   Store raw data into a string, optionally reversing the order of elements
   based on op, which may be Forward or Reverse.

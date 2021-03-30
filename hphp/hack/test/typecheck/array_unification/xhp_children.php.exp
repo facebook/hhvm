@@ -1,0 +1,4 @@
+File "xhp_children.php", line 12, characters 13-14:
+XHP children must be compatible with XHPChild (Typing[4193])
+  File "xhp_children.php", line 11, characters 14-18:
+  This is a mixed value

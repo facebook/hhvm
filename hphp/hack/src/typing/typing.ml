@@ -3040,6 +3040,11 @@ and expr_
     let tchildren =
       match te with
       | (_, New (_, _, [_; (_, Varray (_, children)); _; _], _, _)) -> children
+      | (_, New (_, _, [_; (_, ValCollection (Vec, _, children)); _; _], _, _))
+        when TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env) ->
+        (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal,
+         * which is interpreted as a vec[] during typing when hack_arr_dv_arrs is enabled. *)
+        children
       | _ ->
         (* We end up in this case when the cosntructed new expression does
         not typecheck. *)

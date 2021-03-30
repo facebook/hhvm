@@ -1,0 +1,64 @@
+File "default_parameter.php", line 5, characters 64-64:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 5, characters 54-55:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 8, characters 26-33:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 5, characters 64-64:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 5, characters 54-55:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 18, characters 26-32:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 5, characters 64-64:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 5, characters 54-55:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 139, characters 19-24:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 5, characters 64-64:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 5, characters 54-55:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 167, characters 19-29:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 9, characters 54-54:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 9, characters 44-45:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 8, characters 26-33:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 9, characters 54-54:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 9, characters 44-45:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 18, characters 26-32:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 9, characters 54-54:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 9, characters 44-45:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 139, characters 19-24:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "default_parameter.php", line 9, characters 54-54:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "default_parameter.php", line 9, characters 44-45:
+  From this declaration, the context of this function body provides the capability AccessStaticVariable
+  File "expr_tree.hhi", line 167, characters 19-29:
+  But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

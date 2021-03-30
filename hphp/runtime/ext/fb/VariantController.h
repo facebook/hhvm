@@ -160,48 +160,17 @@ struct VariantControllerImpl {
 
   // map methods
   static MapType createMap() {
-    switch (HackArraysMode) {
-      case VariantControllerHackArraysMode::ON:
-      case VariantControllerHackArraysMode::ON_AND_KEYSET:
-        return empty_dict_array();
-      case VariantControllerHackArraysMode::OFF:
-        return empty_darray();
-      case VariantControllerHackArraysMode::MIGRATORY:
-        return empty_darray();
-    }
+    return Array::CreateDict();
   }
   static MapType createMap(DArrayInit&& map) {
-    auto arrayData = map.toArray().detach();
-    switch (HackArraysMode) {
-      case VariantControllerHackArraysMode::ON:
-      case VariantControllerHackArraysMode::ON_AND_KEYSET:
-        return Array::attach(arrayData->toDict(false));
-      case VariantControllerHackArraysMode::OFF:
-        return Array::attach(arrayData->toDArray(false));
-      case VariantControllerHackArraysMode::MIGRATORY:
-        return Array::attach(arrayData->toDArray(false));
-    }
-    not_reached(); // not sure why I need this here and not in createMap()
+    return map.toArray();
   }
   static DArrayInit reserveMap(size_t n) {
     DArrayInit res(n, CheckAllocation{});
     return res;
   }
   static MapType getStaticEmptyMap() {
-    ArrayData* empty;
-    switch (HackArraysMode) {
-      case VariantControllerHackArraysMode::ON:
-      case VariantControllerHackArraysMode::ON_AND_KEYSET:
-        empty = ArrayData::CreateDict();
-        break;
-      case VariantControllerHackArraysMode::OFF:
-        empty = ArrayData::CreateDArray();
-        break;
-      case VariantControllerHackArraysMode::MIGRATORY:
-        empty = ArrayData::CreateDArray();
-        break;
-    }
-    return MapType(empty);
+    return Array::CreateDict();
   }
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
@@ -249,11 +218,10 @@ struct VariantControllerImpl {
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
       case VariantControllerHackArraysMode::ON_AND_KEYSET:
+      case VariantControllerHackArraysMode::MIGRATORY:
         return empty_vec_array();
       case VariantControllerHackArraysMode::OFF:
-        return empty_darray();
-      case VariantControllerHackArraysMode::MIGRATORY:
-        return empty_varray();
+        return empty_dict_array();
     }
   }
   static int64_t vectorSize(const VectorType& vec) {

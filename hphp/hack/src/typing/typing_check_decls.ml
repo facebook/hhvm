@@ -141,8 +141,8 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
                       ck
                       ty
                       ~cstr_ty
-                      (fun ?code:_ l ->
-                        Reason.explain_generic_constraint (fst h) r x l)
+                      (fun ?code:_ reasons ->
+                        Reason.explain_generic_constraint (fst h) r x reasons)
                   in
                   ())
             end

@@ -67,7 +67,7 @@ let join_upper_bounds env u1 u2 =
 
 let join env tpenv1 tpenv2 =
   let merge_pos p1 p2 =
-    if Pos.equal p1 Pos.none then
+    if Pos_or_decl.equal p1 Pos_or_decl.none then
       p2
     else
       p1

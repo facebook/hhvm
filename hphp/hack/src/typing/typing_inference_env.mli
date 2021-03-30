@@ -145,12 +145,11 @@ val wrap_ty_in_var : t -> Typing_reason.t -> locl_ty -> t * locl_ty
 
 val get_tyvar_eager_solve_fail : t -> Ident.t -> bool
 
-val get_tyvar_type_const :
-  t -> Ident.t -> Aast.sid -> (Aast.sid * locl_ty) option
+val get_tyvar_type_const : t -> Ident.t -> pos_id -> (pos_id * locl_ty) option
 
-val set_tyvar_type_const : t -> Ident.t -> Aast.sid -> locl_ty -> t
+val set_tyvar_type_const : t -> Ident.t -> pos_id -> locl_ty -> t
 
-val get_tyvar_type_consts : t -> Ident.t -> (Aast.sid * locl_ty) SMap.t
+val get_tyvar_type_consts : t -> Ident.t -> (pos_id * locl_ty) SMap.t
 
 val add_subtype_prop : t -> Typing_logic.subtype_prop -> t
 
@@ -174,7 +173,7 @@ val initialize_tyvar_as_in : as_in:t_global -> t -> int -> t
 
 val get_tyvar_reason_exn_g : t_global -> Ident.t -> Reason.t
 
-val get_tyvar_pos_exn_g : t_global -> Ident.t -> Pos.t
+val get_tyvar_pos_exn_g : t_global -> Ident.t -> Pos_or_decl.t
 
 (** Move a type variable from a global env to an env. If the variable
     already exists in the env, union the constraints of both variables.

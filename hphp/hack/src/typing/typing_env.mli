@@ -160,7 +160,7 @@ val get_val_kind : env -> Typing_defs.val_kind
 
 val get_self_ty : env -> locl_ty option
 
-val get_self_class_type : env -> (Nast.sid * exact * locl_ty list) option
+val get_self_class_type : env -> (pos_id * exact * locl_ty list) option
 
 val get_self_id : env -> string option
 
@@ -377,11 +377,11 @@ val extract_global_inference_env : env -> env * Typing_inference_env.t_global
 
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
-val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
+val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option
 
-val set_tyvar_type_const : env -> int -> Aast.sid -> locl_ty -> env
+val set_tyvar_type_const : env -> int -> pos_id -> locl_ty -> env
 
-val get_tyvar_type_consts : env -> int -> (Aast.sid * locl_ty) SMap.t
+val get_tyvar_type_consts : env -> int -> (pos_id * locl_ty) SMap.t
 
 val initialize_tyvar_as_in :
   as_in:Typing_inference_env.t_global -> env -> int -> env

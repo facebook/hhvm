@@ -31,7 +31,7 @@ type tyvar_constraints = {
   lower_bounds: ITySet.t;
   upper_bounds: ITySet.t;
   type_constants:
-    ( Aast.sid (* id of the type constant "T", containing its position. *)
+    ( pos_id (* id of the type constant "T", containing its position. *)
     * locl_ty )
     SMap.t;
       (** Map associating a type to each type constant id of this variable.
@@ -170,7 +170,7 @@ module Log = struct
 
   let reason_to_json r =
     let open Hh_json in
-    let p = Reason.to_pos r in
+    let p = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let to_n x = JSON_Number (string_of_int x) in
     JSON_Object
       [
@@ -469,11 +469,12 @@ let new_global_tyvar env ?i r =
     Ident.from_string_hash
       (Printf.sprintf
          "%s%s"
-         (Pos.print_verbose_relative (Reason.to_pos r))
+         (Pos.print_verbose_relative
+            (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos))
          extension)
   in
   let env =
-    let p = Reason.to_pos r in
+    let p = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     match get_tyvar_info_opt env v with
     | Some tvinfo ->
       assert (Option.is_some tvinfo.global_reason);
@@ -487,7 +488,7 @@ let wrap_ty_in_var env r ty =
   let v = Ident.tmp () in
   let tvinfo =
     {
-      tyvar_pos = Reason.to_pos r;
+      tyvar_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
       global_reason = None;
       eager_solve_failed = false;
       solving_info = TVIType ty;
@@ -791,7 +792,7 @@ let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
     global_reason = Some tyvar_reason;
     eager_solve_failed = false;
     solving_info = solving_info_g;
-    tyvar_pos = Reason.to_pos tyvar_reason;
+    tyvar_pos = Reason.to_pos tyvar_reason |> Pos_or_decl.unsafe_to_raw_pos;
   }
 
 let get_vars (env : t) = IMap.keys env.tvenv

@@ -39,7 +39,8 @@ val is_hhi : t -> bool
 (** This may become unsafe in the future as we change the implementation
     of positions in the decl heap. Avoid using in new code.
     Use a position from an AST instead of from a decl or type,
-    or resolve decl position to a raw position using a provider context. *)
+    or resolve decl position to a raw position using a provider context.
+    TODO: get rid of unsafe_to_raw_pos before changing implementation of t. T87777740 *)
 val unsafe_to_raw_pos : t -> Pos.t
 
 (** For spans over just one line, return the line number, start column and end column.

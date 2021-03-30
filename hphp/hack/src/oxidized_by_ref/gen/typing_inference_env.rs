@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb68c40cfd8dbd81b47bce7f0decb2d8>>
+// @generated SignedSource<<ad10ee6f88703fde3060d829c7ed207b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,7 +49,7 @@ pub struct TyvarConstraints<'a> {
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: s_map::SMap<'a, (aast::Sid<'a>, &'a Ty<'a>)>,
+    pub type_constants: s_map::SMap<'a, (PosId<'a>, &'a Ty<'a>)>,
 }
 impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 

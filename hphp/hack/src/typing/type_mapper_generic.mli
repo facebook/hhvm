@@ -89,7 +89,7 @@ class type ['env] type_mapper_type =
     method on_tclass :
       'env ->
       Typing_reason.t ->
-      Ast_defs.id ->
+      Typing_defs.pos_id ->
       Typing_defs.exact ->
       Typing_defs.locl_ty list ->
       'env * Typing_defs.locl_ty
@@ -135,7 +135,7 @@ class type ['env] type_mapper_type =
       'env ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->
-      Ast_defs.id ->
+      Typing_defs.pos_id ->
       'env * Typing_defs.locl_ty
 
     method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty

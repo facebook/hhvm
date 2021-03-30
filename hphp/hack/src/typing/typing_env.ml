@@ -474,7 +474,9 @@ let add_fresh_generic_parameter_by_kind env prefix kind =
   let name = iterate 1 in
   let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
   let env =
-    env_with_tpenv env (TPEnv.add ~def_pos:Pos.none name kind (get_tpenv env))
+    env_with_tpenv
+      env
+      (TPEnv.add ~def_pos:Pos_or_decl.none name kind (get_tpenv env))
   in
   (env, name)
 
@@ -786,7 +788,7 @@ let get_const env class_ mid =
   Cls.get_const class_ mid
 
 let consts env class_ =
-  if not (Pos.is_hhi (Cls.pos class_)) then
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then
     make_depend_on_class env (Cls.name class_);
   Cls.consts class_
 

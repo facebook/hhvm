@@ -29,7 +29,7 @@ let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
 type t = {
-  tparams: (Pos.t * tparam_info) SMap.t;
+  tparams: (Pos_or_decl.t * tparam_info) SMap.t;
       (** The position indicates where the type parameter was defined.
           It may be Pos.none if the type parameter denotes a fresh type variable
           (i.e., without a source location that defines it) *)
@@ -121,7 +121,7 @@ let get_newable tpenv name =
 
 let get_pos tpenv name =
   match get_with_pos name tpenv with
-  | None -> Pos.none
+  | None -> Pos_or_decl.none
   | Some (pos, _) -> pos
 
 let get_names tpenv = SMap.keys tpenv.tparams
@@ -146,7 +146,7 @@ let add_upper_bound_ tpenv name ty =
     let (def_pos, tpinfo) =
       match get_with_pos name tpenv with
       | None ->
-        ( Pos.none,
+        ( Pos_or_decl.none,
           {
             lower_bounds = empty_bounds;
             upper_bounds = singleton_bound ty;
@@ -169,7 +169,7 @@ let add_lower_bound_ tpenv name ty =
     let (def_pos, tpinfo) =
       match get_with_pos name tpenv with
       | None ->
-        ( Pos.none,
+        ( Pos_or_decl.none,
           {
             lower_bounds = singleton_bound ty;
             upper_bounds = empty_bounds;
@@ -368,7 +368,7 @@ let rec pp_tparam_info fmt tpi =
     (List.fold_left
        ~f:(fun sep (name, x) ->
          if sep then Format.fprintf fmt ";@ ";
-         let () = Aast.pp_sid fmt name in
+         let () = Typing_defs.pp_pos_id fmt name in
          Format.fprintf fmt ":@ ";
          pp_tparam_info fmt x;
          true)

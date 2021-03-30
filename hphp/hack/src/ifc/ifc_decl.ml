@@ -64,17 +64,19 @@ let get_method_from_provider ~static ctx class_name method_name =
     construct_opt
   | Some cls -> Decl_provider.Class.get_method cls method_name
 
-let convert_fun_type fun_ty =
+let convert_fun_type ctx fun_ty =
   let open Typing_defs in
-  let pos = get_pos fun_ty in
+  let resolve = Naming_provider.resolve_position ctx in
+  let pos = get_pos fun_ty |> resolve in
   let fty = get_node fun_ty in
   match fty with
   | Tfun { ft_params; ft_ifc_decl; _ } ->
     let fd_kind = convert_ifc_fun_decl pos ft_ifc_decl in
     let mk_arg fp =
+      let pos = resolve fp.fp_pos in
       match (T.get_fp_ifc_can_call fp, T.get_fp_ifc_external fp) with
-      | (_, true) -> AKExternal fp.fp_pos
-      | (true, _) -> AKCallable fp.fp_pos
+      | (_, true) -> AKExternal pos
+      | (true, _) -> AKCallable pos
       | (false, false) -> AKDefault
     in
     let fd_args = List.map ft_params ~f:mk_arg in
@@ -86,7 +88,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : string) : fun_decl option =
   let open Typing_defs in
   match Decl_provider.get_fun ctx fun_name with
   | None -> None
-  | Some { fe_type; _ } -> Some (convert_fun_type fe_type)
+  | Some { fe_type; _ } -> Some (convert_fun_type ctx fe_type)
 
 (* Grab a method from the decl heap and convert it into a fun_decl *)
 let get_method
@@ -101,7 +103,8 @@ let get_method
     in
     Some { fd_kind = default_kind; fd_args = [] }
   | None -> None
-  | Some { ce_type = (lazy fun_type); _ } -> Some (convert_fun_type fun_type)
+  | Some { ce_type = (lazy fun_type); _ } ->
+    Some (convert_fun_type ctx fun_type)
 
 let get_static_method
     (ctx : Provider_context.t) (class_name : string) (method_name : string) :
@@ -109,7 +112,8 @@ let get_static_method
   let open Typing_defs in
   match get_method_from_provider ~static:true ctx class_name method_name with
   | None -> None
-  | Some { ce_type = (lazy fun_type); _ } -> Some (convert_fun_type fun_type)
+  | Some { ce_type = (lazy fun_type); _ } ->
+    Some (convert_fun_type ctx fun_type)
 
 (* Grab any callable from the decl heap *)
 let get_callable_decl (ctx : Provider_context.t) (callable_name : callable_name)

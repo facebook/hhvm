@@ -36,7 +36,7 @@ val check_valid_flow :
 
 val analyse_callable :
   ?class_name:Ifc_types.purpose ->
-  pos:Pos_or_decl.t ->
+  pos:Pos.t ->
   opts:Ifc_types.options ->
   decl_env:Ifc_types.decl_env ->
   is_static:bool ->

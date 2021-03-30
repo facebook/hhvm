@@ -102,7 +102,13 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
             (env, acc_field_with_type fty)
           | (TSFlit_str (_, "nullable"), (_, Toption fty), (_, Toption _)) ->
             (env, acc_field_with_type fty)
-          | (TSFlit_str (_, "classname"), (_, Toption fty), (_, Tclass _)) ->
+          | ( TSFlit_str (_, "classname"),
+              (_, Toption fty),
+              (_, Tclass ((_, x), _, _)) )
+            when not
+                   ( String.equal x SN.Collections.cVec
+                   || String.equal x SN.Collections.cDict
+                   || String.equal x SN.Collections.cKeyset ) ->
             (env, acc_field_with_type fty)
           | ( TSFlit_str (_, "classname"),
               (_, Toption fty),

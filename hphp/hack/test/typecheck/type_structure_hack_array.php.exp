@@ -1,0 +1,12 @@
+File "type_structure_hack_array.php", line 8, characters 6-16:
+The field `classname` is undefined (Typing[4108])
+  File "typestructure.hhi", line 55, characters 29-698:
+  Definition is here
+File "type_structure_hack_array.php", line 9, characters 6-16:
+The field `classname` is undefined (Typing[4108])
+  File "typestructure.hhi", line 55, characters 29-698:
+  Definition is here
+File "type_structure_hack_array.php", line 10, characters 6-16:
+The field `classname` is undefined (Typing[4108])
+  File "typestructure.hhi", line 55, characters 29-698:
+  Definition is here

@@ -62,3 +62,8 @@ val assert_is_in_current_decl :
   current_decl:Decl_reference.t option ->
   current_file:Relative_path.t ->
   Pos.t option
+
+(** Returns either a raw position equivalent to this position or the decl
+    that this position belongs to. *)
+val get_raw_pos_or_decl_reference :
+  t -> [> `Raw of Pos.t | `Decl_ref of Decl_reference.t ]

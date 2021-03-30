@@ -147,22 +147,6 @@ let get_const_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   get_const_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
 
-let get_const_full_pos ctx (pos, name) =
-  match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Const, fn) ->
-    begin
-      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Decl_service { decl = decl_service; _ } ->
-        Decl_service_client.rpc_get_gconst decl_service name
-        |> Option.map ~f:(fun decl -> decl.Typing_defs.cd_pos)
-      | _ ->
-        Ast_provider.find_gconst_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
-    end
-  | _ -> None
-
 let add_const
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   if !writes_enabled then
@@ -231,22 +215,6 @@ let fun_exists (ctx : Provider_context.t) (name : string) : bool =
 let get_fun_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   get_fun_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
-
-let get_fun_full_pos ctx (pos, name) =
-  match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Fun, fn) ->
-    begin
-      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Decl_service { decl = decl_service; _ } ->
-        Decl_service_client.rpc_get_fun decl_service name
-        |> Option.map ~f:(fun decl -> decl.Typing_defs.fe_pos)
-      | _ ->
-        Ast_provider.find_fun_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.f_name)
-    end
-  | _ -> None
 
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
@@ -469,39 +437,6 @@ let get_type_kind (ctx : Provider_context.t) (name : string) :
   | Some (_pos, kind) -> Some kind
   | None -> None
 
-let get_type_full_pos ctx (pos, name) =
-  match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (name_type, fn) ->
-    (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
-    (match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl = decl_service; _ } ->
-      begin
-        match name_type with
-        | FileInfo.Class ->
-          Decl_service_client.rpc_get_class decl_service name
-          |> Option.map ~f:(fun decl -> fst decl.Shallow_decl_defs.sc_name)
-        | FileInfo.Typedef ->
-          Decl_service_client.rpc_get_typedef decl_service name
-          |> Option.map ~f:(fun decl -> decl.Typing_defs.td_pos)
-        | FileInfo.RecordDef ->
-          Decl_service_client.rpc_get_record_def decl_service name
-          |> Option.map ~f:(fun decl -> decl.Typing_defs.rdt_pos)
-        | _ -> None
-      end
-    | _ ->
-      (match name_type with
-      | FileInfo.Class ->
-        Ast_provider.find_class_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
-      | FileInfo.Typedef ->
-        Ast_provider.find_typedef_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
-      | FileInfo.RecordDef ->
-        Ast_provider.find_record_def_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.rd_name)
-      | _ -> None))
-
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   let open Option.Monad_infix in
@@ -598,6 +533,89 @@ let get_typedef_path (ctx : Provider_context.t) (name : string) :
 let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type backend name pos Naming_types.TTypedef
+
+let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
+ fun ctx pos ->
+  match Pos_or_decl.get_raw_pos_or_decl_reference pos with
+  | `Raw pos -> pos
+  | `Decl_ref decl ->
+    let filename =
+      (match decl with
+      | Decl_reference.Function name -> get_fun_path ctx name
+      | Decl_reference.Type name -> get_type_path ctx name
+      | Decl_reference.GlobalConstant name -> get_const_path ctx name)
+      |> Option.value ~default:Relative_path.default
+      (* TODO: what to do if decl not found? *)
+    in
+    Pos_or_decl.fill_in_filename filename pos
+
+let get_const_full_pos ctx (pos, name) =
+  match pos with
+  | FileInfo.Full p -> Some p
+  | FileInfo.File (FileInfo.Const, fn) ->
+    begin
+      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Decl_service { decl = decl_service; _ } ->
+        Decl_service_client.rpc_get_gconst decl_service name
+        |> Option.map ~f:(fun decl ->
+               decl.Typing_defs.cd_pos |> resolve_position ctx)
+      | _ ->
+        Ast_provider.find_gconst_in_file ctx fn name
+        |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
+    end
+  | _ -> None
+
+let get_fun_full_pos ctx (pos, name) =
+  match pos with
+  | FileInfo.Full p -> Some p
+  | FileInfo.File (FileInfo.Fun, fn) ->
+    begin
+      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Decl_service { decl = decl_service; _ } ->
+        Decl_service_client.rpc_get_fun decl_service name
+        |> Option.map ~f:(fun decl ->
+               decl.Typing_defs.fe_pos |> resolve_position ctx)
+      | _ ->
+        Ast_provider.find_fun_in_file ctx fn name
+        |> Option.map ~f:(fun ast -> fst ast.Aast.f_name)
+    end
+  | _ -> None
+
+let get_type_full_pos ctx (pos, name) =
+  match pos with
+  | FileInfo.Full p -> Some p
+  | FileInfo.File (name_type, fn) ->
+    (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
+    (match Provider_context.get_backend ctx with
+    | Provider_backend.Decl_service { decl = decl_service; _ } ->
+      begin
+        match name_type with
+        | FileInfo.Class ->
+          Decl_service_client.rpc_get_class decl_service name
+          |> Option.map ~f:(fun decl -> fst decl.Shallow_decl_defs.sc_name)
+        | FileInfo.Typedef ->
+          Decl_service_client.rpc_get_typedef decl_service name
+          |> Option.map ~f:(fun decl -> decl.Typing_defs.td_pos)
+        | FileInfo.RecordDef ->
+          Decl_service_client.rpc_get_record_def decl_service name
+          |> Option.map ~f:(fun decl -> decl.Typing_defs.rdt_pos)
+        | _ -> None
+      end
+      |> Option.map ~f:(resolve_position ctx)
+    | _ ->
+      (match name_type with
+      | FileInfo.Class ->
+        Ast_provider.find_class_in_file ctx fn name
+        |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
+      | FileInfo.Typedef ->
+        Ast_provider.find_typedef_in_file ctx fn name
+        |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
+      | FileInfo.RecordDef ->
+        Ast_provider.find_record_def_in_file ctx fn name
+        |> Option.map ~f:(fun ast -> fst ast.Aast.rd_name)
+      | _ -> None))
 
 (** This removes the name->path mapping from the naming table (i.e. the combination
 of sqlite and delta). It is an error to call this method unless name->path exists.

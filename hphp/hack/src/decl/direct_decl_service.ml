@@ -10,6 +10,7 @@
 open Hh_prelude
 
 let decls_to_fileinfo
+    fn
     ((decls, file_mode, hash) :
       Direct_decl_parser.decls * FileInfo.mode option * Int64.t option) :
     FileInfo.t =
@@ -19,32 +20,42 @@ let decls_to_fileinfo
       {
         acc with
         FileInfo.classes =
-          (FileInfo.Full (fst c.Shallow_decl_defs.sc_name), name)
+          ( FileInfo.Full
+              ( fst c.Shallow_decl_defs.sc_name
+              |> Pos_or_decl.fill_in_filename fn ),
+            name )
           :: acc.FileInfo.classes;
       }
     | Shallow_decl_defs.Fun f ->
       {
         acc with
         FileInfo.funs =
-          (FileInfo.Full f.Typing_defs.fe_pos, name) :: acc.FileInfo.funs;
+          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn f.Typing_defs.fe_pos),
+            name )
+          :: acc.FileInfo.funs;
       }
     | Shallow_decl_defs.Typedef tf ->
       {
         acc with
         FileInfo.typedefs =
-          (FileInfo.Full tf.Typing_defs.td_pos, name) :: acc.FileInfo.typedefs;
+          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn tf.Typing_defs.td_pos),
+            name )
+          :: acc.FileInfo.typedefs;
       }
     | Shallow_decl_defs.Const c ->
       {
         acc with
         FileInfo.consts =
-          (FileInfo.Full c.Typing_defs.cd_pos, name) :: acc.FileInfo.consts;
+          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn c.Typing_defs.cd_pos),
+            name )
+          :: acc.FileInfo.consts;
       }
     | Shallow_decl_defs.Record r ->
       {
         acc with
         FileInfo.record_defs =
-          (FileInfo.Full r.Typing_defs.rdt_pos, name)
+          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn r.Typing_defs.rdt_pos),
+            name )
           :: acc.FileInfo.record_defs;
       }
   in
@@ -66,7 +77,7 @@ let parse_batch
         Relative_path.Map.add
           acc
           ~key:fn
-          ~data:(decls_to_fileinfo decl_and_mode_and_hash)
+          ~data:(decls_to_fileinfo fn decl_and_mode_and_hash)
   in
   List.fold ~f:parse ~init:acc fnl
 

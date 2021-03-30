@@ -52,7 +52,7 @@ val json : t -> Hh_json.json
 val show_as_absolute_file_line_characters : t -> string
 
 (** Replace the decl reference part of the position with a filename. *)
-val resolve : Relative_path.t -> t -> Pos.t
+val fill_in_filename : Relative_path.t -> t -> Pos.t
 
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)

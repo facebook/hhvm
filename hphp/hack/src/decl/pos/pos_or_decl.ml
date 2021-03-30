@@ -41,7 +41,7 @@ let json : t -> Hh_json.json = (fun p -> p |> Pos.to_absolute |> Pos.json)
 let show_as_absolute_file_line_characters : t -> string =
  (fun p -> p |> Pos.to_absolute |> Pos.string)
 
-let resolve : Relative_path.t -> t -> Pos.t = (fun _filename p -> p)
+let fill_in_filename : Relative_path.t -> t -> Pos.t = (fun _filename p -> p)
 
 let assert_is_in_current_decl :
     t ->

@@ -459,12 +459,17 @@ let autocomplete_enum_atom env f pos_atomname =
   let open Typing_defs in
   match get_node ty with
   | Tfun { ft_params = { fp_type = { et_type = t; _ }; fp_flags; _ } :: _; _ }
-    when Typing_defs_flags.(is_set fp_flags_atom fp_flags) ->
+    ->
+    let is_enum_atom_ty_name name =
+      Typing_defs_flags.(is_set fp_flags_atom fp_flags)
+      && String.equal Naming_special_names.Classes.cMemberOf name
+      || String.equal Naming_special_names.Classes.cLabel name
+    in
     (match get_node t with
-    | Tnewtype (memberOf, [enum_ty; _member_ty], _)
-      when String.equal Naming_special_names.Classes.cMemberOf memberOf ->
+    | Tnewtype (ty_name, [enum_ty; _member_ty], _)
+      when is_enum_atom_ty_name ty_name ->
       suggest_members_from_ty env enum_ty
-    | _ -> (* TODO: suggest on Label *) ())
+    | _ -> ())
   | _ -> ()
 
 let visitor =

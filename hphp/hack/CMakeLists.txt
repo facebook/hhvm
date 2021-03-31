@@ -114,12 +114,16 @@ invoke_dune(hack_dune_debug debug)
 invoke_dune(hack_dune_test test)
 invoke_dune(hack_dune all)
 
+set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
+
 add_custom_target(
   hack_ffi
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
-    "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh" hack_parser_ffi rust_parser_ffi
-  COMMENT "Compiling Rust Parser FFI"
+    ${CARGO_BUILD} hack_parser_ffi rust_parser_ffi &&
+    ${CARGO_BUILD} rust_facts_ffi rust_facts_ffi &&
+    ${CARGO_BUILD} compile_ffi compile_ffi
+  COMMENT "Compiling Rust FFI"
 )
 
 add_dependencies(hack_ffi rustc cargo)
@@ -146,16 +150,17 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-# libcompile_ffi_stubs.a, librust_facts_ffi_stubs.a, are built by dune so we need some magic
-# to expose them as library targets to cmake for other targets (e.g. hhvm) to depend on.
-set(LIBCOMPILE_PATH "${DUNE_BUILD_DIR}/libcompile_ffi_stubs.a")
+# libcompile_ffi_stubs.a, librust_facts_ffi_stubs.a, and
+# librust_parser_ffi_stubs.a need to be exposed as library targets to cmake
+# for other targets (e.g. hhvm) to depend on.
+set(LIBCOMPILE_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libcompile_ffi_stubs.a")
 add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(libcompile_ffi_stubs hack_dune)
+add_dependencies(libcompile_ffi_stubs hack_ffi)
 set_target_properties(libcompile_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBCOMPILE_PATH})
 
-set(LIBRUST_PATH "${DUNE_BUILD_DIR}/librust_facts_ffi_stubs.a")
+set(LIBRUST_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_facts_ffi_stubs.a")
 add_library(librust_facts_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(librust_facts_ffi_stubs hack_dune)
+add_dependencies(librust_facts_ffi_stubs hack_ffi)
 set_target_properties(librust_facts_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PATH})
 
 set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.a")

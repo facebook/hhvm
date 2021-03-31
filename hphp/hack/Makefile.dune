@@ -33,15 +33,9 @@ build-hack$(2):
 		src/hh_parse.$(1) \
 		src/generate_full_fidelity.$(1) \
 		src/hh_single_compile.$(1) \
-		src/hh_fanout/hh_fanout.$(1) \
-		src/hhbc/libcompile_ffi_stubs.a \
-		src/facts/librust_facts_ffi_stubs.a
-
-build-facts$(2): build-hack$(2)
-	dune build \
-		src/facts/librust_facts_ffi_stubs.a
-
-copy-hack$(2)-files: build-facts$(2)
+		src/hh_fanout/hh_fanout.$(1)
+		
+copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
@@ -51,8 +45,6 @@ copy-hack$(2)-files: build-facts$(2)
 	cp "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_compile.$(1)" "$(HACK_BIN_DIR)/hh_single_compile$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"	
-	cp "$(DUNE_BUILD_DIR)/default/src/hhbc/libcompile_ffi_stubs.a" "$(DUNE_BUILD_DIR)/libcompile_ffi_stubs.a$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/facts/librust_facts_ffi_stubs.a" "$(DUNE_BUILD_DIR)/librust_facts_ffi_stubs.a$(ext)"
 endef
 
 # Define rules for normal build / debug build

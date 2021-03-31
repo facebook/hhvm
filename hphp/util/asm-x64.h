@@ -1014,8 +1014,9 @@ struct Label {
   {}
 
   ~Label() {
-    if (!m_toPatch.empty()) {
-      assert(m_a && m_address && "Label had jumps but was never set");
+    // Label had jumps but was never set -- this can happen if we fill the TC.
+    if (!m_a || !m_address) {
+      return;
     }
     for (auto& ji : m_toPatch) {
       auto realSrc = ji.a->toDestAddress(ji.addr);
@@ -1271,4 +1272,3 @@ inline DecodedInstruction::BranchType& operator|=(
 #undef CCS
 
 }}}
-

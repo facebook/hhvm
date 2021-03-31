@@ -10911,6 +10911,10 @@ SPOffsets calculate_sp_offsets(const State& state) {
       if (inst.op == Vinstr::recordbasenativesp) {
         assertx(!spOffset);
         spOffset = 0;
+      } else if (inst.op == Vinstr::unrecordbasenativesp) {
+        assert_flog(spOffset, "Block B{} Instr {} uninitiailizes native SP, "
+                    "but already uninitialized.", b, i);
+        spOffset = folly::none;
       } else if (spOffset) {
         *spOffset += sp_change(state, inst);
         // Don't support moving the stack pointer before where it started
@@ -11136,6 +11140,9 @@ void materialize_spills(const State& state, size_t spillSpace) {
         if (inst.op == Vinstr::recordbasenativesp) {
           assertx(!spOffset);
           spOffset = 0;
+        } else if (inst.op == Vinstr::unrecordbasenativesp) {
+          assertx(spOffset);
+          spOffset = folly::none;
         } else if (spOffset) {
           *spOffset += sp_change(state, inst);
           assertx(*spOffset <= 0);
@@ -11263,6 +11270,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
         auto const& inst = block.code[i];
         assertx(inst.op != Vinstr::reload);
         if (inst.op == Vinstr::recordbasenativesp) spRecorded = true;
+        else if (inst.op == Vinstr::unrecordbasenativesp) spRecorded = false;
         if (!is_spill_inst(inst)) continue;
         live.begin = i;
         // This should be caught earlier when the spill occurs.
@@ -11273,11 +11281,12 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
         break;
       }
     } else {
-      always_assert_flog(spRecorded, "Trying to spill before it is allowed. "
-                         "Spill slots are live at the start of B{}, but the "
-                         "base native sp is not yet recorded. There is a "
-                         "spill somewhere in a loop that is not dominated by "
-                         "the recording of the base native sp.", b);
+      always_assert_flog(spRecorded, "Trying to spill before or after it is "
+                         "allowed. Spill slots are live at the start of B{}, "
+                         "but the base native sp is not yet recorded. There "
+                         "is a spill somewhere in a loop that is not "
+                         "dominated by the recording of the base native sp.",
+                         b);
     }
 
     // If there are no spill slots alive going out of the block and there's any
@@ -11349,7 +11358,18 @@ jit::vector<SPAdjustLiveness> find_sp_liveness(const State& state,
       auto& block = unit.blocks[b];
       for (size_t i = 0; i < block.code.size(); ++i) {
         auto const& inst = block.code[i];
-        if (!in && inst.op == Vinstr::recordbasenativesp) in = 0;
+        if (inst.op == Vinstr::recordbasenativesp) {
+          assertx(!in);
+          in = 0;
+          continue;
+        }
+        if (inst.op == Vinstr::unrecordbasenativesp) {
+          assertx(in);
+          assert_flog(*in == 0, "Base native sp unrecorded when spill space "
+                      "is live.");
+          in = folly::none;
+          continue;
+        }
         if (!in || sp_change(state, inst) == 0) continue;
         live.begin = i;
         found = true;
@@ -11361,16 +11381,26 @@ jit::vector<SPAdjustLiveness> find_sp_liveness(const State& state,
       found = true;
     }
 
-    if (!out) continue;
-    if (*out == 0) {
+    if (!out || *out == 0) {
       // The out-offset of the block is 0, so the stack pointer offset is dead
       // going out of the block. Look backwards for any instruction which
       // changes it to make the stack pointer offset alive.
       auto& block = unit.blocks[b];
       for (size_t i = block.code.size(); i > 0; --i) {
         auto const& inst = block.code[i-1];
-        if (inst.op == Vinstr::recordbasenativesp) break;
-        if (sp_change(state, inst) == 0) continue;
+        if (inst.op == Vinstr::recordbasenativesp) {
+          assertx(out);
+          assert_flog(*out == 0, "Base native sp unrecorded when spill space "
+                      "is live.");
+          out = folly::none;
+          continue;
+        }
+        if (inst.op == Vinstr::unrecordbasenativesp) {
+          assertx(!out);
+          out = 0;
+          continue;
+        }
+        if (!out || sp_change(state, inst) == 0) continue;
         live.end = i - 1;
         found = true;
         break;

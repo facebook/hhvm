@@ -91,6 +91,7 @@ struct Vunit;
   O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(recordbasenativesp, Inone, Un, Dn)\
+  O(unrecordbasenativesp, Inone, Un, Dn)\
   O(spill, Inone, U(s), D(d))\
   O(spillbi, I(s), Un, D(d))\
   O(spillli, I(s), Un, D(d))\
@@ -562,6 +563,7 @@ struct conjureuse { Vreg c; };
  * ActRec on the vm stack.
  */
 struct recordbasenativesp {};
+struct unrecordbasenativesp {};
 
 /*
  * Pseudo-instructions used to represent where Vregs are moved to/from

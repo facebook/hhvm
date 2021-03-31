@@ -127,6 +127,11 @@ add_custom_target(
 )
 
 add_dependencies(hack_ffi rustc cargo)
+# Not a true dependency, but we need to make sure we don't have two cargo/rustc
+# processes building the FFI files at the same time; this leads to intermittent
+# failures, which for some reason are particularly common on our Azure MacOS
+# build jobs
+add_dependencies(hack_dune hack_ffi)
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

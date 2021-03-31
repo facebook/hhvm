@@ -659,7 +659,9 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
         e.setStr("data_block", dbFull.name);
         e.setInt("bytes_dropped", bytes);
       });
-      Logger::Warning(dbFull.name);
+      if (RuntimeOption::ServerExecutionMode()) {
+        Logger::Warning("TC area %s filled up!", dbFull.name.c_str());
+      }
       reset();
       return;
     }

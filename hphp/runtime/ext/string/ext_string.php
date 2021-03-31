@@ -111,8 +111,7 @@ function bin2hex(string $str)[]: string;
  *   string or FALSE on failure.
  *
  */
-// Not __IsFoldable since it uses isdigit() which depends on the current locale
-<<__Native>>
+<<__IsFoldable, __Native>>
 function hex2bin(string $str)[]: mixed;
 
 /**

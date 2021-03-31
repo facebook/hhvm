@@ -286,7 +286,7 @@ Variant HHVM_FUNCTION(hex2bin,
 
   for (; src != end; ++src) {
     int val;
-    if (isdigit(*src))                   val = 16 * (*src++ - '0');
+    if      ('0' <= *src && *src <= '9') val = 16 * (*src++ - '0');
     else if ('a' <= *src && *src <= 'f') val = 16 * (*src++ - 'a' + 10);
     else if ('A' <= *src && *src <= 'F') val = 16 * (*src++ - 'A' + 10);
     else {
@@ -294,7 +294,7 @@ Variant HHVM_FUNCTION(hex2bin,
       return false;
     }
 
-    if (isdigit(*src))                   val += (*src - '0');
+    if      ('0' <= *src && *src <= '9') val += (*src - '0');
     else if ('a' <= *src && *src <= 'f') val += (*src - 'a' + 10);
     else if ('A' <= *src && *src <= 'F') val += (*src - 'A' + 10);
     else {

@@ -122,7 +122,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
 
       auto const sha1 = SHA1(sha1Tmp);
       auto const func = repoWrapper->getFunc(sha1, funcSn);
-      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Dummy;
+      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       auto const sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.blocks.emplace_back(TransRec::Block { sha1, sk, past });
     }
@@ -206,7 +206,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
 
       bcMap.sha1 = SHA1(sha1Tmp);
       auto const func = repoWrapper->getFunc(bcMap.sha1, funcSn);
-      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Dummy;
+      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.bcMapping.push_back(bcMap);
     }

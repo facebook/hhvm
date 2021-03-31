@@ -586,7 +586,7 @@ void Class::releaseRefs() {
 
       // Purge all references to scoped closure clones that are scoped to
       // `this'---there is no way anyone can find them at this point.
-      for (auto const template_cls : xtra->m_clonesWithThisScope) {
+      for (auto const& template_cls : xtra->m_clonesWithThisScope) {
         auto const invoke = template_cls->m_invoke;
 
         if (invoke->cls() == this) {

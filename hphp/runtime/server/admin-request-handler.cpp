@@ -1104,7 +1104,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
 
     if (RuntimeOption::EvalEnableReusableTC) {
       auto const memInfos = jit::tc::getTCMemoryUsage();
-      for (auto const info : memInfos) {
+      for (auto const& info : memInfos) {
         appendStat(folly::format("tc-{}-allocs", info.name).str(), info.allocs);
         appendStat(folly::format("tc-{}-frees", info.name).str(), info.frees);
         appendStat(folly::format("tc-{}-free-size", info.name).str(),

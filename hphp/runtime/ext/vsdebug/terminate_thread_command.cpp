@@ -77,7 +77,7 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
     const auto& args = tryGetObject(message, "arguments", s_emptyArgs);
     const auto& val = args["threadIds"];
     if (val.isArray()) {
-      for (const auto requestIdVal : val) {
+      for (const auto& requestIdVal : val) {
         auto requestId = requestIdVal.isInt() ? requestIdVal.asInt() : -1;
         dispatchRequest(requestId);
       }

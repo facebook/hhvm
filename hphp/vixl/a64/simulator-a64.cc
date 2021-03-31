@@ -1454,9 +1454,9 @@ int32_t Simulator::FPToInt32(double value, FPRounding rmode) {
 
 int64_t Simulator::FPToInt64(double value, FPRounding rmode) {
   value = FPRoundInt(value, rmode);
-  if (value >= kXMaxInt) {
+  if (value >= (double)kXMaxInt) {
     return kXMaxInt;
-  } else if (value < kXMinInt) {
+  } else if (value < (double)kXMinInt) {
     return kXMinInt;
   }
   return std::isnan(value) ? 0 : static_cast<int64_t>(value);
@@ -1476,7 +1476,7 @@ uint32_t Simulator::FPToUInt32(double value, FPRounding rmode) {
 
 uint64_t Simulator::FPToUInt64(double value, FPRounding rmode) {
   value = FPRoundInt(value, rmode);
-  if (value >= kXMaxUInt) {
+  if (value >= (double)kXMaxUInt) {
     return kXMaxUInt;
   } else if (value < 0.0) {
     return 0;

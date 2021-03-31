@@ -1775,7 +1775,7 @@ uint64_t cli_server_api_version() {
     return s_cliServerComputedVersion;
   }
   std::string key;
-  for (const auto it : s_extensionHandlers) {
+  for (const auto& it : s_extensionHandlers) {
     key += it.first.c_str();
   }
   s_cliServerComputedVersion = murmur_hash_64A(

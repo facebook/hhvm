@@ -258,6 +258,33 @@ let autocomplete_xhp_attributes env class_ cid id =
           (Some class_))
   )
 
+let autocomplete_xhp_bool_value attr_ty id_id env =
+  if is_auto_complete (snd id_id) then begin
+    ac_env := Some env;
+    argument_global_type := Some Acprop;
+    autocomplete_identifier := Some id_id;
+
+    let is_bool_or_bool_option ty : bool =
+      let is_bool = function
+        | Tprim Tbool -> true
+        | _ -> false
+      in
+      let (_, ty_) = Typing_defs_core.deref ty in
+      match ty_ with
+      | Toption ty -> is_bool (get_node ty)
+      | _ -> is_bool ty_
+    in
+
+    if is_bool_or_bool_option attr_ty then (
+      add_partial_result "true" (Phase.locl attr_ty) SearchUtils.SI_Literal None;
+      add_partial_result
+        "false"
+        (Phase.locl attr_ty)
+        SearchUtils.SI_Literal
+        None
+    )
+  end
+
 let autocomplete_xhp_enum_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
     ac_env := Some env;
@@ -590,7 +617,8 @@ let visitor =
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
                         *)
-                     autocomplete_xhp_enum_value ty id_id env
+                     autocomplete_xhp_enum_value ty id_id env;
+                     autocomplete_xhp_bool_value ty id_id env
                    | _ -> ());
                    if Cls.is_xhp c then
                      autocomplete_xhp_attributes env c (Some cid) id

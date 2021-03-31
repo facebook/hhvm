@@ -447,7 +447,7 @@ void SocketTransport::rejectClientWithMsg(
   response["type"] = MessageTypeEvent;
 
   // Send the user an error message.
-  std::string serialized =  folly::toJson(response);
+  const std::string serialized =  folly::toJson(response);
   const char* output = serialized.c_str();
   write(newFd, output, strlen(output) + 1);
 
@@ -462,7 +462,8 @@ void SocketTransport::rejectClientWithMsg(
   refusedEvent["event"] = EventTypeConnectionRefused;
   refusedEvent["body"] = rejectDetails;
   refusedEvent["type"] = MessageTypeEvent;
-  const char* refusedEventOutput = folly::toJson(refusedEvent).c_str();
+  const std::string json = folly::toJson(refusedEvent);
+  const char* refusedEventOutput = json.c_str();
   write(newFd, refusedEventOutput, strlen(refusedEventOutput) + 1);
   shutdownSocket(newFd, abortFd);
 }

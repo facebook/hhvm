@@ -131,6 +131,16 @@ impl<'a> TypeBuilder<'a> {
     pub fn prim(&'a self, reason: &'a Reason<'a>, kind: PrimKind) -> &'a Ty<'a> {
         self.mk(reason, Ty_::Tprim(self.alloc(kind)))
     }
+
+    pub fn shape(
+        &'a self,
+        reason: &'a Reason<'a>,
+        kind: ShapeKind,
+        map: t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
+    ) -> &'a Ty<'a> {
+        self.mk(reason, Ty_::Tshape(self.alloc((kind, map))))
+    }
+
     pub fn class(
         &'a self,
         reason: &'a Reason<'a>,

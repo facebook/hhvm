@@ -1,0 +1,14 @@
+File "collection_append.php", line 8, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_append.php", line 9, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_append.php", line 12, characters 3-6:
+Invalid collection modification (Typing[4411])
+  File "collection_append.php", line 12, characters 10-27:
+  This expression is readonly
+  File "collection_append.php", line 12, characters 3-4:
+  But this value is mutable
+File "collection_append.php", line 13, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_append.php", line 20, characters 3-9:
+This value is readonly, its properties cannot be modified (Typing[4409])

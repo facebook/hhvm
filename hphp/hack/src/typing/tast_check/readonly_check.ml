@@ -11,6 +11,8 @@ open Aast
 module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
+module MakeType = Typing_make_type
+module Reason = Typing_reason
 
 type rty =
   | Readonly
@@ -306,11 +308,21 @@ let check =
       in
       match lval with
       | (_, Array_get (array, _)) ->
-        (* TODO: appending to readonly value types is technically allowed *)
         begin
-          match self#ty_expr env array with
-          | Readonly -> Errors.readonly_modified (Tast.get_position array)
-          | Mut -> ()
+          match (self#ty_expr env array, self#ty_expr env rval) with
+          | (Readonly, _)
+            when self#is_value_collection_ty env (Tast.get_type array) ->
+            ()
+          | (Mut, Readonly) ->
+            Errors.readonly_mismatch
+              "Invalid collection modification"
+              (Tast.get_position lval)
+              ~reason_sub:
+                [(Tast.get_position rval, "This expression is readonly")]
+              ~reason_super:
+                [(Tast.get_position array, "But this value is mutable")]
+          | (Readonly, _) -> Errors.readonly_modified (Tast.get_position array)
+          | (Mut, Mut) -> ()
         end
       | (_, Class_get (id, expr, _)) ->
         let prop_elts = self#get_static_prop_elts env id expr in
@@ -427,6 +439,20 @@ let check =
       in
       check_readonly_call caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
+
+    method is_value_collection_ty env ty =
+      let mixed = MakeType.mixed Reason.none in
+      let env = Tast_env.tast_env_as_typing_env env in
+      let hackarray = MakeType.any_array Reason.none mixed mixed in
+      (* Subtype against an empty open shape (shape(...)) *)
+      let shape =
+        MakeType.shape
+          Reason.none
+          Typing_defs.Open_shape
+          Typing_defs.TShapeMap.empty
+      in
+      Typing_utils.is_sub_type env ty hackarray
+      || Typing_utils.is_sub_type env ty shape
 
     method grab_class_elts_from_ty ~static env ty prop_id =
       let open Typing_defs in

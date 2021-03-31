@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -2464,9 +2463,7 @@ struct LoggingProfileData : IRExtraData {
     return folly::sformat("{}", reinterpret_cast<void*>(profile));
   }
 
-  size_t stableHash() const {
-    return profile ? profile->key.stableHash() : 0;
-  }
+  size_t stableHash() const;
 
   bool equals(const LoggingProfileData& o) const {
     return profile == o.profile;
@@ -2486,10 +2483,7 @@ struct SinkProfileData : IRExtraData {
     return folly::sformat("{}", reinterpret_cast<void*>(profile));
   }
 
-  size_t stableHash() const {
-    if (!profile) return 0;
-    return profile->key.first ^ SrcKey::StableHasher()(profile->key.second);
-  }
+  size_t stableHash() const;
 
   bool equals(const SinkProfileData& o) const {
     return profile == o.profile;

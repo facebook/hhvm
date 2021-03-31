@@ -648,8 +648,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_dictionary_type_specifier(self, keyword, left_angle, members, right_angle)
     }
 
-    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, contexts: Self::R, colon: Self::R, readonly_return: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_closure_type_specifier(self, outer_left_paren, function_keyword, inner_left_paren, parameter_list, inner_right_paren, contexts, colon, readonly_return, return_type, outer_right_paren)
+    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, readonly_keyword: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, contexts: Self::R, colon: Self::R, readonly_return: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_closure_type_specifier(self, outer_left_paren, readonly_keyword, function_keyword, inner_left_paren, parameter_list, inner_right_paren, contexts, colon, readonly_return, return_type, outer_right_paren)
     }
 
     fn make_closure_parameter_type_specifier(&mut self, call_convention: Self::R, readonly: Self::R, type_: Self::R) -> Self::R {

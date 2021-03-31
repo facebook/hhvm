@@ -1655,9 +1655,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_contexts: Self, closure_colon: Self, closure_readonly_return: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_readonly_keyword: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_contexts: Self, closure_colon: Self, closure_readonly_return: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
             closure_outer_left_paren,
+            closure_readonly_keyword,
             closure_function_keyword,
             closure_inner_left_paren,
             closure_parameter_list,
@@ -3084,8 +3085,9 @@ where
                 acc
             },
             SyntaxVariant::ClosureTypeSpecifier(x) => {
-                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_contexts, closure_colon, closure_readonly_return, closure_return_type, closure_outer_right_paren } = *x;
+                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_readonly_keyword, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_contexts, closure_colon, closure_readonly_return, closure_return_type, closure_outer_right_paren } = *x;
                 let acc = f(closure_outer_left_paren, acc);
+                let acc = f(closure_readonly_keyword, acc);
                 let acc = f(closure_function_keyword, acc);
                 let acc = f(closure_inner_left_paren, acc);
                 let acc = f(closure_parameter_list, acc);
@@ -4462,7 +4464,7 @@ where
                  dictionary_type_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClosureTypeSpecifier, 10) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
+             (SyntaxKind::ClosureTypeSpecifier, 11) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
                  closure_outer_right_paren: ts.pop().unwrap(),
                  closure_return_type: ts.pop().unwrap(),
                  closure_readonly_return: ts.pop().unwrap(),
@@ -4472,6 +4474,7 @@ where
                  closure_parameter_list: ts.pop().unwrap(),
                  closure_inner_left_paren: ts.pop().unwrap(),
                  closure_function_keyword: ts.pop().unwrap(),
+                 closure_readonly_keyword: ts.pop().unwrap(),
                  closure_outer_left_paren: ts.pop().unwrap(),
                  
              })),
@@ -5789,6 +5792,7 @@ pub struct DictionaryTypeSpecifierChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct ClosureTypeSpecifierChildren<T, V> {
     pub closure_outer_left_paren: Syntax<T, V>,
+    pub closure_readonly_keyword: Syntax<T, V>,
     pub closure_function_keyword: Syntax<T, V>,
     pub closure_inner_left_paren: Syntax<T, V>,
     pub closure_parameter_list: Syntax<T, V>,
@@ -7625,17 +7629,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureTypeSpecifier(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.closure_outer_left_paren),
-                    1 => Some(&x.closure_function_keyword),
-                    2 => Some(&x.closure_inner_left_paren),
-                    3 => Some(&x.closure_parameter_list),
-                    4 => Some(&x.closure_inner_right_paren),
-                    5 => Some(&x.closure_contexts),
-                    6 => Some(&x.closure_colon),
-                    7 => Some(&x.closure_readonly_return),
-                    8 => Some(&x.closure_return_type),
-                    9 => Some(&x.closure_outer_right_paren),
+                    1 => Some(&x.closure_readonly_keyword),
+                    2 => Some(&x.closure_function_keyword),
+                    3 => Some(&x.closure_inner_left_paren),
+                    4 => Some(&x.closure_parameter_list),
+                    5 => Some(&x.closure_inner_right_paren),
+                    6 => Some(&x.closure_contexts),
+                    7 => Some(&x.closure_colon),
+                    8 => Some(&x.closure_readonly_return),
+                    9 => Some(&x.closure_return_type),
+                    10 => Some(&x.closure_outer_right_paren),
                         _ => None,
                     }
                 })

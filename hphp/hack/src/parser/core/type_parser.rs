@@ -763,7 +763,7 @@ where
         let _ = parser1.assert_token(TokenKind::LeftParen);
         let token = parser1.peek_token();
         match token.kind() {
-            TokenKind::Function => self.parse_closure_type_specifier(),
+            TokenKind::Readonly | TokenKind::Function => self.parse_closure_type_specifier(),
             _ => self.parse_tuple_or_union_or_intersection_type_specifier(),
         }
     }
@@ -805,13 +805,17 @@ where
         // TODO: Update grammar for inout parameters.
         // (This work is tracked by task T22582715.)
         //
+        // TODO: Update grammar for readonly keyword
+        // (This work is tracked by task T87253111.)
         // closure-type-specifier:
-        //   ( function ( \
+        //   (  readonly-opt
+        //   function ( \
         //   closure-param-type-specifier-list-opt \
         //   ) : type-specifier )
         //
         // TODO: Error recovery is pretty weak here. We could be smarter.
         let olp = self.fetch_token();
+        let ro = self.parse_readonly_opt();
         let fnc = self.fetch_token();
         let ilp = self.require_left_paren();
         let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
@@ -834,6 +838,7 @@ where
             make_closure_type_specifier,
             self,
             olp,
+            ro,
             fnc,
             ilp,
             pts,

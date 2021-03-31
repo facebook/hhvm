@@ -6002,6 +6002,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               x.closure_parameter_list;
           closure_inner_left_paren = validate_token x.closure_inner_left_paren;
           closure_function_keyword = validate_token x.closure_function_keyword;
+          closure_readonly_keyword =
+            validate_option_with validate_token x.closure_readonly_keyword;
           closure_outer_left_paren = validate_token x.closure_outer_left_paren;
         } )
     | s -> validation_fail (Some SyntaxKind.ClosureTypeSpecifier) s
@@ -6014,6 +6016,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           {
             closure_outer_left_paren =
               invalidate_token x.closure_outer_left_paren;
+            closure_readonly_keyword =
+              invalidate_option_with invalidate_token x.closure_readonly_keyword;
             closure_function_keyword =
               invalidate_token x.closure_function_keyword;
             closure_inner_left_paren =

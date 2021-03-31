@@ -905,6 +905,7 @@ module type Syntax_S = sig
       }
     | ClosureTypeSpecifier of {
         closure_outer_left_paren: t;
+        closure_readonly_keyword: t;
         closure_function_keyword: t;
         closure_inner_left_paren: t;
         closure_parameter_list: t;
@@ -1382,7 +1383,7 @@ module type Syntax_S = sig
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
 
   val make_closure_type_specifier :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_closure_parameter_type_specifier : t -> t -> t -> t
 

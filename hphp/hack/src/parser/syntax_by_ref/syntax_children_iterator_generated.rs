@@ -1524,17 +1524,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureTypeSpecifier(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.outer_left_paren),
-                    1 => Some(&x.function_keyword),
-                    2 => Some(&x.inner_left_paren),
-                    3 => Some(&x.parameter_list),
-                    4 => Some(&x.inner_right_paren),
-                    5 => Some(&x.contexts),
-                    6 => Some(&x.colon),
-                    7 => Some(&x.readonly_return),
-                    8 => Some(&x.return_type),
-                    9 => Some(&x.outer_right_paren),
+                    1 => Some(&x.readonly_keyword),
+                    2 => Some(&x.function_keyword),
+                    3 => Some(&x.inner_left_paren),
+                    4 => Some(&x.parameter_list),
+                    5 => Some(&x.inner_right_paren),
+                    6 => Some(&x.contexts),
+                    7 => Some(&x.colon),
+                    8 => Some(&x.readonly_return),
+                    9 => Some(&x.return_type),
+                    10 => Some(&x.outer_right_paren),
                         _ => None,
                     }
                 })

@@ -44,7 +44,7 @@ async function expressions(readonly Foo $x) : readonly Awaitable<Foo> {
 }
 
 function closure_type_spec(
-  (function(readonly Foo, readonly Bar) : readonly Foo) $f
+  (readonly function(readonly Foo, readonly Bar) : readonly Foo) $f
 ) : readonly (function(): void) {
 }
 

@@ -1385,6 +1385,7 @@ pub struct DictionaryTypeSpecifierChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct ClosureTypeSpecifierChildren<'a, T, V> {
     pub outer_left_paren: Syntax<'a, T, V>,
+    pub readonly_keyword: Syntax<'a, T, V>,
     pub function_keyword: Syntax<'a, T, V>,
     pub inner_left_paren: Syntax<'a, T, V>,
     pub parameter_list: Syntax<'a, T, V>,

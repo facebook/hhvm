@@ -2215,6 +2215,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ClosureTypeSpecifier
         {
           closure_outer_left_paren = outer_left_p;
+          closure_readonly_keyword = ro;
           closure_function_keyword = kw;
           closure_inner_left_paren = inner_left_p;
           closure_parameter_list = param_list;
@@ -2228,6 +2229,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat
         [
           t env outer_left_p;
+          t env ro;
+          when_present ro space;
           t env kw;
           t env inner_left_p;
           when_present param_list split;

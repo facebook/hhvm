@@ -4656,6 +4656,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     fn make_closure_type_specifier(
         &mut self,
         outer_left_paren: Self::R,
+        _readonly_keyword: Self::R, // TODO: update readonly decl
         _function_keyword: Self::R,
         _inner_left_paren: Self::R,
         parameter_list: Self::R,

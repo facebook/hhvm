@@ -152,6 +152,7 @@ struct
 
   and closure_type_specifier = {
     closure_outer_left_paren: t;
+    closure_readonly_keyword: t;
     closure_function_keyword: t;
     closure_inner_left_paren: t;
     closure_parameter_list: t;
@@ -1034,6 +1035,7 @@ struct
       }
     | ClosureTypeSpecifier of {
         closure_outer_left_paren: t;
+        closure_readonly_keyword: t;
         closure_function_keyword: t;
         closure_inner_left_paren: t;
         closure_parameter_list: t;
@@ -2453,6 +2455,7 @@ struct
 
   and closure_type_specifier = {
     closure_outer_left_paren: Token.t value;
+    closure_readonly_keyword: Token.t option value;
     closure_function_keyword: Token.t value;
     closure_inner_left_paren: Token.t value;
     closure_parameter_list: closure_parameter_type_specifier listesque value;

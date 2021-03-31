@@ -653,6 +653,14 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   return ad;
 }
 
+void eachLayout(std::function<void(Layout& layout)> fn) {
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
+    auto const layout = s_layoutTable[i];
+    if (layout) fn(*layout);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }}

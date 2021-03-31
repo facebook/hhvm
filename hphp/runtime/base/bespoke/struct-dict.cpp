@@ -96,15 +96,24 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
   if (s_numStructLayouts == kMaxIndex) return nullptr;
   auto const index = Index(s_numStructLayouts++);
   auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
-  auto const result = new (malloc(bytes)) StructLayout(ko, index);
+  auto const result = new (malloc(bytes)) StructLayout(index, ko);
   s_keySetToIdx.emplace(ko, index);
   return result;
 }
 
-StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
-  : ConcreteLayout(idx, describeStructLayout(ko),
+const StructLayout* StructLayout::Deserialize(
+    LayoutIndex index, const KeyOrder& ko) {
+  auto const layout = GetLayout(ko, true);
+  always_assert(layout != nullptr);
+  always_assert(layout->index() == index);
+  return layout;
+}
+
+StructLayout::StructLayout(LayoutIndex index, const KeyOrder& ko)
+  : ConcreteLayout(index, describeStructLayout(ko),
                    {AbstractLayout::GetBespokeTopIndex()},
                    structArrayVtable())
+  , m_key_order(ko)
 {
   Slot i = 0;
   m_key_to_slot.reserve(ko.size());
@@ -115,10 +124,10 @@ StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
     i++;
   }
   assertx(numFields() == ko.size());
-  m_typeOff = numFields();
-  m_valueOff = (m_typeOff + numFields() + 7) & ~7;
+  m_type_offset = numFields();
+  m_value_offset = (m_type_offset + numFields() + 7) & ~7;
   auto const bytes = sizeof(StructDict) +
-                     m_valueOff +
+                     m_value_offset +
                      numFields() * sizeof(Value);
   m_size_index = MemoryManager::size2Index(bytes);
 }

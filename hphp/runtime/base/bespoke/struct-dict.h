@@ -102,16 +102,18 @@ struct StructLayout : public ConcreteLayout {
   struct Field { LowStringPtr key; };
 
   static LayoutIndex Index(uint8_t raw);
-  static const StructLayout* GetLayout(const KeyOrder&, bool create);
   static const StructLayout* As(const Layout*);
+  static const StructLayout* GetLayout(const KeyOrder&, bool create);
+  static const StructLayout* Deserialize(LayoutIndex index, const KeyOrder&);
 
   size_t numFields() const;
   size_t sizeIndex() const;
   Slot keySlot(const StringData* key) const;
   const Field& field(Slot slot) const;
 
-  size_t typeOffset() const { return m_typeOff; }
-  size_t valueOffset() const { return m_valueOff; }
+  KeyOrder keyOrder() const { return m_key_order; }
+  size_t typeOffset() const { return m_type_offset; }
+  size_t valueOffset() const { return m_value_offset; }
 
 private:
   // Callers must check whether the key is static before using one of these
@@ -135,16 +137,18 @@ private:
     }
   };
 
-  StructLayout(const KeyOrder&, const LayoutIndex&);
+  StructLayout(LayoutIndex index, const KeyOrder&);
 
+  KeyOrder m_key_order;
   size_t m_size_index;
 
   // Offsets of datatypes and values in a StructDict
   // from the end of the array header.
-  size_t m_typeOff;
-  size_t m_valueOff;
+  size_t m_type_offset;
+  size_t m_value_offset;
 
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
+
   // Variable-size array field; must be last in this struct.
   Field m_fields[1];
 };

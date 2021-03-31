@@ -267,8 +267,29 @@ Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
+using bespoke::KeyOrder;
 using bespoke::LoggingProfileKey;
 using bespoke::SinkProfileKey;
+using bespoke::StructLayout;
+
+void write_key_order(ProfDataSerializer& ser, const KeyOrder& ko) {
+  assertx(ko.valid());
+  write_raw(ser, ko.size());
+  for (auto const key : ko) {
+    write_string(ser, key);
+  }
+}
+
+KeyOrder read_key_order(ProfDataDeserializer& des) {
+  auto data = KeyOrder::KeyOrderData{};
+  auto const keys = read_raw<size_t>(des);
+  for (auto i = 0; i < keys; i++) {
+    data.push_back(read_string(des));
+  }
+  auto const result = KeyOrder::Make(data);
+  assertx(result.valid());
+  return result;
+}
 
 void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
   write_raw(ser, key.slot);
@@ -302,6 +323,20 @@ SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
 }
 
 void serializeBespokeLayouts(ProfDataSerializer& ser) {
+  // For now, we only need to serialize and deserialize StructLayouts,
+  // because they are the only dynamically-constructed layouts.
+  std::vector<const StructLayout*> layouts;
+  bespoke::eachLayout([&](auto const& layout) {
+    if (!ArrayLayout(&layout).is_struct()) return;
+    layouts.push_back(StructLayout::As(&layout));
+  });
+  write_raw(ser, layouts.size());
+  for (auto const layout : layouts) {
+    write_raw(ser, layout->index());
+    write_key_order(ser, layout->keyOrder());
+  }
+
+  // Serialize the decisions we made at all sources and sinks.
   write_raw(ser, bespoke::countSources());
   bespoke::eachSource([&](auto const& profile) {
     write_source_key(ser, profile.key);
@@ -315,6 +350,11 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
 }
 
 void deserializeBespokeLayouts(ProfDataDeserializer& des) {
+  auto const layouts = read_raw<size_t>(des);
+  for (auto i = 0; i < layouts; i++) {
+    auto const index = read_raw<bespoke::LayoutIndex>(des);
+    StructLayout::Deserialize(index, read_key_order(des));
+  }
   auto const sources = read_raw<size_t>(des);
   for (auto i = 0; i < sources; i++) {
     auto const key = read_source_key(des);

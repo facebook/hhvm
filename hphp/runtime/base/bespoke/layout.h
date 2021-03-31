@@ -453,4 +453,7 @@ struct ConcreteLayout : public Layout {
   static const ConcreteLayout* FromConcreteIndex(LayoutIndex index);
 };
 
+// Global view, used for debugging and serialization.
+void eachLayout(std::function<void(Layout& layout)> fn);
+
 }}

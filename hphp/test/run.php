@@ -455,6 +455,7 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     'bespoke' => '',
     'lazyclass' => '',
     '*force-repo' => '',
+    'hn' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -966,25 +967,27 @@ function hhvm_cmd(
   $test_run = null,
   $is_temp_file = false
 ): (varray<string>, darray<string, mixed>) {
-  if ($test_run === null) {
-    $test_run = $test;
-  }
+  $test_run ??= $test;
   // hdf support is only temporary until we fully migrate to ini
   // Discourage broad use.
   $hdf_suffix = ".use.for.ini.migration.testing.only.hdf";
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
+  $extra_opts = read_opts_file(find_test_ext($test, 'opts'));
+  if (isset($options['hn'])) {
+    $extra_opts = read_opts_file("$test.hn_opts")." ".$extra_opts;
+  }
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
     Status::getTestTmpPath($test, 'autoloadDB'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
-    read_opts_file(find_test_ext($test, 'opts')),
+    $extra_opts,
+    $is_temp_file ? " --temp-file" : "",
     '--file',
     escapeshellarg($test_run),
-    $is_temp_file ? " --temp-file" : ""
   );
 
   $cmd = "";
@@ -2316,7 +2319,6 @@ function should_skip_test_simple(
     }
   }
 
-
   $no_bespoke_tag = "nobespoke";
   if (isset($options['bespoke']) &&
       file_exists("$test.$no_bespoke_tag")) {
@@ -2328,6 +2330,11 @@ function should_skip_test_simple(
   if (isset($options['lazyclass']) &&
       file_exists("$test.$no_lazyclass_tag")) {
     return 'skip-lazyclass';
+  }
+
+  // The "--hn" option requires an explicit "$test.hn_opts" file.
+  if (isset($options['hn']) && !file_exists("$test.hn_opts")) {
+    return 'skip-hn';
   }
 
   return null;
@@ -2884,6 +2891,7 @@ function run_and_log_test($options, $test) {
 function run_test($options, $test) {
   $skip_reason = should_skip_test_simple($options, $test);
   if ($skip_reason !== null) return $skip_reason;
+
   if (!($options['no-skipif'] ?? false)) {
     $skip_reason = skipif_should_skip_test($options, $test);
     if ($skip_reason !== null) return $skip_reason;

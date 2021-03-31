@@ -2318,6 +2318,7 @@ static void update_constants_and_options() {
 }
 
 void hphp_thread_init() {
+  init_current_pthread_stack_limits();
 #if USE_JEMALLOC_EXTENT_HOOKS
   arenas_thread_init();
 #endif
@@ -2376,7 +2377,7 @@ void cli_client_init() {
   *s_sessionInitialized = true;
 }
 
-void hphp_process_init() {
+void init_current_pthread_stack_limits() {
   pthread_attr_t attr;
 // Linux+GNU extension
 #if defined(_GNU_SOURCE) && defined(__linux__)
@@ -2395,6 +2396,10 @@ void hphp_process_init() {
     Logger::Error("pthread_attr_destroy failed after checking stack limits");
     _exit(1);
   }
+}
+
+void hphp_process_init() {
+  init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
   Process::InitProcessStatics();

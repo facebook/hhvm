@@ -116,6 +116,8 @@ void hphp_context_exit();
 void hphp_thread_init();
 void hphp_thread_exit();
 
+void init_current_pthread_stack_limits();
+
 void hphp_memory_cleanup();
 /*
  * Tear down various internal state at the very end of a session. If transport

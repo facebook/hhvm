@@ -75,10 +75,18 @@ struct TransLocMaker {
       };
     }
 
+    // During a rollback we must be careful for cases where we failed to
+    // reserve the dword in cold and frozen that is intended to store the size.
+    // In those cases we must ensure the ranges are still valid (their end is
+    // after their beginning).
+    auto coldEnd = cache.cold().frontier();
+    if (coldEnd == coldStart) coldEnd += sizeof(uint32_t);
+    auto frozenEnd = cache.frozen().frontier();
+    if (frozenEnd == frozenStart) frozenEnd += sizeof(uint32_t);
     auto const range = TransRange{
       {mainStart, cache.main().frontier()},
-      {coldStart + sizeof(uint32_t), cache.cold().frontier()},
-      {frozenStart + sizeof(uint32_t), cache.frozen().frontier()},
+      {coldStart + sizeof(uint32_t), coldEnd},
+      {frozenStart + sizeof(uint32_t), frozenEnd},
       {dataStart, cache.data().frontier()}
     };
     cache.main().setFrontier(mainStart);

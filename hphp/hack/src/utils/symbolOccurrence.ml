@@ -32,6 +32,8 @@ type kind =
   | GConst
   (* For __Override occurrences, we track the associated method and class. *)
   | Attribute of override_info option
+  (* enum class name, atom name *)
+  | EnumAtom of string * string
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -57,6 +59,7 @@ let kind_to_string = function
   | Typeconst _ -> "typeconst"
   | GConst -> "global_const"
   | Attribute _ -> "attribute"
+  | EnumAtom _ -> "enum_atom"
 
 let enclosing_class occurrence =
   match occurrence.type_ with
@@ -64,7 +67,8 @@ let enclosing_class occurrence =
   | Property (c, _)
   | XhpLiteralAttr (c, _)
   | ClassConst (c, _)
-  | Typeconst (c, _) ->
+  | Typeconst (c, _)
+  | EnumAtom (c, _) ->
     Some c
   | _ -> None
 

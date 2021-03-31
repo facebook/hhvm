@@ -31,7 +31,7 @@ struct KeyCollectionHash {
   size_t operator()(const KeyOrder::KeyOrderData& ko) const {
     size_t seed = 0;
     for (auto const key : ko) {
-      folly::hash::hash_combine(seed, key->hash());
+      seed = folly::hash::hash_combine(seed, key->hash());
     }
     return seed;
   }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cf6ad708219ac1905b7b07b22ba317b5>>
+// @generated SignedSource<<9c9d2d85d19aa1e8dea542f272c3e1af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -142,6 +142,7 @@ impl TrivialDrop for HfParamInfo {}
     ToOcamlRep
 )]
 pub struct HintFun<'a> {
+    pub is_readonly: Option<oxidized::ast_defs::ReadonlyKind>,
     pub param_tys: &'a [&'a Hint<'a>],
     pub param_info: &'a [Option<&'a HfParamInfo>],
     pub variadic_ty: &'a VariadicHint<'a>,

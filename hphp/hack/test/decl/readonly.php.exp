@@ -119,12 +119,39 @@
            (Rwitness_from_decl ([22:28-34]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+                 ft_where_constraints = [];
+                 ft_params =
+                 [{ fp_pos = [22:63-65]; fp_name = (Some "$v");
+                    fp_type =
+                    { et_enforced = Typing_defs_core.Unenforced;
+                      et_type =
+                      (Rhint ([22:35-62]),
+                       (Tfun
+                          { ft_arity = (Fstandard ()); ft_tparams = [];
+                            ft_where_constraints = []; ft_params = [];
+                            ft_implicit_params =
+                            { capability = (CapDefaults [22:35-62]) };
+                            ft_ret =
+                            { et_enforced = Typing_defs_core.Unenforced;
+                              et_type = (Rhint ([22:57-61]), (Tprim Tvoid)) };
+                            ft_flags =
+                            (make_ft_flags FSync ~return_disposable:false
+                              ~returns_readonly:false ~readonly_this:true
+                              ~is_const:false);
+                            ft_ifc_decl = FDPolicied {PUBLIC} }))
+                      };
+                    fp_flags =
+                    (make_fp_flags ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false ~is_atom:false
+                      ~readonly:false ~const_function:false);
+                     }
+                   ];
                  ft_implicit_params =
                  { capability = (CapDefaults [22:28-34]) };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([22:39-43]), (Tprim Tvoid)) };
+                   et_type = (Rhint ([22:69-73]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:true

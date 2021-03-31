@@ -98,6 +98,7 @@ and hint_ p env = function
   | Hlike h -> Tlike (hint env h)
   | Hfun
       {
+        hf_is_readonly = ro;
         hf_param_tys = hl;
         hf_param_info = pil;
         hf_variadic_ty = vh;
@@ -136,8 +137,8 @@ and hint_ p env = function
             ~const_function:false;
       }
     in
-    let readonly_ret =
-      match readonly_ret with
+    let readonly_opt ro =
+      match ro with
       | Some Ast_defs.Readonly -> true
       | None -> false
     in
@@ -164,15 +165,10 @@ and hint_ p env = function
           make_ft_flags
             Ast_defs.FSync
             ~return_disposable:false
-            ~returns_readonly:readonly_ret
+            ~returns_readonly:(readonly_opt readonly_ret)
             ~readonly_this:
-              false
-              (* TODO: The constness of a function type hint is associated with
-            an attribute on the parameter, not on the hint itself.
-            Thus it's always false here, but we check for the attribute
-            in readonly_check.ml. When we decide actual syntax for this,
-            this will likely change.
-            *)
+              (readonly_opt ro)
+              (* We use readonly_this to represent constfun, TODO delete this flag *)
             ~const:false;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;

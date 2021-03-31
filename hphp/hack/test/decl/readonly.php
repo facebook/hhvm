@@ -19,7 +19,7 @@ class Bar {
     ) {
     $this->x = new Foo();
   }
-  public readonly function getFoo() : void {
+  public readonly function getFoo((readonly function(): void) $v) : void {
     $f = /* <<readonly>> */  (Foo $y) ==> {return $y;};
     $z = readonly function(Foo $f)  : void {
     };

@@ -942,6 +942,7 @@ where
                 }
                 let (ctxs, _) = Self::p_contexts(&c.contexts, env)?;
                 Ok(Hfun(ast::HintFun {
+                    is_readonly: Self::mp_optional(Self::p_readonly, &c.readonly_keyword, env)?,
                     param_tys: type_hints,
                     param_info: info,
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),

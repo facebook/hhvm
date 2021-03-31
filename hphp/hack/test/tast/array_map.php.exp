@@ -8,8 +8,9 @@
          (((function(int): bool)),
           (Some ([4:3-24],
                  (Hfun
-                    { hf_param_tys = [([4:13-16], (Hprim Tint))]; hf_param_info = [None]; 
-                      hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
+                    { hf_is_readonly = None; hf_param_tys = [([4:13-16], (Hprim Tint))]; 
+                      hf_param_info = [None]; hf_variadic_ty = None; 
+                      hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
                       hf_is_readonly_return = None }))));
          param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f"; 
          param_expr = None; param_readonly = None; param_callconv = None; 
@@ -19,7 +20,7 @@
           (((function(int, string): bool)),
            (Some ([5:3-32],
                   (Hfun
-                     { hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))]; 
+                     { hf_is_readonly = None; hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))]; 
                        hf_param_info = [None; None]; hf_variadic_ty = None; 
                        hf_ctxs = None; hf_return_ty = ([5:27-31], (Hprim Tbool)); 
                        hf_is_readonly_return = None }))));
@@ -31,7 +32,7 @@
           (((function(int, string, num): Container<int>)),
            (Some ([6:3-47],
                   (Hfun
-                     { hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))]; 
+                     { hf_is_readonly = None; hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))]; 
                        hf_param_info = [None; None; None]; hf_variadic_ty = None; 
                        hf_ctxs = None; hf_return_ty = ([6:32-46], (Happly (([6:32-41], "\\HH\\Container"), [([6:42-45], (Hprim Tint))]))); 
                        hf_is_readonly_return = None }))));
@@ -43,8 +44,9 @@
           (((function(num): bool)),
            (Some ([7:3-24],
                   (Hfun
-                     { hf_param_tys = [([7:13-16], (Hprim Tnum))]; hf_param_info = [None]; 
-                       hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
+                     { hf_is_readonly = None; hf_param_tys = [([7:13-16], (Hprim Tnum))]; 
+                       hf_param_info = [None]; hf_variadic_ty = None; 
+                       hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
                        hf_is_readonly_return = None }))));
           param_is_variadic = false; param_pos = [7:25-27]; param_name = "$i"; 
           param_expr = None; param_readonly = None; param_callconv = None; 

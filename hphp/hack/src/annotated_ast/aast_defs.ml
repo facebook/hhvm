@@ -73,6 +73,7 @@ and hf_param_info = {
 }
 
 and hint_fun = {
+  hf_is_readonly: Ast_defs.readonly_kind option;
   hf_param_tys: hint list;
   (* hf_param_info is None when all three are none, for perf optimization reasons.
    It is not semantically incorrect for the record to appear with 3 None values,

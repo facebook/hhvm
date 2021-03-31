@@ -233,6 +233,7 @@ and hint_ ~is_atom env p h_ =
     hint env h
   | Hfun
       {
+        hf_is_readonly = _;
         hf_param_tys = hl;
         hf_param_info = _;
         hf_variadic_ty = variadic_hint;

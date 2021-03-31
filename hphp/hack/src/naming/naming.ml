@@ -371,13 +371,14 @@ and contexts env ctxs =
   in
   (pos, hl)
 
-and hfun env hl il variadic_hint ctxs h readonly_ret =
+and hfun env ro hl il variadic_hint ctxs h readonly_ret =
   let variadic_hint = Option.map variadic_hint (hint env) in
   let hl = List.map ~f:(hint env) hl in
   let ctxs = Option.map ~f:(contexts env) ctxs in
   N.Hfun
     N.
       {
+        hf_is_readonly = ro;
         hf_param_tys = hl;
         hf_param_info = il;
         hf_variadic_ty = variadic_hint;
@@ -421,6 +422,7 @@ and hint_
   | Aast.Hfun
       Aast.
         {
+          hf_is_readonly = ro;
           hf_param_tys = hl;
           hf_param_info = il;
           hf_variadic_ty = variadic_hint;
@@ -428,7 +430,7 @@ and hint_
           hf_return_ty = h;
           hf_is_readonly_return = readonly_ret;
         } ->
-    hfun env hl il variadic_hint ctxs h readonly_ret
+    hfun env ro hl il variadic_hint ctxs h readonly_ret
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id

@@ -94,6 +94,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hfun
       Aast.
         {
+          hf_is_readonly = _;
           hf_param_tys = hl;
           hf_param_info = _;
           (* TODO: shouldn't we be checking this hint as well? *)

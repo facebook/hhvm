@@ -12,8 +12,9 @@
           (((function(int): int)),
            (Some ([3:24-45],
                   (Hfun
-                     { hf_param_tys = [([3:35-38], (Hprim Tint))]; hf_param_info = [None]; 
-                       hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:41-44], (Hprim Tint)); 
+                     { hf_is_readonly = None; hf_param_tys = [([3:35-38], (Hprim Tint))]; 
+                       hf_param_info = [None]; hf_variadic_ty = None; 
+                       hf_ctxs = None; hf_return_ty = ([3:41-44], (Hprim Tint)); 
                        hf_is_readonly_return = None }))));
           param_is_variadic = false; param_pos = [3:46-48]; param_name = "$f"; 
           param_expr = None; param_readonly = None; param_callconv = None; 

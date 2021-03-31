@@ -4656,7 +4656,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     fn make_closure_type_specifier(
         &mut self,
         outer_left_paren: Self::R,
-        _readonly_keyword: Self::R, // TODO: update readonly decl
+        readonly_keyword: Self::R,
         _function_keyword: Self::R,
         _inner_left_paren: Self::R,
         parameter_list: Self::R,
@@ -4715,6 +4715,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let mut flags = FunTypeFlags::empty();
         if readonly_ret.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::RETURNS_READONLY;
+        }
+        if readonly_keyword.is_token(TokenKind::Readonly) {
+            flags |= FunTypeFlags::READONLY_THIS;
         }
 
         self.hint_ty(

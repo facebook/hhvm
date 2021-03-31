@@ -528,9 +528,11 @@ Type loggingArrLikeReturn(const IRInstruction* inst) {
 }
 
 Type structDictReturn(const IRInstruction* inst) {
-  assertx(inst->is(NewBespokeStructDict));
-  auto const data = inst->extra<NewBespokeStructData>();
-  return TDict.narrowToLayout(data->layout);
+  assertx(inst->is(AllocBespokeStructDict, NewBespokeStructDict));
+  auto const layout = inst->is(AllocBespokeStructDict)
+    ? inst->extra<AllocBespokeStructDict>()->layout
+    : inst->extra<NewBespokeStructDict>()->layout;
+  return TDict.narrowToLayout(layout);
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {

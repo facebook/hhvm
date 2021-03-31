@@ -275,6 +275,7 @@ bool canDCE(IRInstruction* inst) {
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:
+  case AllocBespokeStructDict:
   case AllocStructDict:
   case AllocVec:
   case GetDictPtrIter:

@@ -1491,6 +1491,10 @@ To string conversions:
   and N stack elements at `offset` on stack S0 for values.  This op assumes it
   can move values from the stack without inc-reffing them.
 
+| AllocBespokeStructDict<layout>, DStructDict, NA, CRc
+
+  Allocate a new, empty dict with the bespoke StructLayout `layout`.
+
 | NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc
 
   Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the

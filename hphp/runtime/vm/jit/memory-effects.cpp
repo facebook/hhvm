@@ -1150,9 +1150,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       // NewBespokeStructDict reads elements from the stack, but writes to
       // a completely new array, so we can treat the stores as empty.
-      // TODO(kshaunak): Introduce an Alloc version for the numSlots == 0 case.
-      auto const extra = inst.extra<NewBespokeStructData>();
-      if (extra->numSlots == 0) return may_load_store(AEmpty, AEmpty);
+      auto const extra = inst.extra<NewBespokeStructDict>();
       auto const stack_in = AStack::range(
         extra->offset,
         extra->offset + static_cast<int32_t>(extra->numSlots)
@@ -1408,6 +1406,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FuncCred:
   case AllocVec:
   case AllocStructDict:
+  case AllocBespokeStructDict:
   case ConvDblToStr:
   case ConvIntToStr:
     return IrrelevantEffects {};

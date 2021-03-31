@@ -1061,23 +1061,29 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const op = sk.op();
   assertx(op == Op::NewDictArray || op == Op::NewStructDict);
 
-  auto const is_struct = op == Op::NewStructDict;
-  auto const imms = is_struct ? getImmVector(sk.pc()) : ImmVector{};
+  if (op == Op::NewDictArray) {
+    auto const data = ArrayLayoutData { layout };
+    auto const arr = gen(env, AllocBespokeStructDict, data);
+    push(env, arr);
+    return true;
+  }
+
+  auto const imms = getImmVector(sk.pc());
+  auto const size = safe_cast<uint32_t>(imms.size());
 
   auto const data = [&]() -> NewBespokeStructData {
-    auto const numSlots = safe_cast<uint32_t>(imms.size());
     auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
-    auto const slots = new (env.unit.arena()) Slot[numSlots];
-    for (auto i = 0; i < imms.size(); i++) {
+    auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
+    for (auto i = 0; i < size; i++) {
       auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
       slots[i] = slayout->keySlot(key);
       assertx(slots[i] != kInvalidSlot);
     }
-    return {layout, spOffBCFromIRSP(env), numSlots, slots};
+    return {layout, spOffBCFromIRSP(env), safe_cast<uint32_t>(size), slots};
   }();
 
   auto const arr = gen(env, NewBespokeStructDict, data, sp(env));
-  discard(env, imms.size());
+  discard(env, size);
   push(env, arr);
   return true;
 }

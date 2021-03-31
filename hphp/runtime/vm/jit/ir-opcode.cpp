@@ -493,6 +493,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPushTailFrame:
   case AKExistsDict:
   case AKExistsKeyset:
+  case AllocBespokeStructDict:
   case AllocStructDict:
   case AllocVec:
   case AndInt:

@@ -433,9 +433,20 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 using bespoke::StructDict;
 using bespoke::StructLayout;
 
+void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<AllocBespokeStructDict>();
+  auto& v = vmain(env);
+
+  auto const target = CallSpec::direct(StructDict::AllocStructDict);
+  auto const args = argGroup(env, inst)
+    .imm(StructLayout::As(extra->layout.bespokeLayout()));
+
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
 void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<NewBespokeStructData>();
+  auto const extra = inst->extra<NewBespokeStructDict>();
   auto& v = vmain(env);
 
   auto const table = v.allocData<Slot>(extra->numSlots);

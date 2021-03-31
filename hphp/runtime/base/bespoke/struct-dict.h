@@ -39,9 +39,8 @@ struct StructDict : public BespokeArray {
   static StructDict* MakeReserve(
       HeaderKind kind, bool legacy, const StructLayout* layout);
 
-  static StructDict* MakeStructDArray(
-      const StructLayout* layout, uint32_t size,
-      const Slot* slots, const TypedValue* vals);
+  static StructDict* AllocStructDict(
+      const StructLayout* layout);
   static StructDict* MakeStructDict(
       const StructLayout* layout, uint32_t size,
       const Slot* slots, const TypedValue* vals);
@@ -58,11 +57,6 @@ struct StructDict : public BespokeArray {
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X
-
-private:
-  static StructDict* MakeStructImpl(
-      const StructLayout* layout, uint32_t size,
-      const Slot* slots, const TypedValue* tvs, HeaderKind hk);
 
   const StructLayout* layout() const;
 

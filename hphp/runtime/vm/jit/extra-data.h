@@ -1547,6 +1547,18 @@ struct NewStructData : IRExtraData {
   StringData** keys;
 };
 
+struct ArrayLayoutData : IRExtraData {
+  explicit ArrayLayoutData(ArrayLayout layout) : layout(layout) {}
+
+  std::string show() const { return layout.describe(); }
+
+  size_t stableHash() const { return layout.toUint16(); }
+
+  bool equals(const ArrayLayoutData& o) const { return layout == o.layout; }
+
+  ArrayLayout layout;
+};
+
 struct NewBespokeStructData : IRExtraData {
   NewBespokeStructData(ArrayLayout layout, IRSPRelOffset offset,
                        uint32_t numSlots, Slot* slots)
@@ -2663,6 +2675,7 @@ X(OODeclExists,                 ClassKindData);
 X(NewStructDict,                NewStructData);
 X(NewRecord,                    NewStructData);
 X(AllocStructDict,              NewStructData);
+X(AllocBespokeStructDict,       ArrayLayoutData);
 X(NewBespokeStructDict,         NewBespokeStructData);
 X(AllocVec,                     PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);

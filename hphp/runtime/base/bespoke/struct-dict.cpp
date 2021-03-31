@@ -237,23 +237,16 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   return result;
 }
 
-StructDict* StructDict::MakeStructDArray(
-    const StructLayout* layout, uint32_t size,
-    const Slot* slots, const TypedValue* vals) {
-  return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDArray);
+StructDict* StructDict::AllocStructDict(const StructLayout* layout) {
+  return MakeReserve<false>(HeaderKind::BespokeDict, false, layout);
 }
 
 StructDict* StructDict::MakeStructDict(
     const StructLayout* layout, uint32_t size,
-    const Slot* slots, const TypedValue* vals) {
-  return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDict);
-}
+    const Slot* slots, const TypedValue* tvs) {
 
-StructDict* StructDict::MakeStructImpl(
-    const StructLayout* layout, uint32_t size,
-    const Slot* slots, const TypedValue* tvs, HeaderKind hk) {
-
-  auto const result = MakeReserve<false>(hk, false, layout);
+  auto const result = MakeReserve<false>(
+      HeaderKind::BespokeDict, false, layout);
   result->m_size = size;
 
   auto const types = result->rawTypes();

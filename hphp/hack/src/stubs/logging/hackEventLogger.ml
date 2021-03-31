@@ -98,6 +98,8 @@ let server_is_ready _ = ()
 
 let load_deptable_end _ = ()
 
+let saved_state_download_and_load_done ~load_state_approach:_ ~success:_ _ = ()
+
 let init_start ~experiments_config_meta = ignore experiments_config_meta
 
 let nfs_root _ = ()

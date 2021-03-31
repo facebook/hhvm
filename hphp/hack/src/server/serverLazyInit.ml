@@ -1377,6 +1377,7 @@ let saved_state_init
     in
     state_result
   in
+  let t = Unix.gettimeofday () in
   let state_result =
     try
       match
@@ -1393,6 +1394,10 @@ let saved_state_init
       let stack = Utils.Callstack (Printexc.get_backtrace ()) in
       Error (Load_state_unhandled_exception { exn; stack })
   in
+  HackEventLogger.saved_state_download_and_load_done
+    ~load_state_approach:(show_load_state_approach load_state_approach)
+    ~success:(Result.is_ok state_result)
+    t;
   match state_result with
   | Error err -> Error err
   | Ok state_result ->

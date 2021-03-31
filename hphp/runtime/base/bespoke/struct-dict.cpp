@@ -467,7 +467,7 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
   auto const layout = sadIn->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) {
-    auto const vad = EscalateToVanilla(sadIn, __func__);
+    auto const vad = sadIn->escalateWithCapacity(sadIn->size() + 1, __func__);
     auto const res = vad->setMove(k, v);
     assertx(vad == res);
     if (sadIn->decReleaseCheck()) Release(sadIn);

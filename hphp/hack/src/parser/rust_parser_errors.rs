@@ -142,13 +142,6 @@ impl<X> Strmap<X> {
             YesCase(m) => YesCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
         }
     }
-
-    fn into_iter(self) -> std::collections::hash_map::IntoIter<String, X> {
-        match self {
-            NoCase(m) => m.into_iter(),
-            YesCase(m) => m.into_iter(),
-        }
-    }
 }
 
 use crate::Strmap::*;

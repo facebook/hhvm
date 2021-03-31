@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eaf251f87714af5c1945ef21271eec1b>>
+// @generated SignedSource<<dba655dc202019e15b36630dbfe7c68d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -509,7 +509,6 @@ pub enum Typing {
     ConsiderMethCaller = 4407,
     EnumSupertypingReservedSyntax = 4408,
     ReadonlyValueModified = 4409,
-    ReadonlyVarMismatch = 4410,
     ReadonlyMismatch = 4411,
     ExplicitReadonlyCast = 4412,
     ReadonlyMethodCall = 4413,

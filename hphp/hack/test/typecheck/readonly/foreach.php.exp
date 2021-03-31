@@ -1,7 +1,2 @@
 File "foreach.php", line 18, characters 5-8:
 This value is readonly, its properties cannot be modified (Typing[4409])
-File "foreach.php", line 22, characters 3-6:
-This variable is readonly (Typing[4410])
-  File "foreach.php", line 22, characters 10-18:
-  But it's being assigned to an expression which is mutable.
- For now, variables can only be assigned the same readonlyness within the body of a function.

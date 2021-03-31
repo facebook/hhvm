@@ -34,6 +34,19 @@ let rty_to_str = function
   | Readonly -> "readonly"
   | Mut -> "mutable"
 
+let merge_lenvs left right =
+  let meet left right =
+    match (left, right) with
+    | (Mut, Mut) -> Mut
+    | _ -> Readonly
+  in
+  (* We can't assume that the variable is not defined if it's not in one of the envs
+     because the typechecker has smarter flow analysis than the readonly analysis (including
+     terminality checks). Therefore, we should take the readonlyness from the branch that has
+     a value, in case it's readonly.
+   *)
+  SMap.merge (fun _key -> Option.merge ~f:meet) left right
+
 let has_const_attribute user_attributes =
   List.exists user_attributes ~f:(fun ua ->
       String.equal
@@ -81,11 +94,63 @@ let param_to_rty param =
   else
     Mut
 
+let lenv_eq l1 l2 =
+  SMap.equal
+    (fun r1 r2 ->
+      match (r1, r2) with
+      | (Mut, Mut)
+      | (Readonly, Readonly) ->
+        true
+      | _ -> false)
+    l1
+    l2
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
 
     val mutable ctx : ctx = empty_ctx
+
+    method run_with_lenv f lenv =
+      ctx <- { ctx with lenv };
+      let result = f () in
+      let new_lenv = ctx.lenv in
+      (result, new_lenv)
+
+    method handle_single_block env b old_lenv =
+      self#run_with_lenv (fun () -> self#on_block env b) old_lenv
+
+    (* f_loop is a function that executes analysis on a single loop iteration
+      Handle loop will iterate f_loop a maximum of X times, where X is the number of
+      mutable variables in the lenv. Each loop, we check if the lenv has changed at
+      all; if not, we can return early. Since each iteration of the loop must naturally
+      make a mutable variable readonly, we only need to iterate a maximum X times to reach
+      a fixed point.
+      TODO: This may need to change once we have more than just two types, but with a constant
+      number of types, it should generally be pretty scalable.
+    *)
+    method handle_loop f_loop =
+      let rec iter_fixed_point lenv =
+        (* Run the loop once and merge the lenv *)
+        let (_, iter_lenv) = self#run_with_lenv f_loop lenv in
+        let new_lenv = merge_lenvs lenv iter_lenv in
+        (* If the merged lenv is equivalent to the old one we can stop  *)
+        (* Note, this is O(m*f), where m is the number of vars and f is the cost of f_loop
+          which can lead to exponential behavior in the case of a huge number of nested loops.
+          TODO: break early if we're iterating too much here and throw an error.
+        *)
+        if lenv_eq new_lenv lenv then
+          new_lenv
+        else
+          iter_fixed_point new_lenv
+      in
+      (* We need to run the f_loop first at least once,
+      to find any mutable variables created within the loop *)
+      let (_, loop_lenv) = self#run_with_lenv f_loop ctx.lenv in
+      let lenv = merge_lenvs ctx.lenv loop_lenv in
+      (* Then, iterate at most X more times to reach a fixed point *)
+      let new_lenv = iter_fixed_point lenv in
+      new_lenv
 
     method ty_expr env (e : Tast.expr) : rty =
       match snd e with
@@ -260,28 +325,9 @@ let check =
         (* If there's a mutable prop, then there's a chance we're assigning to one *)
         check_prop_assignment prop_elts rval
       | (_, Lvar (_, lid)) ->
-        let var_ro_opt = SMap.find_opt (Local_id.to_string lid) ctx.lenv in
-        begin
-          match (var_ro_opt, self#ty_expr env rval) with
-          | (Some Readonly, Mut) ->
-            Errors.var_readonly_mismatch
-              (Tast.get_position lval)
-              "readonly"
-              (Tast.get_position rval)
-              "mutable"
-          | (Some Mut, Readonly) ->
-            Errors.var_readonly_mismatch
-              (Tast.get_position lval)
-              "mutable"
-              (Tast.get_position rval)
-              "readonly"
-          | (None, r) ->
-            (* If it's a new assignment, add to the lenv *)
-            let new_lenv = SMap.add (Local_id.to_string lid) r ctx.lenv in
-            ctx <- { ctx with lenv = new_lenv }
-          | (Some Mut, Mut) -> ()
-          | (Some Readonly, Readonly) -> ()
-        end
+        let r = self#ty_expr env rval in
+        let new_lenv = SMap.add (Local_id.to_string lid) r ctx.lenv in
+        ctx <- { ctx with lenv = new_lenv }
       | (_, List el) ->
         (* List expressions require all of their lvals assigned to the readonlyness of the rval *)
         List.iter el ~f:(fun list_lval -> self#assign env list_lval rval)
@@ -546,15 +592,46 @@ let check =
         as the collection in question. If it is readonly,
         then the as expression's lvals are each assigned to readonly.
       *)
-      (match as_e with
-      | As_v lval
-      | Await_as_v (_, lval) ->
-        self#assign env lval e
-      | As_kv (l1, l2)
-      | Await_as_kv (_, l1, l2) ->
-        self#assign env l1 e;
-        self#assign env l2 e);
-      super#on_Foreach env e as_e b
+      let f () =
+        (match as_e with
+        | As_v lval
+        | Await_as_v (_, lval) ->
+          self#assign env lval e
+        | As_kv (l1, l2)
+        | Await_as_kv (_, l1, l2) ->
+          self#assign env l1 e;
+          self#assign env l2 e);
+        super#on_Foreach env e as_e b
+      in
+      let lenv = self#handle_loop f in
+      ctx <- { ctx with lenv }
+
+    method! on_For env expr cond incr b =
+      let f () = super#on_For env expr cond incr b in
+      let lenv = self#handle_loop f in
+      ctx <- { ctx with lenv }
+
+    method! on_While env expr block =
+      let f () = super#on_While env expr block in
+      let lenv = self#handle_loop f in
+      ctx <- { ctx with lenv }
+
+    method! on_Try env try_ clist finally =
+      (* Each of the catch blocks and the try blocks should be merged together,
+        with each running without knowledge of each other. *)
+      let old_lenv = ctx.lenv in
+      let (_, try_lenv) = self#handle_single_block env try_ old_lenv in
+      (* Starting with the try_lenv, run every catch lenv and merge them into a single lenv *)
+      let fold_catch acc (_, _, catch_block) =
+        let (_, catch_lenv) =
+          self#handle_single_block env catch_block old_lenv
+        in
+        merge_lenvs acc catch_lenv
+      in
+      let new_lenv = List.fold clist ~f:fold_catch ~init:try_lenv in
+      ctx <- { ctx with lenv = new_lenv };
+      (* Finally, run the finally block given our new lenv *)
+      self#on_block env finally
 
     method! on_expr env e =
       match e with
@@ -661,6 +738,15 @@ let check =
       | (_, Hole _) ->
         super#on_expr env e
 
+    method! on_If env condition b1 b2 =
+      let _ = self#on_expr env condition in
+      let old_lenv = ctx.lenv in
+      let (_, left) = self#handle_single_block env b1 old_lenv in
+      let (_, right) = self#handle_single_block env b2 old_lenv in
+      let new_lenv = merge_lenvs left right in
+      ctx <- { ctx with lenv = new_lenv };
+      ()
+
     method! on_stmt_ env s =
       (match s with
       | Return (Some e) ->
@@ -688,9 +774,11 @@ let check =
       | Expr _
       | If (_, _, _)
       | Do (_, _)
+      (* Do blocks are executed at least once, so we can treat it as always occurring *)
       | While (_, _)
       | Using _
-      | For (_, _, _, _) (* Inner assignments are handled by recursive step *)
+      | For (_, _, _, _)
+      (* Inner assignments are handled by recursive step, same with flow typing *)
       | Switch (_, _)
       | Try (_, _, _)
       | Block _

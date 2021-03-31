@@ -5242,19 +5242,6 @@ let readonly_modified ?reason pos =
       pos
       "This value is readonly, its properties cannot be modified"
 
-let var_readonly_mismatch pos var_ro rval_pos rval_ro =
-  add_list
-    (Typing.err_code Typing.ReadonlyVarMismatch)
-    (pos, "This variable is " ^ var_ro)
-    [
-      ( rval_pos,
-        "But it's being assigned to an expression which is "
-        ^ rval_ro
-        ^ "."
-        ^ "\n For now, variables can only be assigned the same readonlyness within the body of a function."
-      );
-    ]
-
 let readonly_mismatch prefix pos ~reason_sub ~reason_super =
   add_list
     (Typing.err_code Typing.ReadonlyMismatch)

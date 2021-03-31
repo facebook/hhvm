@@ -602,7 +602,7 @@ module Typing = struct
     | ConsiderMethCaller [@value 4407]
     | EnumSupertypingReservedSyntax [@value 4408]
     | ReadonlyValueModified [@value 4409]
-    | ReadonlyVarMismatch [@value 4410]
+    (* | ReadonlyVarMismatch [@value 4410] DEPRECATED *)
     | ReadonlyMismatch [@value 4411]
     | ExplicitReadonlyCast [@value 4412]
     | ReadonlyMethodCall [@value 4413]

@@ -1,7 +1,8 @@
 File "modify.php", line 12, characters 3-4:
 This value is readonly, its properties cannot be modified (Typing[4409])
-File "modify.php", line 19, characters 3-4:
-This variable is mutable (Typing[4410])
-  File "modify.php", line 19, characters 8-25:
-  But it's being assigned to an expression which is readonly.
- For now, variables can only be assigned the same readonlyness within the body of a function.
+File "modify.php", line 18, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "modify.php", line 27, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "modify.php", line 28, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])

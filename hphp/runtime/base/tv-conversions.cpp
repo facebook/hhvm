@@ -51,6 +51,15 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+template <typename T>
+ArrayData* makeSingletonDict(const T& t) {
+  DictInit init(1);
+  init.append(t);
+  return init.create();
+}
+}
+
 template<typename T>
 enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
@@ -618,7 +627,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
-      return ArrayData::Create(tv);
+      return makeSingletonDict(tv);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -686,11 +695,11 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfInt64:
       case KindOfDouble:
       case KindOfPersistentString:
-        a = ArrayData::Create(*tv);
+        a = makeSingletonDict(*tv);
         continue;
 
       case KindOfString:
-        a = ArrayData::Create(*tv);
+        a = makeSingletonDict(*tv);
         tvDecRefStr(tv);
         continue;
 
@@ -718,14 +727,14 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       }
 
       case KindOfResource:
-        a = ArrayData::Create(*tv);
+        a = makeSingletonDict(*tv);
         tvDecRefRes(tv);
         continue;
 
       case KindOfFunc:
       case KindOfClass:
       case KindOfLazyClass:
-        a = ArrayData::Create(*tv);
+        a = makeSingletonDict(*tv);
         continue;
 
       case KindOfClsMeth: {

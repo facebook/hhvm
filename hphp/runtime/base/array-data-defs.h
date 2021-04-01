@@ -32,20 +32,6 @@ extern const StaticString s_InvalidKeysetOperationMsg;
 extern const StaticString s_VecUnsetMsg;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline ArrayData* ArrayData::Create(const Variant& value) {
-  return Create(*value.asTypedValue());
-}
-
-inline ArrayData* ArrayData::Create(const Variant& name, TypedValue value) {
-  return Create(*name.asTypedValue(), value);
-}
-
-inline ArrayData* ArrayData::Create(const Variant& name, const Variant& value) {
-  return Create(*name.asTypedValue(), *value.asTypedValue());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
 inline bool ArrayData::notCyclic(TypedValue v) const {

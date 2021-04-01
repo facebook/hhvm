@@ -486,7 +486,7 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-      return Array::attach(ArrayData::Create(*this));
+      return make_dict_array(0, *this);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -501,14 +501,14 @@ Array Variant::toPHPArrayHelper() const {
       return empty_array();
     case KindOfFunc:
       invalidFuncConversion("array");
-    case KindOfClass:
-      return Array::attach(ArrayData::Create(
-        Variant{classToStringHelper(m_data.pclass),
-                PersistentStrInit{}}));
-    case KindOfLazyClass:
-      return Array::attach(ArrayData::Create(
-        Variant{lazyClassToStringHelper(m_data.plazyclass),
-                PersistentStrInit{}}));
+    case KindOfClass: {
+      auto const str = classToStringHelper(m_data.pclass);
+      return make_dict_array(0, Variant{str, PersistentStrInit{}});
+    }
+    case KindOfLazyClass: {
+      auto const str = lazyClassToStringHelper(m_data.plazyclass);
+      return make_dict_array(0, Variant{str, PersistentStrInit{}});
+    }
     case KindOfClsMeth:
       if (!RO::EvalIsCompatibleClsMethType) {
         throwInvalidClsMethToType("array");

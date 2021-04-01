@@ -177,24 +177,6 @@ public:
   static ArrayData* CreateDArray(arrprov::Tag tag = {}, bool legacy = false);
 
   /*
-   * Create a new kPackedKind ArrayData with a single element, `value'.
-   *
-   * Initializes `value' if it's UninitNull.
-   */
-  static ArrayData* Create(TypedValue value);
-  static ArrayData* Create(const Variant& value);
-
-  /*
-   * Create a new kMixedKind ArrayData with a single key `name' and value
-   * `value'.
-   *
-   * Initializes `value' if it's UninitNull.
-   */
-  static ArrayData* Create(TypedValue name, TypedValue value);
-  static ArrayData* Create(const Variant& name, TypedValue value);
-  static ArrayData* Create(const Variant& name, const Variant& value);
-
-  /*
    * Convert between array kinds.
    */
   ArrayData* toPHPArray(bool copy);

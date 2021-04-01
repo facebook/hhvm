@@ -684,20 +684,6 @@ bool ArrayData::IsValidKey(const String& k) {
   return IsValidKey(k.get());
 }
 
-ArrayData* ArrayData::Create(TypedValue value) {
-  MixedArrayInit pai(1);
-  pai.append(value);
-  return pai.create();
-}
-
-ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
-  if (debug) assertForCreate(name);
-
-  ArrayInit init(1, ArrayInit::Map{});
-  init.setValidKey(name, value);
-  return init.create();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // reads
 

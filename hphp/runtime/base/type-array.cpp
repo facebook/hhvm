@@ -340,7 +340,10 @@ void Array::removeImpl(const T& key) {
 template<typename T> ALWAYS_INLINE
 void Array::setImpl(const T& key, TypedValue v) {
   if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, v));
+    // NOTE: DictInit doesn't support set(TypedValue key, TypedValue val) yet.
+    ArrayInit init(1, ArrayInit::Map{});
+    init.set(key, v);
+    m_arr = Ptr::attach(init.toArray().detach());
   } else {
     m_arr.mutateInPlace([&](ArrayData* ad) {
       return ad->setMove(key, v);

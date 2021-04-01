@@ -19,6 +19,7 @@ list(REMOVE_ITEM hfiles ${WANGLE_DIR}/channel/FileRegion.h)
 
 add_library(wangle STATIC ${files} ${hfiles})
 auto_source_group(wangle "${WANGLE_DIR}" ${files} ${hfiles})
+target_include_directories(wangle INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR} "${TP_DIR}/fizz/src" "${CMAKE_CURRENT_SOURCE_DIR}/src")

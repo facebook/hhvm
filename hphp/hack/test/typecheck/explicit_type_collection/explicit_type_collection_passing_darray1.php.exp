@@ -1,8 +1,8 @@
 File "explicit_type_collection_passing_darray1.php", line 6, characters 3-13:
-  darray<arraykey, bool>
+  dict<arraykey, bool>
 File "explicit_type_collection_passing_darray1.php", line 7, characters 10-11:
 Invalid argument (Typing[4110])
-File "explicit_type_collection_passing_darray1.php", line 3, characters 24-29:
-Expected `string`
-File "explicit_type_collection_passing_darray1.php", line 5, characters 15-22:
-But got `arraykey`
+  File "explicit_type_collection_passing_darray1.php", line 3, characters 24-29:
+  Expected `string`
+  File "explicit_type_collection_passing_darray1.php", line 5, characters 15-22:
+  But got `arraykey`

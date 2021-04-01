@@ -1,5 +1,5 @@
 File "typename_array_literal_bad.php", line 10, characters 3-15:
-  darray<string, (classname<exact D> | typename<I>)>
+  dict<string, (classname<exact D> | typename<I>)>
 File "typename_array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
   File "typename_array_literal_bad.php", line 8, characters 52-52:

@@ -1,1 +1,8 @@
-No errors
+File "collection_mixed.php", line 18, characters 23-40:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "collection_mixed.php", line 18, characters 30-34:
+  But got `mixed`

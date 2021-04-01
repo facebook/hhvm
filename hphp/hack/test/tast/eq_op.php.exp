@@ -16,16 +16,16 @@
           ([6:3-11], (Expr (([6:3-10], int), (Binop ((Eq (Some Star)), (([6:3-5], int), (Lvar ([6:3-5], $x))), (([6:9-10], int), (Int "4")))))));
           ([8:3-29],
            (Expr
-              (([8:3-28], varray<int>),
-               (Binop ((Eq None), (([8:3-7], varray<int>), (Lvar ([8:3-7], $arr))),
-                  (([8:10-28], varray<int>), (Varray (None, [(([8:17-18], int), (Int "1")); (([8:20-21], int), (Int "2")); (([8:23-24], int), (Int "3")); (([8:26-27], int), (Int "4"))]))))))));
+              (([8:3-28], vec<int>),
+               (Binop ((Eq None), (([8:3-7], vec<int>), (Lvar ([8:3-7], $arr))),
+                  (([8:10-28], vec<int>), (ValCollection (Vec, None, [(([8:17-18], int), (Int "1")); (([8:20-21], int), (Int "2")); (([8:23-24], int), (Int "3")); (([8:26-27], int), (Int "4"))]))))))));
           ([8:30-37], (Expr (([8:30-36], int), (Binop ((Eq None), (([8:30-32], int), (Lvar ([8:30-32], $i))), (([8:35-36], int), (Int "2")))))));
           ([9:3-21],
            (Expr
               (([9:3-20], int),
                (Binop ((Eq (Some Plus)),
                   (([9:3-15], int),
-                   (Array_get ((([9:3-7], varray<int>), (Lvar ([9:3-7], $arr))), (Some (([9:8-14], int), (Binop (Minus, (([9:8-10], int), (Lvar ([9:8-10], $i))), (([9:13-14], int), (Int "1"))))))))),
+                   (Array_get ((([9:3-7], vec<int>), (Lvar ([9:3-7], $arr))), (Some (([9:8-14], int), (Binop (Minus, (([9:8-10], int), (Lvar ([9:8-10], $i))), (([9:13-14], int), (Int "1"))))))))),
                   (([9:19-20], int), (Int "4")))))));
           ([11:3-13], (Return (Some (([11:10-12], int), (Lvar ([11:10-12], $x))))))];
         fb_annotation = () };

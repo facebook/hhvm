@@ -1,6 +1,14 @@
+File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
+  But got `Tk`
 File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
 Invalid argument (Typing[4110])
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
-  Expected `darray<[unresolved], [unresolved]>`
+  Expected `dict<[unresolved], [unresolved]>`
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-25:
-  But got `varray<int>`
+  But got `vec<int>`

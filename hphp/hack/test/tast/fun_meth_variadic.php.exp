@@ -22,7 +22,7 @@
        f_tparams = []; f_where_constraints = [];
        f_variadic =
        (FVvariadicArg
-          { param_annotation = ([5:22-27], varray<string>); param_type_hint = ((varray<string>), (Some ([5:12-18], (Hprim Tstring)))); 
+          { param_annotation = ([5:22-27], vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
             param_is_variadic = true; param_pos = [5:22-27]; param_name = "$args"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None });
@@ -30,7 +30,7 @@
        f_body =
        { fb_ast =
          [([6:3-8:4],
-           (Foreach ((([6:12-17], varray<string>), (Lvar ([6:12-17], $args))), (
+           (Foreach ((([6:12-17], vec<string>), (Lvar ([6:12-17], $args))), (
               As_v (([6:21-25], string), (Lvar ([6:21-25], $arg)))),
               [([6:3-8:4], (AssertEnv (Join, {$#capability $#local_capability $args})));
                 ([7:5-24],
@@ -60,7 +60,7 @@
           m_name = ([12:19-23], "meth"); m_tparams = []; m_where_constraints = [];
           m_variadic =
           (FVvariadicArg
-             { param_annotation = ([12:27-32], varray<_>); param_type_hint = ((varray<_>), None); 
+             { param_annotation = ([12:27-32], vec<_>); param_type_hint = ((vec<_>), None); 
                param_is_variadic = true; param_pos = [12:27-32]; param_name = "$args"; 
                param_expr = None; param_readonly = None; param_callconv = None; 
                param_user_attributes = []; param_visibility = None });

@@ -1,6 +1,1 @@
-File "vec_not_an_array.php", line 6, characters 15-18:
-Invalid argument (Typing[4110])
-  File "vec_not_an_array.php", line 3, characters 22-27:
-  Expected `varray<_>`
-  File "vec_not_an_array.php", line 5, characters 14-24:
-  But got `vec<string>`
+No errors

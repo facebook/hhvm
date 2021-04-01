@@ -1,24 +1,6 @@
-File "reifiable3.php", line 10, characters 23-24:
-Invalid type (Typing[4322])
-  File "reifiable3.php", line 9, characters 5-15:
-  This type constant has the `__Reifiable` attribute
-  File "reifiable3.php", line 10, characters 32-42:
-  It cannot contain an array type
 File "reifiable3.php", line 17, characters 14-15:
 Invalid type (Typing[4322])
   File "reifiable3.php", line 16, characters 5-15:
   This type constant has the `__Reifiable` attribute
   File "reifiable3.php", line 17, characters 19-26:
   It cannot contain the late static bound this type
-File "reifiable3.php", line 21, characters 14-15:
-Invalid type (Typing[4322])
-  File "reifiable3.php", line 6, characters 5-15:
-  This type constant has the `__Reifiable` attribute
-  File "reifiable3.php", line 21, characters 25-35:
-  It cannot contain an array type
-File "reifiable3.php", line 27, characters 23-24:
-Invalid constraint (Typing[4322])
-  File "reifiable3.php", line 26, characters 5-15:
-  This type constant has the `__Reifiable` attribute
-  File "reifiable3.php", line 3, characters 12-32:
-  It cannot contain an array type

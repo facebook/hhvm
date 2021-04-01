@@ -39,7 +39,7 @@ File "bad_type_structure_nullable.php", line 31, characters 3-29:
 File "bad_type_structure_nullable.php", line 32, characters 3-29:
   err
 File "bad_type_structure_nullable.php", line 33, characters 3-31:
-  ?varray<_>
+  ?vec<_>
 File "bad_type_structure_nullable.php", line 36, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_nullable.php", line 10, characters 15-25:

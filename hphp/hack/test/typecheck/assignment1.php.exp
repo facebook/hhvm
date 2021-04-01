@@ -1,4 +1,6 @@
 File "assignment1.php", line 14, characters 14-22:
-You are trying to access the method `getLength` but this is a darray (Typing[4062])
-File "assignment1.php", line 13, characters 10-17:
-Definition is here
+No instance method `getLength` in `dict` (Typing[4053])
+  File "assignment1.php", line 13, characters 10-17:
+  This is why I think it is an object of type HH\dict because legacy arrays have been unified with Hack arrays
+  File "hackarray.hhi", line 23, characters 22-25:
+  Declaration of `dict` is here

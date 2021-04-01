@@ -29,7 +29,7 @@ File "bad_type_structure_class.php", line 26, characters 3-22:
 File "bad_type_structure_class.php", line 27, characters 3-27:
   ~classname<T>
 File "bad_type_structure_class.php", line 28, characters 3-31:
-  ~?varray<_>
+  ~?vec<_>
 File "bad_type_structure_class.php", line 31, characters 3-26:
   ~err
 File "bad_type_structure_class.php", line 32, characters 3-28:

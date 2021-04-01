@@ -1,6 +1,6 @@
 File "not_an_array.php", line 6, characters 15-16:
 Invalid argument (Typing[4110])
   File "not_an_array.php", line 3, characters 22-27:
-  Expected `varray<_>`
+  Expected `vec<_>`
   File "not_an_array.php", line 5, characters 14-30:
   But got `dict<int, string>`

@@ -1,1 +1,36 @@
-No errors
+File "untyped_keyed_container.php", line 5, characters 7-14:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2
+File "untyped_keyed_container.php", line 6, characters 7-14:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2
+File "untyped_keyed_container.php", line 7, characters 7-14:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2
+File "untyped_keyed_container.php", line 8, characters 7-20:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2
+File "untyped_keyed_container.php", line 9, characters 7-21:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2
+File "untyped_keyed_container.php", line 10, characters 7-28:
+Invalid argument (Typing[4101])
+  File "untyped_keyed_container.php", line 4, characters 14-27:
+  This type has 0 arguments
+  File "hackarray.hhi", line 19, characters 58-71:
+  This one has 2

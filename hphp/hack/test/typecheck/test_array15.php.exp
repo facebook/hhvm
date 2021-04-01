@@ -3,6 +3,6 @@ Encountered unexpected token `&`. (Parsing[1002])
 File "test_array15.php", line 13, characters 22-34:
 Wrong type hint (Typing[4339])
   File "test_array15.php", line 13, characters 10-20:
-  Expected `varray<int>`
+  Expected `vec<int>`
   File "test_array15.php", line 13, characters 27-34:
-  But got `darray<nothing, nothing>`
+  But got `dict<nothing, nothing>` because legacy arrays have been unified with Hack arrays

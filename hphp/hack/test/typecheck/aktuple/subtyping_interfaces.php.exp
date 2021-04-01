@@ -1,1 +1,8 @@
-No errors
+File "subtyping_interfaces.php", line 17, characters 29-42:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "subtyping_interfaces.php", line 17, characters 36-37:
+  But got `Tk`

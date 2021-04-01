@@ -13,7 +13,7 @@ Invalid index type for this dict (Typing[4324])
   File "index_array_bad.php", line 15, characters 11-13:
   It is incompatible with a string
 File "index_array_bad.php", line 16, characters 8-15:
-Invalid index type for this array (Typing[4324])
+Invalid index type for this dict (Typing[4324])
   File "index_array_bad.php", line 7, characters 10-12:
   This is an int
   File "index_array_bad.php", line 16, characters 12-14:

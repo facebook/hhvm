@@ -7,15 +7,15 @@ File "as_generic.php", line 7, characters 3-35:
 File "as_generic.php", line 8, characters 3-40:
   ~?classname<T>
 File "as_generic.php", line 9, characters 3-42:
-  ~?varray<_>
+  ~?vec<_>
 File "as_generic.php", line 10, characters 3-42:
-  ~?darray<_, _>
+  ~?dict<_, _>
 File "as_generic.php", line 11, characters 3-39:
   ~?bool
 File "as_generic.php", line 12, characters 3-41:
-  ~?varray<_>
+  ~?vec<_>
 File "as_generic.php", line 13, characters 3-37:
-  ~?darray<_, _>
+  ~?dict<_, _>
 File "as_generic.php", line 14, characters 3-44:
-  ~?varray<_>
+  ~?vec<_>
 No errors

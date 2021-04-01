@@ -1,23 +1,5 @@
-//// function_chain_types_PHPism_FIXME_Array.php--file1.php
-<?hh
-
-/* HH_FIXME[2071] Fixme'd to not have thousands of FIXMEs in WWW (for now) */
- type PHPism_FIXME_Array = varray_or_darray;
-
-//// function_chain_types_PHPism_FIXME_Array.php--file2.php
-<?hh // partial
-
-function fa(<<__Soft>> varray_or_darray<int, string> $x) : <<__Soft>> varray_or_darray<int, string> {
-  return $x;
-}
-
-//// function_chain_types_PHPism_FIXME_Array.php--file3.php
-<?hh // partial
-
-function fb(): <<__Soft>> varray_or_darray<int, string> {
-  return darray[4 => "why type?"];
-}
-
-function foo(): void {
-  fa(fb());
-}
+Errors:
+  [4:10-34] Invalid return type
+  [3:16-34] Expected `varray_or_darray<[unresolved], [unresolved]>`
+  [4:10-34] But got `dict<int, string>` because legacy arrays have been unified with Hack arrays
+No patches

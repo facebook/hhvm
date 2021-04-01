@@ -1,6 +1,6 @@
 File "array_option_unify.php", line 13, characters 10-13:
 Invalid return type (Typing[4110])
   File "array_option_unify.php", line 12, characters 33-38:
-  Expected `varray<_>`
+  Expected `vec<_>`
   File "array_option_unify.php", line 13, characters 10-13:
   But got `null`

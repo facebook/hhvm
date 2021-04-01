@@ -1,6 +1,6 @@
 File "variadic_args6.php", line 9, characters 16-20:
 Invalid argument (Typing[4110])
-File "variadic_args6.php", line 3, characters 23-28:
-Expected `string`
-File "variadic_args6.php", line 5, characters 16-20:
-But got `varray<_>` (variadic argument)
+  File "variadic_args6.php", line 3, characters 23-28:
+  Expected `string`
+  File "variadic_args6.php", line 5, characters 16-20:
+  But got `vec<_>` (variadic argument)

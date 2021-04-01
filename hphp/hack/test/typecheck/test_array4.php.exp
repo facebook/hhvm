@@ -1,3 +1,11 @@
+File "test_array4.php", line 12, characters 15-31:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "test_array4.php", line 12, characters 22-25:
+  But got `bool`
 File "test_array4.php", line 13, characters 10-17:
 Invalid return type (Typing[4110])
   File "test_array4.php", line 12, characters 38-41:
@@ -7,6 +15,6 @@ Invalid return type (Typing[4110])
 File "test_array4.php", line 13, characters 10-17:
 This value is not a valid key type for this container (Typing[4298])
   File "test_array4.php", line 12, characters 15-31:
-  This container is a darray
+  This container is an object of type dict<bool, int>
   File "test_array4.php", line 13, characters 13-16:
-  A bool cannot be used as a key for a darray
+  A bool cannot be used as a key for an object of type dict<bool, int>

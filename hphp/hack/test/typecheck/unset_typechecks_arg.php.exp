@@ -1,5 +1,5 @@
 File "unset_typechecks_arg.php", line 4, characters 9-13:
-Invalid index type for this array (Typing[4324])
+Invalid index type for this dict (Typing[4324])
   File "unset_typechecks_arg.php", line 3, characters 19-24:
   This is a string
   File "unset_typechecks_arg.php", line 4, characters 12-12:

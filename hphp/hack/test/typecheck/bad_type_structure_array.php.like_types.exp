@@ -27,7 +27,7 @@ File "bad_type_structure_array.php", line 23, characters 3-23:
 File "bad_type_structure_array.php", line 24, characters 3-22:
   ~?string
 File "bad_type_structure_array.php", line 25, characters 3-31:
-  ~?varray<_>
+  ~?vec<_>
 File "bad_type_structure_array.php", line 28, characters 3-27:
   ~err
 File "bad_type_structure_array.php", line 29, characters 3-26:

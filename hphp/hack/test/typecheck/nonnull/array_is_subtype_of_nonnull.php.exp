@@ -1,1 +1,16 @@
-No errors
+File "array_is_subtype_of_nonnull.php", line 7, characters 30-43:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "array_is_subtype_of_nonnull.php", line 7, characters 37-38:
+  But got `Tk`
+File "array_is_subtype_of_nonnull.php", line 15, characters 30-43:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "array_is_subtype_of_nonnull.php", line 15, characters 37-38:
+  But got `Tk`

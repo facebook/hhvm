@@ -1,6 +1,6 @@
 File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 6, characters 26-39:
 Invalid argument (Typing[4110])
   File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 3, characters 33-48:
-  Expected `darray<int, int>`
+  Expected `dict<int, int>`
   File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 5, characters 22-35:
-  But got `varray<~int>` (variadic argument)
+  But got `vec<~int>` (variadic argument)

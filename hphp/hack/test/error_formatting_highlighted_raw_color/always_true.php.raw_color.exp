@@ -1,12 +1,1 @@
-[31;1mTyping[4151][0m [0;1mThis expression is always [0m[0;1;4mtrue[0m [0;2m[[0m[31m1[0m[0;2m][0m
-[0;2m->[0m This is a varray and cannot be null [0;2m[[0m[36m2[0m[0;2m][0m
-
-always_true.php[0;2m:4:7[0m
-    [0;2m1[0m[0;2m |[0m <?hh // strict
-    [0;2m2[0m[0;2m |[0m 
-[0;2m[[0m[36m2[0m[0;2m][0m [0;2m3[0m[0;2m |[0m function foo([36mv[0m[36ma[0m[36mr[0m[36mr[0m[36ma[0m[36my[0m[36m<[0m[36mi[0m[36mn[0m[36mt[0m[36m>[0m $arg): void {
-[0;2m[[0m[31m1[0m[0;2m][0m [0;2m4[0m[0;2m |[0m   if ([31mn[0m[31mu[0m[31ml[0m[31ml[0m[31m [0m[31m![0m[31m=[0m[31m=[0m[31m [0m[31m$[0m[31ma[0m[31mr[0m[31mg[0m) {
-    [0;2m5[0m[0;2m |[0m   }
-    [0;2m6[0m[0;2m |[0m }
-
-1 error found.
+No errors

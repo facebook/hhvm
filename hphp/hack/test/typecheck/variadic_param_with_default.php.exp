@@ -1,8 +1,2 @@
 File "variadic_param_with_default.php", line 9, characters 31-51:
 A variadic parameter `...` must not have a default value. (Parsing[1002])
-File "variadic_param_with_default.php", line 9, characters 39-43:
-Wrong type hint (Typing[4331])
-File "variadic_param_with_default.php", line 9, characters 39-43:
-Expected `varray<IFoo>` (variadic argument)
-File "variadic_param_with_default.php", line 9, characters 47-51:
-But got `vec<nothing>`

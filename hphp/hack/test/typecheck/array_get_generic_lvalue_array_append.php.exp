@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "array_get_generic_lvalue_array_append.php", line 7, characters 41-42:
   Expected `Tv`
   File "array_get_generic_lvalue_array_append.php", line 7, characters 18-30:
-  But got `varray<mixed>`
+  But got `vec<mixed>`

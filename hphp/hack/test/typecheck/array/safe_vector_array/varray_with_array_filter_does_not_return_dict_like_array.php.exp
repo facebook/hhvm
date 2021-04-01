@@ -1,6 +1,1 @@
-File "varray_with_array_filter_does_not_return_dict_like_array.php", line 4, characters 10-57:
-Invalid return type (Typing[4110])
-  File "varray_with_array_filter_does_not_return_dict_like_array.php", line 3, characters 35-50:
-  Expected `darray<int, int>`
-  File "varray_with_array_filter_does_not_return_dict_like_array.php", line 4, characters 23-43:
-  But got `varray<int>`
+No errors

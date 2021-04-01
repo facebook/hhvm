@@ -1,3 +1,11 @@
+File "disallow_darray_with_non_arraykey_keys.php", line 3, characters 41-54:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "disallow_darray_with_non_arraykey_keys.php", line 3, characters 48-49:
+  But got `Tk`
 File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 10-31:
 Invalid index type for this darray (Typing[4110])
   File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 17-20:

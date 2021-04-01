@@ -1,6 +1,6 @@
 File "darray_assign_bad.php", line 9, characters 5-22:
 This value is not a valid key type for this container (Typing[4371])
-File "darray_assign_bad.php", line 5, characters 11-28:
-This container is a darray
-File "darray_assign_bad.php", line 6, characters 26-32:
-A nullable type cannot be used as a key for a darray
+  File "darray_assign_bad.php", line 5, characters 11-28:
+  This container is an object of type dict<string, int>
+  File "darray_assign_bad.php", line 6, characters 26-32:
+  A nullable type cannot be used as a key for an object of type dict<string, int>

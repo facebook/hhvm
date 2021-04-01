@@ -1,10 +1,14 @@
 File "test_arrays.php", line 7, characters 31-41:
   dynamic
 File "test_arrays.php", line 10, characters 31-41:
-  varray<dynamic>
+  vec<nothing>
+File "test_arrays.php", line 5, characters 19-24:
+Unbound name: `vec` (Naming[2049])
 File "test_arrays.php", line 11, characters 10-11:
 Invalid return type (Typing[4110])
+  File "test_arrays.php", line 8, characters 8-15:
+  Expected `nothing`
   File "test_arrays.php", line 5, characters 26-28:
-  Expected `int`
-  File "test_arrays.php", line 2, characters 10-12:
-  But got `dynamic`
+  But got `int`
+  File "test_arrays.php", line 5, characters 26-28:
+  This type argument to `vec` must match exactly (it is invariant)

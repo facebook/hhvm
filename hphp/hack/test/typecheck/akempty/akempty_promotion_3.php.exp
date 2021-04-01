@@ -1,8 +1,8 @@
 File "akempty_promotion_3.php", line 10, characters 3-13:
-  varray<nothing>
+  vec<nothing>
 File "akempty_promotion_3.php", line 12, characters 5-6:
 Invalid argument (Typing[4110])
-File "akempty_promotion_3.php", line 15, characters 12-14:
-Expected `int`
-File "akempty_promotion_3.php", line 7, characters 8-15:
-But got `varray<string>`
+  File "akempty_promotion_3.php", line 15, characters 12-14:
+  Expected `int`
+  File "akempty_promotion_3.php", line 7, characters 8-15:
+  But got `vec<string>` because legacy arrays have been unified with Hack arrays

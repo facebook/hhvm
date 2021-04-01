@@ -1,9 +1,14 @@
 File "array_filter.php", line 16, characters 3-35:
-  darray<arraykey, string>
+  dict<arraykey, string>
 File "array_filter.php", line 18, characters 3-33:
   _
 File "array_filter.php", line 21, characters 3-42:
-  varray<?string>
+  dict<int, ?string>
 File "array_filter.php", line 25, characters 3-37:
   _
-No errors
+File "array_filter.php", line 14, characters 21-47:
+Invalid argument (Typing[4110])
+  File "array_filter.php", line 29, characters 28-41:
+  Expected `vec<string>`
+  File "array_filter.php", line 4, characters 3-17:
+  But got `dict<int, string>`

@@ -1,12 +1,12 @@
 File "varray_darray_const_ctx_bad.php", line 5, characters 47-49:
-You are trying to access the type constant `bad` but this is a varray (Typing[4062])
-  File "varray_darray_const_ctx_bad.php", line 5, characters 27-37:
-  Definition is here
+No type constant `bad` in `vec` (Typing[4090])
+  File "hackarray.hhi", line 25, characters 22-24:
+  Declaration of `vec` is here
 File "varray_darray_const_ctx_bad.php", line 7, characters 52-54:
-You are trying to access the type constant `bad` but this is a darray (Typing[4062])
-  File "varray_darray_const_ctx_bad.php", line 7, characters 27-42:
-  Definition is here
+No type constant `bad` in `dict` (Typing[4090])
+  File "hackarray.hhi", line 23, characters 22-25:
+  Declaration of `dict` is here
 File "varray_darray_const_ctx_bad.php", line 9, characters 67-69:
-You are trying to access the type constant `bad` but this is a varray_or_darray (Typing[4062])
+You are trying to access the type constant `bad` but this is a vec_or_dict (Typing[4062])
   File "varray_darray_const_ctx_bad.php", line 9, characters 37-57:
   Definition is here

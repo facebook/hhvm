@@ -1,6 +1,6 @@
 <?hh // partial
 
-function f(<<__Soft>> darray<int, string> $v) : <<__Soft>> ?int {
+function f(darray $v) {
   $v[3] = "foo";
   foreach ($v as $k => $v) {
     return $k;
@@ -12,7 +12,7 @@ function ff() : <<__Soft>> void {
   expect<?int>(f(darray[2 => "fs"]));
 }
 
-function g(<<__Soft>> darray<int, string> $v) : <<__Soft>> darray<int, string> {
+function g(darray $v) {
   expect<string>($v[0]);
   return $v;
 }
@@ -21,11 +21,11 @@ function gg() : <<__Soft>> void {
   g(darray[0 => "sdf"]);
 }
 
-function h(): <<__Soft>> darray<int, string> {
+function h(): darray {
   return darray[0 => 'billie', 3 => 'willie'];
 }
 
-function i(): <<__Soft>> darray<int, string> {
+function i(): darray {
   $x = darray[];
   $x[3] = 'bob';
   return $x;

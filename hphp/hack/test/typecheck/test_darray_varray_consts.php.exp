@@ -1,6 +1,6 @@
 File "test_darray_varray_consts.php", line 12, characters 12-20:
 Invalid return type (Typing[4110])
-File "test_darray_varray_consts.php", line 11, characters 27-32:
-Expected `string`
-File "test_darray_varray_consts.php", line 5, characters 9-30:
-But got `darray<string, string>`
+  File "test_darray_varray_consts.php", line 11, characters 27-32:
+  Expected `string`
+  File "test_darray_varray_consts.php", line 5, characters 9-30:
+  But got `dict<string, string>`

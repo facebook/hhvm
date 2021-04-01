@@ -1,1 +1,6 @@
-No errors
+File "varray_with_array_filter_returns_vect_like_array.php", line 4, characters 10-57:
+Invalid return type (Typing[4110])
+  File "varray_with_array_filter_returns_vect_like_array.php", line 3, characters 35-45:
+  Expected `vec<int>`
+  File "varray_with_array_filter_returns_vect_like_array.php", line 4, characters 23-43:
+  But got `dict<int, int>` because legacy arrays have been unified with Hack arrays

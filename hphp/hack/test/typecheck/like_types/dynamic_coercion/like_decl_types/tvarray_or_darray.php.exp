@@ -1,6 +1,6 @@
 File "tvarray_or_darray.php", line 9, characters 10-11:
 Invalid return type (Typing[4110])
-File "tvarray_or_darray.php", line 8, characters 49-69:
-Expected `varray_or_darray<arraykey, int>`
-File "tvarray_or_darray.php", line 8, characters 21-42:
-But got `dynamic`
+  File "tvarray_or_darray.php", line 8, characters 49-69:
+  Expected `vec_or_dict<arraykey, int>`
+  File "tvarray_or_darray.php", line 8, characters 21-42:
+  But got `dynamic`

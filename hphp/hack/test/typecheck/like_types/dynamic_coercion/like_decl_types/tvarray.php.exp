@@ -1,12 +1,12 @@
 File "tvarray.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
-File "tvarray.php", line 5, characters 37-42:
-Expected `varray<_>`
-File "tvarray.php", line 5, characters 24-30:
-But got `dynamic`
+  File "tvarray.php", line 5, characters 37-42:
+  Expected `vec<_>`
+  File "tvarray.php", line 5, characters 24-30:
+  But got `dynamic`
 File "tvarray.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
-File "tvarray.php", line 9, characters 39-49:
-Expected `varray<int>`
-File "tvarray.php", line 9, characters 21-32:
-But got `dynamic`
+  File "tvarray.php", line 9, characters 39-49:
+  Expected `vec<int>`
+  File "tvarray.php", line 9, characters 21-32:
+  But got `dynamic`

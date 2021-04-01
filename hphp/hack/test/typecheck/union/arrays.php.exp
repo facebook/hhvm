@@ -1,77 +1,77 @@
 File "arrays.php", line 31, characters 3-13:
-  varray<nothing>
+  vec<nothing>
 File "arrays.php", line 32, characters 3-16:
   nothing
 File "arrays.php", line 40, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 41, characters 3-16:
   int
 File "arrays.php", line 45, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 46, characters 3-16:
   int
 File "arrays.php", line 49, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 50, characters 3-16:
   int
 File "arrays.php", line 53, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 54, characters 3-16:
   int
 File "arrays.php", line 61, characters 3-13:
-  varray<(int | string)>
+  vec<(int | string)>
 File "arrays.php", line 62, characters 3-16:
   (int | string)
 File "arrays.php", line 69, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 70, characters 3-16:
   int
 File "arrays.php", line 77, characters 3-13:
-  varray<int>
+  vec<int>
 File "arrays.php", line 78, characters 3-16:
   int
 File "arrays.php", line 86, characters 3-13:
-  varray<(int | string)>
+  vec<(int | string)>
 File "arrays.php", line 87, characters 3-16:
   (int | string)
 File "arrays.php", line 98, characters 3-13:
-  darray<int, bool>
+  dict<int, bool>
 File "arrays.php", line 99, characters 3-16:
   bool
 File "arrays.php", line 106, characters 3-13:
-  darray<int, (bool | string)>
+  dict<int, (bool | string)>
 File "arrays.php", line 107, characters 3-16:
   (bool | string)
 File "arrays.php", line 114, characters 3-13:
-  darray<int, int>
+  dict<int, int>
 File "arrays.php", line 115, characters 3-16:
   int
 File "arrays.php", line 122, characters 3-13:
-  darray<int, int>
+  dict<int, int>
 File "arrays.php", line 123, characters 3-16:
   int
 File "arrays.php", line 130, characters 3-13:
-  darray<int, (int | string)>
+  dict<int, (int | string)>
 File "arrays.php", line 131, characters 3-16:
   (int | string)
 File "arrays.php", line 134, characters 3-13:
-  darray<int, (bool | string)>
+  dict<int, (bool | string)>
 File "arrays.php", line 135, characters 3-16:
   (bool | string)
 File "arrays.php", line 138, characters 3-13:
-  darray<int, bool>
+  dict<int, bool>
 File "arrays.php", line 139, characters 3-16:
   bool
 File "arrays.php", line 142, characters 3-13:
-  darray<int, bool>
+  dict<int, bool>
 File "arrays.php", line 143, characters 3-16:
   bool
 File "arrays.php", line 146, characters 3-13:
-  darray<int, bool>
+  dict<int, bool>
 File "arrays.php", line 147, characters 3-16:
   bool
 File "arrays.php", line 150, characters 3-13:
-  darray<int, bool>
+  dict<int, bool>
 File "arrays.php", line 151, characters 3-16:
   bool
 File "arrays.php", line 4, characters 16-16:

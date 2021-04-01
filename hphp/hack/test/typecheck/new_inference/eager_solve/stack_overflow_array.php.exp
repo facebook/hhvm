@@ -1,5 +1,5 @@
 File "stack_overflow_array.php", line 25, characters 3-13:
-  darray<int, (bool | darray<string, (err | darray<int, (err | darray<string, darray<nothing, nothing>>)>)>)>
+  dict<int, (bool | dict<string, (err | dict<int, (err | dict<string, dict<nothing, nothing>>)>)>)>
 File "stack_overflow_array.php", line 15, characters 3-13:
 This is not an object of type `KeyedContainer`, this is a bool (Typing[4005])
   File "stack_overflow_array.php", line 12, characters 17-21:

@@ -55,8 +55,8 @@
                    None)))));
            ([10:3-23],
             (Expr
-               (([10:3-22], darray<string, int>),
-                (Call ((([10:3-18], (function(shape(...) $shape): darray<string, int>)), (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
+               (([10:3-22], dict<string, int>),
+                (Call ((([10:3-18], (function(shape(...) $shape): dict<string, int>)), (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
                    [], [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))], None)))))
            ];
          fb_annotation = () };

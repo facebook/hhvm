@@ -1,6 +1,6 @@
 File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-26:
 Invalid return type (Typing[4110])
   File "disallow_varray_where_dict_like_array_is_required.php", line 3, characters 18-39:
-  Expected `darray<string, string>`
+  Expected `dict<string, string>`
   File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-26:
-  But got `varray<string>`
+  But got `vec<string>` because legacy arrays have been unified with Hack arrays

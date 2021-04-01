@@ -1,6 +1,1 @@
-File "disallow_dict_where_varray_or_darray_is_required.php", line 4, characters 10-25:
-Invalid return type (Typing[4110])
-File "disallow_dict_where_varray_or_darray_is_required.php", line 3, characters 18-41:
-Expected `varray_or_darray<arraykey, string>`
-File "disallow_dict_where_varray_or_darray_is_required.php", line 4, characters 10-25:
-But got `dict<int, string>`
+No errors

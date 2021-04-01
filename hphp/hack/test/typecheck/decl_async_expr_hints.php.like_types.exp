@@ -11,4 +11,4 @@ Invalid return type (Typing[4110])
   File "decl_async_expr_hints.php", line 12, characters 15-18:
   Expected `void`
   File "decl_async_expr_hints.php", line 13, characters 10-184:
-  But got `(function(varray<int> $a): ~Awaitable<varray<int>>)`
+  But got `(function(vec<int> $a): ~Awaitable<vec<int>>)`

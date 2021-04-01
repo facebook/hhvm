@@ -39,8 +39,8 @@
           cv_readonly = false; cv_visibility = Private; cv_type = ((dynamic), None); 
           cv_id = ([8:18-20], "d");
           cv_expr =
-          (Some (([8:23-11:4], darray<string, classname<(A | B)>>),
-                 (Darray (None,
+          (Some (([8:23-11:4], dict<string, classname<(A | B)>>),
+                 (KeyValCollection (Dict, None,
                     [((([9:5-8], string), (String "a")), (([9:12-20], classname<A>), (Class_const ((([9:12-13], A), (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
                       ((([10:5-8], string), (String "b")), (([10:12-20], classname<B>), (Class_const ((([10:12-13], B), (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))]
                     ))));

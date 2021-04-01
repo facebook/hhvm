@@ -1,12 +1,12 @@
 File "tdarray.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
-File "tdarray.php", line 5, characters 37-42:
-Expected `darray<_, _>`
-File "tdarray.php", line 5, characters 24-30:
-But got `dynamic`
+  File "tdarray.php", line 5, characters 37-42:
+  Expected `dict<_, _>`
+  File "tdarray.php", line 5, characters 24-30:
+  But got `dynamic`
 File "tdarray.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
-File "tdarray.php", line 9, characters 47-65:
-Expected `darray<int, string>`
-File "tdarray.php", line 9, characters 21-40:
-But got `dynamic`
+  File "tdarray.php", line 9, characters 47-65:
+  Expected `dict<int, string>`
+  File "tdarray.php", line 9, characters 21-40:
+  But got `dynamic`

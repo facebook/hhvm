@@ -1,18 +1,28 @@
 File "variadic_args8.php", line 7, characters 18-21:
 Invalid argument (Typing[4110])
-File "variadic_args8.php", line 3, characters 23-28:
-Expected `string`
-File "variadic_args8.php", line 5, characters 19-23:
-But got `int` (variadic argument)
+  File "variadic_args8.php", line 3, characters 23-28:
+  Expected `string`
+  File "variadic_args8.php", line 5, characters 19-23:
+  But got `int` (variadic argument)
+  File "hackarray.hhi", line 25, characters 52-52:
+    via this generic `T`
+  File "hackarray.hhi", line 19, characters 77-78:
+    via this generic `Tv`
+  File "interfaces.hhi", line 123, characters 66-67:
+    via this generic `Tv`
+  File "interfaces.hhi", line 93, characters 53-54:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 26, characters 52-53:
+    via this generic `Tv`
 File "variadic_args8.php", line 12, characters 5-9:
 Invalid argument (Typing[4110])
-File "variadic_args8.php", line 5, characters 19-23:
-Expected `int` (variadic argument)
-File "variadic_args8.php", line 12, characters 5-9:
-But got `string`
+  File "variadic_args8.php", line 5, characters 19-23:
+  Expected `int` (variadic argument)
+  File "variadic_args8.php", line 12, characters 5-9:
+  But got `string`
 File "variadic_args8.php", line 12, characters 12-16:
 Invalid argument (Typing[4110])
-File "variadic_args8.php", line 5, characters 19-23:
-Expected `int` (variadic argument)
-File "variadic_args8.php", line 12, characters 12-16:
-But got `string`
+  File "variadic_args8.php", line 5, characters 19-23:
+  Expected `int` (variadic argument)
+  File "variadic_args8.php", line 12, characters 12-16:
+  But got `string`

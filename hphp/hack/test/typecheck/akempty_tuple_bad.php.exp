@@ -1,6 +1,6 @@
 File "akempty_tuple_bad.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
   File "akempty_tuple_bad.php", line 4, characters 17-38:
-  Expected `(?string, varray<int>)`
+  Expected `(?string, vec<int>)`
   File "akempty_tuple_bad.php", line 5, characters 8-15:
-  But got `varray<nothing>`
+  But got `vec<nothing>` because legacy arrays have been unified with Hack arrays

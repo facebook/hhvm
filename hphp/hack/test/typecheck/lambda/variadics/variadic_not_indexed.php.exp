@@ -1,16 +1,24 @@
 File "variadic_not_indexed.php", line 16, characters 35-37:
-You are trying to access the method `foo` but this is a varray (Typing[4062])
-File "variadic_not_indexed.php", line 16, characters 23-24:
-Definition is here
+No instance method `foo` in `vec` (Typing[4053])
+  File "variadic_not_indexed.php", line 16, characters 23-24:
+  This is why I think it is an object of type HH\vec (variadic argument)
+  File "hackarray.hhi", line 25, characters 22-24:
+  Declaration of `vec` is here
 File "variadic_not_indexed.php", line 17, characters 37-39:
-You are trying to access the method `foo` but this is a varray (Typing[4062])
-File "variadic_not_indexed.php", line 17, characters 25-26:
-Definition is here
+No instance method `foo` in `vec` (Typing[4053])
+  File "variadic_not_indexed.php", line 17, characters 25-26:
+  This is why I think it is an object of type HH\vec (variadic argument)
+  File "hackarray.hhi", line 25, characters 22-24:
+  Declaration of `vec` is here
 File "variadic_not_indexed.php", line 19, characters 29-31:
-You are trying to access the method `foo` but this is a varray (Typing[4062])
-File "variadic_not_indexed.php", line 19, characters 17-18:
-Definition is here
+No instance method `foo` in `vec` (Typing[4053])
+  File "variadic_not_indexed.php", line 19, characters 17-18:
+  This is why I think it is an object of type HH\vec (variadic argument)
+  File "hackarray.hhi", line 25, characters 22-24:
+  Declaration of `vec` is here
 File "variadic_not_indexed.php", line 20, characters 31-33:
-You are trying to access the method `foo` but this is a varray (Typing[4062])
-File "variadic_not_indexed.php", line 20, characters 19-20:
-Definition is here
+No instance method `foo` in `vec` (Typing[4053])
+  File "variadic_not_indexed.php", line 20, characters 19-20:
+  This is why I think it is an object of type HH\vec (variadic argument)
+  File "hackarray.hhi", line 25, characters 22-24:
+  Declaration of `vec` is here

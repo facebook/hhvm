@@ -1,19 +1,19 @@
 <?hh // partial
 
-function f(<<__Soft>> varray<string> $v) : <<__Soft>> string {
+function f(varray $v) {
   $v[3] = "foo";
   return $v[34897];
 }
 
-function g(<<__Soft>> varray<string> $v) : <<__Soft>> void {
+function g(varray $v) : <<__Soft>> void {
   expect<string>($v[0]);
 }
 
-function h(): <<__Soft>> varray<string> {
+function h(): varray {
   return varray['billie', 'willie'];
 }
 
-function i(): <<__Soft>> varray<string> {
+function i(): varray {
   $x = varray[];
   $x[] = 'bob';
   return $x;

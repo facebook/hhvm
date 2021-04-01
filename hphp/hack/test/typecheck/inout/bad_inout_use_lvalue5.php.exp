@@ -5,6 +5,6 @@ File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 File "bad_inout_use_lvalue5.php", line 6, characters 5-22:
 Invalid argument (Typing[4110])
   File "bad_inout_use_lvalue5.php", line 3, characters 18-28:
-  Expected `varray<int>`
+  Expected `vec<int>`
   File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
   But got `(int, int)`

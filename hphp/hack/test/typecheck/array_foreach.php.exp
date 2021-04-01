@@ -1,6 +1,6 @@
 File "array_foreach.php", line 20, characters 8-11:
 Invalid argument (Typing[4110])
   File "array_foreach.php", line 30, characters 15-33:
-  Expected `darray<int, string>`
+  Expected `dict<int, string>`
   File "array_foreach.php", line 12, characters 15-28:
-  But got `varray<string>`
+  But got `vec<string>`

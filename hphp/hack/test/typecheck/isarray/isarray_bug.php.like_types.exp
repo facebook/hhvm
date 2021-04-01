@@ -1,6 +1,6 @@
 File "isarray_bug.php", line 8, characters 12-17:
 Invalid return type (Typing[4110])
-File "isarray_bug.php", line 6, characters 28-28:
-Expected `T`
-File "isarray_bug.php", line 7, characters 24-38:
-But got `varray_or_darray<arraykey, T#1>` from the argument to this \HH\is_php_array test
+  File "isarray_bug.php", line 6, characters 28-28:
+  Expected `T`
+  File "isarray_bug.php", line 7, characters 24-38:
+  But got `vec_or_dict<arraykey, T#1>` from the argument to this \HH\is_php_array test

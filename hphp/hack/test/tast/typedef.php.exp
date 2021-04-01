@@ -12,7 +12,7 @@
          m_name = ([3:62-73], "__construct"); m_tparams = []; m_where_constraints = [];
          m_variadic =
          (FVvariadicArg
-            { param_annotation = ([3:81-83], varray<int>); param_type_hint = ((varray<int>), (Some ([3:74-77], (Hprim Tint)))); 
+            { param_annotation = ([3:81-83], vec<int>); param_type_hint = ((vec<int>), (Some ([3:74-77], (Hprim Tint)))); 
               param_is_variadic = true; param_pos = [3:81-83]; param_name = "$x"; 
               param_expr = None; param_readonly = None; param_callconv = None; 
               param_user_attributes = []; param_visibility = None });

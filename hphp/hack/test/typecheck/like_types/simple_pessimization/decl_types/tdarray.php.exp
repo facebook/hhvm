@@ -1,5 +1,5 @@
 File "tdarray.php", line 5, characters 3-13:
-  ~darray<_, _>
+  ~dict<_, _>
 File "tdarray.php", line 9, characters 3-13:
-  ~darray<int, string>
+  ~dict<int, string>
 No errors

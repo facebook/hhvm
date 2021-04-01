@@ -1,34 +1,16 @@
-File "is_dict_or_darray.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-File "is_dict_or_darray.php", line 22, characters 21-41:
-Expected `dict<arraykey, mixed>`
-File "is_dict_or_darray.php", line 4, characters 7-26:
-But got `darray<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
 File "is_dict_or_darray.php", line 11, characters 15-16:
 Invalid argument (Typing[4110])
-File "is_dict_or_darray.php", line 21, characters 20-29:
-Expected `vec<mixed>`
-File "is_dict_or_darray.php", line 4, characters 7-26:
-But got `darray<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
-File "is_dict_or_darray.php", line 12, characters 18-19:
-Invalid argument (Typing[4110])
-File "is_dict_or_darray.php", line 24, characters 23-45:
-Expected `darray<arraykey, mixed>`
-File "is_dict_or_darray.php", line 4, characters 7-26:
-But got `dict<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
+  File "is_dict_or_darray.php", line 21, characters 20-29:
+  Expected `vec<mixed>`
+  File "is_dict_or_darray.php", line 4, characters 7-26:
+  But got `dict<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
 File "is_dict_or_darray.php", line 13, characters 18-19:
 Invalid argument (Typing[4110])
-File "is_dict_or_darray.php", line 23, characters 23-35:
-Expected `varray<mixed>`
-File "is_dict_or_darray.php", line 4, characters 7-26:
-But got `darray<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
-File "is_dict_or_darray.php", line 14, characters 28-29:
-Invalid argument (Typing[4110])
-File "is_dict_or_darray.php", line 25, characters 33-65:
-Expected `varray_or_darray<arraykey, mixed>`
-File "is_dict_or_darray.php", line 4, characters 7-26:
-But got `dict<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
+  File "is_dict_or_darray.php", line 23, characters 23-35:
+  Expected `vec<mixed>`
+  File "is_dict_or_darray.php", line 4, characters 7-26:
+  But got `dict<(string | Tk#1), (string | T#1)>` from the argument to this \HH\is_dict_or_darray test
 File "is_dict_or_darray.php", line 16, characters 5-17:
 This is not an object of type `KeyedContainer`, this is a mixed value (Typing[4370])
-File "is_dict_or_darray.php", line 3, characters 15-19:
-Definition is here
+  File "is_dict_or_darray.php", line 3, characters 15-19:
+  Definition is here

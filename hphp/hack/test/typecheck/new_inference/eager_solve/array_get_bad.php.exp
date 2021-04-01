@@ -1,5 +1,5 @@
 File "array_get_bad.php", line 39, characters 15-21:
-Invalid index type for this array (Typing[4324])
+Invalid index type for this dict (Typing[4324])
   File "array_get_bad.php", line 20, characters 10-15:
   This is a string
   File "array_get_bad.php", line 39, characters 19-20:

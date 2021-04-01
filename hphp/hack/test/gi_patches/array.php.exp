@@ -5,19 +5,19 @@ function f(varray_or_darray $v) : <<__Soft>> string {
   return $v[34897];
 }
 
-function g(<<__Soft>> varray_or_darray<arraykey, string> $v) : <<__Soft>> void {
+function g(<<__Soft>> vec_or_dict<arraykey, string> $v) : <<__Soft>> void {
   expect<string>($v[0]);
 }
 
-function h1(): <<__Soft>> varray_or_darray<arraykey, string> {
+function h1(): <<__Soft>> vec_or_dict<arraykey, string> {
   return darray[0 => 'billie'];
 }
 
-function h2(): <<__Soft>> varray_or_darray<arraykey, string> {
+function h2(): <<__Soft>> vec_or_dict<arraykey, string> {
   return varray['billie'];
 }
 
-function i(): <<__Soft>> varray_or_darray<arraykey, string> {
+function i(): <<__Soft>> vec_or_dict<arraykey, string> {
   $x = darray[];
   $x[3] = 'bob';
   return $x;

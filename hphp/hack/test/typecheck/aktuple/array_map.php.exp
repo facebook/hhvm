@@ -1,1 +1,12 @@
-No errors
+File "array_map.php", line 6, characters 17-53:
+Invalid argument (Typing[4110])
+  File "array_map.php", line 3, characters 24-34:
+  Expected `vec<int>`
+  File "array_map.php", line 6, characters 38-52:
+  But got `dict<[unresolved], _>` because legacy arrays have been unified with Hack arrays
+File "array_map.php", line 6, characters 17-53:
+Invalid argument (Typing[4110])
+  File "array_map.php", line 3, characters 24-34:
+  Expected `vec<int>`
+  File "array_map.php", line 6, characters 38-52:
+  But got `dict<int, _>` because legacy arrays have been unified with Hack arrays

@@ -31,13 +31,13 @@ Invalid argument (Typing[4110])
 File "coerce_from_dyn.bad.php", line 21, characters 22-23:
 Invalid argument (Typing[4110])
   File "coerce_from_dyn.bad.php", line 18, characters 17-32:
-  Expected `darray<int, int>`
+  Expected `dict<int, int>`
   File "coerce_from_dyn.bad.php", line 20, characters 20-26:
   But got `dynamic`
 File "coerce_from_dyn.bad.php", line 21, characters 26-27:
 Invalid argument (Typing[4110])
   File "coerce_from_dyn.bad.php", line 18, characters 39-49:
-  Expected `varray<int>`
+  Expected `vec<int>`
   File "coerce_from_dyn.bad.php", line 20, characters 20-26:
   But got `dynamic`
 File "coerce_from_dyn.bad.php", line 29, characters 13-14:

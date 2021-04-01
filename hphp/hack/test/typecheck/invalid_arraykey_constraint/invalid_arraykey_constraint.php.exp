@@ -1,16 +1,64 @@
-File "invalid_arraykey_constraint.php", line 20, characters 17-18:
-This type is a value of generic type Ta, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 21, characters 17-18:
-This type is a value of generic type Tb, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 22, characters 17-24:
-This type is the expression dependent type this::Tc, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 23, characters 17-24:
-This type is the expression dependent type this::Td, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 34, characters 10-14:
-This type is a float, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 35, characters 10-13:
-This type is null, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 36, characters 10-20:
-This type is a float, which cannot be used as an arraykey (string | int) (Typing[4319])
-File "invalid_arraykey_constraint.php", line 37, characters 10-19:
-This type is null, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 20, characters 10-24:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 20, characters 17-18:
+  But got `Ta`
+File "invalid_arraykey_constraint.php", line 21, characters 10-24:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 21, characters 17-18:
+  But got `Tb`
+File "invalid_arraykey_constraint.php", line 22, characters 10-30:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 22, characters 17-24:
+  But got `this::Tc`
+File "invalid_arraykey_constraint.php", line 23, characters 10-30:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 23, characters 17-24:
+  But got `this::Td`
+File "invalid_arraykey_constraint.php", line 34, characters 3-20:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 34, characters 10-14:
+  But got `float`
+File "invalid_arraykey_constraint.php", line 35, characters 3-19:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 35, characters 10-13:
+  But got `null`
+File "invalid_arraykey_constraint.php", line 36, characters 3-26:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 36, characters 10-20:
+  But got `float`
+File "invalid_arraykey_constraint.php", line 37, characters 3-25:
+Some type constraint(s) here are violated (Typing[4323])
+  File "hackarray.hhi", line 23, characters 28-29:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 23, characters 34-41:
+  Expected `arraykey`
+  File "invalid_arraykey_constraint.php", line 37, characters 10-19:
+  But got `null`

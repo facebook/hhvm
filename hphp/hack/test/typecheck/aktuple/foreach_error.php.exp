@@ -1,6 +1,16 @@
 File "foreach_error.php", line 12, characters 14-15:
 Invalid argument (Typing[4110])
-File "foreach_error.php", line 16, characters 19-21:
-Expected `int`
-File "foreach_error.php", line 9, characters 18-21:
-But got `num`
+  File "foreach_error.php", line 16, characters 19-21:
+  Expected `int`
+  File "foreach_error.php", line 9, characters 18-21:
+  But got `num`
+  File "hackarray.hhi", line 25, characters 52-52:
+    via this generic `T`
+  File "hackarray.hhi", line 19, characters 77-78:
+    via this generic `Tv`
+  File "interfaces.hhi", line 123, characters 66-67:
+    via this generic `Tv`
+  File "interfaces.hhi", line 93, characters 53-54:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 26, characters 52-53:
+    via this generic `Tv`

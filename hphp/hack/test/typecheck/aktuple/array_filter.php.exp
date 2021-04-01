@@ -1,1 +1,6 @@
-No errors
+File "array_filter.php", line 9, characters 10-38:
+Invalid return type (Typing[4110])
+  File "array_filter.php", line 8, characters 18-28:
+  Expected `vec<int>`
+  File "array_filter.php", line 9, characters 23-37:
+  But got `dict<int, int>` because legacy arrays have been unified with Hack arrays

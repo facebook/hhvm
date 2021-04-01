@@ -7,20 +7,20 @@
       { fb_ast =
         [([13:3-52],
           (Expr
-             (([13:3-51], darray<string, _>),
-              (Binop ((Eq None), (([13:3-5], darray<string, _>), (Lvar ([13:3-5], $x))),
-                 (([13:8-51], darray<string, _>),
-                  (Darray (None,
+             (([13:3-51], dict<string, _>),
+              (Binop ((Eq None), (([13:3-5], dict<string, _>), (Lvar ([13:3-5], $x))),
+                 (([13:8-51], dict<string, _>),
+                  (KeyValCollection (Dict, None,
                      [((([13:15-18], string), (String "k")), (([13:22-23], int), (Int "0")));
                        ((([13:25-29], string), (String "k2")), (([13:33-50], _), (Call ((([13:33-48], (function(): _)), (Id ([13:33-48], "\\my_php_function"))), [], [], None))))]
                      )))
                  )))));
           ([14:3-37],
            (Expr
-              (([14:3-36], varray<_>),
-               (Binop ((Eq None), (([14:3-5], varray<_>), (Lvar ([14:3-5], $y))),
-                  (([14:8-36], varray<_>),
-                   (Varray (None, [(([14:15-16], int), (Int "0")); (([14:18-35], _), (Call ((([14:18-33], (function(): _)), (Id ([14:18-33], "\\my_php_function"))), [], [], None)))])))
+              (([14:3-36], vec<_>),
+               (Binop ((Eq None), (([14:3-5], vec<_>), (Lvar ([14:3-5], $y))),
+                  (([14:8-36], vec<_>),
+                   (ValCollection (Vec, None, [(([14:15-16], int), (Int "0")); (([14:18-35], _), (Call ((([14:18-33], (function(): _)), (Id ([14:18-33], "\\my_php_function"))), [], [], None)))])))
                   )))))
           ];
         fb_annotation = () };

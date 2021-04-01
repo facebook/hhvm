@@ -7,7 +7,7 @@ Invalid index type for this darray (Typing[4110])
 File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-26:
 Invalid return type (Typing[4110])
   File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 3, characters 19-39:
-  This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)
+  This is vec_or_dict, which requires keys that have type arraykey
   File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
   But got `bool`
 File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-29:

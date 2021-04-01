@@ -1,6 +1,6 @@
 File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-17:
 Invalid return type (Typing[4110])
   File "disallow_empty_darray_where_vector_like_array_is_required.php", line 3, characters 18-31:
-  Expected `varray<string>`
+  Expected `vec<string>`
   File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-17:
-  But got `darray<nothing, nothing>`
+  But got `dict<nothing, nothing>` because legacy arrays have been unified with Hack arrays

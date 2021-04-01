@@ -480,8 +480,13 @@ TEST(AliasClass, IterUnion) {
 }
 
 TEST(AliasClass, FrameUnion) {
-  auto const FP1 = FPRelOffset { 0 };
-  auto const FP2 = FPRelOffset { -1 };
+  IRUnit unit{test_context};
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
+  auto const dsData = DefStackData { FPInvOffset { 0 }, FPInvOffset { 0 } };
+  auto const biData = BeginInliningData { IRSPRelOffset { 0 }, nullptr, 0, 0 };
+  auto const SP = unit.gen(DefRegSP, bcctx, dsData)->dst();
+  auto const FP1 = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
+  auto const FP2 = unit.gen(BeginInlining, bcctx, biData, SP, FP1)->dst();
 
   AliasClass const local1 = ALocal { FP1, 0 };
   AliasClass const localR = ALocal { FP1, AliasIdSet::IdRange(0, 2) };
@@ -510,7 +515,7 @@ TEST(AliasClass, FrameUnion) {
   EXPECT_FALSE(u3.fcontext().hasValue());
   EXPECT_EQ(u3, u4);
   EXPECT_TRUE(u5.local().hasValue());
-  EXPECT_EQ(u5.local()->base, local1.local()->base);
+  EXPECT_EQ(u5.local()->frameIdx, local1.local()->frameIdx);
   EXPECT_EQ(u5.local()->ids, local1.local()->ids);
 }
 

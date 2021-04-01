@@ -91,7 +91,7 @@ struct ALocal;
 struct AIter;
 
 namespace detail {
-FPRelOffset frame_base_offset(SSATmp* fp);
+u_int32_t frame_depth_index(SSATmp* fp);
 
 static constexpr uint32_t kSlotsPerAIter = 4;
 static constexpr uint32_t kAIterBaseOffset = 0;
@@ -102,25 +102,21 @@ static constexpr uint32_t kAIterEndOffset = 3;
 }
 
 struct UFrameBase {
-  UFrameBase(SSATmp* fp) : base{detail::frame_base_offset(fp)} {}
-  UFrameBase(FPRelOffset off) : base{off} {}
-  FPRelOffset base;
+  explicit UFrameBase(SSATmp* fp) : frameIdx{detail::frame_depth_index(fp)} {}
+  explicit UFrameBase(uint32_t frameIdx) : frameIdx{frameIdx} {}
+  uint32_t frameIdx;
 };
 
-#define FRAME_RELATIVE(Name)                                                  \
-  struct Name : UFrameBase {                                                  \
-    Name(SSATmp* fp, AliasIdSet ids, FPInvOffset off = FPInvOffset{0})        \
-      : UFrameBase{detail::frame_base_offset(fp) - off.offset}, ids{ids} {}   \
-    Name(FPRelOffset off, AliasIdSet ids) : UFrameBase{off}, ids{ids} {}      \
-    AliasIdSet ids;                                                           \
+#define FRAME_RELATIVE(Name)                                                   \
+  struct Name : UFrameBase {                                                   \
+    Name(SSATmp* fp, AliasIdSet ids) : UFrameBase{fp}, ids{ids} {}             \
+    Name(uint32_t frameIdx, AliasIdSet ids) : UFrameBase{frameIdx}, ids{ids} {}\
+    AliasIdSet ids;                                                            \
   }
 
-#define FRAME_RELATIVE0(Name)                                                 \
-  struct Name : UFrameBase {                                                  \
-    using UFrameBase::UFrameBase;                                             \
-    Name() = default;                                                         \
-    /* implicit */ Name(const UFrameBase& base) : UFrameBase{base} {}         \
-    Name& operator=(const UFrameBase& b) { base = b.base; return *this; }     \
+#define FRAME_RELATIVE0(Name)                                                  \
+  struct Name : UFrameBase {                                                   \
+    using UFrameBase::UFrameBase;                                              \
   }
 
 /*
@@ -134,34 +130,28 @@ FRAME_RELATIVE(ALocal);
  */
 FRAME_RELATIVE(AIter);
 
-inline AIter aiter_base(SSATmp* fp, uint32_t id,
-                        FPInvOffset off = FPInvOffset{0}) {
+inline AIter aiter_base(SSATmp* fp, uint32_t id) {
   using namespace detail;
-  return AIter { fp, id * kSlotsPerAIter + kAIterBaseOffset, off };
+  return AIter { fp, id * kSlotsPerAIter + kAIterBaseOffset };
 }
-inline AIter aiter_type(SSATmp* fp, uint32_t id,
-                        FPInvOffset off = FPInvOffset{0}) {
+inline AIter aiter_type(SSATmp* fp, uint32_t id) {
   using namespace detail;
-  return AIter { fp, id * kSlotsPerAIter + kAIterTypeOffset, off };
+  return AIter { fp, id * kSlotsPerAIter + kAIterTypeOffset };
 }
-inline AIter aiter_pos(SSATmp* fp, uint32_t id,
-                       FPInvOffset off = FPInvOffset{0}) {
+inline AIter aiter_pos(SSATmp* fp, uint32_t id) {
   using namespace detail;
-  return AIter { fp, id * kSlotsPerAIter + kAIterPosOffset, off };
+  return AIter { fp, id * kSlotsPerAIter + kAIterPosOffset };
 }
-inline AIter aiter_end(SSATmp* fp, uint32_t id,
-                       FPInvOffset off = FPInvOffset{0}) {
+inline AIter aiter_end(SSATmp* fp, uint32_t id) {
   using namespace detail;
-  return AIter { fp, id * kSlotsPerAIter + kAIterEndOffset, off };
+  return AIter { fp, id * kSlotsPerAIter + kAIterEndOffset };
 }
 
-inline AIter aiter_all(SSATmp* fp, uint32_t id,
-                       FPInvOffset off = FPInvOffset{0}) {
+inline AIter aiter_all(SSATmp* fp, uint32_t id) {
   using namespace detail;
   return AIter {
     fp,
-    AliasIdSet::IdRange(id * kSlotsPerAIter, (id + 1) * kSlotsPerAIter),
-    off
+    AliasIdSet::IdRange(id * kSlotsPerAIter, (id + 1) * kSlotsPerAIter)
   };
 }
 

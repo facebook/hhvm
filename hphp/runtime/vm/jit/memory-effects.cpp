@@ -1997,13 +1997,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     return folly::sformat("  inst: {}\n  effects: {}\n", inst, show(me));
   };
 
-  auto check_fp = [&] (FPRelOffset base) {
-    always_assert_flog(
-      base.offset <= 0,
-      "frame offset is above base frame"
-    );
-  };
-
   auto check_obj = [&] (SSATmp* obj) {
     always_assert_flog(
       obj->type() <= TObj,
@@ -2012,7 +2005,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   };
 
   auto check = [&] (AliasClass a) {
-    if (auto const fr = a.local()) check_fp(fr->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

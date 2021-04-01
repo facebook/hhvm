@@ -192,7 +192,7 @@ bool collect_component(AliasAnalysis& aa,
       if (loc->ids.size() <= kMaxExpandedSize) {
         for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
           if (loc->ids.test(id)) {
-            if (auto const index = add_class(aa, T { loc->base, id })) {
+            if (auto const index = add_class(aa, T { loc->frameIdx, id })) {
               range.set(*index);
             }
           }
@@ -391,10 +391,10 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     }
 
     if (auto const ar = acls.actrec()) {
-      auto const fp = ar->base;
-      if (acls.maybe(AFContext { fp })) add_class(ret, AFContext { fp });
-      if (acls.maybe(AFFunc { fp }))    add_class(ret, AFFunc { fp });
-      if (acls.maybe(AFMeta { fp }))    add_class(ret, AFMeta { fp });
+      auto const idx = ar->frameIdx;
+      if (acls.maybe(AFContext { idx })) add_class(ret, AFContext { idx });
+      if (acls.maybe(AFFunc { idx }))    add_class(ret, AFFunc { idx });
+      if (acls.maybe(AFMeta { idx }))    add_class(ret, AFMeta { idx });
       // Fallthrough here: it's possible to share these specializations with
       // ALocal and AIter specializations.
     }

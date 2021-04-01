@@ -21,10 +21,12 @@ ExternalProject_add(
   bundled_folly
   ${FOLLY_SOURCE_ARGS}
   PATCH_COMMAND
-    patch -p1 --forward < "${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch" &&
-    patch -p1 --forward < "${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch"
+    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch" || true &&
+    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch" || true &&
+    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/disable-gflags.patch" || true
   CMAKE_ARGS
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include"
+    -DWITHOUT_GFLAGS=TRUE
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
@@ -43,6 +45,9 @@ ExternalProject_add(
   BUILD_COMMAND
     ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly --parallel
   INSTALL_COMMAND
+    ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_CURRENT_LIST_DIR}/include"
+      "<INSTALL_DIR>/include" &&
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
 )
@@ -51,7 +56,12 @@ add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd)
 
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)
-target_include_directories(folly INTERFACE "${INSTALL_DIR}/include")
+target_include_directories(
+  folly
+  INTERFACE
+  "${INSTALL_DIR}/include"
+  "${CMAKE_CURRENT_LIST_DIR}/include"
+)
 target_link_libraries(folly INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   fmt # referred to by folly's headers, so anything using folly needs to find them

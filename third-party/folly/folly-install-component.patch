@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 07afb6cf9..1b2d890de 100644
+index 07afb6cf9..a9065b196 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -371,8 +371,6 @@ target_compile_definitions(folly_base
@@ -11,7 +11,7 @@ index 07afb6cf9..1b2d890de 100644
  option(PYTHON_EXTENSIONS
    "Build Python Bindings for Folly, requires Cython and (BUILD_SHARED_LIBS=ON)"
    OFF
-@@ -400,21 +398,33 @@ target_link_libraries(folly_test_util
+@@ -400,21 +398,31 @@ target_link_libraries(folly_test_util
      ${LIBGMOCK_LIBRARIES}
  )
  apply_folly_compile_options_to_target(folly_test_util)
@@ -24,27 +24,29 @@ index 07afb6cf9..1b2d890de 100644
 +  RUNTIME DESTINATION bin
 +  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
 +  ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
-+auto_install_files(folly ${FOLLY_DIR}
-+)
 +install(TARGETS folly_test_util
 +  EXPORT folly_test_util
 +  COMPONENT test_util
    RUNTIME DESTINATION bin
    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
    ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
- auto_install_files(folly ${FOLLY_DIR}
+-auto_install_files(folly ${FOLLY_DIR}
 -  ${hfiles}
- )
+-)
  install(
    FILES ${CMAKE_CURRENT_BINARY_DIR}/folly/folly-config.h
    DESTINATION ${INCLUDE_INSTALL_DIR}/folly
-   COMPONENT dev
- )
-+install(
-+  FILES ${hfiles}
-+  DESTINATION ${INCLUDE_INSTALL_DIR}/folly
-+  COMPONENT dev
-+)
+-  COMPONENT dev
+-)
++  COMPONENT dev)
++foreach(HEADER ${hfiles})
++  string(REPLACE "${FOLLY_DIR}" "${INCLUDE_INSTALL_DIR}/folly" DEST "${HEADER}")
++  get_filename_component(DEST "${DEST}" DIRECTORY)
++  install(
++    FILES "${HEADER}"
++    DESTINATION "${DEST}"
++    COMPONENT dev)
++endforeach()
  
  # Generate the folly-config.cmake file for installation so that
  # downstream projects that use on folly can easily depend on it in their CMake

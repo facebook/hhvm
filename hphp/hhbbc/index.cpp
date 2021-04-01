@@ -3883,6 +3883,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
       propName,
       TriBool::Yes,
       yesOrNo(prop.attrs & AttrIsConst),
+      yesOrNo(prop.attrs & AttrIsReadOnly),
       yesOrNo(prop.attrs & AttrLateInit),
       initMightRaise
     };
@@ -3893,6 +3894,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
     return PropLookupResult<>{
       TBottom,
       propName,
+      TriBool::No,
       TriBool::No,
       TriBool::No,
       TriBool::No,
@@ -5707,6 +5709,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
       TriBool::Maybe,
       TriBool::Maybe,
       TriBool::Maybe,
+      TriBool::Maybe,
       true
     };
   };
@@ -5899,7 +5902,7 @@ PropMergeResult<> Index::merge_static_type(
     if (!sname) {
       // Very bad case. We don't know `cls' or the property name. This
       // mutation can be affecting anything, so merge it into all
-      // properties (this drops type information for p ublic
+      // properties (this drops type information for public
       // properties).
       ITRACE(4, "unknown class and prop. merging everything\n");
       publicMutations.mergeUnknown(ctx);

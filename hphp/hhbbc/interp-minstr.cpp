@@ -2026,6 +2026,13 @@ void in(ISS& env, const bc::BaseSC& op) {
       // These don't mutate the base, so AttrConst does not apply
       break;
   }
+  
+  // Whether we might potentially throw because of AttrIsReadOnly
+  if (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
+    return unreachable(env);
+  }
+  auto const mightReadOnlyThrow =
+    (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe);
 
   // Loading the base from a static property can be considered
   // effect_free if there's no possibility of throwing. This requires
@@ -2036,6 +2043,7 @@ void in(ISS& env, const bc::BaseSC& op) {
       lookup.lateInit == TriBool::No &&
       !lookup.classInitMightRaise &&
       !mightConstThrow &&
+      !mightReadOnlyThrow &&
       tcls.subtypeOf(BCls) &&
       tname.subtypeOf(BStr)) {
 

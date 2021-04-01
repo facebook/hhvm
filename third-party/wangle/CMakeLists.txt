@@ -21,6 +21,6 @@ add_library(wangle STATIC ${files} ${hfiles})
 auto_source_group(wangle "${WANGLE_DIR}" ${files} ${hfiles})
 
 find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR} "${TP_DIR}/fizz/src")
+include_directories(${OPENSSL_INCLUDE_DIR} "${TP_DIR}/fizz/src" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_link_libraries(wangle folly boost fizz ${OPENSSL_LIBRARIES})

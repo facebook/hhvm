@@ -2685,17 +2685,17 @@ and expr_
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
     let is_dyn = Typing_utils.is_dynamic env hint_ty in
-    ( if enable_sound_dynamic && is_dyn then
-      let (_ : env * locl_ty) =
-        ( SubType.sub_type
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            env
-            expr_ty
-            hint_ty
-            Errors.unify_error,
-          hint_ty )
-      in
-      () );
+    let env =
+      if enable_sound_dynamic && is_dyn then
+        SubType.sub_type
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          env
+          expr_ty
+          hint_ty
+          Errors.unify_error
+      else
+        env
+    in
     let (env, hint_ty) =
       if is_dyn && not enable_sound_dynamic then
         let env =

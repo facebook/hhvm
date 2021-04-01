@@ -60,6 +60,7 @@ enum hackc_compile_parser_flags {
   , ENABLE_XHP_CLASS_MODIFIER=1 << 17
   , DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18
   , ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19
+  , ENABLE_READONLY_ENFORCEMENT=1 << 20
 };
 
 #  if defined(__cplusplus)

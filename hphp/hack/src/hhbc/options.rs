@@ -272,6 +272,7 @@ prefixed_flags!(
     DISABLE_ARRAY_TYPEHINT,
     DISABLE_ARRAY,
     RUST_EMITTER,
+    ENABLE_READONLY_ENFORCEMENT,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
@@ -750,6 +751,9 @@ mod tests {
   "hhvm.hack.lang.enable_enum_classes": {
     "global_value": true
   },
+  "hhvm.hack.lang.enable_readonly_enforcement": {
+    "global_value": false
+  },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
@@ -1173,5 +1177,6 @@ bitflags! {
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS = 1 << 59;
         const DISALLOW_INST_METH = 1 << 60;
+        const ENABLE_READONLY_ENFORCEMENT = 1 << 61;
     }
 }

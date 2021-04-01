@@ -110,6 +110,7 @@ bitflags! {
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19;
+        const ENABLE_READONLY_ENFORCEMENT=1 << 20;
   }
 }
 
@@ -245,6 +246,9 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS) {
             f |= LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS;
+        }
+        if self.contains(ParserFlags::ENABLE_READONLY_ENFORCEMENT) {
+            f |= LangFlags::ENABLE_READONLY_ENFORCEMENT;
         }
         f
     }

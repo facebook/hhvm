@@ -229,6 +229,35 @@ impl<'a> Env<'a> {
             Some(S::Method(md)) => check_valid_fun_kind(&md.get_name().1, md.get_fun_kind()),
         }
     }
+
+    fn check_readonlyness(&self, state: &mut State, lhs: &Expr, rhs: &Expr) -> Result<()> {
+        match &lhs.1 {
+            Expr_::Lvar(id_orig) => {
+                let var_name = local_id::get_name(&id_orig.1);
+                // TODO(alnash) we need to handle $this separately because the readonlyness
+                // comes from the function for this and not by the name
+                if var_name != special_idents::THIS {
+                    match get_readonlyness(state, &rhs.1) {
+                        Readonlyness::Readonly => {
+                            state.add_readonly(var_name.to_string());
+                            Ok(())
+                        }
+                        _ => Ok(()),
+                    }
+                } else {
+                    Ok(())
+                }
+            }
+            Expr_::ObjGet(_) => match get_readonlyness(state, &lhs.1) {
+                Readonlyness::Readonly => Err(emit_fatal::raise_fatal_parse(
+                    &self.pos,
+                    "check readonlyness fails",
+                )),
+                _ => Ok(()),
+            },
+            _ => Ok(()),
+        }
+    }
 }
 
 struct State {
@@ -250,6 +279,8 @@ struct State {
     current_function_state: PerFunctionState,
     // accumulated information about program
     global_state: GlobalState,
+    // readonly locals
+    readonly_locals: HashSet<String>,
 }
 
 impl State {
@@ -265,7 +296,20 @@ impl State {
             named_hoisted_functions: SMap::new(),
             current_function_state: PerFunctionState::default(),
             global_state: GlobalState::default(),
+            readonly_locals: HashSet::new(),
         }
+    }
+
+    pub fn add_readonly(&mut self, var_name: String) {
+        self.readonly_locals.insert(var_name);
+    }
+
+    pub fn is_readonly<S: ?Sized>(&self, var_name: &S) -> bool
+    where
+        String: std::borrow::Borrow<S>,
+        S: std::hash::Hash + Eq,
+    {
+        self.readonly_locals.contains(var_name)
     }
 
     pub fn reset_function_counts(&mut self) {
@@ -298,6 +342,33 @@ impl State {
 
     pub fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
         self.namespace = namespace;
+    }
+}
+
+pub enum Readonlyness {
+    Readonly,
+    Mutable,
+}
+
+fn get_readonlyness(state: &mut State, expr: &Expr_) -> Readonlyness {
+    match expr {
+        Expr_::ReadonlyExpr(_) => Readonlyness::Readonly,
+        Expr_::ObjGet(og) => {
+            let (obj, _member_name, _null_flavor, _reffiness) = &**og;
+            get_readonlyness(state, &obj.1)
+        }
+        Expr_::Lvar(id_orig) => {
+            let var_name = local_id::get_name(&id_orig.1);
+            // TODO(alnash) we need to handle $this separately because the readonlyness
+            // comes from the function for this and not by the name
+            let is_this = var_name == special_idents::THIS;
+            if !is_this && state.is_readonly(var_name) {
+                Readonlyness::Readonly
+            } else {
+                Readonlyness::Mutable
+            }
+        }
+        _ => Readonlyness::Mutable,
     }
 }
 
@@ -1529,6 +1600,22 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             Expr_::ReadonlyExpr(mut x) => {
                 x.recurse(env, self.object())?;
                 Expr_::ReadonlyExpr(x)
+            }
+            Expr_::Binop(mut x) => {
+                x.recurse(env, self.object())?;
+                let strict = env
+                    .options
+                    .hhvm
+                    .hack_lang
+                    .flags
+                    .contains(LangFlags::ENABLE_READONLY_ENFORCEMENT);
+                if strict {
+                    let (bop, e_lhs, e_rhs) = x.as_ref();
+                    if let Bop::Eq(None) = bop {
+                        env.check_readonlyness(&mut self.state, e_lhs, e_rhs)?;
+                    }
+                }
+                Expr_::Binop(x)
             }
             Expr_::ExpressionTree(mut x) => {
                 x.desugared_expr.recurse(env, self.object())?;

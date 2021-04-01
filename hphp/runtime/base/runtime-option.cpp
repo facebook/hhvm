@@ -409,6 +409,9 @@ std::uint32_t RepoOptions::getParserFlags() const {
   if (DisallowDynamicMethCallerArgs) {
     parser_flags |= DISALLOW_DYNAMIC_METH_CALLER_ARGS;
   }
+  if (EnableReadonlyEnforcement) {
+    parser_flags |= ENABLE_READONLY_ENFORCEMENT;
+  }
   return parser_flags;
 }
 

@@ -165,6 +165,11 @@ struct IRSPRelOffset {
   }
 
   /*
+   * Difference.
+   */
+  int32_t operator-(IRSPRelOffset o) const { return offset - o.offset; }
+
+  /*
    * Convert to an FP*Off, given that the IR stack pointer is at `sp' relative
    * to the frame pointer.
    *

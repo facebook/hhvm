@@ -459,19 +459,10 @@ void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
 InlineFrame implInlineReturn(IRGS& env, bool suspend) {
   assertx(resumeMode(env) == ResumeMode::None);
 
-  auto const& fs = env.irb->fs();
-
-  // The offset of our caller's FP relative to our own.
-  auto const callerFPOff =
-    // Offset of the (unchanged) vmsp relative to our fp...
-    - fs.irSPOff()
-    // ...plus the offset of our parent's fp relative to vmsp.
-    + FPInvOffset{0}.to<IRSPRelOffset>(fs.callerIRSPOff()).offset;
-
   auto const calleeFp = fp(env);
   auto const prevFp = calleeFp->inst()->src(1);
   // Return to the caller function.
-  gen(env, InlineReturn, FPRelOffsetData { callerFPOff }, fp(env), prevFp);
+  gen(env, InlineReturn, fp(env), prevFp);
   gen(env, EndInlining, calleeFp);
 
   return popInlineFrame(env);

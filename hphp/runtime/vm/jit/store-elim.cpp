@@ -1421,61 +1421,11 @@ struct FPState {
 
 void append_inline_returns(Global& genv, Block* b, SSATmp* start, SSATmp* end) {
   auto const it = b->backIter();
-  for (; start != end; start = start->inst()->src(1)) {
+  while (start != end) {
     assertx(start->inst()->is(BeginInlining));
-
-    auto const sInst = start->inst();
     auto const next = start->inst()->src(1);
-    auto const nInst = next->inst();
-    auto const startOff = sInst->extra<BeginInlining>()->spOffset.offset;
-    auto const nextOff = [&] {
-      if (next->inst()->is(BeginInlining)) {
-        return nInst->extra<BeginInlining>()->spOffset;
-      }
-      auto const sp = sInst->src(0);
-      assertx(sp->inst()->is(DefRegSP, DefFrameRelSP));
-
-      // The IRSPRelOffset of `next` relative to `sp` is the same as the
-      // FPInvOffset of `sp` relative to `next`.
-      auto const off = sp->inst()->extra<DefStackData>()->irSPOff;
-      return IRSPRelOffset{off.offset};
-    }().offset;
-
-    /*
-     * IRSPRel offsets get smaller the further down the stack they are, and
-     * start will by definition always be below next. The offset computed by
-     * nextOff - startOff will therefore be > 0. We want the FPRelOff, relative
-     * to start of next. FPRel offsets are positive above the fp they are
-     * are relative to ane negative below.
-     *
-     * +---------------------------+
-     * |            ...            |
-     * |                           |
-     * +---------------------------+
-     * |                           |
-     * +---------------------------+ <- sp ----+--+
-     * |                           |           |  |
-     * +---------------------------+  nextOff >|  |
-     * |                           |           |  |
-     * +---------------------------+ <- next --+--|-+
-     * |                           |              | |
-     * +---------------------------+    startOff >| |< nextOff - startOff
-     * |                           |              | |
-     * +---------------------------+ <- start ----+-+
-     * |                           |
-     * |            ...            |
-     * +---------------------------+
-     */
-    auto const callerFpOff = FPRelOffset{nextOff - startOff};
-
-    auto returnInst = genv.unit.gen(
-      InlineReturn,
-      it->bcctx(),
-      FPRelOffsetData { callerFpOff },
-      start,
-      next
-    );
-    b->insert(it, returnInst);
+    b->insert(it, genv.unit.gen(InlineReturn, it->bcctx(), start, next));
+    start = next;
   }
 }
 

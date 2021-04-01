@@ -45,18 +45,6 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-bool isResumedParent(const IRInstruction* inst) {
-  auto const fp = inst->src(0);
-  assertx(fp->inst()->is(BeginInlining));
-
-  auto const callerFp = fp->inst()->src(1);
-  return callerFp->inst()->marker().resumeMode() != ResumeMode::None;
-}
-
-}
-
 void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
   auto const callerSP = srcLoc(env, inst, 0).reg();
   auto const calleeFP = dstLoc(env, inst, 0).reg();
@@ -76,20 +64,14 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   auto const callerFP = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  assertx(inst->src(0)->inst()->is(BeginInlining));
   auto const off = [&] () -> int32_t {
-    if (isResumedParent(inst)) return 0;
-    auto const be = inst->src(0)->inst();
-    auto const defsp = be->src(0)->inst();
-    auto const parentToSp = [&] {
-      if (be->src(1)->inst()->is(BeginInlining)) {
-        auto const extra = be->src(1)->inst()->extra<BeginInlining>();
-        return FPInvOffset{extra->spOffset.offset};
-      }
-      return defsp->extra<DefStackData>()->irSPOff;
-    }();
-    auto const spoff = inst->src(0)->inst()->extra<BeginInlining>()->spOffset;
-    return spoff.to<FPInvOffset>(parentToSp).offset;
+    auto const callerFPOff = offsetOfFrame(inst->src(1));
+    if (!callerFPOff) return 0;
+
+    auto const calleeFPInst = inst->src(0)->inst();
+    assertx(calleeFPInst->is(BeginInlining));
+    auto const calleeFPOff = calleeFPInst->extra<BeginInlining>()->spOffset;
+    return *callerFPOff - calleeFPOff;
   }();
 
   // Do roughly the same work as an HHIR Call.
@@ -121,14 +103,19 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
 
 void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const callerFp = srcLoc(env, inst, 1).reg();
-  if (isResumedParent(inst)) {
-    v << popvmfp{callerFp};
+  auto const callerFPOff = offsetOfFrame(inst->src(1));
+  if (!callerFPOff) {
+    // Offset to the caller's FP not known, use callerFP SSA.
+    auto const callerFP = srcLoc(env, inst, 1).reg();
+    v << popvmfp{callerFP};
   } else {
+    // Calculate the offset to the caller's FP and use it to update FP.
+    auto const calleeFPInst = inst->src(0)->inst();
+    assertx(calleeFPInst->is(BeginInlining));
+    auto const calleeFPOff = calleeFPInst->extra<BeginInlining>()->spOffset;
+    auto const calleeFP = srcLoc(env, inst, 0).reg();
     auto const tmp = v.makeReg();
-    auto const callerFPOff = inst->extra<InlineReturn>()->offset;
-    v << lea{fp[cellsToBytes(callerFPOff.offset)], tmp};
+    v << lea{calleeFP[cellsToBytes(*callerFPOff - calleeFPOff)], tmp};
     v << popvmfp{tmp};
   }
   v << popframe{};

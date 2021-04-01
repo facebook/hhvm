@@ -698,24 +698,6 @@ struct TransIDData : IRExtraData {
   TransID transId;
 };
 
-/*
- * FP-relative offset.
- */
-struct FPRelOffsetData : IRExtraData {
-  explicit FPRelOffsetData(FPRelOffset offset) : offset(offset) {}
-
-  std::string show() const {
-    return folly::to<std::string>("FPRelOff ", offset.offset);
-  }
-
-  bool equals(FPRelOffsetData o) const { return offset == o.offset; }
-  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
-
-  size_t stableHash() const { return std::hash<int32_t>()(offset.offset); }
-
-  FPRelOffset offset;
-};
-
 struct DefFPData : IRExtraData {
   explicit DefFPData(folly::Optional<IRSPRelOffset> offset) : offset(offset) {}
 
@@ -2633,7 +2615,6 @@ X(LdStkAddr,                    IRSPRelOffsetData);
 X(InlineCall,                   InlineCallData);
 X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
-X(InlineReturn,                 FPRelOffsetData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslate,               IRSPRelOffsetData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);

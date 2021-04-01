@@ -21,6 +21,7 @@ let sharedmem_config =
     (* Half a gig by default *)
     log_level = 0;
     sample_rate = 0.0;
+    compression = 0;
   }
 
 let merge_worker ((filename : string), (ignore_hh_version : bool)) : unit =

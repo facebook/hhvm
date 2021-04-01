@@ -30,6 +30,8 @@ type config = {
   shm_min_avail: int;
   log_level: int;
   sample_rate: float;
+  (* 0 - lz4, others -- compression level for zstd*)
+  compression: int;
 }
 [@@deriving show]
 
@@ -47,6 +49,7 @@ let default_config =
     (* Half a gig by default *)
     log_level = 0;
     sample_rate = 0.0;
+    compression = 0;
   }
 
 (* There are places where we don't expect to write to shared memory, and doing
@@ -63,6 +66,7 @@ let empty_config =
     shm_min_avail = 0;
     log_level = 0;
     sample_rate = 0.0;
+    compression = 0;
   }
 
 (* Allocated in C only. *)

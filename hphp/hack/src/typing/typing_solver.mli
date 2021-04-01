@@ -31,8 +31,7 @@ val expand_type_and_solve :
   Errors.typing_error_callback ->
   env * locl_ty
 
-val expand_type_and_solve_eq :
-  env -> locl_ty -> Errors.typing_error_callback -> env * locl_ty
+val expand_type_and_solve_eq : env -> locl_ty -> env * locl_ty
 
 val expand_type_and_narrow :
   env ->

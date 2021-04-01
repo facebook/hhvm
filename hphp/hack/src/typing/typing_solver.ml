@@ -341,7 +341,7 @@ let union_any_if_any_in_lower_bounds env ty lower_bounds =
   in
   (env, ty)
 
-let try_bind_to_equal_bound ~freshen env r var on_error =
+let try_bind_to_equal_bound ~freshen env r var =
   if Env.tyvar_is_solved_or_skip_global env var then
     env
   else
@@ -393,6 +393,12 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           | Some (LoclType shallow_match) ->
             let (env, ty) = freshen_inside_ty env shallow_match in
             let var_ty = mk (r, Tvar var) in
+            (* In theory, the following subtype would only fail if the shallow match
+             * we've found was already in conflict with another bound. However we don't
+             * add such conflicting bounds to avoid cascading errors, so in theory,
+             * the following subtype calls should not fail, and the error callback
+             * should not matter. *)
+            let on_error = Errors.unify_error_at @@ Env.get_tyvar_pos env var in
             let env = Typing_utils.sub_type env ty var_ty on_error in
             let env = Typing_utils.sub_type env var_ty ty on_error in
             let (env, ty) =
@@ -412,7 +418,7 @@ the operation which we eagerly solved for in the first place.
 *)
 let rec always_solve_tyvar_down ~freshen env r var on_error =
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen env r var on_error in
+  let env = try_bind_to_equal_bound ~freshen env r var in
   if Env.tyvar_is_solved_or_skip_global env var then
     env
   else
@@ -493,7 +499,7 @@ let solve_to_equal_bound_or_wrt_variance env r var on_error =
           ]));
 
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen:false env r var on_error in
+  let env = try_bind_to_equal_bound ~freshen:false env r var in
   solve_tyvar_wrt_variance env r var on_error
 
 let solve_to_equal_bound_or_wrt_variance env r var on_error =
@@ -606,10 +612,10 @@ let expand_type_and_solve
     (env, TUtils.terr env (Reason.Rsolve_fail p))
   | _ -> (env', ety)
 
-let expand_type_and_solve_eq env ty on_error =
+let expand_type_and_solve_eq env ty =
   (fun (env, ty) -> Env.expand_type env ty)
   @@ Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
-         let env = try_bind_to_equal_bound ~freshen:true env r v on_error in
+         let env = try_bind_to_equal_bound ~freshen:true env r v in
          Env.expand_var env r v)
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
@@ -676,7 +682,7 @@ let expand_type_and_narrow
     env ?default ~description_of_expected widen_concrete_type p ty on_error =
   (fun (env, ty) -> Env.expand_type env ty)
   @@
-  let (env, ty) = expand_type_and_solve_eq env ty on_error in
+  let (env, ty) = expand_type_and_solve_eq env ty in
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete
    * type so just return expanded type
@@ -743,8 +749,8 @@ let close_tyvars_and_solve env on_error =
 let is_sub_type env ty1 ty2 =
   (* It seems weird that this can cause errors, but I'm wary of simply discarding
    *  errors here. Using unify_error for now to maintain existing behavior. *)
-  let (env, ty1) = expand_type_and_solve_eq env ty1 Errors.unify_error in
-  let (env, ty2) = expand_type_and_solve_eq env ty2 Errors.unify_error in
+  let (env, ty1) = expand_type_and_solve_eq env ty1 in
+  let (env, ty2) = expand_type_and_solve_eq env ty2 in
   Typing_utils.is_sub_type env ty1 ty2
 
 (**
@@ -790,5 +796,5 @@ let rec non_null env pos ty =
   Inter.intersect env r ty (MakeType.nonnull r)
 
 let try_bind_to_equal_bound env v =
-  (* The error and reason we pass here doesn't matter since it's used only when `freshen` is true. *)
-  try_bind_to_equal_bound ~freshen:false env Reason.none v Errors.unify_error
+  (* The reason we pass here doesn't matter since it's used only when `freshen` is true. *)
+  try_bind_to_equal_bound ~freshen:false env Reason.none v

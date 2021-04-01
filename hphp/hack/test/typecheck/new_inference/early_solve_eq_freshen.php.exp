@@ -1,0 +1,8 @@
+File "early_solve_eq_freshen.php", line 21, characters 23-31:
+Invalid argument (Typing[4110])
+  File "early_solve_eq_freshen.php", line 21, characters 10-20:
+  Expected `C<arraykey>`
+  File "early_solve_eq_freshen.php", line 16, characters 20-20:
+    via this generic `T`
+  File "early_solve_eq_freshen.php", line 18, characters 15-23:
+  But got `B<string>`

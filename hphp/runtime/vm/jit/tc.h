@@ -106,6 +106,7 @@ struct Translator {
   // make use of some of the internal publishing methods so they can hold the
   // code and metadata locks across multiple operations.
 
+  static constexpr size_t kTranslationAlign = 16;
   // The following members are the inputs to the translation pipeline.
   SrcKey sk;
   TransKind kind;

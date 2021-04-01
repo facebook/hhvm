@@ -716,6 +716,11 @@ void Translator::relocate() {
       TransLocMaker maker{dstView};
 
       try {
+        dstView.cold().alignFrontier(Translator::kTranslationAlign);
+        dstView.frozen().alignFrontier(Translator::kTranslationAlign);
+        dstView.main().alignFrontier(Translator::kTranslationAlign);
+        dstView.data().alignFrontier(Translator::kTranslationAlign);
+
         maker.markStart();
         auto origin = range.data;
         if (!origin.empty()) {

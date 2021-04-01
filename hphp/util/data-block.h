@@ -96,6 +96,15 @@ struct DataBlock {
     init(start, start, sz, sz, name);
   }
 
+  void alignFrontier(size_t align) {
+    assertx(align == 1 || align == 2 || align == 4 || align == 8 || align == 16);
+
+    auto const mask = align - 1;
+    auto const nf = (uint8_t*)(((uintptr_t)m_frontier + mask) & ~mask);
+    assertCanEmit(nf - m_frontier);
+    setFrontier(nf);
+  }
+
   /*
    * allocRaw
    * alloc
@@ -105,10 +114,8 @@ struct DataBlock {
    */
   void* allocRaw(size_t sz, size_t align = 16) {
     // Round frontier up to a multiple of align
-    align = folly::nextPowTwo(align) - 1;
-    auto const nf = (uint8_t*)(((uintptr_t)m_frontier + align) & ~align);
-    assertCanEmit(nf - m_frontier + sz);
-    setFrontier(nf);
+    alignFrontier(align);
+    assertCanEmit(sz);
     auto data = m_frontier;
     m_frontier += sz;
     assertx(m_frontier <= m_base + m_size);

@@ -360,7 +360,6 @@ macro(hphp_link target)
 
   add_dependencies(${target} boostMaybeBuild)
   target_link_libraries(${target} boost)
-  add_dependencies(${target} libsodiumMaybeBuild)
   target_link_libraries(${target} libsodium)
 
   target_link_libraries(${target} ${PCRE_LIBRARY})

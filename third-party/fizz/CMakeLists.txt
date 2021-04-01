@@ -19,7 +19,4 @@ auto_source_group(fizz "${FIZZ_DIR}" ${files} ${hfiles})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR} ${FIZZ_DIR})
 
-add_dependencies(fizz libsodiumMaybeBuild)
-target_include_directories(fizz PUBLIC "${LIBSODIUM_INCLUDE_DIRS}")
-
 target_link_libraries(fizz folly boost brotli zstd libsodium ${OPENSSL_LIBRARIES})

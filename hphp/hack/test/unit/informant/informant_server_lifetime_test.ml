@@ -77,6 +77,7 @@ module Tools = struct
       saved_state_cache_limit = 20;
       ignore_hh_version = false;
       ignore_hhconfig = false;
+      is_saved_state_precomputed = false;
     }
 end
 

@@ -23,6 +23,8 @@ module Types = struct
         (** Informant should ignore the hhconfig_hash column when looking up a saved
      * state from XDB. *)
     ignore_hhconfig: bool;
+        (** Was the server initialized with a precomputed saved-state? *)
+    is_saved_state_precomputed: bool;
   }
 
   type init_env = options

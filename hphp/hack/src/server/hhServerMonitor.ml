@@ -109,6 +109,10 @@ let monitor_daemon_main
         use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
         ignore_hh_version = ServerArgs.ignore_hh_version options;
         ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig options;
+        is_saved_state_precomputed =
+          (match ServerArgs.with_saved_state options with
+          | Some (ServerArgs.Saved_state_target_info _) -> true
+          | _ -> false);
       }
     in
     let max_purgatory_clients =

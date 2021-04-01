@@ -50,7 +50,6 @@
  *    | ........... |                           |
  *                                      lower addresses
  *
- * FPRel:   Offset in cells relative to the frame pointer in address order.
  * FPInv:   Offset in cells relative to the frame pointer in reverse address
  *          order (i.e. a positive offset indicates lower address).
  * IRSPRel: Offset in cells relative to the IR stack pointer in address order.
@@ -60,12 +59,12 @@
  * Supposing we're translating a bytecode instruction where EE is "top of
  * stack" in HHBC semantics, then here are some examples:
  *
- *  slot    FPRel   FPInv   IRSPRel   BCSPRel
- *    EE     -5       5       -2         0
- *    DD     -4       4       -1         1
- *    CC     -3       3        0         2
- *    BB     -2       2        1         3
- *    AA     -1       1        2         4
+ *  slot    FPInv   IRSPRel   BCSPRel
+ *    EE      5       -2         0
+ *    DD      4       -1         1
+ *    CC      3        0         2
+ *    BB      2        1         3
+ *    AA      1        2         4
  *
  * FPInvOffsets are usually used for the IR and BC stack pointer offsets,
  * relative to the frame pointer.  {IR,BC}SPRelOffsets are then offsets
@@ -77,7 +76,6 @@ namespace HPHP { namespace jit {
 struct BCSPRelOffset;
 struct IRSPRelOffset;
 struct FPInvOffset;
-struct FPRelOffset;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -242,11 +240,6 @@ struct FPInvOffset {
   int32_t operator-(FPInvOffset o) const { return offset - o.offset; }
 
   /*
-   * Invert to an FPRelOffset.
-   */
-  FPRelOffset operator-() const;
-
-  /*
    * Convert to an *SPOff, where the (bytecode or IR) stack pointer is at `sp'
    * relative to the frame pointer.
    */
@@ -256,60 +249,9 @@ struct FPInvOffset {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct FPRelOffset {
-  int32_t offset;
-
-  /*
-   * Comparisons.
-   *
-   * A "lower" FPInvOffset means "farther from fp" (i.e., lower address).
-   */
-  bool operator==(FPRelOffset o) const { return offset == o.offset; }
-  bool operator!=(FPRelOffset o) const { return offset != o.offset; }
-  bool operator< (FPRelOffset o) const { return offset <  o.offset; }
-  bool operator<=(FPRelOffset o) const { return offset <= o.offset; }
-  bool operator> (FPRelOffset o) const { return offset >  o.offset; }
-  bool operator>=(FPRelOffset o) const { return offset >= o.offset; }
-
-  /*
-   * Move up and down the stack space for the frame.
-   */
-  FPRelOffset operator+(int32_t x) const { return FPRelOffset{offset + x}; }
-  FPRelOffset operator-(int32_t x) const { return FPRelOffset{offset - x}; }
-  FPRelOffset& operator+=(int32_t d) { offset += d; return *this; }
-  FPRelOffset& operator-=(int32_t d) { offset -= d; return *this; }
-
-  /*
-   * Invert to an FPInvOffset.
-   */
-  FPInvOffset operator-() const;
-
-  /*
-   * Convert to an *SPOff, where the (bytecode or IR) stack pointer is at `sp'
-   * relative to the frame pointer.
-   */
-  template<typename SPOff>
-  SPOff to(FPInvOffset sp) const;
-};
-
-inline FPRelOffset operator+(int32_t lhs, FPRelOffset rhs) {
-  return rhs + lhs;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /*
  * Interconversions.
  */
-
-/*
- * FPInvOffset <-> FPRelOffset
- */
-inline FPRelOffset FPInvOffset::operator-() const {
-  return FPRelOffset{-offset};
-}
-inline FPInvOffset FPRelOffset::operator-() const {
-  return FPInvOffset{-offset};
-}
 
 /*
  * {BC,IR}SPRelOffset -> FPInvOffset
@@ -334,18 +276,6 @@ IRSPRelOffset::to<FPInvOffset>(FPInvOffset sp) const {
 }
 
 /*
- * {BC,IR}SPRelOffset -> FPRelOffset
- */
-template<> inline FPRelOffset
-BCSPRelOffset::to<FPRelOffset>(FPInvOffset sp) const {
-  return -to<FPInvOffset>(sp);
-}
-template<> inline FPRelOffset
-IRSPRelOffset::to<FPRelOffset>(FPInvOffset sp) const {
-  return -to<FPInvOffset>(sp);
-}
-
-/*
  * FPInvOffset -> {BC,IR}SPRelOffset
  */
 template<> inline BCSPRelOffset
@@ -355,18 +285,6 @@ FPInvOffset::to<BCSPRelOffset>(FPInvOffset sp) const {
 template<> inline IRSPRelOffset
 FPInvOffset::to<IRSPRelOffset>(FPInvOffset sp) const {
   return IRSPRelOffset{sp.offset - offset};
-}
-
-/*
- * FPRelOffset -> {BC,IR}SPRelOffset
- */
-template<> inline BCSPRelOffset
-FPRelOffset::to<BCSPRelOffset>(FPInvOffset sp) const {
-  return (-*this).to<BCSPRelOffset>(sp);
-}
-template<> inline IRSPRelOffset
-FPRelOffset::to<IRSPRelOffset>(FPInvOffset sp) const {
-  return (-*this).to<IRSPRelOffset>(sp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

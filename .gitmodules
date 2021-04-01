@@ -13,9 +13,6 @@
 [submodule "fizz"]
 	path = third-party/fizz/src
 	url = https://github.com/facebookincubator/fizz
-[submodule "folly"]
-	path = third-party/folly/src
-	url = https://github.com/facebook/folly.git
 [submodule "libafdt"]
 	path = third-party/libafdt/src
 	url = https://github.com/facebook/libafdt

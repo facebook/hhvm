@@ -230,10 +230,8 @@ private:
 public:
   const TypedValue* tvOfPos(uint32_t) const;
 
-  template <class F, bool inc = true>
+  template <class F>
   static void Iterate(const SetArray* a, F fn) {
-    if (inc) a->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(const_cast<SetArray*>(a)); };
     auto const* elm = a->data();
     for (auto i = a->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {

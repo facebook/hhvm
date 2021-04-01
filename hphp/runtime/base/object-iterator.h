@@ -41,18 +41,13 @@ namespace HPHP {
  * their properties, NOT the values you would see if you foreached them. If
  * you need the foreach behavior, use the array-iterator.h APIs.
  *
- * If incRef is false, then you promise neither you nor any other code will
- * mutate or manipulate refcounts of either obj or its dynamic prop arrray,
- * if any. If incRef is true then mutating the object is safe, but while you
- * will see the new values of declared properties you have yet to visit, you
- * may or may not see the new values of dynamic properties.
+ * This operation has no refcounting at all. If you may mutate the object or
+ * the dynamic-prop array during iteration, you must guard the operation with
+ * an inc-ref before and dec-ref after.
  */
-template <typename DeclFn, typename DynFn, bool incRef = true>
+template <typename DeclFn, typename DynFn>
 void IteratePropMemOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   assertx(!obj->isCollection());
-
-  if (incRef) obj->incRefCount();
-  SCOPE_EXIT { if (incRef) decRefObj(const_cast<ObjectData*>(obj)); };
 
   auto cls = obj->getVMClass();
   auto const declProps = cls->declProperties();
@@ -65,21 +60,9 @@ void IteratePropMemOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   }
 
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-    // If we increffed the object, we still have to incref the dyn prop
-    // array since a write to it can cause it to grow or cow.
-    MixedArray::IterateKV<DynFn, incRef>(
-      MixedArray::asMixed(obj->dynPropArray().get()),
-      dynFn
-    );
+    auto const mad = MixedArray::asMixed(obj->dynPropArray().get());
+    MixedArray::IterateKV(mad, dynFn);
   }
-}
-
-template <typename DeclFn, typename DynFn>
-ALWAYS_INLINE
-void IteratePropMemOrderNoInc(const ObjectData* obj, DeclFn declFn,
-                              DynFn dynFn) {
-  IteratePropMemOrder<DeclFn, DynFn, false>(obj, std::move(declFn),
-                                            std::move(dynFn));
 }
 
 /*
@@ -87,13 +70,9 @@ void IteratePropMemOrderNoInc(const ObjectData* obj, DeclFn declFn,
  * in the order they appear when an object is cast to an array. All the
  * warnings from IteratePropMemOrder are also applicable to this version.
  */
-template <typename DeclFn, typename DynFn, bool incRef = true>
-void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn,
-                             DynFn dynFn) {
+template <typename DeclFn, typename DynFn>
+void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   assertx(!obj->isCollection());
-
-  if (incRef) obj->incRefCount();
-  SCOPE_EXIT { if (incRef) decRefObj(const_cast<ObjectData*>(obj)); };
 
   // The iteration order is going most-to-least-derived in the inheritance
   // hierarchy, visiting properties in declaration order (with the wrinkle
@@ -110,21 +89,9 @@ void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn,
   }
 
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-    // If we increffed the object, we still have to incref the dyn prop
-    // array since a write to it can cause it to grow or cow.
-    MixedArray::IterateKV<DynFn, incRef>(
-      MixedArray::asMixed(obj->dynPropArray().get()),
-      dynFn
-    );
+    auto const mad = MixedArray::asMixed(obj->dynPropArray().get());
+    MixedArray::IterateKV(mad, dynFn);
   }
-}
-
-template <typename DeclFn, typename DynFn>
-ALWAYS_INLINE
-void IteratePropToArrayOrderNoInc(const ObjectData* obj, DeclFn declFn,
-                                  DynFn dynFn) {
-  IteratePropToArrayOrder<DeclFn, DynFn, false>(obj, std::move(declFn),
-                                                std::move(dynFn));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

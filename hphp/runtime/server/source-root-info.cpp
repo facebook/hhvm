@@ -226,7 +226,7 @@ Array SourceRootInfo::setServerVariables(Array server) const {
   }
 
   if (!m_serverVars.empty()) {
-    IterateKVNoInc(
+    IterateKV(
       m_serverVars.get(),
       [&](TypedValue key, TypedValue val) {
         if (!server.exists(key)) {

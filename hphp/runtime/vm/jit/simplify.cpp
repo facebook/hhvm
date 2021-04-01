@@ -2930,7 +2930,7 @@ SSATmp* simplifyCheckDictKeys(State& env, const IRInstruction* inst) {
   auto const arr = src->arrLikeVal();
 
   auto match = true;
-  IterateKVNoInc(arr, [&](TypedValue key, TypedValue val){
+  IterateKV(arr, [&](TypedValue key, TypedValue val){
     match &= Type::cns(key) <= inst->typeParam();
     return !match;
   });

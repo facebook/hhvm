@@ -109,7 +109,7 @@ bool EntryTypes::checkInvariants() const {
 
 EntryTypes EntryTypes::ForArray(const ArrayData* ad) {
   auto state = EntryTypes(KeyTypes::Empty, ValueTypes::Empty, kInvalidDataType);
-  IterateKVNoInc(ad, [&](auto k, auto v) { state = state.with(k, v); });
+  IterateKV(ad, [&](auto k, auto v) { state = state.with(k, v); });
   return state;
 }
 

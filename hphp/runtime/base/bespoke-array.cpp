@@ -99,7 +99,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
       }
     };
     if (vad->hasMultipleRefs()) seen->insert({vad, nullptr});
-    IterateKVNoInc(vad, [&](auto k, auto v) { mark(k); mark(v); });
+    IterateKV(vad, [&](auto k, auto v) { mark(k); mark(v); });
   }
 
   if (vad->hasVanillaPackedLayout()) {

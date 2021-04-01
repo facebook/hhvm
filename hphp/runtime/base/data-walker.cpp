@@ -46,7 +46,7 @@ void DataWalker::traverseData(ArrayData* data,
     return;
   }
 
-  IterateVNoInc(data, [&](TypedValue rval) {
+  IterateV(data, [&](TypedValue rval) {
     visitTypedValue(rval, features, visited, seenArrs);
   });
 }
@@ -74,7 +74,7 @@ void DataWalker::traverseData(
     return;
   }
 
-  IteratePropMemOrderNoInc(
+  IteratePropMemOrder(
     data,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       visitTypedValue(val.tv(), features, visited);

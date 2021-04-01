@@ -423,24 +423,20 @@ public:
   }
 
   // Fast iteration
-  template <class F, bool inc = true>
+  template <class F>
   static void IterateV(const MixedArray* arr, F fn) {
     assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
-    if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         if (ArrayData::call_helper(fn, elm->data)) break;
       }
     }
   }
-  template <class F, bool inc = true>
+  template <class F>
   static void IterateKV(const MixedArray* arr, F fn) {
     assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
-    if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         TypedValue key;

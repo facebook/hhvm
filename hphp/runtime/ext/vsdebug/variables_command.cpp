@@ -429,7 +429,7 @@ int VariablesCommand::addLocals(
 
   // Append the debugger specific environment.
   if (!g_context->getDebuggerEnv().isNull()) {
-    IterateKVNoInc(
+    IterateKV(
       g_context->getDebuggerEnv().get(),
       [&] (TypedValue k, TypedValue v) {
         if (locals.exists(k, true) || !isStringType(type(k))) return;

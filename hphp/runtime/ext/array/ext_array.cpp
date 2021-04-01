@@ -1140,12 +1140,12 @@ TypedValue HHVM_FUNCTION(array_unshift,
       int64_t i = 0;
       newArray.set(i++, var);
       if (!args.empty()) {
-        IterateVNoInc(args.get(), [&](auto val) { newArray.set(i++, val); });
+        IterateV(args.get(), [&](auto val) { newArray.set(i++, val); });
       }
     } else {
       newArray.append(var);
       if (!args.empty()) {
-        IterateVNoInc(args.get(), [&](auto val) { newArray.append(val); });
+        IterateV(args.get(), [&](auto val) { newArray.append(val); });
       }
     }
     Array& arr_array = array.asArrRef();
@@ -1663,7 +1663,7 @@ bool array_diff_intersect_key_inputs_ok(const TypedValue& c1, const TypedValue& 
   callback(getContainerSize(c2));
 
   bool ok = true;
-  IterateKVNoInc(args, [&](TypedValue k, TypedValue v) {
+  IterateKV(args, [&](TypedValue k, TypedValue v) {
     assertx(k.m_type == KindOfInt64);
     if (isClsMethType(v.m_type)) {
       raiseIsClsMethWarning(fname, k.m_data.num + 3);
@@ -1863,7 +1863,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
   };
 
   auto ret = diff_step(c1, c2);
-  IterateVNoInc(args.get(), [&](TypedValue v) {
+  IterateV(args.get(), [&](TypedValue v) {
     ret = diff_step(make_array_like_tv(ret.get()), v);
   });
   return make_array_like_tv(ret.detach());
@@ -2301,7 +2301,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
   };
 
   auto ret = intersect_step(c1, c2);
-  IterateVNoInc(args.get(), [&](TypedValue v) {
+  IterateV(args.get(), [&](TypedValue v) {
     ret = intersect_step(make_array_like_tv(ret.get()), v);
   });
   return make_array_like_tv(ret.detach());

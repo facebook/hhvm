@@ -761,7 +761,7 @@ std::pair<int, double> getObjSize(
     return std::make_pair(size, sized);
   }
 
-  IteratePropMemOrderNoInc(
+  IteratePropMemOrder(
     obj,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       FTRACE(2, "Skipping declared property key {}\n", prop.name->data());
@@ -890,7 +890,7 @@ void getObjStrings(
   }
 
   path->push_back(obj->getClassName().data());
-  IteratePropMemOrderNoInc(
+  IteratePropMemOrder(
     obj,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       FTRACE(2, "Skipping declared property key {}\n", prop.name->data());

@@ -332,7 +332,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
 
 static void sock_array_to_fd_set(const Array& sockets, std::vector<pollfd>& fds,
                                  const short flag) {
-  IterateVNoInc(
+  IterateV(
     sockets.get(),
     [&](TypedValue v) {
       assertx(v.m_type == KindOfResource);
@@ -358,7 +358,7 @@ static void sock_array_from_fd_set(Variant &sockets,
   Array ret = Array::CreateDArray();
   assertx(sockets.isArray());
   const auto& sock_array = sockets.asCArrRef();
-  IterateKVNoInc(
+  IterateKV(
     sock_array.get(),
     [&](TypedValue k, TypedValue v) {
       const pollfd &fd = fds.at(nfds++);
@@ -1044,7 +1044,7 @@ Variant HHVM_FUNCTION(socket_select,
     // sock_array_from_fd_set can set a sparsely indexed array, so
     // we use darray everywhere.
     auto hasData = Array::CreateDArray();
-    IterateVNoInc(
+    IterateV(
       read.asCArrRef().get(),
       [&](TypedValue v) {
         assertx(v.m_type == KindOfResource);

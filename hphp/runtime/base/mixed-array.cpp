@@ -1348,7 +1348,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ArrayMergeGeneric(ret, elems);
   }
 
-  PackedArray::IterateVNoInc(elems, [&](TypedValue tv) {
+  PackedArray::IterateV(elems, [&](TypedValue tv) {
     ret->nextInsert<false>(tv);
   });
   return tagArrProv(ret);

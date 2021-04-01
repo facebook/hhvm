@@ -149,31 +149,22 @@ inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   }
 }
 
-template <class F, bool inc>
+template <class F>
 void PackedArray::IterateV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
-  if (inc) arr->incRefCount();
-  SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   auto const size = arr->m_size;
   for (uint32_t i = 0; i < size; ++i) {
     if (ArrayData::call_helper(fn, GetPosVal(arr, i))) break;
   }
 }
 
-template <class F, bool inc>
+template <class F>
 void PackedArray::IterateKV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
-  if (inc) arr->incRefCount();
-  SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   auto const size = arr->m_size;
   for (auto k = make_tv<KindOfInt64>(0); val(k).num < size; ++val(k).num) {
     if (ArrayData::call_helper(fn, k, GetPosVal(arr, val(k).num))) break;
   }
-}
-
-template <class F>
-ALWAYS_INLINE void PackedArray::IterateVNoInc(const ArrayData* arr, F fn) {
-  PackedArray::IterateV<F, false>(arr, std::move(fn));
 }
 
 //////////////////////////////////////////////////////////////////////

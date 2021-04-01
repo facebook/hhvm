@@ -1332,7 +1332,7 @@ Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   for (auto i = builtins.size(); i > 0; i--) {
     all.append(builtins.lookup(safe_cast<int64_t>(i - 1)));
   }
-  IterateVNoInc(non_builtins.get(), [&](auto name) { all.append(name); });
+  IterateV(non_builtins.get(), [&](auto name) { all.append(name); });
   return all.toArray();
 }
 

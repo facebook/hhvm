@@ -278,7 +278,7 @@ Array HHVM_FUNCTION(
     "" : _root.toString().toCppString();
 
   req::vector<StringData*> pathListStringData;
-  IterateVNoInc(
+  IterateV(
     pathList.get(),
     [&] (TypedValue tv) {
       if (UNLIKELY(!isStringType(tv.m_type))) {

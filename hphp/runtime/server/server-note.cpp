@@ -34,7 +34,7 @@ void ServerNote::Add(const String& name, const String& value) {
 
 void ServerNote::AddNotes(const Array& notes) {
   auto& arr = s_note->m_notes;
-  IterateKVNoInc(notes.get(), [&arr](TypedValue key, TypedValue v) {
+  IterateKV(notes.get(), [&arr](TypedValue key, TypedValue v) {
     if (!isStringType(type(key)) || !isStringType(type(v))) {
       SystemLib::throwInvalidArgumentExceptionObject(
       "server notes: keys and values must be strings");

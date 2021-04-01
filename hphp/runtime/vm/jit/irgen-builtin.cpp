@@ -319,7 +319,7 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
 
   KeysetInit flipped{haystack->size()};
   bool failed{false};
-  IterateVNoInc(
+  IterateV(
     haystack,
     [&](TypedValue key) {
 

@@ -828,7 +828,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       auto id = arr[s_id].toInt64Val();
       assertx(id < env.tsList->size());
       // Overwrite data in newarr with fields in the reified generics type.
-      IterateKVNoInc(env.tsList->at(id).get(), [&](auto key, auto val) {
+      IterateKV(env.tsList->at(id).get(), [&](auto key, auto val) {
         newarr.set(key, val);
       });
       break;

@@ -1039,7 +1039,7 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
   // Check if we need to intish-cast any string keys.
   int64_t i;
   auto intish = false;
-  IterateKVNoInc(base, [&](TypedValue k, TypedValue) {
+  IterateKV(base, [&](TypedValue k, TypedValue) {
     return intish |= tvIsString(k) && val(k).pstr->isStrictlyInteger(i);
   });
   if (!intish) return base;
@@ -1050,7 +1050,7 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
 
   // Create a new, plain PHP array with the casted keys.
   auto result = MixedArrayInit(base->size());
-  IterateKVNoInc(base, [&](TypedValue k, TypedValue v) {
+  IterateKV(base, [&](TypedValue k, TypedValue v) {
     result.setUnknownKey<IntishCast::Cast>(tvAsCVarRef(&k), tvAsCVarRef(&v));
   });
   if (base != this) decRefArr(base);
@@ -1130,7 +1130,7 @@ ArrayData* ArrayData::toVArray(bool copy) {
 
   if (empty()) return ArrayData::CreateVArray();
   VArrayInit init{size()};
-  IterateVNoInc(this, [&](auto v) { init.append(v); });
+  IterateV(this, [&](auto v) { init.append(v); });
   return init.create();
 }
 
@@ -1141,7 +1141,7 @@ ArrayData* ArrayData::toDArray(bool copy) {
 
   if (empty()) return ArrayData::CreateDArray();
   DArrayInit init{size()};
-  IterateKVNoInc(this, [&](auto k, auto v) { init.setValidKey(k, v); });
+  IterateKV(this, [&](auto k, auto v) { init.setValidKey(k, v); });
   return init.create();
 }
 
@@ -1152,7 +1152,7 @@ ArrayData* ArrayData::toVec(bool copy) {
 
   if (empty()) return ArrayData::CreateVec();
   VecInit init{size()};
-  IterateVNoInc(this, [&](auto v) { init.append(v); });
+  IterateV(this, [&](auto v) { init.append(v); });
   return init.create();
 }
 
@@ -1163,7 +1163,7 @@ ArrayData* ArrayData::toDict(bool copy) {
 
   if (empty()) return ArrayData::CreateDict();
   DictInit init{size()};
-  IterateKVNoInc(this, [&](auto k, auto v) { init.setValidKey(k, v); });
+  IterateKV(this, [&](auto k, auto v) { init.setValidKey(k, v); });
   return init.create();
 }
 
@@ -1172,7 +1172,7 @@ ArrayData* ArrayData::toKeyset(bool copy) {
   if (isKeysetType()) return this;
   if (empty()) return ArrayData::CreateKeyset();
   KeysetInit init{size()};
-  IterateVNoInc(this, [&](auto v) { init.add(v); });
+  IterateV(this, [&](auto v) { init.add(v); });
   return init.create();
 }
 

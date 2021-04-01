@@ -383,7 +383,7 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
     ? MakeReserve<true>(kind, ad->isLegacyArray(), ad->size(), dt)
     : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
 
-  PackedArray::IterateVNoInc(ad, [&](auto v) {
+  PackedArray::IterateV(ad, [&](auto v) {
     auto const next = AppendMove(result, v);
     tvIncRefGen(v);
     assertx(result == next);

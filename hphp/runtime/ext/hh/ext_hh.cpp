@@ -304,7 +304,7 @@ void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
 
 void serialize_memoize_set(StringBuffer& sb, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_CONTAINER);
-  IterateKVNoInc(ad, [&] (TypedValue k, TypedValue) {
+  IterateKV(ad, [&] (TypedValue k, TypedValue) {
     serialize_memoize_arraykey(sb, k);
     serialize_memoize_arraykey(sb, k);
   });

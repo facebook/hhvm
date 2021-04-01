@@ -118,7 +118,7 @@ bool KeyOrder::operator==(const KeyOrder& other) const {
 KeyOrder KeyOrder::ForArray(const ArrayData* ad) {
   KeyOrderData ko;
   auto hasStaticStrKeysOnly = true;
-  IterateKVNoInc(ad, [&](auto k, auto /*v*/) -> bool {
+  IterateKV(ad, [&](auto k, auto /*v*/) -> bool {
     if (tvIsString(k) && val(k).pstr->isStatic()) {
       ko.push_back(val(k).pstr);
       return false;

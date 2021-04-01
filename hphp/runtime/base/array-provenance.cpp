@@ -552,7 +552,7 @@ ArrayData* apply_mutation_fast(ArrayData* in, ArrayData* result,
 template <typename State>
 ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
                                State& state, bool cow, uint32_t depth) {
-  // Careful! Even IterateKVNoInc will take a refcount on unknown arrays.
+  // Careful! Even IterateKV will take a refcount on unknown arrays.
   // In order to do the mutation in place when possible, we iterate by hand.
   auto const end = in->iter_end();
   for (auto pos = in->iter_begin(); pos != end; pos = in->iter_advance(pos)) {

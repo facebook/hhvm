@@ -163,7 +163,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
     auto const cached = profile->data->staticLoggingArray;
     if (cached) return cached;
     // Log non-static constructors as a sequence of sets or appends.
-    IterateKVNoInc(ad, [&](auto k, auto v) {
+    IterateKV(ad, [&](auto k, auto v) {
       tvIsString(k) ? profile->logEvent(ArrayOp::ConstructStr, val(k).pstr, v)
                     : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
     });

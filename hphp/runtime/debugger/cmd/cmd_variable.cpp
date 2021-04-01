@@ -263,7 +263,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
 
   auto const& denv = g_context->getDebuggerEnv();
   if (m_frame >= 0 && !denv.isNull()) {
-    IterateKVNoInc(denv.get(), [&] (TypedValue k, TypedValue v) {
+    IterateKV(denv.get(), [&] (TypedValue k, TypedValue v) {
       if (!m_variables.exists(k)) m_variables.set(k, v, true);
     });
   }

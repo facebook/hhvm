@@ -516,7 +516,7 @@ void ObjectData::o_getArray(Array& props,
     auto val = this->propRvalAtOffset(slot);
     props.set(StrNR(prop.name).asString(), val.tv());
   }
-  IteratePropToArrayOrderNoInc(
+  IteratePropToArrayOrder(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       assertx(assertTypeHint(val, slot));
@@ -868,7 +868,7 @@ bool ObjectData::equal(const ObjectData& other) const {
   check_recursion_error();
 
   bool result = true;
-  IteratePropMemOrderNoInc(
+  IteratePropMemOrder(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
       auto otherVal = other.propRvalAtOffset(slot);
@@ -960,7 +960,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   check_recursion_error();
 
   int64_t result = 0;
-  IteratePropToArrayOrderNoInc(
+  IteratePropToArrayOrder(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
       auto otherVal = other.propRvalAtOffset(slot);

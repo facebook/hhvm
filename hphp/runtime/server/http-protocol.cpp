@@ -69,7 +69,7 @@ static bool read_all_post_data(Transport *transport,
 }
 
 static void CopyParams(Array& dest, const Array& src) {
-  IterateKVNoInc(
+  IterateKV(
     src.get(),
     [&](TypedValue k, TypedValue v) {
       const auto arraykey =

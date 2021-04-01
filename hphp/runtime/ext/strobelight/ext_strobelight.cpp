@@ -87,7 +87,7 @@ bool logToUSDT(const Array& bt) {
   memset(&bt_slab, 0, sizeof(bt_slab));
 
   int i = 0;
-  IterateVNoInc(
+  IterateV(
     bt.get(),
     [&](TypedValue tv) -> bool {
       if (i >= strobelight::kMaxStackframes) {

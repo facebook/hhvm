@@ -181,12 +181,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool VecNotSame(const ArrayData* ad1, const ArrayData* ad2);
 
   // Fast iteration
-  template <class F, bool inc = true>
-  static void IterateV(const ArrayData* arr, F fn);
-  template <class F, bool inc = true>
-  static void IterateKV(const ArrayData* arr, F fn);
   template <class F>
-  static void IterateVNoInc(const ArrayData* arr, F fn);
+  static void IterateV(const ArrayData* arr, F fn);
+  template <class F>
+  static void IterateKV(const ArrayData* arr, F fn);
 
   // Return a MixedArray with the same elements as this PackedArray.
   // The target type is based on the source: varray -> darray, vec -> dict.

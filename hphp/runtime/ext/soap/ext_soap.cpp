@@ -2613,7 +2613,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
     return init_null();
   }
   if (!data->m_default_headers.isNull()) {
-    IterateVNoInc(data->m_default_headers.toArray().get(), [&](auto val) {
+    IterateV(data->m_default_headers.toArray().get(), [&](auto val) {
       soap_headers.append(val);
     });
   }

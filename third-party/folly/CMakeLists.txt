@@ -18,8 +18,8 @@ ExternalProject_add(
   follyBuild
   ${FOLLY_SOURCE_ARGS}
   PATCH_COMMAND
-    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch &&
-    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch
+    (patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch || true) &&
+    (patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch || true)
   CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>

@@ -337,6 +337,15 @@ let test_context_changes_consts () =
 let test_context_changes_funs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\bar")
+        (Naming_provider.get_fun_canon_name ctx "\\bar")
+        "Existing function should be accessible by non-canon name \\bar";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\bar")
+        (Naming_provider.get_fun_canon_name ctx "\\BAR")
+        "Existing function should be accessible by non-canon name \\BAR";
+
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
@@ -367,18 +376,42 @@ let test_context_changes_funs () =
         (Naming_provider.get_fun_canon_name ctx "\\NeW_bAr")
         "New function in context should be accessible by canon name";
 
-      (* NB: under shared-memory provider, this doesn't hold true if we made
-      a call to `get_fun_canon_name` before we added the context entry, as
-      the result will be cached. The caller is expected to have manually
-      removed any old reverse naming table entries manually in that case. *)
+      (* NB: under shared-memory provider, the following two tests aren't
+      useful. Sharedmem doesn't suppress canonical lookup results that
+      have been overridden by the context. (That's because sharedmem only
+      gives us back the canonical name, not the path where that canonical
+      name was defined, and without paths we can't tell whether it's been
+      overridden by context). For the sharedmem case, the caller is expected
+      to manually remove any old reverse-naming-table entries before calling
+      into the naming provider -- something that this test doesn't do.
+      Hence why it gives incorrect answers. *)
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\bar") (* TODO(ljw): this is a bug; should be None *)
+        (Naming_provider.get_fun_canon_name ctx "\\bar")
+        "Old function in context should NOT be accessible by non-canon name \\bar";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\bar") (* TODO(ljw): this is a bug; should be None *)
+        (Naming_provider.get_fun_canon_name ctx "\\BAR")
+        "Old function in context should NOT be accessible by non-canon name \\BAR";
       Asserter.String_asserter.assert_option_equals
         None
-        (Naming_provider.get_fun_canon_name ctx "\\BAR")
-        "Old function in context should NOT be accessible by canon name")
+        (* TODO(ljw): this avoids the bug but only because of incorrect caching *)
+        (Naming_provider.get_fun_canon_name ctx "\\BaR")
+        "Old function in context should NOT be accessible by non-canon name \\BaR";
+      ())
 
 let test_context_changes_classes () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Foo")
+        (Naming_provider.get_type_canon_name ctx "\\Foo")
+        "Existing class should be accessible by non-canon name \\Foo";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Foo")
+        (Naming_provider.get_type_canon_name ctx "\\FOO")
+        "Existing class should be accessible by non-canon name \\FOO";
+
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
@@ -401,18 +434,42 @@ let test_context_changes_classes () =
         (Naming_provider.get_type_canon_name ctx "\\NEWFOO")
         "New class in context should be accessible by canon name";
 
-      (* NB: under shared-memory provider, this doesn't hold true if we made
-      a call to `get_type_canon_name` before we added the context entry, as
-      the result will be cached. The caller is expected to have manually
-      removed any old reverse naming table entries manually in that case. *)
+      (* NB: under shared-memory provider, the following two tests aren't
+      useful. Sharedmem doesn't suppress canonical lookup results that
+      have been overridden by the context. (That's because sharedmem only
+      gives us back the canonical name, not the path where that canonical
+      name was defined, and without paths we can't tell whether it's been
+      overridden by context). For the sharedmem case, the caller is expected
+      to manually remove any old reverse-naming-table entries before calling
+      into the naming provider -- something that this test doesn't do.
+      Hence why it gives incorrect answers. *)
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Foo") (* TODO(ljw) should be None; this is a bug *)
+        (Naming_provider.get_type_canon_name ctx "\\Foo")
+        "Old class in context should NOT be accessible by non-canon name \\Foo";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Foo") (* TODO(ljw) should be None; this is a bug *)
+        (Naming_provider.get_type_canon_name ctx "\\FOO")
+        "Old class in context should NOT be accessible by non-canon name \\FOO";
       Asserter.String_asserter.assert_option_equals
         None
-        (Naming_provider.get_type_canon_name ctx "\\FOO")
-        "Old class in context should NOT be accessible by canon name")
+        (* TODO(ljw) This avoids the bug but only because of incorrect caching *)
+        (Naming_provider.get_type_canon_name ctx "\\FoO")
+        "Old class in context should NOT be accessible by non-canon name \\FoO";
+      ())
 
 let test_context_changes_typedefs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Baz")
+        (Naming_provider.get_type_canon_name ctx "\\Baz")
+        "Existing typedef should be accessible by non-canon name \\Baz";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Baz")
+        (Naming_provider.get_type_canon_name ctx "\\BAZ")
+        "Existing typedef should be accessible by non-canon name \\BAZ";
+
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
@@ -435,14 +492,29 @@ let test_context_changes_typedefs () =
         (Naming_provider.get_type_canon_name ctx "\\NEWBAZ")
         "New typedef in context should be accessible by canon name";
 
-      (* NB: under shared-memory provider, this doesn't hold true if we made
-      a call to `get_type_canon_name` before we added the context entry, as
-      the result will be cached. The caller is expected to have manually
-      removed any old reverse naming table entries manually in that case. *)
+      (* NB: under shared-memory provider, the following two tests aren't
+      useful. Sharedmem doesn't suppress canonical lookup results that
+      have been overridden by the context. (That's because sharedmem only
+      gives us back the canonical name, not the path where that canonical
+      name was defined, and without paths we can't tell whether it's been
+      overridden by context). For the sharedmem case, the caller is expected
+      to manually remove any old reverse-naming-table entries before calling
+      into the naming provider -- something that this test doesn't do.
+      Hence why it gives incorrect answers. *)
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Baz") (* TODO(ljw): this is a bug; should be None *)
+        (Naming_provider.get_type_canon_name ctx "\\Baz")
+        "Old typedef in context should NOT be accessible by non-canon name \\Baz";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\Baz") (* TODO(ljw): this is a bug; should be None *)
+        (Naming_provider.get_type_canon_name ctx "\\BAZ")
+        "Old typedef in context should NOT be accessible by non-canon name \\BAZ";
       Asserter.String_asserter.assert_option_equals
         None
-        (Naming_provider.get_type_canon_name ctx "\\BAZ")
-        "Old typedef in context should NOT be accessible by canon name")
+        (* TODO(ljw) This avoids the bug but only because of incorrect caching *)
+        (Naming_provider.get_type_canon_name ctx "\\BaZ")
+        "Old typedef in context should NOT be accessible by non-canon name \\BaZ";
+      ())
 
 let test_naming_table_hash () =
   (* Dep hash is 31 bits. *)

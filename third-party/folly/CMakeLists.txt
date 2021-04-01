@@ -1,110 +1,51 @@
-string(REPLACE "-fno-operator-names" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-set(FOLLY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set(FOLLY_DIR "${FOLLY_ROOT}/folly")
-
-include(CMakePushCheckState)
-include(CheckCXXSourceCompiles)
-include(CheckFunctionExists)
-include(CheckIncludeFile)
-include(CheckIncludeFileCXX)
-include(CheckLibraryExists)
-
+include(ExternalProject)
 include(HPHPFunctions)
 
-# Check if the given source compiles and set RETURN_VALUE based on the result.
-# Also sets RETURN_VALUE=<result> as a preprocessor macro.
-function (folly_check_source_compiles SOURCE RETURN_VALUE)
-  check_cxx_source_compiles("${SOURCE}" ${RETURN_VALUE})
-  if (${RETURN_VALUE})
-    target_compile_definitions(folly PUBLIC "${RETURN_VALUE}=1")
-  else()
-    target_compile_definitions(folly PUBLIC "${RETURN_VALUE}=0")
-  endif()
-endfunction(folly_check_source_compiles)
-
-# Needed for fcntl w/ F_SETPIPE_SZ
-add_definitions("-D_GNU_SOURCE")
-
-if (NOT EXISTS "${FOLLY_DIR}/Portability.h")
-  message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to "
-                      "run `git submodule update --init --recursive`?")
-endif()
-
-# Main folly library files
-auto_sources(files "*.cpp" "RECURSE" "${FOLLY_DIR}")
-auto_sources(cfiles "*.c" "RECURSE" "${FOLLY_DIR}")
-auto_sources(hfiles "*.h" "RECURSE" "${FOLLY_DIR}")
-
-# No need for tests, Benchmarks, Utils, or most experimental stuff
-HHVM_REMOVE_MATCHES_FROM_LISTS(files cfiles hfiles
- MATCHES
- "/bench/"
- "/logging/example/"
- "/experimental/pushmi/"
- "/experimental/exception_tracer/"
- "/futures/exercises/"
- "/python/"
- "/test/"
- "Test.cpp$"
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  FOLLY_SOURCE_ARGS
+  SOURCE_URL
+  "https://github.com/facebook/folly/releases/download/v2020.11.02.00/folly-v2020.11.02.00.tar.gz"
+  SOURCE_HASH
+  "SHA512=6d1f36dadce7c46d65175473ef303eafff49b91b1aa0d91ce496afd93f11ee86ba94f36bcf0a50db2c6899f67a0307a9443428e82883528f0fd332042c7cd109"
 )
-if (NOT LINUX)
-  HHVM_REMOVE_MATCHES_FROM_LISTS(files cfiles hfiles
-   MATCHES
-   "/experimental/symbolizer/"
-  )
-endif()
-list(REMOVE_ITEM files
-  ${FOLLY_DIR}/Benchmark.cpp
-  ${FOLLY_DIR}/SingletonStackTrace.cpp
-  ${FOLLY_DIR}/build/GenerateFingerprintTables.cpp
-  ${FOLLY_DIR}/experimental/DynamicParser.cpp
-  ${FOLLY_DIR}/experimental/JSONSchemaTester.cpp
-  ${FOLLY_DIR}/experimental/RCUUtils.cpp
-  ${FOLLY_DIR}/experimental/ProgramOptions.cpp
-  ${FOLLY_DIR}/experimental/Select64.cpp
-  ${FOLLY_DIR}/experimental/TestUtil.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionCounterLib.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionStackTraceLib.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracer.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerBenchmark.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerLib.cpp
-  ${FOLLY_DIR}/experimental/exception_tracer/StackTrace.cpp
-  ${FOLLY_DIR}/experimental/io/AsyncBase.cpp
-  ${FOLLY_DIR}/experimental/io/AsyncIO.cpp
-  ${FOLLY_DIR}/experimental/io/IoUring.cpp
-  ${FOLLY_DIR}/experimental/io/IoUringBackend.cpp
-  ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
-  ${FOLLY_DIR}/experimental/io/PollIoBackend.cpp
-  ${FOLLY_DIR}/experimental/io/SimpleAsyncIO.cpp
-  ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
-  ${FOLLY_DIR}/init/Init.cpp
-  ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.cpp
-  ${FOLLY_DIR}/python/GILAwareManualExecutor.cpp
+
+get_target_property(LIBFMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(LIBFMT_LIBRARY fmt INTERFACE_LINK_LIBRARIES)
+
+# TODO: point at jemalloc, libsodium
+
+ExternalProject_add(
+  follyBuild
+  ${FOLLY_SOURCE_ARGS}
+  PATCH_COMMAND
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch &&
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch
+  CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+    -DCMAKE_INSTALL_LIBDIR=lib
+    -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+    -DLIBFMT_INCLUDE_DIR=${LIBFMT_INCLUDE_DIR}
+    -DLIBFMT_LIBRARY=${LIBFMT_LIBRARY}
+    ${EXTRA_ARGS}
+  BUILD_COMMAND
+    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly --parallel
+  INSTALL_COMMAND
+    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
+    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
 )
-list(REMOVE_ITEM hfiles
-  ${FOLLY_DIR}/Benchmark.h
-  ${FOLLY_DIR}/experimental/DynamicParser.h
-  ${FOLLY_DIR}/experimental/DynamicParser-inl.h
-  ${FOLLY_DIR}/experimental/RCUUtils.h
-  ${FOLLY_DIR}/experimental/ProgramOptions.h
-  ${FOLLY_DIR}/experimental/TestUtil.h
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionAbi.h
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionCounterLib.h
-  ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracer.h
-  ${FOLLY_DIR}/experimental/exception_tracer/StackTrace.h
-  ${FOLLY_DIR}/experimental/io/AsyncBase.h
-  ${FOLLY_DIR}/experimental/io/AsyncIO.h
-  ${FOLLY_DIR}/experimental/io/IoUring.h
-  ${FOLLY_DIR}/experimental/io/IoUringBackend.h
-  ${FOLLY_DIR}/experimental/io/PollIoBackend.h
-  ${FOLLY_DIR}/experimental/io/SimpleAsyncIO.h
-  ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
-  ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h
-  ${FOLLY_DIR}/init/Init.h
-  ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.h
-  ${FOLLY_DIR}/python/AsyncioExecutor.h
-  ${FOLLY_DIR}/python/GILAwareManualExecutor.h
+ExternalProject_Get_Property(follyBuild INSTALL_DIR)
+add_dependencies(follyBuild boost fmt jemalloc libsodium)
+
+add_library(folly INTERFACE)
+add_dependencies(folly follyBuild)
+target_include_directories(folly INTERFACE "${INSTALL_DIR}/include")
+target_link_libraries(folly INTERFACE
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
+<<<<<<< HEAD
 
 # Actually delete this file (not just remove from the list) because
 # proxygen/lib/services/WorkerThread.cpp checks for it via __has_include.
@@ -297,3 +238,5 @@ if (APPLE)
   # Just assume we have sched.h
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_SCHED_H=1")
 endif()
+=======
+>>>>>>> wip: build folly from source tarball instead of submodule

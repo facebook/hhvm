@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 309c30c9e..58ff8e3ae 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -370,8 +370,6 @@ target_compile_definitions(folly_base
+     $<TARGET_PROPERTY:folly_deps,INTERFACE_COMPILE_DEFINITIONS>
+ )
+ 
+-set(FOLLY_INSTALL_TARGETS folly folly_deps)
+-
+ option(PYTHON_EXTENSIONS
+   "Build Python Bindings for Folly, requires Cython and (BUILD_SHARED_LIBS=ON)"
+   OFF
+@@ -399,10 +397,19 @@ target_link_libraries(folly_test_util
+     ${LIBGMOCK_LIBRARIES}
+ )
+ apply_folly_compile_options_to_target(folly_test_util)
+-list(APPEND FOLLY_INSTALL_TARGETS folly_test_util)
+ 
+-install(TARGETS ${FOLLY_INSTALL_TARGETS}
++install(TARGETS folly folly_deps
+   EXPORT folly
++  COMPONENT lib
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
++  ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
++auto_install_files(folly ${FOLLY_DIR}
++  ${hfiles}
++)
++install(TARGETS folly folly_test_util
++  EXPORT folly_test_util
++  COMPONENT test_util
+   RUNTIME DESTINATION bin
+   LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+   ARCHIVE DESTINATION ${LIB_INSTALL_DIR})

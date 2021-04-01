@@ -44,6 +44,7 @@ add_dependencies(folly follyBuild)
 target_include_directories(folly INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(folly INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  fmt # referred to by folly's headers, so anything using folly needs to find them
 )
 <<<<<<< HEAD
 

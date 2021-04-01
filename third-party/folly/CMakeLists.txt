@@ -11,24 +11,34 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
 
 get_target_property(LIBFMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(LIBFMT_LIBRARY fmt INTERFACE_LINK_LIBRARIES)
-
-# TODO: point at jemalloc, libsodium
+get_target_property(LIBSODIUM_INCLUDE_DIR libsodium INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(LIBSODIUM_LIBRARY libsodium INTERFACE_LINK_LIBRARIES)
+get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
+get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 ExternalProject_add(
   bundled_folly
   ${FOLLY_SOURCE_ARGS}
   PATCH_COMMAND
-    (patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch || true) &&
-    (patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch || true)
+    patch -p1 --forward < "${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch" &&
+    patch -p1 --forward < "${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch"
   CMAKE_ARGS
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
     -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
     -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+    -DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
+    -DGLOG_LIBRARY=${LIBGLOG_LIBRARY}
     -DLIBFMT_INCLUDE_DIR=${LIBFMT_INCLUDE_DIR}
     -DLIBFMT_LIBRARY=${LIBFMT_LIBRARY}
+    -DLIBSODIUM_INCLUDE_DIR=${LIBSODIUM_INCLUDE_DIR}
+    -DLIBSODIUM_LIBRARY=${LIBSODIUM_LIBRARY}
+    -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
+    -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
     ${EXTRA_ARGS}
   BUILD_COMMAND
     ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly --parallel
@@ -37,7 +47,7 @@ ExternalProject_add(
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
 )
 ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
-add_dependencies(bundled_folly boost fmt jemalloc libsodium)
+add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd)
 
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)

@@ -83,5 +83,5 @@ add_library(hphp_proxygen STATIC ${CXX_SOURCES})
 target_include_directories(hphp_proxygen PUBLIC ${PROXYGEN_GENERATED_ROOT})
 
 target_link_libraries(hphp_proxygen wangle zstd boost
-  fizz libsodium
+  fizz libsodium folly
   ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES})

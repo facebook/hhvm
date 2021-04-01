@@ -605,7 +605,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     std::make_unique<AnnotationData>());
     unit->initLogEntry(context.initSrcKey.func());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
-    irgen::defineStack(irgs, region.entry()->initialSpOffset());
+    irgen::defineFrameAndStack(irgs, region.entry()->initialSpOffset());
     tries++;
 
     // Set the profCount of the IRUnit's entry block, which is created a
@@ -785,7 +785,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     // account for the locals, iters, and slots, etc.
     // TODO: make inlining cost calculation caller agnostic
     auto const bcSPOff = FPInvOffset{ctx.initSrcKey.func()->numSlotsInFrame()};
-    irgen::defineStack(irgs, bcSPOff);
+    irgen::defineFrameAndStack(irgs, bcSPOff);
     irgs.inlineState.conjure = true;
     if (hasTransID(entryBID)) {
       irgs.profTransIDs.clear();

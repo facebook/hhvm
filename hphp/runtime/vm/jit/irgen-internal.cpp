@@ -61,14 +61,25 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   return key;
 }
 
-void defineStack(IRGS& env, FPInvOffset bcSPOff) {
-  // Define SP.
+void defineFrameAndStack(IRGS& env, FPInvOffset bcSPOff) {
+  // Define FP and SP.
   if (resumeMode(env) != ResumeMode::None) {
-    // rvmsp() points to the top of the stack in resumables
+    // - resumable frames live on the heap, so they do not have a stack position
+    // - fp(env) and sp(env) are backed by rvmfp() and rvmsp() registers
+    // - sp(env) points to the top of the stack at translation entry
+    // - stack base is `irSPOff` away from sp(env)
+    gen(env, DefFP, DefFPData { folly::none });
+    updateMarker(env);
+
     auto const irSPOff = bcSPOff;
     gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
   } else {
-    // stack starts at the FP in regular functions
+    // - frames of regular functions live on the stack
+    // - fp(env) and sp(env) are backed by the same rvmfp() register
+    // - stack base is at sp(env)
+    gen(env, DefFP, DefFPData { IRSPRelOffset { 0 } });
+    updateMarker(env);
+
     auto const irSPOff = FPInvOffset { 0 };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   }

@@ -121,4 +121,15 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 
 //////////////////////////////////////////////////////////////////////
 
+folly::Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp) {
+  assertx(fp->isA(TFramePtr));
+  auto const inst = canonical(fp)->inst();
+  if (inst->is(DefFP)) return inst->extra<DefFP>()->offset;
+  if (inst->is(DefFuncEntryFP)) return IRSPRelOffset { 0 };
+  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->spOffset;
+  always_assert(false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

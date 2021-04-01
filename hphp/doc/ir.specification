@@ -1819,9 +1819,13 @@ To string conversions:
 
 12. Misc
 
-| DefFP, D(FramePtr), NA, NF
+| DefFP<offset>, D(FramePtr), NA, NF
 
-  Creates a temporary D representing the current vm frame pointer.
+  Creates a temporary D representing the current VM frame pointer.
+
+  If the offset is specified, the frame is located at that offset from the SP,
+  otherwise the frame either lives on the heap, or its position on the stack
+  is unknown.
 
 | DefFrameRelSP<irSPOff, bcSPOff>, D(StkPtr), S(FramePtr), NF
 

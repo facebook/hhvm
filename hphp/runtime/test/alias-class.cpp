@@ -53,7 +53,7 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
 
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
-  auto const mainFP = unit.gen(DefFP, bcctx)->dst();
+  auto const mainFP = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
 
   return {
     // Frame locals.
@@ -385,7 +385,7 @@ TEST(AliasClass, StackUnions) {
 TEST(AliasClass, IterUnion) {
   IRUnit unit{test_context};
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto const FP = unit.gen(DefFP, bcctx)->dst();
+  auto const FP = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
 
   {
     AliasClass const iterP0 = aiter_pos(FP, 0);

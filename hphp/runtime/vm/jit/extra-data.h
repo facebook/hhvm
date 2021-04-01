@@ -716,6 +716,23 @@ struct FPRelOffsetData : IRExtraData {
   FPRelOffset offset;
 };
 
+struct DefFPData : IRExtraData {
+  explicit DefFPData(folly::Optional<IRSPRelOffset> offset) : offset(offset) {}
+
+  std::string show() const {
+    if (!offset) return "IRSPOff unknown";
+    return folly::to<std::string>("IRSPOff ", offset->offset);
+  }
+
+  bool equals(DefFPData o) const { return offset == o.offset; }
+  size_t stableHash() const {
+    return offset ? std::hash<int32_t>()(offset->offset) : 0;
+  }
+
+  // Frame position on the stack, if it lives there and the position is known.
+  folly::Optional<IRSPRelOffset> offset;
+};
+
 /*
  * Stack pointer offset.
  */
@@ -2608,6 +2625,7 @@ X(StStk,                        IRSPRelOffsetData);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
 X(AssertStk,                    IRSPRelOffsetData);
+X(DefFP,                        DefFPData);
 X(DefFrameRelSP,                DefStackData);
 X(DefRegSP,                     DefStackData);
 X(LdStk,                        IRSPRelOffsetData);

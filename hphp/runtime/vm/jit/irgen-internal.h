@@ -911,9 +911,9 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
 SSATmp* convertClassKey(IRGS& env, SSATmp* key);
 
 /*
- * Define sp(env).
+ * Define fp(env) and sp(env).
  */
-void defineStack(IRGS& env, FPInvOffset bcSPOff);
+void defineFrameAndStack(IRGS& env, FPInvOffset bcSPOff);
 
 //////////////////////////////////////////////////////////////////////
 

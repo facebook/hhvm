@@ -557,7 +557,11 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
 
 namespace {
 
-void definePrologueStack(IRGS& env, const Func* callee, uint32_t argc) {
+void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
+  // Define caller's frame. It is unknown if/where it lives on the stack.
+  gen(env, DefFP, DefFPData { folly::none });
+  updateMarker(env);
+
   // The stack base of prologues points to the stack without the potentially
   // uninitialized space reserved for ActRec and inouts. The rvmsp() register
   // points to the future ActRec. The stack contains additional `argc' inputs
@@ -586,7 +590,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID) {
   assertx(argc <= callee->numNonVariadicParams() + 1);
 
-  definePrologueStack(env, callee, argc);
+  definePrologueFrameAndStack(env, callee, argc);
 
   // Define register inputs before doing anything else that may clobber them.
   auto const callFlags = gen(env, DefCallFlags);

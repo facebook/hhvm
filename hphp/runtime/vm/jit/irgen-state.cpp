@@ -35,10 +35,6 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   , retryContext(retryContext)
 {
   updateMarker(*this);
-
-  // Define frame and update the BC marker appropriately.
-  gen(*this, DefFP);
-  updateMarker(*this);
 }
 
 //////////////////////////////////////////////////////////////////////

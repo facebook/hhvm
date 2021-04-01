@@ -11,15 +11,17 @@
 
 namespace apache { namespace thrift { namespace metadata {
 typedef apache::thrift::ThriftPresult<false> ThriftMetadataService_getThriftServiceMetadata_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT,  ::apache::thrift::metadata::ThriftServiceMetadataResponse*>> ThriftMetadataService_getThriftServiceMetadata_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::apache::thrift::metadata::ThriftServiceMetadataResponse*>> ThriftMetadataService_getThriftServiceMetadata_presult;
 
 template <typename Protocol_>
-void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback) {
+void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback) {
+
   std::shared_ptr<apache::thrift::transport::THeader> header(ctx, &ctx->header);
   ThriftMetadataService_getThriftServiceMetadata_pargs args;
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "getThriftServiceMetadata", writer, sizer);
+  static constexpr std::string_view methodName = "getThriftServiceMetadata";
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOptions), std::move(callback), ctx->ctx, std::move(header), channel_.get(), apache::thrift::ManagedStringView::from_static(methodName), writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -31,12 +33,7 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(std::unique_ptr<
 }
 
 void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
-  auto ctx = std::make_shared<apache::thrift::detail::ac::ClientRequestContext>(
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(),
-      rpcOptions.releaseWriteHeaders(),
-      this->handlers_,
-      this->getServiceName(),
-      "ThriftMetadataService.getThriftServiceMetadata");
+  auto ctx = getThriftServiceMetadataCtx(&rpcOptions);
   apache::thrift::RequestCallback::Context callbackContext;
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -45,7 +42,7 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(apache::thrift::
   getThriftServiceMetadataImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback));
 }
 
-void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback) {
+void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback) {
   switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -66,76 +63,80 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataImpl(apache::thri
   }
 }
 
-void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) {
+std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> ThriftMetadataServiceAsyncClient::getThriftServiceMetadataCtx(apache::thrift::RpcOptions* rpcOptions) {
+  return std::make_shared<apache::thrift::detail::ac::ClientRequestContext>(
+      channel_->getProtocolId(),
+      rpcOptions ? rpcOptions->releaseWriteHeaders() : std::map<std::string, std::string>{},
+      handlers_,
+      getServiceName(),
+      "ThriftMetadataService.getThriftServiceMetadata");
+}
+
+void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_getThriftServiceMetadata(rpcOptions, _return);
 }
 
-void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions,  ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) {
-  apache::thrift::ClientReceiveState _returnState;
-  apache::thrift::ClientSyncCallback<false> callback(&_returnState);
+void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) {
+  apache::thrift::ClientReceiveState returnState;
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
-  auto ctx = std::make_shared<apache::thrift::detail::ac::ClientRequestContext>(
-      protocolId,
-      rpcOptions.releaseWriteHeaders(),
-      this->handlers_,
-      this->getServiceName(),
-      "ThriftMetadataService.getThriftServiceMetadata");
+  auto ctx = getThriftServiceMetadataCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   getThriftServiceMetadataImpl(rpcOptions, ctx, std::move(wrappedCallback));
   callback.waitUntilDone(evb);
-  _returnState.resetProtocolId(protocolId);
-  _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
+
+  if (returnState.isException()) {
+    returnState.exception().throw_exception();
+  }
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
   SCOPE_EXIT {
-    if (_returnState.header() && !_returnState.header()->getHeaders().empty()) {
-      rpcOptions.setReadHeaders(_returnState.header()->releaseHeaders());
+    if (returnState.header() && !returnState.header()->getHeaders().empty()) {
+      rpcOptions.setReadHeaders(returnState.header()->releaseHeaders());
     }
   };
-  if (!_returnState.buf()) {
-    assert(!!_returnState.exception());
-    _returnState.exception().throw_exception();
-  }
   return folly::fibers::runInMainContext([&] {
-      recv_getThriftServiceMetadata(_return, _returnState);
+      recv_getThriftServiceMetadata(_return, returnState);
   });
 }
 
 
-folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::future_getThriftServiceMetadata() {
+folly::Future<::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::future_getThriftServiceMetadata() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_getThriftServiceMetadata(rpcOptions);
 }
 
-folly::SemiFuture< ::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::semifuture_getThriftServiceMetadata() {
+folly::SemiFuture<::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::semifuture_getThriftServiceMetadata() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_getThriftServiceMetadata(rpcOptions);
 }
 
-folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise< ::apache::thrift::metadata::ThriftServiceMetadataResponse> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>(std::move(_promise), recv_wrapped_getThriftServiceMetadata, channel_);
+folly::Future<::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
+  folly::Promise<::apache::thrift::metadata::ThriftServiceMetadataResponse> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::apache::thrift::metadata::ThriftServiceMetadataResponse>>(std::move(promise), recv_wrapped_getThriftServiceMetadata, channel_);
   getThriftServiceMetadata(rpcOptions, std::move(callback));
-  return _future;
+  return future;
 }
 
-folly::SemiFuture< ::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
+folly::SemiFuture<::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
   auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_getThriftServiceMetadata, channel_);
   auto callback = std::move(callbackAndFuture.first);
   getThriftServiceMetadata(rpcOptions, std::move(callback));
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> ThriftMetadataServiceAsyncClient::header_future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>(std::move(_promise), recv_wrapped_getThriftServiceMetadata, channel_);
+folly::Future<std::pair<::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> ThriftMetadataServiceAsyncClient::header_future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
+  folly::Promise<std::pair<::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::apache::thrift::metadata::ThriftServiceMetadataResponse>>(std::move(promise), recv_wrapped_getThriftServiceMetadata, channel_);
   getThriftServiceMetadata(rpcOptions, std::move(callback));
-  return _future;
+  return future;
 }
 
-folly::SemiFuture<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> ThriftMetadataServiceAsyncClient::header_semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
+folly::SemiFuture<std::pair<::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> ThriftMetadataServiceAsyncClient::header_semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
   auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_getThriftServiceMetadata, channel_);
   auto callback = std::move(callbackAndFuture.first);
   getThriftServiceMetadata(rpcOptions, std::move(callback));
@@ -148,7 +149,7 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(folly::Function<
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_wrapped_getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -178,18 +179,18 @@ folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_wrapped_getThrif
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-void ThriftMetadataServiceAsyncClient::recv_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
+void ThriftMetadataServiceAsyncClient::recv_getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_getThriftServiceMetadata(_return, state);
   if (ew) {
     ew.throw_exception();
   }
 }
 
-void ThriftMetadataServiceAsyncClient::recv_instance_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
+void ThriftMetadataServiceAsyncClient::recv_instance_getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_getThriftServiceMetadata(_return, state);
 }
 
-folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_instance_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_instance_wrapped_getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_getThriftServiceMetadata(_return, state);
 }
 

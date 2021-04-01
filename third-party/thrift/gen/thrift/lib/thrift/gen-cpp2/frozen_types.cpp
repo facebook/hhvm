@@ -36,7 +36,7 @@ void TccStructTraits<::apache::thrift::frozen::schema::Field>::translateFieldNam
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-Field::Field(apache::thrift::FragileConstructor, int16_t layoutId__arg, int16_t offset__arg) :
+Field::Field(apache::thrift::FragileConstructor, ::std::int16_t layoutId__arg, ::std::int16_t offset__arg) :
     layoutId(std::move(layoutId__arg)),
     offset(std::move(offset__arg)) {
   __isset.layoutId = true;
@@ -100,6 +100,7 @@ template uint32_t Field::serializedSizeZC<>(apache::thrift::CompactProtocolWrite
 
 
 }}}} // apache::thrift::frozen::schema
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -124,7 +125,7 @@ void TccStructTraits<::apache::thrift::frozen::schema::Layout>::translateFieldNa
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-Layout::Layout(apache::thrift::FragileConstructor, int32_t size__arg, int16_t bits__arg, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field> fields__arg, ::std::string typeName__arg) :
+Layout::Layout(apache::thrift::FragileConstructor, ::std::int32_t size__arg, ::std::int16_t bits__arg, folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field> fields__arg, ::std::string typeName__arg) :
     size(std::move(size__arg)),
     bits(std::move(bits__arg)),
     fields(std::move(fields__arg)),
@@ -165,11 +166,11 @@ bool Layout::operator==(const Layout& rhs) const {
   return true;
 }
 
-const folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>& Layout::get_fields() const& {
+const folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field>& Layout::get_fields() const& {
   return fields;
 }
 
-folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field> Layout::get_fields() && {
+folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field> Layout::get_fields() && {
   return std::move(fields);
 }
 
@@ -198,17 +199,18 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Layout,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>>,
+        folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field>>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         Layout,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>>,
+        folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field>>,
     "inconsistent use of nimble option");
 
 }}}} // apache::thrift::frozen::schema
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -233,7 +235,7 @@ void TccStructTraits<::apache::thrift::frozen::schema::Schema>::translateFieldNa
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-Schema::Schema(apache::thrift::FragileConstructor, int32_t fileVersion__arg, bool relaxTypeChecks__arg, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout> layouts__arg, int16_t rootLayout__arg) :
+Schema::Schema(apache::thrift::FragileConstructor, ::std::int32_t fileVersion__arg, bool relaxTypeChecks__arg, folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout> layouts__arg, ::std::int16_t rootLayout__arg) :
     fileVersion(std::move(fileVersion__arg)),
     relaxTypeChecks(std::move(relaxTypeChecks__arg)),
     layouts(std::move(layouts__arg)),
@@ -274,11 +276,11 @@ bool Schema::operator==(const Schema& rhs) const {
   return true;
 }
 
-const folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>& Schema::get_layouts() const& {
+const folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout>& Schema::get_layouts() const& {
   return layouts;
 }
 
-folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout> Schema::get_layouts() && {
+folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout> Schema::get_layouts() && {
   return std::move(layouts);
 }
 
@@ -307,14 +309,14 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Schema,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>>,
+        folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout>>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         Schema,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>>,
+        folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout>>,
     "inconsistent use of nimble option");
 
 }}}} // apache::thrift::frozen::schema

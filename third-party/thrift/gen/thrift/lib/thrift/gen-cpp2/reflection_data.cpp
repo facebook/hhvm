@@ -12,24 +12,99 @@
 namespace apache {
 namespace thrift {
 
+const std::array<::apache::thrift::reflection::Type, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::values = {{
+  type::TYPE_VOID,
+  type::TYPE_STRING,
+  type::TYPE_BOOL,
+  type::TYPE_BYTE,
+  type::TYPE_I16,
+  type::TYPE_I32,
+  type::TYPE_I64,
+  type::TYPE_DOUBLE,
+  type::TYPE_ENUM,
+  type::TYPE_LIST,
+  type::TYPE_SET,
+  type::TYPE_MAP,
+  type::TYPE_STRUCT,
+  type::TYPE_SERVICE,
+  type::TYPE_PROGRAM,
+  type::TYPE_FLOAT,
+}};
+const std::array<folly::StringPiece, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::names = {{
+  "TYPE_VOID",
+  "TYPE_STRING",
+  "TYPE_BOOL",
+  "TYPE_BYTE",
+  "TYPE_I16",
+  "TYPE_I32",
+  "TYPE_I64",
+  "TYPE_DOUBLE",
+  "TYPE_ENUM",
+  "TYPE_LIST",
+  "TYPE_SET",
+  "TYPE_MAP",
+  "TYPE_STRUCT",
+  "TYPE_SERVICE",
+  "TYPE_PROGRAM",
+  "TYPE_FLOAT",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::reflection::Type>::size;
-constexpr const std::array<::apache::thrift::reflection::Type, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::values;
-constexpr const std::array<folly::StringPiece, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::names;
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_names = {{
+  "isRequired",
+  "type",
+  "name",
+  "annotations",
+  "order",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_types = {{
+  TType::T_BOOL,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_MAP,
+  TType::T_I16,
+}};
 
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_names = {{
+  "name",
+  "fields",
+  "mapKeyType",
+  "valueType",
+  "enumValues",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_types = {{
+  TType::T_STRING,
+  TType::T_MAP,
+  TType::T_I64,
+  TType::T_I64,
+  TType::T_MAP,
+}};
 
-constexpr const std::size_t TStructDataStorage<::apache::thrift::reflection::StructField>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::reflection::StructField>::fields_size> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::reflection::StructField>::fields_size> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::reflection::StructField>::fields_size> TStructDataStorage<::apache::thrift::reflection::StructField>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::reflection::DataType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::reflection::DataType>::fields_size> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::reflection::DataType>::fields_size> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::reflection::DataType>::fields_size> TStructDataStorage<::apache::thrift::reflection::DataType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::reflection::Schema>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::reflection::Schema>::fields_size> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::reflection::Schema>::fields_size> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::reflection::Schema>::fields_size> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_types;
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_names = {{
+  "dataTypes",
+  "names",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::reflection::Schema>::fields_types = {{
+  TType::T_MAP,
+  TType::T_MAP,
+}};
 
 } // namespace thrift
 } // namespace apache

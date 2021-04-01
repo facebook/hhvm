@@ -12,97 +12,442 @@
 namespace apache {
 namespace thrift {
 
+const std::array<::apache::thrift::metadata::ThriftPrimitiveType, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::values = {{
+  type::THRIFT_BOOL_TYPE,
+  type::THRIFT_BYTE_TYPE,
+  type::THRIFT_I16_TYPE,
+  type::THRIFT_I32_TYPE,
+  type::THRIFT_I64_TYPE,
+  type::THRIFT_FLOAT_TYPE,
+  type::THRIFT_DOUBLE_TYPE,
+  type::THRIFT_BINARY_TYPE,
+  type::THRIFT_STRING_TYPE,
+  type::THRIFT_VOID_TYPE,
+}};
+const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::names = {{
+  "THRIFT_BOOL_TYPE",
+  "THRIFT_BYTE_TYPE",
+  "THRIFT_I16_TYPE",
+  "THRIFT_I32_TYPE",
+  "THRIFT_I64_TYPE",
+  "THRIFT_FLOAT_TYPE",
+  "THRIFT_DOUBLE_TYPE",
+  "THRIFT_BINARY_TYPE",
+  "THRIFT_STRING_TYPE",
+  "THRIFT_VOID_TYPE",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::size;
-constexpr const std::array<::apache::thrift::metadata::ThriftPrimitiveType, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::values;
-constexpr const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::names;
+const std::array<::apache::thrift::metadata::ThriftConstValue::Type, 7> TEnumDataStorage<::apache::thrift::metadata::ThriftConstValue::Type>::values = {{
+  type::cv_bool,
+  type::cv_integer,
+  type::cv_double,
+  type::cv_string,
+  type::cv_map,
+  type::cv_list,
+  type::cv_struct,
+}};
+const std::array<folly::StringPiece, 7> TEnumDataStorage<::apache::thrift::metadata::ThriftConstValue::Type>::names = {{
+  "cv_bool",
+  "cv_integer",
+  "cv_double",
+  "cv_string",
+  "cv_map",
+  "cv_list",
+  "cv_struct",
+}};
 
+const std::array<::apache::thrift::metadata::ThriftType::Type, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::values = {{
+  type::t_primitive,
+  type::t_list,
+  type::t_set,
+  type::t_map,
+  type::t_enum,
+  type::t_struct,
+  type::t_union,
+  type::t_typedef,
+  type::t_stream,
+  type::t_sink,
+}};
+const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::names = {{
+  "t_primitive",
+  "t_list",
+  "t_set",
+  "t_map",
+  "t_enum",
+  "t_struct",
+  "t_union",
+  "t_typedef",
+  "t_stream",
+  "t_sink",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::size;
-constexpr const std::array<::apache::thrift::metadata::ThriftType::Type, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::values;
-constexpr const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::names;
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_names = {{
+  "name",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_types = {{
+  TType::T_STRING,
+}};
 
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstStruct>::fields_names = {{
+  "type",
+  "fields",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstStruct>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstStruct>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_MAP,
+}};
 
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStructType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_size> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_types;
+const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::metadata::ThriftConstValue>::fields_names = {{
+  "cv_bool",
+  "cv_integer",
+  "cv_double",
+  "cv_string",
+  "cv_map",
+  "cv_list",
+  "cv_struct",
+}};
+const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::metadata::ThriftConstValue>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+}};
+const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::metadata::ThriftConstValue>::fields_types = {{
+  TType::T_BOOL,
+  TType::T_I64,
+  TType::T_DOUBLE,
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstValuePair>::fields_names = {{
+  "key",
+  "value",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstValuePair>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftConstValuePair>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_names = {{
+  "valueType",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftListType>::fields_types = {{
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_names = {{
+  "valueType",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftSetType>::fields_types = {{
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_names = {{
+  "keyType",
+  "valueType",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftMapType>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_names = {{
+  "name",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftEnumType>::fields_types = {{
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_names = {{
+  "name",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftUnionType>::fields_types = {{
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_names = {{
+  "name",
+  "underlyingType",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftTypedefType>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_names = {{
+  "elemType",
+  "initialResponseType",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftStreamType>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_names = {{
+  "elemType",
+  "finalResponseType",
+  "initialResponseType",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::metadata::ThriftSinkType>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 10> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_names = {{
+  "t_primitive",
+  "t_list",
+  "t_set",
+  "t_map",
+  "t_enum",
+  "t_struct",
+  "t_union",
+  "t_typedef",
+  "t_stream",
+  "t_sink",
+}};
+const std::array<int16_t, 10> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+}};
+const std::array<protocol::TType, 10> TStructDataStorage<::apache::thrift::metadata::ThriftType>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_names = {{
+  "name",
+  "elements",
+  "structured_annotations",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::metadata::ThriftEnum>::fields_types = {{
+  TType::T_STRING,
+  TType::T_MAP,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_names = {{
+  "id",
+  "type",
+  "name",
+  "is_optional",
+  "structured_annotations",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::metadata::ThriftField>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_STRING,
+  TType::T_BOOL,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_names = {{
+  "name",
+  "fields",
+  "is_union",
+  "structured_annotations",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::metadata::ThriftStruct>::fields_types = {{
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_BOOL,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_names = {{
+  "name",
+  "fields",
+  "structured_annotations",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::metadata::ThriftException>::fields_types = {{
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_names = {{
+  "name",
+  "return_type",
+  "arguments",
+  "exceptions",
+  "is_oneway",
+  "structured_annotations",
+}};
+const std::array<int16_t, 6> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 6> TStructDataStorage<::apache::thrift::metadata::ThriftFunction>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRUCT,
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_BOOL,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_names = {{
+  "name",
+  "functions",
+  "parent",
+  "structured_annotations",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::metadata::ThriftService>::fields_types = {{
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_STRING,
+  TType::T_LIST,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_names = {{
+  "name",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::metadata::ThriftModuleContext>::fields_types = {{
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_names = {{
+  "service_info",
+  "module",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceContext>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_names = {{
+  "enums",
+  "structs",
+  "exceptions",
+  "services",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_ids = {{
+  2,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::metadata::ThriftMetadata>::fields_types = {{
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_names = {{
+  "context",
+  "metadata",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::metadata::ThriftServiceMetadataResponse>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
 
 } // namespace thrift
 } // namespace apache

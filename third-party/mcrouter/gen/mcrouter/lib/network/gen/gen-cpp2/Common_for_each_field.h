@@ -17,10 +17,7 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McVersionRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McVersionRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).key_ref()...);
+    f(0, static_cast<T&&>(t).key_ref()...);
   }
 };
 
@@ -28,13 +25,10 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McVersionReply> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McVersionReply>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).value_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).message_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).appSpecificErrorCode_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).value_ref()...);
+    f(2, static_cast<T&&>(t).message_ref()...);
+    f(3, static_cast<T&&>(t).appSpecificErrorCode_ref()...);
   }
 };
 
@@ -42,10 +36,7 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McStatsRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McStatsRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).key_ref()...);
+    f(0, static_cast<T&&>(t).key_ref()...);
   }
 };
 
@@ -53,13 +44,10 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McStatsReply> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McStatsReply>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).message_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).stats_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).appSpecificErrorCode_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).message_ref()...);
+    f(2, static_cast<T&&>(t).stats_ref()...);
+    f(3, static_cast<T&&>(t).appSpecificErrorCode_ref()...);
   }
 };
 
@@ -67,10 +55,7 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McShutdownRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McShutdownRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).key_ref()...);
+    f(0, static_cast<T&&>(t).key_ref()...);
   }
 };
 
@@ -78,12 +63,9 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McShutdownReply> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McShutdownReply>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).message_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).appSpecificErrorCode_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).message_ref()...);
+    f(2, static_cast<T&&>(t).appSpecificErrorCode_ref()...);
   }
 };
 
@@ -91,10 +73,7 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McQuitRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McQuitRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).key_ref()...);
+    f(0, static_cast<T&&>(t).key_ref()...);
   }
 };
 
@@ -102,12 +81,9 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McQuitReply> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McQuitReply>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).message_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).appSpecificErrorCode_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).message_ref()...);
+    f(2, static_cast<T&&>(t).appSpecificErrorCode_ref()...);
   }
 };
 
@@ -115,10 +91,7 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McExecRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McExecRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).key_ref()...);
+    f(0, static_cast<T&&>(t).key_ref()...);
   }
 };
 
@@ -126,13 +99,10 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::McExecReply> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::McExecReply>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).response_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).message_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).appSpecificErrorCode_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).response_ref()...);
+    f(2, static_cast<T&&>(t).message_ref()...);
+    f(3, static_cast<T&&>(t).appSpecificErrorCode_ref()...);
   }
 };
 
@@ -140,9 +110,6 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::GoAwayAcknowledgement> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::GoAwayAcknowledgement>;
-
   }
 };
 
@@ -150,11 +117,8 @@ template <>
 struct ForEachField<::facebook::memcache::thrift::GoAwayRequest> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::facebook::memcache::thrift::GoAwayRequest>;
-
-    f(get_metadata(0), static_cast<T&&>(t).result_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).reason_ref()...);
+    f(0, static_cast<T&&>(t).result_ref()...);
+    f(1, static_cast<T&&>(t).reason_ref()...);
   }
 };
 } // namespace detail

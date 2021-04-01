@@ -12,261 +12,88 @@
 
 namespace apache { namespace thrift {
 
-
-
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McVersionRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "key",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McVersionReply> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 4;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "value",
-    "message",
-    "appSpecificErrorCode",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_STRING,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McStatsRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "key",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McStatsReply> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 4;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "message",
-    "stats",
-    "appSpecificErrorCode",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_LIST,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McShutdownRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "key",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McShutdownReply> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 3;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "message",
-    "appSpecificErrorCode",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McQuitRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "key",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McQuitReply> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 3;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "message",
-    "appSpecificErrorCode",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McExecRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "key",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::McExecReply> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 4;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "response",
-    "message",
-    "appSpecificErrorCode",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_STRING,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::GoAwayAcknowledgement> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::facebook::memcache::thrift::GoAwayRequest> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "result",
-    "reason",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 }} // apache::thrift

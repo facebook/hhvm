@@ -73,13 +73,13 @@ StructField::StructField() :
       isRequired(0),
       type(0),
       order(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 StructField::~StructField() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__arg, int64_t type__arg, ::std::string name__arg, std::unordered_map<::std::string, ::std::string> annotations__arg, int16_t order__arg) :
+StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__arg, ::std::int64_t type__arg, ::std::string name__arg, std::unordered_map<::std::string, ::std::string> annotations__arg, ::std::int16_t order__arg) :
     isRequired(std::move(isRequired__arg)),
     type(std::move(type__arg)),
     name(std::move(name__arg)),
@@ -159,6 +159,7 @@ template uint32_t StructField::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // apache::thrift::reflection
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -186,13 +187,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType() :
       mapKeyType(0),
       valueType(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 DataType::~DataType() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField> fields__arg, int64_t mapKeyType__arg, int64_t valueType__arg, std::unordered_map<::std::string, int32_t> enumValues__arg) :
+DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField> fields__arg, ::std::int64_t mapKeyType__arg, ::std::int64_t valueType__arg, std::unordered_map<::std::string, ::std::int32_t> enumValues__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
     mapKeyType(std::move(mapKeyType__arg)),
@@ -239,19 +240,19 @@ bool DataType::operator==(const DataType& rhs) const {
   return true;
 }
 
-const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>* DataType::get_fields() const& {
+const std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>* DataType::get_fields() const& {
   return fields_ref().has_value() ? std::addressof(fields) : nullptr;
 }
 
-std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>* DataType::get_fields() & {
+std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>* DataType::get_fields() & {
   return fields_ref().has_value() ? std::addressof(fields) : nullptr;
 }
 
-const std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() const& {
+const std::unordered_map<::std::string, ::std::int32_t>* DataType::get_enumValues() const& {
   return enumValues_ref().has_value() ? std::addressof(enumValues) : nullptr;
 }
 
-std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() & {
+std::unordered_map<::std::string, ::std::int32_t>* DataType::get_enumValues() & {
   return enumValues_ref().has_value() ? std::addressof(enumValues) : nullptr;
 }
 
@@ -281,17 +282,18 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         DataType,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>,
+        std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         DataType,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>,
+        std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>>,
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::reflection
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -316,7 +318,7 @@ void TccStructTraits<::apache::thrift::reflection::Schema>::translateFieldName(
 namespace apache { namespace thrift { namespace reflection {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-Schema::Schema(apache::thrift::FragileConstructor, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> dataTypes__arg, std::unordered_map<::std::string, int64_t> names__arg) :
+Schema::Schema(apache::thrift::FragileConstructor, std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType> dataTypes__arg, std::unordered_map<::std::string, ::std::int64_t> names__arg) :
     dataTypes(std::move(dataTypes__arg)),
     names(std::move(names__arg)) {
   __isset.dataTypes = true;
@@ -345,19 +347,19 @@ bool Schema::operator==(const Schema& rhs) const {
   return true;
 }
 
-const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>& Schema::get_dataTypes() const& {
+const std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>& Schema::get_dataTypes() const& {
   return dataTypes;
 }
 
-std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> Schema::get_dataTypes() && {
+std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType> Schema::get_dataTypes() && {
   return std::move(dataTypes);
 }
 
-const std::unordered_map<::std::string, int64_t>& Schema::get_names() const& {
+const std::unordered_map<::std::string, ::std::int64_t>& Schema::get_names() const& {
   return names;
 }
 
-std::unordered_map<::std::string, int64_t> Schema::get_names() && {
+std::unordered_map<::std::string, ::std::int64_t> Schema::get_names() && {
   return std::move(names);
 }
 
@@ -384,14 +386,14 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Schema,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>,
+        std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         Schema,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>,
+        std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>>,
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::reflection

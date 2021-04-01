@@ -146,39 +146,6 @@ FOLLY_POP_WARNING
 
 namespace apache { namespace thrift {
 
-constexpr std::size_t const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::size;
-folly::Range<::apache::thrift::RequestRpcMetadataFlags const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::values = folly::range(TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::names = folly::range(TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::names);
-
-char const* TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::findName(type value) {
-  using factory = ::apache::thrift::_RequestRpcMetadataFlags_EnumMapFactory;
-  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
-      factory::makeValuesToNamesMap()};
-  auto found = map->find(value);
-  return found == map->end() ? nullptr : found->second;
-}
-
-bool TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::findValue(char const* name, type* out) {
-  using factory = ::apache::thrift::_RequestRpcMetadataFlags_EnumMapFactory;
-  static folly::Indestructible<factory::NamesToValuesMapType> const map{
-      factory::makeNamesToValuesMap()};
-  auto found = map->find(name);
-  return found == map->end() ? false : (*out = found->second, true);
-}
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _RequestRpcMetadataFlags_EnumMapFactory::ValuesToNamesMapType _RequestRpcMetadataFlags_VALUES_TO_NAMES = _RequestRpcMetadataFlags_EnumMapFactory::makeValuesToNamesMap();
-const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcMetadataFlags_NAMES_TO_VALUES = _RequestRpcMetadataFlags_EnumMapFactory::makeNamesToValuesMap();
-FOLLY_POP_WARNING
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
 constexpr std::size_t const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::size;
 folly::Range<::apache::thrift::ResponseRpcErrorCategory const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::values = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::names = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::names);
@@ -335,10 +302,15 @@ template void ZlibCompressionCodecConfig::readNoXfer<>(apache::thrift::CompactPr
 template uint32_t ZlibCompressionCodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ZlibCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ZlibCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ZlibCompressionCodecConfig::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ZlibCompressionCodecConfig::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -398,10 +370,15 @@ template void ZstdCompressionCodecConfig::readNoXfer<>(apache::thrift::CompactPr
 template uint32_t ZstdCompressionCodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ZstdCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ZstdCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ZstdCompressionCodecConfig::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ZstdCompressionCodecConfig::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -507,34 +484,39 @@ template void CodecConfig::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t CodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t CodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void CodecConfig::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t CodecConfig::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t CodecConfig::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t CodecConfig::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CodecConfig,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ZlibCompressionCodecConfig>,
+        ::apache::thrift::ZlibCompressionCodecConfig>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CodecConfig,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ZstdCompressionCodecConfig>,
+        ::apache::thrift::ZstdCompressionCodecConfig>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         CodecConfig,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ZlibCompressionCodecConfig>,
+        ::apache::thrift::ZlibCompressionCodecConfig>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         CodecConfig,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ZstdCompressionCodecConfig>,
+        ::apache::thrift::ZstdCompressionCodecConfig>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -559,7 +541,7 @@ void TccStructTraits<::apache::thrift::CompressionConfig>::translateFieldName(
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-CompressionConfig::CompressionConfig(apache::thrift::FragileConstructor,  ::apache::thrift::CodecConfig codecConfig__arg, int64_t compressionSizeLimit__arg) :
+CompressionConfig::CompressionConfig(apache::thrift::FragileConstructor, ::apache::thrift::CodecConfig codecConfig__arg, ::std::int64_t compressionSizeLimit__arg) :
     codecConfig(std::move(codecConfig__arg)),
     compressionSizeLimit(std::move(compressionSizeLimit__arg)) {
   __isset.codecConfig = true;
@@ -601,11 +583,11 @@ bool CompressionConfig::operator<(const CompressionConfig& rhs) const {
   return false;
 }
 
-const  ::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() const& {
+const ::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() const& {
   return codecConfig_ref().has_value() ? std::addressof(codecConfig) : nullptr;
 }
 
- ::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() & {
+::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() & {
   return codecConfig_ref().has_value() ? std::addressof(codecConfig) : nullptr;
 }
 
@@ -627,22 +609,27 @@ template void CompressionConfig::readNoXfer<>(apache::thrift::CompactProtocolRea
 template uint32_t CompressionConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t CompressionConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CompressionConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void CompressionConfig::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t CompressionConfig::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t CompressionConfig::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t CompressionConfig::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CompressionConfig,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::CodecConfig>,
+        ::apache::thrift::CodecConfig>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         CompressionConfig,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::CodecConfig>,
+        ::apache::thrift::CodecConfig>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -727,10 +714,15 @@ template void NegotiationParameters::readNoXfer<>(apache::thrift::CompactProtoco
 template uint32_t NegotiationParameters::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void NegotiationParameters::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t NegotiationParameters::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -755,7 +747,7 @@ void TccStructTraits<::apache::thrift::InteractionCreate>::translateFieldName(
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-InteractionCreate::InteractionCreate(apache::thrift::FragileConstructor, int64_t interactionId__arg, ::std::string interactionName__arg) :
+InteractionCreate::InteractionCreate(apache::thrift::FragileConstructor, ::std::int64_t interactionId__arg, ::apache::thrift::ManagedStringViewField interactionName__arg) :
     interactionId(std::move(interactionId__arg)),
     interactionName(std::move(interactionName__arg)) {
   __isset.interactionId = true;
@@ -765,7 +757,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 void InteractionCreate::__clear() {
   // clear all fields
   interactionId = 0;
-  interactionName = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  interactionName = apache::thrift::StringTraits< ManagedStringViewWithConversions>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -815,10 +807,15 @@ template void InteractionCreate::readNoXfer<>(apache::thrift::CompactProtocolRea
 template uint32_t InteractionCreate::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t InteractionCreate::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t InteractionCreate::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void InteractionCreate::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t InteractionCreate::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t InteractionCreate::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t InteractionCreate::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -843,7 +840,7 @@ void TccStructTraits<::apache::thrift::InteractionTerminate>::translateFieldName
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-InteractionTerminate::InteractionTerminate(apache::thrift::FragileConstructor, int64_t interactionId__arg) :
+InteractionTerminate::InteractionTerminate(apache::thrift::FragileConstructor, ::std::int64_t interactionId__arg) :
     interactionId(std::move(interactionId__arg)) {
   __isset.interactionId = true;
 }
@@ -893,10 +890,15 @@ template void InteractionTerminate::readNoXfer<>(apache::thrift::CompactProtocol
 template uint32_t InteractionTerminate::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t InteractionTerminate::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t InteractionTerminate::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void InteractionTerminate::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t InteractionTerminate::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t InteractionTerminate::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t InteractionTerminate::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -929,16 +931,15 @@ RequestRpcMetadata::RequestRpcMetadata() :
       queueTimeoutMs(0),
       priority( ::apache::thrift::RpcPriority::HIGH_IMPORTANT),
       crc32c(0),
-      flags(0),
       compression( ::apache::thrift::CompressionAlgorithm::NONE),
       interactionId(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestRpcMetadata::~RequestRpcMetadata() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::CompressionConfig compressionConfig__arg, int64_t interactionId__arg,  ::apache::thrift::InteractionCreate interactionCreate__arg) :
+RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor, ::apache::thrift::ProtocolId protocol__arg, ::apache::thrift::ManagedStringViewField name__arg, ::apache::thrift::RpcKind kind__arg, ::std::int32_t seqId__arg, ::std::int32_t clientTimeoutMs__arg, ::std::int32_t queueTimeoutMs__arg, ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, std::uint32_t crc32c__arg, ::std::string loadMetric__arg, ::apache::thrift::CompressionAlgorithm compression__arg, ::apache::thrift::CompressionConfig compressionConfig__arg, ::std::int64_t interactionId__arg, ::apache::thrift::InteractionCreate interactionCreate__arg, ::std::string clientId__arg, ::std::string serviceTraceMeta__arg) :
     protocol(std::move(protocol__arg)),
     name(std::move(name__arg)),
     kind(std::move(kind__arg)),
@@ -947,15 +948,14 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
     queueTimeoutMs(std::move(queueTimeoutMs__arg)),
     priority(std::move(priority__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
-    host(std::move(host__arg)),
-    url(std::move(url__arg)),
     crc32c(std::move(crc32c__arg)),
-    flags(std::move(flags__arg)),
     loadMetric(std::move(loadMetric__arg)),
     compression(std::move(compression__arg)),
     compressionConfig(std::move(compressionConfig__arg)),
     interactionId(std::move(interactionId__arg)),
-    interactionCreate(std::move(interactionCreate__arg)) {
+    interactionCreate(std::move(interactionCreate__arg)),
+    clientId(std::move(clientId__arg)),
+    serviceTraceMeta(std::move(serviceTraceMeta__arg)) {
   __isset.protocol = true;
   __isset.name = true;
   __isset.kind = true;
@@ -964,36 +964,34 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
   __isset.queueTimeoutMs = true;
   __isset.priority = true;
   __isset.otherMetadata = true;
-  __isset.host = true;
-  __isset.url = true;
   __isset.crc32c = true;
-  __isset.flags = true;
   __isset.loadMetric = true;
   __isset.compression = true;
   __isset.compressionConfig = true;
   __isset.interactionId = true;
   __isset.interactionCreate = true;
+  __isset.clientId = true;
+  __isset.serviceTraceMeta = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void RequestRpcMetadata::__clear() {
   // clear all fields
   protocol =  ::apache::thrift::ProtocolId::BINARY;
-  name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  name = apache::thrift::StringTraits< ManagedStringViewWithConversions>::fromStringLiteral("");
   kind =  ::apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   seqId = 0;
   clientTimeoutMs = 0;
   queueTimeoutMs = 0;
   priority =  ::apache::thrift::RpcPriority::HIGH_IMPORTANT;
   otherMetadata.clear();
-  host = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  url = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   crc32c = 0;
-  flags = 0;
   loadMetric = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   compressionConfig.__clear();
   interactionId = 0;
   interactionCreate.__clear();
+  clientId = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  serviceTraceMeta = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1027,16 +1025,7 @@ bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
   if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return false;
   }
-  if (lhs.host_ref() != rhs.host_ref()) {
-    return false;
-  }
-  if (lhs.url_ref() != rhs.url_ref()) {
-    return false;
-  }
   if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
-    return false;
-  }
-  if (lhs.flags_ref() != rhs.flags_ref()) {
     return false;
   }
   if (lhs.loadMetric_ref() != rhs.loadMetric_ref()) {
@@ -1052,6 +1041,12 @@ bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
     return false;
   }
   if (lhs.interactionCreate_ref() != rhs.interactionCreate_ref()) {
+    return false;
+  }
+  if (lhs.clientId_ref() != rhs.clientId_ref()) {
+    return false;
+  }
+  if (lhs.serviceTraceMeta_ref() != rhs.serviceTraceMeta_ref()) {
     return false;
   }
   return true;
@@ -1085,17 +1080,8 @@ bool RequestRpcMetadata::operator<(const RequestRpcMetadata& rhs) const {
   if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
   }
-  if (lhs.host_ref() != rhs.host_ref()) {
-    return lhs.host_ref() < rhs.host_ref();
-  }
-  if (lhs.url_ref() != rhs.url_ref()) {
-    return lhs.url_ref() < rhs.url_ref();
-  }
   if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
     return lhs.crc32c_ref() < rhs.crc32c_ref();
-  }
-  if (lhs.flags_ref() != rhs.flags_ref()) {
-    return lhs.flags_ref() < rhs.flags_ref();
   }
   if (lhs.loadMetric_ref() != rhs.loadMetric_ref()) {
     return lhs.loadMetric_ref() < rhs.loadMetric_ref();
@@ -1112,6 +1098,12 @@ bool RequestRpcMetadata::operator<(const RequestRpcMetadata& rhs) const {
   if (lhs.interactionCreate_ref() != rhs.interactionCreate_ref()) {
     return lhs.interactionCreate_ref() < rhs.interactionCreate_ref();
   }
+  if (lhs.clientId_ref() != rhs.clientId_ref()) {
+    return lhs.clientId_ref() < rhs.clientId_ref();
+  }
+  if (lhs.serviceTraceMeta_ref() != rhs.serviceTraceMeta_ref()) {
+    return lhs.serviceTraceMeta_ref() < rhs.serviceTraceMeta_ref();
+  }
   return false;
 }
 
@@ -1123,19 +1115,19 @@ const ::std::map<::std::string, ::std::string>* RequestRpcMetadata::get_otherMet
   return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
-const  ::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() const& {
+const ::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() const& {
   return compressionConfig_ref().has_value() ? std::addressof(compressionConfig) : nullptr;
 }
 
- ::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() & {
+::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() & {
   return compressionConfig_ref().has_value() ? std::addressof(compressionConfig) : nullptr;
 }
 
-const  ::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() const& {
+const ::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() const& {
   return interactionCreate_ref().has_value() ? std::addressof(interactionCreate) : nullptr;
 }
 
- ::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() & {
+::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() & {
   return interactionCreate_ref().has_value() ? std::addressof(interactionCreate) : nullptr;
 }
 
@@ -1150,15 +1142,14 @@ void swap(RequestRpcMetadata& a, RequestRpcMetadata& b) {
   swap(a.queueTimeoutMs_ref().value_unchecked(), b.queueTimeoutMs_ref().value_unchecked());
   swap(a.priority_ref().value_unchecked(), b.priority_ref().value_unchecked());
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
-  swap(a.host_ref().value_unchecked(), b.host_ref().value_unchecked());
-  swap(a.url_ref().value_unchecked(), b.url_ref().value_unchecked());
   swap(a.crc32c_ref().value_unchecked(), b.crc32c_ref().value_unchecked());
-  swap(a.flags_ref().value_unchecked(), b.flags_ref().value_unchecked());
   swap(a.loadMetric_ref().value_unchecked(), b.loadMetric_ref().value_unchecked());
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.compressionConfig_ref().value_unchecked(), b.compressionConfig_ref().value_unchecked());
   swap(a.interactionId_ref().value_unchecked(), b.interactionId_ref().value_unchecked());
   swap(a.interactionCreate_ref().value_unchecked(), b.interactionCreate_ref().value_unchecked());
+  swap(a.clientId_ref().value_unchecked(), b.clientId_ref().value_unchecked());
+  swap(a.serviceTraceMeta_ref().value_unchecked(), b.serviceTraceMeta_ref().value_unchecked());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1172,34 +1163,39 @@ template void RequestRpcMetadata::readNoXfer<>(apache::thrift::CompactProtocolRe
 template uint32_t RequestRpcMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t RequestRpcMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RequestRpcMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void RequestRpcMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t RequestRpcMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t RequestRpcMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t RequestRpcMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         RequestRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::CompressionConfig>,
+        ::apache::thrift::CompressionConfig>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         RequestRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::InteractionCreate>,
+        ::apache::thrift::InteractionCreate>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         RequestRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::CompressionConfig>,
+        ::apache::thrift::CompressionConfig>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         RequestRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::InteractionCreate>,
+        ::apache::thrift::InteractionCreate>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1259,10 +1255,15 @@ template void PayloadResponseMetadata::readNoXfer<>(apache::thrift::CompactProto
 template uint32_t PayloadResponseMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadResponseMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadResponseMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadResponseMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadResponseMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadResponseMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadResponseMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1322,10 +1323,15 @@ template void PayloadDeclaredExceptionMetadata::readNoXfer<>(apache::thrift::Com
 template uint32_t PayloadDeclaredExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadDeclaredExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadDeclaredExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadDeclaredExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadDeclaredExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1385,10 +1391,15 @@ template void PayloadProxyExceptionMetadata::readNoXfer<>(apache::thrift::Compac
 template uint32_t PayloadProxyExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadProxyExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadProxyExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadProxyExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadProxyExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1448,10 +1459,15 @@ template void PayloadProxiedExceptionMetadata::readNoXfer<>(apache::thrift::Comp
 template uint32_t PayloadProxiedExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadProxiedExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadProxiedExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadProxiedExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadProxiedExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1511,10 +1527,15 @@ template void PayloadAppClientExceptionMetadata::readNoXfer<>(apache::thrift::Co
 template uint32_t PayloadAppClientExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadAppClientExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadAppClientExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadAppClientExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadAppClientExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1574,10 +1595,15 @@ template void PayloadAppServerExceptionMetadata::readNoXfer<>(apache::thrift::Co
 template uint32_t PayloadAppServerExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadAppServerExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadAppServerExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadAppServerExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadAppServerExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1704,70 +1730,75 @@ template void PayloadExceptionMetadata::readNoXfer<>(apache::thrift::CompactProt
 template uint32_t PayloadExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadExceptionMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadExceptionMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadDeclaredExceptionMetadata>,
+        ::apache::thrift::PayloadDeclaredExceptionMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadProxyExceptionMetadata>,
+        ::apache::thrift::PayloadProxyExceptionMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadProxiedExceptionMetadata>,
+        ::apache::thrift::PayloadProxiedExceptionMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadAppClientExceptionMetadata>,
+        ::apache::thrift::PayloadAppClientExceptionMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadAppServerExceptionMetadata>,
+        ::apache::thrift::PayloadAppServerExceptionMetadata>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadDeclaredExceptionMetadata>,
+        ::apache::thrift::PayloadDeclaredExceptionMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadProxyExceptionMetadata>,
+        ::apache::thrift::PayloadProxyExceptionMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadProxiedExceptionMetadata>,
+        ::apache::thrift::PayloadProxiedExceptionMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadAppClientExceptionMetadata>,
+        ::apache::thrift::PayloadAppClientExceptionMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadAppServerExceptionMetadata>,
+        ::apache::thrift::PayloadAppServerExceptionMetadata>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1792,7 +1823,7 @@ void TccStructTraits<::apache::thrift::PayloadExceptionMetadataBase>::translateF
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::PayloadExceptionMetadata metadata__arg) :
+PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg, ::apache::thrift::PayloadExceptionMetadata metadata__arg) :
     name_utf8(std::move(name_utf8__arg)),
     what_utf8(std::move(what_utf8__arg)),
     metadata(std::move(metadata__arg)) {
@@ -1843,11 +1874,11 @@ bool PayloadExceptionMetadataBase::operator<(const PayloadExceptionMetadataBase&
   return false;
 }
 
-const  ::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() const& {
+const ::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() const& {
   return metadata_ref().has_value() ? std::addressof(metadata) : nullptr;
 }
 
- ::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() & {
+::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() & {
   return metadata_ref().has_value() ? std::addressof(metadata) : nullptr;
 }
 
@@ -1870,22 +1901,27 @@ template void PayloadExceptionMetadataBase::readNoXfer<>(apache::thrift::Compact
 template uint32_t PayloadExceptionMetadataBase::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadExceptionMetadataBase::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadExceptionMetadataBase::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadExceptionMetadataBase::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadExceptionMetadataBase::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadExceptionMetadataBase,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::PayloadExceptionMetadata>,
+        ::apache::thrift::PayloadExceptionMetadata>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadExceptionMetadataBase,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::PayloadExceptionMetadata>,
+        ::apache::thrift::PayloadExceptionMetadata>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1991,34 +2027,39 @@ template void PayloadMetadata::readNoXfer<>(apache::thrift::CompactProtocolReade
 template uint32_t PayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t PayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void PayloadMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t PayloadMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t PayloadMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t PayloadMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadResponseMetadata>,
+        ::apache::thrift::PayloadResponseMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         PayloadMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadExceptionMetadataBase>,
+        ::apache::thrift::PayloadExceptionMetadataBase>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadResponseMetadata>,
+        ::apache::thrift::PayloadResponseMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         PayloadMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::PayloadExceptionMetadataBase>,
+        ::apache::thrift::PayloadExceptionMetadataBase>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2078,10 +2119,15 @@ template void ProxiedPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtoc
 template uint32_t ProxiedPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ProxiedPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ProxiedPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ProxiedPayloadMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ProxiedPayloadMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2112,13 +2158,13 @@ ResponseRpcMetadata::ResponseRpcMetadata() :
       load(0),
       crc32c(0),
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::PayloadMetadata payloadMetadata__arg,  ::apache::thrift::ProxiedPayloadMetadata proxiedPayloadMetadata__arg) :
+ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor, ::apache::thrift::ProtocolId protocol__arg, ::std::int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::int64_t load__arg, std::uint32_t crc32c__arg, ::apache::thrift::CompressionAlgorithm compression__arg, ::apache::thrift::PayloadMetadata payloadMetadata__arg, ::apache::thrift::ProxiedPayloadMetadata proxiedPayloadMetadata__arg) :
     protocol(std::move(protocol__arg)),
     seqId(std::move(seqId__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
@@ -2221,19 +2267,19 @@ const ::std::map<::std::string, ::std::string>* ResponseRpcMetadata::get_otherMe
   return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
-const  ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() const& {
+const ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() const& {
   return payloadMetadata_ref().has_value() ? std::addressof(payloadMetadata) : nullptr;
 }
 
- ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() & {
+::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() & {
   return payloadMetadata_ref().has_value() ? std::addressof(payloadMetadata) : nullptr;
 }
 
-const  ::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() const& {
+const ::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() const& {
   return proxiedPayloadMetadata_ref().has_value() ? std::addressof(proxiedPayloadMetadata) : nullptr;
 }
 
- ::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() & {
+::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() & {
   return proxiedPayloadMetadata_ref().has_value() ? std::addressof(proxiedPayloadMetadata) : nullptr;
 }
 
@@ -2261,34 +2307,39 @@ template void ResponseRpcMetadata::readNoXfer<>(apache::thrift::CompactProtocolR
 template uint32_t ResponseRpcMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ResponseRpcMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ResponseRpcMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ResponseRpcMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ResponseRpcMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ResponseRpcMetadata,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::PayloadMetadata>,
+        ::apache::thrift::PayloadMetadata>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ResponseRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ProxiedPayloadMetadata>,
+        ::apache::thrift::ProxiedPayloadMetadata>,
     "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         ResponseRpcMetadata,
         ::apache::thrift::type_class::variant,
-         ::apache::thrift::PayloadMetadata>,
+        ::apache::thrift::PayloadMetadata>,
     "inconsistent use of nimble option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
         ResponseRpcMetadata,
         ::apache::thrift::type_class::structure,
-         ::apache::thrift::ProxiedPayloadMetadata>,
+        ::apache::thrift::ProxiedPayloadMetadata>,
     "inconsistent use of nimble option");
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2317,13 +2368,13 @@ ResponseRpcError::ResponseRpcError() :
       category( ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR),
       code( ::apache::thrift::ResponseRpcErrorCode::UNKNOWN),
       load(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcError::~ResponseRpcError() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ResponseRpcError::ResponseRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::ResponseRpcErrorCategory category__arg,  ::apache::thrift::ResponseRpcErrorCode code__arg, int64_t load__arg) :
+ResponseRpcError::ResponseRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg, ::apache::thrift::ResponseRpcErrorCategory category__arg, ::apache::thrift::ResponseRpcErrorCode code__arg, ::std::int64_t load__arg) :
     name_utf8(std::move(name_utf8__arg)),
     what_utf8(std::move(what_utf8__arg)),
     category(std::move(category__arg)),
@@ -2413,10 +2464,15 @@ template void ResponseRpcError::readNoXfer<>(apache::thrift::CompactProtocolRead
 template uint32_t ResponseRpcError::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ResponseRpcError::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ResponseRpcError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ResponseRpcError::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ResponseRpcError::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ResponseRpcError::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ResponseRpcError::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2441,7 +2497,7 @@ void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldNam
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
+StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor, ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
     compression(std::move(compression__arg)),
     otherMetadata(std::move(otherMetadata__arg)) {
   __isset.compression = true;
@@ -2509,10 +2565,126 @@ template void StreamPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtoco
 template uint32_t StreamPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t StreamPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t StreamPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void StreamPayloadMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t StreamPayloadMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t StreamPayloadMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t StreamPayloadMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ClientMetadata>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::ClientMetadata>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ClientMetadata::ClientMetadata(apache::thrift::FragileConstructor, ::std::string agent__arg, ::std::string hostname__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
+    agent(std::move(agent__arg)),
+    hostname(std::move(hostname__arg)),
+    otherMetadata(std::move(otherMetadata__arg)) {
+  __isset.agent = true;
+  __isset.hostname = true;
+  __isset.otherMetadata = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ClientMetadata::__clear() {
+  // clear all fields
+  agent = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  hostname = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  otherMetadata.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool ClientMetadata::operator==(const ClientMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.agent_ref() != rhs.agent_ref()) {
+    return false;
+  }
+  if (lhs.hostname_ref() != rhs.hostname_ref()) {
+    return false;
+  }
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return false;
+  }
+  return true;
+}
+
+bool ClientMetadata::operator<(const ClientMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.agent_ref() != rhs.agent_ref()) {
+    return lhs.agent_ref() < rhs.agent_ref();
+  }
+  if (lhs.hostname_ref() != rhs.hostname_ref()) {
+    return lhs.hostname_ref() < rhs.hostname_ref();
+  }
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
+  }
+  return false;
+}
+
+const ::std::map<::std::string, ::std::string>* ClientMetadata::get_otherMetadata() const& {
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
+}
+
+::std::map<::std::string, ::std::string>* ClientMetadata::get_otherMetadata() & {
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
+}
+
+
+void swap(ClientMetadata& a, ClientMetadata& b) {
+  using ::std::swap;
+  swap(a.agent_ref().value_unchecked(), b.agent_ref().value_unchecked());
+  swap(a.hostname_ref().value_unchecked(), b.hostname_ref().value_unchecked());
+  swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void ClientMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ClientMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ClientMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ClientMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ClientMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ClientMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ClientMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ClientMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ClientMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ClientMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ClientMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ClientMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+
+
+
+}} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2543,25 +2715,27 @@ RequestSetupMetadata::RequestSetupMetadata() :
       maxVersion(0),
       dscpToReflect(0),
       markToReflect(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestSetupMetadata::~RequestSetupMetadata() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg, int32_t dscpToReflect__arg, int32_t markToReflect__arg) :
+RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg, ::apache::thrift::InterfaceKind interfaceKind__arg, ::std::int32_t minVersion__arg, ::std::int32_t maxVersion__arg, ::std::int32_t dscpToReflect__arg, ::std::int32_t markToReflect__arg, ::apache::thrift::ClientMetadata clientMetadata__arg) :
     opaque(std::move(opaque__arg)),
     interfaceKind(std::move(interfaceKind__arg)),
     minVersion(std::move(minVersion__arg)),
     maxVersion(std::move(maxVersion__arg)),
     dscpToReflect(std::move(dscpToReflect__arg)),
-    markToReflect(std::move(markToReflect__arg)) {
+    markToReflect(std::move(markToReflect__arg)),
+    clientMetadata(std::move(clientMetadata__arg)) {
   __isset.opaque = true;
   __isset.interfaceKind = true;
   __isset.minVersion = true;
   __isset.maxVersion = true;
   __isset.dscpToReflect = true;
   __isset.markToReflect = true;
+  __isset.clientMetadata = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void RequestSetupMetadata::__clear() {
@@ -2572,6 +2746,7 @@ void RequestSetupMetadata::__clear() {
   maxVersion = 0;
   dscpToReflect = 0;
   markToReflect = 0;
+  clientMetadata.__clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2599,6 +2774,9 @@ bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
   if (lhs.markToReflect_ref() != rhs.markToReflect_ref()) {
     return false;
   }
+  if (lhs.clientMetadata_ref() != rhs.clientMetadata_ref()) {
+    return false;
+  }
   return true;
 }
 
@@ -2610,6 +2788,14 @@ apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* RequestSetupMet
   return opaque_ref().has_value() ? std::addressof(opaque) : nullptr;
 }
 
+const ::apache::thrift::ClientMetadata* RequestSetupMetadata::get_clientMetadata() const& {
+  return clientMetadata_ref().has_value() ? std::addressof(clientMetadata) : nullptr;
+}
+
+::apache::thrift::ClientMetadata* RequestSetupMetadata::get_clientMetadata() & {
+  return clientMetadata_ref().has_value() ? std::addressof(clientMetadata) : nullptr;
+}
+
 
 void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   using ::std::swap;
@@ -2619,6 +2805,7 @@ void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   swap(a.maxVersion_ref().value_unchecked(), b.maxVersion_ref().value_unchecked());
   swap(a.dscpToReflect_ref().value_unchecked(), b.dscpToReflect_ref().value_unchecked());
   swap(a.markToReflect_ref().value_unchecked(), b.markToReflect_ref().value_unchecked());
+  swap(a.clientMetadata_ref().value_unchecked(), b.clientMetadata_ref().value_unchecked());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2632,10 +2819,229 @@ template void RequestSetupMetadata::readNoXfer<>(apache::thrift::CompactProtocol
 template uint32_t RequestSetupMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t RequestSetupMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void RequestSetupMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t RequestSetupMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t RequestSetupMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RequestSetupMetadata,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::ClientMetadata>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        RequestSetupMetadata,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::ClientMetadata>,
+    "inconsistent use of nimble option");
+
+}} // apache::thrift
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::SetupResponse>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::SetupResponse>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+SetupResponse::SetupResponse(apache::thrift::FragileConstructor, ::std::int32_t version__arg) :
+    version(std::move(version__arg)) {
+  __isset.version = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void SetupResponse::__clear() {
+  // clear all fields
+  version = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool SetupResponse::operator==(const SetupResponse& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.version_ref() != rhs.version_ref()) {
+    return false;
+  }
+  return true;
+}
+
+bool SetupResponse::operator<(const SetupResponse& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.version_ref() != rhs.version_ref()) {
+    return lhs.version_ref() < rhs.version_ref();
+  }
+  return false;
+}
+
+
+void swap(SetupResponse& a, SetupResponse& b) {
+  using ::std::swap;
+  swap(a.version_ref().value_unchecked(), b.version_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void SetupResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t SetupResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t SetupResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t SetupResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SetupResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SetupResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SetupResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SetupResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void SetupResponse::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t SetupResponse::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t SetupResponse::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t SetupResponse::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ServerPushMetadata>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::ServerPushMetadata>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::ServerPushMetadata::Type>::size;
+folly::Range<::apache::thrift::ServerPushMetadata::Type const*> const TEnumTraits<::apache::thrift::ServerPushMetadata::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::ServerPushMetadata::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ServerPushMetadata::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::ServerPushMetadata::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::ServerPushMetadata::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::ServerPushMetadata::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::ServerPushMetadata::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::ServerPushMetadata::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+void ServerPushMetadata::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::setupResponse:
+      destruct(value_.setupResponse);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool ServerPushMetadata::operator==(const ServerPushMetadata& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::setupResponse:
+      return value_.setupResponse == rhs.value_.setupResponse;
+    default:
+      return true;
+  }
+}
+
+bool ServerPushMetadata::operator<(const ServerPushMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.type_ != rhs.type_) {
+    return lhs.type_ < rhs.type_;
+  }
+  switch (lhs.type_) {
+    case Type::setupResponse:
+      return lhs.value_.setupResponse < rhs.value_.setupResponse;
+    default:
+      return false;
+  }
+}
+
+void swap(ServerPushMetadata& a, ServerPushMetadata& b) {
+  ServerPushMetadata temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void ServerPushMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ServerPushMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ServerPushMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ServerPushMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ServerPushMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ServerPushMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ServerPushMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ServerPushMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ServerPushMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ServerPushMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ServerPushMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ServerPushMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ServerPushMetadata,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::SetupResponse>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ServerPushMetadata,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::SetupResponse>,
+    "inconsistent use of nimble option");
+
+}} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2718,10 +3124,15 @@ template void HeadersPayloadContent::readNoXfer<>(apache::thrift::CompactProtoco
 template uint32_t HeadersPayloadContent::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void HeadersPayloadContent::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t HeadersPayloadContent::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 
 }} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2746,7 +3157,7 @@ void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldNa
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-HeadersPayloadMetadata::HeadersPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg) :
+HeadersPayloadMetadata::HeadersPayloadMetadata(apache::thrift::FragileConstructor, ::apache::thrift::CompressionAlgorithm compression__arg) :
     compression(std::move(compression__arg)) {
   __isset.compression = true;
 }
@@ -2796,6 +3207,10 @@ template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtoc
 template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 

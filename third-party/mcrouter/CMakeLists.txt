@@ -17,7 +17,7 @@ auto_sources(src_files "*.cpp" RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter")
 auto_sources(gen_files "*.cpp" RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/gen")
 set(files ${src_files} ${gen_files})
 foreach (file ${files})
-  if (${file} MATCHES "(/(test|tools|examples?)/|(Test(Main)?|main).cpp$)")
+  if (${file} MATCHES "(/(test|tools|examples?)/|(StandaloneUtils|Test(Main)?|main).cpp$)")
     list(REMOVE_ITEM files ${file})
   endif()
 endforeach()
@@ -46,8 +46,18 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
   COMMENT "Creating ThriftAcceptor.h symlink"
 )
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
+  COMMENT "Creating mcrouter_sr_deps.h symlink"
+)
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h")
 list(APPEND CXX_SOURCES ${files})
 
 # We need to make sure several files are the same
@@ -82,3 +92,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 add_library(mcrouter STATIC ${C_SOURCES} ${CXX_SOURCES})
 add_dependencies(mcrouter boostMaybeBuild)
 target_link_libraries(mcrouter folly hphp_thrift boost fizz fmt)
+target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")

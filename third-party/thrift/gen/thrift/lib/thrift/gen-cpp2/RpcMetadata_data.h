@@ -15,733 +15,267 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
   using type = ::apache::thrift::ProtocolId;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, size> values = {{
-    type::BINARY,
-    type::COMPACT,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "BINARY",
-    "COMPACT",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
+
 template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
   using type = ::apache::thrift::RpcKind;
   static constexpr const std::size_t size = 7;
-  static constexpr const std::array<type, size> values = {{
-    type::SINGLE_REQUEST_SINGLE_RESPONSE,
-    type::SINGLE_REQUEST_NO_RESPONSE,
-    type::STREAMING_REQUEST_SINGLE_RESPONSE,
-    type::STREAMING_REQUEST_NO_RESPONSE,
-    type::SINGLE_REQUEST_STREAMING_RESPONSE,
-    type::STREAMING_REQUEST_STREAMING_RESPONSE,
-    type::SINK,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "SINGLE_REQUEST_SINGLE_RESPONSE",
-    "SINGLE_REQUEST_NO_RESPONSE",
-    "STREAMING_REQUEST_SINGLE_RESPONSE",
-    "STREAMING_REQUEST_NO_RESPONSE",
-    "SINGLE_REQUEST_STREAMING_RESPONSE",
-    "STREAMING_REQUEST_STREAMING_RESPONSE",
-    "SINK",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
+
 template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
   using type = ::apache::thrift::RpcPriority;
   static constexpr const std::size_t size = 6;
-  static constexpr const std::array<type, size> values = {{
-    type::HIGH_IMPORTANT,
-    type::HIGH,
-    type::IMPORTANT,
-    type::NORMAL,
-    type::BEST_EFFORT,
-    type::N_PRIORITIES,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "HIGH_IMPORTANT",
-    "HIGH",
-    "IMPORTANT",
-    "NORMAL",
-    "BEST_EFFORT",
-    "N_PRIORITIES",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
+
 template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
   using type = ::apache::thrift::CompressionAlgorithm;
   static constexpr const std::size_t size = 3;
-  static constexpr const std::array<type, size> values = {{
-    type::NONE,
-    type::ZLIB,
-    type::ZSTD,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "NONE",
-    "ZLIB",
-    "ZSTD",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
-template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
-  using type = ::apache::thrift::RequestRpcMetadataFlags;
-  static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, size> values = {{
-    type::UNKNOWN,
-    type::QUERY_SERVER_LOAD,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "UNKNOWN",
-    "QUERY_SERVER_LOAD",
-  }};
-};
+
 template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory> {
   using type = ::apache::thrift::ResponseRpcErrorCategory;
   static constexpr const std::size_t size = 4;
-  static constexpr const std::array<type, size> values = {{
-    type::INTERNAL_ERROR,
-    type::INVALID_REQUEST,
-    type::LOADSHEDDING,
-    type::SHUTDOWN,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "INTERNAL_ERROR",
-    "INVALID_REQUEST",
-    "LOADSHEDDING",
-    "SHUTDOWN",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
+
 template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode> {
   using type = ::apache::thrift::ResponseRpcErrorCode;
   static constexpr const std::size_t size = 16;
-  static constexpr const std::array<type, size> values = {{
-    type::UNKNOWN,
-    type::OVERLOAD,
-    type::TASK_EXPIRED,
-    type::QUEUE_OVERLOADED,
-    type::SHUTDOWN,
-    type::INJECTED_FAILURE,
-    type::REQUEST_PARSING_FAILURE,
-    type::QUEUE_TIMEOUT,
-    type::RESPONSE_TOO_BIG,
-    type::WRONG_RPC_KIND,
-    type::UNKNOWN_METHOD,
-    type::CHECKSUM_MISMATCH,
-    type::INTERRUPTION,
-    type::APP_OVERLOAD,
-    type::UNKNOWN_INTERACTION_ID,
-    type::INTERACTION_CONSTRUCTOR_ERROR,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "UNKNOWN",
-    "OVERLOAD",
-    "TASK_EXPIRED",
-    "QUEUE_OVERLOADED",
-    "SHUTDOWN",
-    "INJECTED_FAILURE",
-    "REQUEST_PARSING_FAILURE",
-    "QUEUE_TIMEOUT",
-    "RESPONSE_TOO_BIG",
-    "WRONG_RPC_KIND",
-    "UNKNOWN_METHOD",
-    "CHECKSUM_MISMATCH",
-    "INTERRUPTION",
-    "APP_OVERLOAD",
-    "UNKNOWN_INTERACTION_ID",
-    "INTERACTION_CONSTRUCTOR_ERROR",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
+
 template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
   using type = ::apache::thrift::InterfaceKind;
-  static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, size> values = {{
-    type::USER,
-    type::DEBUGGING,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "USER",
-    "DEBUGGING",
-  }};
+  static constexpr const std::size_t size = 4;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
 template <> struct TEnumDataStorage<::apache::thrift::CodecConfig::Type> {
   using type = ::apache::thrift::CodecConfig::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, size> values = {{
-    type::zlibConfig,
-    type::zstdConfig,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "zlibConfig",
-    "zstdConfig",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
 template <> struct TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type> {
   using type = ::apache::thrift::PayloadExceptionMetadata::Type;
   static constexpr const std::size_t size = 5;
-  static constexpr const std::array<type, size> values = {{
-    type::declaredException,
-    type::proxyException,
-    type::proxiedException,
-    type::appClientException,
-    type::appServerException,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "declaredException",
-    "proxyException",
-    "proxiedException",
-    "appClientException",
-    "appServerException",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
 template <> struct TEnumDataStorage<::apache::thrift::PayloadMetadata::Type> {
   using type = ::apache::thrift::PayloadMetadata::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, size> values = {{
-    type::responseMetadata,
-    type::exceptionMetadata,
-  }};
-  static constexpr const std::array<folly::StringPiece, size> names = {{
-    "responseMetadata",
-    "exceptionMetadata",
-  }};
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
+template <> struct TEnumDataStorage<::apache::thrift::ServerPushMetadata::Type> {
+  using type = ::apache::thrift::ServerPushMetadata::Type;
+  static constexpr const std::size_t size = 1;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
+};
 
 template <> struct TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::CodecConfig> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "zlibConfig",
-    "zstdConfig",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::CompressionConfig> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "codecConfig",
-    "compressionSizeLimit",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRUCT,
-    TType::T_I64,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::NegotiationParameters> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "compressionAlgos",
-    "useStopTLS",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I64,
-    TType::T_BOOL,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::InteractionCreate> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "interactionId",
-    "interactionName",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I64,
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::InteractionTerminate> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "interactionId",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I64,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::RequestRpcMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
-  static constexpr const std::size_t fields_size = 17;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "protocol",
-    "name",
-    "kind",
-    "seqId",
-    "clientTimeoutMs",
-    "queueTimeoutMs",
-    "priority",
-    "otherMetadata",
-    "host",
-    "url",
-    "crc32c",
-    "flags",
-    "loadMetric",
-    "compression",
-    "compressionConfig",
-    "interactionId",
-    "interactionCreate",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_STRING,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_MAP,
-    TType::T_STRING,
-    TType::T_STRING,
-    TType::T_I32,
-    TType::T_I64,
-    TType::T_STRING,
-    TType::T_I32,
-    TType::T_STRUCT,
-    TType::T_I64,
-    TType::T_STRUCT,
-  }};
+  static constexpr const std::size_t fields_size = 16;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadResponseMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadExceptionMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 5;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "declaredException",
-    "proxyException",
-    "proxiedException",
-    "appClientException",
-    "appServerException",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-    5,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 3;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "name_utf8",
-    "what_utf8",
-    "metadata",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-    TType::T_STRING,
-    TType::T_STRUCT,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::PayloadMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "responseMetadata",
-    "exceptionMetadata",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 0;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::ResponseRpcMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 8;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "protocol",
-    "seqId",
-    "otherMetadata",
-    "load",
-    "crc32c",
-    "compression",
-    "payloadMetadata",
-    "proxiedPayloadMetadata",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_MAP,
-    TType::T_I64,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_STRUCT,
-    TType::T_STRUCT,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::ResponseRpcError> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 5;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "name_utf8",
-    "what_utf8",
-    "category",
-    "code",
-    "load",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-    5,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_STRING,
-    TType::T_STRING,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I64,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::StreamPayloadMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "compression",
-    "otherMetadata",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_MAP,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
+template <> struct TStructDataStorage<::apache::thrift::ClientMetadata> {
+  static constexpr const std::size_t fields_size = 3;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+};
 
 template <> struct TStructDataStorage<::apache::thrift::RequestSetupMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
-  static constexpr const std::size_t fields_size = 6;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "opaque",
-    "interfaceKind",
-    "minVersion",
-    "maxVersion",
-    "dscpToReflect",
-    "markToReflect",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_MAP,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-    TType::T_I32,
-  }};
+  static constexpr const std::size_t fields_size = 7;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
+template <> struct TStructDataStorage<::apache::thrift::SetupResponse> {
+  static constexpr const std::size_t fields_size = 1;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+};
+
+template <> struct TStructDataStorage<::apache::thrift::ServerPushMetadata> {
+  static constexpr const std::size_t fields_size = 1;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+};
 
 template <> struct TStructDataStorage<::apache::thrift::HeadersPayloadContent> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "otherMetadata",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_MAP,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::HeadersPayloadMetadata> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 1;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "compression",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 }} // apache::thrift

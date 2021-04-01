@@ -12,159 +12,676 @@
 namespace apache {
 namespace thrift {
 
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_names = {{
+  "key",
+  "flags",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+}};
 
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_types;
-constexpr const std::size_t TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_size> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_types;
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_names = {{
+  "result",
+  "value",
+  "flags",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McGetReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McSetRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_names = {{
+  "result",
+  "flags",
+  "value",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McSetReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_names = {{
+  "key",
+  "flags",
+  "exptime",
+  "value",
+  "attributes",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_MAP,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_names = {{
+  "result",
+  "flags",
+  "value",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McDeleteReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_names = {{
+  "key",
+  "flags",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_names = {{
+  "result",
+  "leaseToken",
+  "value",
+  "flags",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 6> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 6> TStructDataStorage<::facebook::memcache::thrift::McLeaseGetReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+  "leaseToken",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McLeaseSetReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McAddRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McAddReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McReplaceRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McReplaceReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_names = {{
+  "key",
+  "flags",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McGetsRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_names = {{
+  "result",
+  "casToken",
+  "value",
+  "flags",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 6> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 6> TStructDataStorage<::facebook::memcache::thrift::McGetsReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+  "casToken",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McCasRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McCasReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_names = {{
+  "key",
+  "delta",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McIncrRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_names = {{
+  "result",
+  "delta",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McIncrReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_names = {{
+  "key",
+  "delta",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McDecrRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_names = {{
+  "result",
+  "delta",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McDecrReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_names = {{
+  "key",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::facebook::memcache::thrift::McMetagetRequest>::fields_types = {{
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 7> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_names = {{
+  "result",
+  "age",
+  "exptime",
+  "ipv",
+  "ipAddress",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 7> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+}};
+const std::array<protocol::TType, 7> TStructDataStorage<::facebook::memcache::thrift::McMetagetReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I16,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McAppendRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McAppendReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_names = {{
+  "key",
+  "exptime",
+  "flags",
+  "value",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::facebook::memcache::thrift::McPrependRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McPrependReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_names = {{
+  "key",
+  "exptime",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McTouchRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McTouchReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_names = {{
+  "key",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::facebook::memcache::thrift::McFlushReRequest>::fields_types = {{
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushReReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_names = {{
+  "key",
+  "delay",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McFlushAllRequest>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_names = {{
+  "result",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::facebook::memcache::thrift::McFlushAllReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_names = {{
+  "exptime",
+  "key",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McGatRequest>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_names = {{
+  "result",
+  "value",
+  "flags",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::memcache::thrift::McGatReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_names = {{
+  "exptime",
+  "key",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::facebook::memcache::thrift::McGatsRequest>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_names = {{
+  "result",
+  "casToken",
+  "value",
+  "flags",
+  "message",
+  "appSpecificErrorCode",
+}};
+const std::array<int16_t, 6> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 6> TStructDataStorage<::facebook::memcache::thrift::McGatsReply>::fields_types = {{
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_I16,
+}};
 
 } // namespace thrift
 } // namespace apache

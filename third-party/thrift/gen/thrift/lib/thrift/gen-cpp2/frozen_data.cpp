@@ -12,19 +12,56 @@
 namespace apache {
 namespace thrift {
 
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_names = {{
+  "layoutId",
+  "offset",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_types = {{
+  TType::T_I16,
+  TType::T_I16,
+}};
 
-constexpr const std::size_t TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Field>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_size> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_types;
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_names = {{
+  "size",
+  "bits",
+  "fields",
+  "typeName",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::frozen::schema::Layout>::fields_types = {{
+  TType::T_I32,
+  TType::T_I16,
+  TType::T_MAP,
+  TType::T_STRING,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_names = {{
+  "fileVersion",
+  "relaxTypeChecks",
+  "layouts",
+  "rootLayout",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_ids = {{
+  4,
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::frozen::schema::Schema>::fields_types = {{
+  TType::T_I32,
+  TType::T_BOOL,
+  TType::T_MAP,
+  TType::T_I16,
+}};
 
 } // namespace thrift
 } // namespace apache

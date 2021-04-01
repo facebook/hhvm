@@ -14,33 +14,55 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct VisitUnion<::apache::thrift::metadata::ThriftConstValue> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::cv_bool:
+      return f(0, *static_cast<T&&>(t).cv_bool_ref());
+    case Union::Type::cv_integer:
+      return f(1, *static_cast<T&&>(t).cv_integer_ref());
+    case Union::Type::cv_double:
+      return f(2, *static_cast<T&&>(t).cv_double_ref());
+    case Union::Type::cv_string:
+      return f(3, *static_cast<T&&>(t).cv_string_ref());
+    case Union::Type::cv_map:
+      return f(4, *static_cast<T&&>(t).cv_map_ref());
+    case Union::Type::cv_list:
+      return f(5, *static_cast<T&&>(t).cv_list_ref());
+    case Union::Type::cv_struct:
+      return f(6, *static_cast<T&&>(t).cv_struct_ref());
+    case Union::Type::__EMPTY__: ;
+    }
+  }
+};
+template <>
 struct VisitUnion<::apache::thrift::metadata::ThriftType> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata = 
-        get_field_metadata<::apache::thrift::metadata::ThriftType>;
     switch (t.getType()) {
     case Union::Type::t_primitive:
-      return f(get_metadata(0), *static_cast<T&&>(t).t_primitive_ref());
+      return f(0, *static_cast<T&&>(t).t_primitive_ref());
     case Union::Type::t_list:
-      return f(get_metadata(1), *static_cast<T&&>(t).t_list_ref());
+      return f(1, *static_cast<T&&>(t).t_list_ref());
     case Union::Type::t_set:
-      return f(get_metadata(2), *static_cast<T&&>(t).t_set_ref());
+      return f(2, *static_cast<T&&>(t).t_set_ref());
     case Union::Type::t_map:
-      return f(get_metadata(3), *static_cast<T&&>(t).t_map_ref());
+      return f(3, *static_cast<T&&>(t).t_map_ref());
     case Union::Type::t_enum:
-      return f(get_metadata(4), *static_cast<T&&>(t).t_enum_ref());
+      return f(4, *static_cast<T&&>(t).t_enum_ref());
     case Union::Type::t_struct:
-      return f(get_metadata(5), *static_cast<T&&>(t).t_struct_ref());
+      return f(5, *static_cast<T&&>(t).t_struct_ref());
     case Union::Type::t_union:
-      return f(get_metadata(6), *static_cast<T&&>(t).t_union_ref());
+      return f(6, *static_cast<T&&>(t).t_union_ref());
     case Union::Type::t_typedef:
-      return f(get_metadata(7), *static_cast<T&&>(t).t_typedef_ref());
+      return f(7, *static_cast<T&&>(t).t_typedef_ref());
     case Union::Type::t_stream:
-      return f(get_metadata(8), *static_cast<T&&>(t).t_stream_ref());
+      return f(8, *static_cast<T&&>(t).t_stream_ref());
     case Union::Type::t_sink:
-      return f(get_metadata(9), *static_cast<T&&>(t).t_sink_ref());
+      return f(9, *static_cast<T&&>(t).t_sink_ref());
     case Union::Type::__EMPTY__: ;
     }
   }

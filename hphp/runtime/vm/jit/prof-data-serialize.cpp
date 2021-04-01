@@ -759,13 +759,15 @@ void maybe_output_prof_trans_rec_trace(
       }
     }
     folly::dynamic profTransRecProfile = folly::dynamic::object;
+    profTransRecProfile["end_bytecode_offset"] = profTransRec->lastBcOff();
     profTransRecProfile["end_line_nunber"] = func->getLineNumber(profTransRec->lastBcOff());
     profTransRecProfile["file_path"] = filePath;
     profTransRecProfile["function_name"] = sk.func()->fullName()->data();
     profTransRecProfile["profile"] = folly::dynamic::object("profileType", "ProfTransRec");
+    profTransRecProfile["region"] = folly::dynamic::object("blocks", blocks);
+    profTransRecProfile["start_bytecode_offset"] = profTransRec->startBcOff();
     profTransRecProfile["start_line_number"] = profTransRec->region()->start().lineNumber();
     profTransRecProfile["translation_weight"] = translationWeight;
-    profTransRecProfile["region"] = folly::dynamic::object("blocks", blocks);
     HPHP::Trace::traceRelease("json:%s\n", folly::toJson(profTransRecProfile).c_str());
   }
 }
@@ -909,6 +911,7 @@ void maybe_output_target_profile_trace(
         targetProfileInfo["file_path"] = filePath;
         targetProfileInfo["line_number"] = func->getLineNumber(pt.bcOff);
         targetProfileInfo["function_name"] = func->fullName()->data();
+        targetProfileInfo["start_bytecode_offset"] = pt.bcOff;
         HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
       }
     }

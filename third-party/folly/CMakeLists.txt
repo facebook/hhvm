@@ -158,8 +158,6 @@ target_link_libraries(folly fmt)
 add_dependencies(folly boostMaybeBuild)
 target_link_libraries(folly boost)
 
-add_dependencies(folly libsodiumMaybeBuild)
-target_include_directories(folly PUBLIC "${LIBSODIUM_INCLUDE_DIRS}")
 target_link_libraries(folly libsodium)
 
 find_package(Glog REQUIRED)

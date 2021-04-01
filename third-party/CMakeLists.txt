@@ -149,21 +149,7 @@ add_subdirectory(boost)
 
 ##### libsodium #####
 
-add_library(libsodium INTERFACE)
-add_custom_target(libsodiumMaybeBuild)
-find_package(LibSodium 1.0.9)
-if (LIBSODIUM_INCLUDE_DIRS AND LIBSODIUM_LIBRARIES)
-  message(STATUS "Using system libsodium ${LIBSODIUM_VERSION}")
-else()
-  message(STATUS "Using third-party bundled libsodium")
-  add_dependencies(libsodiumMaybeBuild libsodiumBuild)
-  add_subdirectory(libsodium EXCLUDE_FROM_ALL)
-endif()
-target_include_directories(libsodium INTERFACE ${LIBSODIUM_INCLUDE_DIRS})
-target_link_libraries(libsodium INTERFACE ${LIBSODIUM_LIBRARIES})
-add_definitions("-DHAVE_LIBSODIUM")
-list(APPEND EXTRA_INCLUDE_PATHS "${LIBSODIUM_INCLUDE_DIRS}")
-list(APPEND THIRD_PARTY_DEFINITIONS "-DHAVE_LIBSODIUM")
+add_subdirectory(libsodium)
 
 ##### rustc #####
 

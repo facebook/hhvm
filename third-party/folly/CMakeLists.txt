@@ -4,9 +4,9 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FOLLY_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/folly/releases/download/v2020.11.02.00/folly-v2020.11.02.00.tar.gz"
+  "https://github.com/facebook/folly/releases/download/v2021.03.22.00/folly-v2021.03.22.00.tar.gz"
   SOURCE_HASH
-  "SHA512=6d1f36dadce7c46d65175473ef303eafff49b91b1aa0d91ce496afd93f11ee86ba94f36bcf0a50db2c6899f67a0307a9443428e82883528f0fd332042c7cd109"
+  "SHA256=1e1ee0fa1dd61763f4ea87bad76362f39cdbc0ecb599893693b3013e7d43ed87"
 )
 
 get_target_property(LIBFMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
@@ -15,7 +15,7 @@ get_target_property(LIBFMT_LIBRARY fmt INTERFACE_LINK_LIBRARIES)
 # TODO: point at jemalloc, libsodium
 
 ExternalProject_add(
-  follyBuild
+  bundled_folly
   ${FOLLY_SOURCE_ARGS}
   PATCH_COMMAND
     (patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch || true) &&
@@ -36,17 +36,16 @@ ExternalProject_add(
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
 )
-ExternalProject_Get_Property(follyBuild INSTALL_DIR)
-add_dependencies(follyBuild boost fmt jemalloc libsodium)
+ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
+add_dependencies(bundled_folly boost fmt jemalloc libsodium)
 
 add_library(folly INTERFACE)
-add_dependencies(folly follyBuild)
+add_dependencies(folly bundled_folly)
 target_include_directories(folly INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(folly INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   fmt # referred to by folly's headers, so anything using folly needs to find them
 )
-<<<<<<< HEAD
 
 # Actually delete this file (not just remove from the list) because
 # proxygen/lib/services/WorkerThread.cpp checks for it via __has_include.
@@ -239,5 +238,3 @@ if (APPLE)
   # Just assume we have sched.h
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_SCHED_H=1")
 endif()
-=======
->>>>>>> wip: build folly from source tarball instead of submodule

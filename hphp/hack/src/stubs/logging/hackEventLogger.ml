@@ -128,7 +128,7 @@ let client_start _ = ()
 
 let client_stop _ = ()
 
-let client_restart _ = ()
+let client_restart ~data:_ = ()
 
 let client_check_finish _ _ = ()
 

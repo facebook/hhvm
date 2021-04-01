@@ -17,6 +17,7 @@
 
 
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -92,13 +93,13 @@ void freeLocalsAndThis(IRGS& env) {
 }
 
 void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
+  assertx(resumeMode(env) == ResumeMode::None);
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if async
   // eager return was requested.
   auto const aux = [&] {
     if (suspended) return AuxUnion{0};
-    if (curFunc(env)->isAsyncFunction() &&
-        resumeMode(env) == ResumeMode::None) {
+    if (curFunc(env)->isAsyncFunction()) {
       return AuxUnion{std::numeric_limits<uint32_t>::max()};
     }
     return AuxUnion{0};
@@ -213,8 +214,10 @@ void implRet(IRGS& env, bool suspended) {
 }
 
 IRSPRelOffset offsetToReturnSlot(IRGS& env) {
-  auto const retOff = FPRelOffset { kArRetOff / int32_t{sizeof(TypedValue)} };
-  return retOff.to<IRSPRelOffset>(env.irb->fs().irSPOff());
+  assertx(resumeMode(env) == ResumeMode::None);
+  auto const fpOff = offsetOfFrame(fp(env));
+  assertx(fpOff);
+  return *fpOff + kArRetOff / int32_t{sizeof(TypedValue)};
 }
 
 void emitRetC(IRGS& env) {

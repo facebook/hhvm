@@ -20,11 +20,13 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
+#include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-data-macros.h"
 
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -344,6 +346,7 @@ constexpr uint8_t kIndexSize = 4;
 // MonotypeDict has capacity 5, and when we grow, that number doubles + 1.
 static_assert(kArrSize == kElmSize);
 
+// NB: changing these values will require you to modify monotype-dict-x64.S
 constexpr size_t kMinNumElms = 6;
 constexpr size_t kMinNumIndices = 8;
 
@@ -561,6 +564,19 @@ bool MonotypeDict<Key>::checkInvariants() const {
   static_assert(kArrSize == sizeof(*this));
   static_assert(kElmSize == sizeof(Elm));
   static_assert(kIndexSize == sizeof(Index));
+
+#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
+    !defined(_MSC_VER)
+  static_assert(HeapObject::aux_offset() + 1 == MD_SIZE_CLASS_OFFSET);
+  static_assert(sizeof(StringDict) == MD_DATA);
+  static_assert(kMinSizeIndex == MD_MIN_SIZE_CLASS);
+  static_assert(kLgSizeClassesPerDoubling == MD_SH_SIZE_CLASSES);
+  static_assert(offsetof(Elm, key) == MD_KEY);
+  static_assert(offsetof(Elm, val) == MD_VAL);
+  static_assert(ArrayData::offsetOfBespokeIndex() ==
+                sizeof(StringDict) + MD_TYPE_NEG);
+#endif
+
   assertx(isDArray() || isDictType());
   assertx(isValidSizeIndex(sizeIndex()));
   assertx(size() <= used());
@@ -633,6 +649,12 @@ MonotypeDict<Key>::findForGet(Key key, strhash_t hash) const {
   auto const mad = const_cast<MonotypeDict<Key>*>(this);
   return mad->template find<Get>(key, hash).elm;
 }
+
+#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
+    !defined(_MSC_VER)
+template <>
+TypedValue MonotypeDict<StringData*>::getImpl(StringData* key) const;
+#endif
 
 template <typename Key>
 TypedValue MonotypeDict<Key>::getImpl(Key key) const {
@@ -1187,7 +1209,12 @@ bool MonotypeDict<Key>::IsVectorData(const Self* mad) {
 
 template <typename Key>
 TypedValue MonotypeDict<Key>::NvGetInt(const Self* mad, int64_t k) {
-  return mad->getImpl(coerceKey<Key>(k));
+  // To avoid having to emit a tombstone check for our non-static string
+  // accessor, fail fast in the non-int key case.
+  if constexpr (std::is_same<Key, int64_t>::value) {
+    return mad->getImpl(coerceKey<Key>(k));
+  }
+  return make_tv<KindOfUninit>();
 }
 
 template <typename Key>

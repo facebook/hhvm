@@ -1115,8 +1115,11 @@ struct RuntimeOption {
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, BespokeEscalationSampleRate, 0)                           \
   F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
-  F(bool, EmitBespokeStructDicts, false)                                \
   F(string, ExportLoggingArrayDataPath, "")                             \
+  /* Should we use structs? If so, how big can they get? Due to how we  \
+   * represent structs, we can't make any with more than 255 keys. */   \
+  F(bool, EmitBespokeStructDicts, true)                                 \
+  F(uint8_t, BespokeStructDictMaxNumKeys, 64)                           \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \
@@ -1127,7 +1130,7 @@ struct RuntimeOption {
   /* We will use specialized layouts for a given array if they cover    \
    * the given percent of operations logged during profiling. */        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
-  F(double, BespokeArraySinkSpecializationThreshold,   99.0)            \
+  F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

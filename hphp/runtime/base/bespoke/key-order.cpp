@@ -52,7 +52,8 @@ KeyOrder KeyOrder::insert(const StringData* k) const {
   }
   if (isTooLong()) return *this;
   KeyOrderData newOrder{*m_keys};
-  newOrder.push_back(m_keys->size() == kMaxLen ? s_extraKey.get() : k);
+  auto const full = m_keys->size() == RO::EvalBespokeStructDictMaxNumKeys;
+  newOrder.push_back(full ? s_extraKey.get() : k);
   return Make(newOrder);
 }
 
@@ -91,8 +92,8 @@ KeyOrder::KeyOrder(const KeyOrderData* keys)
 
 KeyOrder::KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
   KeyOrderData res{ko};
-  if (res.size() > kMaxLen) {
-    res.resize(kMaxLen);
+  if (res.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+    res.resize(RO::EvalBespokeStructDictMaxNumKeys);
     res.push_back(s_extraKey.get());
   }
   return res;
@@ -135,7 +136,7 @@ KeyOrder KeyOrder::MakeInvalid() {
 
 bool KeyOrder::isTooLong() const {
   assertx(m_keys);
-  return m_keys->size() > kMaxLen;
+  return m_keys->size() > RO::EvalBespokeStructDictMaxNumKeys;
 }
 
 size_t KeyOrder::size() const {
@@ -159,6 +160,26 @@ KeyOrder::const_iterator KeyOrder::begin() const {
 KeyOrder::const_iterator KeyOrder::end() const {
   assertx(m_keys);
   return m_keys->end();
+}
+
+KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
+  std::unordered_set<const StringData*> keys;
+  for (auto const& pair : keyOrderMap) {
+    if (!pair.first.valid()) return pair.first;
+    keys.insert(pair.first.begin(), pair.first.end());
+  }
+
+  if (keys.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+    return KeyOrder::MakeInvalid();
+  }
+
+  KeyOrder::KeyOrderData sorted;
+  for (auto const key : keys) {
+    sorted.push_back(key);
+  }
+  std::sort(sorted.begin(), sorted.end(),
+            [](auto a, auto b) { return a->compare(b) < 0; });
+  return KeyOrder::Make(sorted);
 }
 
 }}

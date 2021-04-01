@@ -125,32 +125,6 @@ struct LoggingProfileKey::TbbHashCompare {
   }
 };
 
-// A wrapper around std::atomic offering copy construction/assignment. This
-// wrapper should only be used to store an atomic inside a container when we
-// have properly synchronized all potential internal value copies (e.g.
-// resizes).
-template <typename T>
-struct CopyAtomic {
-  /* implicit */ CopyAtomic(T value): value(value) {}
-
-  CopyAtomic(const CopyAtomic<T>& other)
-    : value(other.value.load())
-  {}
-
-  CopyAtomic& operator=(const CopyAtomic<T>& other) {
-    value = other.value.load();
-  }
-
-  operator T() const {
-    return value;
-  }
-
-  std::atomic<T> value;
-};
-
-using KeyOrderMap =
-  std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
-
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {

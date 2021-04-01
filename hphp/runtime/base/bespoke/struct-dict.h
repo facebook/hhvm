@@ -51,9 +51,6 @@ struct StructDict : public BespokeArray {
   static const StructDict* As(const ArrayData* ad);
   static StructDict* As(ArrayData* ad);
 
-  static constexpr size_t kMaxKeyNum = KeyOrder::kMaxLen;
-  static_assert(kMaxKeyNum <= std::numeric_limits<uint8_t>::max());
-
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X

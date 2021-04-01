@@ -571,22 +571,6 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
   return current;
 }
 
-KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
-  std::unordered_set<const StringData*> keys;
-  for (auto const& p : keyOrderMap) {
-    if (!p.first.valid()) continue;
-    keys.insert(p.first.begin(), p.first.end());
-  }
-
-  KeyOrder::KeyOrderData sorted;
-  for (auto const key : keys) {
-    sorted.push_back(key);
-  }
-  std::sort(sorted.begin(), sorted.end(),
-            [](auto a, auto b) { return a->compare(b) < 0; });
-  return KeyOrder::Make(sorted);
-}
-
 }
 
 void logBespokeDispatch(const BespokeArray* bad, const char* fn) {

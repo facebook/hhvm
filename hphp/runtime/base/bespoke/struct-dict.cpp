@@ -611,7 +611,7 @@ ArrayData* StructDict::EscalateToVanilla(const StructDict* sad,
 }
 
 void StructDict::addNextSlot(Slot slot) {
-  assertx(slot < kMaxKeyNum);
+  assertx(slot < RO::EvalBespokeStructDictMaxNumKeys);
   rawPositions()[m_size++] = slot;
 }
 
@@ -628,7 +628,7 @@ void StructDict::removeSlot(Slot slot) {
 
 Slot StructDict::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
-  assertx(pos < kMaxKeyNum);
+  assertx(pos < RO::EvalBespokeStructDictMaxNumKeys);
   return rawPositions()[pos];
 }
 

@@ -128,23 +128,6 @@ struct StructAnalysisResult {
   folly::F14FastMap<const SinkProfile*, const StructLayout*> sinks;
 };
 
-// Returns an invalid KeyOrder if we can't combine the ones in the map.
-KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
-  std::unordered_set<const StringData*> keys;
-  for (auto const& pair : keyOrderMap) {
-    if (!pair.first.valid()) return pair.first;
-    keys.insert(pair.first.begin(), pair.first.end());
-  }
-
-  KeyOrder::KeyOrderData sorted;
-  for (auto const key : keys) {
-    sorted.push_back(key);
-  }
-  std::sort(sorted.begin(), sorted.end(),
-            [](auto a, auto b) { return a->compare(b) < 0; });
-  return KeyOrder::Make(sorted);
-}
-
 // Returns true if we treat the given sink as a "merge point" and union the
 // sets of sinks that are incident to that merge. These points are also the
 // only ones at which we'll JIT struct access code.
@@ -183,7 +166,6 @@ bool mergeStructsAtSink(const SinkProfile& profile, const StructAnalysis& sa) {
   }
   return uf.countGroups() == 1;
 }
-
 
 void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // We only use a struct layout for a dict/darray array sources. We don't

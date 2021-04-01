@@ -154,34 +154,36 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   return *result;
 }
 
-#define CGET_PROP_HELPER_TABLE(m)                       \
-  /* name            keyType       mode  */             \
+#define CGET_PROP_HELPER_TABLE(m)                      \
+  /* name            keyType       mode  */            \
   m(cGetPropCQuiet,  KeyType::Any, MOpMode::None)      \
   m(cGetPropSQuiet,  KeyType::Str, MOpMode::None)      \
   m(cGetPropC,       KeyType::Any, MOpMode::Warn)      \
   m(cGetPropS,       KeyType::Str, MOpMode::Warn)      \
 
-#define X(nm, kt, mode)                                                \
-inline TypedValue nm(Class* ctx, tv_lval base, key_type<kt> key) {     \
-  TypedValue localTvRef;                                               \
-  auto result = Prop<mode,kt>(localTvRef, ctx, base, key);             \
-  return cGetRefShuffle(localTvRef, result);                           \
+#define X(nm, kt, mode)                                               \
+inline TypedValue nm(Class* ctx, tv_lval base, key_type<kt> key,      \
+                     ReadOnlyOp op) {                                 \
+  TypedValue localTvRef;                                              \
+  auto result = Prop<mode,kt>(localTvRef, ctx, base, key, op);        \
+  return cGetRefShuffle(localTvRef, result);                          \
 }
 CGET_PROP_HELPER_TABLE(X)
 #undef X
 
-#define CGET_OBJ_PROP_HELPER_TABLE(m)                   \
+#define CGET_OBJ_PROP_HELPER_TABLE(m)                  \
   /* name            keyType       mode */             \
   m(cGetPropCOQuiet, KeyType::Any, MOpMode::None)      \
   m(cGetPropSOQuiet, KeyType::Str, MOpMode::None)      \
   m(cGetPropCO,      KeyType::Any, MOpMode::Warn)      \
   m(cGetPropSO,      KeyType::Str, MOpMode::Warn)      \
 
-#define X(nm, kt, mode)                                                \
-inline TypedValue nm(Class* ctx, ObjectData* base, key_type<kt> key) { \
-  TypedValue localTvRef;                                               \
-  auto result = PropObj<mode,kt>(localTvRef, ctx, base, key);          \
-  return cGetRefShuffle(localTvRef, result);                           \
+#define X(nm, kt, mode)                                               \
+inline TypedValue nm(Class* ctx, ObjectData* base, key_type<kt> key,  \
+                     ReadOnlyOp op) {                                 \
+  TypedValue localTvRef;                                              \
+  auto result = PropObj<mode,kt>(localTvRef, ctx, base, key, op);     \
+  return cGetRefShuffle(localTvRef, result);                          \
 }
 CGET_OBJ_PROP_HELPER_TABLE(X)
 #undef X
@@ -189,16 +191,18 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 // NullSafe prop.
-inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key) {
+inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key,
+                             ReadOnlyOp op) {
   TypedValue localTvRef;
-  auto result = nullSafeProp(localTvRef, ctx, base, key);
+  auto result = nullSafeProp(localTvRef, ctx, base, key, op);
   return cGetRefShuffle(localTvRef, result);
 }
 
 // NullSafe prop with object base.
-inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
+inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
+                              ReadOnlyOp op) {
   TypedValue localTvRef;
-  auto result = base->prop(&localTvRef, ctx, key);
+  auto result = base->prop(&localTvRef, ctx, key, op);
   return cGetRefShuffle(localTvRef, result);
 }
 

@@ -1,0 +1,78 @@
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""y:0:{}""")] (16,21) <"HH\\void" N  > test() {
+  .declvars $t $y $x $z;
+  .srcloc 17:8,17:16;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 17:3,17:16;
+  SetL $t
+  .srcloc 17:3,17:17;
+  PopC
+  .srcloc 18:8,18:15;
+  BaseL $t Warn
+  QueryM 0 CGet PT:"prop" Mutable
+  .srcloc 18:3,18:15;
+  SetL $y
+  .srcloc 18:3,18:16;
+  PopC
+  .srcloc 19:17,19:22;
+  BaseL $t Warn
+  QueryM 0 CGet PT:"ro" Any
+  .srcloc 19:3,19:22;
+  SetL $x
+  .srcloc 19:3,19:23;
+  PopC
+  .srcloc 20:8,20:13;
+  BaseL $t Warn
+  QueryM 0 CGet PT:"ro" Mutable
+  .srcloc 20:3,20:13;
+  SetL $z
+  .srcloc 20:3,20:14;
+  PopC
+  .srcloc 21:2,21:2;
+  Null
+  RetC
+}
+
+.class {}  Bar (4,4) {
+}
+
+.class {}  Foo (5,13) {
+  .property [public sys_initial_val] <"HH\\int" "HH\\int" extended_hint > prop =
+    """N;""";
+  .property [public readonly sys_initial_val] <"Bar" "Bar" extended_hint > ro =
+    """N;""";
+  .method{}{} [public] (8,11) <"" N  > __construct() {
+    .srcloc 9:5,9:9;
+    CheckThis
+    .srcloc 9:19,9:19;
+    Int 1
+    BaseH
+    .srcloc 9:5,9:15;
+    SetM 0 PT:"prop" Any
+    .srcloc 9:5,9:20;
+    PopC
+    .srcloc 10:5,10:9;
+    CheckThis
+    .srcloc 10:17,10:25;
+    NewObjD "Bar"
+    Dup
+    NullUninit
+    FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+    PopC
+    LockObj
+    BaseH
+    .srcloc 10:5,10:13;
+    SetM 0 PT:"ro" Any
+    .srcloc 10:5,10:26;
+    PopC
+    .srcloc 11:4,11:4;
+    Null
+    RetC
+  }
+}

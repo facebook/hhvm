@@ -128,7 +128,7 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCGetProp(IRLS& env, const IRInstruction* inst) {
-  auto const mode    = inst->extra<MOpModeData>()->mode;
+  auto const mode    = inst->extra<PropData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
@@ -138,7 +138,9 @@ void cgCGetProp(IRLS& env, const IRInstruction* inst) {
                CGET_PROP_HELPER_TABLE,
                keyType, mode);
 
-  auto const args = propArgs(env, inst).memberKeyS(1);
+  auto const args = propArgs(env, inst)
+    .memberKeyS(1)
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
@@ -147,7 +149,9 @@ void cgCGetProp(IRLS& env, const IRInstruction* inst) {
 void cgCGetPropQ(IRLS& env, const IRInstruction* inst) {
   using namespace MInstrHelpers;
 
-  auto args = propArgs(env, inst).ssa(1);
+  auto args = propArgs(env, inst)
+    .ssa(1)
+    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op));
 
   auto& v = vmain(env);
 

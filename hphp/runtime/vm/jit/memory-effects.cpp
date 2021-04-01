@@ -1925,6 +1925,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParamInOutMismatchRange:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
+  case ThrowMustBeMutableException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case SetOpTV:

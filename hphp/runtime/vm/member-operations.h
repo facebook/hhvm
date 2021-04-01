@@ -2495,7 +2495,8 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
 inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
-                            StringData* key) {
+                            StringData* key,
+                            ReadOnlyOp op = ReadOnlyOp::Any) {
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -2524,7 +2525,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
       raise_notice("Cannot access property on non-object");
       return &tvRef;
     case KindOfObject:
-      return val(base).pobj->prop(&tvRef, ctx, key);
+      return val(base).pobj->prop(&tvRef, ctx, key, op);
   }
   not_reached();
 }
@@ -2536,7 +2537,8 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
-                       ObjectData* instance, key_type<keyType> key) {
+                       ObjectData* instance, key_type<keyType> key,
+                       ReadOnlyOp op = ReadOnlyOp::Any) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
@@ -2545,10 +2547,10 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
     return instance->propD(&tvRef, ctx, keySD);
   }
   if (mode == MOpMode::None) {
-    return instance->prop(&tvRef, ctx, keySD);
+    return instance->prop(&tvRef, ctx, keySD, op);
   }
   if (mode == MOpMode::Warn) {
-    return instance->propW(&tvRef, ctx, keySD);
+    return instance->propW(&tvRef, ctx, keySD, op);
   }
   assertx(mode == MOpMode::Unset);
   return instance->propU(&tvRef, ctx, keySD);
@@ -2556,10 +2558,10 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
-                    tv_lval base, key_type<keyType> key) {
+                    tv_lval base, key_type<keyType> key, ReadOnlyOp op = ReadOnlyOp::Any) {
   auto const result = propPre<mode>(tvRef, base);
   if (result.type() == KindOfNull) return result;
-  return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key);
+  return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key, op);
 }
 
 template <KeyType kt>

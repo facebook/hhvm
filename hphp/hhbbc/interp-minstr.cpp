@@ -1365,7 +1365,7 @@ Effects miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
 
   if (name && mustBeThisObj(env, env.collect.mInstrState.base)) {
     if (auto const pt = thisPropAsCell(env, name)) {
-      if (isMaybeLateInitThisProp(env, name)) {
+      if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
         // LateInit props can always be maybe unset, except if its never set at
         // all.
         push(env, pt->subtypeOf(BBottom) ? TFalse : TBool);
@@ -1384,8 +1384,8 @@ Effects miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
   return Effects::Throws;
 }
 
-Effects miFinalCGetProp(ISS& env, int32_t nDiscard,
-                        const Type& key, bool quiet) {
+Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
+                        bool quiet, bool mustBeMutable) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
 
@@ -1395,8 +1395,11 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard,
     if (mustBeThisObj(env, env.collect.mInstrState.base)) {
       if (auto const t = thisPropAsCell(env, name)) {
         push(env, *t);
+        if (mustBeMutable && isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+          return Effects::Throws;  
+        }
         if (t->subtypeOf(BBottom)) return Effects::AlwaysThrows;
-        if (isMaybeLateInitThisProp(env, name)) return Effects::Throws;
+        if (isMaybeThisPropAttr(env, name, AttrLateInit)) return Effects::Throws;
         if (quiet) return Effects::None;
         auto const elem = thisPropRaw(env, name);
         assertx(elem);
@@ -2240,7 +2243,8 @@ void in(ISS& env, const bc::QueryM& op) {
         case QueryMOp::CGet:
         case QueryMOp::CGetQuiet:
           return miFinalCGetProp(env, nDiscard, key->first,
-                                 op.subop2 == QueryMOp::CGetQuiet);
+                                 op.subop2 == QueryMOp::CGetQuiet,
+                                 op.mkey.rop == ReadOnlyOp::Mutable);
         case QueryMOp::Isset:
           return miFinalIssetProp(env, nDiscard, key->first);
         case QueryMOp::InOut:

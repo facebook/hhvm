@@ -74,6 +74,7 @@ struct PropInfo {
   explicit PropInfo(Slot slot,
                     uint16_t index,
                     bool isConst,
+                    bool readOnly,
                     bool lateInit,
                     bool lateInitCheck,
                     Type knownType,
@@ -84,6 +85,7 @@ struct PropInfo {
     : slot{slot}
     , index{index}
     , isConst{isConst}
+    , readOnly{readOnly}
     , lateInit{lateInit}
     , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
@@ -96,6 +98,7 @@ struct PropInfo {
   Slot slot{kInvalidSlot};
   uint16_t index{0};
   bool isConst{false};
+  bool readOnly{false};
   bool lateInit{false};
   bool lateInitCheck{false};
   Type knownType{TCell};
@@ -191,6 +194,7 @@ getPropertyOffset(IRGS& env,
     slot,
     baseClass->propSlotToIndex(slot),
     prop.attrs & AttrIsConst,
+    prop.attrs & AttrIsReadOnly,
     prop.attrs & AttrLateInit,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
@@ -326,7 +330,7 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 folly::Optional<PropInfo>
 getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
                          bool ignoreLateInit) {
-  // We allow the use of clases from nullable objects because
+  // We allow the use of classes from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
   auto const baseType = base->type().derefIfPtr();
@@ -1167,11 +1171,14 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
 
 template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
-                     MOpMode mode, bool nullsafe, Finish finish) {
+                     MOpMode mode, bool nullsafe, Finish finish, ReadOnlyOp op) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
-
   if (propInfo) {
+    if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+      gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+      return cns(env, TBottom);
+    }
     auto propAddr =
       emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
     auto const ty = propAddr->type().deref();
@@ -1186,9 +1193,9 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 
   // No warning takes precedence over nullsafe.
   if (!nullsafe || mode != MOpMode::Warn) {
-    return gen(env, CGetProp, MOpModeData{mode}, base, key);
+    return gen(env, CGetProp, PropData{mode, op}, base, key);
   }
-  return gen(env, CGetPropQ, base, key);
+  return gen(env, CGetPropQ, ReadOnlyData{op}, base, key);
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
@@ -1672,7 +1679,8 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(env, extractBaseIfObj(env), key,
                          mode, mk.mcode == MQT,
-                         [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); })
+                         [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); },
+                         mk.rop)
           : emitCGetElem(env, maybeExtractBase(env), key, mode, simpleOp,
                          [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
@@ -1682,12 +1690,10 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(
               env, extractBaseIfObj(env), key, mode, mk.mcode == MQT,
-              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }
-            )
+              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }, mk.rop)
           : emitCGetElemQuiet(
               env, maybeExtractBase(env), key, mode, simpleOp,
-              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }
-            );
+              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
 
       case QueryMOp::Isset:

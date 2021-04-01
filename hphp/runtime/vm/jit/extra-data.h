@@ -1947,6 +1947,43 @@ struct MOpModeData : IRExtraData {
   MOpMode mode;
 };
 
+struct PropData : IRExtraData {
+  explicit PropData(MOpMode mode, ReadOnlyOp op) : mode{mode}, op(op) {}
+
+  std::string show() const {
+    return fmt::format("{} {}", subopToName(mode), subopToName(op));
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<MOpMode>()(mode),
+      std::hash<ReadOnlyOp>()(op)
+    );
+  }
+
+  bool equals(const PropData& o) const {
+    return mode == o.mode && op == o.op;
+  }
+
+  MOpMode mode;
+  ReadOnlyOp op;
+};
+
+struct ReadOnlyData : IRExtraData {
+  explicit ReadOnlyData(ReadOnlyOp op) : op(op) {}
+  std::string show() const { return subopToName(op); }
+
+  size_t stableHash() const {
+    return std::hash<ReadOnlyOp>()(op);
+  }
+
+  bool equals(const ReadOnlyData& o) const {
+    return op == o.op;
+  }
+
+  ReadOnlyOp op;
+};
+
 struct SetOpData : IRExtraData {
   explicit SetOpData(SetOpOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
@@ -2695,7 +2732,8 @@ X(PropDX,                       MOpModeData);
 X(ElemX,                        MOpModeData);
 X(ElemDX,                       MOpModeData);
 X(ElemUX,                       MOpModeData);
-X(CGetProp,                     MOpModeData);
+X(CGetProp,                     PropData);
+X(CGetPropQ,                    ReadOnlyData);
 X(CGetElem,                     MOpModeData);
 X(MemoGetStaticValue,           MemoValueStaticData);
 X(MemoSetStaticValue,           MemoValueStaticData);

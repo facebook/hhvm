@@ -2636,16 +2636,16 @@ OPTBLD_INLINE void iopBaseH() {
   mstate.base = &mstate.tvTempBase;
 }
 
-static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
+static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp op) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
   mstate.base = [&]{
     switch (mode) {
       case MOpMode::None:
-        return Prop<MOpMode::None>(mstate.tvTempBase, ctx, mstate.base, key);
+        return Prop<MOpMode::None>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Warn:
-        return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key);
+        return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
           mstate.tvTempBase, ctx, mstate.base, key
@@ -2659,14 +2659,14 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
   }();
 }
 
-static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key) {
+static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadOnlyOp op) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
   
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
   mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
-                             key.m_data.pstr);
+                             key.m_data.pstr, op);
 }
 
 static OPTBLD_INLINE
@@ -2718,12 +2718,12 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
+static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk, ReadOnlyOp op = ReadOnlyOp::Any) {
   auto const key = key_tv(mk);
   if (mk.mcode == MQT) {
-    propQDispatch(mode, key);
+    propQDispatch(mode, key, op);
   } else if (mcodeIsProp(mk.mcode)) {
-    propDispatch(mode, key);
+    propDispatch(mode, key, op);
   } else if (mcodeIsElem(mk.mcode)) {
     elemDispatch(mode, key);
   } else {
@@ -2757,7 +2757,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       // fallthrough
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      dimDispatch(getQueryMOpMode(op), mk);
+      dimDispatch(getQueryMOpMode(op), mk, mk.rop);
       tvDup(*mstate.base, result);
       break;
 

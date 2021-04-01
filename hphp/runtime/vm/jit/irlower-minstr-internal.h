@@ -127,4 +127,3 @@ inline KeyType getKeyTypeNoInt(const SSATmp* key) {
 }
 
 }}}
-

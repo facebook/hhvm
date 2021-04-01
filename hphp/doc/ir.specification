@@ -3185,6 +3185,12 @@ fields of that struct for holding intermediate values.
 
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
+  
+| ThrowMustBeMutableException, ND, S(Cls) S(Str), T
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where the property was required to be mutable. S0 is the class the property
+  was declared on. S1 is the property name.
 
 | ProfileType, ND, S(Cell), NF
 

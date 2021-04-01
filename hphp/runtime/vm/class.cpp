@@ -1240,9 +1240,11 @@ Class::PropSlotLookup Class::getDeclPropSlot(
   auto const propSlot = lookupDeclProp(key);
 
   auto accessible = false;
+  auto readonly = false;
 
   if (propSlot != kInvalidSlot) {
     auto const attrs = m_declProperties[propSlot].attrs;
+    readonly = bool(attrs & AttrIsReadOnly);
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
@@ -1251,11 +1253,11 @@ Class::PropSlotLookup Class::getDeclPropSlot(
       assertx(baseClass);
 
       // If ctx == baseClass, we have the right property and we can stop here.
-      if (ctx == baseClass) return PropSlotLookup { propSlot, true };
+      if (ctx == baseClass) return PropSlotLookup { propSlot, true, false, readonly };
 
       // The anonymous context cannot access protected or private properties, so
       // we can fail fast here.
-      if (ctx == nullptr) return PropSlotLookup { propSlot, false };
+      if (ctx == nullptr) return PropSlotLookup { propSlot, false, false, readonly };
 
       assertx(ctx);
       if (attrs & AttrPrivate) {
@@ -1270,7 +1272,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
-          return PropSlotLookup { propSlot, true };
+          return PropSlotLookup { propSlot, true, false, readonly };
         }
         if (!baseClass->classof(ctx)) {
           // ctx is not the same, an ancestor, or a descendent of baseClass,
@@ -1278,7 +1280,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
           // be the same or an ancestor of this, so we don't need to check if
           // ctx declares a private property with the same name and we can
           // fail fast here.
-          return PropSlotLookup { propSlot, false };
+          return PropSlotLookup { propSlot, false, false, readonly };
         }
         // We now know this protected property is accessible, but we need to
         // keep going because ctx may define a private property with the same
@@ -1292,7 +1294,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
       accessible = true;
       // If ctx == this, we don't have to check if ctx defines a private
       // property with the same name and we can stop here.
-      if (ctx == this) return PropSlotLookup { propSlot, true };
+      if (ctx == this) return PropSlotLookup { propSlot, true, false, readonly };
 
       // We still need to check if ctx defines a private property with the same
       // name.
@@ -1312,7 +1314,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
         (ctx->m_declProperties[ctxPropSlot].attrs & AttrPrivate)) {
       // A private property from ctx trumps any other property we may
       // have found.
-      return PropSlotLookup { ctxPropSlot, true };
+      return PropSlotLookup { ctxPropSlot, true, false, readonly };
     }
   }
 
@@ -1327,7 +1329,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
     return m_parent->getDeclPropSlot(ctx, key);
   }
 
-  return PropSlotLookup { propSlot, accessible };
+  return PropSlotLookup { propSlot, accessible, false, readonly };
 }
 
 Class::PropSlotLookup Class::findSProp(

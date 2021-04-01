@@ -658,6 +658,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParameterWrongType:
   case ThrowParamInOutMismatch:
   case ThrowParamInOutMismatchRange:
+  case ThrowMustBeMutableException:
   case StMBase:
   case FinishMemberOp:
   case BeginInlining:

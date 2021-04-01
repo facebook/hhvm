@@ -907,14 +907,14 @@ bool isTrackedThisProp(ISS& env, SString name) {
   return thisPropRaw(env, name);
 }
 
-bool isMaybeLateInitThisProp(ISS& env, SString name) {
+bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
   if (!env.ctx.cls) return false;
   for (auto const& prop : env.ctx.cls->properties) {
     if (prop.name == name &&
         (prop.attrs & AttrPrivate) &&
         !(prop.attrs & AttrStatic)
        ) {
-      return prop.attrs & AttrLateInit;
+      return prop.attrs & attr;
     }
   }
   // Prop either doesn't exist, or is on an unflattened trait. Be conservative.

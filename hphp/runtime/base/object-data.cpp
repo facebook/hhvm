@@ -1103,6 +1103,14 @@ void ObjectData::throwMutateConstProp(Slot prop) const {
   );
 }
 
+NEVER_INLINE
+void ObjectData::throwMustBeMutable(Slot prop) const {
+  throw_must_be_mutable(
+    getClassName().data(),
+    m_cls->declProperties()[prop].name->data()
+  );
+}
+
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
@@ -1137,7 +1145,8 @@ ObjectData::PropLookup ObjectData::getPropImpl(
      // instantiates with false by mistake it will always see const
      forWrite
        ? bool(declProp.attrs & AttrIsConst)
-       : true
+       : true,
+     lookup.readonly
     };
   }
 
@@ -1153,11 +1162,11 @@ ObjectData::PropLookup ObjectData::getPropImpl(
       // not const since all dynamic properties are. If we may write to
       // the property we need to allow the array to escalate.
       auto const lval = arr.lval(StrNR(key), AccessFlags::Key);
-      return { lval, nullptr, kInvalidSlot, true, !forWrite };
+      return { lval, nullptr, kInvalidSlot, true, !forWrite, false };
     }
   }
 
-  return { nullptr, nullptr, kInvalidSlot, false, !forWrite };
+  return { nullptr, nullptr, kInvalidSlot, false, !forWrite, false };
 }
 
 tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
@@ -1197,29 +1206,31 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
-                             const StringData* key) {
+                             const StringData* key, const ReadOnlyOp op) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
   auto const lookup = getPropImpl<write, read, false>(ctx, key);
   auto const prop = lookup.val;
-
   if (prop) {
     if (lookup.accessible) {
-      auto const checkConstProp = [&]() {
+      auto const checkPropAttrs = [&]() {
         if (mode == PropMode::DimForWrite) {
           if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
             throwMutateConstProp(lookup.slot);
           }
         }
+        if (lookup.readonly && op == ReadOnlyOp::Mutable) {
+          throwMustBeMutable(lookup.slot);
+        }
         return prop;
       };
 
       // Property exists, is accessible, and is not unset.
-      if (type(prop) != KindOfUninit) return checkConstProp();
+      if (type(prop) != KindOfUninit) return checkPropAttrs();
 
       if (mode == PropMode::ReadWarn) raiseUndefProp(key);
-      if (write) return checkConstProp();
+      if (write) return checkPropAttrs();
       return const_cast<TypedValue*>(&immutable_null_base);
     }
 
@@ -1258,17 +1269,19 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 tv_lval ObjectData::prop(
   TypedValue* tvRef,
   const Class* ctx,
-  const StringData* key
+  const StringData* key,
+  const ReadOnlyOp op
 ) {
-  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key);
+  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op);
 }
 
 tv_lval ObjectData::propW(
   TypedValue* tvRef,
   const Class* ctx,
-  const StringData* key
+  const StringData* key,
+  const ReadOnlyOp op
 ) {
-  return propImpl<PropMode::ReadWarn>(tvRef, ctx, key);
+  return propImpl<PropMode::ReadWarn>(tvRef, ctx, key, op);
 }
 
 tv_lval ObjectData::propU(

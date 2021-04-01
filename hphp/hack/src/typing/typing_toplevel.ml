@@ -350,12 +350,8 @@ let fun_def ctx f :
       let (env, user_attributes) =
         List.map_env env f.f_user_attributes Typing.user_attribute
       in
-      let env =
-        Typing_solver.close_tyvars_and_solve env Errors.bad_function_typevar
-      in
-      let env =
-        Typing_solver.solve_all_unsolved_tyvars env Errors.bad_function_typevar
-      in
+      let env = Typing_solver.close_tyvars_and_solve env in
+      let env = Typing_solver.solve_all_unsolved_tyvars env in
       let fundef =
         {
           Aast.f_annotation = Env.save local_tpenv env;
@@ -640,12 +636,8 @@ let method_def env cls m =
       let (env, user_attributes) =
         List.map_env env m.m_user_attributes Typing.user_attribute
       in
-      let env =
-        Typing_solver.close_tyvars_and_solve env Errors.bad_method_typevar
-      in
-      let env =
-        Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar
-      in
+      let env = Typing_solver.close_tyvars_and_solve env in
+      let env = Typing_solver.solve_all_unsolved_tyvars env in
 
       (* if the enclosing class implements dynamic, or the method is annotated with
        * <<__SoundDynamicCallable>>, check that the method is dynamically callable *)
@@ -1557,9 +1549,7 @@ let class_def_ env c tc =
   let (env, user_attributes) =
     List.map_env env c.c_user_attributes Typing.user_attribute
   in
-  let env =
-    Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
-  in
+  let env = Typing_solver.solve_all_unsolved_tyvars env in
   ( if TypecheckerOptions.enable_sound_dynamic (Provider_context.get_tcopt ctx)
   then
     let parent_names =

@@ -656,7 +656,6 @@ and obj_get_inner
           ~description_of_expected:"an object"
           obj_pos
           ty1
-          Errors.unify_error
     else
       Typing_solver.expand_type_and_narrow
         env
@@ -664,7 +663,6 @@ and obj_get_inner
         (widen_class_for_obj_get ~is_method ~nullsafe id_str)
         obj_pos
         ty1
-        Errors.unify_error
   in
   let nullable_obj_get ~read_context ty =
     nullable_obj_get

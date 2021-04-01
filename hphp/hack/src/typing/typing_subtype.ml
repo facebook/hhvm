@@ -1982,7 +1982,6 @@ and simplify_subtype_has_member
                 env
                 Reason.Rnone
                 var
-                subtype_env.on_error
             | None -> env
           in
           (env, Some fresh_tyvar)

@@ -82,7 +82,6 @@ let check_dynamic_or_enforce_num env p t r err =
       widen_for_arithmetic
       p
       t
-      err
   in
   (env, Typing_utils.is_dynamic env t)
 
@@ -123,7 +122,6 @@ let expand_type_and_narrow_to_int env p ty =
     widen_for_arithmetic
     p
     ty
-    Errors.unify_error
 
 let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =

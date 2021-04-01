@@ -85,7 +85,7 @@ let check_param : env -> Nast.fun_param -> unit =
       let (env, prop) = SubType.prop_to_env env props Errors.unify_error in
       let is_container = Typing_logic.is_valid prop in
       let env = Env.set_tyvar_variance env container_type in
-      let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
+      let env = Typing_solver.close_tyvars_and_solve env in
       if is_container then
         check_memoizable env type_param
       else

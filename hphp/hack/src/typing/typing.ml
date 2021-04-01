@@ -648,8 +648,7 @@ and stmt_ env pos st =
     loop env 1
   in
   let env = Env.open_tyvars env pos in
-  (fun (env, tb) ->
-    (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tb))
+  (fun (env, tb) -> (Typing_solver.close_tyvars_and_solve env, tb))
   @@
   match st with
   | Fallthrough ->
@@ -1090,7 +1089,6 @@ and case_list parent_locals ty env switch_pos cl =
           ~description_of_expected:"a value"
           switch_pos
           ty
-          Errors.unify_error
     in
     (* leverage that enums are checked for exhaustivity *)
     let is_enum =
@@ -1178,7 +1176,7 @@ and as_expr env ty1 pe e =
   in
   let env = distribute_union env ty1 in
   let env = Env.set_tyvar_variance env expected_ty in
-  (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv)
+  (Typing_solver.close_tyvars_and_solve env, tk, tv)
 
 and bind_as_expr env p ty1 ty2 aexpr =
   match aexpr with
@@ -1428,7 +1426,7 @@ and expr_
     ((p, e) as outer) =
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
-    let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
+    let env = Typing_solver.close_tyvars_and_solve env in
     (env, te, ty))
   @@
   let expr ?(allow_awaitable = allow_awaitable) =
@@ -2173,7 +2171,7 @@ and expr_
           Env.set_log_level env key_str (int_of_string level_str)
         | _ -> env
       else if String.equal s SN.PseudoFunctions.hh_force_solve then
-        Typing_solver.solve_all_unsolved_tyvars env Errors.unify_error
+        Typing_solver.solve_all_unsolved_tyvars env
       else if String.equal s SN.PseudoFunctions.hh_loop_forever then (
         loop_forever env;
         env
@@ -5108,11 +5106,7 @@ and dispatch_call
     let env =
       match get_var method_ty with
       | Some var ->
-        Typing_solver.solve_to_equal_bound_or_wrt_variance
-          env
-          Reason.Rnone
-          var
-          Errors.unify_error
+        Typing_solver.solve_to_equal_bound_or_wrt_variance env Reason.Rnone var
       | None -> env
     in
     let localize_targ env (_, targ) = Phase.localize_targ env targ in
@@ -5174,7 +5168,6 @@ and dispatch_call
         env
         fpos
         fty
-        Errors.unify_error
     in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
@@ -5843,7 +5836,6 @@ and static_class_id
           env
           p
           ty
-          Errors.unify_error
       in
       let base_ty = TUtils.get_base_type env ty in
       match deref base_ty with
@@ -6069,7 +6061,6 @@ and call
           env
           pos
           fty
-          Errors.unify_error
     in
     match deref efty with
     | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->

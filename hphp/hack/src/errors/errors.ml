@@ -3381,12 +3381,6 @@ let parameter_default_value_wrong_type =
 let newtype_alias_must_satisfy_constraint =
   maybe_unify_error Typing.NewtypeAliasMustSatisfyConstraint
 
-let bad_function_typevar = maybe_unify_error Typing.BadFunctionTypevar
-
-let bad_class_typevar = maybe_unify_error Typing.BadClassTypevar
-
-let bad_method_typevar = maybe_unify_error Typing.BadMethodTypevar
-
 let missing_return = maybe_unify_error Typing.MissingReturnInNonVoidFunction
 
 let inout_return_type_mismatch =

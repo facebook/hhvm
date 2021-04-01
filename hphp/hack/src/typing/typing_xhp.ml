@@ -41,7 +41,6 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       env
       pos
       cty
-      Errors.unify_error
   in
   match get_node cty with
   | Tany _

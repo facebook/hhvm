@@ -677,12 +677,6 @@ val parameter_default_value_wrong_type : typing_error_callback
 
 val newtype_alias_must_satisfy_constraint : typing_error_callback
 
-val bad_function_typevar : typing_error_callback
-
-val bad_class_typevar : typing_error_callback
-
-val bad_method_typevar : typing_error_callback
-
 val missing_return : typing_error_callback
 
 val inout_return_type_mismatch : typing_error_callback

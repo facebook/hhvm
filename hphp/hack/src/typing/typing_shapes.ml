@@ -40,7 +40,6 @@ let refine_shape field_name pos env shape =
       (widen_for_refine_shape ~expr_pos:pos field_name)
       pos
       shape
-      Errors.unify_error
   in
   let sft_ty =
     MakeType.mixed
@@ -73,7 +72,6 @@ let rec shrink_shape pos field_name env shape =
       env
       pos
       shape
-      Errors.unify_error
   in
   match get_node shape with
   | Tshape (shape_kind, fields) ->
@@ -118,7 +116,6 @@ let shapes_idx_not_null env shape_ty (p, field) =
         (widen_for_refine_shape ~expr_pos:p field)
         p
         shape_ty
-        Errors.unify_error
     in
     let refine_type env shape_ty =
       let (env, shape_ty) = Env.expand_type env shape_ty in
@@ -349,7 +346,6 @@ let to_array env pos shape_ty res =
       env
       pos
       shape_ty
-      Errors.unify_error
   in
   to_collection env shape_ty res (fun env r key value ->
       let unification =
@@ -366,7 +362,6 @@ let to_dict env pos shape_ty res =
       env
       pos
       shape_ty
-      Errors.unify_error
   in
   to_collection env shape_ty res (fun env r key value ->
       Typing_enforceability.make_locl_like_type env (MakeType.dict r key value))

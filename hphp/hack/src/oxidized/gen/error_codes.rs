@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dba655dc202019e15b36630dbfe7c68d>>
+// @generated SignedSource<<65707e6d8cebc206fccd1a17f6c26489>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -438,9 +438,6 @@ pub enum Typing {
     EnumSubtypeMustHaveCompatibleConstraint = 4330,
     ParameterDefaultValueWrongType = 4331,
     NewtypeAliasMustSatisfyConstraint = 4332,
-    BadFunctionTypevar = 4333,
-    BadClassTypevar = 4334,
-    BadMethodTypevar = 4335,
     MissingReturnInNonVoidFunction = 4336,
     InoutReturnTypeMismatch = 4337,
     ClassConstantValueDoesNotMatchHint = 4338,

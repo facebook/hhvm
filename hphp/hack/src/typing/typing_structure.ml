@@ -61,7 +61,6 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       env
       pos
       ty
-      Errors.unify_error
   in
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely

@@ -525,9 +525,9 @@ module Typing = struct
     | EnumSubtypeMustHaveCompatibleConstraint [@value 4330]
     | ParameterDefaultValueWrongType [@value 4331]
     | NewtypeAliasMustSatisfyConstraint [@value 4332]
-    | BadFunctionTypevar [@value 4333]
-    | BadClassTypevar [@value 4334]
-    | BadMethodTypevar [@value 4335]
+    (* | BadFunctionTypevarDEPRECATED [@value 4333] *)
+    (* | BadClassTypevarDEPRECATED [@value 4334] *)
+    (* | BadMethodTypevarDEPRECATED [@value 4335] *)
     | MissingReturnInNonVoidFunction [@value 4336]
     | InoutReturnTypeMismatch [@value 4337]
     | ClassConstantValueDoesNotMatchHint [@value 4338]

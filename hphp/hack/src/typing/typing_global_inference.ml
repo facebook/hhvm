@@ -328,7 +328,7 @@ module StateSolvedGraph = struct
       if is_ordered_solving env then
         Typing_ordered_solver.solve_env env make_on_error
       else
-        Typing_solver.solve_all_unsolved_tyvars_gi env make_on_error
+        Typing_solver.solve_all_unsolved_tyvars_gi env
     in
     (env, errors, type_map)
 end

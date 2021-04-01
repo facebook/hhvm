@@ -169,7 +169,6 @@ let rec array_get
       (widen_for_array_get ~lhs_of_null_coalesce ~expr_pos e2)
       array_pos
       ty1
-      Errors.unify_error
   in
   GenericRules.apply_rules ~ignore_type_structure:true env ty1 (fun env ty1 ->
       let (r, ety1_) = deref ty1 in
@@ -531,7 +530,6 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       (widen_for_assign_array_append ~expr_pos)
       array_pos
       ty1
-      Errors.unify_error
   in
   GenericRules.apply_rules env ty1 (fun env ty1 ->
       match deref ty1 with
@@ -633,7 +631,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       (widen_for_assign_array_get ~expr_pos key)
       array_pos
       ty1
-      Errors.unify_error
   in
   GenericRules.apply_rules env ety1 (fun env ety1 ->
       let (r, ety1_) = deref ety1 in

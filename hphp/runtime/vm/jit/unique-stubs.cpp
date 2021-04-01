@@ -102,12 +102,6 @@ void alignCacheLine(CodeBlock& cb) {
   }
 }
 
-void assertNativeStackAligned(Vout& v, RegSet set = {}) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << call{TCA(assert_native_stack_aligned), set};
-  }
-}
-
 /*
  * Load and store the VM registers from/to RDS.
  */
@@ -655,18 +649,27 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
-    // After writing to svcreq registers or calling a function,
-    // return regs are invalid
-    v << copy2{rret_data(), rret_type(), r_svcreq_arg(2), r_svcreq_arg(3)};
+    // Load ActRec::m_callOffAndFlags.
+    auto const callOffAndFlags = v.makeReg();
+    v << loadl{rvmsp()[-kArRetOff + AROFF(m_callOffAndFlags)], callOffAndFlags};
 
-    assertNativeStackAligned(v, RegSet() | r_svcreq_arg(2) | r_svcreq_arg(3));
+    // Store return value (overwrites ActRec) and sync VM regs.
+    storeReturnRegs(v);
+    storeVMRegs(v);
 
-    v << lea{rvmsp()[-kArRetOff], r_svcreq_arg(0)};
-    v << copy{rvmfp(), r_svcreq_arg(1)};
-    v << fallthru{r_svcreq_arg(0) | r_svcreq_arg(1) |
-                  r_svcreq_arg(2) | r_svcreq_arg(3)};
+    auto const ret = v.makeReg();
+    v << vcall{
+      CallSpec::direct(svcreq::handlePostInterpRet),
+      v.makeVcallArgs({{callOffAndFlags}}),
+      v.makeTuple({ret}),
+      Fixup::none(),
+      DestType::SSA
+    };
+
+    loadVMRegs(v);
+    loadReturnRegs(v);  // spurious load if we're not returning
+    v << jmpr{ret, php_return_regs()};
   });
-  svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
   return start;
 }
 
@@ -675,15 +678,29 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
-    // Sync return regs before calling native assert function.
-    storeReturnRegs(v);
-    assertNativeStackAligned(v);
+    // Load ActRec::m_callOffAndFlags.
+    auto const calleeFP = v.makeReg();
+    auto const callOffAndFlags = v.makeReg();
+    loadGenFrame<async>(v, calleeFP);
+    v << loadl{calleeFP[AROFF(m_callOffAndFlags)], callOffAndFlags};
 
-    loadGenFrame<async>(v, r_svcreq_arg(0));
-    v << copy{rvmfp(), r_svcreq_arg(1)};
-    v << fallthru{r_svcreq_arg(0) | r_svcreq_arg(1)};
+    // Store return value and sync VM regs.
+    storeReturnRegs(v);
+    storeVMRegs(v);
+
+    auto const ret = v.makeReg();
+    v << vcall{
+      CallSpec::direct(svcreq::handlePostInterpRet),
+      v.makeVcallArgs({{callOffAndFlags}}),
+      v.makeTuple({ret}),
+      Fixup::none(),
+      DestType::SSA
+    };
+
+    loadVMRegs(v);
+    loadReturnRegs(v);  // spurious load if we're not returning
+    v << jmpr{ret, php_return_regs()};
   });
-  svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET_GENITER);
   return start;
 }
 

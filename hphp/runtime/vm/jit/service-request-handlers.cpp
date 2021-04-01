@@ -253,6 +253,28 @@ TCA getFuncBody(const Func* func) {
   return tca != nullptr ? tca : tc::ustubs().resumeHelper;
 }
 
+namespace {
+
+TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
+  auto const start = [&] {
+    if (auto const addr = transResult.addr()) return addr;
+    vmpc() = sk.pc();
+    return transResult.scope() == TranslationResult::Scope::Transient
+      ? tc::ustubs().interpHelperSyncedPC
+      : tc::ustubs().interpHelperNoTranslate;
+  }();
+
+  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
+    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
+    Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
+  }
+
+  tl_regState = VMRegState::DIRTY;
+  return start;
+}
+
+}
+
 TCA handleServiceRequest(ReqInfo& info) noexcept {
   FTRACE(1, "handleServiceRequest {}\n", svcreq::to_name(info.req));
 
@@ -303,48 +325,6 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       }
       break;
     }
-
-    case REQ_POST_INTERP_RET:
-    case REQ_POST_INTERP_RET_GENITER: {
-      // This is only responsible for the control-flow aspect of the Ret:
-      // getting to the destination's translation, if any.
-      auto const ar = info.args[0].ar;
-      auto const caller = info.args[1].ar;
-      UNUSED auto const func = ar->func();
-      auto const callOff = ar->callOffset();
-      auto const isAER = ar->isAsyncEagerReturn();
-      assertx(caller == vmfp());
-      auto const destFunc = caller->func();
-      // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = skipCall(destFunc->at(callOff));
-      if (info.req == REQ_POST_INTERP_RET) {
-        TypedValue rv;
-        rv.m_data = info.args[2].tvData;
-        rv.m_type = info.args[3].tvType;
-        rv.m_aux = info.args[3].tvAux;
-        *ar->retSlot() = rv;
-      }
-      if (isAER) {
-        // When returning to the interpreted FCall, the execution continues at
-        // the next opcode, not honoring the request for async eager return.
-        // If the callee returned eagerly, we need to wrap the result into
-        // StaticWaitHandle.
-        assertx(ar->retSlot()->m_aux.u_asyncEagerReturnFlag + 1 < 2);
-        if (ar->retSlot()->m_aux.u_asyncEagerReturnFlag) {
-          auto const retval = tvAssertPlausible(*ar->retSlot());
-          auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);
-          tvCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
-        }
-      }
-      assertx(caller == vmfp());
-      FTRACE(3, "REQ_POST_INTERP_RET{}: from {} to {}\n",
-             info.req == REQ_POST_INTERP_RET ? "" : "_GENITER",
-             func->fullName()->data(),
-             destFunc->fullName()->data());
-      sk = liveSK();
-      transResult = getTranslation(sk);
-      break;
-    }
   }
 
   if (smashed && info.stub) {
@@ -353,22 +333,37 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     Treadmill::enqueue([stub] { tc::freeTCStub(stub); });
   }
 
-  auto const start = [&] {
-    assertx(transResult);
-    if (auto const addr = transResult->addr()) return addr;
-    vmpc() = sk.pc();
-    return transResult->scope() == TranslationResult::Scope::Transient
-      ? tc::ustubs().interpHelperSyncedPC
-      : tc::ustubs().interpHelperNoTranslate;
-  }();
+  assertx(transResult);
+  return resume(sk, *transResult);
+}
 
-  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
-    Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
+TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
+  assert_native_stack_aligned();
+  tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
+
+  FTRACE(3, "handlePostInterpRet to {}\n", vmfp()->func()->fullName()->data());
+
+  auto const callOffset = callOffAndFlags >> ActRec::CallOffsetStart;
+  auto const isAER = callOffAndFlags & (1 << ActRec::AsyncEagerRet);
+
+  // Reconstruct PC so that the subsequent logic have clean reg state.
+  vmpc() = skipCall(vmfp()->func()->at(callOffset));
+
+  if (isAER) {
+    // When returning to the interpreted FCall, the execution continues at
+    // the next opcode, not honoring the request for async eager return.
+    // If the callee returned eagerly, we need to wrap the result into
+    // StaticWaitHandle.
+    assertx(tvIsPlausible(vmsp()[0]));
+    assertx(vmsp()[0].m_aux.u_asyncEagerReturnFlag + 1 < 2);
+    if (vmsp()[0].m_aux.u_asyncEagerReturnFlag) {
+      auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(vmsp()[0]);
+      vmsp()[0] = make_tv<KindOfObject>(waitHandle);
+    }
   }
 
-  tl_regState = VMRegState::DIRTY;
-  return start;
+  auto const sk = liveSK();
+  return resume(sk, getTranslation(sk));
 }
 
 TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {

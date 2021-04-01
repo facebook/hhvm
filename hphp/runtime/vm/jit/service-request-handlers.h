@@ -40,6 +40,13 @@ namespace svcreq {
 TCA handleServiceRequest(ReqInfo& info) noexcept;
 
 /*
+ * Handle a situation where the translated code in the TC executes a return
+ * for a frame that was pushed by the interpreter, i.e. there is no TCA to
+ * return to.
+ */
+TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept;
+
+/*
  * Handle a bindcall request---i.e., look up (or create) the appropriate func
  * prologue for `func' and `numArgs', then smash the call instruction
  * at `toSmash'.

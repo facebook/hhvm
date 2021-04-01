@@ -131,6 +131,13 @@ let run_naming_table_test f =
       in
 
       Provider_backend.set_local_memory_backend_with_defaults ();
+      let ctx =
+        Provider_context.empty_for_tool
+          ~popt
+          ~tcopt
+          ~backend:(Provider_backend.get ())
+          ~deps_mode
+      in
       (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
       here is a fresh ctx with a fresh backend so we have to set it again. *)
       Db_path_provider.set_naming_db_path
@@ -385,12 +392,18 @@ let test_context_changes_funs () =
       to manually remove any old reverse-naming-table entries before calling
       into the naming provider -- something that this test doesn't do.
       Hence why it gives incorrect answers. *)
+      let expected =
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Shared_memory ->
+          Some "\\bar" (* because the caller (us) is expected to clean up *)
+        | _ -> None
+      in
       Asserter.String_asserter.assert_option_equals
-        (Some "\\bar") (* TODO(ljw): this is a bug; should be None *)
+        expected
         (Naming_provider.get_fun_canon_name ctx "\\bar")
         "Old function in context should NOT be accessible by non-canon name \\bar";
       Asserter.String_asserter.assert_option_equals
-        (Some "\\bar") (* TODO(ljw): this is a bug; should be None *)
+        expected
         (Naming_provider.get_fun_canon_name ctx "\\BAR")
         "Old function in context should NOT be accessible by non-canon name \\BAR";
       Asserter.String_asserter.assert_option_equals
@@ -443,12 +456,18 @@ let test_context_changes_classes () =
       to manually remove any old reverse-naming-table entries before calling
       into the naming provider -- something that this test doesn't do.
       Hence why it gives incorrect answers. *)
+      let expected =
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Shared_memory ->
+          Some "\\Foo" (* because the caller (us) is expected to clean up *)
+        | _ -> None
+      in
       Asserter.String_asserter.assert_option_equals
-        (Some "\\Foo") (* TODO(ljw) should be None; this is a bug *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\Foo")
         "Old class in context should NOT be accessible by non-canon name \\Foo";
       Asserter.String_asserter.assert_option_equals
-        (Some "\\Foo") (* TODO(ljw) should be None; this is a bug *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\FOO")
         "Old class in context should NOT be accessible by non-canon name \\FOO";
       Asserter.String_asserter.assert_option_equals
@@ -501,12 +520,18 @@ let test_context_changes_typedefs () =
       to manually remove any old reverse-naming-table entries before calling
       into the naming provider -- something that this test doesn't do.
       Hence why it gives incorrect answers. *)
+      let expected =
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Shared_memory ->
+          Some "\\Baz" (* because the caller (us) is expected to clean up *)
+        | _ -> None
+      in
       Asserter.String_asserter.assert_option_equals
-        (Some "\\Baz") (* TODO(ljw): this is a bug; should be None *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\Baz")
         "Old typedef in context should NOT be accessible by non-canon name \\Baz";
       Asserter.String_asserter.assert_option_equals
-        (Some "\\Baz") (* TODO(ljw): this is a bug; should be None *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\BAZ")
         "Old typedef in context should NOT be accessible by non-canon name \\BAZ";
       Asserter.String_asserter.assert_option_equals

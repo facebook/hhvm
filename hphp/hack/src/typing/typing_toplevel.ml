@@ -398,7 +398,7 @@ let method_dynamically_callable
     let dynamic_return_info =
       Typing_env_return_info.
         {
-          return_type = MakeType.enforced dynamic_return_ty;
+          return_type = MakeType.unenforced dynamic_return_ty;
           return_disposable = false;
           return_explicit = true;
           return_dynamically_callable = true;

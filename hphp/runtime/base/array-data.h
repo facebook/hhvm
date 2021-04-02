@@ -86,14 +86,10 @@ struct ArrayData : MaybeCountable {
    * kNumKinds-1 since we use these values to index into a table.
    */
   enum ArrayKind : uint8_t {
-    kMixedKind,         // darray: dict-like array with int or string keys
-    kBespokeDArrayKind,
-    kPackedKind,        // varray: vec-like array with keys in range [0..size)
-    kBespokeVArrayKind,
-    kDictKind,
-    kBespokeDictKind,
     kVecKind,
     kBespokeVecKind,
+    kDictKind,
+    kBespokeDictKind,
     kKeysetKind,
     kBespokeKeysetKind,
     kNumKinds           // Insert new values before kNumKinds.
@@ -625,10 +621,12 @@ protected:
   };
 };
 
-static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
-static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
-static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
-static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
+static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec));
+static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict));
+static_assert(ArrayData::kKeysetKind == uint8_t(HeaderKind::Keyset));
+static_assert(ArrayData::kBespokeVecKind == uint8_t(HeaderKind::BespokeVec));
+static_assert(ArrayData::kBespokeDictKind == uint8_t(HeaderKind::BespokeDict));
+static_assert(ArrayData::kBespokeKeysetKind == uint8_t(HeaderKind::BespokeKeyset));
 
 //////////////////////////////////////////////////////////////////////
 

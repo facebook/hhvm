@@ -43,15 +43,6 @@ inline void MixedArray::scan(type_scan::Scanner& scanner) const {
   scanner.scan(*data, m_used * sizeof(*data));
 }
 
-ALWAYS_INLINE
-void MixedArray::InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey) {
-  InitSmallHash(a);
-  a->initHeader(HeaderKind::Mixed, OneReference);
-  a->m_size = size;
-  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
-  a->m_nextKI = nextIntKey;
-}
-
 inline void
 MixedArray::copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
                                uint32_t nElems) {

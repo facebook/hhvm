@@ -153,13 +153,6 @@ inline ArrayData* ArrayData::makeSampledStaticArray() const {
 ALWAYS_INLINE
 DataType ArrayData::toDataType() const {
   switch (kind()) {
-    // TODO(kshaunak): Clean these enum values up next.
-    case kPackedKind:
-    case kBespokeVArrayKind:
-    case kMixedKind:
-    case kBespokeDArrayKind:
-      return kInvalidDataType;
-
     case kVecKind:
     case kBespokeVecKind:
       return KindOfVec;
@@ -180,13 +173,6 @@ DataType ArrayData::toDataType() const {
 ALWAYS_INLINE
 DataType ArrayData::toPersistentDataType() const {
   switch (kind()) {
-    // TODO(kshaunak): Clean these enum values up next.
-    case kPackedKind:
-    case kBespokeVArrayKind:
-    case kMixedKind:
-    case kBespokeDArrayKind:
-      return kInvalidDataType;
-
     case kVecKind:
     case kBespokeVecKind:
       return KindOfPersistentVec;

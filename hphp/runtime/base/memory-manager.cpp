@@ -432,8 +432,7 @@ void MemoryManager::flush() {
  */
 
 constexpr const std::array<char*,NumHeaderKinds> header_names = {{
-  "MixedArray", "BespokeDArray", "PackedArray", "BespokeVArray",
-  "Dict", "BespokeDict", "Vec", "BespokeVec", "Keyset", "BespokeKeyset",
+  "Vec", "BespokeVec", "Dict", "BespokeDict", "Keyset", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "RClsMeth", "Record", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
@@ -519,8 +518,6 @@ void MemoryManager::checkHeap(const char* phase) {
           apc_strings.insert(h, alloc_size);
         }
         break;
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
       case HeaderKind::Vec:
       case HeaderKind::Dict:
       case HeaderKind::Keyset:
@@ -548,8 +545,6 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::Record:
-      case HeaderKind::BespokeVArray:
-      case HeaderKind::BespokeDArray:
       case HeaderKind::BespokeVec:
       case HeaderKind::BespokeDict:
       case HeaderKind::BespokeKeyset:

@@ -915,8 +915,8 @@ Array make_vec_array(Vals&&... vals) {
 }
 
 /*
- * Helper for creating map-like arrays (kMixedKind).  Takes pairs of
- * arguments for the keys and values.
+ * Helper for creating dicts. TODO(kshaunak): Rename to make_dict.
+ * Takes pairs of arguments for the keys and values.
  *
  * Usage:
  *

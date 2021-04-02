@@ -263,15 +263,11 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
               "add new kinds here");
 
 #define DISPATCH(entry)                           \
-  { MixedArray::entry,       /* darray */         \
-    BespokeArray::entry,     /* bespoke darray */ \
-    PackedArray::entry,      /* varray */         \
-    BespokeArray::entry,     /* bespoke varray */ \
-    MixedArray::entry,       /* dict */           \
-    BespokeArray::entry,     /* bespoke dict */   \
-    PackedArray::entry,      /* vec */            \
+  { PackedArray::entry,      /* vanilla vec */    \
     BespokeArray::entry,     /* bespoke vec */    \
-    SetArray::entry,         /* keyset */         \
+    MixedArray::entry,       /* vanilla dict */   \
+    BespokeArray::entry,     /* bespoke dict */   \
+    SetArray::entry,         /* vanilla keyset */ \
     BespokeArray::entry,     /* bespoke keyset */ \
   },
 
@@ -713,15 +709,11 @@ void ArrayData::getNotFound(const StringData* k) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*, 10> names = {{
-    "MixedKind",
-    "BespokeDArrayKind",
-    "PackedKind",
-    "BespokeVArrayKind",
-    "DictKind",
-    "BespokeDictKind",
+  std::array<const char*, 6> names = {{
     "VecKind",
     "BespokeVecKind",
+    "DictKind",
+    "BespokeDictKind",
     "KeysetKind",
     "BespokeKeysetKind",
   }};

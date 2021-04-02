@@ -100,13 +100,13 @@ struct RepoAuthType::Array {
     /*
      * Known size with zero-based contiguous integer keys.
      *
-     * Does not currently imply kPackedKind at runtime.
+     * May be used with list-like dicts as well as with vecs.
      */
     Packed,
     /*
      * Unknown size, zero-based contiguous integer keys.
      *
-     * Does not currently imply kPackedKind at runtime.
+     * May be used with list-like dicts as well as with vecs.
      */
     PackedN,
   };

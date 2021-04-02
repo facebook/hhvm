@@ -212,53 +212,6 @@ ssize_t HashTable<ArrayType, ElmType>::IterRewind(const ArrayData* ad,
 }
 
 template<typename ArrayType, typename ElmType>
-ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
-  // Hash table should be initialized before header.
-#if defined(__x86_64__)
-  static_assert(Empty == -1, "");
-  static_assert(SmallSize == 3, "");
-  __asm__ __volatile__(
-    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
-    "movdqu     %%xmm0, %0\n"
-    : : "o"(*((uint8_t*)a + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
-    : "xmm0"
-  );
-#elif defined(__aarch64__)
-  static_assert(Empty == -1, "");
-  static_assert(SmallSize == 3, "");
-  auto const emptyVal = int64_t{Empty};
-  //Use a2 since writeback == true for stp instruction
-  auto a2 = a;
-  __asm__ __volatile__(
- #ifdef __clang__
-  "stp        %[data], %[data], %[addr]\n"
-  :[addr] "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
-  :[data] "r"(emptyVal));
-#else
-    "stp        %x1, %x1, %x0\n"
-    : "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
-    : "r"(emptyVal)
-  );
-#endif
-
-#elif defined(__powerpc__)
-  static_assert(Empty == -1, "");
-  static_assert(SmallSize == 3, "");
-  __asm__ __volatile__(
-    "vspltisw   0, -1\n"
-    "stxvd2x    32, 0, %0\n"
-    : : "r"((uint8_t*)a + (sizeof(ArrayType) + SmallSize * sizeof(Elm)))
-    : "v0"
-  );
-#else
-  auto const hash = HashTab(a, SmallScale);
-  auto const emptyVal = int64_t{Empty};
-  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
-  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
-#endif
-}
-
-template<typename ArrayType, typename ElmType>
 TypedValue HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
                                                    int64_t k) {
   auto a = asArrayType(ad);

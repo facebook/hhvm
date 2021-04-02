@@ -42,20 +42,9 @@ namespace HPHP {
  * HHVM_REPO_SCHEMA, because kind values are used in HHBC.
  */
 enum class HeaderKind : uint8_t {
-  // Array-like header kinds. We use the concrete values of these kinds for
-  // tests in array-data.h, so take care when changing them. Specifically,
-  // we currently require that:
-  //
-  //  1. Array-like HeaderKind values match up with ArrayData::ArrayKind.
-  //  2. All PHP kinds come before any Hack array kinds.
-  //  3. varray-ish and darray-ish kinds come first (used for dvarray tests)
-  //  4. "vanilla" kinds are even, and "bespoke" kinds are odd.
-  //  5. We support fast mask-compare tests for packed and mixed layouts.
-
-  // dvarrays, with bespoke counterparts
-  Mixed, BespokeDArray, Packed, BespokeVArray,
-  // Hack arrays, with bespoke counterparts
-  Dict, BespokeDict, Vec, BespokeVec, Keyset, BespokeKeyset,
+  // Array-like header kinds. They must match up with ArrayData::ArrayKind.
+  // "vanilla" kinds must be odd and "bespoke" kinds must be even.
+  Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
 
   // Other ordinary refcounted heap objects
   String, Resource, ClsMeth, RClsMeth, Record, RFunc,
@@ -146,9 +135,10 @@ enum class GCBits : uint8_t {};
  * padding with ONE_BIT_REFCOUNT.
  *
  * 0       32     40      48            56
- * [ cnt | kind | marks | arrBits      | sizeClass ] Packed, Vec
- * [ cnt | kind | marks | arrBits      | keyTypes  ] Mixed, Dict
- * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
+ * [ cnt | kind | marks | arrBits      | sizeClass ] (vanilla) Vec
+ * [ cnt | kind | marks | arrBits      | keyTypes  ] (vanilla) Dict
+ * [ cnt | kind | marks |                          ] (vanilla) Keyset
+ * [ cnt | kind | marks | arrBits      | extraData ] any BespokeArray
  * [ cnt | kind | marks | sizeClass    | isSymbol  ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
@@ -156,12 +146,12 @@ enum class GCBits : uint8_t {};
  * Note: arrBits includes several flags, mostly from the Hack array migration:
  *  - 1 bit for hasAPCTypedValue
  *  - 1 bit for isLegacyArray
- *  - 1 bit for hasProvenanceData
  *  - 1 bit for hasStrKeyTable
+ *  - 1 bit for isSampledArray
  *  - 4 bits unused
  *
- * When HAM is complete, we can eliminate DVArray and hasProvenanceData and move
- * the MixedArray keyTypes bitset (which uses 4 bits) to byte 6.
+ * Now that HAM is done, we can merge the MixedArrayKeys bitset (which also
+ * uses 4 bits) into this field, so the highest byte is always the size class.
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
  * NativeData, ClosureHeader, or MemoData), only the special header is marked
@@ -276,7 +266,7 @@ inline constexpr bool isObjectKind(HeaderKind k) {
 }
 
 inline constexpr bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Mixed && k <= HeaderKind::BespokeKeyset;
+  return k >= HeaderKind::Vec && k <= HeaderKind::BespokeKeyset;
 }
 
 inline constexpr bool isFreeKind(HeaderKind k) {

@@ -181,12 +181,6 @@ struct MixedArray final : ArrayData,
   };
 
   /*
-   * Initialize an empty small mixed array with given field. This should be
-   * inlined.
-   */
-  static void InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey);
-
-  /*
    * Allocate a new, empty, request-local array in (mixed|dict) mode, with
    * enough space reserved for `capacity' members.
    *
@@ -244,8 +238,7 @@ public:
    * input 'array' into the uncounted one. All values copied are made
    * uncounted as well.  An uncounted array can only contain uncounted
    * values (primitive values, uncounted or static strings and
-   * uncounted or static arrays).  The Packed version does the same
-   * when the array has a kPackedKind.
+   * uncounted or static arrays).
    *
    * If withApcTypedValue is true, space for an APCTypedValue will be
    * allocated in front of the returned pointer.

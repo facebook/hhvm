@@ -302,12 +302,10 @@ bool record_request_heap_mem_event(const void* addr,
       fill_record(static_cast<const StringData*>(hdr), addr, record);
       break;
 
-    case HeaderKind::Packed:
     case HeaderKind::Vec:
       fill_record(static_cast<const ArrayData*>(hdr), addr, record);
       break;
 
-    case HeaderKind::Mixed:
     case HeaderKind::Dict:
       fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
@@ -316,8 +314,6 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const SetArray*>(hdr), addr, record);
       break;
 
-    case HeaderKind::BespokeVArray:
-    case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:
     case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:

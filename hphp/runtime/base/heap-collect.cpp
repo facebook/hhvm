@@ -150,18 +150,14 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
     case HeaderKind::RClsMeth:
-    case HeaderKind::Packed:
-    case HeaderKind::Mixed:
-    case HeaderKind::Dict:
-    case HeaderKind::Vec:
-    case HeaderKind::Keyset:
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
     case HeaderKind::Record:
-    case HeaderKind::BespokeVArray:
-    case HeaderKind::BespokeDArray:
+    case HeaderKind::Vec:
+    case HeaderKind::Dict:
+    case HeaderKind::Keyset:
     case HeaderKind::BespokeVec:
     case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:

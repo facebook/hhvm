@@ -309,9 +309,6 @@ protected:
     return table;
   }
 
-  // Hash table should be initialized before the header.
-  static void InitSmallHash(ArrayType* a);
-
   static ALWAYS_INLINE bool hitIntKey(const Elm& e, int64_t ki) {
     assertx(!e.isInvalid());
     return e.intKey() == ki && e.hasIntKey();

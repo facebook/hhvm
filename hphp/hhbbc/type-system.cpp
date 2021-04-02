@@ -2713,13 +2713,6 @@ bool Type::checkInvariants() const {
     // (static) specific array type.
     DEBUG_ONLY auto const b = bits() & BArrLikeN;
     switch (m_data.aval->kind()) {
-
-      case ArrayData::kMixedKind:
-      case ArrayData::kBespokeDArrayKind:
-      case ArrayData::kPackedKind:
-      case ArrayData::kBespokeVArrayKind:
-        always_assert(false);
-
       case ArrayData::kDictKind:
       case ArrayData::kBespokeDictKind:
         assertx(b == BSDictN);

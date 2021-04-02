@@ -338,10 +338,8 @@ ArrayLayout selectSinkLayout(
 
   if (p_monotype >= p_cutoff) {
     using AK = ArrayData::ArrayKind;
-    auto const vec = load(profile.data->arrCounts[AK::kVecKind / 2]) +
-                     load(profile.data->arrCounts[AK::kPackedKind / 2]);
-    auto const dict = load(profile.data->arrCounts[AK::kDictKind / 2]) +
-                      load(profile.data->arrCounts[AK::kMixedKind / 2]);
+    auto const vec = load(profile.data->arrCounts[AK::kVecKind / 2]);
+    auto const dict = load(profile.data->arrCounts[AK::kDictKind / 2]);
     auto const keyset = load(profile.data->arrCounts[AK::kKeysetKind / 2]);
 
     assertx(vec || dict || keyset);

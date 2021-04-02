@@ -61,8 +61,6 @@ TRACE_SET_MOD(irlower);
 void cgCheckVecBounds(IRLS& env, const IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
 
-  // We may check packed array bounds on profiled arrays that we do not
-  // statically know have kPackedKind.
   assertx(inst->taken());
   auto arr = srcLoc(env, inst, 0).reg();
   auto idx = srcLoc(env, inst, 1).reg();

@@ -210,7 +210,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
 
     switch (from_hdr->kind()) {
       // Known generalized cases that don't really need pointer kind
-      case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Keyset: {
         if (edge.offset >= sizeof(MixedArray)) {
@@ -230,7 +229,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
-      case HeaderKind::Packed:
       case HeaderKind::Vec: {
         if (edge.offset >= sizeof(ArrayData)) {
           auto elm_offset = edge.offset - sizeof(ArrayData);
@@ -242,8 +240,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
-      case HeaderKind::BespokeVArray:
-      case HeaderKind::BespokeDArray:
       case HeaderKind::BespokeVec:
       case HeaderKind::BespokeDict:
       case HeaderKind::BespokeKeyset:

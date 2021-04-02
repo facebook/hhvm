@@ -177,7 +177,7 @@ struct AProp  { SSATmp* obj; uint16_t offset; };
 
 /*
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any
- * kind of array (not necessarily kPackedKind or whatnot).
+ * kind of array (not necessarily a vec).
  */
 struct AElemI { SSATmp* arr; int64_t idx; };
 

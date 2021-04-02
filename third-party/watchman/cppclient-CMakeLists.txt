@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 project(watchman CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,10 +12,20 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "*.cpp")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include")
 file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include/watchman" SYMBOLIC)
 
-add_library(watchman STATIC ${SOURCES})
-target_include_directories(watchman PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include")
+add_library(watchmanclient STATIC ${SOURCES})
+target_include_directories(watchmanclient PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include")
+# Needed for no-config folly
+if (APPLE)
+  target_compile_definitions(watchmanclient PRIVATE "-DFOLLY_HAVE_CLOCK_GETTIME=1")
+endif()
 
-foreach(DEP BOOST FMT FOLLY)
+foreach(DEP BOOST DOUBLE_CONVERSION FMT FOLLY OPENSSL)
   set("${DEP}_INCLUDE_DIR" "${DEP}_INCLUDE_DIR-notfound" CACHE PATH "Path to ${DEP}'s includes")
-  target_include_directories(watchman PRIVATE "${${DEP}_INCLUDE_DIR}")
+  target_include_directories(watchmanclient PRIVATE "${${DEP}_INCLUDE_DIR}")
 endforeach()
+
+include(GNUInstallDirs)
+install(TARGETS watchmanclient LIBRARY)
+
+file(GLOB HEADERS CONFIGURE_DEPENDS "*.h")
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/watchman)

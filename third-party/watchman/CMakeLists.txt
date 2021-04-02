@@ -12,6 +12,7 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
 )
 
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(FMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
 
 ExternalProject_Add(
@@ -23,10 +24,16 @@ ExternalProject_Add(
     "cppclient/CMakeLists.txt"
   SOURCE_SUBDIR cppclient
   CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+    -DCMAKE_INSTALL_LIBDIR=lib
+    "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
     "-DBOOST_INCLUDE_DIR=${BOOST_INCLUDE_DIR}"
+    "-DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}"
     "-DFMT_INCLUDE_DIR=${FMT_INCLUDE_DIR}"
     "-DFOLLY_INCLUDE_DIR=${CMAKE_CURRENT_LIST_DIR}/../folly"
+    "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
 )
-add_dependencies(bundled_watchman folly boost fmt)
+add_dependencies(bundled_watchman folly boost fmt double-conversion)
 
 add_dependencies(libwatchmanclient bundled_watchman)

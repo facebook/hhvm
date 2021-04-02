@@ -208,8 +208,6 @@ public:
 
   // copies and conversions
   static ArrayData* CopyStatic(const ArrayData* ad);
-  static ArrayData* ToDVArray(ArrayData* ad, bool copy);
-  static ArrayData* ToHackArr(ArrayData* ad, bool copy);
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy);
 };
 

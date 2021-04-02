@@ -251,7 +251,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_array,
       raise_warning("Not a valid callback function %s",
                     iter.second().toString().data());
       return subject.isString() ? empty_string_variant()
-                                : Variant(empty_array());
+                                : Variant(empty_dict_array());
     }
   }
 

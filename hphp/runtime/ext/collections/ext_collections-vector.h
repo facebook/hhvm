@@ -164,8 +164,8 @@ public:
   void reserve(uint32_t sz);
 
   Array toPHPArrayImpl() {
-    if (!m_size) return empty_array();
-    auto ad = arrayData()->toPHPArray(true);
+    if (!m_size) return empty_dict_array();
+    auto ad = arrayData()->toDict(true);
     return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 

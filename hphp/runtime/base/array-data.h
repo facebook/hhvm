@@ -156,13 +156,10 @@ public:
   /*
    * Convert between array kinds.
    */
-  ArrayData* toPHPArray(bool copy);
-  ArrayData* toPHPArrayIntishCast(bool copy);
-  ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
+  ArrayData* toDict(bool copy);
   ArrayData* toKeyset(bool copy);
-  ArrayData* toVArray(bool copy);
-  ArrayData* toDArray(bool copy);
+  ArrayData* toDictIntishCast(bool copy);
 
   /*
    * Return the array to the request heap.
@@ -750,8 +747,6 @@ struct ArrayFunctions {
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
-  ArrayData* (*toDVArray[NK])(ArrayData*, bool copy);
-  ArrayData* (*toHackArr[NK])(ArrayData*, bool copy);
   void (*onSetEvalScalar[NK])(ArrayData*);
 };
 

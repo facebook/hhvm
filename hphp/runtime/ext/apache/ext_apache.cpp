@@ -60,7 +60,7 @@ Array HHVM_FUNCTION(apache_request_headers) {
     auto const& headers = transport->getHeaders();
     return get_headers(headers);
   }
-  return empty_darray();
+  return empty_dict_array();
 }
 
 Array HHVM_FUNCTION(apache_response_headers) {
@@ -70,7 +70,7 @@ Array HHVM_FUNCTION(apache_response_headers) {
     transport->getResponseHeaders(headers);
     return get_headers(headers);
   }
-  return empty_darray();
+  return empty_dict_array();
 }
 
 bool HHVM_FUNCTION(apache_setenv, const String& /*variable*/,
@@ -115,7 +115,7 @@ Array HHVM_FUNCTION(get_headers_secure) {
     auto const& headers = transport->getHeaders();
     return get_headers(headers, true);
   }
-  return empty_darray();
+  return empty_dict_array();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

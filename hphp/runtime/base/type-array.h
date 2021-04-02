@@ -168,13 +168,7 @@ public:
   Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
-
-  Array toVArray() const { return toVec(); }
-  Array toDArray() const { return toDict(); }
-  Array toPHPArray() const { return toDict(); }
-  Array toPHPArrayIntishCast() const {
-    COPY_BODY(toPHPArrayIntishCast(true), Array{})
-  }
+  Array toDictIntishCast() const { COPY_BODY(toDictIntishCast(true), Array{}) }
 
   #undef COPY_BODY
 
@@ -537,18 +531,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-ALWAYS_INLINE Array empty_array() {
-  return Array::attach(ArrayData::CreateDict());
-}
-
-ALWAYS_INLINE Array empty_varray() {
-  return Array::attach(ArrayData::CreateVec());
-}
-
-ALWAYS_INLINE Array empty_darray() {
-  return Array::attach(ArrayData::CreateDict());
-}
 
 ALWAYS_INLINE Array empty_vec_array() {
   return Array::attach(ArrayData::CreateVec());

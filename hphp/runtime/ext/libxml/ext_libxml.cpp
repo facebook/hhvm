@@ -666,7 +666,7 @@ Array HHVM_FUNCTION(libxml_get_errors) {
   xmlErrorVec* error_list = &rl_libxml_request_data->m_errors;
   const auto length = error_list->size();
   if (!length) {
-    return empty_varray();
+    return empty_vec_array();
   }
   VArrayInit ret(length);
   for (int64_t i = 0; i < length; i++) {

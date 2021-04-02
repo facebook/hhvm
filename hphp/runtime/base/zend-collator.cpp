@@ -593,9 +593,9 @@ static bool collator_sort_internal(bool renumber, Variant &array,
     return false;
   }
   if (renumber) {
-    array = temp.toVArray();
+    array = temp.toVec();
   } else {
-    array = temp.toDArray();
+    array = temp.toDict();
   }
   return true;
 }

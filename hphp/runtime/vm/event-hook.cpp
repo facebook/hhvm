@@ -519,7 +519,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
         Variant("fb_intercept2 requires a darray to be returned"));
     }
     assertx(ret.isArray());
-    auto const retArr = ret.toDArray();
+    auto const retArr = ret.toDict();
     if (retArr.exists(s_value)) {
       ret = retArr[s_value];
     } else if (retArr.exists(s_callback)) {

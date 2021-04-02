@@ -2109,7 +2109,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     return ret.toArray();
   }
   if (ret.isNull()) {
-    return empty_array();
+    return empty_dict_array();
   }
   raise_error("__debugInfo() must return an array");
   not_reached();

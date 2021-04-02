@@ -264,14 +264,6 @@ ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }
 NO_PROFILING
-ArrayData* BespokeArray::ToDVArray(ArrayData* ad, bool copy) {
-  return g_layout_funcs.fnToDVArray[getLayoutByte(ad)](ad, copy);
-}
-NO_PROFILING
-ArrayData* BespokeArray::ToHackArr(ArrayData* ad, bool copy) {
-  return g_layout_funcs.fnToHackArr[getLayoutByte(ad)](ad, copy);
-}
-NO_PROFILING
 ArrayData* BespokeArray::SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
   return g_layout_funcs.fnSetLegacyArray[getLayoutByte(ad)](ad, copy, legacy);
 }

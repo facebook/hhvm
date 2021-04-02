@@ -337,7 +337,7 @@ TypedValue HHVM_FUNCTION(array_fill,
     raise_invalid_argument_warning("Number of elements can't be negative");
     return make_tv<KindOfBoolean>(false);
   } else if (num == 0) {
-    return tvReturn(start_index == 0 ? empty_varray() : empty_darray());
+    return tvReturn(start_index == 0 ? empty_vec_array() : empty_dict_array());
   }
 
   if (start_index == 0) {
@@ -486,7 +486,7 @@ void php_array_merge_recursive(Array& arr1, const Array& arr2) {
         arr1.convertKey<IntishCast::Cast>(*key.asTypedValue());
       auto const lval = arr1.lval(arrkey, AccessFlags::Key);
       auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv());
-      subarr1 = subarr1.toDArray();
+      subarr1 = subarr1.toDict();
       auto subarr2 = tvCastToArrayLike<IntishCast::Cast>(iter.secondVal());
       php_array_merge_recursive(subarr1, subarr2);
       tvUnset(lval); // avoid contamination of the value that was strongly bound
@@ -662,7 +662,7 @@ static void php_array_replace_recursive(Array &arr1, const Array& arr2) {
       if (isArrayLikeType(lval.type())) {
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
-        ).toPHPArrayIntishCast();
+        ).toDictIntishCast();
         php_array_replace_recursive(subarr1, ArrNR(val(tv).parr));
         tvSet(make_array_like_tv(subarr1.get()), lval);
       } else {
@@ -983,7 +983,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   // the whole thing into a varray and return it immediately.
   if (offset == 0 && len == num_in && input_is_packed) {
     if (tvIsArrayLike(cell_input)) {
-      return tvReturn(ArrNR{val(cell_input).parr}.asArray().toVArray());
+      return tvReturn(ArrNR{val(cell_input).parr}.asArray().toVec());
     }
     if (tvIsClsMeth(cell_input) && RO::EvalIsCompatibleClsMethType) {
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
@@ -1197,7 +1197,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
 TypedValue HHVM_FUNCTION(array_values,
                          const Variant& input) {
   if (input.isArray() || input.isClsMeth()) {
-    return tvReturn(input.toVArray());
+    return tvReturn(input.toVec());
   }
 
   folly::Optional<VArrayInit> ai;
@@ -1460,7 +1460,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 #define diff_intersect_body(type, vararg, intersect_params)     \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) {                                     \
-    return tvReturn(empty_array());                             \
+    return tvReturn(empty_dict_array());                             \
   }                                                             \
   auto ret = arr_array1.type(array2, intersect_params);         \
   if (ret.size()) {                                             \
@@ -1798,7 +1798,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
   auto diff_step = [](TypedValue left, TypedValue right) {
     auto leftSize = getContainerSize(left);
     // If we have more than 2 args, the left input could end up empty
-    if (leftSize == 0) return empty_array();
+    if (leftSize == 0) return empty_dict_array();
 
     ArrayInit ret(leftSize, ArrayInit::Map{});
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
@@ -2236,7 +2236,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
 
   auto intersect_step = [](TypedValue left, TypedValue right) {
     auto const leftSize = getContainerSize(left);
-    if (leftSize == 0) return empty_array();
+    if (leftSize == 0) return empty_dict_array();
 
     ArrayInit ret(leftSize, ArrayInit::Map{});
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
@@ -3013,12 +3013,12 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
 
 // HH\\varray
 Array HHVM_FUNCTION(HH_varray, const Variant& input) {
-  return input.toVArray();
+  return input.toVec();
 }
 
 // HH\\darray
 Array HHVM_FUNCTION(HH_darray, const Variant& input) {
-  return input.toDArray();
+  return input.toDict();
 }
 
 TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {

@@ -669,14 +669,6 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* SetArray::ToDVArray(ArrayData* ad, bool copy) {
-  always_assert(false);
-}
-
-ArrayData* SetArray::ToHackArr(ArrayData* ad, bool copy) {
-  always_assert(false);
-}
-
 void SetArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asSet(ad);
   auto const used = a->m_used;

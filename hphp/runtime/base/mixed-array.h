@@ -323,8 +323,6 @@ public:
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
-  static ArrayData* ToDVArray(ArrayData*, bool copy);
-  static ArrayData* ToHackArr(ArrayData*, bool copy);
 
   static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);

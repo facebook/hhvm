@@ -203,10 +203,10 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
     s_name,      name,
     s_version,   ext ? ext->getVersion() : "",
     s_info,      empty_string(),
-    s_ini,       empty_darray(),
-    s_constants, empty_darray(),
-    s_functions, empty_darray(),
-    s_classes,   empty_darray()
+    s_ini,       empty_dict_array(),
+    s_constants, empty_dict_array(),
+    s_functions, empty_dict_array(),
+    s_classes,   empty_dict_array()
   );
 }
 
@@ -1238,13 +1238,13 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   if (!(cls->attrs() & (AttrTrait | AttrInterface))) {
     // requirements are applied to abstract/concrete classes when they use
     // a trait / implement an interface
-    return empty_varray();
+    return empty_vec_array();
   }
 
   auto const& requirements = cls->allRequirements();
   auto numReqs = requirements.size();
   if (numReqs == 0) {
-    return empty_varray();
+    return empty_vec_array();
   }
 
   VArrayInit pai(numReqs);
@@ -1482,7 +1482,7 @@ static Array HHVM_STATIC_METHOD(
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
-    return empty_darray();
+    return empty_dict_array();
   }
 
   auto st = req::make<c_Set>();
@@ -1507,7 +1507,7 @@ template <typename Fn>
 static Array orderedConstantsHelper(const Class* cls, Fn filterFn) {
   auto const numConsts = cls->numConstants();
   if (!numConsts) {
-    return empty_darray();
+    return empty_dict_array();
   }
 
   auto st = KeysetInit{numConsts};
@@ -1519,7 +1519,7 @@ static Array orderedConstantsHelper(const Class* cls, Fn filterFn) {
     }
   }
 
-  auto ret = st.create()->toDArray(false /*copy*/);
+  auto ret = st.create()->toDict(false /*copy*/);
   assertx(ret->size() <= numConsts);
   return Array::attach(std::move(ret));
 }

@@ -1607,7 +1607,7 @@ Variant HHVM_FUNCTION(str_word_count,
   case 1:
   case 2:
     if (!str_len) {
-      return empty_array();
+      return empty_dict_array();
     }
     break;
   case 0:
@@ -1752,7 +1752,7 @@ String HHVM_FUNCTION(fb_htmlspecialchars,
   if (!extra.isNull() && !extra.isArray()) {
     raise_expected_array_warning("fb_htmlspecialchars");
   }
-  const Array& arr_extra = extra.isNull() ? empty_varray() : extra.toArray();
+  const Array& arr_extra = extra.isNull() ? empty_vec_array() : extra.toArray();
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, arr_extra);
 }

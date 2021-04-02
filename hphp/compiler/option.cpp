@@ -145,7 +145,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
       VariableUnserializer uns{
         value.data(), value.size(),
         VariableUnserializer::Type::Internal,
-        false, empty_array()
+        false, empty_dict_array()
       };
       try {
         auto v = uns.unserialize();

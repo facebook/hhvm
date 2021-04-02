@@ -772,27 +772,6 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
   return ad;
 }
 
-ArrayData* PackedArray::ToDVArray(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  if (adIn->empty()) return ArrayData::CreateVec();
-  auto const ad = copy ? Copy(adIn) : adIn;
-  ad->m_kind = HeaderKind::Packed;
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
-  assertx(checkInvariants(ad));
-  return ad;
-}
-
-ArrayData* PackedArray::ToHackArr(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  if (adIn->empty()) return ArrayData::CreateVec();
-  auto const ad = copy ? Copy(adIn) : adIn;
-  ad->m_kind = HeaderKind::Vec;
-  ad->setLegacyArrayInPlace(false);
-  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
-  assertx(checkInvariants(ad));
-  return ad;
-}
-
 void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   assertx(checkInvariants(ad));
   auto const size = ad->m_size;

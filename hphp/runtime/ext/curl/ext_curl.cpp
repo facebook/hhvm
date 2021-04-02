@@ -129,7 +129,7 @@ const StaticString
 Array HHVM_FUNCTION(curl_list_pools) {
   ReadLock lock(CurlHandlePool::namedPoolsMutex);
   auto size = CurlHandlePool::namedPools.size();
-  if (!size) return empty_darray();
+  if (!size) return empty_dict_array();
 
   DArrayInit ret(size);
   for (auto it: CurlHandlePool::namedPools) {

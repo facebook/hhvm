@@ -2116,7 +2116,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
       )
     );
   } else {
-    return empty_varray();
+    return empty_vec_array();
   }
 
   assertx(class_name.get());
@@ -2124,7 +2124,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   assertx(cls);
   auto ret = DArrayInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, nullptr, ret);
-  return ret.toVArray();
+  return ret.toVec();
 }
 
 static bool valid_function(SoapServer *server, Object &soap_obj,

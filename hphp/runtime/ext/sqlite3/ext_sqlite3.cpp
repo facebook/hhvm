@@ -413,7 +413,7 @@ Variant HHVM_METHOD(SQLite3, querysingle,
         return get_column_value(pstmt, 0);
       case SQLITE_DONE: /* Valid but no results */
         if (entire_row) {
-          return empty_array();
+          return empty_dict_array();
         } else {
           return init_null();
         }

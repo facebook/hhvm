@@ -1055,8 +1055,8 @@ Variant HHVM_FUNCTION(socket_select,
       }
     );
     if (hasData.size() > 0) {
-      write = empty_darray();
-      except = empty_darray();
+      write = empty_dict_array();
+      except = empty_dict_array();
       read = hasData;
       return hasData.size();
     }
@@ -1678,7 +1678,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
         break;
       }
       default:
-        data.set(s_sockaddr, empty_array());
+        data.set(s_sockaddr, empty_dict_array());
         break;
     }
 

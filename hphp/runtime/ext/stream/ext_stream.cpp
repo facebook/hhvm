@@ -263,7 +263,7 @@ Variant HHVM_FUNCTION(stream_context_get_default,
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   auto context = g_context->getStreamContext();
   if (!context) {
-    context = req::make<StreamContext>(empty_darray(), empty_darray());
+    context = req::make<StreamContext>(empty_dict_array(), empty_dict_array());
     g_context->setStreamContext(context);
   }
   if (!arrOptions.isNull() &&
@@ -845,7 +845,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   if (file != nullptr) {
     auto context = file->getStreamContext();
     if (!context) {
-      context = req::make<StreamContext>(empty_darray(), empty_darray());
+      context = req::make<StreamContext>(empty_dict_array(), empty_dict_array());
       file->setStreamContext(context);
     }
     return context;
@@ -906,7 +906,7 @@ void StreamContext::setOption(const String& wrapper,
 
 Array StreamContext::getOptions() const {
   if (m_options.isNull()) {
-    return empty_darray();
+    return empty_dict_array();
   }
   return m_options;
 }

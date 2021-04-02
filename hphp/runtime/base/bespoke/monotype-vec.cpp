@@ -276,14 +276,6 @@ ArrayData* EmptyMonotypeVec::Pop(EmptyMonotypeVec* ead, Variant& value) {
   return ead;
 }
 
-ArrayData* EmptyMonotypeVec::ToDVArray(EmptyMonotypeVec* eadIn, bool copy) {
-  always_assert(false);
-}
-
-ArrayData* EmptyMonotypeVec::ToHackArr(EmptyMonotypeVec* eadIn, bool copy) {
-  always_assert(false);
-}
-
 ArrayData* EmptyMonotypeVec::PreSort(EmptyMonotypeVec* ead, SortFunction sf) {
   always_assert(false);
 }
@@ -723,14 +715,6 @@ ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
   value = Variant::attach(mad->typedValueUnchecked(newSize));
   mad->m_size = newSize;
   return mad;
-}
-
-ArrayData* MonotypeVec::ToDVArray(MonotypeVec* madIn, bool copy) {
-  always_assert(false);
-}
-
-ArrayData* MonotypeVec::ToHackArr(MonotypeVec* madIn, bool copy) {
-  always_assert(false);
 }
 
 ArrayData* MonotypeVec::PreSort(MonotypeVec* mad, SortFunction sf) {

@@ -566,12 +566,6 @@ ArrayData* convert(LoggingArray* lad, ArrayData* result) {
 }
 }
 
-ArrayData* LoggingArray::ToDVArray(LoggingArray* lad, bool copy) {
-  always_assert(false);
-}
-ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
-  always_assert(false);
-}
 ArrayData* LoggingArray::PreSort(LoggingArray* lad, SortFunction sf) {
   logEvent(lad, ArrayOp::PreSort, makeStaticString(sortFunctionName(sf)));
   auto const cow = lad->cowCheck();

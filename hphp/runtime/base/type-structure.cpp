@@ -816,11 +816,11 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     }
     case TypeStructure::Kind::T_typevar: {
       env.invalidType = true;
-      if (!ctx.generics) return arr.toDArray();
+      if (!ctx.generics) return arr.toDict();
       assertx(arr.exists(s_name));
       auto const generic = ctx.generics->get(arr[s_name].asCStrRef().get());
-      if (!generic.is_init()) return arr.toDArray();
-      return Variant::wrap(generic).toDArray();
+      if (!generic.is_init()) return arr.toDict();
+      return Variant::wrap(generic).toDict();
     }
     case TypeStructure::Kind::T_reifiedtype: {
       assertx(env.tsList != nullptr);
@@ -835,7 +835,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     }
     case TypeStructure::Kind::T_xhp:
     default:
-      return arr.toDArray();
+      return arr.toDict();
   }
 
   if (arr.exists(s_typevars)) newarr.set(s_typevars, arr[s_typevars]);
@@ -945,7 +945,7 @@ bool coerceToVecOrVArray(tv_lval lval) {
   if (!ad->isVectorData()) return false;
 
   // Do the coercion and replace the value.
-  auto const varray = ad->toVArray(/*copy=*/true);
+  auto const varray = ad->toVec(/*copy=*/true);
   tvCopy(make_array_like_tv(varray), lval);
   assertx(ad != varray);
   decRefArr(ad);

@@ -947,7 +947,7 @@ Array DateTime::toArray(ArrayFormat format) const {
       );
     }
   }
-  return empty_varray();
+  return empty_vec_array();
 }
 
 bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,

@@ -478,7 +478,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
 Array Variant::toPHPArrayHelper() const {
   switch (m_type) {
     case KindOfUninit:
-    case KindOfNull:          return empty_array();
+    case KindOfNull:          return empty_dict_array();
 
     // These scalars all get converted into single-element arrays.
     case KindOfBoolean:
@@ -493,12 +493,12 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:        return ArrNR{m_data.parr}.asArray().toPHPArray();
-    case KindOfObject:        return m_data.pobj->toArray().toPHPArray();
+    case KindOfKeyset:        return ArrNR{m_data.parr}.asArray().toDict();
+    case KindOfObject:        return m_data.pobj->toArray().toDict();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfRFunc:
       SystemLib::throwInvalidOperationExceptionObject("RFunc to PHPArray conversion");
-      return empty_array();
+      return empty_dict_array();
     case KindOfFunc:
       invalidFuncConversion("array");
     case KindOfClass: {
@@ -519,10 +519,10 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfRClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");
-      return empty_array();
+      return empty_dict_array();
     case KindOfRecord:
       raise_convert_record_to_type("array");
-      return empty_array();
+      return empty_dict_array();
   }
   not_reached();
 }

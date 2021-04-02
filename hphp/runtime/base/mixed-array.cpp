@@ -1359,27 +1359,6 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::ToDVArray(ArrayData* adIn, bool copy) {
-  assertx(MixedArray::asMixed(adIn));
-  if (adIn->empty()) return ArrayData::CreateDict();
-  auto const ad = copy ? Copy(adIn) : adIn;
-  ad->m_kind = HeaderKind::Mixed;
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
-  assertx(MixedArray::asMixed(ad));
-  return ad;
-}
-
-ArrayData* MixedArray::ToHackArr(ArrayData* adIn, bool copy) {
-  assertx(MixedArray::asMixed(adIn));
-  if (adIn->empty()) return ArrayData::CreateDict();
-  auto const ad = copy ? Copy(adIn) : adIn;
-  ad->m_kind = HeaderKind::Dict;
-  ad->setLegacyArrayInPlace(false);
-  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
-  assertx(MixedArray::asMixed(ad));
-  return ad;
-}
-
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   asMixed(ad)->compact(true);

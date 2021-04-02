@@ -713,15 +713,15 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         a = [&]{
           assertx(IC == IntishCast::Cast || IC == IntishCast::None);
           return IC == IntishCast::Cast
-            ? adIn->toPHPArrayIntishCast(adIn->cowCheck())
-            : adIn->toPHPArray(adIn->cowCheck());
+            ? adIn->toDictIntishCast(adIn->cowCheck())
+            : adIn->toDict(adIn->cowCheck());
         }();
         if (a != adIn) decRefArr(adIn);
         continue;
       }
 
       case KindOfObject: {
-        a = val(tv).pobj->template toArray<IC>().toPHPArray().detach();
+        a = val(tv).pobj->template toArray<IC>().toDict().detach();
         tvDecRefObj(tv);
         continue;
       }

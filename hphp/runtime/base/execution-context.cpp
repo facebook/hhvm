@@ -442,10 +442,10 @@ const StaticString
   s_default_output_handler("default output handler");
 
 Array ExecutionContext::obGetStatus(bool full) {
-  Array ret = empty_varray();
+  Array ret = empty_vec_array();
   int level = 0;
   for (auto& buffer : m_buffers) {
-    Array status = empty_darray();
+    Array status = empty_dict_array();
     if (level < m_protectedLevel || buffer.handler.isNull()) {
       status.set(s_name, s_default_output_handler);
       status.set(s_type, 0);
@@ -501,7 +501,7 @@ void ExecutionContext::obSetImplicitFlush(bool on) {
 }
 
 Array ExecutionContext::obGetHandlers() {
-  Array ret = empty_varray();
+  Array ret = empty_vec_array();
   for (auto& ob : m_buffers) {
     auto& handler = ob.handler;
     ret.append(handler.isNull() ? s_default_output_handler : handler);
@@ -897,7 +897,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
-                     fileAndLine.first, fileAndLine.second, empty_darray(),
+                     fileAndLine.first, fileAndLine.second, empty_dict_array(),
                      backtrace)),
                 false)) {
         return true;

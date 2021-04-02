@@ -253,8 +253,7 @@ ssize_t EmptyMonotypeDict::IterRewind(const Self* ad, ssize_t prev) {
 
 namespace {
 template <typename Key>
-ArrayData* makeStrMonotypeDict(
-    bool legacy, StringData* k, TypedValue v) {
+ArrayData* makeStrMonotypeDict(bool legacy, StringData* k, TypedValue v) {
   auto const mad = MonotypeDict<Key>::MakeReserve(legacy, 1, type(v));
   auto const result = MonotypeDict<Key>::SetStrMove(mad, k, v);
   assertx(result == mad);
@@ -288,9 +287,8 @@ ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
 }
 ArrayData* EmptyMonotypeDict::SetStrMove(Self* ad, StringData* k, TypedValue v) {
   auto const legacy = ad->isLegacyArray();
-  return k->isStatic()
-    ? makeStrMonotypeDict<StaticStrPtr>(legacy, k, v)
-    : makeStrMonotypeDict<StringData*>(legacy, k, v);
+  return k->isStatic() ? makeStrMonotypeDict<StaticStrPtr>(legacy, k, v)
+                       : makeStrMonotypeDict<StringData*>(legacy, k, v);
 }
 ArrayData* EmptyMonotypeDict::RemoveInt(Self* ad, int64_t k) {
   return ad;
@@ -309,12 +307,6 @@ ArrayData* EmptyMonotypeDict::Pop(Self* ad, Variant& ret) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyMonotypeDict::ToDVArray(Self* ad, bool copy) {
-  always_assert(false);
-}
-ArrayData* EmptyMonotypeDict::ToHackArr(Self* ad, bool copy) {
-  always_assert(false);
-}
 ArrayData* EmptyMonotypeDict::PreSort(Self* ead, SortFunction sf) {
   always_assert(false);
 }
@@ -1381,16 +1373,6 @@ ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
   value = tvAsCVarRef(GetPosVal(mad, pos));
   return tvIsString(key) ? RemoveStr(mad, val(key).pstr)
                          : RemoveInt(mad, val(key).num);
-}
-
-template <typename Key>
-ArrayData* MonotypeDict<Key>::ToDVArray(Self* madIn, bool copy) {
-  always_assert(false);
-}
-
-template <typename Key>
-ArrayData* MonotypeDict<Key>::ToHackArr(Self* madIn, bool copy) {
-  always_assert(false);
 }
 
 template <typename Key>

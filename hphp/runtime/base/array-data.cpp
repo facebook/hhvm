@@ -631,22 +631,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Pop)
 
   /*
-   * ArrayData* ToDVArray(ArrayData*, bool copy)
-   *
-   *   Convert the given {vec, dict} to a {varray, darray}. If copy is false,
-   *   this conversion may be done in place.
-   */
-  DISPATCH(ToDVArray)
-
-  /*
-   * ArrayData* ToHackArr(ArrayData*, bool copy)
-   *
-   *   Convert the given {varray, darray} to a {vec, dict}. If copy is false,
-   *   this conversion may be done in place.
-   */
-  DISPATCH(ToHackArr)
-
-  /*
    * void OnSetEvalScalar(ArrayData*)
    *
    *   Go through an array and call Variant::setEvalScalar on each
@@ -1009,8 +993,8 @@ template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
-  auto const base = toPHPArray(copy);
+ArrayData* ArrayData::toDictIntishCast(bool copy) {
+  auto const base = toDict(copy);
   if (isVecType()) return base;
 
   // Check if we need to intish-cast any string keys.
@@ -1022,7 +1006,7 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
   if (!intish) return base;
 
   if (RO::EvalHackArrCompatIntishCastNotices) {
-    raise_hackarr_compat_notice("triggered IntishCast for toPHPArray");
+    raise_hackarr_compat_notice("triggered IntishCast for toDictIntishCast");
   }
 
   // Create a new, plain PHP array with the casted keys.
@@ -1083,14 +1067,6 @@ void ArrayData::setLegacyArrayInPlace(bool legacy) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-ArrayData* ArrayData::toVArray(bool copy) {
-  return toVec(copy);
-}
-
-ArrayData* ArrayData::toDArray(bool copy) {
-  return toDict(copy);
-}
 
 ArrayData* ArrayData::toVec(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));

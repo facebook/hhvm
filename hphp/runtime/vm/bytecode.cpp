@@ -795,7 +795,7 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 }
 
 Array getDefinedVariables(const ActRec* fp) {
-  if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_darray();
+  if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_dict_array();
   auto const func = fp->func();
   auto const numLocals = func->numNamedLocals();
   DArrayInit ret(numLocals);

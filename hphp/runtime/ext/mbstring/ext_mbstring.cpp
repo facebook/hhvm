@@ -1361,7 +1361,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_string *string,
                                 mbfl_string *result) {
   if (var.isArray()) {
-    Array ret = empty_array();
+    Array ret = empty_dict_array();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       ret.set(iter.first(),

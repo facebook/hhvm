@@ -1620,7 +1620,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
   }
 
   if (callable || !replace.isArray()) {
-    Array arr = regex.toDArray();
+    Array arr = regex.toDict();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
       auto ret = php_pcre_replace(regex_entry, subject, replace, callable,
@@ -1635,8 +1635,8 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
     return preg_return_no_error(std::move(subject));
   }
 
-  Array arrReplace = replace.toDArray();
-  Array arrRegex = regex.toDArray();
+  Array arrReplace = replace.toDict();
+  Array arrRegex = regex.toDict();
   ArrayIter iterReplace(arrReplace);
   for (ArrayIter iterRegex(arrRegex); iterRegex; ++iterRegex) {
     String regex_entry = iterRegex.second().toString();
@@ -1684,7 +1684,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
   }
 
   Array return_value = Array::CreateDict();
-  Array arrSubject = subject.toDArray();
+  Array arrSubject = subject.toDict();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
     String subject_entry = iter.second().toString();

@@ -64,8 +64,6 @@ struct LoggingArray;
   X(IterRewind,         true)  \
   X(Append,             false) \
   X(Pop,                false) \
-  X(ToDVArray,          true)  \
-  X(ToHackArr,          true)  \
   X(PreSort,            true)  \
   X(PostSort,           true)  \
   X(SetLegacyArray,     true)

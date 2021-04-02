@@ -252,7 +252,7 @@ TEST(Array, Offsets) {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toDict()));
   }
   {
     Array arr;
@@ -266,7 +266,7 @@ TEST(Array, Offsets) {
     Variant v2 = String("v2");
     tvSet(*v1.asTypedValue(), arr.lvalForce(0));
     tvSet(*v2.asTypedValue(), arr.lvalForce(1));
-    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toDict()));
   }
   {
     Array arr;
@@ -417,7 +417,7 @@ TEST(Array, Membership) {
   {
     Array arr;
     arr.append(Variant("test"));
-    EXPECT_TRUE(same_arrays(arr, make_varray("test").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("test").toDict()));
   }
   {
     Array arr = Array::CreateVec();

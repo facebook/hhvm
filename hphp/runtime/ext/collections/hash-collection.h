@@ -52,14 +52,14 @@ struct HashCollection : ObjectData {
   template <IntishCast intishCast = IntishCast::None>
   Array toPHPArrayImpl() {
     if (!m_size) {
-      return empty_array();
+      return empty_dict_array();
     }
 
     ArrayData* ad;
     if (intishCast == IntishCast::None) {
-      ad = arrayData()->toPHPArray(true);
+      ad = arrayData()->toDict(true);
     } else if (intishCast == IntishCast::Cast) {
-      ad = arrayData()->toPHPArrayIntishCast(true);
+      ad = arrayData()->toDictIntishCast(true);
     } else {
       always_assert(false);
     }

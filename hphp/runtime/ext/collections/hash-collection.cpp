@@ -97,13 +97,13 @@ void HashCollection::warnOnStrIntDup() const {
 }
 
 Array HashCollection::toVArray() {
-  if (!m_size) return empty_varray();
-  return Array{arrayData()}.toVArray();
+  if (!m_size) return empty_vec_array();
+  return Array{arrayData()}.toVec();
 }
 
 Array HashCollection::toDArray() {
-  if (!m_size) return empty_darray();
-  auto arr = Array{arrayData()}.toDArray();
+  if (!m_size) return empty_dict_array();
+  auto arr = Array{arrayData()}.toDict();
   if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
   return arr;
 }

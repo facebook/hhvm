@@ -154,7 +154,7 @@ Array HHVM_FUNCTION(hphp_get_status) {
     false,
     512,
     HPHP::k_JSON_FB_DARRAYS_AND_VARRAYS);
-  return Variant::attach(result).toArray().toDArray();
+  return Variant::attach(result).toArray().toDict();
 }
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();

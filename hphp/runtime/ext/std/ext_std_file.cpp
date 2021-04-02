@@ -742,7 +742,7 @@ Variant HHVM_FUNCTION(file,
   }
   String content = contents.toString();
   if (content.empty()) {
-    return empty_varray();
+    return empty_vec_array();
   }
   auto ret = Array::CreateVec();
 
@@ -1791,7 +1791,7 @@ Variant HHVM_FUNCTION(glob,
                   &globbuf);
   if (nret == GLOB_NOMATCH) {
     globfree(&globbuf);
-    return empty_varray();
+    return empty_vec_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
@@ -1802,7 +1802,7 @@ Variant HHVM_FUNCTION(glob,
       }
     }
     globfree(&globbuf);
-    return empty_varray();
+    return empty_vec_array();
   }
 
   if (nret) {
@@ -1840,7 +1840,7 @@ Variant HHVM_FUNCTION(glob,
   // php's glob always produces an array, but Variant::Variant(CArrRef)
   // will produce KindOfNull if given a req::ptr wrapped around null.
   if (ret.isNull()) {
-    return empty_varray();
+    return empty_vec_array();
   }
   return ret;
 }

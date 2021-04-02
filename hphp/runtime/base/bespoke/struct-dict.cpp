@@ -553,19 +553,6 @@ ArrayData* StructDict::Pop(StructDict* sadIn, Variant& value) {
   return sad;
 }
 
-ArrayData* StructDict::ToDVArray(StructDict* sadIn, bool copy) {
-  always_assert(false);
-}
-
-ArrayData* StructDict::ToHackArr(StructDict* sadIn, bool copy) {
-  if (sadIn->isDictType()) return sadIn;
-  auto const sad = copy ? sadIn->copy() : sadIn;
-  sad->m_kind = HeaderKind::BespokeDict;
-  sad->setLegacyArrayInPlace(false);
-  assertx(sad->checkInvariants());
-  return sad;
-}
-
 ArrayData* StructDict::PreSort(StructDict* sad, SortFunction sf) {
   return sad->escalateWithCapacity(sad->size(), sortFunctionName(sf));
 }

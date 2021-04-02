@@ -296,7 +296,7 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
 
 Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */) {
   if (input.empty()) {
-    return empty_darray();
+    return empty_dict_array();
   }
 
   auto ret = Array::CreateDict();

@@ -93,8 +93,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
-  static ArrayData* ToDVArray(ArrayData*, bool copy);
-  static ArrayData* ToHackArr(ArrayData*, bool copy);
   static void OnSetEvalScalar(ArrayData*);
 
   //////////////////////////////////////////////////////////////////////

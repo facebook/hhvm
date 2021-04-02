@@ -46,11 +46,6 @@ inline ArrayData* ArrayData::copyStatic() const {
 }
 
 NO_PROFILING
-inline ArrayData* ArrayData::toPHPArray(bool copy) {
-  return toDArray(copy);
-}
-
-NO_PROFILING
 inline bool ArrayData::isVectorData() const {
   return g_array_funcs.isVectorData[kind()](this);
 }

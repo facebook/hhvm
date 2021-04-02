@@ -329,7 +329,7 @@ Array& ObjectData::dynPropArray() const {
 
 void ObjectData::setDynProps(const Array& newArr) {
   // don't expose the ref returned by setDynPropArr
-  (void)setDynPropArray(newArr.toDArray());
+  (void)setDynPropArray(newArr.toDict());
 }
 
 void ObjectData::reserveDynProps(int numDynamic) {
@@ -1087,7 +1087,7 @@ ObjectData::~ObjectData() {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
-  auto const props = properties->toDArray(true);
+  auto const props = properties->toDict(true);
   Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), props);

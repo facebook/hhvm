@@ -516,7 +516,7 @@ macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
     # No-arg parameter (none):
     ""
     # Single-argument parameters
-    "SOURCE_URL;SOURCE_HASH;Linux_URL;Linux_HASH;Darwin_URL;Darwin_HASH"
+    "SOURCE_URL;SOURCE_HASH;Linux_URL;Linux_HASH;Darwin_URL;Darwin_HASH;FILENAME_PREFIX"
     # Multi-argument parameters (none)
     ""
     ${ARGN}
@@ -546,6 +546,8 @@ macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
     endif()
   endif()
 
+
+  get_filename_component("_URL_NAME" "${_URL}" NAME)
   if ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" STREQUAL "")
     list(APPEND ${VAR_NAME} URL "${_URL}")
     if (${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
@@ -555,16 +557,15 @@ macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
       )
     endif()
   else()
-
-    get_filename_component("_URL_NAME" "${_URL}" NAME)
     list(
       APPEND "${VAR_NAME}"
       URL
-      "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}"
+      "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_arg_FILENAME_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}"
     )
     if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
       list(APPEND "${VAR_NAME}" "${_URL}")
     endif()
-    list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${_URL_NAME}")
   endif()
+  list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${_arg_FILENAME_PREFIX}${_URL_NAME}")
+  message(STATUS "Download name: ${_arg_FILENAME_PREFIX}${_URL_NAME}")
 endmacro()

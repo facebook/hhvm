@@ -96,12 +96,6 @@ if (LIBSQLITE3_INCLUDE_DIR)
   include_directories(${LIBSQLITE3_INCLUDE_DIR})
 endif ()
 
-# libdouble-conversion
-find_package(DoubleConversion)
-if (DOUBLE_CONVERSION_INCLUDE_DIR)
-  include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
-endif ()
-
 # fastlz
 find_package(FastLZ)
 if (FASTLZ_INCLUDE_DIR)
@@ -423,11 +417,7 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  if (DOUBLE_CONVERSION_FOUND)
-    target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
-  else()
-    target_link_libraries(${target} double-conversion)
-  endif()
+  target_link_libraries(${target} double-conversion)
 
   target_link_libraries(${target} lz4)
   target_link_libraries(${target} libzip)

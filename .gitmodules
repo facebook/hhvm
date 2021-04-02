@@ -1,9 +1,6 @@
 [submodule "__FORKS__"]
 	path = third-party/forks
 	url = https://github.com/hhvm/hhvm-third-party.git
-[submodule "double-conversion"]
-	path = third-party/double-conversion
-	url = https://github.com/google/double-conversion
 [submodule "fastlz"]
 	path = third-party/fastlz/src
 	url = https://github.com/ariya/FastLZ

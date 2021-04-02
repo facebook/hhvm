@@ -1,0 +1,368 @@
+bool(true)
+string(5) "class"
+string(4) "enum"
+string(9) "interface"
+string(5) "trait"
+BaseClass is class
+DerivedClass is class
+C1 is class
+E1 is enum
+I1 is interface
+T1 is trait
+Nonexistent has no kind
+Subtypes of BaseClass: ["DerivedClass","IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Supertypes of BaseClass: []
+Subtypes of IBase with filters {"kind":["class"]}: ["DerivedClass","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["class"]}: [["DerivedClass","derived-class.inc","class",false],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Subtypes of IBase with filters {"kind":["trait"]}: ["TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["trait"]}: [["TImplementsIBase","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Subtypes of IBase with filters {"kind":["class","trait"]}: ["DerivedClass","TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["class","trait"]}: [["DerivedClass","derived-class.inc","class",false],["TImplementsIBase","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Supertypes of DerivedClass: ["BaseClass","IBase","TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["class"]}: ["BaseClass"]
+Supertypes of DerivedClass with filters {"kind":["trait"]}: ["TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["interface"]}: ["IBase"]
+Supertypes of DerivedClass with filters {"kind":["class","trait"]}: ["BaseClass","TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["interface","trait"]}: ["IBase","TImplementsIBase"]
+
+Excluding `require extends` relations
+Subtypes of IBase with filters {"derive_kind":["extends"]}: ["DerivedClass","TImplementsIBase","TRequireImplementsAndImplementsIBase","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"derive_kind":["extends"]}: [["DerivedClass","derived-class.inc","class",false],["TImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["DerivedClass"]
+Transitive subtypes of BaseClass with filters {"derive_kind":["extends"]}: [["DerivedClass","derived-class.inc","class",false]]
+Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["extends"]}: []
+Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
+Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+
+Excluding `extends` relations
+Subtypes of IBase with filters {"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Subtypes of BaseClass with filters {"derive_kind":["require extends"]}: ["IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["require extends"]}: ["BaseClass","IBase"]
+Transitive subtypes of BaseClass with filters {"derive_kind":["require extends"]}: [["IRequireExtendsBaseClass","derived-class.inc","interface",true],["TRequireExtendsBaseClass","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["require extends"]}: ["IBase"]
+Supertypes of SomeEnum with filters {"kind":["class"]}: ["HH\\BuiltinEnum"]
+Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
+Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
+Subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+
+Filtering by attribute
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: [["BananaThenApple","attribute-classes.inc","class",false]]
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: ["AppleThenBanana","AppleThenCarrot"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: [["AppleThenBanana","attribute-classes.inc","class",false],["AppleThenCarrot","attribute-classes.inc","class",false]]
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: ["AppleThenCarrot"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: [["AppleThenCarrot","attribute-classes.inc","class",false]]
+
+Getting attributes
+Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
+Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
+Attributes of AppleThenCarrot: {"TwoArgAttr":["apple","carrot"]}
+Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
+Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
+
+Getting types with attribute
+Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
+Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
+
+Getting type aliases with attribute
+Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
+
+Checking nonexistent paths
+this/path/does/not/exist.php has 0 types
+this/path/does/not/exist.php has 0 functions
+this/path/does/not/exist.php has 0 constants
+this/path/does/not/exist.php has 0 type aliases
+/this/path/does/not/exist.php has 0 types
+/this/path/does/not/exist.php has 0 functions
+/this/path/does/not/exist.php has 0 constants
+/this/path/does/not/exist.php has 0 type aliases
+
+Getting all types
+AbstractFinalClass => derived-class.inc
+  Abstract? true
+  Final? true
+AppleThenBanana => attribute-classes.inc
+  Abstract? false
+  Final? false
+AppleThenCarrot => attribute-classes.inc
+  Abstract? false
+  Final? false
+BananaThenApple => attribute-classes.inc
+  Abstract? false
+  Final? false
+BaseClass => base-class.inc
+  Abstract? true
+  Final? false
+BaseClassForAttributeFiltering => attribute-classes.inc
+  Abstract? false
+  Final? false
+C1 => types-with-kinds.inc
+  Abstract? false
+  Final? false
+ClassWithTwoAttrs => attribute-classes.inc
+  Abstract? false
+  Final? false
+DerivedClass => derived-class.inc
+  Abstract? false
+  Final? true
+E1 => types-with-kinds.inc
+  Abstract? false
+  Final? false
+I1 => types-with-kinds.inc
+  Abstract? true
+  Final? false
+IBase => base-class.inc
+  Abstract? true
+  Final? false
+IBaseForAttributeFiltering => attribute-classes.inc
+  Abstract? true
+  Final? false
+IRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+IimplementsIRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+NoArgAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
+SomeEnum => base-class.inc
+  Abstract? false
+  Final? false
+T1 => types-with-kinds.inc
+  Abstract? true
+  Final? false
+TImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireExtendsBaseClassAndRequireImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireImplementsAndImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TwoArgAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
+TypeAliasAttr => type_aliases.inc
+  Abstract? false
+  Final? false
+UsesTRequireImplementsIBase => derived-class.inc
+  Abstract? false
+  Final? false
+
+Getting all functions
+facts => facts.php
+jsonify_arr => facts.php
+jsonify_filters => facts.php
+print_attr_type_aliases => facts.php
+print_attr_types => facts.php
+print_kind => facts.php
+print_num_symbols => facts.php
+print_subtypes => facts.php
+print_supertypes => facts.php
+print_transitive_subtypes => facts.php
+print_type_alias_attrs => facts.php
+print_type_attrs => facts.php
+relative_path => facts.php
+
+Getting all constants
+SOME_CONSTANT => constants.inc
+
+Getting all type aliases
+SomeTypeAlias => type_aliases.inc
+TypeAliasWithAttr => type_aliases.inc
+Finished.
+bool(true)
+string(5) "class"
+string(4) "enum"
+string(9) "interface"
+string(5) "trait"
+BaseClass is class
+DerivedClass is class
+C1 is class
+E1 is enum
+I1 is interface
+T1 is trait
+Nonexistent has no kind
+Subtypes of BaseClass: ["DerivedClass","IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Supertypes of BaseClass: []
+Subtypes of IBase with filters {"kind":["class"]}: ["DerivedClass","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["class"]}: [["DerivedClass","derived-class.inc","class",false],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Subtypes of IBase with filters {"kind":["trait"]}: ["TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["trait"]}: [["TImplementsIBase","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Subtypes of IBase with filters {"kind":["class","trait"]}: ["DerivedClass","TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["class","trait"]}: [["DerivedClass","derived-class.inc","class",false],["TImplementsIBase","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Supertypes of DerivedClass: ["BaseClass","IBase","TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["class"]}: ["BaseClass"]
+Supertypes of DerivedClass with filters {"kind":["trait"]}: ["TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["interface"]}: ["IBase"]
+Supertypes of DerivedClass with filters {"kind":["class","trait"]}: ["BaseClass","TImplementsIBase"]
+Supertypes of DerivedClass with filters {"kind":["interface","trait"]}: ["IBase","TImplementsIBase"]
+
+Excluding `require extends` relations
+Subtypes of IBase with filters {"derive_kind":["extends"]}: ["DerivedClass","TImplementsIBase","TRequireImplementsAndImplementsIBase","UsesTRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"derive_kind":["extends"]}: [["DerivedClass","derived-class.inc","class",false],["TImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["UsesTRequireImplementsIBase","derived-class.inc","class",false]]
+Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["DerivedClass"]
+Transitive subtypes of BaseClass with filters {"derive_kind":["extends"]}: [["DerivedClass","derived-class.inc","class",false]]
+Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["extends"]}: []
+Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
+Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+
+Excluding `extends` relations
+Subtypes of IBase with filters {"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Subtypes of BaseClass with filters {"derive_kind":["require extends"]}: ["IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["require extends"]}: ["BaseClass","IBase"]
+Transitive subtypes of BaseClass with filters {"derive_kind":["require extends"]}: [["IRequireExtendsBaseClass","derived-class.inc","interface",true],["TRequireExtendsBaseClass","derived-class.inc","trait",true],["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["require extends"]}: ["IBase"]
+Supertypes of SomeEnum with filters {"kind":["class"]}: ["HH\\BuiltinEnum"]
+Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
+Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
+Subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
+Transitive subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+
+Filtering by attribute
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: [["BananaThenApple","attribute-classes.inc","class",false]]
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: ["AppleThenBanana","AppleThenCarrot"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: [["AppleThenBanana","attribute-classes.inc","class",false],["AppleThenCarrot","attribute-classes.inc","class",false]]
+Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: ["AppleThenCarrot"]
+Transitive subtypes of IBaseForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: [["AppleThenCarrot","attribute-classes.inc","class",false]]
+
+Getting attributes
+Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
+Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
+Attributes of AppleThenCarrot: {"TwoArgAttr":["apple","carrot"]}
+Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
+Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
+
+Getting types with attribute
+Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
+Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
+
+Getting type aliases with attribute
+Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
+
+Checking nonexistent paths
+this/path/does/not/exist.php has 0 types
+this/path/does/not/exist.php has 0 functions
+this/path/does/not/exist.php has 0 constants
+this/path/does/not/exist.php has 0 type aliases
+/this/path/does/not/exist.php has 0 types
+/this/path/does/not/exist.php has 0 functions
+/this/path/does/not/exist.php has 0 constants
+/this/path/does/not/exist.php has 0 type aliases
+
+Getting all types
+AbstractFinalClass => derived-class.inc
+  Abstract? true
+  Final? true
+AppleThenBanana => attribute-classes.inc
+  Abstract? false
+  Final? false
+AppleThenCarrot => attribute-classes.inc
+  Abstract? false
+  Final? false
+BananaThenApple => attribute-classes.inc
+  Abstract? false
+  Final? false
+BaseClass => base-class.inc
+  Abstract? true
+  Final? false
+BaseClassForAttributeFiltering => attribute-classes.inc
+  Abstract? false
+  Final? false
+C1 => types-with-kinds.inc
+  Abstract? false
+  Final? false
+ClassWithTwoAttrs => attribute-classes.inc
+  Abstract? false
+  Final? false
+DerivedClass => derived-class.inc
+  Abstract? false
+  Final? true
+E1 => types-with-kinds.inc
+  Abstract? false
+  Final? false
+I1 => types-with-kinds.inc
+  Abstract? true
+  Final? false
+IBase => base-class.inc
+  Abstract? true
+  Final? false
+IBaseForAttributeFiltering => attribute-classes.inc
+  Abstract? true
+  Final? false
+IRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+IimplementsIRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+NoArgAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
+SomeEnum => base-class.inc
+  Abstract? false
+  Final? false
+T1 => types-with-kinds.inc
+  Abstract? true
+  Final? false
+TImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireExtendsBaseClass => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireExtendsBaseClassAndRequireImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireImplementsAndImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TwoArgAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
+TypeAliasAttr => type_aliases.inc
+  Abstract? false
+  Final? false
+UsesTRequireImplementsIBase => derived-class.inc
+  Abstract? false
+  Final? false
+
+Getting all functions
+facts => facts.php
+jsonify_arr => facts.php
+jsonify_filters => facts.php
+print_attr_type_aliases => facts.php
+print_attr_types => facts.php
+print_kind => facts.php
+print_num_symbols => facts.php
+print_subtypes => facts.php
+print_supertypes => facts.php
+print_transitive_subtypes => facts.php
+print_type_alias_attrs => facts.php
+print_type_attrs => facts.php
+relative_path => facts.php
+
+Getting all constants
+SOME_CONSTANT => constants.inc
+
+Getting all type aliases
+SomeTypeAlias => type_aliases.inc
+TypeAliasWithAttr => type_aliases.inc
+Finished.

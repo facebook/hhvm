@@ -1,0 +1,4 @@
+-i "hphp/test/slow/native-autoload2/native-autoload-function.inc"
+-i "hphp/test/slow/native-autoload2/dir1/native-autoload-const.inc"
+-i "hphp/test/slow/native-autoload2/dir1/dir2/native-autoload-class.inc"
+-i "hphp/test/slow/native-autoload2/dir1/dir2/native-autoload-type-alias.inc"

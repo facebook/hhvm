@@ -1,0 +1,42 @@
+vec(1) {
+  string(1) "A"
+}
+vec(0) {
+}
+vec(2) {
+  string(4) "func"
+  string(13) "func_memoized"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "C"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "T"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "A"
+}
+vec(0) {
+}
+vec(2) {
+  string(4) "func"
+  string(13) "func_memoized"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "C"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "T"
+}
+vec(0) {
+}

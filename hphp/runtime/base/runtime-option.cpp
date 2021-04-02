@@ -1651,7 +1651,7 @@ void RuntimeOption::Load(
         [&] (const String& f) {
           if (access(f.data(), R_OK) == 0) {
             fullpath = f.toCppString();
-            FTRACE_MOD(Trace::watchman_autoload, 3, "Parsing {}\n", fullpath);
+            FTRACE_MOD(Trace::facts, 3, "Parsing {}\n", fullpath);
             Config::ParseConfigFile(fullpath, ini, config);
             return true;
           }

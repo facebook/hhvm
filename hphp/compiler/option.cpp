@@ -191,9 +191,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(RuntimeOption::EvalArrayProvenance,
-               ini, config, "ArrayProvenance",
-               RuntimeOption::EvalArrayProvenance);
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
 
 #define BIND_HAC_OPTION(Name, Def)                      \
@@ -281,11 +278,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                "NoticeOnCoerceForBitOp",
                RuntimeOption::EvalNoticeOnCoerceForBitOp);
 
-  // arrprov is only for dvarrays. It should be off if HADVAs is on.
-  if (RO::EvalHackArrDVArrs) {
-    RO::EvalArrayProvenance = false;
-    RO::EvalLogArrayProvenance = false;
-  }
+  RO::EvalArrayProvenance = false;
+  RO::EvalLogArrayProvenance = false;
 }
 
 void Option::Load() {

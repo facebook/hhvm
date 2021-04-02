@@ -302,22 +302,13 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << subl{numNonVariadicParams, numArgs, numToPack, v.makeReg()};
 
     // Pack the extra args into a vec/varray.
-    auto const helper = [](uint32_t count,
-                           TypedValue* values,
-                           const Func* func) -> ArrayData* {
-      arrprov::TagOverride _(RO::EvalArrayProvenance
-        ? arrprov::Tag::Param(func, func->numNonVariadicParams())
-        : arrprov::Tag{});
-      return PackedArray::MakeVec(count, values);
-    };
     auto const packedArr = v.makeReg();
     {
-      using PackExtraArgs = ArrayData* (*)(uint32_t, TypedValue*, const Func*);
       auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
       PhysRegSaver prs{v, save};
       v << vcall{
-        CallSpec::direct(static_cast<PackExtraArgs>(helper)),
-        v.makeVcallArgs({{numToPack, stackTopPtr, func}}),
+        CallSpec::direct(PackedArray::MakeVec),
+        v.makeVcallArgs({{numToPack, stackTopPtr}}),
         v.makeTuple({packedArr}),
         Fixup::none(),
         DestType::SSA

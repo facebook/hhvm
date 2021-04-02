@@ -357,7 +357,6 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
 bool VirtualHost::match(const String &host) const {
   if (m_pattern) {
-    ARRPROV_USE_RUNTIME_LOCATION();
     Variant ret = preg_match(m_pattern, host.get());
     return ret.toInt64() > 0;
   } else if (!m_prefix.empty()) {

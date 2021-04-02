@@ -176,7 +176,7 @@ private:
   void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);
   Array unserializeArray();
-  arrprov::Tag unserializeProvenanceTag();
+  void unserializeProvenanceTag();
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();

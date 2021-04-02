@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 

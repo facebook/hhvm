@@ -975,7 +975,6 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const folly::StringPiece name, const SHA1& sha1,
                     const Native::FuncTable& nativeFuncs) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   auto ue = loadEmitter(name, sha1, nativeFuncs);
   if (!ue) return nullptr;
   if (RO::EvalStressUnitSerde) ue = ue->stressSerde();

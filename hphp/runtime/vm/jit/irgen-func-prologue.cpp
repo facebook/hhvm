@@ -184,7 +184,6 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
 
       // Push an empty array, as the remainder of the prologue assumes generics
       // are on the stack.
-      arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
       push(env, cns(env, ArrayData::CreateVec()));
       updateMarker(env);
       env.irb->exceptionStackBoundary();
@@ -406,9 +405,6 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
   if (argc < callee->numParams()) {
     // Push an empty array for `...$args'.
-    arrprov::TagOverride _(RO::EvalArrayProvenance
-      ? arrprov::Tag::Param(callee, numParams)
-      : arrprov::Tag{});
     assertx(callee->hasVariadicCaptureParam());
     push(env, cns(env, ArrayData::CreateVec()));
     ++argc;

@@ -1162,27 +1162,11 @@ struct RuntimeOption {
   /* Notice on array serialization behavior, even if array provenance   \
    * is disabled. If we see these notices, we're missing markings. */   \
   F(bool, RaiseArraySerializationNotices, false)                        \
-  /* Enable instrumentation and information in the repo for tracking    \
-   * the source of vecs and dicts whose vec/dict-ness is observed       \
-   * during program execution                                           \
-   *                                                                    \
-   * Latches to false at startup if either the repo we're loading in    \
-   * RepoAuthoritativeMode wasn't built with this flag or if the        \
-   * flag LogArrayProvenance is unset */                                \
+  /* Dead flags. Will clean up when we clean them up in GlobalData. */  \
   F(bool, ArrayProvenance, false)                                       \
-  /* Log the source of dvarrays whose dvarray-ness is observed, e.g.    \
-   * through serialization. If this flag is off, we won't bother to     \
-   * track array provenance at runtime, because it isn't exposed.       \
-   *                                                                    \
-   * Code should just depend on ArrayProvenance alone - we'll set it    \
-   * based on this flag when loading a repo build. */                   \
   F(bool, LogArrayProvenance, false)                                    \
-  /* Log only out out of this many array headers when serializing */    \
   F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \
-  /* Use dummy tags for enums with this many values, to avoid copies */ \
   F(uint32_t, ArrayProvenanceLargeEnumLimit, 256)                       \
-  /* What fraction of array provenance diagnostics should be logged?    \
-   * Set to 0 to disable diagnostics entirely */                        \
   F(uint32_t, LogArrayProvenanceDiagnosticsSampleRate, 0)               \
   /* Raise a notice when the result of appending to a dict or darray    \
    * is affected by removing keys from that array-like. */              \
@@ -1524,12 +1508,6 @@ inline bool isJitSerializing() {
 
 inline bool unitPrefetchingEnabled() {
   return RO::EvalUnitPrefetcherMaxThreads > 0;
-}
-
-inline bool raiseArraySerializationNotices() {
-  auto const without_provenance = RO::EvalHackArrCompatNotices &&
-                                  RO::EvalRaiseArraySerializationNotices;
-  return without_provenance || RO::EvalArrayProvenance;
 }
 
 uintptr_t lowArenaMinAddr();

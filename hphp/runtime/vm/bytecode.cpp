@@ -931,7 +931,6 @@ static void dispatch();
 void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
-  ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
@@ -963,7 +962,6 @@ void enterVMAtCurPC() {
   assertx(vmfp());
   assertx(vmpc());
   assertx(vmfp()->func()->contains(vmpc()));
-  ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
     jit::enterTC(jit::tc::ustubs().resumeHelper);

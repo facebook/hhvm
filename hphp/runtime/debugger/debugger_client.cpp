@@ -1136,7 +1136,6 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
                                              int expectedCmd,
                                              const char *caller) {
   TRACE(2, "DebuggerClient::eventLoop\n");
-  ARRPROV_USE_RUNTIME_LOCATION();
   if (loopKind == NestedWithExecution) {
     // Some callers have caused the server to start executing more PHP, so
     // update the machine/client state accordingly.

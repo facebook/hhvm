@@ -666,22 +666,6 @@ SSATmp* opt_foldable(IRGS& env,
                      const ParamPrep& params) {
   if (!func->isFoldable()) return nullptr;
 
-  // Tag arrprov with the last non-ProvenanceSkipFrame SrcKey in inlineState.
-  auto const sk = [&]{
-    auto const cur = curSrcKey(env);
-    if (!RO::EvalArrayProvenance) return cur;
-    if (!cur.func()->isProvenanceSkipFrame()) return cur;
-    auto const& stack = env.inlineState.bcStateStack;
-    for (auto it = stack.rbegin(); it != stack.rend(); it++) {
-      if (!it->func()->isProvenanceSkipFrame()) return *it;
-    }
-    return SrcKey();
-  }();
-  assertx(IMPLIES(!RO::EvalArrayProvenance, sk.valid()));
-  if (!sk.valid()) return nullptr;
-  auto const tag = arrprov::tagFromSK(sk);
-  arrprov::TagOverride _{tag};
-
   const Class* cls = nullptr;
   if (func->isMethod()) {
     if (!params.ctx || !func->isStatic()) return nullptr;
@@ -1032,7 +1016,6 @@ SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
 }
 
 const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
-  if (RO::EvalArrayProvenance) return nullptr;
   if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
   auto const cls = params.ctx->clsVal();
   if (!(isEnum(cls) && classHasPersistentRDS(cls))) return nullptr;

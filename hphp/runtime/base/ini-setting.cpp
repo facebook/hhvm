@@ -1195,7 +1195,6 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
 }
 
 std::string IniSetting::GetAllAsJSON() {
-  ARRPROV_USE_RUNTIME_LOCATION();
   Array settings = GetAll(empty_string(), true);
   auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
   String out = Variant::attach(HHVM_FN(json_encode)(settings, opts)).toString();

@@ -324,9 +324,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
   if (RuntimeOption::EvalRxIsEnabled) {
     hhbc_flags |= RX_IS_ENABLED;
   }
-  if (RuntimeOption::EvalArrayProvenance) {
-    hhbc_flags |= ARRAY_PROVENANCE;
-  }
   if (RuntimeOption::EvalFoldLazyClassKeys) {
     hhbc_flags |= FOLD_LAZY_CLASS_KEYS;
   }
@@ -1603,7 +1600,6 @@ void RuntimeOption::Load(
   const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */,
   std::vector<std::string>* messages /* = nullptr */,
   std::string cmd /* = "" */) {
-  ARRPROV_USE_RUNTIME_LOCATION_FORCE();
 
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it
@@ -3006,20 +3002,11 @@ void RuntimeOption::Load(
                                " RepoAuthoritative is turned on");
   }
 
-  // arrprov is only for dvarrays. It should be off if HADVAs is on.
-  if (RO::EvalHackArrDVArrs) {
-    RO::EvalArrayProvenance = false;
-    RO::EvalLogArrayProvenance = false;
-  }
+  // arrprov is no longer functional. We must clean it up.
+  RO::EvalArrayProvenance = false;
+  RO::EvalLogArrayProvenance = false;
 
   // Bespoke array-likes
-
-  // We don't support provenance for bespoke array-likes, so don't construct
-  // any at runtime if we're logging provenance instrumentation results.
-  if (RO::EvalBespokeArrayLikeMode > 0 &&
-      (RO::EvalArrayProvenance || RO::EvalLogArrayProvenance)) {
-    RO::EvalBespokeArrayLikeMode = 0;
-  }
 
   // If we're going to construct bespoke array-likes at runtime, ensure that
   // we JIT checks for these types as well. We support JIT-ing these checks
@@ -3036,10 +3023,6 @@ void RuntimeOption::Load(
 
   if (!RuntimeOption::EvalEmitClsMethPointers) {
     RuntimeOption::EvalIsCompatibleClsMethType = false;
-  }
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    RuntimeOption::EvalJitForceVMRegSync = true;
   }
 
   // Coeffects

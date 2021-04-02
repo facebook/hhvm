@@ -1761,8 +1761,6 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
                                         trep bits,
                                         HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
-  ARRPROV_USE_RUNTIME_LOCATION();
-
   auto const legacyMark = ham.legacyMark(bits);
   if (legacyMark == LegacyMark::Unknown) return folly::none;
 
@@ -1812,8 +1810,6 @@ folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
                                         trep bits,
                                         HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
-  ARRPROV_USE_RUNTIME_LOCATION();
-
   auto const legacyMark = ham.legacyMark(bits);
   if (legacyMark == LegacyMark::Unknown) return folly::none;
 

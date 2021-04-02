@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/hhbbc/type-system-bits.h"
 

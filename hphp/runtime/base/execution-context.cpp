@@ -109,7 +109,6 @@ ExecutionContext::ExecutionContext()
   , m_executingSetprofileCallback(false)
   , m_logger_hook(*this)
 {
-  ARRPROV_USE_RUNTIME_LOCATION();
   m_deferredErrors = staticEmptyVec();
   resetCoverageCounters();
   // We don't want a new execution context to cause any request-heap
@@ -365,7 +364,6 @@ bool ExecutionContext::obFlush(bool force /*= false*/) {
       try {
         Variant tout;
         {
-          ARRPROV_USE_RUNTIME_LOCATION();
           m_insideOBHandler = true;
           SCOPE_EXIT { m_insideOBHandler = false; };
           tout = vm_call_user_func(
@@ -386,7 +384,6 @@ bool ExecutionContext::obFlush(bool force /*= false*/) {
     try {
       Variant tout;
       {
-        ARRPROV_USE_RUNTIME_LOCATION();
         m_insideOBHandler = true;
         SCOPE_EXIT { m_insideOBHandler = false; };
         tout = vm_call_user_func(
@@ -634,7 +631,6 @@ void ExecutionContext::onRequestShutdown() {
 }
 
 void ExecutionContext::executeFunctions(ShutdownType type) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   RID().resetTimers(
       RuntimeOption::PspTimeoutSeconds,
       RuntimeOption::PspCpuTimeoutSeconds
@@ -890,7 +886,6 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       backtrace = ee->getBacktrace();
     }
     try {
-      ARRPROV_USE_RUNTIME_LOCATION();
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       m_deferredErrors = empty_vec_array();
       SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
@@ -988,7 +983,6 @@ bool ExecutionContext::onUnhandledException(Object e) {
   }
 
   if (e.instanceof(SystemLib::s_ThrowableClass)) {
-    ARRPROV_USE_RUNTIME_LOCATION();
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
@@ -1244,7 +1238,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     if (it->isAsync()) {
       invokeFunc(
         Func::lookup(s_enter_async_entry_point.get()),
-        make_vec_array_tagged(ARRPROV_HERE(), Variant{it}),
+        make_vec_array(Variant{it}),
         nullptr, nullptr, false
       );
     } else {
@@ -1443,7 +1437,6 @@ void ExecutionContext::requestExit() {
   }
 
   {
-    ARRPROV_USE_RUNTIME_LOCATION();
     m_deferredErrors = empty_vec_array();
   }
 
@@ -1545,19 +1538,12 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   });
 
   if (UNLIKELY(f->takesInOutParams())) {
-    // This is OK (albeit ugly) since the return value should only be readable
-    // from user code via e.g. call_user_func and we will tagTV the result from
-    // the native wrapper and getting the correct frame pointer here (or from
-    // the normal arrprov::tagFromPC) is awkward.
-    ARRPROV_USE_RUNTIME_LOCATION();
-
-    VArrayInit varr(f->numInOutParams() + 1);
+    VecInit vec(f->numInOutParams() + 1);
     for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
-      varr.append(*vmStack().topTV());
+      vec.append(*vmStack().topTV());
       vmStack().popC();
     }
-    auto arr = varr.toArray();
-    return make_array_like_tv(arr.detach());
+    return make_array_like_tv(vec.create());
   } else {
     auto const retval = *vmStack().topTV();
     vmStack().discard();

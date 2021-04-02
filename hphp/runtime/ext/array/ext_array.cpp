@@ -17,9 +17,9 @@
 
 #include "hphp/runtime/ext/array/ext_array.h"
 
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
@@ -3097,8 +3097,7 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
 }
 
 TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in, int64_t flags) {
-  auto force_cow = Variant::wrap(in);
-  return arrprov::tagTvRecursively(in, flags);
+  return tvReturn(tvAsCVarRef(in));
 }
 
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,

@@ -504,9 +504,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         is_callable(context->getExitCallback())) {
       Array stack = e.getBacktrace();
-      Array argv = make_vec_array_tagged(ARRPROV_HERE(),
-                                         *rl_exit_code,
-                                         stack);
+      Array argv = make_vec_array(*rl_exit_code, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException& e) {
@@ -685,7 +683,6 @@ init_command_line_globals(
   const std::map<std::string, std::string>& serverVariables,
   const std::map<std::string, std::string>& envVariables
 ) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   auto& variablesOrder = RID().getVariablesOrder();
 
   if (variablesOrder.find('e') != std::string::npos ||

@@ -34,7 +34,6 @@ SOFTWARE.
 
 #include <folly/FBVector.h>
 
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/string-buffer.h"

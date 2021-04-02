@@ -220,7 +220,6 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
 }
 
 TranslationResult getFuncPrologue(Func* func, int nPassed) {
-  ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
   func->validate();

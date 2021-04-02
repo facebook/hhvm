@@ -188,7 +188,6 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
     try {
       ProfileNonVMThread nonVM;
       HphpSession hps{Treadmill::SessionKind::TranslateWorker};
-      ARRPROV_USE_POISONED_LOCATION();
 
       // Check if the func was treadmilled before the job started
       if (!Func::isFuncIdValid(info->fid)) return;
@@ -526,7 +525,6 @@ void joinWorkerThreads() {
 }
 
 TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
-  ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
   tc::RegionTranslator translator(args.sk);
@@ -555,7 +553,6 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
 }
 
 bool retranslateOpt(FuncId funcId) {
-  ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
   if (isDebuggerAttachedProcess()) return false;

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -603,23 +602,18 @@ protected:
   uint32_t m_size;
 
   /*
-   * m_extra is used to store BespokeArray data and to store arrprov::Tag for
-   * dvarrays when array provenance is enabled. It's fine to share the field,
-   * since we refuse to enable these features together.
+   * m_extra is used to store extra data for BespokeArray. For now, we require
+   * that for vanilla arrays, m_extra always equals kDefaultVanillaArrayExtra.
    *
-   * When RO::EvalArrayProvenance is on, this stores an arrprov::Tag.
-   * Otherwise we use this field as follows:
+   * We may modify this field to include "array-provenance-like" info that
+   * could help us removing legacy marks.
    *
    * When the array is bespoke:
    *
-   *   bits 0..15: For private BespokeArray use. We don't constrain the value
-   *               in this field - different layouts can use it differently.
+   *   m_extra_lo16: For private BespokeArray use. We don't constrain the value
+   *                 in this field - different layouts can use it differently.
    *
-   *   bits 16..31: The bespoke LayoutIndex.
-   *
-   * When the array is vanilla and array provenance is disabled, m_extra must
-   * be kDefaultVanillaArrayExtra. This value must also equal, as raw bytes,
-   * the default arrprov::Tag.
+   *   m_extra_hi16: The bespoke LayoutIndex.
    */
   union {
     uint32_t m_extra;

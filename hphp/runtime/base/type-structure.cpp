@@ -636,7 +636,6 @@ void copyTypeModifiers(const Array& from, Array& to) {
 }
 
 Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   assertx(arr.exists(s_kind));
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());

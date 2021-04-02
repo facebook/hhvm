@@ -1250,10 +1250,10 @@ Array VariableUnserializer::unserializeArray() {
   return arr;
 }
 
-arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
+void VariableUnserializer::unserializeProvenanceTag() {
   if (type() != VariableUnserializer::Type::Internal &&
       type() != VariableUnserializer::Type::Serialize) {
-    return {};
+    return;
   }
 
   auto const read_line = [&]() -> int {
@@ -1277,18 +1277,7 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     }
   };
 
-  // Used for arrprov::Tag kinds that are defined by their name alone.
-  auto const expect_name = [&]() -> const StringData* {
-    readChar();
-    expectChar(':');
-    auto const name = read_name();
-    expectChar(';');
-    return name;
-  };
-
-  if (peek() != 'p') {
-    return {};
-  }
+  if (peek() != 'p') return;
   expectChar('p');
 
   auto const peeked = peek();
@@ -1302,10 +1291,11 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     read_name();
     expectChar(';');
   } else if (peeked == 'c' || peeked == 'e' || peeked == 'r' || peeked == 'z') {
-    expect_name();
+    readChar();
+    expectChar(':');
+    read_name();
+    expectChar(';');
   }
-
-  return {};
 }
 
 Array VariableUnserializer::unserializeDict() {

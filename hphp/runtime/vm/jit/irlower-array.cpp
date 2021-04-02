@@ -108,22 +108,6 @@ static ArrayData* markLegacyRecursiveHelper(ArrayData* ad, bool legacy) {
   return val(result).parr;
 }
 
-static ArrayData* tagProvenanceArrLike(ArrayData* ad, int64_t flags) {
-  auto const tv = make_array_like_tv(ad);
-  auto const result = arrprov::tagTvRecursively(tv, flags);
-  decRefArr(ad);
-  assertx(tvIsArrayLike(result));
-  return val(result).parr;
-}
-
-static ObjectData* tagProvenanceObject(ObjectData* od, int64_t flags) {
-  auto const tv = make_tv<KindOfObject>(od);
-  auto const result = arrprov::tagTvRecursively(tv, flags);
-  decRefObj(od);
-  assertx(tvIsObject(result));
-  return val(result).pobj;
-}
-
 void markLegacyShallow(IRLS& env, const IRInstruction* inst, bool legacy) {
   auto const args = argGroup(env, inst).ssa(0).imm(legacy);
   auto const target = CallSpec::direct(markLegacyShallowHelper);
@@ -299,7 +283,6 @@ void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
-  arrprov::TagOverride ap_override{arrprov::tagFromSK(inst->marker().sk())};
   auto const extra = inst->extra<NewStructData>();
   auto init = DictInit{extra->numKeys};
   for (auto i = 0; i < extra->numKeys; ++i) {

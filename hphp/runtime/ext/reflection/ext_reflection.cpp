@@ -796,9 +796,7 @@ static Array get_function_param_info(const Func* func) {
     {
       DArrayInit userAttrs(fpi.userAttributes.size());
       for (auto const& attr : fpi.userAttributes) {
-        userAttrs.set(
-          StrNR{attr.first},
-          Variant::attach(arrprov::tagTvRecursively(attr.second)));
+        userAttrs.set(StrNR{attr.first}, attr.second);
       }
       param.set(s_attributes, make_array_like_tv(userAttrs.create()));
     }
@@ -912,8 +910,7 @@ static Array get_function_user_attributes(const Func* func) {
 
   DArrayInit ai(userAttrs.size());
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(VarNR::MakeKey(StrNR(it->first).asString()).tv(),
-           Variant::attach(arrprov::tagTvRecursively(it->second)));
+    ai.set(VarNR::MakeKey(StrNR(it->first).asString()).tv(), it->second);
   }
   return ai.toArray();
 }
@@ -1559,8 +1556,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
   auto userAttrs = pcls->userAttributes();
   DArrayInit ai(userAttrs.size());
   for (auto const& attr : userAttrs) {
-    ai.set(StrNR(attr.first),
-           Variant::attach(arrprov::tagTvRecursively(attr.second)));
+    ai.set(StrNR(attr.first), attr.second);
   }
   return ai.toArray();
 }
@@ -1581,8 +1577,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
     for (auto it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
       if (!ret.exists(StrNR(it->first))) {
-        ret.set(StrNR(it->first),
-                Variant::attach(arrprov::tagTvRecursively(it->second)));
+        ret.set(StrNR(it->first), it->second);
       }
     }
   } while ((currentCls = currentCls->parent()));
@@ -2042,16 +2037,14 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributesNamespaced) {
     case ReflectionPropHandle::Type::Instance: {
       auto const prop = data->getProp()->preProp;
       for (auto attr : prop->userAttributes()) {
-        attrs.set(StrNR(attr.first),
-                  Variant::attach(arrprov::tagTvRecursively(attr.second)));
+        attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;
     }
     case ReflectionPropHandle::Type::Static: {
       auto const prop = data->getSProp()->preProp;
       for (auto attr : prop->userAttributes()) {
-        attrs.set(StrNR(attr.first),
-                  Variant::attach(arrprov::tagTvRecursively(attr.second)));
+        attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;
     }
@@ -2570,8 +2563,7 @@ Array get_class_info(const String& name) {
     auto const& attrs = pcls->userAttributes();
     DArrayInit arr{attrs.size()};
     for (auto const& attr : attrs) {
-      arr.set(StrNR(attr.first),
-              Variant::attach(arrprov::tagTvRecursively(attr.second)));
+      arr.set(StrNR(attr.first), attr.second);
     }
     ret.set(s_attributes, make_array_like_tv(arr.create()));
   }

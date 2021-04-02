@@ -21,8 +21,9 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

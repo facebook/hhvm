@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/tv-type.h"
 

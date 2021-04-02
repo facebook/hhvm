@@ -347,8 +347,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("repo-schema", "display the repo schema id used by this app")
     ;
 
-  ARRPROV_USE_RUNTIME_LOCATION_FORCE();
-
   positional_options_description p;
   p.add("inputs", -1);
   variables_map vm;

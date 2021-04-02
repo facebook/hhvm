@@ -213,7 +213,6 @@ static void StartRequest(Array& server) {
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   auto const vhost = VirtualHost::GetCurrent();
   auto const emptyArr = empty_dict_array();
   php_global_set(s__SERVER, emptyArr);

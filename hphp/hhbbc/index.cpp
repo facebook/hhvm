@@ -3998,6 +3998,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
                                          const Type& val,
                                          bool checkUB,
                                          bool ignoreConst,
+                                         bool mustBeReadOnly,
                                          bool startOnly) {
   ITRACE(
     6, "merge_static_type_impl: {} {} {} {}\n",
@@ -4079,6 +4080,11 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
             ITRACE(6, "skipping const {}::${}\n", ci->cls->name, prop.name);
             continue;
           }
+          if (mustBeReadOnly && !(prop.attrs & AttrIsReadOnly)) {
+            ITRACE(6, "skipping mutable property that must be readonly {}::${}\n",
+              ci->cls->name, prop.name);
+            continue;
+          }
           result |= merge(prop, ci);
         }
         return startOnly;
@@ -4111,6 +4117,13 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
         if (!ignoreConst && (prop.attrs & AttrIsConst)) {
           ITRACE(
             6, "{}:${} found but const, stopping\n",
+            ci->cls->name, propName
+          );
+          return notFound();
+        }
+        if (mustBeReadOnly && !(prop.attrs & AttrIsReadOnly)) {
+          ITRACE(
+            6, "{}:${} found but is mutable and must be readonly, stopping\n",
             ci->cls->name, propName
           );
           return notFound();
@@ -5860,7 +5873,8 @@ PropMergeResult<> Index::merge_static_type(
     const Type& name,
     const Type& val,
     bool checkUB,
-    bool ignoreConst) const {
+    bool ignoreConst,
+    bool mustBeReadOnly) const {
   ITRACE(
     4, "merge_static_type: {} {}::${} {}\n",
     show(ctx), show(cls), show(name), show(val)
@@ -5871,7 +5885,7 @@ PropMergeResult<> Index::merge_static_type(
 
   using R = PropMergeResult<>;
 
-  // In some cases we might try to merge Bottom if we're un
+  // In some cases we might try to merge Bottom if we're in
   // unreachable code. This won't affect anything, so just skip out
   // early.
   if (val.subtypeOf(BBottom)) return R{ TBottom, TriBool::No };
@@ -5913,6 +5927,7 @@ PropMergeResult<> Index::merge_static_type(
 
       for (auto& kv : statics) {
         if (!ignoreConst && (kv.second.attrs & AttrIsConst)) continue;
+        if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadOnly)) continue;
         kv.second.ty |=
           unctx(adjust_type_for_prop(*this, *ctx.cls, kv.second.tc, val));
       }
@@ -5932,6 +5947,7 @@ PropMergeResult<> Index::merge_static_type(
     auto it = statics.find(sname);
     if (it == end(statics)) return conservative();
     if (!ignoreConst && (it->second.attrs & AttrIsConst)) return conservative();
+    if (mustBeReadOnly && !(it->second.attrs & AttrIsReadOnly)) return conservative();
 
     it->second.ty |=
       unctx(adjust_type_for_prop(*this, *ctx.cls, it->second.tc, val));
@@ -5982,6 +5998,7 @@ PropMergeResult<> Index::merge_static_type(
           val,
           checkUB,
           ignoreConst,
+          mustBeReadOnly,
           !sname && sub != cinfo
         );
         ITRACE(4, "{} -> {}\n", sub->cls->name, show(r));
@@ -6009,6 +6026,7 @@ PropMergeResult<> Index::merge_static_type(
         val,
         checkUB,
         ignoreConst,
+        mustBeReadOnly,
         false
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));

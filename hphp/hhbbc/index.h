@@ -206,7 +206,7 @@ struct PropMergeResult {
   T adjusted; // The merged type, potentially adjusted according to
               // the prop's type-constraint (it's the subtype of the
               // merged type that would succeed).
-  TriBool throws; // Whether the mutation this merge representations
+  TriBool throws; // Whether the mutation this merge represents
                   // can throw.
 };
 
@@ -996,7 +996,8 @@ struct Index {
                                       const Type& name,
                                       const Type& val,
                                       bool checkUB = false,
-                                      bool ignoreConst = false) const;
+                                      bool ignoreConst = false,
+                                      bool mustBeReadOnly = false) const;
 
   /*
    * Initialize the initial types for public static properties. This should be

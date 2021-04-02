@@ -2333,10 +2333,17 @@ void in(ISS& env, const bc::CGetS& op) {
   if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
     return throws();
   }
+  
+  if (op.subop1 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
+    return throws();
+  }
+  auto const mightReadOnlyThrow =
+    op.subop1 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe;
 
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
       !lookup.classInitMightRaise &&
+      !mightReadOnlyThrow &&
       tcls.subtypeOf(BCls) &&
       tname.subtypeOf(BStr)) {
     effect_free(env);
@@ -3279,7 +3286,9 @@ void in(ISS& env, const bc::SetS& op) {
     tcls,
     tname,
     val,
-    true
+    true,
+    false,
+    op.subop1 == ReadOnlyOp::ReadOnly
   );
 
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {

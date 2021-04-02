@@ -630,7 +630,6 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
   auto const memoTy =
     typeFromRAT(extra->func->repoReturnType(), extra->func->cls()) & TInitCell;
   if (!memoTy.maybe(TCounted)) {
-    assertx(!val->type().maybe(TCounted));
     store();
     return;
   }

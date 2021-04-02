@@ -695,6 +695,7 @@ void SymbolMap<S>::update(
 
   // Write information about base and derived types
   for (auto i = 0; i < alteredPaths.size(); i++) {
+    wlock->removePath(db, txn, Path<S>{alteredPaths[i]});
     wlock->updatePath(Path<S>{alteredPaths[i]}, alteredPathFacts[i]);
   }
 

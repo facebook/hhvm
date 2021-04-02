@@ -42,15 +42,7 @@ public:
       m_excluded.erase(value);
     }
 
-    auto [_, didInsert] = m_included.insert(value);
-    if (UNLIKELY(!didInsert)) {
-      // Because types and functions are case-insensitive, old and new values
-      // can compare equal without actually being equal. So if there was a
-      // value in the map before, explicitly remove the old value and insert
-      // the new value.
-      m_included.erase(value);
-      m_included.insert(std::move(value));
-    }
+    m_included.insert(value);
   }
 
   void erase(T value) {
@@ -114,7 +106,6 @@ public:
     return m_included;
   }
 
-private:
   /**
    * Get data from SourceFn and set `m_complete` to `true`.
    */
@@ -232,15 +223,23 @@ public:
    * the key is the file path, and the values are the classes declared in that
    * path.
    */
-  void setValuesForKey(Key key, ValuesSet&& values) {
-    // Add any new value-to-keys mappings. We'll take care of erasing obsolete
-    // mappings during queries.
-    for (auto value : std::forward<ValuesSet>(values)) {
+  void setValuesForKey(Key key, ValuesSet&& newValues) {
+    auto& canonicalValues = m_keyToValues[key];
+
+    // Add any new value-to-keys mappings.
+    for (auto value : newValues) {
       m_valueToKeys[value].insert(key);
     }
 
+    // Erase obsolete mappings.
+    for (auto oldValue : canonicalValues.m_included) {
+      if (!newValues.count(oldValue)) {
+        m_valueToKeys[oldValue].erase(key);
+      }
+    }
+
     // Set the canonical key-to-values mappings.
-    m_keyToValues[key] = std::move(values);
+    canonicalValues = std::move(newValues);
   }
 
 private:

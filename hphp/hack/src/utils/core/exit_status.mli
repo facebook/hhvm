@@ -76,6 +76,7 @@ type t =
   | Failed_to_load_should_retry
   | Failed_to_load_should_abort
   | Server_non_opt_build_mode
+  | Not_restarting_server_with_precomputed_saved_state
 [@@deriving show]
 
 exception Exit_with of t

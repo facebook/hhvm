@@ -465,6 +465,13 @@ let watchman_debug_logging options = options.watchman_debug_logging
 
 let with_saved_state options = options.with_saved_state
 
+let is_using_precomputed_saved_state options =
+  match with_saved_state options with
+  | Some (Saved_state_target_info _) -> true
+  | Some (Informant_induced_saved_state_target _)
+  | None ->
+    false
+
 let allow_non_opt_build options = options.allow_non_opt_build
 
 let write_symbol_info options = options.write_symbol_info

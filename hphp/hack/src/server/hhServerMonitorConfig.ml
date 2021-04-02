@@ -176,4 +176,6 @@ module HhServerConfig = struct
 
   let wait_pid process =
     Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+
+  let is_saved_state_precomputed = ServerArgs.is_using_precomputed_saved_state
 end

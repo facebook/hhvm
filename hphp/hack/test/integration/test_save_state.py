@@ -85,7 +85,7 @@ class SavedStateTests(TestCase[SavedStateTestDriver]):
     def test_hhconfig_change(self) -> None:
         """
         Start hh_server, then change .hhconfig and check that the server
-        restarts itself
+        kills itself.
         """
         self.test_driver.start_hh_server()
         self.test_driver.check_cmd(["No errors!"])
@@ -100,25 +100,17 @@ assume_php = true
         # Server may take some time to kill itself.
         time.sleep(2)
 
-        # The sleep(2) above also almost-always ensures another race condition
-        # goes the way we want: The informant-directed restart doesn't happen
-        # *during* processing of a new client connection. The ambiguity of that
-        # situation (whether or not the newly-connected client did read the
-        # new hhconfig file contents or not) means that the Monitor can't safely
-        # start a new server instance until the *next* client connects. Just in
-        # case the race doesn't go the way we want, add another "check_cmd"
-        # call here to force the Monitor into the state we want.
-        self.test_driver.check_cmd(None, assert_loaded_saved_state=False)
-
-        # this should start a new server
-        self.test_driver.check_cmd(["No errors!"])
-        # check how the old one exited
-        log_file = (
-            self.test_driver.proc_call(
-                [hh_client, "--logname", self.test_driver.repo_dir]
-            )[0].strip()
-            + ".old"
+        stderr = self.test_driver.check_cmd(
+            None,
+            options=["--autostart-server", "false"],
+            assert_loaded_saved_state=False,
         )
+        self.assertIn("Error: no hh_server running", stderr)
+
+        # check how the old one exited
+        log_file = self.test_driver.proc_call(
+            [hh_client, "--logname", self.test_driver.repo_dir]
+        )[0].strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn(".hhconfig changed in an incompatible way", logs)

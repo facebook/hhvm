@@ -92,6 +92,8 @@ module type S = sig
 
   val with_saved_state : options -> saved_state_target option
 
+  val is_using_precomputed_saved_state : options -> bool
+
   val allow_non_opt_build : options -> bool
 
   val write_symbol_info : options -> string option

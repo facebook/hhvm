@@ -20,11 +20,22 @@ type process_data = {
 
 type server_process =
   | Not_yet_started
-  | Alive of process_data
+  | Alive of (process_data[@opaque])
   (* When the server crashes, we want to track that it has crashed and report
    * that crash info to the next hh_client that connects. We keep that info
    * here. *)
-  | Died_unexpectedly of Unix.process_status * bool
+  | Died_unexpectedly of
+      (Unix.process_status
+      [@printer
+        fun fmt s ->
+          let (how, code) =
+            match s with
+            | Unix.WEXITED c -> ("WEXITED", c)
+            | Unix.WSIGNALED c -> ("WSIGNALED", c)
+            | Unix.WSTOPPED c -> ("WSTOPPED", c)
+          in
+          fprintf fmt "<%s %d>" how code])
+      * bool
   (*
    * The problem we need to solve is this: when the Monitor wants to start
    * a new Server instance, it might not be safe to do so because we might
@@ -82,3 +93,4 @@ type server_process =
    * the user having to click anything.
    *)
   | Died_config_changed
+[@@deriving show]

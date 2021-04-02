@@ -81,6 +81,8 @@ let init_batch_tool ~init_id:_ ~root:_ ~time:_ = ()
 
 let starting_first_server _ = ()
 
+let refuse_to_restart_server ~reason:_ ~server_state:_ ~version_matches:_ = ()
+
 let init_lazy_end
     _
     ~informant_use_xdb:_

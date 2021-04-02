@@ -72,6 +72,8 @@ module type Server_config = sig
 
   (* Callback to run when server exits *)
   val on_server_exit : monitor_config -> unit
+
+  val is_saved_state_precomputed : server_start_options -> bool
 end
 
 type build_mismatch_info = {

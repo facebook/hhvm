@@ -180,9 +180,11 @@ let rec truthiness env ty =
     else
       Possibly_falsy
   | Ttuple [] -> Always_falsy
+  | Ttuple (_ :: _) ->
+    (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
+    Always_truthy
   | Tobject
   | Tfun _
-  | Ttuple _
   | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
   | Tvec_or_dict _ ->

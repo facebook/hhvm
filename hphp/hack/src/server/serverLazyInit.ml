@@ -1128,7 +1128,6 @@ let post_saved_state_initialization
     state_result
   in
   let trace = genv.local_config.SLC.trace_parsing in
-  let hg_aware = genv.local_config.SLC.hg_aware in
   let {
     naming_table_fallback_fn;
     dirty_naming_files;
@@ -1147,7 +1146,14 @@ let post_saved_state_initialization
   } =
     loaded_info
   in
-  if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
+  if genv.local_config.SLC.hg_aware then
+    if ServerArgs.is_using_precomputed_saved_state genv.options then begin
+      HackEventLogger.tried_to_be_hg_aware_with_precomputed_saved_state_warning
+        ();
+      Hh_logger.log
+        "Warning: disabling restart on rebase (server was started with precomputed saved-state)"
+    end else
+      Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
   let env =
     {
       env with

@@ -102,6 +102,8 @@ let load_deptable_end _ = ()
 
 let saved_state_download_and_load_done ~load_state_approach:_ ~success:_ _ = ()
 
+let tried_to_be_hg_aware_with_precomputed_saved_state_warning _ = ()
+
 let init_start ~experiments_config_meta = ignore experiments_config_meta
 
 let nfs_root _ = ()

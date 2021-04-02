@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.14)
+project(watchman CXX C)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "*.cpp")
+
+# Files include `#include <watchman/foo.h>` where `foo.h` isn't in a directory
+# called watchman
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include")
+file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include/watchman" SYMBOLIC)
+
+add_library(watchman STATIC ${SOURCES})
+target_include_directories(watchman PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include")
+
+foreach(DEP BOOST FMT FOLLY)
+  set("${DEP}_INCLUDE_DIR" "${DEP}_INCLUDE_DIR-notfound" CACHE PATH "Path to ${DEP}'s includes")
+  target_include_directories(watchman PRIVATE "${${DEP}_INCLUDE_DIR}")
+endforeach()

@@ -81,7 +81,7 @@ let handler =
         TypecheckerOptions.experimental_feature_enabled
           (Tast_env.get_tcopt env)
           TypecheckerOptions.experimental_case_sensitive_inheritance
-      then (
+      then
         (* Check if any methods, including inherited ones, interfere via canonical name *)
         let (_, cls_name) = c.c_name in
         let result = Env.get_class env cls_name in
@@ -90,8 +90,10 @@ let handler =
         | Some cls ->
           let methods = Cls.methods cls in
           let smethods = Cls.smethods cls in
-          check_inheritance_cases "method" c.c_name methods;
-          check_inheritance_cases "static method" c.c_name smethods
-      ) else
+          let all_methods = methods @ smethods in
+          (* All methods are treated the same when it comes to inheritance *)
+          (* Member type may be useful for properties, constants, etc later *)
+          check_inheritance_cases "method" c.c_name all_methods
+      else
         ()
   end

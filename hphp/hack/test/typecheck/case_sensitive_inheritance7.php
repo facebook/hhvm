@@ -4,6 +4,5 @@ class A {
 }
 
 class B extends A {
-  // static function and instance function do not coincide
   public static function foo(): void {}
 }

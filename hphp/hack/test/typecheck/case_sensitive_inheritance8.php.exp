@@ -1,0 +1,4 @@
+File "case_sensitive_inheritance8.php", line 18, characters 27-39:
+MyA inherits a method named `createBuildID` whose name differs from this one (`createBuildId`) only by case. (Typing[4393])
+  File "case_sensitive_inheritance8.php", line 6, characters 26-38:
+  It was inherited from MyTrait as `createBuildI~~D~~`. If you meant to override it, please use the same casing as the inherited method. Otherwise, please choose a different name for the new method

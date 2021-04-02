@@ -1,1 +1,4 @@
-No errors
+File "case_sensitive_inheritance7.php", line 7, characters 26-28:
+B inherits a method named `FOO` whose name differs from this one (`foo`) only by case. (Typing[4393])
+  File "case_sensitive_inheritance7.php", line 3, characters 19-21:
+  It was inherited from A as `~~FOO~~`. If you meant to override it, please use the same casing as the inherited method. Otherwise, please choose a different name for the new method

@@ -4904,8 +4904,8 @@ let inherited_class_member_with_different_case
       ^ member_type
       ^ " named "
       ^ Markdown_lite.md_codify name_prev
-      ^ " which differs from this one ("
-      ^ name
+      ^ " whose name differs from this one ("
+      ^ Markdown_lite.md_codify name
       ^ ") only by case." )
   in
   let reasons =
@@ -4918,7 +4918,8 @@ let inherited_class_member_with_different_case
         ^ ". If you meant to override it, please use the same casing as the inherited "
         ^ member_type
         ^ "."
-        ^ " Otherwise, please choose a different name for the new method." );
+        ^ " Otherwise, please choose a different name for the new "
+        ^ member_type );
     ]
   in
   add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) claim reasons
@@ -4937,7 +4938,7 @@ let multiple_inherited_class_member_with_different_case
       ^ member_type
       ^ " "
       ^ Markdown_lite.md_codify name1
-      ^ " that differ only by case." )
+      ^ " whose names differ only by case." )
   in
   let reasons =
     [
@@ -4952,7 +4953,9 @@ let multiple_inherited_class_member_with_different_case
         ^ Markdown_lite.md_codify name2
         ^ " from "
         ^ class2
-        ^ " here. Please rename these methods to the same casing." );
+        ^ " here. Please rename these "
+        ^ member_type
+        ^ "s to the same casing." );
     ]
   in
   add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) claim reasons

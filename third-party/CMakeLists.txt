@@ -51,7 +51,9 @@ list(APPEND EXTRA_INCLUDE_PATHS
 list(APPEND THIRD_PARTY_MODULES forks/timelib)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/timelib")
 
-add_subdirectory(zstd) # Required by folly
+# Required by folly
+add_subdirectory(double-conversion)
+add_subdirectory(zstd)
 
 list(APPEND THIRD_PARTY_MODULES folly)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/folly/src")
@@ -112,12 +114,6 @@ endif()
 if(NOT LIBSQLITE3_LIBRARY)
   list(APPEND THIRD_PARTY_MODULES forks/libsqlite3)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/libsqlite3")
-endif()
-
-# Add bundled double-conversion if the system one will not be used
-if(NOT DOUBLE_CONVERSION_FOUND)
-  list(APPEND THIRD_PARTY_MODULES double-conversion)
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/double-conversion")
 endif()
 
 # Add bundled PCRE if the system one will not be used

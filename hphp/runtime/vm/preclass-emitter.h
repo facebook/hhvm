@@ -59,7 +59,6 @@ struct PreClassEmitter {
   struct Prop {
     Prop()
       : m_name(nullptr)
-      , m_mangledName(nullptr)
       , m_attrs(AttrNone)
       , m_userType(nullptr)
       , m_docComment(nullptr)
@@ -80,7 +79,6 @@ struct PreClassEmitter {
     ~Prop();
 
     const StringData* name() const { return m_name; }
-    const StringData* mangledName() const { return m_mangledName; }
     Attr attrs() const { return m_attrs; }
     const StringData* userType() const { return m_userType; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
@@ -107,12 +105,10 @@ struct PreClassEmitter {
     friend PreClassEmitter;
     void updateAfterDeserialize(const PreClassEmitter* pce) {
       m_repoAuthType.resolveArray(pce->ue());
-      m_mangledName = PreClass::manglePropName(pce->name(), m_name, m_attrs);
     }
 
   private:
     LowStringPtr m_name;
-    LowStringPtr m_mangledName;
     Attr m_attrs;
     LowStringPtr m_userType;
     LowStringPtr m_docComment;

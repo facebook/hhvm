@@ -96,7 +96,6 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
   , m_ubs(ubs)
   , m_userAttributes(userAttributes)
 {
-  m_mangledName = PreClass::manglePropName(pce->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
 }
 

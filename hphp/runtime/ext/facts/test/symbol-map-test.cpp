@@ -38,6 +38,8 @@ namespace {
 constexpr int kTypeFlagAbstractBit = 1;
 constexpr int kTypeFlagFinalBit = 2;
 
+auto constexpr kSHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
 /**
  * RAII wrapper which ensures we finish draining the given
  * ManualExecutor before ending each test.
@@ -1173,6 +1175,44 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
       m3.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
       "SomeClass");
   EXPECT_TRUE(m3.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
+}
+
+TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
+  auto& m = make("/var/www");
+
+  FileFacts ffWithAttr{
+      .m_types =
+          {{.m_name = "C1",
+            .m_kind = TypeKind::Class,
+            .m_attributes = {{.m_name = "A1"}}}},
+      .m_sha1hex = kSHA};
+  folly::fs::path p1{"p1.php"};
+
+  m.update("", "1", {p1}, {}, {ffWithAttr});
+  {
+    auto c1Attrs = m.getAttributesOfType("C1");
+    EXPECT_EQ(c1Attrs.size(), 1);
+    EXPECT_EQ(c1Attrs.at(0).slice(), "A1");
+
+    auto a1Types = m.getTypesAndTypeAliasesWithAttribute("A1");
+    EXPECT_EQ(a1Types.size(), 1);
+    EXPECT_EQ(a1Types.at(0).slice(), "C1");
+  }
+
+  FileFacts ffEmpty{.m_sha1hex = kSHA};
+  FileFacts ffNoAttr{
+      .m_types = {{.m_name = "C1", .m_kind = TypeKind::Class}},
+      .m_sha1hex = kSHA};
+  folly::fs::path p2{"p2.php"};
+
+  m.update("1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
+  {
+    auto c1Attrs = m.getAttributesOfType("C1");
+    EXPECT_TRUE(c1Attrs.empty());
+
+    auto a1Types = m.getTypesAndTypeAliasesWithAttribute("A1");
+    EXPECT_TRUE(a1Types.empty());
+  }
 }
 
 TEST_F(SymbolMapTest, RemovePathFromExistingFile) {

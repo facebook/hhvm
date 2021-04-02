@@ -45,7 +45,6 @@ struct StringData;
 struct VariableSerializer;
 struct Variant;
 
-namespace arrprov { struct Tag; }
 namespace bespoke {
   struct LoggingArray;
   struct MonotypeVec;
@@ -457,8 +456,7 @@ public:
    * If `tag` is set or `arr` has provenance data, we copy the tag to the new
    * static array.  (A set `tag` overrides the provenance of `arr`.)
    */
-  static void GetScalarArray(ArrayData** arr,
-                             arrprov::Tag tag = {});
+  static void GetScalarArray(ArrayData** arr);
 
   /*
    * Promote the array referenced by `arr` to a static array and return it.
@@ -587,14 +585,6 @@ private:
 
   /////////////////////////////////////////////////////////////////////////////
 
-  template<bool>
-  static void GetScalarArrayImpl(ArrayData**, arrprov::Tag);
-
-  static void GetScalarArrayNoProv(ArrayData**);
-  static void GetScalarArrayProv(ArrayData**, arrprov::Tag);
-
-  /////////////////////////////////////////////////////////////////////////////
-
 protected:
   friend struct BespokeArray;
   friend struct PackedArray;
@@ -607,7 +597,6 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct arrprov::Tag;
   friend struct bespoke::LoggingArray;
   friend struct bespoke::MonotypeVec;
 
@@ -779,16 +768,6 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
 bool checkHACCompare();
-
-/*
- * Add a provenance tag for the current vmpc to `ad`, copying instead from
- * `src` if it's provided (and if it has a tag).  Returns `ad` for convenience.
- *
- * This function does not assert that `ad` does not have an existing tag, and
- * instead overrides it.
- */
-ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src = nullptr);
-ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -137,7 +137,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static void scan(const ArrayData*, type_scan::Scanner&);
 
-  static ArrayData* MakeReserveVArray(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);
 
   /*
@@ -147,16 +146,13 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
    *
    * This function takes ownership of the Cells in `values'.
    */
-  static ArrayData* MakeVArray(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
 
   /*
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
-  static ArrayData* MakeVArrayNatural(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVecNatural(uint32_t size, const TypedValue* values);
 
-  static ArrayData* MakeUninitializedVArray(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(
@@ -225,14 +221,8 @@ private:
   struct VecInitializer;
   static VecInitializer s_vec_initializer;
 
-  struct VArrayInitializer;
-  static VArrayInitializer s_varr_initializer;
-
   struct MarkedVecInitializer;
   static MarkedVecInitializer s_marked_vec_initializer;
-
-  struct MarkedVArrayInitializer;
-  static MarkedVArrayInitializer s_marked_varr_initializer;
 };
 
 //////////////////////////////////////////////////////////////////////

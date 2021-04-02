@@ -341,12 +341,9 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
     return nullptr;
   }
 
-  return gen(
-    env,
-    AKExistsKeyset,
-    cns(env, ArrayData::GetScalarArray(flipped.toArray())),
-    needle
-  );
+
+  auto const ad = ArrayData::GetScalarArray(flipped.toArray());
+  return gen(env, AKExistsKeyset, cns(env, ad), needle);
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
@@ -754,7 +751,7 @@ SSATmp* opt_foldable(IRGS& env,
 
     auto scalar_array = [&] {
       auto& a = val(retVal).parr;
-      ArrayData::GetScalarArray(&a, tag);
+      ArrayData::GetScalarArray(&a);
       return a;
     };
 

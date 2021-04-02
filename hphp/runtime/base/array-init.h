@@ -177,12 +177,12 @@ protected:
 namespace detail {
 
 struct VArray {
-  static constexpr auto MakeReserve = &PackedArray::MakeReserveVArray;
+  static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
   static constexpr auto Release = PackedArray::Release;
 };
 
 struct DArray {
-  static constexpr auto MakeReserve = &MixedArray::MakeReserveDArray;
+  static constexpr auto MakeReserve = &MixedArray::MakeReserveDict;
   static constexpr auto Release = MixedArray::Release;
 };
 
@@ -475,7 +475,7 @@ using VecInit = PackedArrayInitBase<detail::Vec, KindOfVec>;
 
 struct VArrayInit {
   explicit VArrayInit(size_t n)
-    : m_arr(PackedArray::MakeReserveVArray(n))
+    : m_arr(PackedArray::MakeReserveVec(n))
 #ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
@@ -573,7 +573,7 @@ private:
 
 struct DArrayInit {
   explicit DArrayInit(size_t n)
-    : m_arr(MixedArray::MakeReserveDArray(n))
+    : m_arr(MixedArray::MakeReserveDict(n))
 #ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)

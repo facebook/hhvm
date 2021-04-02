@@ -148,28 +148,6 @@ struct Tag {
 private:
   Tag(Kind kind, const StringData* name, int32_t line = -1);
 
-  /* these are here since we needed to be friends with these types */
-  static Tag get(const ArrayData* ad);
-  static Tag get(const APCArray* a);
-  static Tag get(const AsioExternalThreadEvent* ev);
-  static void set(ArrayData* ad, Tag tag);
-  static void set(APCArray* a, Tag tag);
-  static void set(AsioExternalThreadEvent* ev, Tag tag);
-
-  /* we are just everybody's best friend */
-  friend Tag getTag(const ArrayData* a);
-  friend Tag getTag(const APCArray* a);
-  friend Tag getTag(const AsioExternalThreadEvent* ev);
-
-  friend void setTag(ArrayData* a, Tag tag);
-  friend void setTag(APCArray* a, Tag tag);
-  friend void setTag(AsioExternalThreadEvent* ev, Tag tag);
-  friend void setTagForStatic(ArrayData* a, Tag tag);
-
-  friend void clearTag(ArrayData* ad);
-  friend void clearTag(APCArray* a);
-  friend void clearTag(AsioExternalThreadEvent* ev);
-
 private:
   uint32_t m_id = -1;
 };
@@ -259,63 +237,6 @@ private:
 
 #define ARRPROV_USE_VMPC() \
   ::HPHP::arrprov::TagOverride ap_override({})
-
-/*
- * Whether `a` admits a provenance tag.
- *
- * Depends on the ArrProv.* runtime options.
- */
-bool arrayWantsTag(const ArrayData* a);
-bool arrayWantsTag(const APCArray* a);
-bool arrayWantsTag(const AsioExternalThreadEvent* a);
-
-auto constexpr kAPCTagSize = 8;
-
-/*
- * Get the provenance tag for `a`.
- */
-Tag getTag(const ArrayData* a);
-Tag getTag(const APCArray* a);
-Tag getTag(const AsioExternalThreadEvent* ev);
-
-/*
- * Set the provenance tag for `a` to `tag`. The ArrayData* must be
- * non-static.
- */
-void setTag(ArrayData* a, Tag tag);
-void setTag(APCArray* a, Tag tag);
-void setTag(AsioExternalThreadEvent* ev, Tag tag);
-
-/*
- * Like setTag(), but for static arrays. Only meant for use in
- * GetScalarArray.
- */
-void setTagForStatic(ArrayData* a, Tag tag);
-
-/*
- * Clear a tag for a released array---only call this if the array is henceforth
- * unreachable or no longer of a kind that accepts provenance tags
- */
-void clearTag(ArrayData* ad);
-void clearTag(APCArray* a);
-void clearTag(AsioExternalThreadEvent* ev);
-
-/*
- * Invalidates the old tag on the provided array and reassigns one from the
- * current PC, if the array still admits a tag.
- *
- * If the array no longer admits a tag, but has one set, clears it.
- *
- */
-void reassignTag(ArrayData* ad);
-
-/*
- * Produce a static array with the given provenance tag.
- *
- * If an invalid tag is provided, we attempt to make one from vmpc(), and
- * failing that we just return the input array.
- */
-ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 

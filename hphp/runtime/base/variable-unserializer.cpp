@@ -1291,38 +1291,21 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
   }
   expectChar('p');
 
-  // We assert that we don't construct a non-trivial arrprov::Tag when arrprov
-  // is disabled, because doing so is expensive. We must construct them lazily.
-#define FINISH(x) (RO::EvalArrayProvenance ? arrprov::Tag::x : arrprov::Tag{})
-
-  if (peek() == ':') {
-    auto const line = read_line();
-    auto const name = read_name();
+  auto const peeked = peek();
+  if (peeked == ':') {
+    read_line();
+    read_name();
     expectChar(';');
-    return FINISH(Known(name, line));
-  } else if (peek() == 'f') {
+  } else if (peeked == 'f') {
     readChar();
-    auto const line = read_line();
-    auto const name = read_name();
+    read_line();
+    read_name();
     expectChar(';');
-    return FINISH(Param(name, line));
-  } else if (peek() == 'r') {
-    auto const name = expect_name();
-    return FINISH(TraitMerge(name));
-  } else if (peek() == 'e') {
-    auto const name = expect_name();
-    return FINISH(LargeEnum(name));
-  } if (peek() == 'c') {
-    auto const name = expect_name();
-    return FINISH(RuntimeLocation(name));
-  } if (peek() == 'z') {
-    auto const name = expect_name();
-    return FINISH(RuntimeLocationPoison(name));
-  } else {
-    return {};
+  } else if (peeked == 'c' || peeked == 'e' || peeked == 'r' || peeked == 'z') {
+    expect_name();
   }
 
-#undef FINISH
+  return {};
 }
 
 Array VariableUnserializer::unserializeDict() {

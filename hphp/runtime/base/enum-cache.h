@@ -71,10 +71,6 @@ struct EnumCache {
   // Helper that raises a PHP exception
   [[noreturn]] static void failLookup(const Variant& msg);
 
-  // Large enums get the dummy LargeEnum tag (so that we can cache a single
-  // static value for these enums). Small enums get a tag based on the caller.
-  static Array tagEnumWithProvenance(Array input);
-
 private:
   // Class* to intptr_ti key helpers
   const static intptr_t RECURSE_MASK = 1;

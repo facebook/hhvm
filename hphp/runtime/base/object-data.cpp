@@ -347,8 +347,8 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     check_non_safepoint_surprise();
   }
 
-  return
-    setDynPropArray(Array::attach(MixedArray::MakeReserveDArray(numDynamic)));
+  return setDynPropArray(Array::attach(
+      MixedArray::MakeReserveDict(numDynamic)));
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
@@ -623,7 +623,7 @@ Array ObjectData::o_toIterArray(const String& context) {
   if (getAttribute(HasDynPropArr)) {
     size += dynPropArray().size();
   }
-  Array retArray { Array::attach(MixedArray::MakeReserveMixed(size)) };
+  Array retArray { Array::attach(MixedArray::MakeReserveDict(size)) };
 
   Class* ctx = nullptr;
   if (!context.empty()) {

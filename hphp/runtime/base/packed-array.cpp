@@ -45,9 +45,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
-std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
-std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVArray;
 
 auto constexpr kDefaultVanillaArrayExtra = ArrayData::kDefaultVanillaArrayExtra;
 
@@ -63,18 +61,6 @@ struct PackedArray::VecInitializer {
 };
 PackedArray::VecInitializer PackedArray::s_vec_initializer;
 
-struct PackedArray::VArrayInitializer {
-  VArrayInitializer() {
-    auto const aux = packSizeIndexAndAuxBits(0, 0);
-    auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVArray);
-    ad->m_size = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
-    ad->initHeader_16(HeaderKind::Packed, StaticValue, aux);
-    assertx(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
-  }
-};
-PackedArray::VArrayInitializer PackedArray::s_varr_initializer;
-
 struct PackedArray::MarkedVecInitializer {
   MarkedVecInitializer() {
     auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
@@ -82,22 +68,10 @@ struct PackedArray::MarkedVecInitializer {
     ad->m_size = 0;
     ad->m_extra = kDefaultVanillaArrayExtra;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
-    assertx(!RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
+    assertx(checkInvariants(ad));
   }
 };
 PackedArray::MarkedVecInitializer PackedArray::s_marked_vec_initializer;
-
-struct PackedArray::MarkedVArrayInitializer {
-  MarkedVArrayInitializer() {
-    auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
-    auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVArray);
-    ad->m_size = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
-    ad->initHeader_16(HeaderKind::Packed, StaticValue, aux);
-    assertx(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
-  }
-};
-PackedArray::MarkedVArrayInitializer PackedArray::s_marked_varr_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -118,10 +92,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(arr->isVanillaVec());
   assertx(arr->m_size <= MixedArray::MaxSize);
   assertx(arr->m_size <= capacity(arr));
-  assertx(IMPLIES(!arrprov::arrayWantsTag(arr),
-                  arr->m_extra == kDefaultVanillaArrayExtra &&
-                  IMPLIES(RO::EvalArrayProvenance,
-                          !arrprov::getTag(arr).valid())));
+  assertx(arr->m_extra == kDefaultVanillaArrayExtra);
 
   // This loop is too slow for normal use, but can be enabled to debug
   // packed arrays.
@@ -271,7 +242,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_extra == adIn->m_extra);
   assertx(checkInvariants(ad));
-  return tagArrProv(ad, adIn);
+  return ad;
 }
 
 ALWAYS_INLINE
@@ -326,7 +297,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assertx(ad->m_extra == adIn->m_extra);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return tagArrProv(ad, adIn);
+  return ad;
 }
 
 ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
@@ -345,8 +316,6 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   );
 
   assertx(ad->kind() == adIn->kind());
-  assertx(!arrprov::arrayWantsTag(ad) ||
-          arrprov::getTag(ad) == arrprov::getTag(adIn));
   assertx(capacity(ad) >= adIn->m_size);
   assertx(ad->m_size == adIn->m_size);
   assertx(ad->m_extra == adIn->m_extra);
@@ -369,18 +338,6 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
   assertx(capacity(ad) >= cap);
   assertx(ad->hasExactlyOneRef());
   return ad;
-}
-
-ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
-  if (RO::EvalHackArrDVArrs) {
-    return  MakeReserveVec(capacity);
-  }
-  auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
-  ad->m_size = 0;
-  ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->m_size == 0);
-  assertx(checkInvariants(ad));
-  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
@@ -430,48 +387,12 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   return ad;
 }
 
-ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  if (RO::EvalHackArrDVArrs) {
-    return MakeVec(size, values);
-  }
-  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
-  return tagArrProv(ad);
-}
-
 ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Vec);
-  assertx(ad->isVanillaVec());
-  return ad;
-}
-
-ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* values) {
-  if (RO::EvalHackArrDVArrs) {
-    return MakeVecNatural(size, values);
-  }
-  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
-  return tagArrProv(ad);
+  return MakePackedImpl<true>(size, values, HeaderKind::Vec);
 }
 
 ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) {
-  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Vec);
-  assertx(ad->isVanillaVec());
-  return ad;
-}
-
-ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
-  if (RO::EvalHackArrDVArrs) {
-    return MakeUninitializedVec(size);
-  }
-  auto ad = MakeReserveImpl(size, HeaderKind::Packed);
-  ad->m_size = size;
-  ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->m_size == size);
-  assertx(checkInvariants(ad));
-  return tagArrProv(ad);
+  return MakePackedImpl<false>(size, values, HeaderKind::Vec);
 }
 
 ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
@@ -501,10 +422,6 @@ void PackedArray::Release(ArrayData* ad) {
   assertx(checkInvariants(ad));
   assertx(ad->isRefCounted());
   assertx(ad->hasExactlyOneRef());
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::clearTag(ad);
-  }
 
   if constexpr (stores_typed_values) {
     for (uint32_t i = 0; i < ad->m_size; ++i) {
@@ -540,9 +457,6 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
   assertx(checkInvariants(ad));
   if (!ad->uncountedDecRef()) return;
 
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::clearTag(ad);
-  }
   for (uint32_t i = 0; i < ad->m_size; ++i) {
     ReleaseUncountedTv(LvalUncheckedInt(ad, i));
   }
@@ -851,7 +765,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
   if (updateSeen) (*seen)[array] = ad;
-  return tagArrProv(ad, array);
+  return ad;
 }
 
 ALWAYS_INLINE

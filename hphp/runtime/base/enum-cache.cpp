@@ -200,22 +200,6 @@ const EnumValues* EnumCache::loadEnumValues(
   assertx(names.isDict());
   assertx(values.isDict());
 
-  // Tag all enums with the large enum tag. Small enums will be tagged again
-  // based on the actual PC by the reflection methods that access this cache.
-  if (RO::EvalArrayProvenance) {
-    auto const tag = arrprov::Tag::LargeEnum(klass->name());
-    if (names->isStatic()) {
-      names = Array::attach(arrprov::tagStaticArr(names.get(), tag));
-    } else {
-      arrprov::setTag(names.get(), tag);
-    }
-    if (values->isStatic()) {
-      values = Array::attach(arrprov::tagStaticArr(values.get(), tag));
-    } else {
-      arrprov::setTag(values.get(), tag);
-    }
-  }
-
   // If we saw dynamic constants we cannot cache the enum values across requests
   // as they may not be the same in every request.
   return persist
@@ -263,17 +247,6 @@ void EnumCache::deleteEnumValues(intptr_t key) {
     delete acc->second;
     m_enumValuesMap.erase(acc);
   }
-}
-
-Array EnumCache::tagEnumWithProvenance(Array input) {
-  assertx(RO::EvalArrayProvenance);
-  assertx(IMPLIES(arrprov::arrayWantsTag(input.get()),
-                  arrprov::getTag(input.get())));
-  if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
-  assertx(input->isVanillaDict());
-  auto const ad = MixedArray::Copy(input.get());
-  arrprov::setTag(ad, arrprov::tagFromPC());
-  return Array::attach(ad);
 }
 
 //////////////////////////////////////////////////////////////////////

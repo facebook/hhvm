@@ -608,15 +608,6 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
     }
   }
   out += ")";
-
-  if (RO::EvalArrayProvenance) {
-    auto const tag = arrprov::getTag(ad);
-    if (tag.valid()) {
-      out += " [";
-      out += tag.toString();
-      out += "]";
-    }
-  }
 }
 
 void staticStreamer(const TypedValue* tv, std::string& out) {

@@ -30,8 +30,7 @@ namespace HPHP {
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   assertx(values->values.isDict());
-  if (!RO::EvalArrayProvenance) return values->values;
-  return EnumCache::tagEnumWithProvenance(values->values);
+  return values->values;
 }
 
 const StaticString s_invariant_violation("HH\\invariant_violation");
@@ -100,8 +99,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   }
 
   assertx(values->names.isDict());
-  if (!RO::EvalArrayProvenance) return values->names;
-  return EnumCache::tagEnumWithProvenance(values->names);
+  return values->names;
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {

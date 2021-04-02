@@ -225,22 +225,4 @@ ALWAYS_INLINE bool checkHACCompare() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace arrprov_detail {
-template<typename SrcArray>
-ArrayData* tagArrProvImpl(ArrayData*, const SrcArray*);
-}
-
-ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
-  return RO::EvalArrayProvenance
-    ? arrprov_detail::tagArrProvImpl(ad, src)
-    : ad;
-}
-ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
-  return RO::EvalArrayProvenance
-    ? arrprov_detail::tagArrProvImpl(ad, src)
-    : ad;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }

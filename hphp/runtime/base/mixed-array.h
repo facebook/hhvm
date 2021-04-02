@@ -192,18 +192,16 @@ struct MixedArray final : ArrayData,
    *
    * The returned array is already incref'd.
    */
-  static ArrayData* MakeReserveMixed(uint32_t size);
-  static ArrayData* MakeReserveDArray(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
-  static constexpr auto MakeReserve = &MakeReserveMixed;
+  static auto constexpr MakeReserve = &MakeReserveDict;
 
   /*
    * Allocates a new request-local array with given key,value,key,value,... in
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
    */
-  static MixedArray* MakeDArray(uint32_t size, const TypedValue* kvs);
   static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
+
 private:
   template<HeaderKind hdr>
   static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
@@ -225,7 +223,7 @@ public:
   /*
    * Same semantics as PackedArray::MakeNatural().
    */
-  static MixedArray* MakeDArrayNatural(uint32_t size, const TypedValue* vals);
+  static MixedArray* MakeDictNatural(uint32_t size, const TypedValue* vals);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -234,16 +232,12 @@ public:
   static MixedArray* MakeStructDict(uint32_t size,
                                     const StringData* const* keys,
                                     const TypedValue* values);
-  static MixedArray* MakeStructDArray(uint32_t size,
-                                      const StringData* const* keys,
-                                      const TypedValue* values);
 
   /*
    * Allocate a struct-like array (with string literal keys), but only init
    * the hash table and the header, leaving elms uninit. Requires size > 0.
    */
   static MixedArray* AllocStructDict(uint32_t size, const int32_t* hash);
-  static MixedArray* AllocStructDArray(uint32_t size, const int32_t* hash);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -363,10 +357,6 @@ public:
 
 private:
   MixedArray* copyMixed() const;
-  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
-  static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
-                                    const TypedValue*, HeaderKind);
-  static MixedArray* AllocStructImpl(uint32_t, const int32_t*, HeaderKind);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -477,12 +467,6 @@ private:
   static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
                                  uint32_t nElems);
 
-  // TODO(kshaunak): Delete this method and use CopyMixed.
-  //
-  // There are subtleties which make it tricky, though; this method clears the
-  // m_nextKI and m_pos fields in the result array, which CopyMixed does not.
-  static ArrayData* ToDArrayImpl(const MixedArray* adIn);
-
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
@@ -506,10 +490,6 @@ private:
 
   using HashTable<MixedArray, MixedArrayElm>::findForRemove;
 
-  static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
-  static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
-  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
-
   template <bool Move>
   void nextInsert(TypedValue);
   ArrayData* addVal(int64_t ki, TypedValue data);
@@ -529,8 +509,6 @@ private:
       compact(false);
     }
   }
-
-  MixedArray* copyImpl(MixedArray* target) const;
 
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 
@@ -572,14 +550,8 @@ private:
   struct DictInitializer;
   static DictInitializer s_dict_initializer;
 
-  struct DArrayInitializer;
-  static DArrayInitializer s_darr_initializer;
-
   struct MarkedDictArrayInitializer;
   static MarkedDictArrayInitializer s_marked_dict_initializer;
-
-  struct MarkedDArrayInitializer;
-  static MarkedDArrayInitializer s_marked_darr_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

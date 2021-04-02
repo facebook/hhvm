@@ -281,10 +281,6 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   Array frameinfo;
   {
-    arrprov::TagOverride _(RO::EvalArrayProvenance
-      ? arrprov::Tag::Param(func, 2)
-      : arrprov::Tag{});
-
     frameinfo = Array::attach(ArrayData::CreateDict());
     if (!isResume) {
       // Add arguments only if this is a function call.
@@ -324,9 +320,6 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   Array frameinfo;
   {
-    arrprov::TagOverride _(RO::EvalArrayProvenance
-      ? arrprov::Tag::Param(func, 2)
-      : arrprov::Tag{});
     if (retval) {
       frameinfo = make_darray(s_return, tvAsCVarRef(retval));
     } else if (exception) {
@@ -375,12 +368,7 @@ static Variant call_intercept_handler(
     );
   }
 
-  {
-    arrprov::TagOverride _(RO::EvalArrayProvenance
-      ? arrprov::Tag::Param(f, 2)
-      : arrprov::Tag{});
-    args = hhvm_get_frame_args(ar);
-  }
+  args = hhvm_get_frame_args(ar);
 
   VArrayInit par{newCallback ? 3u : 5u};
   par.append(called);
@@ -427,13 +415,6 @@ static Variant call_intercept_handler_callback(
   }
 
   auto const args = [&]{
-    // The array here is the array of all parameters. Typically, this array
-    // isn't observed - however, if the callback takes the array as a single
-    // varargs list, it will be. In this case, it will be param 0.
-    arrprov::TagOverride _(RO::EvalArrayProvenance
-      ? arrprov::Tag::Param(f, 0)
-      : arrprov::Tag{});
-
     auto const curArgs = hhvm_get_frame_args(ar);
     VArrayInit args(prepend_this + curArgs.size());
     if (prepend_this) {

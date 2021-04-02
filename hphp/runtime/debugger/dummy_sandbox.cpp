@@ -94,7 +94,7 @@ void DummySandbox::run() {
             "PHP files may not be loaded properly.\n";
         } else {
           auto server = php_global_exchange(s__SERVER, init_null());
-          forceToDArray(server);
+          forceToDict(server);
           Array arr = server.asArrRef();
           server.unset();
           php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));

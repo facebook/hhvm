@@ -261,155 +261,6 @@ InitFiniNode flushTable([]{
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool arrayWantsTag(const ArrayData* ad) {
-  return false;
-}
-
-bool arrayWantsTag(const APCArray* a) {
-  return false;
-}
-
-bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
-  return false;
-}
-
-/*
- * Mutable access to a given object's provenance slot.
- */
-void Tag::set(ArrayData* ad, Tag tag) {
-  assertx(ad->isVanilla());
-  static_assert(sizeof(decltype(ad->m_extra)) == sizeof(Tag));
-  ad->m_extra = folly::bit_cast<uint32_t>(tag);
-}
-
-void Tag::set(APCArray* a, Tag tag) {
-  auto mem = reinterpret_cast<Tag*>(
-    reinterpret_cast<char*>(a) - kAPCTagSize
-  );
-  *mem = tag;
-}
-
-void Tag::set(AsioExternalThreadEvent* a, Tag tag) {
-  if (tag.valid()) {
-    rl_array_provenance->tags[a] = tag;
-  } else {
-    rl_array_provenance->tags.erase(a);
-  }
-}
-
-/*
- * Const access to a given object's provenance slot.
- */
-Tag Tag::get(const ArrayData* ad) {
-  assertx(ad->isVanilla());
-  static_assert(sizeof(decltype(ad->m_extra)) == sizeof(Tag));
-  return folly::bit_cast<Tag>(ad->m_extra);
-}
-
-Tag Tag::get(const APCArray* a) {
-  auto const mem = reinterpret_cast<const Tag*>(
-    reinterpret_cast<const char*>(a) - kAPCTagSize
-  );
-  return *mem;
-}
-
-Tag Tag::get(const AsioExternalThreadEvent* a) {
-  auto const& table = rl_array_provenance->tags;
-  auto const it = table.find(a);
-  if (it == table.end()) return {};
-  assertx(it->second.valid());
-  return it->second;
-}
-
-Tag getTag(const ArrayData* ad) {
-  assertx(RO::EvalArrayProvenance);
-  // We ensure that arrays that don't want a tag have an invalid tag set.
-  return Tag::get(ad);
-}
-
-Tag getTag(const APCArray* a) {
-  assertx(RO::EvalArrayProvenance);
-  if (!arrayWantsTag(a)) return {};
-  return Tag::get(a);
-}
-
-Tag getTag(const AsioExternalThreadEvent* ev) {
-  assertx(RO::EvalArrayProvenance);
-  // We ensure that Asio events that don't want a tag have an invalid tag set.
-  return Tag::get(ev);
-}
-
-void setTag(ArrayData* ad, Tag tag) {
-  assertx(RO::EvalArrayProvenance);
-  assertx(tag.valid());
-  assertx(!ad->isStatic());
-  if (!arrayWantsTag(ad)) return;
-  Tag::set(ad, tag);
-}
-
-void setTag(APCArray* a, Tag tag) {
-  assertx(RO::EvalArrayProvenance);
-  assertx(tag.valid());
-  if (!arrayWantsTag(a)) return;
-  Tag::set(a, tag);
-}
-
-void setTag(AsioExternalThreadEvent* ev, Tag tag) {
-  assertx(RO::EvalArrayProvenance);
-  assertx(tag.valid());
-  if (!arrayWantsTag(ev)) return;
-  Tag::set(ev, tag);
-}
-
-void setTagForStatic(ArrayData* ad, Tag tag) {
-  assertx(RO::EvalArrayProvenance);
-  assertx(tag.valid());
-  assertx(ad->isStatic());
-  if (!arrayWantsTag(ad)) return;
-  Tag::set(ad, tag);
-}
-
-void clearTag(ArrayData* ad) {
-  assertx(RO::EvalArrayProvenance);
-  Tag::set(ad, {});
-}
-
-void clearTag(APCArray* a) {
-  assertx(RO::EvalArrayProvenance);
-  Tag::set(a, {});
-}
-
-void clearTag(AsioExternalThreadEvent* ev) {
-  assertx(RO::EvalArrayProvenance);
-  Tag::set(ev, {});
-}
-
-void reassignTag(ArrayData* ad) {
-  assertx(RO::EvalArrayProvenance);
-  if (arrayWantsTag(ad)) {
-    if (auto const tag = tagFromPC()) {
-      setTag(ad, tag);
-      return;
-    }
-  }
-  clearTag(ad);
-}
-
-ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
-  assertx(!RO::EvalHackArrDVArrs);
-  assertx(RO::EvalArrayProvenance);
-  assertx(ad->isStatic());
-  assertx(arrayWantsTag(ad));
-
-  if (!tag.valid()) tag = tagFromPC();
-  if (!tag.valid()) return ad;
-
-  ArrayData::GetScalarArray(&ad, tag);
-  return ad;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 TagOverride::TagOverride(Tag tag)
   : m_valid(RO::EvalArrayProvenance)
 {
@@ -610,78 +461,6 @@ ArrayData* apply_mutation_ignore_collections(TypedValue tv, State& state,
   return apply_mutation_to_array(arr, state, cow, depth);
 }
 
-template <typename State>
-ArrayData* apply_mutation_mutate_collections(TypedValue tv, State& state,
-                                             bool cow, uint32_t depth) {
-  // Visit each collection exactly once. When we do, we'll first mutate its
-  // inner array and then replace it, destroying the old one.
-  if (tvIsObject(tv) && val(tv).pobj->isCollection()) {
-    auto const obj = val(tv).pobj;
-    auto const ad = collections::asArray(obj);
-    if (!ad) return nullptr;
-    if (!state.visited.insert({obj, nullptr}).second) return nullptr;
-    auto result = apply_mutation(make_array_like_tv(ad), state, false, depth);
-    if (result != nullptr) collections::replaceArray(obj, result);
-    return nullptr;
-  }
-
-  if (!tvIsVec(tv) && !tvIsDict(tv)) {
-    return nullptr;
-  }
-  auto const arr = val(tv).parr;
-
-  // We may revisit arrays. We store a cached value of nullptr the first time
-  // we visit any array. After we've evaluated it, we cache the final result.
-  //
-  // If we revisit an array before we've completed evaluating it, we must do
-  // something slow but correct. We handle this case by copying the array to
-  // get a new one (guaranteed to not be visited) and immediately caching it.
-  // We then mutate the copied array.
-  //
-  // It's critical that we can operate on the copy in place: that's what lets
-  // us hand it out as the answer the next time we visit the same array before
-  // before we've finished evaluating it! We use an always_assert to enforce
-  // this invariant in all environments.
-  //
-  // Overall, we visit each array in the input at most two times, which gives
-  // us a reasonable asymptotic runtime bound even on complex recursive cases.
-  auto const insert = state.visited.insert({arr, nullptr});
-  auto const cached = insert.first->second;
-  if (cached) {
-    cached->incRefCount();
-    return cached;
-  } else if (!insert.second) {
-    // NOTE: There is no longer any general-purpose API to copy an array-like.
-    // Certain empty bespoke array-like classes do not provide this facility.
-    //
-    // But we can still copy our input, because a) we know it's a dvarray,
-    // vec, or dict, and b) we only use this "mutate collections" option when
-    // array provenance is on, implying that bespoke array-likes are off.
-    //
-    // Since this invariant is delicate, we always_assert it. (If we break it
-    // in the future, we can "copy" an array by first escalating to vanilla.)
-    //
-    // Note that we may inc-ref and hand out this cached array in a recursive
-    // call issued while mutating it. The mutation only works because the two
-    // array types here are handled by apply_mutation_fast, which specifically
-    // allows for a mutation of arrays with refcount > 1 (see above).
-    auto const copy = [&]{
-      if (arr->isVanillaVec()) return PackedArray::Copy(arr);
-      if (arr->isVanillaDict())  return MixedArray::Copy(arr);
-      always_assert(false);
-    }();
-    insert.first->second = copy;
-    assertx(copy->hasExactlyOneRef());
-    auto const result = apply_mutation_to_array(copy, state, false, depth);
-    always_assert(result == nullptr);
-    return copy;
-  }
-
-  auto const result = apply_mutation_to_array(arr, state, cow, depth);
-  state.visited.insert({arr, result ? result : arr});
-  return result;
-}
-
 // This function applies `state.mutation` to `tv` to get a modified array-like.
 // Then, if `state.recursive` is set, it recursively applies the mutation to
 // the values of the array-like. It does so with the minimum number of copies,
@@ -705,10 +484,6 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
       state.raised_stack_notice = true;
     }
     return nullptr;
-  }
-
-  if constexpr (shouldMutateCollections<State>()) {
-    return apply_mutation_mutate_collections(tv, state, cow, depth);
   }
   return apply_mutation_ignore_collections(tv, state, cow, depth);
 }
@@ -758,38 +533,10 @@ TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
-template <typename Collections>
-TypedValue tagTvImpl(TypedValue in) {
-  // Closure state: an expensive-to-compute provenance tag.
-  folly::Optional<arrprov::Tag> tag = folly::none;
-
-  // The closure: tag array-likes if they want tags, else leave them alone.
-  auto const tag_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
-    if (!arrprov::arrayWantsTag(ad)) return nullptr;
-    if (!tag) tag = arrprov::tagFromPC();
-    if (!tag->valid()) return nullptr;
-    auto const result = [&]{
-      if (!cow) return ad;
-      auto const packed = ad->isVanillaVec();
-      return packed ? PackedArray::Copy(ad) : MixedArray::Copy(ad);
-    }();
-    arrprov::setTag(result, *tag);
-    return cow ? result : nullptr;
-  };
-
-  auto state = MutationState<decltype(tag_tv), Collections>{
-    tag_tv, "tag_provenance_here"};
-  auto const ad = apply_mutation(in, state);
-  return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
-}
-
 }
 
 TypedValue tagTvRecursively(TypedValue in, int64_t flags) {
-  if (!RO::EvalArrayProvenance) return tvReturn(tvAsCVarRef(&in));
-  return flags & TagTVFlags::TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS
-    ? tagTvImpl<MutateCollections>(in)
-    : tagTvImpl<IgnoreCollections>(in);
+  return tvReturn(tvAsCVarRef(&in));
 }
 
 TypedValue markTvRecursively(TypedValue in, bool legacy) {

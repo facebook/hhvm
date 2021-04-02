@@ -315,9 +315,9 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 
-  auto ad = isDictType() ? MixedArray::MakeReserveDict(capacity)
-                         : MixedArray::MakeReserveDArray(capacity);
+  auto ad = MixedArray::MakeReserveDict(capacity);
   ad->setLegacyArrayInPlace(isLegacyArray());
+
   auto const layout = this->layout();
   for (auto i = 0; i < m_size; i++) {
     auto const slot = getSlotInPos(i);

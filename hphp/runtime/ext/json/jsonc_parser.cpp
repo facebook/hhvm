@@ -169,10 +169,8 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
           break;
         }
         case JSONContainerType::HACK_ARRAYS:
-          forceToDict(var).set(key, tmpvar);
-          break;
         case JSONContainerType::DARRAYS:
-          forceToDArray(var).set(key, tmpvar);
+          forceToDict(var).set(key, tmpvar);
           break;
       }
     }

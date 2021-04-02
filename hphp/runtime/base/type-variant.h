@@ -1539,20 +1539,6 @@ inline Array& forceToDict(tv_lval lval) {
   return asArrRef(lval);
 }
 
-inline Array& forceToDArray(Variant& var) {
-  if (!tvIsDict(var.asTypedValue())) {
-    var = Variant(Array::CreateDict());
-  }
-  return var.asArrRef();
-}
-
-inline Array& forceToDArray(tv_lval lval) {
-  if (!tvIsDict(lval)) {
-    tvMove(make_array_like_tv(ArrayData::CreateDict()), lval);
-  }
-  return asArrRef(lval);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Variant empty_string_variant() {

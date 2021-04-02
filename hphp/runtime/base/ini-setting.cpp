@@ -578,7 +578,6 @@ void IniSettingMap::set(const String& key, const Variant& v) {
 Array IniSetting::ParserCallback::emptyArrayForMode() const {
   switch (mode_) {
     case ParserCallbackMode::DARRAY:
-      return Array::CreateDict();
     case ParserCallbackMode::DICT:
       return Array::CreateDict();
   }
@@ -588,7 +587,6 @@ Array IniSetting::ParserCallback::emptyArrayForMode() const {
 Array& IniSetting::ParserCallback::forceToArrayForMode(Variant& var) const {
   switch (mode_) {
     case ParserCallbackMode::DARRAY:
-      return forceToDArray(var);
     case ParserCallbackMode::DICT:
       return forceToDict(var);
   }
@@ -598,7 +596,6 @@ Array& IniSetting::ParserCallback::forceToArrayForMode(Variant& var) const {
 Array& IniSetting::ParserCallback::forceToArrayForMode(tv_lval var) const {
   switch (mode_) {
     case ParserCallbackMode::DARRAY:
-      return forceToDArray(var);
     case ParserCallbackMode::DICT:
       return forceToDict(var);
   }

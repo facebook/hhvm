@@ -260,7 +260,7 @@ TypedValue HHVM_FUNCTION(array_combine,
                   "number of elements");
     return make_tv<KindOfBoolean>(false);
   }
-  Array ret = Array::attach(MixedArray::MakeReserveMixed(keys_size));
+  Array ret = Array::attach(MixedArray::MakeReserveDict(keys_size));
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
     auto const key = iter1.secondValPlus();
@@ -1006,7 +1006,7 @@ TypedValue HHVM_FUNCTION(array_slice,
 
   // Otherwise VArrayInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
-  Array ret = Array::attach(MixedArray::MakeReserveDArray(len));
+  Array ret = Array::attach(MixedArray::MakeReserveDict(len));
   auto nextKI = 0; // for appends
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
     auto const key = iter.first();
@@ -3093,16 +3093,7 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
 }
 
 String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
-  if (!isArrayLikeType(in.getType())) return "";
-  if (!RuntimeOption::EvalArrayProvenance) return "";
-
-  auto const& arr = in.asCArrRef();
-  auto const tag = arrprov::getTag(arr.get());
-  if (tag.valid()) {
-    return tag.toString();
-  } else {
-    return "<none>";
-  }
+  return "";
 }
 
 TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in, int64_t flags) {

@@ -127,9 +127,9 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
 
   ArrayData* data;
   if (input->isVecType()) {
-    data = PackedArray::MakeReserveVArray(pad_size);
+    data = PackedArray::MakeReserveVec(pad_size);
   } else {
-    data = MixedArray::MakeReserveDArray(pad_size);
+    data = MixedArray::MakeReserveDict(pad_size);
   }
   auto ret = Array::attach(data);
   for (int i = input_size; i < pad_size; i++) {

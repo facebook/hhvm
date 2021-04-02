@@ -1908,7 +1908,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       auto const name_key =
         ret.asArrRef().convertKey<IntishCast::Cast>(name);
       /* already have an item with this name? */
-      forceToDArray(ret);
+      forceToDict(ret);
       if (ret.asArrRef().exists(name_key)) {
         auto const curr_val = ret.asArrRef().lval(name_key);
         if (!isArrayLikeType(curr_val.type())) {
@@ -1953,7 +1953,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       break;
 
     case PDO_FETCH_FUNC:
-      forceToDArray(stmt->fetch.values).set(idx, val);
+      forceToDict(stmt->fetch.values).set(idx, val);
       break;
 
     default:

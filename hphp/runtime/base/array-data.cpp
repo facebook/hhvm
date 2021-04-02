@@ -153,7 +153,7 @@ bool compareArrayPortion(const ArrayData* ad1, const ArrayData* ad2) {
   return equal;
 }
 
-struct ScalarHashNoProv {
+struct ScalarHash {
   size_t operator()(ArrayData* arr) const {
     return s_cachedHash.first == arr
       ? s_cachedHash.second
@@ -164,70 +164,21 @@ struct ScalarHashNoProv {
   }
 };
 
-struct ScalarHashProv {
-  size_t operator()(const std::pair<ArrayData*, arrprov::Tag>& p) const {
-    assertx(IMPLIES(p.second.valid(), arrprov::arrayWantsTag(p.first)));
-    return folly::hash::hash_combine(
-      p.first == s_cachedHash.first
-        ? s_cachedHash.second
-        : hashArrayPortion(p.first),
-      p.second.hash()
-    );
-  }
-  bool operator()(const std::pair<ArrayData*, arrprov::Tag>& p1,
-                  const std::pair<ArrayData*, arrprov::Tag>& p2) const {
-    assertx(p1.first->isVanilla());
-    assertx(p2.first->isVanilla());
-    assertx(IMPLIES(p1.second.valid(), arrprov::arrayWantsTag(p1.first)));
-    assertx(IMPLIES(p2.second.valid(), arrprov::arrayWantsTag(p2.first)));
-
-    // NB: The arrprov::Tag here might not match the one inside the
-    // ArrayData because one of the arrays might be the one we're
-    // trying to lookup with (and thus has its old tag).
-    if (p1.second != p2.second) return false;
-    return compareArrayPortion(p1.first, p2.first);
-  }
-};
-
-using ArrayDataMapNoProv = tbb::concurrent_unordered_set<
-  ArrayData*,
-  ScalarHashNoProv,
-  ScalarHashNoProv
->;
-ArrayDataMapNoProv s_arrayDataMapNoProv;
-
-using ArrayDataMapProv = tbb::concurrent_unordered_set<
-  std::pair<ArrayData*, arrprov::Tag>,
-  ScalarHashProv,
-  ScalarHashProv
->;
-ArrayDataMapProv s_arrayDataMapProv;
+using ArrayDataMap =
+  tbb::concurrent_unordered_set<ArrayData*, ScalarHash, ScalarHash>;
+ArrayDataMap s_arrayDataMap;
 
 }
 
 size_t loadedStaticArrayCount() {
-  return RO::EvalArrayProvenance
-    ? s_arrayDataMapProv.size()
-    : s_arrayDataMapNoProv.size();
+  return s_arrayDataMap.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <bool ArrayProv>
-ALWAYS_INLINE
-void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
-  assertx(IMPLIES(!ArrayProv, !tag.valid()));
-
+void ArrayData::GetScalarArray(ArrayData** parr) {
   auto const base = *parr;
-  assertx(IMPLIES(tag.valid(), arrprov::arrayWantsTag(base)));
-
-  auto const oldTag = ArrayProv
-    ? arrprov::getTag(base)
-    : arrprov::Tag{};
-  assertx(IMPLIES(oldTag.valid(), arrprov::arrayWantsTag(base)));
-
-  auto const newTag = tag.valid() ? tag : oldTag;
-  if (base->isStatic() && LIKELY(newTag == oldTag)) return;
+  if (base->isStatic()) return;
 
   auto const arr = [&]{
     if (base->isVanilla()) return base;
@@ -237,28 +188,21 @@ void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
   }();
 
   auto const replace = [&] (ArrayData* rep) {
-    assertx(IMPLIES(ArrayProv, arrprov::getTag(rep) == newTag));
     *parr = rep;
     decRefArr(arr);
     s_cachedHash.first = nullptr;
   };
 
-  if (arr->empty() && !newTag.valid()) {
-    return replace(
-      [&]{
-        auto const legacy = arr->isLegacyArray();
-        switch (arr->toDataType()) {
-        case KindOfVec:
-          return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
-        case KindOfDict:
-          return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
-        case KindOfKeyset:
-          return staticEmptyKeysetArray();
-        default:
-          always_assert(false);
-        }
-      }()
-    );
+  if (arr->empty()) {
+    return replace([&]{
+      auto const legacy = arr->isLegacyArray();
+      switch (arr->toDataType()) {
+        case KindOfVec:    return ArrayData::CreateVec(legacy);
+        case KindOfDict:   return ArrayData::CreateDict(legacy);
+        case KindOfKeyset: return ArrayData::CreateKeyset();
+        default: always_assert(false);
+      }
+    }());
   }
 
   arr->onSetEvalScalar();
@@ -267,19 +211,11 @@ void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
   s_cachedHash.second = hashArrayPortion(arr);
 
   auto const lookup = [&] (ArrayData* a) -> ArrayData* {
-    if (ArrayProv) {
-      if (auto const it = s_arrayDataMapProv.find({a, newTag});
-          it != s_arrayDataMapProv.end()) {
-        return it->first;
-      }
-      return nullptr;
-    } else {
-      if (auto const it = s_arrayDataMapNoProv.find(a);
-          it != s_arrayDataMapNoProv.end()) {
-        return *it;
-      }
-      return nullptr;
+    if (auto const it = s_arrayDataMap.find(a);
+        it != s_arrayDataMap.end()) {
+      return *it;
     }
+    return nullptr;
   };
 
   if (auto const a = lookup(arr)) return replace(a);
@@ -297,7 +233,6 @@ void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
   auto const ad = arr->copyStatic();
   ad->m_aux16 &= ~kSampledArray;
   assertx(ad->isStatic());
-  if (newTag.valid()) arrprov::setTagForStatic(ad, newTag);
 
   // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
@@ -305,32 +240,9 @@ void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
   s_cachedHash.first = ad;
   assertx(hashArrayPortion(ad) == s_cachedHash.second);
 
-  if (ArrayProv) {
-    auto const DEBUG_ONLY inserted =
-      s_arrayDataMapProv.insert({ad, newTag}).second;
-    assertx(inserted);
-  } else {
-    auto const DEBUG_ONLY inserted =
-      s_arrayDataMapNoProv.insert(ad).second;
-    assertx(inserted);
-  }
+  auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
+  assertx(inserted);
   return replace(ad);
-}
-
-ALWAYS_INLINE
-void ArrayData::GetScalarArrayNoProv(ArrayData** parr) {
-  return GetScalarArrayImpl<false>(parr, arrprov::Tag{});
-}
-
-NEVER_INLINE
-void ArrayData::GetScalarArrayProv(ArrayData** parr, arrprov::Tag tag) {
-  return GetScalarArrayImpl<true>(parr, tag);
-}
-
-void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
-  if (UNLIKELY(RO::EvalArrayProvenance)) return GetScalarArrayProv(parr, tag);
-  assertx(!tag.valid());
-  return GetScalarArrayNoProv(parr);
 }
 
 ArrayData* ArrayData::GetScalarArray(Array&& arr) {
@@ -957,38 +869,6 @@ void throwVecUnsetException() {
 
 void raiseHackArrCompatArrHackArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace arrprov_detail {
-
-template<typename SrcArr>
-ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(RuntimeOption::EvalArrayProvenance);
-  assertx(ad->hasExactlyOneRef() || !ad->isRefCounted());
-
-  if (!arrprov::arrayWantsTag(ad)) return ad;
-
-  auto const do_tag = [] (ArrayData* ad, arrprov::Tag tag) {
-    if (ad->isStatic()) return tagStaticArr(ad, tag);
-
-    arrprov::setTag(ad, tag);
-    return ad;
-  };
-
-  if (src != nullptr) {
-    if (auto const tag = arrprov::getTag(src)) return do_tag(ad, tag);
-  }
-  if (auto const tag = arrprov::tagFromPC()) return do_tag(ad, tag);
-
-  return ad;
-}
-
-template ArrayData* tagArrProvImpl<ArrayData>(ArrayData*, const ArrayData*);
-template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1867,59 +1867,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
                                             bool isVectorData) {
   using AK = VariableSerializer::ArrayKind;
   AK kind = getKind(arr);
-  writeArrayHeader(
-    arr->size(),
-    isVectorData,
-    kind
-  );
-
-  auto const write_name = [&](const StringData* name) {
-    if (m_unitFilename == name) {
-      m_buf->append("t;");
-    } else {
-      write(name->data(), name->size());
-    }
-  };
-
-  if ((m_type == Type::Internal || m_serializeProvenanceAndLegacy) &&
-      arrprov::arrayWantsTag(arr)) {
-    auto const tag = arrprov::getTag(arr);
-    if (tag.valid()) {
-      switch (tag.kind()) {
-      case arrprov::Tag::Kind::Invalid: always_assert(false);
-      case arrprov::Tag::Kind::Known: {
-        m_buf->append("p:");
-        write(tag.line());
-        write_name(tag.name());
-        break;
-      }
-      case arrprov::Tag::Kind::KnownFuncParam: {
-        m_buf->append("pf:");
-        write(tag.line());
-        write_name(tag.name());
-        break;
-      }
-      case arrprov::Tag::Kind::KnownTraitMerge: {
-        m_buf->append("pr:");
-        write_name(tag.name());
-        break;
-      }
-      case arrprov::Tag::Kind::KnownLargeEnum: {
-        m_buf->append("pe:");
-        write_name(tag.name());
-        break;
-      }
-      case arrprov::Tag::Kind::RuntimeLocation:
-        m_buf->append("pc:");
-        write_name(tag.name());
-        break;
-      case arrprov::Tag::Kind::RuntimeLocationPoison:
-        m_buf->append("pz:");
-        write_name(tag.name());
-        break;
-      }
-    }
-  }
+  writeArrayHeader(arr->size(), isVectorData, kind);
 
   IterateKV(
     arr,

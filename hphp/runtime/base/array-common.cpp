@@ -57,12 +57,7 @@ ArrayData* castObjToArrayLikeImpl(ObjectData* obj,
 
   auto arr = empty();
   for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
-  auto const out = arr.detach();
-  return RuntimeOption::EvalArrayProvenance
-      && arrprov::arrayWantsTag(out)
-      && out->isRefCounted()
-    ? tagArrProv(out)
-    : out;
+  return arr.detach();
 }
 
 }

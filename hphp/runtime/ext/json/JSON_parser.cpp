@@ -559,12 +559,12 @@ struct SimpleParser {
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
           ? ArrayData::CreateVec()
-          : PackedArray::MakeVArrayNatural(top - fp, fp);
+          : PackedArray::MakeVecNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::DARRAYS);
       return top == fp
         ? ArrayData::CreateDict()
-        : MixedArray::MakeDArrayNatural(top - fp, fp);
+        : MixedArray::MakeDictNatural(top - fp, fp);
     }();
     top = fp;
     pushArrayData(arr);
@@ -596,7 +596,7 @@ struct SimpleParser {
               container_type == JSONContainerType::DARRAYS_AND_VARRAYS);
       return top == fp
         ? ArrayData::CreateDict()
-        : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
+        : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
     }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys
     if (!arr) return false;
@@ -685,7 +685,6 @@ struct SimpleParser {
     auto const tv = top++;
     tv->m_type = data->toDataType();
     tv->m_data.parr = data;
-    assertx(IMPLIES(arrprov::arrayWantsTag(data), arrprov::getTag(data)));
   }
 
   const char* p;
@@ -1054,14 +1053,10 @@ static void object_set(const json_parser* json,
     } else {
       int64_t i;
       if (key.get()->isStrictlyInteger(i)) {
-        forceToDArray(var).set(i, value);
+        forceToDict(var).set(i, value);
       } else {
-        forceToDArray(var).set(key, value);
+        forceToDict(var).set(key, value);
       }
-    }
-    if (var.isArray()) {
-      DEBUG_ONLY auto const data = var.getArrayData();
-      assertx(IMPLIES(arrprov::arrayWantsTag(data), arrprov::getTag(data)));
     }
   }
 }

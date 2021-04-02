@@ -987,8 +987,7 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(
   logEscalateToVanilla(this, reason);
 
   auto const space = capacity + tombstones();
-  auto ad = isDictType() ? MixedArray::MakeReserveDict(space)
-                         : MixedArray::MakeReserveDArray(space);
+  auto ad = MixedArray::MakeReserveDict(space);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
   auto const dt = type();

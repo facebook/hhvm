@@ -371,7 +371,7 @@ int64_t DateTimeData::getTimestamp(const Object& obj) {
     return getDateTimeData(obj)->getTimestamp();
   }
   assertx(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
-  Variant result = obj->o_invoke(s_getTimestamp, Array::CreateVArray());
+  Variant result = obj->o_invoke(s_getTimestamp, Array::CreateVec());
   return result.toInt64();
 }
 
@@ -498,7 +498,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
   int item_count = tzdb->index_size;
   const timelib_tzdb_index_entry *table = tzdb->index;
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i = 0; i < item_count; ++i) {
     // This string is what PHP considers as "data" or "info" which is basically
     // the string of "PHP1xx" where xx is country code that uses this timezone.

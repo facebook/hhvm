@@ -258,11 +258,11 @@ private:
 template <typename ArrFn>
 void IterateV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return;
-  if (adata->hasVanillaPackedLayout()) {
+  if (adata->isVanillaVec()) {
     PackedArray::IterateV(adata, arrFn);
-  } else if (adata->hasVanillaMixedLayout()) {
+  } else if (adata->isVanillaDict()) {
     MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
-  } else if (adata->isKeysetKind()) {
+  } else if (adata->isVanillaKeyset()) {
     SetArray::Iterate(SetArray::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
@@ -338,11 +338,11 @@ bool IterateV(const TypedValue& it, ArrFn arrFn) {
 template <typename ArrFn>
 void IterateKV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return;
-  if (adata->hasVanillaMixedLayout()) {
+  if (adata->isVanillaDict()) {
     MixedArray::IterateKV(MixedArray::asMixed(adata), arrFn);
-  } else if (adata->hasVanillaPackedLayout()) {
+  } else if (adata->isVanillaVec()) {
     PackedArray::IterateKV(adata, arrFn);
-  } else if (adata->isKeysetKind()) {
+  } else if (adata->isVanillaKeyset()) {
     auto fun = [&](TypedValue v) { return arrFn(v, v); };
     SetArray::Iterate(SetArray::asSet(adata), fun);
   } else {

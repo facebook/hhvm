@@ -421,7 +421,7 @@ static Variant HHVM_METHOD(MessageFormatter, parse, const String& value) {
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i = 0; i < count; ++i) {
     switch (fargs[i].getType()) {
       case icu::Formattable::kDate:

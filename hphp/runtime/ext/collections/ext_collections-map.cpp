@@ -79,12 +79,12 @@ void BaseMap::addAllImpl(const Variant& iterable) {
       if (!array->isVanilla()) {
         array = BespokeArray::ToVanilla(array, "BaseMap::addAllImpl");
       }
-      if (array->hasVanillaMixedLayout() && array->isLegacyArray()) {
+      if (array->isVanillaDict() && array->isLegacyArray()) {
         auto const tmp = array->setLegacyArray(array->cowCheck(), false);
         if (array != adata && array != tmp) decRefArr(array);
         array = tmp;
       }
-      if (!array->isDictKind()) {
+      if (!array->isVanillaDict()) {
         auto const dict = array->toDict(array->cowCheck());
         if (array != adata && array != dict) decRefArr(array);
         array = dict;

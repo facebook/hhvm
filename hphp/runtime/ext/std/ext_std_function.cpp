@@ -105,7 +105,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
     ar = g_context->getPrevVMState(ar);
   }
 
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   if (!ar) return ret;
 
   int numNonVariadic = ar->func()->numNonVariadicParams();

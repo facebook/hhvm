@@ -421,7 +421,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
       memcached_result_create(&data->m_memcache, &result);
 
       // To mimic PHP5 should return empty array at failure.
-      Array return_val = Array::CreateDArray();
+      Array return_val = Array::CreateDict();
 
       while ((memcached_fetch_result(&data->m_memcache, &result, &ret))
              != nullptr) {
@@ -633,7 +633,7 @@ static Array memcache_build_stats(const memcached_st *ptr,
     return Array();
   }
 
-  Array return_val = Array::CreateDArray();
+  Array return_val = Array::CreateDict();
 
   for (curr_key = stat_keys; *curr_key; curr_key++) {
     char *mc_val;
@@ -697,7 +697,7 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 
   int server_count = memcached_server_count(&data->m_memcache);
 
-  Array return_val = Array::CreateDArray();
+  Array return_val = Array::CreateDict();
 
   for (int server_id = 0; server_id < server_count; server_id++) {
     memcached_stat_st *stat;

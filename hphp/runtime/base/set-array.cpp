@@ -58,14 +58,14 @@ SetArray::Initializer SetArray::s_initializer;
 //////////////////////////////////////////////////////////////////////
 
 SetArray* SetArray::asSet(ArrayData* ad) {
-  assertx(ad->isKeysetKind());
+  assertx(ad->isVanillaKeyset());
   auto a = static_cast<SetArray*>(ad);
   assertx(a->checkInvariants());
   return a;
 }
 
 const SetArray* SetArray::asSet(const ArrayData* ad) {
-  assertx(ad->isKeysetKind());
+  assertx(ad->isVanillaKeyset());
   auto a = static_cast<const SetArray*>(ad);
   assertx(a->checkInvariants());
   return a;
@@ -482,7 +482,6 @@ bool SetArray::checkInvariants() const {
 
   // All arrays:
   assertx(checkCount());
-  assertx(isNotDVArray());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
   assertx(m_extra == kDefaultVanillaArrayExtra);

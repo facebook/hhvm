@@ -893,7 +893,7 @@ namespace make_array_detail {
  */
 template<class... Vals>
 Array make_varray(Vals&&... vals) {
-  static_assert(sizeof...(vals), "use Array::CreateVArray() instead");
+  static_assert(sizeof...(vals), "use Array::CreateVec() instead");
   VArrayInit init(sizeof...(vals));
   make_array_detail::varray_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
@@ -952,7 +952,7 @@ Array make_map_array(KVPairs&&... kvpairs) {
  */
 template<class... KVPairs>
 Array make_darray(KVPairs&&... kvpairs) {
-  static_assert(sizeof...(kvpairs), "use Array::CreateDArray() instead");
+  static_assert(sizeof...(kvpairs), "use Array::CreateDict() instead");
   static_assert(
     sizeof...(kvpairs) % 2 == 0, "make_darray needs key value pairs");
   DArrayInit init(sizeof...(kvpairs) / 2);

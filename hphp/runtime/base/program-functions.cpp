@@ -357,7 +357,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        symtable->append(make_persistent_array_like_tv(ArrayData::Create()));
+        symtable->append(make_persistent_array_like_tv(ArrayData::CreateDict()));
         auto const key = symtable->get()->getKey(symtable->get()->iter_last());
         symtable = &asArrRef(symtable->lval(key));
       } else {
@@ -366,7 +366,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
         auto const v = symtable->lookup(key);
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, make_persistent_array_like_tv(ArrayData::Create()));
+          symtable->set(key, make_persistent_array_like_tv(ArrayData::CreateDict()));
         }
         symtable = &asArrRef(symtable->lval(key));
       }
@@ -690,7 +690,7 @@ init_command_line_globals(
 
   if (variablesOrder.find('e') != std::string::npos ||
       variablesOrder.find('E') != std::string::npos) {
-    auto envArr = Array::CreateDArray();
+    auto envArr = Array::CreateDict();
     process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
@@ -712,7 +712,7 @@ init_command_line_globals(
 
   if (variablesOrder.find('s') != std::string::npos ||
       variablesOrder.find('S') != std::string::npos) {
-    auto serverArr = Array::CreateDArray();
+    auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
     time_t now;
     struct timeval tp = {0};

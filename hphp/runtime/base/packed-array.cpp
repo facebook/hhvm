@@ -114,9 +114,8 @@ inline ArrayData* alloc_packed_static(const ArrayData* ad) {
 }
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
-  assertx(arr->isVecKind());
-  assertx(arr->hasVanillaPackedLayout());
   assertx(arr->checkCountZ());
+  assertx(arr->isVanillaVec());
   assertx(arr->m_size <= MixedArray::MaxSize);
   assertx(arr->m_size <= capacity(arr));
   assertx(IMPLIES(!arrprov::arrayWantsTag(arr),
@@ -146,7 +145,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
-  auto const kind    = old->isVArray() ? HeaderKind::Mixed : HeaderKind::Dict;
+  auto const kind    = HeaderKind::Dict;
   ad->initHeader_16(kind, OneReference, MixedArrayKeys::packIntsForAux());
   ad->m_size         = oldSize;
   ad->m_extra        = old->m_extra;
@@ -154,8 +153,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   ad->m_nextKI       = oldSize;
 
   assertx(ad->m_size == oldSize);
-  assertx(ad->hasVanillaMixedLayout());
-  assertx(ad->isDArray() == old->isVArray());
+  assertx(ad->isVanillaDict());
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == oldSize);
   assertx(ad->m_scale == scale);
@@ -269,7 +267,6 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
   }
 
   assertx(ad->kind() == adIn->kind());
-  assertx(ArrayData::dvArrayEqual(ad, adIn));
   assertx(capacity(ad) > capacity(adIn));
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_extra == adIn->m_extra);
@@ -348,7 +345,6 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   );
 
   assertx(ad->kind() == adIn->kind());
-  assertx(ArrayData::dvArrayEqual(ad, adIn));
   assertx(!arrprov::arrayWantsTag(ad) ||
           arrprov::getTag(ad) == arrprov::getTag(adIn));
   assertx(capacity(ad) >= adIn->m_size);
@@ -382,8 +378,6 @@ ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
   auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
   ad->m_size = 0;
   ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->isPackedKind());
-  assertx(ad->isVArray());
   assertx(ad->m_size == 0);
   assertx(checkInvariants(ad));
   return tagArrProv(ad);
@@ -393,7 +387,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   auto ad = MakeReserveImpl(capacity, HeaderKind::Vec);
   ad->m_size = 0;
   ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->isVecKind());
+  assertx(ad->isVanillaVec());
   assertx(ad->m_size == 0);
   assertx(checkInvariants(ad));
   return ad;
@@ -443,8 +437,6 @@ ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
     return MakeVec(size, values);
   }
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
-  assertx(ad->isPackedKind());
-  assertx(ad->isVArray());
   return tagArrProv(ad);
 }
 
@@ -452,7 +444,7 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Vec);
-  assertx(ad->isVecKind());
+  assertx(ad->isVanillaVec());
   return ad;
 }
 
@@ -461,14 +453,12 @@ ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* value
     return MakeVecNatural(size, values);
   }
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
-  assertx(ad->isPackedKind());
-  assertx(ad->isVArray());
   return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) {
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Vec);
-  assertx(ad->isVecKind());
+  assertx(ad->isVanillaVec());
   return ad;
 }
 
@@ -479,8 +469,6 @@ ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Packed);
   ad->m_size = size;
   ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->isPackedKind());
-  assertx(ad->isVArray());
   assertx(ad->m_size == size);
   assertx(checkInvariants(ad));
   return tagArrProv(ad);
@@ -490,7 +478,7 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Vec);
   ad->m_size = size;
   ad->m_extra = kDefaultVanillaArrayExtra;
-  assertx(ad->isVecKind());
+  assertx(ad->isVanillaVec());
   assertx(ad->m_size == size);
   assertx(checkInvariants(ad));
   return ad;
@@ -681,7 +669,7 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
     return ad;
   }
 
-  if (adIn->isVecKind()) {
+  if (adIn->isVanillaVec()) {
     throwVecUnsetException();
   } else {
     throwVarrayUnsetException();
@@ -786,7 +774,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
 
 ArrayData* PackedArray::ToDVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  if (adIn->empty()) return ArrayData::CreateVArray();
+  if (adIn->empty()) return ArrayData::CreateVec();
   auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
@@ -818,7 +806,7 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
 
 void PackedArray::Ksort(ArrayData* ad, int /*flags*/, bool ascending) {
   assertx(ascending);
-  assertx(ad->isVecKind() || ad->isVArray());
+  assertx(checkInvariants(ad));
 }
 
 void PackedArray::Asort(ArrayData* ad, int, bool) {
@@ -878,7 +866,6 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   }
 
   assertx(ad->kind() == array->kind());
-  assertx(ArrayData::dvArrayEqual(ad, array));
   assertx(capacity(ad) >= size);
   assertx(ad->m_size == size);
   assertx(ad->m_extra == array->m_extra);
@@ -893,8 +880,8 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                                  bool strict) {
   assertx(checkInvariants(ad1));
   assertx(checkInvariants(ad2));
-  assertx(ad1->isVecKind());
-  assertx(ad2->isVecKind());
+  assertx(ad1->isVanillaVec());
+  assertx(ad2->isVanillaVec());
 
   if (ad1 == ad2) return true;
   if (ad1->m_size != ad2->m_size) return false;

@@ -188,7 +188,7 @@ void throwArrayIndexException(const ArrayData* ad, const int64_t index) {
 }
 
 void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
-  assertx(ad->isDArray() || ad->isDictType());
+  assertx(ad->isDictType());
   throwOOBArrayKeyException(key, ad);
 }
 

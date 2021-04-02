@@ -100,7 +100,7 @@ static Variant HHVM_STATIC_METHOD(Transliterator, listIDs) {
     return false;
   }
   error = U_ZERO_ERROR;
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for(;;) {
     int32_t len;
     auto str = se->next(&len, error);

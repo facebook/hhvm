@@ -116,7 +116,7 @@ static Array HHVM_FUNCTION(
   fribidi_charset_info,
   int64_t charset
 ) {
-  Array result = Array::CreateDArray();
+  Array result = Array::CreateDict();
 
   result.set(
     String("name"),

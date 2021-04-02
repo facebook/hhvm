@@ -465,14 +465,14 @@ protected:
 private:
   static ALWAYS_INLINE
   ArrayType* asArrayType(ArrayData* ad) {
-    assertx(ad->hasVanillaMixedLayout() || ad->isKeysetKind());
+    assertx(ad->isVanillaDict() || ad->isVanillaKeyset());
     auto a = static_cast<ArrayType*>(ad);
     assertx(a->checkInvariants());
     return a;
   }
   static ALWAYS_INLINE
   const ArrayType* asArrayType(const ArrayData* ad) {
-    assertx(ad->hasVanillaMixedLayout() || ad->isKeysetKind());
+    assertx(ad->isVanillaDict() || ad->isVanillaKeyset());
     auto a = static_cast<const ArrayType*>(ad);
     assertx(a->checkInvariants());
     return a;

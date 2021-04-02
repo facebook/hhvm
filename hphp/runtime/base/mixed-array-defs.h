@@ -288,7 +288,7 @@ void ConvertTvToUncounted(
       auto& ad = data.parr;
       if (handlePersistent(ad)) break;
       assertx(!ad->empty());
-      assertx(ad->hasVanillaPackedLayout());
+      assertx(ad->isVanillaVec());
       ad = PackedArray::MakeUncounted(ad, false, seen);
       break;
     }
@@ -323,9 +323,9 @@ void ReleaseUncountedTv(tv_lval lval) {
     auto const arr = val(lval).parr;
     assertx(!arr->isRefCounted());
     if (!arr->isStatic()) {
-      if (arr->hasVanillaPackedLayout()) PackedArray::ReleaseUncounted(arr);
-      else if (arr->hasVanillaMixedLayout()) MixedArray::ReleaseUncounted(arr);
-      else if (arr->isKeysetKind()) SetArray::ReleaseUncounted(arr);
+      if (arr->isVanillaVec()) PackedArray::ReleaseUncounted(arr);
+      else if (arr->isVanillaDict()) MixedArray::ReleaseUncounted(arr);
+      else if (arr->isVanillaKeyset()) SetArray::ReleaseUncounted(arr);
       else BespokeArray::ReleaseUncounted(arr);
     }
     return;

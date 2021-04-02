@@ -411,7 +411,7 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
   }
   forceToArray(parser->info);
   if (!parser->info.asCArrRef().exists(nameStr)) {
-    parser->info.asArrRef().set(nameStr, Array::CreateVArray());
+    parser->info.asArrRef().set(nameStr, Array::CreateVec());
   }
   auto const inner = parser->info.asArrRef().lval(nameStr);
   forceToArray(inner).append(parser->curtag);
@@ -586,7 +586,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       Array args = make_varray(
         Variant(parser),
         tag_name,
-        Array::CreateDArray()
+        Array::CreateDict()
       );
 
       while (attributes && *attributes) {
@@ -605,8 +605,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     if (!parser->data.isNull()) {
       if (parser->level <= XML_MAXLEVEL) {
         int atcnt = 0;
-        auto tag = Array::CreateDArray();
-        auto atr = Array::CreateDArray();
+        auto tag = Array::CreateDict();
+        auto atr = Array::CreateDict();
 
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
 
@@ -811,8 +811,8 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
   SYNC_VM_REGS_SCOPED();
   int ret;
   auto p = cast<XmlParser>(parser);
-  p->data = Array::CreateVArray();
-  p->info = Array::CreateDArray();
+  p->data = Array::CreateVec();
+  p->info = Array::CreateDict();
   SCOPE_EXIT {
     values = p->data;
     index = p->info;

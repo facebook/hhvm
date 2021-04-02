@@ -218,12 +218,12 @@ Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 Array create_certinfo(struct curl_certinfo *ci) {
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   if (ci) {
     for (int i = 0; i < ci->num_of_certs; i++) {
       struct curl_slist *slist = ci->certinfo[i];
 
-      Array certData = Array::CreateDArray();
+      Array certData = Array::CreateDict();
       while (slist) {
         Array parts = StringUtil::Explode(
           String(slist->data, CopyString),
@@ -432,7 +432,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
 #if LIBCURL_VERSION_NUM >= 0x070c03 /* Available since 7.12.3 */
     case CURLINFO_SLIST: {
       struct curl_slist *slist;
-      Array ret = Array::CreateVArray();
+      Array ret = Array::CreateVec();
       if (curl_easy_getinfo(cp, (CURLINFO)opt, &slist) == CURLE_OK) {
         while (slist) {
           ret.append(slist->data);
@@ -642,7 +642,7 @@ Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
 }
 
 Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
       ret.append(Variant(req::make<BuiltinFile>(i)));

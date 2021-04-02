@@ -176,7 +176,7 @@ bool EvaluateCommand::executeImpl(
     // Note that the execution code, if it succeeded, should have created
     // a varenv at the frame already.
     auto& denv = g_context->getDebuggerEnv();
-    if (denv.isNull()) denv = Array::CreateDArray();
+    if (denv.isNull()) denv = Array::CreateDict();
     denv.set(StrNR{s_varName.get()}, executor.m_result.result, true);
   }
 

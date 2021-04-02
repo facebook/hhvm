@@ -320,7 +320,7 @@ private:
       m_errors = ec;
     }
     Array getLastWarnings() const {
-      if (!m_errors) return Array::CreateDArray();
+      if (!m_errors) return Array::CreateDict();
       DArrayInit ret(m_errors->warning_count);
       for(int i = 0; i < m_errors->warning_count; i++) {
         timelib_error_message *em = m_errors->warning_messages + i;
@@ -329,7 +329,7 @@ private:
       return ret.toArray();
     }
     Array getLastErrors() const {
-      if (!m_errors) return Array::CreateDArray();
+      if (!m_errors) return Array::CreateDict();
       DArrayInit ret(m_errors->error_count);
       for(int i = 0; i < m_errors->error_count; i++) {
         timelib_error_message *em = m_errors->error_messages + i;

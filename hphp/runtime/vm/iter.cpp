@@ -126,11 +126,11 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
 
   // Check that array's vtable index is compatible with the array's layout.
   if (m_nextHelperIdx == IterNextIndex::ArrayPacked) {
-    assertx(arr->hasVanillaPackedLayout());
+    assertx(arr->isVanillaVec());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
-    assertx(arr->hasVanillaMixedLayout());
+    assertx(arr->isVanillaDict());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
-    assertx(arr->hasVanillaMixedLayout());
+    assertx(arr->isVanillaDict());
     assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
   } else if (m_nextHelperIdx == IterNextIndex::MonotypeVec) {
     assertx(!arr->isVanilla());
@@ -143,8 +143,8 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     // We check it for non-local iters.
     assertx(m_nextHelperIdx == IterNextIndex::Array);
     if (m_data != nullptr) {
-      assertx(!m_data->hasVanillaPackedLayout());
-      assertx(!m_data->hasVanillaMixedLayout());
+      assertx(!m_data->isVanillaVec());
+      assertx(!m_data->isVanillaDict());
     }
   }
 
@@ -497,7 +497,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     }
   }
 
-  if (LIKELY(ad->hasVanillaPackedLayout())) {
+  if (LIKELY(ad->isVanillaVec())) {
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
@@ -505,7 +505,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 1;
   }
 
-  if (LIKELY(ad->hasVanillaMixedLayout())) {
+  if (LIKELY(ad->isVanillaDict())) {
     auto const mixed = MixedArray::asMixed(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
@@ -576,7 +576,7 @@ int64_t new_iter_array_key(Iter*       dest,
     }
   }
 
-  if (ad->hasVanillaPackedLayout()) {
+  if (ad->isVanillaVec()) {
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
@@ -585,7 +585,7 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  if (ad->hasVanillaMixedLayout()) {
+  if (ad->isVanillaDict()) {
     auto const mixed = MixedArray::asMixed(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();

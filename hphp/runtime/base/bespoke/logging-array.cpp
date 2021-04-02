@@ -94,8 +94,8 @@ ArrayData* makeSampledArray(ArrayData* vad) {
   auto const result = [&]{
     if (!vad->cowCheck()) return vad;
     vad->decRefCount();
-    if (vad->hasVanillaPackedLayout()) return PackedArray::Copy(vad);
-    if (vad->hasVanillaMixedLayout())  return MixedArray::Copy(vad);
+    if (vad->isVanillaVec()) return PackedArray::Copy(vad);
+    if (vad->isVanillaDict())  return MixedArray::Copy(vad);
     return SetArray::Copy(vad);
   }();
   result->setSampledArrayInPlace();
@@ -567,14 +567,10 @@ ArrayData* convert(LoggingArray* lad, ArrayData* result) {
 }
 
 ArrayData* LoggingArray::ToDVArray(LoggingArray* lad, bool copy) {
-  logEvent(lad, ArrayOp::ToDVArray);
-  auto const cow = copy || lad->wrapped->cowCheck();
-  return convert(lad, lad->wrapped->toDVArray(cow));
+  always_assert(false);
 }
 ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
-  logEvent(lad, ArrayOp::ToHackArr);
-  auto const cow = copy || lad->wrapped->cowCheck();
-  return convert(lad, lad->wrapped->toHackArr(cow));
+  always_assert(false);
 }
 ArrayData* LoggingArray::PreSort(LoggingArray* lad, SortFunction sf) {
   logEvent(lad, ArrayOp::PreSort, makeStaticString(sortFunctionName(sf)));

@@ -288,7 +288,7 @@ static bool filter_var(Variant& ret, const Variant& variable, int64_t filter,
 
 static bool filter_recursive(Variant& ret, const Variant& variable,
                              int64_t filter, const Variant& options) {
-  Array arr = Array::CreateDArray();
+  Array arr = Array::CreateDict();
   for (ArrayIter iter(variable.toArray()); iter; ++iter) {
     Variant v;
     if (iter.second().isArray()) {

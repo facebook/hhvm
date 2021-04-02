@@ -191,32 +191,9 @@ void raise_convert_rcls_meth_to_type(const char* typeName);
 
 void raise_hack_arr_compat_serialize_notice(const ArrayData*);
 
-void raise_hack_arr_compat_cast_marked_array_notice(const ArrayData*);
-
 void raise_hackarr_compat_is_operator(const char* source, const char* target);
 
 void raise_hackarr_compat_notice(const std::string& msg);
-
-
-enum class SerializationSite {
-  IsDict,
-  IsVec,
-  IsTuple,
-  IsShape,
-  IsArray,
-  FBSerialize,
-  FBCompactSerialize,
-  Gettype,
-  Serialize,
-  VarExport,
-  PrintR,
-  JsonEncode,
-  Count
-};
-
-void raise_array_serialization_notice(SerializationSite src,
-                                      const ArrayData* arr,
-                                      const char* detail = nullptr);
 
 [[noreturn]] void raise_use_of_specialized_array();
 

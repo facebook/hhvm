@@ -573,7 +573,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
-    auto ret = Array::CreateDArray();
+    auto ret = Array::CreateDict();
     o_getArray(ret, pubOnly, ignoreLateInit);
     return ret;
   }
@@ -615,7 +615,7 @@ Array ObjectData::o_toIterArray(const String& context) {
       // not returning Array&; makes a copy
       return props;
     }
-    return Array::CreateDArray();
+    return Array::CreateDict();
   }
 
   size_t accessibleProps = m_cls->declPropNumAccessible();

@@ -734,7 +734,7 @@ static Array get_function_param_info(const Func* func) {
   VArrayInit ai(func->numParams());
 
   for (int i = 0; i < func->numParams(); ++i) {
-    Array param = Array::CreateDArray();
+    Array param = Array::CreateDict();
     const Func::ParamInfo& fpi = params[i];
 
     param.set(s_index, make_tv<KindOfInt64>(i));
@@ -1568,7 +1568,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
 static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  Array ret = Array::CreateDArray(); // no reasonable idea about sizing
+  Array ret = Array::CreateDict(); // no reasonable idea about sizing
 
   // UserAttributes are stored in the PreClass, so we must walk the parent
   // chain to get all of them; attribute specifications from child classes
@@ -1615,7 +1615,7 @@ static Array HHVM_STATIC_METHOD(
       continue;
     }
 
-    auto info = Array::CreateDArray();
+    auto info = Array::CreateDict();
     set_instance_prop_info(info, &prop, default_val);
     ret.set(StrNR(prop.name), VarNR(info).tv());
   }
@@ -1629,7 +1629,7 @@ static Array HHVM_STATIC_METHOD(
       continue;
     }
 
-    auto info = Array::CreateDArray();
+    auto info = Array::CreateDict();
     set_static_prop_info(info, &prop);
     ret.set(StrNR(prop.name), VarNR(info).tv());
   }
@@ -1652,7 +1652,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
       auto const key = tvCastToString(k);
       obj_data->raiseReadDynamicProp(key.get());
     }
-    auto info = Array::CreateDArray();
+    auto info = Array::CreateDict();
     set_dyn_prop_info(info, k, cls->name());
     ret.setValidKey(k, VarNR(info).tv());
   });
@@ -2316,7 +2316,7 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
     prototypeCls = get_prototype_class_from_interfaces(func->implCls(), func);
   }
   if (prototypeCls) {
-    Array prototype = Array::CreateDArray();
+    Array prototype = Array::CreateDict();
     prototype.set(s_class,
                   make_tv<KindOfPersistentString>(prototypeCls->name()));
     prototype.set(s_name, make_tv<KindOfPersistentString>(func->name()));
@@ -2379,7 +2379,7 @@ Array get_function_info(const String& name) {
   if (name.get() == nullptr) return null_array;
   const Func* func = Func::load(name.get());
   if (!func) return null_array;
-  auto ret = Array::CreateDArray();
+  auto ret = Array::CreateDict();
   ret.set(s_name,       make_tv<KindOfPersistentString>(func->name()));
 
   // setting parameters and static variables
@@ -2393,7 +2393,7 @@ Array get_class_info(const String& name) {
   auto cls = get_cls(name);
   if (!cls) return null_array;
 
-  auto ret = Array::CreateDArray();
+  auto ret = Array::CreateDict();
   ret.set(s_name, make_tv<KindOfPersistentString>(cls->name()));
   ret.set(s_extension, empty_string_tv());
   ret.set(s_parent, make_tv<KindOfPersistentString>(cls->preClass()->parent()));
@@ -2460,7 +2460,7 @@ Array get_class_info(const String& name) {
 
   // methods
   {
-    auto arr = Array::CreateDArray();
+    auto arr = Array::CreateDict();
 
     // Fetch from PreClass as:
     // - the order is important
@@ -2473,7 +2473,7 @@ Array get_class_info(const String& name) {
       if (m->isGenerated()) continue;
 
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
-      auto info = Array::CreateDArray();
+      auto info = Array::CreateDict();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info).tv());
     }
@@ -2483,7 +2483,7 @@ Array get_class_info(const String& name) {
       if (m->isGenerated()) continue;
 
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
-      auto info = Array::CreateDArray();
+      auto info = Array::CreateDict();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info).tv());
     }
@@ -2492,10 +2492,10 @@ Array get_class_info(const String& name) {
 
   // properties
   {
-    auto arr        = Array::CreateDArray();
-    auto arrPriv    = Array::CreateDArray();
-    auto arrIdx     = Array::CreateDArray();
-    auto arrPrivIdx = Array::CreateDArray();
+    auto arr        = Array::CreateDict();
+    auto arrPriv    = Array::CreateDict();
+    auto arrIdx     = Array::CreateDict();
+    auto arrPrivIdx = Array::CreateDict();
 
     auto const properties = cls->declProperties();
     auto const& propInitVec = cls->declPropInit();
@@ -2505,7 +2505,7 @@ Array get_class_info(const String& name) {
       auto index = cls->propSlotToIndex(slot);
       auto const& prop = properties[slot];
       auto const default_val = propInitVec[index].val.tv();
-      auto info = Array::CreateDArray();
+      auto info = Array::CreateDict();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_instance_prop_info(info, &prop, default_val);
@@ -2520,7 +2520,7 @@ Array get_class_info(const String& name) {
     }
 
     for (auto const& prop : cls->staticProperties()) {
-      auto info = Array::CreateDArray();
+      auto info = Array::CreateDict();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_static_prop_info(info, &prop);

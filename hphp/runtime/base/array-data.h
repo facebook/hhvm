@@ -145,36 +145,13 @@ protected:
    */
   ~ArrayData() { always_assert(false); }
 
-  /*
-   * Part of the implementation of conversion methods.
-   *
-   * If you call ToDVArray on a {vec, dict}, you'll get a {varray, darray}.
-   * We only ever call it on vecs and dicts. Similarly, toDVArr converts in
-   * the opposite direction, and we only ever call it on dvarrays.
-   *
-   * It's important that we implement these conversions efficiently, but these
-   * casts also come with critical logging behavior. As a result, we extract
-   * the (per-layout) conversion helper for performance, and then add logging
-   * and HAM behavior in the generic helpers.
-   *
-   * All other conversions can be implemented generically with no performance
-   * penalty (since they require a change of layout).
-   */
-  ArrayData* toDVArrayWithLogging(bool copy);
-  ArrayData* toHackArrWithLogging(bool copy);
-  ArrayData* toDVArray(bool copy);
-  ArrayData* toHackArr(bool copy);
-
 public:
   /*
    * Create a new empty ArrayData with the appropriate ArrayKind.
    */
-  static ArrayData* Create(bool legacy = false);
   static ArrayData* CreateVec(bool legacy = false);
   static ArrayData* CreateDict(bool legacy = false);
   static ArrayData* CreateKeyset();
-  static ArrayData* CreateVArray(arrprov::Tag tag = {}, bool legacy = false);
-  static ArrayData* CreateDArray(arrprov::Tag tag = {}, bool legacy = false);
 
   /*
    * Convert between array kinds.
@@ -226,31 +203,22 @@ public:
   ArrayKind kind() const;
 
   /*
-   * Whether the array has a particular kind.
-   */
-  bool isPackedKind() const;
-  bool isMixedKind() const;
-  bool isPlainKind() const;
-  bool isDictKind() const;
-  bool isVecKind() const;
-  bool isKeysetKind() const;
-
-  /*
-   * Whether the array has a particular Hack type
+   * Whether the array has a particular type.
    */
   bool isVecType() const;
   bool isDictType() const;
   bool isKeysetType() const;
 
   /*
-   * Whether the ArrayData is backed by PackedArray or MixedArray.
+   * Whether the array has a particular type *and layout*.
    */
-  bool hasVanillaPackedLayout() const;
-  bool hasVanillaMixedLayout() const;
+  bool isVanillaVec() const;
+  bool isVanillaDict() const;
+  bool isVanillaKeyset() const;
 
   /*
-   * Whether the array-like has the standard layout. This check excludes
-   * array-likes with a "bespoke" hidden-class layout.
+   * Whether the array-like has the standard layout for its type.
+   * This check excludes array-likes with a "bespoke" hidden-class layout.
    */
   bool isVanilla() const;
 
@@ -288,16 +256,6 @@ public:
    * when we copy or resize the array
    */
   uint8_t auxBits() const;
-
-  /*
-   * Is the array a varray, darray, either, or neither?
-   */
-  bool isVArray() const;
-  bool isDArray() const;
-  bool isDVArray() const;
-  bool isNotDVArray() const;
-
-  static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 
   /*
    * Whether the array contains "vector-like" data---i.e., iteration order
@@ -728,8 +686,6 @@ extern ArrayData* s_theEmptyMarkedDictArrayPtr;
  * is needed. We should avoid using these methods, as these arrays don't have
  * provenance information; use ArrayData::CreateDArray and friends instead.
  */
-ArrayData* staticEmptyVArray();
-ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVec();
 ArrayData* staticEmptyDictArray();
 ArrayData* staticEmptyKeysetArray();
@@ -738,8 +694,6 @@ ArrayData* staticEmptyKeysetArray();
  * Static empty marked arrays; they're common enough (due to constant-folding)
  * that it's useful to keep a singleton value for them, too.
  */
-ArrayData* staticEmptyMarkedVArray();
-ArrayData* staticEmptyMarkedDArray();
 ArrayData* staticEmptyMarkedVec();
 ArrayData* staticEmptyMarkedDictArray();
 

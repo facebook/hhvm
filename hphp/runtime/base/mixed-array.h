@@ -410,13 +410,13 @@ private:
 public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad) {
-    assertx(ad->hasVanillaMixedLayout());
+    assertx(ad->isVanillaDict());
     auto a = static_cast<MixedArray*>(ad);
     assertx(a->checkInvariants());
     return a;
   }
   static const MixedArray* asMixed(const ArrayData* ad) {
-    assertx(ad->hasVanillaMixedLayout());
+    assertx(ad->isVanillaDict());
     auto a = static_cast<const MixedArray*>(ad);
     assertx(a->checkInvariants());
     return a;
@@ -425,7 +425,7 @@ public:
   // Fast iteration
   template <class F>
   static void IterateV(const MixedArray* arr, F fn) {
-    assertx(arr->hasVanillaMixedLayout());
+    assertx(arr->isVanillaDict());
     auto elm = arr->data();
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
@@ -435,7 +435,7 @@ public:
   }
   template <class F>
   static void IterateKV(const MixedArray* arr, F fn) {
-    assertx(arr->hasVanillaMixedLayout());
+    assertx(arr->isVanillaDict());
     auto elm = arr->data();
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {

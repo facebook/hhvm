@@ -351,7 +351,7 @@ void stringsOfArray(
 
   path->push_back(std::string("array()"));
 
-  if (ad->hasVanillaPackedLayout()) {
+  if (ad->isVanillaVec()) {
     path->push_back(std::string("[]"));
     IterateV(ad, [&] (TypedValue v) {
       tvGetStrings(v, metrics, path, pointers, val_stack);

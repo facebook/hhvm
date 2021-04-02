@@ -214,7 +214,7 @@ inline TypedValue ElemVecPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemVec(ArrayData* base, key_type<keyType> key) {
-  assertx(base->hasVanillaPackedLayout());
+  assertx(base->isVanillaVec());
   auto const result = ElemVecPre<mode>(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
@@ -245,7 +245,7 @@ inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
 // This helper may also be used when we know we have a MixedArray in the JIT.
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
-  assertx(base->hasVanillaMixedLayout());
+  assertx(base->isVanillaDict());
   auto const result = ElemDictPre(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
@@ -275,7 +275,7 @@ inline TypedValue ElemKeysetPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemKeyset(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isKeysetKind());
+  assertx(base->isVanillaKeyset());
   auto result = ElemKeysetPre(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
@@ -514,9 +514,9 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
     auto const ad = base.val().parr;
     if (!ad->isVanilla()) {
       return ElemBespoke<mode, keyType>(ad, key);
-    } else if (ad->hasVanillaPackedLayout()) {
+    } else if (ad->isVanillaVec()) {
       return ElemVec<mode, keyType>(ad, key);
-    } else if (ad->hasVanillaMixedLayout()) {
+    } else if (ad->isVanillaDict()) {
       return ElemDict<mode, keyType>(ad, key);
     } else {
       return ElemKeyset<mode, keyType>(ad, key);
@@ -2305,7 +2305,7 @@ bool IssetElemString(const StringData* sd, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
-  assertx(a->hasVanillaPackedLayout());
+  assertx(a->isVanillaVec());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result));
 }
@@ -2315,7 +2315,7 @@ bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemDict(ArrayData* a, key_type<keyType> key) {
-  assertx(a->hasVanillaMixedLayout());
+  assertx(a->isVanillaDict());
   auto const result = ElemDict<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result));
 }
@@ -2325,7 +2325,7 @@ bool IssetElemDict(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemKeyset(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isKeysetKind());
+  assertx(a->isVanillaKeyset());
   auto const result = ElemKeyset<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result));
 }
@@ -2422,9 +2422,9 @@ bool IssetElem(tv_rval base, key_type<keyType> key) {
     auto const ad = val(base).parr;
     if (!ad->isVanilla()) {
       return IssetElemBespoke<keyType>(ad, key);
-    } else if (ad->hasVanillaPackedLayout()) {
+    } else if (ad->isVanillaVec()) {
       return IssetElemVec<keyType>(ad, key);
-    } else if (ad->hasVanillaMixedLayout()) {
+    } else if (ad->isVanillaDict()) {
       return IssetElemDict<keyType>(ad, key);
     } else {
       return IssetElemKeyset<keyType>(ad, key);

@@ -104,7 +104,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
@@ -338,7 +338,7 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
 
 Array HHVM_FUNCTION(headers_list) {
   auto const transport = g_context->getTransport();
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);

@@ -379,7 +379,7 @@ Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
     raise_invalid_argument_warning(
         "__SystemLib\\extract_trace() expects parameter 1 "
         "to be a CompactTrace resource.");
-    return Array::CreateVArray();
+    return Array::CreateVec();
   }
 
   return bt->extract();

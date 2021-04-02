@@ -56,7 +56,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
     return false;
   }
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
 
   if (input.empty()) {
     if (limit >= 0) {

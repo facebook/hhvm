@@ -507,7 +507,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
    * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY.
    *   (step NUMTYPES+1 )
    */
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   bool first_query = true;
   bool store_results = true;
   for (int t = (type == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);

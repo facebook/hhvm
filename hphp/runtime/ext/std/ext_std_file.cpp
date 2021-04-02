@@ -744,7 +744,7 @@ Variant HHVM_FUNCTION(file,
   if (content.empty()) {
     return empty_varray();
   }
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
 
   char eol_marker = '\n';
   bool include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
@@ -1810,7 +1810,7 @@ Variant HHVM_FUNCTION(glob,
     return false;
   }
 
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   bool basedir_limit = false;
   for (int n = 0; n < (int)globbuf.gl_pathc; n++) {
     String translated = File::TranslatePath(globbuf.gl_pathv[n]);

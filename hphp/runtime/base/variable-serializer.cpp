@@ -92,7 +92,6 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
 
 VariableSerializer::ArrayKind
 VariableSerializer::getKind(const ArrayData* arr) const {
-  assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
   if (UNLIKELY(m_forcePHPArrays)) {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
@@ -1951,46 +1950,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
 
   const bool isVectorData = arr->isVectorData();
-
-  if (arr->isDVArray() && !m_serializeProvenanceAndLegacy &&
-      !m_forcePHPArrays && !m_forceHackArrays) {
-    auto const source = [&]() -> folly::Optional<SerializationSite> {
-      switch (getType()) {
-      case VariableSerializer::Type::JSON:
-        // json_encode only observes provenance on list-like darrays
-        return arr->isVArray() || !isVectorData
-          ? folly::none
-          : folly::make_optional(SerializationSite::JsonEncode);
-      case VariableSerializer::Type::Serialize:
-        return SerializationSite::Serialize;
-      case VariableSerializer::Type::VarExport:
-        return SerializationSite::VarExport;
-      case VariableSerializer::Type::PrintR:
-        return SerializationSite::PrintR;
-      default:
-        return folly::none;
-      }
-    }();
-    if (source && raiseArraySerializationNotices()) {
-      auto buffer = StringBuffer{};
-      if (!m_arrayInfos.empty()) {
-        auto count = 0;
-        buffer.append(" at path [");
-        for (auto const& info : m_arrayInfos) {
-          if (count++) buffer.append(',');
-          if (info.key) {
-            appendJsonEscape(buffer, info.key->data(), info.key->size(), 0);
-          } else {
-            buffer.append('?');
-          }
-        }
-        buffer.append(']');
-      }
-      raise_array_serialization_notice(*source, arr, buffer.data());
-    }
-  }
-
-  if (arr->size() == 0 && LIKELY(!arrprov::arrayWantsTag(arr))) {
+  if (arr->empty()) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, isVectorData, kind);
     writeArrayFooter(kind);
@@ -2093,7 +2053,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
  */
 Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if (getType() == VariableSerializer::Type::VarExport) {
-    Array props = Array::CreateDArray();
+    Array props = Array::CreateDict();
     for (ArrayIter iter(obj->toArray(false, true)); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling
@@ -2123,7 +2083,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
-      auto ret = Array::CreateDArray();
+      auto ret = Array::CreateDict();
       obj->o_getArray(ret, false, true);
       return ret;
     }
@@ -2131,7 +2091,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(c_Closure::classof()))) {
-      auto ret = Array::CreateDArray();
+      auto ret = Array::CreateDict();
       obj->o_getArray(ret, false, true);
       return ret;
     }
@@ -2237,7 +2197,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   if (UNLIKELY(handleSleep)) {
     assertx(!obj->isCollection());
     if (ret.isArray()) {
-      Array wanted = Array::CreateDArray();
+      Array wanted = Array::CreateDict();
       assertx(isArrayLikeType(ret.getType()));
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {

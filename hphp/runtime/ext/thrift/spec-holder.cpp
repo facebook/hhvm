@@ -96,23 +96,19 @@ bool typeSatisfiesConstraint(const TypeConstraint& tc,
       return tc.alwaysPasses(KindOfString);
     case T_MAP: {
       auto const format = tvCastToString(spec.lookup(s_format));
-      if (format.equal(s_harray)) {
-        return tc.alwaysPasses(KindOfDict);
-      } else if (format.equal(s_collection)) {
+      if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Map::classof()->name());
       } else {
-        return tc.alwaysPasses(staticEmptyDArray()->toDataType());
+        return tc.alwaysPasses(KindOfDict);
       }
       break;
     }
     case T_LIST: {
       auto const format = tvCastToString(spec.lookup(s_format));
-      if (format.equal(s_harray)) {
-        return tc.alwaysPasses(KindOfVec);
-      } else if (format.equal(s_collection)) {
+      if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Vector::classof()->name());
       } else {
-        return tc.alwaysPasses(staticEmptyVArray()->toDataType());
+        return tc.alwaysPasses(KindOfVec);
       }
       break;
     }
@@ -123,7 +119,7 @@ bool typeSatisfiesConstraint(const TypeConstraint& tc,
       } else if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Set::classof()->name());
       } else {
-        return tc.alwaysPasses(staticEmptyDArray()->toDataType());
+        return tc.alwaysPasses(KindOfDict);
       }
       break;
     }

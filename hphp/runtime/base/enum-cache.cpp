@@ -134,8 +134,8 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
 const EnumValues* EnumCache::loadEnumValues(
     const Class* klass, bool recurse, bool require_static) {
   auto const numConstants = klass->numConstants();
-  auto values = Array::CreateDArray();
-  auto names = Array::CreateDArray();
+  auto values = Array::CreateDict();
+  auto names = Array::CreateDict();
   auto const consts = klass->constants();
   bool persist = true;
   for (size_t i = 0; i < numConstants; i++) {
@@ -270,7 +270,7 @@ Array EnumCache::tagEnumWithProvenance(Array input) {
   assertx(IMPLIES(arrprov::arrayWantsTag(input.get()),
                   arrprov::getTag(input.get())));
   if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
-  assertx(input->hasVanillaMixedLayout());
+  assertx(input->isVanillaDict());
   auto const ad = MixedArray::Copy(input.get());
   arrprov::setTag(ad, arrprov::tagFromPC());
   return Array::attach(ad);

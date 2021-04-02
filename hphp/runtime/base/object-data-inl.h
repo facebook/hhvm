@@ -144,7 +144,7 @@ NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
     assertx(obj->checkCount());
   }
   if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVArray());
+    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
   }
   return obj;
 }
@@ -200,7 +200,7 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     return obj;
   }
   if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVArray());
+    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
   }
   return obj;
 }

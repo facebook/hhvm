@@ -288,7 +288,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, Variant& arr) {
              sizeof(collator_sort_key_index_t),
              collator_cmp_sort_keys, nullptr);
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i = 0; i < sortIndexPos; ++i) {
     ret.append(hash->getValue(sortIndex[i].valPos));
   }

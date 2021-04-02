@@ -59,7 +59,7 @@ namespace {
 void copySlice(ArrayData* from, ArrayData* to,
                int64_t from_pos, int64_t to_pos, int64_t size) {
   assertx(0 < size && from_pos + size <= from->size());
-  assertx(from->hasVanillaPackedLayout() && to->hasVanillaPackedLayout());
+  assertx(from->isVanillaVec() && to->isVanillaVec());
   int64_t offset = from_pos - to_pos;
   int64_t to_end = to_pos + size;
   do {
@@ -94,12 +94,12 @@ void BaseVector::addAllImpl(const Variant& t) {
       if (!array->isVanilla()) {
         array = BespokeArray::ToVanilla(array, "BaseVector::addAllImpl");
       }
-      if (array->hasVanillaPackedLayout() && array->isLegacyArray()) {
+      if (array->isVanillaVec() && array->isLegacyArray()) {
         auto const tmp = array->setLegacyArray(array->cowCheck(), false);
         if (array != adata && array != tmp) decRefArr(array);
         array = tmp;
       }
-      if (!array->isVecKind()) {
+      if (!array->isVanillaVec()) {
         auto const vec = array->toVec(array->cowCheck());
         if (array != adata && array != vec) decRefArr(array);
         array = vec;
@@ -200,7 +200,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   setArrayData(arr);
   arr->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
-    assertx(oldAd->isVecKind());
+    assertx(oldAd->isVanillaVec());
     if (m_size > 0) {
       const size_t bytes = PackedArray::capacityToSizeBytes(m_size);
       std::memcpy(arrayData() + 1, oldAd + 1, bytes - sizeof(ArrayData));

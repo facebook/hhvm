@@ -50,7 +50,7 @@ static Variant extractValue(ResourceBundle* data,
       int32_t len;
       auto vec = bundle.getIntVector(len, error);
       EXTRACT_ERR(vector);
-      Array ret = Array::CreateVArray();
+      Array ret = Array::CreateVec();
       for (int i = 0; i < len; ++i) {
         ret.append((int64_t)vec[i]);
       }
@@ -187,7 +187,7 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   const char *entry;
   int32_t entry_len;
   while ((entry = uenum_next(le, &entry_len, &error))) {

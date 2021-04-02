@@ -142,7 +142,7 @@ const StaticString
   s_clientPort("clientPort");
 
 Array HHVM_FUNCTION(debugger_get_info) {
-  Array ret(Array::CreateDArray());
+  Array ret(Array::CreateDict());
   if (!RuntimeOption::EnableHphpdDebugger) return ret;
   DebuggerProxyPtr proxy = Debugger::GetProxy();
   if (!proxy) return ret;

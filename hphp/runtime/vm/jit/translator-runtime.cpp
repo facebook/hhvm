@@ -94,13 +94,13 @@ void setNewElemDict(tv_lval base, TypedValue val) {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
-  assertx(vec->hasVanillaPackedLayout());
+  assertx(vec->isVanillaVec());
   tvIncRefGen(v);
   return PackedArray::AppendMove(vec, v);
 }
 
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
-  assertx(keyset->isKeysetKind());
+  assertx(keyset->isVanillaKeyset());
   tvIncRefGen(v);
   return SetArray::AppendMove(keyset, v);
 }
@@ -414,39 +414,39 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 // This helper may also be used when we know we have a MixedArray in the JIT.
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
+  assertx(a->isVanillaDict());
   return getDefaultIfMissing(MixedArray::NvGetInt(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
+  assertx(a->isVanillaDict());
   return getDefaultIfMissing(MixedArray::NvGetStr(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
 NEVER_INLINE
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
+  assertx(a->isVanillaDict());
   auto const ad = MixedArray::asMixed(a);
   if (!ad->keyTypes().mustBeStaticStrs()) return dictIdxS(a, key, def);
   return doScan(ad, key, def);
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isKeysetKind());
+  assertx(a->isVanillaKeyset());
   return getDefaultIfMissing(SetArray::NvGetInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isKeysetKind());
+  assertx(a->isVanillaKeyset());
   return getDefaultIfMissing(SetArray::NvGetStr(a, key), def);
 }
 
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
-  assertx(a->isVecKind() || a->isPackedKind());
+  assertx(a->isVanillaVec());
   auto const size = a->size();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
   return PackedArray::NvGetInt(a, isFirst ? 0 : size - 1);

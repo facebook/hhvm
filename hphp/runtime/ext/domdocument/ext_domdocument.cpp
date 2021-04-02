@@ -1282,7 +1282,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   {
     int i;
     xmlNodeSetPtr nodesetp;
-    Array retval = Array::CreateVArray();
+    Array retval = Array::CreateVec();
     if (xpathobjp->type == XPATH_NODESET &&
         nullptr != (nodesetp = xpathobjp->nodesetval)) {
       for (i = 0; i < nodesetp->nodeNr; i++) {
@@ -5472,7 +5472,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
         arg = String(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
-        Array argArr = Array::CreateVArray();
+        Array argArr = Array::CreateVec();
         if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
           for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
@@ -5535,7 +5535,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     if (retval.isObject() &&
         retval.getObjectData()->instanceof(s_DOMNode)) {
       if (intern->m_node_list.empty()) {
-        intern->m_node_list = Array::CreateVArray();
+        intern->m_node_list = Array::CreateVec();
       }
       intern->m_node_list.append(retval);
       auto* node_data = Native::data<DOMNode>(retval.toObject());

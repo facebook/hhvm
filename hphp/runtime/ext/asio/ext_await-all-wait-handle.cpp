@@ -175,7 +175,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
   assertx(ad);
   if (!ad->size()) return Object{returnEmpty()};
   if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
-  assertx(ad->isVecKind());
+  assertx(ad->isVanillaVec());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     PackedArray::IterateV(ad, fn);
   });
@@ -187,7 +187,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   assertx(ad);
   if (!ad->size()) return Object{returnEmpty()};
   if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
-  assertx(ad->isDictKind());
+  assertx(ad->isVanillaDict());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     MixedArray::IterateV(MixedArray::asMixed(ad), fn);
   });

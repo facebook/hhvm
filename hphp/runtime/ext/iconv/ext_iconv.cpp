@@ -1741,7 +1741,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
   const char *encoded_str = encoded_headers.data();
   int encoded_str_len = encoded_headers.size();

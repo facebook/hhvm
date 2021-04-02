@@ -1035,7 +1035,7 @@ Array resolveAndVerifyTypeStructure(
   auto const handleResolutionException = [&](auto const& errMsg) {
     if (!suppress || !IsOrAsOp) raise_error(errMsg);
     if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
-    auto unresolved = Array::CreateDArray();
+    auto unresolved = Array::CreateDict();
     unresolved.set(
       s_kind,
       Variant(static_cast<uint8_t>(TypeStructure::Kind::T_unresolved))

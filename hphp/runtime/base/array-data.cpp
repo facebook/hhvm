@@ -691,14 +691,6 @@ ALWAYS_INLINE
 bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                             bool strict) {
   if (ad1 == ad2) return true;
-  if (!ArrayData::dvArrayEqual(ad1, ad2)) {
-    if (checkHACCompare() &&
-        ((ad1->isDArray() && ad2->isNotDVArray()) ||
-         (ad1->isNotDVArray() && ad2->isDArray()))) {
-      raise_hackarr_compat_notice("Comparing plain array and darray");
-    }
-    return false;
-  }
   if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
@@ -808,8 +800,8 @@ bool ArrayData::same(const ArrayData* v2) const {
   }
 
   if (!bothVanilla(this, v2)) return Same(this, v2);
-  if (isVecKind())  return PackedArray::VecSame(this, v2);
-  if (isDictKind()) return MixedArray::DictSame(this, v2);
+  if (isVanillaVec())  return PackedArray::VecSame(this, v2);
+  if (isVanillaDict()) return MixedArray::DictSame(this, v2);
   return SetArray::Same(this, v2);
 }
 
@@ -821,8 +813,7 @@ void ArrayData::getNotFound(int64_t k) const {
 }
 
 void ArrayData::getNotFound(const StringData* k) const {
-  // For varrays and vecs, we throw an InvalidArgumentException
-  if (isVArray() || isVecType()) throwInvalidArrayKeyException(k, this);
+  if (isVecType()) throwInvalidArrayKeyException(k, this);
   throwOOBArrayKeyException(k, this);
 }
 
@@ -1020,7 +1011,7 @@ template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
 
 ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
   auto const base = toPHPArray(copy);
-  if (isVArray() || isVecType()) return base;
+  if (isVecType()) return base;
 
   // Check if we need to intish-cast any string keys.
   int64_t i;
@@ -1068,8 +1059,7 @@ bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
 
 ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {
   assertx(IMPLIES(cowCheck(), copy));
-  assertx(IMPLIES(!RO::EvalHackArrDVArrs, isDVArray()));
-  assertx(IMPLIES(RO::EvalHackArrDVArrs, isDictType() || isVecType()));
+  assertx(isDictType() || isVecType());
 
   if (legacy == isLegacyArray()) return this;
 
@@ -1077,8 +1067,7 @@ ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {
 
   auto const ad = [&]{
     if (!copy) return this;
-    auto const packed = hasVanillaPackedLayout();
-    return packed ? PackedArray::Copy(this) : MixedArray::Copy(this);
+    return isVanillaVec() ? PackedArray::Copy(this) : MixedArray::Copy(this);
   }();
   ad->setLegacyArrayInPlace(legacy);
   return ad;
@@ -1088,7 +1077,6 @@ void ArrayData::setLegacyArrayInPlace(bool legacy) {
   assertx(hasExactlyOneRef());
   if (legacy) {
     m_aux16 |= kLegacyArray;
-    if (RO::EvalArrayProvenance && isVanilla()) arrprov::clearTag(this);
   } else {
     m_aux16 &= ~kLegacyArray;
   }
@@ -1096,45 +1084,17 @@ void ArrayData::setLegacyArrayInPlace(bool legacy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* ArrayData::toDVArrayWithLogging(bool copy) {
-  assertx(isVecType() || isDictType());
-  return RO::EvalHackArrDVArrs ? this : toDVArray(copy);
-}
-
-ArrayData* ArrayData::toHackArrWithLogging(bool copy) {
-  assertx(isDVArray());
-  if (isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
-    raise_hack_arr_compat_cast_marked_array_notice(this);
-  }
-  return toHackArr(copy);
-}
-
 ArrayData* ArrayData::toVArray(bool copy) {
-  assertx(IMPLIES(cowCheck(), copy));
-  if (isVArray()) return this;
-  if (isVecType()) return toDVArrayWithLogging(copy);
-
-  if (empty()) return ArrayData::CreateVArray();
-  VArrayInit init{size()};
-  IterateV(this, [&](auto v) { init.append(v); });
-  return init.create();
+  return toVec(copy);
 }
 
 ArrayData* ArrayData::toDArray(bool copy) {
-  assertx(IMPLIES(cowCheck(), copy));
-  if (isDArray()) return this;
-  if (isDictType()) return toDVArrayWithLogging(copy);
-
-  if (empty()) return ArrayData::CreateDArray();
-  DArrayInit init{size()};
-  IterateKV(this, [&](auto k, auto v) { init.setValidKey(k, v); });
-  return init.create();
+  return toDict(copy);
 }
 
 ArrayData* ArrayData::toVec(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));
   if (isVecType()) return this;
-  if (isVArray()) return toHackArrWithLogging(copy);
 
   if (empty()) return ArrayData::CreateVec();
   VecInit init{size()};
@@ -1145,7 +1105,6 @@ ArrayData* ArrayData::toVec(bool copy) {
 ArrayData* ArrayData::toDict(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));
   if (isDictType()) return this;
-  if (isDArray()) return toHackArrWithLogging(copy);
 
   if (empty()) return ArrayData::CreateDict();
   DictInit init{size()};

@@ -51,16 +51,6 @@ inline ArrayData* ArrayData::toPHPArray(bool copy) {
 }
 
 NO_PROFILING
-inline ArrayData* ArrayData::toDVArray(bool copy) {
-  return g_array_funcs.toDVArray[kind()](this, copy);
-}
-
-NO_PROFILING
-inline ArrayData* ArrayData::toHackArr(bool copy) {
-  return g_array_funcs.toHackArr[kind()](this, copy);
-}
-
-NO_PROFILING
 inline bool ArrayData::isVectorData() const {
   return g_array_funcs.isVectorData[kind()](this);
 }

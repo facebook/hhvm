@@ -364,7 +364,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
     TRACE(1, "xenon_get_data\n");
     return s_xenonData->createResponse();
   }
-  return Array::CreateVArray();
+  return Array::CreateVec();
 }
 
 Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
@@ -375,7 +375,7 @@ Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
     s_xenonData->m_stackSnapshots.reset();
     return ret;
   }
-  return Array::CreateVArray();
+  return Array::CreateVec();
 }
 
 int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {

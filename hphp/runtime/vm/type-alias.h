@@ -57,7 +57,7 @@ struct PreTypeAlias {
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
-  Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
+  Array typeStructure{ArrayData::CreateDict()};
 
   std::pair<int,int> getLocation() const {
     return std::make_pair(line0, line1);
@@ -105,7 +105,7 @@ struct TypeAlias {
   LowPtr<RecordDesc> rec{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
-  Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
+  Array typeStructure{ArrayData::CreateDict()};
   UserAttributeMap userAttrs;
   Unit* unit{nullptr};
 };

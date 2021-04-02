@@ -53,7 +53,7 @@ public:
   ArrayData* arrayData() { return m_arr; }
   const ArrayData* arrayData() const { return m_arr; }
   void setArrayData(ArrayData* arr) {
-    assertx(arr->isVecKind());
+    assertx(arr->isVanillaVec());
     assertx(!arr->isLegacyArray());
     m_arr = arr;
   }

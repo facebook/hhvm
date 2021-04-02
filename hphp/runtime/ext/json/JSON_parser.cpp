@@ -558,12 +558,12 @@ struct SimpleParser {
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? ArrayData::CreateVArray()
+          ? ArrayData::CreateVec()
           : PackedArray::MakeVArrayNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::DARRAYS);
       return top == fp
-        ? ArrayData::CreateDArray()
+        ? ArrayData::CreateDict()
         : MixedArray::MakeDArrayNatural(top - fp, fp);
     }();
     top = fp;
@@ -595,7 +595,7 @@ struct SimpleParser {
       assertx(container_type == JSONContainerType::DARRAYS ||
               container_type == JSONContainerType::DARRAYS_AND_VARRAYS);
       return top == fp
-        ? ArrayData::CreateDArray()
+        ? ArrayData::CreateDict()
         : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
     }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys
@@ -1316,10 +1316,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             } else if (container_type == JSONContainerType::DARRAYS ||
                        container_type == JSONContainerType::DARRAYS_AND_VARRAYS)
             {
-              top = Array::CreateDArray();
+              top = Array::CreateDict();
             /* </fb> */
             } else {
-              top = Array::CreateDArray();
+              top = Array::CreateDict();
             }
           /*<fb>*/
           }
@@ -1390,11 +1390,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           } else if (container_type == JSONContainerType::HACK_ARRAYS) {
             top = Array::CreateVec();
           } else if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
-            top = Array::CreateVArray();
+            top = Array::CreateVec();
           } else if (container_type == JSONContainerType::DARRAYS) {
-            top = Array::CreateDArray();
+            top = Array::CreateDict();
           } else {
-            top = Array::CreateDArray();
+            top = Array::CreateDict();
           }
           /*</fb>*/
           json->stack[json->top].key = copy_and_clear(*key);

@@ -683,7 +683,7 @@ static Variant post_proc_open(const String& cmd, Array& pipes,
 
   // need to set pipes to a new empty array, ignoring whatever it was
   // previously set to
-  pipes = Array::CreateDArray();
+  pipes = Array::CreateDict();
 
   for (auto& item : items) {
     Resource f = item.dupParent();

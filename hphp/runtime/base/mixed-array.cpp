@@ -181,18 +181,12 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 }
 
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
-  if (RO::EvalHackArrDVArrs) {
-    return MakeReserveDict(size);
-  }
-  auto ad = MakeReserveImpl(size, HeaderKind::Mixed);
-  assertx(ad->isMixedKind());
-  assertx(ad->isDArray());
-  return tagArrProv(ad);
+  return MakeReserveDict(size);
 }
 
 ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Dict);
-  assertx(ad->isDictKind());
+  assertx(ad->isVanillaDict());
   return ad;
 }
 
@@ -367,13 +361,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 }
 
 MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
-  if (RO::EvalHackArrDVArrs) {
-    return MakeDict(size, kvs);
-  }
-  auto const ad = MakeMixedImpl<HeaderKind::Mixed>(size, kvs);
-  assertx(ad == nullptr || ad->kind() == kMixedKind);
-  assertx(ad == nullptr || ad->isDArray());
-  return ad ? asMixed(tagArrProv(ad)) : nullptr;
+  return MakeDict(size, kvs);
 }
 
 MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
@@ -742,16 +730,12 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
-  assertx(isDictKind());
-  assertx(hasVanillaMixedLayout());
   assertx(checkCount());
+  assertx(isVanillaDict());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(MixedArray::HashSize(m_scale) ==
-         folly::nextPowTwo<uint64_t>(capacity()));
-  assertx(IMPLIES(!arrprov::arrayWantsTag(this),
-                  m_extra == kDefaultVanillaArrayExtra &&
-                  IMPLIES(RO::EvalArrayProvenance,
-                          !arrprov::getTag(this).valid())));
+          folly::nextPowTwo<uint64_t>(capacity()));
+  assertx(m_extra == kDefaultVanillaArrayExtra);
 
   if (isZombie()) return true;
 
@@ -918,7 +902,6 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     assertx(res->checkInvariants());
     assertx(res->hasExactlyOneRef());
     assertx(res->kind() == old->kind());
-    assertx(res->isDArray() == old->isDArray());
     assertx(res->isLegacyArray() == old->isLegacyArray());
     assertx(res->keyTypes() == old->keyTypes());
     assertx(res->m_size == old->m_size);
@@ -1285,7 +1268,6 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   ad->m_used = i;
 
   assertx(ad->kind() == src->kind());
-  assertx(ad->isDArray() == src->isDArray());
   assertx(ad->m_size == src->m_size);
   assertx(ad->m_extra == src->m_extra);
   assertx(ad->hasExactlyOneRef());
@@ -1301,7 +1283,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
-  assertx(ret->isDictKind());
+  assertx(ret->isVanillaDict());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1325,7 +1307,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const aux = asMixed(ad)->keyTypes().packForAux();
   auto const hk  = RO::EvalHackArrDVArrs ? HeaderKind::Dict : HeaderKind::Mixed;
   ret->initHeader_16(hk, OneReference, aux);
-  if (elems->hasVanillaMixedLayout()) {
+  if (elems->isVanillaDict()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
@@ -1344,7 +1326,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return tagArrProv(ret);
   }
 
-  if (UNLIKELY(!elems->hasVanillaPackedLayout())) {
+  if (UNLIKELY(!elems->isVanillaVec())) {
     return ArrayMergeGeneric(ret, elems);
   }
 
@@ -1379,7 +1361,7 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
 
 ArrayData* MixedArray::ToDVArray(ArrayData* adIn, bool copy) {
   assertx(MixedArray::asMixed(adIn));
-  if (adIn->empty()) return ArrayData::CreateDArray();
+  if (adIn->empty()) return ArrayData::CreateDict();
   auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Mixed;
   if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
@@ -1429,8 +1411,8 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                                  bool strict) {
   assertx(asMixed(ad1)->checkInvariants());
   assertx(asMixed(ad2)->checkInvariants());
-  assertx(ad1->isDictKind());
-  assertx(ad2->isDictKind());
+  assertx(ad1->isVanillaDict());
+  assertx(ad2->isVanillaDict());
 
   if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;

@@ -38,10 +38,6 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-bool isMixedOrDictKind(const ArrayData* ad) {
-  return ad->isMixedKind() || ad->isDictKind();
-}
-
 template<typename Arr>
 int32_t findStringKey(const Arr* ad, const StringData* sd) {
   // We can only optimize cases where the strings compare equal as pointers.
@@ -50,7 +46,7 @@ int32_t findStringKey(const Arr* ad, const StringData* sd) {
 }
 
 bool isSmallStaticArray(const ArrayData* ad) {
-  if (!isMixedOrDictKind(ad)) return false;
+  if (!ad->isVanillaDict()) return false;
   auto const arr = MixedArray::asMixed(ad);
   return arr->iterLimit() <= MixedArray::SmallSize &&
          arr->keyTypes().mustBeStaticStrs();
@@ -185,8 +181,8 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   auto const h = hash_int64(i);
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    isMixedOrDictKind(ad) ? MixedArray::asMixed(ad)->find(i, h) :
-    ad->isKeysetKind() ? SetArray::asSet(ad)->find(i, h) :
+    ad->isVanillaDict() ? MixedArray::asMixed(ad)->find(i, h) :
+    ad->isVanillaKeyset() ? SetArray::asSet(ad)->find(i, h) :
     -1;
   if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;
@@ -200,8 +196,8 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   // pointers (checked within findStringKey).
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    isMixedOrDictKind(ad) ? findStringKey(MixedArray::asMixed(ad), sd) :
-    ad->isKeysetKind() ? findStringKey(SetArray::asSet(ad), sd) :
+    ad->isVanillaDict() ? findStringKey(MixedArray::asMixed(ad), sd) :
+    ad->isVanillaKeyset() ? findStringKey(SetArray::asSet(ad), sd) :
     -1;
   if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;

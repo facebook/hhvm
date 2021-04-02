@@ -781,7 +781,7 @@ Array File::readCSV(int64_t length /* = 0 */,
   temp = (char *)malloc(temp_len + line_end_len + 1);
 
   /* Initialize return array */
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
 
   /* Main loop to read CSV fields */
   /* NB this routine will return a single null entry for a blank line */

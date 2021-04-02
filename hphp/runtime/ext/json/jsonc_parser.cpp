@@ -109,7 +109,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
       var = Array::CreateVec();
       break;
     case JSONContainerType::DARRAYS:
-      var = Array::CreateDArray();
+      var = Array::CreateDict();
       break;
   }
 
@@ -142,7 +142,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
         var = Array::CreateDict();
         break;
       case JSONContainerType::DARRAYS:
-        var = Array::CreateDArray();
+        var = Array::CreateDict();
         break;
     }
   }

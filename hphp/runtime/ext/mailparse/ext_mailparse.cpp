@@ -122,9 +122,9 @@ Array HHVM_FUNCTION(mailparse_rfc822_parse_addresses,
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
   php_rfc822_addresses_t *addrs = php_rfc822_parse_address_tokens(toks);
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int i = 0; i < addrs->naddrs; i++) {
-    Array item = Array::CreateDArray();
+    Array item = Array::CreateDict();
     if (addrs->addrs[i].name) {
       item.set(s_display, String(addrs->addrs[i].name, CopyString));
     }
@@ -306,16 +306,16 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
       /* make the return an array */
       if (nparts == 0) {
-        return_value = Array::CreateVArray();
+        return_value = Array::CreateVec();
         /* create an initial item representing the file with all uuencoded
            parts removed */
-        Array item = Array::CreateDArray();
+        Array item = Array::CreateDict();
         item.set(s_filename, String(outstream->getName()));
         return_value.append(item);
       }
 
       /* add an item */
-      Array item = Array::CreateDArray();
+      Array item = Array::CreateDict();
       item.set(s_origfilename, String(origfilename, namelen, CopyString));
 
       /* create a temp file for the data */

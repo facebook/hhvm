@@ -888,7 +888,7 @@ static Variant HHVM_FUNCTION(pg_version, const Resource& connection) {
     FAIL_RETURN;
   }
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   int proto_ver = pgsql->get().protocolVersion();
   if (proto_ver) {

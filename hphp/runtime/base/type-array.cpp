@@ -45,7 +45,7 @@ const Array null_array{};
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
-  if (!m_arr) thisPtr->m_arr = Ptr::attach(ArrayData::Create());
+  if (!m_arr) thisPtr->m_arr = Ptr::attach(ArrayData::CreateDict());
   if (!m_arr->isStatic()) {
     thisPtr->m_arr = ArrayData::GetScalarArray(std::move(*thisPtr));
   }
@@ -142,7 +142,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     value_cmp_as_string_function = CompareAsStrings;
   }
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   if (by_key && !key_cmp_function) {
     // Fast case
     for (ArrayIter iter(*this); iter; ++iter) {
@@ -303,7 +303,7 @@ TypedValue Array::lookupImpl(const T& key, AccessFlags flags) const {
 
 template<typename T> ALWAYS_INLINE
 tv_lval Array::lvalImpl(const T& key, AccessFlags) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+  if (!m_arr) m_arr = Ptr::attach(ArrayData::CreateDict());
   auto const lval = m_arr->lval(key);
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
@@ -312,7 +312,7 @@ tv_lval Array::lvalImpl(const T& key, AccessFlags) {
 
 template<typename T> ALWAYS_INLINE
 tv_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+  if (!m_arr) m_arr = Ptr::attach(ArrayData::CreateDict());
   if (!m_arr->exists(key)) {
     m_arr.mutateInPlace([&](ArrayData* ad) {
       return ad->setMove(key, make_tv<KindOfNull>());
@@ -385,7 +385,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
                     const String& key, Args&&... args) {
   if (is_key) return fn(key, std::forward<Args>(args)...);
 
-  auto const ad = arr.get() ? arr.get() : ArrayData::Create();
+  auto const ad = arr.get() ? arr.get() : ArrayData::CreateDict();
 
   // The logic here is a specialization of tvToKey().
   if (key.isNull()) {
@@ -507,7 +507,7 @@ FOR_EACH_KEY_TYPE(set)
 ///////////////////////////////////////////////////////////////////////////////
 
 void Array::append(TypedValue v) {
-  if (!m_arr) operator=(Create());
+  if (!m_arr) operator=(CreateDict());
   assertx(m_arr);
   m_arr.mutateInPlace([&](ArrayData* ad) {
     return ad->appendMove(tvToInit(v));
@@ -601,7 +601,7 @@ void Array::SortImpl(std::vector<int> &indices, const Array& source,
 
 void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
                  const void *data /* = NULL */) {
-  Array sorted = Array::CreateDArray();
+  Array sorted = Array::CreateDict();
   if (m_arr && m_arr->isLegacyArray()) sorted.setLegacyArray(true);
 
   SortData opaque;
@@ -661,7 +661,7 @@ bool Array::MultiSort(std::vector<SortData> &data) {
   for (unsigned int ki = 0; ki < data.size(); ki++) {
     SortData &opaque = data[ki];
     const Array& arr = *opaque.array;
-    Array sorted = Array::CreateDArray();
+    Array sorted = Array::CreateDict();
     if (arr->isLegacyArray()) sorted.setLegacyArray(true);
     int64_t nextKI = 0;
     for (int i = 0; i < count; i++) {

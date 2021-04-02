@@ -115,7 +115,7 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
   assertx(m_hits.has_value());
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (const auto& iter : *m_hits) {
     if (!sys && Extension::IsSystemlibPath(iter.first)) {
       continue;
@@ -127,7 +127,7 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
                                        [](int i) { return i != 0; });
       ret.set(String(iter.first), Variant((int64_t)count));
     } else {
-      auto tmp = Array::CreateDArray();
+      auto tmp = Array::CreateDict();
       for (int i = 1; i < (int)lines.size(); i++) {
         if (lines[i]) {
           tmp.set(i, Variant((int64_t)lines[i]));

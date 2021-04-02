@@ -1218,11 +1218,11 @@ Array VariableUnserializer::unserializeArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto const provTag = unserializeProvenanceTag();
+  unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
-    return Array::CreateDArray(provTag);
+    return Array::CreateDict();
   }
   // For large arrays, do a naive pre-check for OOM.
   auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
@@ -1247,7 +1247,6 @@ Array VariableUnserializer::unserializeArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 
@@ -1406,25 +1405,12 @@ Array VariableUnserializer::unserializeVArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto const provTag = unserializeProvenanceTag();
+  unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
-    if (m_type != Type::Serialize) {
-      return Array::attach(provTag
-        ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
-        : staticEmptyVArray()
-      );
-    }
-    return m_forceDArrays
-      ? Array::attach(provTag
-          ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
-          : staticEmptyDArray()
-        )
-      : Array::attach(provTag
-          ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
-          : staticEmptyVArray()
-        );
+    if (m_type != Type::Serialize) return Array::CreateVec();
+    return m_forceDArrays ? Array::CreateDict() : Array::CreateVec();
   }
 
   auto const oomCheck = [&](size_t allocsz) {
@@ -1462,7 +1448,6 @@ Array VariableUnserializer::unserializeVArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 
@@ -1475,14 +1460,11 @@ Array VariableUnserializer::unserializeDArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto const provTag = unserializeProvenanceTag();
+  unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
-    return Array::attach(provTag
-      ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
-      : staticEmptyDArray()
-    );
+    return Array::CreateDict();
   }
 
   // For large arrays, do a naive pre-check for OOM.
@@ -1504,7 +1486,6 @@ Array VariableUnserializer::unserializeDArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 

@@ -438,7 +438,7 @@ Array ServerStats::EndNetworkProfile() {
   s_profile_network = false;
   Lock lock(s_lock, false);
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     auto ss = s_loggers[i];
     Lock loggerLock(ss->m_lock, false);

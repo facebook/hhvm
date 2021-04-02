@@ -1669,7 +1669,7 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
 
-  imageinfo = Array::CreateDArray();
+  imageinfo = Array::CreateDict();
   itype = php_getimagetype(stream);
   switch( itype) {
   case IMAGE_FILETYPE_GIF:
@@ -2839,7 +2839,7 @@ const StaticString
   s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
 
 Array HHVM_FUNCTION(gd_info) {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
@@ -3164,7 +3164,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
   double dm1[6];
   double dm2[6];
   double dmr[6];
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   if (nelem1 != 6 || nelem2 != 6) {
     raise_warning("imageaffinematrixconcat(): Affine array must "
@@ -3205,7 +3205,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
 Variant HHVM_FUNCTION(imageaffinematrixget,
                       int64_t type,
                       const Variant& options /* = Array() */) {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   double affine[6];
   int res = GD_FALSE, i;
 
@@ -4601,7 +4601,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 
     String skey((const char *)key, CopyString);
     if (!ret.exists(skey)) {
-      ret.set(skey, Array::CreateVArray());
+      ret.set(skey, Array::CreateVec());
     }
     auto const lval = ret.lval(skey);
     forceToArray(lval).append(

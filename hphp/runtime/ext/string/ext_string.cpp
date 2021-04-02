@@ -689,7 +689,7 @@ Variant str_replace(const Variant& search, const Variant& replace,
   count = 0;
   if (subject.isArray()) {
     Array arr = subject.toArray();
-    Array ret = Array::CreateDArray();
+    Array ret = Array::CreateDict();
     int64_t c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().isArray() || iter.second().is(KindOfObject)) {
@@ -1544,7 +1544,7 @@ Variant HHVM_FUNCTION(count_chars,
     chars[*buf++]++;
   }
 
-  Array retarr = Array::CreateDArray();
+  Array retarr = Array::CreateDict();
   char retstr[256];
   int retlen = 0;
   switch (mode) {
@@ -1644,7 +1644,7 @@ Variant HHVM_FUNCTION(str_word_count,
     e--;
   }
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   while (p < e) {
     const char *s = p;
     while (p < e &&
@@ -2229,7 +2229,7 @@ Array HHVM_FUNCTION(localeconv) {
     currlocdata = *res;
   }
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 #define SET_LOCALE_STRING(x) ret.set(s_ ## x, String(currlocdata.x, CopyString))
   SET_LOCALE_STRING(decimal_point);
   SET_LOCALE_STRING(thousands_sep);
@@ -2530,7 +2530,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
 
   bool all = (table == k_HTML_ENTITIES);
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   switch (table) {
   case k_HTML_ENTITIES: {
     if (charset == cs_utf_8) {

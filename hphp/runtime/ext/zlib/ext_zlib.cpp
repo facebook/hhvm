@@ -114,7 +114,7 @@ Variant HHVM_FUNCTION(gzfile, const String& filename,
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   Variant line;
   while (!same(line = HHVM_FN(gzgets)(stream.toResource()), false)) {
     ret.append(line);

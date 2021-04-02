@@ -236,7 +236,7 @@ static void set_address(DArrayInit &ai, const char *prop, ADDRESS *addr) {
     ai.set(String(prop) + "address", String(fulladdress, AttachString));
   }
 
-  auto paddress = Array::CreateVArray();
+  auto paddress = Array::CreateVec();
   do {
     DArrayInit props(4);
     ARR_SET_ENTRY(props, addr, "personal", personal);
@@ -326,7 +326,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (body->disposition.parameter) {
     props.set("ifdparameters", 1);
 
-    auto dparams = Array::CreateVArray();
+    auto dparams = Array::CreateVec();
     for (auto dpar = body->disposition.parameter; dpar; dpar = dpar->next) {
       DArrayInit dparam(2);
       dparam.set("attribute", String((const char*)dpar->attribute, CopyString));
@@ -341,7 +341,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (body->parameter) {
     props.set("ifparameters", 1);
 
-    auto params = Array::CreateVArray();
+    auto params = Array::CreateVec();
     for (auto par = body->parameter; par; par = par->next) {
       DArrayInit param(2);
       ARR_SET_ENTRY(param, par, "attribute", attribute);
@@ -356,7 +356,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (do_multipart) {
     /* multipart message ? */
     if (body->type == TYPEMULTIPART) {
-      auto parts = Array::CreateVArray();
+      auto parts = Array::CreateVec();
       for (auto part = body->nested.part; part; part = part->next) {
         parts.append(_php_imap_body(&part->body, do_multipart));
       }
@@ -365,7 +365,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
 
     /* encapsulated message ? */
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
-      auto parts = Array::CreateVArray();
+      auto parts = Array::CreateVec();
       parts.append(_php_imap_body(body->nested.msg->body, do_multipart));
       props.set("parts", parts);
     }
@@ -702,7 +702,7 @@ static Variant HHVM_FUNCTION(imap_alerts) {
     return false;
   }
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
 
   for (STRINGLIST *cur = IMAPG(alertstack); cur != NIL;
        cur = cur->next) {
@@ -867,7 +867,7 @@ static Variant HHVM_FUNCTION(imap_errors, ) {
     return false;
   }
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
 
   for (ERRORLIST *cur = IMAPG(errorstack); cur != NIL;
        cur = cur->next) {
@@ -893,7 +893,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
 
   auto obj = cast<ImapStream>(imap_stream);
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
 
   long status = (options & FT_UID)
     ? mail_uid_sequence(obj->m_stream, (unsigned char *)sequence.data())
@@ -1149,7 +1149,7 @@ static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
     return false;
   }
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
   for (STRINGLIST *cur = IMAPG(folders); cur != NIL; cur = cur->next) {
     ret.append(String((const char *)cur->text.data, CopyString));
   }
@@ -1407,7 +1407,7 @@ static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
     return false;
   }
 
-  Array ret(Array::CreateVArray());
+  Array ret(Array::CreateVec());
 
   MESSAGELIST *cur = IMAPG(messages);
   while (cur != NIL) {

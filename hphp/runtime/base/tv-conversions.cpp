@@ -616,7 +616,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return ArrayData::Create();
+      return ArrayData::CreateDict();
 
     case KindOfBoolean:
     case KindOfInt64:
@@ -688,7 +688,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
     switch (type(tv)) {
       case KindOfUninit:
       case KindOfNull:
-        a = ArrayData::Create();
+        a = ArrayData::CreateDict();
         continue;
 
       case KindOfBoolean:

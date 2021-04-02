@@ -326,7 +326,7 @@ void createGlobalNVTable() {
   assertx(!g_context->m_globalNVTable);
   g_context->m_globalNVTable = req::make_raw<NameValueTable>();
   auto nvTable = g_context->m_globalNVTable;
-  Variant arr(ArrayData::CreateDArray());
+  Variant arr(ArrayData::CreateDict());
   nvTable->set(s_argc.get(),               init_null_variant.asTypedValue());
   nvTable->set(s_argv.get(),               init_null_variant.asTypedValue());
   nvTable->set(s__SERVER.get(),            arr.asTypedValue());
@@ -343,7 +343,7 @@ const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
 Array getDefinedVariables() {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   NameValueTable::Iterator iter(g_context->m_globalNVTable);
   for (; iter.valid(); iter.next()) {

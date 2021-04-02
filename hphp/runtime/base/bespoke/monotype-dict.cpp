@@ -60,9 +60,7 @@ static_assert(sizeof(EmptyMonotypeDict) <= kMinSizeBytes);
 static_assert(kMinSizeBytes == kSizeIndex2Size[kMinSizeIndex]);
 
 std::aligned_storage<kMinSizeBytes, 16>::type s_emptyDict;
-std::aligned_storage<kMinSizeBytes, 16>::type s_emptyDArray;
 std::aligned_storage<kMinSizeBytes, 16>::type s_emptyMarkedDict;
-std::aligned_storage<kMinSizeBytes, 16>::type s_emptyMarkedDArray;
 
 const LayoutFunctions* emptyVtable() {
   static auto const result = fromArray<EmptyMonotypeDict>();
@@ -170,16 +168,12 @@ EmptyMonotypeDict* EmptyMonotypeDict::GetDict(bool legacy) {
   auto const mem = legacy ? &s_emptyMarkedDict : &s_emptyDict;
   return reinterpret_cast<EmptyMonotypeDict*>(mem);
 }
-EmptyMonotypeDict* EmptyMonotypeDict::GetDArray(bool legacy) {
-  auto const mem = legacy ? &s_emptyMarkedDArray : &s_emptyDArray;
-  return reinterpret_cast<EmptyMonotypeDict*>(mem);
-}
 
 bool EmptyMonotypeDict::checkInvariants() const {
   assertx(isStatic());
   assertx(m_size == 0);
   assertx(m_extra_lo16 == 0);
-  assertx(isDArray() || isDictType());
+  assertx(isDictType());
   assertx(layoutIndex() == getEmptyLayoutIndex());
 
   auto const DEBUG_ONLY mad =
@@ -203,9 +197,7 @@ ArrayData* EmptyMonotypeDict::EscalateToVanilla(
     const Self* ad, const char* reason) {
   logEscalateToVanilla(ad, reason);
   auto const legacy = ad->isLegacyArray();
-  return ad->isDictType()
-    ? (legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray())
-    : (legacy ? staticEmptyMarkedDArray() : staticEmptyDArray());
+  return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
 }
 void EmptyMonotypeDict::ConvertToUncounted(
     Self* ad, DataWalker::PointerMap* seen) {
@@ -262,8 +254,8 @@ ssize_t EmptyMonotypeDict::IterRewind(const Self* ad, ssize_t prev) {
 namespace {
 template <typename Key>
 ArrayData* makeStrMonotypeDict(
-    HeaderKind kind, bool legacy, StringData* k, TypedValue v) {
-  auto const mad = MonotypeDict<Key>::MakeReserve(kind, legacy, 1, type(v));
+    bool legacy, StringData* k, TypedValue v) {
+  auto const mad = MonotypeDict<Key>::MakeReserve(legacy, 1, type(v));
   auto const result = MonotypeDict<Key>::SetStrMove(mad, k, v);
   assertx(result == mad);
   return result;
@@ -289,7 +281,7 @@ tv_lval EmptyMonotypeDict::ElemStr(
 
 ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
   auto const mad = MonotypeDict<int64_t>::MakeReserve(
-      ad->m_kind, ad->isLegacyArray(), 1, type(v));
+      ad->isLegacyArray(), 1, type(v));
   auto const result = MonotypeDict<int64_t>::SetIntMove(mad, k, v);
   assertx(result == mad);
   return result;
@@ -297,8 +289,8 @@ ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
 ArrayData* EmptyMonotypeDict::SetStrMove(Self* ad, StringData* k, TypedValue v) {
   auto const legacy = ad->isLegacyArray();
   return k->isStatic()
-    ? makeStrMonotypeDict<StaticStrPtr>(ad->m_kind, legacy, k, v)
-    : makeStrMonotypeDict<StringData*>(ad->m_kind, legacy, k, v);
+    ? makeStrMonotypeDict<StaticStrPtr>(legacy, k, v)
+    : makeStrMonotypeDict<StringData*>(legacy, k, v);
 }
 ArrayData* EmptyMonotypeDict::RemoveInt(Self* ad, int64_t k) {
   return ad;
@@ -318,10 +310,10 @@ ArrayData* EmptyMonotypeDict::Pop(Self* ad, Variant& ret) {
 //////////////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyMonotypeDict::ToDVArray(Self* ad, bool copy) {
-  return GetDArray(false);
+  always_assert(false);
 }
 ArrayData* EmptyMonotypeDict::ToHackArr(Self* ad, bool copy) {
-  return GetDict(false);
+  always_assert(false);
 }
 ArrayData* EmptyMonotypeDict::PreSort(Self* ead, SortFunction sf) {
   always_assert(false);
@@ -330,7 +322,7 @@ ArrayData* EmptyMonotypeDict::PostSort(Self* ead, ArrayData* vad) {
   always_assert(false);
 }
 ArrayData* EmptyMonotypeDict::SetLegacyArray(Self* ad, bool copy, bool legacy) {
-  return ad->isDArray() ? GetDArray(legacy) : GetDict(legacy);
+  return GetDict(legacy);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -498,7 +490,7 @@ uint8_t MonotypeDict<Key>::ComputeSizeIndex(size_t size) {
 
 template <typename Key> template <bool Static>
 MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
-    HeaderKind kind, bool legacy, size_t capacity, DataType dt) {
+    bool legacy, size_t capacity, DataType dt) {
   auto const index = ComputeSizeIndex(capacity);
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
@@ -510,7 +502,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
   auto const aux = packSizeIndexAndAuxBits(
       index, legacy ? ArrayData::kLegacyArray : 0);
 
-  mad->initHeader_16(kind, OneReference, aux);
+  mad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   mad->setLayoutIndex(getLayoutIndex<Key>(dt));
   mad->m_extra_lo16 = 0;
   mad->m_size = 0;
@@ -523,12 +515,10 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
 template <typename Key>
 MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
     ArrayData* ad, DataType dt) {
-  assertx(ad->hasVanillaMixedLayout());
-  auto const kind = ad->isDArray() ? HeaderKind::BespokeDArray
-                                   : HeaderKind::BespokeDict;
+  assertx(ad->isVanillaDict());
   auto result = ad->isStatic()
-    ? MakeReserve<true>(kind, ad->isLegacyArray(), ad->size(), dt)
-    : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
+    ? MakeReserve<true>(ad->isLegacyArray(), ad->size(), dt)
+    : MakeReserve<false>(ad->isLegacyArray(), ad->size(), dt);
 
   MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) {
     auto const next = tvIsString(k) ? SetStrMove(result, val(k).pstr, v)
@@ -541,7 +531,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
   if (ad->isStatic()) {
     auto const aux = packSizeIndexAndAuxBits(
       result->sizeIndex(), result->auxBits());
-    result->initHeader_16(kind, StaticValue, aux);
+    result->initHeader_16(HeaderKind::BespokeDict, StaticValue, aux);
   }
 
   assertx(result->checkInvariants());
@@ -577,7 +567,7 @@ bool MonotypeDict<Key>::checkInvariants() const {
                 sizeof(StringDict) + MD_TYPE_NEG);
 #endif
 
-  assertx(isDArray() || isDictType());
+  assertx(isDictType());
   assertx(isValidSizeIndex(sizeIndex()));
   assertx(size() <= used());
   assertx(IMPLIES(!isZombie(), used() <= numElms()));
@@ -931,7 +921,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
   // clear the hash table), or we'll move values to a newly-allocated dict.
   auto const result = [&]{
     if (!shrink) { initHash(); return this; }
-    auto const mad = MakeReserve(m_kind, isLegacyArray(), target, type());
+    auto const mad = MakeReserve(isLegacyArray(), target, type());
     mad->setLayoutIndex(layoutIndex());
     return mad;
   }();
@@ -1395,25 +1385,12 @@ ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::ToDVArray(Self* madIn, bool copy) {
-  assertx(madIn->isDictType());
-  if (madIn->empty()) return EmptyMonotypeDict::GetDArray(false);
-
-  auto const mad = copy ? madIn->copy() : madIn;
-  mad->m_kind = HeaderKind::BespokeDArray;
-  assertx(mad->checkInvariants());
-  return mad;
+  always_assert(false);
 }
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::ToHackArr(Self* madIn, bool copy) {
-  assertx(madIn->isDArray());
-  if (madIn->empty()) return EmptyMonotypeDict::GetDict(false);
-
-  auto const mad = copy ? madIn->copy() : madIn;
-  mad->m_kind = HeaderKind::BespokeDict;
-  mad->setLegacyArrayInPlace(false);
-  assertx(mad->checkInvariants());
-  return mad;
+  always_assert(false);
 }
 
 template <typename Key>
@@ -1449,10 +1426,7 @@ ArrayData* MonotypeDict<Key>::PostSort(Self* mad, ArrayData* vad) {
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetLegacyArray(
     Self* madIn, bool copy, bool legacy) {
-  if (madIn->empty()) {
-    return madIn->isDictType() ? EmptyMonotypeDict::GetDict(legacy)
-                               : EmptyMonotypeDict::GetDArray(legacy);
-  }
+  if (madIn->empty()) return EmptyMonotypeDict::GetDict(legacy);
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
@@ -1646,13 +1620,14 @@ DATATYPES
 
   new EmptyMonotypeDictLayout();
 
-  auto const init = [&](EmptyMonotypeDict* ad, HeaderKind kind, bool legacy) {
+  auto const init = [&](EmptyMonotypeDict* ad, bool legacy) {
     // We use kMinSizeIndex in the header of EmptyMonotypeDicts so that they
     // can be used interchangeably with regular MonotypeDicts. This information
     // will never be used to compute capacity, as all EmptyMonotypeDicts are
     // static.
-    ad->initHeader_16(kind, StaticValue, packSizeIndexAndAuxBits(
-          kMinSizeIndex, legacy ? kLegacyArray : 0));
+    auto const aux = packSizeIndexAndAuxBits(
+        kMinSizeIndex, legacy ? kLegacyArray : 0);
+    ad->initHeader_16(HeaderKind::BespokeDict, StaticValue, aux);
     ad->setLayoutIndex(getEmptyLayoutIndex());
     ad->m_extra_lo16 = 0;
     ad->m_size = 0;
@@ -1660,10 +1635,8 @@ DATATYPES
     mad->initHash();
     assertx(mad->checkInvariants());
   };
-  init(GetDict(false), HeaderKind::BespokeDict, false);
-  init(GetDArray(false), HeaderKind::BespokeDArray, false);
-  init(GetDict(true), HeaderKind::BespokeDict, true);
-  init(GetDArray(true), HeaderKind::BespokeDArray, true);
+  init(GetDict(false), false);
+  init(GetDict(true), true);
 }
 
 TopMonotypeDictLayout::TopMonotypeDictLayout(KeyTypes kt)

@@ -263,7 +263,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
 
   UVersionInfo version;
   u_charAge(cp, version);
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for(int i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
     ret.append(version[i]);
   }

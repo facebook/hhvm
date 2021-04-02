@@ -750,7 +750,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_VECTOR:
     {
-      Array arr = Array::CreateVArray();
+      Array arr = Array::CreateVec();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant value;
         int err =
@@ -771,7 +771,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_LIST_MAP:
     {
-      Array arr = Array::CreateDArray();
+      Array arr = Array::CreateDict();
       int64_t i = 0;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
@@ -798,7 +798,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_MAP:
     {
-      Array arr = Array::CreateDArray();
+      Array arr = Array::CreateDict();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant key;
         int err = fb_compact_unserialize_from_buffer(key, buf, n, p, depth + 1);

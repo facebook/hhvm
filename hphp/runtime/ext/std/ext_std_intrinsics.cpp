@@ -44,20 +44,20 @@ TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
 
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
   if (arr.isVec()) return arr;
-  return Array::CreateVArray();
+  return Array::CreateVec();
 }
 
 Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
   if (arr.isDict()) return arr;
-  return Array::CreateDArray();
+  return Array::CreateDict();
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofdarray_builtin) {
-  return make_array_like_tv(ArrayData::CreateDArray());
+  return make_array_like_tv(ArrayData::CreateDict());
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofvarray_builtin) {
-  return make_array_like_tv(ArrayData::CreateVArray());
+  return make_array_like_tv(ArrayData::CreateVec());
 }
 
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
@@ -65,7 +65,7 @@ TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
     auto const& arr = var.asCArrRef();
     if (arr.isVec() || arr.isDict()) return tvReturn(arr);
   }
-  return tvReturn(ArrayData::CreateVArray());
+  return tvReturn(ArrayData::CreateVec());
 }
 
 TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
@@ -223,7 +223,7 @@ Array HHVM_FUNCTION(
 ) {
   auto const orig = retOrig
     ? make_varray(s.get(), str, num, i, obj, o.get(), m, mix)
-    : Array::CreateVArray();
+    : Array::CreateVec();
 
   str += ";; IN =\"";
   str += StrNR{s.get()};
@@ -238,7 +238,7 @@ Array HHVM_FUNCTION(
 
   outArr = retOrig
     ? make_varray(outBool, outArr, outObj)
-    : Array::CreateVArray();
+    : Array::CreateVec();
   outBool = true;
   outObj = SystemLib::AllocStdClassObject();
 

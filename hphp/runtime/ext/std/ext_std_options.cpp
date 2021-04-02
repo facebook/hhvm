@@ -470,7 +470,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
     free_longopts(opt_vec);
   };
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   Variant val;
   int optchr = 0;

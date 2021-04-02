@@ -125,9 +125,9 @@ void APCTypedValue::deleteUncounted() {
     StringData::ReleaseUncounted(m_data.str);
   } else {
     auto const arr = m_data.arr;
-    if (arr->hasVanillaPackedLayout()) PackedArray::ReleaseUncounted(arr);
-    else if (arr->hasVanillaMixedLayout()) MixedArray::ReleaseUncounted(arr);
-    else if (arr->isKeysetKind()) SetArray::ReleaseUncounted(arr);
+    if (arr->isVanillaVec()) PackedArray::ReleaseUncounted(arr);
+    else if (arr->isVanillaDict()) MixedArray::ReleaseUncounted(arr);
+    else if (arr->isVanillaKeyset()) SetArray::ReleaseUncounted(arr);
     else BespokeArray::ReleaseUncounted(arr);
     if (arr == static_cast<void*>(this + 1)) {
       return;  // *::ReleaseUncounted freed the joint allocation.

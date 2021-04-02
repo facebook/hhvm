@@ -355,7 +355,7 @@ static void sock_array_to_fd_set(const Array& sockets, std::vector<pollfd>& fds,
 static void sock_array_from_fd_set(Variant &sockets,
                                    const std::vector<pollfd>& fds,
                                    int &nfds, int &count, const short flag) {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   assertx(sockets.isArray());
   const auto& sock_array = sockets.asCArrRef();
   IterateKV(
@@ -1043,7 +1043,7 @@ Variant HHVM_FUNCTION(socket_select,
   if (!read.isNull()) {
     // sock_array_from_fd_set can set a sparsely indexed array, so
     // we use darray everywhere.
-    auto hasData = Array::CreateDArray();
+    auto hasData = Array::CreateDict();
     IterateV(
       read.asCArrRef().get(),
       [&](TypedValue v) {
@@ -1633,7 +1633,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
 
   for (res = res0; res; res = res->ai_next) {
     Array data = make_darray(

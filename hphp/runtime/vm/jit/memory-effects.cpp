@@ -1843,7 +1843,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case RaiseClsMethPropConvertNotice:
-  case RaiseArraySerializeNotice:
   case ThrowUninitLoc:
   case RaiseUndefProp:
   case RaiseTooManyArg:

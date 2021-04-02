@@ -406,7 +406,6 @@ bool opcodeMayRaise(Opcode opc) {
   case PropQ:
   case PropTypeRedefineCheck:
   case PropX:
-  case RaiseArraySerializeNotice:
   case RaiseClsMethPropConvertNotice:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:

@@ -109,7 +109,6 @@ struct EmptyMonotypeDict : BespokeArray {
   static EmptyMonotypeDict* As(ArrayData* ad);
   static const EmptyMonotypeDict* As(const ArrayData* ad);
   static EmptyMonotypeDict* GetDict(bool legacy);
-  static EmptyMonotypeDict* GetDArray(bool legacy);
 
   bool checkInvariants() const;
 
@@ -125,8 +124,7 @@ struct MonotypeDict : BespokeArray {
   // Create a new, empty MonotypeDict with the given capacity. The result will
   // have a refcount of 1, but if Static is true, it will be in static memory.
   template <bool Static = false>
-  static MonotypeDict* MakeReserve(
-      HeaderKind kind, bool legacy, size_t capacity, DataType dt);
+  static MonotypeDict* MakeReserve(bool legacy, size_t capacity, DataType dt);
 
   static MonotypeDict* MakeFromVanilla(ArrayData* ad, DataType dt);
 

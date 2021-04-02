@@ -336,7 +336,7 @@ static Variant HHVM_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec) {
                           "obtaining the status values");
     return false;
   }
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   for (int32_t i = 0; i < count; ++i) {
     ret.append((int64_t)rules[i]);
   }

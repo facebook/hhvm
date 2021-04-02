@@ -186,7 +186,7 @@ bool PageletTransport::isPipelineEmpty() {
 }
 
 Array PageletTransport::getAsyncResults(bool allow_empty) {
-  auto results = Array::CreateVArray();
+  auto results = Array::CreateVec();
   PageletServerTaskEvent* next_event = nullptr;
   int code = 0;
 
@@ -228,7 +228,7 @@ String PageletTransport::getResults(
 ) {
   // Make sure that we only ever return a vec or null.
   if (!headers.isNull() && !headers.isVec()) {
-    headers = Array::CreateVArray();
+    headers = Array::CreateVec();
   }
 
   {
@@ -256,7 +256,7 @@ String PageletTransport::getResults(
   }
 
   String response(m_response.c_str(), m_response.size(), CopyString);
-  headers = Array::CreateVArray();
+  headers = Array::CreateVec();
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     for (unsigned int i = 0; i < iter->second.size(); i++) {

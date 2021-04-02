@@ -514,7 +514,7 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, TypedValue val) {
 template<KeyType keyType>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
   assertx(tvIsPlausible(value));
-  assertx(a->hasVanillaMixedLayout());
+  assertx(a->isVanillaDict());
   return dictSetImplPre(a, key, value);
 }
 

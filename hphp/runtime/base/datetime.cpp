@@ -188,7 +188,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
 
   Array DateTime::ParseTime(timelib_time* parsed_time,
                           timelib_error_container* error) {
-  auto ret = Array::CreateDArray();
+  auto ret = Array::CreateDict();
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_year,      y);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_month,     m);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_day,       d);
@@ -1050,7 +1050,7 @@ const StaticString
   s_astronomical_twilight_end("astronomical_twilight_end");
 
 Array DateTime::getSunInfo(double latitude, double longitude) const {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   timelib_sll sunrise, sunset, transit;
   double ddummy;
 

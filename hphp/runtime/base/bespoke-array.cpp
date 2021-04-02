@@ -102,9 +102,9 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
     IterateKV(vad, [&](auto k, auto v) { mark(k); mark(v); });
   }
 
-  if (vad->hasVanillaPackedLayout()) {
+  if (vad->isVanillaVec()) {
     return PackedArray::MakeUncounted(vad, hasApcTv, seen);
-  } else if (vad->hasVanillaMixedLayout()) {
+  } else if (vad->isVanillaDict()) {
     return MixedArray::MakeUncounted(vad, hasApcTv, seen);
   }
   return SetArray::MakeUncounted(vad, hasApcTv, seen);
@@ -234,10 +234,7 @@ ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
 // sorting
 NO_PROFILING
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  if (!isSortFamily(sf)) {
-    if (ad->isVArray())  return ad->toDArray(true);
-    if (ad->isVecType()) return ad->toDict(true);
-  }
+  if (!isSortFamily(sf) && ad->isVecType()) return ad->toDict(true);
   assertx(!ad->empty());
   return g_layout_funcs.fnPreSort[getLayoutByte(ad)](ad, sf);
 }

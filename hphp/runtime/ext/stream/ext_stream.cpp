@@ -874,12 +874,12 @@ bool StreamContext::validateOptions(const Variant& options) {
 
 void StreamContext::mergeOptions(const Array& options) {
   if (m_options.isNull()) {
-    m_options = Array::CreateDArray();
+    m_options = Array::CreateDict();
   }
   for (ArrayIter it(options); it; ++it) {
     Variant wrapper = it.first();
     if (!m_options.exists(wrapper)) {
-      m_options.set(wrapper, Array::CreateDArray());
+      m_options.set(wrapper, Array::CreateDict());
     }
     assertx(m_options[wrapper].isArray());
     Array& opts = asArrRef(m_options.lval(wrapper));
@@ -894,10 +894,10 @@ void StreamContext::setOption(const String& wrapper,
                                const String& option,
                                const Variant& value) {
   if (m_options.isNull()) {
-    m_options = Array::CreateDArray();
+    m_options = Array::CreateDict();
   }
   if (!m_options.exists(wrapper)) {
-    m_options.set(wrapper, Array::CreateDArray());
+    m_options.set(wrapper, Array::CreateDict());
   }
   assertx(m_options[wrapper].isArray());
   Array& opts = asArrRef(m_options.lval(wrapper));
@@ -931,7 +931,7 @@ bool StreamContext::validateParams(const Variant& params) {
 
 void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
-    m_params = Array::CreateDArray();
+    m_params = Array::CreateDict();
   }
   if (params.exists(s_notification)) {
     m_params.set(s_notification, params[s_notification]);
@@ -945,7 +945,7 @@ void StreamContext::mergeParams(const Array& params) {
 Array StreamContext::getParams() const {
   Array params = m_params;
   if (params.isNull()) {
-    params = Array::CreateDArray();
+    params = Array::CreateDict();
   }
   params.set(s_options, getOptions());
   return params;

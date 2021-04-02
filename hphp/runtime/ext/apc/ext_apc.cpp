@@ -292,7 +292,7 @@ Variant HHVM_FUNCTION(apc_store,
         ServerStats::Log("apc.write", 1);
       }
     }
-    return Variant(ArrayData::Create());
+    return Variant(ArrayData::CreateDict());
   }
 
   if (!key_or_array.isString()) {

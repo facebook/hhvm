@@ -698,7 +698,7 @@ TypedValue HHVM_FUNCTION(all_request_stats) {
   if (auto const trace = g_context->getRequestTrace()) {
     return tvReturn(from_stats_list(trace->stats()));
   }
-  return tvReturn(ArrayData::CreateDArray());
+  return tvReturn(ArrayData::CreateDict());
 }
 
 TypedValue HHVM_FUNCTION(all_process_stats) {

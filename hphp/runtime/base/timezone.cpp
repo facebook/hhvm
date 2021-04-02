@@ -243,11 +243,11 @@ Array TimeZone::GetAbbreviations() {
       element.set(s_timezone_id, uninit_null());
     }
     if (ret.isNull()) {
-      ret = Array::CreateDArray();
+      ret = Array::CreateDict();
     }
     String key{entry->name};
     if (!ret.exists(key)) {
-      ret.set(key, Array::CreateVArray());
+      ret.set(key, Array::CreateVec());
     }
     auto const lval = ret.lval(key);
     forceToArray(lval).append(element.toArray());
@@ -422,7 +422,7 @@ bool TimeZone::dst(int64_t timestamp) const {
 
 Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
                             int64_t timestamp_end /* = k_PHP_INT_MAX */) const {
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
 
   if (m_tztype == TIMELIB_ZONETYPE_ABBR) {
     // PHP 5.5+ just returns `false` here, but we're probably depending on

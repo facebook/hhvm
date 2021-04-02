@@ -1027,7 +1027,7 @@ static String convertArg(const Variant& arg) {
 }
 
 Array HHVM_FUNCTION(mb_list_encodings) {
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   int i = 0;
   const mbfl_encoding **encodings = mbfl_get_supported_encodings();
   const mbfl_encoding *encoding;
@@ -1047,7 +1047,7 @@ Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   if (encoding->aliases != nullptr) {
     while ((*encoding->aliases)[i] != nullptr) {
       ret.append((*encoding->aliases)[i]);
@@ -1066,14 +1066,14 @@ Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
   mbfl_no_encoding no_encoding;
   int i, j;
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   if (name.isNull()) {
     i = 0;
     encodings = mbfl_get_supported_encodings();
     while ((encoding = encodings[i++]) != nullptr) {
       Array row;
       if (encoding->aliases != nullptr) {
-        row = Array::CreateVArray();
+        row = Array::CreateVec();
         j = 0;
         while ((*encoding->aliases)[j] != nullptr) {
           row.append(String((*encoding->aliases)[j], CopyString));
@@ -1122,7 +1122,7 @@ Variant HHVM_FUNCTION(mb_list_mime_names,
   mbfl_no_encoding no_encoding;
   int i;
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   if (name.isNull()) {
     i = 0;
     encodings = mbfl_get_supported_encodings();
@@ -1620,7 +1620,7 @@ Variant HHVM_FUNCTION(mb_detect_order,
   mbfl_encoding **list, **entry;
 
   if (encoding_list.isNull()) {
-    Array ret = Array::CreateVArray();
+    Array ret = Array::CreateVec();
     entry = MBSTRG(current_detect_order_list);
     n = MBSTRG(current_detect_order_list_size);
     while (n > 0) {
@@ -1743,7 +1743,7 @@ Variant HHVM_FUNCTION(mb_get_info,
 
   char *name;
   if (type.empty() || strcasecmp(type.data(), "all") == 0) {
-    Array ret = Array::CreateDArray();
+    Array ret = Array::CreateDict();
     if (MBSTRG(current_internal_encoding) != nullptr &&
         (name = (char *) MBSTRG(current_internal_encoding)->name) != nullptr) {
       ret.set(s_internal_encoding, String(name, CopyString));
@@ -1780,7 +1780,7 @@ Variant HHVM_FUNCTION(mb_get_info,
     n = MBSTRG(current_detect_order_list_size);
     entry = MBSTRG(current_detect_order_list);
     if (n > 0) {
-      Array row = Array::CreateVArray();
+      Array row = Array::CreateVec();
       while (n > 0) {
         if ((name = (char *)(*entry)->name) != nullptr) {
           row.append(String(name, CopyString));
@@ -1852,7 +1852,7 @@ Variant HHVM_FUNCTION(mb_get_info,
     n = MBSTRG(current_detect_order_list_size);
     entry = MBSTRG(current_detect_order_list);
     if (n > 0) {
-      Array ret = Array::CreateVArray();
+      Array ret = Array::CreateVec();
       while (n > 0) {
         name = (char *)(*entry)->name;
         if (name) {
@@ -1900,7 +1900,7 @@ Variant HHVM_FUNCTION(mb_http_input,
     case 'S': case 's': result = MBSTRG(http_input_identify_string); break;
     case 'I': case 'i':
       {
-        Array ret = Array::CreateVArray();
+        Array ret = Array::CreateVec();
         entry = MBSTRG(http_input_list);
         n = MBSTRG(http_input_list_size);
         while (n > 0) {
@@ -2276,7 +2276,7 @@ bool HHVM_FUNCTION(mb_parse_str,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = req::strndup(encoded_string.data(), encoded_string.size());
-  result = Array::CreateDArray();
+  result = Array::CreateDict();
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, result, encstr);
   req::free(encstr);
@@ -3700,7 +3700,7 @@ bool HHVM_FUNCTION(mb_ereg_search_setpos,
 Variant HHVM_FUNCTION(mb_ereg_search_getregs) {
   OnigRegion *search_regs = MBSTRG(search_regs);
   if (search_regs && !MBSTRG(search_str).empty()) {
-    Array ret = Array::CreateVArray();
+    Array ret = Array::CreateVec();
     OnigUChar *str = (OnigUChar *)MBSTRG(search_str).data();
     int len = MBSTRG(search_str).size();
     int n = search_regs->num_regs;
@@ -3819,7 +3819,7 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
       break;
     case 2:
       n = MBSTRG(search_regs)->num_regs;
-      ret = Variant(Array::CreateVArray());
+      ret = Variant(Array::CreateVec());
       for (i = 0; i < n; i++) {
         beg = MBSTRG(search_regs)->beg[i];
         end = MBSTRG(search_regs)->end[i];
@@ -4034,7 +4034,7 @@ Variant HHVM_FUNCTION(mb_split,
     return false;
   }
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   OnigUChar *pos0 = (OnigUChar *)str.data();
   OnigUChar *pos_end = (OnigUChar *)(str.data() + str.size());
   OnigUChar *pos = pos0;
@@ -4313,7 +4313,7 @@ bool HHVM_FUNCTION(mb_send_mail,
     body_enc = lang->mail_body_encoding;
   }
 
-  Array ht_headers = Array::CreateDArray();
+  Array ht_headers = Array::CreateDict();
   if (!headers.empty()) {
     _php_mbstr_parse_mail_headers(ht_headers, headers.data(), headers.size());
   }

@@ -202,11 +202,10 @@ const StructLayout* StructLayout::As(const Layout* l) {
 
 StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
                                         const StructLayout* layout) {
-  if (!ad->hasVanillaMixedLayout()) return nullptr;;
+  if (!ad->isVanillaDict()) return nullptr;;
 
   assertx(layout);
-  auto const kind = ad->isDArray() ? HeaderKind::BespokeDArray
-                                   : HeaderKind::BespokeDict;
+  auto const kind = HeaderKind::BespokeDict;
   auto const result = ad->isStatic()
     ? MakeReserve<true>(kind, ad->isLegacyArray(), layout)
     : MakeReserve<false>(kind, ad->isLegacyArray(), layout);
@@ -555,11 +554,7 @@ ArrayData* StructDict::Pop(StructDict* sadIn, Variant& value) {
 }
 
 ArrayData* StructDict::ToDVArray(StructDict* sadIn, bool copy) {
-  if (sadIn->isDArray()) return sadIn;
-  auto const sad = copy ? sadIn->copy() : sadIn;
-  sad->m_kind = HeaderKind::BespokeDArray;
-  assertx(sad->checkInvariants());
-  return sad;
+  always_assert(false);
 }
 
 ArrayData* StructDict::ToHackArr(StructDict* sadIn, bool copy) {

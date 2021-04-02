@@ -2710,7 +2710,6 @@ bool Type::checkInvariants() const {
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
     assertx(!m_data.aval->empty());
-    assertx(m_data.aval->isNotDVArray());
     assertx(couldBe(BArrLikeN));
     assertx(subtypeOf(BArrLikeN | kNonSupportBits));
 

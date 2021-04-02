@@ -119,7 +119,7 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
     raise_warning("class_implements(): object or string expected");
     return false;
   }
-  Array ret(Array::CreateDArray());
+  Array ret(Array::CreateDict());
   const Class::InterfaceMap& ifaces = cls->allInterfaces();
   for (int i = 0, size = ifaces.size(); i < size; i++) {
     ret.set(ifaces[i]->nameStr(),
@@ -151,7 +151,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
     raise_warning("class_parents(): object or string expected");
     return false;
   }
-  Array ret(Array::CreateDArray());
+  Array ret(Array::CreateDict());
   for (cls = cls->parent(); cls; cls = cls->parent()) {
     ret.set(cls->nameStr(), make_tv<KindOfPersistentString>(cls->name()));
   }

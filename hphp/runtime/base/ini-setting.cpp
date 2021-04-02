@@ -578,7 +578,7 @@ void IniSettingMap::set(const String& key, const Variant& v) {
 Array IniSetting::ParserCallback::emptyArrayForMode() const {
   switch (mode_) {
     case ParserCallbackMode::DARRAY:
-      return Array::CreateDArray();
+      return Array::CreateDict();
     case ParserCallbackMode::DICT:
       return Array::CreateDict();
   }
@@ -806,7 +806,7 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   if (process_sections) {
     CallbackData data;
     SectionParserCallback cb(ParserCallbackMode::DARRAY);
-    data.arr = Array::CreateDArray();
+    data.arr = Array::CreateDict();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
       if (!data.active_name.isNull()) {
         data.arr.asArrRef().set(data.active_name, data.active_section);
@@ -815,7 +815,7 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
     }
   } else {
     ParserCallback cb(ParserCallbackMode::DARRAY);
-    Variant arr = Array::CreateDArray();
+    Variant arr = Array::CreateDict();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &arr)) {
       ret = arr;
     }
@@ -1146,7 +1146,7 @@ bool IniSetting::GetMode(const std::string& name, Mode& mode) {
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {
-  Array r = Array::CreateDArray();
+  Array r = Array::CreateDict();
 
   const Extension* ext = nullptr;
   if (!ext_name.empty()) {
@@ -1176,7 +1176,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       value = value.toString();
     }
     if (details) {
-      Array item = Array::CreateDArray();
+      Array item = Array::CreateDict();
       item.set(s_global_value, value);
       item.set(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {

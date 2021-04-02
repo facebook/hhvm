@@ -457,7 +457,7 @@ struct HashCollection : ObjectData {
   MixedArray* arrayData() { return m_arr; }
   const MixedArray* arrayData() const { return m_arr; }
   void setArrayData(MixedArray* arr) {
-    assertx(arr->isDictKind());
+    assertx(arr->isVanillaDict());
     assertx(!arr->isLegacyArray());
     m_arr = arr;
   }
@@ -633,7 +633,7 @@ struct HashCollection : ObjectData {
     ~SortTmp() {
       if (m_h->arrayData() != m_ad) {
         Array tmp = Array::attach(m_h->arrayData());
-        assertx(m_ad->isDictKind());
+        assertx(m_ad->isVanillaDict());
         m_h->setArrayData(static_cast<MixedArray*>(m_ad));
       }
     }

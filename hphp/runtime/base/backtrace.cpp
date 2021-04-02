@@ -323,7 +323,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }
 
-  auto bt = Array::CreateVArray();
+  auto bt = Array::CreateVec();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
   BTContext ctx;
@@ -762,7 +762,7 @@ Array CompactTraceData::extract() const {
 }
 
 Array CompactTrace::extract() const {
-  if (size() <= 1) return Array::CreateVArray();
+  if (size() <= 1) return Array::CreateVec();
 
   Cache::ConstAccessor acc;
   if (s_cache.find(acc, m_backtrace)) {
@@ -772,7 +772,7 @@ Array CompactTrace::extract() const {
   auto arr = m_backtrace->extract();
   auto ins = CachedArray(
     arr.get()->empty()
-      ? ArrayData::CreateVArray()
+      ? ArrayData::CreateVec()
       : PackedArray::MakeUncounted(arr.get()),
     CacheDeleter()
   );

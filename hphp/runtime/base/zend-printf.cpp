@@ -309,7 +309,7 @@ inline static int getnumber(const char *buffer, int *pos) {
 String string_printf(const char *format, int len, const Array& args) {
   Array vargs = args;
   if (!vargs.isNull() && !vargs->isVectorData()) {
-    vargs = Array::CreateVArray();
+    vargs = Array::CreateVec();
     for (ArrayIter iter(args); iter; ++iter) {
       vargs.append(iter.second());
     }

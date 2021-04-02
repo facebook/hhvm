@@ -72,9 +72,7 @@ namespace {
 using StaticVec = std::aligned_storage<kMinSizeBytes, 16>::type;
 
 StaticVec s_emptyMonotypeVec;
-StaticVec s_emptyMonotypeVArray;
 StaticVec s_emptyMonotypeVecMarked;
-StaticVec s_emptyMonotypeVArrayMarked;
 
 const LayoutFunctions* monotypeVecVtable() {
   static auto const result = fromArray<MonotypeVec>();
@@ -140,17 +138,11 @@ EmptyMonotypeVec* EmptyMonotypeVec::GetVec(bool legacy) {
   return reinterpret_cast<EmptyMonotypeVec*>(src);
 }
 
-EmptyMonotypeVec* EmptyMonotypeVec::GetVArray(bool legacy) {
-  auto const src = legacy ? &s_emptyMonotypeVArrayMarked
-                          : &s_emptyMonotypeVArray;
-  return reinterpret_cast<EmptyMonotypeVec*>(src);
-}
-
 bool EmptyMonotypeVec::checkInvariants() const {
   assertx(isStatic());
   assertx(kindIsValid());
   assertx(size() == 0);
-  assertx(isVecType() || isVArray());
+  assertx(isVecType());
   assertx(layoutIndex() == getEmptyLayoutIndex());
 
   // Check that EmptyMonotypeVec puns a MonotypeVec modulo its type().
@@ -173,9 +165,7 @@ ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
                                                const char* reason) {
   logEscalateToVanilla(ead, reason);
   auto const legacy = ead->isLegacyArray();
-  return ead->isVecType()
-    ? (legacy ? staticEmptyMarkedVec() : staticEmptyVec())
-    : (legacy ? staticEmptyMarkedVArray() : staticEmptyVArray());
+  return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
 }
 
 void EmptyMonotypeVec::ConvertToUncounted(EmptyMonotypeVec*,
@@ -275,8 +265,7 @@ ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t pos) {
 }
 
 ArrayData* EmptyMonotypeVec::AppendMove(EmptyMonotypeVec* ead, TypedValue v) {
-  auto const mad = MonotypeVec::MakeReserve(
-      ead->m_kind, ead->isLegacyArray(), 1, type(v));
+  auto const mad = MonotypeVec::MakeReserve(ead->isLegacyArray(), 1, type(v));
   auto const res = MonotypeVec::AppendMove(mad, v);
   assertx(mad == res);
   return res;
@@ -288,15 +277,11 @@ ArrayData* EmptyMonotypeVec::Pop(EmptyMonotypeVec* ead, Variant& value) {
 }
 
 ArrayData* EmptyMonotypeVec::ToDVArray(EmptyMonotypeVec* eadIn, bool copy) {
-  assertx(copy);
-  assertx(eadIn->isVecType());
-  return GetVArray(false);
+  always_assert(false);
 }
 
 ArrayData* EmptyMonotypeVec::ToHackArr(EmptyMonotypeVec* eadIn, bool copy) {
-  assertx(copy);
-  assertx(eadIn->isVArray());
-  return GetVec(false);
+  always_assert(false);
 }
 
 ArrayData* EmptyMonotypeVec::PreSort(EmptyMonotypeVec* ead, SortFunction sf) {
@@ -309,12 +294,7 @@ ArrayData* EmptyMonotypeVec::PostSort(EmptyMonotypeVec* ead, ArrayData* vad) {
 
 ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec* eadIn,
                                             bool copy, bool legacy) {
-  if (eadIn->isVecType()) {
-    return GetVec(legacy);
-  } else {
-    assertx(eadIn->isVArray());
-    return GetVArray(legacy);
-  }
+  return GetVec(legacy);
 }
 
 
@@ -354,7 +334,7 @@ void MonotypeVec::incRefValues() {
 
 template <bool Static>
 MonotypeVec* MonotypeVec::MakeReserve(
-    HeaderKind hk, bool legacy, uint32_t capacity, DataType dt) {
+    bool legacy, uint32_t capacity, DataType dt) {
   auto const bytes = sizeof(MonotypeVec) + capacity * sizeof(Value);
   auto const index = std::max(MemoryManager::size2Index(bytes), kMinSizeIndex);
   auto const alloc = [&]{
@@ -367,7 +347,7 @@ MonotypeVec* MonotypeVec::MakeReserve(
   auto const aux = packSizeIndexAndAuxBits(
       index, legacy ? ArrayData::kLegacyArray : 0);
 
-  mad->initHeader_16(hk, OneReference, aux);
+  mad->initHeader_16(HeaderKind::BespokeVec, OneReference, aux);
   mad->setLayoutIndex(getLayoutIndex(dt));
   mad->m_size = 0;
 
@@ -376,12 +356,10 @@ MonotypeVec* MonotypeVec::MakeReserve(
 }
 
 MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
-  assertx(ad->hasVanillaPackedLayout());
-  auto const kind = ad->isVArray() ? HeaderKind::BespokeVArray
-                                   : HeaderKind::BespokeVec;
+  assertx(ad->isVanillaVec());
   auto result = ad->isStatic()
-    ? MakeReserve<true>(kind, ad->isLegacyArray(), ad->size(), dt)
-    : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
+    ? MakeReserve<true>(ad->isLegacyArray(), ad->size(), dt)
+    : MakeReserve<false>(ad->isLegacyArray(), ad->size(), dt);
 
   PackedArray::IterateV(ad, [&](auto v) {
     auto const next = AppendMove(result, v);
@@ -393,7 +371,7 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
   if (ad->isStatic()) {
     auto const aux = packSizeIndexAndAuxBits(
       result->sizeIndex(), result->auxBits());
-    result->initHeader_16(kind, StaticValue, aux);
+    result->initHeader_16(HeaderKind::BespokeVec, StaticValue, aux);
   }
 
   assertx(result->checkInvariants());
@@ -477,8 +455,7 @@ ArrayData* MonotypeVec::escalateWithCapacity(
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 
-  auto const ad = isVecType() ? PackedArray::MakeReserveVec(capacity)
-                              : PackedArray::MakeReserveVArray(capacity);
+  auto const ad = PackedArray::MakeReserveVec(capacity);
   for (uint32_t i = 0; i < size(); i++) {
     auto const tv = typedValueUnchecked(i);
     tvCopy(tv, PackedArray::LvalUncheckedInt(ad, i));
@@ -491,7 +468,7 @@ ArrayData* MonotypeVec::escalateWithCapacity(
 
 bool MonotypeVec::checkInvariants() const {
   assertx(kindIsValid());
-  assertx(isVecType() || isVArray());
+  assertx(isVecType());
   assertx(size() <= capacity());
   assertx(sizeIndex() >= kMinSizeIndex);
 
@@ -749,24 +726,11 @@ ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
 }
 
 ArrayData* MonotypeVec::ToDVArray(MonotypeVec* madIn, bool copy) {
-  assertx(madIn->isVecType());
-  if (madIn->empty()) return EmptyMonotypeVec::GetVArray(false);
-
-  auto const mad = copy ? madIn->copy() : madIn;
-  mad->m_kind = HeaderKind::BespokeVArray;
-  assertx(mad->checkInvariants());
-  return mad;
+  always_assert(false);
 }
 
 ArrayData* MonotypeVec::ToHackArr(MonotypeVec* madIn, bool copy) {
-  assertx(madIn->isVArray());
-  if (madIn->empty()) return EmptyMonotypeVec::GetVec(false);
-
-  auto const mad = copy ? madIn->copy() : madIn;
-  mad->setLegacyArrayInPlace(false);
-  mad->m_kind = HeaderKind::BespokeVec;
-  assertx(mad->checkInvariants());
-  return mad;
+  always_assert(false);
 }
 
 ArrayData* MonotypeVec::PreSort(MonotypeVec* mad, SortFunction sf) {
@@ -781,10 +745,7 @@ ArrayData* MonotypeVec::PostSort(MonotypeVec* mad, ArrayData* vad) {
 
 ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
                                        bool copy, bool legacy) {
-  if (madIn->empty()) {
-    return madIn->isVecType() ? EmptyMonotypeVec::GetVec(legacy)
-                              : EmptyMonotypeVec::GetVArray(legacy);
-  }
+  if (madIn->empty()) EmptyMonotypeVec::GetVec(legacy);
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
@@ -887,24 +848,21 @@ void MonotypeVec::InitializeLayouts() {
 
   new EmptyMonotypeVecLayout();
 
-  auto const init = [&](EmptyMonotypeVec* ead, HeaderKind hk, bool legacy) {
+  auto const init = [&](EmptyMonotypeVec* ead, bool legacy) {
     // For EmptyMonotypeVecs, we use the minimum size index so that MonotypeVec
     // functions can always safely read the size index. It will never be used
     // for capacity decisions in this case, as EmptyMonotypeVecs are always
     // static.
-    auto const aux =
-      packSizeIndexAndAuxBits(kMinSizeIndex,
-                              legacy ? ArrayData::kLegacyArray : 0);
-    ead->initHeader_16(hk, StaticValue, aux);
+    auto const aux = packSizeIndexAndAuxBits(
+        kMinSizeIndex, legacy ? ArrayData::kLegacyArray : 0);
+    ead->initHeader_16(HeaderKind::BespokeVec, StaticValue, aux);
     ead->m_size = 0;
     ead->setLayoutIndex(getEmptyLayoutIndex());
     assertx(ead->checkInvariants());
   };
 
-  init(EmptyMonotypeVec::GetVec(false), HeaderKind::BespokeVec, false);
-  init(EmptyMonotypeVec::GetVArray(false), HeaderKind::BespokeVArray, false);
-  init(EmptyMonotypeVec::GetVec(true), HeaderKind::BespokeVec, true);
-  init(EmptyMonotypeVec::GetVArray(true), HeaderKind::BespokeVArray, true);
+  init(EmptyMonotypeVec::GetVec(false), false);
+  init(EmptyMonotypeVec::GetVec(true), true);
 }
 
 TopMonotypeVecLayout::TopMonotypeVecLayout()

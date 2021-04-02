@@ -194,7 +194,7 @@ static Variant php_posix_group_to_array(group* gr) {
   // Invalid user.
   if (gr == nullptr) return false;
 
-  auto members = Array::CreateVArray();
+  auto members = Array::CreateVec();
   for (int count=0; gr->gr_mem[count] != NULL; count++) {
     members.append(String(gr->gr_mem[count], CopyString));
   }

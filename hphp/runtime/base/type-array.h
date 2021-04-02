@@ -70,38 +70,16 @@ private:
 
 public:
   /*
-   * Create an empty array.
+   * Create an empty array of a given type.
    */
-  static Array Create() {
-    return Array(ArrayData::Create(), NoIncRef{});
-  }
-
-  /*
-   * There are existing callsites that we intentionally want to create a
-   * "traditional" PHP array with no specialization. Array::CreatePHPArray()
-   * are calls that have been audited and determined that the callsite should
-   * never be converted.
-   */
-  static constexpr auto CreatePHPArray = &Create;
-
   static Array CreateVec() {
     return Array(ArrayData::CreateVec(), NoIncRef{});
   }
-
   static Array CreateDict() {
     return Array(ArrayData::CreateDict(), NoIncRef{});
   }
-
   static Array CreateKeyset() {
     return Array(ArrayData::CreateKeyset(), NoIncRef{});
-  }
-
-  static Array CreateVArray() {
-    return Array(ArrayData::CreateVArray(), NoIncRef{});
-  }
-
-  static Array CreateDArray(arrprov::Tag tag = {}) {
-    return Array(ArrayData::CreateDArray(tag), NoIncRef{});
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -190,12 +168,13 @@ public:
   Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
-  Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
+
+  Array toVArray() const { return toVec(); }
+  Array toDArray() const { return toDict(); }
+  Array toPHPArray() const { return toDict(); }
   Array toPHPArrayIntishCast() const {
     COPY_BODY(toPHPArrayIntishCast(true), Array{})
   }
-  Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
-  Array toDArray() const { COPY_BODY(toDArray(true), CreateDArray()) }
 
   #undef COPY_BODY
 
@@ -468,7 +447,7 @@ public:
   /*
    * Remove all elements.
    */
-  void clear() { operator=(Create()); }
+  void clear() { operator=(CreateDict()); }
 
   /*
    * Stack-like function - the inverse of append().
@@ -560,15 +539,15 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Array empty_array() {
-  return Array::attach(ArrayData::Create());
+  return Array::attach(ArrayData::CreateDict());
 }
 
 ALWAYS_INLINE Array empty_varray() {
-  return Array::attach(ArrayData::CreateVArray());
+  return Array::attach(ArrayData::CreateVec());
 }
 
 ALWAYS_INLINE Array empty_darray() {
-  return Array::attach(ArrayData::CreateDArray());
+  return Array::attach(ArrayData::CreateDict());
 }
 
 ALWAYS_INLINE Array empty_vec_array() {

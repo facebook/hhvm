@@ -545,7 +545,7 @@ Variant getMultiByKeyImpl(ObjectData* const this_, const String& server_key,
   data->m_impl->rescode = MEMCACHED_SUCCESS;
 
   bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
-  Array returnValue = Array::CreateDArray();
+  Array returnValue = Array::CreateDict();
   if (!data->getMultiImpl(server_key, keys, cas_tokens,
                           preserveOrder ? &returnValue : nullptr)) {
     return false;
@@ -750,7 +750,7 @@ Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
 
   memcached_return status_memcached;
   bool status;
-  Array returnValue = Array::CreateDArray();
+  Array returnValue = Array::CreateDict();
   for (ArrayIter iter(keys); iter; ++iter) {
     Variant vKey = iter.second();
     if (!vKey.isString()) continue;
@@ -854,7 +854,7 @@ doServerListCallback(const memcached_st* /*ptr*/,
 
 Array HHVM_METHOD(Memcached, getserverlist) {
   auto data = Native::data<MemcachedData>(this_);
-  Array returnValue = Array::CreateVArray();
+  Array returnValue = Array::CreateVec();
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;
@@ -1028,7 +1028,7 @@ Variant HHVM_METHOD(Memcached, getversion) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_version(&data->m_impl->memcached);
 
-  Array returnValue = Array::CreateDArray();
+  Array returnValue = Array::CreateDict();
   memcached_server_function callbacks[] = { doVersionCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;

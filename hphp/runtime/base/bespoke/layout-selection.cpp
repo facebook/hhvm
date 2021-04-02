@@ -173,7 +173,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // dict/darray) will rarely produce useful struct-like arrays.
   auto const type_okay = [&]{
     auto const vad = profile.data->staticSampledArray;
-    if (vad != nullptr && (vad->isDictType() || vad->isDArray())) return true;
+    if (vad != nullptr && vad->isDictType()) return true;
     auto const op = profile.key.op();
     return op == OpNewDictArray || op == OpNewStructDict;
   }();

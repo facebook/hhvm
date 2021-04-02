@@ -214,7 +214,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
     // Push an empty array, as the remainder of the call setup assumes generics
     // are on the stack.
     ARRPROV_USE_RUNTIME_LOCATION();
-    auto const ad = ArrayData::CreateVArray();
+    auto const ad = ArrayData::CreateVec();
     vmStack().pushArrayLikeNoRc(ad);
     return;
   }
@@ -279,7 +279,7 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
     arrprov::TagOverride _(RO::EvalArrayProvenance
       ? arrprov::Tag::Param(callee, numParams)
       : arrprov::Tag{});
-    auto const ad = ArrayData::CreateVArray();
+    auto const ad = ArrayData::CreateVec();
     vmStack().pushArrayLikeNoRc(ad);
     ++numArgsInclUnpack;
   }

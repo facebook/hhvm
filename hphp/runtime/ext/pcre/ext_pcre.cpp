@@ -198,7 +198,7 @@ static Variant preg_replace_callback_array_impl(
   int limit,
   int64_t& total_count) {
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   auto key = 0;
   total_count = 0;
   for (ArrayIter s_iter(subjects); s_iter; ++s_iter) {
@@ -256,7 +256,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_array,
   }
 
   if (subject.isString()) {
-    Array subject_arr = Array::CreateDArray();
+    Array subject_arr = Array::CreateDict();
     subject_arr.set(0, subject.toString());
     Variant ret = preg_replace_callback_array_impl(
       patterns_and_callbacks, subject_arr, limit, count

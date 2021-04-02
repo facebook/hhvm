@@ -270,7 +270,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   }
 
   /* Parse content of <Body> element */
-  return_value = Array::CreateDArray();
+  return_value = Array::CreateDict();
   resp = body->children;
   while (resp != nullptr && resp->type != XML_ELEMENT_NODE) {
     resp = resp->next;

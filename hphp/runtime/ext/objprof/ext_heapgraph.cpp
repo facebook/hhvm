@@ -536,15 +536,15 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
 
 Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return Array::CreateDArray();
-  if (size_t(index) >= hgptr->hg.ptrs.size()) return Array::CreateDArray();
+  if (!hgptr) return Array::CreateDict();
+  if (size_t(index) >= hgptr->hg.ptrs.size()) return Array::CreateDict();
   return createPhpEdge(hgptr, index);
 }
 
 Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return Array::CreateDArray();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateDArray();
+  if (!hgptr) return Array::CreateDict();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateDict();
   return createPhpNode(hgptr, index);
 }
 
@@ -553,8 +553,8 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return Array::CreateVArray();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
+  if (!hgptr) return Array::CreateVec();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVec();
   size_t num_edges{0};
   hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
   VArrayInit result(num_edges);
@@ -569,8 +569,8 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return Array::CreateVArray();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
+  if (!hgptr) return Array::CreateVec();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVec();
   size_t num_edges{0};
   hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
   VArrayInit result(num_edges);
@@ -582,7 +582,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return Array::CreateDArray();
+  if (!hgptr) return Array::CreateDict();
   auto result = make_darray(
     s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
     s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),

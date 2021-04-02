@@ -1030,7 +1030,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   /* Initialize return array */
-  auto ret = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
+  auto ret = hackArrOutput ? Array::CreateDict() : Array::CreateDict();
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -1090,7 +1090,7 @@ static Variant preg_match_impl(const StringData* pattern,
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
   if (subpats) {
-    *subpats = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
+    *subpats = hackArrOutput ? Array::CreateDict() : Array::CreateDict();
   }
   int exec_options = 0;
 
@@ -1138,11 +1138,11 @@ static Variant preg_match_impl(const StringData* pattern,
   /* Allocate match sets array and initialize the values. */
 
   /* An array of sets of matches for each subpattern after a global match */
-  auto match_sets = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
+  auto match_sets = hackArrOutput ? Array::CreateDict() : Array::CreateDict();
   if (global && subpats_order == PREG_PATTERN_ORDER) {
     for (int i = 0; i < num_subpats; i++) {
       match_sets.set(i,
-        hackArrOutput ? Array::CreateDict() : Array::CreateDArray());
+        hackArrOutput ? Array::CreateDict() : Array::CreateDict());
     }
   }
 
@@ -1223,7 +1223,7 @@ static Variant preg_match_impl(const StringData* pattern,
           } else {
             auto result_set = hackArrOutput
               ? Array::CreateDict()
-              : Array::CreateDArray();
+              : Array::CreateDict();
 
             /* Add all the subpatterns to it */
             for (i = 0; i < count; i++) {
@@ -1356,7 +1356,7 @@ Variant preg_match_all(const StringData* pattern, const StringData* subject,
 static String preg_do_repl_func(const Variant& function, const String& subject,
                                 int* offsets, const char* const* subpat_names,
                                 int count) {
-  Array subpats = Array::CreateDArray();
+  Array subpats = Array::CreateDict();
   for (int i = 0; i < count; i++) {
     auto off1 = offsets[i<<1];
     auto off2 = offsets[(i<<1)+1];
@@ -1683,7 +1683,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     return preg_return_no_error(std::move(ret));
   }
 
-  Array return_value = Array::CreateDArray();
+  Array return_value = Array::CreateDict();
   Array arrSubject = subject.toDArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
@@ -1762,7 +1762,7 @@ Variant preg_split(const String& pattern, const String& subject,
   const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   // Get next piece if no limit or limit not yet reached and something matched
-  Array result = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
+  Array result = hackArrOutput ? Array::CreateDict() : Array::CreateDict();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
   PCRECache::Accessor bump_accessor;
@@ -2036,7 +2036,7 @@ Variant php_split(const String& spliton, const String& str, int count,
     return false;
   }
 
-  Array return_value = Array::CreateVArray();
+  Array return_value = Array::CreateVec();
   regmatch_t subs[1];
 
   /* churn through str, generating array entries as we go */

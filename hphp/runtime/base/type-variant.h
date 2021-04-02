@@ -1516,13 +1516,13 @@ inline void concat_assign(tv_lval lhs, const String& s2) {
 //////////////////////////////////////////////////////////////////////
 
 inline Array& forceToArray(Variant& var) {
-  if (!var.isArray()) var = Variant(Array::Create());
+  if (!var.isArray()) var = Variant(Array::CreateDict());
   return var.asArrRef();
 }
 
 inline Array& forceToArray(tv_lval lval) {
   if (!isArrayLikeType(lval.type())) {
-    tvMove(make_array_like_tv(ArrayData::Create()), lval);
+    tvMove(make_array_like_tv(ArrayData::CreateDict()), lval);
   }
   return asArrRef(lval);
 }
@@ -1541,14 +1541,14 @@ inline Array& forceToDict(tv_lval lval) {
 
 inline Array& forceToDArray(Variant& var) {
   if (!tvIsDict(var.asTypedValue())) {
-    var = Variant(Array::CreateDArray());
+    var = Variant(Array::CreateDict());
   }
   return var.asArrRef();
 }
 
 inline Array& forceToDArray(tv_lval lval) {
   if (!tvIsDict(lval)) {
-    tvMove(make_array_like_tv(ArrayData::CreateDArray()), lval);
+    tvMove(make_array_like_tv(ArrayData::CreateDict()), lval);
   }
   return asArrRef(lval);
 }
@@ -1583,7 +1583,7 @@ inline bool isa_non_null(const Variant& v) {
 // and type-array
 template <IntishCast IC>
 ALWAYS_INLINE TypedValue Array::convertKey(TypedValue k) const {
-  return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
+  return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::CreateDict());
 }
 template <IntishCast IC>
 ALWAYS_INLINE TypedValue Array::convertKey(const Variant& k) const {

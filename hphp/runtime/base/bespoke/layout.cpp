@@ -598,7 +598,7 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
   }
 
   auto const dt = et.valueDatatype;
-  return ad->isDArray() || ad->isDictType()
+  return ad->isDictType()
     ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
     : MonotypeVec::MakeFromVanilla(ad, dt);
 }

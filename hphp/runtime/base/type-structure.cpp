@@ -465,7 +465,7 @@ std::string resolveContextMsg(const TSCtx& ctx) {
  * return an empty Array. */
 Array getAlias(TSEnv& env, const String& aliasName) {
   if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
-    return Array::CreateDArray();
+    return Array::CreateDict();
   }
 
   auto persistentTA = true;
@@ -474,7 +474,7 @@ Array getAlias(TSEnv& env, const String& aliasName) {
     : Unit::loadTypeAlias(aliasName.get(), &persistentTA);
   if (!typeAlias) {
     env.partial = true;
-    return Array::CreateDArray();
+    return Array::CreateDict();
   }
 
   // this returned type structure is unresolved.
@@ -552,7 +552,7 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
          == TypeStructure::Kind::T_shape);
   assertx(arr.exists(s_fields));
 
-  auto newfields = Array::CreateDArray();
+  auto newfields = Array::CreateDict();
   auto const fields = arr[s_fields].asCArrRef();
   auto const sz = fields.size();
   for (auto i = 0; i < sz; i++) {
@@ -641,7 +641,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());
 
-  auto newarr = Array::CreateDArray();
+  auto newarr = Array::CreateDict();
   copyTypeModifiers(arr, newarr);
   newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 

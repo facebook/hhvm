@@ -56,8 +56,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length,
     length = num_in - offset;
   }
 
-  auto const ad = ArrayData::CreateDArray(
-      arrprov::Tag{}, input->isLegacyArray());
+  auto const ad = ArrayData::CreateDict(input->isLegacyArray());
   auto out_hash = Array::attach(ad);
 
   int pos = 0;
@@ -155,7 +154,7 @@ Variant ArrayUtil::Range(unsigned char low, unsigned char high,
     return false;
   }
 
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   if (low > high) { // Negative Steps
     for (; low >= high; low -= (unsigned int)step) {
       ret.append(String::FromChar(low));
@@ -197,7 +196,7 @@ void rangeCheckAlloc(double estNumSteps) {
 }
 
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   double element;
   int64_t i;
   if (low > high) { // Negative steps
@@ -227,7 +226,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
 }
 
 Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
-  auto ret = Array::CreateVArray();
+  auto ret = Array::CreateVec();
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
       raise_invalid_argument_warning("step exceeds the specified range");
@@ -256,7 +255,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 // information and calculations
 
 Variant ArrayUtil::CountValues(const Array& input) {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const inner = iter.secondVal();
     if (isIntType(type(inner)) || isStringType(type(inner)) ||
@@ -279,7 +278,7 @@ Variant ArrayUtil::CountValues(const Array& input) {
 // manipulations
 
 Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (ArrayIter iter(input); iter; ++iter) {
     Variant key(iter.first());
     if (key.isString()) {
@@ -300,7 +299,7 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
     return empty_darray();
   }
 
-  auto ret = Array::CreateDArray();
+  auto ret = Array::CreateDict();
   auto pos_limit = input->iter_end();
   int64_t nextKI = 0;
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
@@ -407,7 +406,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
 
 Variant ArrayUtil::StringUnique(const Array& input) {
   Array seenValues = Array::CreateKeyset();
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const str = tvCastToString(iter.secondVal());
     if (!seenValues.exists(str)) {
@@ -421,7 +420,7 @@ Variant ArrayUtil::StringUnique(const Array& input) {
 
 Variant ArrayUtil::NumericUnique(const Array& input) {
   std::set<double> seenValues;
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const value = tvCastToDouble(iter.secondVal());
     std::pair<std::set<double>::iterator, bool> res =

@@ -29,8 +29,6 @@ struct ObjectData;
 ArrayData* castObjToVec(ObjectData*);
 ArrayData* castObjToDict(ObjectData*);
 ArrayData* castObjToKeyset(ObjectData*);
-ArrayData* castObjToVArray(ObjectData*);
-ArrayData* castObjToDArray(ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

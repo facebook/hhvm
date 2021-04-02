@@ -591,9 +591,9 @@ ArrayData* apply_mutation_to_array(ArrayData* in, State& state,
 
   // Recursively apply the mutation to the array's contents. For efficiency,
   // we do the layout check outside of the iteration loop.
-  if (in->hasVanillaPackedLayout()) {
+  if (in->isVanillaVec()) {
     return apply_mutation_fast<PackedArray>(in, result, state, cow, depth);
-  } else if (in->hasVanillaMixedLayout()) {
+  } else if (in->isVanillaDict()) {
     return apply_mutation_fast<MixedArray>(in, result, state, cow, depth);
   }
   return apply_mutation_slow(in, result, state, cow, depth);
@@ -666,8 +666,8 @@ ArrayData* apply_mutation_mutate_collections(TypedValue tv, State& state,
     // array types here are handled by apply_mutation_fast, which specifically
     // allows for a mutation of arrays with refcount > 1 (see above).
     auto const copy = [&]{
-      if (arr->hasVanillaPackedLayout()) return PackedArray::Copy(arr);
-      if (arr->hasVanillaMixedLayout())  return MixedArray::Copy(arr);
+      if (arr->isVanillaVec()) return PackedArray::Copy(arr);
+      if (arr->isVanillaDict())  return MixedArray::Copy(arr);
       always_assert(false);
     }();
     insert.first->second = copy;
@@ -715,7 +715,6 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
 
 TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
   // Closure state: whether or not we've raised notices for array-likes.
-  auto raised_hack_array_notice = false;
   auto raised_non_hack_array_notice = false;
   auto warn_once = [](bool& warned, const char* message) {
     if (!warned) raise_warning("%s", message);
@@ -725,19 +724,7 @@ TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
   // The closure: pre-HAM, tag dvarrays and notice on vec / dicts / PHP arrays;
   // post-HAM, tag vecs and dicts and notice on any other array-like inputs.
   auto const mark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
-    if (!RO::EvalHackArrDVArrs) {
-      if (ad->isVecType()) {
-        warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_VEC);
-        return nullptr;
-      } else if (ad->isDictType()) {
-        warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_DICT);
-        return nullptr;
-      } else if (ad->isNotDVArray()) {
-        warn_once(raised_non_hack_array_notice,
-                  "array_mark_legacy expects a varray or darray");
-        return nullptr;
-      }
-    } else if (!ad->isVecType() && !ad->isDictType()) {
+    if (!ad->isVecType() && !ad->isDictType()) {
       warn_once(raised_non_hack_array_notice,
                 "array_mark_legacy expects a dict or vec");
       return nullptr;
@@ -750,11 +737,9 @@ TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
   // Unmark legacy vecs/dicts to silence logging,
   // e.g. while casting to regular vecs or dicts.
   auto const unmark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
-    if (RO::EvalHackArrDVArrs && !ad->isVecType() && !ad->isDictType()) {
+    if (!ad->isVecType() && !ad->isDictType()) {
       return nullptr;
     }
-    if (!RO::EvalHackArrDVArrs && !ad->isDVArray()) return nullptr;
-
     auto const result = ad->setLegacyArray(cow, false);
     return result == ad ? nullptr : result;
   };
@@ -785,7 +770,7 @@ TypedValue tagTvImpl(TypedValue in) {
     if (!tag->valid()) return nullptr;
     auto const result = [&]{
       if (!cow) return ad;
-      auto const packed = ad->hasVanillaPackedLayout();
+      auto const packed = ad->isVanillaVec();
       return packed ? PackedArray::Copy(ad) : MixedArray::Copy(ad);
     }();
     arrprov::setTag(result, *tag);

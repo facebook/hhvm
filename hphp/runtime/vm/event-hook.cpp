@@ -241,7 +241,7 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
     return;
   }
   if (frameinfo.isNull()) {
-    frameinfo = Array::CreateDArray();
+    frameinfo = Array::CreateDict();
   }
 
   if (isCall) {
@@ -285,7 +285,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
       ? arrprov::Tag::Param(func, 2)
       : arrprov::Tag{});
 
-    frameinfo = Array::attach(ArrayData::CreateDArray());
+    frameinfo = Array::attach(ArrayData::CreateDict());
     if (!isResume) {
       // Add arguments only if this is a function call.
       frameinfo.set(s_args, hhvm_get_frame_args(ar));

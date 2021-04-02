@@ -3310,7 +3310,7 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
   if (src0->hasConstVal() && src1->hasConstVal(TInt)) {
     auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
-    assertx(arr->hasVanillaPackedLayout());
+    assertx(arr->isVanillaVec());
     auto const tv = PackedArray::NvGetInt(arr, idx);
     return tv.is_init() ? cns(env, tv) : nullptr;
   }

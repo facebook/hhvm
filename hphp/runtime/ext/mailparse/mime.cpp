@@ -36,7 +36,7 @@ MimePart::MimeHeader::MimeHeader()
 MimePart::MimeHeader::MimeHeader(const char *value)
   : m_empty(false) {
   assertx(value);
-  m_attributes = Array::CreateDArray();
+  m_attributes = Array::CreateDict();
   m_value = String(value, CopyString);
 }
 
@@ -50,7 +50,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
   int charset_p = 0, prevcharset_p = 0;
   bool namechanged = false, currentencoded = false;
 
-  m_attributes = Array::CreateDArray();
+  m_attributes = Array::CreateDict();
 
   /* php_rfc822_print_tokens(toks); */
   /* look for optional ; which separates optional attributes from the main
@@ -318,7 +318,7 @@ void MimePart::MimeHeader::rfc2231_to_mime(StringBuffer &value_buf,
 MimePart::MimePart()
   : m_startpos(0), m_endpos(0), m_bodystart(0), m_bodyend(0),
     m_nlines(0), m_nbodylines(0) {
-  m_headers = Array::CreateDArray();
+  m_headers = Array::CreateDict();
 
   /* begin in header parsing mode */
   m_parsedata.in_header = true;
@@ -398,7 +398,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
 }
 
 Array MimePart::getStructure() {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   enumerateParts(&MimePart::getStructure, &ret);
   return ret;
 }
@@ -537,7 +537,7 @@ const StaticString
   s_content_transfer_encoding("content-transfer-encoding");
 
 Variant MimePart::getPartData() {
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   ret.set(s_headers, m_headers);
 
@@ -710,7 +710,7 @@ bool MimePart::processHeader() {
           asArrRef(zheaderval).append(String(header_val, CopyString));
         } else {
           // Create a nested array if there is more than one of the same header
-          Array zarr = Array::CreateVArray();
+          Array zarr = Array::CreateVec();
           zarr.append(zheaderval.tv());
           zarr.append(String(header_val, CopyString));
           m_headers.set(header_arrkey, make_array_like_tv(zarr.get()));

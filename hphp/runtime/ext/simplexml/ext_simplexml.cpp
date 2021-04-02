@@ -794,7 +794,7 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
     }
     if (!node || node->type != XML_ENTITY_DECL) {
       xmlAttrPtr attr = node ? (xmlAttrPtr)node->properties : nullptr;
-      Array zattr = Array::CreateDArray();
+      Array zattr = Array::CreateDict();
       bool test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
       while (attr) {
         if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) &&
@@ -889,7 +889,7 @@ next_iter:
 
 Array SimpleXMLElement_darrayCast(const ObjectData* obj) {
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
-  Array properties = Array::CreateDArray();
+  Array properties = Array::CreateDict();
   sxe_get_prop_hash(sxe, true, properties);
   return properties;
 }
@@ -901,7 +901,7 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
   if (type == KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
     if (node) return true;
-    Array properties = Array::CreateDArray();
+    Array properties = Array::CreateDict();
     sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
   }
@@ -1343,7 +1343,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, xpath, const String& path) {
 
   xmlNodeSetPtr result = retval->nodesetval;
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   if (result != nullptr) {
     for (int64_t i = 0; i < result->nodeNr; ++i) {
       nodeptr = result->nodeTab[i];
@@ -1477,7 +1477,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 static Array HHVM_METHOD(SimpleXMLElement, getNamespaces,
                          bool recursive /* = false */) {
   auto data = Native::data<SimpleXMLElement>(this_);
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   xmlNodePtr node = data->nodep();
   node = php_sxe_get_first_node(data, node);
   if (node) {
@@ -1497,7 +1497,7 @@ static Array HHVM_METHOD(SimpleXMLElement, getDocNamespaces,
   xmlNodePtr node =
     from_root ? xmlDocGetRootElement(data->docp())
               : data->nodep();
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   sxe_add_registered_namespaces(data, node, recursive, ret);
   return ret;
 }

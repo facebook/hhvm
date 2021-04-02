@@ -317,9 +317,9 @@ private:
     m_data = Local ? nullptr : ad;
     setArrayNext(IterNextIndex::Array);
     if (ad != nullptr) {
-      if (ad->hasVanillaPackedLayout()) {
+      if (ad->isVanillaVec()) {
         setArrayNext(IterNextIndex::ArrayPacked);
-      } else if (ad->hasVanillaMixedLayout()) {
+      } else if (ad->isVanillaDict()) {
         setArrayNext(IterNextIndex::ArrayMixed);
       }
       m_pos = ad->iter_begin();

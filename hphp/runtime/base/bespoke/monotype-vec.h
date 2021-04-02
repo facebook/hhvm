@@ -37,8 +37,7 @@ struct MonotypeVec : public BespokeArray {
    * have a refcount of 1, but if Static is true, it will be in static memory.
    */
   template <bool Static = false>
-  static MonotypeVec* MakeReserve(
-      HeaderKind hk, bool legacy, uint32_t capacity, DataType dt);
+  static MonotypeVec* MakeReserve(bool legacy, uint32_t capacity, DataType dt);
 
   /**
    * Create a new MonotypeVec from the given vanilla vec or varray. The values
@@ -96,9 +95,7 @@ private:
 struct EmptyMonotypeVec : public BespokeArray {
   static EmptyMonotypeVec* As(ArrayData* ad);
   static const EmptyMonotypeVec* As(const ArrayData* ad);
-
   static EmptyMonotypeVec* GetVec(bool legacy);
-  static EmptyMonotypeVec* GetVArray(bool legacy);
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(EmptyMonotypeVec)

@@ -490,7 +490,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   if (stmt && stmt->stmt()) {
     pdo_raise_impl_error(stmt->dbh, nullptr, pdo_err[0], einfo->errmsg);
   } else {
-    Array info = Array::CreateVArray();
+    Array info = Array::CreateVec();
     info.append(String(*pdo_err, CopyString));
     if (stmt) {
       stmt->dbh->conn()->fetchErr(stmt, info);
@@ -1229,7 +1229,7 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  Array flags = Array::CreateVArray();
+  Array flags = Array::CreateVec();
 
   const MYSQL_FIELD *F = m_fields + colno;
   if (F->def) {

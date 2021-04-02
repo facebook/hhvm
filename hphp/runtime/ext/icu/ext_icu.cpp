@@ -47,7 +47,7 @@ static Variant icu_match_impl(const String& pattern,
                               int64_t flags) {
   UErrorCode status = U_ZERO_ERROR;
 
-  Array matchesArr = Array::CreateVArray();
+  Array matchesArr = Array::CreateVec();
   SCOPE_EXIT {
     if (matches) {
       *matches = matchesArr;
@@ -320,7 +320,7 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
   const String BEGIN_MARKER("_B_");
   const String END_MARKER("_E_");
 
-  Array ret = Array::CreateVArray();
+  Array ret = Array::CreateVec();
   std::vector<Token> tokens;
   tokenizeString(tokens, getMaster(), UnicodeString::fromUTF8(text.data()));
 

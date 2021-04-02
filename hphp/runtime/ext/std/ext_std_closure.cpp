@@ -41,7 +41,7 @@ const StaticString
 static Array HHVM_METHOD(Closure, __debugInfo) {
   auto closure = c_Closure::fromObject(this_);
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
 
   // Serialize 'use' parameters.
   auto cls = this_->getVMClass();
@@ -61,7 +61,7 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
 
   // Serialize function parameters.
   if (auto nParams = func->numParams()) {
-   Array params = Array::CreateDArray();
+   Array params = Array::CreateDict();
 
    auto lNames = func->localNames();
    for (int i = 0; i < nParams; ++i) {

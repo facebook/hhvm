@@ -46,20 +46,11 @@ TEST(Array, Constructors) {
   EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
 
-  arr = Array::Create();
+  arr = Array::CreateDict();
   EXPECT_TRUE(arr.empty());
   EXPECT_TRUE(arr.size() == 0);
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr.isDict());
-  EXPECT_FALSE(arr.isVec());
-  EXPECT_FALSE(arr.isKeyset());
-
-  arr = Array::CreatePHPArray();
-  arr.append(1);
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(arr.isDict());
   EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
@@ -429,7 +420,7 @@ TEST(Array, Membership) {
     EXPECT_TRUE(same_arrays(arr, make_varray("test").toPHPArray()));
   }
   {
-    Array arr = Array::CreateVArray();
+    Array arr = Array::CreateVec();
     arr.append(Variant("test"));
     EXPECT_TRUE(same_arrays(arr, make_varray("test")));
   }

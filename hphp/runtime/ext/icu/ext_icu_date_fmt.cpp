@@ -357,7 +357,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
                      uValue.getBuffer(), uValue.length(),
                      &parse_pos, &error);
 
-  Array ret = Array::CreateDArray();
+  Array ret = Array::CreateDict();
   error = U_ZERO_ERROR;
   add_to_localtime_arr(ret, cal, UCAL_SECOND, s_tm_sec, error);
   add_to_localtime_arr(ret, cal, UCAL_MINUTE, s_tm_min, error);

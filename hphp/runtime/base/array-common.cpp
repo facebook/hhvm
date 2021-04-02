@@ -97,29 +97,6 @@ ArrayData* castObjToKeyset(ObjectData* obj) {
   );
 }
 
-ArrayData* castObjToVArray(ObjectData* obj) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return castObjToArrayLikeImpl(
-    obj,
-    Array::CreateVArray,
-    [](const Array& arr) { return arr.toVArray(); },
-    [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
-    "Non-iterable object to varray conversion"
-  );
-}
-
-
-ArrayData* castObjToDArray(ObjectData* obj) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return castObjToArrayLikeImpl(
-    obj,
-    []{ return Array::CreateDArray(); },
-    [](const Array& arr) { return arr.toDArray(); },
-    [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
-    "Non-iterable object to darray conversion"
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -1,0 +1,14 @@
+---
+Language: Cpp
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortFunctionsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+DisableFormat: false
+IndentCaseLabels: true
+FixNamespaceComments: true
+PointerAlignment: Left
+SortIncludes: true
+...

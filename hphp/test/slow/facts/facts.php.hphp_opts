@@ -1,0 +1,3 @@
+-i "hphp/test/slow/native-autoload2/base-class.inc"
+-i "hphp/test/slow/native-autoload2/derived-class.inc"
+-vRuntime.Eval.IsCompatibleClsMethType=1

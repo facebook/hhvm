@@ -1,0 +1,74 @@
+Test passed successfully
+Native Autoload: true
+Paths:
+  %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-class.inc:
+    Types:
+      TestClass => PASS
+    Functions:
+    Constants:
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-type-alias.inc:
+    Types:
+    Functions:
+    Constants:
+    TypeAliases:
+      TestTypeAlias => PASS
+  %s/test/slow/native-autoload-trusted-db/dir1/native-autoload-const.inc:
+    Types:
+    Functions:
+    Constants:
+      TEST_CONSTANT => PASS
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/native-autoload-function.inc:
+    Types:
+    Functions:
+      test_fn => PASS
+    Constants:
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/trusted-autoload.php:
+    Types:
+    Functions:
+      main_trusted_autoload => PASS
+      print_enabled_stats => PASS
+      sorted => PASS
+    Constants:
+    TypeAliases:
+Overriding: 1
+Native Autoload: false
+Test passed successfully
+Native Autoload: true
+Paths:
+  %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-class.inc:
+    Types:
+      TestClass => PASS
+    Functions:
+    Constants:
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-type-alias.inc:
+    Types:
+    Functions:
+    Constants:
+    TypeAliases:
+      TestTypeAlias => PASS
+  %s/test/slow/native-autoload-trusted-db/dir1/native-autoload-const.inc:
+    Types:
+    Functions:
+    Constants:
+      TEST_CONSTANT => PASS
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/native-autoload-function.inc:
+    Types:
+    Functions:
+      test_fn => PASS
+    Constants:
+    TypeAliases:
+  %s/test/slow/native-autoload-trusted-db/trusted-autoload.php:
+    Types:
+    Functions:
+      main_trusted_autoload => PASS
+      print_enabled_stats => PASS
+      sorted => PASS
+    Constants:
+    TypeAliases:
+Overriding: 1
+Native Autoload: false

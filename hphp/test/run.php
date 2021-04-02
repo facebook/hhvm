@@ -2332,11 +2332,6 @@ function should_skip_test_simple(
     return 'skip-lazyclass';
   }
 
-  // The "--hn" option requires an explicit "$test.hn_opts" file.
-  if (isset($options['hn']) && !file_exists("$test.hn_opts")) {
-    return 'skip-hn';
-  }
-
   return null;
 }
 

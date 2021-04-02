@@ -9,6 +9,9 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA256=1e1ee0fa1dd61763f4ea87bad76362f39cdbc0ecb599893693b3013e7d43ed87"
 )
 
+get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(DOUBLE_CONVERSION_LIBRARY double-conversion INTERFACE_LINK_LIBRARIES)
 get_target_property(LIBFMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(LIBFMT_LIBRARY fmt INTERFACE_LINK_LIBRARIES)
 get_target_property(LIBSODIUM_INCLUDE_DIR libsodium INTERFACE_INCLUDE_DIRECTORIES)
@@ -16,6 +19,8 @@ get_target_property(LIBSODIUM_LIBRARY libsodium INTERFACE_LINK_LIBRARIES)
 get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
+
+message(STATUS "DCID: ${DOUBLE_CONVERSION_INCLUDE_DIR}")
 
 ExternalProject_add(
   bundled_folly
@@ -35,6 +40,9 @@ ExternalProject_add(
     -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
     -DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
     -DGLOG_LIBRARY=${LIBGLOG_LIBRARY}
+    -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
+    -DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}
+    -DDOUBLE_CONVERSION_LIBRARY=${DOUBLE_CONVERSION_LIBRARY}
     -DLIBFMT_INCLUDE_DIR=${LIBFMT_INCLUDE_DIR}
     -DLIBFMT_LIBRARY=${LIBFMT_LIBRARY}
     -DLIBSODIUM_INCLUDE_DIR=${LIBSODIUM_INCLUDE_DIR}
@@ -52,7 +60,7 @@ ExternalProject_add(
     ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
 )
 ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
-add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd)
+add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd double-conversion)
 
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)

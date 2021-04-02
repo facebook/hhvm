@@ -21,8 +21,6 @@ module SN = Naming_special_names
 (* The types *)
 (*****************************************************************************)
 
-let canon_key = String.lowercase
-
 let category = "naming_global"
 
 module GEnv = struct
@@ -60,8 +58,7 @@ module GEnv = struct
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
-  let type_canon_name ctx name =
-    Naming_provider.get_type_canon_name ctx (canon_key name)
+  let type_canon_name ctx name = Naming_provider.get_type_canon_name ctx name
 
   let type_pos ctx name =
     match Naming_provider.get_type_pos ctx name with
@@ -80,8 +77,7 @@ module GEnv = struct
       Some (p, kind)
     | None -> None
 
-  let fun_canon_name ctx name =
-    Naming_provider.get_fun_canon_name ctx (canon_key name)
+  let fun_canon_name ctx name = Naming_provider.get_fun_canon_name ctx name
 
   let fun_pos ctx name =
     match Naming_provider.get_fun_pos ctx name with
@@ -130,7 +126,7 @@ end
 (* The primitives to manipulate the naming environment *)
 module Env = struct
   let check_type_not_typehint ctx (p, name) =
-    let x = canon_key (Utils.strip_all_ns name) in
+    let x = String.lowercase (Utils.strip_all_ns name) in
     if
       SN.Typehints.is_reserved_hh_name x
       || SN.Typehints.is_reserved_global_name x
@@ -142,22 +138,20 @@ module Env = struct
       true
 
   let new_fun_skip_if_already_bound ctx fn (_p, name) =
-    let name_key = canon_key name in
-    match Naming_provider.get_fun_canon_name ctx name_key with
+    match Naming_provider.get_fun_canon_name ctx name with
     | Some _ -> ()
     | None ->
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_cid_skip_if_already_bound ctx fn (_p, name) cid_kind =
-    let name_key = canon_key name in
     let mode =
       match cid_kind with
       | Naming_types.TClass -> FileInfo.Class
       | Naming_types.TTypedef -> FileInfo.Typedef
       | Naming_types.TRecordDef -> FileInfo.RecordDef
     in
-    match Naming_provider.get_type_canon_name ctx name_key with
+    match Naming_provider.get_type_canon_name ctx name with
     | Some _ -> ()
     | None ->
       let backend = Provider_context.get_backend ctx in
@@ -179,8 +173,7 @@ module Env = struct
     Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun_error_if_already_bound ctx (p, name) =
-    let name_key = canon_key name in
-    match Naming_provider.get_fun_canon_name ctx name_key with
+    match Naming_provider.get_fun_canon_name ctx name with
     | Some canonical ->
       let p' = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
       if not @@ GEnv.compare_pos ctx p' p canonical then
@@ -195,8 +188,7 @@ module Env = struct
     if not (check_type_not_typehint ctx (p, name)) then
       ()
     else
-      let name_key = canon_key name in
-      match Naming_provider.get_type_canon_name ctx name_key with
+      match Naming_provider.get_type_canon_name ctx name with
       | Some canonical ->
         let p' =
           Option.value_exn (Naming_provider.get_type_pos ctx canonical)

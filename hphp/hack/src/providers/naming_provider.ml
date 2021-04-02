@@ -219,6 +219,7 @@ let get_fun_path (ctx : Provider_context.t) (name : string) :
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   let open Option.Monad_infix in
+  let name = String.lowercase name in
   let canon_name_key = Naming_sqlite.to_canon_name_key name in
   let symbol_opt =
     find_symbol_in_context
@@ -440,6 +441,7 @@ let get_type_kind (ctx : Provider_context.t) (name : string) :
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   let open Option.Monad_infix in
+  let name = String.lowercase name in
   let canon_name_key = Naming_sqlite.to_canon_name_key name in
   let symbol_opt =
     find_symbol_in_context

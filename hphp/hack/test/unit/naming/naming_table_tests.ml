@@ -407,8 +407,7 @@ let test_context_changes_funs () =
         (Naming_provider.get_fun_canon_name ctx "\\BAR")
         "Old function in context should NOT be accessible by non-canon name \\BAR";
       Asserter.String_asserter.assert_option_equals
-        None
-        (* TODO(ljw): this avoids the bug but only because of incorrect caching *)
+        expected
         (Naming_provider.get_fun_canon_name ctx "\\BaR")
         "Old function in context should NOT be accessible by non-canon name \\BaR";
       ())
@@ -471,8 +470,7 @@ let test_context_changes_classes () =
         (Naming_provider.get_type_canon_name ctx "\\FOO")
         "Old class in context should NOT be accessible by non-canon name \\FOO";
       Asserter.String_asserter.assert_option_equals
-        None
-        (* TODO(ljw) This avoids the bug but only because of incorrect caching *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\FoO")
         "Old class in context should NOT be accessible by non-canon name \\FoO";
       ())
@@ -535,8 +533,7 @@ let test_context_changes_typedefs () =
         (Naming_provider.get_type_canon_name ctx "\\BAZ")
         "Old typedef in context should NOT be accessible by non-canon name \\BAZ";
       Asserter.String_asserter.assert_option_equals
-        None
-        (* TODO(ljw) This avoids the bug but only because of incorrect caching *)
+        expected
         (Naming_provider.get_type_canon_name ctx "\\BaZ")
         "Old typedef in context should NOT be accessible by non-canon name \\BaZ";
       ())

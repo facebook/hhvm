@@ -14,6 +14,7 @@ use parser_core_types::{
     trivia_factory::TriviaFactory,
     trivia_kind::TriviaKind,
 };
+use static_assertions::*;
 
 use std::cell::RefCell;
 use std::ops::DerefMut;
@@ -94,6 +95,43 @@ pub enum KwSet {
     AllKeywords,
     NonReservedKeywords,
     NoKeywords,
+}
+
+macro_rules! as_case_insensitive_keyword {
+    ($size:tt, $size_type:ty $(, $keyword:tt)+) => {
+        fn as_case_insensitive_keyword(&self, text: &str) -> Option<(&'static str, bool)> {
+            use heapless::consts::*;
+
+            // - The $size should be greater than or equal to the each length of keyword
+            // - The $size should be equal to at least one of the length of a keyword
+            // Therefore, $size is equal to the length of the longest keyword.
+            $(
+                const_assert!($size >= $keyword.len());
+            )*
+            const_assert!(
+                $(
+                    $size == $keyword.len() ||
+                )*
+                false
+            );
+
+            if text.len() > $size {
+                None
+            } else {
+                let mut t: heapless::String<$size_type> = text.into();
+                let t: &mut str = t.as_mut_str();
+                t.make_ascii_lowercase();
+                let has_upper = t != text;
+                let t: &str = t as &str;
+                match t {
+                    $(
+                        $keyword => Some(($keyword, has_upper)),
+                    )*
+                    _ => None,
+                }
+            }
+        }
+    }
 }
 
 impl<'a, TF> Lexer<'a, TF>
@@ -2009,42 +2047,95 @@ where
         lexer.is_xhp_class_name()
     }
 
-    fn as_case_insensitive_keyword(&self, text: &str) -> Option<String> {
-        let lower = text.to_ascii_lowercase();
-        match lower.as_ref() {
-            "abstract" | "and" | "as" | "bool" | "boolean" | "break" | "callable" | "case"
-            | "catch" | "class" | "clone" | "const" | "continue" | "default" | "die" | "do"
-            | "echo" | "else" | "elseif" | "empty" | "endfor" | "endforeach" | "endif"
-            | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false" | "final"
-            | "finally" | "for" | "foreach" | "function" | "global" | "if" | "implements"
-            | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int"
-            | "integer" | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or"
-            | "parent" | "print" | "private" | "protected" | "public" | "require"
-            | "require_once" | "return" | "self" | "static" | "string" | "switch" | "throw"
-            | "trait" | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
-            | "xor" | "yield" => Some(lower),
-            _ => None,
-        }
-    }
-
-    fn lowercase_error(&self, original_text: &str, lowered_text: &str) -> bool {
-        match lowered_text {
-            "true" | "false" | "null" => false,
-            _ => original_text != lowered_text,
-        }
-    }
+    as_case_insensitive_keyword!(
+        12,
+        U12,
+        "abstract",
+        "and",
+        "as",
+        "bool",
+        "boolean",
+        "break",
+        "callable",
+        "case",
+        "catch",
+        "class",
+        "clone",
+        "const",
+        "continue",
+        "default",
+        "die",
+        "do",
+        "echo",
+        "else",
+        "elseif",
+        "empty",
+        "endfor",
+        "endforeach",
+        "endif",
+        "endswitch",
+        "endwhile",
+        "eval",
+        "exit",
+        "extends",
+        "false",
+        "final",
+        "finally",
+        "for",
+        "foreach",
+        "function",
+        "global",
+        "if",
+        "implements",
+        "include",
+        "include_once",
+        "inout",
+        "instanceof",
+        "insteadof",
+        "int",
+        "integer",
+        "interface",
+        "isset",
+        "list",
+        "namespace",
+        "new",
+        "null",
+        "or",
+        "parent",
+        "print",
+        "private",
+        "protected",
+        "public",
+        "require",
+        "require_once",
+        "return",
+        "self",
+        "static",
+        "string",
+        "switch",
+        "throw",
+        "trait",
+        "try",
+        "true",
+        "unset",
+        "use",
+        "using",
+        "var",
+        "void",
+        "while",
+        "xor",
+        "yield"
+    );
 
     fn as_keyword(&mut self, only_reserved: bool, kind: TokenKind) -> TokenKind {
         if kind == TokenKind::Name {
             let original_text = self.current_text_as_str();
-            let text_as_lowercase_keyword = self.as_case_insensitive_keyword(original_text);
-            let text = match text_as_lowercase_keyword.as_ref() {
-                Some(x) => x,
-                None => original_text,
-            };
-            match TokenKind::from_string(&text.as_bytes(), only_reserved) {
+            let (text, has_upper) = self
+                .as_case_insensitive_keyword(original_text)
+                .unwrap_or((original_text, false));
+            match TokenKind::from_string(text.as_bytes(), only_reserved) {
                 Some(keyword) => {
-                    if self.lowercase_error(original_text, &text) {
+                    if has_upper && text != "true" && text != "false" && text != "null" {
                         let err = Errors::uppercase_kw(original_text);
                         self.with_error(err);
                     }

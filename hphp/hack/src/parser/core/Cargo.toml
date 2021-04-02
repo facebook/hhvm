@@ -8,7 +8,9 @@ edition = "2018"
 path = "lib.rs"
 
 [dependencies]
+heapless = "0.6.1"
 operator = { path = "../cargo/operator" }
 parser_core_types = { path = "../cargo/core_types" }
 smart_constructors = { path = "../cargo/smart_constructors" }
 stack_limit = { path = "../../utils/stack_limit" }
+static_assertions = "1.1.0"

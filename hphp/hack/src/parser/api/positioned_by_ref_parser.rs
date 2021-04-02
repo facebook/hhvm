@@ -8,7 +8,6 @@ use parser::{
     lexer::Lexer,
     parser::Parser,
     parser_env::ParserEnv,
-    smart_constructors_wrappers::WithKind,
     source_text::SourceText,
     syntax_by_ref::{
         arena_state::State,
@@ -34,7 +33,7 @@ pub fn parse_script<'src, 'arena>(
     stack_limit: Option<&'src StackLimit>,
 ) -> (Syntax<'arena>, Vec<SyntaxError>, State<'arena>) {
     let tf = TokenFactory::new(arena);
-    let sc = WithKind::new(SmartConstructors::new(State { arena }, tf));
+    let sc = SmartConstructors::new(State { arena }, tf);
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
@@ -48,7 +47,7 @@ pub fn parse_header_only<'src, 'arena>(
     source: &SourceText<'src>,
 ) -> Option<Syntax<'arena>> {
     let tf = TokenFactory::new(arena);
-    let sc = WithKind::new(SmartConstructors::new(State { arena }, tf));
+    let sc = SmartConstructors::new(State { arena }, tf);
     Parser::parse_header_only(env, source, sc)
 }
 

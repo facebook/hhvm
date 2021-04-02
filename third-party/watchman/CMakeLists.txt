@@ -33,7 +33,21 @@ ExternalProject_Add(
     "-DFMT_INCLUDE_DIR=${FMT_INCLUDE_DIR}"
     "-DFOLLY_INCLUDE_DIR=${CMAKE_CURRENT_LIST_DIR}/../folly"
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
+  EXCLUDE_FROM_ALL
 )
 add_dependencies(bundled_watchman folly boost fmt double-conversion)
 
-add_dependencies(libwatchmanclient bundled_watchman)
+find_package(libWatchmanClient)
+if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARIES)
+  target_include_directories(libwatchmanclient INTERFACE "${WATCHMANCLIENT_INCLUDE_DIRS}")
+  target_link_libraries(libwatchmanclient INTERFACE "${WATCHMANCLIENT_LIBRARIES}")
+else()
+  add_dependencies(libwatchmanclient bundled_watchman)
+  ExternalProject_Get_Property(bundled_watchman INSTALL_DIR)
+  target_include_directories(libwatchmanclient INTERFACE "${INSTALL_DIR}/include")
+  target_link_libraries(
+    libwatchmanclient
+    INTERFACE
+    "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}watchmanclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+endif()

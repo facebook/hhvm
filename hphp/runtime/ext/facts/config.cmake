@@ -1,11 +1,9 @@
-HHVM_DEFINE_EXTENSION("facts" IMPLICIT
+HHVM_DEFINE_EXTENSION(
+  "facts"
   SOURCES
     ext_facts.cpp
   HEADERS
     ext_facts.h
   SYSTEMLIB
     ext_facts.php
-  DEPENDS
-    libFolly
-    libWatchmanClient
 )

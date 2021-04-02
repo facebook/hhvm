@@ -220,16 +220,13 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   let open Option.Monad_infix in
   let name = String.lowercase name in
-  let canon_name_key = Naming_sqlite.to_canon_name_key name in
   let symbol_opt =
     find_symbol_in_context
       ~ctx
       ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
         List.map funs ~f:(attach_name_type FileInfo.Fun))
       ~is_symbol:(fun symbol_name ->
-        String.equal
-          (Naming_sqlite.to_canon_name_key symbol_name)
-          canon_name_key)
+        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
   let compute_symbol_canon_name path =
     Ast_provider.find_ifun_in_file ctx path name
@@ -254,7 +251,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache
         ~ctx
-        ~name:canon_name_key
+        ~name
         ~cache:reverse_naming_table_delta.funs_canon_key
         ~fallback:(fun db_path ->
           Naming_sqlite.get_ifun_pos db_path name
@@ -442,15 +439,12 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   let open Option.Monad_infix in
   let name = String.lowercase name in
-  let canon_name_key = Naming_sqlite.to_canon_name_key name in
   let symbol_opt =
     find_symbol_in_context
       ~ctx
       ~get_entry_symbols:get_entry_symbols_for_type
       ~is_symbol:(fun symbol_name ->
-        String.equal
-          (Naming_sqlite.to_canon_name_key symbol_name)
-          canon_name_key)
+        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
   let compute_symbol_canon_name path kind =
     match kind with
@@ -485,7 +479,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache
         ~ctx
-        ~name:canon_name_key
+        ~name
         ~cache:reverse_naming_table_delta.types_canon_key
         ~fallback:(fun db_path ->
           Naming_sqlite.get_itype_pos db_path name

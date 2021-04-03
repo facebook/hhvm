@@ -18,6 +18,9 @@
 
 #include <mutex>
 
+#include "hphp/runtime/server/memory-stats.h"
+
+#include "hphp/util/address-range.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -32,6 +35,9 @@ namespace {
 std::mutex s_maxMemMutex;
 std::string s_maxMemPhase;
 int64_t s_maxMemUsageMb;
+size_t s_maxLowMemMb;
+size_t s_maxSStringMb;
+std::string s_maxLowMemPhase;
 
 void update_memory_stats(const char* what, const char* when,
                          const std::string& extra) {
@@ -40,17 +46,28 @@ void update_memory_stats(const char* what, const char* when,
     : folly::sformat("{} {} ({})", what, when, extra);
 
   auto const usage = Process::GetMemUsageMb();
+  auto const lowMemUsage = alloc::getLowMapped() / 1024 / 1024;
+  auto const sstringUsage =
+    MemoryStats::TotalSize(AllocKind::StaticString) / 1024 / 1024;
+
   {
     std::lock_guard<std::mutex> _{s_maxMemMutex};
     if (usage > s_maxMemUsageMb) {
       s_maxMemUsageMb = usage;
       s_maxMemPhase = phase;
     }
+    if (lowMemUsage > s_maxLowMemMb) {
+      s_maxLowMemMb = lowMemUsage;
+      s_maxSStringMb = sstringUsage;
+      s_maxLowMemPhase = phase;
+    }
   }
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_mem, 1)) {
-    auto const message = folly::sformat("RSS at {}: {} Mb\n", phase, usage);
-    Trace::traceRelease("%s", message.c_str());
+    Trace::ftraceRelease(
+      "RSS at {}: {} Mb [{} Mb low-mem, {} Mb sstrings]\n",
+      phase, usage, lowMemUsage, sstringUsage
+    );
   }
 }
 
@@ -89,6 +106,12 @@ void summarize_memory() {
     "Max RSS at {}: {} Mb",
     s_maxMemPhase,
     s_maxMemUsageMb
+  ).c_str());
+  Logger::Info("%s", folly::sformat(
+    "Max low-mem at {}: {} Mb [{} Mb sstrings]",
+    s_maxLowMemPhase,
+    s_maxLowMemMb,
+    s_maxSStringMb
   ).c_str());
 }
 

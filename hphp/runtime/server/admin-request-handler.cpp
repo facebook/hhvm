@@ -880,18 +880,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       size_t allocated = call_mallctl("stats.allocated");
       size_t active = call_mallctl("stats.active");
       size_t mapped = call_mallctl("stats.mapped");
+      auto const low_mapped = alloc::getLowMapped();
 
-#if USE_JEMALLOC_EXTENT_HOOKS
-      size_t low_mapped = 0;
-      // The low range [1G, 4G) is divided into two ranges, and shared by 3
-      // arenas.
-      low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
-      low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
-#else
-      size_t low_mapped = call_mallctl(
-          folly::sformat("stats.arenas.{}.mapped",
-                         low_arena).c_str());
-#endif
       std::ostringstream stats;
       stats << "<jemalloc-stats>" << endl;
       stats << "  <allocated>" << allocated << "</allocated>" << endl;

@@ -277,16 +277,16 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return  array<arraykey, array<mixed>>
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  final public function getAttributesNamespaced(): darray<arraykey, varray<mixed>>;
+  <<__Native>>
+  final public function getAttributesNamespaced()[]: darray<arraykey, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 
   <<__Native>>
   public function getNumberOfParameters()[]: int;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getParamInfo(): varray<darray<string, mixed>>;
+  <<__Native>>
+  private function getParamInfo()[]: varray<darray<string, mixed>>;
 
   private $params = null;
 
@@ -1020,11 +1020,11 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getDeclaringClassname(): string;
+  <<__Native>>
+  private function getDeclaringClassname()[]: string;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getPrototypeClassname(): string; // ?string
+  <<__Native>>
+  private function getPrototypeClassname()[]: string; // ?string
 
   use ReflectionTypedAttribute;
 }
@@ -1066,8 +1066,8 @@ class ReflectionClass implements Reflector {
     $this->name = $name;
   }
 
-  <<__Native, __Pure, __Mutable>>
-  private function __init(string $name): string;
+  <<__Native>>
+  private function __init(string $name)[]: string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.tostring.php )
@@ -2140,8 +2140,8 @@ class ReflectionClass implements Reflector {
 
   use ReflectionTypedAttribute;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getAttributesNamespaced(): darray<string, varray<mixed>>;
+  <<__Native>>
+  public function getAttributesNamespaced()[]: darray<string, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 
@@ -2299,23 +2299,22 @@ class ReflectionTypeConstant implements Reflector {
     print $str;
   }
 
-  <<__Native, __Pure, __Mutable>>
-  private function __init(mixed $cls_or_obj, string $const): bool;
+  <<__Native>>
+  private function __init(mixed $cls_or_obj, string $const)[]: bool;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getAssignedTypeHint(): string;
+  <<__Native>>
+  private function getAssignedTypeHint()[]: string;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getDeclaringClassname(): string;
+  <<__Native>>
+  private function getDeclaringClassname()[]: string;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getClassname(): string;
+  <<__Native>>
+  private function getClassname()[]: string;
 
   /* returns the shape containing the full type information for this
    * type constant. The structure of this shape is specified in
    * reflection.hhi. */
-  <<__Pure, __MaybeMutable>>
-  public function getTypeStructure() {
+  public function getTypeStructure()[] {
     return HH\type_structure(
       $this->getDeclaringClassname(),
       $this->getName()
@@ -2367,9 +2366,9 @@ class ReflectionTypeAlias implements Reflector {
    *
    * @return  darray<arraykey, varray<mixed>>
    */
-  <<__Native, __Pure, __MaybeMutable>>
+  <<__Native>>
   final public function getAttributesNamespaced(
-  ): darray<arraykey, varray<mixed>>;
+  )[]: darray<arraykey, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 
@@ -2457,17 +2456,17 @@ final class ReflectionFile implements Reflector {
   }
 
   // helper for ctor
-  <<__Native, __Pure, __Mutable>>
-  private function __init(string $name): string;
+  <<__Native>>
+  private function __init(string $name)[]: string;
 
   /**
    * Gets all attributes
    *
    * @return  darray<arraykey, varray<mixed>>
    */
-  <<__Native, __Pure, __MaybeMutable>>
+  <<__Native>>
   final public function getAttributesNamespaced(
-  ): darray<arraykey, varray<mixed>>;
+  )[]: darray<arraykey, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 

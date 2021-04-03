@@ -37,7 +37,7 @@ abstract class Awaitable {
    * DEPRECATED: use HH\Asio\has_finished()
    */
   <<__Native>>
-  final public function isFinished(): bool;
+  final public function isFinished()[]: bool;
 
   /** Check if this wait handle succeeded
    * @return bool - A boolean indicating whether this wait handle succeeded
@@ -45,7 +45,7 @@ abstract class Awaitable {
    * DEPRECATED: use HH\Asio\has_succeeded()
    */
   <<__Native>>
-  final public function isSucceeded(): bool;
+  final public function isSucceeded()[]: bool;
 
   /** Check if this wait handle failed
    * @return bool - A boolean indicating whether this wait handle failed
@@ -53,7 +53,7 @@ abstract class Awaitable {
    * DEPRECATED: use HH\Asio\has_failed()
    */
   <<__Native>>
-  final public function isFailed(): bool;
+  final public function isFailed()[]: bool;
 
   /** Get name of the operation behind this wait handle
    * @return string - A name of the operation behind this wait handle
@@ -61,7 +61,7 @@ abstract class Awaitable {
    * TODO: replace this with a HH\Asio equivalent
    */
   <<__Native>>
-  final public function getName(): string;
+  final public function getName()[]: string;
 }
 
 /** A wait handle that is always finished
@@ -133,7 +133,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromDArray(darray $dependencies): Awaitable;
+  public static function fromDArray(darray $dependencies)[]: Awaitable;
 
   /** Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - A VArray of dependencies to wait for
@@ -141,7 +141,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVArray(varray $dependencies): Awaitable;
+  public static function fromVArray(varray $dependencies)[]: Awaitable;
 
   /** Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for
@@ -149,7 +149,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVec(vec $dependencies): Awaitable;
+  public static function fromVec(vec $dependencies)[]: Awaitable;
 
   /** Create a wait handle that waits for a given dict of dependencies
    * @param array $dependencies - A dict of dependencies to wait for
@@ -157,7 +157,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromDict(dict $dependencies): Awaitable;
+  public static function fromDict(dict $dependencies)[]: Awaitable;
 
   /** Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
@@ -165,7 +165,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromMap(mixed $dependencies): Awaitable;
+  public static function fromMap(mixed $dependencies)[]: Awaitable;
 
   /** Create a wait handle that waits for a given Vector of dependencies
    * @param mixed $dependencies - A Vector of dependencies to wait for
@@ -173,7 +173,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVector(mixed $dependencies): Awaitable;
+  public static function fromVector(mixed $dependencies)[]: Awaitable;
 
   /** Create a wait handle that can, generically, wait for a given Container<_>
    * of dependencies.
@@ -183,7 +183,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * otherwise prefer to use `fromVec` or `fromDict`
    */
   <<__Native>>
-  public static function fromContainer(mixed $dependencies): Awaitable;
+  public static function fromContainer(mixed $dependencies)[]: Awaitable;
 
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
@@ -214,13 +214,13 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
    * @param mixed $result - A result to be set
    */
   <<__Native>>
-  public function succeed(mixed $result): void;
+  public function succeed(mixed $result)[]: void;
 
   /** Notify the condition variable and mark the ConditionWaitHandle as failed
    * @param mixed $exception - An exception to be set
    */
   <<__Native>>
-  public function fail(\Exception $exception): void;
+  public function fail(\Exception $exception)[]: void;
 }
 
 /** A wait handle that succeeds with null once desired scheduling priority is
@@ -337,21 +337,21 @@ function join<T>(Awaitable<T> $awaitable): mixed;
  *
  * Throws an InvalidOperationException if the Awaitable is not finished.
  */
-function result<T>(Awaitable<T> $awaitable): T {
+function result<T>(Awaitable<T> $awaitable)[]: T {
   return \__hhvm_internal_whresult($awaitable);
 }
 
 /**
  * Check whether the given Awaitable has finished.
  */
-function has_finished<T>(Awaitable<T> $awaitable): bool {
+function has_finished<T>(Awaitable<T> $awaitable)[]: bool {
   return $awaitable->isFinished();
 }
 
 /**
  * Get the name of the Awaitable
  */
-function name<T>(Awaitable<T> $awaitable): string {
+function name<T>(Awaitable<T> $awaitable)[]: string {
   return $awaitable->getName();
 }
 

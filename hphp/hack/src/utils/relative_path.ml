@@ -129,16 +129,37 @@ let to_root (_, rest) = (Root, rest)
 module Set = struct
   include Reordered_argument_set (Caml.Set.Make (S))
 
-  let pp fmt x =
+  let pp_limit ?(max_items = None) fmt x =
     Format.fprintf fmt "@[<2>{";
     ignore
-    @@ List.fold_left (elements x) ~init:false ~f:(fun sep s ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp fmt s;
-           true);
+    @@ List.fold_left (elements x) ~init:0 ~f:(fun i s ->
+           (match max_items with
+           | Some max_items when i >= max_items -> ()
+           | _ ->
+             if i > 0 then Format.fprintf fmt ";@ ";
+             pp fmt s);
+           i + 1);
     Format.fprintf fmt "@,}@]"
 
+  let pp = pp_limit ~max_items:None
+
   let show x = Format.asprintf "%a" pp x
+
+  let pp_large ?(max_items = 5) fmt sset =
+    let l = cardinal sset in
+    if l <= max_items then
+      pp fmt sset
+    else
+      Format.fprintf
+        fmt
+        "<only showing %d of %d elems: %a>"
+        max_items
+        l
+        (pp_limit ~max_items:(Some max_items))
+        sset
+
+  let show_large ?(max_items = 5) sset =
+    Format.asprintf "%a" (pp_large ~max_items) sset
 end
 
 module Map = struct

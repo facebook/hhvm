@@ -69,6 +69,10 @@ module Set : sig
   val pp : Format.formatter -> t -> unit
 
   val show : t -> string
+
+  val pp_large : ?max_items:int -> Format.formatter -> t -> unit
+
+  val show_large : ?max_items:int -> t -> string
 end
 
 module Map : sig

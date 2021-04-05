@@ -147,7 +147,7 @@ pub enum FatalOp {
     RuntimeOmitFrame,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadOnlyOp),
     EL(local::Type<'arena>, ReadOnlyOp),

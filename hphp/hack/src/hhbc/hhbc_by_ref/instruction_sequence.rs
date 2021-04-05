@@ -1615,18 +1615,6 @@ impl<'a> InstrSeq<'a> {
         }
     }
 
-    pub fn optional(
-        alloc: &'a bumpalo::Bump,
-        pred: bool,
-        instrs: std::vec::Vec<Self>,
-    ) -> InstrSeq<'a> {
-        if pred {
-            InstrSeq::gather(alloc, instrs)
-        } else {
-            InstrSeq::new_empty(alloc)
-        }
-    }
-
     pub fn iter<'i>(&'i self) -> InstrIter<'i, 'a> {
         InstrIter::new(self)
     }

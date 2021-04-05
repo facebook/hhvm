@@ -1332,6 +1332,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+ "rustc-hash",
+]
+
+[[package]]
 name = "hash32"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2930,7 +2938,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "escaper",
- "fnv",
+ "hash",
  "hh_autoimport_rust",
  "html_entities",
  "itertools",
@@ -3048,6 +3056,7 @@ dependencies = [
 name = "naming_special_names_rust"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "lazy_static",
 ]
 
@@ -3682,6 +3691,7 @@ name = "rust_parser_errors"
 version = "0.0.0"
 dependencies = [
  "escaper",
+ "hash",
  "hh_autoimport_rust",
  "itertools",
  "lazy_static",
@@ -3721,6 +3731,12 @@ dependencies = [
  "stack_limit",
  "to_ocaml_impl",
 ]
+
+[[package]]
+name = "rustc-hash"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc_version"

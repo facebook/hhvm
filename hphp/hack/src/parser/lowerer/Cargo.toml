@@ -11,7 +11,7 @@ path = "lib.rs"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 escaper = { path = "../../utils/escaper" }
-fnv = "1.0"
+hash = { path = "../../utils/hash" }
 hh_autoimport_rust = { path = "../cargo/hh_autoimport" }
 html_entities = { path = "../../utils/html_entities" }
 itertools = "0.8"

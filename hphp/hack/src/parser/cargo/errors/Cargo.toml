@@ -11,6 +11,7 @@ doctest = false
 
 [dependencies]
 escaper = { path = "../../../utils/escaper" }
+hash = { path = "../../../utils/hash" }
 hh_autoimport_rust = { path = "../hh_autoimport" }
 itertools = "0.8"
 lazy_static = "1.0"

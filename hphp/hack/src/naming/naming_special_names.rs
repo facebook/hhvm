@@ -109,9 +109,8 @@ pub mod collections {
 }
 
 pub mod members {
+    use hash::{HashMap, HashSet};
     use lazy_static::lazy_static;
-    use std::collections::HashMap;
-    use std::collections::HashSet;
 
     pub const M_CLASS: &str = "class";
 
@@ -174,7 +173,7 @@ pub mod members {
         pub static ref AS_LOWERCASE_SET: HashSet<String> = {
             AS_SET
                 .iter()
-                .fold(HashSet::<String>::new(), |mut set, special_name| {
+                .fold(HashSet::<String>::default(), |mut set, special_name| {
                     set.insert(special_name.to_ascii_lowercase());
                     set
                 })
@@ -183,7 +182,7 @@ pub mod members {
             vec![__CALL, __CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
                 .iter()
                 .fold(
-                    HashMap::<String, &'static str>::new(),
+                    HashMap::<String, &'static str>::default(),
                     |mut set, special_name| {
                         set.insert(special_name.to_ascii_lowercase(), special_name);
                         set
@@ -340,8 +339,8 @@ pub mod user_attributes {
 }
 
 pub mod attribute_kinds {
+    use hash::HashMap;
     use lazy_static::lazy_static;
-    use std::collections::HashMap;
 
     pub const CLS: &str = "\\HH\\ClassAttribute";
 

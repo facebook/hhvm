@@ -5,9 +5,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{desugar_expression_tree::desugar, modifier};
-use bstr::{BStr, BString, ByteSlice, B};
+use bstr::{BString, ByteSlice, B};
 use bumpalo::Bump;
 use escaper::*;
+use hash::{HashMap, HashSet};
 use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Itertools};
 use lint_rust::LintError;
@@ -49,7 +50,6 @@ use regex::bytes::Regex;
 use stack_limit::StackLimit;
 use std::{
     cell::{Ref, RefCell, RefMut},
-    collections::HashSet,
     matches, mem,
     rc::Rc,
     slice::Iter,
@@ -254,7 +254,7 @@ impl<'a, TF: Clone> Env<'a, TF> {
             arena,
 
             state: Rc::new(RefCell::new(State {
-                cls_reified_generics: HashSet::new(),
+                cls_reified_generics: HashSet::default(),
                 in_static_method: false,
                 parent_maybe_reified: false,
                 lowpri_errors: vec![],
@@ -857,10 +857,7 @@ where
                 }
 
                 let field_map = Self::could_map(Self::p_shape_field, &c.fields, env)?;
-                // TODO:(shiqicao) improve perf
-                // 1. replace HashSet by fnv hash map or something faster,
-                // 2. move `set` to Env to avoid allocation,
-                let mut set: HashSet<&BStr> = HashSet::with_capacity(field_map.len());
+                let mut set = HashSet::default();
                 for f in field_map.iter() {
                     if !set.insert(f.name.get_name()) {
                         Self::raise_hh_error(
@@ -3340,11 +3337,8 @@ where
             ),
         };
 
-        let mut hint_by_param: std::collections::HashMap<
-            &str,
-            (&mut Option<ast::Hint>, &Pos, aast::IsVariadic),
-            std::hash::BuildHasherDefault<fnv::FnvHasher>,
-        > = fnv::FnvHashMap::default();
+        let mut hint_by_param: HashMap<&str, (&mut Option<ast::Hint>, &Pos, aast::IsVariadic)> =
+            HashMap::default();
         for param in params.iter_mut() {
             hint_by_param.insert(
                 param.name.as_ref(),
@@ -4928,7 +4922,7 @@ where
                 );
                 let has_xhp_keyword = matches!(Self::token_kind(&c.xhp), Some(TK::XHP));
                 let name = Self::pos_name(&c.name, env)?;
-                *env.cls_reified_generics() = HashSet::new();
+                *env.cls_reified_generics() = HashSet::default();
                 let tparams = Self::p_tparam_l(true, &c.type_parameters, env)?;
                 let class_kind = match Self::token_kind(&c.keyword) {
                     Some(TK::Class) if kinds.has(modifier::ABSTRACT) => ast::ClassKind::Cabstract,

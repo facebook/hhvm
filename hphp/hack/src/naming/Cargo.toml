@@ -8,4 +8,5 @@ edition = "2018"
 path = "naming_special_names.rs"
 
 [dependencies]
+hash = { path = "../utils/hash" }
 lazy_static = "1.0"

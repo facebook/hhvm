@@ -6,7 +6,7 @@
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::BTreeMap;
 use std::{matches, str::FromStr};
 use strum;
 use strum::IntoEnumIterator;
@@ -14,6 +14,7 @@ use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 
 use naming_special_names_rust as sn;
 
+use hash::{HashMap, HashSet};
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
@@ -147,7 +148,7 @@ impl<X> Strmap<X> {
 use crate::Strmap::*;
 
 fn empty_trait_require_clauses() -> Strmap<TokenKind> {
-    NoCase(HashMap::new())
+    NoCase(HashMap::default())
 }
 
 #[derive(Clone, Debug)]
@@ -162,11 +163,11 @@ struct UsedNames {
 impl UsedNames {
     fn empty() -> Self {
         Self {
-            classes: NoCase(HashMap::new()),
-            namespaces: NoCase(HashMap::new()),
-            functions: NoCase(HashMap::new()),
-            constants: YesCase(HashMap::new()),
-            attributes: YesCase(HashMap::new()),
+            classes: NoCase(HashMap::default()),
+            namespaces: NoCase(HashMap::default()),
+            functions: NoCase(HashMap::default()),
+            constants: YesCase(HashMap::default()),
+            attributes: YesCase(HashMap::default()),
         }
     }
 }
@@ -3511,8 +3512,8 @@ where
         &mut self,
         l: S<'a, Token, Value>,
     ) -> (HashSet<&'a str>, HashSet<&'a str>) {
-        let mut res: HashSet<&'a str> = HashSet::new();
-        let mut notreified: HashSet<&'a str> = HashSet::new();
+        let mut res: HashSet<&'a str> = HashSet::default();
+        let mut notreified: HashSet<&'a str> = HashSet::default();
         for p in Self::syntax_to_list_no_separators(l).rev() {
             match &p.children {
                 TypeParameter(x) => {
@@ -3557,7 +3558,7 @@ where
                     TypeParameters(x) => {
                         self.get_type_params_and_emit_shadowing_errors(&x.parameters)
                     }
-                    _ => (HashSet::new(), HashSet::new()),
+                    _ => (HashSet::default(), HashSet::default()),
                 };
 
                 let tparams: HashSet<&'a str> = reified
@@ -3867,9 +3868,9 @@ where
                 let class_body_methods =
                     || class_body_elts().filter(|x| Self::is_method_declaration(x));
 
-                let mut p_names = HashSet::<String>::new();
-                let mut c_names = HashSet::<String>::new();
-                let mut xhp_names = HashSet::<String>::new();
+                let mut p_names = HashSet::<String>::default();
+                let mut c_names = HashSet::<String>::default();
+                let mut xhp_names = HashSet::<String>::default();
                 for elt in class_body_elts() {
                     self.check_repeated_properties_tconst_const(
                         &full_name,
@@ -5293,9 +5294,9 @@ where
                 // Reset the function declarations
 
                 let constants =
-                    std::mem::replace(&mut self.names.constants, YesCase(HashMap::new()));
+                    std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
                 let functions =
-                    std::mem::replace(&mut self.names.functions, NoCase(HashMap::new()));
+                    std::mem::replace(&mut self.names.functions, NoCase(HashMap::default()));
                 let trait_require_clauses = std::mem::replace(
                     &mut self.trait_require_clauses,
                     empty_trait_require_clauses(),
@@ -5394,7 +5395,7 @@ where
                 active_callable: None,
                 active_callable_attr_spec: None,
                 active_const: None,
-                active_unstable_features: HashSet::new(),
+                active_unstable_features: HashSet::default(),
                 active_expression_tree: false,
             },
             hhvm_compat_mode,

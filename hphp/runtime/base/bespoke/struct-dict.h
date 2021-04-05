@@ -112,6 +112,12 @@ struct StructLayout : public ConcreteLayout {
   size_t typeOffset() const { return m_type_offset; }
   size_t valueOffset() const { return m_value_offset; }
 
+  // Offset of DataType and Value for 'slot' from beginning of a StructDict.
+  size_t typeOffsetForSlot(Slot slot) const;
+  size_t valueOffsetForSlot(Slot slot) const;
+
+  std::pair<Type, bool> elemType(Type key) const override;
+
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.

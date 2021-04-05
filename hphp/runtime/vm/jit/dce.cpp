@@ -199,6 +199,7 @@ bool canDCE(IRInstruction* inst) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:
   case NewInstanceRaw:

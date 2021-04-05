@@ -343,15 +343,15 @@ Type bespokeElemReturn(const IRInstruction* inst, bool present) {
 
   auto resultType = arrLikeElemType(
       inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
-  if (present) return resultType.first;
 
-  assertx(inst->is(BespokeGet));
-  auto const keyState = inst->extra<BespokeGet>()->state;
-  auto const knownPresent =
-    resultType.second || (keyState == BespokeGetData::KeyState::Present);
-  auto const type = knownPresent ? resultType.first
-                                 : (resultType.first | TUninit);
-  return type;
+  auto const knownPresent = [&] {
+    if (present || resultType.second) return true;
+    if (!inst->is(BespokeGet)) return false;
+    auto const keyState = inst->extra<BespokeGet>()->state;
+    return keyState == BespokeGetData::KeyState::Present;
+  }();
+
+  return knownPresent ? resultType.first : (resultType.first | TUninit);
 }
 
 Type bespokePosReturn(const IRInstruction* inst, bool isKey) {

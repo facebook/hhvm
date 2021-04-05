@@ -428,6 +428,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     ++curSrc;
   };
 
+  auto checkStructDict = [&]() {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      check(t.arrSpec().is_struct(), Type(), "TArrLike=StructDict");
+    }
+    ++curSrc;
+  };
+
   auto checkDst = [&] (bool cond, const std::string& errorMessage) {
     if (cond) return true;
 
@@ -498,6 +506,7 @@ using TypeNames::TCA;
 #define SBespokeArr   checkBespokeArr();
 #define SMonotypeVec  checkMonotypeArr(TVec);
 #define SMonotypeDict checkMonotypeArr(TDict);
+#define SStructDict   checkStructDict();
 #define ND
 #define DMulti
 #define DSetElem
@@ -564,6 +573,7 @@ using TypeNames::TCA;
 #undef SBespokeArr
 #undef SMonotypeVec
 #undef SMonotypeDict
+#undef SStructDict
 #undef SKnownArrLike
 
 #undef ND

@@ -462,6 +462,24 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
+void cgLdStructDictElem(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const arr = inst->src(0);
+  auto layout = arr->type().arrSpec().layout();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+  auto const key = inst->src(1);
+  assertx(key->hasConstVal());
+  auto const slot = slayout->keySlot(key->strVal());
+  if (slot == kInvalidSlot) {
+    assertx(inst->dst()->isA(TUninit));
+    return;
+  }
+  auto const type = rarr[slayout->typeOffsetForSlot(slot)];
+  auto const value = rarr[slayout->valueOffsetForSlot(slot)];
+  loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
+         type, value);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }}}

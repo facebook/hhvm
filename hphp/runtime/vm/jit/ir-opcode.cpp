@@ -786,6 +786,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:

@@ -1067,6 +1067,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
+  case LdStructDictElem: {
+    auto const base = inst.src(0);
+    auto const key = inst.src(1);
+    return PureLoad { AElemS { base, key->strVal() } };
+  }
+
   case DictGetK:
   case KeysetGetK:
   case BespokeGet:

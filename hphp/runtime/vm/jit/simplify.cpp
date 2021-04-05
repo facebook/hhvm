@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
@@ -35,6 +36,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -149,6 +151,7 @@ DEBUG_ONLY bool validate(const State& env,
   // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
+    if (src->inst()->is(LdStructDictElem)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
 
@@ -3100,6 +3103,16 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
     }
   }
 
+  if (arr->type().arrSpec().is_struct()) {
+    auto const elemType =
+      arrLikeElemType(arr->type(), key->type(), inst->ctx());
+    if (elemType.first == TBottom) {
+      return cns(env, TUninit);
+    } else if (key->hasConstVal(TStr)) {
+      return gen(env, LdStructDictElem, arr, key);
+    }
+  }
+
   return nullptr;
 }
 
@@ -3123,6 +3136,28 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
         gen(env, ThrowOutOfBounds, inst->taken(), arr, key);
         return cns(env, TBottom);
       }
+    }
+  }
+
+  if (arr->type().arrSpec().is_struct()) {
+    // 'taken' block for BespokeGetThrow is a special catch block that catches
+    // a C++ exception from native helpers and then throws ThrowOutOfBounds.
+    // When we simplify this instruction as follows, we do not need the
+    // BeginCatch in the taken block anymore.
+    auto const taken = inst->taken();
+    auto const n = taken->numPreds();
+    always_assert(taken->isCatch());
+    always_assert(n == 0 || (n == 1 && taken->preds().back().inst() == inst));
+    auto const elemType =
+      arrLikeElemType(arr->type(), key->type(), inst->ctx());
+    if (elemType.first == TBottom) {
+      taken->erase(taken->begin());
+      gen(env, Jmp, taken);
+      return cns(env, TBottom);
+    } else if (key->hasConstVal(TStr)) {
+      taken->erase(taken->begin());
+      auto const elem = gen(env, LdStructDictElem, arr, key);
+      return gen(env, CheckType, TInitCell, taken, elem);
     }
   }
 

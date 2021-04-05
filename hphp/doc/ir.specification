@@ -3062,6 +3062,10 @@ fields of that struct for holding intermediate values.
   assumes that the vec actually contains an element at that offset (i.e. the
   index is within bounds).
 
+| LdStructDictElem, DBespokeElemUninit, SStructDict C(StaticStr), NF
+
+  Loads the element of the StructDict in S0 at the constant string key S1.
+
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.

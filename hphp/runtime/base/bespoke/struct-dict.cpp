@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
+#include "hphp/runtime/vm/jit/type.h"
+
 namespace HPHP { namespace bespoke {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -72,6 +74,14 @@ bool StructDict::checkInvariants() const {
   assertx(layout()->valueOffset() == valueOffsetInValueSize() * sizeof(Value));
   assertx(layoutIndex().byte() == kStructLayoutByte);
   return true;
+}
+
+size_t StructLayout::typeOffsetForSlot(Slot slot) const {
+  return sizeof(StructDict) + typeOffset() + slot;
+}
+
+size_t StructLayout::valueOffsetForSlot(Slot slot) const {
+  return sizeof(StructDict) + valueOffset() + slot * sizeof(Value);
 }
 
 LayoutIndex StructLayout::Index(uint8_t idx) {
@@ -198,6 +208,18 @@ size_t StructDict::valueOffsetInValueSize() const {
 const StructLayout* StructLayout::As(const Layout* l) {
   assertx(dynamic_cast<const StructLayout*>(l));
   return reinterpret_cast<const StructLayout*>(l);
+}
+
+std::pair<jit::Type, bool> StructLayout::elemType(jit::Type key) const {
+  using namespace jit;
+  if (key <= TInt) return {TBottom, false};
+  if (key.hasConstVal(TStr)) {
+    auto const keyVal = key.strVal();
+    auto const slot = keySlot(keyVal);
+    return slot == kInvalidSlot ? std::pair{TBottom, false} :
+                                  std::pair{TInitCell, false};
+  }
+  return {TInitCell, false};
 }
 
 StructDict* StructDict::MakeFromVanilla(ArrayData* ad,

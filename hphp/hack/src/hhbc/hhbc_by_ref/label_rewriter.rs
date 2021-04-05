@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhbc_ast::{
@@ -10,8 +11,6 @@ use hhbc_by_ref_hhbc_ast::{
 };
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use hhbc_by_ref_label::{Id, Label};
-
-use std::collections::{HashMap, HashSet};
 
 fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id, usize> {
     let mut folder =
@@ -26,7 +25,7 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id
             }
             _ => (i + 1, map),
         };
-    instrseq.fold_left(&mut folder, (0, HashMap::new())).1
+    instrseq.fold_left(&mut folder, (0, HashMap::default())).1
 }
 
 fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
@@ -95,7 +94,7 @@ fn create_label_ref_map<'arena>(
                 };
             instrseq.fold_left(&mut folder, acc)
         };
-    let init = gather_using((0, (HashSet::new(), HashMap::new())), body);
+    let init = gather_using((0, (HashSet::default(), HashMap::default())), body);
     let (_, map) = params.iter().fold(
         init,
         |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), param: &HhasParam<'arena>| match &param
@@ -222,7 +221,7 @@ pub fn clone_with_fresh_regular_labels<'arena>(
         (regular, named)
     };
     let (regular_labels, named_labels) =
-        block.fold_left(&mut folder, (HashMap::new(), HashMap::new()));
+        block.fold_left(&mut folder, (HashMap::default(), HashMap::default()));
 
     if !regular_labels.is_empty() || !named_labels.is_empty() {
         let relabel = |l: &mut Label<'arena>| {

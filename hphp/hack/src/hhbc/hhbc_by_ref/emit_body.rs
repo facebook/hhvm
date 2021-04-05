@@ -11,6 +11,7 @@ use reified_generics_helpers as RGH;
 
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
+use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
@@ -48,7 +49,6 @@ use oxidized::{
 use bitflags::bitflags;
 use indexmap::IndexSet;
 use itertools::Either;
-use std::collections::HashSet;
 
 static THIS: &'static str = "$this";
 
@@ -1177,7 +1177,7 @@ fn emit_shadowed_tparams(
     class_tparam_names: &[&str],
 ) -> Vec<String> {
     let s1 = get_tp_names_set(immediate_tparams);
-    let s2: HashSet<&str> = class_tparam_names.into_iter().cloned().collect();
+    let s2: HashSet<&str> = class_tparam_names.iter().cloned().collect();
     // TODO(hrust): remove sort after Rust emitter released
     let mut r = s1
         .intersection(&s2)

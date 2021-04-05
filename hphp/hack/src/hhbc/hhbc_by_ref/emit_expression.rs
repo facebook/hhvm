@@ -39,13 +39,10 @@ use oxidized::{
 };
 use regex::Regex;
 
+use hash::HashSet;
 use indexmap::IndexSet;
 use std::{
-    collections::{BTreeMap, HashSet},
-    convert::TryInto,
-    iter,
-    result::Result as StdResult,
-    str::FromStr,
+    collections::BTreeMap, convert::TryInto, iter, result::Result as StdResult, str::FromStr,
 };
 
 #[derive(Debug)]
@@ -83,8 +80,9 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 
 mod inout_locals {
     use crate::*;
+    use hash::HashMap;
     use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast as tast, ast_defs};
-    use std::{collections::HashMap, marker::PhantomData};
+    use std::marker::PhantomData;
 
     pub(super) struct AliasInfo {
         first_inout: isize,
@@ -130,6 +128,10 @@ mod inout_locals {
 
     pub(super) type AliasInfoMap = HashMap<String, AliasInfo>;
 
+    pub(super) fn new_alias_info_map() -> AliasInfoMap {
+        HashMap::default()
+    }
+
     fn add_write(name: String, i: usize, map: &mut AliasInfoMap) {
         map.entry(name).or_default().add_write(i as isize);
     }
@@ -166,7 +168,7 @@ mod inout_locals {
         env: &Env<'a, 'arena>,
         args: &[tast::Expr],
     ) -> AliasInfoMap {
-        let mut acc = HashMap::new();
+        let mut acc = HashMap::default();
         args.iter()
             .enumerate()
             .for_each(|(i, arg)| handle_arg(env, true, i, arg, &mut acc));
@@ -200,20 +202,14 @@ mod inout_locals {
         }
         // dive into argument value
         aast_visitor::visit(
-            &mut Visitor {
-                phantom_a: PhantomData,
-                phantom_b: PhantomData,
-            },
+            &mut Visitor(PhantomData),
             &mut Ctx { state: acc, env, i },
             arg,
         )
         .unwrap();
     }
 
-    struct Visitor<'a, 'arena: 'a> {
-        phantom_a: PhantomData<&'a str>,
-        phantom_b: PhantomData<&'arena str>,
-    }
+    struct Visitor<'a, 'arena: 'a>(PhantomData<&'arena &'a ()>);
 
     pub struct Ctx<'a, 'arena: 'a> {
         // TODO(shiqicao): Change AliasInfoMap to AliasInfoMap<'ast>
@@ -1419,7 +1415,7 @@ fn is_struct_init<'a, 'arena>(
 ) -> Result<bool> {
     let alloc = env.arena;
     let mut are_all_keys_non_numeric_strings = true;
-    let mut uniq_keys = std::collections::HashSet::<bstr::BString>::new();
+    let mut uniq_keys = HashSet::<bstr::BString>::default();
     for f in fields.iter() {
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
@@ -2604,7 +2600,7 @@ fn emit_args_inout_setters<'a, 'arena>(
     let aliases = if has_inout_arg(args) {
         inout_locals::collect_written_variables(env, args)
     } else {
-        inout_locals::AliasInfoMap::new()
+        inout_locals::new_alias_info_map()
     };
     fn emit_arg_and_inout_setter<'a, 'arena>(
         e: &mut Emitter<'arena>,
@@ -6728,7 +6724,7 @@ pub fn emit_reified_arg<'b, 'arena>(
         .scope
         .get_fun_tparams()
         .iter()
-        .fold(HashSet::<&str>::new(), |acc, t| f(acc, &*t));
+        .fold(HashSet::<&str>::default(), |acc, t| f(acc, &*t));
     let class_tparams = env.scope.get_class_tparams();
     let current_tags = class_tparams
         .iter()

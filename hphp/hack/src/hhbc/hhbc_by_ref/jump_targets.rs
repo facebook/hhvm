@@ -7,7 +7,7 @@ use hhbc_by_ref_label::Label;
 use oxidized::aast::*;
 
 type Id = usize;
-type LabelSet = std::collections::HashSet<String>;
+type LabelSet = hash::HashSet<String>;
 
 #[derive(Clone, Debug)]
 pub struct LoopLabels<'arena> {
@@ -384,7 +384,7 @@ impl<'arena> Gen<'arena> {
     where
         F: FnOnce(&mut LabelSet),
     {
-        std::collections::HashSet::new()
+        hash::HashSet::default()
     }
 
     fn collect_valid_target_labels_for_block<Ex, Fb, En, Hi>(

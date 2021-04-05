@@ -5,8 +5,9 @@
 
 use hhbc_by_ref_unique_id_builder::*;
 use itertools::{Either, EitherOrBoth::*, Itertools};
-use std::{collections::HashSet, mem};
+use std::mem;
 
+use hash::HashSet;
 use hhbc_by_ref_ast_scope::{
     self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
 };
@@ -94,7 +95,7 @@ impl<'a> Env<'a> {
             scope,
             variable_scopes: vec![Variables {
                 all_vars,
-                parameter_names: HashSet::new(),
+                parameter_names: HashSet::default(),
             }],
             defined_class_count: class_count,
             defined_record_count: record_count,

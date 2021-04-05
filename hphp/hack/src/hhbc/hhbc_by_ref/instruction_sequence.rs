@@ -1669,7 +1669,7 @@ impl<'a> InstrSeq<'a> {
     fn get_or_put_label<'i, 'm>(
         alloc: &'a bumpalo::Bump,
         label_gen: &mut hhbc_by_ref_label::Gen,
-        name_label_map: &'m mut std::collections::HashMap<std::string::String, Label<'a>>,
+        name_label_map: &'m mut hash::HashMap<std::string::String, Label<'a>>,
         name: &'i str,
     ) -> Label<'a> {
         match name_label_map.get(name) {
@@ -1686,7 +1686,7 @@ impl<'a> InstrSeq<'a> {
         alloc: &'a bumpalo::Bump,
         label_gen: &mut hhbc_by_ref_label::Gen,
         i: &'i mut Instruct<'a>,
-        name_label_map: &'m mut std::collections::HashMap<std::string::String, Label<'a>>,
+        name_label_map: &'m mut hash::HashMap<std::string::String, Label<'a>>,
     ) {
         use Instruct::*;
         let mut get_result = |x| InstrSeq::get_or_put_label(alloc, label_gen, name_label_map, x);
@@ -1720,7 +1720,7 @@ impl<'a> InstrSeq<'a> {
         alloc: &'a bumpalo::Bump,
         label_gen: &mut hhbc_by_ref_label::Gen,
     ) {
-        let name_label_map = &mut std::collections::HashMap::new();
+        let name_label_map = &mut hash::HashMap::default();
         self.map_mut(&mut |i| {
             InstrSeq::rewrite_user_labels_instr(alloc, label_gen, i, name_label_map)
         });

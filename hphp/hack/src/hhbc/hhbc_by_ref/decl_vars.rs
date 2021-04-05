@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_unique_id_builder::SSet;
@@ -14,7 +15,7 @@ use oxidized::{
 };
 
 use hhbc_by_ref_unique_list::UniqueList;
-use std::{collections::HashSet, iter::Iterator};
+use std::iter::Iterator;
 
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a SSet>,

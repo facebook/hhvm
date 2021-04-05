@@ -9,6 +9,7 @@ path = "../../instruction_sequence.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }

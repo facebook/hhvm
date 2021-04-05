@@ -1743,6 +1743,7 @@ name = "hhbc_by_ref_closure_convert"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_ast_scope",
@@ -1793,6 +1794,7 @@ dependencies = [
 name = "hhbc_by_ref_decl_vars"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_hhas_param",
  "hhbc_by_ref_unique_id_builder",
@@ -1842,6 +1844,7 @@ dependencies = [
  "bitflags",
  "bstr",
  "bumpalo",
+ "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_scope",
@@ -1943,6 +1946,7 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
+ "hash",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_adata",
@@ -2286,6 +2290,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "hash",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -2545,6 +2550,7 @@ name = "hhbc_by_ref_instruction_sequence"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "hash",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_iterator",
  "hhbc_by_ref_label",
@@ -2572,6 +2578,7 @@ name = "hhbc_by_ref_label_rewriter"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "hash",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_param",
  "hhbc_by_ref_hhbc_ast",

@@ -9,7 +9,7 @@ use hhbc_by_ref_instruction_sequence::*;
 use naming_special_names_rust as sn;
 use oxidized::{aast, ast_defs::Id, pos::Pos};
 
-use std::collections::HashSet;
+use hash::HashSet;
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {

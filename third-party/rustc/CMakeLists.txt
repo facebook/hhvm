@@ -13,13 +13,13 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   RUST_DOWNLOAD_ARGS
   Linux_URL
-  "https://static.rust-lang.org/dist/rust-1.43.0-x86_64-unknown-linux-gnu.tar.gz"
+  "https://static.rust-lang.org/dist/rust-1.51.0-x86_64-unknown-linux-gnu.tar.gz"
   Darwin_URL
-  "https://static.rust-lang.org/dist/rust-1.43.0-x86_64-apple-darwin.tar.gz"
+  "https://static.rust-lang.org/dist/rust-1.51.0-x86_64-apple-darwin.tar.gz"
   Linux_HASH
-  "SHA512=f2118652dc4f5d4353a693ec277bfcce649c493ffd0cff4a4992ca0bbddeb49de5f1cb99b4f93b6d271edfa0dae40dd052a52a548dda3a32addbed738cdb86cc"
+  "SHA512=08230543a78082a758f43d5cd70a9c7330a1132af394e3191db9cb64cb61462ec2ce5af6b81a719a2059662f11c08586a241aa0048e5ca8f729c9daf550b57fd"
   Darwin_HASH
-  "SHA512=e1b3b1c41131af65f0487c742c0085b589e7c0eb73ce7ca4a38d30c9ce1af4d04686a141dde8cbaa7afc56bcb670e4d6f9b8b2dbad4700b89c5db371829a4ec4"
+  "SHA512=e5241828e524cb849c0496c55df46bb51d96ef5f934f763d98b4ed723d18fc888318e3d82771970502672d24dda1c25f6af86d46b6682bea1bab3400327766d2"
 )
 
 include(ExternalProject)

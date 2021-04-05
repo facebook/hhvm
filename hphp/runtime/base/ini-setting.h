@@ -259,9 +259,11 @@ public:
                                        const std::string& filename);
 
   static bool Get(const std::string& name, std::string &value);
+  static bool Get(const String& name, std::string &value);
   static bool Get(const String& name, Variant& value);
   static bool Get(const String& name, String& value);
   static std::string Get(const std::string& name);
+  static std::string Get(const String& name);
   static Array GetAll(const String& extension, bool details);
   static std::string GetAllAsJSON();
 
@@ -294,7 +296,7 @@ public:
   /**
    * Get the mode for a setting
    */
-  static bool GetMode(const std::string& name, Mode& mode);
+  static bool GetMode(const String& name, Mode& mode);
 
   template<class T>
   struct SetAndGet {

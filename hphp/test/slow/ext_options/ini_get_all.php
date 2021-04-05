@@ -12,8 +12,12 @@ $all_short = ini_get_all('', false);
 var_dump($all_short['allow_url_fopen']);
 var_dump($all_short['arg_separator.output']);
 
-var_dump(ini_get_all('pcre'));
-var_dump(ini_get_all('pcre', false));
+$pcre = ini_get_all('pcre');
+ksort(inout $pcre);
+var_dump($pcre);
+$pcre_false = ini_get_all('pcre', false);
+ksort(inout $pcre_false);
+var_dump($pcre_false);
 
 $core = ini_get_all('core');
 var_dump(darray[

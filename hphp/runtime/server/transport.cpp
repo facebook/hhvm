@@ -48,6 +48,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static const char HTTP_RESPONSE_STATS_PREFIX[] = "http_response_";
+const StaticString s_defaultCharset("default_charset");
 
 Transport::Transport()
   : m_instructions(0), m_sleepTime(0), m_usleepTime(0),
@@ -696,8 +697,9 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
     std::string contentType = "text/html";
-    if (IniSetting::Get("default_charset") != "") {
-      contentType += "; charset=" + IniSetting::Get("default_charset");
+    auto const defaultCharset = IniSetting::Get(s_defaultCharset);
+    if (defaultCharset != "") {
+      contentType += "; charset=" + defaultCharset;
     }
     addHeaderImpl("Content-Type", contentType.c_str());
   }

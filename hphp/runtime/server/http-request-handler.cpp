@@ -52,6 +52,10 @@
 
 namespace HPHP {
 
+namespace {
+const StaticString s_defaultCharset("default_charset");
+}
+
 using std::string;
 using std::vector;
 
@@ -146,7 +150,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
          strcmp(valp + 5, "html")  == 0)) {
       // Apache adds character set for these two types
       val += "; charset=";
-      val += IniSetting::Get("default_charset");
+      val += IniSetting::Get(s_defaultCharset);
       valp = val.c_str();
     }
     transport->addHeader("Content-Type", valp);

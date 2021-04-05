@@ -1007,7 +1007,8 @@ bool ExecutionContext::onUnhandledException(Object e) {
 
 void ExecutionContext::debuggerInfo(
     std::vector<std::pair<const char*,std::string>>& info) {
-  int64_t newInt = convert_bytes_to_long(IniSetting::Get("memory_limit"));
+  static StaticString s_memoryLimit("memory_limit");
+  int64_t newInt = convert_bytes_to_long(IniSetting::Get(s_memoryLimit));
   if (newInt <= 0) {
     newInt = std::numeric_limits<int64_t>::max();
   }

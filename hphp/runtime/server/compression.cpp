@@ -32,13 +32,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+const StaticString s_brotliCQ("brotli.compression_quality");
+const StaticString s_brotliCL("brotli.compression_lgwin");
+const StaticString s_brotliC("brotli.compression");
+const StaticString s_brotliCC("brotli.chunked_compression");
+
+const StaticString s_zlibOCL("zlib.output_compression_level");
+const StaticString s_zstdCL("zstd.compression_level");
+const StaticString s_zstdCR("zstd.checksum_rate");
+const StaticString s_zlibOC("zlib.output_compression");
+const StaticString s_zstdC("zstd.compression");
+
 bool isOff(const String& s) {
   return s.size() == 3 && bstrcaseeq(s.data(), "off", 3);
 }
 bool isOn(const String& s) {
   return s.size() == 2 && bstrcaseeq(s.data(), "on", 2);
 }
-void finalizeCompressionOnOff(int8_t& state, const char* ini_key) {
+void finalizeCompressionOnOff(int8_t& state, const StaticString& ini_key) {
   if (state == 0) {
     return;
   }
@@ -209,13 +220,13 @@ void GzipResponseCompressor::disable() {
 
 GzipCompressor* GzipResponseCompressor::getCompressor() {
   if (!m_compressor) {
-    finalizeCompressionOnOff(m_enabled, "zlib.output_compression");
+    finalizeCompressionOnOff(m_enabled, s_zlibOC);
     if (!isEnabled()) {
       return nullptr;
     }
     int compressionLevel = RuntimeOption::GzipCompressionLevel;
     String compressionLevelStr;
-    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+    IniSetting::Get(s_zlibOCL, compressionLevelStr);
     int level = compressionLevelStr.toInt64();
     if (level > compressionLevel &&
         level <= RuntimeOption::GzipMaxCompressionLevel) {
@@ -269,11 +280,11 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
     int size, bool last) {
   if (!m_compressor) {
     if (last) {
-      finalizeCompressionOnOff(m_enabled, "brotli.compression");
+      finalizeCompressionOnOff(m_enabled, s_brotliC);
       m_chunkedEnabled = false;
     } else {
       m_enabled = false;
-      finalizeCompressionOnOff(m_chunkedEnabled, "brotli.chunked_compression");
+      finalizeCompressionOnOff(m_chunkedEnabled, s_brotliCC);
     }
     if (!isEnabled()) {
       return nullptr;
@@ -282,12 +293,12 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
         (BrotliEncoderMode)RuntimeOption::BrotliCompressionMode;
 
     Variant qualityVar;
-    IniSetting::Get("brotli.compression_quality", qualityVar);
+    IniSetting::Get(s_brotliCQ, qualityVar);
     uint32_t quality = static_cast<uint32_t>(qualityVar.asInt64Val());
 
 
     Variant windowSizeVar;
-    IniSetting::Get("brotli.compression_lgwin", windowSizeVar);
+    IniSetting::Get(s_brotliCL, windowSizeVar);
     uint32_t windowSize = static_cast<uint32_t>(windowSizeVar.asInt64Val());
     if (size && !m_chunkedEnabled) {
       // If there is only one block (i.e. non-chunked content) set a maximum
@@ -347,15 +358,15 @@ void ZstdResponseCompressor::disable() {
 
 ZstdCompressor* ZstdResponseCompressor::getCompressor() {
   if (!m_compressor) {
-    finalizeCompressionOnOff(m_enabled, "zstd.compression");
+    finalizeCompressionOnOff(m_enabled, s_zstdC);
     if (!isEnabled()) {
       return nullptr;
     }
     Variant quality;
-    IniSetting::Get("zstd.compression_level", quality);
+    IniSetting::Get(s_zstdCL, quality);
     auto compression_level = quality.asInt64Val();
     Variant checksumRate;
-    IniSetting::Get("zstd.checksum_rate", checksumRate);
+    IniSetting::Get(s_zstdCR, checksumRate);
     auto checksum_rate = checksumRate.asInt64Val();
 
     m_compressor = std::make_unique<ZstdCompressor>(

@@ -2716,12 +2716,12 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk, ReadOnlyOp op = ReadOnlyOp::Any) {
+static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
   auto const key = key_tv(mk);
   if (mk.mcode == MQT) {
-    propQDispatch(mode, key, op);
+    propQDispatch(mode, key, mk.rop);
   } else if (mcodeIsProp(mk.mcode)) {
-    propDispatch(mode, key, op);
+    propDispatch(mode, key, mk.rop);
   } else if (mcodeIsElem(mk.mcode)) {
     elemDispatch(mode, key);
   } else {
@@ -2755,7 +2755,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       // fallthrough
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      dimDispatch(getQueryMOpMode(op), mk, mk.rop);
+      dimDispatch(getQueryMOpMode(op), mk);
       tvDup(*mstate.base, result);
       break;
 

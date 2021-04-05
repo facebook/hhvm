@@ -38,9 +38,11 @@ ETCH_NAME(\MANGLED_NAME):
 
         mov       SD_HASH(%rsi), %edx   // key->hash
         mov       \SCALE(%rdi), %eax  // scale
+        and       $0x7fffffff, %edx
+        jz        ETCH_LABEL(hashHelper_NvGetStr\MANGLED_NAME)
+ETCH_LABEL(hasHash\MANGLED_NAME):
         add       $\DATA, %rdi        // rdi: ad->data()
-        push      %rbx
-        lea       -1(, %eax, 4), %ebx // mask = scale * 4 -1
+        lea       -1(, %eax, 4), %r9d // mask = scale * 4 -1
 .if \ELM_QUADWORDS==2
         lea       (%rax, %rax, 2), %rax
         lea       (%rax, %rax), %rax
@@ -48,12 +50,39 @@ ETCH_NAME(\MANGLED_NAME):
         lea       (%rax, %rax, 8), %rax
 .endif
         lea       (%rdi, %rax, 8), %r10 // ad->hashTab()
-        and       $0x7fffffff, %edx
-        jz        ETCH_LABEL(hashHelper_NvGetStr\MANGLED_NAME)
 
-ETCH_LABEL(hasHash\MANGLED_NAME):
-        xor       %r9, %r9              // probe count
+ETCH_LABEL(unrollFirst\MANGLED_NAME):
         mov       %edx, %eax            // eax: index into hashTab
+        and       %r9d, %eax
+        mov       (%r10, %rax, 4), %r8d
+        test      %r8d, %r8d
+        js        ETCH_LABEL(failTrampoline\MANGLED_NAME)      // EMPTY or TOMBSTONE
+        lea       (%r8, %r8, \ELM_QUADWORDS - 1), %r8
+        lea       (%rdi, %r8, 8), %r8
+        cmp       %edx, \ELM_HASH(%r8)   // Same hash?
+        jne       ETCH_LABEL(firstprobe\MANGLED_NAME)
+        mov       \ELM_KEY(%r8), %r11    // StringData* in the table
+        cmp       %rsi, %r11            // Same pointer?
+        jne       ETCH_LABEL(cmplengthTrampoline\MANGLED_NAME)
+        mov       \ELM_DATA(%r8), %rax
+        movzbl    \ELM_TYPE(%r8), %edx
+        ret
+
+ETCH_LABEL(failTrampoline\MANGLED_NAME):
+        jnp       ETCH_LABEL(firstprobe\MANGLED_NAME) // Tombstone
+        mov       $UNINIT_DT_VALUE, %edx
+        ret
+
+ETCH_LABEL(cmplengthTrampoline\MANGLED_NAME):
+        push      %rbx
+        mov       %r9d, %ebx
+        mov       $1, %r9d
+        jmp       ETCH_LABEL(cmplength\MANGLED_NAME)
+
+ETCH_LABEL(firstprobe\MANGLED_NAME):
+        push      %rbx
+        mov       %r9d, %ebx
+        mov       $1, %r9d
 
 ETCH_LABEL(nextprobe\MANGLED_NAME):
         add       %r9d, %eax

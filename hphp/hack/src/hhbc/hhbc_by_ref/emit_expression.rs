@@ -444,17 +444,7 @@ pub fn emit_expr<'a, 'arena>(
             .0)
         }
         Expr_::ObjGet(e) => {
-            if e.3 {
-                // Case ($x->foo).
-                let e = tast::Expr(
-                    pos.clone(),
-                    Expr_::ObjGet(Box::new((e.0.clone(), e.1.clone(), e.2.clone(), false))),
-                );
-                emit_expr(emitter, env, &e)
-            } else {
-                // Case $x->foo.
-                Ok(emit_obj_get(emitter, env, pos, QueryOp::CGet, &e.0, &e.1, &e.2, e.3)?.0)
-            }
+            Ok(emit_obj_get(emitter, env, pos, QueryOp::CGet, &e.0, &e.1, &e.2, false)?.0)
         }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
@@ -521,17 +511,7 @@ pub fn emit_expr<'a, 'arena>(
             emit_lambda(emitter, env, &e.0, &e.1)?,
         )),
 
-        Expr_::ClassGet(e) => {
-            if !e.2 {
-                emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1)
-            } else {
-                let e = tast::Expr(
-                    pos.clone(),
-                    Expr_::ClassGet(Box::new((e.0.clone(), e.1.clone(), false))),
-                );
-                emit_expr(emitter, env, &e)
-            }
-        }
+        Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(alloc, pos, emit_id(emitter, env, e)?)),

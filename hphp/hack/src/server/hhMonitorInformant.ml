@@ -399,7 +399,11 @@ module Revision_tracker = struct
   type repo_transition =
     | State_enter of Hg.hg_rev
     | State_leave of Hg.hg_rev
-    | Changed_merge_base of Hg.hg_rev * SSet.t * Watchman.clock
+    | Changed_merge_base of
+        Hg.hg_rev * (SSet.t[@printer SSet.pp_large]) * Watchman.clock
+  [@@deriving show]
+
+  let _ = show_repo_transition (* allow unused show *)
 
   type init_settings = {
     watchman: Watchman.watchman_instance ref;

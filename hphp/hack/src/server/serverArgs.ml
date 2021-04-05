@@ -13,6 +13,7 @@ type saved_state_target =
   | Informant_induced_saved_state_target of
       ServerMonitorUtils.target_saved_state
   | Saved_state_target_info of saved_state_target_info
+[@@deriving show]
 
 (*****************************************************************************)
 (* The options from the command line *)

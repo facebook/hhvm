@@ -23,6 +23,14 @@ val print_endlinef : ('a, unit, string, unit) format4 -> 'a
 
 val prerr_endlinef : ('a, unit, string, unit) format4 -> 'a
 
+val pp_large_list :
+  ?pp_sep:(Format.formatter -> unit -> unit) option ->
+  ?max_items:int ->
+  (Format.formatter -> 'a -> unit) ->
+  Format.formatter ->
+  'a list ->
+  unit
+
 val timestring : float -> string
 
 val opt : ('a -> 'b -> 'a * 'c) -> 'a -> 'b option -> 'a * 'c option

@@ -23,6 +23,20 @@ let print_endlinef fmt = Printf.ksprintf Stdio.print_endline fmt
 
 let prerr_endlinef fmt = Printf.ksprintf Stdio.prerr_endline fmt
 
+let pp_large_list ?(pp_sep = None) ?(max_items = 5) pp_elt fmt xs =
+  let list_len = List.length xs in
+  if list_len <= max_items then
+    Format.pp_print_list ?pp_sep pp_elt fmt xs
+  else
+    let xs = List.take xs max_items in
+    Format.fprintf
+      fmt
+      "<only showing first %d of %d elems: %a>"
+      max_items
+      list_len
+      (Format.pp_print_list ?pp_sep pp_elt)
+      xs
+
 let timestring (time : float) : string =
   let tm = Unix.localtime time in
   Printf.sprintf

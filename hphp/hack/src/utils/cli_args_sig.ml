@@ -9,13 +9,17 @@
 module Types = struct
   type saved_state_target_info = {
     changes: Relative_path.t list;
+        [@printer Utils.pp_large_list Relative_path.pp]
     naming_changes: Relative_path.t list;
+        [@printer Utils.pp_large_list Relative_path.pp]
     corresponding_base_revision: string;
     deptable_fn: string;
     deptable_is_64bit: bool;
     prechecked_changes: Relative_path.t list;
+        [@printer Utils.pp_large_list Relative_path.pp]
     naming_table_path: string;
   }
+  [@@deriving show]
 
   (* The idea of a file range necessarily means that the hypothetical list
     of them is sorted in some way. It is valid to have None as either endpoint

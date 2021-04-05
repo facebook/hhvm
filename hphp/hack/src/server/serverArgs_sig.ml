@@ -19,6 +19,7 @@ module type S = sig
     | Informant_induced_saved_state_target of
         ServerMonitorUtils.target_saved_state
     | Saved_state_target_info of saved_state_target_info
+  [@@deriving show]
 
   (****************************************************************************)
   (* The main entry point *)

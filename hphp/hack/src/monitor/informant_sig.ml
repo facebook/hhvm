@@ -11,11 +11,13 @@ type report =
   | Move_along  (** Nothing to see here. *)
   | Restart_server of ServerMonitorUtils.target_saved_state option
       (** Kill the server (if one is running) and start a new one. *)
+[@@deriving show]
 
 type server_state =
   | Server_not_yet_started
   | Server_alive
   | Server_dead
+[@@deriving show]
 
 (** The informant collects information to tell the monitor when to
     intelligently kill and restart the server daemon.

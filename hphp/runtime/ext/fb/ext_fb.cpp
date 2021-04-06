@@ -57,6 +57,7 @@ namespace HPHP {
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
 const int64_t k_FB_SERIALIZE_VARRAY_DARRAY = 1<<2;
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS = 1<<3;
+const int64_t k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION = 1<<4;
 
 // fb_compact_serialize options
 const int64_t FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS = 1 << 0;
@@ -110,7 +111,17 @@ enum TType {
 
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   try {
-    if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
+    if (options & k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION) {
+      size_t len = HPHP::serialize
+        ::FBSerializer<VariantControllerPostHackArrayMigration>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerPostHackArrayMigration>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
         ::serializedSize(thing);
@@ -189,7 +200,13 @@ Variant fb_unserialize(const char* str,
                        bool& success,
                        int64_t options) {
   try {
-    if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
+    if (options & k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerPostHackArrayMigration>
+        ::unserialize(folly::StringPiece(str, len));
+      success = true;
+      return res;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingHackArrays>
         ::unserialize(folly::StringPiece(str, len));
@@ -1299,6 +1316,8 @@ struct FBExtension : Extension {
     HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS,
                 k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+    HHVM_RC_INT(FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION,
+                k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION);
 
     HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS);
 

@@ -25,6 +25,7 @@ namespace HPHP {
 extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS;
 extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS;
 extern const int64_t k_FB_SERIALIZE_VARRAY_DARRAY;
+extern const int64_t k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION;
 
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options = 0);
 Variant HHVM_FUNCTION(fb_unserialize,

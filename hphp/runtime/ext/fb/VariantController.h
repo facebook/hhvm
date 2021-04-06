@@ -42,18 +42,24 @@ inline void mapSetConvertStatic(Array& map, StringData* str, Variant&& v) {
 }
 
 enum class VariantControllerHackArraysMode {
-  // Do not serialize Hack arrays and unserialize as PHP arrays
+  // Serialize vecs and dicts both as dicts. Intish-cast dict keys. This mode
+  // does not preserve types or values, and only exists because vecs and dicts
+  // were once a single PHP array type with the intish-cast behavior.
   OFF,
-  // Do serialize Hack arrays and unserialize as Hack arrays.
-  // Does not support serializing keysets.
+  // Serialize Hack arrays (excluding keysets), and unserialize them as the
+  // same Hack arrays, except for one case: unserialize marked vecs as dicts.
   ON,
   // (Un)serialize varrays / darrays: this will accept / emit Hack arrays if
-  // HackArrDVArrs is set.
+  // HackArrDVArrs is set. Intish-cast dict keys.
   MIGRATORY,
-  // Do serialize Hack arrays and unserialize as Hack arrays.
-  // Supports serializing keysets.
+  // Serialize Hack arrays (including keysets), and unserialize them as the
+  // same Hack arrays, except for one case: unserialize marked vecs as dicts.
   ON_AND_KEYSET,
-
+  // The "best" mode, with the fewest number of legacy array behaviors.
+  //
+  // Serialize Hack arrays (including keysets), and unserialize them as the
+  // same Hack array in all cases. Ignore legacy array marks.
+  POST_MIGRATION,
 };
 
 /**
@@ -99,6 +105,7 @@ struct VariantControllerImpl {
           case VariantControllerHackArraysMode::OFF:
             return HPHP::serialize::Type::MAP;
           case VariantControllerHackArraysMode::MIGRATORY:
+          case VariantControllerHackArraysMode::POST_MIGRATION:
             return HPHP::serialize::Type::LIST;
           case VariantControllerHackArraysMode::ON:
           case VariantControllerHackArraysMode::ON_AND_KEYSET: {
@@ -111,13 +118,17 @@ struct VariantControllerImpl {
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        if (HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
+        if constexpr (
+            HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET ||
+            HackArraysMode == VariantControllerHackArraysMode::POST_MIGRATION) {
           return HPHP::serialize::Type::SET;
         }
         throw HPHP::serialize::KeysetSerializeError{};
 
       case KindOfClsMeth:
-        if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
+        if constexpr (
+            HackArraysMode == VariantControllerHackArraysMode::MIGRATORY ||
+            HackArraysMode == VariantControllerHackArraysMode::POST_MIGRATION) {
           return HPHP::serialize::Type::LIST;
         } else {
           return HPHP::serialize::Type::MAP;
@@ -184,6 +195,7 @@ struct VariantControllerImpl {
       switch (HackArraysMode) {
         case VariantControllerHackArraysMode::ON:
         case VariantControllerHackArraysMode::ON_AND_KEYSET:
+        case VariantControllerHackArraysMode::POST_MIGRATION:
           return IntishCast::None;
         case VariantControllerHackArraysMode::OFF:
         case VariantControllerHackArraysMode::MIGRATORY:
@@ -218,6 +230,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::ON:
       case VariantControllerHackArraysMode::ON_AND_KEYSET:
       case VariantControllerHackArraysMode::MIGRATORY:
+      case VariantControllerHackArraysMode::POST_MIGRATION:
         return empty_vec_array();
       case VariantControllerHackArraysMode::OFF:
         return empty_dict_array();
@@ -305,6 +318,9 @@ using VariantControllerUsingHackArraysAndKeyset =
   VariantControllerImpl<VariantControllerHackArraysMode::ON_AND_KEYSET>;
 using VariantControllerUsingVarrayDarray =
   VariantControllerImpl<VariantControllerHackArraysMode::MIGRATORY>;
+using VariantControllerPostHackArrayMigration =
+  VariantControllerImpl<VariantControllerHackArraysMode::POST_MIGRATION>;
+
 }
 
 

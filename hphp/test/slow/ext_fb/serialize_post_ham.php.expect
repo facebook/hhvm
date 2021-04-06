@@ -1,0 +1,636 @@
+
+===========================================================
+Input:
+vec(0) {
+}
+
+DEFAULT:
+dict(0) {
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+vec(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+vec(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+vec(0) {
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+vec(0) {
+}
+
+===========================================================
+Input:
+varray(0) {
+}
+
+DEFAULT:
+dict(0) {
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+vec(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(0) {
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+vec(0) {
+}
+
+===========================================================
+Input:
+dict(0) {
+}
+
+DEFAULT:
+dict(0) {
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(0) {
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(0) {
+}
+
+===========================================================
+Input:
+darray(0) {
+}
+
+DEFAULT:
+dict(0) {
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(0) {
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(0) {
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(0) {
+}
+
+===========================================================
+Input:
+keyset(0) {
+}
+
+DEFAULT:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_VARRAY_DARRAY:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_HACK_ARRAYS:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+keyset(0) {
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+keyset(0) {
+}
+
+===========================================================
+Input:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+DEFAULT:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+===========================================================
+Input:
+varray(2) {
+  int(17)
+  string(2) "xy"
+}
+
+DEFAULT:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+vec(2) {
+  int(17)
+  string(2) "xy"
+}
+
+===========================================================
+Input:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+DEFAULT:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+===========================================================
+Input:
+darray(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+DEFAULT:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  [0]=>
+  int(17)
+  [1]=>
+  string(2) "xy"
+}
+
+===========================================================
+Input:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+darray(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  [17]=>
+  int(0)
+  ["xy"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+darray(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+darray(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+DEFAULT:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_VARRAY_DARRAY:
+dict(2) {
+  [17]=>
+  int(0)
+  [34]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+dict(2) {
+  ["17"]=>
+  int(0)
+  ["34"]=>
+  int(1)
+}
+
+===========================================================
+Input:
+keyset(2) {
+  int(17)
+  string(2) "xy"
+}
+
+DEFAULT:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_VARRAY_DARRAY:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_HACK_ARRAYS:
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+keyset(2) {
+  int(17)
+  string(2) "xy"
+}
+
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+keyset(2) {
+  int(17)
+  string(2) "xy"
+}
+
+===========================================================
+DEFAULT:
+XX..XXX....XXXXX
+FB_SERIALIZE_VARRAY_DARRAY:
+....X......XXXXX
+FB_SERIALIZE_HACK_ARRAYS:
+.X..X.X........X
+FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS:
+.X....X.........
+FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION:
+................

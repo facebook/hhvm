@@ -1,7 +1,7 @@
 dict(2) {
   ["/:systemlib.phpfb"]=>
   dict(1) {
-    [197]=>
+    [%d]=>
     int(1)
   }
   ["%s/test/slow/ext_fb/coverage.php"]=>

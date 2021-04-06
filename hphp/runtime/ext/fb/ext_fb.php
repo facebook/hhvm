@@ -5,16 +5,24 @@ namespace {
 /** Serialize data into a compact format that can be unserialized by
  * fb_unserialize().
  *
- * WARNING: FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS mode has been added in March
- * 2020, and support for underlying serialization format may not yet be
- * available in all non-Hack implementations yet. Caution is adviced when using
- * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS for serializing data, which may be
- * deserialized outside of Hack.
- *
  * @param mixed $thing - What to serialize. Note that objects are not
  * supported.
- * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS,
- * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
+ * @param options bitmask of options:
+ *
+ * FB_SERIALIZE_VARRAY_DARRAY
+ * FB_SERIALIZE_HACK_ARRAYS
+ * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS
+ * FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION
+ *
+ * Of these options, the last one is the best to use: it works on vecs, dicts,
+ * and keysets, and deserializes the result with no change to types or values.
+ *
+ * All other modes are deficient to the post-HAM mode in some way:
+ *
+ *  - VARRAY_DARRAY rejects keysets, and does intish-cast-ing of dict keys.
+ *  - HACK_ARRAYS rejects keysets, and converts legacy vecs inputs to dicts.
+ *  - HACK_ARRAYS_AND_KEYSETS converts legacy vec inputs to dicts.
+ *
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native>>
@@ -23,8 +31,7 @@ function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
 /** Unserialize previously fb_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
  * @param mixed $success - Whether it was successful or not.
- * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS,
- * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
+ * @param options bitmask of options (see fb_serialize for details)
  * @return mixed - Unserialized data.
  */
 <<__HipHopSpecific, __Native>>

@@ -18,6 +18,9 @@ else ()
     LZ4_DOWNLOAD_ARGS
     SOURCE_URL "https://github.com/lz4/lz4/archive/v1.9.2.tar.gz"
     SOURCE_HASH "SHA256=658ba6191fa44c92280d4aa2c271b0f4fbc0e34d249578dd05e50e76d0e5efcc"
+    # By default, we'd look for v1.9.2.tar.gz in the cache - let's look for
+    # lz4-v1.9.2 instead
+    FILENAME_PREFIX "lz4-"
   )
   set(MAKE_ARGS MOREFLAGS=-fPIC)
   ExternalProject_Add(

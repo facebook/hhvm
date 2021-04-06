@@ -1303,9 +1303,10 @@ tv_lval ObjectData::propU(
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
   const Class* ctx,
-  const StringData* key
+  const StringData* key,
+  const ReadOnlyOp op
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

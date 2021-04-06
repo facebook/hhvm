@@ -2731,16 +2731,19 @@ fields of that struct for holding intermediate values.
 
 | PropX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), NF
 
-  Lookup intermediate property in S0, with key S1.
+  Lookup intermediate property in S0, with key S1. An exception is thrown if
+  the property is ReadOnly when it was required to be Mutable.
 
 | PropQ, D(LvalToMembCell), S(Obj,LvalToCell) S(StaticStr) S(PtrToMISCell), NF
 
-  A nullsafe version of PropX, returns null if the base S0 is null.
+  A nullsafe version of PropX, returns null if the base S0 is null. An exception
+  is thrown if the property is ReadOnly when it was required to be Mutable.
 
 | PropDX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), MProp
 
   Like PropX, but used for intermediate element lookups that may modify the
-  base.
+  base. An exception is thrown if the property is ReadOnly when it was
+  required to be Mutable.
 
 | CGetProp, D(Cell), S(Obj,LvalToCell) S(Cell), PRc
 

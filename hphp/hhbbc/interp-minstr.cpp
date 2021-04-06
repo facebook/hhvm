@@ -953,7 +953,7 @@ Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
-Effects miProp(ISS& env, bool, MOpMode mode, Type key) {
+Effects miProp(ISS& env, bool, MOpMode mode, Type key, ReadOnlyOp op) {
   auto const name     = mStringKey(key);
   auto const isDefine = mode == MOpMode::Define;
   auto const isUnset  = mode == MOpMode::Unset;
@@ -992,9 +992,14 @@ Effects miProp(ISS& env, bool, MOpMode mode, Type key) {
     auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
+      auto const elem = thisPropRaw(env, name);
+      if (elem && elem->attrs & AttrIsReadOnly && op == ReadOnlyOp::Mutable) {
+        return Effects::AlwaysThrows;
+      }
+      
       auto const ty = [&] {
         if (update) {
-          if (auto const elem = thisPropRaw(env, name)) return elem->ty;
+          if (elem) return elem->ty;
         } else {
           if (auto const propTy = thisPropAsCell(env, name)) return *propTy;
         }
@@ -2168,7 +2173,7 @@ void in(ISS& env, const bc::Dim& op) {
   auto const effects = [&] {
     if (mcodeIsProp(op.mkey.mcode)) {
       return miProp(
-        env, op.mkey.mcode == MQT, op.subop1, std::move(key->first)
+        env, op.mkey.mcode == MQT, op.subop1, std::move(key->first), op.mkey.rop
       );
     } else if (mcodeIsElem(op.mkey.mcode)) {
       return miElem(env, op.subop1, std::move(key->first), key_local(env, op));

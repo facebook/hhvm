@@ -548,7 +548,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op = ReadOnlyOp::Any);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
   tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
 
   bool propIsset(const Class* ctx, const StringData* key);
 

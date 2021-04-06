@@ -2496,7 +2496,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
                             StringData* key,
-                            ReadOnlyOp op = ReadOnlyOp::Any) {
+                            ReadOnlyOp op) {
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -2544,7 +2544,7 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 
   // Get property.
   if (mode == MOpMode::Define) {
-    return instance->propD(&tvRef, ctx, keySD);
+    return instance->propD(&tvRef, ctx, keySD, op);
   }
   if (mode == MOpMode::None) {
     return instance->prop(&tvRef, ctx, keySD, op);

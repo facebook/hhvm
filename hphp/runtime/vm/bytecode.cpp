@@ -2646,7 +2646,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp 
         return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
-          mstate.tvTempBase, ctx, mstate.base, key
+          mstate.tvTempBase, ctx, mstate.base, key, op
         );
       case MOpMode::Unset:
         return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key);

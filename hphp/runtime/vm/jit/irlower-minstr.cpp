@@ -80,12 +80,15 @@ ArgGroup propArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implProp(IRLS& env, const IRInstruction* inst) {
-  auto const mode    = inst->extra<MOpModeData>()->mode;
+  auto const mode    = inst->extra<PropData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
-  auto const args = propArgs(env, inst).memberKeyS(1).ssa(2);
+  auto const args = propArgs(env, inst)
+    .memberKeyS(1)
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto const target = [&] {
     if (inst->is(PropDX)) {
@@ -117,7 +120,10 @@ void cgPropDX(IRLS& env, const IRInstruction* i) { implProp(env, i); }
 void cgPropQ(IRLS& env, const IRInstruction* inst) {
   using namespace MInstrHelpers;
 
-  auto const args = propArgs(env, inst).ssa(1).ssa(2);
+  auto const args = propArgs(env, inst)
+    .ssa(1)
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op));;
 
   auto helper = inst->src(0)->isA(TObj)
     ? CallSpec::direct(propCOQ)

@@ -939,7 +939,7 @@ const StaticString
   s_NULLSAFE_PROP_WRITE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
 
 SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
-                        bool nullsafe) {
+                        bool nullsafe, ReadOnlyOp rop) {
   auto const define = mode == MOpMode::Define;
   if (define && nullsafe) {
     gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
@@ -947,12 +947,12 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
   }
 
   auto const tvRef = propTvRefPtr(env, base, key);
-  if (nullsafe) return gen(env, PropQ, base, key, tvRef);
+  if (nullsafe) return gen(env, PropQ, ReadOnlyData { rop }, base, key, tvRef);
   auto const op = define ? PropDX : PropX;
-  return gen(env, op, MOpModeData { mode }, base, key, tvRef);
+  return gen(env, op, PropData { mode, rop }, base, key, tvRef);
 }
 
-SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
+SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp op) {
   auto const baseType = env.irb->fs().mbase().type;
 
   if (mode == MOpMode::Unset && !baseType.maybe(TObj)) {
@@ -965,7 +965,11 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
-    return propGenericImpl(env, mode, base, key, nullsafe);
+    return propGenericImpl(env, mode, base, key, nullsafe, op);
+  }
+  if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+    gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+    return cns(env, TBottom);
   }
 
   SSATmp* propPtr;
@@ -1637,7 +1641,7 @@ void emitBaseH(IRGS& env) {
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   auto const key = memberKey(env, mk);
   auto const base = [&] {
-    if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT);
+    if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT, mk.rop);
     if (mcodeIsElem(mk.mcode)) return elemImpl(env, mode, key);
     PUNT(DimNewElem);
   }();

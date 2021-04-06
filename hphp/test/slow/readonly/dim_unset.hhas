@@ -1,0 +1,114 @@
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (17,25) <"HH\\void" N  > test() {
+  .declvars $t $t1;
+  .srcloc 18:8,18:17;
+  NewObjD "Foo1"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 18:3,18:17;
+  SetL $t
+  .srcloc 18:3,18:18;
+  PopC
+  .srcloc 19:9,19:18;
+  NewObjD "Foo1"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 19:3,19:18;
+  SetL $t1
+  .srcloc 19:3,19:19;
+  PopC
+  .srcloc 20:16,20:25;
+  NewObjD "Foo2"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 20:12,20:26;
+  NewVec 1
+  BaseL $t Define
+  .srcloc 20:3,20:8;
+  SetM 0 PT:"f2" Any
+  .srcloc 20:3,20:27;
+  PopC
+  .srcloc 21:18,21:19;
+  Int 10
+  BaseL $t Define
+  Dim Define PT:"f2" Mutable
+  Dim Define EI:0 Any
+  .srcloc 21:3,21:14;
+  SetM 0 PT:"x" Any
+  .srcloc 21:3,21:20;
+  PopC
+  .srcloc 22:20,22:31;
+  NewObjD "Foo2"
+  Dup
+  NullUninit
+  .srcloc 22:29,22:30;
+  Int 10
+  .srcloc 22:20,22:31;
+  FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+  PopC
+  LockObj
+  .srcloc 22:16,22:32;
+  NewVec 1
+  BaseL $t1 Define
+  .srcloc 22:3,22:12;
+  SetM 0 PT:"ro_f2" Any
+  .srcloc 22:3,22:33;
+  PopC
+  .srcloc 23:9,23:17;
+  BaseL $t Unset
+  Dim Unset PT:"f2" Mutable
+  UnsetM 0 EI:0 Any
+  .srcloc 24:9,24:21;
+  BaseL $t1 Unset
+  Dim Unset PT:"ro_f2" Mutable
+  UnsetM 0 EI:0 Any
+  .srcloc 25:2,25:2;
+  Null
+  RetC
+}
+
+.class {}  Foo2 (4,9) {
+  .property [public sys_initial_val] <"HH\\int" "HH\\int" extended_hint > x =
+    """N;""";
+  .method{}{} [public] (6,8) <"" N  > __construct(<"HH\\num" "HH\\num"  > $x = DV1("""0""")) {
+  L0:
+    .srcloc 6:10,8:66;
+    VerifyParamType $x
+    .srcloc 7:5,7:9;
+    CheckThis
+    .srcloc 7:16,7:17;
+    CGetL $x
+    BaseH
+    .srcloc 7:5,7:12;
+    SetM 0 PT:"x" Any
+    .srcloc 7:5,7:18;
+    PopC
+    .srcloc 8:4,8:4;
+    Null
+    RetC
+  DV1:
+    .srcloc 6:40,6:40;
+    Int 0
+    .srcloc 6:10,8:66;
+    SetL $x
+    PopC
+    JmpNS L0
+  }
+}
+
+.class {}  Foo1 (11,14) {
+  .property [public sys_initial_val] <"HH\\vec<Foo2>" "HH\\vec" extended_hint > f2 =
+    """N;""";
+  .property [public readonly sys_initial_val] <"HH\\vec<Foo2>" "HH\\vec" extended_hint > ro_f2 =
+    """N;""";
+}

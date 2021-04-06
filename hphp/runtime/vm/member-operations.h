@@ -2538,7 +2538,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
                        ObjectData* instance, key_type<keyType> key,
-                       ReadOnlyOp op = ReadOnlyOp::Any) {
+                       ReadOnlyOp op) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
@@ -2553,12 +2553,12 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
     return instance->propW(&tvRef, ctx, keySD, op);
   }
   assertx(mode == MOpMode::Unset);
-  return instance->propU(&tvRef, ctx, keySD);
+  return instance->propU(&tvRef, ctx, keySD, op);
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
-                    tv_lval base, key_type<keyType> key, ReadOnlyOp op = ReadOnlyOp::Any) {
+                    tv_lval base, key_type<keyType> key, ReadOnlyOp op) {
   auto const result = propPre<mode>(tvRef, base);
   if (result.type() == KindOfNull) return result;
   return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key, op);

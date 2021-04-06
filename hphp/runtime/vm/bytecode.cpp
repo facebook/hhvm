@@ -2649,7 +2649,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp 
           mstate.tvTempBase, ctx, mstate.base, key, op
         );
       case MOpMode::Unset:
-        return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key);
+        return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }

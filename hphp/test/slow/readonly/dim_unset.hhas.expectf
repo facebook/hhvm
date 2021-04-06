@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property ro_f2 of class Foo1 must be mutable.' in %s/dim_unset.hhas:24
+%A

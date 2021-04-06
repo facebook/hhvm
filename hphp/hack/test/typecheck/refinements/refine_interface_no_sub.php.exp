@@ -1,0 +1,12 @@
+File "refine_interface_no_sub.php", line 16, characters 3-5:
+Some type constraint(s) here are violated (Typing[4323])
+  File "refine_interface_no_sub.php", line 7, characters 14-14:
+  `T` is a constrained type parameter
+  File "refine_interface_no_sub.php", line 7, characters 19-22:
+  Some type constraint(s) are violated here
+  File "refine_interface_no_sub.php", line 7, characters 14-14:
+  `T` is a constrained type parameter
+  File "refine_interface_no_sub.php", line 7, characters 19-22:
+  Expected `IBar`
+  File "refine_interface_no_sub.php", line 16, characters 7-12:
+  But got `string`

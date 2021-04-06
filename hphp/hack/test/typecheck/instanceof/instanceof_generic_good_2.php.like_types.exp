@@ -1,0 +1,18 @@
+File "instanceof_generic_good_2.php", line 15, characters 12-18:
+Invalid return type (Typing[4110])
+  File "instanceof_generic_good_2.php", line 13, characters 53-53:
+  Expected `T`
+  File "instanceof_generic_good_2.php", line 15, characters 16-16:
+  But got `B`
+File "instanceof_generic_good_2.php", line 23, characters 12-33:
+Invalid return type (Typing[4110])
+  File "instanceof_generic_good_2.php", line 21, characters 65-65:
+  Expected `T`
+  File "instanceof_generic_good_2.php", line 23, characters 21-21:
+  But got `A`
+File "instanceof_generic_good_2.php", line 23, characters 12-33:
+Invalid return type (Typing[4110])
+  File "instanceof_generic_good_2.php", line 21, characters 65-65:
+  Expected `T`
+  File "instanceof_generic_good_2.php", line 23, characters 31-31:
+  But got `B`

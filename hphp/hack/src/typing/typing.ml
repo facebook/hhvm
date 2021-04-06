@@ -7044,11 +7044,28 @@ and safely_refine_class_type
    * and have obj_ty = C and x_ty = B<T> for a generic parameter Aast.
    * Then SubType.add_constraint will deduce that T=int and add int as
    * both lower and upper bound on T in env.lenv.tpenv
+   *
+   * We only wish to do this if the types are in a possible subtype relationship.
    *)
   let (env, supertypes) = TUtils.get_concrete_supertypes env ivar_ty in
+  let rec might_be_supertype ty =
+    let (_env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tclass ((_, name), _, _)
+      when String.equal name (Cls.name class_info)
+           || Cls.has_ancestor class_info name ->
+      true
+    | Tdynamic -> true
+    | Toption ty -> might_be_supertype ty
+    | Tunion tyl -> List.for_all tyl might_be_supertype
+    | _ -> false
+  in
   let env =
     List.fold_left supertypes ~init:env ~f:(fun env ty ->
-        SubType.add_constraint p env Ast_defs.Constraint_as obj_ty ty)
+        if might_be_supertype ty then
+          SubType.add_constraint p env Ast_defs.Constraint_as obj_ty ty
+        else
+          env)
   in
   (* It's often the case that the fresh name isn't necessary. For
    * example, if C<T> extends B<T>, and we have $x:B<t> for some type t

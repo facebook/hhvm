@@ -15,7 +15,7 @@ vec(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-string(48) "__invoke() expects exactly 2 parameters, 1 given"
+string(54) "Closure$main#2() expects exactly 2 parameters, 1 given"
 -- anonymous function with NULL parameter --
 dict(3) {
   [0]=>

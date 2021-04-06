@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'RuntimeException' with message 'Closure$A::get#3() expects exactly 0 parameters, 3 given' in %s:15
+Stack trace:
+%A

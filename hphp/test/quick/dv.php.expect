@@ -6,5 +6,5 @@ string(43) "foo() expects at least 1 parameter, 0 given"
 4/5/6
 4/5/6
 4/5/66
-string(49) "__invoke() expects at least 2 parameters, 1 given"
-string(49) "__invoke() expects at least 2 parameters, 0 given"
+string(53) "Closure$main() expects at least 2 parameters, 1 given"
+string(53) "Closure$main() expects at least 2 parameters, 0 given"

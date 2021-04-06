@@ -445,6 +445,18 @@ let method_dynamically_callable
       set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
     in
 
+    let env =
+      if Cls.get_implements_dynamic cls then
+        let this_ty =
+          Typing_make_type.intersection
+            (Reason.Rsound_dynamic_callable Pos.none)
+            [Env.get_local env this; make_dynamic Pos.none]
+        in
+        Env.set_local env this this_ty Pos.none
+      else
+        env
+    in
+
     let disable =
       Naming_attributes.mem
         SN.UserAttributes.uaDisableTypecheckerInternal

@@ -1647,6 +1647,10 @@ std::string serializeProfData(const std::string& filename) {
     auto const pd = profData();
     write_prof_data(ser, pd);
 
+    if (RO::EnableIntrinsicsExtension) {
+      write_container(ser, prioritySerializeClasses(), write_class);
+    }
+
     write_target_profiles(ser);
 
     // We've written everything directly referenced by the profile
@@ -1750,6 +1754,10 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     auto const pd = profData();
     read_prof_data(ser, pd);
     pd->setDeserialized(buildHost, tag, buildTime);
+
+    if (RO::EnableIntrinsicsExtension) {
+      read_container(ser, [&] { read_class(ser); });
+    }
 
     read_target_profiles(ser);
 

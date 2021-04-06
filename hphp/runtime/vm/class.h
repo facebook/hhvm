@@ -1994,6 +1994,8 @@ bool classHasPersistentRDS(const Class* cls);
  */
 const StringData* classToStringHelper(const Class* cls);
 
+std::vector<Class*> prioritySerializeClasses();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

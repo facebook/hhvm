@@ -282,6 +282,8 @@ template struct assert_sizeof_class<sizeof_Class>;
  */
 ReadWriteMutex s_scope_cache_mutex;
 
+std::set<std::pair<int64_t, Class*>> s_priority_serialize;
+
 }
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
@@ -4668,6 +4670,8 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
 
 }
 
+const StaticString s__JitSerdesPriority("__JitSerdesPriority");
+
 Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
   FTRACE(3, "  Defining cls {} failIsFatal {}\n",
          preClass->name()->data(), failIsFatal);
@@ -4793,6 +4797,18 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
     assertx(!RO::RepoAuthoritative ||
             (newClass.get()->isPersistent() &&
              classHasPersistentRDS(newClass.get())));
+
+    if (UNLIKELY(RO::EnableIntrinsicsExtension)) {
+      auto const it =
+        preClass->userAttributes().find(s__JitSerdesPriority.get());
+      if (it != preClass->userAttributes().end()) {
+        auto const prio = it->second;
+        if (tvIsInt(prio)) {
+          s_priority_serialize.emplace(val(prio).num, newClass.get());
+        }
+      }
+    }
+
     return newClass.get();
   }
 }
@@ -4850,6 +4866,13 @@ bool Class::exists(const StringData* name, bool autoload, ClassKind kind) {
   Class* cls = Class::get(name, autoload);
   return cls &&
     (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
+}
+
+std::vector<Class*> prioritySerializeClasses() {
+  assertx(RO::EnableIntrinsicsExtension);
+  std::vector<Class*> ret;
+  for (auto [_p, c] : s_priority_serialize) ret.emplace_back(c);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

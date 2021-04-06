@@ -527,9 +527,6 @@ SrcRec* findSrcRec(SrcKey sk) {
 bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength) {
   if (srcDB().find(sk)) return true;
 
-  auto const srcRecSPOff = sk.resumeMode() != ResumeMode::None
-    ? folly::none : folly::make_optional(spOff);
-
   // We put retranslate requests at the end of our slab to more frequently
   // allow conditional jump fall-throughs
   auto codeLock = lockCode();
@@ -544,7 +541,7 @@ bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength) {
     if (checkLength && !codeView.cold().canEmit(stubsize)) return false;
     req = svcreq::emit_persistent(codeView.cold(),
                                   codeView.data(),
-                                  srcRecSPOff,
+                                  spOff,
                                   REQ_RETRANSLATE,
                                   sk.offset());
   } else {
@@ -558,7 +555,7 @@ bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength) {
     req = svcreq::emit_ephemeral(codeView.cold(),
                                  codeView.data(),
                                  (TCA)newStart,
-                                 srcRecSPOff,
+                                 spOff,
                                  REQ_RETRANSLATE,
                                  sk.offset());
   }

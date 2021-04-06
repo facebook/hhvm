@@ -103,6 +103,7 @@ RegSet arg_regs_ind_ret(size_t n);
  * Service request argument registers.
  */
 PhysReg r_svcreq_req();
+PhysReg r_svcreq_spoff();
 PhysReg r_svcreq_stub();
 PhysReg r_svcreq_sf();
 PhysReg r_svcreq_arg(size_t i);
@@ -150,7 +151,7 @@ inline RegSet cross_trace_regs_resumed()  { return vm_regs_with_sp(); }
  * Registers that are live when we reenter the JIT from the TC (e.g., via
  * service requests).
  */
-inline RegSet leave_trace_regs() { return vm_regs_with_sp(); }
+inline RegSet leave_trace_regs() { return vm_regs_no_sp(); }
 
 /*
  * Registers that are live between the caller and the callee when making a PHP

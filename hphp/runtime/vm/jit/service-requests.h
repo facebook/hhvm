@@ -98,7 +98,7 @@ struct CGMeta;
 /*
  * Service request types.
  */
-enum ServiceRequest {
+enum ServiceRequest : uint32_t {
 #define REQ(nm) REQ_##nm,
   SERVICE_REQUESTS
 #undef REQ
@@ -177,7 +177,7 @@ template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
                     CGMeta& meta,
-                    folly::Optional<FPInvOffset> spOff,
+                    FPInvOffset spOff,
                     ServiceRequest sr,
                     Args... args);
 template<typename... Args>
@@ -185,7 +185,7 @@ TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    CGMeta& meta,
                    TCA start,
-                   folly::Optional<FPInvOffset> spOff,
+                   FPInvOffset spOff,
                    ServiceRequest sr,
                    Args... args);
 /*
@@ -195,14 +195,14 @@ TCA emit_ephemeral(CodeBlock& cb,
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
-                    folly::Optional<FPInvOffset> spOff,
+                    FPInvOffset spOff,
                     ServiceRequest sr,
                     Args... args);
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    TCA start,
-                   folly::Optional<FPInvOffset> spOff,
+                   FPInvOffset spOff,
                    ServiceRequest sr,
                    Args... args);
 
@@ -230,7 +230,7 @@ TCA emit_interp_no_translate_stub(FPInvOffset spOff, SrcKey sk);
 /*
  * Maximum number of arguments a service request can accept.
  */
-constexpr int kMaxArgs = 4;
+constexpr int kMaxArgs = 2;
 
 namespace x64 {
   constexpr int kMovLen = 10;
@@ -298,6 +298,11 @@ struct ReqInfo {
   ServiceRequest req;
 
   /*
+   * Depth of the evaluation stack.
+   */
+  FPInvOffset spOff;
+
+  /*
    * Address of the service request's code stub for non-persistent requests.
    *
    * The service request handler will free this stub if it's set, after the
@@ -312,18 +317,10 @@ struct ReqInfo {
     TCA tca;
     Offset offset;
     SrcKey::AtomicInt sk;
-    TransID transID;
-    bool boolVal;
-    ActRec* ar;
-    Value tvData;
-    struct {
-      DataType tvType;
-      AuxUnion tvAux;
-    };
   } args[kMaxArgs];
 };
 
-static_assert(sizeof(ReqInfo) == 0x30,
+static_assert(sizeof(ReqInfo) == 0x20,
               "rsp adjustments in handleSRHelper");
 
 ///////////////////////////////////////////////////////////////////////////////

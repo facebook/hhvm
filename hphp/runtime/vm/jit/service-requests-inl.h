@@ -87,8 +87,7 @@ inline bool is_ephemeral(ServiceRequest sr) {
  * Declared here for use in the templatized stub emitters defined below.
  */
 void emit_svcreq(CodeBlock& cb, DataBlock& data, CGMeta& meta,
-                 TCA start, bool persist,
-                 folly::Optional<FPInvOffset> spOff,
+                 TCA start, bool persist, FPInvOffset spOff,
                  ServiceRequest sr, const ArgVec& argv);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,7 +100,7 @@ template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
                     CGMeta& meta,
-                    folly::Optional<FPInvOffset> spOff,
+                    FPInvOffset spOff,
                     ServiceRequest sr,
                     Args... args) {
   using namespace detail;
@@ -118,7 +117,7 @@ TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    CGMeta& meta,
                    TCA start,
-                   folly::Optional<FPInvOffset> spOff,
+                   FPInvOffset spOff,
                    ServiceRequest sr,
                    Args... args) {
   using namespace detail;
@@ -132,7 +131,7 @@ TCA emit_ephemeral(CodeBlock& cb,
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
-                    folly::Optional<FPInvOffset> spOff,
+                    FPInvOffset spOff,
                     ServiceRequest sr,
                     Args... args) {
   CGMeta dummy;
@@ -146,7 +145,7 @@ template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    TCA start,
-                   folly::Optional<FPInvOffset> spOff,
+                   FPInvOffset spOff,
                    ServiceRequest sr,
                    Args... args) {
   CGMeta dummy;

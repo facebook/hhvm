@@ -201,9 +201,10 @@ RegSet arg_regs_ind_ret(size_t n) {
 }
 
 PhysReg r_svcreq_req() { return rarg(0); }
-PhysReg r_svcreq_stub() { return rarg(1); }
+PhysReg r_svcreq_spoff() { return rarg(1); }
+PhysReg r_svcreq_stub() { return rarg(2); }
 PhysReg r_svcreq_sf() { return abi().sf.choose(); }
-PhysReg r_svcreq_arg(size_t i) { return rarg(i + 2); }
+PhysReg r_svcreq_arg(size_t i) { return rarg(i + 3); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -61,10 +61,10 @@ void emit_svcreq(CodeBlock& cb,
                  CGMeta& meta,
                  TCA start,
                  bool persist,
-                 folly::Optional<FPInvOffset> spOff,
+                 FPInvOffset spOff,
                  ServiceRequest sr,
                  const ArgVec& argv) {
-  FTRACE(2, "svcreq @{} {}(", start, to_name(sr));
+  FTRACE(2, "svcreq @{} {}(spOff={}, ", start, to_name(sr), spOff.offset);
 
   tracing::Pause _p;
   tracing::Block _{
@@ -87,14 +87,6 @@ void emit_svcreq(CodeBlock& cb,
   {
     Vauto vasm{stub, stub, data, meta};
     auto& v = vasm.main();
-
-    // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
-    // a VM reg sync.  (When we don't have an spOff, the caller of the service
-    // request was responsible for making sure rvmsp already contained the top
-    // of the stack.)
-    if (spOff) {
-      v << lea{rvmfp()[-cellsToBytes(spOff->offset)], rvmsp()};
-    }
 
     auto live_out = leave_trace_regs();
 
@@ -139,9 +131,11 @@ void emit_svcreq(CodeBlock& cb,
       v << leap{reg::rip[int64_t(stub.base())], r_svcreq_stub()};
     }
     v << copy{v.cns(sr), r_svcreq_req()};
+    v << copy{v.cns(spOff.offset), r_svcreq_spoff()};
 
     live_out |= r_svcreq_stub();
     live_out |= r_svcreq_req();
+    live_out |= r_svcreq_spoff();
 
     v << jmpi{tc::ustubs().handleSRHelper, live_out};
 
@@ -166,8 +160,7 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     data,
     fixups,
     allocTCStub(cb, &fixups),
-    target.resumeMode() != ResumeMode::None
-      ? folly::none : folly::make_optional(spOff),
+    spOff,
     REQ_BIND_JMP,
     jmp,
     target.toAtomicInt()
@@ -187,8 +180,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       data,
       fixups,
       allocTCStub(cb, &fixups),
-      target.resumeMode() != ResumeMode::None
-        ? folly::none : folly::make_optional(spOff),
+      spOff,
       REQ_BIND_ADDR,
       (TCA)addr, // needs to be RIP relative so that we can relocate it
       target.toAtomicInt()
@@ -200,8 +192,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     data,
     fixups,
     allocTCStub(cb, &fixups),
-    target.resumeMode() != ResumeMode::None
-      ? folly::none : folly::make_optional(spOff),
+    spOff,
     REQ_BIND_ADDR,
     addr,
     target.toAtomicInt()
@@ -214,8 +205,7 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     cb,
     data,
     fixups,
-    sk.resumeMode() != ResumeMode::None
-      ? folly::none : folly::make_optional(spOff),
+    spOff,
     REQ_RETRANSLATE_OPT,
     sk.toAtomicInt()
   );

@@ -108,10 +108,9 @@ void alignCacheLine(CodeBlock& cb) {
 void loadVmfp(Vout& v) { v << load{rvmtl()[rds::kVmfpOff], rvmfp()}; }
 void loadVmsp(Vout& v) { v << load{rvmtl()[rds::kVmspOff], rvmsp()}; }
 void loadVMRegs(Vout& v) { loadVmfp(v); loadVmsp(v); }
-void storeVMRegs(Vout& v) {
-  v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
-  v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
-}
+void storeVmfp(Vout& v) { v << store{rvmfp(), rvmtl()[rds::kVmfpOff]}; }
+void storeVmsp(Vout& v) { v << store{rvmsp(), rvmtl()[rds::kVmspOff]}; }
+void storeVMRegs(Vout& v) { storeVmfp(v); storeVmsp(v); }
 
 /*
  * Load and store the PHP return registers from/to the top of the VM stack.
@@ -1022,14 +1021,22 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
-    storeVMRegs(v);
+    storeVmfp(v);
+
+    // Combine ServiceRequest and FPInvOffset into one pushable 64-bit reg.
+    static_assert(folly::kIsLittleEndian,
+        "Packing two 32-bit ints into one 64-bit for ReqInfo.");
+    auto const spOffShifted = v.makeReg();
+    auto const reqAndSpOff = v.makeReg();
+    v << shlqi{32, r_svcreq_spoff(), spOffShifted, v.makeReg()};
+    v << orq{r_svcreq_req(), spOffShifted, reqAndSpOff, v.makeReg()};
 
     // Pack the service request args into a svcreq::ReqInfo on the stack.
     assertx(!(svcreq::kMaxArgs & 1));
     for (auto i = svcreq::kMaxArgs; i >= 2; i -= 2) {
       v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i - 2)};
     }
-    v << pushp{r_svcreq_stub(), r_svcreq_req()};
+    v << pushp{r_svcreq_stub(), reqAndSpOff};
 
     // Call mcg->handleServiceRequest(rsp()).
     auto const sp = v.makeReg();

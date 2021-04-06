@@ -279,7 +279,14 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   FTRACE(1, "handleServiceRequest {}\n", svcreq::to_name(info.req));
 
   assert_native_stack_aligned();
-  tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
+
+  // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
+  // later if we are going to use the resume helper.
+  tl_regState = VMRegState::CLEAN;
+  vmsp() = (isResumed(vmfp())
+    ? Stack::resumableStackBase(vmfp())
+    : reinterpret_cast<TypedValue*>(vmfp())
+  ) - info.spOff.offset;
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     Trace::ringbufferEntry(

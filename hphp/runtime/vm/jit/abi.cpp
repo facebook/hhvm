@@ -51,6 +51,7 @@ size_t num_arg_regs_simd() { return ARCH_SWITCH_CALL(num_arg_regs_simd); }
 size_t num_arg_regs_ind_ret() { return ARCH_SWITCH_CALL(num_arg_regs_ind_ret); }
 
 PhysReg r_svcreq_req() { return ARCH_SWITCH_CALL(r_svcreq_req); }
+PhysReg r_svcreq_spoff() { return ARCH_SWITCH_CALL(r_svcreq_spoff); }
 PhysReg r_svcreq_stub() { return ARCH_SWITCH_CALL(r_svcreq_stub); }
 PhysReg r_svcreq_sf() { return ARCH_SWITCH_CALL(r_svcreq_sf); }
 PhysReg r_svcreq_arg(size_t i) { return ARCH_SWITCH_CALL(r_svcreq_arg, i); }

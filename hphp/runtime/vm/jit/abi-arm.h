@@ -74,6 +74,7 @@ RegSet arg_regs_simd(size_t n);
 RegSet arg_regs_ind_ret(size_t n);
 
 PhysReg r_svcreq_req();
+PhysReg r_svcreq_spoff();
 PhysReg r_svcreq_stub();
 PhysReg r_svcreq_sf();
 PhysReg r_svcreq_arg(size_t i);

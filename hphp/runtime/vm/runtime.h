@@ -59,6 +59,7 @@ std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                                uint64_t vals);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
+[[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);
 [[noreturn]] void throwMustBeReadOnlyException(const Class* cls, const StringData* propName);
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);

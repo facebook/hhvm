@@ -1190,7 +1190,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
     gen(env, IncRef, profres);
     return profres;
   }
-
+  
   // No warning takes precedence over nullsafe.
   if (!nullsafe || mode != MOpMode::Warn) {
     return gen(env, CGetProp, PropData{mode, op}, base, key);
@@ -1653,7 +1653,7 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
     PUNT(QueryM_is_ClsMeth);
   }
   auto simpleOp = SimpleOp::None;
-
+  
   if (mcodeIsElem(mk.mcode)) {
     simpleOp = simpleCollectionOp(baseType, key->type(), true,
                                   query == QueryMOp::InOut);

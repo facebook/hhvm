@@ -228,13 +228,6 @@ void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).ssa(0).ssa(1).ssa(2));
 }
 
-void cgThrowMustBeMutableException(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(vmain(env), env, CallSpec::direct(throw_must_be_mutable),
-               kVoidDest, SyncOptions::Sync,
-               argGroup(env, inst).ssa(0).ssa(1));
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
@@ -267,6 +260,7 @@ IMPL_OPCODE_CALL(ThrowInvalidArrayKey)
 IMPL_OPCODE_CALL(ThrowInvalidOperation)
 IMPL_OPCODE_CALL(ThrowMissingArg)
 IMPL_OPCODE_CALL(ThrowMissingThis)
+IMPL_OPCODE_CALL(ThrowMustBeMutableException)
 IMPL_OPCODE_CALL(ThrowMustBeReadOnlyException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 IMPL_OPCODE_CALL(ThrowParameterWrongType)

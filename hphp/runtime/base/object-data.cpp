@@ -1554,7 +1554,7 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
   raise_error("Cannot instantiate %s %s",
               (attrs & AttrInterface) ? "interface" :
               (attrs & AttrTrait)     ? "trait" :
-              (attrs & AttrEnum)      ? "enum" : "abstract class",
+              (attrs & (AttrEnum|AttrEnumClass)) ? "enum" : "abstract class",
               cls->preClass()->name()->data());
 }
 

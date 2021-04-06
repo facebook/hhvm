@@ -210,13 +210,6 @@ inline bool Class::classof(const Class* cls) const {
     return this == cls ||
       m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
   }
-  if (UNLIKELY(cls->attrs() & this->attrs() & AttrEnum)) {
-    if (this == cls) {
-      return true;
-    } else if (cls->m_extra && cls->m_extra->m_includedEnums.size() != 0) {
-      cls->m_extra->m_includedEnums.lookupDefault(this->m_preClass->name(), nullptr) == this;
-    }
-  }
   return classofNonIFace(cls);
 }
 
@@ -692,12 +685,21 @@ inline bool isEnum(const Class* cls) {
   return cls->attrs() & AttrEnum;
 }
 
+inline bool isEnumClass(const Class* cls) {
+  return cls->attrs() & AttrEnumClass;
+}
+
+inline bool isAnyEnum(const Class* cls) {
+  return isEnum(cls) || isEnumClass(cls);
+}
+
 inline bool isInterface(const Class* cls) {
   return cls->attrs() & AttrInterface;
 }
 
 inline bool isNormalClass(const Class* cls) {
-  return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum));
+  return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum |
+                           AttrEnumClass));
 }
 
 inline bool isAbstract(const Class* cls) {

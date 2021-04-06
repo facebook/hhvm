@@ -552,21 +552,28 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   if (preClass->attrs() & AttrEnum &&
       preClass->enumBaseTy().isObject()) {
     auto const dt = read_raw<DataType>(ser);
-    auto const& tc = preClass->enumBaseTy();
-    auto const ne = tc.namedEntity();
-    if (!ne->m_cachedTypeAlias.bound() ||
-        !ne->m_cachedTypeAlias.isInit()) {
-      enumBaseReq.emplace();
-      enumBaseReq->type = dt == KindOfInt64 ?
-        AnnotType::Int : AnnotType::String;
-      enumBaseReq->name = tc.typeName();
-      ne->m_cachedTypeAlias.bind(
-        rds::Mode::Normal,
-        rds::LinkName{"TypeAlias", tc.typeName()}
-      );
-      ne->m_cachedTypeAlias.initWith(*enumBaseReq);
+    if (dt != KindOfUninit) {
+      auto const& tc = preClass->enumBaseTy();
+      auto const ne = tc.namedEntity();
+      if (!ne->m_cachedTypeAlias.bound() ||
+          !ne->m_cachedTypeAlias.isInit()) {
+        enumBaseReq.emplace();
+        enumBaseReq->type = dt == KindOfInt64 ?
+          AnnotType::Int : AnnotType::String;
+        enumBaseReq->name = tc.typeName();
+        ne->m_cachedTypeAlias.bind(
+          rds::Mode::Normal,
+          rds::LinkName{"TypeAlias", tc.typeName()}
+        );
+        ne->m_cachedTypeAlias.initWith(*enumBaseReq);
+      }
     }
   }
+
+  if (!preClass->includedEnums().empty()) {
+    read_container(ser, [&] { read_class(ser); });
+  }
+
   auto const ne = preClass->namedEntity();
   // If it's not persistent, make sure its NamedEntity is
   // unbound, ready for DefClass
@@ -1348,6 +1355,10 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   if (cls->attrs() & AttrEnum &&
       cls->preClass()->enumBaseTy().isObject()) {
     write_raw(ser, cls->enumBaseTy().value_or(KindOfUninit));
+  }
+
+  if (cls->hasIncludedEnums()) {
+    write_container(ser, cls->allIncludedEnums().range(), write_class);
   }
 
   if (cls->parent() == c_Closure::classof()) {

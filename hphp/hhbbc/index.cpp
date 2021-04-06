@@ -1564,7 +1564,7 @@ bool build_class_constants(BuildClsInfo& info,
 
       // A constant from an interface or from an included enum collides
       // with an existing constant.
-      if (rparent->cls->attrs & (AttrInterface | AttrEnum)) {
+      if (rparent->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
         ITRACE(2,
                "build_cls_info_rec failed for `{}' because "
                "`{}' was defined by both `{}' and `{}'\n",
@@ -2658,11 +2658,13 @@ void resolve_combinations(ClassNamingEnv& env,
 
   for (auto& included_enum_name : cls->includedEnumNames) {
     auto const included_enum = map.at(included_enum_name);
-    if (!(included_enum->cls->attrs & AttrEnum)) {
+    auto const want_attr = cls->attrs & (AttrEnum | AttrEnumClass);
+    if (!(included_enum->cls->attrs & want_attr)) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because `{}' "
-             "is not an enum\n",
-             cls->name, included_enum_name);
+             "is not an enum{}\n",
+             cls->name, included_enum_name,
+             want_attr & AttrEnumClass ? " class" : "");
       return;
     }
     cinfo->includedEnums.push_back(included_enum);
@@ -2780,6 +2782,7 @@ void compute_subclass_list(IndexData& index) {
   trace_time _("compute subclass list");
   auto fixupTraits = false;
   auto fixupEnums = false;
+  auto const AnyEnum = AttrEnum | AttrEnumClass;
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->cls->attrs & AttrInterface) continue;
     for (auto& cparent : cinfo->baseList) {
@@ -2791,13 +2794,13 @@ void compute_subclass_list(IndexData& index) {
       compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
     }
     // Add the included enum lists if cinfo is an enum
-    if (!(cinfo->cls->attrs & AttrEnum) &&
+    if ((cinfo->cls->attrs & AnyEnum) &&
         cinfo->cls->includedEnumNames.size()) {
       fixupEnums = true;
       compute_included_enums_list_rec(index, cinfo.get(), cinfo.get());
     }
     // Also add instantiable classes to their interface's subclassLists
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+    if (cinfo->cls->attrs & (AttrTrait | AnyEnum | AttrAbstract)) continue;
     for (auto& ipair : cinfo->implInterfaces) {
       auto impl = const_cast<ClassInfo*>(ipair.second);
       impl->subclassList.push_back(cinfo.get());
@@ -2807,7 +2810,7 @@ void compute_subclass_list(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto& sub = cinfo->subclassList;
     if ((fixupTraits && cinfo->cls->attrs & AttrTrait) ||
-        (fixupEnums && cinfo->cls->attrs & AttrEnum)) {
+        (fixupEnums && cinfo->cls->attrs & AnyEnum)) {
       // traits and enums can be reached by multiple paths, so we need to
       // uniquify their subclassLists.
       std::sort(begin(sub), end(sub));
@@ -3027,7 +3030,7 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
       ifaces.emplace_back(cinfo->cls);
       continue;
     }
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum)) continue;
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrEnumClass)) continue;
 
     classes.emplace_back(Cls{cinfo.get()});
     auto& vtable = classes.back().vtable;
@@ -3150,7 +3153,7 @@ void compute_iface_vtables(IndexData& index) {
     }
 
     // Only worry about classes with methods that can be called.
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum)) continue;
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrEnumClass)) continue;
 
     for (auto& ipair : cinfo->implInterfaces) {
       ++iface_uses[ipair.second->cls];

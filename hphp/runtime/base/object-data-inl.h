@@ -120,7 +120,8 @@ template <bool Unlocked>
 NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
   assertx(cls);
   if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
+                AttrEnumClass))) {
     raiseAbstractClassError(cls);
   }
   if (cls->hasReifiedGenerics()) {
@@ -158,7 +159,8 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     return newInstanceSlow<Unlocked>(cls);
   }
   if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
+                AttrEnumClass))) {
     raiseAbstractClassError(cls);
   }
   auto obj = ObjectData::newInstanceImpl<Unlocked>(
@@ -176,7 +178,8 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
                                                   ArrayData* reifiedTypes) {
   assertx(cls);
   if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
+                AttrEnumClass))) {
     raiseAbstractClassError(cls);
   }
   if (cls->hasReifiedGenerics()) {
@@ -207,7 +210,8 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
 
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   assertx(!(cls->attrs() &
-            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
+            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
+             AttrEnumClass)));
   return ObjectData::newInstanceImpl<false>(
     cls,
     [&](void* mem, uint8_t sizeFlag) {

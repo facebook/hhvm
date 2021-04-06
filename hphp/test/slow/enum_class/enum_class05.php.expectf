@@ -1,1 +1,2 @@
-Fatal error: Non-enum class D cannot extend enum class parent B in %s/enum_class/enum_class05.php on line 5
+
+Fatal error: Class D may not inherit from enum (B) in %s/enum_class05.php on line 5

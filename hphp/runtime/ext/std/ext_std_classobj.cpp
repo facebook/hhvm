@@ -96,7 +96,7 @@ bool HHVM_FUNCTION(trait_exists, const String& trait_name,
 bool HHVM_FUNCTION(enum_exists, const String& enum_name,
                    bool autoload /* = true */) {
   Class* cls = Class::get(enum_name.get(), autoload);
-  return cls && isEnum(cls);
+  return cls && isAnyEnum(cls);
 }
 
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {

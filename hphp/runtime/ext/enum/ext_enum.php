@@ -87,7 +87,6 @@ newtype Label<-TEnumClass, +TType> = string;
  * definition below is not actually used at run time; it is simply
  * provided for the typechecker and for developer reference.
  */
-<<__EnumClass>>
 abstract class BuiltinEnumClass<+T> {
   /**
    * Get the values of the public consts defined on this class,

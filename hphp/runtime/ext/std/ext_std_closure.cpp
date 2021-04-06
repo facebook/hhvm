@@ -194,7 +194,8 @@ void c_Closure::instanceDtor(ObjectData* obj, const Class* cls) {
 
 ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
                                           size_t index) {
-  assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
+  assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum|
+                            AttrEnumClass)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof() && cls != c_Closure::classof());
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
@@ -205,7 +206,8 @@ ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
 }
 
 ObjectData* createClosureRepoAuth(Class* cls) {
-  assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
+  assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum|
+                            AttrEnumClass)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof() || cls == c_Closure::classof());
   auto const nProps = cls->numDeclProperties();

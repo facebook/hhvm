@@ -668,7 +668,7 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
 
-  if (m_preClass->attrs() & AttrEnum) {
+  if (m_preClass->attrs() & (AttrEnum|AttrEnumClass)) {
     auto const& ie = m_extra->m_includedEnums;
     for (size_t i = 0; i < ie.size(); ++i) {
       auto const penum = ie[i]->m_preClass.get();
@@ -1819,15 +1819,16 @@ void Class::setParent() {
   if (m_parent.get() != nullptr) {
     Attr parentAttrs = m_parent->attrs();
     if (UNLIKELY(parentAttrs &
-                 (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
+                 (AttrFinal | AttrInterface | AttrTrait | AttrEnum |
+                  AttrEnumClass))) {
       if (!(parentAttrs & AttrFinal) ||
-          (parentAttrs & AttrEnum) ||
+          (parentAttrs & (AttrEnum|AttrEnumClass)) ||
           m_preClass->userAttributes().find(s___MockClass.get()) ==
           m_preClass->userAttributes().end() ||
           m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
-                    ((parentAttrs & AttrEnum)      ? "enum" :
+                    ((parentAttrs & (AttrEnum|AttrEnumClass)) ? "enum" :
                      (parentAttrs & AttrFinal)     ? "final class" :
                      (parentAttrs & AttrInterface) ? "interface"   : "trait"),
                     m_parent->name()->data());
@@ -1846,20 +1847,6 @@ void Class::setParent() {
     if ((m_attrCopy & AttrIsConst) && !(parentAttrs & AttrIsConst)) {
       raise_error(
         "Const class %s cannot extend non-const parent %s",
-        m_preClass->name()->data(),
-        m_parent->name()->data()
-      );
-    }
-    if (!(m_attrCopy & AttrEnumClass) && (parentAttrs & AttrEnumClass)) {
-      raise_error(
-        "Non-enum class %s cannot extend enum class parent %s",
-        m_preClass->name()->data(),
-        m_parent->name()->data()
-      );
-    }
-    if ((m_attrCopy & AttrEnumClass) && !(parentAttrs & AttrEnumClass)){
-      raise_error(
-        "Enum class %s cannot extend non-enum class parent %s",
         m_preClass->name()->data(),
         m_parent->name()->data()
       );
@@ -2493,7 +2480,7 @@ void Class::setConstants() {
         }
       }
       // Forbid redefining constants from included enums
-      if ((definingClass->attrs() & AttrEnum) && m_extra) {
+      if ((definingClass->attrs() & (AttrEnum|AttrEnumClass)) && m_extra) {
         for (int j = 0, size = m_extra->m_includedEnums.size(); j < size; ++j) {
           const Class* includedEnum = m_extra->m_includedEnums[j];
           if (includedEnum->hasConstant(preConst->name())) {
@@ -3917,7 +3904,6 @@ void Class::setEnumType() {
 
     // Make sure we've loaded a valid underlying type.
     if (m_enumBaseTy &&
-        !((attrs() & AttrEnumClass) && isObjectType(*m_enumBaseTy)) &&
         !isIntType(*m_enumBaseTy) &&
         !isStringType(*m_enumBaseTy)) {
       raise_error("Invalid base type for enum %s",
@@ -3929,7 +3915,7 @@ void Class::setEnumType() {
 void Class::setIncludedEnums() {
   IncludedEnumMap::Builder includedEnumsBuilder;
 
-  if (!isEnum(this) || m_preClass->includedEnums().empty()) {
+  if (!isAnyEnum(this) || m_preClass->includedEnums().empty()) {
     return;
   }
 
@@ -3941,9 +3927,10 @@ void Class::setIncludedEnums() {
     if (cp == nullptr) {
       raise_error("Undefined enum: %s", (*it)->data());
     }
-    if (!isEnum(cp)) {
-      raise_error("%s cannot include %s - it is not an enum",
-                  m_preClass->name()->data(), cp->name()->data());
+    if (isEnum(this) != isEnum(cp) || isEnumClass(this) != isEnumClass(cp)) {
+      raise_error("%s cannot include %s - it is not an enum%s",
+                  m_preClass->name()->data(), cp->name()->data(),
+                  isEnumClass(this) ? " class" : "");
     }
     m_preClass->enforceInMaybeSealedParentWhitelist(cp->preClass());
     auto cp_baseType = cp->m_enumBaseTy;

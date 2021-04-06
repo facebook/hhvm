@@ -43,13 +43,13 @@ const EnumValues* EnumCache::getValues(const Class* klass,
 }
 
 const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
-  assertx(isEnum(klass));
+  assertx(isAnyEnum(klass));
   if (auto const values = klass->getEnumValues()) return values;
   return s_cache.getEnumValues(klass, false);
 }
 
 const EnumValues* EnumCache::getValuesStatic(const Class* klass) {
-  assertx(isEnum(klass));
+  assertx(isAnyEnum(klass));
   auto const result = [&]() -> const EnumValues* {
     if (auto const values = klass->getEnumValues()) return values;
     return s_cache.getEnumValues(klass, false, true);
@@ -144,7 +144,7 @@ const EnumValues* EnumCache::loadEnumValues(
     }
     // The outer condition below enables caching of enum constants defined
     // in enums included by the current class.
-    if (!(isEnum(klass)
+    if (!(isAnyEnum(klass)
         && klass->hasIncludedEnums()
         && klass->allIncludedEnums().contains(consts[i].cls->name()))) {
       if (consts[i].cls != klass && !recurse) {

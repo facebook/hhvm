@@ -1142,7 +1142,8 @@ static bool HHVM_METHOD(ReflectionClass, isInternal) {
 
 static bool HHVM_METHOD(ReflectionClass, isInstantiable) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))
+  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
+                           AttrEnumClass))
     && (cls->getCtor()->attrs() & AttrPublic);
 }
 
@@ -1168,12 +1169,12 @@ static bool HHVM_METHOD(ReflectionClass, isTrait) {
 
 static bool HHVM_METHOD(ReflectionClass, isEnum) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return cls->attrs() & AttrEnum;
+  return cls->attrs() & (AttrEnum|AttrEnumClass);
 }
 
 static String HHVM_METHOD(ReflectionClass, getEnumUnderlyingType) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  if (!(cls->attrs() & AttrEnum)) {
+  if (!(cls->attrs() & (AttrEnum|AttrEnumClass))) {
     Reflection::ThrowReflectionExceptionObject(
       "Trying to read the Enum-type of a non-Enum");
   }

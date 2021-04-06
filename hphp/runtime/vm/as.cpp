@@ -3245,7 +3245,7 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
     if (!pce.interfaces().empty() ||
         !pce.usedTraits().empty() ||
         !pce.requirements().empty() ||
-        (pce.attrs() & AttrEnum)) {
+        (pce.attrs() & (AttrEnum|AttrEnumClass))) {
       return PreClass::Mergeable;
     }
     if (!parentName.empty() && !as.hoistables.count(parentName)) {
@@ -3284,7 +3284,7 @@ void parse_class(AsmState& as) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
   if (attrs & AttrIsConst) {
-    if (attrs & (AttrEnum | AttrInterface | AttrTrait)) {
+    if (attrs & (AttrEnum | AttrEnumClass | AttrInterface | AttrTrait)) {
       as.error("interfaces, traits and enums may not be const");
     }
     if (!(attrs & AttrForbidDynamicProps)) {

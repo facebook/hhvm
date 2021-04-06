@@ -743,7 +743,7 @@ void print_enum_includes(Output& out, const PreClass* cls) {
 }
 
 void print_cls_enum_ty(Output& out, const PreClass* cls) {
-  if (cls->attrs() & AttrEnum) {
+  if (cls->attrs() & (AttrEnum|AttrEnumClass)) {
     out.fmtln(".enum_ty <{}>;", type_constraint(cls->enumBaseTy()));
   }
 }

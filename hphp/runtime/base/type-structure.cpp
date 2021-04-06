@@ -602,7 +602,7 @@ bool resolveClass(TSEnv& env, const TSCtx& ctx, Array& ret,
   if (!cls) return false;
 
   TypeStructure::Kind resolvedKind;
-  if (isNormalClass(cls)) {
+  if (isNormalClass(cls) || isEnumClass(cls)) {
     resolvedKind = TypeStructure::Kind::T_class;
   } else if (isInterface(cls)) {
     resolvedKind = TypeStructure::Kind::T_interface;

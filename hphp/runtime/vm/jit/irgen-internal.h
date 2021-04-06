@@ -468,7 +468,8 @@ private:
 // Eval stack manipulation
 
 inline SSATmp* assertType(SSATmp* tmp, Type type) {
-  assertx(!tmp || tmp->isA(type));
+  assert_flog(!tmp || tmp->isA(type), "tmp = {} ; tmp.type = {}; type = {}",
+              *tmp, tmp->type(), type);
   return tmp;
 }
 
@@ -530,7 +531,11 @@ inline SSATmp* popC(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
 }
 
 inline SSATmp* popCU(IRGS& env) { return assertType(pop(env), TCell); }
-inline SSATmp* popU(IRGS& env) { return assertType(pop(env), TUninit); }
+inline SSATmp* popU(IRGS& env) {
+  auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
+  gen(env, AssertStk, TUninit, IRSPRelOffsetData{offset}, sp(env));
+  return assertType(pop(env), TUninit);
+}
 
 inline void discard(IRGS& env, uint32_t n = 1) {
   env.irb->fs().decBCSPDepth(n);

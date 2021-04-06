@@ -19,11 +19,12 @@ let with_in_channel filename f =
 
 (* Helper to extract the file contents *)
 let string_of_file filename =
+  let string_size = 32759 and buffer_size = 1000 in
   with_in_channel filename @@ fun ic ->
-  let s = Bytes.create 32759 in
-  let b = Buffer.create 1000 in
+  let s = Bytes.create string_size in
+  let b = Buffer.create buffer_size in
   let rec iter ic b s =
-    let nread = input ic s 0 32759 in
+    let nread = input ic s 0 string_size in
     if nread > 0 then (
       Buffer.add_substring b (Bytes.to_string s) 0 nread;
       iter ic b s
@@ -39,7 +40,7 @@ let normalize_dir dir =
   (* Check the last sep_len characters *)
   let trailing = String.sub dir (String.length dir - sep_len) sep_len in
   (* Strip the trailing separators if necessary *)
-  if trailing = sep then
+  if String.equal trailing sep then
     String.sub dir 0 (String.length dir - sep_len)
   else
     dir

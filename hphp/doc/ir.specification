@@ -3190,6 +3190,12 @@ fields of that struct for holding intermediate values.
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be mutable. S0 is the class the property
   was declared on. S1 is the property name.
+  
+| ThrowMustBeReadOnlyException, ND, S(Cls) S(Str), T
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where the property was required to be readonly. S0 is the class the property
+  was declared on. S1 is the property name.
 
 | ProfileType, ND, S(Cell), NF
 

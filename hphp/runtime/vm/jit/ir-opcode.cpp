@@ -457,6 +457,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowParamInOutMismatch:
   case ThrowParamInOutMismatchRange:
   case ThrowMustBeMutableException:
+  case ThrowMustBeReadOnlyException:
   case UnsetElem:
   case UnsetProp:
   case VecSet:

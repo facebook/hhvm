@@ -1,0 +1,79 @@
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (10,16) <"HH\\void" N  > test() {
+  .declvars $t;
+  .srcloc 11:8,11:16;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 11:3,11:16;
+  SetL $t
+  .srcloc 11:3,11:17;
+  PopC
+  .srcloc 12:11,12:19;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $t Define
+  .srcloc 12:3,12:7;
+  SetM 0 PT:"c" Any
+  .srcloc 12:3,12:20;
+  PopC
+  .srcloc 13:14,13:22;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $t Define
+  .srcloc 13:3,13:10;
+  SetM 0 PT:"ro_c" Any
+  .srcloc 13:3,13:23;
+  PopC
+  .srcloc 14:23,14:31;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $t Define
+  .srcloc 14:3,14:10;
+  SetM 0 PT:"ro_c" ReadOnly
+  .srcloc 14:3,14:32;
+  PopC
+  .srcloc 15:20,15:28;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $t Define
+  .srcloc 15:3,15:7;
+  SetM 0 PT:"c" ReadOnly
+  .srcloc 15:3,15:29;
+  PopC
+  .srcloc 16:2,16:2;
+  Null
+  RetC
+}
+
+.class {}  Bar (3,3) {
+}
+
+.class {}  Foo (4,7) {
+  .property [public sys_initial_val] <"Bar" "Bar" extended_hint > c =
+    """N;""";
+  .property [public readonly sys_initial_val] <"Bar" "Bar" extended_hint > ro_c =
+    """N;""";
+}
+
+# /data/users/voork/fbsource2/fbcode/hphp/test/slow/readonly/test.php ends here

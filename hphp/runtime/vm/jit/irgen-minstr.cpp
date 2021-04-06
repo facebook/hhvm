@@ -1242,7 +1242,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   return block;
 }
 
-SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
+SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadOnlyOp op) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const base = extractBaseIfObj(env);
@@ -1252,6 +1252,10 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
     getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo && !propInfo->isConst) {
+    if (!propInfo->readOnly && op == ReadOnlyOp::ReadOnly) {
+      gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
+      return cns(env, TBottom);
+    }
     SSATmp* propPtr;
     SSATmp* obj;
     std::tie(propPtr, obj) = emitPropSpecialized(
@@ -1283,7 +1287,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
     gen(env, StMem, propPtr, newVal);
     decRef(env, oldVal);
   } else {
-    gen(env, SetProp, makeCatchSet(env, nDiscard), base, key, value);
+    gen(env, SetProp, makeCatchSet(env, nDiscard), ReadOnlyData{op}, base, key, value);
   }
 
   return value;
@@ -1716,7 +1720,7 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const result =
     mk.mcode == MW        ? setNewElemImpl(env, nDiscard) :
     mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key) :
-                            setPropImpl(env, nDiscard, key);
+                            setPropImpl(env, nDiscard, key, mk.rop);
 
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, result);

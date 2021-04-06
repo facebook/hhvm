@@ -214,8 +214,9 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
   m(setPropCS,   KeyType::Str)           \
 
 #define X(nm, kt)                                                            \
-inline void nm(Class* ctx, tv_lval base, key_type<kt> key, TypedValue val) { \
-  HPHP::SetProp<false, kt>(ctx, base, key, &val);                            \
+inline void nm(Class* ctx, tv_lval base, key_type<kt> key, TypedValue val,   \
+               ReadOnlyOp op) {                                              \
+  HPHP::SetProp<false, kt>(ctx, base, key, &val, op);                        \
 }
 SETPROP_HELPER_TABLE(X)
 #undef X
@@ -225,9 +226,10 @@ SETPROP_HELPER_TABLE(X)
   m(setPropCO,   KeyType::Any)          \
   m(setPropCOS,  KeyType::Str)          \
 
-#define X(nm, kt)                                                          \
-inline void nm(Class* ctx, ObjectData* base, key_type<kt> key, TypedValue val) { \
-  HPHP::SetPropObj<kt>(ctx, base, key, &val);                              \
+#define X(nm, kt)                                                              \
+inline void nm(Class* ctx, ObjectData* base, key_type<kt> key, TypedValue val, \
+               ReadOnlyOp op) {                                                \
+  HPHP::SetPropObj<kt>(ctx, base, key, &val, op);                              \
 }
 SETPROP_OBJ_HELPER_TABLE(X)
 #undef X

@@ -1427,7 +1427,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
   return Effects::Throws;
 }
 
-Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
+Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp op) {
   auto const name = mStringKey(key);
   auto const t1 = unctx(popC(env));
 
@@ -1437,6 +1437,17 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
     push(env, std::move(ty));
     return Effects::Throws;
   };
+  
+  auto const alwaysThrows = [&] {
+    discard(env, nDiscard);
+    push(env, TBottom);
+    return Effects::AlwaysThrows;
+  };
+  
+  auto const prop = thisPropRaw(env, name);
+  if (prop && !(prop->attrs & AttrIsReadOnly) && op == ReadOnlyOp::ReadOnly) {
+    return alwaysThrows();
+  }
 
   if (couldBeThisObj(env, env.collect.mInstrState.base)) {
     if (!name) {
@@ -1452,11 +1463,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   }
 
   if (env.collect.mInstrState.base.type.subtypeOf(BObj)) {
-    if (t1.subtypeOf(BBottom)) {
-      discard(env, nDiscard);
-      push(env, TBottom);
-      return Effects::AlwaysThrows;
-    }
+    if (t1.subtypeOf(BBottom)) return alwaysThrows();
     moveBase(
       env,
       Base { t1, BaseLoc::Prop, env.collect.mInstrState.base.type, name }
@@ -2341,7 +2348,7 @@ void in(ISS& env, const bc::SetM& op) {
 
   auto const effects = [&] {
     if (mcodeIsProp(op.mkey.mcode)) {
-      return miFinalSetProp(env, op.arg1, key->first);
+      return miFinalSetProp(env, op.arg1, key->first, op.mkey.rop);
     } else if (mcodeIsElem(op.mkey.mcode)) {
       return miFinalSetElem(env, op.arg1, key->first, key_local(env, op));
     } else {

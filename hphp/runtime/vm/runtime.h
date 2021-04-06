@@ -52,13 +52,14 @@ void raiseNotice(const StringData* sd);
 [[noreturn]] void throwArrayIndexException(const ArrayData *ad, int64_t index);
 [[noreturn]] void throwArrayKeyException(const ArrayData *ad, const StringData* key);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
-                                   bool funcByRef);
+                                     bool funcByRef);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwParamInOutMismatchRange(const Func* func,
                                                unsigned firstBit, uint64_t mask,
                                                uint64_t vals);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
+[[noreturn]] void throwMustBeReadOnlyException(const Class* cls, const StringData* propName);
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
 

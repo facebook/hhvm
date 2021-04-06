@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot store readonly value in a non-readonly property c of class Foo.' in %s/setm.hhas:15
+%A

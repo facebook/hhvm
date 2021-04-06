@@ -504,6 +504,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   
   [[noreturn]] NEVER_INLINE
   void throwMustBeMutable(Slot prop) const;
+  
+  [[noreturn]] NEVER_INLINE
+  void throwMustBeReadOnly(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead
@@ -549,7 +552,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   bool propIsset(const Class* ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, TypedValue val);
+  void setProp(Class* ctx, const StringData* key, TypedValue val, ReadOnlyOp op = ReadOnlyOp::Any);
   tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                     const StringData* key, TypedValue* val);
 

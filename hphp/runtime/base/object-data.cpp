@@ -1111,6 +1111,14 @@ void ObjectData::throwMustBeMutable(Slot prop) const {
   );
 }
 
+NEVER_INLINE
+void ObjectData::throwMustBeReadOnly(Slot prop) const {
+  throw_cannot_write_non_readonly_prop(
+    getClassName().data(),
+    m_cls->declProperties()[prop].name->data()
+  );
+}
+
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
@@ -1319,7 +1327,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   return false;
 }
 
-void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
+void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, ReadOnlyOp op) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
@@ -1329,6 +1337,9 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
   if (prop && lookup.accessible) {
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
+    }
+    if (!lookup.readonly && op == ReadOnlyOp::ReadOnly) {
+      throwMustBeReadOnly(lookup.slot);
     }
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.

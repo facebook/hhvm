@@ -2592,19 +2592,19 @@ inline void SetPropNull(TypedValue* val) {
 }
 
 template <KeyType keyType>
-inline void SetPropObj(Class* ctx, ObjectData* instance,
-                       key_type<keyType> key, TypedValue* val) {
+inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
+                       TypedValue* val, ReadOnlyOp op) {
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Set property.
-  instance->setProp(ctx, keySD, *val);
+  instance->setProp(ctx, keySD, *val, op);
 }
 
 // $base->$key = $val
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
-                    TypedValue* val) {
+                    TypedValue* val, ReadOnlyOp op) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -2638,7 +2638,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
                                           : detail::raiseEmptyObject();
 
     case KindOfObject:
-      return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
+      return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val, op);
   }
   unknownBaseType(type(base));
 }

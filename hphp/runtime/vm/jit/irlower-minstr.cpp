@@ -170,7 +170,8 @@ void cgSetProp(IRLS& env, const IRInstruction* inst) {
 
   auto args = propArgs(env, inst)
     .memberKeyS(1)
-    .typedValue(2);
+    .typedValue(2)
+    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op));
 
   auto const target = [&] {
     if (base->isA(TObj)) {

@@ -174,6 +174,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   auto const type_okay = [&]{
     auto const vad = profile.data->staticSampledArray;
     if (vad != nullptr && vad->isDictType()) return true;
+    if (profile.key.isRuntimeLocation()) return true;
     auto const op = profile.key.op();
     return op == OpNewDictArray || op == OpNewStructDict;
   }();
@@ -266,13 +267,20 @@ ArrayLayout selectSourceLayout(
     return ArrayLayout(it->second);
   }
 
-  // 2. If we escalate too often, use a vanilla layout.
+  // 2. If the array is a runtime source, use a vanilla layout.
+  // TODO(mcolavita): We can eventually support more general runtime sources.
+
+  if (profile.key.isRuntimeLocation()) {
+    return ArrayLayout::Vanilla();
+  }
+
+  // 3. If we escalate too often, use a vanilla layout.
 
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
-  // 3. If the array is likely to stay monotyped, use a monotype layout.
+  // 4. If the array is likely to stay monotyped, use a monotype layout.
 
   uint64_t monotype = 0;
   uint64_t total = 0;
@@ -401,7 +409,7 @@ void selectBespokeLayouts() {
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
-  eachSource([&](auto& x) { x.layout = selectSourceLayout(x, sar); });
+  eachSource([&](auto& x) { x.applyLayout(selectSourceLayout(x, sar)); });
   eachSink([&](auto& x) { x.layout = selectSinkLayout(x, sar); });
   Layout::FinalizeHierarchy();
   startExportProfiles();

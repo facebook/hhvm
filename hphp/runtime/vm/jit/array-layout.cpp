@@ -307,6 +307,7 @@ LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
     key.sk = read_srckey(des);
   } else {
     key.cls = read_class(des);
+    key.locationType = bespoke::LocationType::Property;
   }
   return key;
 }
@@ -339,6 +340,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   // Serialize the decisions we made at all sources and sinks.
   write_raw(ser, bespoke::countSources());
   bespoke::eachSource([&](auto const& profile) {
+    if (profile.key.isRuntimeLocation()) return;
     write_source_key(ser, profile.key);
     write_raw(ser, profile.layout);
   });

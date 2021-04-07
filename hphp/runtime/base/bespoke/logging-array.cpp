@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -124,12 +125,23 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
   return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
 }
 
+ArrayData* maybeMakeLoggingArray(
+    ArrayData* ad, RuntimeStruct* structHandle) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
+
+  auto const profile = getLoggingProfile(structHandle);
+  assertx(profile);
+
+  return maybeMakeLoggingArray(ad, profile);
+}
+
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
   assertx(profile->data);
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
-    DEBUG_ONLY auto const op = profile->key.op();
+    assertx(!profile->key.isRuntimeLocation());
+    DEBUG_ONLY auto const op = *profile->key.op();
     assertx(isArrLikeCastOp(op) || op == Op::NewObjD);
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");

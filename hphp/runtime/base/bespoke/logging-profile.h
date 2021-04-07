@@ -19,11 +19,14 @@
 
 #include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 
+#include <folly/Optional.h>
 #include <folly/String.h>
+
 #include <folly/container/F14Map.h>
 
 #include <algorithm>
@@ -77,49 +80,108 @@ ARRAY_OPS
 // Internal storage detail of EventMap.
 struct EventKey;
 
+// The type of location a profile is attached to.
+enum class LocationType : uint8_t {
+  SrcKey,
+  Property,
+  Runtime
+};
+
+using EventMap = folly::F14FastMap<uint64_t, CopyAtomic<size_t>>;
+
 // We profile some bytecodes (array constructors or casts) and prop init vals.
 struct LoggingProfileKey {
   struct TbbHashCompare;
 
-  explicit LoggingProfileKey(SrcKey sk) : sk(sk), slot(kInvalidSlot) {}
-  explicit LoggingProfileKey(const Class* cls, Slot slot)
-    : cls(cls), slot(slot) {}
+  explicit LoggingProfileKey(SrcKey sk)
+    : sk(sk)
+    , slot(kInvalidSlot)
+    , locationType(LocationType::SrcKey)
+  {}
 
-  Op op() const {
-    return slot == kInvalidSlot ? sk.op() : Op::NewObjD;
+  explicit LoggingProfileKey(const Class* cls, Slot slot)
+    : cls(cls)
+    , slot(slot)
+    , locationType(LocationType::Property)
+  {}
+
+  explicit LoggingProfileKey(RuntimeStruct* runtimeStruct)
+    : runtimeStruct(runtimeStruct)
+    , slot(kInvalidSlot)
+    , locationType(LocationType::Runtime)
+  {}
+
+  bool isRuntimeLocation() const {
+    return locationType == LocationType::Runtime;
+  }
+
+  folly::Optional<Op> op() const {
+    switch (locationType) {
+      case LocationType::SrcKey:
+        return {sk.op()};
+      case LocationType::Property:
+        return {Op::NewObjD};
+      case LocationType::Runtime:
+        return folly::none;
+    }
+    always_assert(false);
   }
 
   std::string toString() const {
-    if (slot == kInvalidSlot) return sk.getSymbol();
-    auto const& prop = cls->declProperties()[slot];
-    return folly::sformat("{}->{}", cls->name(), prop.name);
+    switch (locationType) {
+      case LocationType::SrcKey:
+        return sk.getSymbol();
+      case LocationType::Property: {
+        auto const& prop = cls->declProperties()[slot];
+        return folly::sformat("{}->{}", cls->name(), prop.name);
+      }
+      case LocationType::Runtime:
+        return runtimeStruct->toString()->toCppString();
+    }
+    always_assert(false);
   }
 
   std::string toStringDetail() const {
-    if (slot == kInvalidSlot) return sk.showInst();
-    return folly::sformat("NewObjD \"{}\"", cls->name());
+    switch (locationType) {
+      case LocationType::SrcKey:
+        return sk.showInst();
+      case LocationType::Property:
+        return folly::sformat("NewObjD \"{}\"", cls->name());
+      case LocationType::Runtime:
+        return runtimeStruct->toString()->toCppString();
+    }
+    always_assert(false);
   }
 
   size_t stableHash() const {
-    if (slot == kInvalidSlot) return SrcKey::StableHasher()(sk);
-    return cls->stableHash() ^ slot;
+    switch (locationType) {
+      case LocationType::SrcKey:
+        return SrcKey::StableHasher()(sk);
+      case LocationType::Property:
+        return cls->stableHash() ^ slot;
+      case LocationType::Runtime:
+        return runtimeStruct->stableHash();
+    }
+    always_assert(false);
   }
 
   union {
     SrcKey sk;
     const Class* cls;
+    RuntimeStruct* runtimeStruct;
     uintptr_t ptr;
   };
   // The logical slot of a property on cls, or kInvalidSlot if sk is set.
   Slot slot;
+  LocationType locationType;
 };
 
 struct LoggingProfileKey::TbbHashCompare {
   static size_t hash(const LoggingProfileKey& key) {
-    return folly::hash::hash_combine(hash_int64(key.ptr), key.slot);
+    return folly::hash::hash_combine(hash_int64(key.ptr), key.slot, key.locationType);
   }
   static bool equal(const LoggingProfileKey& a, const LoggingProfileKey& b) {
-    return a.ptr == b.ptr && a.slot == b.slot;
+    return a.ptr == b.ptr && a.slot == b.slot && a.locationType == b.locationType;
   }
 };
 
@@ -178,6 +240,8 @@ struct LoggingProfile {
   // a LayoutFunction - MakeFromVanilla - to do so as cleanly as possible.)
   BespokeArray* getStaticBespokeArray() const;
   void setStaticBespokeArray(BespokeArray* array);
+
+  void applyLayout(jit::ArrayLayout layout);
 
 private:
   void logEventImpl(const EventKey& key);
@@ -240,6 +304,7 @@ public:
 // profile this bytecode, this function will return nullptr.
 LoggingProfile* getLoggingProfile(SrcKey sk);
 LoggingProfile* getLoggingProfile(const Class* cls, Slot slot);
+LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.

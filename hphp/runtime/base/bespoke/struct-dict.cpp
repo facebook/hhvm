@@ -497,6 +497,12 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
     if (sadIn->decReleaseCheck()) Release(sadIn);
     return res;
   }
+  return SetStrInSlot(sadIn, v, slot);
+}
+
+ArrayData* StructDict::SetStrInSlot(StructDict* sadIn,
+                                    TypedValue v, Slot slot) {
+  assertx(slot != kInvalidSlot);
   auto const cow = sadIn->cowCheck();
   auto const sad = cow ? sadIn->copy() : sadIn;
   auto& oldType = sad->rawTypes()[slot];

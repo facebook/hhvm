@@ -18,6 +18,7 @@
 #define HPHP_BESPOKE_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -72,6 +73,7 @@ struct SinkProfile;
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
+ArrayData* maybeMakeLoggingArray(ArrayData*, RuntimeStruct*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void profileArrLikeProps(ObjectData*);

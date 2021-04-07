@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -81,18 +82,27 @@ SrcKey canonicalize(SrcKey sk) {
 
 // If the given source always produces a particular static array, return it.
 ArrayData* getStaticArray(LoggingProfileKey key) {
-  if (key.slot != kInvalidSlot) {
-    auto const index = key.cls->propSlotToIndex(key.slot);
-    auto const tv = key.cls->declPropInit()[index].val.tv();
-    return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
+  switch (key.locationType) {
+    case LocationType::Runtime:
+      return nullptr;
+
+    case LocationType::Property: {
+      auto const index = key.cls->propSlotToIndex(key.slot);
+      auto const tv = key.cls->declPropInit()[index].val.tv();
+      return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
+    }
+
+    case LocationType::SrcKey: {
+      auto const op = key.sk.op();
+      if (op != Op::Vec && op != Op::Dict && op != Op::Keyset) {
+        return nullptr;
+      }
+      auto const unit = key.sk.func()->unit();
+      auto const result = unit->lookupArrayId(getImm(key.sk.pc(), 0).u_AA);
+      return const_cast<ArrayData*>(result);
+    }
   }
-  auto const op = key.sk.op();
-  if (op != Op::Vec && op != Op::Dict && op != Op::Keyset) {
-    return nullptr;
-  }
-  auto const unit = key.sk.func()->unit();
-  auto const result = unit->lookupArrayId(getImm(key.sk.pc(), 0).u_AA);
-  return const_cast<ArrayData*>(result);
+  always_assert(false);
 }
 
 template <typename M, typename L, typename K>
@@ -353,7 +363,7 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
 
   staticBespokeArray = bad;
 
-  if (key.slot != kInvalidSlot) {
+  if (key.locationType == LocationType::Property) {
     auto const index = key.cls->propSlotToIndex(key.slot);
     auto props = const_cast<Class::PropInitVec*>(&key.cls->declPropInit());
     auto const lval = (*props)[index].val;
@@ -361,6 +371,15 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
     lval.val().parr = bad;
   }
 }
+
+void LoggingProfile::applyLayout(jit::ArrayLayout layout) {
+  this->layout = layout;
+  if (key.isRuntimeLocation() && layout.is_struct()) {
+    // TODO(mcolavita): We can support other types of runtime bespokes.
+    key.runtimeStruct->applyLayout(StructLayout::As(layout.bespokeLayout()));
+  }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1026,6 +1045,14 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
 LoggingProfile* getLoggingProfile(SrcKey sk) {
   if (!shouldLogAtSrcKey(sk)) return nullptr;
   return getLoggingProfile(LoggingProfileKey(canonicalize(sk)));
+}
+
+LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct) {
+  auto const profile = runtimeStruct->m_profile.load(std::memory_order_relaxed);
+  if (profile) return profile;
+  auto const newProfile = getLoggingProfile(LoggingProfileKey(runtimeStruct));
+  runtimeStruct->m_profile.store(newProfile, std::memory_order_relaxed);
+  return newProfile;
 }
 
 LoggingProfile* getLoggingProfile(const Class* cls, Slot slot) {

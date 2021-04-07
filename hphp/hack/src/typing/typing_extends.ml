@@ -791,37 +791,50 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
     in
-    let child_cstr =
-      match child_typeconst.ttc_abstract with
-      | TCAbstract _ ->
-        Some (Option.value child_typeconst.ttc_as_constraint ~default)
-      | _ -> child_typeconst.ttc_as_constraint
-    in
-    let env =
+    let check_cstrs reason env sub super =
       Option.value ~default:env
       @@ Option.map2
-           child_cstr
-           parent_typeconst.ttc_as_constraint
-           ~f:
-             (Typing_ops.sub_type_decl_on_error
-                pos
-                Reason.URsubsume_tconst_cstr
-                env
-                on_error)
+           sub
+           super
+           ~f:(Typing_ops.sub_type_decl_on_error pos reason env on_error)
+    in
+    let (child_super_cstr, child_as_cstr) =
+      match child_typeconst.ttc_abstract with
+      | TCAbstract _ ->
+        ( Some (Option.value child_typeconst.ttc_super_constraint ~default),
+          Some (Option.value child_typeconst.ttc_as_constraint ~default) )
+      | _ ->
+        (child_typeconst.ttc_super_constraint, child_typeconst.ttc_as_constraint)
+    in
+    let env =
+      check_cstrs
+        Reason.URsubsume_tconst_cstr
+        env
+        child_as_cstr
+        parent_typeconst.ttc_as_constraint
+    in
+    let env =
+      check_cstrs
+        Reason.URsubsume_tconst_cstr
+        env
+        parent_typeconst.ttc_super_constraint
+        child_super_cstr
     in
 
     (* Check that the child's assigned type satisifies parent constraint *)
     let env =
-      Option.value ~default:env
-      @@ Option.map2
-           child_typeconst.ttc_type
-           parent_typeconst.ttc_as_constraint
-           ~f:
-             (Typing_ops.sub_type_decl_on_error
-                pos
-                Reason.URtypeconst_cstr
-                env
-                on_error)
+      check_cstrs
+        Reason.URtypeconst_cstr
+        env
+        child_typeconst.ttc_type
+        parent_typeconst.ttc_as_constraint
+    in
+    let env =
+      check_cstrs
+        Reason.URtypeconst_cstr
+        env
+        parent_typeconst.ttc_super_constraint
+        child_typeconst.ttc_type
     in
 
     (* Don't recheck inherited type constants: errors will

@@ -1,0 +1,30 @@
+File "ctx-const-bounds_lower-only_inheritance.php", line 4, characters 24-39:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 24-33:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 15-24:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 23, characters 15-22:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 15-30:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 30, characters 15-24:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 13-13:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 29-36:
+  Expected `nothing`
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-33:
+  But got `((HH\Capabilities\Rx & HH\Capabilities\WriteProperty))`
+File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 13-13:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 18-25:
+  Expected `nothing`
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-33:
+  But got `((HH\Capabilities\Rx & HH\Capabilities\WriteProperty))`
+File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 13-13:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 22-29:
+  Expected `nothing`
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-33:
+  But got `((HH\Capabilities\Rx & HH\Capabilities\WriteProperty))`

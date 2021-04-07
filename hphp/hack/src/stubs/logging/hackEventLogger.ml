@@ -445,12 +445,15 @@ module ProfileDecl = struct
 end
 
 module Rage = struct
+  let rage_start ~rageid:_ ~desc:_ ~root:_ ~from:_ ~disk_config:_ = ()
+
   let rage
       ~rageid:_
       ~desc:_
       ~root:_
       ~from:_
       ~hhconfig_version:_
+      ~disk_config:_
       ~experiments:_
       ~experiments_config_meta:_
       ~items:_

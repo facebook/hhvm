@@ -194,6 +194,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Int:
   case Op::Double:
   case Op::String:
+  case Op::LazyClass:
   case Op::Dict:
   case Op::Vec:
   case Op::Keyset:
@@ -849,13 +850,14 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfPersistentKeyset:
       assertx(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
+    case KindOfLazyClass:
+      return bc::LazyClass { cell.m_data.plazyclass.name() };
 
     case KindOfResource:
     case KindOfObject:
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfLazyClass: // TODO (T68822846)
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

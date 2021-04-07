@@ -668,6 +668,10 @@ std::string show(const Type& t) {
       );
     case DataTag::Str:
       return impl(BStr, folly::sformat("={}", escaped_string(t.m_data.sval)));
+    case DataTag::LazyCls:
+      return impl(BLazyCls,
+                  folly::sformat("={}",
+                  escaped_string(t.m_data.lazyclsval)));
     case DataTag::Int: return impl(BInt, folly::sformat("={}", t.m_data.ival));
     case DataTag::Dbl: return impl(BDbl, folly::sformat("={}", t.m_data.dval));
     case DataTag::None: return gather(bits);

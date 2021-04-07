@@ -331,8 +331,12 @@ ArrayData* impl_type_structure_opts(ISS& env,
     }
     return nullptr;
   }
-  if (tvIsString(&*cls_or_obj)) {
-    auto const rcls = env.index.resolve_class(env.ctx, cls_or_obj->m_data.pstr);
+  if (tvIsString(&*cls_or_obj) || tvIsLazyClass(&*cls_or_obj)) {
+    auto const rcls =
+      env.index.resolve_class(env.ctx,
+                              tvIsString(&*cls_or_obj) ?
+                              cls_or_obj->m_data.pstr :
+                              cls_or_obj->m_data.plazyclass.name());
     if (!rcls || !rcls->resolved()) return nullptr;
     return result(*rcls, cns_sd, false);
   } else if (!tvIsObject(&*cls_or_obj) && !tvIsClass(&*cls_or_obj)) {

@@ -184,6 +184,7 @@ struct Type;
   DT(Obj, DObj, dobj)                                           \
   DT(WaitHandle, DWaitHandle, dwh)                              \
   DT(Cls, DCls, dcls)                                           \
+  DT(LazyCls, SString, lazyclsval)                              \
   DT(Record, DRecord, drec)                                     \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
@@ -471,6 +472,7 @@ private:
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_record(const Type&);
   friend bool is_specialized_cls(const Type&);
+  friend bool is_specialized_lazycls(const Type&);
   friend bool is_specialized_string(const Type&);
   friend bool is_specialized_int(const Type&);
   friend bool is_specialized_double(const Type&);
@@ -480,6 +482,7 @@ private:
   friend Type sval_counted(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
+  friend Type lazyclsval(SString);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
@@ -495,6 +498,7 @@ private:
   friend DRecord drec_of(const Type&);
   friend DCls dcls_of(Type);
   friend SString sval_of(const Type&);
+  friend SString lazyclsval_of(const Type&);
   friend int64_t ival_of(const Type&);
   friend Type union_of(Type, Type);
   friend Type intersection_of(Type, Type);
@@ -516,6 +520,7 @@ private:
   friend Type remove_int(Type);
   friend Type remove_double(Type);
   friend Type remove_string(Type);
+  friend Type remove_lazycls(Type);
   friend Type remove_cls(Type);
   friend Type remove_obj(Type);
   friend Type remove_keyset(Type);
@@ -524,6 +529,7 @@ private:
   friend std::pair<Type, Type> split_cls(Type);
   friend std::pair<Type, Type> split_array_like(Type);
   friend std::pair<Type, Type> split_string(Type);
+  friend std::pair<Type, Type> split_lazycls(Type);
 
   friend std::string show(const Type&);
   friend std::pair<Type,bool> array_like_elem_impl(const Type&, const Type&);
@@ -731,6 +737,7 @@ Type wait_handle_inner(const Type& t);
  */
 Type ival(int64_t);
 Type dval(double);
+Type lazyclsval(SString);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
@@ -900,9 +907,10 @@ bool is_specialized_record(const Type&);
 
 /*
  * Returns true if type 't' represents a "specialized"
- * string/int/double--i.e. with a known value.
+ * string/int/double/lazy class--i.e. with a known value.
  */
 bool is_specialized_string(const Type&);
+bool is_specialized_lazycls(const Type&);
 bool is_specialized_int(const Type&);
 bool is_specialized_double(const Type&);
 
@@ -937,6 +945,7 @@ std::pair<Type, Type> split_obj(Type);
 std::pair<Type, Type> split_cls(Type);
 std::pair<Type, Type> split_array_like(Type);
 std::pair<Type, Type> split_string(Type);
+std::pair<Type, Type> split_lazycls(Type);
 
 /*
  * Remove TInt/TDbl/TStr/TCls/TObj from the type `t', including any
@@ -946,6 +955,7 @@ std::pair<Type, Type> split_string(Type);
 Type remove_int(Type);
 Type remove_double(Type);
 Type remove_string(Type);
+Type remove_lazycls(Type);
 Type remove_cls(Type);
 Type remove_obj(Type);
 
@@ -1066,6 +1076,13 @@ DCls dcls_of(Type t);
  * Pre: is_specialized_string(t)
  */
 SString sval_of(const Type& t);
+
+/*
+ * Return the SString for a strict subtype of TLazyCls.
+ *
+ * Pre: is_specialized_lazycls(t)
+ */
+SString lazyclsval_of(const Type& t);
 
 /*
  * Return the specialized integer value for a type.

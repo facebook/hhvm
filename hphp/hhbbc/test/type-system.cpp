@@ -187,6 +187,10 @@ Type make_specialized_string(trep bits, SString s) {
   return set_trep_for_testing(sval(s), bits);
 }
 
+Type make_specialized_lazycls(trep bits, SString s) {
+  return set_trep_for_testing(lazyclsval(s), bits);
+}
+
 Type make_specialized_int(trep bits, int64_t i) {
   return set_trep_for_testing(ival(i), bits);
 }
@@ -272,6 +276,10 @@ Type sval_nonstatic(const StaticString& s) {
 }
 Type sval_counted(const StaticString& s) {
   return HPHP::HHBBC::sval_counted(s.get());
+}
+
+Type lazyclsval(const StaticString& s) {
+  return HPHP::HHBBC::lazyclsval(s.get());
 }
 
 TypedValue tv(SString s) { return make_tv<KindOfPersistentString>(s); }
@@ -383,7 +391,8 @@ std::vector<Type> withData(const Index& index) {
   auto const skeyset1 = static_keyset(s_A.get(), s_B.get());
   auto const skeyset2 = static_keyset(123, 456);
 
-  auto const support = BStr | BDbl | BInt | BCls | BObj | BRecord | BArrLikeN;
+  auto const support = BStr | BDbl | BInt | BCls | BObj |
+                       BRecord | BArrLikeN | BLazyCls;
   auto const nonSupport = BCell & ~support;
 
   auto const add = [&] (trep b) {
@@ -394,6 +403,10 @@ std::vector<Type> withData(const Index& index) {
     if (couldBe(b, BStr) && subtypeOf(b, BStr | nonSupport)) {
       types.emplace_back(make_specialized_string(b, s_A.get()));
       types.emplace_back(make_specialized_string(b, s_B.get()));
+    }
+    if (couldBe(b, BLazyCls) && subtypeOf(b, BLazyCls | nonSupport)) {
+      types.emplace_back(make_specialized_lazycls(b, s_A.get()));
+      types.emplace_back(make_specialized_lazycls(b, s_B.get()));
     }
     if (couldBe(b, BInt) && subtypeOf(b, BInt | nonSupport)) {
       types.emplace_back(make_specialized_int(b, 123));
@@ -1555,6 +1568,9 @@ TEST(Type, Split) {
 
     auto const [str, strRest] = split_string(t);
     test(is_specialized_string, BStr, str, strRest, t);
+
+    auto const [lcls, lclsRest] = split_lazycls(t);
+    test(is_specialized_lazycls, BLazyCls, lcls, lclsRest, t);
   }
 
   auto split = split_array_like(Type{BDictN|BInt});
@@ -1671,6 +1687,18 @@ TEST(Type, Split) {
   split = split_string(union_of(TStr, ival(123)));
   EXPECT_EQ(split.first, TStr);
   EXPECT_EQ(split.second, TInt);
+
+  split = split_lazycls(TInt);
+  EXPECT_EQ(split.first, TBottom);
+  EXPECT_EQ(split.second, TInt);
+
+  split = split_lazycls(Type{BStr|BLazyCls});
+  EXPECT_EQ(split.first, TLazyCls);
+  EXPECT_EQ(split.second, TStr);
+
+  split = split_lazycls(union_of(lazyclsval(s_A), TFalse));
+  EXPECT_EQ(split.first, lazyclsval(s_A));
+  EXPECT_EQ(split.second, TFalse);
 }
 
 TEST(Type, Remove) {
@@ -1698,12 +1726,14 @@ TEST(Type, Remove) {
     test(is_specialized_int, BInt, remove_int(t), t);
     test(is_specialized_double, BDbl, remove_double(t), t);
     test(is_specialized_string, BStr, remove_string(t), t);
+    test(is_specialized_lazycls, BLazyCls, remove_lazycls(t), t);
     test(is_specialized_cls, BCls, remove_cls(t), t);
     test(is_specialized_obj, BObj, remove_obj(t), t);
 
     EXPECT_EQ(remove_int(t), remove_bits(t, BInt));
     EXPECT_EQ(remove_double(t), remove_bits(t, BDbl));
     EXPECT_EQ(remove_string(t), remove_bits(t, BStr));
+    EXPECT_EQ(remove_lazycls(t), remove_bits(t, BLazyCls));
     EXPECT_EQ(remove_cls(t), remove_bits(t, BCls));
     EXPECT_EQ(remove_obj(t), remove_bits(t, BObj));
 
@@ -1744,6 +1774,12 @@ TEST(Type, Remove) {
   EXPECT_EQ(remove_string(sval(s_A)), TBottom);
   EXPECT_EQ(remove_string(union_of(ival(123),TStr)), TInt);
   EXPECT_EQ(remove_string(union_of(TInt,sval(s_A))), TInt);
+
+  EXPECT_EQ(remove_lazycls(TStr), TStr);
+  EXPECT_EQ(remove_lazycls(TLazyCls), TBottom);
+  EXPECT_EQ(remove_lazycls(Type{BLazyCls|BStr}), TStr);
+  EXPECT_EQ(remove_lazycls(lazyclsval(s_A)), TBottom);
+  EXPECT_EQ(remove_lazycls(union_of(TInt,lazyclsval(s_A))), TInt);
 
   auto const clsA = index.resolve_class(Context{}, s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
@@ -1802,6 +1838,7 @@ TEST(Type, Prim) {
     { TPrim, dval(0.0) },
     { TCls, TInitPrim },
     { TFunc, TInitPrim },
+    { TLazyCls, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -1820,6 +1857,7 @@ TEST(Type, Prim) {
     { TPrim, TSStr },
     { TInitPrim, TSStr },
     { TInitPrim, sval(s_test) },
+    { TInitPrim, lazyclsval(s_test) },
     { TPrim, sval(s_test) },
     { TInitPrim, TUninit },
     { TPrim, TObj },
@@ -1881,6 +1919,9 @@ TEST(Type, CouldBeValues) {
   EXPECT_TRUE(sval_nonstatic(s_test).couldBe(sval(s_test)));
   EXPECT_FALSE(sval(s_test.get()).couldBe(sval_nonstatic(s_A)));
   EXPECT_FALSE(sval_nonstatic(s_test).couldBe(sval(s_A)));
+
+  EXPECT_FALSE(lazyclsval(s_test).couldBe(lazyclsval(s_A)));
+  EXPECT_TRUE(lazyclsval(s_test).couldBe(lazyclsval(s_test)));
 }
 
 TEST(Type, Unc) {
@@ -2021,6 +2062,11 @@ TEST(Type, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(BOptStr));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptStr));
 
+  EXPECT_TRUE(lazyclsval(s_test).subtypeOf(BOptLazyCls));
+  EXPECT_TRUE(TLazyCls.subtypeOf(BOptLazyCls));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptLazyCls));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptLazyCls));
+
   EXPECT_TRUE(TObj.subtypeOf(BOptObj));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptObj));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptObj));
@@ -2061,9 +2107,11 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(opt(ival(2)), union_of(ival(2), TInitNull));
   EXPECT_EQ(opt(dval(2.0)), union_of(TInitNull, dval(2.0)));
   EXPECT_EQ(opt(sval(s_test)), union_of(sval(s_test), TInitNull));
+  EXPECT_EQ(opt(lazyclsval(s_test)), union_of(lazyclsval(s_test), TInitNull));
   EXPECT_EQ(opt(sval_nonstatic(s_test)),
             union_of(sval_nonstatic(s_test), TInitNull));
   EXPECT_EQ(opt(sval(s_test)), union_of(TInitNull, sval(s_test)));
+  EXPECT_EQ(opt(lazyclsval(s_test)), union_of(TInitNull, lazyclsval(s_test)));
   EXPECT_EQ(opt(sval_nonstatic(s_test)),
             union_of(TInitNull, sval_nonstatic(s_test)));
 
@@ -2172,6 +2220,7 @@ TEST(Type, TV) {
   test(ival(123), make_tv<KindOfInt64>(123));
   test(dval(3.141), make_tv<KindOfDouble>(3.141));
   test(sval(s_A), tv(s_A));
+  test(lazyclsval(s_A), tv(s_A));
   test(vec_val(static_vec(123, 456, 789)),
        make_array_like_tv(const_cast<ArrayData*>(static_vec(123, 456, 789))));
   test(make_specialized_arrpacked(BDictN, {ival(1), ival(2), ival(3)}, LegacyMark::Unmarked),
@@ -2204,6 +2253,7 @@ TEST(Type, TV) {
   EXPECT_FALSE(tv(union_of(dict_empty(), vec_empty())).has_value());
   EXPECT_FALSE(tv(make_specialized_int(BInt|BFalse, 123)).has_value());
   EXPECT_FALSE(tv(make_specialized_string(BStr|BFalse, s_A.get())).has_value());
+  EXPECT_FALSE(tv(make_specialized_lazycls(BLazyCls|BFalse, s_A.get())).has_value());
   EXPECT_FALSE(
     tv(
       make_specialized_arrmap(
@@ -2336,6 +2386,11 @@ TEST(Type, OptCouldBe) {
     { opt(sval_nonstatic(s_test)), TSStr },
     { opt(sval_nonstatic(s_test)), sval_nonstatic(s_test) },
     { opt(sval_nonstatic(s_test)), sval(s_test) },
+
+    { opt(lazyclsval(s_test)), TLazyCls },
+    { opt(lazyclsval(s_test)), TInitNull },
+    { opt(lazyclsval(s_test)), lazyclsval(s_test) },
+    { opt(sval(s_test)), sval_nonstatic(s_test) },
 
     { opt(ival(2)), TInt },
     { opt(ival(2)), TInitNull },
@@ -5099,11 +5154,14 @@ TEST(Type, Emptiness) {
     { opt(ival(1)), Emptiness::Maybe },
     { sempty(), Emptiness::Empty },
     { sval(s_A), Emptiness::NonEmpty },
+    { lazyclsval(s_A), Emptiness::NonEmpty },
     { dval(3.14), Emptiness::NonEmpty },
     { dval(0), Emptiness::Empty },
     { TInitCell, Emptiness::Maybe },
     { TInt, Emptiness::Maybe },
     { TStr, Emptiness::Maybe },
+    { TLazyCls, Emptiness::NonEmpty },
+    { TCls, Emptiness::NonEmpty },
     { TDbl, Emptiness::Maybe }
   };
   for (auto const& p : tests) {
@@ -5162,6 +5220,7 @@ TEST(Type, AssertNonEmptiness) {
     { ival(1), ival(1) },
     { sempty(), TBottom },
     { sval(s_A), sval(s_A) },
+    { lazyclsval(s_A), lazyclsval(s_A) },
     { dval(3.14), dval(3.14) },
     { dval(0), TBottom },
     { opt(ival(0)), TBottom },
@@ -5169,6 +5228,7 @@ TEST(Type, AssertNonEmptiness) {
     { TInitCell, Type{BInitCell & ~(BNull | BFalse | BArrLikeE)} },
     { TInt, TInt },
     { TStr, TStr },
+    { TLazyCls, TLazyCls },
     { TDbl, TDbl },
     { union_of(ival(1),TStr), union_of(ival(1),TStr) },
     { union_of(ival(0),TStr), TArrKey },
@@ -5228,6 +5288,7 @@ TEST(Type, AssertEmptiness) {
     { sempty(), sempty() },
     { sempty_nonstatic(), sempty_nonstatic() },
     { sval(s_A), TBottom },
+    { lazyclsval(s_A), TBottom },
     { dval(3.14), TBottom },
     { dval(0), dval(0) },
     { opt(ival(0)), opt(ival(0)) },
@@ -5235,6 +5296,7 @@ TEST(Type, AssertEmptiness) {
     { TInt, ival(0) },
     { TStr, sempty_nonstatic() },
     { TSStr, sempty() },
+    { TLazyCls, TBottom },
     { TDbl, dval(0) },
     { union_of(ival(1),TStr), TArrKey },
     { union_of(ival(0),TStr), union_of(TInt,sempty_nonstatic()) },
@@ -5339,6 +5401,7 @@ TEST(Type, LoosenValues) {
     if (is_specialized_string(t) ||
         is_specialized_int(t) ||
         is_specialized_double(t) ||
+        is_specialized_lazycls(t) ||
         is_specialized_array_like(t)) {
       EXPECT_FALSE(loosen_values(t).hasData());
     } else if (!t.couldBe(BBool)) {
@@ -5360,6 +5423,7 @@ TEST(Type, LoosenValues) {
     { dval(3.14), TDbl },
     { sval(s_test), TSStr },
     { sval_nonstatic(s_test), TStr },
+    { lazyclsval(s_test), TLazyCls },
     { dict_val(static_dict(0, 42, 1, 23, 2, 12)), TSDictN },
     { dict_packedn(TInt), TDictN },
     { dict_packed({TInt, TBool}), TDictN },
@@ -5573,7 +5637,7 @@ TEST(Type, Scalarize) {
     if (!t.hasData() && !t.subtypeOf(BArrLikeE)) {
       EXPECT_EQ(scalarize(t), t);
     }
-    if (is_specialized_int(t) || is_specialized_double(t)) {
+    if (is_specialized_int(t) || is_specialized_double(t) || is_specialized_lazycls(t)) {
       EXPECT_EQ(scalarize(t), t);
     }
     if (is_specialized_string(t)) {
@@ -6375,8 +6439,10 @@ TEST(Type, LoosenLikeness) {
     { TClsMeth, Type{BClsMeth|BVecN} },
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
+    { lazyclsval(s_A), Type{BLazyCls|BSStr} },
     { TInt, TInt },
-    { Type{BInt|BCls}, Type{BCls|BSStr|BInt} }
+    { Type{BInt|BCls}, Type{BCls|BSStr|BInt} },
+    { Type{BInt|BLazyCls}, Type{BLazyCls|BSStr|BInt} }
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_likeness(p.first), p.second);

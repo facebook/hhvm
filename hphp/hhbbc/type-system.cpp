@@ -72,7 +72,7 @@ constexpr int kTypeWidenMaxDepth = 8;
 // only allow specialized data if there's only one support bit (there
 // can be any non-support bits).
 constexpr trep kSupportBits =
-  BStr | BDbl | BInt | BCls | BObj | BRecord | BArrLikeN;
+  BStr | BDbl | BInt | BCls | BObj | BRecord | BArrLikeN | BLazyCls;
 // These bits don't correspond to any potential specialized data and
 // can be present freely.
 constexpr trep kNonSupportBits = BCell & ~kSupportBits;
@@ -2068,6 +2068,7 @@ Type Type::unctxHelper(Type t, bool& changed) {
   case DataTag::Str:
   case DataTag::ArrLikeVal:
   case DataTag::Record:
+  case DataTag::LazyCls:
     break;
   }
   return t;
@@ -2209,6 +2210,7 @@ Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,F> f) const {
   case DataTag::Cls:            return f();
   case DataTag::Record:         return f();
   case DataTag::Str:            return f();
+  case DataTag::LazyCls:        return f();
   case DataTag::Obj:            return f();
   case DataTag::WaitHandle:     return f();
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
@@ -2236,6 +2238,7 @@ Type::dualDispatchDataFn(const Type& o, F f) const {
   case DataTag::Cls:            return f();
   case DataTag::Record:         return f();
   case DataTag::Str:            return f();
+  case DataTag::LazyCls:        return f();
   case DataTag::Obj:            return f();
   case DataTag::WaitHandle:     return f();
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
@@ -2284,6 +2287,10 @@ bool Type::equivImpl(const Type& o) const {
     assertx(m_data.sval->isStatic());
     assertx(o.m_data.sval->isStatic());
     return m_data.sval == o.m_data.sval;
+  case DataTag::LazyCls:
+    assertx(m_data.lazyclsval->isStatic());
+    assertx(o.m_data.lazyclsval->isStatic());
+    return m_data.lazyclsval == o.m_data.lazyclsval;
   case DataTag::ArrLikeVal:
     assertx(m_data.aval->isStatic());
     assertx(o.m_data.aval->isStatic());
@@ -2373,6 +2380,8 @@ size_t Type::hash() const {
           return (uintptr_t)m_data.drec.rec.name();
         case DataTag::Str:
           return (uintptr_t)m_data.sval;
+        case DataTag::LazyCls:
+          return (uintptr_t)m_data.lazyclsval;
         case DataTag::Int:
           return m_data.ival;
         case DataTag::Dbl:
@@ -2476,6 +2485,12 @@ bool Type::subtypeOfImpl(const Type& o) const {
     return
       is_specialized_string(*this) &&
       m_data.sval == o.m_data.sval;
+  }
+
+  if (couldBe(isect, BLazyCls) && is_specialized_lazycls(o)) {
+    return
+      is_specialized_lazycls(*this) &&
+      m_data.lazyclsval == o.m_data.lazyclsval;
   }
 
   if (couldBe(isect, BInt) && is_specialized_int(o)) {
@@ -2621,6 +2636,13 @@ bool Type::couldBe(const Type& o) const {
     return m_data.sval == o.m_data.sval;
   }
 
+  if (subtypeOf(isect, BLazyCls)) {
+    if (!is_specialized_lazycls(*this) || !is_specialized_lazycls(o)) {
+      return true;
+    }
+    return m_data.lazyclsval == o.m_data.lazyclsval;
+  }
+
   if (subtypeOf(isect, BInt)) {
     if (!is_specialized_int(*this) || !is_specialized_int(o)) return true;
     return m_data.ival == o.m_data.ival;
@@ -2674,6 +2696,11 @@ bool Type::checkInvariants() const {
     assertx(m_data.sval->isStatic());
     assertx(couldBe(BStr));
     assertx(subtypeOf(BStr | kNonSupportBits));
+    break;
+  case DataTag::LazyCls:
+    assertx(m_data.lazyclsval->isStatic());
+    assertx(couldBe(BLazyCls));
+    assertx(subtypeOf(BLazyCls | kNonSupportBits));
     break;
   case DataTag::Dbl:
     assertx(couldBe(BDbl));
@@ -2956,6 +2983,14 @@ Type dval(double val) {
   auto r        = Type { BDbl, HAMSandwich::None };
   r.m_data.dval = val;
   r.m_dataTag   = DataTag::Dbl;
+  assertx(r.checkInvariants());
+  return r;
+}
+
+Type lazyclsval(SString val) {
+  auto r        = Type { BLazyCls, HAMSandwich::None };
+  r.m_data.lazyclsval = val;
+  r.m_dataTag   = DataTag::LazyCls;
   assertx(r.checkInvariants());
   return r;
 }
@@ -3362,6 +3397,7 @@ bool is_specialized_array_like(const Type& t) {
   switch (t.m_dataTag) {
   case DataTag::None:
   case DataTag::Str:
+  case DataTag::LazyCls:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -3411,6 +3447,10 @@ bool is_specialized_cls(const Type& t) {
 
 bool is_specialized_string(const Type& t) {
   return t.m_dataTag == DataTag::Str;
+}
+
+bool is_specialized_lazycls(const Type& t) {
+  return t.m_dataTag == DataTag::LazyCls;
 }
 
 bool is_specialized_int(const Type& t) {
@@ -3466,6 +3506,7 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3525,6 +3566,7 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3566,6 +3608,7 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3674,6 +3717,10 @@ R tvImpl(const Type& t) {
     case DataTag::Str:
       if (!t.subtypeOf(BStr) || (!allow_counted && t.subtypeOf(BCStr))) break;
       return H::template make<KindOfPersistentString>(t.m_data.sval);
+    case DataTag::LazyCls:
+      if (!t.subtypeOf(BLazyCls)) break;
+      return H::template make<KindOfLazyClass>(
+          LazyClassData::create(t.m_data.lazyclsval));
     case DataTag::ArrLikeVal:
       // It's a Type invariant that the bits will be exactly one of
       // the array types with ArrLikeVal. We don't care which.
@@ -3753,6 +3800,7 @@ Type scalarize(Type t) {
       break;
     case DataTag::Int:
     case DataTag::Dbl:
+    case DataTag::LazyCls:
       break;
     case DataTag::ArrLikeVal:
       t.m_bits &= BSArrLike;
@@ -3951,6 +3999,12 @@ SString sval_of(const Type& t) {
   return t.m_data.sval;
 }
 
+SString lazyclsval_of(const Type& t) {
+  assertx(t.checkInvariants());
+  assertx(is_specialized_lazycls(t));
+  return t.m_data.lazyclsval;
+}
+
 int64_t ival_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_int(t));
@@ -3990,7 +4044,7 @@ Type from_cell(TypedValue cell) {
     always_assert(cell.m_data.parr->isKeysetType());
     return keyset_val(cell.m_data.parr);
 
-  case KindOfLazyClass: return TLazyCls;
+  case KindOfLazyClass: return lazyclsval(cell.m_data.plazyclass.name());
 
   case KindOfObject:
   case KindOfResource:
@@ -4312,6 +4366,18 @@ Type intersection_of(Type a, Type b) {
     if (couldBe(isect, BStr)) return reuse(b);
   }
 
+  if (is_specialized_lazycls(a)) {
+    if (is_specialized_lazycls(b)) {
+      assertx(couldBe(isect, BLazyCls));
+      if (a.m_data.lazyclsval == b.m_data.lazyclsval) return reuse(a);
+      isect &= ~BLazyCls;
+      return isect ? nodata() : TBottom;
+    }
+    if (couldBe(isect, BLazyCls)) return reuse(a);
+  } else if (is_specialized_lazycls(b)) {
+    if (couldBe(isect, BLazyCls)) return reuse(b);
+  }
+
   if (is_specialized_int(a)) {
     if (is_specialized_int(b)) {
       assertx(couldBe(isect, BInt));
@@ -4526,6 +4592,24 @@ Type union_of(Type a, Type b) {
     return reuse(b);
   }
 
+  if (is_specialized_lazycls(a)) {
+    if (is_specialized_lazycls(b)) {
+      if (a.m_data.lazyclsval == b.m_data.lazyclsval) return reuse(a);
+      return nodata();
+    }
+    if (b.couldBe(BLazyCls) ||
+        !subtypeOf(combined, BLazyCls | kNonSupportBits)) {
+      return nodata();
+    }
+    return reuse(a);
+  } else if (is_specialized_lazycls(b)) {
+    if (a.couldBe(BLazyCls) ||
+        !subtypeOf(combined, BLazyCls | kNonSupportBits)) {
+      return nodata();
+    }
+    return reuse(b);
+  }
+
   if (is_specialized_int(a)) {
     if (is_specialized_int(b)) {
       if (a.m_data.ival == b.m_data.ival) return reuse(a);
@@ -4594,7 +4678,7 @@ Emptiness emptiness(const Type& t) {
   assertx(t.subtypeOf(BCell));
 
   auto const emptyMask = BNull | BFalse | BArrLikeE;
-  auto const nonEmptyMask = BTrue | BArrLikeN | BObj;
+  auto const nonEmptyMask = BTrue | BArrLikeN | BObj | BCls | BLazyCls;
   auto const bothMask =
     BCell & ~(emptyMask | nonEmptyMask | BInt | BDbl | BStr);
   auto empty = t.couldBe(emptyMask | bothMask);
@@ -4652,6 +4736,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
   switch (t.m_dataTag) {
     case DataTag::None:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -4783,6 +4868,7 @@ Type loosen_staticness(Type t) {
     if (couldBe(bits, a)) bits |= a;
   };
   check(BStr);
+  check(BLazyCls);
   check(BVecE);
   check(BVecN);
   check(BDictE);
@@ -4795,6 +4881,7 @@ Type loosen_staticness(Type t) {
   switch (t.m_dataTag) {
     case DataTag::None:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -4891,6 +4978,7 @@ Type loosen_array_values(Type a) {
       return Type { a.bits(), a.m_ham };
     case DataTag::None:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -4906,6 +4994,7 @@ Type loosen_values(Type a) {
   auto t = [&]{
     switch (a.m_dataTag) {
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::ArrLikeVal:
@@ -4954,6 +5043,7 @@ Type loosen_likeness_recursively(Type t) {
   switch (t.m_dataTag) {
   case DataTag::None:
   case DataTag::Str:
+  case DataTag::LazyCls:
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Obj:
@@ -5096,6 +5186,16 @@ Type remove_string(Type t) {
   return t;
 }
 
+Type remove_lazycls(Type t) {
+  assertx(t.subtypeOf(BCell));
+  if (t.m_dataTag == DataTag::LazyCls) {
+    return remove_data(std::move(t), BLazyCls);
+  }
+  t.m_bits &= ~BLazyCls;
+  assertx(t.checkInvariants());
+  return t;
+}
+
 Type remove_cls(Type t) {
   assertx(t.subtypeOf(BCell));
   if (t.m_dataTag == DataTag::Cls) {
@@ -5140,6 +5240,7 @@ Type remove_bits(Type t, trep bits) {
       case DataTag::Int:        return BInt;
       case DataTag::Dbl:        return BDbl;
       case DataTag::Str:        return BStr;
+      case DataTag::LazyCls:    return BLazyCls;
       case DataTag::Obj:
       case DataTag::WaitHandle: return BObj;
       case DataTag::Cls:        return BCls;
@@ -5228,6 +5329,19 @@ std::pair<Type, Type> split_string(Type t) {
   return std::make_pair(Type { b & BStr, HAMSandwich::None }, std::move(t));
 }
 
+std::pair<Type, Type> split_lazycls(Type t) {
+  assertx(t.subtypeOf(BCell));
+  auto const b = t.bits();
+  if (is_specialized_lazycls(t)) {
+    auto const ham = t.m_ham;
+    t.m_bits &= BLazyCls;
+    t.m_ham = HAMSandwich::None;
+    return std::make_pair(std::move(t), Type { b & ~BLazyCls, ham });
+  }
+  t.m_bits &= ~BLazyCls;
+  return std::make_pair(Type { b & BLazyCls, HAMSandwich::None }, std::move(t));
+}
+
 Type assert_emptiness(Type t) {
   auto const stripVal = [&] (TypedValue tv, trep support) {
     if (tvToBool(tv)) t = remove_data(std::move(t), support);
@@ -5235,6 +5349,14 @@ Type assert_emptiness(Type t) {
 
   if (t.couldBe(BArrLikeN)) {
     t = remove_data(std::move(t), BArrLikeN);
+  }
+
+  if (t.couldBe(BLazyCls)) {
+    t = remove_data(std::move(t), BLazyCls);
+  }
+
+  if (t.couldBe(BCls)) {
+    t = remove_data(std::move(t), BCls);
   }
 
   if (!could_have_magic_bool_conversion(t) && t.couldBe(BObj)) {
@@ -5292,6 +5414,7 @@ Type assert_nonemptiness(Type t) {
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
     case DataTag::ArrLikeVal:
+    case DataTag::LazyCls:
       break;
     case DataTag::Int:
       stripVal(make_tv<KindOfInt64>(t.m_data.ival), BInt);
@@ -5389,6 +5512,7 @@ IterTypes iter_types(const Type& iterable) {
   switch (iterable.m_dataTag) {
   case DataTag::None:
   case DataTag::Str:
+  case DataTag::LazyCls:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -5454,6 +5578,7 @@ bool could_contain_objects(const Type& t) {
   switch (t.m_dataTag) {
   case DataTag::None:
   case DataTag::Str:
+  case DataTag::LazyCls:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -5533,6 +5658,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
         return true;
 
       case DataTag::Str:
+      case DataTag::LazyCls:
       case DataTag::Obj:
       case DataTag::WaitHandle:
       case DataTag::Int:
@@ -5587,6 +5713,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
           return TInitCell;
 
         case DataTag::Str:
+        case DataTag::LazyCls:
         case DataTag::Obj:
         case DataTag::WaitHandle:
         case DataTag::Int:
@@ -5812,6 +5939,7 @@ std::pair<Type, bool> array_like_elem_impl(const Type& arr, const Type& key) {
   auto r = [&] () -> std::pair<Type, bool> {
     switch (arr.m_dataTag) {
       case DataTag::Str:
+      case DataTag::LazyCls:
       case DataTag::Obj:
       case DataTag::WaitHandle:
       case DataTag::Int:
@@ -6243,6 +6371,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
 
   switch (arr.m_dataTag) {
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -6490,6 +6619,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
 
   switch (arr.m_dataTag) {
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -6615,8 +6745,12 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
   // statically.
   auto promoted = false;
   if (ty.couldBe(BLazyCls)) {
-    ty.m_bits &= ~BLazyCls;
-    ty |= TSStr;
+    auto t = [&] {
+      if (!is_specialized_lazycls(ty)) return TSStr;
+      auto const name = lazyclsval_of(ty);
+      return sval(name);
+    }();
+    ty = union_of(remove_lazycls(std::move(ty)), std::move(t));
     promoted = true;
   }
   if (ty.couldBe(BCls)) {
@@ -6682,6 +6816,7 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     switch (t.m_dataTag) {
     case DataTag::None:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -6969,6 +7104,7 @@ Type loosen_mark_for_testing(Type t) {
   switch (t.m_dataTag) {
     case DataTag::None:
     case DataTag::Str:
+    case DataTag::LazyCls:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:

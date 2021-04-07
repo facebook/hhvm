@@ -86,6 +86,7 @@ bool poppable(Op op) {
     case Op::Keyset:
     case Op::NewDictArray:
     case Op::NewCol:
+    case Op::LazyClass:
       return true;
     default:
       return false;
@@ -513,8 +514,9 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
 }
 
 SString getNameFromType(const Type& t) {
-  if (!t.subtypeOf(BStr)) return nullptr;
+  if (!t.subtypeOf(BStr) && !t.subtypeOf(BLazyCls)) return nullptr;
   if (is_specialized_string(t)) return sval_of(t);
+  if (is_specialized_lazycls(t)) return lazyclsval_of(t);
   return nullptr;
 }
 
@@ -3928,9 +3930,9 @@ void in(ISS& env, const bc::ResolveClass& op) {
   }
 }
 
-void in(ISS& env, const bc::LazyClass&) {
-  // TODO: T70712990: Specialize HHBBC types for lazy classes
-  push(env, TLazyCls);
+void in(ISS& env, const bc::LazyClass& op) {
+  effect_free(env);
+  push(env, lazyclsval(op.str1));
 }
 
 namespace {
@@ -5254,6 +5256,7 @@ void in(ISS& env, const bc::InitProp& op) {
     } else {
       badPropInitialValue(env);
       prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
+      continue;
     }
 
     auto const v = tv(t);

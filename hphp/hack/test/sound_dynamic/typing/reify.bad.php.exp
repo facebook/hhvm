@@ -1,0 +1,28 @@
+File "reify.bad.php", line 10, characters 15-17:
+Invalid argument (Typing[4110])
+  File "reify.bad.php", line 5, characters 22-31:
+  Expected `C<dynamic>`
+  File "reify.bad.php", line 9, characters 31-36:
+  But got `<expr#1> as C<int>`
+  File "reify.bad.php", line 10, characters 15-17:
+    where `<expr#1>` is a reference to this expression
+File "reify.bad.php", line 11, characters 15-17:
+Invalid argument (Typing[4110])
+  File "reify.bad.php", line 7, characters 22-27:
+  Expected `C<int>`
+  File "reify.bad.php", line 9, characters 15-24:
+  But got `<expr#2> as C<dynamic>`
+  File "reify.bad.php", line 11, characters 15-17:
+    where `<expr#2>` is a reference to this expression
+File "reify.bad.php", line 12, characters 15-26:
+Invalid argument (Typing[4110])
+  File "reify.bad.php", line 5, characters 22-31:
+  Expected `C<dynamic>`
+  File "reify.bad.php", line 12, characters 19-19:
+  But got `C<int>`
+File "reify.bad.php", line 13, characters 15-30:
+Invalid argument (Typing[4110])
+  File "reify.bad.php", line 7, characters 22-27:
+  Expected `C<int>`
+  File "reify.bad.php", line 13, characters 19-19:
+  But got `C<dynamic>`

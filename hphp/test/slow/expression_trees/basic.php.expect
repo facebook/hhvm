@@ -1,1 +1,1 @@
-1 __plus function_ptr("bar", )
+${1}->__plus(${function_ptr}(${"bar"}))

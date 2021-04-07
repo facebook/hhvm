@@ -2,11 +2,12 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-class Code {}
-
-function foo(): void {
-  $e = Code`__splice__(1)`;
-}
-
 <<__EntryPoint>>
-function main(): void {}
+function test(): void {
+  require 'expression_tree.inc';
+
+  $x = Code`1`;
+  $et = Code`${ $x }`;
+
+  print_et($et);
+}

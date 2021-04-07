@@ -380,7 +380,6 @@ void LoggingProfile::applyLayout(jit::ArrayLayout layout) {
   }
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 SinkProfile::SinkProfile(SinkProfileKey key)

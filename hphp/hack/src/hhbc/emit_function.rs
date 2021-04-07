@@ -127,8 +127,8 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
             f.fun_kind == ast_defs::FunKind::FAsync,
         );
         body_flags.set(
-            EmitBodyFlags::HAS_COEFFECT_RULES,
-            coeffects.has_coeffect_rules(),
+            EmitBodyFlags::HAS_COEFFECTS_LOCAL,
+            coeffects.has_coeffects_local(),
         );
 
         emit_body::emit_body(

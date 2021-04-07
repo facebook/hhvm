@@ -293,11 +293,15 @@ impl HhasCoeffects {
         self.is_any_rx() || self.is_pure
     }
 
-    pub fn has_coeffect_rules(&self) -> bool {
+    fn has_coeffect_rules(&self) -> bool {
         !self.fun_param.is_empty()
             || !self.cc_param.is_empty()
             || !self.cc_this.is_empty()
             || self.closure_inherit_from_parent
+    }
+
+    pub fn has_coeffects_local(&self) -> bool {
+        self.has_coeffect_rules()
     }
 
     pub fn is_closure_inherit_from_parent(&self) -> bool {

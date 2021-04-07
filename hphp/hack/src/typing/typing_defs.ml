@@ -460,9 +460,14 @@ end
 (* Set to true when we are trying to infer the missing type hints. *)
 let is_suggest_mode = ref false
 
-(* Ordinal value for type constructor, for localized types *)
-let ty_con_ordinal ty_ =
-  match ty_ with
+(* Ordinal value for type constructor *)
+let ty_con_ordinal_ : type a. a ty_ -> int = function
+  (* only decl constructors *)
+  | Tthis -> 100
+  | Tapply _ -> 101
+  | Tmixed -> 102
+  | Tlike _ -> 103
+  (* exist in both phases *)
   | Tany _
   | Terr ->
     0
@@ -479,46 +484,26 @@ let ty_con_ordinal ty_ =
   | Ttuple _ -> 7
   | Tshape _ -> 8
   | Tvar _ -> 9
-  | Tnewtype _ -> 10
   | Tgeneric _ -> 11
-  | Tdependent _ -> 12
   | Tunion _ -> 13
   | Tintersection _ -> 14
-  | Tobject -> 15
-  | Tclass _ -> 16
   | Tvarray _ -> 20
   | Tdarray _ -> 21
   | Tvarray_or_darray _ -> 22
-  | Tunapplied_alias _ -> 23
   | Taccess _ -> 24
   | Tvec_or_dict _ -> 25
+  (* only locl constructors *)
+  | Tunapplied_alias _ -> 200
+  | Tnewtype _ -> 201
+  | Tdependent _ -> 202
+  | Tobject -> 203
+  | Tclass _ -> 204
 
 (* Ordinal value for type constructor, for decl types *)
-let decl_ty_con_ordinal ty_ =
-  match ty_ with
-  | Tany _
-  | Terr ->
-    0
-  | Tthis -> 1
-  | Tapply _ -> 2
-  | Tgeneric _ -> 3
-  | Taccess _ -> 4
-  | Tdarray _ -> 6
-  | Tvarray _ -> 7
-  | Tvarray_or_darray _ -> 8
-  | Tmixed -> 9
-  | Tlike _ -> 10
-  | Tnonnull -> 11
-  | Tdynamic -> 12
-  | Toption _ -> 13
-  | Tprim _ -> 14
-  | Tfun _ -> 15
-  | Ttuple _ -> 16
-  | Tshape _ -> 17
-  | Tvar _ -> 19
-  | Tunion _ -> 20
-  | Tintersection _ -> 21
-  | Tvec_or_dict _ -> 22
+let decl_ty_con_ordinal : decl_ty ty_ -> int = (fun ty_ -> ty_con_ordinal_ ty_)
+
+(* Ordinal value for type constructor, for localized types *)
+let ty_con_ordinal : locl_ty ty_ -> int = (fun ty_ -> ty_con_ordinal_ ty_)
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
@@ -529,9 +514,25 @@ let decl_ty_con_ordinal ty_ =
  * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
  * by any typing rules.
  *)
-let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
-  let rec ty__compare ty_1 ty_2 =
+let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
+ fun ?(normalize_lists = false) ty_1 ty_2 ->
+  let rec ty__compare : type a. a ty_ -> a ty_ -> int =
+   fun ty_1 ty_2 ->
     match (ty_1, ty_2) with
+    (* Only in Declared Phase *)
+    | (Tthis, Tthis) -> 0
+    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
+      begin
+        match String.compare (snd id1) (snd id2) with
+        | 0 -> tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
+        | n -> n
+      end
+    | (Tmixed, Tmixed) -> 0
+    | (Tlike ty1, Tlike ty2) -> ty_compare ty1 ty2
+    | ((Tthis | Tapply _ | Tmixed | Tlike _), _)
+    | (_, (Tthis | Tapply _ | Tmixed | Tlike _)) ->
+      ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
+    (* Both or in Localized Phase *)
     | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2
     | (Toption ty, Toption ty2)
     | (Tvarray ty, Tvarray ty2) ->
@@ -611,15 +612,11 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
         | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
         | Tany _ ),
-        _ )
-    | ( _,
-        ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-        | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
-        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
-        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
-        | Tany _ ) ) ->
-      ty_con_ordinal ty_1 - ty_con_ordinal ty_2
-  and shape_field_type_compare sft1 sft2 =
+        _ ) ->
+      ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
+  and shape_field_type_compare :
+      type a. a shape_field_type -> a shape_field_type -> int =
+   fun sft1 sft2 ->
     let { sft_ty = ty1; sft_optional = optional1 } = sft1 in
     let { sft_ty = ty2; sft_optional = optional2 } = sft2 in
     match ty_compare ty1 ty2 with
@@ -633,7 +630,8 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | n -> n
   and user_attributes_compare ual1 ual2 =
     List.compare user_attribute_compare ual1 ual2
-  and tparam_compare tp1 tp2 =
+  and tparam_compare : type a. a ty tparam -> a ty tparam -> int =
+   fun tp1 tp2 ->
     let {
       (* Type parameters on functions are always marked invariant *)
       tp_variance = _;
@@ -675,13 +673,28 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | n -> n
-  and tparams_compare tpl1 tpl2 = List.compare tparam_compare tpl1 tpl2
-  and constraints_compare cl1 cl2 = List.compare constraint_compare cl1 cl2
-  and constraint_compare (ck1, ty1) (ck2, ty2) =
+  and tparams_compare : type a. a ty tparam list -> a ty tparam list -> int =
+   (fun tpl1 tpl2 -> List.compare tparam_compare tpl1 tpl2)
+  and constraints_compare :
+      type a.
+      (Ast_defs.constraint_kind * a ty) list ->
+      (Ast_defs.constraint_kind * a ty) list ->
+      int =
+   (fun cl1 cl2 -> List.compare constraint_compare cl1 cl2)
+  and constraint_compare :
+      type a.
+      Ast_defs.constraint_kind * a ty -> Ast_defs.constraint_kind * a ty -> int
+      =
+   fun (ck1, ty1) (ck2, ty2) ->
     match Ast_defs.compare_constraint_kind ck1 ck2 with
     | 0 -> ty_compare ty1 ty2
     | n -> n
-  and where_constraint_compare (ty1a, ck1, ty1b) (ty2a, ck2, ty2b) =
+  and where_constraint_compare :
+      type a b.
+      a ty * Ast_defs.constraint_kind * b ty ->
+      a ty * Ast_defs.constraint_kind * b ty ->
+      int =
+   fun (ty1a, ck1, ty1b) (ty2a, ck2, ty2b) ->
     match Ast_defs.compare_constraint_kind ck1 ck2 with
     | 0 ->
       begin
@@ -690,10 +703,15 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | n -> n
-  and where_constraints_compare cl1 cl2 =
-    List.compare where_constraint_compare cl1 cl2
+  and where_constraints_compare :
+      type a b.
+      (a ty * Ast_defs.constraint_kind * b ty) list ->
+      (a ty * Ast_defs.constraint_kind * b ty) list ->
+      int =
+   (fun cl1 cl2 -> List.compare where_constraint_compare cl1 cl2)
   (* We match every field rather than using field selection syntax. This guards against future additions to function type elements *)
-  and tfun_compare fty1 fty2 =
+  and tfun_compare : type a. a ty fun_type -> a ty fun_type -> int =
+   fun fty1 fty2 ->
     let {
       ft_ret = ret1;
       ft_params = params1;
@@ -762,25 +780,33 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | n -> n
-  and ft_arity_compare a1 a2 =
+  and ft_arity_compare : type a. a ty fun_arity -> a ty fun_arity -> int =
+   fun a1 a2 ->
     match (a1, a2) with
     | (Fstandard, Fstandard) -> 0
     | (Fstandard, Fvariadic _) -> -1
     | (Fvariadic _, Fstandard) -> 1
     | (Fvariadic p1, Fvariadic p2) -> ft_param_compare ~normalize_lists p1 p2
-  and capability_compare cap1 cap2 =
+  and capability_compare : type a. a ty capability -> a ty capability -> int =
+   fun cap1 cap2 ->
     match (cap1, cap2) with
     | (CapDefaults _, CapDefaults _) -> 0
     | (CapDefaults _, CapTy _) -> -1
     | (CapTy _, CapDefaults _) -> 1
     | (CapTy ty1, CapTy ty2) -> ty_compare ty1 ty2
-  and ty_compare ty1 ty2 = ty__compare (get_node ty1) (get_node ty2) in
+  and ty_compare : type a. a ty -> a ty -> int =
+   (fun ty1 ty2 -> ty__compare (get_node ty1) (get_node ty2))
+  in
   ty__compare ty_1 ty_2
 
-and ty_compare ?(normalize_lists = false) ty1 ty2 =
+and ty_compare : type a. ?normalize_lists:bool -> a ty -> a ty -> int =
+ fun ?(normalize_lists = false) ty1 ty2 ->
   ty__compare ~normalize_lists (get_node ty1) (get_node ty2)
 
-and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
+and tyl_compare :
+    type a. sort:bool -> ?normalize_lists:bool -> a ty list -> a ty list -> int
+    =
+ fun ~sort ?(normalize_lists = false) tyl1 tyl2 ->
   let (tyl1, tyl2) =
     if sort then
       (List.sort ~compare:ty_compare tyl1, List.sort ~compare:ty_compare tyl2)
@@ -789,20 +815,39 @@ and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
   in
   List.compare (ty_compare ~normalize_lists) tyl1 tyl2
 
-and possibly_enforced_ty_compare ?(normalize_lists = false) ety1 ety2 =
+and possibly_enforced_ty_compare :
+    type a.
+    ?normalize_lists:bool ->
+    a ty possibly_enforced_ty ->
+    a ty possibly_enforced_ty ->
+    int =
+ fun ?(normalize_lists = false) ety1 ety2 ->
   match ty_compare ~normalize_lists ety1.et_type ety2.et_type with
   | 0 -> compare_enforcement ety1.et_enforced ety2.et_enforced
   | n -> n
 
-and ft_param_compare ?(normalize_lists = false) param1 param2 =
+and ft_param_compare :
+    type a. ?normalize_lists:bool -> a ty fun_param -> a ty fun_param -> int =
+ fun ?(normalize_lists = false) param1 param2 ->
   match
     possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type
   with
   | 0 -> Int.compare param1.fp_flags param2.fp_flags
   | n -> n
 
-and ft_params_compare ?(normalize_lists = false) params1 params2 =
+and ft_params_compare :
+    type a.
+    ?normalize_lists:bool -> a ty fun_param list -> a ty fun_param list -> int =
+ fun ?(normalize_lists = false) params1 params2 ->
   List.compare (ft_param_compare ~normalize_lists) params1 params2
+
+(* Dedicated functions with more easily discoverable names *)
+let compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int =
+  ty_compare
+
+(* Dedicated functions with more easily discoverable names *)
+let compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int =
+  ty_compare
 
 let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
 
@@ -918,9 +963,11 @@ let equal_internal_type ty1 ty2 =
     constraint_ty_equal ~normalize_lists:true ty1 ty2
   | (_, (LoclType _ | ConstraintType _)) -> false
 
-let equal_locl_ty ty1 ty2 = ty_equal ty1 ty2
+let equal_locl_ty : locl_ty -> locl_ty -> bool =
+ (fun ty1 ty2 -> ty_equal ty1 ty2)
 
-let equal_locl_ty_ ty_1 ty_2 = Int.equal 0 (ty__compare ty_1 ty_2)
+let equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool =
+ (fun ty_1 ty_2 -> Int.equal 0 (ty__compare ty_1 ty_2))
 
 let equal_locl_fun_arity ft1 ft2 =
   match (ft1.ft_arity, ft2.ft_arity) with
@@ -932,7 +979,7 @@ let equal_locl_fun_arity ft1 ft2 =
   | (Fvariadic _, Fstandard) ->
     false
 
-let is_type_no_return = equal_locl_ty_ (Tprim Aast.Tnoreturn)
+let is_type_no_return : locl_ty_ -> bool = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
 let rec equal_decl_ty_ ty_1 ty_2 =
   match (ty_1, ty_2) with

@@ -24,7 +24,7 @@ impl<'a> From<Id<'a>> for PosId<'a> {
 // or to compare two types for "exact" equality.
 // Note that this function does *not* expand type variables, or type
 // aliases.
-// But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
+// But if compare_locl/decl_ty ty1 ty2 = 0, then the types must not be distinguishable
 // by any typing rules.
 impl PartialEq for Ty<'_> {
     fn eq(&self, other: &Self) -> bool {

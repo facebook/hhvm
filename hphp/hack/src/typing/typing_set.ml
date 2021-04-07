@@ -7,9 +7,9 @@
  *
  *)
 
-(* An implementation of a set of types, using ty_compare for a total order.
+(* An implementation of a set of types, using compare_locl_ty for a total order.
  * Typing-rule-equivalent types may get duplicated, as the equality induced
- * by ty_compare does not expand Tvars and type aliases.
+ * by compare_locl_ty does not expand Tvars and type aliases.
  *)
 open Hh_prelude
 open Typing_defs
@@ -17,7 +17,7 @@ open Typing_defs
 module Ty_ = struct
   type t = locl_ty [@@deriving show]
 
-  let compare r1 r2 = Typing_defs.ty_compare r1 r2
+  let compare r1 r2 = Typing_defs.compare_locl_ty r1 r2
 end
 
 include Caml.Set.Make (Ty_)

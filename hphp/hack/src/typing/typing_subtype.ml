@@ -1290,6 +1290,12 @@ and simplify_subtype_i
               | _ ->
                 (* This ill-formed type should have been caught earlier *)
                 valid env
+            else if String.equal class_name SN.Classes.cAwaitable then
+              match tyargs with
+              | [tyarg] -> simplify_subtype ~subtype_env tyarg ty_super env
+              | _ ->
+                (* This ill-formed type should have been caught earlier *)
+                valid env
             else
               default_subtype env)))
     | (_, Tdynamic) ->

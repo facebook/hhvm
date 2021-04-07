@@ -292,22 +292,39 @@ KeyOrder read_key_order(ProfDataDeserializer& des) {
 }
 
 void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
-  write_raw(ser, key.slot);
-  if (key.slot == kInvalidSlot) {
-    write_srckey(ser, key.sk);
-  } else {
-    write_class(ser, key.cls);
+  write_raw(ser, key.locationType);
+  switch (key.locationType) {
+    case bespoke::LocationType::SrcKey:
+      write_srckey(ser, key.sk);
+      break;
+    case bespoke::LocationType::Property:
+      write_raw(ser, key.slot);
+      write_class(ser, key.cls);
+      break;
+    case bespoke::LocationType::Runtime:
+      write_string(ser, key.runtimeStruct->getStableIdentifier());
+      break;
   }
 }
 
 LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
   LoggingProfileKey key(SrcKey{});
-  read_raw(des, key.slot);
-  if (key.slot == kInvalidSlot) {
-    key.sk = read_srckey(des);
-  } else {
-    key.cls = read_class(des);
-    key.locationType = bespoke::LocationType::Property;
+  read_raw(des, key.locationType);
+  switch (key.locationType) {
+    case bespoke::LocationType::SrcKey:
+      key.sk = read_srckey(des);
+      key.slot = kInvalidSlot;
+      break;
+    case bespoke::LocationType::Property:
+      read_raw(des, key.slot);
+      key.cls = read_class(des);
+      break;
+    case bespoke::LocationType::Runtime: {
+      auto const stableIdentifier = read_string(des);
+      key.runtimeStruct = RuntimeStruct::findById(stableIdentifier);
+      key.slot = kInvalidSlot;
+      break;
+    }
   }
   return key;
 }
@@ -323,6 +340,54 @@ SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
 }
 }
 
+struct RuntimeStructSerde {
+  static void write_runtime_struct(
+      ProfDataSerializer& ser, const RuntimeStruct* runtimeStruct) {
+    write_string(ser, runtimeStruct->m_stableIdentifier);
+
+    write_raw(ser, runtimeStruct->m_fields.size());
+    for (size_t i = 0; i < runtimeStruct->m_fields.size(); i++) {
+      if (runtimeStruct->m_fields[i]) {
+        write_raw(ser, true);
+        write_string(ser, runtimeStruct->m_fields[i]);
+      } else {
+        write_raw(ser, false);
+      }
+    }
+
+    auto const layout = runtimeStruct->m_assignedLayout.load();
+    if (layout) {
+      write_raw(ser, true);
+      write_raw(ser, layout->index());
+    } else {
+      write_raw(ser, false);
+    }
+  }
+
+  static void deserialize_runtime_struct(ProfDataDeserializer& des) {
+    auto const stableIdentifier = read_string(des);
+    auto const fieldSize = read_raw<size_t>(des);
+
+    auto fields = RuntimeStruct::FieldKeys(fieldSize, nullptr);
+    for (int i = 0; i < fieldSize; i ++) {
+      auto const present = read_raw<bool>(des);
+      if (present) {
+        fields[i] = read_string(des);
+      }
+    }
+
+    auto const runtimeStruct =
+      RuntimeStruct::deserialize(stableIdentifier, std::move(fields));
+
+    auto const hasLayout = read_raw<bool>(des);
+    if (hasLayout) {
+      auto const layoutIdx = read_raw<bespoke::LayoutIndex>(des);
+      auto const layout = bespoke::Layout::FromIndex(layoutIdx);
+      runtimeStruct->applyLayout(bespoke::StructLayout::As(layout));
+    }
+  }
+};
+
 void serializeBespokeLayouts(ProfDataSerializer& ser) {
   // For now, we only need to serialize and deserialize StructLayouts,
   // because they are the only dynamically-constructed layouts.
@@ -337,10 +402,19 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
     write_key_order(ser, layout->keyOrder());
   }
 
+  // Serialize the runtime sources
+  std::vector<const RuntimeStruct*> runtimeStructs;
+  RuntimeStruct::eachRuntimeStruct([&](RuntimeStruct* runtimeStruct) {
+    runtimeStructs.push_back(runtimeStruct);
+  });
+  write_raw(ser, runtimeStructs.size());
+  for (auto const runtimeStruct : runtimeStructs) {
+    RuntimeStructSerde::write_runtime_struct(ser, runtimeStruct);
+  }
+
   // Serialize the decisions we made at all sources and sinks.
   write_raw(ser, bespoke::countSources());
   bespoke::eachSource([&](auto const& profile) {
-    if (profile.key.isRuntimeLocation()) return;
     write_source_key(ser, profile.key);
     write_raw(ser, profile.layout);
   });
@@ -356,6 +430,10 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
     StructLayout::Deserialize(index, read_key_order(des));
+  }
+  auto const runtimeStructs = read_raw<size_t>(des);
+  for (auto i = 0; i < runtimeStructs; i++) {
+    RuntimeStructSerde::deserialize_runtime_struct(des);
   }
   auto const sources = read_raw<size_t>(des);
   for (auto i = 0; i < sources; i++) {

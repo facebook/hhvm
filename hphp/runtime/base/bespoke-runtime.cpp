@@ -62,6 +62,17 @@ RuntimeStruct::RuntimeStruct(
   m_fields = std::move(fieldKeys);
 }
 
+RuntimeStruct::RuntimeStruct(
+    const StringData* stableIdentifier, FieldKeys&& fields)
+  : m_profile(nullptr)
+  , m_stableIdentifier(stableIdentifier)
+  , m_assignedLayout(nullptr)
+  , m_fields(std::move(fields))
+  , m_fieldSlots()
+{
+  assertx(stableIdentifier->isStatic());
+}
+
 RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     const String& stableIdentifier, const FieldIndexVector& fields) {
   assertx(stableIdentifier.get()->isStatic());
@@ -90,6 +101,31 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
   if (!pair.second) delete rs;
 
   return pair.first->second;
+}
+
+RuntimeStruct* RuntimeStruct::deserialize(
+    const StringData* stableIdentifier, FieldKeys&& fields) {
+  assertx(allowBespokeArrayLikes());
+  auto const runtimeStruct = new RuntimeStruct(stableIdentifier, std::move(fields));
+  s_runtimeStrMap.emplace(stableIdentifier, runtimeStruct);
+  return runtimeStruct;
+}
+
+RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
+  assertx(allowBespokeArrayLikes());
+  assertx(stableIdentifier->isStatic());
+
+  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  auto const runtimeStruct = s_runtimeStrMap[stableIdentifier];
+  assertx(runtimeStruct);
+  return runtimeStruct;
+}
+
+void RuntimeStruct::eachRuntimeStruct(std::function<void(RuntimeStruct*)> fn) {
+  assertx(allowBespokeArrayLikes());
+
+  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  for (auto& it : s_runtimeStrMap) fn(it.second);
 }
 
 void RuntimeStruct::applyLayout(const bespoke::StructLayout* layout) {

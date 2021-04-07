@@ -32,6 +32,10 @@ struct StructLayout;
 struct LoggingProfile;
 }
 
+namespace jit {
+struct RuntimeStructSerde;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -73,6 +77,7 @@ struct RuntimeStruct {
    */
   static RuntimeStruct* registerRuntimeStruct(
       const String& stableIdentifier, const FieldIndexVector& fields);
+  static void eachRuntimeStruct(std::function<void(RuntimeStruct*)>);
 
   static RuntimeStruct* findById(const StringData* stableIdentifier);
 
@@ -94,6 +99,10 @@ private:
 
   RuntimeStruct(
       const StringData* stableIdentifier, const FieldIndexVector& fields);
+  RuntimeStruct(
+      const StringData* stableIdentifier, FieldKeys&& fields);
+  static RuntimeStruct* deserialize(
+      const StringData* stableIdentifier, FieldKeys&& fields);
 
   const StringData* m_stableIdentifier;
   std::atomic<const bespoke::StructLayout*> m_assignedLayout;
@@ -101,6 +110,7 @@ private:
   FieldSlots m_fieldSlots;
 
   friend struct StructDictInit;
+  friend struct jit::RuntimeStructSerde;
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1231,10 +1231,6 @@ void DebuggerClient::console() {
         // treat ^D as quit
         print("quit");
         line = "quit";
-      } else {
-#ifdef USE_EDITLINE
-        print("%s", line); // Stay consistent with the readline library
-#endif
       }
     } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
@@ -1400,9 +1396,6 @@ char DebuggerClient::ask(const char *fmt, ...) {
   fflush(stdout);
   auto input = readline("");
   if (input == nullptr) return ' ';
-#ifdef USE_EDITLINE
-  print("%s", input); // Stay consistent with the readline library
-#endif
   if (strlen(input) > 0) return tolower(input[0]);
   return ' ';
 }

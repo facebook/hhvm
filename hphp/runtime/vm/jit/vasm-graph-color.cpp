@@ -11175,6 +11175,8 @@ struct SPAdjustLiveness {
   // If set, the index of the last instruction in the block which goes from
   // alive to dead.
   folly::Optional<size_t> end;
+  // Whether this block contains an indirect fixup
+  bool hasIndirectFixup;
 };
 
 // Implementation of spill liveness algorithm, templated to allow for
@@ -11209,6 +11211,8 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
     }
   };
 
+  jit::vector<SPAdjustLiveness> liveness(unit.blocks.size());
+
   for (auto const b : state.rpo) {
     auto& live = slotLiveness[b];
     resize(live.in);
@@ -11227,6 +11231,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
         live.kill[o] = false;
         live.gen[o] = true;
       }
+      if (instrHasIndirectFixup(inst)) liveness[b].hasIndirectFixup = true;
     }
 
     live.in = live.gen;
@@ -11250,8 +11255,6 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
       live.in = std::move(in);
     }
   }
-
-  jit::vector<SPAdjustLiveness> liveness(unit.blocks.size());
 
   for (auto const b : state.rpo) {
     auto& live = liveness[b];
@@ -11491,6 +11494,7 @@ void expand_spill_liveness(const State& state,
 
 // Insert stack pointer adjustments at the appropriate places
 void insert_sp_adjustments(State& state, size_t spillSpace) {
+  assertx(spillSpace != 0);
   // We make use of the stack pointer offset info to determine liveness of the
   // stack pointer, and establish if the base sp has been recorded.
   auto const spOffsets = calculate_sp_offsets(state);
@@ -11527,8 +11531,42 @@ void insert_sp_adjustments(State& state, size_t spillSpace) {
     return 1;
   };
 
+  auto const adjust_rip = [&](Vlabel b, size_t begin, size_t end) {
+    assertx(begin < state.unit.blocks[b].code.size());
+    assertx(end <= state.unit.blocks[b].code.size());
+    for (size_t i = begin; i < end; ++i) {
+      auto& inst = state.unit.blocks[b].code[i];
+      if (instrHasIndirectFixup(inst)) {
+        updateIndirectFixupBySpill(inst, spillSpace);
+      }
+    }
+  };
+
+  auto const prologue = isPrologue(state.unit.context->kind);
   for (auto const b : state.rpo) {
     auto const& spill = spillLiveness[b];
+
+    if (prologue && spill.hasIndirectFixup) {
+      if (spill.begin) {
+        // Spill begins in this block
+        assertx(!spill.in);
+        assertx(IMPLIES(!spill.end, spill.out));
+        assertx(IMPLIES(spill.end, !spill.out));
+        auto const end =
+          spill.end ? *spill.end + 1 : state.unit.blocks[b].code.size();
+        adjust_rip(b, *spill.begin, end);
+      } else if (spill.end) {
+        // Spill ends in this block
+        assertx(spill.in);
+        assertx(!spill.out);
+        adjust_rip(b, 0, *spill.end + 1);
+      } else if (spill.in && spill.out) {
+        // Spill persists in this block
+        adjust_rip(b, 0, state.unit.blocks[b].code.size());
+      } else {
+        assertx(!spill.in && !spill.out);
+      }
+    }
 
     size_t added = 0;
     if (spill.begin) {

@@ -1416,6 +1416,17 @@ inline bool isCall(const Vinstr& inst) { return isCall(inst.op); }
  */
 Width width(Vinstr::Opcode op);
 
+/*
+ * Returns whether the instruction has an indirect fixup
+ */
+bool instrHasIndirectFixup(const Vinstr&);
+
+/*
+ * Updates the rip offset of the indirect fixup by spill amount
+ * Requires: instrHasIndirectFixup()
+ */
+void updateIndirectFixupBySpill(Vinstr&, size_t);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

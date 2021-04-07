@@ -142,6 +142,11 @@ struct Fixup {
   FPInvOffset spOffset() const { assertx(isValid()); return m_spOffset; }
   std::string show() const;
 
+  void adjustRipOffset(int off) {
+    assertx(isValid() && isIndirect());
+    m_pcOrRipOffset -= off;
+  }
+
   bool operator==(const Fixup& o) const {
     return m_pcOrRipOffset == o.m_pcOrRipOffset && m_spOffset == o.m_spOffset;
   }

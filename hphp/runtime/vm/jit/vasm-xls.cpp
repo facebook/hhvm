@@ -2570,6 +2570,7 @@ struct SpillStates {
   SpillState in;
   SpillState out;
   bool changes;
+  bool hasIndirectFixup;
 };
 
 /*
@@ -2788,7 +2789,8 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
   jit::vector<uint32_t> rpoIds(unit.blocks.size());
   for (uint32_t i = 0; i < ctx.blocks.size(); ++i) rpoIds[ctx.blocks[i]] = i;
 
-  jit::vector<SpillStates> states(unit.blocks.size(), {Uninit, Uninit, false});
+  jit::vector<SpillStates> states(unit.blocks.size(),
+                                  {Uninit, Uninit, false, false});
   states[unit.entry].in = NoSpillPossible;
   dataflow_worklist<uint32_t> worklist(unit.blocks.size());
   worklist.push(0);
@@ -2805,6 +2807,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     for (auto& inst : block.code) {
       state = instrInState(unit, inst, state, ctx.sp);
       if (state != stateIn) states[label].changes = true;
+      if (instrHasIndirectFixup(inst)) states[label].hasIndirectFixup = true;
     }
     states[label].out = state;
 
@@ -2881,6 +2884,22 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     // to free spill space.
     if (state.out == NeedSpill) {
       processSpillExits(unit, label, state.in, free, ctx.sp);
+    }
+
+    if (isPrologue(unit.context->kind)) {
+      if (state.hasIndirectFixup) {
+        auto blockState = state.in;
+        for (auto it = block.code.begin(); it != block.code.end(); ++it) {
+          // Note that if the instruction at the start or end of the spill
+          // regions has fixup, this loop does not account for it.
+          // This is not ideal but currently there are no instructions that
+          // have fixups that can start/end spill regions, so it is fine.
+          if (instrInState(unit, *it, blockState, ctx.sp) == NeedSpill &&
+              instrHasIndirectFixup(*it)) {
+            updateIndirectFixupBySpill(*it, spillSize);
+          }
+        }
+      }
     }
   }
 }

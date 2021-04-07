@@ -275,8 +275,6 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     }
     if (callee->hasCoeffectsLocal()) {
       push(env, required);
-      // This is a *gross* hack to reduce register pressure for prologues
-      env.irb->fs().forgetValue(offsetFromIRSP(env, BCSPRelOffset{0}));
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }

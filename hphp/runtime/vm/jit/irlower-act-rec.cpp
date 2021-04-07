@@ -73,6 +73,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   v << store{prevFP, newFP + AROFF(m_sfp)};
+  v << unrecordbasenativesp{};
   v << unstublogue{};
   v << phplogue{newFP};
   v << storeli{(int32_t)func->getFuncId().toInt(), newFP[AROFF(m_funcId)]};

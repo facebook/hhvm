@@ -1,0 +1,2 @@
+Warning: Call to C::f() requires [rx] coeffects but main() provided [] in %s on line 13
+ok

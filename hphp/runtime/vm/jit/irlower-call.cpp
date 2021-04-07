@@ -442,6 +442,7 @@ void cgProfileCall(IRLS& env, const IRInstruction* inst) {
 
 void cgEnterPrologue(IRLS& env, const IRInstruction*) {
   vmain(env) << stublogue{false};
+  vmain(env) << recordbasenativesp{};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

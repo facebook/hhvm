@@ -181,21 +181,17 @@ struct FrameState {
   bool stackModified{false};
 
   /*
-   * Whether the tracking of all locals has been cleared since the unit's entry.
-   */
-  bool localsCleared{false};
-
-  /*
    * The values in the eval stack in memory, either above or below the current
-   * spValue pointer.  This is keyed by the offset to the base of the eval stack
+   * spValue pointer.  These are indexed relative to the base of the eval stack
    * for the whole function.
    */
-  jit::hash_map<uint32_t,StackState> stack;
+  jit::vector<StackState> stack;
 
   /*
-   * Maps the local ids to local variable information.
+   * Vector of local variable information; sized for numLocals on the curFunc
+   * (if the state is initialized).
    */
-  jit::hash_map<uint32_t,LocalState> locals;
+  jit::vector<LocalState> locals;
 
   /*
    * Values and types of the member base register and its pointee.
@@ -352,20 +348,9 @@ struct FrameStateMgr final {
    * Return the LocationState for local `id' or stack element at `off' in the
    * most-inlined frame.
    */
-  LocalState local(uint32_t id) const;
-  StackState stack(IRSPRelOffset off) const;
-  StackState stack(FPInvOffset off) const;
-
-  /*
-   * Return whether the given location is currently being tracked.
-   */
-  bool tracked(Location l) const;
-
-  /*
-   * Return whether the state of the locals have even been cleared since the
-   * unit's entry.
-   */
-  bool localsCleared() const { return cur().localsCleared; }
+  const LocalState& local(uint32_t id) const;
+  const StackState& stack(IRSPRelOffset off) const;
+  const StackState& stack(FPInvOffset off) const;
 
   /*
    * Generic accessors for LocationState members.
@@ -373,7 +358,7 @@ struct FrameStateMgr final {
   SSATmp* valueOf(Location l) const;
   Type typeOf(Location l) const;
   Type predictedTypeOf(Location l) const;
-  TypeSourceSet typeSrcsOf(Location l) const;
+  const TypeSourceSet& typeSrcsOf(Location l) const;
 
   /*
    * Return tracked state for the member base register.
@@ -509,3 +494,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+

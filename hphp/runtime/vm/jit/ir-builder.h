@@ -114,8 +114,8 @@ struct IRBuilder {
    *
    * These simply constrain the location, then delegate to fs().
    */
-  LocalState local(uint32_t id, GuardConstraint gc);
-  StackState stack(IRSPRelOffset offset, GuardConstraint gc);
+  const LocalState& local(uint32_t id, GuardConstraint gc);
+  const StackState& stack(IRSPRelOffset offset, GuardConstraint gc);
   SSATmp* valueOf(Location l, GuardConstraint gc);
   Type     typeOf(Location l, GuardConstraint gc);
 
@@ -399,3 +399,4 @@ struct BlockPusher {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+

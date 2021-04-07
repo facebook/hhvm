@@ -216,11 +216,6 @@ struct InputInfoVec : public std::vector<InputInfo> {
 InputInfoVec getInputs(const NormalizedInstruction&, FPInvOffset bcSPOff);
 
 /*
- * Get the list of local output operands written by the `ni' instruction.
- */
-jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni);
-
-/*
  * Return the index of op's local immediate.
  */
 size_t localImmIdx(Op op);

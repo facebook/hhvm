@@ -1449,8 +1449,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
     return Effects::AlwaysThrows;
   };
   
-  auto const prop = thisPropRaw(env, name);
-  if (prop && !(prop->attrs & AttrIsReadOnly) && op == ReadOnlyOp::ReadOnly) {
+  if (op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
     return alwaysThrows();
   }
 

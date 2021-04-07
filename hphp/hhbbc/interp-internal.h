@@ -908,17 +908,9 @@ bool isTrackedThisProp(ISS& env, SString name) {
 }
 
 bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
-  if (!env.ctx.cls) return false;
-  for (auto const& prop : env.ctx.cls->properties) {
-    if (prop.name == name &&
-        (prop.attrs & AttrPrivate) &&
-        !(prop.attrs & AttrStatic)
-       ) {
-      return prop.attrs & attr;
-    }
-  }
+  auto const prop = thisPropRaw(env, name);
   // Prop either doesn't exist, or is on an unflattened trait. Be conservative.
-  return true;
+  return prop ? prop->attrs & attr : true;
 }
 
 void killThisProps(ISS& env) {

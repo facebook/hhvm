@@ -572,6 +572,13 @@ let float_ n =
 
 let string_ s = JSON_String s
 
+let bool_ flag = JSON_Bool flag
+
+let opt_ (to_json : 'a -> json) (x : 'a option) : json =
+  match x with
+  | None -> JSON_Null
+  | Some x -> to_json x
+
 let get_object_exn = function
   | JSON_Object o -> o
   | _ -> assert false

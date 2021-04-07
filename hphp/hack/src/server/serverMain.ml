@@ -1329,32 +1329,14 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
    * overhead *)
   let gc_control = Caml.Gc.get () in
   Caml.Gc.set { gc_control with Caml.Gc.max_overhead = 200 };
-  let {
-    ServerLocalConfig.cpu_priority;
-    io_priority;
-    enable_on_nfs;
-    search_chunk_size;
-    max_bucket_size;
-    use_full_fidelity_parser;
-    interrupt_on_watchman;
-    interrupt_on_client;
-    predeclare_ide;
-    max_typechecker_worker_memory_mb;
-    _;
-  } =
+  let { ServerLocalConfig.cpu_priority; io_priority; enable_on_nfs; _ } =
     local_config
   in
   let hhconfig_version =
     config |> ServerConfig.version |> Config_file.version_to_string_opt
   in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
-  let prechecked_files =
-    ServerPrecheckedFiles.should_use options local_config
-  in
   let logging_init init_id ~is_worker =
-    let max_times_to_defer =
-      local_config.ServerLocalConfig.max_times_to_defer_type_checking
-    in
     let profile_owner = local_config.ServerLocalConfig.profile_owner in
     let profile_desc = local_config.ServerLocalConfig.profile_desc in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
@@ -1368,10 +1350,10 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~hhconfig_version
         ~init_id
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
+        ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
         ~time:(Unix.gettimeofday ())
         ~profile_owner
         ~profile_desc
-        ~max_times_to_defer
     else
       HackEventLogger.init
         ~root
@@ -1379,19 +1361,11 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~init_id
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~informant_managed
+        ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
         ~time:(Unix.gettimeofday ())
-        ~search_chunk_size
         ~max_workers:num_workers
-        ~max_bucket_size
-        ~use_full_fidelity_parser
-        ~interrupt_on_watchman
-        ~interrupt_on_client
-        ~prechecked_files
-        ~predeclare_ide
-        ~max_typechecker_worker_memory_mb
         ~profile_owner
         ~profile_desc
-        ~max_times_to_defer
   in
   logging_init init_id ~is_worker:false;
   HackEventLogger.init_start

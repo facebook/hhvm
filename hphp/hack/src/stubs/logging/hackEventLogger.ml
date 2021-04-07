@@ -11,6 +11,18 @@ type serialized_globals = Serialized_globals
 
 let serialize_globals () = Serialized_globals
 
+type rollout_flags = {
+  search_chunk_size: int;
+  max_bucket_size: int;
+  use_full_fidelity_parser: bool;
+  interrupt_on_watchman: bool;
+  interrupt_on_client: bool;
+  prechecked_files: bool;
+  predeclare_ide: bool;
+  max_typechecker_worker_memory_mb: int option;
+  max_times_to_defer_type_checking: int option;
+}
+
 let flush () = ()
 
 let deserialize_globals _ = ()
@@ -34,47 +46,29 @@ let bad_exit _ _ _ ~is_oom:_ = ()
 let init
     ~root:_
     ~hhconfig_version:_
-    ~custom_columns:_
     ~init_id:_
+    ~custom_columns:_
     ~informant_managed:_
+    ~rollout_flags:_
     ~time:_
-    ~search_chunk_size:_
     ~max_workers:_
-    ~max_bucket_size:_
-    ~use_full_fidelity_parser:_
-    ~interrupt_on_watchman:_
-    ~interrupt_on_client:_
-    ~prechecked_files:_
-    ~predeclare_ide:_
-    ~max_typechecker_worker_memory_mb:_
     ~profile_owner:_
-    ~profile_desc:_
-    ~max_times_to_defer:_ =
+    ~profile_desc:_ =
   ()
 
 let init_worker
     ~root:_
     ~hhconfig_version:_
-    ~custom_columns:_
     ~init_id:_
+    ~custom_columns:_
+    ~rollout_flags:_
     ~time:_
     ~profile_owner:_
-    ~profile_desc:_
-    ~max_times_to_defer:_ =
+    ~profile_desc:_ =
   ()
 
-let init_monitor
-    ~from:_
-    ~custom_columns:_
-    ~proc_stack:_
-    ~search_chunk_size:_
-    ~prechecked_files:_
-    ~predeclare_ide:_
-    ~max_typechecker_worker_memory_mb:_
-    _
-    _
-    _
-    _ =
+let init_monitor ~from:_ ~custom_columns:_ ~proc_stack:_ ~rollout_flags:_ _ _ _
+    =
   ()
 
 let init_batch_tool ~init_id:_ ~root:_ ~time:_ = ()

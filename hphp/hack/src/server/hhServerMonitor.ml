@@ -41,24 +41,17 @@ let monitor_daemon_main
   let (config, local_config) =
     ServerConfig.(load ~silent:false filename options)
   in
-  ( if Sys_utils.is_test_mode () then
+  if Sys_utils.is_test_mode () then
     EventLogger.init_fake ()
   else
-    let max_typechecker_worker_memory_mb =
-      local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-    in
     HackEventLogger.init_monitor
       ~from:(ServerArgs.from options)
       ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
       ~proc_stack
-      ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
-      ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
-      ~predeclare_ide:local_config.ServerLocalConfig.predeclare_ide
-      ~max_typechecker_worker_memory_mb
       (ServerArgs.root options)
       init_id
-      (Unix.gettimeofday ())
-      false );
+      (Unix.gettimeofday ());
   Sys_utils.set_signal
     Sys.sigpipe
     (Sys.Signal_handle
@@ -81,9 +74,6 @@ let monitor_daemon_main
   ignore (make_tmp_dir ());
   ignore (Hhi.get_hhi_root ());
   Typing_global_inference.set_path ();
-
-  if local_config.ServerLocalConfig.use_full_fidelity_parser then
-    HackEventLogger.set_use_full_fidelity_parser true;
 
   if ServerArgs.check_mode options then (
     Hh_logger.log "%s" "Will run once in check mode then exit.";

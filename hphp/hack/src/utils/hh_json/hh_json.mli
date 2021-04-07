@@ -92,6 +92,10 @@ val float_ : float -> json
 
 val string_ : string -> json
 
+val bool_ : bool -> json
+
+val opt_ : ('a -> json) -> 'a option -> json
+
 (* Types and functions for monadic API for traversing a JSON object. *)
 
 type json_type =

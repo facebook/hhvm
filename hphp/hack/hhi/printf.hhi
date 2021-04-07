@@ -18,9 +18,9 @@ namespace {
  *
  * T is treated as a state machine. After the first %, each character
  * causes the corresponding method in T to be looked up. For example,
- * '%d' will "call" the method
+ * '%b' will "call" the method
  *
- *   function format_d(?int $s) : string;
+ *   function format_b(int $s) : string;
  *
  * and consume an 'int' from the argument list.
  *
@@ -37,11 +37,13 @@ namespace {
  *
  * Note that you *could* use an actual instance of T to do the
  * formatting. We don't; T is only here to provide the types.
+ *
+ * For another example on how to implement your own format string interface,
+ * see \HH\Lib\Str\SprintfFormat in the HSL.
  */
 
 interface PlainSprintf {
-  // It's common to pass floats; would be nice to type this as
-  // 'number' once that type becomes available in userland.
+  // Technically %d should only take ints, but we don't.
   public function format_d(mixed $s)[]: string;
   public function format_s(?arraykey $s)[]: string;
   public function format_u(?int $s)[]: string;
@@ -86,8 +88,20 @@ interface SprintfQuote {
   public function format_0x3d()[]: PlainSprintf;
 }
 
+/**
+ * sprintf uses PlainSprintf as its format string.
+ * This type is very wide and will allow many incorrect calls to typecheck.
+ * If possible, upgrade to \HH\Lib\Str\format().
+ * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
+ */
 <<__PHPStdLib>>
 function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args)[]: string;
+/**
+ * printf uses PlainSprintf as its format string.
+ * This type is very wide and will allow many incorrect calls to typecheck.
+ * If possible, upgrade to \HH\Lib\Str\format().
+ * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
+ */
 <<__PHPStdLib>>
 function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
 
@@ -96,7 +110,8 @@ function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
 namespace HH {
 
 // Results in an \HH\InvariantException whose message is the result of
-// calling sprintf with the arguments given this function
+// calling sprintf with the arguments given this function.
+// Equivalent to invariant(false, $fmt, ...$fmt_args).
 function invariant_violation(FormatString<\PlainSprintf> $fmt, ...$fmt_args)[]: noreturn;
 
 }

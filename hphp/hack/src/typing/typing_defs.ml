@@ -499,12 +499,6 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tobject -> 203
   | Tclass _ -> 204
 
-(* Ordinal value for type constructor, for decl types *)
-let decl_ty_con_ordinal : decl_ty ty_ -> int = (fun ty_ -> ty_con_ordinal_ ty_)
-
-(* Ordinal value for type constructor, for localized types *)
-let ty_con_ordinal : locl_ty ty_ -> int = (fun ty_ -> ty_con_ordinal_ ty_)
-
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,

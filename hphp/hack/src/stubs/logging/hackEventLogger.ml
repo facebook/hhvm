@@ -253,9 +253,9 @@ let parsing_end_for_init _ _ ~parsed_count:_ = ()
 
 let parsing_end_for_typecheck _ _ ~parsed_count:_ = ()
 
-let updating_deps_end _ = ()
+let updating_deps_end ?count:_ _ = ()
 
-let naming_end _ _ = ()
+let naming_end ~count:_ _ _ = ()
 
 let global_naming_end _ _ = ()
 

@@ -1187,7 +1187,7 @@ functor
        toplevel symbols declared in that file. Also, update Typing_deps' table,
        which is a map from toplevel symbol hash (Dep.t) to filename. *)
       let naming_table = update_naming_table env fast_parsed profiling in
-      HackEventLogger.updating_deps_end t;
+      HackEventLogger.updating_deps_end ~count:reparse_count t;
       let t = Hh_logger.log_duration logstring t in
       let telemetry =
         Telemetry.duration telemetry ~key:"naming_update_end" ~start_time
@@ -1225,10 +1225,10 @@ functor
           ~profiling
       in
 
-      let t = Hh_logger.log_duration logstring t in
       let heap_size = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
-      HackEventLogger.naming_end t heap_size;
+      HackEventLogger.naming_end ~count:reparse_count t heap_size;
+      let t = Hh_logger.log_duration logstring t in
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"naming_end" ~start_time

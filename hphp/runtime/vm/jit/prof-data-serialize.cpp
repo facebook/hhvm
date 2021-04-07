@@ -526,8 +526,6 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAlias* td) {
   return false;
 }
 
-bool read_named_type(ProfDataDeserializer& ser);
-
 Class* read_class_internal(ProfDataDeserializer& ser) {
   auto const id = read_raw<decltype(std::declval<PreClass*>()->id())>(ser);
   auto const unit = read_unit(ser);
@@ -553,7 +551,23 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   };
   if (preClass->attrs() & AttrEnum &&
       preClass->enumBaseTy().isObject()) {
-    read_named_type(ser);
+    auto const dt = read_raw<DataType>(ser);
+    if (dt != KindOfUninit) {
+      auto const& tc = preClass->enumBaseTy();
+      auto const ne = tc.namedEntity();
+      if (!ne->m_cachedTypeAlias.bound() ||
+          !ne->m_cachedTypeAlias.isInit()) {
+        enumBaseReq.emplace();
+        enumBaseReq->type = dt == KindOfInt64 ?
+          AnnotType::Int : AnnotType::String;
+        enumBaseReq->name = tc.typeName();
+        ne->m_cachedTypeAlias.bind(
+          rds::Mode::Normal,
+          rds::LinkName{"TypeAlias", tc.typeName()}
+        );
+        ne->m_cachedTypeAlias.initWith(*enumBaseReq);
+      }
+    }
   }
 
   if (!preClass->includedEnums().empty()) {
@@ -1340,7 +1354,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
 
   if (cls->attrs() & AttrEnum &&
       cls->preClass()->enumBaseTy().isObject()) {
-    write_named_type(ser, cls->preClass()->enumBaseTy().namedEntity());
+    write_raw(ser, cls->enumBaseTy().value_or(KindOfUninit));
   }
 
   if (cls->hasIncludedEnums()) {

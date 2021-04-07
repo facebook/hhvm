@@ -1208,6 +1208,9 @@ struct RuntimeOption {
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \
+  /* When this flag is on, var_export for
+   * classes and lazy classes outputs a string. */                      \
+  F(bool, ClassAsStringVarExport, false)                                \
   /* When this flag is on, gettype for
    * classes and lazy classes outputs string. */                        \
   F(bool, ClassAsStringGetType, true)                                   \

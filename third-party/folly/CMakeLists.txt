@@ -155,7 +155,6 @@ target_include_directories(folly PUBLIC ${FOLLY_ROOT})
 
 target_link_libraries(folly fmt)
 
-add_dependencies(folly boostMaybeBuild)
 target_link_libraries(folly boost)
 
 target_link_libraries(folly libsodium)

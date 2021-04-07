@@ -352,7 +352,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  add_dependencies(${target} boostMaybeBuild)
   target_link_libraries(${target} boost)
   target_link_libraries(${target} libsodium)
 

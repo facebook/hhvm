@@ -975,74 +975,34 @@ let equal_locl_fun_arity ft1 ft2 =
 
 let is_type_no_return : locl_ty_ -> bool = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
-let rec equal_decl_ty_ ty_1 ty_2 =
-  match (ty_1, ty_2) with
-  | (Tany _, Tany _) -> true
-  | (Terr, Terr) -> true
-  | (Tthis, Tthis) -> true
-  | (Tmixed, Tmixed) -> true
-  | (Tnonnull, Tnonnull) -> true
-  | (Tdynamic, Tdynamic) -> true
-  | (Tapply ((_, s1), tyl1), Tapply ((_, s2), tyl2)) ->
-    String.equal s1 s2 && equal_decl_tyl tyl1 tyl2
-  | (Tgeneric (s1, argl1), Tgeneric (s2, argl2)) ->
-    String.equal s1 s2 && equal_decl_tyl argl1 argl2
-  | (Taccess (ty1, (_, s1)), Taccess (ty2, (_, s2))) ->
-    equal_decl_ty ty1 ty2 && String.equal s1 s2
-  | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
-    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
-  | (Tvarray ty1, Tvarray ty2) -> equal_decl_ty ty1 ty2
-  | (Tvarray_or_darray (tk1, tv1), Tvarray_or_darray (tk2, tv2)) ->
-    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
-  | (Tvec_or_dict (tk1, tv1), Tvec_or_dict (tk2, tv2)) ->
-    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
-  | (Tlike ty1, Tlike ty2) -> equal_decl_ty ty1 ty2
-  | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
-  | (Toption ty, Toption ty2) -> equal_decl_ty ty ty2
-  | (Tfun fty1, Tfun fty2) -> equal_decl_fun_type fty1 fty2
-  | (Tunion tyl1, Tunion tyl2)
-  | (Tintersection tyl1, Tintersection tyl2)
-  | (Ttuple tyl1, Ttuple tyl2) ->
-    equal_decl_tyl tyl1 tyl2
-  | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
-    equal_shape_kind shape_kind1 shape_kind2
-    && List.equal
-         (fun (k1, v1) (k2, v2) ->
-           TShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
-         (TShapeMap.elements fields1)
-         (TShapeMap.elements fields2)
-  | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
-  | (Tany _, _)
-  | (Terr, _)
-  | (Tthis, _)
-  | (Tapply _, _)
-  | (Tgeneric _, _)
-  | (Taccess _, _)
-  | (Tdarray _, _)
-  | (Tvarray _, _)
-  | (Tvarray_or_darray _, _)
-  | (Tvec_or_dict _, _)
-  | (Tmixed, _)
-  | (Tlike _, _)
-  | (Tnonnull, _)
-  | (Tdynamic, _)
-  | (Toption _, _)
-  | (Tprim _, _)
-  | (Tfun _, _)
-  | (Ttuple _, _)
-  | (Tshape _, _)
-  | (Tvar _, _)
-  | (Tunion _, _)
-  | (Tintersection _, _) ->
-    false
+let equal_decl_ty_ : decl_ty_ -> decl_ty_ -> bool =
+ (fun ty1 ty2 -> Int.equal 0 (ty__compare ty1 ty2))
 
-and equal_decl_ty ty1 ty2 = equal_decl_ty_ (get_node ty1) (get_node ty2)
+let equal_decl_ty ty1 ty2 = equal_decl_ty_ (get_node ty1) (get_node ty2)
 
-and equal_shape_field_type sft1 sft2 =
+let equal_shape_field_type sft1 sft2 =
   equal_decl_ty sft1.sft_ty sft2.sft_ty
   && Bool.equal sft1.sft_optional sft2.sft_optional
 
-and equal_decl_fun_arity ft1 ft2 =
+let non_public_ifc ifc =
+  match ifc with
+  | FDPolicied (Some "PUBLIC") -> false
+  | _ -> true
+
+let equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
+
+let equal_decl_possibly_enforced_ty ety1 ety2 =
+  equal_decl_ty ety1.et_type ety2.et_type
+  && equal_enforcement ety1.et_enforced ety2.et_enforced
+
+let equal_decl_fun_param param1 param2 =
+  equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type
+  && Int.equal param1.fp_flags param2.fp_flags
+
+let equal_decl_ft_params params1 params2 =
+  List.equal equal_decl_fun_param params1 params2
+
+let equal_decl_fun_arity ft1 ft2 =
   match (ft1.ft_arity, ft2.ft_arity) with
   | (Fstandard, Fstandard) ->
     Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
@@ -1052,34 +1012,7 @@ and equal_decl_fun_arity ft1 ft2 =
   | (Fvariadic _, Fstandard) ->
     false
 
-and equal_decl_fun_type fty1 fty2 =
-  equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
-  && equal_decl_ft_params fty1.ft_params fty2.ft_params
-  && equal_decl_ft_implicit_params
-       fty1.ft_implicit_params
-       fty2.ft_implicit_params
-  && equal_decl_fun_arity fty1 fty2
-  && Int.equal fty1.ft_flags fty2.ft_flags
-
-and non_public_ifc ifc =
-  match ifc with
-  | FDPolicied (Some "PUBLIC") -> false
-  | _ -> true
-
-and equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
-
-and equal_decl_possibly_enforced_ty ety1 ety2 =
-  equal_decl_ty ety1.et_type ety2.et_type
-  && equal_enforcement ety1.et_enforced ety2.et_enforced
-
-and equal_decl_fun_param param1 param2 =
-  equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type
-  && Int.equal param1.fp_flags param2.fp_flags
-
-and equal_decl_ft_params params1 params2 =
-  List.equal equal_decl_fun_param params1 params2
-
-and equal_decl_ft_implicit_params :
+let equal_decl_ft_implicit_params :
     decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool =
  fun { capability = cap1 } { capability = cap2 } ->
   (* TODO(coeffects): could rework this so that implicit defaults and explicit
@@ -1090,6 +1023,15 @@ and equal_decl_ft_implicit_params :
   | (CapDefaults _, CapTy _)
   | (CapTy _, CapDefaults _) ->
     false
+
+let equal_decl_fun_type fty1 fty2 =
+  equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
+  && equal_decl_ft_params fty1.ft_params fty2.ft_params
+  && equal_decl_ft_implicit_params
+       fty1.ft_implicit_params
+       fty2.ft_implicit_params
+  && equal_decl_fun_arity fty1 fty2
+  && Int.equal fty1.ft_flags fty2.ft_flags
 
 let equal_typeconst_abstract_kind ak1 ak2 =
   match (ak1, ak2) with

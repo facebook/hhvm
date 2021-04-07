@@ -36,6 +36,8 @@ namespace HPHP {
 
 bool is_valid_class_name(folly::StringPiece className);
 
+struct AutoloadMapFactory;
+
 struct AutoloadHandler final : RequestEventHandler {
 
   AutoloadHandler() = default;

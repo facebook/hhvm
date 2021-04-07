@@ -273,22 +273,25 @@ StructDict* StructDict::AllocStructDict(const StructLayout* layout) {
 
 StructDict* StructDict::MakeStructDict(
     const StructLayout* layout, uint32_t size,
-    const Slot* slots, const TypedValue* tvs) {
+    const uint8_t* slots, const TypedValue* tvs) {
 
   auto const result = MakeReserve<false>(
       HeaderKind::BespokeDict, false, layout);
   result->m_size = size;
 
+  auto const positions = result->rawPositions();
+  assertx(uintptr_t(positions) % 8 == 0);
+  assertx(uintptr_t(slots) % 8 == 0);
+  memcpy8(positions, slots, size);
+
   auto const types = result->rawTypes();
   auto const vals = result->rawValues();
-  auto const positions = result->rawPositions();
 
   for (auto i = 0; i < size; i++) {
     assertx(slots[i] <= layout->numFields());
     auto const& tv = tvs[size - i - 1];
     types[slots[i]] = type(tv);
     vals[slots[i]] = val(tv);
-    positions[i] = slots[i];
   }
 
   assertx(result->checkInvariants());

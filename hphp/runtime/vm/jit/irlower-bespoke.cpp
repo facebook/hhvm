@@ -449,14 +449,20 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<NewBespokeStructDict>();
   auto& v = vmain(env);
 
-  auto const table = v.allocData<Slot>(extra->numSlots);
-  memcpy(table, extra->slots, extra->numSlots * sizeof(*extra->slots));
+  auto const n = static_cast<size_t>((extra->numSlots + 7) & ~7);
+  auto const slots = reinterpret_cast<uint8_t*>(v.allocData<uint64_t>(n / 8));
+  for (auto i = 0; i < extra->numSlots; i++) {
+    slots[i] = safe_cast<uint8_t>(extra->slots[i]);
+  }
+  for (auto i = extra->numSlots; i < n; i++) {
+    slots[i] = static_cast<uint8_t>(KindOfUninit);
+  }
 
   auto const target = CallSpec::direct(StructDict::MakeStructDict);
   auto const args = argGroup(env, inst)
     .imm(StructLayout::As(extra->layout.bespokeLayout()))
     .imm(extra->numSlots)
-    .dataPtr(table)
+    .dataPtr(slots)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);

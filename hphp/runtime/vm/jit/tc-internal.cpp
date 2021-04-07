@@ -634,6 +634,7 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
     CGMeta fixups;
     TransLocMaker maker{*view};
     try {
+      view->alignForTranslation();
       maker.markStart();
       emitVunit(*vunit, unit.get(), *view, fixups,
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
@@ -716,11 +717,7 @@ void Translator::relocate() {
       TransLocMaker maker{dstView};
 
       try {
-        dstView.cold().alignFrontier(Translator::kTranslationAlign);
-        dstView.frozen().alignFrontier(Translator::kTranslationAlign);
-        dstView.main().alignFrontier(Translator::kTranslationAlign);
-        dstView.data().alignFrontier(Translator::kTranslationAlign);
-
+        dstView.alignForTranslation();
         maker.markStart();
         auto origin = range.data;
         if (!origin.empty()) {

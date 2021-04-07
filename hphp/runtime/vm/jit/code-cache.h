@@ -209,6 +209,11 @@ struct CodeCache::View {
     , m_isLocal(isLocal)
   {}
 
+  /*
+   * Align all blocks to the right alignment for a translation start.
+   */
+  void alignForTranslation();
+
   CodeBlock& main()   { return *m_main; }
   CodeBlock& cold()   { return *m_cold; }
   CodeBlock& frozen() { return *m_frozen; }

@@ -44,22 +44,15 @@ let sub_type_i
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 
-let sub_type_decl p ur env ty_sub ty_super =
+let sub_type_decl ?(on_error = Errors.unify_error) p ur env ty_sub ty_super =
   let localize_with_self =
     Typing_utils.localize_with_self ~ignore_errors:true
   in
   let (env, ty_super) = localize_with_self env ty_super in
   let (env, ty_sub) = localize_with_self env ty_sub in
-  let env = sub_type p ur env ty_sub ty_super Errors.unify_error in
-  env
-
-let sub_type_decl_on_error p ur env on_error ty_sub ty_super =
-  let localize_with_self =
-    Typing_utils.localize_with_self ~ignore_errors:true
+  let env =
+    sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
   in
-  let (env, ty_super) = localize_with_self env ty_super in
-  let (env, ty_sub) = localize_with_self env ty_sub in
-  let env = sub_type p ur env ty_sub ty_super on_error in
   env
 
 (* Ensure that types are equivalent i.e. subtypes of each other *)

@@ -349,11 +349,11 @@ let check_override
         on_error
     | _ ->
       if get_ce_const class_elt then
-        Typing_ops.sub_type_decl_on_error
+        Typing_ops.sub_type_decl
+          ~on_error
           pos
           Typing_reason.URnone
           env
-          on_error
           fty_child
           fty_parent
       else
@@ -796,7 +796,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
       @@ Option.map2
            sub
            super
-           ~f:(Typing_ops.sub_type_decl_on_error pos reason env on_error)
+           ~f:(Typing_ops.sub_type_decl ~on_error pos reason env)
     in
     let (child_super_cstr, child_as_cstr) =
       match child_typeconst.ttc_abstract with
@@ -888,11 +888,11 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           x
           y
       else
-        Typing_ops.sub_type_decl_on_error
+        Typing_ops.sub_type_decl
+          ~on_error
           pos
           Reason.URsubsume_tconst_assign
           env
-          on_error
           y
           x
     in

@@ -26,18 +26,10 @@ val sub_type :
   Typing_env_types.env
 
 val sub_type_decl :
+  ?on_error:Errors.typing_error_callback ->
   Pos.t ->
   Typing_reason.ureason ->
   Typing_env_types.env ->
-  Typing_defs.decl_ty ->
-  Typing_defs.decl_ty ->
-  Typing_env_types.env
-
-val sub_type_decl_on_error :
-  Pos.t ->
-  Typing_reason.ureason ->
-  Typing_env_types.env ->
-  Errors.typing_error_callback ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty ->
   Typing_env_types.env

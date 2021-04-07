@@ -22,8 +22,12 @@ open Utils
 module FunUtils = Decl_fun_utils
 module Reason = Typing_reason
 module Env = Typing_env
-module EnvFromDef = Typing_env_from_def
 module MakeType = Typing_make_type
+module Type = Typing_ops
+module Phase = Typing_phase
+module Subst = Decl_subst
+module EnvFromDef = Typing_env_from_def
+module Partial = Partial_provider
 
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if

@@ -20,32 +20,14 @@ open Aast
 module TFTerm = Typing_func_terminality
 module TUtils = Typing_utils
 module Reason = Typing_reason
-module Inst = Decl_instantiate
-module Type = Typing_ops
 module Env = Typing_env
-module Inf = Typing_inference_env
-module LEnv = Typing_lenv
-module Async = Typing_async
-module SubType = Typing_subtype
-module Union = Typing_union
-module Inter = Typing_intersection
 module SN = Naming_special_names
-module TVis = Typing_visibility
-module Phase = Typing_phase
 module TOG = Typing_object_get
-module Subst = Decl_subst
 module TCO = TypecheckerOptions
-module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations
 module CMap = C.Map
-module Try = Typing_try
-module FL = FeatureLogging
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
-module Partial = Partial_provider
-module Fake = Typing_fake_members
-module TySet = Typing_set
-module TPEnv = Type_parameter_env
 
 module ExpectedTy : sig
   [@@@warning "-32"]

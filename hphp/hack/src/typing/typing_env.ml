@@ -418,6 +418,22 @@ let add_upper_bound_global env name ty =
   in
   { env with global_tpenv = TPEnv.add_upper_bound tpenv name ty }
 
+let add_lower_bound_global env name ty =
+  let tpenv =
+    let (env, ty) = expand_type env ty in
+    match deref ty with
+    | (r, Tgeneric (formal_super, [])) ->
+      TPEnv.add_upper_bound
+        env.global_tpenv
+        formal_super
+        (mk (r, Tgeneric (name, [])))
+    | (_r, Tgeneric (_formal_super, _targs)) ->
+      (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
+      env.global_tpenv
+    | _ -> env.global_tpenv
+  in
+  { env with global_tpenv = TPEnv.add_lower_bound tpenv name ty }
+
 (* Add a single new upper bound [ty] to generic parameter [name] in the local
  * type parameter environment of [env].
  * If the optional [intersect] operation is supplied, then use this to avoid

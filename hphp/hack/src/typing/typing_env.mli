@@ -297,6 +297,8 @@ val get_equal_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
 val get_tparams : env -> locl_ty -> SSet.t
 
+val add_lower_bound_global : env -> string -> locl_ty -> env
+
 val add_upper_bound_global : env -> string -> locl_ty -> env
 
 val env_with_tpenv : env -> TPEnv.t -> env

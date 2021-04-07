@@ -1,6 +1,6 @@
 File "type_arguments.php", line 20, characters 3-37:
 Too many arguments (expected 1 but got 2) (Typing[4105])
-  File "printf.hhi", line 100, characters 10-28:
+  File "printf.hhi", line 115, characters 10-28:
   Definition is here
 File "type_arguments.php", line 20, characters 31-34:
 No instance method `haha` in `X` (Typing[4053])

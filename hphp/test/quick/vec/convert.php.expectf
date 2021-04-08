@@ -532,7 +532,7 @@ dict(2) {
     int(5)
   }
 }
-Exception: "Invalid keyset key: expected a key of type int or string, vec given"
+Exception: "Invalid keyset key: expected a key of type int or string, HH\vec given"
 bool(true)
 int(1)
 float(1)

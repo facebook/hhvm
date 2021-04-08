@@ -725,43 +725,6 @@ namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::string describeKeyType(const TypedValue* tv) {
-  switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull:             return "null";
-  case KindOfBoolean:          return "bool";
-  case KindOfInt64:            return "int";
-  case KindOfDouble:           return "double";
-  case KindOfPersistentString:
-  case KindOfString:           return "string";
-  case KindOfPersistentVec:
-  case KindOfVec:
-    return val(*tv).parr->isLegacyArray() ? "array" : "vec";
-  case KindOfPersistentDict:
-  case KindOfDict:
-    return val(*tv).parr->isLegacyArray() ? "array" : "dict";
-  case KindOfPersistentKeyset:
-  case KindOfKeyset:           return "keyset";
-
-  case KindOfResource:
-    return tv->m_data.pres->data()->o_getClassName().toCppString();
-
-  case KindOfObject:
-    return tv->m_data.pobj->getClassName().get()->toCppString();
-
-  case KindOfRecord:
-    return tv->m_data.prec->record()->name()->toCppString();
-
-  case KindOfRFunc:           return "rfunc";
-  case KindOfFunc:            return "func";
-  case KindOfClass:           return "class";
-  case KindOfLazyClass:       return "lclass";
-  case KindOfClsMeth:         return "clsmeth";
-  case KindOfRClsMeth:        return "rclsmeth";
-  }
-  not_reached();
-}
-
 std::string describeKeyValue(TypedValue tv) {
   switch (tv.m_type) {
   case KindOfPersistentString:
@@ -807,7 +770,7 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
   SystemLib::throwInvalidArgumentExceptionObject(
     folly::sformat(
       "Invalid {} key: expected a key of type {}, {} given",
-      kind_type.first, kind_type.second, describeKeyType(key)
+      kind_type.first, kind_type.second, describe_actual_type(key)
     )
   );
 }

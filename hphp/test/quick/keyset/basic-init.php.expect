@@ -53,11 +53,11 @@ keyset(3) {
 }
 Exception: Invalid keyset key: expected a key of type int or string, null given
 Exception: Invalid keyset key: expected a key of type int or string, bool given
-Exception: Invalid keyset key: expected a key of type int or string, double given
-Exception: Invalid keyset key: expected a key of type int or string, vec given
-Exception: Invalid keyset key: expected a key of type int or string, vec given
-Exception: Invalid keyset key: expected a key of type int or string, dict given
-Exception: Invalid keyset key: expected a key of type int or string, keyset given
+Exception: Invalid keyset key: expected a key of type int or string, float given
+Exception: Invalid keyset key: expected a key of type int or string, HH\vec given
+Exception: Invalid keyset key: expected a key of type int or string, HH\vec given
+Exception: Invalid keyset key: expected a key of type int or string, HH\dict given
+Exception: Invalid keyset key: expected a key of type int or string, HH\keyset given
 Exception: Invalid keyset key: expected a key of type int or string, stdClass given
 Exception: Invalid keyset key: expected a key of type int or string, HH\Vector given
 Exception: Invalid keyset key: expected a key of type int or string, ToString given

@@ -637,7 +637,7 @@ vec(2) {
     string(1) "c"
   }
 }
-Exception: "Invalid keyset key: expected a key of type int or string, dict given"
+Exception: "Invalid keyset key: expected a key of type int or string, HH\dict given"
 bool(true)
 int(1)
 float(1)

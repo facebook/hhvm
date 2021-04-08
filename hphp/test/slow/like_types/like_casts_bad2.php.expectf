@@ -5,6 +5,6 @@ dict(2) {
   string(1) "a"
 }
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid dict key: expected a key of type int or string, double given' in %s/test/slow/like_types/like_casts_bad2.php:4
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid dict key: expected a key of type int or string, float given' in %s/test/slow/like_types/like_casts_bad2.php:4
 Stack trace:
 %A

@@ -1,1 +1,1 @@
-Invalid dict key: expected a key of type int or string, rfunc given
+Invalid dict key: expected a key of type int or string, reified function given

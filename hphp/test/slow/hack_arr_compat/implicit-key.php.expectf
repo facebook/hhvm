@@ -2,118 +2,118 @@
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== null coalesce =======================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== idx =================================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== isset ===============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== array key exists ====================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== empty ===============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== set =================================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== set-op ==============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== unset ===============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== base-elem ===========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== base-elem no-warn ===================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== base-define =========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== base-unset ==========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== dim-elem ============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== dim-elem no-warn ====================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== dim-define ==========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== dim-unset ===========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-get ============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-get no-warn ====================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-isset ==========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-empty ==========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-set ============================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-set-op =========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given
 ======================== fini-unset ==========================
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, null given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
 InvalidArgumentException: Invalid dict key: expected a key of type int or string, bool given
-InvalidArgumentException: Invalid dict key: expected a key of type int or string, double given
+InvalidArgumentException: Invalid dict key: expected a key of type int or string, float given

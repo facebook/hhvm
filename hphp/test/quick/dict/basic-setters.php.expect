@@ -59,12 +59,12 @@ Set to "3" key value succeeded
 Set to "" key value succeeded
 Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(0) {
 }
 dict(8) {
@@ -96,12 +96,12 @@ Set-Op to " + "3" key value" failed: "Out of bounds dict access: invalid index "
 Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
 Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
-Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, float given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(0) {
 }
 dict(0) {
@@ -147,12 +147,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(0) {
 }
 dict(0) {
@@ -242,12 +242,12 @@ Set to "3" key value succeeded
 Set to "" key value succeeded
 Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(4) {
   [0]=>
   int(1)
@@ -291,12 +291,12 @@ Set-Op to " + "3" key value" failed: "Out of bounds dict access: invalid index "
 Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
 Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
-Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, float given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(4) {
   [0]=>
   int(1)
@@ -402,12 +402,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(4) {
   [0]=>
   int(1)
@@ -525,12 +525,12 @@ Set to "3" key value succeeded
 Set to "" key value succeeded
 Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set to array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(6) {
   ["0"]=>
   string(1) "a"
@@ -582,12 +582,12 @@ Set-Op to " + "3" key value" succeeded
 Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
 Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
 Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
-Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, float given"
 Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
-Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
-Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(6) {
   ["0"]=>
   string(1) "a"
@@ -729,12 +729,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
 Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
-Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, float given"
 Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
-Unset of array key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
-Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
-Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, HH\vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, HH\dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, HH\keyset given"
 dict(6) {
   ["0"]=>
   string(1) "a"

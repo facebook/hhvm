@@ -426,7 +426,7 @@ object(HH\Map) (2) {
   float(1.2345)
 }
 ----------------------------------------------------
-Exception: "Invalid keyset key: expected a key of type int or string, double given"
+Exception: "Invalid keyset key: expected a key of type int or string, float given"
 ====================================================
 ====================================================
 object(HH\Pair) (2) {

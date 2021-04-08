@@ -35,7 +35,7 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Invalid dict key: expected a key of type int or string, bool given
-Invalid dict key: expected a key of type int or string, double given
+Invalid dict key: expected a key of type int or string, float given
 Invalid dict key: expected a key of type int or string, null given
 bool(true)
 bool(false)

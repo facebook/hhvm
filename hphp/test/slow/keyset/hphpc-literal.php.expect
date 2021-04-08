@@ -35,7 +35,7 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Invalid keyset key: expected a key of type int or string, bool given
-Invalid keyset key: expected a key of type int or string, double given
+Invalid keyset key: expected a key of type int or string, float given
 Invalid keyset key: expected a key of type int or string, null given
 bool(false)
 bool(true)

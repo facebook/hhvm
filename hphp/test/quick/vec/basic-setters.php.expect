@@ -48,12 +48,12 @@ Set to "3" key value failed: "Invalid vec key: expected a key of type int, strin
 Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
 Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
 Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
-Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, float given"
 Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set to array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(0) {
 }
 vec(0) {
@@ -69,12 +69,12 @@ Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type 
 Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
 Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
 Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
-Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, float given"
 Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
-Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(0) {
 }
 vec(0) {
@@ -120,12 +120,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
 Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
-Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, float given"
 Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Unset of array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(0) {
 }
 vec(0) {
@@ -192,12 +192,12 @@ Set to "3" key value failed: "Invalid vec key: expected a key of type int, strin
 Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
 Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
 Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
-Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, float given"
 Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set to array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(4) {
   int(1)
   int(2)
@@ -221,12 +221,12 @@ Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type 
 Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
 Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
 Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
-Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, float given"
 Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
-Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(4) {
   int(1)
   int(2)
@@ -303,12 +303,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
 Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
-Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, float given"
 Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Unset of array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(4) {
   int(1)
   int(2)
@@ -404,12 +404,12 @@ Set to "3" key value failed: "Invalid vec key: expected a key of type int, strin
 Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
 Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
 Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
-Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, float given"
 Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set to array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(11) {
   string(1) "a"
   string(1) "b"
@@ -447,12 +447,12 @@ Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type 
 Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
 Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
 Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
-Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, float given"
 Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
-Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
-Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
-Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(11) {
   string(1) "a"
   string(1) "b"
@@ -586,12 +586,12 @@ Unset of "3" key value succeeded
 Unset of "" key value succeeded
 Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
 Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
-Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, float given"
 Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
-Unset of array key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
-Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
-Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, HH\vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, HH\dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, HH\keyset given"
 vec(11) {
   string(1) "a"
   string(1) "b"

@@ -64,6 +64,16 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitNone,
 }
 
+#[allow(dead_code)] // Preview is currently unused
+#[derive(Eq, PartialEq)]
+enum FeatureStatus {
+    Unstable,
+    Preview,
+    // TODO: add other modes like "Advanced" or "Deprecated" if necessary.
+    // Those are just variants of "Preview" for the runtime's sake, though,
+    // and likely only need to be distinguished in the lint rule rather than here
+}
+
 #[derive(
     Clone,
     Copy,
@@ -77,12 +87,28 @@ enum BinopAllowsAwaitInPositions {
 )]
 #[strum(serialize_all = "snake_case")]
 enum UnstableFeatures {
+    // TODO: rename this from unstable to something else
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
     EnumAtom,
     IFC,
     Readonly,
+}
+impl UnstableFeatures {
+    // Preview features are allowed to run in prod. This function decides
+    // whether the feature is considered Unstable or Previw.
+    fn get_feature_status(&self) -> FeatureStatus {
+        use FeatureStatus::*;
+        match self {
+            UnstableFeatures::UnionIntersectionTypeHints => Unstable,
+            UnstableFeatures::ClassLevelWhere => Unstable,
+            UnstableFeatures::ExpressionTrees => Unstable,
+            UnstableFeatures::EnumAtom => Unstable,
+            UnstableFeatures::IFC => Unstable,
+            UnstableFeatures::Readonly => Unstable,
+        }
+    }
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -387,7 +413,7 @@ where
         iter.find(|x| assert_fun(*x))
     }
 
-    fn enable_unstable_feature(&mut self, _node: S<'a, Token, Value>, arg: S<'a, Token, Value>) {
+    fn enable_unstable_feature(&mut self, node: S<'a, Token, Value>, arg: S<'a, Token, Value>) {
         let error_invalid_argument = |self_: &mut Self, message| {
             self_.errors.push(Self::make_error_from_node(
                 arg,
@@ -400,7 +426,23 @@ where
                 let text = self.text(&x.expression);
                 match UnstableFeatures::from_str(escaper::unquote_str(text)) {
                     Ok(feature) => {
-                        self.env.context.active_unstable_features.insert(feature);
+                        if !self.env.parser_options.po_allow_unstable_features
+                            && !self.env.is_hhi_mode()
+                            && feature.get_feature_status() == FeatureStatus::Unstable
+                        {
+                            self.errors.push(Self::make_error_from_node(
+                                node,
+                                errors::cannot_enable_unstable_feature(
+                                    format!(
+                                        "{} is unstable and unstable features are disabled",
+                                        text
+                                    )
+                                    .as_str(),
+                                ),
+                            ))
+                        } else {
+                            self.env.context.active_unstable_features.insert(feature);
+                        }
                     }
                     Err(_) => error_invalid_argument(
                         self,
@@ -5077,16 +5119,7 @@ where
                 if self.attr_name(node).as_deref()
                     == Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES)
                 {
-                    if !self.env.parser_options.po_allow_unstable_features
-                        && !self.env.is_hhi_mode()
-                    {
-                        self.errors.push(Self::make_error_from_node(
-                            node,
-                            errors::invalid_use_of_enable_unstable_feature(
-                                "unstable features are disabled",
-                            ),
-                        ))
-                    } else if let Some(args) = self.attr_args(node) {
+                    if let Some(args) = self.attr_args(node) {
                         let mut args = args.peekable();
                         if args.peek().is_none() {
                             self.errors.push(Self::make_error_from_node(
@@ -5102,7 +5135,6 @@ where
                         } else {
                             args.for_each(|ref arg| self.enable_unstable_feature(node, arg))
                         }
-                    } else {
                     }
                 }
             }),

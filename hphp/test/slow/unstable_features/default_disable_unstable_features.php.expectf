@@ -1,1 +1,1 @@
-Fatal error: This is an invalid use of `__EnableUnstableFeatures` because unstable features are disabled in %s on line 6
+Fatal error: Cannot enable unstable feature: 'class_level_where' is unstable and unstable features are disabled in %s on line 6

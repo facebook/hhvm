@@ -913,6 +913,13 @@ pub fn cannot_use_feature(feature: &str) -> Error {
     ))
 }
 
+pub fn cannot_enable_unstable_feature(message: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot enable unstable feature: {}",
+        message.to_string()
+    ))
+}
+
 pub fn invalid_use_of_enable_unstable_feature(message: &str) -> Error {
     Cow::Owned(format!(
         "This is an invalid use of `__EnableUnstableFeatures` because {}",

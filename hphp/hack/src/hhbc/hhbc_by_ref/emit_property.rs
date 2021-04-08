@@ -11,7 +11,7 @@ use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_property::{HhasProperty, HhasPropertyFlags};
 use hhbc_by_ref_hhas_type::{constraint, Info as TypeInfo};
-use hhbc_by_ref_hhbc_ast::{InitpropOp, ReadOnlyOp};
+use hhbc_by_ref_hhbc_ast::InitpropOp;
 use hhbc_by_ref_hhbc_id::{prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
@@ -120,7 +120,7 @@ pub fn from_ast<'ast, 'arena>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitpropOp::Static, ReadOnlyOp::Any),
+                                instr::initprop(alloc, pid, InitpropOp::Static),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -129,7 +129,7 @@ pub fn from_ast<'ast, 'arena>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitpropOp::NonStatic, ReadOnlyOp::Any),
+                                instr::initprop(alloc, pid, InitpropOp::NonStatic),
                             ),
                         )
                     } else {
@@ -146,12 +146,7 @@ pub fn from_ast<'ast, 'arena>(
                                 alloc,
                                 vec![
                                     emit_pos::emit_pos(alloc, &class.span),
-                                    instr::initprop(
-                                        alloc,
-                                        pid,
-                                        InitpropOp::NonStatic,
-                                        ReadOnlyOp::Any,
-                                    ),
+                                    instr::initprop(alloc, pid, InitpropOp::NonStatic),
                                     instr::label(alloc, label),
                                 ],
                             ),

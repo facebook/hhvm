@@ -719,8 +719,8 @@ pub mod instr {
         instr(Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn initprop(pid: PropId, op: InitpropOp, rop: ReadOnlyOp) -> InstrSeq {
-        instr(Instruct::IMutator(InstructMutator::InitProp(pid, op, rop)))
+    pub fn initprop(pid: PropId, op: InitpropOp) -> InstrSeq {
+        instr(Instruct::IMutator(InstructMutator::InitProp(pid, op)))
     }
 
     pub fn checkprop(pid: PropId) -> InstrSeq {

@@ -748,7 +748,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ArrayMarkLegacy,    NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(ArrayUnmarkLegacy,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(InitProp,        THREE(SA, OA(InitPropOp), OA(ReadOnlyOp)),         \
+  O(InitProp,        TWO(SA, OA(InitPropOp)),                           \
                                        ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \

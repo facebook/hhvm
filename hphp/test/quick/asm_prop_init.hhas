@@ -31,7 +31,7 @@
 
   .method [static public] 86sinit() {
     String "default ::foo value"
-    InitProp "foo" Static Any
+    InitProp "foo" Static
 
     Null
     RetC
@@ -41,7 +41,7 @@
     CheckProp "nonstat"
     JmpNZ isset
     String "code-created prop value"
-    InitProp "nonstat" NonStatic Any
+    InitProp "nonstat" NonStatic
 
   isset:
     Null

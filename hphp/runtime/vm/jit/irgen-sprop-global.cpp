@@ -413,7 +413,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
   push(env, gen(env, IsNType, TUninit, curVal));
 }
 
-void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnlyOp /*rop*/) {
+void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
   auto val = popC(env);
   auto const ctx = curClass(env);
 

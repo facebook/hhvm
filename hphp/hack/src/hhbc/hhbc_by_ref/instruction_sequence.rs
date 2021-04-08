@@ -756,15 +756,10 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn initprop<'a>(
-        alloc: &'a bumpalo::Bump,
-        pid: PropId<'a>,
-        op: InitpropOp,
-        readonly_op: ReadOnlyOp,
-    ) -> InstrSeq<'a> {
+    pub fn initprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>, op: InitpropOp) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMutator(InstructMutator::InitProp(pid, op, readonly_op)),
+            Instruct::IMutator(InstructMutator::InitProp(pid, op)),
         )
     }
 

@@ -5249,9 +5249,7 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   vmStack().pushBool(type(val) != KindOfUninit);
 }
 
-OPTBLD_INLINE void iopInitProp(const StringData* propName,
-                               InitPropOp propOp,
-                               ReadOnlyOp /*op*/) {
+OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   auto* cls = vmfp()->getClass();
 
   auto* ctx = arGetContextClass(vmfp());

@@ -1616,7 +1616,7 @@ CheckProp <propName> [] -> [C:Bool]
   initializer for property named %1 in the context class, and pushes
   true on the stack if it is initialized, and false otherwise.
 
-InitProp <propName> <op> <readonly op> [C] -> []
+InitProp <propName> <op> [C] -> []
 
   Initialize non-scalar property. If %2 is 'NonStatic', this instruction sets
   the initializer for the property named %1 in the context class to $1. If %2

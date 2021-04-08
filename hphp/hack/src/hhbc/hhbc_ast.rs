@@ -445,7 +445,7 @@ pub enum InstructMutator {
     UnsetL(local::Type),
     UnsetG,
     CheckProp(PropId),
-    InitProp(PropId, InitpropOp, ReadOnlyOp),
+    InitProp(PropId, InitpropOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

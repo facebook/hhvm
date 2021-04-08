@@ -429,7 +429,7 @@ pub enum InstructMutator<'arena> {
     UnsetL(local::Type<'arena>),
     UnsetG,
     CheckProp(PropId<'arena>),
-    InitProp(PropId<'arena>, InitpropOp, ReadOnlyOp),
+    InitProp(PropId<'arena>, InitpropOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

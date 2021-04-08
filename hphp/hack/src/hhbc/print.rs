@@ -1759,7 +1759,7 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("CheckProp ")?;
             print_prop_id(w, id)
         }
-        M::InitProp(id, op, rop) => {
+        M::InitProp(id, op) => {
             w.write("InitProp ")?;
             print_prop_id(w, id)?;
             w.write(" ")?;
@@ -1767,8 +1767,7 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
                 InitpropOp::Static => w.write("Static"),
                 InitpropOp::NonStatic => w.write("NonStatic"),
             }?;
-            w.write(" ")?;
-            print_readonly_op(w, rop)
+            w.write(" ")
         }
     }
 }

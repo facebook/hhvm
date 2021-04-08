@@ -92,17 +92,6 @@ impl Gen {
         Label::DefaultArg(self.get_next())
     }
 
-    /// Produces named label "resumeN" for use by fuzzer, where N is the next unused Id.
-    pub fn next_resume<'arena>(&mut self, alloc: &'arena bumpalo::Bump) -> Label<'arena> {
-        Label::Named(
-            bumpalo::collections::String::from_str_in(
-                (format!("resume{}", self.get_next())).as_str(),
-                alloc,
-            )
-            .into_bump_str(),
-        )
-    }
-
     fn get_next(&mut self) -> Id {
         let curr_id = self.next_id;
         self.next_id = curr_id + 1;

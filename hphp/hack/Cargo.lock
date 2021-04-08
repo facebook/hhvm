@@ -2291,7 +2291,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "hash",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -2302,7 +2301,6 @@ dependencies = [
  "hhbc_by_ref_options",
  "hhbc_by_ref_statement_state",
  "hhbc_by_ref_symbol_refs_state",
- "itertools",
  "ocamlrep",
  "oxidized",
 ]

@@ -33,7 +33,6 @@ pub struct GlobalState {
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub functions_with_finally: SSet,
-    pub function_to_labels_map: SMap<SMap<bool>>,
     pub lambda_coeffects_of_scope: SMap<HhasCoeffects>,
 }
 

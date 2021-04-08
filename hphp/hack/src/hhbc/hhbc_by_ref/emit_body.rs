@@ -1225,17 +1225,8 @@ fn set_function_jmp_targets<'a, 'arena>(
         [.., Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
         _ => panic!("unexpected scope shape"),
     };
-    let global_state = emitter.emit_global_state();
-    match global_state.function_to_labels_map.get(&function_state_key) {
-        Some(labels) => {
-            env.jump_targets_gen.set_labels_in_function(labels.clone());
-        }
-        None => {
-            env.jump_targets_gen
-                .set_labels_in_function(<SMap<bool>>::new());
-        }
-    };
-    global_state
+    emitter
+        .emit_global_state()
         .functions_with_finally
         .contains(&function_state_key)
 }

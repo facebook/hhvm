@@ -267,20 +267,24 @@ ArrayLayout selectSourceLayout(
     return ArrayLayout(it->second);
   }
 
-  // 2. If the array is a runtime source, use a vanilla layout.
+  // 2. If we aren't emitting monotypes, use a vanilla layout.
+
+  if (!RO::EvalEmitBespokeMonotypes) return ArrayLayout::Vanilla();
+
+  // 3. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
 
   if (profile.key.isRuntimeLocation()) {
     return ArrayLayout::Vanilla();
   }
 
-  // 3. If we escalate too often, use a vanilla layout.
+  // 4. If we escalate too often, use a vanilla layout.
 
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
-  // 4. If the array is likely to stay monotyped, use a monotype layout.
+  // 5. If the array is likely to stay monotyped, use a monotype layout.
 
   uint64_t monotype = 0;
   uint64_t total = 0;

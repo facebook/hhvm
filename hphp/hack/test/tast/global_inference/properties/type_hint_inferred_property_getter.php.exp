@@ -59,10 +59,10 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [16:1-19:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([16:17-21], (Hprim Tvoid)))); f_name = ([16:10-13], "\\foo"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-       f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+     { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([16:17-21], (Hprim Tvoid)))); 
+       f_name = ([16:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([17:3-17],
@@ -91,9 +91,10 @@
          ns_disable_xhp_element_mangling = false };
        f_doc_comment = None });
   (Fun
-     { f_span = [21:1-30]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([21:23-27], (Hprim Tvoid)))); f_name = ([21:10-13], "\\bar"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [21:1-30]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([21:23-27], (Hprim Tvoid)))); 
+       f_name = ([21:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([21:18-20], int); param_type_hint = ((int), (Some ([21:14-17], (Hprim Tint)))); 
           param_is_variadic = false; param_pos = [21:18-20]; param_name = "$_"; 

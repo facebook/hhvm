@@ -32,9 +32,10 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [9:1-10:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([9:23-27], (Hprim Tvoid)))); f_name = ([9:10-13], "\\bar"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [9:1-10:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([9:23-27], (Hprim Tvoid)))); 
+       f_name = ([9:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([9:18-20], int); param_type_hint = ((int), (Some ([9:14-17], (Hprim Tint)))); 
           param_is_variadic = false; param_pos = [9:18-20]; param_name = "$_"; 

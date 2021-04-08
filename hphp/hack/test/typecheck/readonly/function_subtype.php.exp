@@ -22,14 +22,14 @@ The method `setParams` is not compatible with the overridden method (Typing[4341
   This parameter is mutable
   File "function_subtype.php", line 41, characters 17-18:
   But this parameter is readonly
-File "function_subtype.php", line 46, characters 19-26:
-The method `constFun` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 19, characters 32-33:
-  Mismatched constness of function parameter
-  File "function_subtype.php", line 19, characters 32-33:
-  This parameter is a regular function
-  File "function_subtype.php", line 47, characters 47-48:
-  But this parameter requires a const function
+File "function_subtype.php", line 46, characters 19-29:
+The method `readonlyFun` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 19, characters 5-30:
+  Function readonly mismatch
+  File "function_subtype.php", line 19, characters 5-30:
+  This function is not marked readonly
+  File "function_subtype.php", line 47, characters 5-39:
+  This function is marked readonly
 File "function_subtype.php", line 63, characters 11-12:
 Invalid argument (Typing[4411])
   File "function_subtype.php", line 55, characters 22-26:
@@ -46,3 +46,11 @@ Invalid argument (Typing[4411])
   This function returns a readonly value
   File "function_subtype.php", line 55, characters 3-36:
   This function does not return a readonly value
+File "function_subtype.php", line 87, characters 15-16:
+Invalid argument (Typing[4411])
+  File "function_subtype.php", line 84, characters 8-26:
+  Function readonly mismatch
+  File "function_subtype.php", line 84, characters 8-26:
+  This function is not marked readonly
+  File "function_subtype.php", line 79, characters 31-57:
+  This function is marked readonly

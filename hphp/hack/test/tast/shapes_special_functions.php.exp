@@ -16,9 +16,10 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       t_span = [3:1-45]; t_emit_id = None });
   (Fun
-     { f_span = [5:1-11:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid)))); f_name = ([5:10-14], "\\test"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [5:1-11:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid)))); 
+       f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([5:21-23], shape('x' => int, ?'y' => int)); 
           param_type_hint = ((shape('x' => int, ?'y' => int)), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), []))))); 

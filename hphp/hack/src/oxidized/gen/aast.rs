@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a9ac5a600d1bf245238a99c8a4961679>>
+// @generated SignedSource<<d93bb1baa0b63ed743dbb242b9b372f4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1023,6 +1023,7 @@ pub enum FunVariadicity<Ex, Fb, En, Hi> {
 )]
 pub struct Fun_<Ex, Fb, En, Hi> {
     pub span: Pos,
+    pub readonly_this: Option<ast_defs::ReadonlyKind>,
     pub annotation: En,
     pub mode: file_info::Mode,
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,

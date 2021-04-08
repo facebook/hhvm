@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([3:24-28], (Hprim Tvoid)))); f_name = ([3:10-13], "\\foo"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([3:24-28], (Hprim Tvoid)))); 
+      f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:18-20], int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
          param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
@@ -15,9 +16,10 @@
           (Expr
              (([4:3-39], (function(int $x): _)),
               (Efun (
-                 { f_span = [4:3-39]; f_annotation = (); f_mode = Mpartial; 
-                   f_readonly_ret = None; f_ret = ((int), None); f_name = ([4:3-39], ";anonymous"); 
-                   f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+                 { f_span = [4:3-39]; f_readonly_this = None; f_annotation = (); 
+                   f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), None); 
+                   f_name = ([4:3-39], ";anonymous"); f_tparams = []; 
+                   f_where_constraints = []; f_variadic = FVnonVariadic;
                    f_params =
                    [{ param_annotation = ([4:17-19], int); param_type_hint = ((int), (Some ([4:13-16], (Hprim Tint)))); 
                       param_is_variadic = false; param_pos = [4:17-19]; 

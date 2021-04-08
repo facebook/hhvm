@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((int), None); f_name = ([3:10-12], "\\f1"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), None); 
+      f_name = ([3:10-12], "\\f1"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:13-15], num); param_type_hint = ((num), None); 
          param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -17,9 +18,10 @@
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None })[(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((int), None); f_name = ([3:10-12], "\\f2"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), None); 
+      f_name = ([3:10-12], "\\f2"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:13-15], num); param_type_hint = ((num), None); 
          param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -37,9 +39,10 @@
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None })[(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((int), None); f_name = ([3:10-12], "\\f3"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), None); 
+      f_name = ([3:10-12], "\\f3"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:13-15], num); param_type_hint = ((num), None); 
          param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 

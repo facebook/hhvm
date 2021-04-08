@@ -1,10 +1,10 @@
 Errors:
   [20:4-21:1] A semicolon `;` is expected here.
 [(Fun
-    { f_span = [12:1-25:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); f_name = ([12:10-13], "\\foo"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [12:1-25:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
+      f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([13:3-10], (Expr (([13:3-9], int), (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $y))), (([13:8-9], int), (Int "2")))))));
@@ -14,8 +14,8 @@ Errors:
                (Binop ((Eq None), (([15:3-5], (function(num $z): int)), (Lvar ([15:3-5], $x))),
                   (([15:8-22], (function(num $z): int)),
                    (Lfun (
-                      { f_span = [15:8-22]; f_annotation = (); f_mode = Mstrict; 
-                        f_readonly_ret = None; f_ret = ((int), None); 
+                      { f_span = [15:8-22]; f_readonly_this = None; f_annotation = (); 
+                        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), None); 
                         f_name = ([15:8-22], ";anonymous"); f_tparams = []; 
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
@@ -50,10 +50,10 @@ Errors:
                (Binop ((Eq None), (([18:3-5], (function(num $z): int)), (Lvar ([18:3-5], $x))),
                   (([18:8-20:4], (function(num $z): int)),
                    (Efun (
-                      { f_span = [18:8-20:4]; f_annotation = (); f_mode = Mstrict; 
-                        f_readonly_ret = None; f_ret = ((int), None); 
-                        f_name = ([18:8-20:4], ";anonymous"); f_tparams = []; 
-                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                      { f_span = [18:8-20:4]; f_readonly_this = None; 
+                        f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
+                        f_ret = ((int), None); f_name = ([18:8-20:4], ";anonymous"); 
+                        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
                         [{ param_annotation = ([18:17-19], num); param_type_hint = ((num), None); 
                            param_is_variadic = false; param_pos = [18:17-19]; 
@@ -86,8 +86,8 @@ Errors:
                (Binop ((Eq None), (([23:3-5], (function(int $a, int $b): int)), (Lvar ([23:3-5], $x))),
                   (([23:8-28], (function(int $a, int $b): int)),
                    (Lfun (
-                      { f_span = [23:8-28]; f_annotation = (); f_mode = Mstrict; 
-                        f_readonly_ret = None; f_ret = ((int), None); 
+                      { f_span = [23:8-28]; f_readonly_this = None; f_annotation = (); 
+                        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), None); 
                         f_name = ([23:8-28], ";anonymous"); f_tparams = []; 
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =

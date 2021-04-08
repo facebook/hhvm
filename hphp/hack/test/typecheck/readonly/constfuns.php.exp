@@ -1,14 +1,12 @@
-File "constfuns.php", line 31, characters 14-15:
+File "constfuns.php", line 25, characters 5-6:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "constfuns.php", line 30, characters 5-6:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "constfuns.php", line 40, characters 23-24:
 Invalid argument (Typing[4411])
-  File "constfuns.php", line 24, characters 8-65:
-  Function readonly return mismatch
-  File "constfuns.php", line 24, characters 8-65:
-  This function returns a readonly value
-  File "constfuns.php", line 15, characters 39-53:
-  This function does not return a readonly value
-File "constfuns.php", line 32, characters 14-15:
-Invalid argument (Typing[4411])
-  File "constfuns.php", line 32, characters 14-15:
-  This function is not marked <<__ConstFun>>
-  File "constfuns.php", line 15, characters 55-56:
-  It is incompatible with this parameter, which is marked <<__ConstFun>>
+  File "constfuns.php", line 34, characters 8-70:
+  Function readonly mismatch
+  File "constfuns.php", line 34, characters 8-70:
+  This function is not marked readonly
+  File "constfuns.php", line 15, characters 33-65:
+  This function is marked readonly

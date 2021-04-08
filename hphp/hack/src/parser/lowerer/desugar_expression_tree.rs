@@ -172,6 +172,7 @@ fn wrap_fun_<TF>(
 ) -> ast::Fun_ {
     ast::Fun_ {
         span: pos,
+        readonly_this: None,
         annotation: (),
         mode: file_info::Mode::Mstrict,
         readonly_ret: None,

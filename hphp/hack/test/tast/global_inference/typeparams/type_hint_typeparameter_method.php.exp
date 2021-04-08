@@ -2,9 +2,10 @@ Errors:
   [3:14-17] Wrong number of type arguments (expected 2, got 0)
   [54:13-16] Definition is here
 [(Fun
-    { f_span = [3:1-6:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((void), None); f_name = ([3:10-13], "\\foo"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), None); 
+      f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:18-20], Map<string, (int | string)>); 
          param_type_hint = ((Map<string, (int | string)>), (Some ([3:14-17], (Happly (([3:14-17], "\\HH\\Map"), []))))); 

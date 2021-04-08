@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [3:1-42]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); f_name = ([3:10-22], "\\takes_string"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); f_mode = Mpartial; 
+      f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
+      f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:30-32], string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
          param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
@@ -17,9 +18,9 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None });
   (Fun
-     { f_span = [5:1-9:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); f_name = ([5:10-11], "\\f"); 
-       f_tparams = []; f_where_constraints = [];
+     { f_span = [5:1-9:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
+       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic =
        (FVvariadicArg
           { param_annotation = ([5:22-27], vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 

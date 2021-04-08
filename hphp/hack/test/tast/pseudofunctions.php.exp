@@ -31,9 +31,10 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [8:1-22:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid)))); f_name = ([8:10-14], "\\test"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [8:1-22:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid)))); 
+       f_name = ([8:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([8:17-19], C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
           param_is_variadic = false; param_pos = [8:17-19]; param_name = "$c"; 

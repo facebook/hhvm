@@ -1,8 +1,8 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); f_name = ([3:10-14], "\\test"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
+      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([4:3-22],
@@ -15,11 +15,12 @@
                     (Call (
                        ([4:8-20],
                         (Lfun (
-                           { f_span = [4:8-20]; f_annotation = (); f_mode = Mstrict; 
-                             f_readonly_ret = None; f_ret = ((), None); 
-                             f_name = ([Pos.none], ";anonymous"); f_tparams = []; 
-                             f_where_constraints = []; f_variadic = FVnonVariadic; 
-                             f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                           { f_span = [4:8-20]; f_readonly_this = None; 
+                             f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
+                             f_ret = ((), None); f_name = ([Pos.none], ";anonymous"); 
+                             f_tparams = []; f_where_constraints = []; 
+                             f_variadic = FVnonVariadic; f_params = []; 
+                             f_ctxs = None; f_unsafe_ctxs = None;
                              f_body =
                              { fb_ast =
                                [([4:9-10],
@@ -54,6 +55,7 @@
                                                  ([4:8-20],
                                                   (Lfun (
                                                      { f_span = [4:8-20]; 
+                                                       f_readonly_this = None; 
                                                        f_annotation = (); 
                                                        f_mode = Mstrict; 
                                                        f_readonly_ret = None; 
@@ -197,6 +199,7 @@
                                                  ([4:8-20],
                                                   (Efun (
                                                      { f_span = [4:8-20]; 
+                                                       f_readonly_this = None; 
                                                        f_annotation = (); 
                                                        f_mode = Mstrict; 
                                                        f_readonly_ret = None; 

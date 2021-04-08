@@ -1,6 +1,7 @@
 [(Fun
-    { f_span = [3:1-8:69]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((), (Some ([8:62-66], (Hprim Tvoid)))); f_name = ([3:10-14], "\\poly");
+    { f_span = [3:1-8:69]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([8:62-66], (Hprim Tvoid)))); 
+      f_name = ([3:10-14], "\\poly");
       f_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:15-24], "Texplicit"); 
          tp_parameters = []; tp_constraints = [(Constraint_as, ([3:28-29], (Happly (([3:28-29], "\\D"), []))))]; 

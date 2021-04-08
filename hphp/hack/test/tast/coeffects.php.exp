@@ -1,8 +1,8 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([3:25-29], (Hprim Tvoid)))); f_name = ([3:10-11], "\\f"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-      f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
+    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([3:25-29], (Hprim Tvoid)))); 
+      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
       f_unsafe_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\Unsafe\\defaults"), [])))]));
       f_body =
       { fb_ast =
@@ -12,8 +12,8 @@
               (Binop ((Eq None), (([4:3-5], (function(mixed $i): void)), (Lvar ([4:3-5], $x))),
                  (([4:8-23], (function(mixed $i): void)),
                   (Lfun (
-                     { f_span = [4:8-23]; f_annotation = (); f_mode = Mstrict; 
-                       f_readonly_ret = None; f_ret = ((void), None); 
+                     { f_span = [4:8-23]; f_readonly_this = None; f_annotation = (); 
+                       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), None); 
                        f_name = ([4:8-23], ";anonymous"); f_tparams = []; 
                        f_where_constraints = []; f_variadic = FVnonVariadic;
                        f_params =

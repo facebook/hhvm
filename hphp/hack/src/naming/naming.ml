@@ -1519,6 +1519,7 @@ and fun_ ctx f =
   let named_fun =
     {
       N.f_annotation = ();
+      f_readonly_this = f.Aast.f_readonly_this;
       f_span = f.Aast.f_span;
       f_mode = f.Aast.f_mode;
       f_readonly_ret = f.Aast.f_readonly_ret;
@@ -2245,6 +2246,7 @@ and expr_lambda env f =
   let body = { N.fb_ast = body_nast; fb_annotation = annotation } in
   {
     N.f_annotation = ();
+    f_readonly_this = f.Aast.f_readonly_this;
     f_span = f.Aast.f_span;
     f_mode = (fst env).in_mode;
     f_readonly_ret = f.Aast.f_readonly_ret;

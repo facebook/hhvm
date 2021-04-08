@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [3:1-19:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); f_name = ([3:10-14], "\\test"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-19:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
+      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([4:25-27], (function(int): bool));
          param_type_hint =

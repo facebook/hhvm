@@ -49,32 +49,17 @@ let merge_lenvs left right =
    *)
   SMap.merge (fun _key -> Option.merge ~f:meet) left right
 
-let has_const_attribute user_attributes =
-  List.exists user_attributes ~f:(fun ua ->
-      String.equal
-        (snd ua.ua_name)
-        Naming_special_names.UserAttributes.uaConstFun)
-
 let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
 
 (* Debugging tool for printing the local environment. Not actually called in code *)
 let pp_lenv lenv = SMap.show pp_rty lenv
 
-let lenv_from_params (params : Tast.fun_param list) user_attributes : rty SMap.t
-    =
+let lenv_from_params (params : Tast.fun_param list) : rty SMap.t =
   let result = SMap.empty in
-  let constfun = has_const_attribute user_attributes in
   List.fold_left
     params
     ~f:(fun acc p ->
-      SMap.add
-        p.param_name
-        (readonly_kind_to_rty
-           ( if constfun then
-             Some Ast_defs.Readonly
-           else
-             p.param_readonly ))
-        acc)
+      SMap.add p.param_name (readonly_kind_to_rty p.param_readonly) acc)
     ~init:result
 
 let get_local lenv id =
@@ -400,30 +385,7 @@ let check =
                 ( param.fp_pos,
                   "It is incompatible with this parameter, which is "
                   ^ rty_to_str param_rty );
-              ];
-        (* Check fty const matching for an arg *)
-        match
-          (get_node param.fp_type.et_type, get_node (Tast.get_type arg))
-        with
-        | (Tfun _, Tfun fty)
-        (* Passing a nonconst function to a const parameter *)
-          when get_fp_const_function param
-               && not (Typing_defs.get_ft_is_const fty) ->
-          Errors.readonly_mismatch
-            "Invalid argument"
-            (Tast.get_position arg)
-            ~reason_sub:
-              [
-                ( Tast.get_position arg,
-                  "This function is not marked <<__ConstFun>>" );
               ]
-            ~reason_super:
-              [
-                ( param.fp_pos,
-                  "It is incompatible with this parameter, which is marked <<__ConstFun>>"
-                );
-              ]
-        | _ -> ()
       in
 
       (* Check that readonly arguments match their parameters *)
@@ -557,7 +519,7 @@ let check =
         {
           this_ty;
           ret_ty = Some (readonly_kind_to_rty m.m_readonly_ret, ret_pos);
-          lenv = lenv_from_params m.m_params m.m_user_attributes;
+          lenv = lenv_from_params m.m_params;
         }
       in
       ctx <- new_ctx;
@@ -567,11 +529,7 @@ let check =
       let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
       let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos) in
       let new_ctx =
-        {
-          this_ty = None;
-          ret_ty;
-          lenv = lenv_from_params f.f_params f.f_user_attributes;
-        }
+        { this_ty = None; ret_ty; lenv = lenv_from_params f.f_params }
       in
       ctx <- new_ctx;
       super#on_fun_def env f
@@ -589,15 +547,15 @@ let check =
         (* Keep the old context for use later *)
         let old_ctx = ctx in
         (* First get the lenv from parameters, which override captured values *)
-        let is_const = has_const_attribute f.f_user_attributes in
-        (* If the lambda is const, we need to treat the entire lenv as if it is readonly, and all parameters as readonly *)
+        let is_readonly_this = Option.is_some f.f_readonly_this in
+        (* If the lambda is readonly, we need to treat the entire lenv as if it is readonly *)
         let old_lenv =
-          if is_const then
+          if is_readonly_this then
             SMap.map (fun _ -> Readonly) ctx.lenv
           else
             ctx.lenv
         in
-        let new_lenv = lenv_from_params f.f_params f.f_user_attributes in
+        let new_lenv = lenv_from_params f.f_params in
         let new_lenv = SMap.union new_lenv old_lenv in
         let new_ctx =
           {

@@ -135,9 +135,10 @@
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
        c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [32:1-37:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([32:37-41], (Hprim Tvoid)))); f_name = ([32:10-14], "\\test"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [32:1-37:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([32:37-41], (Hprim Tvoid)))); 
+       f_name = ([32:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([32:32-34], MyPhonyVector<X>);
           param_type_hint = ((MyPhonyVector<X>), (Some ([32:15-31], (Happly (([32:15-28], "\\MyPhonyVector"), [([32:29-30], (Happly (([32:29-30], "\\X"), [])))]))))); 

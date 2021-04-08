@@ -3598,6 +3598,7 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let tfun_ =
             {
               Aast.f_annotation = Env.save local_tpenv env;
+              Aast.f_readonly_this = f.f_readonly_this;
               Aast.f_span = f.f_span;
               Aast.f_mode = f.f_mode;
               Aast.f_ret = (hret, hint_of_type_hint f.f_ret);

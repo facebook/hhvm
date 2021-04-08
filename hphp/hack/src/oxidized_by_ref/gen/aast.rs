@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<099d50e73941ac2c44b6d005ab736fbf>>
+// @generated SignedSource<<d999610d6ace53f0a712a5711a54127b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1128,6 +1128,7 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 )]
 pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub span: &'a Pos<'a>,
+    pub readonly_this: Option<oxidized::ast_defs::ReadonlyKind>,
     pub annotation: En,
     pub mode: oxidized::file_info::Mode,
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,

@@ -3,9 +3,10 @@ Errors:
   [5:12-15] Expected `int`
   [3:23-29] But got `string`
 [(Fun
-    { f_span = [3:1-15:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((int), (Some ([3:35-38], (Hprim Tint)))); f_name = ([3:10-14], "\\test"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-15:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), (Some ([3:35-38], (Hprim Tint)))); 
+      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:19-21], int); param_type_hint = ((int), (Some ([3:15-18], (Hprim Tint)))); 
          param_is_variadic = false; param_pos = [3:19-21]; param_name = "$i"; 
@@ -29,8 +30,9 @@ Errors:
                (Binop ((Eq None), (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
                   (([5:8-12:4], (function(): int)),
                    (Lfun (
-                      { f_span = [5:8-12:4]; f_annotation = (); f_mode = Mstrict; 
-                        f_readonly_ret = None; f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
+                      { f_span = [5:8-12:4]; f_readonly_this = None; 
+                        f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
+                        f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
                         f_name = ([5:8-12:4], ";anonymous"); f_tparams = []; 
                         f_where_constraints = []; f_variadic = FVnonVariadic; 
                         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;

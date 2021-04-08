@@ -40,9 +40,10 @@ Errors:
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [7:1-26]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([7:19-23], (Hprim Tvoid)))); f_name = ([7:10-11], "\\f"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [7:1-26]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([7:19-23], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([7:14-16], C<mixed, nothing>); param_type_hint = ((C<mixed, nothing>), (Some ([7:12-13], (Happly (([7:12-13], "\\C"), []))))); 
           param_is_variadic = false; param_pos = [7:14-16]; param_name = "$x"; 

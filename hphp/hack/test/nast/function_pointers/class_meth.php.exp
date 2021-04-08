@@ -24,10 +24,10 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [9:1-15:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); f_name = ([9:10-13], "\\Foo\\Bar\\baz"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-       f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+     { f_span = [9:1-15:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
+       f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([11:3-21],

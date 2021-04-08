@@ -13,10 +13,10 @@ class Foo {
 }
 function returns_readonly(Foo $z) : readonly Baz {
   $f =
-    <<__ConstFun>> (Foo $x, Foo $y) ==> {
+    readonly (Foo $x, readonly Foo $y) ==> {
     $z->prop = 4; // error, $z is readonly
-    $x->prop = 4; // error, $x is readonly
-    $y->prop = 4; // error, $y is readonly
+    $x->prop = 4; // ok
+    $y->prop = 4; // obviously not ok
     return;
   };
   $z->prop = 4;// ok

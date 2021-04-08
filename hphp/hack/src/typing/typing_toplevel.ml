@@ -360,6 +360,7 @@ let fun_def ctx f :
       let fundef =
         {
           Aast.f_annotation = Env.save local_tpenv env;
+          Aast.f_readonly_this = f.f_readonly_this;
           Aast.f_span = f.f_span;
           Aast.f_mode = f.f_mode;
           Aast.f_readonly_ret = f.f_readonly_ret;

@@ -2,7 +2,8 @@ Errors:
   [2:3-7] Unrecognized user attribute: `__Rx` starts with __ but is not a standard attribute
   [4:18-22] Unbound name: `Pure`
 [(Fun
-    { f_span = [2:1-6:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None;
+    { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None;
       f_ret =
       ((Pure<(function(int): void)>),
        (Some ([4:18-47],

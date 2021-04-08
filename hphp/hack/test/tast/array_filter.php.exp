@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [3:1-28:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([10:4-8], (Hprim Tvoid)))); f_name = ([3:10-27], "\\test_array_filter"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [3:1-28:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([10:4-8], (Hprim Tvoid)))); 
+      f_name = ([3:10-27], "\\test_array_filter"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([4:20-34], vec_or_dict<arraykey, _>); param_type_hint = ((vec_or_dict<arraykey, _>), (Some ([4:3-19], (Hvec_or_dict (None, ([4:3-19], Hany))))));
          param_is_variadic = false; param_pos = [4:20-34]; param_name = "$untyped_array"; 
@@ -86,8 +87,8 @@
                (Binop ((Eq None), (([20:3-5], (function(?string $x): bool)), (Lvar ([20:3-5], $f))),
                   (([20:8-35], (function(?string $x): bool)),
                    (Lfun (
-                      { f_span = [20:8-35]; f_annotation = (); f_mode = Mpartial; 
-                        f_readonly_ret = None; f_ret = ((bool), (Some ([20:22-26], (Hprim Tbool)))); 
+                      { f_span = [20:8-35]; f_readonly_this = None; f_annotation = (); 
+                        f_mode = Mpartial; f_readonly_ret = None; f_ret = ((bool), (Some ([20:22-26], (Hprim Tbool)))); 
                         f_name = ([20:8-35], ";anonymous"); f_tparams = []; 
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =

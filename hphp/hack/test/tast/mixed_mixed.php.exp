@@ -1,7 +1,8 @@
 [(Fun
-    { f_span = [4:1-41]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([4:34-38], (Hprim Tvoid)))); f_name = ([4:10-22], "\\expect_mixed"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [4:1-41]; f_readonly_this = None; f_annotation = (); f_mode = Mstrict; 
+      f_readonly_ret = None; f_ret = ((void), (Some ([4:34-38], (Hprim Tvoid)))); 
+      f_name = ([4:10-22], "\\expect_mixed"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([4:29-31], mixed); param_type_hint = ((mixed), (Some ([4:23-28], Hmixed))); 
          param_is_variadic = false; param_pos = [4:29-31]; param_name = "$_"; 
@@ -17,9 +18,10 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None });
   (Fun
-     { f_span = [6:1-13:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([6:35-39], (Hprim Tvoid)))); f_name = ([6:10-14], "\\test"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [6:1-13:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([6:35-39], (Hprim Tvoid)))); 
+       f_name = ([6:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([6:19-21], int); param_type_hint = ((int), (Some ([6:15-18], (Hprim Tint)))); 
           param_is_variadic = false; param_pos = [6:19-21]; param_name = "$a"; 

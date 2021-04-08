@@ -15,7 +15,7 @@ class ParentClass {
     return new ParentClass();
   }
 
-  public function constFun(
+  public function readonlyFun(
     (function (Child) : Child) $f
   ) : void {
   }
@@ -43,8 +43,8 @@ class Child extends ParentClass {
   ) : void {
   }
 
-  public function constFun(
-    <<__ConstFun>> (function (Child) : Child) $f
+  public function readonlyFun(
+    (readonly function (Child) : Child) $f
   ) : void {
   }
 
@@ -63,4 +63,26 @@ function fnTypes(
   fnTypes($z, $f2);
   // fails because the function returns readonly Child instead of mutable Child
   fnTypes($f2, $f2);
+}
+
+function convariant_inner_arg(
+//          ++++++++++++++++++++++++ (covar.)
+// ---------------------------------------- (contravar.)
+  (function(readonly (readonly function(): int)): void)  $f,
+  (readonly function(): int) $arg
+): void {
+  $f($arg);
+}
+
+// TODO: the outermost readonly typehint should be optional, as it's
+// pretty confusing to have both (with different variance as well)
+function readonlyFns(readonly (readonly function(): void) $f): void {
+  // Testing readonly functions and their types
+  $o = readonly () ==> {};
+  $g = readonly function() : void {
+  };
+  $h = function(): void {};
+  readonlyFns($o);
+  readonlyFns($g);
+  readonlyFns($h);
 }

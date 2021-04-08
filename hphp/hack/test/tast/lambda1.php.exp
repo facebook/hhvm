@@ -1,8 +1,8 @@
 [(Fun
-    { f_span = [2:1-7:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([2:26-30], (Hprim Tvoid)))); f_name = ([2:10-22], "\\test_lambda1"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [2:1-7:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([2:26-30], (Hprim Tvoid)))); 
+      f_name = ([2:10-22], "\\test_lambda1"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([3:3-14], (Expr (([3:3-13], string), (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))), (([3:8-13], string), (String "foo")))))));
@@ -12,8 +12,8 @@
                (Binop ((Eq None), (([4:3-5], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), (Lvar ([4:3-5], $f))),
                   (([4:8-41], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)),
                    (Lfun (
-                      { f_span = [4:8-41]; f_annotation = (); f_mode = Mstrict; 
-                        f_readonly_ret = None; f_ret = ((string), None); 
+                      { f_span = [4:8-41]; f_readonly_this = None; f_annotation = (); 
+                        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((string), None); 
                         f_name = ([4:8-41], ";anonymous"); f_tparams = []; 
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =

@@ -17,10 +17,10 @@ File "switch_fallthrough.php", line 33, characters 7-17:
 File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
 [(Fun
-    { f_span = [3:1-38:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-      f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid)))); f_name = ([3:10-14], "\\test"); 
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [3:1-38:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid)))); 
+      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([5:3-10], (Expr (([5:3-9], int), (Binop ((Eq None), (([5:3-5], int), (Lvar ([5:3-5], $x))), (([5:8-9], int), (Int "0")))))));

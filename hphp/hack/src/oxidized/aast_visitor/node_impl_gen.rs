@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29fe33b9fb2e20af2e4ad5e822bfa110>>
+// @generated SignedSource<<d53c37157f2c47a5760bf9d1207409a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1084,6 +1084,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
         self.span.accept(c, v)?;
+        self.readonly_this.accept(c, v)?;
         v.visit_en(c, &self.annotation)?;
         self.mode.accept(c, v)?;
         self.readonly_ret.accept(c, v)?;

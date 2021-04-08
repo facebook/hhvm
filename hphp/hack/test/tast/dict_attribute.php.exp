@@ -324,9 +324,10 @@
          ];
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [19:1-20:60]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); f_name = ([20:10-12], "\\ff"); 
-       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+     { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); 
+       f_name = ([20:10-12], "\\ff"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([20:48-50], int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
           param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 

@@ -697,6 +697,7 @@ and ('ex, 'fb, 'en, 'hi) fun_variadicity =
 
 and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;
+  f_readonly_this: Ast_defs.readonly_kind option;
   f_annotation: 'en;
   f_mode: FileInfo.mode; [@visitors.opaque]
   f_readonly_ret: Ast_defs.readonly_kind option;

@@ -106,6 +106,7 @@ pub enum TokenOp {
 #[derive(Debug)]
 pub struct FunHdr {
     suspension_kind: SuspensionKind,
+    readonly_this: Option<ast::ReadonlyKind>,
     name: ast::Sid,
     constrs: Vec<ast::WhereConstraintHint>,
     type_parameters: Vec<ast::Tparam>,
@@ -120,6 +121,7 @@ impl FunHdr {
     fn make_empty<TF: Clone>(env: &Env<TF>) -> Self {
         Self {
             suspension_kind: SuspensionKind::SKSync,
+            readonly_this: None,
             name: ast::Id(env.mk_none_pos(), String::from("<ANONYMOUS>")),
             constrs: vec![],
             type_parameters: vec![],
@@ -1033,6 +1035,20 @@ where
             _ => Ok(ast::Afield::AFvalue(Self::p_expr(node, env)?)),
         }
     }
+    // We lower readonly lambda declarations as making the inner lambda have readonly_this.
+    fn process_readonly_expr(mut e: ast::Expr) -> ast::Expr_ {
+        use aast::Expr_::*;
+        match &mut e {
+            ast::Expr(_, Efun(ref mut e)) => {
+                e.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+            }
+            ast::Expr(_, Lfun(ref mut l)) => {
+                l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+            }
+            _ => {}
+        }
+        E_::mk_readonly_expr(e)
+    }
 
     fn check_intrinsic_type_arg_varity(
         node: S<'a, T, V>,
@@ -1566,6 +1582,7 @@ where
                 let external = c.body.is_external();
                 let fun = ast::Fun_ {
                     span: pos.clone(),
+                    readonly_this: None, // filled in by mk_unop
                     annotation: (),
                     mode: env.file_mode(),
                     readonly_ret,
@@ -1851,7 +1868,7 @@ where
                         Some(TK::Minus) => mk_unop(Uminus, expr),
                         Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
                         Some(TK::Await) => Self::lift_await(pos, expr, env, location),
-                        Some(TK::Readonly) => Ok(E_::mk_readonly_expr(expr)),
+                        Some(TK::Readonly) => Ok(Self::process_readonly_expr(expr)),
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
                             E::new(
@@ -2140,6 +2157,7 @@ where
                 let name_pos = Self::p_fun_pos(node, env);
                 let fun = ast::Fun_ {
                     span: Self::p_pos(node, env),
+                    readonly_this: None, // set in process_readonly_expr
                     annotation: (),
                     mode: env.file_mode(),
                     readonly_ret: Self::mp_optional(Self::p_readonly, &c.readonly_return, env)?,
@@ -2176,7 +2194,8 @@ where
                     span: pos.clone(),
                     annotation: (),
                     mode: env.file_mode(),
-                    readonly_ret: None, // TODO: awaitable creation expression
+                    readonly_this: None, // set in process_readonly_expr
+                    readonly_ret: None,  // TODO: awaitable creation expression
                     ret: ast::TypeHint((), None),
                     name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -3715,6 +3734,11 @@ where
                 }
                 let kinds = Self::p_kinds(modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
+                let readonly_this = if kinds.has(modifier::READONLY) {
+                    Some(ast::ReadonlyKind::Readonly)
+                } else {
+                    None
+                };
                 let readonly_ret = Self::mp_optional(Self::p_readonly, readonly_return, env)?;
                 let mut type_parameters = Self::p_tparam_l(false, type_parameter_list, env)?;
                 let mut parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
@@ -3732,6 +3756,7 @@ where
                 let name = Self::pos_name(name, env)?;
                 Ok(FunHdr {
                     suspension_kind,
+                    readonly_this,
                     name,
                     constrs,
                     type_parameters,
@@ -4886,6 +4911,7 @@ where
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {
                     span: Self::p_fun_pos(node, env),
+                    readonly_this: hdr.readonly_this,
                     annotation: (),
                     mode: env.file_mode(),
                     ret,

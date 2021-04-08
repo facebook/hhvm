@@ -48,8 +48,8 @@
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
        c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [16:1-19:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-       f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey)))); 
+     { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey)))); 
        f_name = ([16:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
        f_variadic = FVnonVariadic;
        f_params =

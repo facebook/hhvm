@@ -966,6 +966,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
 
     let fd = Fun_ {
         span: pos(),
+        readonly_this: None, // TODOreadonly closure convert
         annotation: dummy_saved_env,
         mode: get_scope_fmode(&env.scope),
         readonly_ret: None,
@@ -1057,6 +1058,7 @@ fn make_dyn_meth_caller_lambda(
 
     let fd = Fun_ {
         span: pos(),
+        readonly_this: None, // TODO: readonly_this in closure convert
         annotation: dummy_saved_env,
         mode: get_scope_fmode(&env.scope),
         readonly_ret: None, // TODO: readonly_ret in closure convert
@@ -1748,6 +1750,7 @@ fn extract_debugger_main(
     );
     let fd = Fun_ {
         span: pos,
+        readonly_this: None, // TODO: readonly_this in closure_convert
         annotation: (),
         mode: Mode::Mstrict,
         readonly_ret: None, // TODO: readonly_ret in closure_convert

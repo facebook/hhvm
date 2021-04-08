@@ -161,6 +161,7 @@ StructDictInit::StructDictInit(RuntimeStruct* structHandle, size_t n) {
       // We have been assigned a layout; use it for the initializer.
       m_arr = StructDict::AllocStructDict(layout);
       m_struct = structHandle;
+      m_escalateCapacity = n;
       return;
     }
   }
@@ -178,31 +179,50 @@ StructDictInit::~StructDictInit() {
 }
 
 void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
-  tvIncRefGen(value);
-  if (m_struct) {
-    assertx(m_struct->m_fields[idx]->same(key.get()));
-    auto const sad = StructDict::As(m_arr);
-    auto const slot = m_struct->m_fieldSlots[idx];
-    if (slot == kInvalidSlot) {
-      // We are adding a key with no corresponding slot. This must escalate to
-      // vanilla, so clear the m_struct field.
-      FTRACE(2, "StructDictInit set at key {}, escalate\n", key.get());
-      m_arr = StructDict::SetStrMove(sad, key.get(), value);
-      assertx(m_arr->isVanilla());
-      m_struct = nullptr;
+  if (!m_struct) {
+    if (m_arr->isVanilla()) {
+      // We have a vanilla MixedArray that must be properly sized. Set the
+      // field in place.
+      auto const DEBUG_ONLY res =
+        MixedArray::SetStrInPlace(m_arr, key.get(), value);
+      assertx(res == m_arr);
     } else {
-      FTRACE(2, "StructDictInit set at key {}, slot {}\n", key.get(), slot);
-      if (debug) {
-        // Validate that the slot translation is correct.
-        auto const DEBUG_ONLY layout =
-          m_struct->m_assignedLayout.load(std::memory_order_acquire);
-        assertx(layout->field(slot).key->same(key.get()));
-      }
-      m_arr = StructDict::SetStrInSlot(sad, value, slot);
-      assertx(!m_arr->isVanilla());
+      // We have a LoggingArray that should update in place.
+      tvIncRefGen(value);
+      auto const DEBUG_ONLY res =
+        m_arr->setMove(key, value);
+      assertx(res == m_arr);
     }
+    return;
+  }
+
+  // We are currently wrapping a StructDict.
+  assertx(m_struct->m_fields[idx]->same(key.get()));
+  auto const sad = StructDict::As(m_arr);
+  auto const slot = m_struct->m_fieldSlots[idx];
+  if (slot == kInvalidSlot) {
+    // We are adding a key with no corresponding slot. This must escalate to
+    // vanilla, so escalate with the requested capacity and clear the m_struct
+    // field.
+    FTRACE(2, "StructDictInit set at key {}, escalate\n", key.get());
+    m_arr = sad->escalateWithCapacity(m_escalateCapacity, "StructDictInit");
+    assertx(m_arr->isVanillaDict());
+    m_struct = nullptr;
+
+    auto const DEBUG_ONLY res =
+      MixedArray::SetStrInPlace(m_arr, key.get(), value);
+    assertx(res == m_arr);
   } else {
-    m_arr = m_arr->setMove(key, value);
+    // We are adding a key with a known slot. This can be done in place.
+    FTRACE(2, "StructDictInit set at key {}, slot {}\n", key.get(), slot);
+    if (debug) {
+      // Validate that the slot translation is correct.
+      auto const DEBUG_ONLY layout =
+        m_struct->m_assignedLayout.load(std::memory_order_acquire);
+      assertx(layout->field(slot).key->same(key.get()));
+    }
+    tvIncRefGen(value);
+    StructDict::SetStrInSlotInPlace(sad, slot, value);
   }
 }
 

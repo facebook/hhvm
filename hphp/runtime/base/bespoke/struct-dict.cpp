@@ -497,23 +497,31 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
     if (sadIn->decReleaseCheck()) Release(sadIn);
     return res;
   }
-  return SetStrInSlot(sadIn, v, slot);
+  return SetStrInSlot(sadIn, slot, v);
 }
 
-ArrayData* StructDict::SetStrInSlot(StructDict* sadIn,
-                                    TypedValue v, Slot slot) {
+ArrayData* StructDict::SetStrInSlot(StructDict* sadIn, Slot slot,
+                                    TypedValue v) {
   assertx(slot != kInvalidSlot);
   auto const cow = sadIn->cowCheck();
   auto const sad = cow ? sadIn->copy() : sadIn;
+  StructDict::SetStrInSlotInPlace(sad, slot, v);
+  if (cow) sadIn->decRefCount();
+  return sad;
+}
+
+void StructDict::SetStrInSlotInPlace(StructDict* sad, Slot slot,
+                                     TypedValue v) {
+  assertx(sad->hasExactlyOneRef());
   auto& oldType = sad->rawTypes()[slot];
   auto& oldVal = sad->rawValues()[slot];
   if (oldType == KindOfUninit) {
     sad->addNextSlot(slot);
+  } else {
+    tvDecRefGen(make_tv_of_type(oldVal, oldType));
   }
   oldType = type(v);
   oldVal = val(v);
-  if (cow) sadIn->decRefCount();
-  return sad;
 }
 
 StructDict* StructDict::copy() const {
@@ -619,7 +627,7 @@ void StructDict::Scan(const StructDict* sad, type_scan::Scanner& scanner) {
 }
 
 ArrayData* StructDict::EscalateToVanilla(const StructDict* sad,
-                                          const char* reason) {
+                                         const char* reason) {
   return sad->escalateWithCapacity(sad->size(), reason);
 }
 

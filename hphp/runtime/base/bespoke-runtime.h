@@ -142,6 +142,7 @@ struct StructDictInit {
 private:
   ArrayData* m_arr;
   RuntimeStruct* m_struct;
+  size_t m_escalateCapacity;
 };
 
 }

@@ -123,6 +123,7 @@ struct StructLayout : public ConcreteLayout {
   size_t valueOffsetForSlot(Slot slot) const;
 
   std::pair<Type, bool> elemType(Type key) const override;
+  ArrayLayout setType(Type key, Type val) const override;
 
 private:
   // Callers must check whether the key is static before using one of these

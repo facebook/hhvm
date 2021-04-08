@@ -536,7 +536,7 @@ Type structDictReturn(const IRInstruction* inst) {
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeSet));
+  assertx(inst->is(BespokeSet, StructDictSet));
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
   auto const val = inst->src(2)->type();

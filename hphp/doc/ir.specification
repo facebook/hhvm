@@ -3069,6 +3069,12 @@ fields of that struct for holding intermediate values.
 
   Loads the element of the StructDict in S0 at the constant string key S1.
 
+| StructDictSet, DArrLikeSet, SStructDict C(StaticStr) S(Cell), PRc|CRc
+
+  Set element with key S1 in the array S0 with struct layout to S2. This 
+  This op has SetMove semantics; it consumes a refcount on the input array and 
+  produces one on the output, and does no refcounting to the value S2.
+
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.

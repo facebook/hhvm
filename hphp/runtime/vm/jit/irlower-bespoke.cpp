@@ -486,6 +486,26 @@ void cgLdStructDictElem(IRLS& env, const IRInstruction* inst) {
          type, value);
 }
 
+void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto layout = arr->type().arrSpec().layout();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+  auto const key = inst->src(1);
+  assertx(key->hasConstVal());
+  auto& v = vmain(env);
+  auto const keyStr = key->strVal();
+  auto const slot = slayout->keySlot(keyStr);
+  if (slot != kInvalidSlot) {
+    auto const target = CallSpec::direct(bespoke::StructDict::SetStrInSlot);
+    auto const args = argGroup(env, inst).ssa(0).imm(slot).typedValue(2);
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  } else {
+    auto const target = CallSpec::direct(bespoke::StructDict::SetStrMove);
+    auto const args = argGroup(env, inst).ssa(0).immPtr(keyStr).typedValue(2);
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }}}

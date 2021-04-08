@@ -1073,6 +1073,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemS { base, key->strVal() } };
   }
 
+  case StructDictSet: {
+    auto const arr = inst.src(0);
+    auto const key = inst.src(1);
+    auto const val = inst.src(2);
+    return PureStore { AElemS { arr, key->strVal() }, val, arr };
+  }
+
   case DictGetK:
   case KeysetGetK:
   case BespokeGet:

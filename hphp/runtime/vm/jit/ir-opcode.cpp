@@ -904,6 +904,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:
+  case StructDictSet:
   case StStk:
   case SubDbl:
   case SubInt:

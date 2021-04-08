@@ -3164,6 +3164,21 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyBespokeSet(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const v = inst->src(2);
+
+  if (key->isA(TInt)) return nullptr;
+
+  assertx(key->isA(TStr));
+  if (arr->type().arrSpec().is_struct() && key->hasConstVal()) {
+    return gen(env, StructDictSet, arr, key, v);
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyBespokeIterFirstPos(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
 
@@ -3720,6 +3735,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdClsMethod)
       X(LdStrLen)
       X(BespokeGet)
+      X(BespokeSet)
       X(BespokeGetThrow)
       X(BespokeIterFirstPos)
       X(BespokeIterLastPos)

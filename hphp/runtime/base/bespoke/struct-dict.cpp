@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
+#include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP { namespace bespoke {
@@ -210,8 +211,9 @@ const StructLayout* StructLayout::As(const Layout* l) {
   return reinterpret_cast<const StructLayout*>(l);
 }
 
-std::pair<jit::Type, bool> StructLayout::elemType(jit::Type key) const {
-  using namespace jit;
+using namespace jit;
+
+std::pair<Type, bool> StructLayout::elemType(Type key) const {
   if (key <= TInt) return {TBottom, false};
   if (key.hasConstVal(TStr)) {
     auto const keyVal = key.strVal();
@@ -220,6 +222,17 @@ std::pair<jit::Type, bool> StructLayout::elemType(jit::Type key) const {
                                   std::pair{TInitCell, false};
   }
   return {TInitCell, false};
+}
+
+ArrayLayout StructLayout::setType(Type key, Type val) const {
+  if (key.maybe(TInt)) return ArrayLayout::Vanilla();
+  if (!key.maybe(TStr)) return ArrayLayout::Top();
+  if (!val.maybe(TInitCell)) return ArrayLayout::Bottom();
+  if (!key.hasConstVal()) return ArrayLayout::Top();
+  auto const keyStr = key.strVal();
+  auto const slot = keySlot(keyStr);
+  if (slot == kInvalidSlot) return ArrayLayout::Vanilla();
+  return ArrayLayout(this);
 }
 
 StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
@@ -486,8 +499,8 @@ ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
 }
 
 ArrayData* StructDict::SetStrMove(StructDict* sadIn,
-                                   StringData* k,
-                                   TypedValue v) {
+                                  StringData* k,
+                                  TypedValue v) {
   auto const layout = sadIn->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) {
@@ -503,6 +516,7 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
 ArrayData* StructDict::SetStrInSlot(StructDict* sadIn, Slot slot,
                                     TypedValue v) {
   assertx(slot != kInvalidSlot);
+  assertx(slot < sadIn->numFields());
   auto const cow = sadIn->cowCheck();
   auto const sad = cow ? sadIn->copy() : sadIn;
   StructDict::SetStrInSlotInPlace(sad, slot, v);

@@ -12,7 +12,6 @@ open ClientEnv
 open Utils
 open ClientRefactor
 open Ocaml_overrides
-module Cmd = ServerCommandLwt
 module Rpc = ServerCommandTypes
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)

@@ -10,6 +10,7 @@ open Typing_defs
 module Env = Typing_env
 module MakeType = Typing_make_type
 module Reason = Typing_reason
+module SN = Naming_special_names
 
 let is_sub_dynamic env t =
   Typing_solver.is_sub_type env t (MakeType.dynamic Reason.Rnone)

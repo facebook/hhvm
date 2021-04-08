@@ -13,6 +13,7 @@
 open Hh_prelude
 open Aast
 open Typing_defs
+module SN = Naming_special_names
 
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =

@@ -12,7 +12,6 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
-module SyntaxKind = Full_fidelity_syntax_kind
 open Syntax
 
 (*

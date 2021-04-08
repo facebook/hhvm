@@ -11,6 +11,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Tast_env
+module SN = Naming_special_names
 
 let check_types env ((p, _), te) =
   let rec check_types_helper = function

@@ -10,6 +10,7 @@
 open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
+module SN = Naming_special_names
 
 (** Origin of Class Constant References:
     In order to be able to detect cycle definitions like

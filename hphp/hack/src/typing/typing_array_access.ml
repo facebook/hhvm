@@ -15,11 +15,11 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
 module Union = Typing_union
-module Inter = Typing_intersection
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
 module Partial = Partial_provider
 module GenericRules = Typing_generic_rules
+module SN = Naming_special_names
 open String.Replace_polymorphic_compare
 
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)

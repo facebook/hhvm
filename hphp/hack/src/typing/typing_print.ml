@@ -20,6 +20,7 @@ module Reason = Typing_reason
 module TySet = Typing_set
 module Cls = Decl_provider.Class
 module Nast = Aast
+module ITySet = Internal_type_set
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 

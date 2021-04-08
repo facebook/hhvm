@@ -11,8 +11,8 @@ open Typing_defs
 open Typing_env_types
 module Reason = Typing_reason
 module Env = Typing_env
-module TUtils = Typing_utils
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 
 let is_object env ty =
   Typing_solver.is_sub_type env ty (MakeType.ty_object (get_reason ty))

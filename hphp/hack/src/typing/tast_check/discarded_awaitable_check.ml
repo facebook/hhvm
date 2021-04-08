@@ -12,6 +12,7 @@ open Aast
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 
 let is_awaitable env ty =
   let mixed = MakeType.mixed Typing_reason.none in

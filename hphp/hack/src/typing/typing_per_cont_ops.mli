@@ -11,7 +11,6 @@
 (* Functions dealing with continuation based flow typing of local variables *)
 (*****************************************************************************)
 open Typing_env_types
-module Env = Typing_env
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env
 

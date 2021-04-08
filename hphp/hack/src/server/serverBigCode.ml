@@ -15,9 +15,7 @@ open Tast
 open Typing_defs
 module Nast = Aast
 module Tast = Aast
-module Phase = Typing_phase
 module Cls = Decl_provider.Class
-module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module TokenKind = Full_fidelity_token_kind
 open Syntax

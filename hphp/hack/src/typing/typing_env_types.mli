@@ -8,7 +8,6 @@
  *)
 
 open Typing_defs
-module ITySet = Internal_type_set
 
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {

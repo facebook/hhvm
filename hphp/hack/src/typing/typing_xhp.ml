@@ -17,6 +17,7 @@ module Reason = Typing_reason
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
+module SN = Naming_special_names
 
 let raise_xhp_required env pos ureason ty =
   let ty_str = Typing_print.error env ty in

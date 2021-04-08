@@ -13,6 +13,7 @@ open Type_validator
 module Env = Tast_env
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
+module SN = Naming_special_names
 
 let validator =
   object (this)

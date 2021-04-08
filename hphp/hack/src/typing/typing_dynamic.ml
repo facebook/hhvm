@@ -9,11 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
-module FunUtils = Decl_fun_utils
 module Reason = Typing_reason
-module Env = Typing_env
-module EnvFromDef = Typing_env_from_def
-module MakeType = Typing_make_type
 
 (* Check that a property type is a subtype of dynamic *)
 let check_property_sound_for_dynamic_read ~on_error env classname id ty =

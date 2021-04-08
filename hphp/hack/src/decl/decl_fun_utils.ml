@@ -10,6 +10,7 @@
 open Hh_prelude
 open Aast
 open Typing_defs
+module SN = Naming_special_names
 
 let get_classname_or_literal_attribute_param = function
   | [(_, String s)] -> Some s

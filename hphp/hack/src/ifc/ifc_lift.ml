@@ -11,13 +11,9 @@ open Hh_prelude
 open Ifc_types
 module Decl = Ifc_decl
 module Env = Ifc_env
-module Lattice = Ifc_security_lattice
 module T = Typing_defs
 module TClass = Decl_provider.Class
-module TEnv = Typing_env
-module TPhase = Typing_phase
 module TReason = Typing_reason
-module TUtils = Typing_utils
 
 let fail fmt = Format.kasprintf (fun s -> raise (IFCError (LiftError s))) fmt
 

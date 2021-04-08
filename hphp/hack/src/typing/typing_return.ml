@@ -13,6 +13,7 @@ open Typing_env_return_info
 module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
 let strip_awaitable_decl fun_kind env (ty : decl_ty) =

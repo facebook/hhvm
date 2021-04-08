@@ -10,7 +10,6 @@
 (* cf: typing_env_types_sig.mli - These files should be the same *)
 open Hh_prelude
 open Typing_defs
-module ITySet = Internal_type_set
 
 type locl_ty = Typing_defs.locl_ty
 

@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module SS = SymbolIndex
 module SUtils = SearchUtils
 
 let print_results (results : SearchUtils.result) : unit =

@@ -14,6 +14,7 @@ open Typing_deps
 open Typing_defs
 module Attrs = Naming_attributes
 module FunUtils = Decl_fun_utils
+module SN = Naming_special_names
 
 (* gather class constants used in a constant initializer *)
 let gather_constants =

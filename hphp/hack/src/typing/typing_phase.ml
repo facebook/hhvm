@@ -19,6 +19,7 @@ module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 module KindDefs = Typing_kinding_defs
 module Kinding = Typing_kinding
+module SN = Naming_special_names
 
 (* Here is the general problem the delayed application of the phase solves.
  * Let's say you have a function that you want to operate generically across

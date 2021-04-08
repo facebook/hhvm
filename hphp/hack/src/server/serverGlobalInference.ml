@@ -14,6 +14,7 @@ module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 module Reason = Typing_reason
+module ITySet = Internal_type_set
 open Syntax
 
 let scuba_table = Scuba.Table.of_name "hh_global_inference"

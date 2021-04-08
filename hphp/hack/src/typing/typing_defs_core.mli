@@ -8,7 +8,6 @@
  *)
 
 module Reason = Typing_reason
-module SN = Naming_special_names
 
 type pos_id = Reason.pos_id [@@deriving eq, ord, show]
 

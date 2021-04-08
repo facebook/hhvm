@@ -10,6 +10,7 @@
 open Typing_defs_core
 open Hh_prelude
 module Env = Typing_env
+module SN = Naming_special_names
 
 let capability_id = Local_id.make_unscoped SN.Coeffects.capability
 

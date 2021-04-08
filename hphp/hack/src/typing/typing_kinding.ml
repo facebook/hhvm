@@ -1,3 +1,10 @@
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
 open Hh_prelude
 open Common
 open Utils
@@ -9,6 +16,7 @@ module KindDefs = Typing_kinding_defs
 module TGenConstraint = Typing_generic_constraint
 module TUtils = Typing_utils
 module Subst = Decl_subst
+module SN = Naming_special_names
 
 module Locl_Inst = struct
   let rec instantiate subst (ty : locl_ty) =

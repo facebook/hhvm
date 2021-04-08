@@ -17,6 +17,7 @@ open Typing_env_return_info
 module Dep = Typing_deps.Dep
 module Inf = Typing_inference_env
 module LID = Local_id
+module SN = Naming_special_names
 module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations

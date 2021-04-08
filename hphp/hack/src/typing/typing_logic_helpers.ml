@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_env_types
-module Env = Typing_env
 module TL = Typing_logic
 
 let with_error (f : unit -> unit) ((env, p) : env * TL.subtype_prop) :

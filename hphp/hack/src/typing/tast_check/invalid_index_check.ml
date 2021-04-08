@@ -13,6 +13,7 @@ open Typing_defs
 module Env = Tast_env
 module TCO = TypecheckerOptions
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 open String.Replace_polymorphic_compare
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)

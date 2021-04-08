@@ -9,7 +9,6 @@
 
 open Hh_prelude
 module TUtils = Typing_utils
-module Reason = Typing_reason
 module Env = Typing_env
 open Typing_defs
 open Typing_env_types

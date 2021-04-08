@@ -11,7 +11,6 @@ open Common
 module C = Typing_continuations
 module LMap = Local_id.Map
 module LEnvC = Typing_per_cont_env
-module Env = Typing_env
 open LEnvC
 
 type 'a locals_merge_fn =

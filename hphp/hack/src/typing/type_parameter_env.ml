@@ -15,6 +15,7 @@ open Hh_prelude
 
 open Typing_defs
 open Typing_kinding_defs
+module SN = Naming_special_names
 module TySet = Typing_set
 
 type tparam_bounds = TySet.t

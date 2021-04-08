@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Aast
-module SN = Naming_special_names
 
 type control_context =
   | Toplevel

@@ -11,6 +11,7 @@ open Hh_prelude
 open Typing_defs_core
 open Typing_env_types
 module Env = Typing_env
+module SN = Naming_special_names
 
 let check_local_capability (mk_required : env -> env * locl_ty) callback env =
   (* gate the check behavior on coeffects TC option *)

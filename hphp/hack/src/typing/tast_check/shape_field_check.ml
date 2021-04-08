@@ -10,7 +10,6 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Aast = Aast_defs
 module SN = Naming_special_names
 
 let shapes_key_exists env shape field_name =

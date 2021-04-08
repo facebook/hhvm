@@ -9,8 +9,6 @@
 
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module PositionedToken = Full_fidelity_positioned_token
-module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree = Full_fidelity_syntax_tree
 module TokenKind = Full_fidelity_token_kind
 open Hh_prelude
 

@@ -10,7 +10,6 @@
 open Hh_prelude
 open ServerCommandTypes.Method_jumps
 open Typing_defs
-module Reason = Typing_reason
 module Cls = Decl_provider.Class
 
 let string_filter_to_method_jump_filter = function

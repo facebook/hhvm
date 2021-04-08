@@ -12,6 +12,7 @@ module Inf = Typing_inference_env
 module Env = Typing_env
 module Sub = Typing_subtype
 module MakeType = Typing_make_type
+module ITySet = Internal_type_set
 
 module StateErrors = struct
   module IdentMap = WrappedMap.Make (Ident)

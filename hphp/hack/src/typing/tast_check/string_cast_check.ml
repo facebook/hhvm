@@ -11,7 +11,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Tast_env
-module TCO = TypecheckerOptions
 module SN = Naming_special_names
 
 (** Produce an error on (string) casts of objects. Currently it is allowed in HHVM to

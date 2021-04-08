@@ -11,7 +11,6 @@ open Hh_prelude
 open Ifc_types
 module Logic = Ifc_logic
 module Mapper = Ifc_mapper
-module Pp = Ifc_pretty
 module Utils = Ifc_utils
 module L = Logic.Infix
 

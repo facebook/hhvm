@@ -12,7 +12,6 @@
  * backed by a source text, like the positioned tokens are.
  *)
 
-module PositionedToken = Full_fidelity_positioned_token
 module Trivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind

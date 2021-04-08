@@ -11,6 +11,7 @@ open Decl_defs
 open Reordered_argument_collections
 open Shallow_decl_defs
 open Typing_defs
+module SN = Naming_special_names
 
 (* Module calculating the Member Resolution Order of a class *)
 

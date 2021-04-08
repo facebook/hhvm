@@ -7,8 +7,6 @@
  *
  *)
 
-module SN = Naming_special_names
-
 let handler =
   object
     inherit Tast_visitor.handler_base

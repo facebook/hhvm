@@ -10,6 +10,7 @@
 open Hh_prelude
 open SymbolOccurrence
 open Typing_defs
+module SN = Naming_special_names
 
 module Result_set = Caml.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t

@@ -11,7 +11,6 @@
 
 open Hh_prelude
 module Env = Typing_env
-module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
 let is_disposable_visitor env =

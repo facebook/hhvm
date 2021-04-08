@@ -48,6 +48,7 @@ module Cls = Decl_provider.Class
 module Partial = Partial_provider
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
+module ITySet = Internal_type_set
 
 type newable_class_info =
   env

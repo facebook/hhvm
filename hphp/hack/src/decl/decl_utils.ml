@@ -10,6 +10,7 @@
 open Reordered_argument_collections
 open Aast
 open Typing_defs
+module SN = Naming_special_names
 
 let unwrap_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->

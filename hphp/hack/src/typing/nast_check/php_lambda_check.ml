@@ -9,7 +9,6 @@
 
 open Aast
 open Nast_check_env
-module SN = Naming_special_names
 
 let handler =
   object

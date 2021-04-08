@@ -11,6 +11,7 @@ open Common
 open Typing_defs
 module Env = Typing_env
 module TySet = Typing_set
+module SN = Naming_special_names
 
 (* Return upper bounds of a generic parameter, transitively following bounds
  * that are themselves parameters. Detect cycles. *)

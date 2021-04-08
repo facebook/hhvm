@@ -11,6 +11,7 @@ open Aast
 open Hh_prelude
 open Typing_defs
 module Env = Tast_env
+module SN = Naming_special_names
 
 (* Requires id to be a property *)
 let check_static_const_prop tenv class_ (pos, id) =

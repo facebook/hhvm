@@ -17,12 +17,9 @@ open Common
 open Typing_defs
 open Typing_env_types
 open Aast
-module TFTerm = Typing_func_terminality
-module TUtils = Typing_utils
 module Reason = Typing_reason
 module Env = Typing_env
 module SN = Naming_special_names
-module TOG = Typing_object_get
 module TCO = TypecheckerOptions
 module C = Typing_continuations
 module CMap = C.Map

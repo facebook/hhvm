@@ -28,6 +28,7 @@ module Phase = Typing_phase
 module Subst = Decl_subst
 module EnvFromDef = Typing_env_from_def
 module Partial = Partial_provider
+module TUtils = Typing_utils
 
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if

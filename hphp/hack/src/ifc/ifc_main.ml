@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Ifc_types
-module Decl = Ifc_decl
 
 let do_ opts files_info ctx =
   ( if Ifc.should_print ~user_mode:opts.opt_mode ~phase:Mlattice then

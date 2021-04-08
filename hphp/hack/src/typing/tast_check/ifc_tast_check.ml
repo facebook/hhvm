@@ -12,7 +12,6 @@ open Aast
 open Base
 module Env = Tast_env
 module Cls = Decl_provider.Class
-module SN = Naming_special_names
 
 let options : options =
   {

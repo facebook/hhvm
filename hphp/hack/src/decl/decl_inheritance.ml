@@ -15,6 +15,7 @@ open Shallow_decl_defs
 open Typing_defs
 module DTT = Decl_to_typing
 module LSTable = Lazy_string_table
+module SN = Naming_special_names
 
 type inherited_members = {
   consts: class_const LSTable.t;

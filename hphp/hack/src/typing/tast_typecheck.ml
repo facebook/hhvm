@@ -14,7 +14,6 @@ open Aast
 module ETast = Tast
 module Nast = Aast
 module C = Typing_continuations
-module Env = Typing_env
 module Phase = Typing_phase
 module Partial = Partial_provider
 

@@ -18,6 +18,7 @@ open Aast
 open Shallow_decl_defs
 open Typing_defs
 module Reason = Typing_reason
+module SN = Naming_special_names
 
 (** [tagged_elt] is a representation internal to Decl_inheritance which is used
     for both methods and properties (members represented using

@@ -43,6 +43,7 @@ RuntimeStruct::RuntimeStruct(
   , m_assignedLayout(nullptr)
   , m_fields()
   , m_fieldSlots()
+  , m_fieldCount(0)
 {
   assertx(stableIdentifier->isStatic());
 
@@ -59,6 +60,7 @@ RuntimeStruct::RuntimeStruct(
     fieldKeys[idx] = str;
   }
 
+  m_fieldCount = fields.size();
   m_fields = std::move(fieldKeys);
 }
 
@@ -69,7 +71,11 @@ RuntimeStruct::RuntimeStruct(
   , m_assignedLayout(nullptr)
   , m_fields(std::move(fields))
   , m_fieldSlots()
+  , m_fieldCount(0)
 {
+  for (auto const key : m_fields) {
+    if (key != nullptr) m_fieldCount++;
+  }
   assertx(stableIdentifier->isStatic());
 }
 
@@ -79,6 +85,13 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
 
   if (!allowBespokeArrayLikes()) return nullptr;
 
+  if (Trace::moduleEnabled(Trace::bespoke, 2)) {
+    FTRACE(2, "Register runtime struct {}\n", stableIdentifier);
+    for (auto const [idx, str] : fields) {
+      FTRACE(2, "  {} -> {}\n", idx, str);
+    }
+  }
+
   {
     folly::SharedMutex::ReadHolder lock{s_mapLock};
     auto it = s_runtimeStrMap.find(stableIdentifier.get());
@@ -87,7 +100,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
       lock.unlock();
       // Validate that the fields provided in the query match the registered
       // fields to avoid catastrophic index mismatches.
-      always_assert(runtimeStruct->m_fields.size() == fields.size());
+      always_assert(runtimeStruct->m_fieldCount == fields.size());
       for (auto const [idx, str] : fields) {
         always_assert(runtimeStruct->m_fields[idx]->same(str.get()));
       }
@@ -131,6 +144,7 @@ void RuntimeStruct::eachRuntimeStruct(std::function<void(RuntimeStruct*)> fn) {
 void RuntimeStruct::applyLayout(const bespoke::StructLayout* layout) {
   auto slots = std::vector<Slot>(m_fields.size(), kInvalidSlot);
   for (size_t i = 0; i < m_fields.size(); i++) {
+    if (m_fields[i] == nullptr) continue;
     slots[i] = layout->keySlot(m_fields[i]);
   }
 

@@ -108,6 +108,7 @@ private:
   std::atomic<const bespoke::StructLayout*> m_assignedLayout;
   FieldKeys m_fields;
   FieldSlots m_fieldSlots;
+  size_t m_fieldCount;
 
   friend struct StructDictInit;
   friend struct jit::RuntimeStructSerde;

@@ -522,7 +522,6 @@ tv_lval LoggingArray::ElemStr(
 }
 
 ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
   auto const ko = KeyOrder::MakeInvalid();
   logEvent(lad, ms, ko, ArrayOp::SetInt, k, v);
@@ -530,7 +529,6 @@ ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) 
                     [&](ArrayData* w) { return w->setMove(k, v); });
 }
 ArrayData* LoggingArray::SetStrMove(LoggingArray* lad, StringData* k, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
   auto const ko = lad->keyOrder.insert(k);
   logEvent(lad, ms, ko, ArrayOp::SetStr, k, v);
@@ -549,7 +547,6 @@ ArrayData* LoggingArray::RemoveStr(LoggingArray* lad, const StringData* k) {
 }
 
 ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);

@@ -193,6 +193,8 @@ StructDictInit::~StructDictInit() {
 }
 
 void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
+  value = tvToInit(value);
+
   if (!m_struct) {
     if (m_arr->isVanilla()) {
       // We have a vanilla MixedArray that must be properly sized. Set the

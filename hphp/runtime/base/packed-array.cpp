@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -550,13 +549,14 @@ tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {
 }
 
 ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   auto const copy = adIn->cowCheck();
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) {
       assertx((adIn != ad) == copy);
       if (copy && adIn->decReleaseCheck()) PackedArray::Release(adIn);
-      setElem(LvalUncheckedInt(ad, k), v, true);
+      tvMove(v, LvalUncheckedInt(ad, k));
       return ad;
     }
   );
@@ -642,11 +642,13 @@ ArrayData* PackedArray::AppendImpl(
 }
 
 ArrayData* PackedArray::AppendMove(ArrayData* adIn, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
   return AppendImpl(adIn, v, adIn->cowCheck(), true);
 }
 
 ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, TypedValue v) {
   assertx(!adIn->cowCheck());
+  assertx(v.m_type != KindOfUninit);
   return AppendImpl(adIn, v, false);
 }
 

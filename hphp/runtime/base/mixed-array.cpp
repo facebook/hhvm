@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -881,15 +880,16 @@ void MixedArray::nextInsert(TypedValue v) {
   }
 }
 
-template <class K, bool move> ALWAYS_INLINE
+template <class K> ALWAYS_INLINE
 ArrayData* MixedArray::update(K k, TypedValue data) {
   assertx(!isFull());
+  assertx(data.m_type != KindOfUninit);
   auto p = insert(k);
   if (p.found) {
-    setElem(p.tv, data, move);
+    tvMove(data, p.tv);
     return this;
   }
-  initElem(p.tv, data, move);
+  tvCopy(data, p.tv);
   return this;
 }
 
@@ -949,9 +949,10 @@ void MixedArray::AppendTombstoneInPlace(ArrayData* ad) {
 }
 
 ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
   auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->update<int64_t, true>(k, v);
+  auto const result = preped->update(k, v);
   if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
   return result;
 }
@@ -959,13 +960,16 @@ ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
 ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(!ad->cowCheck());
   assertx(ad->notCyclic(v));
+  assertx(v.m_type != KindOfUninit);
+  tvIncRefGen(v);
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
 ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
   auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->update<StringData*, true>(k, v);
+  auto const result = preped->update(k, v);
   if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
   return result;
 }
@@ -973,16 +977,20 @@ ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
 ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(!ad->cowCheck());
   assertx(ad->notCyclic(v));
+  assertx(v.m_type != KindOfUninit);
+  tvIncRefGen(v);
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
 ArrayData* MixedArray::AddInt(ArrayData* ad, int64_t k, TypedValue v, bool copy) {
   assertx(!ad->exists(k));
+  assertx(v.m_type != KindOfUninit);
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 
 ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, TypedValue v, bool copy) {
   assertx(!ad->exists(k));
+  assertx(v.m_type != KindOfUninit);
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 

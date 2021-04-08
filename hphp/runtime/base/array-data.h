@@ -343,8 +343,7 @@ public:
   TypedValue get(const Variant& k, bool error = false) const;
 
   /*
-   * Set the element at key `k' to `v'. set() methods make a copy first if
-   * cowCheck() returns true. If `v' is a ref, its inner value is used.
+   * Set the element at key `k' to `v'. `v' must be a TInitCell.
    *
    * Semantically, setMove() methods 1) do a set, 2) dec-ref the value, and
    * 3) if the operation required copy/escalation, dec-ref the old array. This
@@ -377,6 +376,8 @@ public:
   /**
    * Append `v' to the array, making a copy first if necessary. Returns `this`
    * if copy/escalation are not needed, or a copied/escalated ArrayData.
+   *
+   * As with setMove, `v' must be a TInitCell.
    *
    * appendMove dec-refs the old array if we needed copy / escalation, and
    * does not do any refcounting ops on the value.

@@ -490,8 +490,7 @@ private:
   ArrayData* addValNoAsserts(StringData* key, TypedValue data);
 
   template <class K> arr_lval addLvalImpl(K k);
-  // If "move" is false, this method will inc-ref data.
-  template <class K, bool move = false> ArrayData* update(K k, TypedValue data);
+  template <class K> ArrayData* update(K k, TypedValue data);
 
   void updateNextKI(int64_t removedKey, bool updateNext);
   void eraseNoCompact(RemovePos pos);

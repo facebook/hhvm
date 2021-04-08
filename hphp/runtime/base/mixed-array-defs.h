@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 
 #include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/data-walker.h"
@@ -136,14 +135,13 @@ inline ArrayData* MixedArray::addVal(StringData* key, TypedValue data) {
 }
 
 inline ArrayData* MixedArray::addValNoAsserts(StringData* key, TypedValue data) {
+  assertx(data.m_type != KindOfUninit);
   strhash_t h = key->hash();
   auto ei = findForNewInsert(h);
   auto e = allocElm(ei);
   e->setStrKey(key, h);
   mutableKeyTypes()->recordStr(key);
-  // TODO(#3888164): we should restructure things so we don't have to check
-  // KindOfUninit here.
-  initElem(e->data, data);
+  tvDup(data, e->data);
   return this;
 }
 

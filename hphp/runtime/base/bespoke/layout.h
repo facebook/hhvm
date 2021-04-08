@@ -203,9 +203,11 @@ struct LayoutFunctionDispatcher {
     return Array::ElemStr(lval, k, throwOnMissing);
   }
   static ArrayData* SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
+    assertx(type(v) != KindOfUninit);
     return Array::SetIntMove(Cast(ad, __func__), k, v);
   }
   static ArrayData* SetStrMove(ArrayData* ad, StringData* k, TypedValue v){
+    assertx(type(v) != KindOfUninit);
     return Array::SetStrMove(Cast(ad, __func__), k, v);
   }
   static ArrayData* RemoveInt(ArrayData* ad, int64_t k) {
@@ -230,6 +232,7 @@ struct LayoutFunctionDispatcher {
     return Array::IterRewind(Cast(ad, __func__), pos);
   }
   static ArrayData* AppendMove(ArrayData* ad, TypedValue v) {
+    assertx(type(v) != KindOfUninit);
     return Array::AppendMove(Cast(ad, __func__), v);
   }
   static ArrayData* Pop(ArrayData* ad, Variant& v) {

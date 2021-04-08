@@ -346,7 +346,7 @@ void Array::setImpl(const T& key, TypedValue v) {
     m_arr = Ptr::attach(init.toArray().detach());
   } else {
     m_arr.mutateInPlace([&](ArrayData* ad) {
-      return ad->setMove(key, v);
+      return ad->setMove(key, tvToInit(v));
     });
     tvIncRefGen(v);
   }

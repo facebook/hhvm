@@ -57,8 +57,7 @@ add_subdirectory(boost)
 add_subdirectory(fmt)
 add_subdirectory(zstd)
 
-list(APPEND THIRD_PARTY_MODULES folly)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/folly/src")
+add_subdirectory(folly)
 
 # Fatal is a header-only library, so there's nothing to build.
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")

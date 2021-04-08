@@ -280,6 +280,36 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
             env
         | _ -> env)
 
+(** Do a subtype check of inferred type against expected type *)
+let check_expected_ty
+    (message : string)
+    (env : env)
+    (inferred_ty : locl_ty)
+    (expected : ExpectedTy.t option) : env =
+  match expected with
+  | None -> env
+  | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
+    Typing_log.(
+      log_with_level env "typing" 1 (fun () ->
+          log_types
+            p
+            env
+            [
+              Log_head
+                ( Printf.sprintf
+                    "Typing.check_expected_ty %s enforced=%s"
+                    message
+                    (match ty.et_enforced with
+                    | Unenforced -> "unenforced"
+                    | Enforced -> "enforced"
+                    | PartiallyEnforced -> "partially enforced"),
+                  [
+                    Log_type ("inferred_ty", inferred_ty);
+                    Log_type ("expected_ty", ty.et_type);
+                  ] );
+            ]));
+    Typing_coercion.coerce_type p ur env inferred_ty ty Errors.unify_error
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -1453,7 +1483,11 @@ and expr_
     | Tany _ -> (env, supertype)
     | _ ->
       let subtype_value env ty =
-        Type.sub_type use_pos reason env ty supertype Errors.unify_error
+        check_expected_ty
+          "Collection"
+          env
+          ty
+          (Some (ExpectedTy.make use_pos reason supertype))
       in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
       if
@@ -3678,32 +3712,6 @@ and expand_expected_and_get_node env (expected : ExpectedTy.t option) =
     | Tunion [ty] -> (env, Some (p, ur, ty, get_node ty))
     | Toption ty -> (env, Some (p, ur, ty, get_node ty))
     | _ -> (env, Some (p, ur, ty, get_node ty)))
-
-(** Do a subtype check of inferred type against expected type *)
-and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option) =
-  match expected with
-  | None -> env
-  | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
-    Typing_log.(
-      log_with_level env "typing" 1 (fun () ->
-          log_types
-            p
-            env
-            [
-              Log_head
-                ( Printf.sprintf
-                    "Typing.check_expected_ty %s enforced=%s"
-                    message
-                    (match ty.et_enforced with
-                    | Unenforced -> "unenforced"
-                    | Enforced -> "enforced"
-                    | PartiallyEnforced -> "partially enforced"),
-                  [
-                    Log_type ("inferred_ty", inferred_ty);
-                    Log_type ("expected_ty", ty.et_type);
-                  ] );
-            ]));
-    Typing_coercion.coerce_type p ur env inferred_ty ty Errors.unify_error
 
 and new_object
     ~(expected : ExpectedTy.t option)
@@ -6663,7 +6671,6 @@ and generate_splat_type_vars
 
 and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
-
   (* When checking params, the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply
    * it in this case.

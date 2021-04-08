@@ -1,6 +1,0 @@
-File "lambda2.php", line 23, characters 10-26:
-The values of this `Map` are incompatible (Typing[4110])
-File "lambda2.php", line 22, characters 41-42:
-Expected `Tv`
-File "lambda2.php", line 22, characters 23-24:
-But got `dynamic` because it is an unenforceable type

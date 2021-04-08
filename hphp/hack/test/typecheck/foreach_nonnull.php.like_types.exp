@@ -1,6 +1,0 @@
-File "foreach_nonnull.php", line 7, characters 14-15:
-Invalid `foreach` (Typing[4110])
-File "foreach_nonnull.php", line 7, characters 14-15:
-Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
-File "foreach_nonnull.php", line 3, characters 14-21:
-But got `dynamic` because it is an unenforceable type

@@ -1,6 +1,0 @@
-File "vector.php", line 21, characters 10-61:
-Some elements in this collection are incompatible (Typing[4110])
-File "vector.php", line 20, characters 23-36:
-Expected `Vector<string>`
-File "vector.php", line 12, characters 16-29:
-But got `dynamic` because it is an unenforceable type

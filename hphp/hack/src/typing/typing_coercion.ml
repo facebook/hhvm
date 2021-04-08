@@ -50,7 +50,7 @@ module MakeType = Typing_make_type
 *
 * Coercing from dynamic happens when the expected type will be enforced by
 * hhvm, in this case, if whatever happens to be in the dynamic isn't of the
-* expected type execution will not continue. Hence,
+* expected type, execution will not continue. Hence,
 * t1 ~> t2 if t2 is enforced and t1 <: dynamic, without having to
 * coerce t1 to dynamic, e.g., t1 = dynamic or t1 = dynamic | C, but
 * not t1 = C and C implements dynamic. The latter restriction ensures that
@@ -96,14 +96,15 @@ let coerce_type_impl
          This would lead to needing to do two different sub-type checks. However, this
          turns out to be unnecessary because of the restricted form that enforced types
          can have. An enforced type must be an atomic type, mixed, nothing,
-         dynamic, an optional enforced type, or a class type where all generics
+         an optional enforced type, or a class type where all generics
          are reified and applied to enforced types.
 
          Thus the only way for dynamic to appear is if the type is
-         dynamic, ?dynamic, or C<dynamic, ...>, where C's type parameters are reified.
+         C<dynamic, ...>, where C's type parameters are reified.
          Critically, reified parameters are invariant, and so we don't have C<int> <: C<dynamic> even
          with coercion to dynamic enabled.
-         The computation of the enforcement takes case that a top-level dynamic or ?dynamic are not considered Enforced.
+         The computation of the enforcement takes care that top-level dynamic
+         and ?dynamic are not considered Enforced.
          *)
       Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
     | Unenforced

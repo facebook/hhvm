@@ -454,8 +454,8 @@ struct CompactWriter {
                   const FieldSpec& spec,
                   const FieldInfo& fieldInfo) {
       auto elemWriter = [&](TypedValue k, TypedValue v) {
-        writeField(VarNR(k), *spec.key, spec.ktype, fieldInfo);
-        writeField(VarNR(v), *spec.val, spec.vtype, fieldInfo);
+        writeField(VarNR(k), spec.key(), spec.ktype, fieldInfo);
+        writeField(VarNR(v), spec.val(), spec.vtype, fieldInfo);
         return false;
       };
 
@@ -476,10 +476,10 @@ struct CompactWriter {
                    CListType listType,
                    const FieldInfo& fieldInfo) {
       auto const listWriter = [&](TypedValue v) {
-        writeField(VarNR(v), *spec.val, spec.vtype, fieldInfo);
+        writeField(VarNR(v), spec.val(), spec.vtype, fieldInfo);
       };
       auto const setWriter = [&](TypedValue k, TypedValue /*v*/) {
-        writeField(VarNR(k), *spec.val, spec.vtype, fieldInfo);
+        writeField(VarNR(k), spec.val(), spec.vtype, fieldInfo);
       };
 
       always_assert(listType == C_LIST_LIST ||
@@ -792,7 +792,7 @@ struct CompactReader {
           return init_null();
 
         case T_STRUCT: {
-          Variant newStruct = create_object(StrNR(spec.className), Array());
+          Variant newStruct = create_object(spec.className(), Array());
           if (newStruct.isNull()) {
             thrift_error("invalid class type in spec", ERR_INVALID_DATA);
           }
@@ -969,7 +969,7 @@ struct CompactReader {
       uint32_t size;
       readMapBegin(keyType, valueType, size);
 
-      if (spec.format->equal(s_harray.get())) {
+      if (s_harray.equal(spec.format)) {
         DictInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           switch (keyType) {
@@ -977,14 +977,14 @@ struct CompactReader {
             case TType::T_I16:
             case TType::T_I32:
             case TType::T_I64: {
-              int64_t key = readField(*spec.key, keyType).toInt64();
-              Variant value = readField(*spec.val, valueType);
+              int64_t key = readField(spec.key(), keyType).toInt64();
+              Variant value = readField(spec.val(), valueType);
               arr.set(key, value);
               break;
             }
             case TType::T_STRING: {
-              String key = readField(*spec.key, keyType).toString();
-              Variant value = readField(*spec.val, valueType);
+              String key = readField(spec.key(), keyType).toString();
+              Variant value = readField(spec.val(), valueType);
               arr.set(key, value);
               break;
             }
@@ -996,11 +996,11 @@ struct CompactReader {
         }
         readCollectionEnd();
         return arr.toVariant();
-      } else if (spec.format->equal(s_collection.get())) {
+      } else if (s_collection.equal(spec.format)) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
-          Variant key = readField(*spec.key, keyType);
-          Variant value = readField(*spec.val, valueType);
+          Variant key = readField(spec.key(), keyType);
+          Variant value = readField(spec.val(), valueType);
           BaseMap::OffsetSet(ret.get(), key.asTypedValue(), value.asTypedValue());
         }
         readCollectionEnd();
@@ -1011,8 +1011,8 @@ struct CompactReader {
           arr.setLegacyArray(true);
         }
         for (uint32_t i = 0; i < size; i++) {
-          auto key = readField(*spec.key, keyType);
-          auto value = readField(*spec.val, valueType);
+          auto key = readField(spec.key(), keyType);
+          auto value = readField(spec.val(), valueType);
           set_with_intish_key_cast(arr, key, value);
         }
         readCollectionEnd();
@@ -1025,14 +1025,14 @@ struct CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      if (spec.format->equal(s_harray.get())) {
+      if (s_harray.equal(spec.format)) {
         VecInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.append(readField(*spec.val, valueType));
+          arr.append(readField(spec.val(), valueType));
         }
         readCollectionEnd();
         return arr.toVariant();
-      } else if (spec.format->equal(s_collection.get())) {
+      } else if (s_collection.equal(spec.format)) {
         if (size == 0) {
           readCollectionEnd();
           return Variant(req::make<c_Vector>());
@@ -1040,7 +1040,7 @@ struct CompactReader {
         auto vec = req::make<c_Vector>(size);
         int64_t i = 0;
         do {
-          auto val = readField(*spec.val, valueType);
+          auto val = readField(spec.val(), valueType);
           tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
         } while (++i < size);
         readCollectionEnd();
@@ -1051,7 +1051,7 @@ struct CompactReader {
           vai.setLegacyArray(true);
         }
         for (auto i = uint32_t{0}; i < size; ++i) {
-          vai.append(readField(*spec.val, valueType));
+          vai.append(readField(spec.val(), valueType));
         }
         readCollectionEnd();
         return vai.toVariant();
@@ -1063,17 +1063,17 @@ struct CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      if (spec.format->equal(s_harray.get())) {
+      if (s_harray.equal(spec.format)) {
         KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.add(readField(*spec.val, valueType));
+          arr.add(readField(spec.val(), valueType));
         }
         readCollectionEnd();
         return arr.toVariant();
-      } else if (spec.format->equal(s_collection.get())) {
+      } else if (s_collection.equal(spec.format)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(*spec.val, valueType);
+          Variant value = readField(spec.val(), valueType);
           set_ret->add(value);
         }
         readCollectionEnd();
@@ -1084,7 +1084,7 @@ struct CompactReader {
           ainit.setLegacyArray(true);
         }
         for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(*spec.val, valueType);
+          Variant value = readField(spec.val(), valueType);
           set_with_intish_key_cast(ainit, value, true);
         }
         readCollectionEnd();

@@ -127,52 +127,6 @@ bool typeSatisfiesConstraint(const TypeConstraint& tc,
   return false;
 }
 
-FieldSpec compileFieldSpec(const Array& fieldSpec, bool topLevel) {
-  FieldSpec field;
-  field.type = (TType)tvCastToInt64(
-    fieldSpec.lookup(s_type, AccessFlags::ErrorKey));
-  if (topLevel) {
-    field.name = tvCastToStringData(
-      fieldSpec.lookup(s_var, AccessFlags::ErrorKey));
-    field.isUnion = tvCastToBoolean(
-      fieldSpec.lookup(s_union, AccessFlags::Key));
-  }
-  switch (field.type) {
-  case T_STRUCT:
-    field.className = tvCastToStringData(
-      fieldSpec.lookup(s_class, AccessFlags::ErrorKey));
-    break;
-  case T_LIST:
-  case T_SET:
-    field.format = tvCastToStringData(
-      fieldSpec.lookup(s_format, AccessFlags::Key));
-    field.vtype = (TType)tvCastToInt64(
-      fieldSpec.lookup(s_etype, AccessFlags::ErrorKey));
-    field.val = std::make_unique<FieldSpec>(compileFieldSpec(
-      tvCastToArrayLike(fieldSpec.lookup(s_elem, AccessFlags::ErrorKey)),
-      false));
-    break;
-  case T_MAP:
-    field.format = tvCastToStringData(
-      fieldSpec.lookup(s_format, AccessFlags::Key));
-    field.ktype = (TType)tvCastToInt64(
-      fieldSpec.lookup(s_ktype, AccessFlags::ErrorKey));
-    field.vtype = (TType)tvCastToInt64(
-      fieldSpec.lookup(s_vtype, AccessFlags::ErrorKey));
-    field.key = std::make_unique<FieldSpec>(compileFieldSpec(
-      tvCastToArrayLike(fieldSpec.lookup(s_key, AccessFlags::ErrorKey)),
-      false));
-    field.val = std::make_unique<FieldSpec>(compileFieldSpec(
-      tvCastToArrayLike(fieldSpec.lookup(s_val, AccessFlags::ErrorKey)),
-      false));
-    break;
-  default:
-    break;
-  }
-  field.adapter = getAdapter(fieldSpec);
-  return field;
-}
-
 StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
@@ -185,7 +139,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
       thrift_error("Bad keytype in TSPEC (expected 'long')", ERR_INVALID_DATA);
     }
     Array fieldSpec = specIt.second().toArray();
-    auto field = compileFieldSpec(fieldSpec, true);
+    auto field = FieldSpec::compile(fieldSpec, true);
     field.fieldNum = specIt.first().toInt16();
 
     // Determine if we can safely skip the type check when deserializing.
@@ -224,6 +178,52 @@ StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
 }
 
 } // namespace
+
+FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
+  FieldSpec field;
+  field.type = (TType)tvCastToInt64(
+    fieldSpec.lookup(s_type, AccessFlags::ErrorKey));
+  if (topLevel) {
+    field.name = tvCastToStringData(
+      fieldSpec.lookup(s_var, AccessFlags::ErrorKey));
+    field.isUnion = tvCastToBoolean(
+      fieldSpec.lookup(s_union, AccessFlags::Key));
+  }
+  switch (field.type) {
+  case T_STRUCT:
+    field.className_ = tvCastToStringData(
+      fieldSpec.lookup(s_class, AccessFlags::ErrorKey));
+    break;
+  case T_LIST:
+  case T_SET:
+    field.format = tvCastToStringData(
+      fieldSpec.lookup(s_format, AccessFlags::Key));
+    field.vtype = (TType)tvCastToInt64(
+      fieldSpec.lookup(s_etype, AccessFlags::ErrorKey));
+    field.val_ = std::make_unique<FieldSpec>(FieldSpec::compile(
+      tvCastToArrayLike(fieldSpec.lookup(s_elem, AccessFlags::ErrorKey)),
+      false));
+    break;
+  case T_MAP:
+    field.format = tvCastToStringData(
+      fieldSpec.lookup(s_format, AccessFlags::Key));
+    field.ktype = (TType)tvCastToInt64(
+      fieldSpec.lookup(s_ktype, AccessFlags::ErrorKey));
+    field.vtype = (TType)tvCastToInt64(
+      fieldSpec.lookup(s_vtype, AccessFlags::ErrorKey));
+    field.key_ = std::make_unique<FieldSpec>(FieldSpec::compile(
+      tvCastToArrayLike(fieldSpec.lookup(s_key, AccessFlags::ErrorKey)),
+      false));
+    field.val_ = std::make_unique<FieldSpec>(FieldSpec::compile(
+      tvCastToArrayLike(fieldSpec.lookup(s_val, AccessFlags::ErrorKey)),
+      false));
+    break;
+  default:
+    break;
+  }
+  field.adapter = getAdapter(fieldSpec);
+  return field;
+}
 
 // The returned reference is valid at least while this SpecHolder is alive.
 const StructSpec& SpecHolder::getSpec(const Class* cls, bool isBinary) {

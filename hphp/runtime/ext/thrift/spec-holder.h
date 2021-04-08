@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/ext/thrift/util.h"
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/util/fixed-vector.h"
@@ -27,17 +28,32 @@
 namespace HPHP { namespace thrift {
 
 struct FieldSpec {
-  int16_t fieldNum;
-  TType type;
-  StringData* name;
-  bool isUnion;
-  TType ktype, vtype;
-  std::unique_ptr<FieldSpec> key, val;
-  StringData* format;
-  StringData* className;
-  Class* adapter;
-  bool noTypeCheck; // If this field doesn't need type checking
-                    // (conservatively).
+  int16_t fieldNum{};
+  TType type{};
+  StringData* name{};
+  bool isUnion{};
+  TType ktype{}, vtype{};
+  const FieldSpec& key() const {
+    if (!key_) thrift_error("no key type in spec", ERR_INVALID_DATA);
+    return *key_;
+  }
+  const FieldSpec& val() const {
+    if (!val_) thrift_error("no val type in spec", ERR_INVALID_DATA);
+    return *val_;
+  }
+  StringData* format{};
+  StrNR className() const {
+    if (!className_) thrift_error("no class type in spec", ERR_INVALID_DATA);
+    return StrNR(className_);
+  }
+  Class* adapter{};
+  bool noTypeCheck{}; // If this field doesn't need type checking
+                      // (conservatively).
+  static FieldSpec compile(const Array& fieldSpec, bool topLevel);
+
+private:
+  std::unique_ptr<FieldSpec> key_, val_;
+  StringData* className_{};
 };
 
 using StructSpec = FixedVector<FieldSpec>;

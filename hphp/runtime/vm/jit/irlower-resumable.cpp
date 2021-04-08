@@ -127,27 +127,14 @@ void cgContPreNext(IRLS& env, const IRInstruction* inst) {
   // These asserts make sure that the startedCheck work.
   static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
   static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Done) > 3, "");
-
-  // These asserts ensure that the state transition works.  If we're in the
-  // Created state we want to transition to Priming, and if we're in the
-  // Started state we want to transition to Running.  By laying out the enum
-  // this way we can avoid the branch and just transition by adding 2 to the
-  // current state.
-  static_assert(uint8_t(BaseGenerator::State::Priming) ==
-                uint8_t(BaseGenerator::State::Created) + 2, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Running) ==
-                uint8_t(BaseGenerator::State::Started) + 2, "used below");
 
   // Take exit if state != 1 (checkStarted) or if state > 1 (!checkStarted).
   auto stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
   v << cmpbim{int8_t(BaseGenerator::State::Started), cont[stateOff], sf};
   fwdJcc(v, env, checkStarted ? CC_NE : CC_A, sf, inst->taken());
 
-  // Transition the generator into either the Priming state (if we were just
-  // created) or the Running state (if we were started).  Due to the way the
-  // enum is layed out, we can model this by just adding 2.
-  v << addlim{int8_t(2), cont[stateOff], v.makeReg()};
+  // Transition the generator into the Running state
+  v << storeli{int8_t(BaseGenerator::State::Running), cont[stateOff]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

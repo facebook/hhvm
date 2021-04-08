@@ -884,7 +884,8 @@ void ExternCompiler::writeProgram(
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
-    ("config_overrides", options.toDynamic());
+    ("config_overrides", options.toDynamic())
+    ("use_hhbc_by_ref", RuntimeOption::EvalEnableHhbcByRef);
   writeMessage(header, code);
 }
 
@@ -1120,11 +1121,11 @@ CompilerResult hackc_compile(
     std::array<char, 256> buf;
     buf.fill(0);
     hackc_error_buf_t error_buf {buf.data(), buf.size()};
-    
+
     hackc_compile_from_text_ptr hhas{
       hackc_compile_from_text(&native_env, code, &output, &error_buf)
     };
-    if (hhas) { 
+    if (hhas) {
       std::string hhas_str{hhas.get()};
       return assemble_string_handle_errors(code,
                                            hhas_str,
@@ -1276,7 +1277,7 @@ ParseFactsResult extract_facts(
         };
         if (facts) {
           std::string facts_str{facts.get()};
-          return FactsJSONString { facts_str };   
+          return FactsJSONString { facts_str };
         }
         return FactsJSONString { "" }; // Swallow errors from HackC
       } catch (const std::exception& e) {
@@ -1307,16 +1308,16 @@ FfpResult ffp_parse_file(
 ) {
   if (RuntimeOption::EvalHackCompilerUseCompilerPool) {
     return s_manager.get_hackc_pool().parse(file, contents, size, options);
-  } else {    
+  } else {
     auto const env = options.getParserEnvironment();
     hackc_parse_positioned_full_trivia_ptr parse_tree{
       hackc_parse_positioned_full_trivia(file.c_str(), contents, &env)
     };
     if (parse_tree) {
       std::string ffp_str{parse_tree.get()};
-      return FfpJSONString { ffp_str }; 
+      return FfpJSONString { ffp_str };
     } else {
-      return FfpJSONString { "{}" }; 
+      return FfpJSONString { "{}" };
     }
   }
 }

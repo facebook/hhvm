@@ -17,7 +17,7 @@ use hhbc_by_ref_hhbc_id::{method, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, Result};
 use hhbc_by_ref_options::{HhvmFlags, Options};
-use naming_special_names_rust::{special_idents, user_attributes};
+use naming_special_names_rust::{classes, special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as T, ast_defs};
 
@@ -156,6 +156,17 @@ pub fn from_ast<'a, 'arena>(
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
         coeffects = parent_coeffects.inherit_to_child_closure()
     }
+    if is_native_opcode_impl
+        && (class.name.1.as_str() == classes::GENERATOR
+            || class.name.1.as_str() == classes::ASYNC_GENERATOR)
+    {
+        match method.name.1.as_str() {
+            "send" | "raise" | "throw" | "next" | "rewind" => {
+                coeffects = coeffects.with_gen_coeffect()
+            }
+            _ => {}
+        }
+    }
     let (ast_body_block, is_rx_body, rx_disabled) = if !coeffects.is_any_rx() {
         (&method.body.ast, false, false)
     } else {
@@ -207,8 +218,8 @@ pub fn from_ast<'a, 'arena>(
         flags.set(emit_body::Flags::RX_BODY, is_rx_body);
         flags.set(emit_body::Flags::ASYNC, is_async);
         flags.set(
-            emit_body::Flags::HAS_COEFFECT_RULES,
-            coeffects.has_coeffect_rules(),
+            emit_body::Flags::HAS_COEFFECTS_LOCAL,
+            coeffects.has_coeffects_local(),
         );
         emit_body::emit_body(
             alloc,

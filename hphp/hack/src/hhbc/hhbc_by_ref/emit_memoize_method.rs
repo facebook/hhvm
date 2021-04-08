@@ -141,7 +141,7 @@ fn make_memoize_wrapper_method<'a, 'arena>(
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REFIED, is_reified);
-    arg_flags.set(Flags::HAS_COEFFECT_RULES, coeffects.has_coeffect_rules());
+    arg_flags.set(Flags::HAS_COEFFECTS_LOCAL, coeffects.has_coeffects_local());
     let mut args = Args {
         info,
         method,
@@ -482,7 +482,7 @@ fn make_wrapper<'a, 'arena>(
     if args.flags.contains(Flags::IS_REFIED) {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
     }
-    if args.flags.contains(Flags::HAS_COEFFECT_RULES) {
+    if args.flags.contains(Flags::HAS_COEFFECTS_LOCAL) {
         decl_vars.push(coeffects::LOCAL_NAME.into());
     }
     emit_body::make_body(
@@ -535,7 +535,7 @@ struct Args<'r, 'ast, 'arena> {
 
 bitflags! {
     pub struct Flags: u8 {
-        const HAS_COEFFECT_RULES = 1 << 0;
+        const HAS_COEFFECTS_LOCAL = 1 << 0;
         const IS_STATIC = 1 << 1;
         const IS_REFIED = 1 << 2;
         const WITH_LSB = 1 << 3;

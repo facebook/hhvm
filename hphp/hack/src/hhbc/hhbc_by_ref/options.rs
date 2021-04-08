@@ -40,7 +40,7 @@ mod options_cli;
 
 use hhbc_by_ref_options_serde::prefix_all;
 
-use lru_cache::LruCache;
+use lru::LruCache;
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -476,7 +476,7 @@ impl Options {
                 Ok(o.clone())
             } else {
                 let o = Options::from_configs_(&key.0, &key.1)?;
-                cache.insert(key, o.clone());
+                cache.put(key, o.clone());
                 Ok(o)
             }
         })

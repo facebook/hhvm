@@ -6857,9 +6857,9 @@ pub fn emit_jmpnz<'a, 'arena>(
                                     InstrSeq::gather(
                                         alloc,
                                         if r1.is_label_used {
-                                            vec![instr::label(alloc, skip_label)]
+                                            vec![r1.instrs, instr::label(alloc, skip_label)]
                                         } else {
-                                            vec![]
+                                            vec![r1.instrs]
                                         },
                                     ),
                                 ),

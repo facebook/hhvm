@@ -84,7 +84,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
         is_reified,
     )?;
     let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params);
-    let has_coeffect_rules = coeffects.has_coeffect_rules();
+    let has_coeffects_local = coeffects.has_coeffects_local();
     env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = make_wrapper_body(
         alloc,
@@ -94,7 +94,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
         params,
         body_instrs,
         is_reified,
-        has_coeffect_rules,
+        has_coeffects_local,
     )?;
 
     let mut flags = HhasFunctionFlags::empty();
@@ -330,13 +330,13 @@ fn make_wrapper_body<'a, 'arena>(
     params: Vec<HhasParam<'arena>>,
     body_instrs: InstrSeq<'arena>,
     is_reified: bool,
-    has_coeffect_rules: bool,
+    has_coeffects_local: bool,
 ) -> Result<HhasBody<'arena>> {
     let mut decl_vars = vec![];
     if is_reified {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
     }
-    if has_coeffect_rules {
+    if has_coeffects_local {
         decl_vars.push(coeffects::LOCAL_NAME.into());
     }
     emit_body::make_body(

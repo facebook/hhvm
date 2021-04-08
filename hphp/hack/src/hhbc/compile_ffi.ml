@@ -20,6 +20,7 @@ type rust_env = {
 }
 
 external rust_from_text_ffi :
+  bool (* use_hhbc_by_ref *) ->
   rust_env ->
   rust_output_config ->
   Full_fidelity_source_text.t ->

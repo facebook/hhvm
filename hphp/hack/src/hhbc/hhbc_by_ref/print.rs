@@ -745,7 +745,7 @@ fn print_class_special_attributes<W: Write>(
     if c.is_sealed() {
         special_attributes.push("sealed");
     }
-    if c.enum_type.is_some() {
+    if c.enum_type.is_some() && !hhbc_by_ref_hhas_attribute::has_enum_class(user_attrs) {
         special_attributes.push("enum");
     }
     if c.is_abstract() {

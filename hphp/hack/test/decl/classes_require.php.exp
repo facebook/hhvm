@@ -21,8 +21,7 @@
                   et_type = (Rhint ([4:32-36]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false
-                  ~is_const:false);
+                  ~returns_readonly:false ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
@@ -38,8 +37,7 @@
                    et_type = (Rhint ([5:33-37]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
@@ -68,8 +66,7 @@
                    et_type = (Rhint ([9:26-30]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
@@ -103,8 +100,7 @@
                    et_type = (Rhint ([16:30-34]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
@@ -139,8 +135,7 @@
                    et_type = (Rhint ([26:26-30]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];

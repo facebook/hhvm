@@ -11,8 +11,6 @@ val find_policied_attribute :
 
 val has_return_disposable_attribute : Nast.user_attribute list -> bool
 
-val has_constfun_attribute : Nast.user_attribute list -> bool
-
 val hint_to_type_opt :
   is_lambda:bool ->
   Decl_env.env ->

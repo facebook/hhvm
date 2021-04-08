@@ -21,8 +21,7 @@
                   et_type = (Rhint ([5:31-34]), (Tprim Tint)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false
-                  ~is_const:false);
+                  ~returns_readonly:false ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];

@@ -1801,10 +1801,6 @@ where
             if x.readonly.is_readonly() {
                 self.check_can_use_feature(&x.readonly, &UnstableFeatures::Readonly);
             }
-            let attr = &x.attribute;
-            if self.attribute_specification_contains(attr, sn::user_attributes::CONST_FUN) {
-                self.check_can_use_feature(attr, &UnstableFeatures::Readonly);
-            }
         }
     }
 
@@ -2035,28 +2031,6 @@ where
                 }
             }
             DecoratedExpression(_) => self.decoration_errors(node),
-            _ => {}
-        }
-    }
-
-    fn function_attribute_errors(&mut self, node: S<'a, Token, Value>) {
-        match &node.children {
-            FunctionDeclaration(f)
-                if self.attribute_specification_contains(
-                    &f.attribute_spec,
-                    sn::user_attributes::CONST_FUN,
-                ) =>
-            {
-                self.check_can_use_feature(&f.attribute_spec, &UnstableFeatures::Readonly)
-            }
-            MethodishDeclaration(m)
-                if self.attribute_specification_contains(
-                    &m.attribute,
-                    sn::user_attributes::CONST_FUN,
-                ) =>
-            {
-                self.check_can_use_feature(&m.attribute, &UnstableFeatures::Readonly)
-            }
             _ => {}
         }
     }
@@ -5148,7 +5122,6 @@ where
                 self.redeclaration_errors(node);
                 self.multiple_entrypoint_attribute_errors(node);
                 self.methodish_errors(node);
-                self.function_attribute_errors(node);
             }
 
             LiteralExpression(_)

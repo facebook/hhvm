@@ -39,17 +39,6 @@ let check_attribute_arity attrs attr_name min_args max_args =
     Errors.attribute_too_many_arguments pos attr_name max_args
   | _ -> ()
 
-let check_constfun_on_hint fp =
-  let attr =
-    Naming_attributes.find SN.UserAttributes.uaConstFun fp.param_user_attributes
-  in
-  match attr with
-  | Some { ua_name = (pos, _); _ } ->
-    (match fp.param_type_hint with
-    | (_, Some (_, Hfun _)) -> ()
-    | _ -> Errors.invalid_constfun_attribute pos)
-  | _ -> ()
-
 let check_deprecated_static attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   match attr with
@@ -120,13 +109,7 @@ let handler =
             fp.param_user_attributes
             SN.UserAttributes.uaCanCall
             0
-            0;
-          check_attribute_arity
-            fp.param_user_attributes
-            SN.UserAttributes.uaConstFun
-            0
-            0;
-          check_constfun_on_hint fp)
+            0)
         params
 
     method! at_method_ env m =

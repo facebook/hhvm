@@ -871,7 +871,6 @@ struct Attributes<'a> {
     reifiable: Option<&'a Pos<'a>>,
     late_init: bool,
     const_: bool,
-    const_fun: bool,
     lsb: bool,
     memoizelsb: bool,
     override_: bool,
@@ -1168,7 +1167,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             reifiable: None,
             late_init: false,
             const_: false,
-            const_fun: false,
             lsb: false,
             memoizelsb: false,
             override_: false,
@@ -1208,9 +1206,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Const" => {
                         attributes.const_ = true;
-                    }
-                    "__ConstFun" => {
-                        attributes.const_fun = true;
                     }
                     "__LSB" => {
                         attributes.lsb = true;
@@ -1433,10 +1428,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             flags |= FunTypeFlags::READONLY_THIS
         }
 
-        if attributes.const_fun {
-            flags |= FunTypeFlags::IS_CONST
-        }
-
         let ifc_decl = attributes.ifc_attribute;
 
         // Pop the type params stack only after creating all inner types.
@@ -1539,9 +1530,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
                             if attributes.atom {
                                 flags |= FunParamFlags::ATOM
-                            }
-                            if attributes.const_fun {
-                                flags |= FunParamFlags::CONST_FUNCTION
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY

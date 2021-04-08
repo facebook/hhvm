@@ -12,7 +12,7 @@
                et_type = (Rhint ([4:15-19]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false ~is_const:false);
+               ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:10-11]; fe_php_std_lib = true }));
   ("\\C",
@@ -54,8 +54,7 @@
                    et_type = (Rhint ([18:31-35]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib }
@@ -74,8 +73,7 @@
                    et_type = (Rhint ([15:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib }

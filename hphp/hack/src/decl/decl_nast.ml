@@ -39,7 +39,6 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
-  let is_const = FunUtils.has_constfun_attribute f.f_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute f.f_user_attributes
   in
@@ -94,8 +93,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 f.f_fun_kind
                 ~return_disposable
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
-                ~readonly_this:ft_readonly_this
-                ~const:is_const;
+                ~readonly_this:ft_readonly_this;
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )

@@ -56,8 +56,7 @@ let rec strip_ty ty =
               ~ifc_external:false
               ~ifc_can_call:false
               ~is_atom:false
-              ~readonly:false
-              ~const_function:false;
+              ~readonly:false;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos.none;
           fp_name = None;

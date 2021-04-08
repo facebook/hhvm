@@ -16,7 +16,7 @@
                };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false ~is_const:false);
+               ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-12]; fe_php_std_lib = false }));
   ("\\v0",
@@ -34,7 +34,7 @@
                 (Rhint ([7:16-22]), (Tvarray (Rhint ([7:16-22]), Tany))) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-12]; fe_php_std_lib = false }));
   ("\\v1",
@@ -54,7 +54,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [11:10-12]; fe_php_std_lib = false }));
   ("\\d0",
@@ -75,7 +75,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:10-12]; fe_php_std_lib = false }));
   ("\\d2",
@@ -96,7 +96,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:10-12]; fe_php_std_lib = false }));
   ("\\vd0",
@@ -118,7 +118,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [23:10-13]; fe_php_std_lib = false }));
   ("\\vd1",
@@ -140,7 +140,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [27:10-13]; fe_php_std_lib = false }));
   ("\\vd2",
@@ -161,7 +161,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [31:10-13]; fe_php_std_lib = false }));
   ("\\vd3",
@@ -178,7 +178,7 @@
                 et_type = (Rhint ([35:17-52]), Tany) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-13]; fe_php_std_lib = false }))
   ]

@@ -587,8 +587,7 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~ifc_external:false
         ~ifc_can_call:false
         ~is_atom:false
-        ~readonly:false
-        ~const_function:false;
+        ~readonly:false;
   }
 
 let tany = Env.tany

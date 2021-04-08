@@ -41,8 +41,7 @@
                        (Rwitness_from_decl ([9:19-30]), (Tprim Tvoid)) };
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
-                       ~returns_readonly:false ~readonly_this:false
-                       ~is_const:false);
+                       ~returns_readonly:false ~readonly_this:false);
                      ft_ifc_decl = FDPolicied {PUBLIC} }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty) });
@@ -61,8 +60,7 @@
                   et_type = (Rhint ([11:37-41]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false
-                  ~is_const:false);
+                  ~returns_readonly:false ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
@@ -78,8 +76,7 @@
                    et_type = (Rhint ([12:35-39]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
@@ -95,8 +92,7 @@
                    et_type = (Rhint ([13:41-45]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty) };
@@ -115,7 +111,7 @@
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                      ~readonly:false ~const_function:false);
+                      ~readonly:false);
                      };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
@@ -125,7 +121,7 @@
                      (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
                        ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                       ~readonly:false ~const_function:false);
+                       ~readonly:false);
                       }
                    ];
                  ft_implicit_params =
@@ -142,8 +138,7 @@
                    };
                  ft_flags =
                  (make_ft_flags FAsyncGenerator ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
@@ -225,8 +220,7 @@
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
                            ~ifc_external:false ~ifc_can_call:false
-                           ~is_atom:false ~readonly:false
-                           ~const_function:false);
+                           ~is_atom:false ~readonly:false);
                           };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
@@ -237,8 +231,7 @@
                             ~has_default:false
                             ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false
-                            ~const_function:false);
+                            ~is_atom:false ~readonly:false);
                            };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
@@ -249,8 +242,7 @@
                             ~has_default:false
                             ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false
-                            ~const_function:false);
+                            ~is_atom:false ~readonly:false);
                            };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
@@ -261,8 +253,7 @@
                           (make_fp_flags ~accept_disposable:false
                             ~has_default:true ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false
-                            ~const_function:false);
+                            ~is_atom:false ~readonly:false);
                            }
                         ];
                       ft_implicit_params =
@@ -273,8 +264,7 @@
                         (Rwitness_from_decl ([28:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~readonly_this:false
-                        ~is_const:false);
+                        ~returns_readonly:false ~readonly_this:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty) });

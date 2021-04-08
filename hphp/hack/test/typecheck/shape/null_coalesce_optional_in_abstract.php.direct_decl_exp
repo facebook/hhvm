@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,140 +1,140 @@
+@@ -1,137 +1,137 @@
  [("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -40,8 +40,7 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract }
           ];
@@ -89,8 +88,7 @@
                     };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false
-                    ~is_const:false);
+                    ~returns_readonly:false ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
            ];
@@ -135,8 +133,7 @@
                     et_type = (Rhint ([22:35-39]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false
-                    ~is_const:false);
+                    ~returns_readonly:false ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
            ];

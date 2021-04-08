@@ -154,8 +154,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:true ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:true ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [20:10-12]) };
@@ -164,7 +163,7 @@
                 et_type = (Rhint ([20:51-54]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [20:10-12]; fe_php_std_lib = false }))
   ]

@@ -430,8 +430,6 @@ module Flags = struct
 
   let get_ft_readonly_this ft = is_set ft.ft_flags ft_flags_readonly_this
 
-  let get_ft_is_const ft = is_set ft.ft_flags ft_flags_is_const
-
   let get_ft_async ft = is_set ft.ft_flags ft_flags_async
 
   let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
@@ -478,8 +476,6 @@ module Flags = struct
 
   let get_fp_readonly fp = is_set fp.fp_flags fp_flags_readonly
 
-  let get_fp_const_function fp = is_set fp.fp_flags fp_flags_const_function
-
   let fun_kind_to_flags kind =
     match kind with
     | Ast_defs.FSync -> 0
@@ -487,13 +483,11 @@ module Flags = struct
     | Ast_defs.FGenerator -> ft_flags_generator
     | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
 
-  let make_ft_flags
-      kind ~return_disposable ~returns_readonly ~readonly_this ~const =
+  let make_ft_flags kind ~return_disposable ~returns_readonly ~readonly_this =
     let flags = fun_kind_to_flags kind in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
     let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
     let flags = set_bit ft_flags_readonly_this readonly_this flags in
-    let flags = set_bit ft_flags_is_const const flags in
     flags
 
   let mode_to_flags mode =
@@ -508,8 +502,7 @@ module Flags = struct
       ~ifc_external
       ~ifc_can_call
       ~is_atom
-      ~readonly
-      ~const_function =
+      ~readonly =
     let flags = mode_to_flags mode in
     let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
     let flags = set_bit fp_flags_has_default has_default flags in
@@ -517,7 +510,6 @@ module Flags = struct
     let flags = set_bit fp_flags_ifc_can_call ifc_can_call flags in
     let flags = set_bit fp_flags_atom is_atom flags in
     let flags = set_bit fp_flags_readonly readonly flags in
-    let flags = set_bit fp_flags_const_function const_function flags in
     flags
 
   let get_fp_accept_disposable fp =
@@ -849,11 +841,6 @@ module Pp = struct
       Format.fprintf fmt "@[~%s:" "readonly_this";
       Format.fprintf fmt "%B" (get_ft_readonly_this ft);
       Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "is_const";
-      Format.fprintf fmt "%B" (get_ft_is_const ft);
-      Format.fprintf fmt "@]";
 
       Format.fprintf fmt ")@]"
     in
@@ -921,11 +908,7 @@ module Pp = struct
       Format.fprintf fmt "@[~%s:" "readonly";
       Format.fprintf fmt "%B" (get_fp_readonly fp);
       Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
 
-      Format.fprintf fmt "@[~%s:" "const_function";
-      Format.fprintf fmt "%B" (get_fp_const_function fp);
-      Format.fprintf fmt "@]";
       Format.fprintf fmt ")@]"
     in
 

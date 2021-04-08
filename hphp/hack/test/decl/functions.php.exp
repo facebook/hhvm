@@ -12,7 +12,7 @@
                et_type = (Rhint ([3:29-33]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false ~is_const:false);
+               ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-25]; fe_php_std_lib = false }));
   ("\\simple_int_function",
@@ -29,7 +29,7 @@
                 et_type = (Rhint ([4:33-36]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [4:10-29]; fe_php_std_lib = false }));
   ("\\simple_function_with_body",
@@ -46,7 +46,7 @@
                 et_type = (Rhint ([7:39-44]), (Tprim Tfloat)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-35]; fe_php_std_lib = false }));
   ("\\function_with_args",
@@ -65,8 +65,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   };
                 { fp_pos = [11:46-51]; fp_name = (Some "$arg2");
                   fp_type =
@@ -75,8 +74,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false
-                    ~const_function:false);
+                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [11:10-28]) };
@@ -85,7 +83,7 @@
                 et_type = (Rhint ([11:54-58]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [11:10-28]; fe_php_std_lib = false }));
   ("\\Typedef",
@@ -112,8 +110,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [14:10-42]) };
@@ -124,7 +121,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [14:10-42]; fe_php_std_lib = false }));
   ("\\test_generic_fun",
@@ -149,8 +146,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
@@ -159,7 +155,7 @@
                 et_type = (Rhint ([18:40-41]), (Tgeneric ("T", []))) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [18:10-26]; fe_php_std_lib = false }));
   ("\\test_constrained_generic_fun",
@@ -190,8 +186,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   };
                 { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
                   fp_type =
@@ -200,8 +195,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false
-                    ~const_function:false);
+                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
@@ -210,7 +204,7 @@
                 et_type = (Rhint ([25:4-6]), (Tgeneric ("T1", []))) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [22:10-38]; fe_php_std_lib = false }));
   ("\\test_returns_generic",
@@ -231,7 +225,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [29:10-30]; fe_php_std_lib = false }));
   ("\\takes_optional",
@@ -253,8 +247,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [33:10-24]) };
@@ -263,7 +256,7 @@
                 et_type = (Rhint ([33:35-39]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [33:10-24]; fe_php_std_lib = false }));
   ("\\in_out",
@@ -282,8 +275,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPinout ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [35:10-16]) };
@@ -292,7 +284,7 @@
                 et_type = (Rhint ([35:32-36]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-16]; fe_php_std_lib = false }));
   ("\\takes_returns_function_type",
@@ -317,8 +309,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   };
                 { fp_pos = [39:24-31]; fp_name = (Some "$unused");
                   fp_type =
@@ -339,8 +330,7 @@
                                ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
                                ~ifc_external:false ~ifc_can_call:false
-                               ~is_atom:false ~readonly:false
-                               ~const_function:false);
+                               ~is_atom:false ~readonly:false);
                               }
                             ];
                           ft_implicit_params =
@@ -350,15 +340,13 @@
                             et_type = (Rhint ([39:18-22]), (Tprim Tvoid)) };
                           ft_flags =
                           (make_ft_flags FSync ~return_disposable:false
-                            ~returns_readonly:false ~readonly_this:false
-                            ~is_const:false);
+                            ~returns_readonly:false ~readonly_this:false);
                           ft_ifc_decl = FDPolicied {PUBLIC} }))
                     };
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false
-                    ~const_function:false);
+                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [37:10-37]) };
@@ -392,8 +380,7 @@
                                       ~has_default:false
                                       ~mode:Typing_defs_core.FPnormal
                                       ~ifc_external:false ~ifc_can_call:false
-                                      ~is_atom:false ~readonly:false
-                                      ~const_function:false);
+                                      ~is_atom:false ~readonly:false);
                                      }
                                    ];
                                  ft_implicit_params =
@@ -406,15 +393,14 @@
                                  (make_ft_flags FSync
                                    ~return_disposable:false
                                    ~returns_readonly:false
-                                   ~readonly_this:false ~is_const:false);
+                                   ~readonly_this:false);
                                  ft_ifc_decl = FDPolicied {PUBLIC} }))
                            };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
                            ~ifc_external:false ~ifc_can_call:false
-                           ~is_atom:false ~readonly:false
-                           ~const_function:false);
+                           ~is_atom:false ~readonly:false);
                           }
                         ];
                       ft_implicit_params =
@@ -424,13 +410,12 @@
                         et_type = (Rhint ([40:37-41]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~readonly_this:false
-                        ~is_const:false);
+                        ~returns_readonly:false ~readonly_this:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [37:10-37]; fe_php_std_lib = false }));
   ("\\takes_returns_dict",
@@ -455,8 +440,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [46:10-28]) };
@@ -471,7 +455,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [46:10-28]; fe_php_std_lib = false }));
   ("\\C",
@@ -511,8 +495,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [52:10-24]) };
@@ -521,7 +504,7 @@
                 et_type = (Rhint ([52:47-51]), (Tprim Tnull)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [52:10-24]; fe_php_std_lib = false }));
   ("\\resource_type_hint",
@@ -540,8 +523,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [56:10-28]) };
@@ -550,7 +532,7 @@
                 et_type = (Rhint ([56:43-51]), (Tprim Tresource)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [56:10-28]; fe_php_std_lib = false }));
   ("\\noreturn_type_hint",
@@ -567,7 +549,7 @@
                 et_type = (Rhint ([60:32-40]), (Tprim Tnoreturn)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [60:10-28]; fe_php_std_lib = false }));
   ("\\variadic_function",
@@ -585,8 +567,7 @@
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~is_atom:false ~readonly:false
-                     ~const_function:false);
+                     ~ifc_can_call:false ~is_atom:false ~readonly:false);
                     }
                  ));
               ft_tparams = []; ft_where_constraints = []; ft_params = [];
@@ -596,7 +577,7 @@
                 et_type = (Rhint ([65:45-49]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [65:10-27]; fe_php_std_lib = false }))
   ]

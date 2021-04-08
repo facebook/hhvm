@@ -205,7 +205,6 @@ and static_prop env cv =
 
 let method_type env m =
   let ifc_decl = FunUtils.find_policied_attribute m.m_user_attributes in
-  let is_const = FunUtils.has_constfun_attribute m.m_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
@@ -246,8 +245,7 @@ let method_type env m =
         m.m_fun_kind
         ~return_disposable
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
-        ~readonly_this:m.m_readonly_this
-        ~const:is_const;
+        ~readonly_this:m.m_readonly_this;
     ft_ifc_decl = ifc_decl;
   }
 

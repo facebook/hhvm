@@ -29,8 +29,7 @@
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~is_atom:false ~readonly:false
-                     ~const_function:false);
+                     ~ifc_can_call:false ~is_atom:false ~readonly:false);
                     }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
@@ -39,8 +38,7 @@
                   et_type = (Rhint ([4:33-35]), (Tgeneric ("Ta", []))) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false
-                  ~is_const:false);
+                  ~returns_readonly:false ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([8:19-20], "g");
@@ -64,7 +62,7 @@
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                      ~readonly:false ~const_function:false);
+                      ~readonly:false);
                      }
                    ];
                  ft_implicit_params =
@@ -74,8 +72,7 @@
                    et_type = (Rhint ([8:33-35]), (Tgeneric ("Tb", []))) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false
-                   ~is_const:false);
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];

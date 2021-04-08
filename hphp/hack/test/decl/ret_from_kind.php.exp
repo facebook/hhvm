@@ -16,7 +16,7 @@
                };
              ft_flags =
              (make_ft_flags FAsync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false ~is_const:false);
+               ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:16-29]; fe_php_std_lib = false }));
   ("\\no_hint_generator",
@@ -40,7 +40,7 @@
                 };
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:10-27]; fe_php_std_lib = false }));
   ("\\no_hint_async_generator",
@@ -64,7 +64,7 @@
                 };
               ft_flags =
               (make_ft_flags FAsyncGenerator ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:16-39]; fe_php_std_lib = false }))
   ]

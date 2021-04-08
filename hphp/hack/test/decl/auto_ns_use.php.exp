@@ -26,7 +26,7 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [8:12-21]; fe_php_std_lib = false }));
   ("\\get_value",
@@ -48,8 +48,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false
-                   ~const_function:false);
+                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
                   };
                 { fp_pos = [12:50-52]; fp_name = (Some "$k");
                   fp_type =
@@ -58,8 +57,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false
-                    ~const_function:false);
+                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:12-21]) };
@@ -68,7 +66,7 @@
                 et_type = (Rhint ([12:55-60]), Tmixed) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:12-21]; fe_php_std_lib = false }));
   ("\\MyDict",

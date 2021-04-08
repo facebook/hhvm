@@ -4024,12 +4024,6 @@ let invalid_disposable_return_hint pos class_name =
     ^ " must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute."
     )
 
-let invalid_constfun_attribute pos =
-  add
-    (NastCheck.err_code NastCheck.InvalidConstFunAttribute)
-    pos
-    "<<__ConstFun>> can only be used on function type hints and functions."
-
 let xhp_required pos why_xhp ty_reason_msg =
   let msg = "An XHP instance was expected" in
   add_list

@@ -212,8 +212,6 @@ pub mod user_attributes {
 
     pub const CONST: &str = "__Const";
 
-    pub const CONST_FUN: &str = "__ConstFun";
-
     pub const DEPRECATED: &str = "__Deprecated";
 
     pub const ENTRY_POINT: &str = "__EntryPoint";

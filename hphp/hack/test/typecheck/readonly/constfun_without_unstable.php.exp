@@ -1,8 +1,0 @@
-File "constfun_without_unstable.php", line 14, characters 1-14:
-Cannot use unstable feature: `readonly` (Parsing[1002])
-File "constfun_without_unstable.php", line 15, characters 16-29:
-Cannot use unstable feature: `readonly` (Parsing[1002])
-File "constfun_without_unstable.php", line 17, characters 3-16:
-Cannot use unstable feature: `readonly` (Parsing[1002])
-File "constfun_without_unstable.php", line 17, characters 5-14:
-<<__ConstFun>> can only be used on function type hints and functions. (NastCheck[3091])

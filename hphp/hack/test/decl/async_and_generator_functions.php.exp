@@ -12,7 +12,7 @@
                et_type = (Rhint ([3:27-31]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false ~is_const:false);
+               ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-23]; fe_php_std_lib = false }));
   ("\\async_function",
@@ -33,7 +33,7 @@
                 };
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:16-30]; fe_php_std_lib = false }));
   ("\\generator_function",
@@ -57,7 +57,7 @@
                 };
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [10:10-28]; fe_php_std_lib = false }));
   ("\\generator_function_implicit_key",
@@ -81,7 +81,7 @@
                 };
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [14:10-41]; fe_php_std_lib = false }));
   ("\\async_generator",
@@ -105,7 +105,7 @@
                 };
               ft_flags =
               (make_ft_flags FAsyncGenerator ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false ~is_const:false);
+                ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [18:16-31]; fe_php_std_lib = false }))
   ]

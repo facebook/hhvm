@@ -409,8 +409,6 @@ module Flags : sig
 
   val get_ft_readonly_this : 'a fun_type -> bool
 
-  val get_ft_is_const : 'a fun_type -> bool
-
   val get_fp_ifc_can_call : 'a fun_param -> bool
 
   val get_fp_ifc_external : 'a fun_param -> bool
@@ -419,8 +417,6 @@ module Flags : sig
 
   val get_fp_readonly : 'a fun_param -> bool
 
-  val get_fp_const_function : 'a fun_param -> bool
-
   val fun_kind_to_flags : Ast_defs.fun_kind -> Hh_prelude.Int.t
 
   val make_ft_flags :
@@ -428,7 +424,6 @@ module Flags : sig
     return_disposable:bool ->
     returns_readonly:bool ->
     readonly_this:bool ->
-    const:bool ->
     Hh_prelude.Int.t
 
   val mode_to_flags : param_mode -> int
@@ -441,7 +436,6 @@ module Flags : sig
     ifc_can_call:bool ->
     is_atom:bool ->
     readonly:bool ->
-    const_function:bool ->
     Hh_prelude.Int.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool

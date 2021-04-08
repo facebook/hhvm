@@ -30,9 +30,6 @@ let find_policied_attribute user_attributes : ifc_fun_decl =
     FDInferFlows
   | None -> default_ifc_fun_decl
 
-let has_constfun_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaConstFun user_attributes
-
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
 
@@ -175,8 +172,7 @@ let make_param_ty env ~is_lambda param =
         ~ifc_external:(has_external_attribute param.param_user_attributes)
         ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
         ~is_atom:(has_atom_attribute param.param_user_attributes)
-        ~readonly:(Option.is_some param.param_readonly)
-        ~const_function:(has_constfun_attribute param.param_user_attributes);
+        ~readonly:(Option.is_some param.param_readonly);
   }
 
 (** Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
@@ -198,8 +194,7 @@ let make_ellipsis_param_ty :
         ~ifc_external:false
         ~ifc_can_call:false
         ~is_atom:false
-        ~readonly:false
-        ~const_function:false;
+        ~readonly:false;
   }
 
 let ret_from_fun_kind

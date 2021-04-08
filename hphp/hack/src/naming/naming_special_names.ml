@@ -239,8 +239,6 @@ module UserAttributes = struct
 
   let uaConst = "__Const"
 
-  let uaConstFun = "__ConstFun"
-
   let uaDeprecated = "__Deprecated"
 
   let uaEntryPoint = "__EntryPoint"
@@ -320,7 +318,6 @@ module UserAttributes = struct
           (uaOverride, [mthd]);
           (uaConsistentConstruct, [cls]);
           (uaConst, [cls; instProperty; parameter; staticProperty]);
-          (uaConstFun, [parameter; lambda; mthd; fn]);
           (uaDeprecated, [fn; mthd]);
           (uaEntryPoint, [fn]);
           (uaMemoize, [fn; mthd]);

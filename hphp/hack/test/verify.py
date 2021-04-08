@@ -606,7 +606,6 @@ def run_tests(
 def run_idempotence_tests(
     results: List[Result],
     expected_extension: str,
-    fallback_expect_extension: Optional[str],
     out_extension: str,
     program: str,
     default_expect_regex: Optional[str],
@@ -654,7 +653,7 @@ def run_idempotence_tests(
             idempotence_failures,
             out_extension + out_extension,  # e.g., *.out.out
             expected_extension,
-            fallback_expect_extension,
+            None,
             no_copy=True,
         )
         sys.exit(1)  # this exit code fails the suite and lets Buck know
@@ -798,7 +797,6 @@ if __name__ == "__main__":
         run_idempotence_tests(
             successes,
             args.expect_extension,
-            args.fallback_expect_extension,
             args.out_extension,
             args.program,
             args.default_expect_regex,

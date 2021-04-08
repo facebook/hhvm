@@ -17,9 +17,9 @@ trait BaseException {
   protected string $message = ''; // exception message
   private string $string = '';    // php5 has this, we don't use it
   protected int $code = 0;        // user defined exception code
-  protected string $file;         // source filename of exception
-  protected int $line;            // source line of exception
-  private $trace = varray[];       // full stacktrace
+  protected string $file = '';    // source filename of exception
+  protected int $line = 0;        // source line of exception
+  private $trace = varray[];      // full stacktrace
   private ?\Exception $previous = null;
   protected $userMetadata = null;
 
@@ -81,7 +81,7 @@ trait BaseException {
    *                     created.
    */
   <<__Pure, __MaybeMutable>>
-  final public function getFile() {
+  final public function getFile(): string {
     return $this->file;
   }
 
@@ -95,7 +95,7 @@ trait BaseException {
    *                     created.
    */
   <<__Pure, __MaybeMutable>>
-  final public function getLine() {
+  final public function getLine(): int {
     return $this->line;
   }
 

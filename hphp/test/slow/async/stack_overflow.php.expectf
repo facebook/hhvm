@@ -1,0 +1,5 @@
+
+Fatal error: Stack overflow in %s/stack_overflow.php on line 4
+string(37) "The request was abruptly interrupted."
+string(0) ""
+int(0)

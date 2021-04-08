@@ -63,6 +63,9 @@ pub struct Opts {
 
     #[structopt(long)]
     use_hhbc_by_ref: bool,
+
+    #[structopt(long)]
+    thread_num: Option<usize>,
 }
 
 pub fn run(opts: Opts) -> anyhow::Result<()> {
@@ -93,7 +96,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
             ],
         };
 
-        files.par_iter().try_for_each(|f| {
+        let process_one_file = |f: &PathBuf| {
             let content = utils::read_file(f)?;
             let files = multifile::to_files(f, content)?;
             for (f, content) in files {
@@ -111,7 +114,19 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
                 }
             }
             Ok(())
-        })
+        };
+
+        if opts.thread_num.map_or(false, |n| n <= 1) {
+            files.iter().try_for_each(process_one_file)
+        } else {
+            opts.thread_num.map_or((), |thread_num| {
+                rayon::ThreadPoolBuilder::new()
+                    .num_threads(thread_num)
+                    .build_global()
+                    .unwrap();
+            });
+            files.par_iter().try_for_each(process_one_file)
+        }
     }
 }
 

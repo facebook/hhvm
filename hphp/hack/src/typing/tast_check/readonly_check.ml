@@ -443,8 +443,18 @@ let check =
       Typing_utils.is_sub_type env ty hackarray
       || Typing_utils.is_sub_type env ty shape
 
-    method grab_class_elts_from_ty ~static env ty prop_id =
+    method grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
       let open Typing_defs in
+      (* Given a list of types, find recurse on the first type that
+        has the property and return the result *)
+      let find_first_in_list ~seen tyl =
+        List.find_map
+          ~f:(fun ty ->
+            match self#grab_class_elts_from_ty ~static ~seen env ty prop_id with
+            | [] -> None
+            | tyl -> Some tyl)
+          tyl
+      in
       match get_node ty with
       | Tclass (id, _exact, _args) ->
         let provider_ctx = Tast_env.get_ctx env in
@@ -466,36 +476,24 @@ let check =
         is invariant. Thus we just grab the first one from the list where the prop exists. *)
       | Tintersection [] -> []
       | Tintersection tyl ->
-        (match
-           List.find_map
-             ~f:(fun ty ->
-               match self#grab_class_elts_from_ty ~static env ty prop_id with
-               | [] -> None
-               | tyl -> Some tyl)
-             tyl
-         with
-        | Some tyl -> tyl
-        | None -> [])
+        find_first_in_list ~seen tyl |> Option.value ~default:[]
       (* A union type is more interesting, where we must return all possible cases
       and be conservative in our use case. *)
       | Tunion tyl ->
         List.concat_map
-          ~f:(fun ty -> self#grab_class_elts_from_ty ~static env ty prop_id)
+          ~f:(fun ty ->
+            self#grab_class_elts_from_ty ~static ~seen env ty prop_id)
           tyl
       (* Generic types can be treated similarly to an intersection type
         where we find the first prop that works from the upper bounds *)
       | Tgeneric (name, tyargs) ->
-        let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
-        (match
-           List.find_map
-             ~f:(fun ty ->
-               match self#grab_class_elts_from_ty ~static env ty prop_id with
-               | [] -> None
-               | tyl -> Some tyl)
-             (Typing_set.elements upper_bounds)
-         with
-        | Some tyl -> tyl
-        | None -> [])
+        if SSet.mem name seen then
+          []
+        else
+          let new_seen = SSet.add name seen in
+          let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+          find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
+          |> Option.value ~default:[]
       (* TODO: Handle more complex types *)
       | _ -> []
 

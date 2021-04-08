@@ -32,3 +32,7 @@ function test(Foo $x): void {
   // Error, right side needs to be wrapped in readonly
   $x->ro = $x->ro;
 }
+
+function generic<T as T2 as Foo, T2 as T>(T $x): void {
+  $x->not_ro = readonly new Bar();
+}

@@ -5281,6 +5281,14 @@ let invalid_meth_caller_calling_convention call_pos param_pos convention =
         "This is why I think this method uses the `inout` calling convention" );
     ]
 
+let readonly_closure_call pos f_pos suggestion =
+  add_list
+    (Typing.err_code Typing.ReadonlyClosureCall)
+    ( pos,
+      "This function is readonly, so it must be marked readonly at declaration time to be called."
+    )
+    [(f_pos, "Did you mean to " ^ suggestion ^ "?")]
+
 let unsafe_cast pos =
   add
     (Typing.err_code Typing.UnsafeCast)

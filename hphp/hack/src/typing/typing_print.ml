@@ -224,7 +224,17 @@ module Full = struct
   let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
   let tfun ~ty to_doc st env ft =
-    Concat [text "("; text "function"; fun_type ~ty to_doc st env ft; text ")"]
+    Concat
+      [
+        text "(";
+        ( if get_ft_readonly_this ft then
+          text "readonly "
+        else
+          Nothing );
+        text "function";
+        fun_type ~ty to_doc st env ft;
+        text ")";
+      ]
 
   let ttuple k tyl = list "(" k tyl ")"
 

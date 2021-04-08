@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6e65d73de94e0c1d2da12841ad02af59>>
+// @generated SignedSource<<b77167dedd7ce48d3b96ef7f56d7b2ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -522,6 +522,7 @@ pub enum Typing {
     PrivateDynamicRead = 4425,
     PrivateDynamicWrite = 4426,
     IncDecInvalidArgument = 4427,
+    ReadonlyClosureCall = 4428,
 }
 impl TrivialDrop for Typing {}
 

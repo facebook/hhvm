@@ -1,0 +1,8 @@
+File "call.php", line 23, characters 3-4:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "call.php", line 10, characters 19-21:
+  This method is not readonly
+File "call.php", line 23, characters 3-9:
+This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
+  File "call.php", line 10, characters 19-21:
+  Did you mean to declaring this as a `readonly` function?

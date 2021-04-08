@@ -353,11 +353,37 @@ let check =
         (env : Tast_env.t)
         (pos : Pos.t)
         (caller_ty : Tast.ty)
+        (caller_rty : rty)
         (args : Tast.expr list)
         (unpacked_arg : Tast.expr option) =
       let open Typing_defs in
+      let (env, caller_ty) = Tast_env.expand_type env caller_ty in
+      let check_readonly_closure caller_ty caller_rty =
+        match (get_node caller_ty, caller_rty) with
+        | (Tfun fty, Readonly) when not (get_ft_readonly_this fty) ->
+          (* Get the position of why this function is its current type (usually a typehint) *)
+          let reason = get_reason caller_ty in
+          let f_pos = Reason.to_pos (get_reason caller_ty) in
+          let suggestion =
+            match reason with
+            (* If we got this function from a typehint, we suggest marking the function (readonly function) *)
+            | Typing_reason.Rhint _ ->
+              let new_flags =
+                Typing_defs_flags.(
+                  set_bit ft_flags_readonly_this true fty.ft_flags)
+              in
+              let readonly_fty = Tfun { fty with ft_flags = new_flags } in
+              let suggested_fty = mk (reason, readonly_fty) in
+              let suggested_fty_str = Tast_env.print_ty env suggested_fty in
+              "annotate this typehint as a " ^ suggested_fty_str
+            (* Otherwise, it's likely from a Rwitness, but we suggest declaring it as readonly *)
+            | _ -> "declaring this as a `readonly` function"
+          in
+          Errors.readonly_closure_call pos f_pos suggestion
+        | _ -> ()
+      in
       (* Check that function calls which return readonly are wrapped in readonly *)
-      let check_readonly_call caller_ty is_readonly =
+      let check_readonly_return_call caller_ty is_readonly =
         match get_node caller_ty with
         | Tfun fty when get_ft_returns_readonly fty ->
           if not is_readonly then
@@ -399,7 +425,8 @@ let check =
           ()
         | _ -> ()
       in
-      check_readonly_call caller_ty is_readonly;
+      check_readonly_closure caller_ty caller_rty;
+      check_readonly_return_call caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
 
     method is_value_collection_ty env ty =
@@ -641,6 +668,7 @@ let check =
           env
           (Tast.get_position caller)
           (Tast.get_type caller)
+          (self#ty_expr env caller)
           args
           unpacked_arg;
         self#method_call env caller;
@@ -653,6 +681,7 @@ let check =
           ~is_readonly:false
           (Tast.get_position caller)
           (Tast.get_type caller)
+          (self#ty_expr env caller)
           args
           unpacked_arg;
         self#method_call env caller;
@@ -665,7 +694,14 @@ let check =
         super#on_expr env e
       | (_, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
-        self#call ~is_readonly:false env pos constructor_fty args unpacked_arg
+        self#call
+          ~is_readonly:false
+          env
+          pos
+          constructor_fty
+          Mut
+          args
+          unpacked_arg
       | (_, This)
       | (_, ValCollection (_, _, _))
       | (_, KeyValCollection (_, _, _))

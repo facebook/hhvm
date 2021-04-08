@@ -1511,3 +1511,5 @@ val returns_with_and_without_value :
   unit
 
 val cyclic_class_constant : Pos.t -> string -> string -> unit
+
+val readonly_closure_call : Pos.t -> Pos.t -> string -> unit

@@ -217,10 +217,6 @@ struct HotCache {
   bool hasValue(const StringData* key) const;
 
  private:
-  // Uncounted ArrayData is stored 'unwrapped' to save one dereference.
-  using HotValue = Either<APCHandle*,ArrayData*,either_policy::high_bit>;
-  using HotValueRaw = HotValue::Opaque;
-
   // Keys stored are char*, but lookup/insert always use StringData*.
   struct EqualityTester {
     bool operator()(const char* a, const StringData* b) const {
@@ -244,7 +240,7 @@ struct HotCache {
       return reinterpret_cast<const char*>(dst);
     }
   };
-  using HotMap = folly::AtomicHashArray<const char*, std::atomic<HotValueRaw>,
+  using HotMap = folly::AtomicHashArray<const char*, std::atomic<APCHandle*>,
                                         Hasher, EqualityTester,
                                         APCAllocator<char>,
                                         folly::AtomicHashArrayLinearProbeFcn,
@@ -252,38 +248,6 @@ struct HotCache {
 
   static bool supportedKind(const APCHandle* h) {
     return h->isSingletonKind() || h->isUncounted();
-  }
-
-  static HotValueRaw makeRawValue(APCHandle* h) {
-    assertx(h != nullptr && supportedKind(h));
-    HotValue v = [&] {
-      switch (h->kind()) {
-        case APCKind::UncountedVec:
-          return HotValue{APCTypedValue::fromHandle(h)->getVecData()};
-        case APCKind::UncountedDict:
-          return HotValue{APCTypedValue::fromHandle(h)->getDictData()};
-        case APCKind::UncountedKeyset:
-          return HotValue{APCTypedValue::fromHandle(h)->getKeysetData()};
-        default:
-          return HotValue{h};
-      }
-    }();
-    return v.toOpaque();
-  }
-
-  static bool rawValueToLocal(HotValueRaw vraw, Variant& value) {
-    HotValue v = HotValue::fromOpaque(vraw);
-    if (ArrayData* ad = v.right()) {
-      value = Variant{
-        ad, ad->toPersistentDataType(), Variant::PersistentArrInit{}
-      };
-      return true;
-    }
-    if (APCHandle* h = v.left()) {
-      value = h->toLocal();
-      return true;
-    }
-    return false;
   }
 
   bool clearValueIdx(Idx idx);
@@ -351,7 +315,7 @@ bool HotCache::hasValue(const StringData* key) const {
   if (!maybeHotFast(key)) return false;
   HotMap::const_iterator it = m_hotMap->find(key);
   return it != m_hotMap->end() &&
-    !HotValue::fromOpaque(it->second.load(std::memory_order_relaxed)).isNull();
+         it->second.load(std::memory_order_relaxed) != nullptr;
 }
 
 bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
@@ -364,7 +328,8 @@ bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
     idx = StoreValue::kHotCacheUnknown;
     return false;
   }
-  if (rawValueToLocal(it->second.load(std::memory_order_relaxed), value)) {
+  if (auto const handle = it->second.load(std::memory_order_relaxed)) {
+    value = handle->toLocal();
     return true;
   }
   idx = it.getIndex();
@@ -375,11 +340,10 @@ bool HotCache::store(Idx idx, const StringData* key,
                      APCHandle* svar, const StoreValue* sval) {
   if (idx == StoreValue::kHotCacheKnownIneligible) return false;
   if (!svar || !supportedKind(svar)) return false;
-  auto raw = makeRawValue(svar);
   if (idx == StoreValue::kHotCacheUnknown) {
     if (!maybeHot(key->data())) return false;
     if (m_isFull.load(std::memory_order_relaxed)) return false;
-    auto p = m_hotMap->emplace(key, raw);
+    auto p = m_hotMap->emplace(key, svar);
     if (p.first == m_hotMap->end()) {
       m_isFull.store(true, std::memory_order_relaxed);
       return false;
@@ -388,7 +352,7 @@ bool HotCache::store(Idx idx, const StringData* key,
   }
   assertx(idx >= 0);
   sval->hotIndex.store(idx, std::memory_order_relaxed);
-  m_hotMap->findAt(idx)->second.store(raw, std::memory_order_relaxed);
+  m_hotMap->findAt(idx)->second.store(svar, std::memory_order_relaxed);
   return true;
 }
 
@@ -396,7 +360,7 @@ bool HotCache::clearValueIdx(Idx idx) {
   if (idx == StoreValue::kHotCacheUnknown) return false;
   assertx(idx >= 0);
   auto it = m_hotMap->findAt(idx);
-  it->second.store(HotValue(nullptr).toOpaque(), std::memory_order_relaxed);
+  it->second.store(nullptr, std::memory_order_relaxed);
   return true;
 }
 

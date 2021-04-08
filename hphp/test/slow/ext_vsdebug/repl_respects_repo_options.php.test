@@ -1,0 +1,13 @@
+<?hh
+namespace ExpandedAlias {
+  function hello(): void {
+    \printf("Hello from %s\n", __FUNCTION__);
+  }
+}
+
+namespace {
+  <<__EntryPoint>>
+  function repo_options_test_main(): void {
+    hphp_debug_break();
+  }
+}

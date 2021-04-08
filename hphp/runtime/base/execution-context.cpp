@@ -53,12 +53,14 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger_base.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -1142,14 +1144,46 @@ ObjectData* ExecutionContext::getThis() {
   return nullptr;
 }
 
+namespace {
+const RepoOptions& getRepoOptionsForDebuggerEval() {
+  const auto root = SourceRootInfo::GetCurrentSourceRoot();
+  if (root.size() == 0) {
+    return RepoOptions::defaults();
+  }
+
+  const auto dummyPath = fmt::format("{}/$$eval$$.php", root);
+  return RepoOptions::forFile(dummyPath.data());
+}
+} // namespace
+
 const RepoOptions& ExecutionContext::getRepoOptionsForCurrentFrame() const {
+  return getRepoOptionsForFrame(0);
+}
+
+const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
   VMRegAnchor _;
 
-  if (auto const ar = vmfp()) {
+  const RepoOptions* ret{nullptr};
+
+  walkStack([&] (ActRec* ar, Offset) {
+    if (frame--) {
+      return false;
+    }
+
     auto const path = ar->func()->unit()->filepath();
-    return RepoOptions::forFile(path->data());
-  }
-  return RepoOptions::defaults();
+    if (UNLIKELY(path->empty())) {
+      // - Systemlib paths always start with `/:systemlib`
+      // - we make up a bogus filename for eval()
+      // - but let's assert out of paranoia as we're in a path that's not
+      //   perf-sensitive
+      assertx(!ar->func()->unit()->isSystemLib());
+      ret = &getRepoOptionsForDebuggerEval();
+      return true;
+    }
+    ret = &RepoOptions::forFile(path->data());
+    return true;
+  });
+  return ret ? *ret : RepoOptions::defaults();
 }
 
 void ExecutionContext::onLoadWithOptions(
@@ -1195,7 +1229,7 @@ int ExecutionContext::getLine() {
   return func->getLineNumber(pc);
 }
 
-ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {
+ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) const {
   ActRec* ret = nullptr;
   walkStack([&] (ActRec* fp, Offset) {
     if (frameDepth == 0) {
@@ -1907,7 +1941,7 @@ ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?hh" prepended already
   auto unit = compile_debugger_string(code->data(), code->size(),
-    getRepoOptionsForCurrentFrame());
+    getRepoOptionsForFrame(frame));
   if (unit == nullptr) {
     raise_error("Syntax error");
     return {true, init_null_variant, "Syntax error"};
@@ -2121,7 +2155,7 @@ const StaticString s_include("include");
 
 void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_debugger_string(
-    "<?hh", 4, RepoOptions::defaults()
+    "<?hh", 4, getRepoOptionsForDebuggerEval()
   );
   // Ensure that the VM stack is completely empty (vmfp() should be null)
   // and that we're not in a nested VM (reentrancy)

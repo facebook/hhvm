@@ -1,0 +1,1 @@
+"-vServer.SourceRoot=$(dirname "$HPHP_TEST_SOURCE_FILE")"

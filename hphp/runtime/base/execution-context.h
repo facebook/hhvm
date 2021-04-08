@@ -322,6 +322,7 @@ public:
   bool hasRequestEventHandlers() const;
 
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
+  const RepoOptions& getRepoOptionsForFrame(int frame) const;
 
   const RepoOptions* getRepoOptionsForRequest() const;
 
@@ -444,7 +445,7 @@ public:
    * Returns the call frame at the specified depth, intended only
    * for use by the debugger. Use in other contexts may not be safe.
    */
-  ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0);
+  ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0) const;
   Array getLocalDefinedVariablesDebugger(int frame);
   Variant getEvaledArg(const StringData* val,
                        const String& namespacedName,

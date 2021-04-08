@@ -2630,6 +2630,7 @@ function run_config_cli(
   } else {
     $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
   }
+  $cmd_env['HPHP_TEST_SOURCE_FILE'] = $test;
   if (isset($options['log'])) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';

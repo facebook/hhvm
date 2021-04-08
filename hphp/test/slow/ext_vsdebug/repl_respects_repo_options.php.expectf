@@ -1,0 +1,8 @@
+---- FRAME: repo_options_test_main();-----
+STDOUT: Hello from ExpandedAlias\hello
+---- FRAME: hphp_debug_break() -----
+STDOUT: Hit fatal : Call to undefined function Aliased\hello()
+STDOUT:     #0 at [:1]
+    #1 include(), called at [%s/repl_respects_repo_options.php.test:11]
+    #2 repo_options_test_main(), called at [:0]
+----- OK! -----

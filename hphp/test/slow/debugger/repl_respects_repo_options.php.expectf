@@ -1,0 +1,8 @@
+Program %s/repl_respects_repo_options.php loaded. Type '[r]un' or '[c]ontinue' to go.
+r
+Program %s/repl_respects_repo_options.php exited normally.
+=Aliased\hello();
+string(19) "ExpandedAlias\hello"
+
+null
+quit

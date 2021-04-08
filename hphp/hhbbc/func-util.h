@@ -76,6 +76,11 @@ BlockId make_block(php::WideFunc& func, const php::Block* srcBlk);
 */
 int dyn_call_error_level(const php::Func*);
 
+/*
+ * Does this function have a coeffects local?
+ */
+bool has_coeffects_local(const php::Func*);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

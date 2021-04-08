@@ -74,6 +74,7 @@ pub struct HhasCoeffects {
     is_any_rx: bool,
     is_pure: bool,
     closure_inherit_from_parent: bool,
+    generator_this: bool,
 }
 
 impl HhasCoeffects {
@@ -113,6 +114,9 @@ impl HhasCoeffects {
         }
         if coeffects.is_closure_inherit_from_parent() {
             results.push(".coeffects_closure_inherit_from_parent;".to_string());
+        }
+        if coeffects.generator_this() {
+            results.push(".coeffects_generator_this;".to_string());
         }
         results
     }
@@ -245,7 +249,7 @@ impl HhasCoeffects {
             cc_this,
             is_any_rx,
             is_pure,
-            closure_inherit_from_parent: false,
+            ..HhasCoeffects::default()
         }
     }
 
@@ -262,6 +266,13 @@ impl HhasCoeffects {
                 static_coeffects,
                 ..self.clone()
             }
+        }
+    }
+
+    pub fn with_gen_coeffect(&self) -> Self {
+        Self {
+            generator_this: true,
+            ..self.clone()
         }
     }
 
@@ -293,15 +304,20 @@ impl HhasCoeffects {
         self.is_any_rx() || self.is_pure
     }
 
+    pub fn generator_this(&self) -> bool {
+        self.generator_this
+    }
+
     fn has_coeffect_rules(&self) -> bool {
         !self.fun_param.is_empty()
             || !self.cc_param.is_empty()
             || !self.cc_this.is_empty()
             || self.closure_inherit_from_parent
+            || self.generator_this
     }
 
     pub fn has_coeffects_local(&self) -> bool {
-        self.has_coeffect_rules()
+        self.has_coeffect_rules() && !self.generator_this()
     }
 
     pub fn is_closure_inherit_from_parent(&self) -> bool {

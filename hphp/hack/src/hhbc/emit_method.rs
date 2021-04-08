@@ -16,7 +16,7 @@ use hhas_pos_rust::Span;
 use hhbc_id_rust::method;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence::{instr, Result};
-use naming_special_names_rust::{special_idents, user_attributes};
+use naming_special_names_rust::{classes, special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, ast_defs};
@@ -152,6 +152,17 @@ pub fn from_ast<'a>(
             .emit_global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
         coeffects = parent_coeffects.inherit_to_child_closure()
+    }
+    if is_native_opcode_impl
+        && (class.name.1.as_str() == classes::GENERATOR
+            || class.name.1.as_str() == classes::ASYNC_GENERATOR)
+    {
+        match method.name.1.as_str() {
+            "send" | "raise" | "throw" | "next" | "rewind" => {
+                coeffects = coeffects.with_gen_coeffect()
+            }
+            _ => {}
+        }
     }
     let (ast_body_block, is_rx_body, rx_disabled) = if !coeffects.is_any_rx() {
         (&method.body.ast, false, false)

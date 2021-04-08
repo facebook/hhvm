@@ -157,7 +157,7 @@ State entry_state(const Index& index, const Context& ctx,
    * (non-parameter) local (after reified generics, if exists),
    * which stores the ambient coeffects.
    */
-  if (!ctx.func->coeffectRules.empty()) {
+  if (has_coeffects_local(ctx.func)) {
     assertx(locId < ret.locals.size());
     assertx(ctx.func->locals[locId].name->same(s_coeffects_var.get()));
     ret.locals[locId++] = TInt;

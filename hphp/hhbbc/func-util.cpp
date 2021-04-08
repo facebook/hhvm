@@ -81,6 +81,12 @@ int dyn_call_error_level(const php::Func* func) {
   return def;
 }
 
+bool has_coeffects_local(const php::Func* func) {
+  return !func->coeffectRules.empty() &&
+         !(func->coeffectRules.size() == 1 &&
+           func->coeffectRules[0].isGeneratorThis());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

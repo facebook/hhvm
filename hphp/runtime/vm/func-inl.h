@@ -618,7 +618,9 @@ inline bool Func::isRxDisabled() const {
 }
 
 inline bool Func::hasCoeffectsLocal() const {
-  return hasCoeffectRules();
+  return hasCoeffectRules() &&
+         !(getCoeffectRules().size() == 1 &&
+           getCoeffectRules()[0].isGeneratorThis());
 }
 
 inline bool Func::hasCoeffectRules() const {

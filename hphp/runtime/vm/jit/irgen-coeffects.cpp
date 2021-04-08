@@ -180,6 +180,11 @@ SSATmp* emitClosureInheritFromParent(IRGS& env, const Func* f,
   return gen(env, LdMem, TInt, addr);
 }
 
+SSATmp* emitGeneratorThis() {
+  // TODO: implement this
+  return nullptr;
+}
+
 } // namespace
 } // irgen
 } // jit
@@ -198,6 +203,8 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
       return emitFunParam(env, f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(env, f, prologueCtx);
+    case Type::GeneratorThis:
+      return emitGeneratorThis();
     case Type::Invalid:
       always_assert(false);
   }

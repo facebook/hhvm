@@ -97,6 +97,7 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
     case Type::CCThis:
       return folly::to<std::string>("this::", m_name->toCppString());
     case Type::ClosureInheritFromParent:
+    case Type::GeneratorThis:
       return folly::none;
     case Type::Invalid:
       always_assert(false);
@@ -177,6 +178,11 @@ RuntimeCoeffects emitClosureInheritFromParent(const Func* f,
   return closure->getCoeffects();
 }
 
+RuntimeCoeffects emitGeneratorThis() {
+  // TODO: implement this
+  return RuntimeCoeffects::full();
+}
+
 } // namespace
 
 RuntimeCoeffects CoeffectRule::emit(const Func* f,
@@ -191,6 +197,8 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
       return emitFunParam(f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(f, prologueCtx);
+    case Type::GeneratorThis:
+      return emitGeneratorThis();
     case Type::Invalid:
       always_assert(false);
   }
@@ -199,6 +207,10 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
 
 bool CoeffectRule::isClosureInheritFromParent() const {
   return m_type == Type::ClosureInheritFromParent;
+}
+
+bool CoeffectRule::isGeneratorThis() const {
+  return m_type == Type::GeneratorThis;
 }
 
 std::string CoeffectRule::getDirectiveString() const {
@@ -215,6 +227,8 @@ std::string CoeffectRule::getDirectiveString() const {
                               m_name->toCppString()));
     case Type::ClosureInheritFromParent:
       return ".coeffects_closure_inherit_from_parent;";
+    case Type::GeneratorThis:
+      return ".coeffects_generator_this;";
     case Type::Invalid:
       always_assert(false);
   }

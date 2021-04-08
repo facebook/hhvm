@@ -114,6 +114,7 @@ struct CoeffectRule final {
   struct CCParam {};
   struct CCThis {};
   struct ClosureInheritFromParent {};
+  struct GeneratorThis {};
 
   CoeffectRule() = default;
 
@@ -140,11 +141,16 @@ struct CoeffectRule final {
     : m_type(Type::ClosureInheritFromParent)
   {}
 
+  explicit CoeffectRule(GeneratorThis)
+    : m_type(Type::GeneratorThis)
+  {}
+
   RuntimeCoeffects emit(const Func*, uint32_t, void*) const;
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*,
                        uint32_t, jit::SSATmp*) const;
 
   bool isClosureInheritFromParent() const;
+  bool isGeneratorThis() const;
 
   folly::Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;
@@ -160,6 +166,7 @@ private:
     CCParam,
     CCThis,
     ClosureInheritFromParent,
+    GeneratorThis,
   };
 
   Type m_type{Type::Invalid};

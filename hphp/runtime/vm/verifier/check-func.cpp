@@ -330,7 +330,9 @@ bool FuncChecker::checkInfo() {
       return false;
     }
   }
-  if (!m_func->coeffectRules.empty()) {
+  if (!m_func->coeffectRules.empty() &&
+      !(m_func->coeffectRules.size() == 1 &&
+        m_func->coeffectRules[0].isGeneratorThis())) {
     auto const localId = m_func->lookupVarId(s_coeffects_var.get());
     if (localId != m_func->params.size() + (hasReifiedGenerics ? 1 : 0)) {
       ferror("functions with coeffect rules must have the first non parameter"

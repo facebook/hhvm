@@ -1,0 +1,6 @@
+-v Autoload.Enabled=true
+-v Log.Level=Warning
+-v watchman.enable=true
+-v Log.Level=Error
+-v Log.Level=Info
+--count 2

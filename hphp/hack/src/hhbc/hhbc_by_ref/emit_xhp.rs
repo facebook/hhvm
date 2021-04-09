@@ -12,12 +12,11 @@ use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
-use oxidized::{ast::*, ast_defs, local_id, namespace_env, pos::Pos};
+use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
 
 pub fn properties_for_cache<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
-    ns: &namespace_env::Env,
     class: &'a Class_,
     class_is_const: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
@@ -26,7 +25,6 @@ pub fn properties_for_cache<'a, 'arena>(
         alloc,
         emitter,
         class,
-        ns,
         &[],
         class_is_const,
         emit_property::FromAstArgs {

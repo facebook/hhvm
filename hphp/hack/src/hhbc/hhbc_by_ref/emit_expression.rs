@@ -393,13 +393,8 @@ pub fn emit_expr<'a, 'arena>(
         | Expr_::Null
         | Expr_::False
         | Expr_::True => {
-            let v = ast_constant_folder::expr_to_typed_value(
-                alloc,
-                emitter,
-                &env.namespace,
-                expression,
-            )
-            .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
+            let v = ast_constant_folder::expr_to_typed_value(alloc, emitter, expression)
+                .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
             Ok(emit_pos_then(alloc, pos, instr::typedvalue(alloc, v)))
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
@@ -1083,7 +1078,7 @@ fn emit_vec_collection<'a, 'arena>(
     fields: &[tast::Afield],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    match ast_constant_folder::vec_to_typed_value(alloc, e, &env.namespace, fields) {
+    match ast_constant_folder::vec_to_typed_value(alloc, e, fields) {
         Ok(tv) => emit_static_collection(env, None, pos, tv),
         Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
     }
@@ -1208,11 +1203,7 @@ fn emit_collection<'a, 'arena>(
     let alloc = env.arena;
     let pos = &expr.0;
     match ast_constant_folder::expr_to_typed_value_(
-        alloc,
-        e,
-        &env.namespace,
-        expr,
-        true,  /*allow_map*/
+        alloc, e, expr, true,  /*allow_map*/
         false, /*force_class_const*/
     ) {
         Ok(tv) => emit_static_collection(env, transform_to_collection, pos, tv),
@@ -1396,7 +1387,7 @@ fn is_struct_init<'a, 'arena>(
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
-            ast_constant_folder::fold_expr(&mut key, alloc, e, &env.namespace)
+            ast_constant_folder::fold_expr(&mut key, alloc, e)
                 .map_err(|e| unrecoverable(format!("{}", e)))?;
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
@@ -1450,7 +1441,7 @@ fn emit_struct_array<
                 )),
                 _ => {
                     let mut k = k.clone();
-                    ast_constant_folder::fold_expr(&mut k, alloc, e, &env.namespace)
+                    ast_constant_folder::fold_expr(&mut k, alloc, e)
                         .map_err(|e| unrecoverable(format!("{}", e)))?;
                     match k {
                         E(_, E_::String(s)) => Ok((
@@ -4425,15 +4416,12 @@ fn get_elem_member_key<'a, 'arena>(
                 instr::empty(alloc),
             )),
             // Special case for literal integer
-            E_::Int(s) => {
-                match ast_constant_folder::expr_to_typed_value(alloc, e, &env.namespace, elem_expr)
-                {
-                    Ok(TypedValue::Int(i)) => {
-                        Ok((MemberKey::EI(i, ReadOnlyOp::Any), instr::empty(alloc)))
-                    }
-                    _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
+            E_::Int(s) => match ast_constant_folder::expr_to_typed_value(alloc, e, elem_expr) {
+                Ok(TypedValue::Int(i)) => {
+                    Ok((MemberKey::EI(i, ReadOnlyOp::Any), instr::empty(alloc)))
                 }
-            }
+                _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
+            },
             // Special case for literal string
             E_::String(s) => {
                 // FIXME: This is not safe--string literals are binary strings.
@@ -6809,7 +6797,7 @@ pub fn emit_jmpnz<'a, 'arena>(
     let tast::Expr(pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(
-        match ast_constant_folder::expr_to_typed_value(alloc, e, &env.namespace, expr) {
+        match ast_constant_folder::expr_to_typed_value(alloc, e, expr) {
             Ok(tv) => {
                 if Into::<bool>::into(tv) {
                     EmitJmpResult {
@@ -6950,7 +6938,7 @@ pub fn emit_jmpz<'a, 'arena>(
     let tast::Expr(pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(
-        match ast_constant_folder::expr_to_typed_value(alloc, e, &env.namespace, expr) {
+        match ast_constant_folder::expr_to_typed_value(alloc, e, expr) {
             Ok(v) => {
                 let b: bool = v.into();
                 if b {

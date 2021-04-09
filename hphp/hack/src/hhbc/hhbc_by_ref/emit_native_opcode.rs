@@ -10,13 +10,12 @@ use hhbc_by_ref_emit_param as emit_param;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
-use oxidized::{aast, ast as tast, namespace_env, pos::Pos};
+use oxidized::{aast, ast as tast, pos::Pos};
 
 pub fn emit_body<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     scope: &Scope<'a>,
-    namespace: &namespace_env::Env,
     class_attrs: &[tast::UserAttribute],
     name: &tast::Sid,
     params: &[tast::FunParam],
@@ -28,15 +27,7 @@ pub fn emit_body<'a, 'arena>(
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
-    let params = emit_param::from_asts(
-        alloc,
-        emitter,
-        &mut tparams,
-        namespace,
-        false,
-        scope,
-        params,
-    );
+    let params = emit_param::from_asts(alloc, emitter, &mut tparams, false, scope, params);
     let return_type_info = emit_body::emit_return_type_info(alloc, tparams.as_slice(), false, ret);
 
     body_instrs.and_then(|body_instrs| {

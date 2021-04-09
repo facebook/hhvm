@@ -20,7 +20,6 @@ use oxidized::{
     aast_visitor::{self, AstParams, Node},
     ast as a,
     ast_defs::{Id, ParamKind},
-    namespace_env::Env as Namespace,
     pos::Pos,
 };
 
@@ -31,24 +30,13 @@ pub fn from_asts<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     tparams: &mut Vec<&str>,
-    namespace: &Namespace,
     generate_defaults: bool,
     scope: &Scope<'a>,
     ast_params: &[a::FunParam],
 ) -> Result<Vec<HhasParam<'arena>>> {
     ast_params
         .iter()
-        .map(|param| {
-            from_ast(
-                alloc,
-                emitter,
-                tparams,
-                namespace,
-                generate_defaults,
-                scope,
-                param,
-            )
-        })
+        .map(|param| from_ast(alloc, emitter, tparams, generate_defaults, scope, param))
         .collect::<Result<Vec<_>>>()
         .map(|params| {
             params
@@ -97,7 +85,6 @@ fn from_ast<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     tparams: &mut Vec<&str>,
-    namespace: &Namespace,
     generate_defaults: bool,
     scope: &Scope<'a>,
     param: &a::FunParam,
@@ -191,12 +178,7 @@ fn from_ast<'a, 'arena>(
         name: param.name.clone(),
         is_variadic: param.is_variadic,
         is_inout,
-        user_attributes: emit_attribute::from_asts(
-            alloc,
-            emitter,
-            namespace,
-            &param.user_attributes,
-        )?,
+        user_attributes: emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?,
         type_info,
         default_value,
     }))

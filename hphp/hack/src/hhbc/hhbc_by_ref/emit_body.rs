@@ -141,7 +141,6 @@ pub fn emit_body<'b, 'arena>(
     let params = make_params(
         alloc,
         emitter,
-        namespace.as_ref(),
         &mut tp_names,
         args.ast_params,
         &scope,
@@ -406,7 +405,6 @@ pub fn make_env<'a, 'arena>(
 fn make_params<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
-    namespace: &namespace_env::Env,
     tp_names: &mut Vec<&str>,
     ast_params: &[tast::FunParam],
     scope: &Scope<'a>,
@@ -417,7 +415,6 @@ fn make_params<'a, 'arena>(
         alloc,
         emitter,
         tp_names,
-        namespace,
         generate_defaults,
         scope,
         ast_params,

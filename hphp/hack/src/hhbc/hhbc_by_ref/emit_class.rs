@@ -228,7 +228,6 @@ fn from_ctx_constant(tc: &tast::ClassTypeconst) -> Result<HhasCtxConstant> {
 fn from_class_elt_classvars<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
-    namespace: &namespace_env::Env,
     ast_class: &'a tast::Class_,
     class_is_const: bool,
     tparams: &[&str],
@@ -251,7 +250,6 @@ fn from_class_elt_classvars<'a, 'arena>(
                 alloc,
                 emitter,
                 ast_class,
-                namespace,
                 tparams,
                 class_is_const,
                 emit_property::FromAstArgs {
@@ -548,8 +546,7 @@ pub fn emit_class<'a, 'arena>(
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");
 
-    let mut attributes =
-        emit_attribute::from_asts(alloc, emitter, namespace, &ast_class.user_attributes)?;
+    let mut attributes = emit_attribute::from_asts(alloc, emitter, &ast_class.user_attributes)?;
     if !is_closure {
         attributes.extend(emit_attribute::add_reified_attribute(&ast_class.tparams).into_iter());
         attributes.extend(
@@ -707,8 +704,7 @@ pub fn emit_class<'a, 'arena>(
         )?)
     }
     emitter.label_gen_mut().reset();
-    let mut properties =
-        from_class_elt_classvars(alloc, emitter, namespace, &ast_class, is_const, &tparams)?;
+    let mut properties = from_class_elt_classvars(alloc, emitter, &ast_class, is_const, &tparams)?;
     let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
@@ -856,7 +852,7 @@ pub fn emit_class<'a, 'arena>(
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(
-            alloc, emitter, namespace, ast_class, is_const,
+            alloc, emitter, ast_class, is_const,
         )?);
     }
     let info = emit_memoize_method::make_info(ast_class, name, &ast_class.methods)?;

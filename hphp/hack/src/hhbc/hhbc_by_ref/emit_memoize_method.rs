@@ -126,8 +126,7 @@ fn make_memoize_wrapper_method<'a, 'arena>(
             ScopeItem::Method(ast_scope::Method::new_ref(method)),
         ],
     };
-    let mut attributes =
-        emit_attribute::from_asts(alloc, emitter, &class.namespace, &method.user_attributes)?;
+    let mut attributes = emit_attribute::from_asts(alloc, emitter, &method.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(&method.tparams));
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
@@ -191,15 +190,8 @@ fn emit_memoize_wrapper_body<'a, 'arena>(
         args.flags.contains(Flags::IS_ASYNC),
         args.ret,
     )?;
-    let hhas_params = emit_param::from_asts(
-        alloc,
-        emitter,
-        &mut tparams,
-        args.namespace,
-        true,
-        args.scope,
-        args.params,
-    )?;
+    let hhas_params =
+        emit_param::from_asts(alloc, emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
     emit(emitter, env, hhas_params, return_type_info, args)

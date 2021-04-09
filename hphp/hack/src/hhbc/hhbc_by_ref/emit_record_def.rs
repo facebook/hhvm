@@ -13,7 +13,6 @@ use hhbc_by_ref_hhbc_id::record;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::Result;
 use oxidized::ast::*;
-use oxidized::namespace_env::Env as Namespace;
 
 fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
     match &tc.name {
@@ -32,13 +31,12 @@ fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
 fn emit_field<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena>,
-    namespace: &Namespace,
     field: &'a (Sid, Hint, Option<Expr>),
 ) -> Result<RecordField<'a, 'arena>> {
     let (Id(pos, name), hint, expr_opt) = field;
     let otv = expr_opt
         .as_ref()
-        .and_then(|e| constant_folder::expr_to_typed_value(alloc, emitter, namespace, e).ok());
+        .and_then(|e| constant_folder::expr_to_typed_value(alloc, emitter, e).ok());
     let ti = emit_type_hint::hint_to_type_info(
         alloc,
         &emit_type_hint::Kind::Property,
@@ -83,7 +81,7 @@ fn emit_record_def<'a, 'arena>(
         fields: rd
             .fields
             .iter()
-            .map(|f| emit_field(alloc, emitter, rd.namespace.as_ref(), &f))
+            .map(|f| emit_field(alloc, emitter, &f))
             .collect::<Result<Vec<_>>>()?,
         span: Span::from_pos(&rd.span),
     })

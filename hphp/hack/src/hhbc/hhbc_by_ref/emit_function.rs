@@ -38,7 +38,7 @@ pub fn emit_function<'a, 'arena>(
     );
 
     let mut attrs: Vec<HhasAttribute<'arena>> =
-        emit_attribute::from_asts(alloc, e, &f.namespace, &f.user_attributes)?;
+        emit_attribute::from_asts(alloc, e, &f.user_attributes)?;
     attrs.extend(emit_attribute::add_reified_attribute(&f.tparams));
     let memoized = attrs.iter().any(|a| ua::is_memoized(&a.name));
     flags.set(Flags::MEMOIZE_IMPL, memoized);

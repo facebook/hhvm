@@ -13,28 +13,22 @@ use hhbc_by_ref_instruction_sequence::Result;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
-use oxidized::{ast as a, namespace_env::Env as Namespace};
+use oxidized::ast as a;
 
 pub fn from_asts<'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
-    namespace: &Namespace,
     attrs: &[a::UserAttribute],
 ) -> Result<Vec<HhasAttribute<'arena>>> {
-    attrs
-        .iter()
-        .map(|attr| from_ast(alloc, e, namespace, attr))
-        .collect()
+    attrs.iter().map(|attr| from_ast(alloc, e, attr)).collect()
 }
 
 pub fn from_ast<'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
-    namespace: &Namespace,
     attr: &a::UserAttribute,
 ) -> Result<HhasAttribute<'arena>> {
     let arguments = ast_constant_folder::literals_from_exprs(
-        namespace,
         &mut attr.params.clone(),
         alloc,
         e,

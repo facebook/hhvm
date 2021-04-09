@@ -32,16 +32,14 @@ pub fn from_ast<'a, 'arena>(
     let alloc = env.arena;
     let (value, initializer_instrs, is_abstract) = match expr {
         None => (None, None, true),
-        Some(init) => {
-            match ast_constant_folder::expr_to_typed_value(alloc, emitter, &env.namespace, init) {
-                Ok(v) => (Some(v), None, false),
-                Err(_) => (
-                    Some(TypedValue::Uninit),
-                    Some(emit_expr::emit_expr(emitter, env, init)?),
-                    false,
-                ),
-            }
-        }
+        Some(init) => match ast_constant_folder::expr_to_typed_value(alloc, emitter, init) {
+            Ok(v) => (Some(v), None, false),
+            Err(_) => (
+                Some(TypedValue::Uninit),
+                Some(emit_expr::emit_expr(emitter, env, init)?),
+                false,
+            ),
+        },
     };
     Ok(HhasConstant {
         name: hhbc_id::r#const::Type::from_ast_name(alloc, id.name()),

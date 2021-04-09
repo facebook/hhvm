@@ -17,7 +17,7 @@ use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
-use oxidized::{aast_defs, ast as tast, ast_defs, doc_comment, namespace_env};
+use oxidized::{aast_defs, ast as tast, ast_defs, doc_comment};
 
 pub struct FromAstArgs<'ast> {
     pub user_attributes: &'ast [tast::UserAttribute],
@@ -35,14 +35,13 @@ pub fn from_ast<'ast, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     class: &'ast tast::Class_,
-    namespace: &namespace_env::Env,
     tparams: &[&str],
     class_is_const: bool,
     args: FromAstArgs,
 ) -> Result<HhasProperty<'arena>> {
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid: prop::Type<'arena> = prop::Type::from_ast_name(alloc, cv_name);
-    let attributes = emit_attribute::from_asts(alloc, emitter, namespace, args.user_attributes)?;
+    let attributes = emit_attribute::from_asts(alloc, emitter, args.user_attributes)?;
 
     let is_const =
         (!args.is_static && class_is_const) || attributes.iter().any(|a| a.name == ua::CONST);
@@ -108,7 +107,7 @@ pub fn from_ast<'ast, 'arena>(
             };
             let deep_init = !args.is_static
                 && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
-            match ast_constant_folder::expr_to_typed_value(alloc, emitter, &env.namespace, e) {
+            match ast_constant_folder::expr_to_typed_value(alloc, emitter, e) {
                 Ok(tv) if !(deep_init || is_collection_map) => {
                     (Some(tv), None, HhasPropertyFlags::empty())
                 }

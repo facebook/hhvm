@@ -16,7 +16,7 @@ fn emit_file_attributes<'arena>(
     e: &mut Emitter<'arena>,
     fa: &tast::FileAttribute,
 ) -> Result<Vec<HhasAttribute<'arena>>> {
-    from_asts(alloc, e, &fa.namespace, &fa.user_attributes[..])
+    from_asts(alloc, e, &fa.user_attributes[..])
 }
 
 pub fn emit_file_attributes_from_program<'arena>(

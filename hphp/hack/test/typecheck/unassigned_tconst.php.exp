@@ -1,5 +1,5 @@
-File "unassigned_tconst.php", line 4, characters 18-18:
-Encountered unexpected text `;`, was expecting a class element. (Parsing[1002])
+File "unassigned_tconst.php", line 4, characters 3-17:
+Encountered unexpected text `const type asd;`, was expecting a value for the type constant. (Parsing[1002])
 File "unassigned_tconst.php", line 4, characters 19-19:
 A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])
 File "unassigned_tconst.php", line 4, characters 14-16:

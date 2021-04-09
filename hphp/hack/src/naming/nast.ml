@@ -327,8 +327,8 @@ let ast_no_pos_or_docblock_mapper =
     method! on_class_const env ccs =
       super#on_class_const env { ccs with cc_doc_comment = None }
 
-    method! on_class_typeconst env tc =
-      super#on_class_typeconst env { tc with c_tconst_doc_comment = None }
+    method! on_class_typeconst_def env tc =
+      super#on_class_typeconst_def env { tc with c_tconst_doc_comment = None }
 
     (* Skip all blocks because we don't care about method bodies *)
     method! on_block _ _ = []
@@ -577,8 +577,8 @@ module Visitor_DEPRECATED = struct
 
       method on_afield : 'a -> afield -> 'a
 
-      method on_class_typeconst :
-        'a -> (Pos.t, func_body_ann, unit, unit) class_typeconst -> 'a
+      method on_class_typeconst_def :
+        'a -> (Pos.t, func_body_ann, unit, unit) class_typeconst_def -> 'a
 
       method on_class_c_const : 'a -> class_const -> 'a
 
@@ -1120,7 +1120,7 @@ module Visitor_DEPRECATED = struct
         let acc = List.fold_left c.c_uses ~f:this#on_hint ~init:acc in
         let acc = List.fold_left c.c_implements ~f:this#on_hint ~init:acc in
         let acc =
-          List.fold_left c.c_typeconsts ~f:this#on_class_typeconst ~init:acc
+          List.fold_left c.c_typeconsts ~f:this#on_class_typeconst_def ~init:acc
         in
         let acc =
           List.fold_left c.c_consts ~f:this#on_class_c_const ~init:acc
@@ -1131,24 +1131,28 @@ module Visitor_DEPRECATED = struct
         let acc = List.fold_left c.c_methods ~f:this#on_method_ ~init:acc in
         acc
 
-      method on_class_typeconst acc t =
+      method on_class_typeconst_def acc t =
         let acc = this#on_id acc t.c_tconst_name in
-        let acc =
-          match t.c_tconst_as_constraint with
-          | Some h -> this#on_hint acc h
-          | None -> acc
-        in
-        let acc =
-          match t.c_tconst_super_constraint with
-          | Some h -> this#on_hint acc h
-          | None -> acc
-        in
-        let acc =
-          match t.c_tconst_type with
-          | Some h -> this#on_hint acc h
-          | None -> acc
-        in
-        acc
+        match t.c_tconst_kind with
+        | TCAbstract
+            { c_atc_as_constraint; c_atc_super_constraint; c_atc_default } ->
+          let acc =
+            match c_atc_as_constraint with
+            | Some cstr -> this#on_hint acc cstr
+            | None -> acc
+          in
+          let acc =
+            match c_atc_super_constraint with
+            | Some cstr -> this#on_hint acc cstr
+            | None -> acc
+          in
+          (match c_atc_default with
+          | Some d -> this#on_hint acc d
+          | None -> acc)
+        | TCConcrete { c_tc_type } -> this#on_hint acc c_tc_type
+        | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
+          let acc = this#on_hint acc c_patc_constraint in
+          this#on_hint acc c_patc_type
 
       method on_class_c_const acc c_const =
         let acc =

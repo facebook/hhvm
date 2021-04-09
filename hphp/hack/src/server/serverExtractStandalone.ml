@@ -253,7 +253,7 @@ module Nast_helper : sig
     Provider_context.t ->
     string ->
     string ->
-    (Pos.t, Nast.func_body_ann, unit, unit) Aast.class_typeconst option
+    (Pos.t, Nast.func_body_ann, unit, unit) Aast.class_typeconst_def option
 
   val get_prop :
     Provider_context.t ->
@@ -2081,7 +2081,7 @@ end = struct
     val mk_const : Provider_context.t -> Nast.class_const -> t
 
     val mk_tyconst :
-      (Pos.t, Nast.func_body_ann, unit, unit) Aast.class_typeconst -> t
+      (Pos.t, Nast.func_body_ann, unit, unit) Aast.class_typeconst_def -> t
 
     val mk_method : bool -> Nast.method_ -> t
 
@@ -2169,27 +2169,27 @@ end = struct
     let mk_tyconst
         Aast.
           {
-            c_tconst_abstract;
+            c_tconst_kind;
             c_tconst_name = (pos, name);
-            c_tconst_type;
-            c_tconst_as_constraint;
             c_tconst_is_ctx;
             c_tconst_user_attributes;
             _;
           } =
-      let is_abstract =
+      let (is_abstract, type_, constraint_) =
         Aast.(
-          match c_tconst_abstract with
-          | TCAbstract _ -> true
-          | _ -> false)
+          match c_tconst_kind with
+          | TCAbstract { c_atc_as_constraint = c; _ } -> (true, None, c)
+          | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
+            (false, Some t, Some c)
+          | TCConcrete { c_tc_type = t } -> (false, Some t, None))
       in
       EltTypeConst
         {
           name;
           line = Pos.line pos;
           is_abstract;
-          type_ = c_tconst_type;
-          constraint_ = c_tconst_as_constraint;
+          type_;
+          constraint_;
           is_ctx = c_tconst_is_ctx;
           user_attrs = c_tconst_user_attributes;
         }

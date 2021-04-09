@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<14c433bb557dfc30f31982ae351890fa>>
+// @generated SignedSource<<f45540ea9b404a8fa1163c46a654a000>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3054,49 +3054,85 @@ impl CaType {
         }
     }
 }
-impl TypeconstAbstractKind {
-    pub fn mk_tcabstract(p0: Option<Hint>) -> Self {
-        TypeconstAbstractKind::TCAbstract(p0)
+impl ClassTypeconst {
+    pub fn mk_tcabstract(p0: ClassAbstractTypeconst) -> Self {
+        ClassTypeconst::TCAbstract(p0)
     }
-    pub fn mk_tcpartially_abstract() -> Self {
-        TypeconstAbstractKind::TCPartiallyAbstract
+    pub fn mk_tcconcrete(p0: ClassConcreteTypeconst) -> Self {
+        ClassTypeconst::TCConcrete(p0)
     }
-    pub fn mk_tcconcrete() -> Self {
-        TypeconstAbstractKind::TCConcrete
+    pub fn mk_tcpartially_abstract(p0: ClassPartiallyAbstractTypeconst) -> Self {
+        ClassTypeconst::TCPartiallyAbstract(p0)
     }
     pub fn is_tcabstract(&self) -> bool {
         match self {
-            TypeconstAbstractKind::TCAbstract(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_tcpartially_abstract(&self) -> bool {
-        match self {
-            TypeconstAbstractKind::TCPartiallyAbstract => true,
+            ClassTypeconst::TCAbstract(..) => true,
             _ => false,
         }
     }
     pub fn is_tcconcrete(&self) -> bool {
         match self {
-            TypeconstAbstractKind::TCConcrete => true,
+            ClassTypeconst::TCConcrete(..) => true,
             _ => false,
         }
     }
-    pub fn as_tcabstract(&self) -> Option<&Option<Hint>> {
+    pub fn is_tcpartially_abstract(&self) -> bool {
         match self {
-            TypeconstAbstractKind::TCAbstract(p0) => Some(p0),
+            ClassTypeconst::TCPartiallyAbstract(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_tcabstract(&self) -> Option<&ClassAbstractTypeconst> {
+        match self {
+            ClassTypeconst::TCAbstract(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_tcabstract_mut(&mut self) -> Option<&mut Option<Hint>> {
+    pub fn as_tcconcrete(&self) -> Option<&ClassConcreteTypeconst> {
         match self {
-            TypeconstAbstractKind::TCAbstract(p0) => Some(p0),
+            ClassTypeconst::TCConcrete(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_tcabstract_into(self) -> Option<Option<Hint>> {
+    pub fn as_tcpartially_abstract(&self) -> Option<&ClassPartiallyAbstractTypeconst> {
         match self {
-            TypeconstAbstractKind::TCAbstract(p0) => Some(p0),
+            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcabstract_mut(&mut self) -> Option<&mut ClassAbstractTypeconst> {
+        match self {
+            ClassTypeconst::TCAbstract(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcconcrete_mut(&mut self) -> Option<&mut ClassConcreteTypeconst> {
+        match self {
+            ClassTypeconst::TCConcrete(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcpartially_abstract_mut(&mut self) -> Option<&mut ClassPartiallyAbstractTypeconst> {
+        match self {
+            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcabstract_into(self) -> Option<ClassAbstractTypeconst> {
+        match self {
+            ClassTypeconst::TCAbstract(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcconcrete_into(self) -> Option<ClassConcreteTypeconst> {
+        match self {
+            ClassTypeconst::TCConcrete(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tcpartially_abstract_into(self) -> Option<ClassPartiallyAbstractTypeconst> {
+        match self {
+            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
             _ => None,
         }
     }

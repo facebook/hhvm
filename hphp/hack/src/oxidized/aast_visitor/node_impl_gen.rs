@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d53c37157f2c47a5760bf9d1207409a2>>
+// @generated SignedSource<<e7e1b649b2948e086d5a6f6bad370859>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -212,6 +212,25 @@ impl<P: Params> Node<P> for Catch<P::Ex, P::Fb, P::En, P::Hi> {
         Ok(())
     }
 }
+impl<P: Params> Node<P> for ClassAbstractTypeconst {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_abstract_typeconst(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.as_constraint.accept(c, v)?;
+        self.super_constraint.accept(c, v)?;
+        self.default.accept(c, v)?;
+        Ok(())
+    }
+}
 impl<P: Params> Node<P> for ClassAttr<P::Ex, P::Fb, P::En, P::Hi> {
     fn accept<'node>(
         &'node self,
@@ -235,6 +254,23 @@ impl<P: Params> Node<P> for ClassAttr<P::Ex, P::Fb, P::En, P::Hi> {
                 Ok(())
             }
         }
+    }
+}
+impl<P: Params> Node<P> for ClassConcreteTypeconst {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_concrete_typeconst(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.c_tc_type.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> Node<P> for ClassConst<P::Ex, P::Fb, P::En, P::Hi> {
@@ -350,7 +386,25 @@ impl<P: Params> Node<P> for ClassKind {
         }
     }
 }
-impl<P: Params> Node<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {
+impl<P: Params> Node<P> for ClassPartiallyAbstractTypeconst {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_partially_abstract_typeconst(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.constraint.accept(c, v)?;
+        self.type_.accept(c, v)?;
+        Ok(())
+    }
+}
+impl<P: Params> Node<P> for ClassTypeconst {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -363,12 +417,38 @@ impl<P: Params> Node<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
-        self.abstract_.accept(c, v)?;
-        self.name.accept(c, v)?;
-        self.as_constraint.accept(c, v)?;
-        self.super_constraint.accept(c, v)?;
-        self.type_.accept(c, v)?;
+        match self {
+            ClassTypeconst::TCAbstract(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            ClassTypeconst::TCConcrete(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            ClassTypeconst::TCPartiallyAbstract(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+        }
+    }
+}
+impl<P: Params> Node<P> for ClassTypeconstDef<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_typeconst_def(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
         self.user_attributes.accept(c, v)?;
+        self.name.accept(c, v)?;
+        self.kind.accept(c, v)?;
         self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         self.is_ctx.accept(c, v)?;
@@ -1875,29 +1955,6 @@ impl<P: Params> Node<P> for TypeHint<P::Hi> {
         v.visit_hi(c, &self.0)?;
         self.1.accept(c, v)?;
         Ok(())
-    }
-}
-impl<P: Params> Node<P> for TypeconstAbstractKind {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_typeconst_abstract_kind(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            TypeconstAbstractKind::TCAbstract(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            TypeconstAbstractKind::TCPartiallyAbstract => Ok(()),
-            TypeconstAbstractKind::TCConcrete => Ok(()),
-        }
     }
 }
 impl<P: Params> Node<P> for Typedef<P::Ex, P::Fb, P::En, P::Hi> {

@@ -22,9 +22,3 @@ Unable to satisfy constraint on this type constant (Typing[4110])
   Expected `nothing`
   File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-33:
   But got `((HH\Capabilities\Rx & HH\Capabilities\WriteProperty))`
-File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 13-13:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 22-29:
-  Expected `nothing`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-33:
-  But got `((HH\Capabilities\Rx & HH\Capabilities\WriteProperty))`

@@ -1,8 +1,4 @@
-File "ctx_const_both_bounds.php", line 4, characters 15-38:
+File "ctx_const_both_bounds.php", line 4, characters 24-47:
 Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx_const_both_bounds.php", line 8, characters 15-47:
+File "ctx_const_both_bounds.php", line 8, characters 24-56:
 Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx_const_both_bounds.php", line 4, characters 13-13:
-This type constant is not declared as abstract, it must have an assigned type (NastCheck[3026])
-File "ctx_const_both_bounds.php", line 8, characters 13-13:
-This type constant is not declared as abstract, it must have an assigned type (NastCheck[3026])

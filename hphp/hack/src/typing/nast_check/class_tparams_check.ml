@@ -42,7 +42,18 @@ let handler =
       let state = { class_tparams = c.c_tparams } in
       let on_hint = visitor#on_hint (env, state) in
       List.iter c.c_typeconsts (fun t ->
-          Option.iter t.c_tconst_type on_hint;
-          Option.iter t.c_tconst_super_constraint on_hint;
-          Option.iter t.c_tconst_as_constraint on_hint)
+          match t.c_tconst_kind with
+          | TCAbstract
+              {
+                c_atc_as_constraint = a;
+                c_atc_super_constraint = s;
+                c_atc_default = d;
+              } ->
+            Option.iter a on_hint;
+            Option.iter s on_hint;
+            Option.iter d on_hint
+          | TCConcrete { c_tc_type = t } -> on_hint t
+          | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
+            on_hint c;
+            on_hint t)
   end

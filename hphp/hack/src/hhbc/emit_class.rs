@@ -147,16 +147,19 @@ fn from_includes(includes: &Vec<tast::Hint>) -> Vec<hhbc_id::class::Type> {
 
 fn from_type_constant<'a>(
     emitter: &mut Emitter,
-    tc: &'a tast::ClassTypeconst,
+    tc: &'a tast::ClassTypeconstDef,
 ) -> Result<HhasTypeConstant> {
-    use tast::TypeconstAbstractKind::*;
+    use tast::ClassTypeconst::*;
     let name = tc.name.1.to_string();
 
-    let initializer = match (&tc.abstract_, &tc.type_) {
-        (TCAbstract(None), _) | (TCPartiallyAbstract, None) | (TCConcrete, None) => None,
-        (TCAbstract(Some(init)), _)
-        | (TCPartiallyAbstract, Some(init))
-        | (TCConcrete, Some(init)) => {
+    let initializer = match &tc.kind {
+        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => None,
+        TCAbstract(tast::ClassAbstractTypeconst {
+            default: Some(init),
+            ..
+        })
+        | TCPartiallyAbstract(tast::ClassPartiallyAbstractTypeconst { type_: init, .. })
+        | TCConcrete(tast::ClassConcreteTypeconst { c_tc_type: init }) => {
             // TODO: Deal with the constraint
             // Type constants do not take type vars hence tparams:[]
             Some(emit_type_constant::hint_to_type_constant(
@@ -170,8 +173,8 @@ fn from_type_constant<'a>(
         }
     };
 
-    let is_abstract = match &tc.abstract_ {
-        TCConcrete => false,
+    let is_abstract = match &tc.kind {
+        TCConcrete(_) => false,
         _ => true,
     };
 
@@ -182,11 +185,17 @@ fn from_type_constant<'a>(
     })
 }
 
-fn from_ctx_constant(tc: &tast::ClassTypeconst) -> Result<HhasCtxConstant> {
-    use tast::TypeconstAbstractKind::*;
+fn from_ctx_constant(tc: &tast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
+    use tast::ClassTypeconst::*;
     let name = tc.name.1.to_string();
-    let coeffects = match (&tc.abstract_, &tc.type_) {
-        (TCAbstract(Some(hint)), _) | (_, Some(hint)) => {
+    let coeffects = match &tc.kind {
+        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => vec![],
+        TCPartiallyAbstract(_) => vec![], // does not parse
+        TCAbstract(tast::ClassAbstractTypeconst {
+            default: Some(hint),
+            ..
+        })
+        | TCConcrete(tast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let result = HhasCoeffects::from_ctx_constant(hint);
             if result.is_empty() {
                 vec![hhas_coeffects::Ctx::Pure]
@@ -194,10 +203,9 @@ fn from_ctx_constant(tc: &tast::ClassTypeconst) -> Result<HhasCtxConstant> {
                 result
             }
         }
-        (_, None) => vec![],
     };
-    let is_abstract = match &tc.abstract_ {
-        TCConcrete => false,
+    let is_abstract = match &tc.kind {
+        TCConcrete(_) => false,
         _ => true,
     };
     Ok(HhasCtxConstant {

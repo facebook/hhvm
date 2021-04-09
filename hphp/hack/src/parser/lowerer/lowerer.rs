@@ -4222,6 +4222,7 @@ where
                 Ok(class.consts.append(&mut class_consts))
             }
             TypeConstDeclaration(c) => {
+                use ast::ClassTypeconst::{TCAbstract, TCConcrete, TCPartiallyAbstract};
                 if !c.type_parameters.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
                 }
@@ -4234,33 +4235,32 @@ where
                     Self::mp_optional(Self::p_tconstraint_ty, &c.type_constraint, env)?;
                 let span = Self::p_pos(node, env);
                 let has_abstract = kinds.has(modifier::ABSTRACT);
-                let (type_, abstract_kind) = match (has_abstract, &as_constraint, &type__) {
-                    (false, _, None) => {
-                        Self::raise_hh_error(
-                            env,
-                            NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                        );
-                        (
-                            as_constraint.clone(),
-                            ast::TypeconstAbstractKind::TCConcrete,
-                        )
+                let kind = if has_abstract {
+                    TCAbstract(ast::ClassAbstractTypeconst {
+                        as_constraint,
+                        super_constraint: None,
+                        default: type__,
+                    })
+                } else if let Some(type_) = type__ {
+                    match as_constraint {
+                        None => TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ }),
+                        Some(constraint) => {
+                            TCPartiallyAbstract(ast::ClassPartiallyAbstractTypeconst {
+                                constraint,
+                                type_,
+                            })
+                        }
                     }
-                    (false, None, Some(_)) => (type__, ast::TypeconstAbstractKind::TCConcrete),
-                    (false, Some(_), Some(_)) => {
-                        (type__, ast::TypeconstAbstractKind::TCPartiallyAbstract)
-                    }
-                    (true, _, None) => (
-                        type__.clone(),
-                        ast::TypeconstAbstractKind::TCAbstract(type__),
-                    ),
-                    (true, _, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(type__)),
+                } else {
+                    Self::raise_hh_error(
+                        env,
+                        NastCheck::not_abstract_without_typeconst(name.0.clone()),
+                    );
+                    Self::missing_syntax("value for the type constant", node, env)?
                 };
-                Ok(class.typeconsts.push(ast::ClassTypeconst {
-                    abstract_: abstract_kind,
+                Ok(class.typeconsts.push(ast::ClassTypeconstDef {
                     name,
-                    as_constraint,
-                    super_constraint: None,
-                    type_,
+                    kind,
                     user_attributes,
                     span,
                     doc_comment: doc_comment_opt,
@@ -4268,6 +4268,7 @@ where
                 }))
             }
             ContextConstDeclaration(c) => {
+                use ast::ClassTypeconst::{TCAbstract, TCConcrete};
                 if !c.type_parameters.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
                 }
@@ -4301,29 +4302,28 @@ where
                 let span = Self::p_pos(node, env);
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
                 let has_abstract = kinds.has(modifier::ABSTRACT);
-                let (context, abstract_kind) = match (has_abstract, &context) {
-                    (false, None) => {
+                let (super_constraint, as_constraint) =
+                    Self::p_ctx_constraints(&c.constraint, env)?;
+                let kind = if has_abstract {
+                    TCAbstract(ast::ClassAbstractTypeconst {
+                        as_constraint,
+                        super_constraint,
+                        default: context,
+                    })
+                } else {
+                    if let Some(c_tc_type) = context {
+                        TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
+                    } else {
                         Self::raise_hh_error(
                             env,
                             NastCheck::not_abstract_without_typeconst(name.0.clone()),
                         );
-                        (None, ast::TypeconstAbstractKind::TCConcrete)
+                        Self::missing_syntax("value for the context constant", node, env)?
                     }
-                    (false, Some(_)) => (context, ast::TypeconstAbstractKind::TCConcrete),
-                    (true, None) => (
-                        context.clone(),
-                        ast::TypeconstAbstractKind::TCAbstract(context),
-                    ),
-                    (true, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(context)),
                 };
-                let (super_constraint, as_constraint) =
-                    Self::p_ctx_constraints(&c.constraint, env)?;
-                Ok(class.typeconsts.push(ast::ClassTypeconst {
-                    abstract_: abstract_kind,
+                Ok(class.typeconsts.push(ast::ClassTypeconstDef {
                     name,
-                    as_constraint,
-                    super_constraint,
-                    type_: context,
+                    kind,
                     user_attributes: vec![],
                     span,
                     doc_comment: doc_comment_opt,

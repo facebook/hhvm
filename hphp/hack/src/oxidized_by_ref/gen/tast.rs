@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e318772c018495cc81a6f4374d61cc4>>
+// @generated SignedSource<<6819d14613038a6c71d7f60c010d326e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -98,8 +98,8 @@ pub type Targ<'a> = aast::Targ<'a, &'a Ty<'a>>;
 pub type ClassGetExpr<'a> =
     aast::ClassGetExpr<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;
 
-pub type ClassTypeconst<'a> =
-    aast::ClassTypeconst<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassTypeconstDef<'a> =
+    aast::ClassTypeconstDef<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;
 
 pub type UserAttribute<'a> =
     aast::UserAttribute<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;

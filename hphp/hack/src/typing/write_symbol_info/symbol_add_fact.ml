@@ -233,17 +233,21 @@ let add_type_const_defn_fact ctx source_map tc decl_id progress =
   let base_fields =
     [
       ("declaration", build_id_json decl_id);
-      ("kind", build_type_const_kind_json tc.c_tconst_abstract);
+      ("kind", build_type_const_kind_json tc.c_tconst_kind);
       ( "attributes",
         build_attributes_json_nested source_map tc.c_tconst_user_attributes );
     ]
   in
   let json_fields =
-    match tc.c_tconst_type with
-    | None -> base_fields
-    | Some h ->
+    (* TODO(typeconsts) should the default of an abstract type constant be used 
+     * as a value here *)
+    match tc.c_tconst_kind with
+    | TCConcrete { c_tc_type = h }
+    | TCPartiallyAbstract { c_patc_type = h; _ }
+    | TCAbstract { c_atc_default = Some h; _ } ->
       let ty = get_type_from_hint ctx h in
       ("type", build_type_json_nested ty) :: base_fields
+    | TCAbstract { c_atc_default = None; _ } -> base_fields
   in
   add_fact TypeConstDefinition (JSON_Object json_fields) progress
 

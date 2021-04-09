@@ -117,7 +117,7 @@ let summarize_typeconst class_name t =
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
   let modifiers =
-    match t.c_tconst_abstract with
+    match t.c_tconst_kind with
     | TCAbstract _ -> [Abstract]
     | _ -> []
   in

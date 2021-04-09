@@ -287,9 +287,15 @@ let enum env e =
 let const env class_const = maybe hint env class_const.Aast.cc_type
 
 let typeconst (env, _) tconst =
-  maybe hint env tconst.c_tconst_type;
-  maybe hint env tconst.c_tconst_as_constraint;
-  maybe hint env tconst.c_tconst_super_constraint
+  match tconst.c_tconst_kind with
+  | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default } ->
+    maybe hint env c_atc_as_constraint;
+    maybe hint env c_atc_super_constraint;
+    maybe hint env c_atc_default
+  | TCConcrete { c_tc_type } -> hint env c_tc_type
+  | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
+    hint env c_patc_constraint;
+    hint env c_patc_type
 
 let class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
 

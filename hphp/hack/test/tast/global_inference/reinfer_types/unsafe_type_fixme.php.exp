@@ -35,11 +35,9 @@
       c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
-      [{ c_tconst_abstract = TCConcrete; c_tconst_name = ([3:14-26], "MISSING_TYPE"); 
-         c_tconst_as_constraint = None; c_tconst_super_constraint = None; 
-         c_tconst_type = (Some ([3:29-49], (Happly (([3:29-49], "\\UNSAFE_TYPE_HH_FIXME"), [])))); 
-         c_tconst_user_attributes = []; c_tconst_span = [3:3-50]; c_tconst_doc_comment = None; 
-         c_tconst_is_ctx = false }
+      [{ c_tconst_user_attributes = []; c_tconst_name = ([3:14-26], "MISSING_TYPE"); 
+         c_tconst_kind = (TCConcrete { c_tc_type = ([3:29-49], (Happly (([3:29-49], "\\UNSAFE_TYPE_HH_FIXME"), []))) }); 
+         c_tconst_span = [3:3-50]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];
       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
       c_xhp_attrs = [];

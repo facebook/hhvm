@@ -90,12 +90,6 @@ let class_const env (cc : Nast.class_const) =
       scc_refs;
     }
 
-let typeconst_abstract_kind env = function
-  | Aast.TCAbstract default ->
-    TCAbstract (Option.map default (Decl_hint.hint env))
-  | Aast.TCPartiallyAbstract -> TCPartiallyAbstract
-  | Aast.TCConcrete -> TCConcrete
-
 let typeconst env c tc =
   match c.c_kind with
   | Ast_defs.Cenum -> None
@@ -103,11 +97,22 @@ let typeconst env c tc =
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
   | Ast_defs.Cnormal ->
-    let (as_constraint, super_constraint) =
-      ( Option.map tc.c_tconst_as_constraint (Decl_hint.hint env),
-        Option.map tc.c_tconst_super_constraint (Decl_hint.hint env) )
+    let (abstract, as_constraint, super_constraint, ty) =
+      match tc.c_tconst_kind with
+      | Aast.TCAbstract
+          { c_atc_as_constraint; c_atc_super_constraint; c_atc_default } ->
+        ( TCAbstract (Option.map ~f:(Decl_hint.hint env) c_atc_default),
+          Option.map ~f:(Decl_hint.hint env) c_atc_as_constraint,
+          Option.map ~f:(Decl_hint.hint env) c_atc_super_constraint,
+          None )
+      | Aast.TCConcrete { c_tc_type } ->
+        (TCConcrete, None, None, Some (Decl_hint.hint env c_tc_type))
+      | Aast.TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
+        ( TCPartiallyAbstract,
+          Some (Decl_hint.hint env c_patc_constraint),
+          None,
+          Some (Decl_hint.hint env c_patc_type) )
     in
-    let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
     let attributes = tc.c_tconst_user_attributes in
     let enforceable =
       match Attrs.find SN.UserAttributes.uaEnforceable attributes with
@@ -121,7 +126,7 @@ let typeconst env c tc =
     in
     Some
       {
-        stc_abstract = typeconst_abstract_kind env tc.c_tconst_abstract;
+        stc_abstract = abstract;
         stc_name = Decl_env.make_decl_posed env tc.c_tconst_name;
         stc_as_constraint = as_constraint;
         stc_super_constraint = super_constraint;

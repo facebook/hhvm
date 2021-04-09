@@ -37,12 +37,10 @@ let check_interface c =
 
   (* make sure interfaces do not contain partially abstract type constants *)
   List.iter c.c_typeconsts (fun tc ->
-      if
-        ( Option.is_some tc.c_tconst_as_constraint
-        || Option.is_some tc.c_tconst_super_constraint )
-        && Option.is_some tc.c_tconst_type
-      then
-        Errors.interface_with_partial_typeconst (fst tc.c_tconst_name));
+      match tc.c_tconst_kind with
+      | TCPartiallyAbstract _ ->
+        Errors.interface_with_partial_typeconst (fst tc.c_tconst_name)
+      | _ -> ());
 
   (* make sure that interfaces only have empty public methods *)
   List.iter ~f:enforce_no_body c.c_methods

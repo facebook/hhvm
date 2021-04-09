@@ -1041,11 +1041,8 @@ let typeconst_def
     cls
     env
     {
-      c_tconst_abstract;
       c_tconst_name = (pos, _) as id;
-      c_tconst_as_constraint;
-      c_tconst_super_constraint;
-      c_tconst_type = hint;
+      c_tconst_kind;
       c_tconst_user_attributes;
       c_tconst_span;
       c_tconst_doc_comment;
@@ -1053,34 +1050,85 @@ let typeconst_def
     } =
   if Ast_defs.is_c_enum cls.c_kind then
     Errors.cannot_declare_constant `enum pos cls.c_name;
-  let (env, cstr) =
-    opt
-      (Phase.localize_hint_with_self ~ignore_errors:false ?report_cycle:None)
-      env
-      c_tconst_as_constraint
-  in
-  let (env, ty) =
-    match hint with
-    | None -> (env, None)
-    | Some hint ->
-      (* We want to report cycles through the definition *)
-      let name = snd cls.c_name ^ "::" ^ snd id in
+
+  let name = snd cls.c_name ^ "::" ^ snd id in
+  (* Check constraints and report cycles through the definition *)
+  let env =
+    match c_tconst_kind with
+    | TCAbstract
+        { c_atc_as_constraint; c_atc_super_constraint; c_atc_default = Some ty }
+      ->
       let (env, ty) =
         Phase.localize_hint_with_self
-          env
           ~ignore_errors:false
           ~report_cycle:(pos, name)
-          hint
+          env
+          ty
       in
-      (env, Some ty)
+      let env =
+        match c_atc_as_constraint with
+        | Some as_ ->
+          let (env, as_) =
+            Phase.localize_hint_with_self ~ignore_errors:false env as_
+          in
+          Type.sub_type
+            pos
+            Reason.URtypeconst_cstr
+            env
+            ty
+            as_
+            Errors.unify_error
+        | None -> env
+      in
+      let env =
+        match c_atc_super_constraint with
+        | Some super ->
+          let (env, super) =
+            Phase.localize_hint_with_self ~ignore_errors:false env super
+          in
+          Type.sub_type
+            pos
+            Reason.URtypeconst_cstr
+            env
+            super
+            ty
+            Errors.unify_error
+        | None -> env
+      in
+      env
+    | TCPartiallyAbstract { c_patc_constraint = cstr; c_patc_type = ty } ->
+      let (env, cstr) =
+        Phase.localize_hint_with_self ~ignore_errors:false env cstr
+      in
+      let (env, ty) =
+        Phase.localize_hint_with_self
+          ~ignore_errors:false
+          ~report_cycle:(pos, name)
+          env
+          ty
+      in
+      Type.sub_type pos Reason.URtypeconst_cstr env ty cstr Errors.unify_error
+    | TCConcrete { c_tc_type = ty } ->
+      let (env, _ty) =
+        Phase.localize_hint_with_self
+          ~ignore_errors:false
+          ~report_cycle:(pos, name)
+          env
+          ty
+      in
+      env
+    | _ -> env
   in
-  let check env t c =
-    Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
-  in
-  let env = Option.value ~default:env @@ Option.map2 ty cstr ~f:(check env) in
+
+  (* TODO(typeconsts): should this check be happening for defaults
+   * Does this belong here at all? *)
   let env =
-    match hint with
-    | Some (pos, Hshape { nsi_field_map; _ }) ->
+    match c_tconst_kind with
+    | TCConcrete { c_tc_type = (pos, Hshape { nsi_field_map; _ }) }
+    | TCPartiallyAbstract
+        { c_patc_type = (pos, Hshape { nsi_field_map; _ }); _ }
+    | TCAbstract { c_atc_default = Some (pos, Hshape { nsi_field_map; _ }); _ }
+      ->
       let get_name sfi = sfi.sfi_name in
       Typing.check_shape_keys_validity
         env
@@ -1088,6 +1136,7 @@ let typeconst_def
         (List.map ~f:get_name nsi_field_map)
     | _ -> env
   in
+
   let env =
     Typing.attributes_check_def
       env
@@ -1099,11 +1148,8 @@ let typeconst_def
   in
   ( env,
     {
-      Aast.c_tconst_abstract;
       Aast.c_tconst_name = id;
-      Aast.c_tconst_as_constraint;
-      Aast.c_tconst_super_constraint;
-      Aast.c_tconst_type = hint;
+      Aast.c_tconst_kind;
       Aast.c_tconst_user_attributes = user_attributes;
       Aast.c_tconst_span;
       Aast.c_tconst_doc_comment;

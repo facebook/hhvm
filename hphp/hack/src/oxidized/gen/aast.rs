@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<97cc7387fb0257473e0c438ad52ea200>>
+// @generated SignedSource<<ce64aac6936468a72600d69c5d37bf64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1300,7 +1300,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub implements_dynamic: bool,
     pub where_constraints: Vec<WhereConstraintHint>,
     pub consts: Vec<ClassConst<Ex, Fb, En, Hi>>,
-    pub typeconsts: Vec<ClassTypeconst<Ex, Fb, En, Hi>>,
+    pub typeconsts: Vec<ClassTypeconstDef<Ex, Fb, En, Hi>>,
     pub vars: Vec<ClassVar<Ex, Fb, En, Hi>>,
     pub methods: Vec<Method_<Ex, Fb, En, Hi>>,
     pub attributes: Vec<ClassAttr<Ex, Fb, En, Hi>>,
@@ -1458,17 +1458,12 @@ pub struct ClassConst<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum TypeconstAbstractKind {
-    TCAbstract(Option<Hint>),
-    TCPartiallyAbstract,
-    TCConcrete,
+pub struct ClassAbstractTypeconst {
+    pub as_constraint: Option<Hint>,
+    pub super_constraint: Option<Hint>,
+    pub default: Option<Hint>,
 }
 
-/// This represents a type const definition. If a type const is abstract then
-/// then the type hint acts as a constraint. Any concrete definition of the
-/// type const must satisfy the constraint.
-///
-/// If the type const is not abstract then a type must be specified.
 #[derive(
     Clone,
     Debug,
@@ -1483,13 +1478,67 @@ pub enum TypeconstAbstractKind {
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassTypeconst<Ex, Fb, En, Hi> {
-    pub abstract_: TypeconstAbstractKind,
-    pub name: Sid,
-    pub as_constraint: Option<Hint>,
-    pub super_constraint: Option<Hint>,
-    pub type_: Option<Hint>,
+pub struct ClassConcreteTypeconst {
+    pub c_tc_type: Hint,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ClassPartiallyAbstractTypeconst {
+    pub constraint: Hint,
+    pub type_: Hint,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ClassTypeconst {
+    TCAbstract(ClassAbstractTypeconst),
+    TCConcrete(ClassConcreteTypeconst),
+    TCPartiallyAbstract(ClassPartiallyAbstractTypeconst),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ClassTypeconstDef<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub name: Sid,
+    pub kind: ClassTypeconst,
     pub span: Pos,
     pub doc_comment: Option<DocComment>,
     pub is_ctx: bool,

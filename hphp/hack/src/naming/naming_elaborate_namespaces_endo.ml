@@ -132,11 +132,11 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
-    method! on_class_typeconst env tc =
+    method! on_class_typeconst_def env tc =
       if tc.c_tconst_is_ctx then
-        super#on_class_typeconst { env with namespace = contexts_ns } tc
+        super#on_class_typeconst_def { env with namespace = contexts_ns } tc
       else
-        super#on_class_typeconst env tc
+        super#on_class_typeconst_def env tc
 
     method! on_typedef env td =
       let env = { env with namespace = td.t_namespace } in

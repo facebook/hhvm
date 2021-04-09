@@ -66,8 +66,8 @@ pub type ClassId<A> =
     aast::ClassId<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type ClassId_<A> =
     aast::ClassId_<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type ClassTypeconst<A> =
-    aast::ClassTypeconst<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
+pub type ClassTypeconstDef<A> =
+    aast::ClassTypeconstDef<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type ClassVar<A> =
     aast::ClassVar<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type CollectionTarg<A> = aast::CollectionTarg<<A as Annot>::Hi>;

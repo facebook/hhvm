@@ -6,16 +6,12 @@
       c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
-      [{ c_tconst_abstract = TCConcrete; c_tconst_name = ([4:13-14], "C"); 
-         c_tconst_as_constraint = None; c_tconst_super_constraint = None; 
-         c_tconst_type = (Some ([4:17-21], (Hintersection [([4:18-20], (Happly (([4:18-20], "\\HH\\Contexts\\io"), [])))]))); 
-         c_tconst_user_attributes = []; c_tconst_span = [4:3-22]; c_tconst_doc_comment = None; 
-         c_tconst_is_ctx = true };
-        { c_tconst_abstract = TCConcrete; c_tconst_name = ([5:14-16], "C1"); 
-          c_tconst_as_constraint = None; c_tconst_super_constraint = None; 
-          c_tconst_type = (Some ([5:19-21], (Happly (([5:19-21], "\\IO"), [])))); 
-          c_tconst_user_attributes = []; c_tconst_span = [5:3-22]; c_tconst_doc_comment = None; 
-          c_tconst_is_ctx = false }
+      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:13-14], "C");
+         c_tconst_kind = (TCConcrete { c_tc_type = ([4:17-21], (Hintersection [([4:18-20], (Happly (([4:18-20], "\\HH\\Contexts\\io"), [])))])) }); 
+         c_tconst_span = [4:3-22]; c_tconst_doc_comment = None; c_tconst_is_ctx = true };
+        { c_tconst_user_attributes = []; c_tconst_name = ([5:14-16], "C1"); 
+          c_tconst_kind = (TCConcrete { c_tc_type = ([5:19-21], (Happly (([5:19-21], "\\IO"), []))) }); 
+          c_tconst_span = [5:3-22]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];
       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
       c_xhp_attrs = [];

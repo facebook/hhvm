@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10061290199b6166e8b060da5133fc51>>
+// @generated SignedSource<<50b2207427075333e77cf71e5f770019>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -137,6 +137,28 @@ impl<'a> Node<'a> for Catch<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAn
         }
     }
 }
+impl<'a> Node<'a> for ClassAbstractTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_abstract_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassAbstractTypeconst {
+                as_constraint: ref __binding_0,
+                super_constraint: ref __binding_1,
+                default: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
 impl<'a> Node<'a> for ClassAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_attr(self)
@@ -145,6 +167,18 @@ impl<'a> Node<'a> for ClassAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBo
         match self {
             ClassAttr::CAName(ref __binding_0) => __binding_0.accept(v),
             ClassAttr::CAField(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConcreteTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_concrete_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConcreteTypeconst {
+                c_tc_type: ref __binding_0,
+            } => __binding_0.accept(v),
         }
     }
 }
@@ -232,24 +266,51 @@ impl<'a> Node<'a> for ClassKind {
         }
     }
 }
-impl<'a> Node<'a>
-    for ClassTypeconst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for ClassPartiallyAbstractTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_partially_abstract_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassPartiallyAbstractTypeconst {
+                constraint: ref __binding_0,
+                type_: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ClassTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_typeconst(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassTypeconst {
-                abstract_: ref __binding_0,
+            ClassTypeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeconst::TCPartiallyAbstract(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a>
+    for ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
+{
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_typeconst_def(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassTypeconstDef {
+                user_attributes: ref __binding_0,
                 name: ref __binding_1,
-                as_constraint: ref __binding_2,
-                super_constraint: ref __binding_3,
-                type_: ref __binding_4,
-                user_attributes: ref __binding_5,
-                span: ref __binding_6,
-                doc_comment: ref __binding_7,
-                is_ctx: ref __binding_8,
+                kind: ref __binding_2,
+                span: ref __binding_3,
+                doc_comment: ref __binding_4,
+                is_ctx: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -266,16 +327,7 @@ impl<'a> Node<'a>
                 {
                     __binding_4.accept(v)
                 }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                {
-                    __binding_7.accept(v)
-                }
-                { __binding_8.accept(v) }
+                { __binding_5.accept(v) }
             }
         }
     }
@@ -1583,18 +1635,6 @@ impl<'a> Node<'a> for TypeHint<'a, ()> {
                 }
                 { __binding_1.accept(v) }
             }
-        }
-    }
-}
-impl<'a> Node<'a> for TypeconstAbstractKind<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_typeconst_abstract_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            TypeconstAbstractKind::TCAbstract(ref __binding_0) => __binding_0.accept(v),
-            TypeconstAbstractKind::TCPartiallyAbstract => {}
-            TypeconstAbstractKind::TCConcrete => {}
         }
     }
 }

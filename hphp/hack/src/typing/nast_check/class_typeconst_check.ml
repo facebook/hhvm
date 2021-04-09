@@ -11,6 +11,7 @@ open Hh_prelude
 open Aast
 open Nast_check_env
 
+(* TODO: delete this check *)
 let error_if_abstract_type_constant_with_default env typeconst =
   if
     not
@@ -18,8 +19,8 @@ let error_if_abstract_type_constant_with_default env typeconst =
          (get_tcopt env)
          TypecheckerOptions.experimental_abstract_type_const_with_default)
   then
-    match typeconst.c_tconst_abstract with
-    | Aast.TCAbstract (Some _) ->
+    match typeconst.c_tconst_kind with
+    | Aast.TCAbstract { c_atc_default = Some _; _ } ->
       let (pos, _) = typeconst.c_tconst_name in
       Errors.experimental_feature pos "abstract type constant with default"
     | _ -> ()

@@ -11,6 +11,7 @@ aast::CaType
 aast::ClassAttr
 aast::ClassGetExpr
 aast::ClassId_
+aast::ClassTypeconst
 aast::CollectionTarg
 aast::Def
 aast::Expr_

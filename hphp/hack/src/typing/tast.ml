@@ -80,7 +80,8 @@ type targ = ty Aast.targ
 
 type class_get_expr = (Pos.t * ty, unit, saved_env, ty) Aast.class_get_expr
 
-type class_typeconst = (Pos.t * ty, unit, saved_env, ty) Aast.class_typeconst
+type class_typeconst_def =
+  (Pos.t * ty, unit, saved_env, ty) Aast.class_typeconst_def
 
 type user_attribute = (Pos.t * ty, unit, saved_env, ty) Aast.user_attribute
 

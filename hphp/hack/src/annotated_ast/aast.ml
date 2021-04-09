@@ -831,7 +831,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_implements_dynamic: bool;
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
-  c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst list;
+  c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst_def list;
   c_vars: ('ex, 'fb, 'en, 'hi) class_var list;
   c_methods: ('ex, 'fb, 'en, 'hi) method_ list;
   c_attributes: ('ex, 'fb, 'en, 'hi) class_attr list;
@@ -884,25 +884,37 @@ and ('ex, 'fb, 'en, 'hi) class_const = {
   cc_doc_comment: doc_comment option;
 }
 
-and typeconst_abstract_kind =
-  | TCAbstract of hint option (* default *)
-  | TCPartiallyAbstract
-  | TCConcrete
-
 (** This represents a type const definition. If a type const is abstract then
  * then the type hint acts as a constraint. Any concrete definition of the
  * type const must satisfy the constraint.
  *
  * If the type const is not abstract then a type must be specified.
  *)
-and ('ex, 'fb, 'en, 'hi) class_typeconst = {
-  c_tconst_abstract: typeconst_abstract_kind;
-  c_tconst_name: sid;
-  c_tconst_as_constraint: hint option;
-  (* Note: super constraint is currently only used by context constants *)
-  c_tconst_super_constraint: hint option;
-  c_tconst_type: hint option;
+
+and class_abstract_typeconst = {
+  c_atc_as_constraint: hint option;
+  c_atc_super_constraint: hint option;
+  c_atc_default: hint option;
+}
+
+and class_concrete_typeconst = { c_tc_type: hint }
+
+(* A partially abstract type constant always has a constraint *
+ * and always has a value. *)
+and class_partially_abstract_typeconst = {
+  c_patc_constraint: hint;
+  c_patc_type: hint;
+}
+
+and class_typeconst =
+  | TCAbstract of class_abstract_typeconst
+  | TCConcrete of class_concrete_typeconst
+  | TCPartiallyAbstract of class_partially_abstract_typeconst
+
+and ('ex, 'fb, 'en, 'hi) class_typeconst_def = {
   c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  c_tconst_name: sid;
+  c_tconst_kind: class_typeconst;
   c_tconst_span: pos;
   c_tconst_doc_comment: doc_comment option;
   c_tconst_is_ctx: bool;

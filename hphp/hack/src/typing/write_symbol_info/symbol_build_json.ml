@@ -244,8 +244,8 @@ let build_type_const_kind_json kind =
   let num =
     match kind with
     | TCAbstract _ -> 0
-    | TCConcrete -> 1
-    | TCPartiallyAbstract -> 2
+    | TCConcrete _ -> 1
+    | TCPartiallyAbstract _ -> 2
   in
   JSON_Number (string_of_int num)
 

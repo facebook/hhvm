@@ -341,7 +341,7 @@ class type handler =
 
     method at_user_attribute : Env.t -> Tast.user_attribute -> unit
 
-    method at_class_typeconst : Env.t -> Tast.class_typeconst -> unit
+    method at_class_typeconst_def : Env.t -> Tast.class_typeconst_def -> unit
 
     method at_xhp_child : Env.t -> Tast.xhp_child -> unit
   end
@@ -374,7 +374,7 @@ class virtual handler_base : handler =
 
     method at_user_attribute _ _ = ()
 
-    method at_class_typeconst _ _ = ()
+    method at_class_typeconst_def _ _ = ()
 
     method at_xhp_child _ _ = ()
   end
@@ -433,9 +433,9 @@ let iter_with (handlers : handler list) : iter =
       List.iter handlers (fun v -> v#at_user_attribute env ua);
       super#on_user_attribute env ua
 
-    method! on_class_typeconst env tc =
-      List.iter handlers (fun v -> v#at_class_typeconst env tc);
-      super#on_class_typeconst env tc
+    method! on_class_typeconst_def env tc =
+      List.iter handlers (fun v -> v#at_class_typeconst_def env tc);
+      super#on_class_typeconst_def env tc
 
     method! on_xhp_child env c =
       List.iter handlers (fun v -> v#at_xhp_child env c);

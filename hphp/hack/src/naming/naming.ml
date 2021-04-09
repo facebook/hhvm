@@ -1336,26 +1336,32 @@ and class_const env ~in_enum_class cc =
   }
 
 and typeconst env t =
-  let abstract =
-    match t.Aast.c_tconst_abstract with
-    | Aast.TCAbstract (Some default) ->
-      Aast.TCAbstract (Some (hint env default))
-    | _ -> t.Aast.c_tconst_abstract
+  let open Aast in
+  let tconst =
+    match t.c_tconst_kind with
+    | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
+      ->
+      TCAbstract
+        {
+          c_atc_as_constraint = Option.map ~f:(hint env) c_atc_as_constraint;
+          c_atc_super_constraint =
+            Option.map ~f:(hint env) c_atc_super_constraint;
+          c_atc_default = Option.map ~f:(hint env) c_atc_default;
+        }
+    | TCConcrete { c_tc_type } -> TCConcrete { c_tc_type = hint env c_tc_type }
+    | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
+      TCPartiallyAbstract
+        {
+          c_patc_constraint = hint env c_patc_constraint;
+          c_patc_type = hint env c_patc_type;
+        }
   in
-  let as_constraint = Option.map t.Aast.c_tconst_as_constraint (hint env) in
-  let super_constraint =
-    Option.map t.Aast.c_tconst_super_constraint (hint env)
-  in
-  let type_ = Option.map t.Aast.c_tconst_type (hint env) in
   let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
   N.
     {
-      c_tconst_abstract = abstract;
-      c_tconst_name = t.Aast.c_tconst_name;
-      c_tconst_as_constraint = as_constraint;
-      c_tconst_super_constraint = super_constraint;
-      c_tconst_type = type_;
       c_tconst_user_attributes = attrs;
+      c_tconst_name = t.Aast.c_tconst_name;
+      c_tconst_kind = tconst;
       c_tconst_span = t.Aast.c_tconst_span;
       c_tconst_doc_comment = t.Aast.c_tconst_doc_comment;
       c_tconst_is_ctx = t.Aast.c_tconst_is_ctx;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d7d78db9bc9fb23e68d901f256055c59>>
+// @generated SignedSource<<61dd5abdb00d3834567cad14fd1b5f02>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,10 +49,16 @@ pub trait Visitor<'a> {
     ) {
         p.recurse(self.object())
     }
+    fn visit_class_abstract_typeconst(&mut self, p: &'a ClassAbstractTypeconst<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_class_attr(
         &mut self,
         p: &'a ClassAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>,
     ) {
+        p.recurse(self.object())
+    }
+    fn visit_class_concrete_typeconst(&mut self, p: &'a ClassConcreteTypeconst<'a>) {
         p.recurse(self.object())
     }
     fn visit_class_const(
@@ -82,9 +88,18 @@ pub trait Visitor<'a> {
     fn visit_class_kind(&mut self, p: &'a ClassKind) {
         p.recurse(self.object())
     }
-    fn visit_class_typeconst(
+    fn visit_class_partially_abstract_typeconst(
         &mut self,
-        p: &'a ClassTypeconst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>,
+        p: &'a ClassPartiallyAbstractTypeconst<'a>,
+    ) {
+        p.recurse(self.object())
+    }
+    fn visit_class_typeconst(&mut self, p: &'a ClassTypeconst<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_class_typeconst_def(
+        &mut self,
+        p: &'a ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>,
     ) {
         p.recurse(self.object())
     }
@@ -290,9 +305,6 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_type_hint(&mut self, p: &'a TypeHint<'a, ()>) {
-        p.recurse(self.object())
-    }
-    fn visit_typeconst_abstract_kind(&mut self, p: &'a TypeconstAbstractKind<'a>) {
         p.recurse(self.object())
     }
     fn visit_typedef(

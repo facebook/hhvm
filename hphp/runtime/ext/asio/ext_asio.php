@@ -16,19 +16,19 @@ abstract class Awaitable {
   /** Set callback for when the scheduler enters I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is entered
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnIOWaitEnterCallback(mixed $callback): void;
 
   /** Set callback for when the scheduler exits I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is exited
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
   /** Set callback for when \HH\Asio\join() is called
    * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
 
   /** Check if this wait handle finished (succeeded or failed)
@@ -90,28 +90,28 @@ abstract class ResumableWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * is created
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an async function blockingly awaits
    * @param mixed $callback - A Closure to be called when an async function
    * blockingly await
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnAwaitCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * finishes
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle fails
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * fails
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnFailCallback(mixed $callback): void;
 }
 
@@ -188,7 +188,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
@@ -207,7 +207,7 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
   /** Set callback for when a ConditionWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Notify the condition variable and mark the ConditionWaitHandle as succeeded
@@ -260,14 +260,14 @@ final class SleepWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle is
    * created
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when a SleepWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle
    * finishes
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 }
 
@@ -279,7 +279,7 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle is created
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle finishes
@@ -287,14 +287,14 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle finishes
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle fails
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle fails
    */
-  <<__HipHopSpecific, __Native>>
+  <<__Native>>
   public static function setOnFailCallback(mixed $callback): void;
 }
 

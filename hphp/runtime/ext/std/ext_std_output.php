@@ -189,7 +189,7 @@ function ob_list_handlers(): varray;
  * @param string $name - Name of the value.
  * @param string $value - Value to write to log.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_crash_log(string $name,
                         string $value): void;
 
@@ -198,7 +198,7 @@ function hphp_crash_log(string $name,
  * admin commands to retrieve stats while server is running.
  * @param int $value - An integer to add up.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_stats(string $name,
                     int $value): void;
 
@@ -206,23 +206,23 @@ function hphp_stats(string $name,
  * @param string $name - Name of the entry.
  * @return int - Currently accumulated count.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_get_stats(string $name): int;
 
 /** Returns status of different server threads.
  * @return array - Array of thread statuses.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_get_status(): darray;
 
 /** Returns I/O status of current thread. EnableNetworkIOStatus has to be
  * turned on.
  * @return array - Array of all I/O so far for current thread.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_get_iostatus(): darray;
 
-<<__HipHopSpecific, __Native, __Deprecated("this will be removed")>>
+<<__Native, __Deprecated("this will be removed")>>
 function hphp_set_iostatus_address(string $name): void;
 
 /** Returns timestamps of different request events.
@@ -233,7 +233,7 @@ function hphp_set_iostatus_address(string $name): void;
  * starts to get processed; and 'process-cpu', the CPU clock time a request
  * starts to get processed.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_get_timers(bool $get_as_float = true): mixed;
 
 /** Dumps all variables in global state, including global variables, static
@@ -242,26 +242,26 @@ function hphp_get_timers(bool $get_as_float = true): mixed;
  * into a string.
  * @return mixed - An array of global state.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_output_global_state(bool $serialize = true): mixed;
 
 /** @return int - Returns the current instruction counter value.
  */
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function hphp_instruction_counter(): int;
 
 /** @return mixed - An array of hardware counters
  */
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function hphp_get_hardware_counters(): mixed;
 
 /** @param string $events - comma separated list of hardware events
  * @return bool - returns TRUE on success and FALSE on failure
  */
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function hphp_set_hardware_events(?string $events = null): bool;
 
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function hphp_clear_hardware_events(): void;
 
 } // root namespace

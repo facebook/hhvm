@@ -7,7 +7,7 @@
  * profile.
  * @param array $args - Extra argument to reserve for future use.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_enable(int $flags = 0,
                        varray $args = varray[]): void;
 
@@ -16,18 +16,18 @@ function xhprof_enable(int $flags = 0,
  * http://mirror.facebook.net/facebook/xhprof/doc.html.
  * @return mixed - Profile result.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_disable(): mixed;
 
 /** Starts xhprof network I/O profiling.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_network_enable(): void;
 
 /** Ends and reports xhprof network I/O profiling result.
  * @return mixed - Profile result.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_network_disable(): mixed;
 
 /** Starts an artificial frame. Together with xhprof_frame_end(), this times
@@ -35,7 +35,7 @@ function xhprof_network_disable(): mixed;
  * to define arbitrary function boundaries.
  * @param string $name - The "virtual" function's name.
  */
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function xhprof_frame_begin(string $name): void;
 
 /** Ends an artificial frame that xhprof_frame_begin() started. One has to make
@@ -44,14 +44,14 @@ function xhprof_frame_begin(string $name): void;
  * xhprof_frame_end() have to be paired up really well, so not to interfere
  * with regular function's profiling, unless that's the intention.
  */
-<<__HipHopSpecific, __Native("NoInjection")>>
+<<__Native("NoInjection")>>
 function xhprof_frame_end(): void;
 
 /** Starts sampling based xhprof profiling. For details on how to use this
  * function, please refer to
  * http://mirror.facebook.net/facebook/xhprof/doc.html.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_sample_enable(): void;
 
 /** Ends sampling based xhprof profiling. For details on how to use this
@@ -59,7 +59,7 @@ function xhprof_sample_enable(): void;
  * http://mirror.facebook.net/facebook/xhprof/doc.html.
  * @return mixed
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xhprof_sample_disable(): mixed;
 
 /** Set a callback function to be called whenever a function is entered or
@@ -70,7 +70,7 @@ function xhprof_sample_disable(): mixed;
  * @param vec<string> $functions - Only receive callbacks on these functions.
  *                                 In effect only when it's not empty.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_setprofile(
   mixed $callback,
   int $flags = SETPROFILE_FLAGS_DEFAULT,

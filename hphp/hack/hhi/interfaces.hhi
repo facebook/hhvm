@@ -843,7 +843,7 @@ interface XHPChild {}
  * Stringish is a type that matches strings as well as string-convertible
  * objects: that is, objects that provide the __toString method
  */
-<<__HipHopSpecific>>
+
 interface Stringish extends XHPChild {
   <<__Deprecated('Use `stringish_cast(<expression>)` instead.')>>
   public function __toString(): string;
@@ -860,7 +860,7 @@ namespace HH {
  * @guide /hack/attributes/introduction
  * @guide /hack/attributes/special
   */
-<<__HipHopSpecific>>
+
 interface IMemoizeParam {
   abstract const ctx CMemoParam = [defaults];
    /**
@@ -877,7 +877,7 @@ namespace {
 /**
   * Objects that implement IDisposable may be used in using statements
   */
-<<__HipHopSpecific>>
+
 interface IDisposable {
   /**
    * This method is invoked exactly once at the end of the scope of the
@@ -889,7 +889,7 @@ interface IDisposable {
 /**
   * Objects that implement IAsyncDisposable may be used in await using statements
   */
-<<__HipHopSpecific>>
+
 interface IAsyncDisposable {
   /**
    * This method is invoked exactly once at the end of the scope of the

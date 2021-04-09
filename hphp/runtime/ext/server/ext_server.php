@@ -7,7 +7,7 @@ namespace {
  *
  * @return int - thread type. Returns -1 if unknown.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_thread_type(): int;
 
 /**
@@ -17,7 +17,7 @@ function hphp_thread_type(): int;
  * @return bool - TRUE if it's enabled, FALSE otherwise.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_is_enabled(): bool;
 
 /**
@@ -32,7 +32,7 @@ function pagelet_server_is_enabled(): bool;
  *   pagelet_server_task_status() or pagelet_server_task_result().
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_task_start(string $url,
                                    darray $headers = darray[],
                                    string $post_data = "",
@@ -50,7 +50,7 @@ function pagelet_server_task_start(string $url,
  *   and PAGELET_DONE if the pagelet request is done.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_task_status(resource $task): int;
 
 /**
@@ -67,7 +67,7 @@ function pagelet_server_task_status(resource $task): int;
  * @return string - HTTP response from the pagelet.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_task_result(
   resource $task,
   <<__OutOnly('varray')>>
@@ -82,7 +82,7 @@ function pagelet_server_task_result(
  *
  * @return int - Number of pagelet tasks started.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_tasks_started(): int;
 
 /**
@@ -91,14 +91,14 @@ function pagelet_server_tasks_started(): int;
  *   thread.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_flush(): void;
 
 /**
  * Determine whether or not the pagelet thread we are executing on has finished
  * and closed its output buffer.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function pagelet_server_is_done(): bool;
 
 /**
@@ -111,7 +111,7 @@ function pagelet_server_is_done(): bool;
  *   can use.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xbox_task_start(string $message): resource;
 
 /**
@@ -122,7 +122,7 @@ function xbox_task_start(string $message): resource;
  * @return bool - TRUE if finished, FALSE otherwise.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xbox_task_status(resource $task): bool;
 
 /**
@@ -136,7 +136,7 @@ function xbox_task_status(resource $task): bool;
  *   for success and 500 for server error.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xbox_task_result(
   resource $task,
   int $timeout_ms,
@@ -152,7 +152,7 @@ function xbox_task_result(
  * @return mixed - The return value of the xbox call task.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function xbox_process_call_message(string $msg): mixed;
 
 } // root namespace
@@ -165,7 +165,7 @@ namespace HH {
  * server is not running, or is running without a schedule to stop.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function server_is_stopping(): bool;
 
 /**
@@ -181,7 +181,7 @@ function server_is_stopping(): bool;
  * stop.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function server_is_prepared_to_stop(): bool;
 
 /**
@@ -191,7 +191,7 @@ function server_is_prepared_to_stop(): bool;
  * server should not receive any more request.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function server_health_level(): int;
 
 /**
@@ -201,7 +201,7 @@ function server_health_level(): int;
  * server is not started.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function server_uptime(): int;
 
 /**
@@ -211,7 +211,7 @@ function server_uptime(): int;
  * server is not started.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function server_process_start_time(): int;
 
 }

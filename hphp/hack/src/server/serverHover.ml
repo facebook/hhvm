@@ -149,10 +149,6 @@ let make_hover_attr_docs name =
       "Marks a class as extending a class that uses reified generics."
       ^ " This is an internal attribute used for byte compilation, and is banned in user code.";
     ]
-  | "__HipHopSpecific" ->
-    [
-      "Marks a class or function as specific to HHVM, so it is shown on http://docs.hhvm.com.";
-    ]
   | "__IsFoldable" ->
     [
       "Marks this function can be constant-folded if all arguments are constants."

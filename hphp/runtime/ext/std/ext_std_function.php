@@ -94,7 +94,7 @@ function register_shutdown_function(mixed $callback): void;
  *
  * @return void
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function register_postsend_function(mixed $callback): void;
 
 }

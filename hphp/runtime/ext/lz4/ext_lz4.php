@@ -19,7 +19,7 @@ function lz4_compress(string $uncompressed, bool $high = false)[]: mixed;
  *
  * @return string - The compressed data, or FALSE on error
  */
-<<__HipHopSpecific, __IsFoldable>>
+<<__IsFoldable>>
 function lz4_hccompress(string $uncompressed)[]: mixed {
   return lz4_compress($uncompressed, true);
 }

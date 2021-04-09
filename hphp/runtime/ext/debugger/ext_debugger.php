@@ -18,14 +18,14 @@ namespace {
    * Request authentication token from the client. The token is empty in case of
    * error.
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphpd_auth_token(): string;
 
   /**
    * Request signed session from the client. The serialized session is empty in
    * case of error;
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphp_debug_session_auth(): string;
 
   /**
@@ -34,7 +34,7 @@ namespace {
    * attached, it will not do anything.
    * @param bool $condition - If true, break, otherwise, continue.
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphpd_break(bool $condition = true): void;
 
 
@@ -43,7 +43,7 @@ namespace {
    * to debug this thread.
    * @return bool - TRUE if a debugger is attached, FALSE if not.
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphp_debugger_attached(): bool;
 
   /**
@@ -55,7 +55,7 @@ namespace {
    * @return bool - TRUE if the program successfully broke in (and has since
    *   resumed), FALSE if no debugger was attached.
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphp_debug_break(bool $condition = true): bool;
 
   /**
@@ -64,7 +64,7 @@ namespace {
    * @param bool value - Value to set for the debugger option
    * @return bool - New value of the debugger option
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphp_debugger_set_option(string $option, bool $value): bool;
 
   /**
@@ -72,6 +72,6 @@ namespace {
    * @param string option - Name of the option to set, not case sensitive
    * @return bool - Value of the debugger option
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__Native("NoFCallBuiltin")>>
   function hphp_debugger_get_option(string $option): bool;
 }

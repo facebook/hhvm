@@ -7,56 +7,56 @@ namespace __hhvm_intrinsics {
  *
  * @return void
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function trigger_oom(bool $oom): void;
 
 /**
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.
  */
-<<__Native, __HipHopSpecific, __ProvenanceSkipFrame>>
+<<__Native, __ProvenanceSkipFrame>>
 function launder_value(mixed $value): mixed;
 
 /*
  * Builtins for testing array-ish builtin typehints.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_varray_builtin(varray $x): varray;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_darray_builtin(darray $x): darray;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_kindofdarray_builtin(): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_kindofvarray_builtin(): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_varr_or_darr_builtin(varray_or_darray $x): varray_or_darray;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_arraylike_builtin(AnyArray $x): AnyArray;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_dict_builtin(dict $x): dict;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_array_await(): Awaitable;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_darray_await(): Awaitable;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_dict_await(): Awaitable;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function create_class_pointer(string $name): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function create_clsmeth_pointer(string $cls, string $meth): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4): mixed;

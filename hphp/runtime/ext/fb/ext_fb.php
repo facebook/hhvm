@@ -25,7 +25,7 @@ namespace {
  *
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize previously fb_serialize()-ed data.
@@ -34,7 +34,7 @@ function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
  * @param options bitmask of options (see fb_serialize for details)
  * @return mixed - Unserialized data.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_unserialize(mixed $thing,
                         <<__OutOnly("KindOfBoolean")>>
                         inout mixed $success,
@@ -55,7 +55,7 @@ function fb_unserialize(mixed $thing,
  *    results on deserialization, so we want to make it the new default.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_compact_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.
@@ -65,7 +65,7 @@ function fb_compact_serialize(mixed $thing, int $options = 0)[]: mixed;
  * what the decoding error was, if it failed.
  * @return mixed - Unserialized data.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_compact_unserialize(mixed $thing,
                                 <<__OutOnly("KindOfBoolean")>>
                                 inout mixed $success,
@@ -95,7 +95,7 @@ function fb_compact_unserialize(mixed $thing,
  * @param mixed $data - Extra data to pass to the handler when intercepting
  * @return bool - TRUE if successful, FALSE otherwise
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_intercept(string $name,
                       mixed $handler,
                       mixed $data = null): bool;
@@ -127,7 +127,7 @@ function fb_intercept(string $name,
  * set by individual function names, will be removed.
  * @return bool - TRUE if successful, FALSE otherwise
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_intercept2(string $name, mixed $handler): bool;
 
 /** Rename a function, so that a function can be called with the new name.
@@ -140,7 +140,7 @@ function fb_intercept2(string $name, mixed $handler): bool;
  * @param string $new_func_name - What is the new name.
  * @return bool - TRUE if successful, FALSE otherwise.
  */
-<<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin")>>
 function fb_rename_function(string $orig_func_name,
                             string $new_func_name): bool;
 
@@ -149,7 +149,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native, __Pure>>
+<<__Native, __Pure>>
 function fb_utf8ize(inout mixed $input): bool;
 
 /** Count the number of UTF-8 code points in string or byte count if it's not
@@ -158,7 +158,7 @@ function fb_utf8ize(inout mixed $input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable, __Pure>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /** Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -167,7 +167,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * @return int - Returns the number of code points interpreting string as
  * UTF-8.
  */
-<<__HipHopSpecific, __Native, __IsFoldable>>
+<<__Native, __IsFoldable>>
 function fb_utf8_strlen(string $input)[]: int;
 
 /** Cuts a portion of str specified by the start and length parameters.
@@ -187,7 +187,7 @@ function fb_utf8_strlen(string $input)[]: int;
  * length parameters.  If str is shorter than start characters long, the empty
  * string will be returned.
  */
-<<__HipHopSpecific, __Native, __IsFoldable>>
+<<__Native, __IsFoldable>>
 function fb_utf8_substr(string $str,
                         int $start,
                         int $length = PHP_INT_MAX)[]: string;
@@ -200,17 +200,17 @@ function fb_utf8_substr(string $str,
  * @param bool $flush - Whether to clear data after this function call.
  * @return darray<string,mixed>|false
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_get_code_coverage(bool $flush): mixed;
 
 /** Enables code coverage. The coverage information is cleared.
  */
-<<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin")>>
 function fb_enable_code_coverage(): void;
 
 /** Disables and returns code coverage. The coverage information is cleared.
  */
-<<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin")>>
 function fb_disable_code_coverage(): darray<string, mixed>;
 
 /** Toggles the compression status of HipHop output, if headers have already
@@ -218,20 +218,20 @@ function fb_disable_code_coverage(): darray<string, mixed>;
  * @param bool $new_value - The new value for the compression state.
  * @return bool - The old value.
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_output_compression(bool $new_value): bool;
 
 /** Set a callback function that is called when php tries to exit.
  * @param mixed $function - The callback to invoke. An exception object will
  * be passed to the function
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_set_exit_callback(mixed $function): void;
 
 /** Get stats on flushing the last data chunk from server.
  * @return int - Total number of bytes flushed since last flush
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function fb_get_last_flush_size(): int;
 
 /** Gathers the statistics of the file named by filename, like lstat(), except
@@ -259,7 +259,7 @@ namespace HH {
 /** Disables and returns code coverage that contains file to coverage frequency.
  * The coverage information is cleared.
  */
-<<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin")>>
 function disable_code_coverage_with_frequency(): darray<string, mixed>;
 
 /** Returns an int for the upper (first) 64 bits of an md5 hash of a string.

@@ -7,7 +7,7 @@
  * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  *
  */
-<<__HipHopSpecific>>
+
 function lz4compress(string $uncompressed) {
   return lz4_compress($uncompressed);
 }
@@ -19,7 +19,7 @@ function lz4compress(string $uncompressed) {
  * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  *
  */
-<<__HipHopSpecific>>
+
 function lz4hccompress(string $uncompressed) {
   return lz4_hccompress($uncompressed);
 }
@@ -31,7 +31,7 @@ function lz4hccompress(string $uncompressed) {
  * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  *
  */
-<<__HipHopSpecific>>
+
 function lz4uncompress(string $compressed) {
   return lz4_uncompress($compressed);
 }

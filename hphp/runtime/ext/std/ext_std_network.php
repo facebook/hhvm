@@ -183,7 +183,7 @@ function fsockopen(string $hostname,
  *
  * @return int - Returns the size of the http request.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function get_http_request_size(): int;
 
 /**

@@ -23,7 +23,7 @@ function class_exists(string $class_name,
  *
  * @return array - Returns an associative array of constants with their values.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function get_class_constants(string $class_name)[]: darray<string, mixed>;
 
 /**

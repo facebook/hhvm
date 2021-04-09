@@ -6,7 +6,7 @@
  * @return int - The pthread_self() return.
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_get_thread_id(): int;
 
 /**
@@ -16,5 +16,5 @@ function hphp_get_thread_id(): int;
  *   gettid()
  *
  */
-<<__HipHopSpecific, __Native>>
+<<__Native>>
 function hphp_gettid(): int;

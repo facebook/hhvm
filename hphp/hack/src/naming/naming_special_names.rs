@@ -222,8 +222,6 @@ pub mod user_attributes {
 
     pub const PHP_STD_LIB: &str = "__PHPStdLib";
 
-    pub const HIPHOP_SPECIFIC: &str = "__HipHopSpecific";
-
     pub const ACCEPT_DISPOSABLE: &str = "__AcceptDisposable";
 
     pub const RETURN_DISPOSABLE: &str = "__ReturnDisposable";
@@ -280,7 +278,6 @@ pub mod user_attributes {
             MEMOIZE,
             MEMOIZE_LSB,
             PHP_STD_LIB,
-            HIPHOP_SPECIFIC,
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
             LSB,

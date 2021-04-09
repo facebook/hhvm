@@ -249,8 +249,6 @@ module UserAttributes = struct
 
   let uaPHPStdLib = "__PHPStdLib"
 
-  let uaHipHopSpecific = "__HipHopSpecific"
-
   let uaAcceptDisposable = "__AcceptDisposable"
 
   let uaReturnDisposable = "__ReturnDisposable"
@@ -323,7 +321,6 @@ module UserAttributes = struct
           (uaMemoize, [fn; mthd]);
           (uaMemoizeLSB, [mthd]);
           (uaPHPStdLib, [cls; fn; mthd]);
-          (uaHipHopSpecific, [cls; fn; mthd]);
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd; lambda]);
           (uaLSB, [staticProperty]);

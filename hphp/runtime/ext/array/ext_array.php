@@ -1253,7 +1253,7 @@ function i18n_loc_get_error_code(): mixed;
  *   not found.
  *
  */
-<<__Native, __HipHopSpecific, __IsFoldable>>
+<<__Native, __IsFoldable>>
 function hphp_array_idx(
   mixed $search,
   mixed $key,

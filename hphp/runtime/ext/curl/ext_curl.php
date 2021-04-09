@@ -371,7 +371,7 @@ function curl_reset(resource $ch): void;
  * @return mixed - If opt is given, returns its value. Otherwise, returns an
  *    associative array.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
 
 /**
@@ -387,7 +387,7 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
  *
  * @return mixed - Returns 0 on success, or one of the CURLM_XXX errors code.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function fb_curl_multi_fdset(resource $mh,
                               <<__OutOnly("varray")>>
                              inout mixed $read_fd_set,
@@ -449,7 +449,7 @@ namespace HH {
  *
  * @return resource - Returns a cURL handle on success, FALSE on errors.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function curl_init_pooled(string $poolName, ?string $url = null): mixed;
 
 /**
@@ -463,7 +463,7 @@ function curl_init_pooled(string $poolName, ?string $url = null): mixed;
  * @param int $reuseLimit - The number of times a connection will be reused
  *  before being recycled.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function curl_create_pool(string $poolName, int $size = 5,
                           int $connGetTimeout = 5000,
                           int $reuseLimit = 500): void;
@@ -477,7 +477,7 @@ function curl_create_pool(string $poolName, int $size = 5,
  * @return bool - Returns true on success, or false if the pool does not
  *  exist.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function curl_destroy_pool(string $poolName): bool;
 
 /**
@@ -485,7 +485,7 @@ function curl_destroy_pool(string $poolName): bool;
  *
  * @return array
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function curl_list_pools(): darray<string, darray>;
 
 

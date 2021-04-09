@@ -69,7 +69,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
-  <<__Native, __HipHopSpecific>>
+  <<__Native>>
   public function isHack()[]: bool;
 
   /**
@@ -113,7 +113,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   /**
    * @return     bool   TRUE if the function is async, otherwise FALSE.
    */
-  <<__Native, __HipHopSpecific>>
+  <<__Native>>
   public function isAsync()[]: bool;
 
   /**
@@ -216,10 +216,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native, __Pure, __MaybeMutable>>
   private function getRetTypeInfo(): dict;
 
-  <<__Native, __HipHopSpecific, __Pure, __MaybeMutable>>
+  <<__Native, __Pure, __MaybeMutable>>
   private function getReturnTypeHint(): string;
 
-  <<__HipHopSpecific>>
+  
   public function getReturnTypeText()[] {
     return $this->getReturnTypeHint() ?: false;
   }
@@ -1289,7 +1289,7 @@ class ReflectionClass implements Reflector {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
-  <<__Native, __HipHopSpecific, __Pure, __MaybeMutable>>
+  <<__Native, __Pure, __MaybeMutable>>
   public function isHack(): bool;
 
   /**

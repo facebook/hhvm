@@ -86,7 +86,7 @@ function mysql_connect(string $server = "",
                        int $query_timeout_ms = -1,
                        darray<string, string> $conn_attrs = darray[]): mixed;
 
-<<__Native("NoFCallBuiltin"), __HipHopSpecific>>
+<<__Native("NoFCallBuiltin")>>
 function mysql_connect_with_db(string $server = "",
                                string $username = "",
                                string $password = "",
@@ -341,7 +341,7 @@ function mysql_fetch_object(mixed $result,
  *
  * @return mixed - Returns a resource or a boolean
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_fetch_result(?resource $link_identifier = NULL): mixed;
 
 /**
@@ -591,7 +591,7 @@ function mysql_list_tables(string $database,
  *
  * @return bool - True if there is at least one more item in the result set.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_more_results(?resource $link_identifier = NULL): bool;
 
 /**
@@ -615,7 +615,7 @@ function mysql_more_results(?resource $link_identifier = NULL): bool;
  * @return mixed - This is a fb specific query so behaviour is a little random
  *                 at the moment.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_multi_query(string $query,
                            ?resource $link_identifier = NULL): mixed;
 
@@ -634,7 +634,7 @@ function mysql_multi_query(string $query,
  * @return int - 0 - Query succeeded, more results coming. -1 - Query succeeded,
  *               no more results coming. >0 - query failed, value is error code.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_next_result(?resource $link_identifier = NULL): int;
 
 /**
@@ -687,7 +687,7 @@ function mysql_pconnect(string $server = '',
                         int $query_timeout_ms = -1,
                         darray<string, string> $conn_attrs = darray[]): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_pconnect_with_db(string $server = '',
                                 string $username = '',
                                 string $password = '',
@@ -802,7 +802,7 @@ function mysql_set_charset(string $charset,
  *
  * @return bool
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_set_timeout(int $query_timeout_ms,
                            ?resource $link_identifier = NULL): bool;
 
@@ -878,5 +878,5 @@ function mysql_unbuffered_query(string $query,
  * @return int - Returns the number of warnings from the last MySQL function, or
  *               0 (zero) if no warnings occurred.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function mysql_warning_count(?resource $link_identifier = NULL): mixed;

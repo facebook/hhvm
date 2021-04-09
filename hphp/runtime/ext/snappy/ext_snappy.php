@@ -28,7 +28,7 @@ function snappy_uncompress(string $data): mixed;
  *
  * https://github.com/facebook/hhvm/pull/3258 - 23/07/2014
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function sncompress(string $data): mixed;
 
 /**
@@ -36,5 +36,5 @@ function sncompress(string $data): mixed;
  *
  * https://github.com/facebook/hhvm/pull/3258 - 23/07/2014
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function snuncompress(string $data): mixed;

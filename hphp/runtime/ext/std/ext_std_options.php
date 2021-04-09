@@ -192,13 +192,13 @@ function memory_get_usage(bool $real_usage = false): int;
 
 /* Returns the total memory, in bytes, that your PHP script has allocated.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function memory_get_allocation(): int;
 
 /* Returns the request-heap memory currently in use by the script.
  * Does not trigger OOM.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function hphp_memory_heap_usage(): int;
 
 /* Returns the current total capacity of the request-heap, including
@@ -206,13 +206,13 @@ function hphp_memory_heap_usage(): int;
  * external fragmentation, and heap management overhead.
  * Does not trigger OOM.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function hphp_memory_heap_capacity(): int;
 
 /* Returns the peak of memory, in bytes, that's been allocated to your PHP
  * script since calling memory_start_usage_interval.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
 
 /* Starts per-interval usage tracking to allow peak usage to be tracked
@@ -220,7 +220,7 @@ function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
  *
  * Returns whether the state of interval tracking was changed.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function hphp_memory_start_interval(): bool;
 
 /* Stops per-interval usage tracking to allow peak usage to be tracked
@@ -228,7 +228,7 @@ function hphp_memory_start_interval(): bool;
  *
  * Returns whether the state of interval tracking was changed.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function hphp_memory_stop_interval(): bool;
 
 /* Retrieve a path to the loaded php.ini file.

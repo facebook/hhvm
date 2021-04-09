@@ -67,7 +67,7 @@ function apache_setenv(string $variable,
 <<__Native>>
 function getallheaders(): darray<string, string>;
 
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function apache_get_config(): darray<string, mixed>;
 
 }
@@ -80,7 +80,7 @@ namespace HH {
  *   current request. The values in the array will be strings for uniquely
  *   specified headers, but arrays where a header was specified more than once.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function get_headers_secure(): darray<string, varray<string>>;
 
 }

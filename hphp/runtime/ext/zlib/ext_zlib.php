@@ -338,7 +338,7 @@ function readgzfile(string $filename,
  *
  * @return string - The compressed data, or FALSE on error
  */
-<<__Native, __HipHopSpecific, __IsFoldable>>
+<<__Native, __IsFoldable>>
 function nzcompress(string $uncompressed)[]: mixed;
 
 /**
@@ -350,7 +350,7 @@ function nzcompress(string $uncompressed)[]: mixed;
  *
  * @return string - The uncompressed data or FALSE on error
  */
-<<__Native, __HipHopSpecific, __IsFoldable>>
+<<__Native, __IsFoldable>>
 function nzuncompress(string $compressed)[]: mixed;
 
 } // root namespace

@@ -8,7 +8,7 @@
  * @return array - A map containing the extension's name, version, info string
  *                 ini settings, constants, functions and classes.
  */
-<<__Native("NoInjection"), __HipHopSpecific, __Pure>>
+<<__Native("NoInjection"), __Pure>>
 function hphp_get_extension_info(string $name): darray<string, mixed>;
 
 /**
@@ -18,7 +18,7 @@ function hphp_get_extension_info(string $name): darray<string, mixed>;
  * @param Traversable $params - The parameters to pass to the function.
  * @return mixed - The result of the invoked function.
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_invoke(string $name, mixed $params): mixed;
 
 /**
@@ -32,7 +32,7 @@ function hphp_invoke(string $name, mixed $params): mixed;
  * @param Traversable $params - The parameters to pass to the method.
  * @return mixed - The result of the invoked method.
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_invoke_method(?object $obj, string $cls, string $name,
                             mixed $params): mixed;
 
@@ -44,7 +44,7 @@ function hphp_invoke_method(?object $obj, string $cls, string $name,
  * @param array $params - The parameters to pass to the constructor.
  * @return object - The newly created object
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_create_object(string $name, ?varray<mixed> $params): object;
 
 /**
@@ -55,7 +55,7 @@ function hphp_create_object(string $name, ?varray<mixed> $params): object;
  * @param string $name  - The name of the object to create.
  * @return object - The newly created object
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_create_object_without_constructor(string $name): object;
 
 /**
@@ -68,7 +68,7 @@ function hphp_create_object_without_constructor(string $name): object;
  * @param string $prop - The name of the property.
  * @return mixed - The value of the property.
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_get_property(
   object $obj,
   string $cls = "", // null will convert to this and do what we expect
@@ -84,7 +84,7 @@ function hphp_get_property(
  * @param string $prop - The name of the property.
  * @param mixed $value - The value to set the property to.
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_set_property(
   object $obj,
   string $cls = "", // null will convert to this and do what we expect
@@ -101,7 +101,7 @@ function hphp_set_property(
  *                       (true) or only public ones (false)
  * @return mixed - The value of the property
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_get_static_property(string $cls, string $prop,
                                   bool $force): mixed;
 
@@ -115,6 +115,6 @@ function hphp_get_static_property(string $cls, string $prop,
  * @param bool $force  - Whether or not to set protected and private properties
  *                       (true) or only public ones (false)
  */
-<<__Native("NoInjection"), __HipHopSpecific>>
+<<__Native("NoInjection")>>
 function hphp_set_static_property(string $cls, string $prop, mixed $value,
                                   bool $force): void;

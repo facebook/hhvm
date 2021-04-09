@@ -209,6 +209,7 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.RecordDef, SyntaxKind.RecordDeclaration)
         | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
+        | (SymbolDefinition.Enum, SyntaxKind.EnumClassDeclaration)
         | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)
         | (SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration)
         | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)

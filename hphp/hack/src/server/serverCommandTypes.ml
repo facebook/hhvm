@@ -1,3 +1,11 @@
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Hh_prelude
 open Ide_api_types
 
@@ -44,6 +52,33 @@ module Method_jumps = struct
     | Class
     | Interface
     | Trait
+
+  let readable_place name pos p_name =
+    let readable = Pos.string pos in
+    if String.length p_name <> 0 then
+      readable ^ " " ^ Utils.strip_ns p_name ^ "::" ^ Utils.strip_ns name
+    else
+      readable ^ " " ^ Utils.strip_ns name
+
+  let print_readable res ~find_children =
+    List.iter res (fun res ->
+        let origin_readable =
+          readable_place res.orig_name res.orig_pos res.orig_p_name
+        in
+        let dest_readable =
+          readable_place res.dest_name res.dest_pos res.dest_p_name
+        in
+        let extended =
+          "inherited "
+          ^
+          if find_children then
+            "by"
+          else
+            "from"
+        in
+        print_endline
+          (origin_readable ^ "\n    " ^ extended ^ " " ^ dest_readable));
+    ()
 end
 
 module Done_or_retry = struct
@@ -174,6 +209,44 @@ module Symbol_info_service = struct
     fun_calls: symbol_fun_call list;
     symbol_types: Symbol_type.t list;
   }
+
+  let fun_call_to_json fun_call_results =
+    let open Hh_json in
+    List.map fun_call_results (fun item ->
+        let item_type =
+          match item.type_ with
+          | Function -> "Function"
+          | Method -> "Method"
+          | Constructor -> "Constructor"
+        in
+        JSON_Object
+          [
+            ("name", JSON_String item.name);
+            ("type", JSON_String item_type);
+            ("pos", Pos.json item.pos);
+            ("caller", JSON_String item.caller);
+          ])
+
+  let symbol_type_to_json symbol_type_results =
+    let open Hh_json in
+    Symbol_type.(
+      List.rev_map symbol_type_results (fun item ->
+          JSON_Object
+            [
+              ("pos", Pos.json item.pos);
+              ("type", JSON_String item.type_);
+              ("ident", int_ item.ident_);
+            ]))
+
+  let to_json result =
+    let open Hh_json in
+    let fun_call_json = fun_call_to_json result.fun_calls in
+    let symbol_type_json = symbol_type_to_json result.symbol_types in
+    JSON_Object
+      [
+        ("function_calls", JSON_Array fun_call_json);
+        ("symbol_types", JSON_Array symbol_type_json);
+      ]
 end
 
 module Outline = struct

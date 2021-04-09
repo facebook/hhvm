@@ -3,9 +3,15 @@
   (wrapped false)
   (modules
     (:standard
-      \ clientLogCommand))
+      \ clientColorFile clientLogCommand clientGetDefinition
+        clientHighlightRefs clientCoverageMetric clientFindRefsPrint))
   (libraries
     connection_tracker
+    client_color_file
+    client_coverage_metric
+    client_find_refs_print
+    client_get_definition
+    client_highlight_refs
     client_ide_service
     clowder_paste
     flytrap
@@ -34,6 +40,71 @@
   (modules
     clientLogCommand)
   (libraries
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name client_get_definition)
+  (wrapped false)
+  (modules
+    clientGetDefinition)
+  (libraries
+    nuclide_rpc_message_printer
+    server_file_outline
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name client_color_file)
+  (wrapped false)
+  (modules
+    clientColorFile)
+  (libraries
+    ide_rpc_api_types
+    nuclide_rpc_message_printer
+    server_color_file
+    server_command_types
+    utils_core
+  )
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name client_highlight_refs)
+  (wrapped false)
+  (modules
+    clientHighlightRefs)
+  (libraries
+    pos
+    nuclide_rpc_message_printer
+    server
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name client_coverage_metric)
+  (wrapped false)
+  (modules
+    clientCoverageMetric)
+  (libraries
+    coverage_level
+    server_command_types
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name client_find_refs_print)
+  (wrapped false)
+  (modules
+    clientFindRefsPrint)
+  (libraries
+    nuclide_rpc_message_printer
+    pos
+    server
     sys_utils)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))

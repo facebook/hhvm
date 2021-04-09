@@ -11,7 +11,11 @@
     ai
     ifc
     ifc_lib
-    client
+    client_color_file
+    client_coverage_metric
+    client_find_refs_print
+    client_get_definition
+    client_highlight_refs
     default_injector_config
     gen_deps
     glean_dependency_graph_convert
@@ -19,6 +23,8 @@
     parent
     server
     server_env
+    server_color_file
+    server_file_outline
     sys_utils
     tast
     tast_typecheck

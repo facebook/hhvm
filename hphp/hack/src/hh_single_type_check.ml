@@ -1506,7 +1506,9 @@ let handle_mode
         | Some _fileinfo ->
           let raw_result = SymbolInfoService.helper ctx [] [filename] in
           let result = SymbolInfoService.format_result raw_result in
-          let result_json = ClientSymbolInfo.to_json result in
+          let result_json =
+            ServerCommandTypes.Symbol_info_service.to_json result
+          in
           print_endline (Hh_json.json_to_multiline result_json)
         | None -> ())
   | Lint ->
@@ -1563,7 +1565,9 @@ let handle_mode
                   naming_table
                   None
               in
-              ClientMethodJumps.print_readable ancestors ~find_children:false;
+              ServerCommandTypes.Method_jumps.print_readable
+                ancestors
+                ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
           List.iter fileinfo.FileInfo.classes (fun (_p, class_) ->
@@ -1579,7 +1583,9 @@ let handle_mode
                   naming_table
                   None
               in
-              ClientMethodJumps.print_readable children ~find_children:true;
+              ServerCommandTypes.Method_jumps.print_readable
+                children
+                ~find_children:true;
               Printf.printf "\n")
         ))
   | Identify_symbol (line, column) ->
@@ -1684,7 +1690,9 @@ let handle_mode
             ~init:SMap.empty
         in
         let patched =
-          ClientRefactor.apply_patches_to_file_contents file_contents patches
+          ServerRefactorTypes.apply_patches_to_file_contents
+            file_contents
+            patches
         in
         let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
         SMap.iter
@@ -1733,7 +1741,7 @@ let handle_mode
               @@ "should only happen with prechecked files "
               ^ "which are not a thing in hh_single_type_check"))
     in
-    ClientFindRefs.print_ide_readable results
+    ClientFindRefsPrint.print_ide_readable results
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
     let deps_mode = Provider_context.get_deps_mode ctx in
@@ -1776,7 +1784,7 @@ let handle_mode
             @@ "should only happen with prechecked files "
             ^ "which are not a thing in hh_single_type_check"
         in
-        ClientFindRefs.print_ide_readable results))
+        ClientFindRefsPrint.print_ide_readable results))
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

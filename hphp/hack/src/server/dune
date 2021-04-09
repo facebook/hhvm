@@ -8,6 +8,31 @@
     tast)
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
+
+(library
+  (name server_color_file)
+  (wrapped false)
+  (modules
+    colorFile)
+  (libraries 
+    typing_defs
+    ide_rpc_api_types
+    utils_core
+  )
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name server_file_outline)
+  (wrapped false)
+  (modules
+    fileOutline)
+  (libraries 
+    search
+    utils_core
+  )
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+
 (library
   (name server_env)
   (wrapped false)
@@ -160,7 +185,6 @@
   (wrapped false)
   (modules
     cstSearchService
-    fileOutline
     findRefsService
     identifySymbolService
     methodJumps
@@ -186,6 +210,7 @@
     search
     server_command_types
     server_env
+    server_file_outline
     server_pos
     sys_utils
     tast_check
@@ -222,7 +247,6 @@
   (wrapped false)
   (modules
     codemodTypePrinter
-    colorFile
     fullFidelityParseService
     searchServiceRunner
     serverBigCode

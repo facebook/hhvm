@@ -346,8 +346,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): Vector {
+  public function map((function()[_]: void) $callback)[ctx $callback]: Vector {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -360,8 +359,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): Vector {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: Vector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -374,8 +372,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): Vector {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: Vector {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -390,8 +387,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): Vector {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: Vector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -443,8 +439,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): Vector {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: Vector {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -478,8 +473,7 @@ final class Vector implements \MutableVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): Vector {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: Vector {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -739,8 +733,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
+  public function map((function()[_]: void) $callback)[ctx $callback]: ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -753,8 +746,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: ImmVector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -767,8 +759,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -783,8 +774,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: ImmVector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -836,8 +826,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -871,8 +860,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): ImmVector {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: ImmVector {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -975,8 +963,7 @@ final class ImmVector implements \ConstVector {
   /** Returns a Vector built from the values of this ImmVector.
    * @return object
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
-  public function toVector(): Vector {
+  public function toVector()[]: Vector {
     return new Vector($this);
   }
 
@@ -990,8 +977,7 @@ final class ImmVector implements \ConstVector {
   /** Returns a Map built from the keys and values of this ImmVector.
    * @return object
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
-  public function toMap(): Map {
+  public function toMap()[]: Map {
     return new Map($this);
   }
 
@@ -1005,8 +991,7 @@ final class ImmVector implements \ConstVector {
   /** Returns a Set built from the values of this ImmVector.
    * @return object
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
-  public function toSet(): Set {
+  public function toSet()[]: Set {
     return new Set($this);
   }
 

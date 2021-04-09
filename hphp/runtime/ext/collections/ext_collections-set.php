@@ -215,8 +215,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -229,8 +228,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     $ret = new \HH\Set();
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -243,8 +241,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -259,8 +256,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     $ret = new \HH\Set();
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -275,8 +271,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function retain((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     foreach ($this as $k => $v) {
       if (!$callback($v)) {
         $this->remove($k);
@@ -290,8 +285,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function retainWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     foreach ($this as $k => $v) {
       if (!$callback($k, $v)) {
         $this->remove($k);
@@ -319,8 +313,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\Set {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -343,8 +336,7 @@ final class Set implements \MutableSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Set {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\Set {
     $ret = new \HH\Set();
     $skipping = true;
     foreach ($this as $v) {
@@ -529,8 +521,8 @@ final class ImmSet implements \ConstSet {
   /** Returns a Vector built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toVector(): object;
+  <<__Native>>
+  public function toVector()[]: object;
 
   /** Returns a ImmVector built from the values of this ImmSet.
    * @return object
@@ -541,8 +533,8 @@ final class ImmSet implements \ConstSet {
   /** Returns a Map built from the keys and values of this ImmSet.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toMap(): object;
+  <<__Native>>
+  public function toMap()[]: object;
 
   /** Returns a ImmMap built from the keys and values of this ImmSet.
    * @return object
@@ -553,8 +545,8 @@ final class ImmSet implements \ConstSet {
   /** Returns a Set built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toSet(): object;
+  <<__Native>>
+  public function toSet()[]: object;
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -593,8 +585,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\ImmSet {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -607,8 +598,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmSet {
     $ret = new \HH\Set();
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -621,8 +611,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\ImmSet {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -637,8 +626,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmSet {
     $ret = new \HH\Set();
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -669,8 +657,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\ImmSet {
     $ret = new \HH\Set();
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -693,8 +680,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmSet {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\ImmSet {
     $ret = new \HH\Set();
     $skipping = true;
     foreach ($this as $v) {

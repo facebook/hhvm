@@ -508,13 +508,13 @@ function array_slice(
  * @return mixed - Returns the array consisting of the extracted elements.
  *
  */
-<<__Native, __Pure>>
+<<__Native>>
 function array_splice(
   inout mixed $input,
   int $offset,
   mixed $length = null,
   mixed $replacement = null,
-): mixed;
+)[]: mixed;
 
 /**
  * array_sum() returns the sum of values in an array.
@@ -707,13 +707,13 @@ function array_diff(mixed $container1, mixed $container2, ...$argv)[]: mixed;
  *   are not present in any of the other arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_udiff(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
+  (function()[_]: void) $data_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func]: mixed;
 
 /**
  * Compares array1 against array2 and returns the difference. Unlike
@@ -743,13 +743,13 @@ function array_diff_assoc(mixed $array1, mixed $array2, ...$argv)[]: mixed;
  *   that are not present in any of the other arrays.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_diff_uassoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $key_compare_func]: mixed;
 
 /**
  * Computes the difference of arrays with additional index check, compares
@@ -775,13 +775,13 @@ function array_diff_uassoc(
  *   comparison.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_udiff_assoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
+  (function()[_]: void) $data_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func]: mixed;
 
 /**
  * Computes the difference of arrays with additional index check, compares
@@ -807,14 +807,14 @@ function array_udiff_assoc(
  *   are not present in any of the other arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_udiff_uassoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $data_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func, ctx $key_compare_func]: mixed;
 
 /**
  * Compares the keys from container1 against the keys from container2 and
@@ -846,13 +846,13 @@ function array_diff_key(mixed $container1, mixed $container2, ...$argv)[]: mixed
  *   that are not present in any of the other arrays.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_diff_ukey(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $key_compare_func]: mixed;
 
 /**
  * array_intersect() returns an array containing all the values of container1
@@ -883,13 +883,13 @@ function array_intersect(mixed $container1, mixed $container2, ...$argv)[]: mixe
  *   are present in all the arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_uintersect(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
+  (function()[_]: void) $data_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func]: mixed;
 
 /**
  * @param mixed $array1 - The array with master values to check.
@@ -919,13 +919,13 @@ function array_intersect_assoc(mixed $array1, mixed $array2, ...$argv)[]: mixed;
  *   the arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_intersect_uassoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $key_compare_func]: mixed;
 
 /**
  * Computes the intersection of arrays with additional index check, compares
@@ -944,13 +944,13 @@ function array_intersect_uassoc(
  *   are present in all the arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_uintersect_assoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
+  (function()[_]: void) $data_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func]: mixed;
 
 /**
  * Computes the intersection of arrays with additional index check, compares
@@ -970,14 +970,14 @@ function array_uintersect_assoc(
  *   are present in all the arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_uintersect_uassoc(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $data_compare_func,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $data_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $data_compare_func, ctx $key_compare_func]: mixed;
 
 /**
  * array_intersect_key() returns an array containing all the entries of
@@ -1014,13 +1014,13 @@ function array_intersect_key(
  *   arguments.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
+<<__Native>>
 function array_intersect_ukey(
   mixed $array1,
   mixed $array2,
-  <<__AtMostRxAsFunc>> mixed $key_compare_func,
+  (function()[_]: void) $key_compare_func,
   ...$argv
-): mixed;
+)[ctx $key_compare_func]: mixed;
 
 /**
  * This function sorts an array. Elements will be arranged from lowest to
@@ -1208,8 +1208,8 @@ function uksort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
-function natsort(<<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array): bool;
+<<__Native>>
+function natsort(inout mixed $array)[]: bool;
 
 /**
  * natcasesort() is a case insensitive version of natsort(). This function
@@ -1222,10 +1222,8 @@ function natsort(<<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __Pure, __AtMostRxAsArgs>>
-function natcasesort(
-  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array
-): bool;
+<<__Native>>
+function natcasesort(inout mixed $array)[]: bool;
 
 <<__Native>>
 function i18n_loc_get_default(): string;
@@ -1255,12 +1253,12 @@ function i18n_loc_get_error_code(): mixed;
  *   not found.
  *
  */
-<<__Native, __HipHopSpecific, __IsFoldable, __Pure>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function hphp_array_idx(
-  <<__MaybeMutable>> mixed $search,
+  mixed $search,
   mixed $key,
   mixed $def,
-): mixed;
+)[]: mixed;
 
 /**
  * array_multisort() can be used to sort several arrays at once, or a

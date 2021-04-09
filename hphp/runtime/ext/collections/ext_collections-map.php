@@ -306,8 +306,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
+  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = new \HH\Map($this);
     foreach ($this as $k => $v) {
       $res[$k] = $callback($v);
@@ -320,8 +319,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = new \HH\Map($this);
     foreach ($this as $k => $v) {
       $res[$k] = $callback($k, $v);
@@ -334,8 +332,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
     foreach ($this as $k => $v) {
       if ($callback($v)) {
@@ -350,8 +347,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -431,8 +427,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
     foreach ($this as $k => $v) {
       if (!$callback($v)) {
@@ -467,8 +462,7 @@ final class Map implements \MutableMap {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Map {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\Map {
     $res = dict[];
     $skipping = true;
     foreach ($this as $k => $v) {
@@ -691,8 +685,8 @@ final class ImmMap implements \ConstMap {
   /** Returns a Vector built from the values of this ImmMap.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toVector(): object;
+  <<__Native>>
+  public function toVector()[]: object;
 
   /** Returns a ImmVector built from the values of this ImmMap.
    * @return object
@@ -703,8 +697,8 @@ final class ImmMap implements \ConstMap {
   /** Returns a Map built from the keys and values of this ImmMap.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toMap(): object;
+  <<__Native>>
+  public function toMap()[]: object;
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -716,8 +710,8 @@ final class ImmMap implements \ConstMap {
   /** Returns a Set built from the values of this ImmMap.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toSet(): object;
+  <<__Native>>
+  public function toSet()[]: object;
 
   /** Returns a ImmSet built from the values of this ImmMap.
    * @return object
@@ -787,8 +781,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
+  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = $this->toMap();
     foreach ($this as $k => $v) {
       $res[$k] = $callback($v);
@@ -801,8 +794,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
+  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = $this->toMap();
     foreach ($this as $k => $v) {
       $res[$k] = $callback($k, $v);
@@ -815,8 +807,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
+  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
     foreach ($this as $k => $v) {
       if ($callback($v)) {
@@ -831,8 +822,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
+  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -884,8 +874,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
+  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
     foreach ($this as $k => $v) {
       if (!$callback($v)) {
@@ -920,8 +909,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $fn
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmMap {
+  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\ImmMap {
     $res = dict[];
     $skipping = true;
     foreach ($this as $k => $v) {

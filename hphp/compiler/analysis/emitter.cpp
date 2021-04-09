@@ -182,9 +182,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
 
-  for (auto a : Option::APCProfile) {
-    gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
-  }
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

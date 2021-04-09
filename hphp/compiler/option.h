@@ -96,8 +96,6 @@ struct Option {
   static bool GenerateBinaryHHBC;
   static std::string RepoCentralPath;
 
-  static std::vector<std::string> APCProfile;
-
   /**
    * A somewhat unique prefix for system identifiers.
    */

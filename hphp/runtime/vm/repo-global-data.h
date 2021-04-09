@@ -164,8 +164,6 @@ struct Repo::GlobalData {
    */
   HackStrictOption StrictArrayFillKeys = HackStrictOption::OFF;
 
-  std::vector<const StringData*> APCProfile;
-
   std::vector<std::pair<std::string,TypedValue>> ConstantFunctions;
 
   std::unique_ptr<RepoAutoloadMap> AutoloadMap = nullptr;

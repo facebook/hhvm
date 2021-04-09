@@ -1,1 +1,2 @@
-'-vConstantFunctions.0=foo|i:42;' '-vConstantFunctions.1=X::bar|i:24;' -vAPCProfile.0=foobar
+'-vConstantFunctions.0=foo|i:42;' '-vConstantFunctions.1=X::bar|i:24;'
+

@@ -222,7 +222,6 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
           BlobDecoder decoder = query.getBlob(0, true);
           auto& arrayTypeTable = globalArrayTypeTable();
           decoder(arrayTypeTable);
-          decoder(s_globalData.APCProfile);
           decoder(s_globalData.ConstantFunctions);
           decoder.assertDone();
         }
@@ -347,7 +346,6 @@ void Repo::saveGlobalData(GlobalData&& newData,
     query.bindStdString("@key", key);
     BlobEncoder encoder{true};
     encoder(globalArrayTypeTable());
-    encoder(s_globalData.APCProfile);
     encoder(s_globalData.ConstantFunctions);
     query.bindBlob("@data", encoder, /* static */ true);
     query.exec();

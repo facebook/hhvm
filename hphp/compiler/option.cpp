@@ -63,8 +63,6 @@ std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
 std::map<std::string,std::string> Option::AutoloadConstMap;
 std::string Option::AutoloadRoot;
 
-std::vector<std::string> Option::APCProfile;
-
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
@@ -182,8 +180,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
-
-  Config::Bind(APCProfile, ini, config, "APCProfile");
 
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",

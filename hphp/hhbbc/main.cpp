@@ -268,8 +268,7 @@ void open_repo(const std::string& path) {
   Repo::get();
 }
 
-template<typename F>
-std::vector<SString> load_input(F&& fun) {
+template<typename F> void load_input(F&& fun) {
   trace_time timer("load units");
 
   open_repo(input_repo);
@@ -333,7 +332,6 @@ std::vector<SString> load_input(F&& fun) {
       );
     }
   );
-  return Repo().get().global().APCProfile;
 }
 
 void write_units(UnitEmitterQueue& ueq,
@@ -364,7 +362,6 @@ void write_units(UnitEmitterQueue& ueq,
 
 void write_global_data(
   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
-  std::vector<SString> apcProfile,
   const RepoAutoloadMapBuilder& autoloadMapBuilder) {
 
   auto const now = std::chrono::high_resolution_clock::now();
@@ -383,7 +380,6 @@ void write_global_data(
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
-  gd.APCProfile                  = std::move(apcProfile);
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
   gd.ForbidDynamicCallsToClsMeth =
     RuntimeOption::EvalForbidDynamicCallsToClsMeth;
@@ -436,7 +432,7 @@ void write_global_data(
 void compile_repo() {
   auto program = make_program();
 
-  auto apcProfile = load_input(
+  load_input(
     [&] (size_t size, std::unique_ptr<UnitEmitter> ue) {
       if (!ue) {
         if (logging) {
@@ -467,7 +463,7 @@ void compile_repo() {
   {
     RepoAutoloadMapBuilder autoloadMapBuilder;
     write_units(ueq, autoloadMapBuilder);
-    write_global_data(arrTable, apcProfile, autoloadMapBuilder);
+    write_global_data(arrTable, autoloadMapBuilder);
   }
 
   wp_thread.waitForEnd();
@@ -479,7 +475,7 @@ void compile_repo() {
 void print_repo_bytecode_stats() {
   std::array<std::atomic<uint64_t>,Op_count> op_counts{};
 
-  auto const input = load_input(
+  load_input(
     [&] (size_t, std::unique_ptr<UnitEmitter> ue) {
       if (!ue) return;
 

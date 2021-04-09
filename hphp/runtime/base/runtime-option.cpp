@@ -893,6 +893,7 @@ std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
 std::string RuntimeOption::AutoloadDBPath;
+bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::GlobalDocument;
@@ -2502,6 +2503,7 @@ void RuntimeOption::Load(
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DBPath");
+    Config::Bind(AutoloadRethrowExceptions, ini, config, "Autoload.RethrowExceptions", true);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",

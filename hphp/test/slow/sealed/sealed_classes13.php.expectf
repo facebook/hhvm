@@ -1,1 +1,1 @@
-Fatal error: Class undefined: SomeInterface2 in %s/test/slow/sealed/sealed_classes13.php on line 16
+Fatal error: Class SomeInterface2 may not inherit from sealed interface (MyInterface) without being in the whitelist in %s/test/slow/sealed/sealed_classes13.inc on line 3

@@ -477,6 +477,7 @@ struct RuntimeOption {
 
   static bool AutoloadEnabled;
   static std::string AutoloadDBPath;
+  static bool AutoloadRethrowExceptions;
 
   static std::string FileCache;
   static std::string DefaultDocument;

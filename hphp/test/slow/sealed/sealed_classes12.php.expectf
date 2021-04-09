@@ -1,1 +1,1 @@
-Fatal error: Class undefined: Class2 in %s/test/slow/sealed/sealed_classes12.php on line 16
+Fatal error: Class Class2 may not inherit from sealed class (SomeClass) without being in the whitelist in %s/test/slow/sealed/sealed_classes12.inc on line 3

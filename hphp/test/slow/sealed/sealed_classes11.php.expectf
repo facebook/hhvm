@@ -1,1 +1,1 @@
-Fatal error: Class undefined: SomeTrait2 in %s/test/slow/sealed/sealed_classes11.php on line 16
+Fatal error: Class SomeTrait2 may not inherit from sealed class (MyTrait) without being in the whitelist in %s/test/slow/sealed/sealed_classes11.inc on line 3

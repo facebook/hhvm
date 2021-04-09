@@ -238,6 +238,12 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   }
   bool ok = false;
   String fName = *file;
+  // Utility for logging errors in server mode.
+  auto log_err = [](char const* const msg) {
+    if (RuntimeOption::ServerMode) {
+      Logger::Error("Exception: AutoloadMap::loadFromMapImpl: %s", msg);
+    }
+  };
   try {
     VMRegAnchor _;
     bool initial;
@@ -248,23 +254,37 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       if (initial) unit->merge();
       ok = true;
     }
-  } catch (ExitException&) {
+  } catch (ExitException& ee) {
     throw;
-  } catch (ResourceExceededException&) {
+  } catch (ResourceExceededException& ree) {
     throw;
   } catch (ExtendedException& ee) {
     auto fileAndLine = ee.getFileAndLine();
-    err = (fileAndLine.first.empty())
+    std::string msg =
+      (fileAndLine.first.empty())
       ? ee.getMessage()
       : folly::format("{} in {} on line {}",
                       ee.getMessage(), fileAndLine.first,
                       fileAndLine.second).str();
+    if (RuntimeOption::AutoloadRethrowExceptions) {
+      throw;
+    }
+    log_err(msg.c_str());
+    err = msg;
   } catch (Exception& e) {
-    err = e.getMessage();
+    auto msg = e.getMessage();
+    if (RuntimeOption::AutoloadRethrowExceptions) {
+      throw;
+    }
+    log_err(msg.c_str());
+    err = msg;
   } catch (Object& e) {
+    log_err(e.toString().c_str());
     err = e;
   } catch (...) {
-    err = String("Unknown Exception");
+    String msg = "Unknown exception";
+    log_err(msg.c_str());
+    err = msg;
   }
   if (ok && checkExists()) {
     return AutoloadMap::Result::Success;

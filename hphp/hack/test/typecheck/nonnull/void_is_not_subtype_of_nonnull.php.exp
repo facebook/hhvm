@@ -1,6 +1,6 @@
 File "void_is_not_subtype_of_nonnull.php", line 6, characters 10-12:
 Invalid return type (Typing[4110])
-File "void_is_not_subtype_of_nonnull.php", line 5, characters 15-21:
-Expected `nonnull`
-File "void_is_not_subtype_of_nonnull.php", line 3, characters 15-18:
-But got `void`
+  File "void_is_not_subtype_of_nonnull.php", line 5, characters 15-21:
+  Expected `nonnull`
+  File "void_is_not_subtype_of_nonnull.php", line 3, characters 15-18:
+  But got `void`

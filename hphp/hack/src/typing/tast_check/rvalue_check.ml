@@ -73,6 +73,7 @@ let visitor =
     method! on_stmt env stmt =
       match snd stmt with
       | Expr e -> this#allow_non_returning (fun () -> this#on_expr env e)
+      | Return (Some (_, Hole (e, _, _, _)))
       | Return (Some e) ->
         this#allow_non_returning (fun () -> this#on_expr env e)
       | For (e1, e2, e3, b) ->

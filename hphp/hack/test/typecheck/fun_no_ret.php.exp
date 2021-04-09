@@ -1,6 +1,6 @@
 File "fun_no_ret.php", line 14, characters 10-13:
 Invalid return type (Typing[4110])
-File "fun_no_ret.php", line 12, characters 17-19:
-Expected `int`
-File "fun_no_ret.php", line 13, characters 8-21:
-But got `void` because this function does not always return a value
+  File "fun_no_ret.php", line 12, characters 17-19:
+  Expected `int`
+  File "fun_no_ret.php", line 13, characters 8-21:
+  But got `void` because this function does not always return a value

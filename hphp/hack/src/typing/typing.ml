@@ -98,18 +98,42 @@ let hole_on_err te ~err_opt =
 let pack_errs pos ty subtyping_errs =
   let nothing = MakeType.nothing @@ Reason.Rsolve_fail pos in
   let rec aux ~k = function
+    (* Case 1: we have a type error at this positional parameter so
+       replace the type parameter which caused it with the expected type *)
     | ((Some (_, ty) :: rest, var_opt), _ :: tys)
+    (* Case 2: there was no type error here so retain the original type
+       parameter *)
     | ((None :: rest, var_opt), ty :: tys) ->
-      aux ((rest, var_opt), tys) ~k:(fun tys -> k @@ (ty :: tys))
+      (* recurse for any remaining positional parameters and add the
+         corrected (case 1) or original (case 2) type to the front of the
+         list of type parameters in the continuation *)
+      aux ((rest, var_opt), tys) ~k:(fun tys -> k (ty :: tys))
+    (* Case 3: we have a type error at the variadic parameter so replace
+       the type parameter which cased it with the expected type *)
     | ((_, (Some (_, ty) as var_opt)), _ :: tys) ->
-      aux (([], var_opt), tys) ~k:(fun tys -> k @@ (ty :: tys))
+      (* recurse with the variadic parameter error and add the
+         corrected type to the front of the list of type parameters in the
+         continuation *)
+      aux (([], var_opt), tys) ~k:(fun tys -> k (ty :: tys))
+    (* Case 4: we have a variadic parameter but no error - we're done so
+       pass the remaining unchanged type parameters into the contination
+       to rebuild corrected type params in the right order *)
     | ((_, None), tys) -> k tys
+    (* Case 5: no more type parameters - again we're done so pass empty
+       list to continuation and rebuild corrected type params in the right
+       order *)
     | (_, []) -> k []
   in
+  (* The only types that _can_ be upacked are tuples and pairs; match on the
+     type to get the type parameters, pass them to our recursive function
+     aux to subsitute the expected type where we have a type error
+     then reconstruct the type in the continuation *)
   match deref ty with
-  | (r, Ttuple tys) -> mk (r, Ttuple (aux ~k:Fn.id (subtyping_errs, tys)))
+  | (r, Ttuple tys) ->
+    aux (subtyping_errs, tys) ~k:(fun tys -> mk (r, Ttuple tys))
   | (r, Tclass (pos_id, exact, tys)) ->
-    mk (r, Tclass (pos_id, exact, aux ~k:Fn.id (subtyping_errs, tys)))
+    aux (subtyping_errs, tys) ~k:(fun tys ->
+        mk (r, Tclass (pos_id, exact, tys)))
   | _ -> nothing
 
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
@@ -650,6 +674,7 @@ and enforce_return_disposable _env e =
   | (_, New _) -> ()
   | (_, Call _) -> ()
   | (_, Await (_, Call _)) -> ()
+  | (_, Hole (e, _, _, _)) -> enforce_return_disposable _env e
   | (p, _) -> Errors.invalid_return_disposable p
 
 (* Wrappers around the function with the same name in Typing_lenv, which only
@@ -818,17 +843,20 @@ and stmt_ env pos st =
     in
     (* This is a unify_error rather than a return_type_mismatch because the return
      * statement is the problem, not the return type itself. *)
-    let env =
-      Typing_coercion.coerce_type
-        expr_pos
-        Reason.URreturn
-        env
-        rty
-        return_type
-        Errors.unify_error
+    let (env, err_opt) =
+      Result.fold
+        ~ok:(fun env -> (env, None))
+        ~error:(fun env -> (env, Some (rty, return_type.et_type)))
+      @@ Typing_coercion.coerce_type_res
+           expr_pos
+           Reason.URreturn
+           env
+           rty
+           return_type
+           Errors.unify_error
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-    (env, Aast.Return (Some te))
+    (env, Aast.Return (Some (hole_on_err ~err_opt te)))
   | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).

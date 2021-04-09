@@ -1,0 +1,13 @@
+[(Fun
+    { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), (Some ([3:27-30], (Hprim Tint)))); 
+      f_name = ([3:10-24], "\\return_literal"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+      f_body = { fb_ast = [([5:3-16], (Return (Some (([5:10-15], bool), (Hole ((([5:10-15], bool), False), (bool), (int), Typing))))))]; fb_annotation = () }; 
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None })

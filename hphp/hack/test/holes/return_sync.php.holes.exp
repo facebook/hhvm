@@ -1,0 +1,21 @@
+[(Fun
+    { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Pair<int, bool>), (Some ([3:25-40], (Happly (([3:25-29], "\\HH\\Pair"), [([3:30-33], (Hprim Tint)); ([3:35-39], (Hprim Tbool))])))));
+      f_name = ([3:10-21], "\\return_sync"); f_tparams = []; f_where_constraints = []; 
+      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+      f_body =
+      { fb_ast =
+        [([4:3-25],
+          (Expr
+             (([4:3-24], Pair<int, string>),
+              (Binop ((Eq None), (([4:3-5], Pair<int, string>), (Lvar ([4:3-5], $x))),
+                 (([4:8-24], Pair<int, string>), (Pair (None, (([4:14-15], int), (Int "2")), (([4:17-23], string), (String "true"))))))))));
+          ([6:3-13], (Return (Some (([6:10-12], Pair<int, string>), (Hole ((([6:10-12], Pair<int, string>), (Lvar ([6:10-12], $x))), (Pair<int, string>), (Pair<int, bool>), Typing))))))];
+        fb_annotation = () };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None })

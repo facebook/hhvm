@@ -43,7 +43,7 @@ let test () =
     loop_output
     [
       "checked: 6";
-      "partial: 1";
+      "partial: 2";
       "unchecked: 2";
       "File \"/foo.php\", line 4, characters 10-11: partial";
       "File \"/foo.php\", line 7, characters 10-12: checked";

@@ -582,6 +582,7 @@ void Class::releaseRefs() {
   if (m_extra) {
     auto xtra = m_extra.raw();
     xtra->m_usedTraits.clear();
+    xtra->m_declIncludedEnums.clear();
 
     if (xtra->m_clonesWithThisScope.size() > 0) {
       WriteLock l(s_scope_cache_mutex);
@@ -671,17 +672,18 @@ Class::Avail Class::avail(Class*& parent,
   }
 
   if (m_preClass->attrs() & (AttrEnum|AttrEnumClass)) {
-    auto const& ie = m_extra->m_includedEnums;
+    auto const& ie = m_extra->m_declIncludedEnums;
     for (size_t i = 0; i < ie.size(); ++i) {
+      auto const de = ie[i].get();
       auto const penum = ie[i]->m_preClass.get();
       auto const included_enum = Class::get(penum->namedEntity(),
                                             penum->name(), tryAutoload);
-      if (included_enum != ie[i]) {
+      if (included_enum != de) {
         if (!included_enum) {
-          parent = ie[i].get();
+          parent = de;
           return Avail::Fail;
         }
-        if (UNLIKELY(ie[i]->isZombie())) {
+        if (UNLIKELY(de->isZombie())) {
           const_cast<Class*>(this)->destroy();
         }
         return Avail::False;
@@ -3923,6 +3925,8 @@ void Class::setIncludedEnums() {
 
   allocExtraData();
 
+  std::vector<ClassPtr> declIncludedEnums;
+
   for (auto it = m_preClass->includedEnums().begin();
        it != m_preClass->includedEnums().end(); ++it) {
     auto cp = Class::load(*it);
@@ -3934,6 +3938,7 @@ void Class::setIncludedEnums() {
                   m_preClass->name()->data(), cp->name()->data(),
                   isEnumClass(this) ? " class" : "");
     }
+    declIncludedEnums.emplace_back(cp);
     m_preClass->enforceInMaybeSealedParentWhitelist(cp->preClass());
     auto cp_baseType = cp->m_enumBaseTy;
     if (m_enumBaseTy &&
@@ -3955,6 +3960,11 @@ void Class::setIncludedEnums() {
     }
   }
 
+  m_extra->m_declIncludedEnums.insert(
+    m_extra->m_declIncludedEnums.begin(),
+    declIncludedEnums.begin(),
+    declIncludedEnums.end()
+  );
   m_extra->m_includedEnums.create(includedEnumsBuilder);
 }
 

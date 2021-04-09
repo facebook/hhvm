@@ -1594,6 +1594,11 @@ private:
      * List of enums included by an enum class
      */
     mutable IncludedEnumMap m_includedEnums;
+
+    /*
+     * List of enums included directly by this class
+     */
+    mutable VMCompactVector<ClassPtr> m_declIncludedEnums;
   };
 
   /*

@@ -2188,73 +2188,35 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 }
 
 /* gathering all constants that appear in a constant initializer expression */
-/* TODO: hand written reducer, temporary until we get a visitor for by-ref.
- * Here are the expressions that are not yet supported:
- Darray
- Varray
- Shape
- ValCollection
- KeyValCollection
- Collection
- Clone
- ArrayGet
- ObjGet
- ClassGet
- Call
- Yield
- Eif
- Is
- As
- New
- Record
- Efun
- Lfun
- Xml
- Callconv
- Import
- ExpressionTree
- MethodId
- MethodCaller
- SmethodId
- ETSplice
-*/
-fn constants_from_expr<'a>(
-    arena: &'a Bump,
-    acc: &mut BTreeSet<typing_defs::ClassConstRef<'a>>,
-    expr: &'a nast::Expr<'a>,
-) {
-    use aast::Expr_::*;
-    /* Very approximative match, to test the idea first */
-    match expr.1 {
-        PrefixedString(&(_, expr)) => constants_from_expr(arena, acc, expr),
-        String2(args) | List(args) => args
-            .iter()
-            .for_each(|arg| constants_from_expr(arena, acc, arg)),
-        Cast(&(_, expr)) | Unop(&(_, expr)) | Await(expr) | ReadonlyExpr(expr) => {
-            constants_from_expr(arena, acc, expr)
-        }
+struct GatherConstants<'a>(BTreeSet<typing_defs::ClassConstRef<'a>>);
 
-        Binop(&(_, lhs, rhs)) | Pair(&(_, lhs, rhs)) | Pipe(&(_, lhs, rhs)) => {
-            constants_from_expr(arena, acc, lhs);
-            constants_from_expr(arena, acc, rhs)
+impl<'a> oxidized_by_ref::nast_visitor::Visitor<'a> for GatherConstants<'a> {
+    fn object(&mut self) -> &mut dyn oxidized_by_ref::nast_visitor::Visitor<'a> {
+        self
+    }
+    fn visit_expr(&mut self, expr: &'a nast::Expr<'a>) {
+        use oxidized_by_ref::nast_visitor::Node;
+        expr.recurse(self.object());
+        if let aast::Expr_::ClassConst(&(cid, name)) = expr.1 {
+            match cid.1 {
+                nast::ClassId_::CI(sid) => {
+                    self.0.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::From(sid.1),
+                        name.1,
+                    ));
+                }
+                nast::ClassId_::CIself => {
+                    self.0.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::Self_,
+                        name.1,
+                    ));
+                }
+                // Not allowed
+                nast::ClassId_::CIparent
+                | nast::ClassId_::CIstatic
+                | nast::ClassId_::CIexpr(_) => {}
+            }
         }
-        ClassConst(&(cid, name)) => match &cid.1 {
-            nast::ClassId_::CI(sid) => {
-                let ccref =
-                    typing_defs::ClassConstRef(typing_defs::ClassConstFrom::From(sid.1), name.1);
-                let _ = acc.insert(ccref);
-            }
-            nast::ClassId_::CIself => {
-                let ccref = typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, name.1);
-                let _ = acc.insert(ccref);
-            }
-            nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {}
-        },
-        Null | This | True | False | Omitted | Id(_) | Lvar(_) | Dollardollar(_)
-        | FunctionPointer(_) | Int(_) | Float(_) | String(_) | Lplaceholder(_) | FunId(_)
-        | EnumAtom(_) | Any => {}
-
-        _ => {}
     }
 }
 
@@ -2262,12 +2224,12 @@ fn gather_constants<'a>(
     arena: &'a Bump,
     expr: &'a nast::Expr<'a>,
 ) -> &'a [typing_defs::ClassConstRef<'a>] {
-    let mut acc = BTreeSet::new();
-    constants_from_expr(arena, &mut acc, expr);
+    use oxidized_by_ref::nast_visitor::Visitor;
+    let mut visitor = GatherConstants(BTreeSet::new());
+    visitor.visit_expr(expr);
+    let acc = visitor.0;
     let mut elements = bumpalo::collections::Vec::with_capacity_in(acc.len(), arena);
-    for k in acc.into_iter() {
-        elements.push(k)
-    }
+    elements.extend(acc.into_iter());
     elements.into_bump_slice()
 }
 

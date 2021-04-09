@@ -327,9 +327,10 @@ ArrayLayout selectSinkLayout(
   uint64_t total = 0;
 
   for (auto const& it : profile.data->sources) {
-    if (it.first->layout.vanilla()) {
+    auto const layout = it.first->getLayout();
+    if (layout.vanilla()) {
       vanilla += it.second;
-    } else if (it.first->layout.monotype()) {
+    } else if (layout.monotype()) {
       monotype += it.second;
     }
     total += it.second;
@@ -386,20 +387,15 @@ ArrayLayout selectSinkLayout(
 
 ArrayLayout layoutForSource(SrcKey sk) {
   auto const profile = getLoggingProfile(sk);
-  return profile ? profile->layout : ArrayLayout::Vanilla();
+  return profile ? profile->getLayout() : ArrayLayout::Vanilla();
 }
 
 ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
-  // TODO(kshaunak): Delete this block when we can ser/de bespoke profiles.
-  auto const mode = RO::EvalBespokeArraySpecializationMode;
-  if (mode == 1) return ArrayLayout::Vanilla();
-  if (mode == 2) return ArrayLayout::Top();
-
   if (ids.empty()) return ArrayLayout::Top();
   auto result = ArrayLayout::Bottom();
   for (auto const id : ids) {
     auto const profile = getSinkProfile(id, sk);
-    if (profile) result = result | profile->layout;
+    if (profile) result = result | profile->getLayout();
   }
   return result == ArrayLayout::Bottom() ? ArrayLayout::Top() : result;
 }
@@ -413,8 +409,8 @@ void selectBespokeLayouts() {
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
-  eachSource([&](auto& x) { x.applyLayout(selectSourceLayout(x, sar)); });
-  eachSink([&](auto& x) { x.layout = selectSinkLayout(x, sar); });
+  eachSource([&](auto& x) { x.setLayout(selectSourceLayout(x, sar)); });
+  eachSink([&](auto& x) { x.setLayout(selectSinkLayout(x, sar)); });
   Layout::FinalizeHierarchy();
   startExportProfiles();
 }

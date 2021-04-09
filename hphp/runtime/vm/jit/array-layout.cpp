@@ -416,12 +416,12 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   write_raw(ser, bespoke::countSources());
   bespoke::eachSource([&](auto const& profile) {
     write_source_key(ser, profile.key);
-    write_raw(ser, profile.layout);
+    write_raw(ser, profile.getLayout());
   });
   write_raw(ser, bespoke::countSinks());
   bespoke::eachSink([&](auto const& profile) {
     write_sink_key(ser, profile.key);
-    write_raw(ser, profile.layout);
+    write_raw(ser, profile.getLayout());
   });
 }
 

@@ -1094,7 +1094,8 @@ bool specializeSource(IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return false;
   auto const profile = bespoke::getLoggingProfile(sk);
-  if (profile == nullptr || !profile->layout.bespoke()) return false;
+  auto const layout = profile ? profile->getLayout() : ArrayLayout::Top();
+  if (!layout.bespoke()) return false;
 
   if (auto const bad = profile->getStaticBespokeArray()) {
     assertx(arrayTypeCouldBeBespoke(bad->toDataType()));
@@ -1103,8 +1104,8 @@ bool specializeSource(IRGS& env, SrcKey sk) {
     return true;
   }
 
-  assertx(profile->layout.is_struct());
-  return specializeStructSource(env, sk, profile->layout);
+  assertx(layout.is_struct());
+  return specializeStructSource(env, sk, layout);
 }
 
 }

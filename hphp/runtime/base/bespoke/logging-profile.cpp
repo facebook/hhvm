@@ -372,10 +372,14 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
   }
 }
 
-void LoggingProfile::applyLayout(jit::ArrayLayout layout) {
-  this->layout = layout;
+jit::ArrayLayout LoggingProfile::getLayout() const {
+  return layout.load(std::memory_order_acquire);
+}
+
+void LoggingProfile::setLayout(jit::ArrayLayout layout) {
+  this->layout.store(layout, std::memory_order_release);
   if (key.isRuntimeLocation() && layout.is_struct()) {
-    // TODO(mcolavita): We can support other types of runtime bespokes.
+    // TODO(mcolavita): setLayout should trigger setStaticBespokeArray.
     key.runtimeStruct->applyLayout(StructLayout::As(layout.bespokeLayout()));
   }
 }
@@ -393,6 +397,14 @@ SinkProfile::SinkProfile(SinkProfileKey key, jit::ArrayLayout layout)
   : key(key)
   , layout(layout)
 {}
+
+jit::ArrayLayout SinkProfile::getLayout() const {
+  return layout.load(std::memory_order_acquire);
+}
+
+void SinkProfile::setLayout(jit::ArrayLayout layout) {
+  this->layout.store(layout, std::memory_order_release);
+}
 
 void SinkProfile::update(const ArrayData* ad) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
@@ -757,7 +769,7 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                   sourceProfile->data->sampleCount.load(), sourceData.weight);
     LOG_OR_RETURN(file, "  {}\n", sourceProfile->key.toStringDetail());
     LOG_OR_RETURN(file, "  Selected Layout: {}\n",
-                  sourceProfile->layout.describe());
+                  sourceProfile->getLayout().describe());
     LOG_OR_RETURN(file, "  {} reads, {} writes\n",
                   sourceData.readCount, sourceData.writeCount);
 
@@ -801,7 +813,7 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
                   sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
     LOG_OR_RETURN(file, "  Selected Layout: {}\n",
-                  sink.profile->layout.describe());
+                  sink.profile->getLayout().describe());
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;

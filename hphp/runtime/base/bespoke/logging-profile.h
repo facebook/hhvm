@@ -241,18 +241,18 @@ struct LoggingProfile {
   BespokeArray* getStaticBespokeArray() const;
   void setStaticBespokeArray(BespokeArray* array);
 
-  void applyLayout(jit::ArrayLayout layout);
+  jit::ArrayLayout getLayout() const;
+  void setLayout(jit::ArrayLayout layout);
 
 private:
   void logEventImpl(const EventKey& key);
 
 public:
   LoggingProfileKey key;
-  jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
-  // TODO(mcolavita): These fields could become a union.
   std::unique_ptr<LoggingProfileData> data;
 
 private:
+  std::atomic<jit::ArrayLayout> layout = jit::ArrayLayout::Bottom();
   BespokeArray* staticBespokeArray = nullptr;
 };
 
@@ -285,6 +285,9 @@ struct SinkProfile {
     KeyOrderMap keyOrders;
   };
 
+  jit::ArrayLayout getLayout() const;
+  void setLayout(jit::ArrayLayout layout);
+
   void update(const ArrayData* ad);
 
   explicit SinkProfile(SinkProfileKey key);
@@ -294,9 +297,10 @@ struct SinkProfile {
 
 public:
   SinkProfileKey key;
-  // TODO(mcolavita): These fields could become a union.
   std::unique_ptr<SinkProfileData> data;
-  jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
+
+private:
+  std::atomic<jit::ArrayLayout> layout = jit::ArrayLayout::Bottom();
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey

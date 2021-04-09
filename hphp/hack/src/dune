@@ -15,7 +15,7 @@
     default_injector_config
     file_content
     gen_deps
-    glean_dependency_graph_stubs
+    glean_dependency_graph_convert
     hhi
     parent
     server

@@ -164,6 +164,17 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name glean_dependency_graph_convert_stubs)
+  (wrapped false)
+  (modules
+    glean_dependency_graph_convert)
+  (libraries
+    hh_json
+    collections)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name glean_dependency_graph_stubs)
   (wrapped false)
   (modules

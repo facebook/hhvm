@@ -1408,7 +1408,7 @@ let dump_debug_glean_deps
       ( Typing_deps.Dep.dependency Typing_deps.Dep.variant
       * Typing_deps.Dep.dependent Typing_deps.Dep.variant )
       HashSet.t) =
-  let json_opt = Glean_dependency_graph.convert_deps_to_json ~deps in
+  let json_opt = Glean_dependency_graph_convert.convert_deps_to_json ~deps in
   match json_opt with
   | Some json_obj ->
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)

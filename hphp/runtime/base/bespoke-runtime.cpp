@@ -222,6 +222,7 @@ void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
     // field.
     FTRACE(2, "StructDictInit set at key {}, escalate\n", key.get());
     m_arr = sad->escalateWithCapacity(m_escalateCapacity, "StructDictInit");
+    StructDict::Release(sad);
     assertx(m_arr->isVanillaDict());
     m_struct = nullptr;
 

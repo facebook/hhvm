@@ -146,17 +146,17 @@ template<class T> using SStringToOneT =
   >;
 
 /*
- * One-to-one case insensitive map, where the keys are static strings
+ * One-to-one case sensitive map, where the keys are static strings
  * and the values are some T.
  *
  * Elements are not stable under insert/erase.
  */
-template<class T> using ISStringToOneFastT =
+template<class T> using SStringToOneFastT =
   hphp_fast_map<
     SString,
     T,
     string_data_hash,
-    string_data_isame
+    string_data_same
   >;
 
 /*
@@ -499,14 +499,14 @@ struct ClassInfo {
   CompactVector<php::Const> traitConsts;
 
   /*
-   * A (case-insensitive) map from class method names to the php::Func
+   * A (case-sensitive) map from class method names to the php::Func
    * associated with it.  This map is flattened across the inheritance
    * hierarchy.
    */
-  ISStringToOneT<MethTabEntry> methods;
+  SStringToOneT<MethTabEntry> methods;
 
   /*
-   * A (case-insensitive) map from class method names to associated
+   * A (case-sensitive) map from class method names to associated
    * FuncFamily objects that group the set of possibly-overriding
    * methods.
    *
@@ -516,7 +516,7 @@ struct ClassInfo {
    * Invariant: methods on this class with AttrNoOverride or
    * AttrPrivate will not have an entry in this map.
    */
-  ISStringToOneFastT<FuncFamily> methodFamilies;
+  SStringToOneFastT<FuncFamily> methodFamilies;
 
   /*
    * Subclasses of this class, including this class itself.

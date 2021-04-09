@@ -1,0 +1,132 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-20], "\\TestImmVector"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "k"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:36-38], ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([4:21-35], (Happly (([4:21-30], "\\HH\\ImmVector"), [([4:31-34], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [4:36-38]; param_name = "$k"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-39]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\k"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:27-29], ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([7:12-26], (Happly (([7:12-21], "\\HH\\ImmVector"), [([7:22-25], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [7:27-29]; param_name = "$k"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
+       f_name = ([9:10-24], "\\call_immvector"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:20-22], ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([10:3-19], (Happly (([10:3-12], "\\HH\\ImmVector"), [([10:13-18], (Hprim Tfloat))])))));
+          param_is_variadic = false; param_pos = [10:20-22]; param_name = "$k"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([13:3-9],
+           (Expr
+              (([13:3-8], void),
+               (Call ((([13:3-4], (function(ImmVector<int> $k): void)), (Id ([13:3-4], "\\k"))), 
+                  [], [(([13:5-7], ImmVector<float>), (Hole ((([13:5-7], ImmVector<float>), (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))));
+           ([15:3-30],
+            (Expr
+               (([15:3-29], TestImmVector),
+                (Binop ((Eq None), (([15:3-7], TestImmVector), (Lvar ([15:3-7], $foo))),
+                   (([15:10-29], TestImmVector), (New ((([15:14-27], TestImmVector), (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ([15:14-27], _)))))))));
+           ([18:3-15],
+            (Expr
+               (([18:3-14], void),
+                (Call (
+                   (([18:3-10], (function(ImmVector<int> $k): void)),
+                    (Obj_get ((([18:3-7], TestImmVector), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(ImmVector<int> $k): void)), (Id ([18:9-10], "k"))), OG_nullthrows, false))),
+                   [], [(([18:11-13], ImmVector<float>), (Hole ((([18:11-13], ImmVector<float>), (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
+       f_name = ([21:10-29], "\\call_immvector_cast"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([22:20-22], ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([22:3-19], (Happly (([22:3-12], "\\HH\\ImmVector"), [([22:13-18], (Hprim Tfloat))])))));
+          param_is_variadic = false; param_pos = [22:20-22]; param_name = "$k"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([25:3-55],
+           (Expr
+              (([25:3-54], void),
+               (Call ((([25:3-4], (function(ImmVector<int> $k): void)), (Id ([25:3-4], "\\k"))), 
+                  [], [(([25:5-53], ImmVector<int>), (Hole ((([25:50-52], ImmVector<float>), (Lvar ([25:50-52], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))));
+           ([27:3-30],
+            (Expr
+               (([27:3-29], TestImmVector),
+                (Binop ((Eq None), (([27:3-7], TestImmVector), (Lvar ([27:3-7], $foo))),
+                   (([27:10-29], TestImmVector), (New ((([27:14-27], TestImmVector), (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ([27:14-27], _)))))))));
+           ([30:3-61],
+            (Expr
+               (([30:3-60], void),
+                (Call (
+                   (([30:3-10], (function(ImmVector<int> $k): void)),
+                    (Obj_get ((([30:3-7], TestImmVector), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(ImmVector<int> $k): void)), (Id ([30:9-10], "k"))), OG_nullthrows, false))),
+                   [], [(([30:11-59], ImmVector<int>), (Hole ((([30:56-58], ImmVector<float>), (Lvar ([30:56-58], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

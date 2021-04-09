@@ -1,0 +1,164 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-16], "\\TestTuple"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-44]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "a"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:32-34], (int, int)); param_type_hint = (((int, int)), (Some ([4:21-31], (Htuple [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]))));
+            param_is_variadic = false; param_pos = [4:32-34]; param_name = "$a"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:37-41], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-35]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:28-32], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\a"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:23-25], (int, int)); param_type_hint = (((int, int)), (Some ([7:12-22], (Htuple [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))])))); 
+          param_is_variadic = false; param_pos = [7:23-25]; param_name = "$a"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [9:1-24:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
+       f_name = ([9:10-20], "\\call_tuple"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:15-18], (int, bool)); param_type_hint = (((int, bool)), (Some ([10:3-14], (Htuple [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))]))));
+          param_is_variadic = false; param_pos = [10:15-18]; param_name = "$a1"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([11:15-18], (bool, int)); param_type_hint = (((bool, int)), (Some ([11:3-14], (Htuple [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))]))));
+           param_is_variadic = false; param_pos = [11:15-18]; param_name = "$a2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([14:3-10],
+           (Expr
+              (([14:3-9], void),
+               (Call ((([14:3-4], (function((int, int) $a): void)), (Id ([14:3-4], "\\a"))), 
+                  [], [(([14:5-8], (int, bool)), (Hole ((([14:5-8], (int, bool)), (Lvar ([14:5-8], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+           ([16:3-10],
+            (Expr
+               (([16:3-9], void),
+                (Call ((([16:3-4], (function((int, int) $a): void)), (Id ([16:3-4], "\\a"))), 
+                   [], [(([16:5-8], (bool, int)), (Hole ((([16:5-8], (bool, int)), (Lvar ([16:5-8], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))));
+           ([18:3-26],
+            (Expr
+               (([18:3-25], TestTuple),
+                (Binop ((Eq None), (([18:3-7], TestTuple), (Lvar ([18:3-7], $foo))),
+                   (([18:10-25], TestTuple), (New ((([18:14-23], TestTuple), (CI ([18:14-23], "\\TestTuple"))), [], [], None, ([18:14-23], _)))))))));
+           ([21:3-16],
+            (Expr
+               (([21:3-15], void),
+                (Call (
+                   (([21:3-10], (function((int, int) $a): void)),
+                    (Obj_get ((([21:3-7], TestTuple), (Lvar ([21:3-7], $foo))), (([21:9-10], (function((int, int) $a): void)), (Id ([21:9-10], "a"))), OG_nullthrows, false))),
+                   [], [(([21:11-14], (int, bool)), (Hole ((([21:11-14], (int, bool)), (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+           ([23:3-16],
+            (Expr
+               (([23:3-15], void),
+                (Call (
+                   (([23:3-10], (function((int, int) $a): void)),
+                    (Obj_get ((([23:3-7], TestTuple), (Lvar ([23:3-7], $foo))), (([23:9-10], (function((int, int) $a): void)), (Id ([23:9-10], "a"))), OG_nullthrows, false))),
+                   [], [(([23:11-14], (bool, int)), (Hole ((([23:11-14], (bool, int)), (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid)))); 
+       f_name = ([26:10-25], "\\call_tuple_cast"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([27:15-18], (int, bool)); param_type_hint = (((int, bool)), (Some ([27:3-14], (Htuple [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]))));
+          param_is_variadic = false; param_pos = [27:15-18]; param_name = "$a1"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([28:15-18], (bool, int)); param_type_hint = (((bool, int)), (Some ([28:3-14], (Htuple [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]))));
+           param_is_variadic = false; param_pos = [28:15-18]; param_name = "$a2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([31:3-45],
+           (Expr
+              (([31:3-44], void),
+               (Call ((([31:3-4], (function((int, int) $a): void)), (Id ([31:3-4], "\\a"))), 
+                  [], [(([31:5-43], (int, int)), (Hole ((([31:39-42], (int, bool)), (Lvar ([31:39-42], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+           ([33:3-45],
+            (Expr
+               (([33:3-44], void),
+                (Call ((([33:3-4], (function((int, int) $a): void)), (Id ([33:3-4], "\\a"))), 
+                   [], [(([33:5-43], (int, int)), (Hole ((([33:39-42], (bool, int)), (Lvar ([33:39-42], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
+           ([35:3-26],
+            (Expr
+               (([35:3-25], TestTuple),
+                (Binop ((Eq None), (([35:3-7], TestTuple), (Lvar ([35:3-7], $foo))),
+                   (([35:10-25], TestTuple), (New ((([35:14-23], TestTuple), (CI ([35:14-23], "\\TestTuple"))), [], [], None, ([35:14-23], _)))))))));
+           ([38:3-51],
+            (Expr
+               (([38:3-50], void),
+                (Call (
+                   (([38:3-10], (function((int, int) $a): void)),
+                    (Obj_get ((([38:3-7], TestTuple), (Lvar ([38:3-7], $foo))), (([38:9-10], (function((int, int) $a): void)), (Id ([38:9-10], "a"))), OG_nullthrows, false))),
+                   [], [(([38:11-49], (int, int)), (Hole ((([38:45-48], (int, bool)), (Lvar ([38:45-48], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+           ([40:3-51],
+            (Expr
+               (([40:3-50], void),
+                (Call (
+                   (([40:3-10], (function((int, int) $a): void)),
+                    (Obj_get ((([40:3-7], TestTuple), (Lvar ([40:3-7], $foo))), (([40:9-10], (function((int, int) $a): void)), (Id ([40:9-10], "a"))), OG_nullthrows, false))),
+                   [], [(([40:11-49], (int, int)), (Hole ((([40:45-48], (bool, int)), (Lvar ([40:45-48], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

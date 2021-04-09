@@ -24,7 +24,7 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None });
   (Fun
-     { f_span = [5:1-10:2]; f_readonly_this = None; f_annotation = (); 
+     { f_span = [5:1-8:2]; f_readonly_this = None; f_annotation = (); 
        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:43-47], (Hprim Tvoid)))); 
        f_name = ([5:10-22], "\\call_generic"); f_tparams = []; f_where_constraints = []; 
        f_variadic = FVnonVariadic;
@@ -41,12 +41,46 @@
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
-         [([8:3-27],
+         [([7:3-27],
            (Expr
-              (([8:3-26], void),
-               (Call ((([8:3-18], (function<T as num>(int $x, int $y): void)), (Id ([8:3-18], "\\generic_bounded"))), 
-                  [((int), ([8:3-18], (Happly (([Pos.none], "_"), []))))],
-                  [(([8:19-21], int), (Lvar ([8:19-21], $x))); (([8:23-25], string), (Hole ((([8:23-25], string), (Lvar ([8:23-25], $y))), (string), (int), Typing)))], None)))))
+              (([7:3-26], void),
+               (Call ((([7:3-18], (function<T as num>(int $x, int $y): void)), (Id ([7:3-18], "\\generic_bounded"))), 
+                  [((int), ([7:3-18], (Happly (([Pos.none], "_"), []))))],
+                  [(([7:19-21], int), (Lvar ([7:19-21], $x))); (([7:23-25], string), (Hole ((([7:23-25], string), (Lvar ([7:23-25], $y))), (string), (int), Typing)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [10:1-13:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([10:48-52], (Hprim Tvoid)))); 
+       f_name = ([10:10-27], "\\call_generic_cast"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:32-34], int); param_type_hint = ((int), (Some ([10:28-31], (Hprim Tint)))); 
+          param_is_variadic = false; param_pos = [10:32-34]; param_name = "$x"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([10:43-45], string); param_type_hint = ((string), (Some ([10:36-42], (Hprim Tstring)))); 
+           param_is_variadic = false; param_pos = [10:43-45]; param_name = "$y"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([12:3-54],
+           (Expr
+              (([12:3-53], void),
+               (Call ((([12:3-18], (function<T as num>(num $x, num $y): void)), (Id ([12:3-18], "\\generic_bounded"))), 
+                  [((num), ([12:3-18], (Happly (([Pos.none], "_"), []))))],
+                  [(([12:19-21], int), (Lvar ([12:19-21], $x))); (([12:23-52], float), (Hole ((([12:49-51], string), (Lvar ([12:49-51], $y))), (string), (float), UnsafeCast)))], None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 

@@ -1,0 +1,137 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-21], "\\TestCollection"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-49]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "l"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:37-39], Collection<int>); param_type_hint = ((Collection<int>), (Some ([4:21-36], (Happly (([4:21-31], "\\HH\\Collection"), [([4:32-35], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [4:37-39]; param_name = "$l"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:42-46], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-40]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:33-37], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\l"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:28-30], Collection<int>); param_type_hint = ((Collection<int>), (Some ([7:12-27], (Happly (([7:12-22], "\\HH\\Collection"), [([7:23-26], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [7:28-30]; param_name = "$l"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
+       f_name = ([9:10-25], "\\call_collection"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:22-24], Collection<string>);
+          param_type_hint = ((Collection<string>), (Some ([10:3-21], (Happly (([10:3-13], "\\HH\\Collection"), [([10:14-20], (Hprim Tstring))]))))); 
+          param_is_variadic = false; param_pos = [10:22-24]; param_name = "$l"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([13:3-9],
+           (Expr
+              (([13:3-8], void),
+               (Call ((([13:3-4], (function(Collection<int> $l): void)), (Id ([13:3-4], "\\l"))), 
+                  [], [(([13:5-7], <expr#1> as Collection<string>), (Hole ((([13:5-7], Collection<string>), (Lvar ([13:5-7], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))],
+                  None)))));
+           ([15:3-31],
+            (Expr
+               (([15:3-30], TestCollection),
+                (Binop ((Eq None), (([15:3-7], TestCollection), (Lvar ([15:3-7], $foo))),
+                   (([15:10-30], TestCollection), (New ((([15:14-28], TestCollection), (CI ([15:14-28], "\\TestCollection"))), [], [], None, ([15:14-28], _)))))))));
+           ([18:3-15],
+            (Expr
+               (([18:3-14], void),
+                (Call (
+                   (([18:3-10], (function(Collection<int> $l): void)),
+                    (Obj_get ((([18:3-7], TestCollection), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(Collection<int> $l): void)), (Id ([18:9-10], "l"))), OG_nullthrows, false))),
+                   [],
+                   [(([18:11-13], <expr#1> as Collection<string>), (Hole ((([18:11-13], Collection<string>), (Lvar ([18:11-13], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
+       f_name = ([21:10-30], "\\call_collection_cast"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([22:22-24], Collection<string>);
+          param_type_hint = ((Collection<string>), (Some ([22:3-21], (Happly (([22:3-13], "\\HH\\Collection"), [([22:14-20], (Hprim Tstring))]))))); 
+          param_is_variadic = false; param_pos = [22:22-24]; param_name = "$l"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([25:3-58],
+           (Expr
+              (([25:3-57], void),
+               (Call ((([25:3-4], (function(Collection<int> $l): void)), (Id ([25:3-4], "\\l"))), 
+                  [], [(([25:5-56], Collection<int>), (Hole ((([25:53-55], Collection<string>), (Lvar ([25:53-55], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))));
+           ([27:3-31],
+            (Expr
+               (([27:3-30], TestCollection),
+                (Binop ((Eq None), (([27:3-7], TestCollection), (Lvar ([27:3-7], $foo))),
+                   (([27:10-30], TestCollection), (New ((([27:14-28], TestCollection), (CI ([27:14-28], "\\TestCollection"))), [], [], None, ([27:14-28], _)))))))));
+           ([30:3-64],
+            (Expr
+               (([30:3-63], void),
+                (Call (
+                   (([30:3-10], (function(Collection<int> $l): void)),
+                    (Obj_get ((([30:3-7], TestCollection), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Collection<int> $l): void)), (Id ([30:9-10], "l"))), OG_nullthrows, false))),
+                   [], [(([30:11-62], Collection<int>), (Hole ((([30:59-61], Collection<string>), (Lvar ([30:59-61], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

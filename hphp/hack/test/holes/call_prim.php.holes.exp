@@ -54,4 +54,42 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [13:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([13:45-49], (Hprim Tvoid)))); 
+       f_name = ([13:10-24], "\\call_prim_cast"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([13:31-33], float); param_type_hint = ((float), (Some ([13:25-30], (Hprim Tfloat)))); 
+          param_is_variadic = false; param_pos = [13:31-33]; param_name = "$f"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([13:40-42], ?int); param_type_hint = ((?int), (Some ([13:35-39], (Hoption ([13:36-39], (Hprim Tint)))))); 
+           param_is_variadic = false; param_pos = [13:40-42]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([15:5-38],
+           (Expr
+              (([15:5-37], void),
+               (Call ((([15:5-9], (function(int $i): void)), (Id ([15:5-9], "\\prim"))), 
+                  [], [(([15:10-36], int), (Hole ((([15:33-35], float), (Lvar ([15:33-35], $f))), (float), (int), UnsafeCast)))], None)))));
+           ([18:5-37],
+            (Expr
+               (([18:5-36], void),
+                (Call ((([18:5-9], (function(int $i): void)), (Id ([18:5-9], "\\prim"))), 
+                   [], [(([18:10-35], int), (Hole ((([18:32-34], ?int), (Lvar ([18:32-34], $x))), (?int), (int), UnsafeCast)))], None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
        f_doc_comment = None })

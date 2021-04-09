@@ -1,0 +1,148 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-25], "\\TestVarrayOrDarray"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-55]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "d"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:43-45], vec_or_dict<arraykey, int>); 
+            param_type_hint = ((vec_or_dict<arraykey, int>), (Some ([4:21-42], (Hvec_or_dict (None, ([4:38-41], (Hprim Tint))))))); 
+            param_is_variadic = false; param_pos = [4:43-45]; param_name = "$d"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:48-52], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-46]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:39-43], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\d"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:34-36], vec_or_dict<arraykey, int>); 
+          param_type_hint = ((vec_or_dict<arraykey, int>), (Some ([7:12-33], (Hvec_or_dict (None, ([7:29-32], (Hprim Tint))))))); 
+          param_is_variadic = false; param_pos = [7:34-36]; param_name = "$d"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
+       f_name = ([9:10-31], "\\call_varray_or_darray"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:27-29], vec_or_dict<arraykey, float>); 
+          param_type_hint = ((vec_or_dict<arraykey, float>), (Some ([10:3-26], (Hvec_or_dict (None, ([10:20-25], (Hprim Tfloat))))))); 
+          param_is_variadic = false; param_pos = [10:27-29]; param_name = "$d"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([13:3-9],
+           (Expr
+              (([13:3-8], void),
+               (Call ((([13:3-4], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([13:3-4], "\\d"))), 
+                  [],
+                  [(([13:5-7], vec_or_dict<arraykey, float>),
+                    (Hole ((([13:5-7], vec_or_dict<arraykey, float>), (Lvar ([13:5-7], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                  None)))));
+           ([15:3-35],
+            (Expr
+               (([15:3-34], TestVarrayOrDarray),
+                (Binop ((Eq None), (([15:3-7], TestVarrayOrDarray), (Lvar ([15:3-7], $foo))),
+                   (([15:10-34], TestVarrayOrDarray), (New ((([15:14-32], TestVarrayOrDarray), (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([15:14-32], _)))))))));
+           ([18:3-15],
+            (Expr
+               (([18:3-14], void),
+                (Call (
+                   (([18:3-10], (function(vec_or_dict<arraykey, int> $d): void)),
+                    (Obj_get ((([18:3-7], TestVarrayOrDarray), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([18:9-10], "d"))), OG_nullthrows, false))),
+                   [],
+                   [(([18:11-13], vec_or_dict<arraykey, float>),
+                     (Hole ((([18:11-13], vec_or_dict<arraykey, float>), (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
+       f_name = ([21:10-36], "\\call_varray_or_darray_cast"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([22:27-29], vec_or_dict<arraykey, float>); 
+          param_type_hint = ((vec_or_dict<arraykey, float>), (Some ([22:3-26], (Hvec_or_dict (None, ([22:20-25], (Hprim Tfloat))))))); 
+          param_is_variadic = false; param_pos = [22:27-29]; param_name = "$d"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([25:3-69],
+           (Expr
+              (([25:3-68], void),
+               (Call ((([25:3-4], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([25:3-4], "\\d"))), 
+                  [],
+                  [(([25:5-67], vec_or_dict<arraykey, int>),
+                    (Hole ((([25:64-66], vec_or_dict<arraykey, float>), (Lvar ([25:64-66], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
+                  None)))));
+           ([27:3-35],
+            (Expr
+               (([27:3-34], TestVarrayOrDarray),
+                (Binop ((Eq None), (([27:3-7], TestVarrayOrDarray), (Lvar ([27:3-7], $foo))),
+                   (([27:10-34], TestVarrayOrDarray), (New ((([27:14-32], TestVarrayOrDarray), (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([27:14-32], _)))))))));
+           ([30:3-75],
+            (Expr
+               (([30:3-74], void),
+                (Call (
+                   (([30:3-10], (function(vec_or_dict<arraykey, int> $d): void)),
+                    (Obj_get ((([30:3-7], TestVarrayOrDarray), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([30:9-10], "d"))), OG_nullthrows, false))),
+                   [],
+                   [(([30:11-73], vec_or_dict<arraykey, int>),
+                     (Hole ((([30:70-72], vec_or_dict<arraykey, float>), (Lvar ([30:70-72], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

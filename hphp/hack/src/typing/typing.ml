@@ -75,18 +75,26 @@ let debug_print_last_pos _ =
 (* Helpers *)
 (*****************************************************************************)
 
-let mk_hole (((pos, ty), _expr) as expr) ~ty_have ~ty_expect =
-  let aux = function
-    | ((pos, ty), Aast.Callconv (param_kind, expr)) ->
-      let expr' =
-        make_typed_expr pos ty
-        @@ Aast.Hole (expr, ty_have, ty_expect, Aast.Typing)
-      in
-      make_typed_expr pos ty @@ Aast.Callconv (param_kind, expr')
-    | expr ->
-      make_typed_expr pos ty @@ Aast.Hole (expr, ty_have, ty_expect, Aast.Typing)
+let mk_hole ?(source = Aast.Typing) expr ~ty_have ~ty_expect =
+  (* if the hole is generated from typing, we leave the type unchanged,
+     if it is a call to `[unsafe|enforced]_cast`, we give it the expected type
+  *)
+  let ty_hole =
+    match source with
+    | Aast.Typing -> ty_have
+    | UnsafeCast
+    | EnforcedCast ->
+      ty_expect
   in
-  aux expr
+  match expr with
+  | ((pos, ty), Aast.Callconv (param_kind, expr)) ->
+    (* push the hole inside the `Callconv` constructor *)
+    let expr' =
+      make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
+    in
+    make_typed_expr pos ty @@ Aast.Callconv (param_kind, expr')
+  | ((pos, _), _) ->
+    make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
 
 let hole_on_err te ~err_opt =
   Option.value_map err_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
@@ -4538,7 +4546,8 @@ and dispatch_call
     if is_return_disposable_fun_type env fty && not is_using_clause then
       Errors.invalid_new_disposable p
   in
-  let dispatch_id env ((_, _) as id) =
+
+  let dispatch_id env id =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
@@ -4632,8 +4641,26 @@ and dispatch_call
           expr env original_expr
         else (
           Errors.unsafe_cast p;
-          (* dispatch_id also covers arity errors *)
-          dispatch_id env id
+          (* first type the `unsafe_cast` as a call, handling arity errors *)
+          let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
+          check_disposable_in_return env fty;
+          let (env, (tel, typed_unpack_element, ty)) =
+            call ~expected p env fty el unpacked_element
+          in
+          (* then, on the happy path, represent internally as a `Hole`;
+             if we have arity mismatches etc, and therefore errors,
+             represent as a call *)
+          match (tel, typed_unpack_element, tal) with
+          | ([el], None, [(ty_from, _); (ty_to, _)]) ->
+            make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
+          | _ ->
+            make_call
+              env
+              (Tast.make_typed_expr fpos fty (Aast.Id id))
+              tal
+              tel
+              typed_unpack_element
+              ty
         )
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->

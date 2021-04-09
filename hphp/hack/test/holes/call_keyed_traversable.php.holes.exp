@@ -1,0 +1,199 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-27], "\\TestKeyedTraversable"); c_tparams = []; 
+      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+      c_implements_dynamic = false; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-60]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "o"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:48-50], KeyedTraversable<int, int>);
+            param_type_hint = ((KeyedTraversable<int, int>), (Some ([4:21-47], (Happly (([4:21-37], "\\HH\\KeyedTraversable"), [([4:38-41], (Hprim Tint)); ([4:43-46], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [4:48-50]; param_name = "$o"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:53-57], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-51]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:44-48], (Hprim Tvoid)))); 
+       f_name = ([7:10-11], "\\o"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:39-41], KeyedTraversable<int, int>);
+          param_type_hint = ((KeyedTraversable<int, int>), (Some ([7:12-38], (Happly (([7:12-28], "\\HH\\KeyedTraversable"), [([7:29-32], (Hprim Tint)); ([7:34-37], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [7:39-41]; param_name = "$o"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [9:1-24:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
+       f_name = ([9:10-32], "\\call_keyed_traversable"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([10:33-36], KeyedTraversable<string, int>);
+          param_type_hint = ((KeyedTraversable<string, int>), (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Hprim Tstring)); ([10:28-31], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [10:33-36]; param_name = "$o1"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([11:33-36], KeyedTraversable<int, string>);
+           param_type_hint = ((KeyedTraversable<int, string>), (Some ([11:3-32], (Happly (([11:3-19], "\\HH\\KeyedTraversable"), [([11:20-23], (Hprim Tint)); ([11:25-31], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [11:33-36]; param_name = "$o2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([14:3-10],
+           (Expr
+              (([14:3-9], void),
+               (Call ((([14:3-4], (function(KeyedTraversable<int, int> $o): void)), (Id ([14:3-4], "\\o"))), 
+                  [],
+                  [(([14:5-8], <expr#1> as KeyedTraversable<string, int>),
+                    (Hole ((([14:5-8], KeyedTraversable<string, int>), (Lvar ([14:5-8], $o1))), (<expr#1> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing)))],
+                  None)))));
+           ([16:3-10],
+            (Expr
+               (([16:3-9], void),
+                (Call ((([16:3-4], (function(KeyedTraversable<int, int> $o): void)), (Id ([16:3-4], "\\o"))), 
+                   [],
+                   [(([16:5-8], <expr#2> as KeyedTraversable<int, string>),
+                     (Hole ((([16:5-8], KeyedTraversable<int, string>), (Lvar ([16:5-8], $o2))), (<expr#2> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))));
+           ([18:3-37],
+            (Expr
+               (([18:3-36], TestKeyedTraversable),
+                (Binop ((Eq None), (([18:3-7], TestKeyedTraversable), (Lvar ([18:3-7], $foo))),
+                   (([18:10-36], TestKeyedTraversable), (New ((([18:14-34], TestKeyedTraversable), (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ([18:14-34], _)))))))));
+           ([21:3-16],
+            (Expr
+               (([21:3-15], void),
+                (Call (
+                   (([21:3-10], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([21:3-7], TestKeyedTraversable), (Lvar ([21:3-7], $foo))), (
+                       ([21:9-10], (function(KeyedTraversable<int, int> $o): void)), (Id ([21:9-10], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([21:11-14], <expr#1> as KeyedTraversable<string, int>),
+                     (Hole ((([21:11-14], KeyedTraversable<string, int>), (Lvar ([21:11-14], $o1))), (<expr#1> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))));
+           ([23:3-16],
+            (Expr
+               (([23:3-15], void),
+                (Call (
+                   (([23:3-10], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([23:3-7], TestKeyedTraversable), (Lvar ([23:3-7], $foo))), (
+                       ([23:9-10], (function(KeyedTraversable<int, int> $o): void)), (Id ([23:9-10], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([23:11-14], <expr#2> as KeyedTraversable<int, string>),
+                     (Hole ((([23:11-14], KeyedTraversable<int, string>), (Lvar ([23:11-14], $o2))), (<expr#2> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid)))); 
+       f_name = ([26:10-37], "\\call_keyed_traversable_cast"); f_tparams = []; 
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([27:33-36], KeyedTraversable<string, int>);
+          param_type_hint = ((KeyedTraversable<string, int>), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [27:33-36]; param_name = "$o1"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([28:33-36], KeyedTraversable<int, string>);
+           param_type_hint = ((KeyedTraversable<int, string>), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [28:33-36]; param_name = "$o2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([31:3-79],
+           (Expr
+              (([31:3-78], void),
+               (Call ((([31:3-4], (function(KeyedTraversable<int, int> $o): void)), (Id ([31:3-4], "\\o"))), 
+                  [],
+                  [(([31:5-77], KeyedTraversable<int, int>),
+                    (Hole ((([31:73-76], KeyedTraversable<string, int>), (Lvar ([31:73-76], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), UnsafeCast)))],
+                  None)))));
+           ([33:3-79],
+            (Expr
+               (([33:3-78], void),
+                (Call ((([33:3-4], (function(KeyedTraversable<int, int> $o): void)), (Id ([33:3-4], "\\o"))), 
+                   [],
+                   [(([33:5-77], KeyedTraversable<int, int>),
+                     (Hole ((([33:73-76], KeyedTraversable<int, string>), (Lvar ([33:73-76], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), UnsafeCast)))],
+                   None)))));
+           ([35:3-37],
+            (Expr
+               (([35:3-36], TestKeyedTraversable),
+                (Binop ((Eq None), (([35:3-7], TestKeyedTraversable), (Lvar ([35:3-7], $foo))),
+                   (([35:10-36], TestKeyedTraversable), (New ((([35:14-34], TestKeyedTraversable), (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ([35:14-34], _)))))))));
+           ([38:3-85],
+            (Expr
+               (([38:3-84], void),
+                (Call (
+                   (([38:3-10], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([38:3-7], TestKeyedTraversable), (Lvar ([38:3-7], $foo))), (
+                       ([38:9-10], (function(KeyedTraversable<int, int> $o): void)), (Id ([38:9-10], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([38:11-83], KeyedTraversable<int, int>),
+                     (Hole ((([38:79-82], KeyedTraversable<string, int>), (Lvar ([38:79-82], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), UnsafeCast)))],
+                   None)))));
+           ([40:3-85],
+            (Expr
+               (([40:3-84], void),
+                (Call (
+                   (([40:3-10], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([40:3-7], TestKeyedTraversable), (Lvar ([40:3-7], $foo))), (
+                       ([40:9-10], (function(KeyedTraversable<int, int> $o): void)), (Id ([40:9-10], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([40:11-83], KeyedTraversable<int, int>),
+                     (Hole ((([40:79-82], KeyedTraversable<int, string>), (Lvar ([40:79-82], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), UnsafeCast)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

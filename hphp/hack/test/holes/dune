@@ -1,0 +1,23 @@
+(alias
+    (name tast_holes)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/holes/*.php)
+          (glob_files %{project_root}/test/holes/*.php.holes.exp)
+          (glob_files %{project_root}/test/holes/*.php.exp)
+          (glob_files %{project_root}/test/holes/HH_FLAGS))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/holes
+    --program %{exe:../../src/hh_single_type_check.exe}
+    --in-extension .php
+    --out-extension .holes.out
+    --expect-extension .holes.exp
+    --fallback-expect-extension .exp
+    --flags --tast
+    --error-format raw
+    )))
+
+(alias
+    (name runtest)
+    (deps
+        (alias tast_holes)))

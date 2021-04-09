@@ -1,0 +1,890 @@
+[(Class
+    { c_span = [3:1-19:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-10], "\\Foo"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:1-42]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:17-18], "a"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([4:30-32], (int, int)); param_type_hint = (((int, int)), (Some ([4:19-29], (Htuple [([4:20-23], (Hprim Tint)); ([4:25-28], (Hprim Tint))]))));
+            param_is_variadic = false; param_pos = [4:30-32]; param_name = "$a"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:35-39], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None };
+        { m_span = [5:1-46]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([5:17-18], "b"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([5:34-36], Pair<int, int>);
+             param_type_hint = ((Pair<int, int>), (Some ([5:19-33], (Happly (([5:19-23], "\\HH\\Pair"), [([5:24-27], (Hprim Tint)); ([5:29-32], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [5:34-36]; param_name = "$b"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([5:39-43], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [6:1-43]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([6:17-18], "c"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([6:31-33], vec<int>); param_type_hint = ((vec<int>), (Some ([6:19-30], (Happly (([6:19-25], "\\HH\\vec"), [([6:26-29], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [6:31-33]; param_name = "$c"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([6:36-40], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [7:1-53]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([7:17-18], "d"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([7:41-43], vec_or_dict<arraykey, int>); 
+             param_type_hint = ((vec_or_dict<arraykey, int>), (Some ([7:19-40], (Hvec_or_dict (None, ([7:36-39], (Hprim Tint))))))); 
+             param_is_variadic = false; param_pos = [7:41-43]; param_name = "$d"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([7:46-50], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [8:1-40]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([8:17-18], "e"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([8:28-30], vec<int>); param_type_hint = ((vec<int>), (Some ([8:19-27], (Happly (([8:19-22], "\\HH\\vec"), [([8:23-26], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [8:28-30]; param_name = "$e"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([8:33-37], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [9:1-43]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([9:17-18], "f"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([9:31-33], keyset<int>); param_type_hint = ((keyset<int>), (Some ([9:19-30], (Happly (([9:19-25], "\\HH\\keyset"), [([9:26-29], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [9:31-33]; param_name = "$f"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([9:36-40], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [10:1-43]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([10:17-18], "g"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([10:31-33], Vector<int>); param_type_hint = ((Vector<int>), (Some ([10:19-30], (Happly (([10:19-25], "\\HH\\Vector"), [([10:26-29], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [10:31-33]; param_name = "$g"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([10:36-40], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [11:1-40]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([11:17-18], "h"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([11:28-30], Set<int>); param_type_hint = ((Set<int>), (Some ([11:19-27], (Happly (([11:19-22], "\\HH\\Set"), [([11:23-26], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [11:28-30]; param_name = "$h"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([11:33-37], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [12:1-48]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([12:17-18], "i"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([12:36-38], Traversable<int>);
+             param_type_hint = ((Traversable<int>), (Some ([12:19-35], (Happly (([12:19-30], "\\HH\\Traversable"), [([12:31-34], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [12:36-38]; param_name = "$i"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([12:41-45], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [13:1-43]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([13:17-18], "j"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([13:31-33], ImmSet<int>); param_type_hint = ((ImmSet<int>), (Some ([13:19-30], (Happly (([13:19-25], "\\HH\\ImmSet"), [([13:26-29], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [13:31-33]; param_name = "$j"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([13:36-40], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [14:1-46]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([14:17-18], "k"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([14:34-36], ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([14:19-33], (Happly (([14:19-28], "\\HH\\ImmVector"), [([14:29-32], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [14:34-36]; param_name = "$k"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([14:39-43], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [15:1-47]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([15:17-18], "l"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([15:35-37], Collection<int>); param_type_hint = ((Collection<int>), (Some ([15:19-34], (Happly (([15:19-29], "\\HH\\Collection"), [([15:30-33], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [15:35-37]; param_name = "$l"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([15:40-44], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [16:1-45]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([16:17-18], "m"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([16:33-35], Iterable<int>); param_type_hint = ((Iterable<int>), (Some ([16:19-32], (Happly (([16:19-27], "\\HH\\Iterable"), [([16:28-31], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [16:33-35]; param_name = "$m"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([16:38-42], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [17:1-46]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([17:17-18], "n"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([17:34-36], dict<int, int>);
+             param_type_hint = ((dict<int, int>), (Some ([17:19-33], (Happly (([17:19-23], "\\HH\\dict"), [([17:24-27], (Hprim Tint)); ([17:29-32], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [17:34-36]; param_name = "$n"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([17:39-43], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [18:1-58]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([18:17-18], "o"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([18:46-48], KeyedTraversable<int, int>);
+             param_type_hint = ((KeyedTraversable<int, int>), (Some ([18:19-45], (Happly (([18:19-35], "\\HH\\KeyedTraversable"), [([18:36-39], (Hprim Tint)); ([18:41-44], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [18:46-48]; param_name = "$o"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([18:51-55], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [21:1-35]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([21:28-32], (Hprim Tvoid)))); 
+       f_name = ([21:10-11], "\\a"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([21:23-25], (int, int)); param_type_hint = (((int, int)), (Some ([21:12-22], (Htuple [([21:13-16], (Hprim Tint)); ([21:18-21], (Hprim Tint))]))));
+          param_is_variadic = false; param_pos = [21:23-25]; param_name = "$a"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [22:1-39]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([22:32-36], (Hprim Tvoid)))); 
+       f_name = ([22:10-11], "\\b"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([22:27-29], Pair<int, int>);
+          param_type_hint = ((Pair<int, int>), (Some ([22:12-26], (Happly (([22:12-16], "\\HH\\Pair"), [([22:17-20], (Hprim Tint)); ([22:22-25], (Hprim Tint))]))))); 
+          param_is_variadic = false; param_pos = [22:27-29]; param_name = "$b"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [23:1-36]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([23:29-33], (Hprim Tvoid)))); 
+       f_name = ([23:10-11], "\\c"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([23:24-26], vec<int>); param_type_hint = ((vec<int>), (Some ([23:12-23], (Happly (([23:12-18], "\\HH\\vec"), [([23:19-22], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [23:24-26]; param_name = "$c"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [24:1-46]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([24:39-43], (Hprim Tvoid)))); 
+       f_name = ([24:10-11], "\\d"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([24:34-36], vec_or_dict<arraykey, int>); 
+          param_type_hint = ((vec_or_dict<arraykey, int>), (Some ([24:12-33], (Hvec_or_dict (None, ([24:29-32], (Hprim Tint))))))); 
+          param_is_variadic = false; param_pos = [24:34-36]; param_name = "$d"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [25:1-33]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([25:26-30], (Hprim Tvoid)))); 
+       f_name = ([25:10-11], "\\e"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([25:21-23], vec<int>); param_type_hint = ((vec<int>), (Some ([25:12-20], (Happly (([25:12-15], "\\HH\\vec"), [([25:16-19], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [25:21-23]; param_name = "$e"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [26:1-36]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([26:29-33], (Hprim Tvoid)))); 
+       f_name = ([26:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([26:24-26], keyset<int>); param_type_hint = ((keyset<int>), (Some ([26:12-23], (Happly (([26:12-18], "\\HH\\keyset"), [([26:19-22], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [26:24-26]; param_name = "$f"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [27:1-36]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([27:29-33], (Hprim Tvoid)))); 
+       f_name = ([27:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([27:24-26], Vector<int>); param_type_hint = ((Vector<int>), (Some ([27:12-23], (Happly (([27:12-18], "\\HH\\Vector"), [([27:19-22], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [27:24-26]; param_name = "$g"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [28:1-33]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([28:26-30], (Hprim Tvoid)))); 
+       f_name = ([28:10-11], "\\h"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([28:21-23], Set<int>); param_type_hint = ((Set<int>), (Some ([28:12-20], (Happly (([28:12-15], "\\HH\\Set"), [([28:16-19], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [28:21-23]; param_name = "$h"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [29:1-41]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([29:34-38], (Hprim Tvoid)))); 
+       f_name = ([29:10-11], "\\i"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([29:29-31], Traversable<int>); param_type_hint = ((Traversable<int>), (Some ([29:12-28], (Happly (([29:12-23], "\\HH\\Traversable"), [([29:24-27], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [29:29-31]; param_name = "$i"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [30:1-36]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([30:29-33], (Hprim Tvoid)))); 
+       f_name = ([30:10-11], "\\j"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([30:24-26], ImmSet<int>); param_type_hint = ((ImmSet<int>), (Some ([30:12-23], (Happly (([30:12-18], "\\HH\\ImmSet"), [([30:19-22], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [30:24-26]; param_name = "$j"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [31:1-39]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([31:32-36], (Hprim Tvoid)))); 
+       f_name = ([31:10-11], "\\k"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([31:27-29], ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([31:12-26], (Happly (([31:12-21], "\\HH\\ImmVector"), [([31:22-25], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [31:27-29]; param_name = "$k"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [32:1-40]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([32:33-37], (Hprim Tvoid)))); 
+       f_name = ([32:10-11], "\\l"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([32:28-30], Collection<int>); param_type_hint = ((Collection<int>), (Some ([32:12-27], (Happly (([32:12-22], "\\HH\\Collection"), [([32:23-26], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [32:28-30]; param_name = "$l"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [33:1-38]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([33:31-35], (Hprim Tvoid)))); 
+       f_name = ([33:10-11], "\\m"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([33:26-28], Iterable<int>); param_type_hint = ((Iterable<int>), (Some ([33:12-25], (Happly (([33:12-20], "\\HH\\Iterable"), [([33:21-24], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [33:26-28]; param_name = "$m"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [34:1-39]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([34:32-36], (Hprim Tvoid)))); 
+       f_name = ([34:10-11], "\\n"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([34:27-29], dict<int, int>);
+          param_type_hint = ((dict<int, int>), (Some ([34:12-26], (Happly (([34:12-16], "\\HH\\dict"), [([34:17-20], (Hprim Tint)); ([34:22-25], (Hprim Tint))]))))); 
+          param_is_variadic = false; param_pos = [34:27-29]; param_name = "$n"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [35:1-51]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([35:44-48], (Hprim Tvoid)))); 
+       f_name = ([35:10-11], "\\o"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([35:39-41], KeyedTraversable<int, int>);
+          param_type_hint = ((KeyedTraversable<int, int>), (Some ([35:12-38], (Happly (([35:12-28], "\\HH\\KeyedTraversable"), [([35:29-32], (Hprim Tint)); ([35:34-37], (Hprim Tint))])))));
+          param_is_variadic = false; param_pos = [35:39-41]; param_name = "$o"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None });
+  (Fun
+     { f_span = [37:1-137:2]; f_readonly_this = None; f_annotation = (); 
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([57:4-8], (Hprim Tvoid)))); 
+       f_name = ([37:10-21], "\\call_tparam"); f_tparams = []; f_where_constraints = []; 
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([38:15-18], (int, bool)); param_type_hint = (((int, bool)), (Some ([38:3-14], (Htuple [([38:4-7], (Hprim Tint)); ([38:9-13], (Hprim Tbool))]))));
+          param_is_variadic = false; param_pos = [38:15-18]; param_name = "$a1"; 
+          param_expr = None; param_readonly = None; param_callconv = None; 
+          param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([39:15-18], (bool, int)); param_type_hint = (((bool, int)), (Some ([39:3-14], (Htuple [([39:4-8], (Hprim Tbool)); ([39:10-13], (Hprim Tint))]))));
+           param_is_variadic = false; param_pos = [39:15-18]; param_name = "$a2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([40:19-22], Pair<bool, int>);
+           param_type_hint = ((Pair<bool, int>), (Some ([40:3-18], (Happly (([40:3-7], "\\HH\\Pair"), [([40:8-12], (Hprim Tbool)); ([40:14-17], (Hprim Tint))]))))); 
+           param_is_variadic = false; param_pos = [40:19-22]; param_name = "$b1"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([41:19-22], Pair<int, bool>);
+           param_type_hint = ((Pair<int, bool>), (Some ([41:3-18], (Happly (([41:3-7], "\\HH\\Pair"), [([41:8-11], (Hprim Tint)); ([41:13-17], (Hprim Tbool))]))))); 
+           param_is_variadic = false; param_pos = [41:19-22]; param_name = "$b2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([42:17-19], vec<float>); param_type_hint = ((vec<float>), (Some ([42:3-16], (Happly (([42:3-9], "\\HH\\vec"), [([42:10-15], (Hprim Tfloat))])))));
+           param_is_variadic = false; param_pos = [42:17-19]; param_name = "$c"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([43:27-29], vec_or_dict<arraykey, float>); 
+           param_type_hint = ((vec_or_dict<arraykey, float>), (Some ([43:3-26], (Hvec_or_dict (None, ([43:20-25], (Hprim Tfloat))))))); 
+           param_is_variadic = false; param_pos = [43:27-29]; param_name = "$d"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([44:14-16], vec<float>); param_type_hint = ((vec<float>), (Some ([44:3-13], (Happly (([44:3-6], "\\HH\\vec"), [([44:7-12], (Hprim Tfloat))])))));
+           param_is_variadic = false; param_pos = [44:14-16]; param_name = "$e"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([45:18-20], keyset<string>); param_type_hint = ((keyset<string>), (Some ([45:3-17], (Happly (([45:3-9], "\\HH\\keyset"), [([45:10-16], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [45:18-20]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([46:17-19], Vector<float>); param_type_hint = ((Vector<float>), (Some ([46:3-16], (Happly (([46:3-9], "\\HH\\Vector"), [([46:10-15], (Hprim Tfloat))])))));
+           param_is_variadic = false; param_pos = [46:17-19]; param_name = "$g"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([47:15-17], Set<string>); param_type_hint = ((Set<string>), (Some ([47:3-14], (Happly (([47:3-6], "\\HH\\Set"), [([47:7-13], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [47:15-17]; param_name = "$h"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([48:22-24], Traversable<float>);
+           param_type_hint = ((Traversable<float>), (Some ([48:3-21], (Happly (([48:3-14], "\\HH\\Traversable"), [([48:15-20], (Hprim Tfloat))]))))); 
+           param_is_variadic = false; param_pos = [48:22-24]; param_name = "$i"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([49:18-20], ImmSet<string>); param_type_hint = ((ImmSet<string>), (Some ([49:3-17], (Happly (([49:3-9], "\\HH\\ImmSet"), [([49:10-16], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [49:18-20]; param_name = "$j"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([50:20-22], ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([50:3-19], (Happly (([50:3-12], "\\HH\\ImmVector"), [([50:13-18], (Hprim Tfloat))])))));
+           param_is_variadic = false; param_pos = [50:20-22]; param_name = "$k"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([51:22-24], Collection<string>);
+           param_type_hint = ((Collection<string>), (Some ([51:3-21], (Happly (([51:3-13], "\\HH\\Collection"), [([51:14-20], (Hprim Tstring))]))))); 
+           param_is_variadic = false; param_pos = [51:22-24]; param_name = "$l"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([52:19-21], Iterable<float>); param_type_hint = ((Iterable<float>), (Some ([52:3-18], (Happly (([52:3-11], "\\HH\\Iterable"), [([52:12-17], (Hprim Tfloat))])))));
+           param_is_variadic = false; param_pos = [52:19-21]; param_name = "$m"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([53:21-24], dict<string, int>);
+           param_type_hint = ((dict<string, int>), (Some ([53:3-20], (Happly (([53:3-7], "\\HH\\dict"), [([53:8-14], (Hprim Tstring)); ([53:16-19], (Hprim Tint))]))))); 
+           param_is_variadic = false; param_pos = [53:21-24]; param_name = "$n1"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([54:21-24], dict<int, string>);
+           param_type_hint = ((dict<int, string>), (Some ([54:3-20], (Happly (([54:3-7], "\\HH\\dict"), [([54:8-11], (Hprim Tint)); ([54:13-19], (Hprim Tstring))]))))); 
+           param_is_variadic = false; param_pos = [54:21-24]; param_name = "$n2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([55:33-36], KeyedTraversable<string, int>);
+           param_type_hint = ((KeyedTraversable<string, int>), (Some ([55:3-32], (Happly (([55:3-19], "\\HH\\KeyedTraversable"), [([55:20-26], (Hprim Tstring)); ([55:28-31], (Hprim Tint))])))));
+           param_is_variadic = false; param_pos = [55:33-36]; param_name = "$o1"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+         { param_annotation = ([56:33-36], KeyedTraversable<int, string>);
+           param_type_hint = ((KeyedTraversable<int, string>), (Some ([56:3-32], (Happly (([56:3-19], "\\HH\\KeyedTraversable"), [([56:20-23], (Hprim Tint)); ([56:25-31], (Hprim Tstring))])))));
+           param_is_variadic = false; param_pos = [56:33-36]; param_name = "$o2"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+         ];
+       f_ctxs = None; f_unsafe_ctxs = None;
+       f_body =
+       { fb_ast =
+         [([59:1-8],
+           (Expr
+              (([59:1-7], void),
+               (Call ((([59:1-2], (function((int, int) $a): void)), (Id ([59:1-2], "\\a"))), 
+                  [], [(([59:3-6], (int, bool)), (Hole ((([59:3-6], (int, bool)), (Lvar ([59:3-6], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+           ([61:1-8],
+            (Expr
+               (([61:1-7], void),
+                (Call ((([61:1-2], (function((int, int) $a): void)), (Id ([61:1-2], "\\a"))), 
+                   [], [(([61:3-6], (bool, int)), (Hole ((([61:3-6], (bool, int)), (Lvar ([61:3-6], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))));
+           ([63:1-8],
+            (Expr
+               (([63:1-7], void),
+                (Call ((([63:1-2], (function(Pair<int, int> $b): void)), (Id ([63:1-2], "\\b"))), 
+                   [], [(([63:3-6], Pair<bool, int>), (Hole ((([63:3-6], Pair<bool, int>), (Lvar ([63:3-6], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
+           ([65:1-8],
+            (Expr
+               (([65:1-7], void),
+                (Call ((([65:1-2], (function(Pair<int, int> $b): void)), (Id ([65:1-2], "\\b"))), 
+                   [], [(([65:3-6], Pair<int, bool>), (Hole ((([65:3-6], Pair<int, bool>), (Lvar ([65:3-6], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))));
+           ([67:1-7],
+            (Expr
+               (([67:1-6], void),
+                (Call ((([67:1-2], (function(vec<int> $c): void)), (Id ([67:1-2], "\\c"))), 
+                   [], [(([67:3-5], vec<float>), (Hole ((([67:3-5], vec<float>), (Lvar ([67:3-5], $c))), (vec<float>), (vec<int>), Typing)))], None)))));
+           ([69:1-7],
+            (Expr
+               (([69:1-6], void),
+                (Call ((([69:1-2], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([69:1-2], "\\d"))), 
+                   [],
+                   [(([69:3-5], vec_or_dict<arraykey, float>),
+                     (Hole ((([69:3-5], vec_or_dict<arraykey, float>), (Lvar ([69:3-5], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                   None)))));
+           ([71:1-7],
+            (Expr
+               (([71:1-6], void),
+                (Call ((([71:1-2], (function(vec<int> $e): void)), (Id ([71:1-2], "\\e"))), 
+                   [], [(([71:3-5], vec<float>), (Hole ((([71:3-5], vec<float>), (Lvar ([71:3-5], $e))), (vec<float>), (vec<int>), Typing)))], None)))));
+           ([73:1-7],
+            (Expr
+               (([73:1-6], void),
+                (Call ((([73:1-2], (function(keyset<int> $f): void)), (Id ([73:1-2], "\\f"))), 
+                   [], [(([73:3-5], keyset<string>), (Hole ((([73:3-5], keyset<string>), (Lvar ([73:3-5], $f))), (keyset<string>), (keyset<int>), Typing)))], None)))));
+           ([75:1-7],
+            (Expr
+               (([75:1-6], void),
+                (Call ((([75:1-2], (function(Vector<int> $g): void)), (Id ([75:1-2], "\\g"))), 
+                   [], [(([75:3-5], Vector<float>), (Hole ((([75:3-5], Vector<float>), (Lvar ([75:3-5], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))));
+           ([77:1-7],
+            (Expr
+               (([77:1-6], void),
+                (Call ((([77:1-2], (function(Set<int> $h): void)), (Id ([77:1-2], "\\h"))), 
+                   [], [(([77:3-5], Set<string>), (Hole ((([77:3-5], Set<string>), (Lvar ([77:3-5], $h))), (Set<string>), (Set<int>), Typing)))], None)))));
+           ([79:1-7],
+            (Expr
+               (([79:1-6], void),
+                (Call ((([79:1-2], (function(Traversable<int> $i): void)), (Id ([79:1-2], "\\i"))), 
+                   [], [(([79:3-5], Traversable<float>), (Hole ((([79:3-5], Traversable<float>), (Lvar ([79:3-5], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))], None)))));
+           ([81:1-7],
+            (Expr
+               (([81:1-6], void),
+                (Call ((([81:1-2], (function(ImmSet<int> $j): void)), (Id ([81:1-2], "\\j"))), 
+                   [], [(([81:3-5], ImmSet<string>), (Hole ((([81:3-5], ImmSet<string>), (Lvar ([81:3-5], $j))), (ImmSet<string>), (ImmSet<int>), Typing)))], None)))));
+           ([83:1-7],
+            (Expr
+               (([83:1-6], void),
+                (Call ((([83:1-2], (function(ImmVector<int> $k): void)), (Id ([83:1-2], "\\k"))), 
+                   [], [(([83:3-5], ImmVector<float>), (Hole ((([83:3-5], ImmVector<float>), (Lvar ([83:3-5], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))));
+           ([85:1-7],
+            (Expr
+               (([85:1-6], void),
+                (Call ((([85:1-2], (function(Collection<int> $l): void)), (Id ([85:1-2], "\\l"))), 
+                   [], [(([85:3-5], Collection<string>), (Hole ((([85:3-5], Collection<string>), (Lvar ([85:3-5], $l))), (<expr#2> as Collection<string>), (Collection<int>), Typing)))], None)))));
+           ([87:1-7],
+            (Expr
+               (([87:1-6], void),
+                (Call ((([87:1-2], (function(Iterable<int> $m): void)), (Id ([87:1-2], "\\m"))), 
+                   [], [(([87:3-5], Iterable<float>), (Hole ((([87:3-5], Iterable<float>), (Lvar ([87:3-5], $m))), (<expr#3> as Iterable<float>), (Iterable<int>), Typing)))], None)))));
+           ([89:1-8],
+            (Expr
+               (([89:1-7], void),
+                (Call ((([89:1-2], (function(dict<int, int> $n): void)), (Id ([89:1-2], "\\n"))), 
+                   [], [(([89:3-6], dict<string, int>), (Hole ((([89:3-6], dict<string, int>), (Lvar ([89:3-6], $n1))), (dict<string, int>), (dict<int, int>), Typing)))], None)))));
+           ([91:1-8],
+            (Expr
+               (([91:1-7], void),
+                (Call ((([91:1-2], (function(dict<int, int> $n): void)), (Id ([91:1-2], "\\n"))), 
+                   [], [(([91:3-6], dict<int, string>), (Hole ((([91:3-6], dict<int, string>), (Lvar ([91:3-6], $n2))), (dict<int, string>), (dict<int, int>), Typing)))], None)))));
+           ([93:1-8],
+            (Expr
+               (([93:1-7], void),
+                (Call ((([93:1-2], (function(KeyedTraversable<int, int> $o): void)), (Id ([93:1-2], "\\o"))), 
+                   [],
+                   [(([93:3-6], KeyedTraversable<string, int>),
+                     (Hole ((([93:3-6], KeyedTraversable<string, int>), (Lvar ([93:3-6], $o1))), (<expr#4> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))));
+           ([95:1-8],
+            (Expr
+               (([95:1-7], void),
+                (Call ((([95:1-2], (function(KeyedTraversable<int, int> $o): void)), (Id ([95:1-2], "\\o"))), 
+                   [],
+                   [(([95:3-6], KeyedTraversable<int, string>),
+                     (Hole ((([95:3-6], KeyedTraversable<int, string>), (Lvar ([95:3-6], $o2))), (<expr#5> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))));
+           ([97:1-18],
+            (Expr
+               (([97:1-17], Foo),
+                (Binop ((Eq None), (([97:1-5], Foo), (Lvar ([97:1-5], $foo))), (([97:8-17], Foo), (New ((([97:12-15], Foo), (CI ([97:12-15], "\\Foo"))), [], [], None, ([97:12-15], _)))))))));
+           ([100:1-14],
+            (Expr
+               (([100:1-13], void),
+                (Call (
+                   (([100:1-8], (function((int, int) $a): void)),
+                    (Obj_get ((([100:1-5], Foo), (Lvar ([100:1-5], $foo))), (([100:7-8], (function((int, int) $a): void)), (Id ([100:7-8], "a"))), OG_nullthrows, false))),
+                   [], [(([100:9-12], (int, bool)), (Hole ((([100:9-12], (int, bool)), (Lvar ([100:9-12], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+           ([102:1-14],
+            (Expr
+               (([102:1-13], void),
+                (Call (
+                   (([102:1-8], (function((int, int) $a): void)),
+                    (Obj_get ((([102:1-5], Foo), (Lvar ([102:1-5], $foo))), (([102:7-8], (function((int, int) $a): void)), (Id ([102:7-8], "a"))), OG_nullthrows, false))),
+                   [], [(([102:9-12], (bool, int)), (Hole ((([102:9-12], (bool, int)), (Lvar ([102:9-12], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))));
+           ([104:1-14],
+            (Expr
+               (([104:1-13], void),
+                (Call (
+                   (([104:1-8], (function(Pair<int, int> $b): void)),
+                    (Obj_get ((([104:1-5], Foo), (Lvar ([104:1-5], $foo))), (([104:7-8], (function(Pair<int, int> $b): void)), (Id ([104:7-8], "b"))), OG_nullthrows, false))),
+                   [], [(([104:9-12], Pair<bool, int>), (Hole ((([104:9-12], Pair<bool, int>), (Lvar ([104:9-12], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
+           ([106:1-14],
+            (Expr
+               (([106:1-13], void),
+                (Call (
+                   (([106:1-8], (function(Pair<int, int> $b): void)),
+                    (Obj_get ((([106:1-5], Foo), (Lvar ([106:1-5], $foo))), (([106:7-8], (function(Pair<int, int> $b): void)), (Id ([106:7-8], "b"))), OG_nullthrows, false))),
+                   [], [(([106:9-12], Pair<int, bool>), (Hole ((([106:9-12], Pair<int, bool>), (Lvar ([106:9-12], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))));
+           ([108:1-13],
+            (Expr
+               (([108:1-12], void),
+                (Call (
+                   (([108:1-8], (function(vec<int> $c): void)),
+                    (Obj_get ((([108:1-5], Foo), (Lvar ([108:1-5], $foo))), (([108:7-8], (function(vec<int> $c): void)), (Id ([108:7-8], "c"))), OG_nullthrows, false))),
+                   [], [(([108:9-11], vec<float>), (Hole ((([108:9-11], vec<float>), (Lvar ([108:9-11], $c))), (vec<float>), (vec<int>), Typing)))], None)))));
+           ([110:1-13],
+            (Expr
+               (([110:1-12], void),
+                (Call (
+                   (([110:1-8], (function(vec_or_dict<arraykey, int> $d): void)),
+                    (Obj_get ((([110:1-5], Foo), (Lvar ([110:1-5], $foo))), (([110:7-8], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([110:7-8], "d"))), OG_nullthrows, false))),
+                   [],
+                   [(([110:9-11], vec_or_dict<arraykey, float>),
+                     (Hole ((([110:9-11], vec_or_dict<arraykey, float>), (Lvar ([110:9-11], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                   None)))));
+           ([112:1-13],
+            (Expr
+               (([112:1-12], void),
+                (Call (
+                   (([112:1-8], (function(vec<int> $e): void)),
+                    (Obj_get ((([112:1-5], Foo), (Lvar ([112:1-5], $foo))), (([112:7-8], (function(vec<int> $e): void)), (Id ([112:7-8], "e"))), OG_nullthrows, false))),
+                   [], [(([112:9-11], vec<float>), (Hole ((([112:9-11], vec<float>), (Lvar ([112:9-11], $e))), (vec<float>), (vec<int>), Typing)))], None)))));
+           ([114:1-13],
+            (Expr
+               (([114:1-12], void),
+                (Call (
+                   (([114:1-8], (function(keyset<int> $f): void)),
+                    (Obj_get ((([114:1-5], Foo), (Lvar ([114:1-5], $foo))), (([114:7-8], (function(keyset<int> $f): void)), (Id ([114:7-8], "f"))), OG_nullthrows, false))),
+                   [], [(([114:9-11], keyset<string>), (Hole ((([114:9-11], keyset<string>), (Lvar ([114:9-11], $f))), (keyset<string>), (keyset<int>), Typing)))], None)))));
+           ([116:1-13],
+            (Expr
+               (([116:1-12], void),
+                (Call (
+                   (([116:1-8], (function(Vector<int> $g): void)),
+                    (Obj_get ((([116:1-5], Foo), (Lvar ([116:1-5], $foo))), (([116:7-8], (function(Vector<int> $g): void)), (Id ([116:7-8], "g"))), OG_nullthrows, false))),
+                   [], [(([116:9-11], Vector<float>), (Hole ((([116:9-11], Vector<float>), (Lvar ([116:9-11], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))));
+           ([118:1-13],
+            (Expr
+               (([118:1-12], void),
+                (Call (
+                   (([118:1-8], (function(Set<int> $h): void)),
+                    (Obj_get ((([118:1-5], Foo), (Lvar ([118:1-5], $foo))), (([118:7-8], (function(Set<int> $h): void)), (Id ([118:7-8], "h"))), OG_nullthrows, false))),
+                   [], [(([118:9-11], Set<string>), (Hole ((([118:9-11], Set<string>), (Lvar ([118:9-11], $h))), (Set<string>), (Set<int>), Typing)))], None)))));
+           ([120:1-13],
+            (Expr
+               (([120:1-12], void),
+                (Call (
+                   (([120:1-8], (function(Traversable<int> $i): void)),
+                    (Obj_get ((([120:1-5], Foo), (Lvar ([120:1-5], $foo))), (([120:7-8], (function(Traversable<int> $i): void)), (Id ([120:7-8], "i"))), OG_nullthrows, false))),
+                   [], [(([120:9-11], Traversable<float>), (Hole ((([120:9-11], Traversable<float>), (Lvar ([120:9-11], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))], None)))));
+           ([122:1-13],
+            (Expr
+               (([122:1-12], void),
+                (Call (
+                   (([122:1-8], (function(ImmSet<int> $j): void)),
+                    (Obj_get ((([122:1-5], Foo), (Lvar ([122:1-5], $foo))), (([122:7-8], (function(ImmSet<int> $j): void)), (Id ([122:7-8], "j"))), OG_nullthrows, false))),
+                   [], [(([122:9-11], ImmSet<string>), (Hole ((([122:9-11], ImmSet<string>), (Lvar ([122:9-11], $j))), (ImmSet<string>), (ImmSet<int>), Typing)))], None)))));
+           ([124:1-13],
+            (Expr
+               (([124:1-12], void),
+                (Call (
+                   (([124:1-8], (function(ImmVector<int> $k): void)),
+                    (Obj_get ((([124:1-5], Foo), (Lvar ([124:1-5], $foo))), (([124:7-8], (function(ImmVector<int> $k): void)), (Id ([124:7-8], "k"))), OG_nullthrows, false))),
+                   [], [(([124:9-11], ImmVector<float>), (Hole ((([124:9-11], ImmVector<float>), (Lvar ([124:9-11], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))));
+           ([126:1-13],
+            (Expr
+               (([126:1-12], void),
+                (Call (
+                   (([126:1-8], (function(Collection<int> $l): void)),
+                    (Obj_get ((([126:1-5], Foo), (Lvar ([126:1-5], $foo))), (([126:7-8], (function(Collection<int> $l): void)), (Id ([126:7-8], "l"))), OG_nullthrows, false))),
+                   [], [(([126:9-11], Collection<string>), (Hole ((([126:9-11], Collection<string>), (Lvar ([126:9-11], $l))), (<expr#2> as Collection<string>), (Collection<int>), Typing)))], None)))));
+           ([128:1-13],
+            (Expr
+               (([128:1-12], void),
+                (Call (
+                   (([128:1-8], (function(Iterable<int> $m): void)),
+                    (Obj_get ((([128:1-5], Foo), (Lvar ([128:1-5], $foo))), (([128:7-8], (function(Iterable<int> $m): void)), (Id ([128:7-8], "m"))), OG_nullthrows, false))),
+                   [], [(([128:9-11], Iterable<float>), (Hole ((([128:9-11], Iterable<float>), (Lvar ([128:9-11], $m))), (<expr#3> as Iterable<float>), (Iterable<int>), Typing)))], None)))));
+           ([130:1-14],
+            (Expr
+               (([130:1-13], void),
+                (Call (
+                   (([130:1-8], (function(dict<int, int> $n): void)),
+                    (Obj_get ((([130:1-5], Foo), (Lvar ([130:1-5], $foo))), (([130:7-8], (function(dict<int, int> $n): void)), (Id ([130:7-8], "n"))), OG_nullthrows, false))),
+                   [], [(([130:9-12], dict<string, int>), (Hole ((([130:9-12], dict<string, int>), (Lvar ([130:9-12], $n1))), (dict<string, int>), (dict<int, int>), Typing)))], None)))));
+           ([132:1-14],
+            (Expr
+               (([132:1-13], void),
+                (Call (
+                   (([132:1-8], (function(dict<int, int> $n): void)),
+                    (Obj_get ((([132:1-5], Foo), (Lvar ([132:1-5], $foo))), (([132:7-8], (function(dict<int, int> $n): void)), (Id ([132:7-8], "n"))), OG_nullthrows, false))),
+                   [], [(([132:9-12], dict<int, string>), (Hole ((([132:9-12], dict<int, string>), (Lvar ([132:9-12], $n2))), (dict<int, string>), (dict<int, int>), Typing)))], None)))));
+           ([134:1-14],
+            (Expr
+               (([134:1-13], void),
+                (Call (
+                   (([134:1-8], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([134:1-5], Foo), (Lvar ([134:1-5], $foo))), (([134:7-8], (function(KeyedTraversable<int, int> $o): void)), (Id ([134:7-8], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([134:9-12], KeyedTraversable<string, int>),
+                     (Hole ((([134:9-12], KeyedTraversable<string, int>), (Lvar ([134:9-12], $o1))), (<expr#4> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))));
+           ([136:1-14],
+            (Expr
+               (([136:1-13], void),
+                (Call (
+                   (([136:1-8], (function(KeyedTraversable<int, int> $o): void)),
+                    (Obj_get ((([136:1-5], Foo), (Lvar ([136:1-5], $foo))), (([136:7-8], (function(KeyedTraversable<int, int> $o): void)), (Id ([136:7-8], "o"))), OG_nullthrows, false))),
+                   [],
+                   [(([136:9-12], KeyedTraversable<int, string>),
+                     (Hole ((([136:9-12], KeyedTraversable<int, string>), (Lvar ([136:9-12], $o2))), (<expr#5> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None })

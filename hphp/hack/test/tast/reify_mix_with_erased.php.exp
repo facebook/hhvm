@@ -37,7 +37,7 @@ Errors:
               (([8:3-21], string),
                (Call ((([8:3-4], (function<reify T, Tu>(string $f): string)), (Id ([8:3-4], "\\f"))), 
                   [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                  [(([8:18-20], int), (Int "42"))], None)))))
+                  [(([8:18-20], int), (Hole ((([8:18-20], int), (Int "42")), (int), (string), Typing)))], None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 

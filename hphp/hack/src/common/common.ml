@@ -100,3 +100,12 @@ module List = struct
            (Printf.sprintf "List.replicate was called with %d argument" n)
     | _ -> x :: replicate ~num:(num - 1) x
 end
+
+module Result = struct
+  include Core_kernel.Result
+
+  let fold t ~ok ~error =
+    match t with
+    | Ok x -> ok x
+    | Error err -> error err
+end

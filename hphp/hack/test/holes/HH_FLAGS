@@ -1,0 +1,2 @@
+--allowed-fixme-codes-strict 4110,4323
+--allowed-decl-fixme-codes 4110,4323

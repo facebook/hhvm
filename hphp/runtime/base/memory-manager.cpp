@@ -151,6 +151,7 @@ void MemoryManager::traceStats(const char* event) {
     FTRACE(1, "total {} reset alloc-dealloc {} cur alloc-dealloc {}\n",
            m_stats.totalAlloc, m_resetAllocated - m_resetDeallocated,
            *m_allocated - *m_deallocated);
+    FTRACE(1, "freed on another thread {}\n", m_freedOnOtherThread);
   } else {
     FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
            m_stats.usage(), m_stats.capacity(),
@@ -186,6 +187,7 @@ void MemoryManager::resetAllStats() {
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
     m_resetAllocated = *m_allocated;
+    m_freedOnOtherThread = 0;
   }
   traceStats("resetAllStats post");
 }
@@ -205,9 +207,11 @@ void MemoryManager::resetExternalStats() {
   m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
-    m_resetAllocated = *m_allocated - m_stats.malloc_cap;
     // By subtracting malloc_cap here, the next call to refreshStatsImpl()
     // will correctly include m_stats.malloc_cap in extUsage and totalAlloc.
+    m_resetAllocated = *m_allocated - m_stats.malloc_cap;
+    // takeCreditForFreeOnOtherThread should not have been used yet
+    assertx(m_freedOnOtherThread == 0);
   }
   traceStats("resetExternalStats post");
 }
@@ -258,13 +262,14 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // Since these deltas potentially include memory allocated from another
     // thread but deallocated on this one, it is possible for these numbers to
     // go negative.
-    auto curUsage = curAllocated - curDeallocated;
+    auto curUsage = curAllocated - curDeallocated - m_freedOnOtherThread;
     auto resetUsage = m_resetAllocated - m_resetDeallocated;
 
     FTRACE(1, "heap-id {} Before stats sync: ", tl_heap_id);
     FTRACE(1, "reset alloc-dealloc {} cur alloc-dealloc: {} alloc-change: {} ",
       resetUsage, curUsage, curAllocated - m_resetAllocated);
-    FTRACE(1, "dealloc-change: {} ", curDeallocated - m_resetDeallocated);
+    FTRACE(1, "dealloc-change: {} ",
+      curDeallocated - m_resetDeallocated + m_freedOnOtherThread);
     FTRACE(1, "mm usage {} extUsage {} totalAlloc {} capacity {}\n",
       stats.mmUsage(), stats.extUsage, stats.totalAlloc, stats.capacity());
 

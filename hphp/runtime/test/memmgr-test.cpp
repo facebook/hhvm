@@ -243,11 +243,34 @@ void give_memory_to_bg_thread(const String& payload) {
      * bound (e.g. limiting the size of the queue that tasks owning memory
      * allocated in this way on request threads can sit in, and failing to
      * enqueue more work if this server-wide queue limit is reached).
+     *
+     * If you are passing data to a background thread in an async function
+     * consider the second approach below instead.
      */
     MemoryManager::MaskAlloc masker(*tl_heap);
     worker.allocate(payload);
   }
   AsyncFunc<BgThreadFreeWorker>(&worker, &BgThreadFreeWorker::doJob).run();
+}
+
+void give_memory_to_bg_thread2(const String& payload) {
+  BgThreadFreeWorker worker;
+  uint64_t allocated = 0;
+  {
+    /*
+     * This approach is suitable when we get some feedback from the background
+     * thread that the process has completed and freed the memory, e.g. in
+     * an async function that returns an ExternalThreadEventWaitHandle (in
+     * which case you can takeCreditForFreeOnOtherThread in the unserialize
+     * method of the AsioExternalThreadEvent). This approach does not require
+     * you to implement your own memory limit, as the request is still debited
+     * for the allocation until after it has been freed.
+     */
+    MemoryManager::CountMalloc counter(*tl_heap, allocated);
+    worker.allocate(payload);
+  }
+  AsyncFunc<BgThreadFreeWorker>(&worker, &BgThreadFreeWorker::doJob).run();
+  tl_heap->takeCreditForFreeOnOtherThread(allocated);
 }
 
 struct BgThreadAllocWorker {
@@ -281,6 +304,16 @@ TEST(MemoryManager, GiveMemoryToBgThread) {
   auto const usage_at_start = tl_heap->getStatsCopy().usage();
   for (int i = 0; i < 1024; i++) {
     give_memory_to_bg_thread(payload);
+  }
+  auto const usage_at_end = tl_heap->getStatsCopy().usage();
+  EXPECT_EQ(usage_at_end, usage_at_start);
+}
+
+TEST(MemoryManager, GiveMemoryToBgThread2) {
+  String payload(std::string(1024, 'x'));
+  auto const usage_at_start = tl_heap->getStatsCopy().usage();
+  for (int i = 0; i < 1024; i++) {
+    give_memory_to_bg_thread2(payload);
   }
   auto const usage_at_end = tl_heap->getStatsCopy().usage();
   EXPECT_EQ(usage_at_end, usage_at_start);

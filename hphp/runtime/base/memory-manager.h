@@ -568,6 +568,26 @@ struct MemoryManager {
   struct MaskAlloc;
 
   /*
+   * This is an RAII wrapper to count mallocs made in a scoped region. The
+   * intent is for extensions to use this to capture how much memory some
+   * opaque C++ allocation process has allocated in order to be able to
+   * credit this request thread for freeing it after it is freed on the
+   * extension's background thread (e.g. in an AsioExternalThreadEvent's
+   * unserialize method).
+   *
+   * Usage:
+   * uint64_t allocated = 0;
+   * {
+   *   MemoryManager::CountMalloc counter(tl_heap, allocated);
+   *   <do stuff>
+   * }
+   *
+   * Later on:
+   * tl_heap->takeCreditForFreeOnOtherThread(allocated);
+   */
+  struct CountMalloc;
+
+  /*
    * An RAII wrapper to suppress OOM checking in a region.
    */
   struct SuppressOOM;
@@ -802,10 +822,20 @@ struct MemoryManager {
   bool stopStatsInterval();
 
   /*
-   * How much memory this thread has allocated or deallocated.
+   * How much memory this thread has allocated or deallocated from the
+   * underlying malloc implementation's perspective.
    */
   int64_t getAllocated() const;
   int64_t getDeallocated() const;
+  /*
+   * Apply a credit to this thread's malloc memory stats for a free that
+   * happened on another thread.
+   */
+  void takeCreditForFreeOnOtherThread(uint64_t size);
+
+  /*
+   * How much memory this thread has allocated and not freed using heap APIs.
+   */
   int64_t currentUsage() const;
 
   /*
@@ -1054,8 +1084,13 @@ private:
   uint64_t* m_deallocated;
 
   // previous values of *m_[de]allocated from last resetStats()
+  // We adjust these numbers as needed when we want to hide allocations/frees
+  // from the memory manager.
   uint64_t m_resetAllocated;
   uint64_t m_resetDeallocated;
+  // An adjustment to take credit for freeing memory allocated by this thread
+  // and freed on another thread.
+  uint64_t m_freedOnOtherThread;
 
   // true if mallctlnametomib() setup succeeded, which requires jemalloc
   static bool s_statsEnabled;

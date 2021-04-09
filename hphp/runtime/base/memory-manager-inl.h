@@ -74,6 +74,35 @@ private:
   const uint64_t startDealloc;
 };
 
+struct MemoryManager::CountMalloc {
+  explicit CountMalloc(MemoryManager& mm, uint64_t& allocated)
+    : m_mm(mm)
+    , m_allocated(allocated)
+    , startAlloc(s_statsEnabled ? *mm.m_allocated : 0)
+  {}
+
+  ~CountMalloc() {
+    if (s_statsEnabled) {
+      assertx(*m_mm.m_allocated >= startAlloc);
+      m_allocated = *m_mm.m_allocated - startAlloc;
+    } else {
+      m_allocated = 0;
+    }
+  }
+
+  CountMalloc(const CountMalloc&) = delete;
+  CountMalloc& operator=(const CountMalloc&) = delete;
+
+private:
+  MemoryManager& m_mm;
+  uint64_t& m_allocated;
+  const uint64_t startAlloc;
+};
+
+inline void MemoryManager::takeCreditForFreeOnOtherThread(uint64_t size) {
+  m_freedOnOtherThread += size;
+}
+
 struct MemoryManager::SuppressOOM {
   explicit SuppressOOM(MemoryManager& mm)
       : m_mm(mm)

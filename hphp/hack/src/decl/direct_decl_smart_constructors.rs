@@ -2664,6 +2664,95 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::Ignored(SK::AwaitableCreationExpression)
     }
 
+    fn make_darray_intrinsic_expression(
+        &mut self,
+        darray: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
+            Node::ListItem(&(key, value)) => {
+                let key = self.node_to_expr(key)?;
+                let value = self.node_to_expr(value)?;
+                Some((key, value))
+            }
+            n => panic!("Expected a ListItem but was {:?}", n),
+        }));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(darray, right_bracket),
+            nast::Expr_::Darray(self.alloc((None, fields))),
+        )))
+    }
+
+    fn make_dictionary_intrinsic_expression(
+        &mut self,
+        dict: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
+            Node::ListItem(&(key, value)) => {
+                let key = self.node_to_expr(key)?;
+                let value = self.node_to_expr(value)?;
+                Some(self.alloc(aast::Field(key, value)))
+            }
+            n => panic!("Expected a ListItem but was {:?}", n),
+        }));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(dict, right_bracket),
+            nast::Expr_::KeyValCollection(self.alloc((aast::KvcKind::Dict, None, fields))),
+        )))
+    }
+
+    fn make_keyset_intrinsic_expression(
+        &mut self,
+        keyset: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(keyset, right_bracket),
+            nast::Expr_::ValCollection(self.alloc((aast::VcKind::Keyset, None, fields))),
+        )))
+    }
+
+    fn make_varray_intrinsic_expression(
+        &mut self,
+        varray: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(varray, right_bracket),
+            nast::Expr_::Varray(self.alloc((None, fields))),
+        )))
+    }
+
+    fn make_vector_intrinsic_expression(
+        &mut self,
+        vec: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(vec, right_bracket),
+            nast::Expr_::ValCollection(self.alloc((aast::VcKind::Vec, None, fields))),
+        )))
+    }
+
     fn make_element_initializer(
         &mut self,
         key: Self::R,
@@ -4375,6 +4464,41 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         let pos = self.merge_positions(shape, rparen);
         self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into()))))
+    }
+
+    fn make_shape_expression(
+        &mut self,
+        shape: Self::R,
+        _left_paren: Self::R,
+        fields: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
+            Node::ListItem(&(key, value)) => {
+                let key = self.make_shape_field_name(key)?;
+                let value = self.node_to_expr(value)?;
+                Some((key, value))
+            }
+            n => panic!("Expected a ListItem but was {:?}", n),
+        }));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(shape, right_paren),
+            nast::Expr_::Shape(fields),
+        )))
+    }
+
+    fn make_tuple_expression(
+        &mut self,
+        tuple: Self::R,
+        _left_paren: Self::R,
+        fields: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let fields = self.slice(fields.iter().filter_map(|&field| self.node_to_expr(field)));
+        Node::Expr(self.alloc(aast::Expr(
+            self.merge_positions(tuple, right_paren),
+            nast::Expr_::List(fields),
+        )))
     }
 
     fn make_classname_type_specifier(

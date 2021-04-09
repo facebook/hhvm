@@ -2627,6 +2627,7 @@ dependencies = [
  "hhbc_by_ref_env",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_rewrite_xml",
+ "ocamlrep",
  "oxidized",
 ]
 
@@ -2944,7 +2945,6 @@ dependencies = [
  "bumpalo",
  "escaper",
  "hash",
- "hh_autoimport_rust",
  "html_entities",
  "itertools",
  "lazy_static",

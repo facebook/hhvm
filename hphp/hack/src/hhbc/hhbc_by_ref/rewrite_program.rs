@@ -8,7 +8,8 @@ use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
 use hhbc_by_ref_rewrite_xml::rewrite_xml;
-use oxidized::ast as Tast;
+use ocamlrep::rc::RcOc;
+use oxidized::{ast as Tast, namespace_env};
 
 fn debugger_eval_should_modify(tast: &[Tast::Def]) -> Result<bool> {
     /*
@@ -40,6 +41,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter>(
     alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena>,
     prog: &'p mut Tast::Program,
+    namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {
     let for_debugger_eval =
         emitter.for_debugger_eval && debugger_eval_should_modify(prog.as_slice())?;
@@ -57,7 +59,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter>(
     }
 
     let local_alloc = bumpalo::Bump::new();
-    closure_convert::convert_toplevel_prog(&local_alloc, emitter, prog)?;
+    closure_convert::convert_toplevel_prog(&local_alloc, emitter, prog, namespace_env)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
 

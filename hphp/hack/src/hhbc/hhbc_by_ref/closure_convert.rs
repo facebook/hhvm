@@ -1689,6 +1689,7 @@ pub fn convert_toplevel_prog<'local_arena, 'arena>(
     alloc: &'local_arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
     defs: &mut Program,
+    namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {
     if e.options()
         .hack_compiler_flags
@@ -1707,14 +1708,12 @@ pub fn convert_toplevel_prog<'local_arena, 'arena>(
         e.for_debugger_eval,
     )?;
     *defs = flatten_ns(defs);
-    let empty_namespace = namespace_env::Env::empty(vec![], false, false);
-    let ns = RcOc::new(empty_namespace);
     if e.for_debugger_eval {
-        extract_debugger_main(&ns, defs).map_err(unrecoverable)?;
+        extract_debugger_main(&namespace_env, defs).map_err(unrecoverable)?;
     }
 
     let mut visitor = ClosureConvertVisitor {
-        state: State::initial_state(ns),
+        state: State::initial_state(namespace_env),
         phantom_lifetime_a: std::marker::PhantomData,
     };
 

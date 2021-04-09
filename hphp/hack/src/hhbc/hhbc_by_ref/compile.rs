@@ -351,39 +351,40 @@ where
         Some(native_env) => NativeEnv::to_options(&native_env),
     };
 
-    let (mut parse_result, parsing_t) = time(|| {
-        parse_file(
-            &opts,
-            stack_limit,
-            source_text,
-            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
-        )
-    });
-    let log_extern_compiler_perf = opts.log_extern_compiler_perf();
-
     let mut emitter = Emitter::new(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
     );
 
+    let namespace_env = RcOc::new(NamespaceEnv::empty(
+        emitter.options().hhvm.aliased_namespaces_cloned().collect(),
+        true, /* is_codegen */
+        emitter
+            .options()
+            .hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+    ));
+
+    let (mut parse_result, parsing_t) = time(|| {
+        parse_file(
+            emitter.options(),
+            stack_limit,
+            source_text,
+            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+            RcOc::clone(&namespace_env),
+        )
+    });
+    let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
+
     let alloc = &bumpalo::Bump::new();
     let (program, codegen_t) = match &mut parse_result {
         Either::Right(ast) => {
-            let namespace = RcOc::new(NamespaceEnv::empty(
-                emitter.options().hhvm.aliased_namespaces_cloned().collect(),
-                true, /* is_codegen */
-                emitter
-                    .options()
-                    .hhvm
-                    .hack_lang
-                    .flags
-                    .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-            ));
-            // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
-            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
+            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), ast);
             let e = &mut emitter;
-            time(move || rewrite_and_emit(alloc, e, &env, namespace, ast))
+            time(move || rewrite_and_emit(alloc, e, &env, namespace_env, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
             time(|| emit_fatal(*is_runtime_error, pos, msg))
@@ -420,15 +421,15 @@ fn rewrite_and_emit<'p, 'arena, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     env: &Env<S>,
-    namespace: RcOc<NamespaceEnv>,
+    namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p, 'arena>, Error> {
     // First rewrite.
-    let result = rewrite(alloc, emitter, ast); // Modifies `ast` in place.
+    let result = rewrite(alloc, emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit(alloc, emitter, &env, namespace, ast)
+            emit(alloc, emitter, &env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
             emit_program::emit_fatal_program(op, &pos, msg)
@@ -441,8 +442,9 @@ fn rewrite<'p, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     ast: &'p mut Tast::Program,
+    namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
-    rewrite_program(alloc, emitter, ast)
+    rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
 fn emit<'p, 'arena, S: AsRef<str>>(
@@ -523,11 +525,12 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 /// parse_file returns either error(Left) or ast(Right)
 /// - Left((Position, message, is_runtime_error))
 /// - Right(ast)
-pub fn parse_file(
+fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
     source_text: SourceText,
     elaborate_namespaces: bool,
+    namespace_env: RcOc<NamespaceEnv>,
 ) -> Either<(Pos, String, bool), Tast::Program> {
     let aast_env = AastEnv {
         codegen: true,
@@ -544,7 +547,12 @@ pub fn parse_file(
     };
 
     let indexed_source_text = IndexedSourceText::new(source_text);
-    let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));
+    let ast_result = AastParser::from_text_with_namespace_env(
+        &aast_env,
+        namespace_env,
+        &indexed_source_text,
+        Some(stack_limit),
+    );
     match ast_result {
         Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
         Err(AastError::NotAHackFile()) => {

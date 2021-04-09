@@ -246,7 +246,7 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
     use ocamlrep::rc::RcOc;
-    use oxidized::{global_options::GlobalOptions, namespace_env, uast::*};
+    use oxidized::{namespace_env, uast::*};
 
     fn elaborate_xhp_namespace(id: &mut String) {
         if let Some(s) = super::elaborate_xhp_namespace(id.as_str()) {
@@ -416,9 +416,9 @@ pub mod toplevel_elaborator {
     /// namespaces are propagated to inline declarations
     /// during closure conversion process
     pub fn elaborate_toplevel_defs<A: ClonableAnnot>(
-        popt: &GlobalOptions,
+        ns: RcOc<namespace_env::Env>,
         defs: Program<A>,
     ) -> Program<A> {
-        on_program::<A>(RcOc::new(namespace_env::Env::empty_from_popt(popt)), defs)
+        on_program::<A>(ns, defs)
     }
 }

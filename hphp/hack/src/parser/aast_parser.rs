@@ -10,9 +10,11 @@ use bumpalo::Bump;
 use lowerer::{lower, ScourComment};
 use mode_parser::{parse_mode, Language};
 use namespaces_rust as namespaces;
+use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
-    aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments, uast::AstAnnot,
+    aast::Program, file_info::Mode, namespace_env::Env as NamespaceEnv, pos::Pos,
+    scoured_comments::ScouredComments, uast::AstAnnot,
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
@@ -55,6 +57,20 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         stack_limit: Option<&'src StackLimit>,
     ) -> Result<ParserResult> {
+        let ns = NamespaceEnv::empty(
+            env.parser_options.po_auto_namespace_map.clone(),
+            env.codegen,
+            env.parser_options.po_disable_xhp_element_mangling,
+        );
+        Self::from_text_with_namespace_env(env, RcOc::new(ns), indexed_source_text, stack_limit)
+    }
+
+    pub fn from_text_with_namespace_env(
+        env: &Env,
+        ns: RcOc<NamespaceEnv>,
+        indexed_source_text: &'src IndexedSourceText<'src>,
+        stack_limit: Option<&'src StackLimit>,
+    ) -> Result<ParserResult> {
         let arena = Bump::new();
         let (language, mode, tree) =
             Self::parse_text(&arena, env, indexed_source_text, stack_limit)?;
@@ -75,7 +91,7 @@ impl<'src> AastParser {
             mode,
             indexed_source_text,
             &env.parser_options,
-            env.elaborate_namespaces,
+            RcOc::clone(&ns),
             stack_limit,
             TokenFactory::new(&arena),
             &arena,
@@ -83,10 +99,7 @@ impl<'src> AastParser {
         let ret = lower(&mut lowerer_env, tree.root());
         let ret = if env.elaborate_namespaces {
             ret.map(|ast| {
-                namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(
-                    &env.parser_options,
-                    ast,
-                )
+                namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(ns, ast)
             })
         } else {
             ret

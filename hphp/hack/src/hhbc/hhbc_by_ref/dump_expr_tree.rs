@@ -5,9 +5,10 @@
 
 use crate::{expr_to_string_lossy, parse_file, Env};
 // use crate::compile_rust as compile;
-use hhbc_by_ref_options::Options;
+use hhbc_by_ref_options::{LangFlags, Options};
 use itertools::Either::*;
 use ocamlrep::rc::RcOc;
+use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
 use oxidized::{
     aast,
@@ -103,7 +104,15 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
 
     let limit = StackLimit::relative(13 * MI);
     let opts = Options::from_configs(&env.config_jsons, &env.config_list).expect("Invalid options");
-    match parse_file(&opts, &limit, source_text, false) {
+    let ns = RcOc::new(NamespaceEnv::empty(
+        opts.hhvm.aliased_namespaces_cloned().collect(),
+        true,
+        opts.hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+    ));
+    match parse_file(&opts, &limit, source_text, false, ns) {
         Left((_, msg, _)) => panic!("Parsing failed: {}", msg),
         Right(ast) => {
             let old_src = String::from_utf8_lossy(&content);

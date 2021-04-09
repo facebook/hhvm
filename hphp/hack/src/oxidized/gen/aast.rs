@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d93bb1baa0b63ed743dbb242b9b372f4>>
+// @generated SignedSource<<97cc7387fb0257473e0c438ad52ea200>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -819,6 +819,32 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// The [hole_source] indicates whether this came from an
     /// explicit call to [unsafe_cast] or [enforced_cast] or was
     /// generated during typing.
+    ///
+    /// Given a call to [unsafe_cast]:
+    /// ```
+    ///          function f(int $x): void { /* ... */ }
+    ///
+    ///          function g(float $x): void {
+    ///             f(unsafe_cast<float,int>($x));
+    ///          }
+    /// ```
+    /// After typing, this is represented by the following TAST fragment
+    /// ```
+    ///          Call
+    ///            ( ( (..., function(int $x): void), Id (..., "\f"))
+    ///            , []
+    ///            , [ ( (..., int)
+    ///                , Hole
+    ///                    ( ((..., float), Lvar (..., $x))
+    ///                    , float
+    ///                    , int
+    ///                    , UnsafeCast
+    ///                    )
+    ///                )
+    ///              ]
+    ///            , None
+    ///            )
+    /// ```
     Hole(Box<(Expr<Ex, Fb, En, Hi>, Hi, Hi, HoleSource)>),
 }
 

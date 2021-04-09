@@ -638,6 +638,31 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           explicit call to [unsafe_cast] or [enforced_cast] or was
           generated during typing.
 
+          Given a call to [unsafe_cast]:
+          ```
+          function f(int $x): void { /* ... */ }
+
+          function g(float $x): void {
+             f(unsafe_cast<float,int>($x));
+          }
+          ```
+          After typing, this is represented by the following TAST fragment
+          ```
+          Call
+            ( ( (..., function(int $x): void), Id (..., "\f"))
+            , []
+            , [ ( (..., int)
+                , Hole
+                    ( ((..., float), Lvar (..., $x))
+                    , float
+                    , int
+                    , UnsafeCast
+                    )
+                )
+              ]
+            , None
+            )
+          ```
       *)
 
 and ('ex, 'fb, 'en, 'hi) class_get_expr =

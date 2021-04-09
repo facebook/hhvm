@@ -13,7 +13,6 @@
     ifc_lib
     client
     default_injector_config
-    file_content
     gen_deps
     glean_dependency_graph_convert
     hhi
@@ -27,6 +26,24 @@
     typing
     utils_core
     utils_multifile))
+
+(executable
+  (name hh_single_complete)
+  (modules
+    hh_single_complete)
+  (modes exe byte_complete)
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    default_injector_config
+    file_content
+    hhi
+    search
+    server_autocomplete_services
+    string
+    sys_utils
+    utils_core
+  )
+  )
 
 (executable
   (name hh_server)
@@ -160,6 +177,7 @@
     hh_single_compile.exe
     hh_single_decl.exe
     hh_single_type_check.exe
+    hh_single_complete.exe
     ai/zoncolan.exe
     ))
 
@@ -193,4 +211,5 @@
     hh_server.bc.exe
     hh_single_compile.bc.exe
     hh_single_type_check.bc.exe
+    hh_single_complete.bc.exe
     ))

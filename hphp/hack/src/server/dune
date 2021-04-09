@@ -132,23 +132,39 @@
     utils_core)
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
+
 (library
-  (name server_services)
+  (name server_autocomplete_services)
   (wrapped false)
   (modules
     autocompleteService
-    cstSearchService
     ffpAutocompleteContextParser
     ffpAutocompleteGlobals
     ffpAutocompleteKeywords
     ffpAutocompleteService
     ffpAutocompleteTypeCheck
+    serverAutoComplete
+  )
+  (libraries
+    provider_utils
+    search
+    server_command_types
+    server_pos
+    tast_provider
+    )
+  (preprocess (pps lwt_ppx ppx_deriving.std))
+)
+
+(library
+  (name server_services)
+  (wrapped false)
+  (modules
+    cstSearchService
     fileOutline
     findRefsService
     identifySymbolService
     methodJumps
     saveStateService
-    serverAutoComplete
     serverFindLocals
     serverFunDepsBatch
     serverGlobalState
@@ -272,6 +288,7 @@
     search
     security_stubs
     server_api
+    server_autocomplete_services
     server_env
     server_remote_utils
     server_services

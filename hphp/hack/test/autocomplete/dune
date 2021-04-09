@@ -1,13 +1,13 @@
 (alias
     (name autocomplete)
-    (deps %{exe:../../src/hh_single_type_check.exe}
+    (deps %{exe:../../src/hh_single_complete.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
           (glob_files %{project_root}/test/autocomplete/HH_FLAGS)
           (glob_files %{project_root}/test/autocomplete/*.php)
           (glob_files %{project_root}/test/autocomplete/*.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/autocomplete
-    --program %{exe:../../src/hh_single_type_check.exe})))
+    --program %{exe:../../src/hh_single_complete.exe})))
 
 (alias
     (name runtest)

@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open File_content
 open String_utils
 open Sys_utils
 open Typing_env_types
@@ -31,9 +30,6 @@ module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 type mode =
   | Ifc of string * string
   | Ai of Ai_options.t
-  | Autocomplete
-  | Autocomplete_manually_invoked
-  | Ffp_autocomplete
   | Color
   | Coverage
   | Cst_search
@@ -306,23 +302,12 @@ let parse_options () =
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
         " Ignore all functions with attribute '__PHPStdLib'" );
-      ( "--auto-complete",
-        Arg.Unit (set_mode Autocomplete),
-        " Produce autocomplete suggestions as if triggered by trigger character"
-      );
-      ( "--auto-complete-manually-invoked",
-        Arg.Unit (set_mode Autocomplete_manually_invoked),
-        " Produce autocomplete suggestions as if manually triggered by user" );
       ( "--auto-namespace-map",
         Arg.String
           (fun m ->
             auto_namespace_map :=
               Some (ServerConfig.convert_auto_namespace_to_map m)),
         " Alias namespaces" );
-      ( "--ffp-auto-complete",
-        Arg.Unit (set_mode Ffp_autocomplete),
-        " Produce autocomplete suggestions using the full-fidelity parse tree"
-      );
       ( "--no-call-coeffects",
         Arg.Unit (fun () -> call_coeffects := false),
         "Turns off call coeffects" );
@@ -848,27 +833,6 @@ let parse_options () =
           tcopt.GlobalOptions.tco_experimental_features;
     }
   in
-  (* Configure symbol index settings *)
-  let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
-  let sienv =
-    SymbolIndex.initialize
-      ~globalrev:None
-      ~gleanopt:tcopt
-      ~namespace_map
-      ~provider_name:"LocalIndex"
-      ~quiet:true
-      ~ignore_hh_version:false
-      ~savedstate_file_opt:!symbolindex_file
-      ~workers:None
-  in
-  let sienv =
-    {
-      sienv with
-      SearchUtils.sie_resolve_signatures = true;
-      SearchUtils.sie_resolve_positions = true;
-      SearchUtils.sie_resolve_local_decl = true;
-    }
-  in
   ( {
       files = fns;
       extra_builtins = !extra_builtins;
@@ -881,7 +845,6 @@ let parse_options () =
       out_extension = !out_extension;
       verbosity = !verbosity;
     },
-    sienv,
     root,
     !naming_table,
     !sharedmem_config )
@@ -1414,19 +1377,6 @@ let dump_debug_glean_deps
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
   | None -> Printf.printf "No dependencies\n"
 
-let scan_files_for_symbol_index
-    (filename : Relative_path.t)
-    (sienv : SearchUtils.si_env)
-    (ctx : Provider_context.t) : SearchUtils.si_env =
-  let files_contents = Multifile.file_to_files filename in
-  let (_, individual_file_info) = parse_name_and_decl ctx files_contents in
-  let fileinfo_list = Relative_path.Map.values individual_file_info in
-  let transformed_list =
-    List.map fileinfo_list ~f:(fun fileinfo ->
-        (filename, fileinfo, SearchUtils.TypeChecker))
-  in
-  SymbolIndex.update_files ~ctx ~sienv ~paths:transformed_list
-
 let handle_mode
     mode
     filenames
@@ -1441,8 +1391,7 @@ let handle_mode
     out_extension
     dbg_deps
     dbg_glean_deps
-    ~verbosity
-    (sienv : SearchUtils.si_env) =
+    ~verbosity =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1512,85 +1461,6 @@ let handle_mode
     else
       (* No type check *)
       Ai.do_ files_info ai_options ctx
-  | Autocomplete
-  | Autocomplete_manually_invoked ->
-    let path = expect_single_file () in
-    let contents = cat (Relative_path.to_absolute path) in
-    (* Search backwards: there should only be one /real/ case. If there's multiple, *)
-    (* guess that the others are preceding explanation comments *)
-    let offset =
-      Str.search_backward
-        (Str.regexp AutocompleteTypes.autocomplete_token)
-        contents
-        (String.length contents)
-    in
-    let pos = File_content.offset_to_position contents offset in
-    let is_manually_invoked =
-      match mode with
-      | Autocomplete_manually_invoked -> true
-      | _ -> false
-    in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
-    in
-    let autocomplete_context =
-      ServerAutoComplete.get_autocomplete_context
-        ~file_content:contents
-        ~pos
-        ~is_manually_invoked
-    in
-    let sienv = scan_files_for_symbol_index path sienv ctx in
-    let result =
-      ServerAutoComplete.go_at_auto332_ctx
-        ~ctx
-        ~entry
-        ~sienv
-        ~autocomplete_context
-    in
-    List.iter
-      ~f:
-        begin
-          fun r ->
-          AutocompleteTypes.(Printf.printf "%s %s\n" r.res_name r.res_ty)
-        end
-      result.Utils.With_complete_flag.value
-  | Ffp_autocomplete ->
-    iter_over_files (fun path ->
-        try
-          let sienv = scan_files_for_symbol_index path sienv ctx in
-          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-          (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-          let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-          let position =
-            try
-              let file_text = Provider_context.read_file_contents_exn entry in
-              let _ = Str.search_forward args_regex file_text 0 in
-              let raw_flags = Str.matched_string file_text in
-              match split ' ' raw_flags with
-              | [_; row; column] ->
-                { line = int_of_string row; column = int_of_string column }
-              | _ -> failwith "Invalid test file: no flags found"
-            with Caml.Not_found ->
-              failwith "Invalid test file: no flags found"
-          in
-          let result =
-            FfpAutocompleteService.auto_complete
-              ctx
-              entry
-              position
-              ~filter_by_token:true
-              ~sienv
-          in
-          match result with
-          | [] -> Printf.printf "No result found\n"
-          | res ->
-            List.iter res ~f:(fun r ->
-                AutocompleteTypes.(Printf.printf "%s\n" r.res_name))
-        with
-        | Failure msg
-        | Invalid_argument msg ->
-          Printf.printf "%s\n" msg;
-          exit 1)
   | Color ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
@@ -2209,8 +2079,7 @@ let decl_and_run_mode
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
-    (naming_table_path : string option)
-    (sienv : SearchUtils.si_env) : unit =
+    (naming_table_path : string option) : unit =
   Ident.track_names := true;
   let builtins =
     if no_builtins then
@@ -2368,12 +2237,10 @@ let decl_and_run_mode
     out_extension
     dbg_deps
     dbg_glean_deps
-    sienv
     ~verbosity
 
 let main_hack
     ({ tcopt; _ } as opts)
-    (sienv : SearchUtils.si_env)
     (root : Path.t)
     (naming_table : string option)
     (sharedmem_config : SharedMem.config) : unit =
@@ -2389,7 +2256,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root naming_table sienv;
+      decl_and_run_mode opts tcopt hhi_root naming_table;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)
@@ -2402,13 +2269,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, sienv, root, naming_table, sharedmem_config) =
-    parse_options ()
-  in
-  Unix.handle_unix_error
-    main_hack
-    options
-    sienv
-    root
-    naming_table
-    sharedmem_config
+  let (options, root, naming_table, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options root naming_table sharedmem_config

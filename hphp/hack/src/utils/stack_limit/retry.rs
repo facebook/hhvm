@@ -89,7 +89,7 @@ impl Job {
                 }) {
                     Ok(result) => Some(result),
                     Err(_) if stack_limit.exceeded() => None,
-                    Err(msg) => panic!(msg),
+                    Err(msg) => std::panic::panic_any(msg),
                 }
             };
 

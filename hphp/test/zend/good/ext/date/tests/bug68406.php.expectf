@@ -1,0 +1,13 @@
+object(DateTimeZone) (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/Berlin"
+}
+object(DateTimeZone) (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/Berlin"
+}
+yes

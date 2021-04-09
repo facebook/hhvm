@@ -3,89 +3,89 @@
 -- Iteration 1 --
 dict(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 2 --
 dict(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 3 --
 dict(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 4 --
 dict(9) {
   ["sunrise"]=>
-  int(-69665)
+  int(-69672)
   ["sunset"]=>
-  int(-33260)
+  int(-33281)
   ["transit"]=>
-  int(-51462)
+  int(-51476)
   ["civil_twilight_begin"]=>
-  int(-71269)
+  int(-71277)
   ["civil_twilight_end"]=>
-  int(-31655)
+  int(-31675)
   ["nautical_twilight_begin"]=>
-  int(-73092)
+  int(-73100)
   ["nautical_twilight_end"]=>
-  int(-29832)
+  int(-29852)
   ["astronomical_twilight_begin"]=>
-  int(-74874)
+  int(-74883)
   ["astronomical_twilight_end"]=>
-  int(-28050)
+  int(-28069)
 }
 
 -- Iteration 5 --

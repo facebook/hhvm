@@ -29,5 +29,4 @@ foreach($inputs as $timezone => $value) {
      var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90.0, $value["GMT"]) );
 }
 
-echo "===DONE===\n";
 }

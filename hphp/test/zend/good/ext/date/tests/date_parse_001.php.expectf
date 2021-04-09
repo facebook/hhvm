@@ -86,7 +86,7 @@ dict(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(720)
+  int(-43200)
   ["is_dst"]=>
   bool(false)
 }
@@ -210,7 +210,7 @@ dict(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(180)
+  int(-10800)
   ["is_dst"]=>
   bool(false)
 }
@@ -280,6 +280,4 @@ dict(12) {
   ["is_localtime"]=>
   bool(false)
 }
-
-Warning: date_parse() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_parse_001.php on line 12
 Done

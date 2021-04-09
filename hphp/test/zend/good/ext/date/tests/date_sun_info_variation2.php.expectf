@@ -19,111 +19,111 @@ Warning: date_sun_info() expects parameter 2 to be double, integer given in %s/t
 -- Iteration 5 --
 dict(9) {
   ["sunrise"]=>
-  int(1165895237)
+  int(1165895221)
   ["sunset"]=>
-  int(1165936713)
+  int(1165936701)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165893873)
+  int(1165893858)
   ["civil_twilight_end"]=>
-  int(1165938077)
+  int(1165938064)
   ["nautical_twilight_begin"]=>
-  int(1165892293)
+  int(1165892278)
   ["nautical_twilight_end"]=>
-  int(1165939656)
+  int(1165939643)
   ["astronomical_twilight_begin"]=>
-  int(1165890721)
+  int(1165890706)
   ["astronomical_twilight_end"]=>
-  int(1165941229)
+  int(1165941215)
 }
 
 -- Iteration 6 --
 dict(9) {
   ["sunrise"]=>
-  int(1165893058)
+  int(1165893046)
   ["sunset"]=>
-  int(1165938891)
+  int(1165938875)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165891680)
+  int(1165891669)
   ["civil_twilight_end"]=>
-  int(1165940269)
+  int(1165940253)
   ["nautical_twilight_begin"]=>
-  int(1165890055)
+  int(1165890044)
   ["nautical_twilight_end"]=>
-  int(1165941895)
+  int(1165941878)
   ["astronomical_twilight_begin"]=>
-  int(1165888402)
+  int(1165888392)
   ["astronomical_twilight_end"]=>
-  int(1165943548)
+  int(1165943530)
 }
 
 -- Iteration 7 --
 dict(9) {
   ["sunrise"]=>
-  int(1165894152)
+  int(1165894138)
   ["sunset"]=>
-  int(1165937798)
+  int(1165937784)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165892809)
+  int(1165892795)
   ["civil_twilight_end"]=>
-  int(1165939141)
+  int(1165939127)
   ["nautical_twilight_begin"]=>
-  int(1165891239)
+  int(1165891226)
   ["nautical_twilight_end"]=>
-  int(1165940710)
+  int(1165940696)
   ["astronomical_twilight_begin"]=>
-  int(1165889663)
+  int(1165889650)
   ["astronomical_twilight_end"]=>
-  int(1165942287)
+  int(1165942271)
 }
 
 -- Iteration 8 --
 dict(9) {
   ["sunrise"]=>
-  int(1165894152)
+  int(1165894138)
   ["sunset"]=>
-  int(1165937798)
+  int(1165937784)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165892809)
+  int(1165892795)
   ["civil_twilight_end"]=>
-  int(1165939141)
+  int(1165939127)
   ["nautical_twilight_begin"]=>
-  int(1165891239)
+  int(1165891226)
   ["nautical_twilight_end"]=>
-  int(1165940710)
+  int(1165940696)
   ["astronomical_twilight_begin"]=>
-  int(1165889663)
+  int(1165889650)
   ["astronomical_twilight_end"]=>
-  int(1165942287)
+  int(1165942271)
 }
 
 -- Iteration 9 --
 dict(9) {
   ["sunrise"]=>
-  int(1165894203)
+  int(1165894189)
   ["sunset"]=>
-  int(1165937747)
+  int(1165937733)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165892860)
+  int(1165892846)
   ["civil_twilight_end"]=>
-  int(1165939090)
+  int(1165939075)
   ["nautical_twilight_begin"]=>
-  int(1165891292)
+  int(1165891278)
   ["nautical_twilight_end"]=>
-  int(1165940658)
+  int(1165940643)
   ["astronomical_twilight_begin"]=>
-  int(1165889717)
+  int(1165889704)
   ["astronomical_twilight_end"]=>
-  int(1165942233)
+  int(1165942217)
 }
 
 -- Iteration 10 --

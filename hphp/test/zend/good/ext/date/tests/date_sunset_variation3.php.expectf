@@ -65,14 +65,14 @@ Warning: date_sunset() expects parameter 3 to be double, vec given in %s/test/ze
 Warning: date_sunset() expects parameter 3 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunset_variation3.php on line 87
 
 --uppercase NULL--
-string(5) "18:24"
-float(18.413304971035)
-int(1218200087)
+string(5) "18:25"
+float(18.417%d)
+int(1218200102)
 
 --lowercase null--
-string(5) "18:24"
-float(18.413304971035)
-int(1218200087)
+string(5) "18:25"
+float(18.417%d)
+int(1218200102)
 
 --lowercase true--
 

@@ -584,7 +584,7 @@ let go
         !num_files_searched - !last_printed_num_files_searched >= 10000
         || is_bucket_empty
       then (
-        ServerProgress.send_progress_to_monitor
+        ServerProgress.send_progress_to_monitor_w_timeout
           "CST search: searched %d files..."
           !num_files_searched;
         last_printed_num_files_searched := !num_files_searched

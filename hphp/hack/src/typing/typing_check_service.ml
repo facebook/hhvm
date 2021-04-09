@@ -732,7 +732,7 @@ let merge
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
-  ServerProgress.send_percentage_progress_to_monitor
+  ServerProgress.send_percentage_progress_to_monitor_w_timeout
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:files_initial_count
@@ -870,7 +870,7 @@ let process_in_parallel
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
-  ServerProgress.send_percentage_progress_to_monitor
+  ServerProgress.send_percentage_progress_to_monitor_w_timeout
     ~operation:"typechecking"
     ~done_count:0
     ~total_count:files_initial_count

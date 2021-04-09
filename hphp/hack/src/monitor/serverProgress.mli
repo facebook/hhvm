@@ -11,6 +11,12 @@
 
 type pipe_from_server
 
+type seconds = int
+
+type timeout_outcome =
+  | Did_time_out
+  | Did_not_time_out
+
 val make_pipe_from_server : Unix.file_descr -> pipe_from_server
 
 val read_from_server :
@@ -23,13 +29,13 @@ val read_from_server :
     annoying to thread it too *)
 val make_pipe_to_monitor : Unix.file_descr -> unit
 
-val send_to_monitor : MonitorRpc.server_to_monitor_message -> unit
-
 (* This is basically signature of "Printf.printf" *)
-val send_progress_to_monitor :
+val send_progress_to_monitor_w_timeout :
   ?include_in_logs:bool -> ('a, unit, string, unit) format4 -> 'a
 
-val send_percentage_progress_to_monitor :
+val send_progress_warning_to_monitor : string option -> unit
+
+val send_percentage_progress_to_monitor_w_timeout :
   operation:string ->
   done_count:int ->
   total_count:int ->

@@ -1774,7 +1774,7 @@ Type callReturnType(const Func* callee) {
   }
 
   // Otherwise use HHBBC's analysis if present
-  return typeFromRAT(callee->repoReturnType(), callee->cls());
+  return typeFromRAT(callee->repoReturnType(), callee->cls()) & TInitCell;
 }
 
 Type callOutType(const Func* callee, uint32_t index) {

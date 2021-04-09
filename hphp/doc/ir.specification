@@ -2180,9 +2180,9 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElemKeyset, D(Keyset),    S(Keyset) S(Cell),   CRc|PRc
+| AddNewElemKeyset, D(Keyset),    S(Keyset) S(InitCell), CRc|PRc
 
-| AddNewElemVec,    DModified(0), S(Vec) S(Cell), CRc|PRc
+| AddNewElemVec,    DModified(0), S(Vec) S(InitCell),    CRc|PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
@@ -2978,12 +2978,12 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| VecSet, DModified(0), S(Vec) S(Int) S(Cell), PRc|CRc
+| VecSet, DModified(0), S(Vec) S(Int) S(InitCell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
   replace S0; this op produces a ref on the test and consumes one on S0.
 
-| DictSet, DModified(0), S(Dict) S(Int,Str) S(Cell), PRc|CRc
+| DictSet, DModified(0), S(Dict) S(Int,Str) S(InitCell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
@@ -3007,13 +3007,13 @@ fields of that struct for holding intermediate values.
   If the key is missing in the array, we'll use S2 to determine what to do.
   If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-| BespokeSet, DArrLikeSet, S(Vec,Dict,Keyset) S(Int,Str) S(Cell), LA|PRc|CRc
+| BespokeSet, DArrLikeSet, S(Vec,Dict,Keyset) S(Int,Str) S(InitCell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
-| BespokeAppend, DArrLikeAppend, S(Vec,Dict,Keyset) S(Cell), LA|PRc|CRc
+| BespokeAppend, DArrLikeAppend, S(Vec,Dict,Keyset) S(InitCell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has AppendMove semantics; it consumes a refcount on the input array
@@ -3069,21 +3069,21 @@ fields of that struct for holding intermediate values.
 
   Loads the element of the StructDict in S0 at the constant string key S1.
 
-| StructDictSet, DArrLikeSet, SStructDict C(StaticStr) S(Cell), PRc|CRc
+| StructDictSet, DArrLikeSet, SStructDict C(StaticStr) S(InitCell), PRc|CRc
 
-  Set element with key S1 in the array S0 with struct layout to S2. This 
-  This op has SetMove semantics; it consumes a refcount on the input array and 
-  produces one on the output, and does no refcounting to the value S2.
+  Set element with key S1 in the array S0 with struct layout to S2.
+  This op has SetMove semantics; it consumes a refcount on the input array
+  and produces one on the output, and does no refcounting to the value S2.
 
-| MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
-
-  Set element with key S1 in S0 to S2.
-
-| VectorSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
+| MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 
   Set element with key S1 in S0 to S2.
 
-| SetElem, DSetElem, S(LvalToCell) S(Cell) S(Cell), MElem
+| VectorSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
+
+  Set element with key S1 in S0 to S2.
+
+| SetElem, DSetElem, S(LvalToCell) S(Cell) S(InitCell), MElem
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
@@ -3113,13 +3113,13 @@ fields of that struct for holding intermediate values.
 
   Increment/decrement element with key S1 in base S0.
 
-| SetNewElem, ND, S(LvalToCell) S(Cell), MElem
+| SetNewElem, ND, S(LvalToCell) S(InitCell), MElem
 
   Append the value in S1 to S0.
 
-| SetNewElemDict,   ND, S(LvalToDict) S(Cell),      MElem
+| SetNewElemDict,   ND, S(LvalToDict) S(InitCell),  MElem
 
-| SetNewElemVec,    ND, S(LvalToVec)  S(Cell),      MElem
+| SetNewElemVec,    ND, S(LvalToVec)  S(InitCell),  MElem
 
 | SetNewElemKeyset, ND, S(LvalToKeyset) S(Int,Str), MElem
 
@@ -3193,13 +3193,13 @@ fields of that struct for holding intermediate values.
 
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
-  
+
 | ThrowMustBeMutableException, ND, S(Cls) S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be mutable. S0 is the class the property
   was declared on. S1 is the property name.
-  
+
 | ThrowMustBeReadOnlyException, ND, S(Cls) S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation

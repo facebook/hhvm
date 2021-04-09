@@ -1148,13 +1148,12 @@ void translateDispatch(irgen::IRGS& irgs,
 
 Type flavorToType(FlavorDesc f) {
   switch (f) {
-    case NOV: not_reached();
-
-    case CV: return TCell;  // TODO(#3029148) this could be InitCell
+    case CV:  return TInitCell;
     case CUV: return TCell;
-    case UV: return TUninit;
+    case UV:  return TUninit;
+    case NOV: break;
   }
-  not_reached();
+  always_assert(false);
 }
 
 }

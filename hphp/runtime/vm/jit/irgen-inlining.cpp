@@ -293,7 +293,7 @@ void beginInlining(IRGS& env,
     + (target->hasCoeffectsLocal() ? 1U : 0U);
   jit::vector<SSATmp*> inputs{numTotalInputs};
   for (auto i = 0; i < numTotalInputs; ++i) {
-    inputs[numTotalInputs - i - 1] = popC(env);
+    inputs[numTotalInputs - i - 1] = popCU(env);
   }
 
   // NB: Now that we've popped the callee's arguments off the stack

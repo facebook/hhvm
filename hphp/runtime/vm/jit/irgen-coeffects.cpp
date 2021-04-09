@@ -34,7 +34,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   if (paramIdx >= numArgsInclUnpack) return nullptr;
   auto const index =
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
-  auto const tv = topC(env, BCSPRelOffset {static_cast<int32_t>(index)});
+  auto const tv = top(env, BCSPRelOffset {static_cast<int32_t>(index)});
   return cond(
     env,
     [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
@@ -70,7 +70,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   if (paramIdx >= numArgsInclUnpack) return nullptr;
   auto const index =
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
-  auto const tv = topC(env, BCSPRelOffset {static_cast<int32_t>(index)});
+  auto const tv = top(env, BCSPRelOffset {static_cast<int32_t>(index)});
 
   auto const fail = [&] {
     hint(env, Block::Hint::Unlikely);

@@ -31,9 +31,9 @@ pub fn gen(ctx: &Context) -> TokenStream {
 fn gen_visit_function(ast: &syn::DeriveInput) -> TokenStream {
     let ty = &ast.ident;
     let name = gen_visit_fn_name(ty.to_string());
-    let (_, ty_generics, _) = ast.generics.split_for_impl();
+    let type_args = super::rewrite_type_args(&ast.generics);
     quote! {
-        fn #name(&mut self, p: &'a #ty #ty_generics) {
+        fn #name(&mut self, p: &'a #ty #type_args) {
             p.recurse(self.object())
         }
     }

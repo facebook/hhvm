@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod node_impl_generator;
+mod type_arg_rewriter;
 mod visitor_trait_generator;
 
 use crate::common::by_ref_context::Context;
+use type_arg_rewriter::rewrite_type_args;
 
 pub use crate::common::args::Args;
 

@@ -29,7 +29,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
 fn gen_node_impl(s: synstructure::Structure<'_>) -> TokenStream {
     let ty_name = &s.ast().ident;
-    let (_, ty_generics, _) = s.ast().generics.split_for_impl();
+    let type_args = super::rewrite_type_args(&s.ast().generics);
     let visit_fn = visitor_trait_generator::gen_visit_fn_name(ty_name.to_string());
     let recurse_body = s.each(|bi| quote! { #bi.accept(v) });
 
@@ -41,7 +41,7 @@ fn gen_node_impl(s: synstructure::Structure<'_>) -> TokenStream {
     }
 
     quote! {
-        impl<'a> Node<'a> for #ty_name #ty_generics {
+        impl<'a> Node<'a> for #ty_name #type_args {
             fn accept(&'a self, v: &mut dyn Visitor<'a>) {
                 v.#visit_fn(self)
             }

@@ -6,6 +6,7 @@
 
 mod common;
 mod gen_by_ref_decl_visitor;
+mod gen_by_ref_nast_visitor;
 mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
@@ -40,6 +41,8 @@ enum Subcommand {
     Visitor(gen_visitor::Args),
     /// Generate a Visitor trait for by-reference types.
     ByRefDeclVisitor(gen_by_ref_decl_visitor::Args),
+    /// Generate a Visitor trait for by-reference NASTs.
+    ByRefNastVisitor(gen_by_ref_nast_visitor::Args),
 }
 
 fn main() -> Result<()> {
@@ -55,6 +58,7 @@ fn main() -> Result<()> {
         Subcommand::EnumHelpers(args) => gen_enum_helper::run(&args)?,
         Subcommand::Visitor(args) => gen_visitor::run(&args)?,
         Subcommand::ByRefDeclVisitor(args) => gen_by_ref_decl_visitor::run(&args)?,
+        Subcommand::ByRefNastVisitor(args) => gen_by_ref_nast_visitor::run(&args)?,
     };
 
     let output_files = files

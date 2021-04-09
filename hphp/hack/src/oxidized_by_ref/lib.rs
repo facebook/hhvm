@@ -36,6 +36,7 @@ pub use manual::typing_logic;
 pub use manual::typing_set;
 
 pub mod decl_visitor;
+pub mod nast_visitor;
 
 mod gen;
 

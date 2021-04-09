@@ -4,4 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub type LocalIdMap<'a, T> = crate::local_id::map::Map<'a, T>;
+mod node;
+mod node_impl;
+mod node_impl_gen;
+mod visitor;
+
+pub use node::Node;
+pub use visitor::Visitor;

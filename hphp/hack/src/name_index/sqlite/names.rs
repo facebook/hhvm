@@ -85,7 +85,7 @@ mod tests {
         let result = names.get_const_path("\\Foo").unwrap();
 
         match result {
-            Some(path) => assert!(false, format!("Unexpected path: {:?}", path)),
+            Some(path) => assert!(false, "Unexpected path: {:?}", path),
             None => assert!(true),
         }
     }

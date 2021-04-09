@@ -213,7 +213,7 @@ mod tests {
             match err {
                 None => std::fs::remove_file(&path).unwrap(),
                 Some(err) => {
-                    panic!(format!("error in test with file {:?}: {}", path, err));
+                    panic!("error in test with file {:?}: {}", path, err);
                 }
             }
         }

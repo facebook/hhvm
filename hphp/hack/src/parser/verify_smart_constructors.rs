@@ -50,11 +50,11 @@ impl<'a> State<'a> {
 
         params.iter().zip(args.iter()).for_each(|(p, a)| {
             if p != a {
-                panic!(format!(
+                panic!(
                     "verification unequal for {} and {}",
                     p.to_string(),
                     a.to_string()
-                ));
+                );
             }
         });
     }

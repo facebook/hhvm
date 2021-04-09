@@ -227,7 +227,7 @@ fn process_single_file(
 fn assert_regular_file(filepath: impl AsRef<Path>) {
     let filepath = filepath.as_ref();
     if !filepath.is_file() {
-        panic!(format!("{} not a valid file", filepath.display()));
+        panic!("{} not a valid file", filepath.display());
     }
 }
 

@@ -55,6 +55,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS_SINGLE _ -> false
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
+  | INFER_TYPE_ERROR _ -> false
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false

@@ -1,0 +1,159 @@
+{
+  "actual_type": "(int, float, int, float, int, float)",
+  "full_actual_type": {
+    "src_pos": {
+      "filename": "/call_unpack.php",
+      "line": 5,
+      "char_start": 22,
+      "char_end": 57
+    },
+    "kind": "tuple",
+    "is_array": false,
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 23,
+          "char_end": 25
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 28,
+          "char_end": 32
+        },
+        "kind": "primitive",
+        "name": "float"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 35,
+          "char_end": 37
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 40,
+          "char_end": 44
+        },
+        "kind": "primitive",
+        "name": "float"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 47,
+          "char_end": 49
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 5,
+          "char_start": 52,
+          "char_end": 56
+        },
+        "kind": "primitive",
+        "name": "float"
+      }
+    ]
+  },
+  "expected_type": "(float, varray<int>, int, int, int, int)",
+  "full_expected_type": {
+    "src_pos": {
+      "filename": "/call_unpack.php",
+      "line": 5,
+      "char_start": 22,
+      "char_end": 57
+    },
+    "kind": "tuple",
+    "is_array": false,
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 12,
+          "char_end": 16
+        },
+        "kind": "primitive",
+        "name": "float"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 22,
+          "char_end": 32
+        },
+        "kind": "varray",
+        "args": [
+          {
+            "src_pos": {
+              "filename": "/call_unpack.php",
+              "line": 3,
+              "char_start": 29,
+              "char_end": 31
+            },
+            "kind": "primitive",
+            "name": "int"
+          }
+        ]
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 45,
+          "char_end": 47
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 45,
+          "char_end": 47
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 45,
+          "char_end": 47
+        },
+        "kind": "primitive",
+        "name": "int"
+      },
+      {
+        "src_pos": {
+          "filename": "/call_unpack.php",
+          "line": 3,
+          "char_start": 45,
+          "char_end": 47
+        },
+        "kind": "primitive",
+        "name": "int"
+      }
+    ]
+  }
+}

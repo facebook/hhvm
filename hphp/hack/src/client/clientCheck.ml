@@ -468,6 +468,32 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       List.iter responses print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_TYPE_ERROR_AT_POS arg ->
+      let tpos = Str.split (Str.regexp ":") arg in
+      let (fn, line, char) =
+        try
+          match tpos with
+          | [filename; line; char] ->
+            let fn = expand_path filename in
+            ( ServerCommandTypes.FileName fn,
+              int_of_string line,
+              int_of_string char )
+          | [line; char] ->
+            let content = Sys_utils.read_stdin_to_string () in
+            ( ServerCommandTypes.FileContent content,
+              int_of_string line,
+              int_of_string char )
+          | _ -> raise Exit
+        with _ ->
+          Printf.eprintf
+            "Invalid position; expected an argument of the form [filename]:[line]:[column] or [line]:[column]\n";
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let%lwt (ty, telemetry) =
+        rpc args @@ Rpc.INFER_TYPE_ERROR (fn, line, char)
+      in
+      ClientTypeErrorAtPos.go ty args.output_json;
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_FUN_DEPS_AT_POS_BATCH positions ->
       let positions = parse_positions positions in
       let%lwt (responses, telemetry) =

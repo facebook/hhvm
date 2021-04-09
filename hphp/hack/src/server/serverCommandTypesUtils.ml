@@ -5,6 +5,7 @@ let debug_describe_t : type a. a t -> string = function
   | STATUS_SINGLE _ -> "STATUS_SINGLE"
   | INFER_TYPE _ -> "INFER_TYPE"
   | INFER_TYPE_BATCH _ -> "INFER_TYPE_BATCH"
+  | INFER_TYPE_ERROR _ -> "INFER_TYPE_ERROR"
   | IDE_HOVER _ -> "IDE_HOVER"
   | DOCBLOCK_AT _ -> "DOCBLOCK_AT"
   | DOCBLOCK_FOR_SYMBOL _ -> "DOCBLOCK_FOR_SYMBOL"

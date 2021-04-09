@@ -62,6 +62,7 @@ type client_mode =
   | MODE_STATUS_SINGLE of string (* filename *)
   | MODE_TYPE_AT_POS of string
   | MODE_TYPE_AT_POS_BATCH of string list
+  | MODE_TYPE_ERROR_AT_POS of string
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
   | MODE_FILE_DEPENDENTS
   | MODE_GLOBAL_INFERENCE of ServerGlobalInferenceTypes.mode * string list
@@ -156,6 +157,7 @@ let mode_to_string = function
   | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"
   | MODE_TYPE_AT_POS _ -> "MODE_TYPE_AT_POS"
   | MODE_TYPE_AT_POS_BATCH _ -> "MODE_TYPE_AT_POS_BATCH"
+  | MODE_TYPE_ERROR_AT_POS _ -> "MODE_TYPE_ERROR_AT_POS"
   | MODE_FUN_DEPS_AT_POS_BATCH _ -> "MODE_FUN_DEPS_AT_POS_BATCH"
   | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"
   | MODE_GLOBAL_INFERENCE _ -> "MODE_GLOBAL_INFERENCE"

@@ -673,6 +673,10 @@ let parse_check_args cmd =
               | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) show types at multiple positions [file:line:character list]" );
+      ( "--type-error-at-pos",
+        Arg.String (fun x -> set_mode (MODE_TYPE_ERROR_AT_POS x)),
+        " (mode) show type error at a given position in file [line:character]"
+      );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true)),
         " (mode) turn on verbose server log" );

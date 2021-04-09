@@ -1,0 +1,48 @@
+{
+  "actual_type": "vec<bool>",
+  "full_actual_type": {
+    "src_pos": {
+      "filename": "/call_multiple.php",
+      "line": 5,
+      "char_start": 33,
+      "char_end": 41
+    },
+    "kind": "class",
+    "name": "\\HH\\vec",
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_multiple.php",
+          "line": 5,
+          "char_start": 37,
+          "char_end": 40
+        },
+        "kind": "primitive",
+        "name": "bool"
+      }
+    ]
+  },
+  "expected_type": "vec<int>",
+  "full_expected_type": {
+    "src_pos": {
+      "filename": "/call_multiple.php",
+      "line": 3,
+      "char_start": 20,
+      "char_end": 27
+    },
+    "kind": "class",
+    "name": "\\HH\\vec",
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_multiple.php",
+          "line": 3,
+          "char_start": 24,
+          "char_end": 26
+        },
+        "kind": "primitive",
+        "name": "int"
+      }
+    ]
+  }
+}

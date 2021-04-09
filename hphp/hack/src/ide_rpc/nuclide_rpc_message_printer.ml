@@ -32,6 +32,25 @@ let infer_type_response_to_json (type_string, type_json) =
     | Some json -> [("full_type", json_of_string json)]
     | _ -> [] )
 
+let infer_type_error_response_to_json
+    ( actual_type_string,
+      actual_type_json,
+      expected_type_string,
+      expected_type_json ) =
+  Hh_json.JSON_Object
+    (List.filter_map
+       ~f:Fn.id
+       [
+         Some ("actual_type", opt_string_to_json actual_type_string);
+         Option.map
+           ~f:(fun ty -> ("full_actual_type", json_of_string ty))
+           actual_type_json;
+         Some ("expected_type", opt_string_to_json expected_type_string);
+         Option.map
+           ~f:(fun ty -> ("full_expected_type", json_of_string ty))
+           expected_type_json;
+       ])
+
 let identify_symbol_response_to_json results =
   let get_definition_data = function
     | Some x ->

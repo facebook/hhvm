@@ -94,6 +94,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
     let env = { env with tcopt } in
     (env, ServerInferTypeBatch.go genv.workers positions env)
+  | INFER_TYPE_ERROR (file_input, line, column) ->
+    let path =
+      match file_input with
+      | FileName fn -> Relative_path.create_detect_prefix fn
+      | FileContent _ -> Relative_path.create_detect_prefix ""
+    in
+    let (ctx, entry) = single_ctx env path file_input in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerInferTypeError.go_ctx ~ctx ~entry ~line ~column)
+    in
+    (env, result)
   | IDE_HOVER (path, line, column) ->
     let (ctx, entry) = single_ctx_path env path in
     let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in

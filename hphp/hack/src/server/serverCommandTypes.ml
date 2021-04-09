@@ -324,6 +324,7 @@ type _ t =
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool
       -> string list t
+  | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :
       (string * int * int * string option * SearchUtils.si_kind)

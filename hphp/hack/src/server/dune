@@ -116,6 +116,7 @@
     docblockService
     hoverService
     inferAtPosService
+    inferErrorAtPosService
     saveStateServiceTypes
     serverCommandTypes
     serverCommandTypesUtils
@@ -275,6 +276,7 @@
     serverIdle
     serverInferType
     serverInferTypeBatch
+    serverInferTypeError
     serverInvalidateUnits
     serverLint
     serverMethodJumps

@@ -12,7 +12,7 @@ dict(12) {
   ["second"]=>
   int(0)
   ["fraction"]=>
-  float(0)
+  bool(false)
   ["warning_count"]=>
   int(0)
   ["warnings"]=>

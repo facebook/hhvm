@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$d = date_create( "Sun, 22 May 1955 02:00:00 +0200" );
+$d = date_create( "Mon, 23 May 1955 00:00:00 +0200" );
 var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n";
 echo $d->format( 'U' ), "\n\n";

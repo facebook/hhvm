@@ -66,13 +66,13 @@ Warning: date_sunset() expects parameter 4 to be double, vec given in %s/test/ze
 
 --uppercase NULL--
 string(5) "21:42"
-float(21.714%d)
-int(1218211973)
+float(21.711780291547)
+int(1218211962)
 
 --lowercase null--
 string(5) "21:42"
-float(21.714%d)
-int(1218211973)
+float(21.711780291547)
+int(1218211962)
 
 --lowercase true--
 

@@ -66,13 +66,13 @@ Warning: date_sunrise() expects parameter 3 to be double, vec given in %s/test/z
 
 --uppercase NULL--
 string(5) "00:29"
-float(0.492%d)
-int(1218175171)
+float(0.49504901273349)
+int(1218175182)
 
 --lowercase null--
 string(5) "00:29"
-float(0.492%d)
-int(1218175171)
+float(0.49504901273349)
+int(1218175182)
 
 --lowercase true--
 

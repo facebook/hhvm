@@ -1,0 +1,30 @@
+*** Testing date_sunset() : usage variation ***
+
+-- Testing date_sunset() function by passing one parameter --
+string(5) "20:07"
+
+-- Testing date_sunset() function by passing two parameters --
+string(5) "20:07"
+float(20.122342981076)
+int(1327590440)
+
+-- Testing date_sunset() function by passing two parameters --
+string(5) "19:53"
+float(19.898080609359)
+int(1327589633)
+
+-- Testing date_sunset() function by passing three  parameters --
+string(5) "22:50"
+float(22.849280447469)
+int(1327600257)
+
+-- Testing date_sunset() function by passing four parameters --
+string(5) "22:47"
+float(22.795095381886)
+int(1327600062)
+
+-- Testing date_sunset() function by passing five parameters --
+string(5) "18:47"
+float(18.795095381886)
+int(1327600062)
+===DONE===

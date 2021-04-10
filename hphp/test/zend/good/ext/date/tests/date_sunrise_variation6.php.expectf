@@ -65,14 +65,14 @@ Warning: date_sunrise() expects parameter 6 to be double, vec given in %s/test/z
 Warning: date_sunrise() expects parameter 6 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sunrise_variation6.php on line 86
 
 --uppercase NULL--
-string(5) "10:47"
-float(10.796%d)
-int(1218174468)
+string(5) "10:48"
+float(10.800856481173)
+int(1218174483)
 
 --lowercase null--
-string(5) "10:47"
-float(10.796%d)
-int(1218174468)
+string(5) "10:48"
+float(10.800856481173)
+int(1218174483)
 
 --lowercase true--
 

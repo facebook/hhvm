@@ -66,7 +66,22 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
 
     let extracted_splices = extract_and_replace_splices(&mut e)?;
     let splice_count = extracted_splices.len();
-    let temp_pos = e.0.clone();
+    let et_literal_pos = e.0.clone();
+
+    // Create dict of spliced values
+    let key_value_pairs = extracted_splices
+        .iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            let key = Expr::new(
+                expr.0.clone(),
+                Expr_::String(BString::from(temp_lvar_string(i))),
+            );
+            let value = temp_lvar(&expr.0, i);
+            (key, value)
+        })
+        .collect();
+    let spliced_dict = dict_literal(et_literal_pos.clone(), key_value_pairs);
 
     // Create assignments of extracted splices
     // `$0splice0 = spliced_expr0;`
@@ -84,22 +99,8 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         })
         .collect();
 
-    // Create dict of spliced values
-    let key_value_pairs = (0..splice_count)
-        .into_iter()
-        .map(|i| {
-            let key = Expr::new(
-                Pos::make_none(),
-                Expr_::String(BString::from(temp_lvar_string(i))),
-            );
-            let value = temp_lvar(&Pos::make_none(), i);
-            (key, value)
-        })
-        .collect();
-    let spliced_dict = dict_literal(key_value_pairs);
-
     // Make anonymous function of smart constructor calls
-    let visitor_expr = wrap_return(rewrite_expr(env, &e)?, &temp_pos);
+    let visitor_expr = wrap_return(rewrite_expr(env, &e)?, &et_literal_pos);
     let visitor_body = ast::FuncBody {
         ast: vec![visitor_expr],
         annotation: (),
@@ -116,24 +117,26 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         user_attributes: vec![],
         visibility: None,
     };
-    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], temp_pos.clone(), env);
-    let visitor_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
+    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone(), env);
+    let visitor_lambda = Expr::new(et_literal_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
 
     let inferred_type = if env.codegen {
-        // null
-        dummy_expr()
+        null_literal(et_literal_pos.clone())
     } else {
         // Make anonymous function for typing purposes
         let typing_fun_body = ast::FuncBody {
-            ast: vec![wrap_return(e, &temp_pos)],
+            ast: vec![wrap_return(e, &et_literal_pos)],
             annotation: (),
         };
-        let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
+        let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone(), env);
         let spliced_vars = (0..splice_count)
             .into_iter()
-            .map(|i| ast::Lid(Pos::make_none(), (0, temp_lvar_string(i))))
+            .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_lvar_string(i))))
             .collect();
-        Expr::new(temp_pos.clone(), Expr_::mk_efun(typing_fun_, spliced_vars))
+        Expr::new(
+            et_literal_pos.clone(),
+            Expr_::mk_efun(typing_fun_, spliced_vars),
+        )
     };
 
     // Make `return Visitor::makeTree(...)`
@@ -142,20 +145,20 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             &visitor_name,
             "makeTree",
             vec![
-                exprpos(&temp_pos),
+                exprpos(&et_literal_pos),
                 spliced_dict,
                 visitor_lambda,
                 inferred_type,
             ],
-            &temp_pos.clone(),
+            &et_literal_pos.clone(),
         ),
-        &temp_pos.clone(),
+        &et_literal_pos.clone(),
     );
 
     // Add to the body of the thunk after the splice assignments
     thunk_body.push(return_stmt);
 
-    Ok(immediately_invoked_lambda(env, &temp_pos, thunk_body))
+    Ok(immediately_invoked_lambda(env, &et_literal_pos, thunk_body))
 }
 
 /// Convert `foo` to `return foo;`.
@@ -171,13 +174,13 @@ fn wrap_fun_<TF>(
     env: &Env<TF>,
 ) -> ast::Fun_ {
     ast::Fun_ {
-        span: pos,
+        span: pos.clone(),
         readonly_this: None,
         annotation: (),
         mode: file_info::Mode::Mstrict,
         readonly_ret: None,
         ret: ast::TypeHint((), None),
-        name: make_id(";anonymous"),
+        name: make_id(pos, ";anonymous"),
         tparams: vec![],
         where_constraints: vec![],
         variadic: aast::FunVariadicity::FVnonVariadic,
@@ -213,6 +216,8 @@ struct TypeVirtualizer<'a> {
     visitor_name: &'a str,
 }
 
+// Only used as temporary replacements when modifying the AST
+// This node should never show up in the final AST
 fn dummy_expr() -> Expr {
     Expr::new(Pos::make_none(), aast::Expr_::Null)
 }
@@ -716,7 +721,11 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
     let pos = exprpos(&e.0);
     let e = match &e.1 {
         // Convert `$x` to `$v->visitLocal(new ExprPos(...), "$x")` (note the quoting).
-        Lvar(lid) => v_meth_call("visitLocal", vec![pos, string_literal(&((lid.1).1))], &e.0),
+        Lvar(lid) => v_meth_call(
+            "visitLocal",
+            vec![pos, string_literal(e.0.clone(), &((lid.1).1))],
+            &e.0,
+        ),
         // Convert `... = ...` to `$v->visitAssign(new ExprPos(...), $v->..., $v->...)`.
         Binop(bop) => match &**bop {
             (Bop::Eq(None), lhs, rhs) => v_meth_call(
@@ -737,7 +746,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
             let e2 = if let Some(e2) = e2o {
                 rewrite_expr(env, &e2)?
             } else {
-                null_literal()
+                null_literal(e.0.clone())
             };
             v_meth_call(
                 "visitTernary",
@@ -755,7 +764,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                     let (receiver, meth, _, _) = &**objget;
                     match &meth.1 {
                         Id(sid) => {
-                            let fn_name = string_literal(&*sid.1);
+                            let fn_name = string_literal(sid.0.clone(), &*sid.1);
                             let desugared_args = vec![
                                 pos,
                                 rewrite_expr(env, &receiver)?,
@@ -795,7 +804,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                         "Expression trees do not support parameters with default values.".into(),
                     ));
                 }
-                param_names.push(string_literal(&param.name));
+                param_names.push(string_literal(param.pos.clone(), &param.name));
             }
 
             let body_stmts = rewrite_stmts(env, &fun_.body.ast)?;
@@ -810,9 +819,9 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
             // Assumes extract and replace has already occurred
             let s = if let Lvar(lid) = &e.1 {
                 let aast::Lid(_, (_, lid)) = &**lid;
-                Expr::new(Pos::make_none(), Expr_::String(BString::from(lid.clone())))
+                string_literal(e.0.clone(), lid)
             } else {
-                null_literal()
+                null_literal(e.0.clone())
             };
             v_meth_call("splice", vec![pos, s, *e.clone()], &e.0)
         }
@@ -908,7 +917,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             let init_exprs = rewrite_exprs(env, init)?;
             let cond_expr = match cond {
                 Some(cond) => rewrite_expr(env, cond)?,
-                None => null_literal(),
+                None => null_literal(s.0.clone()),
             };
             let incr_exprs = rewrite_exprs(env, incr)?;
 
@@ -941,16 +950,16 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
     Ok(e)
 }
 
-fn null_literal() -> Expr {
-    Expr::new(Pos::make_none(), Expr_::Null)
+fn null_literal(pos: Pos) -> Expr {
+    Expr::new(pos, Expr_::Null)
 }
 
-fn string_literal(s: &str) -> Expr {
-    Expr::new(Pos::make_none(), Expr_::String(BString::from(s)))
+fn string_literal(pos: Pos, s: &str) -> Expr {
+    Expr::new(pos, Expr_::String(BString::from(s)))
 }
 
-fn int_literal(i: usize) -> Expr {
-    Expr::new(Pos::make_none(), Expr_::Int(i.to_string()))
+fn int_literal(pos: Pos, i: usize) -> Expr {
+    Expr::new(pos, Expr_::Int(i.to_string()))
 }
 
 fn vec_literal(items: Vec<Expr>) -> Expr {
@@ -958,25 +967,24 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
     let position = merge_positions(&positions);
     let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
     Expr::new(
-        position,
-        Expr_::Collection(Box::new((make_id("vec"), None, fields))),
+        position.clone(),
+        Expr_::Collection(Box::new((make_id(position, "vec"), None, fields))),
     )
 }
 
-fn dict_literal(key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
-    let pos = Pos::make_none();
+fn dict_literal(pos: Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
     let fields = key_value_pairs
         .into_iter()
         .map(|(k, v)| ast::Afield::AFkvalue(k, v))
         .collect();
     Expr::new(
-        pos,
-        Expr_::Collection(Box::new((make_id("dict"), None, fields))),
+        pos.clone(),
+        Expr_::Collection(Box::new((make_id(pos, "dict"), None, fields))),
     )
 }
 
-fn make_id(name: &str) -> ast::Id {
-    ast::Id(Pos::make_none(), name.into())
+fn make_id(pos: Pos, name: &str) -> ast::Id {
+    ast::Id(pos, name.into())
 }
 
 /// Build `new classname(args)`
@@ -1151,7 +1159,7 @@ fn temp_lvar(pos: &Pos, num: usize) -> Expr {
 /// In case of Pos.none or invalid position, all elements set to 0
 fn exprpos(pos: &Pos) -> Expr {
     if pos.is_none() || !pos.is_valid() {
-        null_literal()
+        null_literal(pos.clone())
     } else {
         let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
             pos.to_start_and_end_lnum_bol_cnum();
@@ -1159,11 +1167,14 @@ fn exprpos(pos: &Pos) -> Expr {
             &pos,
             "\\ExprPos",
             vec![
-                Expr::new(Pos::make_none(), Expr_::Id(Box::new(make_id("__FILE__")))),
-                int_literal(start_lnum),
-                int_literal(start_cnum - start_bol),
-                int_literal(end_lnum),
-                int_literal(end_cnum - end_bol),
+                Expr::new(
+                    pos.clone(),
+                    Expr_::Id(Box::new(make_id(pos.clone(), "__FILE__"))),
+                ),
+                int_literal(pos.clone(), start_lnum),
+                int_literal(pos.clone(), start_cnum - start_bol),
+                int_literal(pos.clone(), end_lnum),
+                int_literal(pos.clone(), end_cnum - end_bol),
             ],
         )
     }

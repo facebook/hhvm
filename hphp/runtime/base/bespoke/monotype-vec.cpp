@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 
 #include "hphp/runtime/vm/jit/type.h"
 

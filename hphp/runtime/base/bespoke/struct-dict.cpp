@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/type.h"

@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/tv-variant.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"

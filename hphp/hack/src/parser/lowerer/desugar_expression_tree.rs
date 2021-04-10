@@ -109,7 +109,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         type_hint: ast::TypeHint((), Some(hint.clone())),
         is_variadic: false,
         pos: hint.0.clone(),
-        name: "$v".into(),
+        name: visitor_variable(),
         expr: None,
         callconv: None,
         readonly: None,
@@ -999,9 +999,13 @@ fn new_obj(pos: &Pos, classname: &str, args: Vec<Expr>) -> Expr {
     )
 }
 
+fn visitor_variable() -> String {
+    "$0v".to_string()
+}
+
 /// Build `$v->meth_name(args)`.
 fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
-    let receiver = Expr::mk_lvar(pos, "$v");
+    let receiver = Expr::mk_lvar(pos, &visitor_variable());
     let meth = Expr::new(
         pos.clone(),
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),

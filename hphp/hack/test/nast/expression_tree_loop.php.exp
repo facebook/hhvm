@@ -79,7 +79,7 @@
                                                           param_type_hint = ((), (Some ([4:3-7], (Happly (([4:3-7], "\\Code"), []))))); 
                                                           param_is_variadic = false; 
                                                           param_pos = [4:3-7]; 
-                                                          param_name = "$v"; 
+                                                          param_name = "$0v"; 
                                                           param_expr = None; 
                                                           param_readonly = None; 
                                                           param_callconv = None; 
@@ -95,7 +95,7 @@
                                                               (Some (
                                                               [4:8-41],
                                                               (Call ((
-                                                                 [4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $v))), ([4:8-41], (Id ([4:8-41], "visitLambda"))), OG_nullthrows, false))), 
+                                                                 [4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $0v))), ([4:8-41], (Id ([4:8-41], "visitLambda"))), OG_nullthrows, false))), 
                                                                  [],
                                                                  [([4:8-41],
                                                                    (New ((
@@ -112,7 +112,7 @@
                                                                     ValCollection (Vec, None,
                                                                     [([4:17-39],
                                                                     (Call (
-                                                                    ([4:17-39], (Obj_get (([4:17-39], (Lvar ([4:17-39], $v))), ([4:17-39], (Id ([4:17-39], "visitWhile"))), OG_nullthrows, false))),
+                                                                    ([4:17-39], (Obj_get (([4:17-39], (Lvar ([4:17-39], $0v))), ([4:17-39], (Id ([4:17-39], "visitWhile"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [([4:17-39],
                                                                     (New ((
@@ -125,7 +125,7 @@
                                                                     [Pos.none], (Int "38"))], None, [4:17-39])));
                                                                     ([4:23-27],
                                                                     (Call (
-                                                                    ([4:23-27], (Obj_get (([4:23-27], (Lvar ([4:23-27], $v))), ([4:23-27], (Id ([4:23-27], "visitMethCall"))), OG_nullthrows, false))),
+                                                                    ([4:23-27], (Obj_get (([4:23-27], (Lvar ([4:23-27], $0v))), ([4:23-27], (Id ([4:23-27], "visitMethCall"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [([4:23-27],
                                                                     (New ((
@@ -137,8 +137,8 @@
                                                                     [Pos.none], (Int "4")); (
                                                                     [Pos.none], (Int "26"))], None, [4:23-27])));
                                                                     ([4:23-27],
-                                                                    (Call ((
-                                                                    [4:23-27], (Obj_get (([4:23-27], (Lvar ([4:23-27], $v))), ([4:23-27], (Id ([4:23-27], "splice"))), OG_nullthrows, false))), 
+                                                                    (Call (
+                                                                    ([4:23-27], (Obj_get (([4:23-27], (Lvar ([4:23-27], $0v))), ([4:23-27], (Id ([4:23-27], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:23-27],
                                                                     (New ((
@@ -157,7 +157,7 @@
                                                                     (ValCollection (Vec, None,
                                                                     [([4:31-36],
                                                                     (Call (
-                                                                    ([4:31-36], (Obj_get (([4:31-36], (Lvar ([4:31-36], $v))), ([4:31-36], (Id ([4:31-36], "visitCall"))), OG_nullthrows, false))), 
+                                                                    ([4:31-36], (Obj_get (([4:31-36], (Lvar ([4:31-36], $0v))), ([4:31-36], (Id ([4:31-36], "visitCall"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [([4:31-36],
                                                                     (New ((
@@ -169,8 +169,8 @@
                                                                     [Pos.none], (Int "4")); (
                                                                     [Pos.none], (Int "35"))], None, [4:31-36])));
                                                                     ([4:31-34],
-                                                                    (Call ((
-                                                                    [4:31-34], (Obj_get (([4:31-34], (Lvar ([4:31-34], $v))), ([4:31-34], (Id ([4:31-34], "splice"))), OG_nullthrows, false))), 
+                                                                    (Call (
+                                                                    ([4:31-34], (Obj_get (([4:31-34], (Lvar ([4:31-34], $0v))), ([4:31-34], (Id ([4:31-34], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:31-34],
                                                                     (New ((
@@ -185,8 +185,8 @@
                                                                     [4:31-34], (Lvar ([4:31-34], $0splice1)))], None))); (
                                                                     [Pos.none], (ValCollection (Vec, None, [])))], None)))])))], None)));
                                                                     ([4:8-41],
-                                                                    (Call ((
-                                                                    [4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $v))), ([4:8-41], (Id ([4:8-41], "visitReturn"))), OG_nullthrows, false))), 
+                                                                    (Call (
+                                                                    ([4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $0v))), ([4:8-41], (Id ([4:8-41], "visitReturn"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:8-41],
                                                                     (New ((
@@ -199,7 +199,7 @@
                                                                     [Pos.none], (Int "40"))], None, [4:8-41])));
                                                                     ([4:8-41],
                                                                     (Call ((
-                                                                    [4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $v))), ([4:8-41], (Id ([4:8-41], "splice"))), OG_nullthrows, false))), 
+                                                                    [4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $0v))), ([4:8-41], (Id ([4:8-41], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:8-41],
                                                                     (New ((

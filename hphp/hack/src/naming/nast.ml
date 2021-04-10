@@ -989,7 +989,9 @@ module Visitor_DEPRECATED = struct
 
       method on_expression_tree acc (et : expression_tree) =
         let acc = this#on_hint acc et.et_hint in
-        let acc = this#on_expr acc et.et_desugared_expr in
+        let acc = this#on_block acc et.et_splices in
+        let acc = this#on_expr acc et.et_virtualized_expr in
+        let acc = this#on_expr acc et.et_runtime_expr in
         acc
 
       method on_unop acc _ e = this#on_expr acc e

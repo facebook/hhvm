@@ -271,7 +271,9 @@ and ('ex, 'fb, 'en, 'hi) function_ptr_id =
 
 and ('ex, 'fb, 'en, 'hi) expression_tree = {
   et_hint: hint;
-  et_desugared_expr: ('ex, 'fb, 'en, 'hi) expr;
+  et_splices: ('ex, 'fb, 'en, 'hi) block;
+  et_virtualized_expr: ('ex, 'fb, 'en, 'hi) expr;
+  et_runtime_expr: ('ex, 'fb, 'en, 'hi) expr;
 }
 
 and ('ex, 'fb, 'en, 'hi) expr_ =

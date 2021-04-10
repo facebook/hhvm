@@ -1523,7 +1523,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 Expr_::ReadonlyExpr(x)
             }
             Expr_::ExpressionTree(mut x) => {
-                x.desugared_expr.recurse(env, self.object())?;
+                x.runtime_expr.recurse(env, self.object())?;
                 Expr_::ExpressionTree(x)
             }
             mut x => {

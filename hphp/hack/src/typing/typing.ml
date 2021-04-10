@@ -3727,14 +3727,23 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
 (* Expression trees *)
 (*****************************************************************************)
 and expression_tree env p et =
-  let (env, t_desugared_expr, ty_desugared) =
-    expr env et.et_desugared_expr ~allow_awaitable:(*?*) false
+  let (env, t_splices) = block env et.et_splices in
+  let (env, t_virtualized_expr, _ty_virtualized) =
+    expr env et.et_virtualized_expr ~allow_awaitable:false
+  in
+  let (env, t_runtime_expr, ty_desugared) =
+    expr env et.et_runtime_expr ~allow_awaitable:(*?*) false
   in
   make_result
     env
     p
     (Aast.ExpressionTree
-       { et_hint = et.et_hint; et_desugared_expr = t_desugared_expr })
+       {
+         et_hint = et.et_hint;
+         et_splices = t_splices;
+         et_virtualized_expr = t_virtualized_expr;
+         et_runtime_expr = t_runtime_expr;
+       })
     ty_desugared
 
 and et_splice env p e =

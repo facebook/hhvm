@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dab5cfbd88fedfcb36afb084bf4c1497>>
+// @generated SignedSource<<34f655b22c3c4d78e19d6a446e4a8fa9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -436,7 +436,9 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 )]
 pub struct ExpressionTree<'a, Ex, Fb, En, Hi> {
     pub hint: &'a Hint<'a>,
-    pub desugared_expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+    pub splices: &'a Block<'a, Ex, Fb, En, Hi>,
+    pub virtualized_expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+    pub runtime_expr: &'a Expr<'a, Ex, Fb, En, Hi>,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for ExpressionTree<'a, Ex, Fb, En, Hi>

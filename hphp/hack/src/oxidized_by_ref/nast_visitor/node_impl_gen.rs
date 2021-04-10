@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<50b2207427075333e77cf71e5f770019>>
+// @generated SignedSource<<975354aec542b70777426262d25bec18>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -783,12 +783,20 @@ impl<'a> Node<'a>
         match self {
             ExpressionTree {
                 hint: ref __binding_0,
-                desugared_expr: ref __binding_1,
+                splices: ref __binding_1,
+                virtualized_expr: ref __binding_2,
+                runtime_expr: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
             }
         }
     }

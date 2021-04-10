@@ -2004,7 +2004,9 @@ where
 
                 Ok(E_::mk_expression_tree(ast::ExpressionTree {
                     hint,
-                    desugared_expr,
+                    splices: vec![],
+                    virtualized_expr: ast::Expr::new(Pos::make_none(), ast::Expr_::Omitted),
+                    runtime_expr: desugared_expr,
                 }))
             }
             ConditionalExpression(c) => {

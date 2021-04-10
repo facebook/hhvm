@@ -2108,7 +2108,9 @@ and expr_ env p (e : Nast.expr_) =
       N.
         {
           et_hint = hint env et.et_hint;
-          et_desugared_expr = expr env et.et_desugared_expr;
+          et_splices = block env et.et_splices;
+          et_virtualized_expr = expr env et.et_virtualized_expr;
+          et_runtime_expr = expr env et.et_runtime_expr;
         }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)

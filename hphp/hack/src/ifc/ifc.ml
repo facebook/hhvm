@@ -1232,7 +1232,8 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
   | A.ET_Splice e
-  | A.ExpressionTree { A.et_desugared_expr = e; _ } ->
+  | A.ExpressionTree { A.et_runtime_expr = e; _ } ->
+    (* TODO: IFC should consider spliced values too *)
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (e, _type_args, args, _extra_args) ->

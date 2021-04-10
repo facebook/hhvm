@@ -83,7 +83,7 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 
     let mut src = src.to_string();
     for (pos, literal) in literals {
-        let desugared_literal_src = expr_to_string_lossy(env, &literal.desugared_expr);
+        let desugared_literal_src = expr_to_string_lossy(env, &literal.runtime_expr);
         let (pos_start, pos_end) = pos.info_raw();
         src.replace_range(pos_start..pos_end, &desugared_literal_src);
     }

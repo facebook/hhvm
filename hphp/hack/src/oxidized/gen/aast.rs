@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce64aac6936468a72600d69c5d37bf64>>
+// @generated SignedSource<<90d5df1e603b8e764f9b4769927c6909>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -424,7 +424,9 @@ pub enum FunctionPtrId<Ex, Fb, En, Hi> {
 )]
 pub struct ExpressionTree<Ex, Fb, En, Hi> {
     pub hint: Hint,
-    pub desugared_expr: Expr<Ex, Fb, En, Hi>,
+    pub splices: Block<Ex, Fb, En, Hi>,
+    pub virtualized_expr: Expr<Ex, Fb, En, Hi>,
+    pub runtime_expr: Expr<Ex, Fb, En, Hi>,
 }
 
 #[derive(

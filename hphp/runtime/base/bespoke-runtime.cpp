@@ -108,6 +108,13 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     }
   }
 
+  if (Trace::moduleEnabled(Trace::bespoke, 2)) {
+    FTRACE(2, "Register new runtime struct {}\n", stableIdentifier);
+    for (auto const [idx, str] : fields) {
+      FTRACE(2, "  {} -> {}\n", idx, str);
+    }
+  }
+
   folly::SharedMutex::WriteHolder lock{s_mapLock};
   auto const rs = new RuntimeStruct(stableIdentifier.get(), fields);
   auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), rs);
@@ -192,7 +199,7 @@ StructDictInit::~StructDictInit() {
   m_arr->release();
 }
 
-void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
+void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
   value = tvToInit(value);
 
   if (!m_struct) {
@@ -200,7 +207,7 @@ void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
       // We have a vanilla MixedArray that must be properly sized. Set the
       // field in place.
       auto const DEBUG_ONLY res =
-        MixedArray::SetStrInPlace(m_arr, key.get(), value);
+        MixedArray::SetStrInPlace(m_arr, key, value);
       assertx(res == m_arr);
     } else {
       // We have a LoggingArray that should update in place.
@@ -213,38 +220,86 @@ void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
   }
 
   // We are currently wrapping a StructDict.
-  assertx(m_struct->m_fields[idx]->same(key.get()));
+  assertx(m_struct->m_fields[idx]->same(key));
   auto const sad = StructDict::As(m_arr);
   auto const slot = m_struct->m_fieldSlots[idx];
   if (slot == kInvalidSlot) {
     // We are adding a key with no corresponding slot. This must escalate to
     // vanilla, so escalate with the requested capacity and clear the m_struct
     // field.
-    FTRACE(2, "StructDictInit set at key {}, escalate\n", key.get());
+    FTRACE(2, "StructDictInit set at key {}, escalate\n", key);
     m_arr = sad->escalateWithCapacity(m_escalateCapacity, "StructDictInit");
     StructDict::Release(sad);
     assertx(m_arr->isVanillaDict());
     m_struct = nullptr;
 
     auto const DEBUG_ONLY res =
-      MixedArray::SetStrInPlace(m_arr, key.get(), value);
+      MixedArray::SetStrInPlace(m_arr, key, value);
     assertx(res == m_arr);
   } else {
     // We are adding a key with a known slot. This can be done in place.
-    FTRACE(2, "StructDictInit set at key {}, slot {}\n", key.get(), slot);
+    FTRACE(2, "StructDictInit set at key {}, slot {}\n", key, slot);
     if (debug) {
       // Validate that the slot translation is correct.
       auto const DEBUG_ONLY layout =
         m_struct->m_assignedLayout.load(std::memory_order_acquire);
-      assertx(layout->field(slot).key->same(key.get()));
+      assertx(layout->field(slot).key->same(key));
     }
     tvIncRefGen(value);
     StructDict::SetStrInSlotInPlace(sad, slot, value);
   }
 }
 
+void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
+  set(idx, key.get(), value);
+}
+
 void StructDictInit::set(size_t idx, const String& key, const Variant& value) {
   set(idx, key, *value.asTypedValue());
+}
+
+void StructDictInit::set(int64_t key, TypedValue value) {
+  value = tvToInit(value);
+
+  if (!m_struct) {
+    if (m_arr->isVanilla()) {
+      // We have a vanilla MixedArray that must be properly sized. Set the
+      // field in place.
+      auto const DEBUG_ONLY res =
+        MixedArray::SetIntInPlace(m_arr, key, value);
+      assertx(res == m_arr);
+    } else {
+      // We have a LoggingArray that should update in place.
+      tvIncRefGen(value);
+      auto const DEBUG_ONLY res =
+        m_arr->setMove(key, value);
+      assertx(res == m_arr);
+    }
+    return;
+  }
+
+  FTRACE(2, "StructDictInit set at integer key {}, escalate\n", key);
+  auto const sad = StructDict::As(m_arr);
+  m_arr = sad->escalateWithCapacity(m_escalateCapacity, "StructDictInit");
+  assertx(m_arr->isVanillaDict());
+  m_struct = nullptr;
+
+  auto const DEBUG_ONLY res = MixedArray::SetIntInPlace(m_arr, key, value);
+  assertx(res == m_arr);
+}
+
+void StructDictInit::set(int64_t key, const Variant& value) {
+  set(key, *value.asTypedValue());
+}
+
+void StructDictInit::setIntishCast(size_t idx, const String& key,
+                                   const Variant& value) {
+  int64_t n;
+  if (ArrayData::IntishCastKey(key.get(), n)) {
+    set(n, value);
+  } else {
+    set(idx, key.get(), *value.asTypedValue());
+  }
 }
 
 Variant StructDictInit::toVariant() {

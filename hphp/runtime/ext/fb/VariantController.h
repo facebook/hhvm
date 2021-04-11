@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/datatype.h"
 
@@ -26,6 +27,8 @@
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 
 #include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 
@@ -67,11 +70,12 @@ enum class VariantControllerHackArraysMode {
  */
 template <VariantControllerHackArraysMode HackArraysMode>
 struct VariantControllerImpl {
-  typedef Variant VariantType;
-  typedef Array MapType;
-  typedef Array VectorType;
-  typedef Array SetType;
-  typedef String StringType;
+  using VariantType = Variant;
+  using MapType = Array;
+  using VectorType = Array;
+  using SetType = Array;
+  using StringType = String;
+  using StructHandle = RuntimeStruct*;
 
   // variant accessors
   static HPHP::serialize::Type type(const_variant_ref obj) {
@@ -175,8 +179,15 @@ struct VariantControllerImpl {
   static MapType createMap(DArrayInit&& map) {
     return map.toArray();
   }
+  static MapType createMap(StructDictInit&& map) {
+    return map.toArray();
+  }
   static DArrayInit reserveMap(size_t n) {
     DArrayInit res(n, CheckAllocation{});
+    return res;
+  }
+  static StructDictInit reserveMap(StructHandle handle, size_t n) {
+    StructDictInit res(handle, n);
     return res;
   }
   static MapType getStaticEmptyMap() {
@@ -212,6 +223,10 @@ struct VariantControllerImpl {
   template <typename Key>
   static void mapSet(DArrayInit& map, Key&& k, VariantType&& v) {
     map.setUnknownKey<IntishCast::Cast>(std::move(k), std::move(v));
+  }
+  static void mapSet(StructDictInit& map, size_t idx, const StringType& k,
+                     VariantType&& v) {
+    map.setIntishCast(idx, k, std::move(v));
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }
   static ArrayIter mapIterator(const MapType& map) {
@@ -307,6 +322,14 @@ struct VariantControllerImpl {
   static size_t stringLen(const StringType& str) { return str.size(); }
   static const char* stringData(const StringType& str) {
     return str.data();
+  }
+
+  static StructHandle registerStruct(
+      const String& stableIdentifier,
+      const std::vector<std::pair<size_t, StringType>>& fields) {
+    auto const runtimeStruct =
+      RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);
+    return runtimeStruct;
   }
 };
 

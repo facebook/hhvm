@@ -480,11 +480,10 @@ public:
   /*
    * Perform intish-string array key conversion on `key'.
    *
-   * Return whether `key' should undergo intish-cast when used in this array
-   * (which may depend on the array kind, e.g.).  If true, `i' is set to the
-   * intish value of `key'.
+   * Return whether `key' should undergo intish-cast.  If true, `i' is set to
+   * the intish value of `key'.
    */
-  bool intishCastKey(const StringData* key, int64_t& i) const;
+  static bool IntishCastKey(const StringData* key, int64_t& i);
 
   /*
    * Get the string name for the array kind `kind'.

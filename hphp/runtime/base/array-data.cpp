@@ -865,7 +865,7 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
   return ad;
 }
 
-bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
+bool ArrayData::IntishCastKey(const StringData* key, int64_t& i) {
   if (key->isStrictlyInteger(i)) {
     if (RO::EvalHackArrCompatIntishCastNotices) {
       raise_hackarr_compat_notice("triggered IntishCast for set");

@@ -139,7 +139,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
   if (isStringType(cell.m_type)) {
     int64_t n;
-    if (IC == IntishCast::Cast && ad->intishCastKey(cell.m_data.pstr, n)) {
+    if (IC == IntishCast::Cast && ArrayData::IntishCastKey(cell.m_data.pstr, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;

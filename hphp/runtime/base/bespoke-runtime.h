@@ -133,8 +133,12 @@ private:
 struct StructDictInit {
   StructDictInit(RuntimeStruct* structHandle, size_t n);
   ~StructDictInit();
+  void set(size_t idx, StringData* key, TypedValue value);
   void set(size_t idx, const String& key, TypedValue value);
   void set(size_t idx, const String& key, const Variant& value);
+  void set(int64_t key, const Variant& value);
+  void set(int64_t key, TypedValue value);
+  void setIntishCast(size_t idx, const String& key, const Variant& value);
 
   Variant toVariant();
   Array toArray();

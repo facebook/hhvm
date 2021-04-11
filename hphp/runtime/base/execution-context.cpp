@@ -81,6 +81,8 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/zend/zend-math.h"
 
+#include "hphp/runtime/base/bespoke-runtime.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(bcinterp);

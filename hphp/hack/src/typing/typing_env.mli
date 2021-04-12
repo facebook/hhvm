@@ -154,6 +154,8 @@ val with_origin : env -> Decl_counters.origin -> (env -> env * 'a) -> env * 'a
 val with_origin2 :
   env -> Decl_counters.origin -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
+val with_in_expr_tree : env -> bool -> (env -> env * 'a * 'b) -> env * 'a * 'b
+
 val is_static : env -> bool
 
 val get_val_kind : env -> Typing_defs.val_kind

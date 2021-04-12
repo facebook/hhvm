@@ -2780,7 +2780,8 @@ and expr_
       Phase.localize_hint_with_self env ~ignore_errors:false hint
     in
     make_result env p (Aast.Cast (hint, te)) ty
-  | ExpressionTree et -> expression_tree { env with in_expr_tree = true } p et
+  | ExpressionTree et ->
+    Typing_env.with_in_expr_tree env true (fun env -> expression_tree env p et)
   | Is (e, hint) ->
     Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in
@@ -3224,7 +3225,8 @@ and expr_
       p
       (Aast.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
-  | ET_Splice e -> et_splice { env with in_expr_tree = true } p e
+  | ET_Splice e ->
+    Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
   | EnumAtom s ->
     Errors.atom_as_expr p;
     make_result env p (Aast.EnumAtom s) (mk (Reason.Rwitness p, Terr))

@@ -977,6 +977,13 @@ let with_origin2 env origin f =
   let env = { env with tracing_info = ti1 } in
   (env, r1, r2)
 
+let with_in_expr_tree env in_expr_tree f =
+  let old_in_expr_tree = env.in_expr_tree in
+  let env = { env with in_expr_tree } in
+  let (env, r1, r2) = f env in
+  let env = { env with in_expr_tree = old_in_expr_tree } in
+  (env, r1, r2)
+
 let is_static env = env.genv.static
 
 let get_val_kind env = env.genv.val_kind

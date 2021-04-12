@@ -59,6 +59,8 @@ function test(): void {
       nullable_bool() ? 1 : 2;
       a_bool() ? 1 : 2;
 
+      "not a bool" ? 1 : 2;
+
       // Represents an infinite loop and should be the last item
       // As the typechecker may not throw type errors afterwards,
       // due to the flow sensitive nature of the typechecker.

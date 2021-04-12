@@ -134,3 +134,15 @@ File "boolean_check.php", line 60, characters 22-22:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "expr_tree.hhi", line 20, characters 6-43:
   But got `dynamic` because it is an unenforceable type
+File "boolean_check.php", line 62, characters 7-18:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 34, characters 5-45:
+  But got `dynamic` because it is an unenforceable type
+File "boolean_check.php", line 62, characters 22-22:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 20, characters 6-43:
+  But got `dynamic` because it is an unenforceable type
+File "boolean_check.php", line 62, characters 26-26:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 20, characters 6-43:
+  But got `dynamic` because it is an unenforceable type

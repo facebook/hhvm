@@ -2957,33 +2957,23 @@ let member_not_found
      in
      hint @ reason @ [(cpos, "Declaration of " ^ type_name ^ " is here")])
 
-let expr_tree_unsupported_operator cls_name meth_name pos ~is_method =
+let expr_tree_unsupported_operator cls_name meth_name pos =
   let msg =
-    match String.chop_prefix meth_name ~prefix:"__to" with
-    | Some type_name ->
-      (* Complain about usage like `if ($not_bool)` that's virtualized to
-         `if ($not_bool->__toBool())`.
-        *)
+    match meth_name with
+    | "__bool" ->
+      (* If the user writes `if ($not_bool)`, provide a more specific
+         error rather than a generic missing method error for
+         `$not_bool->__bool()`. *)
       Printf.sprintf
-        "`%s` cannot be used in a %s position (it has no %s method named `%s`)"
+        "`%s` cannot be used as a boolean (it has no instance method named `__bool`)"
         cls_name
-        (String.lowercase type_name)
-        ( if is_method then
-          "instance"
-        else
-          "static" )
-        meth_name
-    | None ->
-      (* Complain about usage like `$not_int +` that's virtualized to
-         `$not_int->__plus(...)`.
-        *)
+    | _ ->
+      (* If the user writes `$not_int + ...`, provide a more specific
+         error rather than a generic missing method error for
+         `$not_int->__plus(...)`. *)
       Printf.sprintf
-        "`%s` does not support this operator (it has no %s method named `%s`)"
+        "`%s` does not support this operator (it has no instance method named `%s`)"
         cls_name
-        ( if is_method then
-          "instance"
-        else
-          "static" )
         meth_name
   in
   add (Typing.err_code Typing.MemberNotFound) pos msg

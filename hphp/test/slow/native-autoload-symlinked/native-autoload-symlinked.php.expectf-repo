@@ -1,0 +1,3 @@
+Native Autoload: true
+
+Fatal error: Call to undefined function test_fn() in %s/native-autoload-symlinked.php on line %d

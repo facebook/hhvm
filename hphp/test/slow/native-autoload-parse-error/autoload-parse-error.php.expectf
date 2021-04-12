@@ -1,0 +1,6 @@
+Error extracting %s/parse-error.inc: HPHP::Facts::FactsExtractionExc: json parse error on line 0: expected json value - JSON is ""
+
+Error extracting facts from parse-error.inc: json parse error on line 0: expected json value - JSON is ""
+
+PASS
+PASS

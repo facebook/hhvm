@@ -78,7 +78,7 @@ final class Map implements \MutableMap {
    */
   public function keys()[]: \HH\Vector {
     $res = vec[];
-    foreach ($this as $k => $_) {
+    foreach (dict($this) as $k => $_) {
       $res[] = $k;
     }
     return new \HH\Vector($res);
@@ -198,11 +198,7 @@ final class Map implements \MutableMap {
    * @return darray
    */
   public function toDArray()[]: darray {
-    $res = darray[];
-    foreach ($this as $k => $v) {
-      $res[$k] = $v;
-    }
-    return $res;
+    return dict($this);
   }
 
   /** Returns a Vector built from the values of this Map.
@@ -253,10 +249,7 @@ final class Map implements \MutableMap {
    * @return Vector
    */
   public function values()[]: \HH\Vector {
-    $res = vec[];
-    foreach ($this as $v) {
-      $res[] = $v;
-    }
+    $res = vec(dict($this));
     return new \HH\Vector($res);
   }
 
@@ -265,7 +258,7 @@ final class Map implements \MutableMap {
    */
   public function toKeysArray()[]: varray {
     $keys = varray[];
-    foreach ($this as $k => $_) {
+    foreach (dict($this) as $k => $_) {
       $keys[] = $k;
     }
     return $keys;
@@ -275,11 +268,7 @@ final class Map implements \MutableMap {
    * @return varray
    */
   public function toValuesArray()[]: varray {
-    $vals = varray[];
-    foreach ($this as $v) {
-      $vals[] = $v;
-    }
-    return $vals;
+    return vec(dict($this));
   }
 
   /** @param mixed $it
@@ -308,7 +297,7 @@ final class Map implements \MutableMap {
    */
   public function map((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = new \HH\Map($this);
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($v);
     }
     return $res;
@@ -321,7 +310,7 @@ final class Map implements \MutableMap {
    */
   public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = new \HH\Map($this);
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($k, $v);
     }
     return $res;
@@ -334,7 +323,7 @@ final class Map implements \MutableMap {
    */
   public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($callback($v)) {
         $res[$k] = $v;
       }
@@ -349,7 +338,7 @@ final class Map implements \MutableMap {
    */
   public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($callback($k, $v)) {
         $res[$k] = $v;
       }
@@ -363,7 +352,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   public function retain(mixed $callback): \HH\Map {
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
         $this->removeKey($k);
       }
@@ -377,7 +366,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   public function retainWithKey(mixed $callback): \HH\Map {
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if (!$callback($k, $v)) {
         $this->removeKey($k);
       }
@@ -413,7 +402,7 @@ final class Map implements \MutableMap {
     }
 
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $v;
       if (--$n == 0) break;
     }
@@ -429,7 +418,7 @@ final class Map implements \MutableMap {
    */
   public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
         break;
       }
@@ -449,7 +438,7 @@ final class Map implements \MutableMap {
     }
 
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($n-- > 0) continue;
       $res[$k] = $v;
     }
@@ -465,7 +454,7 @@ final class Map implements \MutableMap {
   public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\Map {
     $res = dict[];
     $skipping = true;
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($skipping) {
         if ($fn($v)) {
           continue;
@@ -496,7 +485,7 @@ final class Map implements \MutableMap {
     $end = $start + $len;
     $res = dict[];
 
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($i < $start) {
         $i++;
         continue;
@@ -517,10 +506,7 @@ final class Map implements \MutableMap {
    * @return Vector
    */
   public function concat(\HH\Traversable $iterable)[]: \HH\Vector {
-    $res = vec[];
-    foreach ($this as $v) {
-      $res[] = $v;
-    }
+    $res = vec(dict($this));
 
     foreach ($iterable as $v) {
       $res[] = $v;
@@ -622,7 +608,7 @@ final class ImmMap implements \ConstMap {
    */
   public function keys()[]: \HH\ImmVector {
     $res = vec[];
-    foreach ($this as $k => $_) {
+    foreach (dict($this) as $k => $_) {
       $res[] = $k;
     }
     return new \HH\ImmVector($res);
@@ -675,11 +661,7 @@ final class ImmMap implements \ConstMap {
    * @return darray
    */
   public function toDArray()[]: darray {
-    $res = darray[];
-    foreach ($this as $k => $v) {
-      $res[$k] = $v;
-    }
-    return $res;
+    return dict($this);
   }
 
   /** Returns a Vector built from the values of this ImmMap.
@@ -730,10 +712,7 @@ final class ImmMap implements \ConstMap {
    * @return ImmVector
    */
   public function values()[]: \HH\ImmVector {
-    $res = vec[];
-    foreach ($this as $v) {
-      $res[] = $v;
-    }
+    $res = vec(dict($this));
     return new \HH\ImmVector($res);
   }
 
@@ -742,7 +721,7 @@ final class ImmMap implements \ConstMap {
    */
   public function toKeysArray()[]: varray {
     $keys = varray[];
-    foreach ($this as $k => $_) {
+    foreach (dict($this) as $k => $_) {
       $keys[] = $k;
     }
     return $keys;
@@ -752,11 +731,7 @@ final class ImmMap implements \ConstMap {
    * @return varray
    */
   public function toValuesArray()[]: varray {
-    $vals = varray[];
-    foreach ($this as $v) {
-      $vals[] = $v;
-    }
-    return $vals;
+    return vec(dict($this));
   }
 
   /** @param mixed $it
@@ -783,7 +758,7 @@ final class ImmMap implements \ConstMap {
    */
   public function map((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = $this->toMap();
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($v);
     }
     return $res->toImmMap();
@@ -796,7 +771,7 @@ final class ImmMap implements \ConstMap {
    */
   public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = $this->toMap();
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($k, $v);
     }
     return $res->toImmMap();
@@ -809,7 +784,7 @@ final class ImmMap implements \ConstMap {
    */
   public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($callback($v)) {
         $res[$k] = $v;
       }
@@ -824,7 +799,7 @@ final class ImmMap implements \ConstMap {
    */
   public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($callback($k, $v)) {
         $res[$k] = $v;
       }
@@ -860,7 +835,7 @@ final class ImmMap implements \ConstMap {
     }
 
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       $res[$k] = $v;
       if (--$n == 0) break;
     }
@@ -876,7 +851,7 @@ final class ImmMap implements \ConstMap {
    */
   public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
         break;
       }
@@ -896,7 +871,7 @@ final class ImmMap implements \ConstMap {
     }
 
     $res = dict[];
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($n-- > 0) continue;
       $res[$k] = $v;
     }
@@ -912,7 +887,7 @@ final class ImmMap implements \ConstMap {
   public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\ImmMap {
     $res = dict[];
     $skipping = true;
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($skipping) {
         if ($fn($v)) {
           continue;
@@ -943,7 +918,7 @@ final class ImmMap implements \ConstMap {
     $end = $start + $len;
     $res = dict[];
 
-    foreach ($this as $k => $v) {
+    foreach (dict($this) as $k => $v) {
       if ($i < $start) {
         $i++;
         continue;
@@ -964,10 +939,7 @@ final class ImmMap implements \ConstMap {
    * @return ImmVector
    */
   public function concat(\HH\Traversable $iterable)[]: \HH\ImmVector {
-    $res = vec[];
-    foreach ($this as $v) {
-      $res[] = $v;
-    }
+    $res = vec(dict($this));
 
     foreach ($iterable as $v) {
       $res[] = $v;

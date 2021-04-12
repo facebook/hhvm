@@ -275,8 +275,8 @@ function disable_code_coverage_with_frequency(): darray<string, mixed>;
  * The faster and quite effective xxhash64 is generally recommended for
  * non-crypto hashing needs when no backward compatibility is needed.
  */
-<<__Native, __IsFoldable, __Pure>>
-function non_crypto_md5_upper(string $str): int;
+<<__Native, __IsFoldable>>
+function non_crypto_md5_upper(string $str)[]: int;
 
 /** Returns an int for the lower (last) 64 bits of an md5 hash of a string.
  * The MD5 hash, usually presented as a hex value, is taken as big endian, and
@@ -291,8 +291,8 @@ function non_crypto_md5_upper(string $str): int;
  * The faster and quite effective xxhash64 is generally recommended for
  * non-crypto hashing needs when no backward compatibility is needed.
  */
-<<__Native, __IsFoldable, __Pure>>
-function non_crypto_md5_lower(string $str): int;
+<<__Native, __IsFoldable>>
+function non_crypto_md5_lower(string $str)[]: int;
 
 /** Returns the overflow part of multiplying two ints, as if they were unsigned.
  * In other words, this returns the upper 64 bits of the full product of

@@ -92,9 +92,9 @@ namespace HH {
 <<__PHPStdLib>>
 function disable_code_coverage_with_frequency();
 <<__PHPStdLib>>
-function non_crypto_md5_upper(string $str): int;
+function non_crypto_md5_upper(string $str)[]: int;
 <<__PHPStdLib>>
-function non_crypto_md5_lower(string $str): int;
+function non_crypto_md5_lower(string $str)[]: int;
 
 /** Returns the overflow part of multiplying two ints, as if they were unsigned.
  * In other words, this returns the upper 64 bits of the full product of

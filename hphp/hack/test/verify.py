@@ -318,6 +318,20 @@ def filter_version_field(text: str) -> str:
     )
 
 
+def filter_temp_hhi_path(text: str) -> str:
+    """The .hhi files are stored in a temporary directory whose name
+    changes every time. Normalise it.
+
+    /tmp/ASjh5RoWbb/builtins_fb.hhi -> /tmp/hhi_dir/builtins_fb.hhi
+
+    """
+    return re.sub(
+        r"/tmp/[^/]*/([a-zA-Z0-9_]+\.hhi)",
+        "/tmp/hhi_dir/\\1",
+        text,
+    )
+
+
 def compare_expected(expected: str, out: str) -> bool:
     if expected == "No errors\n" or out == "No errors\n":
         return expected == out
@@ -341,8 +355,10 @@ def check_result(
     output, or if a :default_expect_regex is provided,
     check that the output in :out contains the provided regex.
     """
-    expected = filter_version_field(strip_lines(test_case.expected))
-    normalized_out = filter_version_field(strip_lines(out))
+    expected = filter_temp_hhi_path(
+        filter_version_field(strip_lines(test_case.expected))
+    )
+    normalized_out = filter_temp_hhi_path(filter_version_field(strip_lines(out)))
     is_ok = (
         expected == normalized_out
         or (ignore_error_messages and compare_expected(expected, normalized_out))

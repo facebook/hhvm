@@ -8,7 +8,11 @@ builtin_call_bad_arg.php:4:22
 [1]  4 |   xhprof_frame_begin(3);
      5 | }
 
-builtins_fb.hhi:72:29
-[2] 72 | No source found
+/tmp/Bg5a0e0LNp/builtins_fb.hhi:72:29
+    70 | function xhprof_network_disable();
+    71 | <<__PHPStdLib>>
+[2] 72 | function xhprof_frame_begin(string $name);
+    73 | <<__PHPStdLib>>
+    74 | function xhprof_frame_end();
 
 1 error found.

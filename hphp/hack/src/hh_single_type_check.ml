@@ -116,12 +116,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Raw -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
-  let absolute_errors =
-    if use_canonical_filenames () then
-      Errors.to_absolute l
-    else
-      Errors.to_absolute_for_test l
-  in
+  let absolute_errors = Errors.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
 
 let write_error_list format errors oc max_errors =

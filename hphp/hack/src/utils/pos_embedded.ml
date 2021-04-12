@@ -196,12 +196,21 @@ let rec end_line p =
 (* This returns a closed interval. *)
 let string t =
   let (line, start, end_) = info_pos t in
-  Printf.sprintf
-    "File %S, line %d, characters %d-%d:"
-    (String.strip (filename t))
-    line
-    start
-    end_
+  let path = filename t in
+
+  let hhi_path =
+    try Relative_path.path_of_prefix Relative_path.Hhi
+    with Invalid_argument _ ->
+      (* .hhi path hasn't been set (e.g. when running tests). *)
+      ""
+  in
+  (* Strip temporary .hhi directories from the path shown. *)
+  let path =
+    match String.chop_prefix path ~prefix:hhi_path with
+    | Some file_path -> file_path
+    | None -> path
+  in
+  Printf.sprintf "File %S, line %d, characters %d-%d:" path line start end_
 
 (* Some positions, like those in buffers sent by IDE/created by unit tests might
  * not have a file specified.

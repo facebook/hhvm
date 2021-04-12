@@ -424,7 +424,13 @@ void checkMethCaller(const Func* func, const Class* ctx) {
     ));
   }
 
-  auto const meth = cls->lookupMethod(func->methCallerMethName());
+  auto const meth = [&] () -> const Func* {
+    if (auto const m = cls->lookupMethod(func->methCallerMethName())) return m;
+    for (auto const i : cls->allInterfaces().range()) {
+      if (auto const m = i->lookupMethod(func->methCallerMethName())) return m;
+    }
+    return nullptr;
+  }();
   if (!meth) {
     SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
       "meth_caller(): method {}::{} not found",

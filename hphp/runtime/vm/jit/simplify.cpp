@@ -348,7 +348,7 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
 SSATmp* simplifyFuncHasAttr(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
-    ? cns(env, (funcTmp->funcVal()->attrs() & inst->extra<AttrData>()->attr))
+    ? cns(env, !!(funcTmp->funcVal()->attrs() & inst->extra<AttrData>()->attr))
     : nullptr;
 }
 

@@ -421,7 +421,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::Res:     return TRes;
   case IsTypeOp::ClsMeth: return TClsMeth;
-  case IsTypeOp::Func:    return TFunc;
+  case IsTypeOp::Func:
   case IsTypeOp::Class:
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
@@ -479,6 +479,16 @@ SSATmp* isClassImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
   mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) { return cns(env, true); });
   mc.ifTypeThen(src, TCls, [&](SSATmp*) { return cns(env, true); });
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isFuncImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+  mc.ifTypeThen(src, TFunc, [&](SSATmp* func) {
+    auto const attr = AttrData { AttrIsMethCaller };
+    auto const isMC = gen(env, FuncHasAttr, attr, func);
+    return gen(env, EqBool, isMC, cns(env, false));
+  });
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
@@ -1651,6 +1661,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::ArrLike:       return isArrLikeImpl(env, val);
     case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
     case IsTypeOp::Class:         return isClassImpl(env, val);
+    case IsTypeOp::Func:          return isFuncImpl(env, val);
     default: break;
   }
 

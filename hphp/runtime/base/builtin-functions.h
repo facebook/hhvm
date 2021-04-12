@@ -154,7 +154,7 @@ inline bool is_class(const TypedValue* c) {
 
 inline bool is_fun(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsFunc(c);
+  return tvIsFunc(c) && !val(c).pfunc->isMethCaller();
 }
 
 inline bool is_empty_string(const TypedValue* c) {

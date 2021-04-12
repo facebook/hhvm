@@ -1,0 +1,18 @@
+object(C) (1) {
+  ["m"]=>
+  object(HH\Map) (2) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+  }
+}
+object(C) (1) {
+  ["m"]=>
+  object(HH\Map) (2) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+  }
+}

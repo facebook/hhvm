@@ -2090,13 +2090,6 @@ let decl_and_run_mode
     if no_builtins then
       Relative_path.Map.empty
     else
-      (* Note that the regular `.hhi` files have already been written to disk
-      with `Hhi.get_root ()` *)
-      let magic_builtins =
-        match mode with
-        | Ifc _ -> magic_builtins
-        | _ -> magic_builtins
-      in
       let extra_builtins =
         let add_file_content map filename =
           Relative_path.create Relative_path.Dummy filename

@@ -412,24 +412,40 @@ let method_dynamically_callable
         }
     in
     let (env, param_tys) =
-      List.map_env env m.m_params ~f:(fun env param ->
-          make_param_local_ty
-            env
-            (Some (make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos))
-            param)
+      List.zip_exn m.m_params params_decl_ty
+      |> List.map_env env ~f:(fun env (param, hint) ->
+             let dyn_ty =
+               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
+             in
+             let ty =
+               match hint with
+               | Some ty when Typing_enforceability.is_enforceable env ty ->
+                 Typing_make_type.intersection
+                   (Reason.Rsound_dynamic_callable Pos_or_decl.none)
+                   [ty; dyn_ty]
+               | _ -> dyn_ty
+             in
+             make_param_local_ty env (Some ty) param)
     in
     let params_need_immutable = get_ctx_vars m.m_ctxs in
     let (env, _) =
-      (* This time, bind_param_and_check receives a pair where the lhs is
-       * always Tdynamic, but the fun_param is still referencing the source
-       * hint. We replace this hint with Hdynamic before calling bind_param
+      (* In this pass, bind_param_and_check receives a pair where the lhs is
+       * either Tdynamic or TInstersection of the original type and TDynamic,
+       * but the fun_param is still referencing the source hint. We amend
+       * the source hint to keep in in sync before calling bind_param
        * so the right enforcement is computed.
        *)
       let bind_param_and_check env lty_and_param =
         let (ty, param) = lty_and_param in
         let name = param.param_name in
         let (hi, hopt) = param.param_type_hint in
-        let hopt = Option.map hopt ~f:(fun (p, _) -> (p, Hdynamic)) in
+        let hopt =
+          Option.map hopt ~f:(fun (p, h) ->
+              if Typing_utils.is_tintersection env ty then
+                (p, Hintersection [(p, h); (p, Hdynamic)])
+              else
+                (p, Hdynamic))
+        in
         let param_type_hint = (hi, hopt) in
         let param = (ty, { param with param_type_hint }) in
         let immutable =

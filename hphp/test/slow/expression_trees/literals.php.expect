@@ -1,0 +1,7 @@
+${5}
+${"Hello"}
+${3.14}
+${false}
+${null}
+() ==> {
+return ${void};}

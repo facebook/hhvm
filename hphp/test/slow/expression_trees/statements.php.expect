@@ -1,0 +1,10 @@
+($y) ==> {
+$x = $y;
+if ($x->__bool()) {
+return ${void};} else {
+}
+for ($i = ${0};;$i->__lessThan(${2})->__bool();$i = $i->__plus(${1});) {
+break;}
+while ($x->__bool()) {
+continue;}
+return ${void};}

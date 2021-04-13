@@ -121,7 +121,7 @@ class Code {
     vec<string> $args,
     vec<Code::TAst> $body,
   ): Code::TAst {
-    return "(".concat_arg_list($args).")"." ==> {\n ".concat_block($body)."}";
+    return "(".concat_arg_list($args).")"." ==> {\n".concat_block($body)."}";
   }
 
   // Operators
@@ -238,15 +238,23 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   public function visit(TVisitor $v): TResult {
     return ($this->ast)($v);
   }
+
+  public function getExprPos(): ?ExprPos {
+    return $this->pos;
+  }
+
+  public function getSplices(): dict<string, mixed> {
+    return $this->spliced_values;
+  }
 }
 
 final class ExprPos {
   public function __construct(
-    private string $filepath,
-    private int $begin_line,
-    private int $begin_col,
-    private int $end_line,
-    private int $end_col,
+    public string $filepath,
+    public int $begin_line,
+    public int $begin_col,
+    public int $end_line,
+    public int $end_col,
   ) {}
 }
 
@@ -295,5 +303,5 @@ final class ExampleContext {}
 function print_et<TInfer>(ExprTree<Code, Code::TAst, TInfer> $et): void {
   $visitor = new Code();
   $string = $et->visit($visitor);
-  echo($string);
+  echo($string."\n");
 }

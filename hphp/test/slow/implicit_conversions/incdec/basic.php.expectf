@@ -25,7 +25,11 @@ foobar> postdec<
 Notice: Decrement on string 'foobar' in %s/basic.php on line 35
 foobarfoobar>
 string(0) ""
-preinc<1> postinc<1> predec<
+preinc<
+Notice: Increment on empty string in %s/basic.php on line 25
+1> postinc<
+Notice: Increment on empty string in %s/basic.php on line 28
+1> predec<
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 32
 -1> postdec<
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 35

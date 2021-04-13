@@ -25,7 +25,11 @@ foobar> postdec<
 Notice: Decrement on string 'foobar' in %s/sprop.php on line 40
 foobarfoobar>
 string(0) ""
-preinc<1> postinc<1> predec<
+preinc<
+Notice: Increment on empty string in %s/sprop.php on line 30
+1> postinc<
+Notice: Increment on empty string in %s/sprop.php on line 33
+1> predec<
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/sprop.php on line 37
 -1> postdec<
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/sprop.php on line 40

@@ -576,6 +576,16 @@ struct IncBase {
   }
 
   TypedValue emptyString() const {
+    if (RuntimeOption::EvalNoticeOnCoerceForIncDec > 0) {
+      const auto level =
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec);
+      const auto str = "Increment on empty string";
+      if (level == ConvNoticeLevel::Throw) {
+        SystemLib::throwInvalidOperationExceptionObject(str);
+      } else if (level == ConvNoticeLevel::Log) {
+        raise_notice(str);
+      }
+    }
     return make_tv<KindOfPersistentString>(s_1.get());
   }
 

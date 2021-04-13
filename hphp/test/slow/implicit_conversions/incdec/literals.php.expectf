@@ -2,7 +2,9 @@ preinc<
 Notice: Implicit null to int conversion for pre/post inc/dec in %s/literals.php on line 17
 111432.234
 Notice: Increment on string 'foobar' in %s/literals.php on line 29
-foobas1
+foobas
+Notice: Increment on empty string in %s/literals.php on line 31
+1
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 33
 1235
 Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 35
@@ -11,7 +13,9 @@ postinc<
 Notice: Implicit null to int conversion for pre/post inc/dec in %s/literals.php on line 46
 1110142431.2342.234
 Notice: Increment on string 'foobar' in %s/literals.php on line 64
-foobarfoobas1
+foobarfoobas
+Notice: Increment on empty string in %s/literals.php on line 67
+1
 Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 70
 12341235
 Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 73

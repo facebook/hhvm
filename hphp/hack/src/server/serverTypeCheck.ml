@@ -289,7 +289,9 @@ let parsing genv env to_check ~stop_at_errors profiling =
     {
       env with
       local_symbol_table =
-        SymbolIndex.remove_files ~sienv:env.local_symbol_table ~paths:to_check;
+        SymbolIndexCore.remove_files
+          ~sienv:env.local_symbol_table
+          ~paths:to_check;
     }
   in
   SharedMem.collect `gentle;

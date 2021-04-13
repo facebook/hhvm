@@ -74,7 +74,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
       in
       AutocompleteService.add_position_to_results ctx temp_results
   in
-  SymbolIndex.log_symbol_index_search
+  SymbolIndexCore.log_symbol_index_search
     ~sienv
     ~start_time
     ~query_text

@@ -1,6 +1,25 @@
 (library
+  (name search_core)
+  (wrapped false)
+  (modules localSearchService symbolIndexCore)
+  (libraries
+    ast
+    decl_provider
+    facts
+    file_info
+    heap_shared_mem
+    index_builder
+    logging
+    naming_global
+    pos
+  )
+)
+
+(library
   (name search)
   (wrapped false)
+  (modules autocompleteRankService classMethodSearch customSearchService
+    namespaceSearchService sqliteSearchService symbolIndex)
   (libraries
     ast
     ast_provider
@@ -10,13 +29,13 @@
     full_fidelity
     future
     glean_options
-    heap_shared_mem
     index_builder
     logging
     naming
     naming_global
     procs_procs
     pos
+    search_core
     search_utils
     sqlite3
     state_loader

@@ -192,10 +192,10 @@ let update_naming_tables_for_changed_file
     let sienv =
       match facts with
       | None ->
-        SymbolIndex.remove_files
+        SymbolIndexCore.remove_files
           ~sienv
           ~paths:(Relative_path.Set.singleton path)
-      | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
+      | Some facts -> SymbolIndexCore.update_from_facts ~sienv ~path ~facts
     in
     { naming_table; sienv; old_file_info; new_file_info }
   end else begin

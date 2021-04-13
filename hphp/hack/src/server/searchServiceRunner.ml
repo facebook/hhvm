@@ -31,7 +31,7 @@ module SearchServiceRunner = struct
         iter (x :: acc) (n - 1)
     in
     let fast = iter [] num_files in
-    let sienv = SymbolIndex.update_files ~ctx ~sienv ~paths:fast in
+    let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:fast in
 
     if List.length fast > 0 then (
       let str =

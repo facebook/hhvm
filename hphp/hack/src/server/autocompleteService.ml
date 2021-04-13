@@ -36,7 +36,7 @@ let add_position_to_results
     SearchUtils.result =
   SearchUtils.(
     List.filter_map raw_results ~f:(fun r ->
-        match SymbolIndex.get_pos_for_item_opt ctx r with
+        match SymbolIndexCore.get_pos_for_item_opt ctx r with
         | Some pos ->
           Some { name = r.si_fullname; pos; result_type = r.si_kind }
         | None -> None))
@@ -939,7 +939,7 @@ let go_ctx
               complete_autocomplete_results );
         }
       in
-      SymbolIndex.log_symbol_index_search
+      SymbolIndexCore.log_symbol_index_search
         ~sienv
         ~start_time
         ~query_text:!auto_complete_for_global

@@ -181,7 +181,7 @@ let go_locate_symbol
     ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
     : DocblockService.dbs_symbol_location_result =
   (* Look up this class name *)
-  match SymbolIndex.get_position_for_symbol ctx symbol kind with
+  match SymbolIndexCore.get_position_for_symbol ctx symbol kind with
   | None -> None
   | Some (path, line, column) ->
     let filename = Relative_path.to_absolute path in

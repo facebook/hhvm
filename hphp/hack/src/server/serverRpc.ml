@@ -174,7 +174,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       match facts_opt with
       | None -> sienv
       | Some facts ->
-        SymbolIndex.update_from_facts ~sienv ~path:Relative_path.default ~facts
+        SymbolIndexCore.update_from_facts
+          ~sienv
+          ~path:Relative_path.default
+          ~facts
     in
     let result =
       ServerAutoComplete.go_at_auto332_ctx

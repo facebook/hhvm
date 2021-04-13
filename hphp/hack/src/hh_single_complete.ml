@@ -239,7 +239,7 @@ let scan_files_for_symbol_index
     List.map fileinfo_list ~f:(fun fileinfo ->
         (filename, fileinfo, SearchUtils.TypeChecker))
   in
-  SymbolIndex.update_files ~ctx ~sienv ~paths:transformed_list
+  SymbolIndexCore.update_files ~ctx ~sienv ~paths:transformed_list
 
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =

@@ -1,0 +1,64 @@
+(library
+    (name config_file_test)
+    (wrapped false)
+    (modules config_file_test)
+    (libraries
+        asserter
+        collections
+        test_injector_config
+        unit_test
+        utils_config_file))
+
+(library
+    (name timeout_test)
+    (wrapped false)
+    (modules timeout_test)
+    (libraries
+        sys_utils
+        default_injector_config
+        unit_test))
+
+(library
+    (name timer_test)
+    (wrapped false)
+    (modules timer_test)
+    (libraries
+        asserter
+        default_injector_config
+        sys_utils
+        unit_test))
+
+(library
+    (name findUtils_test)
+    (wrapped false)
+    (modules findUtils_test)
+    (libraries
+        test_injector_config
+        unit_test
+        utils_find))
+
+(library
+    (name hh_json_test)
+    (wrapped false)
+    (modules hh_json_test)
+    (libraries
+        asserter
+        hh_json
+        string
+        test_injector_config
+        unit_test
+        utils_core))
+
+(executable
+    (name errors_test)
+    (modules errors_test)
+    (libraries
+        asserter
+        errors
+        pos
+        pos_or_decl
+        relative_path
+        sys_utils
+        test_injector_config
+        unit_test
+        utils_core))

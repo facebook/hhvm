@@ -21,10 +21,16 @@
     glean_dependency_graph_convert
     hhi
     parent
-    server
-    server_env
+    server_coverage_metric_utils
     server_color_file
+    server_env
+    server_env_build
     server_file_outline
+    server_find_refs
+    server_global_inference
+    server_go_to
+    server_highlight_refs
+    server_symbol_info_service_utils
     sys_utils
     tast
     tast_typecheck

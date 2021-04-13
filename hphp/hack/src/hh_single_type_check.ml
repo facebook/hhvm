@@ -1474,7 +1474,9 @@ let handle_mode
           ()
         else
           let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
-          let type_acc = ServerCoverageMetric.accumulate_types ctx tast fn in
+          let type_acc =
+            ServerCoverageMetricUtils.accumulate_types ctx tast fn
+          in
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
@@ -1499,8 +1501,8 @@ let handle_mode
     iter_over_files (fun filename ->
         match Relative_path.Map.find_opt files_info filename with
         | Some _fileinfo ->
-          let raw_result = SymbolInfoService.helper ctx [] [filename] in
-          let result = SymbolInfoService.format_result raw_result in
+          let raw_result = SymbolInfoServiceUtils.helper ctx [] [filename] in
+          let result = SymbolInfoServiceUtils.format_result raw_result in
           let result_json =
             ServerCommandTypes.Symbol_info_service.to_json result
           in
@@ -1526,7 +1528,7 @@ let handle_mode
           lint_errors
       in
       let lint_errors = List.map ~f:Lint.to_absolute lint_errors in
-      ServerLint.output_text stdout lint_errors error_format;
+      ServerLintTypes.output_text stdout lint_errors error_format;
       exit 2
     ) else
       Printf.printf "No lint errors\n"

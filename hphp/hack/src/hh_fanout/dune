@@ -17,6 +17,7 @@
     server
     server_command_types
     server_env
+    server_env_build
     sys_utils
     temp_file
     utils_core)

@@ -11,7 +11,12 @@
     lwt
     lsp
     server
+    server_autocomplete_services
     server_env
+    server_env_build
+    server_go_to
+    server_highlight_refs
+    server_search
     state_loader
     sys_utils)
   (preprocess

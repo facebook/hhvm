@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module SS = SearchUtils
 module SUtils = SearchUtils
 
 let result_to_json res =

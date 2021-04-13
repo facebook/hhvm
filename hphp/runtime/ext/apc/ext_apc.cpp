@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -224,7 +225,7 @@ void apcExtension::deserialize(std::string data) {
   auto sd = StringData::MakeUncounted(data);
   data.clear();
   apc_store().set(s_internal_preload, Variant{sd}, 0, 0);
-  StringData::ReleaseUncounted(sd);     // a copy was made in APC
+  DecRefUncountedString(sd); // APC did an uncounted inc-ref
 }
 
 void apcExtension::purgeDeferred(req::vector<StringData*>&& keys) {

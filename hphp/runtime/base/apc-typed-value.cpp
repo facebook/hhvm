@@ -15,10 +15,7 @@
 */
 #include "hphp/runtime/base/apc-typed-value.h"
 
-#include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -122,13 +119,10 @@ void APCTypedValue::deleteUncounted() {
                 "destroying it");
 
   if (kind == APCKind::UncountedString) {
-    StringData::ReleaseUncounted(m_data.str);
+    DecRefUncountedString(m_data.str);
   } else {
     auto const arr = m_data.arr;
-    if (arr->isVanillaVec()) PackedArray::ReleaseUncounted(arr);
-    else if (arr->isVanillaDict()) MixedArray::ReleaseUncounted(arr);
-    else if (arr->isVanillaKeyset()) SetArray::ReleaseUncounted(arr);
-    else BespokeArray::ReleaseUncounted(arr);
+    DecRefUncountedArray(arr);
     if (arr == static_cast<void*>(this + 1)) {
       return;  // *::ReleaseUncounted freed the joint allocation.
     }

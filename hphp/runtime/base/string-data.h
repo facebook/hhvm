@@ -214,7 +214,7 @@ struct StringData final : MaybeCountable,
    * uncountedDecRef, and if necessary destroy the StringData and
    * return true.
    */
-  static void ReleaseUncounted(const StringData*);
+  static void ReleaseUncounted(StringData*);
 
   /*
    * Reference-counting related.

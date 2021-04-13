@@ -156,12 +156,14 @@ public:
   ArrayData* toDictIntishCast(bool copy);
 
   /*
-   * Return the array to the request heap.
+   * Return the array to the request heap or the global heap.
    *
-   * This is normally called when the reference count goes to zero (e.g., via a
-   * helper like decRefArr()).
+   * The counted variant is called when the refcount goes to zero (e.g. from
+   * the JIT or from a helper like decRefArr). The uncounted variant is called
+   * when the refcount goes to "uncounted zero", from DecRefUncounted.
    */
   void release() DEBUG_NOEXCEPT;
+  void releaseUncounted();
 
   /*
    * Decref the array and release() it if its refcount goes to zero.
@@ -700,6 +702,7 @@ struct ArrayFunctions {
   static auto const NK = size_t{ArrayData::kNumKinds};
 
   void (*release[NK])(ArrayData*);
+  void (*releaseUncounted[NK])(ArrayData*);
   TypedValue (*nvGetInt[NK])(const ArrayData*, int64_t k);
   TypedValue (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);

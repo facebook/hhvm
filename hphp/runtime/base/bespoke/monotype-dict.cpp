@@ -1154,10 +1154,10 @@ void MonotypeDict<Key>::ReleaseUncounted(Self* mad) {
 
   mad->forEachElm([&](auto i, auto elm) {
     if constexpr (std::is_same<Key, StringData*>::value) {
-      if (elm->key->isUncounted()) StringData::ReleaseUncounted(elm->key);
+      DecRefUncountedString(elm->key);
     }
-    auto tv = make_tv_of_type(elm->val, dt);
-    ReleaseUncountedTv(&tv);
+    auto const tv = make_tv_of_type(elm->val, dt);
+    DecRefUncounted(tv);
   });
 }
 

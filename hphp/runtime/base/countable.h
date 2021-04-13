@@ -79,23 +79,42 @@ struct MaybeCountable : HeapObject {
    * Uncounted types still record how many references there are to
    * them from apc, or other uncounted types. Generally, there will
    * only be one thing manipulating their refcounts at any given time,
-   * but if eg multiple threads store the same uncounted array in apc
+   * but if e.g. multiple threads store the same uncounted array in APC
    * at the same time, it might happen.
    *
-   * uncountedIncRef() will attempt to increment the refcount (in
-   * one_bit_refcount builds there are only 127 ref counts available,
-   * so it can fail) and return true on success. uncountedDecRef()
-   * will decrement the refcount, and return true if the caller is
-   * responsible for freeing it. When it returns false, the caller
-   * cannot do anything further with the uncounted object, since
-   * another thread might already be destroying it.
+   * uncountedIncRef() will increment this count, and uncountedDecRef()
+   * will decrement this count. uncountedDecRef() will return true if
+   * we've dec-ref-ed this value to "uncounted zero" - i.e. it's time
+   * to release the memory. Even if uncountedDecRef() returns false,
+   * the caller must not do anything further with the uncounted object,
+   * because another thread may destroy it in the meantime.
    *
-   * Note that in non one_bit_refcount builds, uncountedIncRef
-   * actually subtracts one from the refcount, and uncountedDecRef
-   * adds one to it; but callers shouldn't care.
+   * Note uncountedIncRef actually subtracts one from the refcount,
+   * and uncountedDecRef adds one to it; but callers shouldn't care.
    */
-  bool uncountedIncRef() const;
+  void uncountedIncRef() const;
   bool uncountedDecRef() const;
+  /*
+   * Like cowCheck(), but for uncounted values. Returns true if the count
+   * for this value is anything other than "uncounted one".
+   *
+   * If a caller is going to use this check to mutate an uncounted value,
+   * it must know that no other thread has a copy of this value and may
+   * mutate the result. An example of when we can use this check is in APC:
+   * if we're going to store a value there, and !uncountedCowCheck, then we
+   * can modify the object freely before publishing it.
+   */
+  bool uncountedCowCheck() const;
+  /*
+   * In debug mode, we call this prior to releasing an uncounted array or
+   * string in order to undo the last dec-ref and make the count valid again.
+   */
+  void uncountedFixCountForRelease() const;
+  /*
+   * Returns true if the value is persistent (static or uncounted). If it is
+   * uncounted, does an uncountedIncRef() before returning.
+   */
+  bool persistentIncRef() const;
 };
 
 /*
@@ -117,20 +136,35 @@ struct Countable : MaybeCountable {
   bool cowCheck() const;
 };
 
-ALWAYS_INLINE bool MaybeCountable::uncountedIncRef() const {
+ALWAYS_INLINE void MaybeCountable::uncountedIncRef() const {
   assertx(isUncounted());
   auto& count = m_atomic_count;
-
   auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_relaxed);
   assertx(val <= UncountedValue);
-  return true;
 }
 
 ALWAYS_INLINE bool MaybeCountable::uncountedDecRef() const {
   assertx(isUncounted());
-  auto const val = m_atomic_count.fetch_add(1,
-                                            std::memory_order_relaxed);
+  auto const val = m_atomic_count.fetch_add(1, std::memory_order_relaxed);
   return val == UncountedValue;
+}
+
+ALWAYS_INLINE bool MaybeCountable::uncountedCowCheck() const {
+  assertx(!isRefCounted());
+  auto const val = m_atomic_count.load(std::memory_order_relaxed);
+  return val != UncountedValue;
+}
+
+ALWAYS_INLINE void MaybeCountable::uncountedFixCountForRelease() const {
+  assertx(m_count == UncountedZero);
+  if (debug) m_atomic_count--;
+}
+
+ALWAYS_INLINE bool MaybeCountable::persistentIncRef() const {
+  if (isRefCounted()) return false;
+  if (isStatic()) return true;
+  uncountedIncRef();
+  return true;
 }
 
 ALWAYS_INLINE bool MaybeCountable::checkCount() const {

@@ -211,16 +211,16 @@ void StringData::destructStatic() {
   }
 }
 
-void StringData::ReleaseUncounted(const StringData* str) {
-  assertx(str->checkSane());
+void StringData::ReleaseUncounted(StringData* str) {
   assertx(str->isFlat());
-  if (!str->uncountedDecRef()) return;
+  assertx(str->checkSane());
+  assertx(!str->uncountedCowCheck());
 
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
   auto const allocSize = str->size() + kStringOverhead;
-  uncounted_sized_free(const_cast<StringData*>(str), allocSize);
+  uncounted_sized_free(str, allocSize);
 }
 
 //////////////////////////////////////////////////////////////////////

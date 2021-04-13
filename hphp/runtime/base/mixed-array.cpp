@@ -409,9 +409,8 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     auto it = seen->find(array);
     assertx(it != seen->end());
     if (auto const arr = static_cast<ArrayData*>(it->second)) {
-      if (arr->uncountedIncRef()) {
-        return arr;
-      }
+      arr->uncountedIncRef();
+      return arr;
     }
   }
   auto a = asMixed(array);
@@ -443,20 +442,23 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
     if (te.hasStrKey() && !te.skey->isStatic()) {
-      if (te.skey->isUncounted() && te.skey->uncountedIncRef()) {
+      auto const key = te.skey;
+      if (key->isUncounted()) {
+        key->uncountedIncRef();
         ad->mutableKeyTypes()->recordNonStaticStr();
       } else {
         te.skey = [&] {
-          if (auto const st = lookupStaticString(te.skey)) return st;
+          if (auto const st = lookupStaticString(key)) return st;
           ad->mutableKeyTypes()->recordNonStaticStr();
           HeapObject** seenStr = nullptr;
-          if (seen && te.skey->hasMultipleRefs()) {
-            seenStr = &(*seen)[te.skey];
+          if (seen && key->hasMultipleRefs()) {
+            seenStr = &(*seen)[key];
             if (auto const st = static_cast<StringData*>(*seenStr)) {
-              if (st->uncountedIncRef()) return st;
+              st->uncountedIncRef();
+              return st;
             }
           }
-          auto const st = StringData::MakeUncounted(te.skey->slice());
+          auto const st = StringData::MakeUncounted(key->slice());
           if (seenStr) *seenStr = st;
           return st;
         }();
@@ -537,8 +539,8 @@ void MixedArray::Release(ArrayData* in) {
 
 NEVER_INLINE
 void MixedArray::ReleaseUncounted(ArrayData* in) {
+  assertx(!in->uncountedCowCheck());
   auto const ad = asMixed(in);
-  if (!ad->uncountedDecRef()) return;
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -546,13 +548,8 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
 
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
-      if (ptr->hasStrKey()) {
-        assertx(!ptr->skey->isRefCounted());
-        if (ptr->skey->isUncounted()) {
-          StringData::ReleaseUncounted(ptr->skey);
-        }
-      }
-      ReleaseUncountedTv(&ptr->data);
+      if (ptr->hasStrKey()) DecRefUncountedString(ptr->skey);
+      DecRefUncounted(ptr->data);
     }
   }
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());

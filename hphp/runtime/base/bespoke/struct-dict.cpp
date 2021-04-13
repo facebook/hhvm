@@ -382,8 +382,8 @@ void StructDict::ConvertToUncounted(StructDict* sad,
 
 void StructDict::ReleaseUncounted(StructDict* sad) {
   for (Slot i = 0; i < sad->numFields(); i++) {
-    auto tv = sad->typedValueUnchecked(i);
-    ReleaseUncountedTv(&tv);
+    auto const tv = sad->typedValueUnchecked(i);
+    DecRefUncounted(tv);
   }
 }
 

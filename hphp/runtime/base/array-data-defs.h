@@ -39,6 +39,11 @@ inline bool ArrayData::notCyclic(TypedValue v) const {
 }
 
 NO_PROFILING
+inline void ArrayData::releaseUncounted() {
+  g_array_funcs.releaseUncounted[kind()](this);
+}
+
+NO_PROFILING
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
   assertx(ret != this && ret->isStatic());

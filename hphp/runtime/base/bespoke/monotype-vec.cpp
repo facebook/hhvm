@@ -522,8 +522,8 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
 
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
   for (uint32_t i = 0; i < mad->size(); i++) {
-    auto tv = mad->typedValueUnchecked(i);
-    ReleaseUncountedTv(&tv);
+    auto const tv = mad->typedValueUnchecked(i);
+    DecRefUncounted(tv);
   }
 }
 

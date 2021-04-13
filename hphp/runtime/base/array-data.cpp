@@ -122,26 +122,25 @@ bool compareArrayPortion(const ArrayData* ad1, const ArrayData* ad2) {
   if (ad1->isLegacyArray() != ad2->isLegacyArray()) return false;
 
   auto const check = [] (const TypedValue& tv1, const TypedValue& tv2) {
-      if (tv1.m_type != tv2.m_type) {
-        // String keys from arrays might be KindOfString, even when
-        // the StringData is static.
-        if (!isStringType(tv1.m_type) || !isStringType(tv2.m_type)) {
-          return false;
-        }
-        assertx(tv1.m_data.pstr->isStatic());
-        assertx(tv2.m_data.pstr->isStatic());
+    if (tv1.m_type != tv2.m_type) {
+      // String keys from arrays might be KindOfString, even when
+      // the StringData is static.
+      if (!isStringType(tv1.m_type) || !isStringType(tv2.m_type)) {
+        return false;
       }
-      if (isNullType(tv1.m_type)) return true;
-      return tv1.m_data.num == tv2.m_data.num;
-    };
+      assertx(tv1.m_data.pstr->isStatic());
+      assertx(tv2.m_data.pstr->isStatic());
+    }
+    if (isNullType(tv1.m_type)) return true;
+    return tv1.m_data.num == tv2.m_data.num;
+  };
 
   auto equal = true;
   ArrayIter iter2{ad2};
   IterateKV(
     ad1,
     [&](TypedValue k, TypedValue v) {
-      if (!check(k, *iter2.first().asTypedValue()) ||
-          !check(v, iter2.secondVal())) {
+      if (!check(k, iter2.nvFirst()) || !check(v, iter2.secondVal())) {
         equal = false;
         return true;
       }
@@ -306,10 +305,18 @@ const ArrayFunctions g_array_funcs = {
   /*
    * void Release(ArrayData*)
    *
-   *   Free memory associated with an array.  Generally called when
-   *   the reference count on an array drops to zero.
+   *   Free the memory associated with a refcounted array. Generally called
+   *   when the reference count on the array drops to zero.
    */
   DISPATCH(Release)
+
+  /*
+   * void ReleaseUncounted(ArrayData*)
+   *
+   *   Free the memory associated with an uncounted array. Generally called
+   *   when the reference count on the array drops to "uncounted zero".
+   */
+  DISPATCH(ReleaseUncounted)
 
   /*
    * TypedValue NvGetInt(const ArrayData*, int64_t key)

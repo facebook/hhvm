@@ -455,10 +455,10 @@ void PackedArray::Release(ArrayData* ad) {
 NEVER_INLINE
 void PackedArray::ReleaseUncounted(ArrayData* ad) {
   assertx(checkInvariants(ad));
-  if (!ad->uncountedDecRef()) return;
+  assertx(!ad->uncountedCowCheck());
 
   for (uint32_t i = 0; i < ad->m_size; ++i) {
-    ReleaseUncountedTv(LvalUncheckedInt(ad, i));
+    DecRefUncounted(*LvalUncheckedInt(ad, i));
   }
 
   if (APCStats::IsCreated()) {
@@ -725,9 +725,8 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
     auto it = seen->find(array);
     assertx(it != seen->end());
     if (auto const arr = static_cast<ArrayData*>(it->second)) {
-      if (arr->uncountedIncRef()) {
-        return arr;
-      }
+      arr->uncountedIncRef();
+      return arr;
     }
   }
   assertx(checkInvariants(array));

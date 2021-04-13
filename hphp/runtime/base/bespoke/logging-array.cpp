@@ -317,8 +317,7 @@ void LoggingArray::ConvertToUncounted(
 
 void LoggingArray::ReleaseUncounted(LoggingArray* lad) {
   logEvent(lad, ArrayOp::ReleaseUncounted);
-  auto tv = make_array_like_tv(lad->wrapped);
-  ReleaseUncountedTv(&tv);
+  DecRefUncountedArray(lad->wrapped);
 }
 
 void LoggingArray::Release(LoggingArray* lad) {

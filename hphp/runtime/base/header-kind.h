@@ -85,28 +85,6 @@ inline bool haveCount(HeaderKind k) {
  * while uncounted objects are freed using the treadmill. Using 8-bit values
  * generates shorter cmp instructions while still being far enough from 0 to be
  * safe.
- *
- * One-bit reference counting:
- *
- * When one_bit_refcount == true, HHVM's reference counting primitives behave
- * very differently. Reference counts are conceptually one bit, where 0 means
- * "one reference" and 1 means "many references". In practice, m_count is a
- * full byte wide, both to accommodate UncountedValue and StaticValue, and so
- * we can operate on m_count directly without any bit twiddling.
- *
- * DecRef becomes `if (m_count == 0) release();`, while IncRef becomes `m_count
- * = 1` (depending on the value of unconditional_one_bit_incref; see
- * runtime/base/countable.h). This means that any object that is ever IncRefed
- * will stick at m_count == 1 until the GC collects it or the end of the
- * request. This also causes spurious COW operations on ararys, and means
- * Object destructors aren't supported.
- *
- * None of this matters to the vast majority of runtime and JIT code. The
- * interpreter and HHIR programs should still use balanced IncRef and DecRef
- * operations as usual, regardless of the build mode. All differences in how
- * reference counts are manipulated are isolated to member functions of
- * Countable/MaybeCountable and the HHIR -> vasm lowering code for the IncRef
- * and DecRef HHIR instructions.
  */
 enum RefCount : int32_t {
   OneReference   = 1,
@@ -114,12 +92,12 @@ enum RefCount : int32_t {
   // something above RefCountMaxRealistic to trip asserts.
   MultiReference = 0x40000000,
 
-  // In one_bit_refcount builds, uncountedIncRef will count upwards
-  // from UncountedValue to -1, so it needs to be above StaticValue;
-  // in regular builds, its going to count downwards towards
-  // INT_MIN, so needs to be below StaticValue.
+  // Uncounted refcounts count down from UncountedValue to INT_MIN. A count
+  // of UncountedZero is not a valid count - it indicates we must release the
+  // memory of the uncounted object.
   UncountedValue = -128,
-  StaticValue    = -127,
+  UncountedZero  = -127,
+  StaticValue    = -126,
 
   RefCountMaxRealistic = (1 << 30) - 1,
 };

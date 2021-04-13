@@ -223,17 +223,16 @@ struct APCTypedValue {
   static APCHandle::Pair HandlePersistent(StaticKey skey,
                                           UncountedKey ukey,
                                           XData *data) {
-    if (!data->isRefCounted()) {
-      if (data->isStatic()) {
-        auto const value = new APCTypedValue(skey, data);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-      if (data->uncountedIncRef()) {
-        auto const value = new APCTypedValue(ukey, data);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
+    if (data->isRefCounted()) {
+      return {nullptr, 0};
     }
-    return {nullptr, 0};
+    if (data->isStatic()) {
+      auto const value = new APCTypedValue(skey, data);
+      return {value->getHandle(), sizeof(APCTypedValue)};
+    }
+    data->uncountedIncRef();
+    auto const value = new APCTypedValue(ukey, data);
+    return {value->getHandle(), sizeof(APCTypedValue)};
   }
 
 private:

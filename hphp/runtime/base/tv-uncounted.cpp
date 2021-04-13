@@ -32,13 +32,6 @@ namespace HPHP {
 void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
   auto& data = source.val();
   auto& type = source.type();
-  auto const handlePersistent = [&] (MaybeCountable* elm) {
-    if (elm->isRefCounted()) return false;
-    if (elm->isStatic()) return true;
-    if (elm->uncountedIncRef()) return true;
-    if (seen) seen->emplace(elm, nullptr);
-    return false;
-  };
 
   // `source' won't be Object or Resource, as these should never appear in an
   // uncounted array.  Thus we only need to deal with strings/arrays.
@@ -59,7 +52,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
       // Fall-through.
     case KindOfPersistentString: {
       auto& str = data.pstr;
-      if (handlePersistent(str)) break;
+      if (str->persistentIncRef()) break;
       if (str->empty()) str = staticEmptyString();
       else if (auto const st = lookupStaticString(str)) str = st;
       else {
@@ -67,10 +60,9 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
         if (seen && str->hasMultipleRefs()) {
           seenStr = &(*seen)[str];
           if (auto const st = static_cast<StringData*>(*seenStr)) {
-            if (st->uncountedIncRef()) {
-              str = st;
-              break;
-            }
+            st->uncountedIncRef();
+            str = st;
+            break;
           }
         }
         str = StringData::MakeUncounted(str->slice());
@@ -84,7 +76,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
     case KindOfPersistentVec: {
       auto& ad = data.parr;
       assertx(ad->isVecType());
-      if (handlePersistent(ad)) break;
+      if (ad->persistentIncRef()) break;
       if (ad->empty()) {
         ad = ArrayData::CreateVec(ad->isLegacyArray());
       } else if (ad->isVanilla()) {
@@ -101,7 +93,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
     case KindOfPersistentDict: {
       auto& ad = data.parr;
       assertx(ad->isDictType());
-      if (handlePersistent(ad)) break;
+      if (ad->persistentIncRef()) break;
       if (ad->empty()) {
         ad = ArrayData::CreateDict(ad->isLegacyArray());
       } else if (ad->isVanilla()) {
@@ -118,7 +110,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
     case KindOfPersistentKeyset: {
       auto& ad = data.parr;
       assertx(ad->isKeysetType());
-      if (handlePersistent(ad)) break;
+      if (ad->persistentIncRef()) break;
       if (ad->empty()) {
         ad = ArrayData::CreateKeyset();
       } else if (ad->isVanilla()) {
@@ -142,7 +134,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
       tvCastToVecInPlace(source);
       type = KindOfPersistentVec;
       auto& ad = data.parr;
-      if (handlePersistent(ad)) break;
+      if (ad->persistentIncRef()) break;
       assertx(!ad->empty());
       assertx(ad->isVanillaVec());
       ad = PackedArray::MakeUncounted(ad, false, seen);
@@ -165,27 +157,26 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
   }
 }
 
-void ReleaseUncountedTv(tv_lval lval) {
-  if (isStringType(type(lval))) {
-    auto const str = val(lval).pstr;
-    assertx(!str->isRefCounted());
-    if (str->isUncounted()) {
-      StringData::ReleaseUncounted(str);
-    }
-    return;
+void DecRefUncounted(TypedValue tv) {
+  if (tvIsString(tv)) return DecRefUncountedString(val(tv).pstr);
+  if (tvIsArrayLike(tv)) return DecRefUncountedArray(val(tv).parr);
+  assertx(!isRefcountedType(type(tv)));
+}
+
+void DecRefUncountedArray(ArrayData* ad) {
+  assertx(!ad->isRefCounted());
+  if (ad->isUncounted() && ad->uncountedDecRef()) {
+    ad->uncountedFixCountForRelease();
+    ad->releaseUncounted();
   }
-  if (isArrayLikeType(type(lval))) {
-    auto const arr = val(lval).parr;
-    assertx(!arr->isRefCounted());
-    if (!arr->isStatic()) {
-      if (arr->isVanillaVec()) PackedArray::ReleaseUncounted(arr);
-      else if (arr->isVanillaDict()) MixedArray::ReleaseUncounted(arr);
-      else if (arr->isVanillaKeyset()) SetArray::ReleaseUncounted(arr);
-      else BespokeArray::ReleaseUncounted(arr);
-    }
-    return;
+}
+
+void DecRefUncountedString(StringData* sd) {
+  assertx(!sd->isRefCounted());
+  if (sd->isUncounted() && sd->uncountedDecRef()) {
+    sd->uncountedFixCountForRelease();
+    StringData::ReleaseUncounted(sd);
   }
-  assertx(!isRefcountedType(type(lval)));
 }
 
 //////////////////////////////////////////////////////////////////////////////

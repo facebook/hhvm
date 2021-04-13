@@ -111,7 +111,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
 }
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {
-  if (!ad->uncountedDecRef()) return;
+  assertx(!ad->uncountedCowCheck());
   auto const byte = getLayoutByte(ad);
   g_layout_funcs.fnReleaseUncounted[byte](ad);
   if (APCStats::IsCreated()) {

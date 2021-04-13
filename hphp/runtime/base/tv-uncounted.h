@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
@@ -29,8 +30,12 @@ namespace HPHP {
 // value will never hold references to refcounted values.
 void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen);
 
-// The analogue of decRefAndRelease for an uncounted value.
-void ReleaseUncountedTv(tv_lval lval);
+// The analogue of decRefAndRelease for an uncounted value. These helpers all
+// handle both static and uncounted values correctly. It's safe to call them
+// on any key or value of an uncounted array.
+void DecRefUncounted(TypedValue tv);
+void DecRefUncountedArray(ArrayData* ad);
+void DecRefUncountedString(StringData* sd);
 
 //////////////////////////////////////////////////////////////////////////////
 

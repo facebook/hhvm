@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hash.h"
@@ -146,9 +147,8 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
     auto it = seen->find(array);
     assertx(it != seen->end());
     if (auto const arr = static_cast<ArrayData*>(it->second)) {
-      if (arr->uncountedIncRef()) {
-        return arr;
-      }
+      arr->uncountedIncRef();
+      return arr;
     }
   }
   auto src = asSet(array);
@@ -175,23 +175,21 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
       StringData*& skey = elm.tv.m_data.pstr;
-
-      if (!skey->isStatic() &&
-          (!skey->isUncounted() || !skey->uncountedIncRef())) {
-        skey = [&] {
-          if (auto const st = lookupStaticString(skey)) return st;
-          HeapObject** seenStr = nullptr;
-          if (seen && skey->hasMultipleRefs()) {
-            seenStr = &(*seen)[skey];
-            if (auto const st = static_cast<StringData*>(*seenStr)) {
-              if (st->uncountedIncRef()) return st;
-            }
+      if (skey->persistentIncRef()) continue;
+      skey = [&] {
+        if (auto const st = lookupStaticString(skey)) return st;
+        HeapObject** seenStr = nullptr;
+        if (seen && skey->hasMultipleRefs()) {
+          seenStr = &(*seen)[skey];
+          if (auto const st = static_cast<StringData*>(*seenStr)) {
+            st->uncountedIncRef();
+            return st;
           }
-          auto const st = StringData::MakeUncounted(skey->slice());
-          if (seenStr) *seenStr = st;
-          return st;
-        }();
-      }
+        }
+        auto const st = StringData::MakeUncounted(skey->slice());
+        if (seenStr) *seenStr = st;
+        return st;
+      }();
     }
   }
 
@@ -293,8 +291,7 @@ void SetArray::Release(ArrayData* in) {
 }
 
 void SetArray::ReleaseUncounted(ArrayData* in) {
-  assertx(in->isUncounted());
-  if (!in->uncountedDecRef()) return;
+  assertx(!in->uncountedCowCheck());
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {
@@ -304,13 +301,7 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       assertx(!elm.isEmpty());
-      if (elm.hasStrKey()) {
-        auto const skey = elm.strKey();
-        assertx(!skey->isRefCounted());
-        if (skey->isUncounted()) {
-          StringData::ReleaseUncounted(skey);
-        }
-      }
+      if (elm.hasStrKey()) DecRefUncountedString(elm.strKey());
     }
   }
   if (APCStats::IsCreated()) {

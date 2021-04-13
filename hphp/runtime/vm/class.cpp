@@ -2313,6 +2313,11 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
     // in declInterfaces
     if (isFromInterface) { return; }
 
+    // Type and Context constants in interfaces can be overriden.
+    if (tConst.kind() == ConstModifiers::Kind::Type ||
+        tConst.kind() == ConstModifiers::Kind::Context)  {
+      return;
+    }
     if (existingConst.cls != tConst.cls) {
 
       // Constants in traits conflict with constants in declared interfaces

@@ -1541,8 +1541,11 @@ bool build_class_constants(BuildClsInfo& info,
       // A constant from a declared interface collides with a constant
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
-      // declared interfaces will silently lose and not conflict in the runtime
-      if (existing->cls->attrs & AttrInterface &&
+      // declared interfaces will silently lose and not conflict in the runtime.
+      // Type and Context constants can be overriden.
+      if (c.kind != ConstModifiers::Kind::Type &&
+          c.kind != ConstModifiers::Kind::Context &&
+          existing->cls->attrs & AttrInterface &&
         !(c.cls->attrs & AttrInterface && fromTrait)) {
         for (auto const& interface : info.rleaf->declInterfaces) {
           if (existing->cls == interface->cls) {

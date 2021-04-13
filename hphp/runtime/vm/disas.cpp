@@ -671,7 +671,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
     not_reached();
   }();
   if (cns->isAbstract()) {
-    out.fmtln(".const {}{};", cns->name(), kind);
+    out.fmtln(".const {}{} isAbstract;", cns->name(), kind);
     return;
   }
   out.fmtln(".const {}{} = {};", cns->name(), kind,

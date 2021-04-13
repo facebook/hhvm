@@ -1,1 +1,0 @@
-Fatal error: C cannot inherit the type constant T, because it was previously inherited from I in %s/type_constant3.php on line 11

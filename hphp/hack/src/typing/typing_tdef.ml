@@ -29,7 +29,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   match Typing_defs.has_expanded ety_env x with
   | Some report ->
     (* Only report a cycle if it's through the specified definition *)
-    if report then Errors.cyclic_typedef td_pos pos;
+    if report then
+      Errors.cyclic_typedef (Pos_or_decl.unsafe_to_raw_pos td_pos) pos;
     (env, (ety_env, MakeType.err r))
   | None ->
     let should_expand =
@@ -37,7 +38,9 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
       ||
       match td_vis with
       | Aast.Opaque ->
-        Relative_path.equal (Pos.filename td_pos) (Env.get_file env)
+        Relative_path.equal
+          (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
+          (Env.get_file env)
       | Aast.Transparent -> true
     in
     let ety_env =

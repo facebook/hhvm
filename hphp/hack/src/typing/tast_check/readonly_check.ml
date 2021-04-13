@@ -21,7 +21,7 @@ type rty =
 type ctx = {
   lenv: rty SMap.t;
   (* whether the method/function returns readonly, and a Pos.t for error messages *)
-  ret_ty: (rty * Pos.t) option;
+  ret_ty: (rty * Pos_or_decl.t) option;
   (* Whether $this is readonly and a Pos.t for error messages *)
   this_ty: (rty * Pos.t) option;
 }
@@ -283,7 +283,10 @@ let check =
             "Invalid property assignment"
             (Tast.get_position lval)
             ~reason_sub:
-              [(Tast.get_position rval, "This expression is readonly")]
+              [
+                ( Tast.get_position rval |> Pos_or_decl.of_raw_pos,
+                  "This expression is readonly" );
+              ]
             ~reason_super:
               [
                 ( Lazy.force elt.Typing_defs.ce_pos,
@@ -303,9 +306,15 @@ let check =
               "Invalid collection modification"
               (Tast.get_position lval)
               ~reason_sub:
-                [(Tast.get_position rval, "This expression is readonly")]
+                [
+                  ( Tast.get_position rval |> Pos_or_decl.of_raw_pos,
+                    "This expression is readonly" );
+                ]
               ~reason_super:
-                [(Tast.get_position array, "But this value is mutable")]
+                [
+                  ( Tast.get_position array |> Pos_or_decl.of_raw_pos,
+                    "But this value is mutable" );
+                ]
           | (Readonly, _) -> Errors.readonly_modified (Tast.get_position array)
           | (Mut, Mut) -> ()
         end
@@ -403,7 +412,7 @@ let check =
             (Tast.get_position arg)
             ~reason_sub:
               [
-                ( Tast.get_position arg,
+                ( Tast.get_position arg |> Pos_or_decl.of_raw_pos,
                   "This expression is " ^ rty_to_str arg_rty );
               ]
             ~reason_super:
@@ -566,7 +575,7 @@ let check =
       match ctx.ret_ty with
       (* If the ret pos is the same between both functions,
           then this is just a fun_def, so ctx is correct already. Don't need to do anything *)
-      | Some (_, outer_ret) when Pos.equal outer_ret ret_pos ->
+      | Some (_, outer_ret) when Pos_or_decl.equal outer_ret ret_pos ->
         super#on_fun_ env f
       | _ ->
         (* Keep the old context for use later *)
@@ -774,7 +783,11 @@ let check =
           Errors.readonly_mismatch
             "Invalid return"
             (Tast.get_position e)
-            ~reason_sub:[(Tast.get_position e, "This expression is readonly")]
+            ~reason_sub:
+              [
+                ( Tast.get_position e |> Pos_or_decl.of_raw_pos,
+                  "This expression is readonly" );
+              ]
             ~reason_super:[(pos, "But this function does not return readonly.")]
         (* If we don't have a ret ty we're not in a function, must have errored somewhere else *)
         | _ -> ())

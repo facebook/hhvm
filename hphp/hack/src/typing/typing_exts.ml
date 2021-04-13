@@ -56,7 +56,7 @@ let strip_dynamic t =
   | Tunion [t1; t2] when is_dynamic t2 -> t1
   | _ -> t
 
-let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
+let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     env * (locl_fun_params * locl_ty option) option =
   match get_node (strip_dynamic class_) with
   | Tclass ((_, className), _, []) ->
@@ -65,13 +65,12 @@ let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
       (Env.get_class env className >>= fun c -> Env.get_member true env c fname)
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
-      | (r, Tfun fty) ->
+      | (_, Tfun fty) ->
         let ety_env =
           Typing_phase.env_with_self env ~on_error:Errors.ignore_error
         in
         let instantiation =
-          Typing_phase.
-            { use_pos = Reason.to_pos r; use_name = fname; explicit_targs = [] }
+          Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
         in
         Some
           (Typing_phase.localize_ft
@@ -119,7 +118,7 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
           in
           { p with fp_type = { p.fp_type with et_type } })
     in
-    match lookup_magic_type env class_ fname with
+    match lookup_magic_type env pos class_ fname with
     | (env, Some (good_args, None)) ->
       let (env, xs) = read_text env (i + 1) in
       (env, add_reason good_args @ xs)

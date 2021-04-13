@@ -11,7 +11,7 @@ Illegal context: `\HH\Capabilities\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "syntax_elaboration.php", line 16, characters 43-55:
+File "syntax_elaboration.php", line 16, characters 42-56:
 Illegal context: `\HH\Contexts\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
@@ -21,8 +21,13 @@ Illegal context: `\HH\Capabilities\AccessStaticVariable`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "syntax_elaboration.php", line 31, characters 34-53:
+File "syntax_elaboration.php", line 31, characters 33-54:
 Illegal context: `\HH\Contexts\AccessStaticVariable`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "syntax_elaboration.php", line 37, characters 43-47:
+Illegal context: `int`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

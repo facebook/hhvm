@@ -78,7 +78,7 @@ end
 (* Return a map describing all the fields in this record, including
    inherited fields, and whether they have a default value. *)
 let all_record_fields (env : env) (rd : Decl_provider.record_def_decl) :
-    (Aast.sid * Typing_defs.record_field_req) SMap.t =
+    (Typing_defs.pos_id * Typing_defs.record_field_req) SMap.t =
   let record_fields rd =
     List.fold
       rd.rdt_fields

@@ -134,13 +134,9 @@ let make_locl_like_type env ty =
 
 let is_enforced env ~explicitly_untrusted ty =
   let enforceable = is_enforceable ~include_dynamic:false env ty in
-  let is_hhi =
-    get_pos ty
-    |> Pos.filename
-    |> Relative_path.prefix
-    |> Relative_path.(equal_prefix Hhi)
-  in
-  enforceable && (not is_hhi) && not explicitly_untrusted
+  enforceable
+  && (not @@ Pos_or_decl.is_hhi @@ get_pos ty)
+  && not explicitly_untrusted
 
 let pessimize_type env { et_type; et_enforced } =
   let is_fully_enforced e =

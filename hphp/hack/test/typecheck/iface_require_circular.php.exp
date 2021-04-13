@@ -1,6 +1,10 @@
-File "iface_require_circular.php", line 17, characters 41-43:
-Unable to satisfy trait/interface requirement (Typing[4110])
-File "iface_require_circular.php", line 12, characters 25-26:
-Expected `KK`
-File "iface_require_circular.php", line 17, characters 25-27:
-But got `Qux`
+File "iface_require_circular.php", line 17, characters 7-9:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_circular.php", line 17, characters 41-43:
+  This requires to extend or implement Super
+  File "iface_require_circular.php", line 12, characters 19-27:
+  Required here
+  File "iface_require_circular.php", line 12, characters 25-26:
+  Expected `KK`
+  File "iface_require_circular.php", line 17, characters 25-27:
+  But got `Qux`

@@ -17,8 +17,8 @@ Class `F` does not correctly implement all required members  (Typing[4340])
   File "BuiltinEnum.hhi", line 33, characters 32-40:
   It was declared as final
 File "typing.extends5.bad.php", line 25, characters 12-12:
-Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])
-File "typing.extends5.bad.php", line 25, characters 12-12:
 Enum classes can only extend other enum classes. (Typing[4115])
   File "typing.extends5.bad.php", line 25, characters 29-38:
   This is an enum.
+File "typing.extends5.bad.php", line 25, characters 29-38:
+Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])

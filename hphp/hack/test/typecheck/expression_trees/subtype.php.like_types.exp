@@ -1,4 +1,6 @@
 File "subtype.php", line 26, characters 13-19:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "subtype.php", line 26, characters 13-19:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "subtype.php", line 15, characters 34-72:
   But got `dynamic` because it is an unenforceable type

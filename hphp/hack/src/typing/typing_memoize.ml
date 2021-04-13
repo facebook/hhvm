@@ -22,105 +22,111 @@ let check_param : env -> Nast.fun_param -> unit =
     let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
     Errors.invalid_memoized_param param_pos msgl
   in
-  let rec check_memoizable : env -> locl_ty -> unit =
-   fun env ty ->
-    let (env, ty) = Env.expand_type env ty in
-    let ety_env =
-      Typing_phase.env_with_self env ~on_error:Errors.ignore_error
-    in
-    let (env, ty, _) = Typing_tdef.force_expand_typedef ~ety_env env ty in
-    match get_node ty with
-    | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
-    | Tnonnull
-    | Tany _
-    | Terr
-    | Tdynamic ->
-      ()
-    | Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
-    | Toption ty -> check_memoizable env ty
-    | Ttuple tyl -> List.iter tyl (check_memoizable env)
-    (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
-    | Tgeneric _ ->
-      (* FIXME fun fact:
+  let check_memoizable env pos ty =
+    let rec check_memoizable : env -> locl_ty -> unit =
+     fun env ty ->
+      let (env, ty) = Env.expand_type env ty in
+      let ety_env =
+        Typing_phase.env_with_self env ~on_error:Errors.ignore_error
+      in
+      let (env, ty, _) = Typing_tdef.force_expand_typedef ~ety_env env ty in
+      match get_node ty with
+      | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
+      | Tnonnull
+      | Tany _
+      | Terr
+      | Tdynamic ->
+        ()
+      | Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
+      | Toption ty -> check_memoizable env ty
+      | Ttuple tyl -> List.iter tyl (check_memoizable env)
+      (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
+      | Tgeneric _ ->
+        (* FIXME fun fact:
         the comment above about "stricter check_memoizables to come later" was added in revision
         in August 2015 *)
-      ()
-    (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
-     * Bar recursively. Also enums represented using AKnewtype.
-     *)
-    | Tnewtype (_, _, ty)
-    | Tdependent (_, ty) ->
-      check_memoizable env ty
-    (* Handling Tunion and Tintersection case here for completeness, even though it
-     * shouldn't be possible to have an unresolved type when check_memoizableing
-     * the method declaration. No corresponding test case for this.
-     *)
-    | Tunion tyl
-    | Tintersection tyl ->
-      List.iter tyl (check_memoizable env)
-    | Tvarray ty
-    | Tdarray (_, ty)
-    | Tvec_or_dict (_, ty)
-    | Tvarray_or_darray (_, ty) ->
-      check_memoizable env ty
-    | Tshape (_, fdm) ->
-      TShapeMap.iter
-        begin
-          fun _ { sft_ty; _ } ->
-          check_memoizable env sft_ty
-        end
-        fdm
-    | Tclass _ ->
-      let p = get_pos ty in
-      let env = Env.open_tyvars env p in
-      let (env, type_param) = Env.fresh_type env p in
-      let container_type = MakeType.container Reason.none type_param in
-      let (env, props) =
-        SubType.simplify_subtype_i
-          env
-          (LoclType ty)
-          (LoclType container_type)
-          Errors.unify_error
-      in
-      let (env, prop) = SubType.prop_to_env env props Errors.unify_error in
-      let is_container = Typing_logic.is_valid prop in
-      let env = Env.set_tyvar_variance env container_type in
-      let env = Typing_solver.close_tyvars_and_solve env in
-      if is_container then
-        check_memoizable env type_param
-      else
-        let (env, (tfty, _tal)) =
-          Typing_object_get.obj_get
-            ~obj_pos:param_pos
-            ~is_method:true
-            ~inst_meth:false
-            ~nullsafe:None
-            ~coerce_from_ty:None
-            ~explicit_targs:[]
-            ~class_id:
-              (CIexpr
-                 (param_pos, Lvar (param_pos, Local_id.make_unscoped param_name)))
-            ~member_id:(p, SN.Members.mGetInstanceKey)
-            ~on_error:(fun ?code:_ _ _ -> error ty)
+        ()
+      (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
+       * Bar recursively. Also enums represented using AKnewtype.
+       *)
+      | Tnewtype (_, _, ty)
+      | Tdependent (_, ty) ->
+        check_memoizable env ty
+      (* Handling Tunion and Tintersection case here for completeness, even though it
+       * shouldn't be possible to have an unresolved type when check_memoizableing
+       * the method declaration. No corresponding test case for this.
+       *)
+      | Tunion tyl
+      | Tintersection tyl ->
+        List.iter tyl (check_memoizable env)
+      | Tvarray ty
+      | Tdarray (_, ty)
+      | Tvec_or_dict (_, ty)
+      | Tvarray_or_darray (_, ty) ->
+        check_memoizable env ty
+      | Tshape (_, fdm) ->
+        TShapeMap.iter
+          begin
+            fun _ { sft_ty; _ } ->
+            check_memoizable env sft_ty
+          end
+          fdm
+      | Tclass _ ->
+        let env = Env.open_tyvars env pos in
+        let (env, type_param) = Env.fresh_type env pos in
+        let container_type = MakeType.container Reason.none type_param in
+        let (env, props) =
+          SubType.simplify_subtype_i
             env
-            ty
+            (LoclType ty)
+            (LoclType container_type)
+            (Errors.unify_error_at pos)
         in
-        ignore (Typing.call ~expected:None p env tfty [] None)
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Taccess _ -> ()
-    | Tfun _
-    | Tvar _
-    | Tobject ->
-      error ty
+        let (env, prop) =
+          SubType.prop_to_env env props (Errors.unify_error_at pos)
+        in
+        let is_container = Typing_logic.is_valid prop in
+        let env = Env.set_tyvar_variance env container_type in
+        let env = Typing_solver.close_tyvars_and_solve env in
+        if is_container then
+          check_memoizable env type_param
+        else
+          let (env, (tfty, _tal)) =
+            Typing_object_get.obj_get
+              ~obj_pos:param_pos
+              ~is_method:true
+              ~inst_meth:false
+              ~nullsafe:None
+              ~coerce_from_ty:None
+              ~explicit_targs:[]
+              ~class_id:
+                (CIexpr
+                   ( param_pos,
+                     Lvar (param_pos, Local_id.make_unscoped param_name) ))
+              ~member_id:(pos, SN.Members.mGetInstanceKey)
+              ~on_error:(fun ?code:_ _ _ -> error ty)
+              env
+              ty
+          in
+          ignore (Typing.call ~expected:None pos env tfty [] None)
+      | Tunapplied_alias _ ->
+        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+      | Taccess _ -> ()
+      | Tfun _
+      | Tvar _
+      | Tobject ->
+        error ty
+    in
+    check_memoizable env ty
   in
   match hint_of_type_hint param_type_hint with
   | None -> ()
   | Some hint ->
+    let (hint_pos, _) = hint in
     let (env, ty) =
       Typing_phase.localize_hint_with_self env ~ignore_errors:true hint
     in
-    check_memoizable env ty
+    check_memoizable env hint_pos ty
 
 let check :
     env ->

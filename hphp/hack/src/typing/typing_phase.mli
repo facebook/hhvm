@@ -17,7 +17,7 @@ type method_instantiation = {
 val env_with_self :
   ?report_cycle:Pos.t * string ->
   env ->
-  on_error:Errors.typing_error_callback ->
+  on_error:Errors.error_from_reasons_callback ->
   expand_env
 
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
@@ -59,7 +59,7 @@ val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
 val localize_ft :
   ?instantiation:method_instantiation ->
   ety_env:expand_env ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   env ->
   decl_fun_type ->
   env * locl_fun_type
@@ -92,7 +92,7 @@ val localize_hint_with_self :
 val localize_targs :
   check_well_kinded:bool ->
   is_method:bool ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
   use_name:string ->
   ?check_explicit_targs:bool ->
@@ -105,7 +105,7 @@ val localize_targs :
 val localize_targs_with_kinds :
   check_well_kinded:bool ->
   is_method:bool ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
   use_name:string ->
   ?check_explicit_targs:bool ->
@@ -122,7 +122,7 @@ val localize_targ :
 val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
 
 val sub_type_decl :
-  env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> env
+  env -> decl_ty -> decl_ty -> Errors.error_from_reasons_callback -> env
 
 val check_tparams_constraints :
   use_pos:Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
@@ -131,7 +131,7 @@ val check_where_constraints :
   in_class:bool ->
   use_pos:Pos.t ->
   ety_env:expand_env ->
-  definition_pos:Pos.t ->
+  definition_pos:Pos_or_decl.t ->
   env ->
   decl_where_constraint list ->
   env
@@ -144,7 +144,7 @@ val localize_targs_and_check_constraints :
   exact:exact ->
   check_well_kinded:bool ->
   check_constraints:bool ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
   ?check_explicit_targs:bool ->
   env ->
@@ -156,7 +156,7 @@ val localize_targs_and_check_constraints :
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints *)
 val localize_and_add_generic_parameters :
-  Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
+  ety_env:expand_env -> env -> decl_tparam list -> env
 
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints.
@@ -164,7 +164,6 @@ val localize_and_add_generic_parameters :
     {!ignore_errors} silences errors because those errors may have already fired
     during another localization and/or are not appropriate at the time we call localize. *)
 val localize_and_add_ast_generic_parameters_and_where_constraints :
-  Pos.t ->
   env ->
   ignore_errors:bool ->
   (Pos.t, Nast.func_body_ann, unit, unit) Aast.tparam list ->

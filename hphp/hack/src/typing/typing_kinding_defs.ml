@@ -15,9 +15,9 @@ type kind = {
   parameters: named_kind list;
 }
 
-and named_kind = Aast.sid * kind
+and named_kind = pos_id * kind
 
-let dummy_name = (Pos.none, "")
+let dummy_name = (Pos_or_decl.none, "")
 
 let with_dummy_name k = (dummy_name, k)
 
@@ -77,7 +77,7 @@ module Simple = struct
 
   type kind = full_kind * bounds_for_wildcard
 
-  type named_kind = Aast.sid * kind
+  type named_kind = pos_id * kind
 
   (* let without_wildcard_bounds k = (k, None) *)
 

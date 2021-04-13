@@ -56,6 +56,29 @@ type format =
 type typing_error_callback =
   ?code:int -> Pos.t * string -> (Pos_or_decl.t * string) list -> unit
 
+type error_from_reasons_callback =
+  ?code:int -> (Pos_or_decl.t * string) list -> unit
+
+(** This will check that the first position of the given reasons is in the
+    current decl and if yes use it as primary error position. If no,
+    then no error is emitted.
+    This also sets the error code to the code for unification error
+    if none is provided. *)
+val unify_error_assert_primary_pos_in_current_decl :
+  current_decl:Decl_reference.t option ->
+  current_file:Relative_path.t ->
+  error_from_reasons_callback
+
+(** This will check that the first position of the given reasons is in the
+    current decl and if yes use it as primary error position. If no,
+    then no error is emitted.
+    This also sets the error code to the code for invalid type hint error
+    if none is provided. *)
+val invalid_type_hint_assert_primary_pos_in_current_decl :
+  current_decl:Decl_reference.t option ->
+  current_file:Relative_path.t ->
+  error_from_reasons_callback
+
 type name_context =
   | FunctionNamespace
   | ConstantNamespace
@@ -98,7 +121,7 @@ val is_hh_fixme : (Pos.t -> int -> bool) ref
 
 val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 
-val get_hh_fixme_pos : (Pos.t -> int -> Pos_or_decl.t option) ref
+val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 
 val to_list : ('p, 'p) error_ -> ('p * string) list
 
@@ -182,7 +205,7 @@ val merge : t -> t -> t
 
 val merge_into_current : t -> unit
 
-val apply_callback_to_errors : t -> typing_error_callback -> unit
+val apply_callback_to_errors : t -> error_from_reasons_callback -> unit
 
 val incremental_update_set :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
@@ -236,14 +259,18 @@ val experimental_feature : Pos.t -> string -> unit
 val fixme_format : Pos.t -> unit
 
 val missing_field :
-  Pos.t -> Pos_or_decl.t -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val violated_constraint :
-  Pos.t ->
+  Pos_or_decl.t ->
   Pos_or_decl.t * string ->
   (Pos_or_decl.t * string) list ->
   (Pos_or_decl.t * string) list ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
 val method_variance : Pos.t -> unit
@@ -252,7 +279,6 @@ val explain_constraint :
   use_pos:Pos.t ->
   definition_pos:Pos_or_decl.t ->
   param_name:string ->
-  Pos_or_decl.t * string ->
   (Pos_or_decl.t * string) list ->
   unit
 
@@ -260,15 +286,17 @@ val explain_where_constraint :
   in_class:bool ->
   use_pos:Pos.t ->
   definition_pos:Pos_or_decl.t ->
-  Pos_or_decl.t * string ->
   (Pos_or_decl.t * string) list ->
   unit
 
 val explain_tconst_where_constraint :
-  use_pos:Pos.t -> definition_pos:Pos.t -> (Pos_or_decl.t * string) list -> unit
+  use_pos:Pos.t ->
+  definition_pos:Pos_or_decl.t ->
+  (Pos_or_decl.t * string) list ->
+  unit
 
 val abstract_tconst_not_allowed :
-  Pos.t -> Pos_or_decl.t * string -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t * string -> error_from_reasons_callback -> unit
 
 val unexpected_arrow : Pos.t -> string -> unit
 
@@ -285,18 +313,22 @@ val mutating_const_property : Pos.t -> unit
 val self_const_parent_not : Pos.t -> unit
 
 val overriding_prop_const_mismatch :
-  Pos.t -> bool -> Pos_or_decl.t -> bool -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  bool ->
+  Pos_or_decl.t ->
+  bool ->
+  error_from_reasons_callback ->
+  unit
 
 val method_name_already_bound : Pos.t -> string -> unit
 
-val error_name_already_bound :
-  string -> string -> Pos.t -> Pos_or_decl.t -> unit
+val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 
 val unbound_name : Pos.t -> string -> name_context -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit
 
-val undefined : Pos.t -> string -> (string * Pos_or_decl.t) option -> unit
+val undefined : Pos.t -> string -> (string * Pos.t) option -> unit
 
 val this_reserved : Pos.t -> unit
 
@@ -304,7 +336,7 @@ val start_with_T : Pos.t -> unit
 
 val already_bound : Pos.t -> string -> unit
 
-val unexpected_typedef : Pos.t -> Pos_or_decl.t -> name_context -> unit
+val unexpected_typedef : Pos.t -> Pos.t -> name_context -> unit
 
 val fd_name_already_bound : Pos.t -> unit
 
@@ -362,7 +394,7 @@ val typaram_applied_to_type : Pos.t -> string -> unit
 
 val tparam_with_tparam : Pos.t -> string -> unit
 
-val shadowed_type_param : Pos.t -> Pos_or_decl.t -> string -> unit
+val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
 
 val missing_typehint : Pos.t -> unit
 
@@ -409,19 +441,30 @@ val new_abstract_record : Pos.t * string -> unit
 val abstract_const_usage : Pos.t -> Pos_or_decl.t -> string -> unit
 
 val concrete_const_interface_override :
-  Pos.t -> Pos_or_decl.t -> string -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val interface_const_multiple_defs :
-  Pos.t -> Pos.t -> string -> string -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val interface_typeconst_multiple_defs :
-  Pos.t ->
-  Pos.t ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
   string ->
   string ->
   string ->
   bool ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
 val const_without_typehint : Pos.t * string -> unit
@@ -461,7 +504,7 @@ val field_kinds : Pos.t -> Pos_or_decl.t -> unit
 
 val unbound_name_typing : Pos.t -> string -> unit
 
-val did_you_mean_naming : Pos.t -> string -> Pos_or_decl.t -> string -> unit
+val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
 
 val previous_default : Pos.t -> unit
 
@@ -471,20 +514,19 @@ val unexpected_type_arguments : Pos.t -> unit
 
 val too_many_type_arguments : Pos.t -> unit
 
-val return_in_void : Pos.t -> Pos_or_decl.t -> unit
+val return_in_void : Pos.t -> Pos.t -> unit
 
 val this_var_outside_class : Pos.t -> unit
 
 val unbound_global : Pos.t -> unit
 
-val private_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos_or_decl.t -> unit
+val private_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
-val protected_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos_or_decl.t -> unit
+val protected_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
-val private_class_meth : def_pos:Pos_or_decl.t -> use_pos:Pos_or_decl.t -> unit
+val private_class_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
-val protected_class_meth :
-  def_pos:Pos_or_decl.t -> use_pos:Pos_or_decl.t -> unit
+val protected_class_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val array_cast : Pos.t -> unit
 
@@ -516,13 +558,17 @@ val unset_nonidx_in_strict : Pos.t -> (Pos_or_decl.t * string) list -> unit
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 
 val invalid_destructure :
-  Pos.t -> Pos_or_decl.t -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val unpack_array_required_argument :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val unpack_array_variadic_argument :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val array_get_arity : Pos.t -> string -> Pos_or_decl.t -> unit
 
@@ -557,6 +603,18 @@ val smember_not_found :
   typing_error_callback ->
   unit
 
+val smember_not_found_ :
+  [< `class_constant | `class_variable | `static_method | `class_typeconst ] ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t * string ->
+  string ->
+  [< `closest of Pos_or_decl.t * string
+  | `did_you_mean of Pos_or_decl.t * string
+  | `no_hint
+  ] ->
+  error_from_reasons_callback ->
+  unit
+
 val member_not_found :
   [< `property | `method_ ] ->
   Pos.t ->
@@ -580,11 +638,25 @@ val constructor_no_args : Pos.t -> unit
 
 val visibility : Pos.t -> string -> Pos_or_decl.t -> string -> unit
 
-val typing_too_many_args :
-  int -> int -> Pos.t -> Pos_or_decl.t -> typing_error_callback option -> unit
+val typing_too_many_args : int -> int -> Pos.t -> Pos_or_decl.t -> unit
 
-val typing_too_few_args :
-  int -> int -> Pos.t -> Pos_or_decl.t -> typing_error_callback option -> unit
+val typing_too_many_args_w_callback :
+  int ->
+  int ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
+
+val typing_too_few_args : int -> int -> Pos.t -> Pos_or_decl.t -> unit
+
+val typing_too_few_args_w_callback :
+  int ->
+  int ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
 
 val bad_call : Pos.t -> string -> unit
 
@@ -604,22 +676,32 @@ val implement_abstract :
 val generic_static : Pos.t -> string -> unit
 
 val fun_too_many_args :
-  int -> int -> Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  int ->
+  int ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
 
 val fun_too_few_args :
-  int -> int -> Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  int ->
+  int ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
 
 val fun_unexpected_nonvariadic :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val fun_variadicity_hh_vs_php56 :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val expected_tparam :
   use_pos:Pos.t ->
   definition_pos:Pos_or_decl.t ->
   int ->
-  typing_error_callback option ->
+  error_from_reasons_callback option ->
   unit
 
 val object_string : Pos.t -> Pos_or_decl.t -> unit
@@ -629,40 +711,41 @@ val object_string_deprecated : Pos.t -> unit
 val cyclic_typedef : Pos.t -> Pos_or_decl.t -> unit
 
 val type_arity_mismatch :
-  Pos.t -> string -> Pos_or_decl.t -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  string ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val this_final :
-  Pos.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
+  Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
 
 val exact_class_final :
-  Pos.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
-
-val fun_arity_mismatch : Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
 
 val discarded_awaitable : Pos.t -> Pos_or_decl.t -> unit
 
 (** Ignore and drops the error. *)
-val ignore_error : typing_error_callback
+val ignore_error : error_from_reasons_callback
 
 val unify_error : typing_error_callback
 
-(** Error callback which leaves the error unchanged, unless no error code
-    is provided in which case this sets error code to the one for invalid
-    type hint error. *)
-val leave_unchanged_default_invalid_type_hint_code : typing_error_callback
+val unify_error_at : Pos.t -> error_from_reasons_callback
 
-val unify_error_at : Pos.t -> typing_error_callback
-
-val invalid_type_hint : Pos.t -> typing_error_callback
+val invalid_type_hint : Pos.t -> error_from_reasons_callback
 
 val index_type_mismatch : typing_error_callback
 
+val index_type_mismatch_at : Pos.t -> error_from_reasons_callback
+
 val expected_stringlike : typing_error_callback
 
-val type_constant_mismatch : typing_error_callback -> typing_error_callback
+val type_constant_mismatch :
+  error_from_reasons_callback -> error_from_reasons_callback
 
 val class_constant_type_mismatch :
-  typing_error_callback -> typing_error_callback
+  error_from_reasons_callback -> error_from_reasons_callback
 
 val constant_does_not_match_enum_type : typing_error_callback
 
@@ -696,7 +779,7 @@ val bitwise_math_invalid_argument : typing_error_callback
 
 val inc_dec_invalid_argument : typing_error_callback
 
-val using_error : Pos_or_decl.t -> bool -> typing_error_callback
+val using_error : Pos.t -> bool -> typing_error_callback
 
 val static_redeclared_as_dynamic :
   Pos.t -> Pos_or_decl.t -> string -> elt_type:[ `Method | `Property ] -> unit
@@ -737,6 +820,15 @@ val non_object_member_read :
   typing_error_callback ->
   unit
 
+val non_object_member_read_ :
+  kind:[< `property | `method_ | `class_typeconst ] ->
+  string ->
+  Pos_or_decl.t ->
+  string ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
+
 val non_object_member_write :
   kind:[< `property | `method_ | `class_typeconst ] ->
   string ->
@@ -744,6 +836,15 @@ val non_object_member_write :
   string ->
   Pos_or_decl.t ->
   typing_error_callback ->
+  unit
+
+val non_object_member_write_ :
+  kind:[< `property | `method_ | `class_typeconst ] ->
+  string ->
+  Pos_or_decl.t ->
+  string ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
   unit
 
 val unknown_object_member :
@@ -758,32 +859,42 @@ val option_mixed : Pos.t -> unit
 
 val option_null : Pos.t -> unit
 
-val declared_covariant :
-  Pos.t -> Pos_or_decl.t -> (Pos_or_decl.t * string) list -> unit
+val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 
-val declared_contravariant :
-  Pos.t -> Pos_or_decl.t -> (Pos_or_decl.t * string) list -> unit
+val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 
 val static_property_type_generic_param :
-  class_pos:Pos.t ->
+  class_pos:Pos_or_decl.t ->
   var_type_pos:Pos_or_decl.t ->
-  generic_pos:Pos_or_decl.t ->
+  generic_pos:Pos.t ->
   unit
 
 val contravariant_this : Pos.t -> string -> string -> unit
 
 val wrong_extend_kind :
-  parent_pos:Pos.t ->
+  parent_pos:Pos_or_decl.t ->
   parent_kind:Ast_defs.class_kind ->
   parent_name:string ->
   parent_is_enum_class:bool ->
-  child_pos:Pos_or_decl.t ->
+  child_pos:Pos.t ->
   child_kind:Ast_defs.class_kind ->
   child_name:string ->
   child_is_enum_class:bool ->
   unit
 
-val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
+val unsatisfied_req :
+  class_pos:Pos.t ->
+  trait_pos:Pos_or_decl.t ->
+  req_pos:Pos_or_decl.t ->
+  string ->
+  unit
+
+val unsatisfied_req_callback :
+  class_pos:Pos.t ->
+  trait_pos:Pos_or_decl.t ->
+  req_pos:Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback
 
 val cyclic_class_def : SSet.t -> Pos.t -> unit
 
@@ -792,7 +903,7 @@ val cyclic_record_def : string list -> Pos.t -> unit
 val trait_reuse_with_final_method :
   Pos.t -> string -> string -> (Pos_or_decl.t * string) list -> unit
 
-val trait_reuse : Pos.t -> string -> Pos_or_decl.t * string -> string -> unit
+val trait_reuse : Pos_or_decl.t -> string -> Pos.t * string -> string -> unit
 
 val trait_reuse_inside_class :
   Pos.t * string -> string -> Pos_or_decl.t list -> unit
@@ -802,27 +913,30 @@ val invalid_is_as_expression_hint :
 
 val invalid_enforceable_type :
   string ->
-  Pos.t * string ->
-  Pos_or_decl.t ->
+  Pos_or_decl.t * string ->
+  Pos.t ->
   (Pos_or_decl.t * string) list ->
   unit
 
 val reifiable_attr :
-  Pos.t -> string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list -> unit
+  Pos_or_decl.t -> string -> Pos.t -> (Pos_or_decl.t * string) list -> unit
 
-val invalid_newable_type_argument : Pos.t * string -> Pos_or_decl.t -> unit
+val invalid_newable_type_argument : Pos_or_decl.t * string -> Pos.t -> unit
 
 val invalid_newable_type_param_constraints :
   Pos.t * string -> string list -> unit
 
 val override_final :
-  parent:Pos.t -> child:Pos.t -> on_error:typing_error_callback option -> unit
+  parent:Pos_or_decl.t ->
+  child:Pos_or_decl.t ->
+  on_error:error_from_reasons_callback ->
+  unit
 
 val override_lsb :
   member_name:string ->
   parent:Pos_or_decl.t ->
-  child:Pos.t ->
-  typing_error_callback ->
+  child:Pos_or_decl.t ->
+  error_from_reasons_callback ->
   unit
 
 val should_be_override : Pos.t -> string -> string -> unit
@@ -888,41 +1002,46 @@ val interface_with_static_member_variable : Pos.t -> unit
 
 val illegal_function_name : Pos.t -> string -> unit
 
-val case_fallthrough : Pos.t -> Pos_or_decl.t -> unit
+val case_fallthrough : Pos.t -> Pos.t -> unit
 
 val default_fallthrough : Pos.t -> unit
 
 val visibility_extends :
-  string -> Pos.t -> Pos_or_decl.t -> string -> typing_error_callback -> unit
-
-val member_not_implemented :
-  string -> Pos.t -> Pos_or_decl.t -> Pos_or_decl.t -> unit
-
-val bad_decl_override :
-  Pos.t ->
   string ->
   Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
+
+val member_not_implemented :
+  string -> Pos_or_decl.t -> Pos.t -> Pos_or_decl.t -> unit
+
+val bad_decl_override :
+  Pos_or_decl.t ->
+  string ->
+  Pos.t ->
   string ->
   (Pos_or_decl.t * string) list ->
   unit
 
 val bad_method_override :
-  Pos.t ->
+  Pos_or_decl.t ->
   string ->
   (Pos_or_decl.t * string) list ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
 val bad_prop_override :
-  Pos.t ->
+  Pos_or_decl.t ->
   string ->
   (Pos_or_decl.t * string) list ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
 val bad_enum_decl : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
-val missing_constructor : Pos.t -> typing_error_callback -> unit
+val missing_constructor : Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val enum_constant_type_bad :
   Pos.t -> Pos_or_decl.t -> string -> Pos_or_decl.t list -> unit
@@ -931,7 +1050,7 @@ val enum_type_bad : Pos.t -> bool -> string -> Pos_or_decl.t list -> unit
 
 val enum_type_typedef_nonnull : Pos.t -> unit
 
-val enum_switch_redundant : string -> Pos.t -> Pos_or_decl.t -> unit
+val enum_switch_redundant : string -> Pos.t -> Pos.t -> unit
 
 val enum_switch_nonexhaustive : Pos.t -> string list -> Pos_or_decl.t -> unit
 
@@ -948,18 +1067,16 @@ val invalid_shape_field_name_empty : Pos.t -> unit
 val invalid_shape_field_type :
   Pos.t -> Pos_or_decl.t -> string -> Pos_or_decl.t list -> unit
 
-val invalid_shape_field_literal : Pos.t -> Pos_or_decl.t -> unit
+val invalid_shape_field_literal : Pos.t -> Pos.t -> unit
 
-val invalid_shape_field_const : Pos.t -> Pos_or_decl.t -> unit
+val invalid_shape_field_const : Pos.t -> Pos.t -> unit
 
-val shape_field_class_mismatch :
-  Pos.t -> Pos_or_decl.t -> string -> string -> unit
+val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
-val shape_field_type_mismatch :
-  Pos.t -> Pos_or_decl.t -> string -> string -> unit
+val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
 val shape_fields_unknown :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val invalid_shape_remove_key : Pos.t -> unit
 
@@ -997,12 +1114,11 @@ val not_abstract_without_typeconst : Pos.t * string -> unit
 
 val mk_not_abstract_without_typeconst : Pos.t * string -> error
 
-val typeconst_depends_on_external_tparam :
-  Pos.t -> Pos_or_decl.t -> string -> unit
+val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
 
 val invalid_type_access_root : Pos.t * string -> unit
 
-val duplicate_user_attribute : Pos.t * string -> Pos_or_decl.t -> unit
+val duplicate_user_attribute : Pos.t * string -> Pos.t -> unit
 
 val unbound_attribute_name : Pos.t -> string -> unit
 
@@ -1015,10 +1131,15 @@ val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> ?pos_def:Pos_or_decl.t option -> string -> unit
 
 val cannot_declare_constant :
-  [< `enum | `record ] -> Pos.t -> Pos_or_decl.t * string -> unit
+  [< `enum | `record ] -> Pos.t -> Pos.t * string -> unit
 
 val ambiguous_inheritance :
-  Pos.t -> string -> string -> error -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  error ->
+  error_from_reasons_callback ->
+  unit
 
 val duplicate_interface : Pos.t -> string -> Pos_or_decl.t list -> unit
 
@@ -1030,13 +1151,14 @@ val abstract_concrete_override :
   [< `method_ | `typeconst | `constant | `property ] ->
   unit
 
-val local_variable_modified_and_used : Pos.t -> Pos_or_decl.t list -> unit
+val local_variable_modified_and_used : Pos.t -> Pos.t list -> unit
 
-val local_variable_modified_twice : Pos.t -> Pos_or_decl.t list -> unit
+val local_variable_modified_twice : Pos.t -> Pos.t list -> unit
 
 val assign_during_case : Pos.t -> unit
 
-val cyclic_enum_constraint : Pos.t -> unit
+val cyclic_enum_constraint :
+  Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val invalid_classname : Pos.t -> unit
 
@@ -1073,7 +1195,11 @@ val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 val too_few_type_arguments : Pos.t -> unit
 
 val required_field_is_optional :
-  Pos.t -> Pos_or_decl.t -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val array_get_with_optional_field : Pos.t -> Pos_or_decl.t -> string -> unit
 
@@ -1090,7 +1216,7 @@ val list_rvalue : Pos.t -> unit
 val nullable_cast : Pos.t -> string -> Pos_or_decl.t -> unit
 
 val return_disposable_mismatch :
-  bool -> Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  bool -> Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val lvar_in_obj_get : Pos.t -> unit
 
@@ -1111,20 +1237,21 @@ val escaping_this : Pos.t -> unit
 val must_extend_disposable : Pos.t -> unit
 
 val accept_disposable_invariant :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val ifc_external_contravariant :
-  Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val inout_params_special : Pos.t -> unit
 
-val inout_params_memoize : Pos.t -> Pos_or_decl.t -> unit
+val inout_params_memoize : Pos.t -> Pos.t -> unit
 
 val inout_annotation_missing : Pos.t -> Pos_or_decl.t -> unit
 
 val inout_annotation_unexpected : Pos.t -> Pos_or_decl.t -> bool -> unit
 
-val inoutness_mismatch : Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+val inoutness_mismatch :
+  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val xhp_required : Pos.t -> string -> (Pos_or_decl.t * string) list -> unit
 
@@ -1151,10 +1278,10 @@ val wrong_expression_kind_attribute :
 
 val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 
-val decl_override_missing_hint : Pos.t -> typing_error_callback -> unit
+val decl_override_missing_hint :
+  Pos_or_decl.t -> error_from_reasons_callback -> unit
 
-val illegal_use_of_dynamically_callable :
-  Pos.t -> Pos_or_decl.t -> string -> unit
+val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
 
 val dynamically_callable_reified : Pos.t -> unit
 
@@ -1220,34 +1347,39 @@ val instance_property_in_abstract_final_class : Pos.t -> unit
 val lateinit_with_default : Pos.t -> unit
 
 val bad_lateinit_override :
-  bool -> Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  bool -> Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
 val bad_xhp_attr_required_override :
-  string -> string -> Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
+  string ->
+  string ->
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  error_from_reasons_callback ->
+  unit
 
 val interface_use_trait : Pos.t -> unit
 
 val nonstatic_method_in_abstract_final_class : Pos.t -> unit
 
 val multiple_concrete_defs :
-  Pos.t ->
+  Pos_or_decl.t ->
   Pos_or_decl.t ->
   string ->
   string ->
   string ->
   string ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
-val require_args_reify : Pos.t -> Pos_or_decl.t -> unit
+val require_args_reify : Pos_or_decl.t -> Pos.t -> unit
 
-val require_generic_explicit : Pos.t * string -> Pos.t -> unit
+val require_generic_explicit : Pos_or_decl.t * string -> Pos.t -> unit
 
 val invalid_reified_argument :
-  Pos.t * string -> Pos.t -> (Pos_or_decl.t * string) list -> unit
+  Pos_or_decl.t * string -> Pos.t -> (Pos_or_decl.t * string) list -> unit
 
 val invalid_reified_argument_reifiable :
-  Pos.t * string -> Pos.t -> Pos_or_decl.t -> string -> unit
+  Pos_or_decl.t * string -> Pos.t -> Pos_or_decl.t -> string -> unit
 
 val new_class_reified : Pos.t -> string -> string option -> unit
 
@@ -1285,7 +1417,7 @@ val invalid_sub_string : Pos.t -> string -> unit
 
 val php_lambda_disallowed : Pos.t -> unit
 
-val static_meth_with_class_reified_generic : Pos.t -> Pos_or_decl.t -> unit
+val static_meth_with_class_reified_generic : Pos.t -> Pos.t -> unit
 
 val exception_occurred : Pos.t -> Exception.t -> unit
 
@@ -1301,15 +1433,15 @@ val tparam_non_shadowing_reuse : Pos.t -> string -> unit
 val illegal_information_flow :
   Pos.t ->
   Pos_or_decl.t list ->
-  Pos.t list * string ->
-  Pos.t list * string ->
+  Pos_or_decl.t list * string ->
+  Pos_or_decl.t list * string ->
   unit
 
 val context_implicit_policy_leakage :
   Pos.t ->
   Pos_or_decl.t list ->
-  Pos.t list * string ->
-  Pos.t list * string ->
+  Pos_or_decl.t list * string ->
+  Pos_or_decl.t list * string ->
   unit
 
 val unknown_information_flow : Pos.t -> string -> unit
@@ -1324,11 +1456,11 @@ val higher_kinded_partial_application : Pos.t -> int -> unit
 val wildcard_for_higher_kinded_type : Pos.t -> unit
 
 val implicit_type_argument_for_higher_kinded_type :
-  use_pos:Pos.t -> def_pos:Pos.t -> string -> unit
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string -> unit
 
 val kind_mismatch :
   use_pos:Pos.t ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   tparam_name:string ->
   expected_kind_repr:string ->
   actual_kind_repr:string ->
@@ -1338,8 +1470,8 @@ val class_with_constraints_used_as_hk_type : Pos.t -> string -> unit
 
 val alias_with_implicit_constraints_as_hk_type :
   use_pos:Pos.t ->
-  typedef_pos:Pos.t ->
-  used_class_in_def_pos:Pos.t ->
+  typedef_pos:Pos_or_decl.t ->
+  used_class_in_def_pos:Pos_or_decl.t ->
   typedef_name:string ->
   typedef_tparam_name:string ->
   used_class_in_def_name:string ->
@@ -1347,10 +1479,10 @@ val alias_with_implicit_constraints_as_hk_type :
   unit
 
 val reinheriting_classish_const :
-  Pos.t -> string -> Pos_or_decl.t -> string -> string -> string -> unit
+  Pos.t -> string -> Pos.t -> string -> string -> string -> unit
 
 val redeclaring_classish_const :
-  Pos.t -> string -> Pos_or_decl.t -> string -> string -> unit
+  Pos.t -> string -> Pos.t -> string -> string -> unit
 
 val incompatible_enum_inclusion_base : Pos.t -> string -> string -> unit
 
@@ -1360,10 +1492,10 @@ val enum_inclusion_not_enum : Pos.t -> string -> string -> unit
 
 val call_coeffect_error :
   available_incl_unsafe:string ->
-  available_pos:Pos.t ->
+  available_pos:Pos_or_decl.t ->
   required:string ->
-  required_pos:Pos.t ->
-  Pos_or_decl.t ->
+  required_pos:Pos_or_decl.t ->
+  Pos.t ->
   unit
 
 val coeffect_subtyping_error :
@@ -1371,16 +1503,16 @@ val coeffect_subtyping_error :
   string ->
   Pos_or_decl.t ->
   string ->
-  typing_error_callback ->
+  error_from_reasons_callback ->
   unit
 
 val op_coeffect_error :
   locally_available:string ->
-  available_pos:Pos.t ->
+  available_pos:Pos_or_decl.t ->
   err_code:int ->
   required:string ->
   string ->
-  Pos_or_decl.t ->
+  Pos.t ->
   unit
 
 val illegal_context : Pos.t -> string -> unit
@@ -1413,8 +1545,8 @@ val multiple_inherited_class_member_with_different_case :
   class2:string ->
   child_class:string ->
   child_p:Pos.t ->
-  p1:Pos.t ->
-  p2:Pos.t ->
+  p1:Pos_or_decl.t ->
+  p2:Pos_or_decl.t ->
   unit
 
 val atom_invalid_parameter : Pos.t -> unit
@@ -1432,7 +1564,12 @@ val atom_invalid_argument : Pos.t -> unit
 val ifc_internal_error : Pos.t -> string -> unit
 
 val ifc_policy_mismatch :
-  Pos.t -> Pos_or_decl.t -> string -> string -> typing_error_callback -> unit
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  error_from_reasons_callback ->
+  unit
 
 val parent_implements_dynamic :
   Pos.t ->
@@ -1446,21 +1583,21 @@ val method_is_not_dynamically_callable :
   string ->
   string ->
   bool ->
-  (Pos.t * string) option ->
+  (Pos_or_decl.t * string) option ->
   error option ->
   unit
 
 val property_is_not_enforceable :
-  Pos.t -> string -> string -> Pos.t * string -> unit
+  Pos.t -> string -> string -> Pos_or_decl.t * string -> unit
 
 val property_is_not_dynamic :
-  Pos.t -> string -> string -> Pos.t * string -> unit
+  Pos.t -> string -> string -> Pos_or_decl.t * string -> unit
 
 val private_property_is_not_enforceable :
-  Pos.t -> string -> string -> Pos.t * string -> unit
+  Pos.t -> string -> string -> Pos_or_decl.t * string -> unit
 
 val private_property_is_not_dynamic :
-  Pos.t -> string -> string -> Pos.t * string -> unit
+  Pos.t -> string -> string -> Pos_or_decl.t * string -> unit
 
 val immutable_local : Pos.t -> unit
 
@@ -1472,28 +1609,29 @@ val consider_meth_caller : Pos.t -> string -> string -> unit
 
 val enum_supertyping_reserved_syntax : Pos.t -> unit
 
-val readonly_modified : ?reason:Pos.t * string -> Pos.t -> unit
+val readonly_modified : ?reason:Pos_or_decl.t * string -> Pos.t -> unit
 
 val readonly_mismatch :
   string ->
   Pos.t ->
-  reason_sub:(Pos.t * string) list ->
-  reason_super:(Pos.t * string) list ->
+  reason_sub:(Pos_or_decl.t * string) list ->
+  reason_super:(Pos_or_decl.t * string) list ->
   unit
 
 val readonly_mismatch_on_error :
   string ->
-  Pos.t ->
-  reason_sub:(Pos.t * string) list ->
-  reason_super:(Pos.t * string) list ->
-  typing_error_callback ->
+  Pos_or_decl.t ->
+  reason_sub:(Pos_or_decl.t * string) list ->
+  reason_super:(Pos_or_decl.t * string) list ->
+  error_from_reasons_callback ->
   unit
 
-val explicit_readonly_cast : string -> Pos.t -> Pos.t -> unit
+val explicit_readonly_cast : string -> Pos.t -> Pos_or_decl.t -> unit
 
-val readonly_method_call : Pos.t -> Pos.t -> unit
+val readonly_method_call : Pos.t -> Pos_or_decl.t -> unit
 
-val invalid_meth_caller_calling_convention : Pos.t -> Pos.t -> string -> unit
+val invalid_meth_caller_calling_convention :
+  Pos.t -> Pos_or_decl.t -> string -> unit
 
 val unsafe_cast : Pos.t -> unit
 
@@ -1511,4 +1649,4 @@ val returns_with_and_without_value :
 
 val cyclic_class_constant : Pos.t -> string -> string -> unit
 
-val readonly_closure_call : Pos.t -> Pos.t -> string -> unit
+val readonly_closure_call : Pos.t -> Pos_or_decl.t -> string -> unit

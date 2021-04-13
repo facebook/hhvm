@@ -41,13 +41,11 @@ let strip_awaitable fun_kind env et =
       { et with et_type = mk (Reason.Rnone, TUtils.tany env) }
     | _ -> et
 
-let enforce_return_not_disposable fun_kind env et =
+let enforce_return_not_disposable ret_pos fun_kind env et =
   let stripped_et = strip_awaitable fun_kind env et in
   match Typing_disposable.is_disposable_type env stripped_et.et_type with
   | Some class_name ->
-    Errors.invalid_disposable_return_hint
-      (get_pos et.et_type)
-      (Utils.strip_ns class_name)
+    Errors.invalid_disposable_return_hint ret_pos (Utils.strip_ns class_name)
   | None -> ()
 
 let has_attribute attr l =
@@ -56,7 +54,7 @@ let has_attribute attr l =
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
 
-let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
+let make_info ret_pos fun_kind attributes env ~is_explicit locl_ty decl_ty =
   let return_disposable = has_return_disposable_attribute attributes in
   let et_enforced =
     match decl_ty with
@@ -67,7 +65,7 @@ let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
   in
   let return_type = { et_type = locl_ty; et_enforced } in
   if not return_disposable then
-    enforce_return_not_disposable fun_kind env return_type;
+    enforce_return_not_disposable ret_pos fun_kind env return_type;
   {
     return_type;
     return_disposable;
@@ -84,7 +82,7 @@ let wrap_awaitable env p rty =
   | Ast_defs.FAsyncGenerator ->
     TUtils.terr env Reason.Rnone
   | Ast_defs.FAsync ->
-    MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
+    MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync)) rty
 
 let make_return_type localize env (ty : decl_ty) =
   match (Env.get_fn_kind env, deref ty) with
@@ -103,6 +101,8 @@ let make_return_type localize env (ty : decl_ty) =
       | _ -> localize env ty
     end
   | _ -> localize env ty
+
+let wrap_awaitable env p = wrap_awaitable env (Pos_or_decl.of_raw_pos p)
 
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in

@@ -1,9 +1,13 @@
 File "splice_state2.php", line 21, characters 7-26:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "splice_state2.php", line 21, characters 7-26:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_state2.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type
 File "splice_state2.php", line 23, characters 7-24:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "splice_state2.php", line 23, characters 7-24:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_state2.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type
 File "splice_state2.php", line 23, characters 14-22:
@@ -16,6 +20,8 @@ Typing error (Typing[4110])
   All the local information about `$x->x` has been invalidated by this lambda function.
 This is a limitation of the type-checker; use a local if that's the problem.
 File "splice_state2.php", line 24, characters 7-13:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "splice_state2.php", line 24, characters 7-13:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 41, characters 38-76:
   But got `dynamic` because it is an unenforceable type

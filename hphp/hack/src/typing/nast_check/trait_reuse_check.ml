@@ -67,13 +67,13 @@ let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
   | None -> false
 
 (* Return the position where class/trait [type_name] is defined. *)
-let classish_def_pos tgenv type_name : Pos.t =
+let classish_def_pos tgenv type_name : Pos_or_decl.t =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Cls.pos decl
-  | None -> Pos.none
+  | None -> Pos_or_decl.none
 
 (* Return all the ancestors of class/trait [type_name] that use
    [trait_name]. *)
@@ -112,7 +112,8 @@ let find_using_class tgenv cls_name (trait_name : string) : string =
 
 (* Find the first use site in class/trait [type_name] of
    [trait_name], directly or via another trait. *)
-let trait_use_pos tgenv (type_name : string) (trait_name : string) : Pos.t =
+let trait_use_pos tgenv (type_name : string) (trait_name : string) :
+    Pos_or_decl.t =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
@@ -121,8 +122,8 @@ let trait_use_pos tgenv (type_name : string) (trait_name : string) : Pos.t =
     let trait_ty = Cls.get_ancestor decl trait_name in
     (match trait_ty with
     | Some trait_ty -> Typing_defs_core.get_pos trait_ty
-    | None -> Pos.none)
-  | None -> Pos.none
+    | None -> Pos_or_decl.none)
+  | None -> Pos_or_decl.none
 
 (* The final methods in [type_name] (excluding inherited methods),
    both instance and static methods. *)
@@ -189,9 +190,9 @@ let rec pairwise_map (items : 'a list) (f : 'a -> 'a -> 'b) : 'b list =
 (* Return a list of positions that show how we ended up using this
    trait. *)
 let relevant_positions tgenv using_cls_name used_trait reused_trait :
-    (Pos.t * string) list =
+    (Pos_or_decl.t * string) list =
   let describe_route (type_name : string) (trait_name : string) :
-      (Pos.t * string) list =
+      (Pos_or_decl.t * string) list =
     let route = trait_use_route tgenv type_name trait_name in
     pairwise_map route (fun type_name trait_name ->
         ( trait_use_pos tgenv type_name trait_name,

@@ -182,7 +182,9 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
       (* Shouldn't happen *)
       make_nullable_member_type ~is_method:false env id_pos pos ty
   else
-    let (env, ty) = Typing_solver.non_null env id_pos ty in
+    let (env, ty) =
+      Typing_solver.non_null env (Pos_or_decl.of_raw_pos id_pos) ty
+    in
     (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
 
 (* We know that the receiver is a concrete class: not a generic with
@@ -234,7 +236,7 @@ let rec obj_get_concrete_ty
         ~inst_meth
         ~is_method
         ~nullsafe:None
-        ~obj_pos:(Reason.to_pos r)
+        ~obj_pos:(Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)
         ~explicit_targs
         ~coerce_from_ty
         ~is_nonnull:true
@@ -815,7 +817,7 @@ and obj_get_inner
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       let (env, ty) =
         if is_nonnull then
-          Typing_solver.non_null env obj_pos ty
+          Typing_solver.non_null env (Pos_or_decl.of_raw_pos obj_pos) ty
         else
           (env, ty)
       in

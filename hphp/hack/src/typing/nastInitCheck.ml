@@ -168,7 +168,7 @@ module Env = struct
       if not @@ SMap.is_empty uninit then
         SMap.bindings uninit
         |> List.map ~f:fst
-        |> Errors.constructor_required sc.sc_name);
+        |> Errors.constructor_required c.c_name);
 
     let ( add_init_not_required_props,
           add_trait_props,
@@ -228,17 +228,17 @@ let is_whitelisted = function
 let is_lateinit cv =
   Naming_attributes.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
-let class_prop_pos class_name prop_name ctx : Pos.t =
+let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
   match Decl_provider.get_class ctx class_name with
-  | None -> Pos.none
+  | None -> Pos_or_decl.none
   | Some decl ->
     (match Decl_provider.Class.get_prop decl prop_name with
-    | None -> Pos.none
+    | None -> Pos_or_decl.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in
       if shallow_decl_enabled ctx then
         match Shallow_classes_provider.get ctx member_origin with
-        | None -> Pos.none
+        | None -> Pos_or_decl.none
         | Some sc ->
           let prop =
             List.find_exn sc.Shallow_decl_defs.sc_props ~f:(fun prop ->
@@ -252,13 +252,13 @@ let class_prop_pos class_name prop_name ctx : Pos.t =
           Ast_provider.find_class_in_file ctx fn x
         in
         (match get_class_by_name ctx member_origin with
-        | None -> Pos.none
+        | None -> Pos_or_decl.none
         | Some cls ->
           let cv =
             List.find_exn cls.Aast.c_vars ~f:(fun cv ->
                 String.equal (snd cv.Aast.cv_id) prop_name)
           in
-          fst cv.Aast.cv_id))
+          Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id))
 
 let rec class_ tenv c =
   if not FileInfo.(equal_mode c.c_mode Mhhi) then

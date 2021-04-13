@@ -82,7 +82,10 @@ let duplicated_used_traits c =
   Hashtbl.iteri
     ~f:(fun ~key ~data ->
       if List.length data > 1 then
-        Errors.trait_reuse_inside_class c.c_name key (List.rev data))
+        Errors.trait_reuse_inside_class
+          c.c_name
+          key
+          (List.rev_map data ~f:Pos_or_decl.of_raw_pos))
     traits
 
 let handler =

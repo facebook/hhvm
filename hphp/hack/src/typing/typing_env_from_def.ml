@@ -30,9 +30,13 @@ let fun_env ?origin ctx f =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness_from_decl p, Tgeneric (s, [])))
+        mk
+          ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
+            Tgeneric (s, []) ))
   in
-  mk (Reason.Rwitness_from_decl (fst c.c_name), Tapply (c.c_name, tparams))
+  let (name_pos, name) = c.c_name in
+  let name_pos = Pos_or_decl.of_raw_pos name_pos in
+  mk (Reason.Rwitness_from_decl name_pos, Tapply ((name_pos, name), tparams))
 
 let class_env ?origin ctx c =
   let file = Pos.filename (fst c.c_name) in

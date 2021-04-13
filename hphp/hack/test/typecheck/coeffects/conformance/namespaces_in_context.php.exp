@@ -6,13 +6,18 @@ File "namespaces_in_context.php", line 12, characters 35-49:
 Unbound name: `HH\Contexts\MyInnerNs\Inner` (Naming[2049])
 File "namespaces_in_context.php", line 12, characters 35-49:
 Unbound name: `HH\Contexts\Unsafe\MyInnerNs\Inner` (Naming[2049])
-File "namespaces_in_context.php", line 9, characters 37-51:
+File "namespaces_in_context.php", line 9, characters 36-52:
 Illegal context: `\HH\Contexts\MyOuterNs\Outer`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "namespaces_in_context.php", line 12, characters 35-49:
+File "namespaces_in_context.php", line 12, characters 34-50:
 Illegal context: `\HH\Contexts\MyInnerNs\Inner`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "namespaces_in_context.php", line 16, characters 33-60:
+Illegal context: `\MyOuterNs\MyInnerNs\Inner`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

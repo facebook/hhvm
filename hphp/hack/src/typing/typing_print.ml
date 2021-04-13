@@ -912,9 +912,7 @@ module Json = struct
   let rec from_type : env -> locl_ty -> json =
    fun env ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
-    let kind p k =
-      [("src_pos", Pos.json (Pos.to_absolute p)); ("kind", JSON_String k)]
-    in
+    let kind p k = [("src_pos", Pos_or_decl.json p); ("kind", JSON_String k)] in
     let args tys = [("args", JSON_Array (List.map tys (from_type env)))] in
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
@@ -1252,12 +1250,12 @@ module Json = struct
             | Some class_ty -> Cls.pos class_ty
             | None ->
               (* Class may not exist (such as in non-strict modes). *)
-              Pos.none
+              Pos_or_decl.none
           in
           get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
           aux_args args ~keytrace >>= fun tyl ->
           (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
-      now, we always return a `Tclass`. *)
+           * now, we always return a `Tclass`. *)
           ty (Tclass ((class_pos, name), Nonexact, tyl))
         | "object" -> ty Tobject
         | "shape" ->
@@ -1273,8 +1271,8 @@ module Json = struct
             get_val "name" (field_json, keytrace)
             >>= fun (name, name_keytrace) ->
             (* We don't need position information for shape field names. They're
-        only used for error messages and the like. *)
-            let dummy_pos = Pos.none in
+             * only used for error messages and the like. *)
+            let dummy_pos = Pos_or_decl.none in
             begin
               match name with
               | Hh_json.JSON_Number name ->
@@ -1314,7 +1312,7 @@ module Json = struct
           >>= fun fields ->
           if is_array then
             (* We don't have enough information to perfectly reconstruct shape-like
-        arrays. We're missing the keys in the shape map of the shape fields. *)
+             * arrays. We're missing the keys in the shape map of the shape fields. *)
             not_supported
               ~message:"Cannot deserialize shape-like array type"
               ~keytrace
@@ -1374,7 +1372,7 @@ module Json = struct
                         ~is_atom:false
                         ~readonly:false;
                     (* Dummy values: these aren't currently serialized. *)
-                    fp_pos = Pos.none;
+                    fp_pos = Pos_or_decl.none;
                     fp_name = None;
                   })
           in
@@ -1385,7 +1383,8 @@ module Json = struct
             (Tfun
                {
                  ft_params;
-                 ft_implicit_params = { capability = CapDefaults Pos.none };
+                 ft_implicit_params =
+                   { capability = CapDefaults Pos_or_decl.none };
                  ft_ret = { et_type = ft_ret; et_enforced = Unenforced };
                  (* Dummy values: these aren't currently serialized. *)
                  ft_arity = Fstandard;
@@ -1458,8 +1457,8 @@ module PrintClass = struct
     let contents = SSet.fold (fun x acc -> x ^ " " ^ acc) s "" in
     Printf.sprintf "Set( %s)" contents
 
-  let pos p =
-    let (line, start, end_) = Pos.info_pos p in
+  let pos_or_decl p =
+    let (line, start, end_) = Pos_or_decl.line_start_end_columns p in
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
 
   let class_kind = function
@@ -1496,7 +1495,7 @@ module PrintClass = struct
         "<" ^ tparam_list ctx params ^ ">"
     in
     variance var
-    ^ pos position
+    ^ pos_or_decl position
     ^ " "
     ^ name
     ^ params_string
@@ -1646,7 +1645,7 @@ module PrintClass = struct
         acc ^ Full.to_string_decl ctx x ^ ", ")
 
   let class_type ctx c =
-    let tenv = Typing_env.empty ctx (Pos.filename (Cls.pos c)) None in
+    let tenv = Typing_env.empty ctx Relative_path.default None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in
@@ -1743,7 +1742,7 @@ module PrintTypedef = struct
         | Some constr -> Full.to_string_decl ctx constr
       in
       let ty_s = Full.to_string_decl ctx td_type in
-      let pos_s = PrintClass.pos td_pos in
+      let pos_s = PrintClass.pos_or_decl td_pos in
       "ty: "
       ^ ty_s
       ^ "\n"

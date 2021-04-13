@@ -1,10 +1,10 @@
-File "multi_inherit2.php", line 8, characters 21-21:
+File "multi_inherit2.php", line 8, characters 21-29:
 Interface `I` is used more than once in this declaration. (Typing[4377])
-File "multi_inherit2.php", line 8, characters 42-42:
-Here is another occurrence
-File "multi_inherit2.php", line 8, characters 50-50:
-Here is another occurrence
-File "multi_inherit2.php", line 8, characters 32-32:
+  File "multi_inherit2.php", line 8, characters 42-42:
+  Here is another occurrence
+  File "multi_inherit2.php", line 8, characters 50-50:
+  Here is another occurrence
+File "multi_inherit2.php", line 8, characters 32-39:
 Interface `K` is used more than once in this declaration. (Typing[4377])
-File "multi_inherit2.php", line 8, characters 67-67:
-Here is another occurrence
+  File "multi_inherit2.php", line 8, characters 67-67:
+  Here is another occurrence

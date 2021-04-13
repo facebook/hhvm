@@ -30,8 +30,8 @@ let handler =
             | (Ast_defs.Cnormal, TCAbstract _) ->
               Errors.implement_abstract
                 ~is_final:(Cls.final cls)
-                (Cls.pos cls)
-                p
+                (Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos)
+                (p |> Pos_or_decl.of_raw_pos)
                 "type constant"
                 name
             | _ -> ()
@@ -48,7 +48,7 @@ let handler =
                     let pos = fst tc.ttc_enforceable in
                     Typing_enforceable_hint.validate_type
                       env
-                      (fst tc.ttc_name)
+                      (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
                       ty
                       (Errors.invalid_enforceable_type "constant" (pos, name))
                 | _ -> ()

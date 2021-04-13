@@ -1,2 +1,2 @@
-File "base.bad.php", line 6, characters 6-6:
+File "base.bad.php", line 7, characters 7-7:
 Enum B includes enum A but their base types are incompatible (Typing[4388])

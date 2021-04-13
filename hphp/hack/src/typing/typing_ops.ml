@@ -23,7 +23,7 @@ let log_sub_type env p ty_sub ty_super =
   Typing_log.(
     log_with_level env "sub" 1 (fun () ->
         log_types
-          p
+          (Pos_or_decl.of_raw_pos p)
           env
           [
             Log_head
@@ -38,20 +38,21 @@ let log_sub_type env p ty_sub ty_super =
 let sub_type_i
     p ur env ty_sub ty_super (on_error : Errors.typing_error_callback) =
   log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i env ty_sub ty_super (fun ?code claim reasons ->
-      on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
+  Typing_utils.sub_type_i env ty_sub ty_super (fun ?code reasons ->
+      on_error ?code (p, Reason.string_of_ureason ur) reasons)
 
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 
-let sub_type_decl ?(on_error = Errors.unify_error) p ur env ty_sub ty_super =
+let sub_type_decl ~on_error p ur env ty_sub ty_super =
   let localize_with_self =
     Typing_utils.localize_with_self ~ignore_errors:true
   in
   let (env, ty_super) = localize_with_self env ty_super in
   let (env, ty_sub) = localize_with_self env ty_sub in
   let env =
-    sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
+    Typing_utils.sub_type env ty_sub ty_super (fun ?code reasons ->
+        on_error ?code ((p, Reason.string_of_ureason ur) :: reasons))
   in
   env
 
@@ -62,6 +63,12 @@ let unify_decl p ur env on_error ty1 ty2 =
   in
   let (env, ty1) = localize_with_self env ty1 in
   let (env, ty2) = localize_with_self env ty2 in
-  let env = sub_type p ur env ty2 ty1 on_error in
-  let env = sub_type p ur env ty1 ty2 on_error in
+  let env =
+    Typing_utils.sub_type env ty2 ty1 (fun ?code reasons ->
+        on_error ?code ((p, Reason.string_of_ureason ur) :: reasons))
+  in
+  let env =
+    Typing_utils.sub_type env ty1 ty2 (fun ?code reasons ->
+        on_error ?code ((p, Reason.string_of_ureason ur) :: reasons))
+  in
   env

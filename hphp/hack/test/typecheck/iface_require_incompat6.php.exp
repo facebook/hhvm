@@ -1,5 +1,9 @@
-File "iface_require_incompat6.php", line 14, characters 7-8:
-Unable to satisfy trait/interface requirement (Typing[4110])
+File "iface_require_incompat6.php", line 13, characters 7-9:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_incompat6.php", line 14, characters 7-8:
+  This requires to extend or implement Super
+  File "iface_require_incompat6.php", line 6, characters 19-30:
+  Required here
   File "iface_require_incompat6.php", line 6, characters 25-29:
   Expected `float`
   File "iface_require_incompat6.php", line 6, characters 25-29:

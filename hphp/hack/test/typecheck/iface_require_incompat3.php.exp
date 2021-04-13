@@ -1,4 +1,6 @@
-File "iface_require_incompat3.php", line 11, characters 20-21:
-Failure to satisfy requirement: Super (Typing[4111])
-File "iface_require_incompat3.php", line 6, characters 19-28:
-Required here
+File "iface_require_incompat3.php", line 11, characters 7-7:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_incompat3.php", line 11, characters 20-21:
+  This requires to extend or implement Super
+  File "iface_require_incompat3.php", line 6, characters 19-28:
+  Required here

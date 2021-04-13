@@ -35,7 +35,7 @@ val fresh_type : env -> Pos.t -> env * locl_ty
 
 (** Same as fresh_type but takes a specific reason as parameter. *)
 val fresh_type_reason :
-  ?variance:Ast_defs.variance -> env -> Reason.t -> env * locl_ty
+  ?variance:Ast_defs.variance -> env -> Pos.t -> Reason.t -> env * locl_ty
 
 val fresh_invariant_type_var : env -> Pos.t -> env * locl_ty
 
@@ -117,12 +117,13 @@ val get_gconst : env -> gconst_key -> gconst_decl option
 val get_static_member : bool -> env -> class_decl -> string -> class_elt option
 
 val suggest_static_member :
-  bool -> class_decl -> string -> (Pos.t * string) option
+  bool -> class_decl -> string -> (Pos_or_decl.t * string) option
 
 (** Get class member declaration from the appropriate backend and add dependency. *)
 val get_member : bool -> env -> class_decl -> string -> class_elt option
 
-val suggest_member : bool -> class_decl -> string -> (Pos.t * string) option
+val suggest_member :
+  bool -> class_decl -> string -> (Pos_or_decl.t * string) option
 
 (** Get class constructor declaration from the appropriate backend and add dependency. *)
 val get_construct : env -> class_decl -> class_elt option * consistent_kind
@@ -181,6 +182,22 @@ val get_file : env -> Relative_path.t
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)
 val assert_pos_in_current_decl : env -> Pos_or_decl.t -> Pos.t option
+
+(** This will check that the first position of the given reasons is in the
+    current decl and if yes use it as primary error position. If no,
+    then no error is emitted.
+    This also sets the error code to the code for unification error
+    if none is provided. *)
+val unify_error_assert_primary_pos_in_current_decl :
+  env -> Errors.error_from_reasons_callback
+
+(** This will check that the first position of the given reasons is in the
+    current decl and if yes use it as primary error position. If no,
+    then no error is emitted.
+    This also sets the error code to the code for invalid type hint error
+    if none is provided. *)
+val invalid_type_hint_assert_primary_pos_in_current_decl :
+  env -> Errors.error_from_reasons_callback
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
@@ -269,7 +286,7 @@ val get_tpenv : env -> TPEnv.t
 val get_global_tpenv : env -> TPEnv.t
 
 val get_pos_and_kind_of_generic :
-  env -> string -> (Pos.t * Typing_kinding_defs.kind) option
+  env -> string -> (Pos_or_decl.t * Typing_kinding_defs.kind) option
 
 val get_lower_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 

@@ -233,9 +233,4 @@ val none : 'phase t_
 val compare : 'phase t_ -> 'phase t_ -> int
 
 val explain_generic_constraint :
-  Pos.t ->
-  'phase t_ ->
-  string ->
-  Pos.t * string ->
-  (Pos_or_decl.t * string) list ->
-  unit
+  Pos.t -> 'phase t_ -> string -> (Pos_or_decl.t * string) list -> unit

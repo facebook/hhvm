@@ -21,7 +21,7 @@ module Env = Typing_env
 (** Ensure that all methods which have the override annotation and were
     shallowly defined within [cls] do in fact override some inherited
     definition. *)
-let check_override_annotations cls ~static =
+let check_override_annotations env cls ~static =
   let methods =
     let sc = Cls.shallow_decl cls in
     if static then
@@ -48,12 +48,13 @@ let check_override_annotations cls ~static =
                 String.( <> ) meth.ce_origin parent_meth.ce_origin)
           in
           if not parent_method_exists then
-            Errors.should_be_override pos (Cls.name cls) id)
+            Option.iter (Env.assert_pos_in_current_decl env pos) ~f:(fun pos ->
+                Errors.should_be_override pos (Cls.name cls) id))
 
 (** Ensure that all methods which have the override annotation, were inherited
     by [cls], and were originally defined in a trait do in fact override some
     other inherited definition. *)
-let check_trait_override_annotations env cls ~static =
+let check_trait_override_annotations env class_pos cls ~static =
   let (methods, all_methods_named) =
     if static then
       (Cls.smethods, Cls.all_inherited_smethods)
@@ -80,13 +81,15 @@ let check_trait_override_annotations env cls ~static =
               in
               if not parent_method_exists then
                 Errors.override_per_trait
-                  (Cls.pos cls, Cls.name cls)
+                  (class_pos, Cls.name cls)
                   id
                   meth.ce_origin
                   (get_pos ty)
           ))
 
-let check_if_cyclic cls =
+(** Error if any member of the class was detected to be cyclic
+    during linearization. *)
+let check_if_cyclic class_pos cls =
   let cyclic_classes =
     Cls.linearization cls Decl_defs.Member_resolution
     |> List.find_map ~f:(fun mro -> mro.mro_cyclic)
@@ -95,7 +98,7 @@ let check_if_cyclic cls =
   | None -> ()
   | Some classes ->
     let classes = SSet.add classes (Cls.name cls) in
-    Errors.cyclic_class_def classes (Cls.pos cls)
+    Errors.cyclic_class_def classes class_pos
 
 let check_extend_kind
     parent_pos
@@ -137,8 +140,8 @@ let check_extend_kind
         ~child_name
         ~child_is_enum_class)
 
-let check_extend_kinds ctx shallow_class =
-  let class_pos = fst shallow_class.sc_name in
+(** Check the proper use of the [extends] keyword between two classes or two interfaces. *)
+let check_extend_kinds ctx class_pos shallow_class =
   let class_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
@@ -161,7 +164,8 @@ let check_extend_kinds ctx shallow_class =
 let disallow_trait_reuse env =
   TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)
 
-let check_trait_reuse ctx cls =
+(** Check that a class does not reuse a trait in its hierarchy. *)
+let check_trait_reuse ctx class_pos cls =
   Cls.linearization cls Decl_defs.Ancestor_types
   |> List.iter ~f:(fun mro ->
          match mro.mro_trait_reuse with
@@ -169,25 +173,27 @@ let check_trait_reuse ctx cls =
          | Some parent_name ->
            let parent_pos =
              Shallow_classes_provider.get ctx parent_name
-             |> Option.value_map ~default:Pos.none ~f:(fun p -> fst p.sc_name)
+             |> Option.value_map ~default:Pos_or_decl.none ~f:(fun p ->
+                    fst p.sc_name)
            in
            Errors.trait_reuse
              parent_pos
              parent_name
-             (Cls.pos cls, Cls.name cls)
+             (class_pos, Cls.name cls)
              mro.mro_name)
 
-let check_class env cls =
-  check_if_cyclic cls;
+let check_class env class_pos cls =
+  check_if_cyclic class_pos cls;
   let shallow_class = Cls.shallow_decl cls in
-  check_extend_kinds (Env.get_ctx env) shallow_class;
-  if disallow_trait_reuse env then check_trait_reuse (Env.get_ctx env) cls;
+  check_extend_kinds (Env.get_ctx env) class_pos shallow_class;
+  if disallow_trait_reuse env then
+    check_trait_reuse (Env.get_ctx env) class_pos cls;
   if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (
-    check_override_annotations cls ~static:false;
-    check_override_annotations cls ~static:true
+    check_override_annotations env cls ~static:false;
+    check_override_annotations env cls ~static:true
   );
   if Ast_defs.(equal_class_kind (Cls.kind cls) Cnormal) then (
-    check_trait_override_annotations env cls ~static:false;
-    check_trait_override_annotations env cls ~static:true
+    check_trait_override_annotations env class_pos cls ~static:false;
+    check_trait_override_annotations env class_pos cls ~static:true
   );
   ()

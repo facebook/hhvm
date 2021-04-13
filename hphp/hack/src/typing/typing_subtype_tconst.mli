@@ -7,7 +7,7 @@ val make_all_type_consts_equal :
   env ->
   Ident.t ->
   internal_type ->
-  on_error:Errors.typing_error_callback ->
+  on_error:Errors.error_from_reasons_callback ->
   as_tyvar_with_cnstr:bool ->
   env
 
@@ -19,6 +19,6 @@ type variable and add it as the type of the type constant in the environment.
 val get_tyvar_type_const :
   env ->
   Ident.t ->
-  Aast.sid ->
-  on_error:Errors.typing_error_callback ->
+  pos_id ->
+  on_error:Errors.error_from_reasons_callback ->
   env * locl_ty

@@ -1,4 +1,6 @@
-File "trait_require_error_noimplement.php", line 29, characters 7-12:
-Failure to satisfy requirement: I1 (Typing[4111])
-File "trait_require_error_noimplement.php", line 17, characters 22-23:
-Required here
+File "trait_require_error_noimplement.php", line 28, characters 16-17:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "trait_require_error_noimplement.php", line 29, characters 7-12:
+  This requires to extend or implement I1
+  File "trait_require_error_noimplement.php", line 17, characters 22-23:
+  Required here

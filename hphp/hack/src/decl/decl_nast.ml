@@ -44,7 +44,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   in
   let ft_readonly_this = Option.is_some f.f_readonly_this in
   let params = FunUtils.make_params env ~is_lambda f.f_params in
-  let capability =
+  let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
   in
   let ret_ty =

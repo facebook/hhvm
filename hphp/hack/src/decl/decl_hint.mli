@@ -18,4 +18,4 @@ val aast_contexts_to_decl_capability :
   Decl_env.env ->
   Aast.contexts option ->
   Aast.pos ->
-  Typing_defs.decl_ty Typing_defs.capability
+  Aast.pos * Typing_defs.decl_ty Typing_defs.capability

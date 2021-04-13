@@ -1,4 +1,4 @@
-File "multi_inherit3.php", line 6, characters 20-20:
+File "multi_inherit3.php", line 6, characters 20-28:
 Interface `I` is used more than once in this declaration. (Typing[4377])
-File "multi_inherit3.php", line 6, characters 31-31:
-Here is another occurrence
+  File "multi_inherit3.php", line 6, characters 31-31:
+  Here is another occurrence

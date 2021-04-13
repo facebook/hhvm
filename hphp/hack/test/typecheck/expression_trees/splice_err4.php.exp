@@ -1,5 +1,7 @@
 File "splice_err4.php", line 13, characters 17-21:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "splice_err4.php", line 13, characters 17-21:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`
 File "splice_err4.php", line 13, characters 19-20:

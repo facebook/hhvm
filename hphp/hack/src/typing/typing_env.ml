@@ -58,6 +58,16 @@ let assert_pos_in_current_decl env pos =
     ~current_decl:(get_current_decl env)
     ~current_file:(get_file env)
 
+let unify_error_assert_primary_pos_in_current_decl env =
+  Errors.unify_error_assert_primary_pos_in_current_decl
+    ~current_decl:(get_current_decl env)
+    ~current_file:(get_file env)
+
+let invalid_type_hint_assert_primary_pos_in_current_decl env =
+  Errors.invalid_type_hint_assert_primary_pos_in_current_decl
+    ~current_decl:(get_current_decl env)
+    ~current_file:(get_file env)
+
 let get_tracing_info env = env.tracing_info
 
 let set_log_level env key log_level =
@@ -114,10 +124,10 @@ let wrap_inference_env_call_env : env -> (Inf.t -> Inf.t) -> env =
 let expand_var env r v =
   wrap_inference_env_call env (fun env -> Inf.expand_var env r v)
 
-let fresh_type_reason ?variance env r =
+let fresh_type_reason ?variance env p r =
   log_env_change_ "fresh_type_reason" env
   @@ wrap_inference_env_call env (fun env ->
-         Inf.fresh_type_reason ?variance env r)
+         Inf.fresh_type_reason ?variance env p r)
 
 let fresh_type env p =
   log_env_change_ "fresh_type" env

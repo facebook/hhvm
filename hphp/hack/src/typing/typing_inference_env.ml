@@ -449,13 +449,13 @@ let add_current_tyvar ?variance env p v =
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
   | _ -> env
 
-let fresh_type_reason ?variance env r =
+let fresh_type_reason ?variance env p r =
   let v = Ident.tmp () in
-  let env = add_current_tyvar ?variance env (Reason.to_pos r) v in
+  let env = add_current_tyvar ?variance env p v in
   (env, mk (r, Tvar v))
 
 let fresh_type ?variance env p =
-  fresh_type_reason env (Reason.Rtype_variable p) ?variance
+  fresh_type_reason env p (Reason.Rtype_variable p) ?variance
 
 let fresh_invariant_type_var = fresh_type ~variance:Ast_defs.Invariant
 

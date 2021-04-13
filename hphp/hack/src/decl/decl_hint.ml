@@ -35,14 +35,17 @@ and aast_user_attribute_to_decl_user_attribute env { ua_name; ua_params } =
           | _ -> None);
   }
 
-and aast_contexts_to_decl_capability env ctxs default_pos =
-  let default_pos = Decl_env.make_decl_pos env default_pos in
+and aast_contexts_to_decl_capability env ctxs default_pos :
+    Aast.pos * decl_ty capability =
   match ctxs with
   | Some (pos, hl) ->
-    let pos = Decl_env.make_decl_pos env pos in
     let hl = List.map ~f:(hint env) hl in
-    CapTy (Typing_make_type.intersection (Reason.Rhint pos) hl)
-  | None -> CapDefaults default_pos
+    ( pos,
+      CapTy
+        (Typing_make_type.intersection
+           (Reason.Rhint (Decl_env.make_decl_pos env pos))
+           hl) )
+  | None -> (default_pos, CapDefaults (Decl_env.make_decl_pos env default_pos))
 
 and aast_tparam_to_decl_tparam env t =
   {
@@ -144,7 +147,7 @@ and hint_ p env = function
     in
     let paraml = List.map2_exn hl pil ~f:make_param in
     let implicit_params =
-      let capability = aast_contexts_to_decl_capability env ctxs p in
+      let (_pos, capability) = aast_contexts_to_decl_capability env ctxs p in
       { capability }
     in
     let ret = possibly_enforced_hint env h in

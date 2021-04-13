@@ -123,10 +123,14 @@ let test_get_sorted_error_list () =
       ~pos_end:(2, 10, 12)
   in
   Printf.printf "%s" (Pos.print_verbose_relative err_pos);
-  let container_pos1 = Pos.make_from (create_path "C1") in
-  let container_pos2 = Pos.make_from (create_path "C2") in
-  let key_pos1 = Pos.make_from (create_path "K1") in
-  let key_pos2 = Pos.make_from (create_path "K2") in
+  let container_pos1 =
+    Pos.make_from (create_path "C1") |> Pos_or_decl.of_raw_pos
+  in
+  let container_pos2 =
+    Pos.make_from (create_path "C2") |> Pos_or_decl.of_raw_pos
+  in
+  let key_pos1 = Pos.make_from (create_path "K1") |> Pos_or_decl.of_raw_pos in
+  let key_pos2 = Pos.make_from (create_path "K2") |> Pos_or_decl.of_raw_pos in
   let (errors, ()) =
     Errors.do_with_context file_with_errors Errors.Typing (fun () ->
         Errors.invalid_arraykey_read

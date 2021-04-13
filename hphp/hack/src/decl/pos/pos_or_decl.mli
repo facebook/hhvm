@@ -11,7 +11,7 @@
     a fully resolved position or a decl position.
     TODO (catg) for now, it is transparantly equal to Pos.t, but its implementation
     will change in the future. *)
-type t = Pos.t [@@deriving eq, ord, show]
+type t [@@deriving eq, ord, show]
 
 module Map : WrappedMap.S with type key = t
 

@@ -24,8 +24,8 @@ module MakeType = Typing_make_type
    below where this behavior is encoded. *)
 
 type context = {
-  id: Nast.sid;  (** The T in the type access C::T *)
-  root_pos: Pos.t;
+  id: pos_id;  (** The T in the type access C::T *)
+  root_pos: Pos_or_decl.t;
   ety_env: expand_env;
       (** The expand environment as passed in by Typing_phase.localize *)
   generics_seen: TySet.t;
@@ -34,7 +34,7 @@ type context = {
       (** Whether or not an abstract type constant is allowed as the result. In the
           future, this boolean should disappear and abstract type constants should
           appear only in the class where they are defined. *)
-  abstract_as_tyvar: bool;
+  abstract_as_tyvar_at_pos: Pos.t option;
       (** If set, abstract type constants will be expanded as type variables. This
           is a hack which should naturally go away when the semantics of abstract
           type constants is cleaned up. *)
@@ -105,7 +105,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     ( env,
       Missing
         (fun () ->
-          Errors.smember_not_found
+          Errors.smember_not_found_
             `class_typeconst
             id_pos
             (Cls.pos class_, class_name)
@@ -121,7 +121,9 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     | Some report ->
       ( if report then
         let seen = List.rev_map type_expansions (fun (_, _, x) -> x) in
-        Errors.cyclic_typeconst (fst typeconst.ttc_name) seen );
+        Errors.cyclic_typeconst
+          (fst typeconst.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
+          seen );
       (* This is a cycle through a type constant that we are using *)
       (env, Missing (fun () -> ()))
     | None ->
@@ -266,15 +268,15 @@ let rec intersect_results err rl =
       Exact ty)
 
 let rec type_of_result ~ignore_errors ctx env root res =
-  let { id = (id_pos, id_name) as id; _ } = ctx in
   let type_with_bound env as_tyvar name ~lower_bounds ~upper_bounds =
-    if as_tyvar then (
-      let (env, tvar) = Env.fresh_invariant_type_var env id_pos in
-      Log.log_new_tvar_for_tconst_access env id_pos tvar name id_name;
+    match as_tyvar with
+    | Some tyvar_pos ->
+      let (env, tvar) = Env.fresh_invariant_type_var env tyvar_pos in
+      Log.log_new_tvar_for_tconst_access env tyvar_pos tvar name ctx.id;
       (env, tvar)
-    ) else
-      let generic_name = tp_name name id in
-      let reason = make_reason env id root Reason.Rnone in
+    | None ->
+      let generic_name = tp_name name ctx.id in
+      let reason = make_reason env ctx.id root Reason.Rnone in
       let ty = MakeType.generic reason generic_name in
       let env =
         TySet.fold
@@ -303,15 +305,20 @@ let rec type_of_result ~ignore_errors ctx env root res =
     let (env, ty) = type_of_result ~ignore_errors ctx env root res' in
     type_with_bound
       env
-      false
+      None
       name
       ~lower_bounds
       ~upper_bounds:(TySet.singleton ty)
   | Abstract { name; names = []; lower_bounds; upper_bounds } ->
-    type_with_bound env ctx.abstract_as_tyvar name ~lower_bounds ~upper_bounds
+    type_with_bound
+      env
+      ctx.abstract_as_tyvar_at_pos
+      name
+      ~lower_bounds
+      ~upper_bounds
   | Missing err ->
     if not ignore_errors then err ();
-    let reason = make_reason env id root Reason.Rnone in
+    let reason = make_reason env ctx.id root Reason.Rnone in
     (env, Typing_utils.terr env reason)
 
 let update_class_name env id new_name = function
@@ -327,7 +334,7 @@ let rec expand ctx env root : _ * result =
   let err () =
     let (pos, tconst) = ctx.id in
     let ty = Typing_print.error env root in
-    Errors.non_object_member_read
+    Errors.non_object_member_read_
       ~kind:`class_typeconst
       tconst
       pos
@@ -383,8 +390,8 @@ let rec expand ctx env root : _ * result =
       let generics_seen = TySet.add root ctx.generics_seen in
       let base = Some (Option.value ctx.base ~default:root) in
       let allow_abstract = true in
-      let abstract_as_tyvar = false in
-      { ctx with generics_seen; base; allow_abstract; abstract_as_tyvar }
+      let abstract_as_tyvar_at_pos = None in
+      { ctx with generics_seen; base; allow_abstract; abstract_as_tyvar_at_pos }
     in
 
     (* Ignore seen bounds to avoid infinite loops *)
@@ -399,8 +406,8 @@ let rec expand ctx env root : _ * result =
     let ctx =
       let base = Some (Option.value ctx.base ~default:root) in
       let allow_abstract = true in
-      let abstract_as_tyvar = false in
-      { ctx with base; allow_abstract; abstract_as_tyvar }
+      let abstract_as_tyvar_at_pos = None in
+      { ctx with base; allow_abstract; abstract_as_tyvar_at_pos }
     in
     let (env, res) = expand ctx env ty in
     (env, update_class_name env ctx.id (DependentKind.to_string dep_ty) res)
@@ -454,9 +461,9 @@ let expand_with_env
     (ety_env : expand_env)
     env
     ?(ignore_errors = false)
-    ?(as_tyvar_with_cnstr = false)
+    ?(as_tyvar_with_cnstr = None)
     root
-    id
+    (id : pos_id)
     ~root_pos
     ~allow_abstract_tconst =
   let (env, ty) =
@@ -469,7 +476,7 @@ let expand_with_env
         base = None;
         generics_seen = TySet.empty;
         allow_abstract = allow_abstract_tconst;
-        abstract_as_tyvar = as_tyvar_with_cnstr;
+        abstract_as_tyvar_at_pos = as_tyvar_with_cnstr;
         root_pos;
       }
     in
@@ -508,9 +515,9 @@ let referenced_typeconsts env ety_env (root, ids) =
         ( expand_with_env
             ety_env
             env
-            ~as_tyvar_with_cnstr:false
+            ~as_tyvar_with_cnstr:None
             root
-            (pos, tconst)
+            (Pos_or_decl.of_raw_pos pos, tconst)
             ~root_pos:(get_pos root)
             ~allow_abstract_tconst:true,
           acc )

@@ -107,5 +107,8 @@ let handler =
             | None -> ()
             | Some cc ->
               if find_cycle env c_name cc_name then
-                Errors.cyclic_class_constant cc.cc_pos c_name cc_name)
+                Option.iter
+                  (Tast_env.assert_pos_in_current_decl env cc.cc_pos)
+                  ~f:(fun cc_pos ->
+                    Errors.cyclic_class_constant cc_pos c_name cc_name))
   end

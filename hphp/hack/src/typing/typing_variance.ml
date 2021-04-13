@@ -241,7 +241,10 @@ let make_tparam_variance : Pos.t -> Ast_defs.variance -> variance =
   make_variance Rtype_parameter
 
 let make_decl_tparam_variance : Typing_defs.decl_tparam -> variance =
- (fun t -> make_tparam_variance (fst t.tp_name) t.tp_variance)
+ fun t ->
+  make_tparam_variance
+    (fst t.tp_name |> Pos_or_decl.unsafe_to_raw_pos)
+    t.tp_variance
 
 let make_tparam_variance : Nast.tparam -> variance =
  (fun t -> make_tparam_variance (fst t.Aast.tp_name) t.Aast.tp_variance)
@@ -495,7 +498,9 @@ let rec get_typarams tenv root env (ty : decl_ty) =
         get_typarams_variance_list (union acc param) variancel tyl
       | _ -> acc
     in
-    let variancel = get_class_variance tenv pos_name in
+    let variancel =
+      get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
+    in
     get_typarams_variance_list empty variancel tyl
   | Tdarray (ty1, ty2) ->
     union (get_typarams tenv root env ty1) (get_typarams tenv root env ty2)

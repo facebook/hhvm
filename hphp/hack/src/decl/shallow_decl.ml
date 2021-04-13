@@ -214,7 +214,7 @@ let method_type env m =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
   let params = FunUtils.make_params env ~is_lambda:false m.m_params in
-  let capability =
+  let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
   in
   let ret =

@@ -1,2 +1,2 @@
-File "includes-not-enum.bad.php", line 6, characters 6-6:
+File "includes-not-enum.bad.php", line 7, characters 7-7:
 Enum A includes C which is not an enum (Typing[4388])

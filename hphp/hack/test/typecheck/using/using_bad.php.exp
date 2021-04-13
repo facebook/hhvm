@@ -8,7 +8,19 @@ File "using_bad.php", line 29, characters 10-31:
 This expression is used in a `using` clause so it must have type `\IDisposable` (Typing[4110])
   File "using_bad.php", line 29, characters 10-31:
   No instance method `__dispose` in `AsyncHandle`
+  File "using_bad.php", line 9, characters 25-38:
+  Did you mean `__disposeAsync` instead?
+  File "using_bad.php", line 29, characters 19-29:
+  This is why I think it is an object of type AsyncHandle
+  File "using_bad.php", line 8, characters 7-17:
+  Declaration of `AsyncHandle` is here
 File "using_bad.php", line 33, characters 15-31:
 This expression is used in a `using` clause with await so it must have type `\IAsyncDisposable` (Typing[4110])
   File "using_bad.php", line 33, characters 15-31:
   No instance method `__disposeAsync` in `Handle`
+  File "using_bad.php", line 5, characters 19-27:
+  Did you mean `__dispose` instead?
+  File "using_bad.php", line 33, characters 24-29:
+  This is why I think it is an object of type Handle
+  File "using_bad.php", line 4, characters 7-12:
+  Declaration of `Handle` is here

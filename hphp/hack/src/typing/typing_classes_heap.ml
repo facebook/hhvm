@@ -23,7 +23,7 @@ type lazy_class_type = {
   parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl_ty) Sequence.t;
+  all_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
   is_disposable: bool Lazy.t;
 }
 

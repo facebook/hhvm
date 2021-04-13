@@ -67,7 +67,7 @@ module MakeType = Typing_make_type
 
 (* does coercion, including subtyping *)
 let coerce_type_impl
-    env ty_have ty_expect (on_error : Errors.typing_error_callback) =
+    env ty_have ty_expect (on_error : Errors.error_from_reasons_callback) =
   let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     match ty_expect.et_enforced with
@@ -149,13 +149,13 @@ let result t ~on_ok ~on_err =
 let coerce_type
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
   result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl env ty_have ty_expect (fun ?code claim reasons ->
-         on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
+  @@ coerce_type_impl env ty_have ty_expect (fun ?code reasons ->
+         on_error ?code (p, Reason.string_of_ureason ur) reasons)
 
 let coerce_type_res
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
-  coerce_type_impl env ty_have ty_expect (fun ?code claim reasons ->
-      on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
+  coerce_type_impl env ty_have ty_expect (fun ?code reasons ->
+      on_error ?code (p, Reason.string_of_ureason ur) reasons)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
@@ -167,7 +167,11 @@ let try_coerce env ty_have ty_expect =
       (fun () ->
         Some
           ( result ~on_ok:Fn.id ~on_err:Fn.id
-          @@ coerce_type_impl env ty_have ty_expect Errors.unify_error ))
+          @@ coerce_type_impl
+               env
+               ty_have
+               ty_expect
+               (Errors.unify_error_at Pos.none) ))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

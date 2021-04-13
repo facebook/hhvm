@@ -50,7 +50,7 @@ end = struct
   let tint = MakeType.int Reason.none
 
   let fresh_tyvar env =
-    let (env, tv) = Env.fresh_type_reason env Reason.none in
+    let (env, tv) = Env.fresh_type_reason env Pos.none Reason.none in
     match get_node tv with
     | Tvar v -> (env, tv, v)
     | _ -> assert_failure "fresh_type_reason should return a type var"

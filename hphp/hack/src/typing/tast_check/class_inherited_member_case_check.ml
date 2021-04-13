@@ -19,7 +19,7 @@ let error_inherited_base member_type base_name parent_name base_elt parent_elt :
     member_type
     base_name
     parent_name
-    (Lazy.force base_elt.ce_pos)
+    (Lazy.force base_elt.ce_pos |> Pos_or_decl.unsafe_to_raw_pos)
     base_elt.ce_origin
     parent_elt.ce_origin
     (Lazy.force parent_elt.ce_pos)

@@ -7,4 +7,4 @@
  *)
 
 val check_reifiable :
-  Type_validator.Env.env -> Typing_defs.typeconst_type -> Pos.t -> unit
+  Type_validator.Env.env -> Typing_defs.typeconst_type -> Pos_or_decl.t -> unit

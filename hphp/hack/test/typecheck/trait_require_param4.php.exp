@@ -1,5 +1,9 @@
-File "trait_require_param4.php", line 15, characters 7-8:
-Unable to satisfy trait/interface requirement (Typing[4110])
+File "trait_require_param4.php", line 13, characters 7-7:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "trait_require_param4.php", line 15, characters 7-8:
+  This requires to extend or implement Super
+  File "trait_require_param4.php", line 10, characters 19-30:
+  Required here
   File "trait_require_param4.php", line 10, characters 25-29:
   Expected `float`
   File "trait_require_param4.php", line 10, characters 25-29:

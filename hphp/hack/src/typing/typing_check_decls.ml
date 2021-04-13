@@ -133,7 +133,7 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
             begin
               fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
               List.iter cstrl (fun (ck, cstr_ty) ->
-                  let r = Reason.Rwitness p in
+                  let r = Reason.Rwitness_from_decl p in
                   let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
                   let (_ : Typing_env_types.env) =
                     TGenConstraint.check_constraint
@@ -156,12 +156,10 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
 let rec fun_ tenv f =
   FunUtils.check_params f.f_params;
   let env = { typedef_tparams = []; tenv } in
-  let (p, _) = f.f_name in
   (* Add type parameters to typing environment and localize the bounds
      and where constraints *)
   let tenv =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      p
       env.tenv
       ~ignore_errors:true
       f.f_tparams
@@ -304,7 +302,6 @@ let method_ env m =
      and where constraints *)
   let tenv =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      (fst m.m_name)
       env.tenv
       ~ignore_errors:true
       m.m_tparams
@@ -324,7 +321,6 @@ let class_ tenv c =
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      (fst c.c_name)
       tenv
       ~ignore_errors:true
       c.c_tparams
@@ -352,7 +348,7 @@ let typedef tenv t =
   let {
     t_tparams;
     t_annotation = _;
-    t_name = (name_pos, _);
+    t_name = _;
     t_constraint;
     t_kind;
     t_mode = _;
@@ -369,7 +365,6 @@ let typedef tenv t =
   let where_constraints = [] in
   let tenv_with_typedef_tparams =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      name_pos
       tenv
       ~ignore_errors:true
       t_tparams

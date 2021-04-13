@@ -74,7 +74,7 @@ let enum_check_const ty_exp env cc t =
  * like any, or dynamic. The free status of type parameter is caught during
  * naming (Unbound name), so we only check the kind of type that is used.
  *)
-let enum_check_type env pos ur ty_interface ty _on_error =
+let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
   let ty_arraykey =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
@@ -93,14 +93,24 @@ let enum_check_type env pos ur ty_interface ty _on_error =
   | Some interface ->
     if not (is_valid_base interface) then
       Errors.enum_type_bad
-        pos
+        (Pos_or_decl.unsafe_to_raw_pos pos)
         true
         (Typing_print.full_strip_ns env interface)
         [];
     env
   | None ->
-    Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ _ ->
-        Errors.enum_type_bad pos false (Typing_print.full_strip_ns env ty) [])
+    Typing_ops.sub_type
+      (Pos_or_decl.unsafe_to_raw_pos pos)
+      ur
+      env
+      ty
+      ty_arraykey
+      (fun ?code:_ _ _ ->
+        Errors.enum_type_bad
+          (Pos_or_decl.unsafe_to_raw_pos pos)
+          false
+          (Typing_print.full_strip_ns env ty)
+          [])
 
 (* Check an enum declaration of the form
  *    enum E : <ty_exp> as <ty_constraint>
@@ -169,7 +179,7 @@ let enum_class_check env tc consts const_types =
             Errors.enum_constraint_must_be_arraykey
         in
         Typing_ops.sub_type
-          pos
+          (Pos_or_decl.unsafe_to_raw_pos pos)
           Reason.URenum_incompatible_cstr
           env
           ty_exp

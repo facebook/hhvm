@@ -1,4 +1,6 @@
 File "splice_variable_state.php", line 21, characters 13-27:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "splice_variable_state.php", line 21, characters 13-27:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_variable_state.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type

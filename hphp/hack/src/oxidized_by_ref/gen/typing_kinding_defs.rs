@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f7a39ef7f66cb3d245403ddd442b0d82>>
+// @generated SignedSource<<223e79ebc7b8c988337005fcdc7c785c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -59,5 +59,5 @@ impl<'a> TrivialDrop for Kind<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct NamedKind<'a>(pub aast::Sid<'a>, pub &'a Kind<'a>);
+pub struct NamedKind<'a>(pub PosId<'a>, pub &'a Kind<'a>);
 impl<'a> TrivialDrop for NamedKind<'a> {}

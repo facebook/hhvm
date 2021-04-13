@@ -944,11 +944,10 @@ let none = Rnone
 (* When the subtyping fails because of a constraint. *)
 (*****************************************************************************)
 
-let explain_generic_constraint p_inst reason name error messages =
+let explain_generic_constraint p_inst reason name messages =
   let pos = to_pos reason in
   Errors.explain_constraint
     ~use_pos:p_inst
     ~definition_pos:pos
     ~param_name:name
-    error
     messages

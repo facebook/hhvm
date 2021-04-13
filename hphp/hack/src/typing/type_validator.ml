@@ -108,7 +108,7 @@ class virtual type_validator =
             | Aast.Opaque
               when not
                      (Relative_path.equal
-                        (Pos.filename td_pos)
+                        (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
                         (Env.get_file acc.env)) ->
               let td_constraint =
                 match td_constraint with

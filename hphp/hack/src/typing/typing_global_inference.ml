@@ -33,23 +33,24 @@ module StateErrors = struct
   let cardinal t = IdentMap.fold (fun _ l acc -> acc + List.length l) !t 0
 end
 
-let convert_on_error : (Errors.error -> unit) -> Errors.typing_error_callback =
- fun on_error ?code claim reasons ->
+let convert_on_error :
+    (Errors.error -> unit) -> Pos.t -> Errors.error_from_reasons_callback =
+ fun on_error pos ?code reasons ->
   let code =
     Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
   in
-  on_error (Errors.make_error code claim reasons)
+  on_error (Errors.make_error code (pos, "Typing_error") reasons)
 
 let catch_exc
     pos
     (on_error : Errors.error -> unit)
     (r : 'a)
     ?(verbose = false)
-    (f : Errors.typing_error_callback -> 'a) : 'a =
+    (f : Errors.error_from_reasons_callback -> 'a) : 'a =
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
-          f @@ convert_on_error on_error)
+          f @@ convert_on_error on_error pos)
     in
     List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v
@@ -89,7 +90,7 @@ let build_ty_map (ctx : Provider_context.t) (tast : Tast.def) : global_type_map
     =
   let get_global_var_pos env (ty : locl_ty) =
     (object
-       inherit [Pos.t option] Type_visitor.locl_type_visitor
+       inherit [Pos_or_decl.t option] Type_visitor.locl_type_visitor
 
        method! on_tvar pos _ tvar =
          match pos with
@@ -116,7 +117,7 @@ let build_ty_map (ctx : Provider_context.t) (tast : Tast.def) : global_type_map
         match get_global_var_pos (Tast_env.tast_env_as_typing_env env) hi with
         | None -> ()
         | Some pos ->
-          let pos = Pos.to_absolute pos in
+          let pos = Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos in
           ty_map := Pos.AbsolutePosMap.add pos hi !ty_map
 
       method! on_fun_with_env state ({ Aast.f_ret; _ } as fun_) =
@@ -275,13 +276,14 @@ module StateConstraintGraph = struct
       (* Collect each global tyvar and map it to a global environment in
       * which it lives. Give preference to the global environment which also
       * has positional information for this type variable *)
-      let initial_tyvar_sources : (Pos.t * Inf.t_global) IMap.t =
+      let initial_tyvar_sources : (Pos_or_decl.t * Inf.t_global) IMap.t =
         List.fold subgraphs ~init:IMap.empty ~f:(fun m (_, genv) ->
             List.fold (Inf.get_vars_g genv) ~init:m ~f:(fun m var ->
                 IMap.update
                   var
                   (function
-                    | Some (pos, genv) when not (Pos.equal pos Pos.none) ->
+                    | Some (pos, genv)
+                      when not (Pos_or_decl.equal pos Pos_or_decl.none) ->
                       Some (pos, genv)
                     | None
                     | Some (_, _) ->
@@ -325,7 +327,7 @@ module StateSolvedGraph = struct
     let make_on_error = StateErrors.add errors in
     let env =
       catch_exc Pos.none (make_on_error 0) env @@ fun _ ->
-      let make_on_error v = convert_on_error @@ make_on_error v in
+      let make_on_error v = convert_on_error (make_on_error v) Pos.none in
       if is_ordered_solving env then
         Typing_ordered_solver.solve_env env make_on_error
       else

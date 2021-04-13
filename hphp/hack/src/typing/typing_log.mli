@@ -34,7 +34,8 @@ type log_structure =
 val log_with_level :
   Typing_env_types.env -> string -> level:int -> (unit -> unit) -> unit
 
-val log_types : Pos.t -> Typing_env_types.env -> log_structure list -> unit
+val log_types :
+  Pos_or_decl.t -> Typing_env_types.env -> log_structure list -> unit
 
 val log_global_inference_env :
   Pos.t -> Typing_env_types.env -> Typing_inference_env.t_global -> unit
@@ -59,14 +60,18 @@ val log_new_tvar_for_new_object :
   unit
 
 val log_new_tvar_for_tconst :
-  Typing_env_types.env -> Pos.t -> int -> string -> Typing_defs.locl_ty -> unit
+  Typing_env_types.env ->
+  Pos.t * Ident.t ->
+  Typing_defs.pos_id ->
+  Typing_defs.locl_ty ->
+  unit
 
 val log_new_tvar_for_tconst_access :
   Typing_env_types.env ->
   Pos.t ->
   Typing_defs.locl_ty ->
   string ->
-  string ->
+  Typing_defs.pos_id ->
   unit
 
 val log_intersection :
@@ -81,7 +86,7 @@ val log_intersection :
 val log_type_access :
   level:int ->
   Typing_defs.locl_ty ->
-  Ast_defs.id ->
+  Typing_defs.pos_id ->
   Typing_env_types.env * Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 

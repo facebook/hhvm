@@ -58,7 +58,7 @@ let rec strip_ty ty =
               ~is_atom:false
               ~readonly:false;
           (* Dummy values: these aren't currently serialized. *)
-          fp_pos = Pos.none;
+          fp_pos = Pos_or_decl.none;
           fp_name = None;
         }
       in

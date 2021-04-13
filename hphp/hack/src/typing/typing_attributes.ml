@@ -70,13 +70,13 @@ let check_implements
        * and its args satisfy the attribute class constructor *)
       let attr_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
-          (Rwitness (Cls.pos attr_class))
+          (Rwitness_from_decl (Cls.pos attr_class))
           (Cls.name attr_class)
           []
       in
       let interface_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
-          (Rwitness (Cls.pos intf_class))
+          (Rwitness_from_decl (Cls.pos intf_class))
           (Cls.name intf_class)
           []
       in
@@ -99,7 +99,7 @@ let check_implements
             ~is_using_clause:false
             attr_pos
             env
-            (Aast.CI attr_cid)
+            (Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
             []
             params (* list of attr parameter literals *)
             None

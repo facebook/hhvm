@@ -8,19 +8,19 @@ File "using_bad_hints.php", line 19, characters 30-31:
 Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
 File "using_bad_hints.php", line 20, characters 26-31:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-File "using_bad_hints.php", line 23, characters 59-64:
+File "using_bad_hints.php", line 23, characters 49-65:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 24, characters 14-19:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_hints.php", line 28, characters 31-44:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-File "using_bad_hints.php", line 31, characters 52-58:
+File "using_bad_hints.php", line 31, characters 42-59:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 36, characters 22-27:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 38, characters 16-21:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-File "using_bad_hints.php", line 42, characters 38-43:
+File "using_bad_hints.php", line 42, characters 28-44:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 44, characters 16-21:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])

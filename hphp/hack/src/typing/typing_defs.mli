@@ -172,7 +172,7 @@ type expand_env = {
   type_expansions: (bool * Pos_or_decl.t * string) list;
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
-  on_error: Errors.typing_error_callback;
+  on_error: Errors.error_from_reasons_callback;
 }
 
 val get_var : 'a ty -> Ident.t option

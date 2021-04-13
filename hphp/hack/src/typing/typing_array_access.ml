@@ -50,7 +50,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   Typing_log.(
     log_with_level env "typing" 1 (fun () ->
         log_types
-          expr_pos
+          (Pos_or_decl.of_raw_pos expr_pos)
           env
           [Log_head ("widen_for_array_get", [Log_type ("ty", ty)])]));
   match deref ty with
@@ -103,7 +103,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
       match TUtils.shape_field_name env index_expr with
       | None -> (env, None)
       | Some field ->
-        let field = TShapeField.of_ast (fun p -> p) field in
+        let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
         (match TShapeMap.find_opt field fdm with
         (* If field is in the lower bound but is optional, then no upper bound makes sense
          * unless this is a null-coalesce access *)
@@ -213,7 +213,7 @@ let rec array_get
         Typing_log.(
           log_with_level env "typing" 1 (fun () ->
               log_types
-                p
+                (Pos_or_decl.of_raw_pos p)
                 env
                 [
                   Log_head
@@ -417,7 +417,7 @@ let rec array_get
                don't report another one for a missing field *)
               (env, err_witness env p)
             | Some field ->
-              let field = TShapeField.of_ast (fun p -> p) field in
+              let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
               begin
                 match TShapeMap.find_opt field fdm with
                 | None ->
@@ -493,7 +493,11 @@ let rec array_get
         let (env, value) = Env.fresh_type env expr_pos in
         let keyed_container = MakeType.keyed_container r ty2 value in
         let env =
-          SubType.sub_type env ty1 keyed_container Errors.index_type_mismatch
+          SubType.sub_type
+            env
+            ty1
+            keyed_container
+            (Errors.index_type_mismatch_at expr_pos)
         in
         (env, value))
 
@@ -575,7 +579,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   Typing_log.(
     log_with_level env "typing" 1 (fun () ->
         log_types
-          expr_pos
+          (Pos_or_decl.of_raw_pos expr_pos)
           env
           [Log_head ("widen_for_assign_array_get", [Log_type ("ty", ty)])]));
   match deref ty with
@@ -788,7 +792,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           match TUtils.shape_field_name env key with
           | None -> error
           | Some field ->
-            let field = TShapeField.of_ast (fun p -> p) field in
+            let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
             let fdm' =
               TShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
             in

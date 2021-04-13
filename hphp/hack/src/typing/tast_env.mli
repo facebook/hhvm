@@ -284,3 +284,7 @@ val get_const :
 
 val consts :
   env -> Decl_provider.class_decl -> (string * Typing_defs.class_const) list
+
+(** Check that the position is in the current decl and if it is, resolve
+    it with the current file. *)
+val assert_pos_in_current_decl : env -> Pos_or_decl.t -> Pos.t option

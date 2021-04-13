@@ -1,13 +1,21 @@
-File "iface_require_incompat5.php", line 10, characters 41-42:
-Unable to satisfy trait/interface requirement (Typing[4110])
+File "iface_require_incompat5.php", line 10, characters 7-9:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_incompat5.php", line 10, characters 41-42:
+  This requires to extend or implement Super
+  File "iface_require_incompat5.php", line 6, characters 19-28:
+  Required here
   File "iface_require_incompat5.php", line 6, characters 25-27:
   Expected `int`
   File "iface_require_incompat5.php", line 6, characters 25-27:
   This type argument to `Super` must match exactly (it is invariant)
   File "iface_require_incompat5.php", line 10, characters 25-27:
   But got `num`
-File "iface_require_incompat5.php", line 10, characters 41-42:
-Unable to satisfy trait/interface requirement (Typing[4110])
+File "iface_require_incompat5.php", line 10, characters 7-9:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_incompat5.php", line 10, characters 41-42:
+  This requires to extend or implement Super
+  File "iface_require_incompat5.php", line 7, characters 19-30:
+  Required here
   File "iface_require_incompat5.php", line 7, characters 25-29:
   Expected `float`
   File "iface_require_incompat5.php", line 7, characters 25-29:

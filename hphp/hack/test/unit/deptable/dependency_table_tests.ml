@@ -73,8 +73,12 @@ let write_and_parse_test_files ctx =
   if not (Errors.is_empty errors) then (
     Errors.iter_error_list
       (fun e ->
-        List.iter (Errors.to_list e) ~f:(fun (pos, msg) ->
-            eprintf "%s: %s\n" (Pos.string (Pos.to_absolute pos)) msg))
+        List.iter (Errors.to_list_ e) ~f:(fun (pos, msg) ->
+            eprintf
+              "%s: %s\n"
+              (Pos.string
+                 (Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos))
+              msg))
       errors;
     failwith "Expected no errors from parsing."
   );

@@ -1,12 +1,18 @@
 File "invalid_call3.php", line 6, characters 9-9:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "invalid_call3.php", line 6, characters 9-9:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 20, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_call3.php", line 6, characters 13-13:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "invalid_call3.php", line 6, characters 13-13:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 20, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_call3.php", line 6, characters 16-16:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Typing error (Typing[4110])
+  File "invalid_call3.php", line 6, characters 16-16:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 20, characters 6-43:
   But got `dynamic` because it is an unenforceable type

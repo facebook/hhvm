@@ -8,31 +8,41 @@
  *)
 
 open Hh_prelude
-module Reason = Typing_reason
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)
-let check_fulfillment env get_impl (parent_pos, req_ty) =
+let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
   match TUtils.try_unwrap_class_type req_ty with
   | None -> env
   | Some (_r, (_p, req_name), _paraml) ->
+    let req_pos = Typing_defs.get_pos req_ty in
     (match get_impl req_name with
     | None ->
-      let req_pos = Typing_defs.get_pos req_ty in
-      Errors.unsatisfied_req parent_pos req_name req_pos;
+      Errors.unsatisfied_req ~class_pos ~trait_pos ~req_pos req_name;
       env
     | Some impl_ty ->
-      Typing_ops.sub_type_decl parent_pos Reason.URclass_req env impl_ty req_ty)
+      Typing_phase.sub_type_decl
+        env
+        impl_ty
+        req_ty
+        (Errors.unsatisfied_req_callback
+           ~class_pos
+           ~trait_pos
+           ~req_pos
+           req_name))
 
-let check_class env tc =
+(** Check whether a class satifies all the requirements of the traits it uses,
+    namely [require extends] and [require implements]. *)
+let check_class env class_pos tc =
   match Cls.kind tc with
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract ->
     List.fold
       (Cls.all_ancestor_reqs tc)
-      ~f:(fun env req -> check_fulfillment env (Cls.get_ancestor tc) req)
+      ~f:(fun env req ->
+        check_fulfillment env class_pos (Cls.get_ancestor tc) req)
       ~init:env
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface

@@ -228,7 +228,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
                     ck
                     ty
                     ~cstr_ty
-                    (fun ?code:_ _ _ -> report_constraint ty cls_name x)
+                    (fun ?code:_ _ -> report_constraint ty cls_name x)
                 in
                 ())
           end
@@ -327,7 +327,9 @@ module Simple = struct
     | Tapply ((_, x), _argl) when String.equal x SN.Typehints.wildcard ->
       let is_higher_kinded = Simple.get_arity kind > 0 in
       if is_higher_kinded then (
-        let pos = get_reason tyarg |> Reason.to_pos in
+        let pos =
+          get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
+        in
         Errors.wildcard_for_higher_kinded_type pos;
         check_well_kinded env tyarg nkind
       )
@@ -338,7 +340,7 @@ module Simple = struct
 
   and check_well_kinded_type ~allow_missing_targs env (ty : decl_ty) =
     let (r, ty_) = deref ty in
-    let use_pos = Reason.to_pos r in
+    let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let check = check_well_kinded_type ~allow_missing_targs:false env in
     let check_against_tparams def_pos tyargs tparams =
       let kinds = Simple.named_kinds_of_decl_tparams tparams in
@@ -418,7 +420,7 @@ module Simple = struct
       =
     let (expected_name, expected_kind) = expected_nkind in
     let r = get_reason ty in
-    let use_pos = Reason.to_pos r in
+    let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let kind_error actual_kind =
       let (def_pos, tparam_name) = expected_name in
 
@@ -464,7 +466,7 @@ module Simple = struct
       | Tgeneric (_, targs)
       | Tapply (_, targs) ->
         Errors.higher_kinded_partial_application
-          (Reason.to_pos r)
+          (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)
           (List.length targs)
       | Terr
       | Tany _ ->

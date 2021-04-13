@@ -108,7 +108,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
   match TUtils.shape_field_name env (p, field) with
   | None -> (env, shape_ty)
   | Some field ->
-    let field = TShapeField.of_ast (fun p -> p) field in
+    let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
     let (env, shape_ty) =
       Typing_solver.expand_type_and_narrow
         ~description_of_expected:"a shape"
@@ -124,7 +124,9 @@ let shapes_idx_not_null env shape_ty (p, field) =
         let (env, field_type) =
           match TShapeMap.find_opt field ftm with
           | Some { sft_ty; _ } ->
-            let (env, sft_ty) = Typing_solver.non_null env p sft_ty in
+            let (env, sft_ty) =
+              Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) sft_ty
+            in
             (env, { sft_optional = false; sft_ty })
           | None ->
             ( env,
@@ -195,7 +197,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
     match TUtils.shape_field_name env field with
     | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
-      let field_name = TShapeField.of_ast (fun p -> p) field_name in
+      let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
         make_idx_fake_super_shape
           shape_pos
@@ -249,7 +251,7 @@ let at env ~expr_pos ~shape_pos shape_ty field =
     match TUtils.shape_field_name env field with
     | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
-      let field_name = TShapeField.of_ast (fun p -> p) field_name in
+      let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
         make_idx_fake_super_shape
           shape_pos
@@ -274,7 +276,7 @@ let remove_key p env shape_ty field =
   match TUtils.shape_field_name env field with
   | None -> (env, TUtils.mk_tany env (fst field))
   | Some field_name ->
-    let field_name = TShapeField.of_ast (fun p -> p) field_name in
+    let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
     shrink_shape p field_name env shape_ty
 
 let to_collection env shape_ty res return_type =
@@ -294,9 +296,9 @@ let to_collection env shape_ty res return_type =
             List.map_env env keys (fun env key ->
                 match key with
                 | Typing_defs.TSFlit_int (p, _) ->
-                  (env, MakeType.int (Reason.Rwitness p))
+                  (env, MakeType.int (Reason.Rwitness_from_decl p))
                 | Typing_defs.TSFlit_str (p, _) ->
-                  (env, MakeType.string (Reason.Rwitness p))
+                  (env, MakeType.string (Reason.Rwitness_from_decl p))
                 | Typing_defs.TSFclass_const ((p, cid), (_, mid)) ->
                   begin
                     match Env.get_class env cid with
@@ -308,9 +310,9 @@ let to_collection env shape_ty res return_type =
                             env
                             ~ignore_errors:true
                             const.cc_type
-                        | None -> (env, TUtils.mk_tany env p)
+                        | None -> (env, TUtils.mk_tany_ env p)
                       end
-                    | None -> (env, TUtils.mk_tany env p)
+                    | None -> (env, TUtils.mk_tany_ env p)
                   end)
           in
           let (env, key) = Typing_union.union_list env r keys in

@@ -72,7 +72,7 @@ let check_attrs pos env sid attrs =
           | Some ty ->
             Reason.to_string
               ("The attribute " ^ attr ^ " is declared in this class.")
-              (Reason.Rwitness (Cls.pos ty))
+              (Reason.Rwitness_from_decl (Cls.pos ty))
         in
         Errors.missing_xhp_required_attr pos attr msg)
       missing_attrs

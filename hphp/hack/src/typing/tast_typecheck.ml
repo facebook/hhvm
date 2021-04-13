@@ -217,20 +217,18 @@ let localize env hint =
   match hint with
   | None -> failwith "There should be a hint in strict mode."
   | Some hint ->
+    let pos = fst hint in
     let (_env, ty) =
       Phase.localize_hint_with_self env ~ignore_errors:false hint
     in
-    ty
+    (pos, ty)
 
 let gamma_from_params env (params : ETast.fun_param list) =
   let add_param_to_gamma gamma param =
     if not (List.is_empty param.param_user_attributes) then
       raise Not_implemented;
     let name = make_local_id param.param_name in
-    let ty = localize env (hint_of_type_hint param.param_type_hint) in
-    (* TODO can we avoid this? *)
-    let reas_ty_to_pos_reas_ty ty = (get_pos ty, ty) in
-    let ty = reas_ty_to_pos_reas_ty ty in
+    let ty = localize env @@ hint_of_type_hint param.param_type_hint in
     add_to_gamma name ty gamma
   in
   List.fold ~init:empty_gamma ~f:add_param_to_gamma params

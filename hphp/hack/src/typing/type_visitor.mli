@@ -63,7 +63,7 @@ class type ['a] decl_type_visitor_type =
     method on_tapply :
       'a ->
       Typing_reason.decl_t ->
-      Ast_defs.id ->
+      Typing_defs.pos_id ->
       Typing_defs.decl_ty list ->
       'a
 
@@ -167,7 +167,7 @@ class type ['a] locl_type_visitor_type =
     method on_tclass :
       'a ->
       Typing_reason.t ->
-      Ast_defs.id ->
+      Typing_defs.pos_id ->
       Typing_defs.exact ->
       Typing_defs.locl_ty list ->
       'a

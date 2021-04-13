@@ -161,7 +161,8 @@ let rec freshen_inside_ty env ty =
     (env, mk (r, Taccess (ty, ids)))
   | Tunapplied_alias _ -> default ()
 
-and freshen_ty env ty = Env.fresh_invariant_type_var env (get_pos ty)
+and freshen_ty env ty =
+  Env.fresh_invariant_type_var env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
 
 and freshen_possibly_enforced_ty env ety =
   let (env, et_type) = freshen_ty env ety.et_type in
@@ -610,7 +611,7 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
             (Reason.to_string "It is unknown" r);
           Env.set_tyvar_eager_solve_fail env v)
     in
-    (env, TUtils.terr env (Reason.Rsolve_fail p))
+    (env, TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)))
   | _ -> (env', ety)
 
 let expand_type_and_solve_eq env ty =
@@ -750,8 +751,6 @@ let close_tyvars_and_solve env =
  * Let's at least notice when these bounds imply an equality.
  *)
 let is_sub_type env ty1 ty2 =
-  (* It seems weird that this can cause errors, but I'm wary of simply discarding
-   *  errors here. Using unify_error for now to maintain existing behavior. *)
   let (env, ty1) = expand_type_and_solve_eq env ty1 in
   let (env, ty2) = expand_type_and_solve_eq env ty2 in
   Typing_utils.is_sub_type env ty1 ty2
@@ -795,7 +794,7 @@ let rec non_null env pos ty =
     end
   in
   let (env, ty) = make_concrete_super_types_nonnull#on_type env ty in
-  let r = Reason.Rwitness pos in
+  let r = Reason.Rwitness_from_decl pos in
   Inter.intersect env r ty (MakeType.nonnull r)
 
 let try_bind_to_equal_bound env v =

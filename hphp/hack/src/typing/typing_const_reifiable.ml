@@ -17,7 +17,7 @@ let check_reifiable env tc attr_pos =
       let emit_err = Errors.reifiable_attr attr_pos kind in
       Typing_reified_check.validator#validate_type
         env
-        (fst tc.ttc_name)
+        (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
         ty
         ~reification:Type_validator.Unresolved
         emit_err

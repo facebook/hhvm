@@ -55,10 +55,14 @@ let ft_redundant_tparams env root tparams tpenv ty =
            *)
           begin
             match super_bounds with
-            | [] -> Errors.redundant_covariant pos bounds_message "nothing"
+            | [] ->
+              Errors.redundant_covariant
+                (Pos_or_decl.unsafe_to_raw_pos pos)
+                bounds_message
+                "nothing"
             | [(_, t)] ->
               Errors.redundant_covariant
-                pos
+                (Pos_or_decl.unsafe_to_raw_pos pos)
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()

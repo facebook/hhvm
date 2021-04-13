@@ -19,7 +19,13 @@ let local_capability_id = Local_id.make_unscoped SN.Coeffects.local_capability
 let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   let cap_pos = Typing_defs.get_pos cap_ty in
   (* Represents the capability for local operations inside a function body, excluding calls. *)
-  let env = Env.set_local env local_capability_id cap_ty cap_pos in
+  let env =
+    Env.set_local
+      env
+      local_capability_id
+      cap_ty
+      (Pos_or_decl.unsafe_to_raw_pos cap_pos)
+  in
   let (env, ty) =
     Typing_intersection.intersect
       env
@@ -29,7 +35,8 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   in
   let (env, ty) = Typing_intersection.simplify_intersections env ty in
   (* The implicit argument for ft_implicit_params.capability *)
-  (Env.set_local env capability_id ty cap_pos, ty)
+  ( Env.set_local env capability_id ty (Pos_or_decl.unsafe_to_raw_pos cap_pos),
+    ty )
 
 let get_type capability =
   match capability with

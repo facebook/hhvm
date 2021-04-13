@@ -14,22 +14,22 @@ File "user-defined-type_as_context.php", line 11, characters 38-42:
 Unbound name: `HH\Contexts\Iface` (Naming[2049])
 File "user-defined-type_as_context.php", line 11, characters 38-42:
 Unbound name: `HH\Contexts\Unsafe\Iface` (Naming[2049])
-File "user-defined-type_as_context.php", line 4, characters 43-47:
+File "user-defined-type_as_context.php", line 4, characters 42-48:
 Illegal context: `\HH\Contexts\Clazz`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "user-defined-type_as_context.php", line 7, characters 47-51:
+File "user-defined-type_as_context.php", line 7, characters 46-52:
 Illegal context: `\HH\Contexts\Iface`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "user-defined-type_as_context.php", line 10, characters 34-38:
+File "user-defined-type_as_context.php", line 10, characters 33-39:
 Illegal context: `\HH\Contexts\Clazz`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "user-defined-type_as_context.php", line 11, characters 38-42:
+File "user-defined-type_as_context.php", line 11, characters 37-43:
 Illegal context: `\HH\Contexts\Iface`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:

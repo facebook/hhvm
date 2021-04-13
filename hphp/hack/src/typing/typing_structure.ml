@@ -36,13 +36,16 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
         td_tparams
     in
     let ts =
-      mk (Reason.Rnone, Tapply ((Pos.none, SN.FB.cTypeStructure), params))
+      mk
+        (Reason.Rnone, Tapply ((Pos_or_decl.none, SN.FB.cTypeStructure), params))
     in
     let ety_env =
       {
         (Phase.env_with_self
            env
-           ~on_error:(Errors.invalid_type_hint (Reason.to_pos r)))
+           ~on_error:
+             (Errors.invalid_type_hint
+                (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)))
         with
         substs = Subst.make_locl td_tparams [ty];
       }

@@ -27,7 +27,7 @@ module ExprDepTy = struct
   (* Convert a class_id into a "dependent kind" (dep). This later informs the make_with_dep_kind function
    * how to translate a type suitable for substituting for `this` in a method signature.
    *)
-  let from_cid env reason cid =
+  let from_cid env reason (cid : Nast.class_id_) =
     let pos = Reason.to_pos reason in
     let (pos, expr_dep_reason, dep) =
       match cid with
@@ -43,9 +43,11 @@ module ExprDepTy = struct
         | None ->
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
-      | N.CI (p, cls) -> (p, Reason.ERclass cls, Dep_Cls cls)
+      | N.CI (p, cls) ->
+        (Pos_or_decl.of_raw_pos p, Reason.ERclass cls, Dep_Cls cls)
       | N.CIstatic -> (pos, Reason.ERstatic, Dep_This)
-      | N.CIexpr (p, N.This) -> (p, Reason.ERstatic, Dep_This)
+      | N.CIexpr (p, N.This) ->
+        (Pos_or_decl.of_raw_pos p, Reason.ERstatic, Dep_This)
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
@@ -57,13 +59,13 @@ module ExprDepTy = struct
           | Some eid -> (Reason.ERexpr eid, Dep_Expr eid)
           | None -> new_ ()
         in
-        (p, ereason, dep)
+        (Pos_or_decl.of_raw_pos p, ereason, dep)
       (* If all else fails we generate a new identifier for our expression
        * dependent type.
        *)
       | N.CIexpr (p, _) ->
         let (ereason, dep) = new_ () in
-        (p, ereason, dep)
+        (Pos_or_decl.of_raw_pos p, ereason, dep)
     in
     (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), dep)
 

@@ -1,7 +1,17 @@
 File "primitive_as_context.php", line 4, characters 12-37:
 Methods need to be marked public, private, or protected. (Naming[2086])
+File "primitive_as_context.php", line 4, characters 40-44:
+Illegal context: `int`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
 File "primitive_as_context.php", line 4, characters 41-43:
 Illegal context: `int`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "primitive_as_context.php", line 7, characters 41-48:
+Illegal context: `string`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

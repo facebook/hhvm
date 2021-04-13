@@ -55,7 +55,7 @@ val fresh_type : ?variance:Ast_defs.variance -> t -> Pos.t -> t * locl_ty
 
 (** Same as fresh_type but takes a specific reason as parameter. *)
 val fresh_type_reason :
-  ?variance:Ast_defs.variance -> t -> Reason.t -> t * locl_ty
+  ?variance:Ast_defs.variance -> t -> Pos.t -> Reason.t -> t * locl_ty
 
 val fresh_invariant_type_var : t -> Pos.t -> t * locl_ty
 

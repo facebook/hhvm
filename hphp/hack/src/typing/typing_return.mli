@@ -11,7 +11,10 @@ open Typing_env_types
 
 (** Typing code concerned with return types. *)
 
+(** Returns the possibly enforced return type along with some other information.
+    The position parameter is used for error generation. *)
 val make_info :
+  Pos.t ->
   Ast_defs.fun_kind ->
   Nast.user_attribute list ->
   env ->

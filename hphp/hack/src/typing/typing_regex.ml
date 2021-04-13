@@ -27,7 +27,11 @@ let rec int_keys p top bottom acc_i =
   if top <= bottom then
     acc_i
   else
-    int_keys p (top - 1) bottom (TSFlit_int (p, string_of_int top) :: acc_i)
+    int_keys
+      p
+      (top - 1)
+      bottom
+      (TSFlit_int (Pos_or_decl.of_raw_pos p, string_of_int top) :: acc_i)
 
 (* Assumes that names_numbers is sorted in DECREASING order of numbers *)
 let rec keys_aux p top names_numbers acc =
@@ -38,7 +42,8 @@ let rec keys_aux p top names_numbers acc =
       p
       (number - 1)
       t
-      (TSFlit_str (p, name) :: (int_keys p top number [] @ acc))
+      ( TSFlit_str (Pos_or_decl.of_raw_pos p, name)
+      :: (int_keys p top number [] @ acc) )
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
@@ -83,7 +88,9 @@ let type_match p s ~flags =
       keys
   in
   (* Any Regex\Match will contain the entire matched substring at key 0 *)
-  let shape_map = TShapeMap.add (TSFlit_int (p, "0")) sft shape_map in
+  let shape_map =
+    TShapeMap.add (TSFlit_int (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
+  in
   mk (Reason.Rregex p, Tshape (Closed_shape, shape_map))
 
 let get_global_options s =

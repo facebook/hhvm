@@ -264,7 +264,6 @@ let fun_def ctx f :
       Typing_check_decls.fun_ env f;
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-          pos
           env
           ~ignore_errors:false
           f.f_tparams
@@ -289,8 +288,14 @@ let fun_def ctx f :
           in
           Typing_return.make_return_type localize env ty
       in
+      let ret_pos =
+        match snd f.f_ret with
+        | Some (ret_pos, _) -> ret_pos
+        | None -> fst f.f_name
+      in
       let return =
         Typing_return.make_info
+          ret_pos
           f.f_fun_kind
           f.f_user_attributes
           env
@@ -408,7 +413,10 @@ let method_dynamically_callable
     in
     let (env, param_tys) =
       List.map_env env m.m_params ~f:(fun env param ->
-          make_param_local_ty env (Some (make_dynamic param.param_pos)) param)
+          make_param_local_ty
+            env
+            (Some (make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos))
+            param)
     in
     let params_need_immutable = get_ctx_vars m.m_ctxs in
     let (env, _) =
@@ -444,7 +452,7 @@ let method_dynamically_callable
         ~partial_callback:(Partial.should_check_error (Env.get_mode env))
         ~pos:variadic_pos
         env
-        (Some (make_dynamic variadic_pos))
+        (Some (make_dynamic @@ Pos_or_decl.of_raw_pos variadic_pos))
         m.m_variadic
     in
     let env =
@@ -455,8 +463,8 @@ let method_dynamically_callable
       if Cls.get_implements_dynamic cls then
         let this_ty =
           Typing_make_type.intersection
-            (Reason.Rsound_dynamic_callable Pos.none)
-            [Env.get_local env this; make_dynamic Pos.none]
+            (Reason.Rsound_dynamic_callable Pos_or_decl.none)
+            [Env.get_local env this; make_dynamic Pos_or_decl.none]
         in
         Env.set_local env this this_ty Pos.none
       else
@@ -531,7 +539,6 @@ let method_def env cls m =
       let env = Env.set_fun_is_constructor env is_ctor in
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-          pos
           env
           ~ignore_errors:false
           m.m_tparams
@@ -574,12 +581,19 @@ let method_def env cls m =
           let ety_env =
             Phase.env_with_self
               env
-              ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code
+              ~on_error:
+                (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
           in
           Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
+      let ret_pos =
+        match snd m.m_ret with
+        | Some (ret_pos, _) -> ret_pos
+        | None -> fst m.m_name
+      in
       let return =
         Typing_return.make_info
+          ret_pos
           m.m_fun_kind
           m.m_user_attributes
           env
@@ -719,13 +733,13 @@ let check_parent env class_def class_type =
       Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   | None -> ()
 
-let check_parent_sealed ~(is_enum_class : bool) child_type parent_type =
+let check_parent_sealed
+    ~(is_enum_class : bool) (child_pos, child_type) parent_type =
   match Cls.sealed_whitelist parent_type with
   | None -> ()
   | Some whitelist ->
     let parent_pos = Cls.pos parent_type in
     let parent_name = Cls.name parent_type in
-    let child_pos = Cls.pos child_type in
     let child_name = Cls.name child_type in
     let check kind action =
       if not (SSet.mem child_name whitelist) then
@@ -756,7 +770,10 @@ let check_parents_sealed env child_def child_type =
         begin
           match Env.get_class_dep env name with
           | Some parent_type ->
-            check_parent_sealed ~is_enum_class child_type parent_type
+            check_parent_sealed
+              ~is_enum_class
+              (fst child_def.c_name, child_type)
+              parent_type
           | None -> ()
         end
       | _ -> ())
@@ -770,32 +787,29 @@ let check_parents_sealed env child_def child_type =
 let rec check_implements_or_extends_unique impl =
   match impl with
   | [] -> ()
-  | ty :: rest ->
+  | (hint, ty) :: rest ->
     (match get_node ty with
-    | Tapply ((pos, name), _ :: _) ->
+    | Tapply ((_, name), _ :: _) ->
       let (pos_list, rest) =
-        List.partition_map rest (fun ty ->
+        List.partition_map rest (fun (h, ty) ->
             match get_node ty with
             | Tapply ((pos', name'), _) when String.equal name name' ->
               `Fst pos'
-            | _ -> `Snd ty)
+            | _ -> `Snd (h, ty))
       in
       if not (List.is_empty pos_list) then
-        Errors.duplicate_interface pos name pos_list;
+        Errors.duplicate_interface (fst hint) name pos_list;
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
 let check_cstr_dep env deps =
-  List.iter deps (fun dep ->
-      match deref dep with
-      | (_, Tapply ((_, class_name), _)) ->
+  List.iter deps (fun ((p, _dep_hint), dep) ->
+      match get_node dep with
+      | Tapply ((_, class_name), _) ->
         Env.make_depend_on_constructor env class_name
-      | (r, Tgeneric _) ->
-        let p = Typing_reason.to_pos r in
+      | Tgeneric _ ->
         Errors.expected_class ~suffix:" or interface but got a generic" p
-      | (r, _) ->
-        let p = Typing_reason.to_pos r in
-        Errors.expected_class ~suffix:" or interface" p)
+      | _ -> Errors.expected_class ~suffix:" or interface" p)
 
 let check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
@@ -805,20 +819,21 @@ let check_const_trait_members pos env use_list =
         if not (get_ce_const ce) then Errors.trait_prop_const_class pos x)
   | _ -> ()
 
-let check_consistent_enum_inclusion included_cls (dest_cls : Cls.t) =
+let check_consistent_enum_inclusion
+    included_cls ((dest_cls_pos, dest_cls) : Pos.t * Cls.t) =
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->
     (* ensure that the base types are identical *)
     if not (Typing_defs.equal_decl_ty included_e.te_base dest_e.te_base) then
       Errors.incompatible_enum_inclusion_base
-        (Cls.pos dest_cls)
+        dest_cls_pos
         (Cls.name dest_cls)
         (Cls.name included_cls);
     (* ensure that the visibility constraint are compatible *)
     (match (included_e.te_constraint, dest_e.te_constraint) with
     | (None, Some _) ->
       Errors.incompatible_enum_inclusion_constraint
-        (Cls.pos dest_cls)
+        dest_cls_pos
         (Cls.name dest_cls)
         (Cls.name included_cls)
     | (_, _) -> ());
@@ -829,13 +844,13 @@ let check_consistent_enum_inclusion included_cls (dest_cls : Cls.t) =
         ~parent_kind:Ast_defs.Cenum
         ~parent_name:(Cls.name included_cls)
         ~parent_is_enum_class:true
-        ~child_pos:(Cls.pos dest_cls)
+        ~child_pos:dest_cls_pos
         ~child_kind:Ast_defs.Cenum
         ~child_name:(Cls.name dest_cls)
         ~child_is_enum_class:false
   | (None, _) ->
     Errors.enum_inclusion_not_enum
-      (Cls.pos dest_cls)
+      dest_cls_pos
       (Cls.name dest_cls)
       (Cls.name included_cls)
   | (_, _) -> ()
@@ -868,7 +883,7 @@ let check_enum_includes env cls =
         (* 1. Check for consistency *)
         (match Env.get_class env dest_class_name with
         | None -> ()
-        | Some cls -> check_consistent_enum_inclusion ie_cls cls);
+        | Some cls -> check_consistent_enum_inclusion ie_cls (ie_pos, cls));
         (* 2. Check for duplicates *)
         List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
             ( if String.equal const_name "class" then
@@ -977,9 +992,9 @@ let check_extend_abstract_const ~is_final p seq =
         let cc_pos = get_pos cc.cc_type in
         Errors.implement_abstract ~is_final p cc_pos "constant" x)
 
-exception Found of Pos.t
+exception Found of Pos_or_decl.t
 
-let contains_generic : Typing_defs.decl_ty -> Pos.t option =
+let contains_generic : Typing_defs.decl_ty -> Pos_or_decl.t option =
  fun ty ->
   let visitor =
     object
@@ -996,7 +1011,7 @@ let contains_generic : Typing_defs.decl_ty -> Pos.t option =
     None
   with Found p -> Some p
 
-let check_no_generic_static_property tc =
+let check_no_generic_static_property env tc =
   if
     (* Check whether the type of a static property (class variable) contains
      * any generic type parameters. Outside of traits, this is illegal as static
@@ -1016,10 +1031,15 @@ let check_no_generic_static_property tc =
            match contains_generic ty with
            | None -> ()
            | Some generic_pos ->
-             Errors.static_property_type_generic_param
-               ~class_pos
-               ~var_type_pos
-               ~generic_pos)
+             Option.iter
+               (* If the static property is inherited from another trait, the position may be
+                * in a different file. *)
+               (Env.assert_pos_in_current_decl env generic_pos)
+               ~f:(fun generic_pos ->
+                 Errors.static_property_type_generic_param
+                   ~class_pos
+                   ~var_type_pos
+                   ~generic_pos))
 
 let get_decl_prop_ty env cls ~is_static prop_id =
   let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
@@ -1275,14 +1295,19 @@ let class_constr_def env cls constructor =
   let env = { env with inside_constructor = true } in
   Option.bind constructor (method_def env cls)
 
-let class_implements_type env implements c1 ctype2 =
+let class_implements_type env implements c1 (_hint2, ctype2) =
   let params =
     List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness_from_decl p, Tgeneric (s, [])))
+        mk
+          ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
+            Tgeneric (s, []) ))
   in
-  let r = Reason.Rwitness_from_decl (fst c1.c_name) in
-  let ctype1 = mk (r, Tapply (c1.c_name, params)) in
-  Typing_extends.check_implements env implements ctype2 ctype1
+  let c1_name_pos = fst c1.c_name in
+  let r = Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos c1_name_pos) in
+  let ctype1 =
+    mk (r, Tapply (Positioned.of_raw_positioned c1.c_name, params))
+  in
+  Typing_extends.check_implements env implements ctype2 (c1_name_pos, ctype1)
 
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
@@ -1432,14 +1457,15 @@ let class_def_ env c tc =
       in
       match get_meth (class_id, meth_id) with
       | Some { fe_pos; _ } -> fe_pos
-      | None -> Pos.none
+      | None -> Pos_or_decl.none
     in
     let check_override ~is_static (id, ce) =
       if get_ce_override ce then
         let pos = method_pos ~is_static ce.ce_origin id in
         (* Method is actually defined in this class *)
         if String.equal ce.ce_origin (snd c.c_name) then
-          Errors.should_be_override pos (snd c.c_name) id
+          Option.iter (Env.assert_pos_in_current_decl env pos) (fun pos ->
+              Errors.should_be_override pos (snd c.c_name) id)
         else
           match Env.get_class env ce.ce_origin with
           | None -> ()
@@ -1459,11 +1485,14 @@ let class_def_ env c tc =
   check_enum_includes env c;
   let (pc, c_name) = c.c_name in
   let (req_extends, req_implements) = split_reqs c in
-  let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
-  let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in
-  let uses = List.map c.c_uses (Decl_hint.hint env.decl_env) in
-  let req_extends = List.map req_extends (Decl_hint.hint env.decl_env) in
-  let req_implements = List.map req_implements (Decl_hint.hint env.decl_env) in
+  let hints_and_decl_tys hints =
+    List.map hints (fun hint -> (hint, Decl_hint.hint env.decl_env hint))
+  in
+  let extends = hints_and_decl_tys c.c_extends in
+  let implements = hints_and_decl_tys c.c_implements in
+  let uses = hints_and_decl_tys c.c_uses in
+  let req_extends = hints_and_decl_tys req_extends in
+  let req_implements = hints_and_decl_tys req_implements in
   let additional_parents =
     (* In an abstract class or a trait, we assume the interfaces
        will be implemented in the future, so we take them as
@@ -1482,14 +1511,12 @@ let class_def_ env c tc =
   check_cstr_dep additional_parents;
   begin
     match c.c_enum with
-    | Some e ->
-      check_cstr_dep (List.map e.e_includes (Decl_hint.hint env.decl_env))
+    | Some e -> check_cstr_dep (hints_and_decl_tys e.e_includes)
     | _ -> ()
   end;
   let impl = extends @ implements @ uses in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      pc
       env
       ~ignore_errors:false
       c.c_tparams
@@ -1499,19 +1526,20 @@ let class_def_ env c tc =
     Phase.check_where_constraints
       ~in_class:true
       ~use_pos:pc
-      ~definition_pos:pc
+      ~definition_pos:(Pos_or_decl.of_raw_pos pc)
       ~ety_env:
         (Phase.env_with_self
            env
-           ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code)
+           ~on_error:(Env.unify_error_assert_primary_pos_in_current_decl env))
       env
       (Cls.where_constraints tc)
   in
   Typing_variance.class_def env c;
-  check_no_generic_static_property tc;
-  let check_where_constraints env ht =
-    let (_, (p, _), _) = TUtils.unwrap_class_type ht in
-    let (env, locl_ty) = Phase.localize_with_self env ~ignore_errors:false ht in
+  check_no_generic_static_property env tc;
+  let check_where_constraints env ((p, _hint), decl_ty) =
+    let (env, locl_ty) =
+      Phase.localize_with_self env ~ignore_errors:false decl_ty
+    in
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls, _, tyl) ->
       (match Env.get_class env (snd cls) with
@@ -1521,7 +1549,8 @@ let class_def_ env c tc =
           {
             (Phase.env_with_self
                env
-               ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code)
+               ~on_error:
+                 (Env.unify_error_assert_primary_pos_in_current_decl env))
             with
             substs = Subst.make_locl tc_tparams tyl;
           }
@@ -1529,7 +1558,7 @@ let class_def_ env c tc =
         Phase.check_where_constraints
           ~in_class:true
           ~use_pos:pc
-          ~definition_pos:p
+          ~definition_pos:(Pos_or_decl.of_raw_pos p)
           ~ety_env
           env
           (Cls.where_constraints cls)
@@ -1568,7 +1597,7 @@ let class_def_ env c tc =
       check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p);
   let env =
     List.fold ~init:env impl ~f:(fun env ->
-        class_implements_type env implements c)
+        class_implements_type env (List.map implements ~f:snd) c)
   in
   if Cls.is_disposable tc then
     List.iter
@@ -1713,7 +1742,8 @@ let class_def ctx c =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span c.c_span @@ fun () ->
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let tc = Env.get_class env (snd c.c_name) in
+  let (name_pos, name) = c.c_name in
+  let tc = Env.get_class env name in
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc Cls.decl_errors);
   Typing_check_decls.class_ env c;
@@ -1725,15 +1755,17 @@ let class_def ctx c =
     None
   | Some tc ->
     (* If there are duplicate definitions of the class then we will end up
-       * checking one AST with respect to the decl corresponding to the other definition.
-       * Naming has already detected duplicates, so let's just avoid cascading unhelpful
-       * typing errors, and also avoid triggering the bad position assert
-       *)
-    if not (Pos.equal (fst c.c_name) (Cls.pos tc)) then
+     * checking one AST with respect to the decl corresponding to the other definition.
+     * Naming has already detected duplicates, so let's just avoid cascading unhelpful
+     * typing errors, and also avoid triggering the bad position assert
+     *)
+    if not (Pos.equal name_pos (Cls.pos tc |> Pos_or_decl.unsafe_to_raw_pos))
+    then
       None
     else
-      let env = Typing_requirements.check_class env tc in
-      if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
+      let env = Typing_requirements.check_class env name_pos tc in
+      if shallow_decl_enabled ctx then
+        Typing_inheritance.check_class env name_pos tc;
       Some (class_def_ env c tc)
 
 let gconst_def ctx cst =

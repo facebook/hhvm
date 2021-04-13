@@ -71,6 +71,7 @@ let make_sharedmem_config config options local_config =
   let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
   let log_level = int_ "sharedmem_log_level" ~default:0 config in
   let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
+  let compression = int_ "sharedmem_compression" ~default:0 config in
   let shm_dirs =
     string_list
       ~delim:(Str.regexp ",")
@@ -81,9 +82,10 @@ let make_sharedmem_config config options local_config =
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in
-  let (global_size, heap_size, dep_table_pow, hash_table_pow) =
+  let (global_size, heap_size, dep_table_pow, hash_table_pow, compression) =
     match ServerArgs.ai_mode options with
-    | None -> (global_size, heap_size, dep_table_pow, hash_table_pow)
+    | None ->
+      (global_size, heap_size, dep_table_pow, hash_table_pow, compression)
     | Some ai_options ->
       Ai_options.modify_shared_mem_sizes
         global_size
@@ -101,6 +103,7 @@ let make_sharedmem_config config options local_config =
     sample_rate;
     shm_dirs;
     shm_min_avail;
+    compression;
   }
 
 let config_list_regexp = Str.regexp "[, \t]+"

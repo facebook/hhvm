@@ -121,6 +121,7 @@
 #include <lz4.h>
 #include <sys/time.h>
 #include <time.h>
+#include <zstd.h>
 
 #ifndef NO_SQLITE3
 #include <sqlite3.h>
@@ -497,6 +498,8 @@ static uintptr_t* counter = NULL;
 static size_t* log_level = NULL;
 
 static double* sample_rate = NULL;
+
+static size_t* compression = NULL;
 
 static size_t* workers_should_exit = NULL;
 
@@ -896,23 +899,26 @@ static void define_globals(char * shared_mem_init) {
   sample_rate = (double*)(mem + 6*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  workers_should_exit = (size_t*)(mem + 7*CACHE_LINE_SIZE);
+  compression = (size_t*)(mem + 7*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  wasted_heap_size = (size_t*)(mem + 8*CACHE_LINE_SIZE);
+  workers_should_exit = (size_t*)(mem + 8*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_removes = (size_t*)(mem + 9*CACHE_LINE_SIZE);
+  wasted_heap_size = (size_t*)(mem + 9*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_dependency_table_reads = (size_t*)(mem + 10*CACHE_LINE_SIZE);
+  allow_removes = (size_t*)(mem + 10*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  hcounter_filled = (size_t*)(mem + 11*CACHE_LINE_SIZE);
+  allow_dependency_table_reads = (size_t*)(mem + 11*CACHE_LINE_SIZE);
+
+  assert (CACHE_LINE_SIZE >= sizeof(size_t));
+  hcounter_filled = (size_t*)(mem + 12*CACHE_LINE_SIZE);
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > 12*CACHE_LINE_SIZE + (int)sizeof(int));
+  assert(page_size > 13*CACHE_LINE_SIZE + (int)sizeof(int));
 
   assert (CACHE_LINE_SIZE >= sizeof(local_t));
   locals = mem;
@@ -966,7 +972,8 @@ static size_t get_shared_mem_size(void) {
 
 static void init_shared_globals(
   size_t config_log_level,
-  double config_sample_rate
+  double config_sample_rate,
+  size_t config_compression
 ) {
   // Initial size is zero for global storage is zero
   global_storage[0] = 0;
@@ -978,6 +985,7 @@ static void init_shared_globals(
   *counter = ALIGN(early_counter + 1, COUNTER_RANGE);
   *log_level = config_log_level;
   *sample_rate = config_sample_rate;
+  *compression = config_compression;
   *workers_should_exit = 0;
   *wasted_heap_size = 0;
   *allow_removes = 1;
@@ -1081,7 +1089,9 @@ CAMLprim value hh_shared_init(
 
   init_shared_globals(
     Long_val(Field(config_val, 6)),
-    Double_val(Field(config_val, 7)));
+    Double_val(Field(config_val, 7)),
+    Long_val(Field(config_val, 8))
+  );
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
 
@@ -1776,13 +1786,25 @@ value hh_serialize_raw(value data) {
   // We limit the size of elements we will allocate to our heap to ~2GB
   assert(size < 0x80000000);
 
-  size_t max_compression_size = LZ4_compressBound(size);
-  char* compressed_data = malloc(max_compression_size);
-  size_t compressed_size = LZ4_compress_default(
-    data_value,
-    compressed_data,
-    size,
-    max_compression_size);
+  size_t max_compression_size = 0;
+  char* compressed_data = NULL;
+  size_t compressed_size = 0;
+
+  if (*compression) {
+    max_compression_size = ZSTD_compressBound(size);
+    compressed_data = malloc(max_compression_size);
+
+    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+  }
+  else {
+    max_compression_size = LZ4_compressBound(size);
+    compressed_data = malloc(max_compression_size);
+    compressed_size = LZ4_compress_default(
+      data_value,
+      compressed_data,
+      size,
+      max_compression_size);
+  }
 
   if (compressed_size != 0 && compressed_size < size) {
     uncompressed_size = size;
@@ -1813,6 +1835,7 @@ value hh_serialize_raw(value data) {
   if (kind == KIND_SERIALIZED) {
     free(data_value);
   }
+
   CAMLreturn(result);
 }
 
@@ -1828,7 +1851,7 @@ static heap_entry_t* hh_store_ocaml(
   /*out*/size_t *orig_size,
   /*out*/size_t *total_size
 ) {
-  char* value = NULL;
+  char* data_value = NULL;
   size_t size = 0;
   size_t uncompressed_size = 0;
   storage_kind kind = 0;
@@ -1836,16 +1859,16 @@ static heap_entry_t* hh_store_ocaml(
   // If the data is an Ocaml string it is more efficient to copy its contents
   // directly in our heap instead of serializing it.
   if (Is_block(data) && Tag_val(data) == String_tag) {
-    value = String_val(data);
+    data_value = String_val(data);
     size = caml_string_length(data);
     kind = KIND_STRING;
   } else {
     intnat serialized_size;
     // We are responsible for freeing the memory allocated by this function
-    // After copying value into our object heap we need to make sure to free
-    // value
+    // After copying data_value into our object heap we need to make sure to free
+    // data_value
     caml_output_value_to_malloc(
-      data, Val_int(0)/*flags*/, &value, &serialized_size);
+      data, Val_int(0)/*flags*/, &data_value, &serialized_size);
 
     assert(serialized_size >= 0);
     size = (size_t) serialized_size;
@@ -1856,13 +1879,25 @@ static heap_entry_t* hh_store_ocaml(
   assert(size < 0x80000000);
   *orig_size = size;
 
-  size_t max_compression_size = LZ4_compressBound(size);
-  char* compressed_data = malloc(max_compression_size);
-  size_t compressed_size = LZ4_compress_default(
-    value,
-    compressed_data,
-    size,
-    max_compression_size);
+  size_t max_compression_size = 0;
+  char* compressed_data = NULL;
+  size_t compressed_size = 0;
+
+  if (*compression) {
+    max_compression_size = ZSTD_compressBound(size);
+    compressed_data = malloc(max_compression_size);
+
+    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+  }
+  else {
+    max_compression_size = LZ4_compressBound(size);
+    compressed_data = malloc(max_compression_size);
+    compressed_size = LZ4_compress_default(
+      data_value,
+      compressed_data,
+      size,
+      max_compression_size);
+  }
 
   if (compressed_size != 0 && compressed_size < size) {
     uncompressed_size = size;
@@ -1882,14 +1917,16 @@ static heap_entry_t* hh_store_ocaml(
 
   heap_entry_t* addr = hh_alloc(header, total_size);
   memcpy(&addr->data,
-         uncompressed_size ? compressed_data : value,
+         uncompressed_size ? compressed_data : data_value,
          size);
 
   free(compressed_data);
   // We temporarily allocate memory using malloc to serialize the Ocaml object.
   // When we have finished copying the serialized data into our heap we need
   // to free the memory we allocated to avoid a leak.
-  if (kind == KIND_SERIALIZED) free(value);
+  if (kind == KIND_SERIALIZED) {
+    free(data_value);
+  }
 
   return addr;
 }
@@ -2225,11 +2262,17 @@ CAMLprim value hh_deserialize(heap_entry_t *elt) {
   char *data = elt->data;
   if (uncompressed_size_exp) {
     data = malloc(uncompressed_size_exp);
-    size_t uncompressed_size = LZ4_decompress_safe(
+  size_t uncompressed_size = 0;
+  if (*compression) {
+    uncompressed_size = ZSTD_decompress(data, uncompressed_size_exp, src, size);
+  }
+  else {
+    uncompressed_size = LZ4_decompress_safe(
       src,
       data,
       size,
       uncompressed_size_exp);
+  }
     assert(uncompressed_size == uncompressed_size_exp);
     size = uncompressed_size;
   }

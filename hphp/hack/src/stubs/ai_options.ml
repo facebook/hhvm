@@ -15,4 +15,4 @@ let set_json_mode opt _ = opt
 
 let modify_shared_mem_sizes global_size heap_size dep_table_pow hash_table_pow _
     =
-  (global_size, heap_size, dep_table_pow, hash_table_pow)
+  (global_size, heap_size, dep_table_pow, hash_table_pow, 0)

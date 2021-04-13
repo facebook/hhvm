@@ -165,7 +165,7 @@ let test_cache_behavior
     expect
       ~msg:
         (Printf.sprintf
-           "Expected L1 cacke size of %d, got %d"
+           "Expected L1 cache size of %d, got %d"
            expected_l1
            actual_l1)
       (actual_l1 = expected_l1);
@@ -173,7 +173,7 @@ let test_cache_behavior
     expect
       ~msg:
         (Printf.sprintf
-           "Expected L2 cacke size of %d, got %d"
+           "Expected L2 cache size of %d, got %d"
            expected_l2
            actual_l2)
       (actual_l2 = expected_l2)
@@ -210,19 +210,36 @@ let test_cache_behavior
 
 module TestNoCache =
   SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
-module TestWithCache =
+
+(* We shall not mix compressions, so create 2 separate caches  *)
+module TestWithCacheLz4 =
+  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
+module TestWithCacheZstd =
   SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
 
 let tests () =
+  let zstd_compression_with_default_level = 3 in
+  let lz4_compression = 0 in
   let list =
     [
-      ("test_local_changes_no_cache", test_local_changes (module TestNoCache));
+      ( "test_local_changes_no_cache",
+        test_local_changes (module TestNoCache),
+        lz4_compression );
       ( "test_local_changes_with_cache",
-        test_local_changes (module TestWithCache) );
-      ("test_cache_behavior", test_cache_behavior (module TestWithCache));
+        test_local_changes (module TestWithCacheLz4),
+        lz4_compression );
+      ( "test_local_changes_with_cache_zstd",
+        test_local_changes (module TestWithCacheZstd),
+        zstd_compression_with_default_level );
+      ( "test_cache_behavior",
+        test_cache_behavior (module TestWithCacheLz4),
+        lz4_compression );
+      ( "test_cache_behavior_zstd",
+        test_cache_behavior (module TestWithCacheZstd),
+        zstd_compression_with_default_level );
     ]
   in
-  let setup_test (name, test) =
+  let setup_test (name, test, compression) =
     ( name,
       fun () ->
         let num_workers = 0 in
@@ -238,6 +255,7 @@ let tests () =
               shm_min_avail = 0;
               log_level = 0;
               sample_rate = 0.0;
+              compression;
             }
         in
         ignore (handle : SharedMem.handle);

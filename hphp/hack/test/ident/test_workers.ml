@@ -42,6 +42,7 @@ let () =
         shm_min_avail = 0;
         log_level = 0;
         sample_rate = 0.0;
+        compression = 0;
       }
   in
   let workers =

@@ -77,6 +77,11 @@ else()
   list(APPEND extra_link_opts ${LZ4_LIBS})
 endif()
 
+get_target_property(ZSTD_INCLUDE_DIRS zstd INTERFACE_INCLUDE_DIRECTORIES)
+list(APPEND extra_include_paths ${ZSTD_INCLUDE_DIRS})
+get_target_property(ZSTD_LIBS zstd INTERFACE_LINK_LIBRARIES)
+list(APPEND extra_link_opts ${ZSTD_LIBS})
+
 if(PC_SQLITE3_FOUND)
   list(APPEND extra_include_paths ${LIBSQLITE3_INCLUDE_DIR})
   get_filename_component(pth ${LIBSQLITE3_LIBRARY} DIRECTORY)
@@ -104,7 +109,7 @@ function(invoke_dune name target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
-  add_dependencies(${name} ocaml rustc cargo)
+  add_dependencies(${name} ocaml rustc cargo zstd)
   if (NOT SKIP_OPAM)
     add_dependencies(${name} opam_setup)
   endif()

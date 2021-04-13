@@ -736,6 +736,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFrameCls:
   case LdFrameThis:
   case LdFuncCls:
+  case LdARFunc:
   case LdFuncFromClsMeth:
   case LdFuncFromRClsMeth:
   case LdFuncFromRFunc:
@@ -754,6 +755,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdLazyClsName:
   case LdLoc:
   case LdLocAddr:
+  case LdLocForeign:
   case LdMBase:
   case LdMem:
   case LdMethCallerName:

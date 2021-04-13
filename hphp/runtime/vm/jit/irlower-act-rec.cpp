@@ -196,6 +196,23 @@ void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
   });
 }
 
+namespace {
+const Func* funcFromActRecHelper(const ActRec* fp) { return fp->func(); }
+} // namespace
+
+void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  if (use_lowptr) {
+    auto const fp = srcLoc(env, inst, 0).reg();
+    auto const dst = dstLoc(env, inst, 0).reg();
+    v << loadzlq{fp[AROFF(m_funcId)], dst};
+    return;
+  }
+  auto const args = argGroup(env, inst).ssa(0);
+  auto const target = CallSpec::direct(funcFromActRecHelper);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

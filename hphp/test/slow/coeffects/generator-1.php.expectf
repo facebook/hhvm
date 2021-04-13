@@ -1,0 +1,3 @@
+int(1)
+
+Warning: Call to Generator::next() requires [rx] coeffects but pure() provided [] in %s on line 9

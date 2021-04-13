@@ -1,0 +1,7 @@
+Warning: Call to HH\AsyncGenerator::next() requires [rx] coeffects but pure() provided [] in %s on line 9
+1
+
+Warning: Call to HH\AsyncGenerator::next() requires [rx] coeffects but pure() provided [] in %s on line 9
+2
+
+Warning: Call to HH\AsyncGenerator::next() requires [rx] coeffects but pure() provided [] in %s on line 9

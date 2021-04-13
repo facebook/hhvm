@@ -944,6 +944,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdLoc:
     return PureLoad { ALocal { inst.src(0), inst.extra<LocalId>()->locId } };
 
+  case LdLocForeign:
+    return may_load_store(ALocalAny, AEmpty);
+
   case CheckLoc:
     return may_load_store(
       ALocal { inst.src(0), inst.extra<LocalId>()->locId },
@@ -1008,6 +1011,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
     );
 
+  case LdARFunc:
   case LdClsFromClsMeth:
   case LdFuncFromClsMeth:
   case LdFuncFromRFunc:

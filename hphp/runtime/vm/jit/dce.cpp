@@ -156,6 +156,7 @@ bool canDCE(IRInstruction* inst) {
   case IsCol:
   case LdStk:
   case LdLoc:
+  case LdLocForeign:
   case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
@@ -272,6 +273,7 @@ bool canDCE(IRInstruction* inst) {
   case ClassHasAttr:
   case IsFunReifiedGenericsMatched:
   case LdFuncRequiredCoeffects:
+  case LdARFunc:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:

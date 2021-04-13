@@ -1,0 +1,8 @@
+Warning: Call to Generator::next() requires [rx] coeffects but pure() provided [] in %s on line 13
+
+Warning: Call to Generator::next() requires [rx] coeffects but pure() provided [] in %s on line 14
+Caught
+
+Fatal error: Uncaught exception 'Exception' with message 'Generator is already finished' in %s:21
+Stack trace:
+%A

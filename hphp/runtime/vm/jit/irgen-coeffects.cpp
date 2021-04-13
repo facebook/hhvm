@@ -21,6 +21,9 @@
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -180,9 +183,48 @@ SSATmp* emitClosureInheritFromParent(IRGS& env, const Func* f,
   return gen(env, LdMem, TInt, addr);
 }
 
-SSATmp* emitGeneratorThis() {
-  // TODO: implement this
-  return nullptr;
+SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
+  assertx(f->isMethod() && !f->isStatic() && f->implCls() &&
+          (f->implCls() == AsyncGenerator::getClass() ||
+           f->implCls() == Generator::getClass()));
+  auto const isAsync = f->implCls()->classof(AsyncGenerator::getClass());
+  auto const genObj = prologueCtx;
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const valid = gen(env, ContValid, IsAsyncData(isAsync), genObj);
+      gen(env, JmpZero, taken, valid);
+    },
+    [&] {
+      auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
+      auto const genFunc = gen(env, LdARFunc, genFp);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          auto const data = AttrData { AttrHasCoeffectRules };
+          auto const success = gen(env, FuncHasAttr, data, genFunc);
+          gen(env, JmpNZero, taken, success);
+        },
+        [&] {
+          // Static coeffects
+          return gen(env, LdFuncRequiredCoeffects, genFunc);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, DbgCheckLocalsDecRefd, genFp);
+          auto const hasReified = gen(env, HasReifiedGenerics, genFunc);
+          auto const numParams = gen(env, LdFuncNumParams, genFunc);
+          auto const locId =
+            gen(env, AddInt, numParams, gen(env, ConvBoolToInt, hasReified));
+          return gen(env, LdLocForeign, TInt, genFp, locId);
+        }
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      return cns(env, RuntimeCoeffects::full().value());
+    }
+  );
 }
 
 } // namespace
@@ -204,7 +246,7 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(env, f, prologueCtx);
     case Type::GeneratorThis:
-      return emitGeneratorThis();
+      return emitGeneratorThis(env, f, prologueCtx);
     case Type::Invalid:
       always_assert(false);
   }

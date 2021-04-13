@@ -345,6 +345,13 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyLdFuncNumParams(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, (funcTmp->funcVal()->numParams()))
+    : nullptr;
+}
+
 SSATmp* simplifyFuncHasAttr(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -3748,6 +3755,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdMonotypeVecElem)
       X(LdVecElem)
       X(MethodExists)
+      X(LdFuncNumParams)
       X(FuncHasAttr)
       X(ClassHasAttr)
       X(LdFuncRequiredCoeffects)

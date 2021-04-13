@@ -51,6 +51,21 @@ void cgLdLoc(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off]);
 }
 
+void cgLdLocForeign(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const locId = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+  auto const off = v.makeReg();
+  auto const shifted = v.makeReg();
+  auto const negated = v.makeReg();
+  // calculate offset: (locId + 1) * sizeof(TypedValue)
+  v << addqi{1, locId, off, v.makeReg()};
+  static_assert(sizeof(TypedValue) == 16, "");
+  v << shlqi{4, off, shifted, v.makeReg()};
+  v << neg{shifted, negated, v.makeReg()};
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[negated]);
+}
+
 void cgLdLocAddr(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<LdLocAddr>()->locId);

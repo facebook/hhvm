@@ -178,9 +178,20 @@ RuntimeCoeffects emitClosureInheritFromParent(const Func* f,
   return closure->getCoeffects();
 }
 
-RuntimeCoeffects emitGeneratorThis() {
-  // TODO: implement this
-  return RuntimeCoeffects::full();
+RuntimeCoeffects emitGeneratorThis(const Func* f, void* prologueCtx) {
+  assertx(prologueCtx);
+  assertx(f->isMethod() && !f->isStatic() && f->implCls() &&
+          (f->implCls() == AsyncGenerator::getClass() ||
+           f->implCls() == Generator::getClass()));
+  auto const obj = reinterpret_cast<ObjectData*>(prologueCtx);
+  auto const gen = f->implCls() == AsyncGenerator::getClass()
+    ? static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj))
+    : static_cast<BaseGenerator*>(Generator::fromObject(obj));
+  if (gen->getState() == BaseGenerator::State::Done) {
+    // We need to make sure coeffects check passes
+    return RuntimeCoeffects::full();
+  }
+  return gen->actRec()->requiredCoeffects();
 }
 
 } // namespace
@@ -198,7 +209,7 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(f, prologueCtx);
     case Type::GeneratorThis:
-      return emitGeneratorThis();
+      return emitGeneratorThis(f, prologueCtx);
     case Type::Invalid:
       always_assert(false);
   }

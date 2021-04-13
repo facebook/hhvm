@@ -909,6 +909,12 @@ To string conversions:
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
+| LdLocForeign<T>, DParam(Cell), S(FramePtr) S(Int), NF
+
+  Loads local slot S1 from the frame S0 and puts the value in D as type T.
+  Note that it does not perform the local optimizations that LdLoc does.
+  Users of this opcode need to ensure that the local is not optimized away.
+
 | LdStkAddr<offset>, D(PtrToStkCell), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the given
@@ -1292,6 +1298,12 @@ To string conversions:
 | LdFuncNumParams, D(Int), S(Func), NF
 
   Returns the value of func->numParams().
+
+| LdARFunc, D(Func), S(FramePtr), NF
+
+  Loads the result of ar->func() where ar is S0.
+  Users of this opcode need to ensure that the writing of m_funcId to S0 is
+  not optimized away.
 
 | LdFuncName, D(StaticStr), S(Func), NF
 

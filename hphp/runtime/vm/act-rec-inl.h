@@ -156,6 +156,7 @@ inline RuntimeCoeffects ActRec::requiredCoeffects() const {
     return func()->requiredCoeffects();
   }
   // Access 0Coeffects variable
+  assertx(!localsDecRefd());
   auto const id = func()->coeffectsLocalId();
   auto const tv = reinterpret_cast<const TypedValue*>(this) - (id + 1);
   assertx(tvIsInt(tv));

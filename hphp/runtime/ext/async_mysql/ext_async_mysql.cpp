@@ -137,6 +137,32 @@ am::Query amquery_from_queryf(const StringData* pattern,
   return am::Query(pattern->toCppString(), query_args);
 }
 
+AsyncMysqlConnectionOptions* getConnectionOptions(const Object& opts) {
+  if (!opts.instanceof(AsyncMysqlConnectionOptions::s_className)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat(
+        "Invalid argument. Expected {}, received {}",
+        AsyncMysqlConnectionOptions::s_className,
+        opts->getClassName().c_str()
+      )
+    );
+  }
+  return Native::data<AsyncMysqlConnectionOptions>(opts);
+}
+
+MySSLContextProvider* getSSLContextProvider(const Object& ctx) {
+  if (!ctx.instanceof(MySSLContextProvider::s_className)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat(
+        "Invalid argument. Expected {}, received {}",
+        MySSLContextProvider::s_className,
+        ctx->getClassName().c_str()
+      )
+    );
+  }
+  return Native::data<MySSLContextProvider>(ctx);
+}
+
 }
 
 static std::shared_ptr<am::AsyncMysqlClient> getClient() {
@@ -415,8 +441,8 @@ Object HHVM_STATIC_METHOD(
       static_cast<std::string>(password));
   auto op = getClient()->beginConnection(key);
   if (!sslContextProvider.isNull()) {
-    auto* mysslContextProvider =
-        Native::data<MySSLContextProvider>(sslContextProvider.toObject());
+    auto* mysslContextProvider = getSSLContextProvider(
+            sslContextProvider.toObject());
     op->setSSLOptionsProvider(mysslContextProvider->getSSLProvider());
   }
 
@@ -455,7 +481,7 @@ Object HHVM_STATIC_METHOD(
       static_cast<std::string>(password));
   auto op = getClient()->beginConnection(key);
 
-  auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
+  auto* obj = getConnectionOptions(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
   op->setConnectionOptions(connOpts);
 
@@ -501,7 +527,7 @@ Object HHVM_STATIC_METHOD(
       static_cast<std::string>(password));
   auto clientPtr = getClient();
   auto connectOp = clientPtr->beginConnection(key);
-  auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
+  auto* obj = getConnectionOptions(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
   connectOp->setConnectionOptions(connOpts);
   auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
@@ -723,7 +749,7 @@ static Object HHVM_METHOD(
       static_cast<std::string>(password),
       static_cast<std::string>(extra_key));
 
-  auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
+  auto* obj = getConnectionOptions(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
   op->setConnectionOptions(connOpts);
 

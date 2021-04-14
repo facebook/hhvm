@@ -1,0 +1,4 @@
+Invalid argument. Expected MySSLContextProvider, received stdClass
+Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass
+Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass
+Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass

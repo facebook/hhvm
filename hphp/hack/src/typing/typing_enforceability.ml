@@ -18,7 +18,7 @@ let wrap_like ty =
   let r = Typing_reason.Renforceable (get_pos ty) in
   MakeType.like r ty
 
-let is_enforceable ?(include_dynamic = true) (env : env) (ty : decl_ty) =
+let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
     TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
   in
@@ -117,13 +117,17 @@ let is_enforceable ?(include_dynamic = true) (env : env) (ty : decl_ty) =
     | Toption ty -> is_enforceable include_dynamic env visited ty
     (* TODO(T36532263) make sure that this is what we want *)
   in
-  is_enforceable include_dynamic env SSet.empty ty
-
-let get_enforcement (env : env) (ty : decl_ty) =
-  if is_enforceable ~include_dynamic:false env ty then
+  if is_enforceable false env SSet.empty ty then
     Enforced
   else
     Unenforced
+
+let is_enforceable (env : env) (ty : decl_ty) =
+  match get_enforcement env ty with
+  | Enforced -> true
+  | Unenforced
+  | PartiallyEnforced ->
+    false
 
 let make_locl_like_type env ty =
   if env.Typing_env_types.pessimize then
@@ -133,7 +137,7 @@ let make_locl_like_type env ty =
     (env, ty)
 
 let is_enforced env ~explicitly_untrusted ty =
-  let enforceable = is_enforceable ~include_dynamic:false env ty in
+  let enforceable = is_enforceable env ty in
   enforceable
   && (not @@ Pos_or_decl.is_hhi @@ get_pos ty)
   && not explicitly_untrusted

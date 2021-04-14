@@ -392,7 +392,7 @@ let fun_def ctx f :
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
   let interface_check =
-    Typing_extends.sound_dynamic_interface_check
+    Typing_dynamic.sound_dynamic_interface_check
       env
       (variadicity_decl_ty :: params_decl_ty)
       ret_locl_ty

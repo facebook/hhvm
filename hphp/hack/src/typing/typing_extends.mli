@@ -7,16 +7,6 @@
  *
  *)
 
-(* checks that a method can be invoked in a dynamic context by ensuring that
-   the types of its arguments are enforceable and its return type can be
-   coerced to dynamic *)
-
-val sound_dynamic_interface_check :
-  Typing_env_types.env ->
-  Typing_defs.decl_ty option list ->
-  Typing_defs.locl_ty ->
-  bool
-
 (*****************************************************************************)
 (* Checks that a class implements an interface, extends a base class, or     *)
 (* uses a trait.                                                             *)

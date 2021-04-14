@@ -481,39 +481,6 @@ let filter_privates members =
   List.filter members (fun (_name, class_elt) ->
       (not (is_private class_elt)) || is_lsb class_elt)
 
-let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
-  (* 1. check if all the parameters of the method are enforceable *)
-  let enforceable_params =
-    List.for_all params_decl_ty ~f:(fun dtyopt ->
-        match dtyopt with
-        | Some dty -> Typing_enforceability.is_enforceable env dty
-        | None -> true)
-  in
-  let coercible_return_type =
-    (* 2. check if the return type is coercible *)
-    Typing_subtype.is_sub_type_for_union
-      ~coerce:(Some Typing_logic.CoerceToDynamic)
-      env
-      ret_locl_ty
-      (mk (Reason.Rnone, Tdynamic))
-  in
-  enforceable_params && coercible_return_type
-
-let sound_dynamic_interface_check_from_fun_ty env fun_ty =
-  let params_decl_ty =
-    List.map fun_ty.ft_params ~f:(fun fun_param ->
-        Some fun_param.fp_type.et_type)
-  in
-  let ety_env = Phase.env_with_self env Errors.ignore_error in
-  let ret_locl_ty =
-    snd
-      (Typing_return.make_return_type
-         (Phase.localize ~ety_env)
-         env
-         fun_ty.ft_ret.et_type)
-  in
-  sound_dynamic_interface_check env params_decl_ty ret_locl_ty
-
 let check_members
     check_private
     env
@@ -602,7 +569,11 @@ let check_members
               let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
               (match get_node ty with
               | Tfun fun_ty ->
-                if not (sound_dynamic_interface_check_from_fun_ty env fun_ty)
+                if
+                  not
+                    (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
+                       env
+                       fun_ty)
                 then
                   Errors.method_is_not_dynamically_callable
                     class_pos

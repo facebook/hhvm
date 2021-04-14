@@ -446,6 +446,7 @@ address:  /* mailbox / group */
     *naddrs = iaddr;
     return;
   }
+  if (addrs && iaddr >= addrs->naddrs) return;
 
   /* look ahead to determine if we are dealing with a group */
   for (i = start_tok; i < toks->ntokens; i++)
@@ -469,6 +470,7 @@ address:  /* mailbox / group */
     *naddrs = iaddr;
     return;
   }
+  if (addrs && iaddr >= addrs->naddrs) return;
 
   /* skip spurious commas */
   while (start_tok < toks->ntokens && (toks->tokens[start_tok].token == ','

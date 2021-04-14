@@ -588,6 +588,7 @@ struct XMLReaderPropHandler : Native::MapPropHandler<XMLReaderPropHandler> {
   static constexpr Native::PropAccessorMap& map = xmlreader_properties_map;
 };
 
+const StaticString s_DOMNode("DOMNode");
 Variant HHVM_METHOD(XMLReader, expand,
                     const Variant& basenode /* = null */) {
   auto* data = Native::data<XMLReader>(this_);
@@ -596,7 +597,17 @@ Variant HHVM_METHOD(XMLReader, expand,
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    auto dombasenode = Native::data<DOMNode>(basenode.toObject());
+    auto obj = basenode.toObject();
+    if (!obj.instanceof(s_DOMNode)) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat(
+          "Invalid argument. Expected {}, received {}",
+          s_DOMNode,
+          obj->getClassName().c_str()
+        )
+      );
+    }
+    auto dombasenode = Native::data<DOMNode>(obj);
     doc = dombasenode->doc();
     if (doc == nullptr || doc->docp() == nullptr) {
       raise_warning("Invalid State Error");

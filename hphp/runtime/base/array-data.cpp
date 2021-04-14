@@ -551,6 +551,16 @@ const ArrayFunctions g_array_funcs = {
    *   value, and make all string keys into static strings.
    */
   DISPATCH(OnSetEvalScalar)
+
+  /*
+   * void MakeUncounted(ArrayData*, DataWalker::PointerMap*, bool hasApcTv)
+   *
+   *   Return a copy of the array where all its contents are converted to
+   *   uncounted values. The caller must confirm that its contents can all be
+   *   converted, e.g. by using DataWalker. If hasApcTv is true, this method
+   *   will colocate an ApcTypedValue right before the array.
+   */
+  DISPATCH(MakeUncounted)
 };
 
 #undef DISPATCH

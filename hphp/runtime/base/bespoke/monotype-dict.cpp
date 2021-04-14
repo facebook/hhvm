@@ -1135,9 +1135,7 @@ void MonotypeDict<Key>::ConvertToUncounted(
   mad->forEachElm([&](auto i, auto elm) {
     auto const elm_mut = const_cast<Elm*>(elm);
     if constexpr (std::is_same<Key, StringData*>::value) {
-      auto tv = make_tv<KindOfString>(elm_mut->key);
-      ConvertTvToUncounted(&tv, seen);
-      elm_mut->key = val(tv).pstr;
+      elm_mut->key = MakeUncountedString(elm_mut->key, seen);
     }
     auto dt_mut = dt;
     ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), seen);

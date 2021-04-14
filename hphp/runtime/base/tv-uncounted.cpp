@@ -16,7 +16,9 @@
 
 #include "hphp/runtime/base/tv-uncounted.h"
 
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -29,102 +31,65 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void* AllocUncounted(size_t bytes) {
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
+  return uncounted_malloc(bytes);
+}
+
+void FreeUncounted(void* ptr) {
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
+  }
+  return uncounted_free(ptr);
+}
+
+void FreeUncounted(void* ptr, size_t bytes) {
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
+  }
+  return uncounted_sized_free(ptr, bytes);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
   auto& data = source.val();
   auto& type = source.type();
 
-  // `source' won't be Object or Resource, as these should never appear in an
-  // uncounted array.  Thus we only need to deal with strings/arrays.
   switch (type) {
     case KindOfFunc:
-    if (RuntimeOption::EvalAPCSerializeFuncs) {
-      assertx(data.pfunc->isPersistent());
-      break;
-    }
-    invalidFuncConversion("string");
+      if (RO::EvalAPCSerializeFuncs) {
+        assertx(data.pfunc->isPersistent());
+        break;
+      }
+      invalidFuncConversion("string");
+
     case KindOfClass:
       if (data.pclass->isPersistent()) break;
       data.plazyclass = LazyClassData::create(data.pclass->name());
       type = KindOfLazyClass;
       break;
+
     case KindOfString:
       type = KindOfPersistentString;
-      // Fall-through.
-    case KindOfPersistentString: {
-      auto& str = data.pstr;
-      if (str->persistentIncRef()) break;
-      if (str->empty()) str = staticEmptyString();
-      else if (auto const st = lookupStaticString(str)) str = st;
-      else {
-        HeapObject** seenStr = nullptr;
-        if (seen && str->hasMultipleRefs()) {
-          seenStr = &(*seen)[str];
-          if (auto const st = static_cast<StringData*>(*seenStr)) {
-            st->uncountedIncRef();
-            str = st;
-            break;
-          }
-        }
-        str = StringData::MakeUncounted(str->slice());
-        if (seenStr) *seenStr = str;
-      }
+      // Intentional fall-through.
+    case KindOfPersistentString:
+      data.pstr = MakeUncountedString(data.pstr, seen);
       break;
-    }
+
     case KindOfVec:
-      type = KindOfPersistentVec;
-      // Fall-through.
-    case KindOfPersistentVec: {
-      auto& ad = data.parr;
-      assertx(ad->isVecType());
-      if (ad->persistentIncRef()) break;
-      if (ad->empty()) {
-        ad = ArrayData::CreateVec(ad->isLegacyArray());
-      } else if (ad->isVanilla()) {
-        ad = PackedArray::MakeUncounted(ad, false, seen);
-      } else {
-        ad = BespokeArray::MakeUncounted(ad, false, seen);
-      }
-      break;
-    }
-
     case KindOfDict:
-      type = KindOfPersistentDict;
-      // Fall-through.
-    case KindOfPersistentDict: {
-      auto& ad = data.parr;
-      assertx(ad->isDictType());
-      if (ad->persistentIncRef()) break;
-      if (ad->empty()) {
-        ad = ArrayData::CreateDict(ad->isLegacyArray());
-      } else if (ad->isVanilla()) {
-        ad = MixedArray::MakeUncounted(ad, false, seen);
-      } else {
-        ad = BespokeArray::MakeUncounted(ad, false, seen);
-      }
-      break;
-    }
-
     case KindOfKeyset:
-      type = KindOfPersistentKeyset;
-      // Fall-through.
-    case KindOfPersistentKeyset: {
-      auto& ad = data.parr;
-      assertx(ad->isKeysetType());
-      if (ad->persistentIncRef()) break;
-      if (ad->empty()) {
-        ad = ArrayData::CreateKeyset();
-      } else if (ad->isVanilla()) {
-        ad = SetArray::MakeUncounted(ad, false, seen);
-      } else {
-        ad = BespokeArray::MakeUncounted(ad, false, seen);
-      }
+      type = dt_with_persistence(type);
+      // Intentional fall-through.
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
+      data.parr = MakeUncountedArray(data.parr, seen);
       break;
-    }
 
-    case KindOfUninit: {
-      type = KindOfNull;
-      break;
-    }
     case KindOfClsMeth: {
       if (RO::EvalAPCSerializeClsMeth) {
         assertx(use_lowptr);
@@ -133,29 +98,99 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
       }
       tvCastToVecInPlace(source);
       type = KindOfPersistentVec;
-      auto& ad = data.parr;
-      if (ad->persistentIncRef()) break;
-      assertx(!ad->empty());
-      assertx(ad->isVanillaVec());
-      ad = PackedArray::MakeUncounted(ad, false, seen);
+      data.parr = MakeUncountedArray(data.parr, seen);
       break;
     }
+
+    case KindOfUninit:
+      type = KindOfNull;
+      break;
+
     case KindOfLazyClass:
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
-    case KindOfDouble: {
+    case KindOfDouble:
       break;
-    }
+
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);
+
+    // DataWalker excludes these cases when it analyzes a value.
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:
     case KindOfRClsMeth:
-      not_reached();
+      always_assert(false);
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+namespace {
+ArrayData* MakeUncountedArrayWithoutEscalation(
+    ArrayData* in, DataWalker::PointerMap* seen, bool hasApcTv) {
+  HeapObject** seenArr = nullptr;
+  if (seen && in->hasMultipleRefs()) {
+    seenArr = &(*seen)[in];
+    if (auto const arr = static_cast<ArrayData*>(*seenArr)) {
+      arr->uncountedIncRef();
+      return arr;
+    }
+  }
+
+  auto const result = in->makeUncounted(seen, hasApcTv);
+  if (seenArr) *seenArr = result;
+  return result;
+}
+}
+
+ArrayData* MakeUncountedArray(
+    ArrayData* in, DataWalker::PointerMap* seen, bool hasApcTv) {
+  // We can take shortcuts if we're not co-allocating an ApcTypedValue.
+  if (!hasApcTv) {
+    if (in->persistentIncRef()) return in;
+    if (in->empty()) {
+      auto const legacy = in->isLegacyArray();
+      switch (in->toDataType()) {
+        case KindOfVec: return ArrayData::CreateVec(legacy);
+        case KindOfDict: return ArrayData::CreateDict(legacy);
+        case KindOfKeyset: return ArrayData::CreateKeyset();
+        default: always_assert(false);
+      }
+    }
+  }
+
+  if (in->isVanilla()) {
+    return MakeUncountedArrayWithoutEscalation(in, seen, hasApcTv);
+  }
+
+  auto const vad = BespokeArray::ToVanilla(in, "MakeUncountedArray");
+  SCOPE_EXIT { decRefArr(vad); };
+
+  return MakeUncountedArrayWithoutEscalation(vad, seen, hasApcTv);
+}
+
+StringData* MakeUncountedString(StringData* in, DataWalker::PointerMap* seen) {
+  if (in->persistentIncRef()) return in;
+  if (in->empty()) return staticEmptyString();
+  if (auto const st = lookupStaticString(in)) return st;
+
+  HeapObject** seenStr = nullptr;
+  if (seen && in->hasMultipleRefs()) {
+    seenStr = &(*seen)[in];
+    if (auto const st = static_cast<StringData*>(*seenStr)) {
+      st->uncountedIncRef();
+      return st;
+    }
+  }
+
+  auto const st = StringData::MakeUncounted(in->slice());
+  if (seenStr) *seenStr = st;
+  return st;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 void DecRefUncounted(TypedValue tv) {
   if (tvIsString(tv)) return DecRefUncountedString(val(tv).pstr);

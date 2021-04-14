@@ -80,14 +80,15 @@ Object createFromSerialized(CollectionType colType, APCHandle* handle) {
 APCHandle::Pair APCCollection::Make(const ObjectData* obj,
                                     APCHandleLevel level,
                                     bool unserializeObj) {
-  auto bail = [&] {
-    return APCString::MakeSerializedObject(
-      apc_serialize(Variant(const_cast<ObjectData*>(obj)))
-    );
-  };
+  auto const ad = const_cast<ArrayData*>(collections::asArray(obj));
+  if (!ad) {
+    auto const ser = apc_serialize(Variant(const_cast<ObjectData*>(obj)));
+    return APCString::MakeSerializedObject(ser);
+  }
 
-  auto const array = collections::asArray(obj);
-  if (!array) return bail();
+  if (auto const value = APCTypedValue::HandlePersistent(ad)) {
+    return WrapArray(value, obj->collectionType());
+  }
 
   /*
    * Create an uncounted array if we can.
@@ -98,37 +99,21 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
    * use a better representation.  For the OuterHandle case, we just delegate
    * to APCArray below (which will do the full DataWalker pass).
    */
-  if (level == APCHandleLevel::Inner && apcExtension::UseUncounted &&
-      !array->empty()) {
+  if (level == APCHandleLevel::Inner && apcExtension::UseUncounted) {
     DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
-    auto const features = walker.traverseData(const_cast<ArrayData*>(array));
+    auto const features = walker.traverseData(ad);
     assertx(!features.isCircular);
     if (!features.hasNonPersistable) {
-      auto const makeUncounted = [&] () {
-        auto const ad = const_cast<ArrayData*>(array);
-        if (isVectorCollection(obj->collectionType())) {
-          return APCArray::MakeUncountedVec(ad, /*PointerMap*/nullptr);
-        }
-        return APCArray::MakeUncountedDict(ad, /*PointerMap*/nullptr);
-      };
-      return WrapArray(
-        { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },
-        obj->collectionType()
-      );
+      auto const arr = APCArray::MakeUncountedArray(ad, /*PointerMap*/nullptr);
+      auto const size = getMemSize(ad) + sizeof(APCTypedValue);
+      return WrapArray({arr, size}, obj->collectionType());
     }
   }
 
-  auto const makeShared = [&] () {
-    if (isVectorCollection(obj->collectionType())) {
-      return APCArray::MakeSharedVec(const_cast<ArrayData*>(array),
-                                     level,
-                                     unserializeObj);
-    }
-    return APCArray::MakeSharedDict(const_cast<ArrayData*>(array),
-                                    level,
-                                    unserializeObj);
-  };
-  return WrapArray(makeShared(), obj->collectionType());
+  auto const arr = isVectorCollection(obj->collectionType())
+    ? APCArray::MakeSharedVec(ad, level, unserializeObj)
+    : APCArray::MakeSharedDict(ad, level, unserializeObj);
+  return WrapArray(arr, obj->collectionType());
 }
 
 void APCCollection::Delete(APCHandle* h) {

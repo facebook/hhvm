@@ -39,12 +39,8 @@ struct APCArray {
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
-  static APCHandle* MakeUncountedVec(
-      ArrayData* vec, DataWalker::PointerMap* m);
-  static APCHandle* MakeUncountedDict(
-      ArrayData* dict, DataWalker::PointerMap* m);
-  static APCHandle* MakeUncountedKeyset(
-      ArrayData* dict, DataWalker::PointerMap* m);
+  static APCHandle* MakeUncountedArray(
+      ArrayData* ad, DataWalker::PointerMap* seen);
 
   static APCHandle::Pair MakeSharedEmptyVec();
   static void Delete(APCHandle* handle);
@@ -172,8 +168,8 @@ private:
   APCArray& operator=(const APCArray&) = delete;
 
 private:
-  template <typename A, typename B, typename C>
-  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, C);
+  template <typename A, typename B>
+  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
                                   bool unserializeObj);

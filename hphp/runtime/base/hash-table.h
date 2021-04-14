@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/hash-table-x64.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 
 // NvGetStr is implemented in assembly in hash-table-x64.S, additional macros
 // are defined for various offsets in hash-table-x64.h
@@ -220,7 +221,7 @@ struct HashTable : HashTableCommon {
   static ALWAYS_INLINE
   ArrayType* uncountedAlloc(uint32_t scale, size_t extra = 0) {
     auto const size = computeAllocBytes(scale) + extra;
-    auto const mem = uncounted_malloc(size);
+    auto const mem = AllocUncounted(size);
     return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
   }
 

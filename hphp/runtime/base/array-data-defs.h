@@ -197,6 +197,12 @@ inline void ArrayData::onSetEvalScalar() {
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }
 
+NO_PROFILING
+inline ArrayData* ArrayData::makeUncounted(
+    DataWalker::PointerMap* seen, bool hasApcTv) {
+  return g_array_funcs.makeUncounted[kind()](this, seen, hasApcTv);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {

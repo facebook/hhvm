@@ -107,8 +107,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
-      if (auto const value = APCTypedValue::HandlePersistent(
-            APCTypedValue::StaticStr{}, APCTypedValue::UncountedStr{}, s)) {
+      if (auto const value = APCTypedValue::HandlePersistent(s)) {
         return value;
       }
       auto const st = lookupStaticString(s);

@@ -244,15 +244,7 @@ public:
    * allocated in front of the returned pointer.
    */
   static ArrayData* MakeUncounted(
-      ArrayData* array, bool withApcTypedValue,
-      DataWalker::PointerMap* seen = nullptr
-  );
-  static ArrayData* MakeUncounted(
-      ArrayData* array, int, DataWalker::PointerMap* seen = nullptr
-  ) = delete;
-  static ArrayData* MakeUncounted(
-      ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
-  ) = delete;
+      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
 

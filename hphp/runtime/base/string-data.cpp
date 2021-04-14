@@ -24,12 +24,12 @@
 #include "hphp/util/stacktrace-profiler.h"
 
 #include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -134,10 +134,9 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
     trueStatic && !s_symbols_loaded.load(std::memory_order_acquire);
 
   auto const extra = symbol ? sizeof(SymbolPrefix) : 0;
-  auto const allocSize = sl.size() + kStringOverhead + extra;
-  auto const ptr = trueStatic ? static_alloc(allocSize)
-                              : uncounted_malloc(allocSize);
-  return MemBlock{ptr, allocSize};
+  auto const bytes = sl.size() + kStringOverhead + extra;
+  auto const ptr = trueStatic ? static_alloc(bytes) : AllocUncounted(bytes);
+  return MemBlock{ptr, bytes};
 }
 
 template <bool trueStatic> ALWAYS_INLINE
@@ -189,9 +188,6 @@ StringData* StringData::MakeStatic(folly::StringPiece sl) {
 }
 
 StringData* StringData::MakeUncounted(folly::StringPiece sl) {
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().addAPCUncountedBlock();
-  }
   return MakeSharedAt<false>(sl, AllocateShared<false>(sl));
 }
 
@@ -215,12 +211,7 @@ void StringData::ReleaseUncounted(StringData* str) {
   assertx(str->isFlat());
   assertx(str->checkSane());
   assertx(!str->uncountedCowCheck());
-
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
-  }
-  auto const allocSize = str->size() + kStringOverhead;
-  uncounted_sized_free(str, allocSize);
+  FreeUncounted(str, str->size() + kStringOverhead);
 }
 
 //////////////////////////////////////////////////////////////////////

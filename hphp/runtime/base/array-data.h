@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -37,11 +38,9 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct APCArray;
 struct Array;
 struct String;
 struct StringData;
-struct VariableSerializer;
 struct Variant;
 
 namespace bespoke {
@@ -445,7 +444,7 @@ public:
   static int64_t Compare(const ArrayData*, const ArrayData*);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Static arrays.
+  // Shared arrays: static and uncounted.
 
   /*
    * If `arr' points to a static array, do nothing.  Otherwise, make a static
@@ -466,6 +465,12 @@ public:
    * Static-ify the contents of the array.
    */
   void onSetEvalScalar();
+
+  /*
+   * Return a new uncounted version of the given array. The array must be a
+   * refcounted array - otherwise, we should call persistentIncRef() instead.
+   */
+  ArrayData* makeUncounted(DataWalker::PointerMap* seen, bool hasApcTv);
 
   /////////////////////////////////////////////////////////////////////////////
   // Other functions.
@@ -732,6 +737,8 @@ struct ArrayFunctions {
   ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   void (*onSetEvalScalar[NK])(ArrayData*);
+  ArrayData* (*makeUncounted[NK])(
+    ArrayData*, DataWalker::PointerMap*, bool hasApcTv);
 };
 
 extern const ArrayFunctions g_array_funcs;

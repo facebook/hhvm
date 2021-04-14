@@ -461,13 +461,9 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
     DecRefUncounted(*LvalUncheckedInt(ad, i));
   }
 
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
-  }
-
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  auto const allocSize = extra + PackedArray::capacityToSizeBytes(ad->m_size);
-  uncounted_sized_free(reinterpret_cast<char*>(ad) - extra, allocSize);
+  auto const bytes = PackedArray::capacityToSizeBytes(ad->m_size);
+  FreeUncounted(reinterpret_cast<char*>(ad) - extra, extra + bytes);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -717,37 +713,25 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
   always_assert(false);
 }
 
-ArrayData* PackedArray::MakeUncounted(ArrayData* array,
-                                      bool withApcTypedValue,
-                                      DataWalker::PointerMap* seen) {
-  auto const updateSeen = seen && array->hasMultipleRefs();
-  if (updateSeen) {
-    auto it = seen->find(array);
-    assertx(it != seen->end());
-    if (auto const arr = static_cast<ArrayData*>(it->second)) {
-      arr->uncountedIncRef();
-      return arr;
-    }
-  }
-  assertx(checkInvariants(array));
+ArrayData* PackedArray::MakeUncounted(
+    ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv) {
   assertx(!array->empty());
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().addAPCUncountedBlock();
-  }
+  assertx(array->isRefCounted());
+  assertx(checkInvariants(array));
 
   auto const size = array->m_size;
-  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
+  auto const extra = hasApcTv ? sizeof(APCTypedValue) : 0;
   auto const bytes = PackedArray::capacityToSizeBytes(size);
   auto const sizeIndex = MemoryManager::size2Index(bytes);
   assertx(sizeIndex <= PackedArray::MaxSizeIndex);
 
-  auto const mem = static_cast<char*>(uncounted_malloc(bytes + extra));
+  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->initHeader_16(
     array->m_kind,
     UncountedValue,
     packSizeIndexAndAuxBits(sizeIndex, array->auxBits()) |
-    (withApcTypedValue ? ArrayData::kHasApcTv : 0)
+    (hasApcTv ? ArrayData::kHasApcTv : 0)
   );
   ad->m_size = array->m_size;
   ad->m_extra = array->m_extra;
@@ -766,7 +750,6 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   assertx(ad->m_extra == array->m_extra);
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
-  if (updateSeen) (*seen)[array] = ad;
   return ad;
 }
 

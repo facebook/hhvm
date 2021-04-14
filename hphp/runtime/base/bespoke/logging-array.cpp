@@ -310,9 +310,7 @@ ArrayData* LoggingArray::EscalateToVanilla(
 void LoggingArray::ConvertToUncounted(
     LoggingArray* lad, DataWalker::PointerMap* seen) {
   logEvent(lad, ArrayOp::ConvertToUncounted);
-  auto tv = make_array_like_tv(lad->wrapped);
-  ConvertTvToUncounted(&tv, seen);
-  lad->wrapped = val(tv).parr;
+  lad->wrapped = MakeUncountedArray(lad->wrapped, seen);
 }
 
 void LoggingArray::ReleaseUncounted(LoggingArray* lad) {

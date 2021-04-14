@@ -24,15 +24,33 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
-// Converts a TypedValue `source' to its uncounted form, so that it can be
-// shared across requests. We call it after doing a raw copy of the array
-// elements without manipulating refcounts. That's safe, because an uncounted
-// value will never hold references to refcounted values.
-void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen);
+/*
+ * Wrappers around uncounted_malloc, etc. that update APC stats.
+ */
+void* AllocUncounted(size_t bytes);
+void FreeUncounted(void* ptr);
+void FreeUncounted(void* ptr, size_t bytes);
 
-// The analogue of decRefAndRelease for an uncounted value. These helpers all
-// handle both static and uncounted values correctly. It's safe to call them
-// on any key or value of an uncounted array.
+/*
+ * Converts TypedValue `tv` to an uncounted form, so that it can be shared
+ * across requests. The result is either a primitive, a static value, or an
+ * uncounted value. Does not dec-ref the input.
+ *
+ * For refcounted and uncounted inputs, this operation produces a net increase
+ * of one "uncounted refcount". For refcounted inputs, it creates a new value
+ * with uncounted refcount 1, and for uncounted, it does an uncountedIncRef().
+ * (Primitives and statics are not refcounted in any way.)
+ */
+void ConvertTvToUncounted(tv_lval in, DataWalker::PointerMap* seen);
+ArrayData* MakeUncountedArray(ArrayData* in, DataWalker::PointerMap* seen,
+                              bool hasApcTv = false);
+StringData* MakeUncountedString(StringData* in, DataWalker::PointerMap* seen);
+
+/*
+ * The analogue of decRefAndRelease for an uncounted value. These helpers all
+ * handle both static and uncounted values correctly. It's safe to call them
+ * on any key or value of an uncounted array.
+ */
 void DecRefUncounted(TypedValue tv);
 void DecRefUncountedArray(ArrayData* ad);
 void DecRefUncountedString(StringData* sd);

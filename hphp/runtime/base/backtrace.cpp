@@ -795,9 +795,7 @@ Array CompactTrace::extract() const {
 
   auto arr = m_backtrace->extract();
   auto ins = CachedArray(
-    arr.get()->empty()
-      ? ArrayData::CreateVec()
-      : PackedArray::MakeUncounted(arr.get()),
+    MakeUncountedArray(arr.get(), nullptr),
     CacheDeleter()
   );
   if (!s_cache.insert(m_backtrace, ins)) {

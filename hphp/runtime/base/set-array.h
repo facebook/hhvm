@@ -180,11 +180,8 @@ public:
    * If withApcTypedValue is true, space for an APCTypedValue will be
    * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  bool withApcTypedValue = false,
-                                  DataWalker::PointerMap* m = nullptr);
-  static ArrayData* MakeUncounted(ArrayData* array, int) = delete;
-  static ArrayData* MakeUncounted(ArrayData* array, size_t) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);

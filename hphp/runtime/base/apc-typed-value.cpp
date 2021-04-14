@@ -20,6 +20,28 @@
 
 namespace HPHP {
 
+namespace {
+APCKind getAPCKind(const ArrayData* ad) {
+  switch (ad->toPersistentDataType()) {
+    case KindOfPersistentVec:
+      return ad->isStatic() ? APCKind::StaticVec : APCKind::UncountedVec;
+    case KindOfPersistentDict:
+      return ad->isStatic() ? APCKind::StaticDict : APCKind::UncountedDict;
+    case KindOfPersistentKeyset:
+      return ad->isStatic() ? APCKind::StaticKeyset : APCKind::UncountedKeyset;
+    default:
+      always_assert(false);
+  }
+}
+}
+
+APCTypedValue::APCTypedValue(ArrayData* ad)
+    : m_handle(getAPCKind(ad), ad->toPersistentDataType()) {
+  assertx(!ad->isRefCounted());
+  m_data.arr = ad;
+  assertx(checkInvariants());
+}
+
 APCTypedValue* APCTypedValue::tvUninit() {
   static APCTypedValue* value = new APCTypedValue(KindOfUninit);
   return value;

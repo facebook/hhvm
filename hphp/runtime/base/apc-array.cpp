@@ -23,9 +23,8 @@
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/data-walker.h"
-
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -45,15 +44,16 @@ size_t getMemSize(DataWalker::PointerMap* seenArrs) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename A, typename B, typename C>
+template <typename A, typename B>
 ALWAYS_INLINE
 APCHandle::Pair
 APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
-                         A shared, B uncounted, C serialized) {
+                         A shared, B serialized) {
   if (level == APCHandleLevel::Outer) {
     auto const seenArrs = apcExtension::ShareUncounted ?
       req::make_unique<DataWalker::PointerMap>() : nullptr;
-    // only need to call traverseData() on the toplevel array
+
+    // We only need to call traverseData() on the top-level array.
     DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
     DataWalker::DataFeature features =
       walker.traverseData(arr, seenArrs.get());
@@ -68,7 +68,7 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
         tl_heap->getAllocated() - tl_heap->getDeallocated() :
         seenArrs.get() ? getMemSize(seenArrs.get()) :
         ::HPHP::getMemSize(arr, true);
-      auto const uncounted_arr = uncounted(seenArrs.get());
+      auto const uncounted_arr = MakeUncountedArray(arr, seenArrs.get());
       auto const size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
         base_size;
@@ -84,19 +84,17 @@ APCHandle::Pair
 APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
                         bool unserializeObj) {
   assertx(vec->isVecType());
-  if (auto const value = APCTypedValue::HandlePersistent(
-        APCTypedValue::StaticVec{}, APCTypedValue::UncountedVec{}, vec)) {
+  if (auto const value = APCTypedValue::HandlePersistent(vec)) {
     return value;
   }
   return MakeSharedImpl(
     vec,
     level,
     [&] {
-      return MakePacked(vec,
-          vec->isLegacyArray() ? APCKind::SharedLegacyVec : APCKind::SharedVec,
-          unserializeObj);
+      auto const kind = vec->isLegacyArray() ? APCKind::SharedLegacyVec
+                                             : APCKind::SharedVec;
+      return MakePacked(vec, kind, unserializeObj);
     },
-    [&](DataWalker::PointerMap* m) { return MakeUncountedVec(vec, m); },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); }
   );
 }
@@ -105,20 +103,17 @@ APCHandle::Pair
 APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
                          bool unserializeObj) {
   assertx(dict->isDictType());
-  if (auto const value = APCTypedValue::HandlePersistent(
-        APCTypedValue::StaticDict{}, APCTypedValue::UncountedDict{}, dict)) {
+  if (auto const value = APCTypedValue::HandlePersistent(dict)) {
     return value;
   }
   return MakeSharedImpl(
     dict,
     level,
     [&] {
-      return MakeHash(
-        dict,
-        dict->isLegacyArray() ? APCKind::SharedLegacyDict : APCKind::SharedDict,
-        unserializeObj);
+      auto const kind = dict->isLegacyArray() ? APCKind::SharedLegacyDict
+                                              : APCKind::SharedDict;
+      return MakeHash(dict, kind, unserializeObj);
     },
-    [&](DataWalker::PointerMap* m) { return MakeUncountedDict(dict, m); },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); }
   );
 }
@@ -127,16 +122,13 @@ APCHandle::Pair
 APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
                            bool unserializeObj) {
   assertx(keyset->isKeysetType());
-  if (auto const value = APCTypedValue::HandlePersistent(
-        APCTypedValue::StaticKeyset{}, APCTypedValue::UncountedKeyset{},
-        keyset)) {
+  if (auto const value = APCTypedValue::HandlePersistent(keyset)) {
     return value;
   }
   return MakeSharedImpl(
     keyset,
     level,
     [&]() { return MakePacked(keyset, APCKind::SharedKeyset, unserializeObj); },
-    [&](DataWalker::PointerMap* m) { return MakeUncountedKeyset(keyset, m); },
     [&](StringData* s) { return APCString::MakeSerializedKeyset(s); }
   );
 }
@@ -183,42 +175,12 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   return {ret->getHandle(), size};
 }
 
-APCHandle* APCArray::MakeUncountedVec(
-    ArrayData* vec,
-    DataWalker::PointerMap* m) {
+APCHandle* APCArray::MakeUncountedArray(
+    ArrayData* ad, DataWalker::PointerMap* seen) {
   assertx(apcExtension::UseUncounted);
-  assertx(vec->isVecType());
-  auto data = vec->isVanilla()
-    ? PackedArray::MakeUncounted(vec, true, m)
-    : BespokeArray::MakeUncounted(vec, true, m);
-  auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-  auto value = new(mem) APCTypedValue(APCTypedValue::UncountedVec{}, data);
-  return value->getHandle();
-}
-
-APCHandle* APCArray::MakeUncountedDict(
-    ArrayData* dict,
-    DataWalker::PointerMap* m) {
-  assertx(apcExtension::UseUncounted);
-  assertx(dict->isDictType());
-  auto data = dict->isVanilla()
-    ? MixedArray::MakeUncounted(dict, true, m)
-    : BespokeArray::MakeUncounted(dict, true, m);
-  auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-  auto value = new(mem) APCTypedValue(APCTypedValue::UncountedDict{}, data);
-  return value->getHandle();
-}
-
-APCHandle* APCArray::MakeUncountedKeyset(
-    ArrayData* keyset,
-    DataWalker::PointerMap* m) {
-  assertx(apcExtension::UseUncounted);
-  assertx(keyset->isKeysetType());
-  auto data = keyset->isVanilla()
-    ? SetArray::MakeUncounted(keyset, true)
-    : BespokeArray::MakeUncounted(keyset, true, m);
-  auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-  auto value = new(mem) APCTypedValue(APCTypedValue::UncountedKeyset{}, data);
+  auto const data = ::HPHP::MakeUncountedArray(ad, seen, true);
+  auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
+  auto const value = new (mem) APCTypedValue(data);
   return value->getHandle();
 }
 

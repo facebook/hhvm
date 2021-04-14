@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -401,23 +400,16 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* MixedArray::MakeUncounted(ArrayData* array,
-                                     bool withApcTypedValue,
-                                     DataWalker::PointerMap* seen) {
-  auto const updateSeen = seen && array->hasMultipleRefs();
-  if (updateSeen) {
-    auto it = seen->find(array);
-    assertx(it != seen->end());
-    if (auto const arr = static_cast<ArrayData*>(it->second)) {
-      arr->uncountedIncRef();
-      return arr;
-    }
-  }
+ArrayData* MixedArray::MakeUncounted(
+    ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv) {
   auto a = asMixed(array);
   assertx(!a->empty());
-  auto const extra = uncountedAllocExtra(array, withApcTypedValue);
+  assertx(a->isRefCounted());
+
+  auto const extra = uncountedAllocExtra(array, hasApcTv);
   auto const ad = uncountedAlloc(a->scale(), extra);
   auto const used = a->m_used;
+
   // Do a raw copy first, without worrying about counted types or refcount
   // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
   // This might overwrite the hash table, but won't go beyond the space
@@ -426,7 +418,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   assertx((extra & 0xf) == 0);
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
   ad->m_count = UncountedValue; // after bcopy, update count
-  if (withApcTypedValue) {
+  if (hasApcTv) {
     ad->m_aux16 |= kHasApcTv;
   } else {
     ad->m_aux16 &= ~kHasApcTv;
@@ -441,35 +433,13 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     auto& te = dstElem[i];
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
-    if (te.hasStrKey() && !te.skey->isStatic()) {
-      auto const key = te.skey;
-      if (key->isUncounted()) {
-        key->uncountedIncRef();
-        ad->mutableKeyTypes()->recordNonStaticStr();
-      } else {
-        te.skey = [&] {
-          if (auto const st = lookupStaticString(key)) return st;
-          ad->mutableKeyTypes()->recordNonStaticStr();
-          HeapObject** seenStr = nullptr;
-          if (seen && key->hasMultipleRefs()) {
-            seenStr = &(*seen)[key];
-            if (auto const st = static_cast<StringData*>(*seenStr)) {
-              st->uncountedIncRef();
-              return st;
-            }
-          }
-          auto const st = StringData::MakeUncounted(key->slice());
-          if (seenStr) *seenStr = st;
-          return st;
-        }();
-      }
+    if (te.hasStrKey()) {
+      te.skey = MakeUncountedString(te.skey, seen);
+      if (!te.skey->isStatic()) ad->mutableKeyTypes()->recordNonStaticStr();
     }
     ConvertTvToUncounted(&te.data, seen);
   }
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().addAPCUncountedBlock();
-  }
-  if (updateSeen) (*seen)[array] = ad;
+
   assertx(ad->checkInvariants());
   return ad;
 }
@@ -553,11 +523,8 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
     }
   }
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  uncounted_sized_free(reinterpret_cast<char*>(ad) - extra,
-                       computeAllocBytes(ad->scale()) + extra);
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
-  }
+  FreeUncounted(reinterpret_cast<char*>(ad) - extra,
+                computeAllocBytes(ad->scale()) + extra);
 }
 
 //=============================================================================

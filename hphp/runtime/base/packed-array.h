@@ -156,16 +156,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(
-      ArrayData* array, bool withApcTypedValue = false,
-      DataWalker::PointerMap* seen = nullptr
-  );
-  static ArrayData* MakeUncounted(
-      ArrayData* array, int, DataWalker::PointerMap* seen = nullptr
-  ) = delete;
-  static ArrayData* MakeUncounted(
-      ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
-  ) = delete;
-  static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
+      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc, bool isLegacy = false);
 

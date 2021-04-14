@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
@@ -22,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 
 namespace HPHP {
 
@@ -85,41 +85,36 @@ bool BespokeArray::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
-                                       DataWalker::PointerMap* seen) {
+ArrayData* BespokeArray::MakeUncounted(
+    ArrayData* ad, DataWalker::PointerMap* seen, bool hasApcTv) {
   assertx(ad->isRefCounted());
+  auto const byte = getLayoutByte(ad);
+  auto const extra = uncountedAllocExtra(ad, hasApcTv);
+  auto const bytes = g_layout_funcs.fnHeapSize[byte](ad);
+  assertx(extra % 16 == 0);
 
-  auto const vad = ToVanilla(ad, "BespokeArray::MakeUncounted");
-  SCOPE_EXIT { decRefArr(vad); };
+  // "Help" out by copying the array's raw bytes to an uncounted allocation.
+  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
+  auto const result = reinterpret_cast<ArrayData*>(mem + extra);
+  memcpy8(reinterpret_cast<char*>(result),
+          reinterpret_cast<char*>(ad), bytes);
+  auto const aux = ad->m_aux16 | (hasApcTv ? ArrayData::kHasApcTv : 0);
+  result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
+  assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
-  if (seen) {
-    auto const mark = [&](TypedValue tv) {
-      if (isRefcountedType(type(tv)) && val(tv).pcnt->hasMultipleRefs()) {
-        seen->insert({val(tv).pcnt, nullptr});
-      }
-    };
-    if (vad->hasMultipleRefs()) seen->insert({vad, nullptr});
-    IterateKV(vad, [&](auto k, auto v) { mark(k); mark(v); });
-  }
+  g_layout_funcs.fnConvertToUncounted[byte](result, seen);
 
-  if (vad->isVanillaVec()) {
-    return PackedArray::MakeUncounted(vad, hasApcTv, seen);
-  } else if (vad->isVanillaDict()) {
-    return MixedArray::MakeUncounted(vad, hasApcTv, seen);
-  }
-  return SetArray::MakeUncounted(vad, hasApcTv, seen);
+  return result;
 }
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {
   assertx(!ad->uncountedCowCheck());
   auto const byte = getLayoutByte(ad);
   g_layout_funcs.fnReleaseUncounted[byte](ad);
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
-  }
+
   auto const bytes = g_layout_funcs.fnHeapSize[byte](ad);
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  uncounted_sized_free(reinterpret_cast<char*>(ad) - extra, bytes + extra);
+  FreeUncounted(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -128,8 +128,8 @@ public:
   static ArrayData* ToVanilla(const ArrayData* ad, const char* reason);
 
   // Bespoke arrays can be converted to uncounted values for APC.
-  static ArrayData* MakeUncounted(ArrayData* array, bool hasApcTv,
-                                  DataWalker::PointerMap* seen);
+  static ArrayData* MakeUncounted(
+      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
   static void ReleaseUncounted(ArrayData*);
 
 private:

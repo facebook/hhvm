@@ -54,14 +54,7 @@ IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
         : (new icu::GregorianCalendar(locale, error));
     calOwned = true;
   } else if (cal.isObject()) {
-    auto IntlCalendar_Class = Class::lookup(s_IntlCalendar.get());
-    auto obj = cal.toObject();
-    auto cls = obj->getVMClass();
-    if (!IntlCalendar_Class ||
-       ((cls != IntlCalendar_Class) && !cls->classof(IntlCalendar_Class))) {
-      goto bad_argument;
-    }
-    auto data = IntlCalendar::Get(obj.get());
+    auto const data = IntlCalendar::Get(cal.toObject().get());
     if (!data) {
       // ::Get raises errors
       return nullptr;
@@ -69,7 +62,6 @@ IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
     calOwned = false;
     return data->calendar();
   } else {
-bad_argument:
     err->setError(U_ILLEGAL_ARGUMENT_ERROR,
                   "%s: Invalid calendar argument; should be an integer "
                   "or an IntlCalendar instance", funcname.c_str());

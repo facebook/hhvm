@@ -59,11 +59,30 @@ struct IntlError {
 };
 
 template<class T>
-T* GetData(ObjectData* obj, const String& ctx) {
+T* GetData(ObjectData* obj, const StaticString& name) {
+  auto const okay = [&]{
+    // Avoid looking up the class if possible. We can do a pointer comparison
+    // on the static string names which will succeed if the classes match.
+    auto const cls = obj->getVMClass();
+    if (cls->name() == name.get()) return true;
+
+    // Load the class and do the expensive check instead. We need this fallback
+    // because ext_icu classes are not final.
+    auto const needed = Class::lookup(name.get());
+    if (needed && (cls == needed || cls->classofNonIFace(needed))) return true;
+
+    // Raise a notice, which we'll upgrade to an error after confirming that
+    // this case is rare (or nonexistent) in most codebases.
+    raise_notice("Invalid argument: expected %s, got %s",
+                 name.data(), cls->name()->data());
+    return false;
+  }();
+  if (!okay) return nullptr;
+
   auto const ret = Native::data<T>(obj);
   if (!ret->isValid()) {
     ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                  "Found unconstructed %s", ctx.c_str());
+                  "Found unconstructed %s", name.data());
     return nullptr;
   }
   return ret;

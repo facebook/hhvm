@@ -61,7 +61,8 @@ type error_from_reasons_callback =
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
-    then no error is emitted.
+    it will error at a default position in the current file and log the failed
+    assertion.
     This also sets the error code to the code for unification error
     if none is provided. *)
 val unify_error_assert_primary_pos_in_current_decl :
@@ -69,7 +70,8 @@ val unify_error_assert_primary_pos_in_current_decl :
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
-    then no error is emitted.
+    it will error at a default position in the current file and log the failed
+    assertion.
     This also sets the error code to the code for invalid type hint error
     if none is provided. *)
 val invalid_type_hint_assert_primary_pos_in_current_decl :
@@ -935,7 +937,12 @@ val override_lsb :
   error_from_reasons_callback ->
   unit
 
-val should_be_override : Pos.t -> string -> string -> unit
+val should_be_override :
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  current_decl_and_file:Pos_or_decl.ctx ->
+  unit
 
 val override_per_trait :
   Pos.t * string -> string -> string -> Pos_or_decl.t -> unit
@@ -1142,9 +1149,10 @@ val duplicate_interface : Pos.t -> string -> Pos_or_decl.t list -> unit
 val cyclic_typeconst : Pos.t -> string list -> unit
 
 val abstract_concrete_override :
-  Pos.t ->
+  Pos_or_decl.t ->
   Pos_or_decl.t ->
   [< `method_ | `typeconst | `constant | `property ] ->
+  current_decl_and_file:Pos_or_decl.ctx ->
   unit
 
 val local_variable_modified_and_used : Pos.t -> Pos.t list -> unit
@@ -1162,7 +1170,11 @@ val illegal_type_structure : Pos.t -> string -> unit
 
 val illegal_typeconst_direct_access : Pos.t -> unit
 
-val override_no_default_typeconst : Pos.t -> Pos_or_decl.t -> unit
+val override_no_default_typeconst :
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  current_decl_and_file:Pos_or_decl.ctx ->
+  unit
 
 val unification_cycle : Pos.t -> string -> unit
 

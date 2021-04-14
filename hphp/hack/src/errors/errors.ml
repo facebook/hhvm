@@ -872,11 +872,12 @@ and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
-let error_assert_primary_pos_in_current_decl :
-    default_code:Typing.t ->
+let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->
-    error_from_reasons_callback =
- fun ~default_code ~current_decl_and_file ?code reasons ->
+    error_code ->
+    Pos_or_decl.t message list ->
+    unit =
+ fun ~current_decl_and_file code reasons ->
   match reasons with
   | [] -> ()
   | ((primary_pos, claim_) as claim) :: remaining_reasons ->
@@ -894,18 +895,28 @@ let error_assert_primary_pos_in_current_decl :
           claim
           reasons
     in
-    add_list
-      (Option.value code ~default:(Typing.err_code default_code))
-      claim
-      reasons
+    add_list code claim reasons
+
+let error_assert_primary_pos_in_current_decl_callback :
+    default_code:Typing.t ->
+    current_decl_and_file:Pos_or_decl.ctx ->
+    error_from_reasons_callback =
+ fun ~default_code ~current_decl_and_file ?code reasons ->
+  let code = Option.value code ~default:(Typing.err_code default_code) in
+  add_error_assert_primary_pos_in_current_decl
+    ~current_decl_and_file
+    code
+    reasons
 
 let unify_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback =
-  error_assert_primary_pos_in_current_decl ~default_code:Typing.UnifyError
+  error_assert_primary_pos_in_current_decl_callback
+    ~default_code:Typing.UnifyError
 
 let invalid_type_hint_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback =
-  error_assert_primary_pos_in_current_decl ~default_code:Typing.InvalidTypeHint
+  error_assert_primary_pos_in_current_decl_callback
+    ~default_code:Typing.InvalidTypeHint
 
 let merge_into_current errors =
   let merged = merge errors (!error_map, !applied_fixmes) in
@@ -3785,10 +3796,12 @@ let abstract_concrete_override pos parent_pos kind =
     | `constant -> "constant"
     | `property -> "property"
   in
-  add_list
+  add_error_assert_primary_pos_in_current_decl
     (Typing.err_code Typing.AbstractConcreteOverride)
-    (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract")
-    [(parent_pos, "Previously defined here")]
+    [
+      (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
+      (parent_pos, "Previously defined here");
+    ]
 
 let required_field_is_optional
     pos1 pos2 name (on_error : error_from_reasons_callback) =
@@ -4124,13 +4137,15 @@ let override_lsb
     ]
 
 let should_be_override pos class_id id =
-  add
+  add_error_assert_primary_pos_in_current_decl
     (Typing.err_code Typing.ShouldBeOverride)
-    pos
-    (Printf.sprintf
-       "%s has no parent class with a method %s to override"
-       (strip_ns class_id |> Markdown_lite.md_codify)
-       (Markdown_lite.md_codify id))
+    [
+      ( pos,
+        Printf.sprintf
+          "%s has no parent class with a method %s to override"
+          (strip_ns class_id |> Markdown_lite.md_codify)
+          (Markdown_lite.md_codify id) );
+    ]
 
 let override_per_trait class_name meth_name trait_name m_pos =
   let (c_pos, c_name) = class_name in
@@ -4404,10 +4419,10 @@ let illegal_typeconst_direct_access pos =
   add (Typing.err_code Typing.IllegalTypeStructure) pos msg
 
 let override_no_default_typeconst pos_child pos_parent =
-  add_list
+  add_error_assert_primary_pos_in_current_decl
     (Typing.err_code Typing.OverrideNoDefaultTypeconst)
-    (pos_child, "This abstract type constant does not have a default type")
     [
+      (pos_child, "This abstract type constant does not have a default type");
       ( pos_parent,
         "It cannot override an abstract type constant that has a default type"
       );

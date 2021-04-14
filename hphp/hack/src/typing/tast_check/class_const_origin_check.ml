@@ -24,7 +24,7 @@ module SPSet = Caml.Set.Make (StringPair)
  * `class_name::constant_name` to build a transitive set and check for cycles.
  *
  * Note that some constant are using `self` instead of the current class
- * name, so we always carry the class where refs come  from to be able
+ * name, so we always carry the class where refs come from to be able
  * to perform the correct naming resolution.
  *)
 let find_cycle env class_name constant_name =
@@ -106,9 +106,11 @@ let handler =
             match cc with
             | None -> ()
             | Some cc ->
-              if find_cycle env c_name cc_name then
-                Option.iter
-                  (Tast_env.assert_pos_in_current_decl env cc.cc_pos)
-                  ~f:(fun cc_pos ->
+              (* This class constant may be inherited from an ancestor class, in which
+               * case we don't want to fire the error in this file. *)
+              Option.iter
+                (Tast_env.fill_in_pos_filename_if_in_current_decl env cc.cc_pos)
+                ~f:(fun cc_pos ->
+                  if find_cycle env c_name cc_name then
                     Errors.cyclic_class_constant cc_pos c_name cc_name))
   end

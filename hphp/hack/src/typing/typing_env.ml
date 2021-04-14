@@ -55,7 +55,7 @@ let get_current_decl env =
 let get_current_decl_and_file env : Pos_or_decl.ctx =
   { Pos_or_decl.file = get_file env; decl = get_current_decl env }
 
-let assert_pos_in_current_decl env pos =
+let fill_in_pos_filename_if_in_current_decl env pos =
   Pos_or_decl.fill_in_filename_if_in_current_decl
     ~current_decl_and_file:(get_current_decl_and_file env)
     pos

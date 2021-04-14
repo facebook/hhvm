@@ -273,15 +273,14 @@ let check_override
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See override_abstract_concrete.php test case for example. *)
-    Env.assert_pos_in_current_decl env pos
-    |> Option.iter ~f:(fun pos ->
-           Errors.abstract_concrete_override
-             pos
-             parent_pos
-             ( if is_method then
-               `method_
-             else
-               `property ));
+    Errors.abstract_concrete_override
+      pos
+      parent_pos
+      ( if is_method then
+        `method_
+      else
+        `property )
+      ~current_decl_and_file:(Env.get_current_decl_and_file env);
   if check_params then (
     let on_error ?code:_ reasons =
       ( if is_method then
@@ -466,12 +465,11 @@ let check_const_override
         const_name
         on_error
     else if is_abstract_concrete_override then
-      Env.assert_pos_in_current_decl env class_const.cc_pos
-      |> Option.iter ~f:(fun pos ->
-             Errors.abstract_concrete_override
-               pos
-               parent_class_const.cc_pos
-               `constant);
+      Errors.abstract_concrete_override
+        class_const.cc_pos
+        parent_class_const.cc_pos
+        `constant
+        ~current_decl_and_file:(Env.get_current_decl_and_file env);
   Phase.sub_type_decl
     env
     class_const.cc_type
@@ -754,19 +752,23 @@ let check_constructors env parent_class class_ psubst subst on_error =
 let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     =
   let (pos, name) = child_typeconst.ttc_name in
-  let pos_opt = Env.assert_pos_in_current_decl env pos in
   let parent_pos = fst parent_typeconst.ttc_name in
   match (parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract) with
   | (TCAbstract (Some _), TCAbstract None) ->
-    Option.iter pos_opt ~f:(fun pos ->
-        Errors.override_no_default_typeconst pos parent_pos);
+    Errors.override_no_default_typeconst
+      pos
+      parent_pos
+      ~current_decl_and_file:(Env.get_current_decl_and_file env);
     env
   | ((TCConcrete | TCPartiallyAbstract), TCAbstract _) ->
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See typecheck/tconst/subsume_tconst5.php test case for example. *)
-    Option.iter pos_opt ~f:(fun pos ->
-        Errors.abstract_concrete_override pos parent_pos `typeconst);
+    Errors.abstract_concrete_override
+      pos
+      parent_pos
+      `typeconst
+      ~current_decl_and_file:(Env.get_current_decl_and_file env);
     env
   | _ ->
     let inherited = not (String.equal child_typeconst.ttc_origin class_name) in

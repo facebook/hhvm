@@ -1050,7 +1050,7 @@ let check_no_generic_static_property env tc =
              Option.iter
                (* If the static property is inherited from another trait, the position may be
                 * in a different file. *)
-               (Env.assert_pos_in_current_decl env generic_pos)
+               (Env.fill_in_pos_filename_if_in_current_decl env generic_pos)
                ~f:(fun generic_pos ->
                  Errors.static_property_type_generic_param
                    ~class_pos
@@ -1480,8 +1480,11 @@ let class_def_ env c tc =
         let pos = method_pos ~is_static ce.ce_origin id in
         (* Method is actually defined in this class *)
         if String.equal ce.ce_origin (snd c.c_name) then
-          Option.iter (Env.assert_pos_in_current_decl env pos) (fun pos ->
-              Errors.should_be_override pos (snd c.c_name) id)
+          Errors.should_be_override
+            pos
+            (snd c.c_name)
+            id
+            ~current_decl_and_file:(Env.get_current_decl_and_file env)
         else
           match Env.get_class env ce.ce_origin with
           | None -> ()

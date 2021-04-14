@@ -287,4 +287,5 @@ val consts :
 
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)
-val assert_pos_in_current_decl : env -> Pos_or_decl.t -> Pos.t option
+val fill_in_pos_filename_if_in_current_decl :
+  env -> Pos_or_decl.t -> Pos.t option

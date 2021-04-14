@@ -315,4 +315,5 @@ let get_const env cls name = Typing_env.get_const env cls name
 
 let consts env cls = Typing_env.consts env cls
 
-let assert_pos_in_current_decl = Typing_env.assert_pos_in_current_decl
+let fill_in_pos_filename_if_in_current_decl =
+  Typing_env.fill_in_pos_filename_if_in_current_decl

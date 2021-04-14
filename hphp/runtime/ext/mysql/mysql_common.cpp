@@ -609,9 +609,21 @@ Variant php_mysql_do_connect_with_ssl(
     const Array* conn_attrs /* = nullptr */,
     const Variant& sslContextProvider /* = null */) {
   std::shared_ptr<SSLOptionsProviderBase> ssl_provider;
+
   if (!sslContextProvider.isNull()) {
+    auto ctx = sslContextProvider.toObject();
+    if (!ctx.instanceof(MySSLContextProvider::s_className)) {
+       SystemLib::throwInvalidArgumentExceptionObject(
+         folly::sformat(
+           "Invalid argument. Expected {}, received {}",
+           MySSLContextProvider::s_className,
+           ctx->getClassName().c_str()
+         )
+       );
+    }
+
     auto* obj =
-        Native::data<HPHP::MySSLContextProvider>(sslContextProvider.toObject());
+        Native::data<HPHP::MySSLContextProvider>(ctx);
     ssl_provider = obj->getSSLProvider();
   }
 

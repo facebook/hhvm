@@ -1,0 +1,12 @@
+
+Notice: Invalid argument: expected IntlCalendar, got MyFakeCalendar0 in %s/wrong_types.php on line 11
+bool(false)
+
+Notice: Invalid argument: expected IntlCalendar, got MyFakeCalendar1 in %s/wrong_types.php on line 12
+bool(false)
+
+Notice: Invalid argument: expected IntlCalendar, got MyFakeCalendar2 in %s/wrong_types.php on line 13
+bool(false)
+
+Notice: Invalid argument: expected IntlCalendar, got MyFakeCalendar3 in %s/wrong_types.php on line 14
+bool(false)

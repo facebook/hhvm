@@ -3,7 +3,5 @@
 <<__EntryPoint>>
 function main(): void {
     $a = new XMLReader();
-    $b = new DOMNode();
-    $a->expand($b);
-    $a->expand($a);
+    $a->expand(new DOMNode());
 }

@@ -629,11 +629,33 @@ let (is_hh_fixme_disallowed : (Pos.t -> error_code -> bool) ref) =
 (* Errors accumulator. *)
 (*****************************************************************************)
 
+(* We still want to error somewhere to avoid silencing any kind of errors, which
+ * could cause errors to creep into the codebase. *)
+let wrap_error_in_different_file ~current_file ~current_span claim reasons =
+  let reasons = claim :: reasons in
+  let message =
+    List.map reasons ~f:(fun (pos, msg) ->
+        Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
+        ^ ": "
+        ^ msg)
+  in
+  let stack =
+    Exception.get_current_callstack_string 99 |> Exception.clean_stack
+  in
+  HackEventLogger.type_check_primary_position_bug ~current_file ~message ~stack;
+  let claim =
+    if Pos.equal current_span Pos.none then
+      (Pos.make_from current_file, badpos_message)
+    else
+      (current_span, badpos_message_2)
+  in
+  (claim, reasons)
+
 (* If primary position in error list isn't in current file, wrap with a sentinel error *)
 let check_pos_msg :
     Pos.t message * Pos_or_decl.t message list ->
     Pos.t message * Pos_or_decl.t message list =
- fun (claim, pos_msg_l) ->
+ fun (claim, reasons) ->
   let pos = fst claim in
   let current_file = fst !current_context in
   let current_span = !current_span in
@@ -645,30 +667,13 @@ let check_pos_msg :
        && Relative_path.equal (Pos.filename pos) current_file
     || Relative_path.equal current_file Relative_path.default
   then
-    (claim, pos_msg_l)
+    (claim, reasons)
   else
-    let pos_msg_l = claim_as_reason claim :: pos_msg_l in
-    let message =
-      pos_msg_l
-      |> List.map ~f:(fun (pos, msg) ->
-             (Pos.print_verbose_relative @@ Pos_or_decl.unsafe_to_raw_pos pos)
-             ^ ": "
-             ^ msg)
-    in
-    let stack =
-      Exception.get_current_callstack_string 99 |> Exception.clean_stack
-    in
-    HackEventLogger.type_check_primary_position_bug
+    wrap_error_in_different_file
       ~current_file
-      ~message
-      ~stack;
-    let err =
-      if Pos.equal current_span Pos.none then
-        (Pos.make_from current_file, badpos_message)
-      else
-        (current_span, badpos_message_2)
-    in
-    (err, pos_msg_l)
+      ~current_span
+      (claim_as_reason claim)
+      reasons
 
 let add_error_with_fixme_error error explanation =
   let { code; claim; reasons = _ } = error in
@@ -875,19 +880,26 @@ let error_assert_primary_pos_in_current_decl :
  fun ~default_code ~current_decl ~current_file ?code reasons ->
   match reasons with
   | [] -> ()
-  | (primary_pos, claim) :: remaining_reasons ->
-    (match
-       Pos_or_decl.assert_is_in_current_decl
-         ~current_decl
-         ~current_file
-         primary_pos
-     with
-    | Some primary_pos ->
-      add_list
-        (Option.value code ~default:(Typing.err_code default_code))
-        (primary_pos, claim)
-        remaining_reasons
-    | None -> ())
+  | ((primary_pos, claim_) as claim) :: remaining_reasons ->
+    let (claim, reasons) =
+      match
+        Pos_or_decl.assert_is_in_current_decl
+          ~current_decl
+          ~current_file
+          primary_pos
+      with
+      | Some primary_pos -> ((primary_pos, claim_), remaining_reasons)
+      | None ->
+        wrap_error_in_different_file
+          ~current_file
+          ~current_span:!current_span
+          claim
+          reasons
+    in
+    add_list
+      (Option.value code ~default:(Typing.err_code default_code))
+      claim
+      reasons
 
 let unify_error_assert_primary_pos_in_current_decl :
     current_decl:Decl_reference.t option ->

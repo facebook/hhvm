@@ -13,4 +13,4 @@ pub mod names;
 
 pub use names::Names;
 
-pub use rusqlite::Result;
+pub use rusqlite::{Error, Result};

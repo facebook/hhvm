@@ -315,7 +315,6 @@
     parser
     provider_context
     provider_utils
-    search
     server_command_types
     server_env
     server_file_outline

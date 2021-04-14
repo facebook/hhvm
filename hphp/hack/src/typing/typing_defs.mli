@@ -168,12 +168,39 @@ type deserialization_error =
   | Not_supported of string
   | Deserialization_error of string
 
+module Type_expansions : sig
+  (** A list of the type defs and type access we have expanded thus far. Used
+      to prevent entering into a cycle when expanding these types. *)
+  type t
+
+  val empty : t
+
+  (** If we are expanding the RHS of a type definition, [report_cycle] contains
+      the position and id of the LHS. This way, if the RHS expands at some point
+      to the LHS id, we are able to report a cycle. *)
+  val empty_w_cycle_report : report_cycle:(Pos.t * string) option -> t
+
+  val ids : t -> string list
+
+  val positions : t -> Pos_or_decl.t list
+end
+
+(** Tracks information about how a type was expanded *)
 type expand_env = {
-  type_expansions: (bool * Pos_or_decl.t * string) list;
+  type_expansions: Type_expansions.t;
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
   on_error: Errors.error_from_reasons_callback;
 }
+
+(** Returns:
+    - [None] if there was no cycle
+    - [Some None] if there was a cycle which did not involve the first
+      type expansion, i.e. error reporting should be done elsewhere
+    - [Some (Some pos)] if there was a cycle involving the first type
+      expansion in which case an error should be reported at [pos]. *)
+val add_type_expansion_check_cycles :
+  expand_env -> Pos_or_decl.t * string -> expand_env * Pos.t option option
 
 val get_var : 'a ty -> Ident.t option
 
@@ -210,8 +237,6 @@ val show_phase_ty : 'a -> string
 val pp_phase_ty : 'a -> 'b -> Base.unit
 
 val is_locl_type : internal_type -> bool
-
-val has_expanded : expand_env -> string -> bool option
 
 val reason : internal_type -> locl_phase Reason.t_
 

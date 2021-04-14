@@ -238,14 +238,78 @@ type deserialization_error =
   | Deserialization_error of string
       (** The input JSON was invalid for some reason. *)
 
+module Type_expansions : sig
+  (** A list of the type defs and type access we have expanded thus far. Used
+      to prevent entering into a cycle when expanding these types. *)
+  type t
+
+  val empty : t
+
+  (** If we are expanding the RHS of a type definition, [report_cycle] contains
+      the position and id of the LHS. This way, if the RHS expands at some point
+      to the LHS id, we are able to report a cycle. *)
+  val empty_w_cycle_report : report_cycle:(Pos.t * string) option -> t
+
+  (** Returns:
+    - [None] if there was no cycle
+    - [Some None] if there was a cycle which did not involve the first
+      type expansion, i.e. error reporting should be done elsewhere
+    - [Some (Some pos)] if there was a cycle involving the first type
+      expansion in which case an error should be reported at [pos]. *)
+  val add_and_check_cycles :
+    t -> Pos_or_decl.t * string -> t * Pos.t option option
+
+  val ids : t -> string list
+
+  val positions : t -> Pos_or_decl.t list
+end = struct
+  type t = {
+    report_cycle: (Pos.t * string) option;
+        (** If we are expanding the RHS of a type definition, [report_cycle] contains
+            the position and id of the LHS. This way, if the RHS expands at some point
+            to the LHS id, we are able to report a cycle. *)
+    expansions: (Pos_or_decl.t * string) list;
+        (** A list of the type defs and type access we have expanded thus far. Used
+            to prevent entering into a cycle when expanding these types.
+            If the boolean is set, then emit an error because we were checking the
+            definition of a type (by type, or newtype, or a type constant) *)
+  }
+
+  let empty_w_cycle_report ~report_cycle = { report_cycle; expansions = [] }
+
+  let empty = empty_w_cycle_report ~report_cycle:None
+
+  let add { report_cycle; expansions } exp =
+    { report_cycle; expansions = exp :: expansions }
+
+  let has_expanded { report_cycle; expansions } x =
+    match report_cycle with
+    | Some (p, x') when String.equal x x' -> Some (Some p)
+    | Some _
+    | None ->
+      List.find_map expansions (function
+          | (_, x') when String.equal x x' -> Some None
+          | _ -> None)
+
+  let add_and_check_cycles exps (p, id) =
+    let has_cycle = has_expanded exps id in
+    let exps = add exps (p, id) in
+    (exps, has_cycle)
+
+  let as_list { report_cycle; expansions } =
+    ( report_cycle
+    |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
+    |> Option.to_list )
+    @ List.rev expansions
+
+  let ids exps = as_list exps |> List.map ~f:snd
+
+  let positions exps = as_list exps |> List.map ~f:fst
+end
+
 (** Tracks information about how a type was expanded *)
 type expand_env = {
-  type_expansions: (bool * Pos_or_decl.t * string) list;
-      (** A list of the type defs and type access we have expanded thus far. Used
-       * to prevent entering into a cycle when expanding these types.
-       * If the boolean is set, then emit an error because we were checking the
-       * definition of a type (by type, or newtype, or a type constant)
-       *)
+  type_expansions: Type_expansions.t;
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
       (** The type that is substituted for `this` in signatures. It should be
@@ -253,6 +317,13 @@ type expand_env = {
        *)
   on_error: Errors.error_from_reasons_callback;
 }
+
+let add_type_expansion_check_cycles env exp =
+  let (type_expansions, has_cycle) =
+    Type_expansions.add_and_check_cycles env.type_expansions exp
+  in
+  let env = { env with type_expansions } in
+  (env, has_cycle)
 
 let get_var t =
   match get_node t with
@@ -334,11 +405,6 @@ let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
 let is_locl_type = function
   | LoclType _ -> true
   | _ -> false
-
-let has_expanded { type_expansions; _ } x =
-  List.find_map type_expansions (function
-      | (report, _, x') when String.equal x x' -> Some report
-      | _ -> None)
 
 let reason = function
   | LoclType t -> get_reason t

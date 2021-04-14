@@ -1090,7 +1090,7 @@ and simplify_subtype_i
             in
             let ety_env =
               {
-                type_expansions = [];
+                type_expansions = Typing_defs.Type_expansions.empty;
                 substs =
                   TUtils.make_locl_subst_for_class_tparams class_ty tyl_super;
                 this_ty = Option.value this_ty ~default:ty_super;
@@ -1608,7 +1608,7 @@ and simplify_subtype_i
               in
               let ety_env =
                 {
-                  type_expansions = [];
+                  type_expansions = Typing_defs.Type_expansions.empty;
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
                   (* TODO: do we need this? *)

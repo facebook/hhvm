@@ -1,7 +1,10 @@
 //// file1.php
 <?hh // strict
+newtype B = int;
 
-newtype Foo = int;
+newtype A = B;
+
+newtype Foo = A;
 
 //// file2.php
 <?hh // strict

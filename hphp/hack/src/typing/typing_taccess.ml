@@ -114,16 +114,17 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
             ctx.ety_env.on_error) )
   | Some typeconst ->
     let name = tp_name class_name id in
-    let type_expansions =
-      (false, id_pos, name) :: ctx.ety_env.type_expansions
+    let (ety_env, has_cycle) =
+      Typing_defs.add_type_expansion_check_cycles ctx.ety_env (id_pos, name)
     in
-    (match Typing_defs.has_expanded ctx.ety_env name with
-    | Some report ->
-      ( if report then
-        let seen = List.rev_map type_expansions (fun (_, _, x) -> x) in
-        Errors.cyclic_typeconst
-          (fst typeconst.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
-          seen );
+    let ctx = { ctx with ety_env } in
+    (match has_cycle with
+    | Some initial_taccess_pos_opt ->
+      Option.iter initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
+          let seen =
+            Typing_defs.Type_expansions.ids ctx.ety_env.type_expansions
+          in
+          Errors.cyclic_typeconst initial_taccess_pos seen);
       (* This is a cycle through a type constant that we are using *)
       (env, Missing (fun () -> ()))
     | None ->
@@ -135,8 +136,10 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
             | ty -> ty)
       in
       let ety_env =
-        let this_ty = drop_exact (Option.value ctx.base ~default:root) in
-        { ctx.ety_env with type_expansions; this_ty }
+        {
+          ctx.ety_env with
+          this_ty = drop_exact (Option.value ctx.base ~default:root);
+        }
       in
       let abstract_or_exact env ~lower_bounds ~upper_bounds =
         ( if not ctx.allow_abstract then

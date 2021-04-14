@@ -2116,7 +2116,7 @@ and expr_
         in
         let ety_env =
           {
-            type_expansions = [];
+            type_expansions = Typing_defs.Type_expansions.empty;
             substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
             on_error = Errors.ignore_error;
@@ -3944,7 +3944,7 @@ and new_object
         | Some ({ ce_type = (lazy ty); _ } as ce) ->
           let ety_env =
             {
-              type_expansions = [];
+              type_expansions = Typing_defs.Type_expansions.empty;
               substs =
                 TUtils.make_locl_subst_for_class_tparams class_info params;
               this_ty = obj_ty;
@@ -5558,7 +5558,7 @@ and class_get_
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
         {
-          type_expansions = [];
+          type_expansions = Typing_defs.Type_expansions.empty;
           this_ty;
           substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
           on_error = Errors.ignore_error;
@@ -6063,7 +6063,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
   in
   let ety_env =
     {
-      type_expansions = [];
+      type_expansions = Typing_defs.Type_expansions.empty;
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
       on_error = Errors.unify_error_at p;
@@ -7225,7 +7225,7 @@ and safely_refine_class_type
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env =
     {
-      type_expansions = [];
+      type_expansions = Typing_defs.Type_expansions.empty;
       substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
       on_error = Errors.ignore_error;

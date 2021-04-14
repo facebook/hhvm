@@ -128,7 +128,7 @@ class virtual type_validator =
             env;
             ety_env =
               {
-                type_expansions = [];
+                type_expansions = Typing_defs.Type_expansions.empty;
                 substs = SMap.empty;
                 this_ty =
                   Option.value

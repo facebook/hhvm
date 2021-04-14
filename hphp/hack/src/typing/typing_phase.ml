@@ -95,11 +95,7 @@ let env_with_self ?report_cycle env ~on_error : expand_env =
   in
   {
     type_expansions =
-      begin
-        match report_cycle with
-        | None -> []
-        | Some (pos, id) -> [(true, Pos_or_decl.of_raw_pos pos, id)]
-      end;
+      Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
     substs = SMap.empty;
     this_ty;
     on_error;
@@ -390,35 +386,31 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
   | Some class_info ->
     (match Cls.enum_type class_info with
     | Some enum_info ->
-      begin
-        (* if argl <> [], nastInitCheck would have raised an error *)
-        match Typing_defs.has_expanded ety_env name with
-        | Some _ ->
-          Errors.cyclic_enum_constraint pos ety_env.on_error;
-          (env, mk (r, Typing_utils.tany env))
-        | None ->
-          if enum_info.te_enum_class then
-            (* Enum classes no longer has the ambiguity between the type of
-             * the enum set and the type of elements, so the enum class
-             * itself is seen as a Tclass
-             *)
-            (env, mk (r, Tclass (sid, Nonexact, [])))
-          else
-            let type_expansions =
-              (false, pos, name) :: ety_env.type_expansions
-            in
-            let ety_env = { ety_env with type_expansions } in
-            let (env, cstr) =
-              match Env.get_enum_constraint env name with
-              (* If not specified, default bound is arraykey *)
-              | None ->
-                ( env,
-                  MakeType.arraykey
-                    (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
-              | Some ty -> localize ~ety_env env ty
-            in
-            (env, mk (r, Tnewtype (name, [], cstr)))
-      end
+      let (ety_env, has_cycle) =
+        Typing_defs.add_type_expansion_check_cycles ety_env (pos, name)
+      in
+      (match has_cycle with
+      | Some _ ->
+        Errors.cyclic_enum_constraint pos ety_env.on_error;
+        (env, mk (r, Typing_utils.tany env))
+      | None ->
+        if enum_info.te_enum_class then
+          (* Enum classes no longer has the ambiguity between the type of
+           * the enum set and the type of elements, so the enum class
+           * itself is seen as a Tclass
+           *)
+          (env, mk (r, Tclass (sid, Nonexact, [])))
+        else
+          let (env, cstr) =
+            match Env.get_enum_constraint env name with
+            (* If not specified, default bound is arraykey *)
+            | None ->
+              ( env,
+                MakeType.arraykey
+                  (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
+            | Some ty -> localize ~ety_env env ty
+          in
+          (env, mk (r, Tnewtype (name, [], cstr))))
     | None ->
       let tparams = Cls.tparams class_info in
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
@@ -784,7 +776,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
   let c_ty = mk (r, Tclass (sid, Nonexact, tyl)) in
   let ety_env =
     {
-      type_expansions = [];
+      type_expansions = Typing_defs.Type_expansions.empty;
       this_ty = c_ty;
       substs = Subst.make_locl tparams tyl;
       on_error = Errors.unify_error_at Pos.none;
@@ -1038,7 +1030,7 @@ let localize_targs_and_check_constraints
     if check_constraints then
       let ety_env =
         {
-          type_expansions = [];
+          type_expansions = Typing_defs.Type_expansions.empty;
           this_ty;
           substs = Subst.make_locl tparaml targs_tys;
           on_error = Errors.unify_error_at use_pos;

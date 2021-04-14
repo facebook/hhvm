@@ -65,9 +65,7 @@ type error_from_reasons_callback =
     This also sets the error code to the code for unification error
     if none is provided. *)
 val unify_error_assert_primary_pos_in_current_decl :
-  current_decl:Decl_reference.t option ->
-  current_file:Relative_path.t ->
-  error_from_reasons_callback
+  current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
@@ -75,9 +73,7 @@ val unify_error_assert_primary_pos_in_current_decl :
     This also sets the error code to the code for invalid type hint error
     if none is provided. *)
 val invalid_type_hint_assert_primary_pos_in_current_decl :
-  current_decl:Decl_reference.t option ->
-  current_file:Relative_path.t ->
-  error_from_reasons_callback
+  current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback
 
 type name_context =
   | FunctionNamespace

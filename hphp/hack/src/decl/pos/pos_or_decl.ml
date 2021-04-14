@@ -10,6 +10,12 @@ type t = Pos.t [@@deriving eq, ord, show]
 
 module Map = Pos.Map
 
+(** The decl and file of a position. *)
+type ctx = {
+  decl: Decl_reference.t option;
+  file: Relative_path.t;
+}
+
 let none : t = Pos.none
 
 let btw = Pos.btw
@@ -43,12 +49,10 @@ let show_as_absolute_file_line_characters : t -> string =
 
 let fill_in_filename : Relative_path.t -> t -> Pos.t = (fun _filename p -> p)
 
-let assert_is_in_current_decl :
-    t ->
-    current_decl:Decl_reference.t option ->
-    current_file:Relative_path.t ->
-    Pos.t option =
- fun p ~current_decl:_ ~current_file ->
+let fill_in_filename_if_in_current_decl :
+    current_decl_and_file:ctx -> t -> Pos.t option =
+ fun ~current_decl_and_file p ->
+  let { file = current_file; decl = _current_decl } = current_decl_and_file in
   (* TODO use current_decl *)
   if Relative_path.equal (Pos.filename p) current_file then
     Some p

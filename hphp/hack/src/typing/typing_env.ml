@@ -52,21 +52,21 @@ let get_file env = env.genv.file
 let get_current_decl env =
   Option.map env.decl_env.Decl_env.droot ~f:Typing_deps.Dep.to_decl_reference
 
+let get_current_decl_and_file env : Pos_or_decl.ctx =
+  { Pos_or_decl.file = get_file env; decl = get_current_decl env }
+
 let assert_pos_in_current_decl env pos =
-  Pos_or_decl.assert_is_in_current_decl
+  Pos_or_decl.fill_in_filename_if_in_current_decl
+    ~current_decl_and_file:(get_current_decl_and_file env)
     pos
-    ~current_decl:(get_current_decl env)
-    ~current_file:(get_file env)
 
 let unify_error_assert_primary_pos_in_current_decl env =
   Errors.unify_error_assert_primary_pos_in_current_decl
-    ~current_decl:(get_current_decl env)
-    ~current_file:(get_file env)
+    ~current_decl_and_file:(get_current_decl_and_file env)
 
 let invalid_type_hint_assert_primary_pos_in_current_decl env =
   Errors.invalid_type_hint_assert_primary_pos_in_current_decl
-    ~current_decl:(get_current_decl env)
-    ~current_file:(get_file env)
+    ~current_decl_and_file:(get_current_decl_and_file env)
 
 let get_tracing_info env = env.tracing_info
 

@@ -15,6 +15,12 @@ type t [@@deriving eq, ord, show]
 
 module Map : WrappedMap.S with type key = t
 
+(** The decl and file of a position. *)
+type ctx = {
+  decl: Decl_reference.t option;
+  file: Relative_path.t;
+}
+
 val none : t
 
 (** Fill in the gap "between" first position and second position.
@@ -57,11 +63,8 @@ val fill_in_filename : Relative_path.t -> t -> Pos.t
 
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)
-val assert_is_in_current_decl :
-  t ->
-  current_decl:Decl_reference.t option ->
-  current_file:Relative_path.t ->
-  Pos.t option
+val fill_in_filename_if_in_current_decl :
+  current_decl_and_file:ctx -> t -> Pos.t option
 
 (** Returns either a raw position equivalent to this position or the decl
     that this position belongs to. *)

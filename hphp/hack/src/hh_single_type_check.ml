@@ -13,13 +13,6 @@ open Sys_utils
 open Typing_env_types
 module Inf = Typing_inference_env
 module Cls = Decl_provider.Class
-
-module StringAnnotation = struct
-  type t = string
-
-  let pp fmt str = Format.pp_print_string fmt str
-end
-
 module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
@@ -29,7 +22,6 @@ module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
 type mode =
   | Ifc of string * string
-  | Ai of Ai_options.t
   | Color
   | Coverage
   | Cst_search
@@ -195,7 +187,6 @@ let parse_options () =
     set_mode (Ifc (!ifc_mode, lattice)) ();
     batch_mode := true
   in
-  let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
@@ -293,7 +284,6 @@ let parse_options () =
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
         " Run the flow analysis" );
-      ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
         " Ignore all functions with attribute '__PHPStdLib'" );
@@ -1053,11 +1043,6 @@ let parse_and_name ctx files_contents =
       Errors.merge_into_current errors);
   (parsed_files, files_info)
 
-let parse_name_and_skip_decl ctx files_contents =
-  Errors.do_ (fun () ->
-      let (_parsed_files, files_info) = parse_and_name ctx files_contents in
-      files_info)
-
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
@@ -1450,12 +1435,6 @@ let handle_mode
     iter_over_files (fun filename ->
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             process_file filename))
-  | Ai ai_options ->
-    if not (List.is_empty parse_errors) then
-      List.iter ~f:(print_error error_format) parse_errors
-    else
-      (* No type check *)
-      Ai.do_ files_info ai_options ctx
   | Color ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
@@ -2216,11 +2195,7 @@ let decl_and_run_mode
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)
   in
-  let (errors, files_info) =
-    match mode with
-    | Ai _ -> parse_name_and_skip_decl ctx to_decl
-    | _ -> parse_name_and_decl ctx to_decl
-  in
+  let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode
     files

@@ -1339,6 +1339,8 @@ struct RuntimeOption {
   F(bool, CheckUnitSHA1, true)                                          \
   F(bool, ReuseUnitsByHash, false)                                      \
   F(bool, StressUnitSerde, false)                                       \
+  /* Arbitrary string to force different unit-cache hashes */           \
+  F(std::string, UnitCacheBreaker, "")                                  \
   /* When dynamic_fun is called on a function not marked as
      __DynamicallyCallable:
 

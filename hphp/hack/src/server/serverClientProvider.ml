@@ -145,9 +145,11 @@ let sleep_and_check
       Select_nothing
     else
       failwith "sleep_and_check got impossible fd"
-  with e ->
+  with exn ->
+    let e = Exception.wrap exn in
     HackEventLogger.get_client_channels_exception e;
     Hh_logger.log "Getting Client FDs failed. Ignoring.";
+    Unix.sleepf 0.5;
     Select_nothing
 
 let has_persistent_connection_request = function

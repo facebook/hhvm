@@ -563,7 +563,15 @@ pub fn copy_and_rebase_value<'a>(src: SlabReader<'_>, dest: &'a mut [usize]) -> 
 }
 
 /// A contiguous memory region containing a tree of OCaml values.
-pub struct OwnedSlab(Box<Slab<'static>>);
+pub struct OwnedSlab(
+    // This 'static lifetime is a lie. Slab's lifetime parameter represents the
+    // lifetime of the OpaqueValues inside it. Since these values are expected
+    // only to reference other values within the same slab, the lifetime of the
+    // values is the same as the lifetime of the backing memory for the slab.
+    // When handing out references to values inside this slab, we must take care
+    // that they borrow `self`, so that they don't outlive this backing memory.
+    Box<Slab<'static>>,
+);
 
 impl OwnedSlab {
     pub fn from_value(value: Value<'_>) -> Option<Self> {
@@ -593,6 +601,32 @@ impl OwnedSlab {
         unsafe { std::slice::from_raw_parts(self.0.as_ptr().cast(), self.0.len()) }
     }
 
+    pub fn as_reader(&self) -> SlabReader<'_> {
+        // SAFETY: `self.0` is a valid Slab, so it's safe to interpret its words
+        // as a slab using a SlabReader.
+        unsafe { SlabReader::from_words(self.as_slice()).unwrap() }
+    }
+
+    /// Convert the given vector into an OwnedSlab.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only invoke this function on a vector containing bytes
+    /// which were initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
+    pub unsafe fn from_vec(words: Vec<usize>) -> Result<Self, SlabIntegrityError> {
+        let mut slab =
+            std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words.into_boxed_slice());
+        slab.check_initialized()?;
+        slab.rebase_to(slab.current_address());
+        Ok(Self(slab))
+    }
+
+    /// Copy the given slice into a newly allocated OwnedSlab.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only invoke this function on slices which were
+    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
     pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
         let mut slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
         slab.check_initialized()?;

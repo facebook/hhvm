@@ -69,7 +69,7 @@ T* GetData(ObjectData* obj, const StaticString& name) {
 
     // Load the class and do the expensive check instead. We need this fallback
     // because ext_icu classes are not final.
-    auto const needed = Class::lookup(name.get());
+    auto const needed = Unit::lookupClass(name.get());
     if (needed && (cls == needed || cls->classofNonIFace(needed))) return true;
 
     // Raise a notice, which we'll upgrade to an error after confirming that

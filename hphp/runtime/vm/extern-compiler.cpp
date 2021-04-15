@@ -181,10 +181,13 @@ folly::Optional<std::string> hackcExtractPath() {
 }
 
 std::string hackcCommand() {
+  std::string log_stats = RuntimeOption::EvalLogHackcMemStats ?
+    " --enable-logging-stats" : "";
+
   if (auto path = hackcExtractPath()) {
-    return *path + " " + RuntimeOption::EvalHackCompilerArgs;
+    return folly::to<std::string>(*path, " ", RuntimeOption::EvalHackCompilerArgs, log_stats);
   }
-  return RuntimeOption::EvalHackCompilerCommand;
+  return RuntimeOption::EvalHackCompilerCommand + log_stats;
 }
 
 struct CompileException : Exception {
@@ -885,7 +888,8 @@ void ExternCompiler::writeProgram(
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
     ("config_overrides", options.toDynamic())
-    ("use_hhbc_by_ref", RuntimeOption::EvalEnableHhbcByRef);
+    ("use_hhbc_by_ref", RuntimeOption::EvalEnableHhbcByRef)
+    ("log_hackc_mem_stats", RuntimeOption::EvalLogHackcMemStats);
   writeMessage(header, code);
 }
 

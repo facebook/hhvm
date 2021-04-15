@@ -9,6 +9,10 @@
 
 let init _ = ()
 
+let init_sync _ = ()
+
 let success ~filename ~parsing_t ~codegen_t ~printing_t ~mode = ()
 
 let fail ~filename ~mode ~exc = ()
+
+let log_peak_mem ~filename vm_rss vm_hwm action = ()

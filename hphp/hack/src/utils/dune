@@ -228,3 +228,10 @@
   (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
   (libraries utils_core)
   (modules bigList))
+
+(library
+  (name memory_stats)
+  (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+  (libraries utils_core sys_utils)
+  (modules memory_stats))

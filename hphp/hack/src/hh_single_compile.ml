@@ -74,6 +74,19 @@ type debug_time = {
 let new_debug_time () =
   { parsing_t = ref 0.0; codegen_t = ref 0.0; printing_t = ref 0.0 }
 
+let prev_vm_hwm = ref 0
+
+let log_peak_mem file action =
+  match Memory_stats.get_vm_hwm () with
+  | Some vm_hwm when vm_hwm > !prev_vm_hwm ->
+    prev_vm_hwm := vm_hwm;
+    Logger.log_peak_mem
+      (Option.value file ~default:"")
+      (Memory_stats.get_vm_rss () |> Option.value ~default:0)
+      vm_hwm
+      action
+  | _ -> ()
+
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -250,19 +263,23 @@ let rec dispatch_loop handlers =
         let body = Bytes.create bytes in
         try
           Caml.really_input Caml.stdin body 0 bytes;
-          (header, Bytes.to_string body)
+          (header, Bytes.to_string body, file)
         with exc ->
           fail_daemon
             file
             ("Exception reading message body: " ^ Caml.Printexc.to_string exc)
       in
-      let (header, body) = read_message () in
+      let (header, body, file) = read_message () in
       let msg_type =
         get_field
           (get_string "type")
           (fun af ->
             fail_daemon None ("Cannot determine type of message: " ^ af))
           header
+      in
+      let log_hackc_mem_stats =
+        get_field_opt (get_bool "log_hackc_mem_stats") header
+        |> Option.value ~default:false
       in
       (match msg_type with
       | "code" -> handlers.compile header body
@@ -271,6 +288,15 @@ let rec dispatch_loop handlers =
       | "facts" -> handlers.facts header body
       | "parse" -> handlers.parse header body
       | _ -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
+      (try if log_hackc_mem_stats then log_peak_mem file msg_type
+       with exc ->
+         let stack = Caml.Printexc.get_backtrace () in
+         Printf.eprintf "%s\n" stack;
+         fail_daemon
+           file
+           ( "Exception reading message body: "
+           ^ Caml.Printexc.to_string exc
+           ^ stack ));
       dispatch_loop handlers))
 
 let print_debug_time_info filename debug_time =
@@ -743,8 +769,10 @@ let decl_and_run_mode compiler_options =
             (Relative_path.to_absolute filename)
             (Caml.Printexc.to_string exc)
         in
-        let process_single_file output_file filename =
-          let filename = Relative_path.create Relative_path.Dummy filename in
+        let process_single_file output_file filename_str =
+          let filename =
+            Relative_path.create Relative_path.Dummy filename_str
+          in
           (* let abs_path = Relative_path.to_absolute filename in *)
           let files = Multifile.file_to_file_list filename in
           List.iter files ~f:(fun (filename, content) ->
@@ -759,7 +787,9 @@ let decl_and_run_mode compiler_options =
                   }
                 handle_exception
                 filename
-                content)
+                content);
+          if compiler_options.log_stats then
+            log_peak_mem (Some filename_str) "compile"
         in
         let (filenames, output_file) =
           match compiler_options.input_file_list with
@@ -806,7 +836,7 @@ let decl_and_run_mode compiler_options =
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in
-  if opts.log_stats then Logger.init start_time;
+  if opts.log_stats then Logger.init_sync start_time;
   decl_and_run_mode opts
 
 (* command line driver *)

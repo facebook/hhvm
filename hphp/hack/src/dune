@@ -135,7 +135,8 @@
     logging
     utils_multifile
     naming
-    naming_elaborate_namespaces_endo)
+    naming_elaborate_namespaces_endo
+    memory_stats)
   (link_flags (:standard (:include dune_config/ld-opts.sexp))))
 
 (executable

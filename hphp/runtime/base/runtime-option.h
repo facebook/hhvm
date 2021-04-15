@@ -759,6 +759,7 @@ struct RuntimeOption {
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, RaiseOnCaseInsensitiveLookup,true)                            \
   F(bool, EnableHhbcByRef,             true)                            \
+  F(bool, LogHackcMemStats,            false)                           \
   F(uint32_t, RaiseOnCaseInsensitiveLookupSampleRate, 1)                \
   /*
     CheckPropTypeHints:

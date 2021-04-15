@@ -149,11 +149,11 @@ function preg_match_all_with_matches_and_error(
  * @return int - preg_match() returns 1 if the pattern matches given
  *   subject, 0 if it does not, or FALSE if an error occurred.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match(string $pattern,
                     string $subject,
                     int $flags = 0,
-                    int $offset = 0): mixed;
+                    int $offset = 0)[]: mixed;
 
 <<__Native>>
 function preg_match_with_error(
@@ -164,13 +164,13 @@ function preg_match_with_error(
   int $offset = 0,
 )[]: mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match_with_matches(string $pattern,
                                  string $subject,
                                  <<__OutOnly>>
                                  inout mixed $matches,
                                  int $flags = 0,
-                                 int $offset = 0): mixed;
+                                 int $offset = 0)[]: mixed;
 
 <<__Native>>
 function preg_match_with_matches_and_error(

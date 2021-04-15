@@ -46,7 +46,7 @@ class virtual type_validator =
     method on_alias acc _ _ tyl ty =
       List.fold_left (ty :: tyl) ~f:this#on_type ~init:acc
 
-    method on_typeconst acc _ typeconst =
+    method on_typeconst acc _ _ typeconst =
       let acc =
         Option.fold ~f:this#on_type ~init:acc typeconst.ttc_as_constraint
       in
@@ -81,8 +81,11 @@ class virtual type_validator =
                 in
                 let ety_env = { acc.ety_env with this_ty = ty } in
                 Some
-                  (this#on_typeconst { acc with ety_env } is_concrete typeconst)
-              )
+                  (this#on_typeconst
+                     { acc with ety_env }
+                     class_
+                     is_concrete
+                     typeconst) )
           | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =

@@ -1,4 +1,1 @@
-File "override_enforceable.php", line 18, characters 21-32:
-Invalid `as` expression hint (Typing[4195])
-  File "override_enforceable.php", line 9, characters 23-23:
-  The `as` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>`
+No errors

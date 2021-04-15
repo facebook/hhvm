@@ -720,8 +720,13 @@ let check_constructors env parent_class class_ psubst subst on_error =
 (** Checks if a child is compatible with the type constant of its parent.
     This requires the child's constraint and assigned type to be a subtype of
     the parent's type constant. *)
-let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
-    =
+let tconst_subsumption
+    env
+    class_name
+    parent_typeconst
+    parent_tconst_enforceable
+    child_typeconst
+    on_error =
   let (pos, name) = child_typeconst.ttc_name in
   let parent_pos = fst parent_typeconst.ttc_name in
   match (parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract) with
@@ -816,7 +821,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
       match
         ( child_typeconst.ttc_abstract,
           child_typeconst.ttc_type,
-          parent_typeconst.ttc_enforceable )
+          parent_tconst_enforceable )
       with
       | (TCAbstract (Some ty), _, (pos, true))
       | ((TCPartiallyAbstract | TCConcrete), Some ty, (pos, true)) ->
@@ -876,7 +881,20 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
 let check_typeconst_override
     env implements class_ parent_tconst tconst parent_class on_error =
   let tconst_check parent_tconst tconst () =
-    tconst_subsumption env (Cls.name class_) parent_tconst tconst on_error
+    let parent_tconst_enforceable =
+      (* We know that this typeconst exists in the parent (else we would not
+         have successfully looked up [parent_tconst]), so we know that
+         [get_typeconst_enforceability] will return Some. *)
+      Option.value_exn
+        (Cls.get_typeconst_enforceability parent_class (snd tconst.ttc_name))
+    in
+    tconst_subsumption
+      env
+      (Cls.name class_)
+      parent_tconst
+      parent_tconst_enforceable
+      tconst
+      on_error
   in
   let env =
     check_ambiguous_inheritance

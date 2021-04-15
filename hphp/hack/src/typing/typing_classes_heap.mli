@@ -159,6 +159,17 @@ module Api : sig
 
   val all_inherited_smethods : t -> string -> class_elt list
 
+  (** Return the enforceability of the typeconst with the given name. A
+      typeconst is enforceable if it was declared with the <<__Enforceable>>
+      attribute, or if it overrides some ancestor typeconst with that attribute.
+      Only enforceable typeconsts may be used in [is] or [as] expressions. The
+      overriding behavior makes this expensive to compute in shallow decl, which
+      is why this separate accessor is provided (rather than making this
+      information available in the [ttc_enforceable] field, whose semantics
+      differ between legacy and shallow decl due to the perf cost in shallow). *)
+  val get_typeconst_enforceability :
+    t -> string -> (Pos_or_decl.t * bool) option
+
   (** Return the shallow declaration for the given class.
 
       To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.

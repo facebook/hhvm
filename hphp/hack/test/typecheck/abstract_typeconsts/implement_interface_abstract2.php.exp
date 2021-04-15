@@ -1,4 +1,1 @@
-File "implement_interface_abstract2.php", line 13, characters 17-23:
-Invalid `as` expression hint (Typing[4195])
-File "implement_interface_abstract2.php", line 8, characters 23-23:
-The `as` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>`
+No errors

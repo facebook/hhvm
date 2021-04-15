@@ -50,10 +50,10 @@ let validator =
 
     method! on_tfun acc r _ = this#invalid acc r "a function type"
 
-    method! on_typeconst acc is_concrete typeconst =
+    method! on_typeconst acc class_ is_concrete typeconst =
       match typeconst.ttc_abstract with
       | _ when Option.is_some typeconst.ttc_reifiable || is_concrete ->
-        super#on_typeconst acc is_concrete typeconst
+        super#on_typeconst acc class_ is_concrete typeconst
       | _ ->
         let r = Reason.Rwitness_from_decl (fst typeconst.ttc_name) in
         let kind =

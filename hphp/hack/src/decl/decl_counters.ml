@@ -59,6 +59,8 @@ type subdecl_kind =
       [@printer (fun fmt _s -> fprintf fmt "Get_typeconst")]
   | Has_typeconst of string
       [@printer (fun fmt _s -> fprintf fmt "Has_typeconst")]
+  | Get_typeconst_enforceability of string
+      [@printer (fun fmt _s -> fprintf fmt "Get_typeconst_enforceability")]
   | Get_prop of string [@printer (fun fmt _s -> fprintf fmt "Get_prop")]
   | Has_prop of string [@printer (fun fmt _s -> fprintf fmt "Has_prop")]
   | Get_sprop of string [@printer (fun fmt _s -> fprintf fmt "Get_sprop")]
@@ -141,6 +143,8 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Has_const _
   | Get_typeconst _
   | Has_typeconst _
+  | Get_typeconst_enforceability _
+  (* Get_typeconst_enforceability is technically lazy, but much less so than Get_typeconst *)
   | Get_prop _
   | Has_prop _
   | Get_sprop _

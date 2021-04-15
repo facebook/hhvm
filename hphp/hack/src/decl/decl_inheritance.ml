@@ -26,6 +26,7 @@ type inherited_members = {
   smethods: class_elt LSTable.t;
   all_inherited_methods: class_elt list LSTable.t;
   all_inherited_smethods: class_elt list LSTable.t;
+  typeconst_enforceability: (Pos_or_decl.t * bool) LSTable.t;
   construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
@@ -446,6 +447,22 @@ let make_typeconst_cache class_name lin =
             descendant_tc
       end
 
+let make_typeconst_enforceability_cache lin =
+  let get_single_seq target =
+    lin (SingleMember target)
+    |> Sequence.map ~f:(fun (_name, ttc) -> ttc.ttc_enforceable)
+  in
+  LSTable.make
+    ( lin AllMembers
+    |> Sequence.map ~f:(fun (name, ttc) -> (name, ttc.ttc_enforceable)) )
+    ~get_single_seq
+    ~is_canonical:(fun (_pos, enforceable) -> enforceable)
+    ~merge:(fun ~earlier ~later ->
+      if snd later then
+        later
+      else
+        earlier)
+
 let constructor_elt child_class_name (mro, cls, subst) =
   let consistent = Decl_utils.consistent_construct_kind cls in
   let elt =
@@ -491,13 +508,11 @@ let consts_cache ctx class_name get_typeconst get_ancestor lin =
     |> consts ~target ctx class_name get_typeconst get_ancestor)
   |> make_consts_cache class_name
 
-let typeconsts_cache ctx class_name lin =
-  (fun target ->
-    lin
-    |> filter_for_const_lookup
-    |> get_shallow_classes_and_substs ~target ctx
-    |> typeconsts ~target class_name)
-  |> make_typeconst_cache class_name
+let get_all_typeconsts ctx class_name lin target =
+  lin
+  |> filter_for_const_lookup
+  |> get_shallow_classes_and_substs ~target ctx
+  |> typeconsts ~target class_name
 
 let construct ctx class_name lin =
   lazy
@@ -514,7 +529,11 @@ let construct ctx class_name lin =
 let make ctx class_name lin get_ancestor =
   let all_methods = get_all_methods ctx class_name lin ~static:false in
   let all_smethods = get_all_methods ctx class_name lin ~static:true in
-  let typeconsts = typeconsts_cache ctx class_name lin in
+  let all_typeconsts = get_all_typeconsts ctx class_name lin in
+  let typeconsts = make_typeconst_cache class_name all_typeconsts in
+  let typeconst_enforceability =
+    make_typeconst_enforceability_cache all_typeconsts
+  in
   {
     consts =
       consts_cache ctx class_name (LSTable.get typeconsts) get_ancestor lin;
@@ -525,5 +544,6 @@ let make ctx class_name lin get_ancestor =
     smethods = make_elt_cache class_name all_smethods;
     all_inherited_methods = make_inheritance_cache all_methods;
     all_inherited_smethods = make_inheritance_cache all_smethods;
+    typeconst_enforceability;
     construct = construct ctx class_name lin;
   }

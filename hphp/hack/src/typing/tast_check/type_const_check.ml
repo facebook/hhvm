@@ -44,8 +44,10 @@ let handler =
                 match (tc.ttc_abstract, tc.ttc_type) with
                 | (TCAbstract (Some ty), _)
                 | ((TCPartiallyAbstract | TCConcrete), Some ty) ->
-                  if snd tc.ttc_enforceable then
-                    let pos = fst tc.ttc_enforceable in
+                  let (pos, enforceable) =
+                    Option.value_exn (Cls.get_typeconst_enforceability cls name)
+                  in
+                  if enforceable then
                     Typing_enforceable_hint.validate_type
                       env
                       (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)

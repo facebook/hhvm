@@ -131,6 +131,18 @@ let add_typeconst name sig_ typeconsts =
     (* The type constant didn't exist so far, let's add it *)
     SMap.add name sig_ typeconsts
   | Some old_sig ->
+    let typeconsts =
+      (* Boolean OR for the second element of the tuple. If some typeconst in
+         some ancestor was enforceable, then the child class' typeconst will be
+         enforceable too, even if we didn't take that ancestor typeconst. *)
+      if snd sig_.ttc_enforceable && not (snd old_sig.ttc_enforceable) then
+        SMap.add
+          name
+          { old_sig with ttc_enforceable = sig_.ttc_enforceable }
+          typeconsts
+      else
+        typeconsts
+    in
     (match (old_sig.ttc_abstract, sig_.ttc_abstract) with
     (* This covers the following case
      *
@@ -184,6 +196,15 @@ let add_typeconst name sig_ typeconsts =
        * checks for this potentially ambiguous situation and warns the programmer to
        * explicitly declare T in C.
        *)
+      let sig_ =
+        (* Boolean OR for the second element of the tuple. If a typeconst we
+           already inherited from some other ancestor was enforceable, then the
+           one we inherit here will be enforceable too. *)
+        if snd old_sig.ttc_enforceable && not (snd sig_.ttc_enforceable) then
+          { sig_ with ttc_enforceable = old_sig.ttc_enforceable }
+        else
+          sig_
+      in
       SMap.add name sig_ typeconsts)
 
 let add_constructor (cstr, cstr_consist) (acc, acc_consist) =

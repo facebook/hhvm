@@ -59,6 +59,7 @@ type subdecl_kind =
   | Has_const of string
   | Get_typeconst of string
   | Has_typeconst of string
+  | Get_typeconst_enforceability of string
   | Get_prop of string
   | Has_prop of string
   | Get_sprop of string

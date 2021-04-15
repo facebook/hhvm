@@ -198,6 +198,24 @@ and typeconst_type = {
   ttc_type: decl_ty option;
   ttc_origin: string;
   ttc_enforceable: Pos_or_decl.t * bool;
+      (** If the typeconst had the <<__Enforceable>> attribute on its
+          declaration, this will be [(position_of_declaration, true)].
+
+          In legacy decl, the second element of the tuple will also be true if
+          the typeconst overrides some parent typeconst which had the
+          <<__Enforceable>> attribute. In that case, the position will point to
+          the declaration of the parent typeconst.
+
+          In shallow decl, this is not the case--there is no overriding behavior
+          modeled here, and the second element will only be true when the
+          declaration of this typeconst had the attribute.
+
+          When the second element of the tuple is false, the position will be
+          [Pos_or_decl.none].
+
+          To manage the difference between legacy and shallow decl, use
+          [Typing_classes_heap.Api.get_typeconst_enforceability] rather than
+          accessing this field directly. *)
   ttc_reifiable: Pos_or_decl.t option;
   ttc_concretized: bool;
 }

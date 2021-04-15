@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e21ebe55dfc6976b5c1089f48da5adfe>>
+// @generated SignedSource<<2c61962a3037f3e2b93584705f2bb1ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -345,6 +345,24 @@ pub struct TypeconstType<'a> {
     pub super_constraint: Option<&'a Ty<'a>>,
     pub type_: Option<&'a Ty<'a>>,
     pub origin: &'a str,
+    /// If the typeconst had the <<__Enforceable>> attribute on its
+    /// declaration, this will be [(position_of_declaration, true)].
+    ///
+    /// In legacy decl, the second element of the tuple will also be true if
+    /// the typeconst overrides some parent typeconst which had the
+    /// <<__Enforceable>> attribute. In that case, the position will point to
+    /// the declaration of the parent typeconst.
+    ///
+    /// In shallow decl, this is not the case--there is no overriding behavior
+    /// modeled here, and the second element will only be true when the
+    /// declaration of this typeconst had the attribute.
+    ///
+    /// When the second element of the tuple is false, the position will be
+    /// [Pos_or_decl.none].
+    ///
+    /// To manage the difference between legacy and shallow decl, use
+    /// [Typing_classes_heap.Api.get_typeconst_enforceability] rather than
+    /// accessing this field directly.
     pub enforceable: (&'a pos_or_decl::PosOrDecl<'a>, bool),
     pub reifiable: Option<&'a pos_or_decl::PosOrDecl<'a>>,
     pub concretized: bool,

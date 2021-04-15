@@ -1,0 +1,2 @@
+
+Fatal error: V1 cannot inherit the constant B from F1, because it was previously inherited from E0 in %s/vshape_bad1.php on line 17

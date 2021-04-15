@@ -1,4 +1,3 @@
-module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 

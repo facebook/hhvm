@@ -113,6 +113,7 @@ t_shape_map::TShapeMap
 typing_cont_key::TypingContKey
 typing_defs_core::Capability
 typing_defs_core::CeVisibility
+typing_defs_core::CollectionStyle
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType
 typing_defs_core::ConstraintType_
@@ -142,6 +143,7 @@ typing_defs_flags::FunTypeFlags
 typing_defs::CeVisibility
 typing_defs::ClassConstFrom
 typing_defs::ClassConstRef
+typing_defs::CollectionStyle
 typing_defs::ConsistentKind
 typing_defs::ConstraintType
 typing_defs::DeserializationError

@@ -10,51 +10,21 @@ Invalid argument (Typing[4110])
   Expected `shape('x' => int)`
   File "coerce_from_dyn.bad.php", line 13, characters 21-27:
   But got `dynamic`
-File "coerce_from_dyn.bad.php", line 21, characters 10-11:
+File "coerce_from_dyn.bad.php", line 22, characters 13-14:
 Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 17, characters 17-24:
-  Expected `vec<int>`
-  File "coerce_from_dyn.bad.php", line 20, characters 20-26:
-  But got `dynamic`
-File "coerce_from_dyn.bad.php", line 21, characters 14-15:
-Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 17, characters 30-43:
-  Expected `dict<int, int>`
-  File "coerce_from_dyn.bad.php", line 20, characters 20-26:
-  But got `dynamic`
-File "coerce_from_dyn.bad.php", line 21, characters 18-19:
-Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 17, characters 49-64:
-  Expected `keyset<arraykey>`
-  File "coerce_from_dyn.bad.php", line 20, characters 20-26:
-  But got `dynamic`
-File "coerce_from_dyn.bad.php", line 21, characters 22-23:
-Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 18, characters 17-32:
-  Expected `dict<int, int>`
-  File "coerce_from_dyn.bad.php", line 20, characters 20-26:
-  But got `dynamic`
-File "coerce_from_dyn.bad.php", line 21, characters 26-27:
-Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 18, characters 39-49:
-  Expected `vec<int>`
-  File "coerce_from_dyn.bad.php", line 20, characters 20-26:
-  But got `dynamic`
-File "coerce_from_dyn.bad.php", line 29, characters 13-14:
-Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 26, characters 20-25:
+  File "coerce_from_dyn.bad.php", line 19, characters 20-25:
   Expected `C<int>`
-  File "coerce_from_dyn.bad.php", line 28, characters 23-29:
+  File "coerce_from_dyn.bad.php", line 21, characters 23-29:
   But got `dynamic`
-File "coerce_from_dyn.bad.php", line 35, characters 13-14:
+File "coerce_from_dyn.bad.php", line 28, characters 13-14:
 Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 32, characters 22-24:
+  File "coerce_from_dyn.bad.php", line 25, characters 22-24:
   Expected `int`
-  File "coerce_from_dyn.bad.php", line 34, characters 25-31:
+  File "coerce_from_dyn.bad.php", line 27, characters 25-31:
   But got `dynamic`
-File "coerce_from_dyn.bad.php", line 46, characters 12-13:
+File "coerce_from_dyn.bad.php", line 39, characters 12-13:
 Invalid argument (Typing[4110])
-  File "coerce_from_dyn.bad.php", line 38, characters 19-24:
+  File "coerce_from_dyn.bad.php", line 31, characters 19-24:
   Expected `string`
-  File "coerce_from_dyn.bad.php", line 44, characters 10-10:
+  File "coerce_from_dyn.bad.php", line 37, characters 10-10:
   But got `int`

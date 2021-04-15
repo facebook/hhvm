@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25e5bba1f922afdc5f05feb161568ece>>
+// @generated SignedSource<<8b1759cb58a21ef74050ac5eefe91530>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -402,12 +402,33 @@ impl<'a> TrivialDrop for WhereConstraint<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub enum Enforcement {
+pub enum CollectionStyle {
+    VecStyle,
+    DictStyle,
+    KeysetStyle,
+}
+impl TrivialDrop for CollectionStyle {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum Enforcement<'a> {
     Unenforced,
     Enforced,
-    PartiallyEnforced,
+    PartiallyEnforced(&'a (CollectionStyle, PosId<'a>)),
 }
-impl TrivialDrop for Enforcement {}
+impl<'a> TrivialDrop for Enforcement<'a> {}
 
 #[derive(Clone, Debug, FromOcamlRepIn, Hash, NoPosHash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::T_<'a>, pub Ty_<'a>);
@@ -714,7 +735,7 @@ impl<'a> TrivialDrop for FunArity<'a> {}
 )]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
-    pub enforced: Enforcement,
+    pub enforced: Enforcement<'a>,
     pub type_: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}

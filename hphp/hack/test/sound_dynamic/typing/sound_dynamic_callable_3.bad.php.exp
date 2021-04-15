@@ -2,7 +2,9 @@ File "sound_dynamic_callable_3.bad.php", line 8, characters 19-21:
 Method  `foo` in class `C` is not dynamically callable. (Typing[4402])
   File "sound_dynamic_callable_3.bad.php", line 9, characters 18-19:
   Invalid argument
-  File "sound_dynamic_callable_3.bad.php", line 4, characters 23-30:
-  Expected `vec<int>`
+  File "sound_dynamic_callable_3.bad.php", line 4, characters 27-29:
+  Expected `int`
   File "sound_dynamic_callable_3.bad.php", line 8, characters 32-33:
   But got `dynamic` because method must be callable in a dynamic context
+  File "sound_dynamic_callable_3.bad.php", line 4, characters 23-30:
+  while allowing dynamic to flow into vec<dynamic>

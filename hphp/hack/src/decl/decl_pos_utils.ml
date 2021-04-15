@@ -132,6 +132,8 @@ struct
     | Rinterp_operand p -> Rinterp_operand (pos p)
     | Rdynamic_coercion r -> Rdynamic_coercion (reason r)
     | Rsound_dynamic_callable p -> Rsound_dynamic_callable (pos_or_decl p)
+    | Rdynamic_partial_enforcement (p, cn, r) ->
+      Rdynamic_partial_enforcement (pos_or_decl p, cn, reason r)
 
   let rec ty t =
     let (p, x) = deref t in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<818c988502579bceff20743df01d00ce>>
+// @generated SignedSource<<aadc2600a7a32f85e577fd9d39891c0b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -102,6 +102,18 @@ impl<'a> Node<'a> for ClassKind {
         }
     }
 }
+impl<'a> Node<'a> for CollectionStyle {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_collection_style(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            CollectionStyle::VecStyle => {}
+            CollectionStyle::DictStyle => {}
+            CollectionStyle::KeysetStyle => {}
+        }
+    }
+}
 impl<'a> Node<'a> for ConstDecl<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_const_decl(self)
@@ -167,7 +179,7 @@ impl<'a> Node<'a> for DependentType {
         }
     }
 }
-impl<'a> Node<'a> for Enforcement {
+impl<'a> Node<'a> for Enforcement<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_enforcement(self)
     }
@@ -175,7 +187,7 @@ impl<'a> Node<'a> for Enforcement {
         match self {
             Enforcement::Unenforced => {}
             Enforcement::Enforced => {}
-            Enforcement::PartiallyEnforced => {}
+            Enforcement::PartiallyEnforced(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -834,6 +846,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),
             T_::RsoundDynamicCallable(ref __binding_0) => __binding_0.accept(v),
+            T_::RdynamicPartialEnforcement(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

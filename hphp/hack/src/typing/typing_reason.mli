@@ -155,6 +155,9 @@ type _ t_ =
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
   | Rsound_dynamic_callable : Pos_or_decl.t -> 'phase t_
+  | Rdynamic_partial_enforcement :
+      Pos_or_decl.t * string * locl_phase t_
+      -> locl_phase t_
 
 type t = locl_phase t_
 

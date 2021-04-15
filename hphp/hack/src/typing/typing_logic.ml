@@ -13,6 +13,7 @@ open Typing_defs
 type coercion_direction =
   | CoerceToDynamic
   | CoerceFromDynamic
+  | PartialCoerceFromDynamic of collection_style * pos_id
 
 (* See comment in .mli file *)
 type subtype_prop =

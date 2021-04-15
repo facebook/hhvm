@@ -133,7 +133,8 @@ module Full = struct
         ( if show_verbose env then
           match et_enforced with
           | Enforced -> text "enforced" ^^ Space
-          | PartiallyEnforced -> text "partially enforced" ^^ Space
+          | PartiallyEnforced (_, (_, cn)) ->
+            text ("partially enforced " ^ cn) ^^ Space
           | Unenforced -> Nothing
         else
           Nothing );
@@ -1821,6 +1822,7 @@ let coercion_direction cd =
   match cd with
   | CoerceToDynamic -> "to"
   | CoerceFromDynamic -> "from"
+  | PartialCoerceFromDynamic (_, (_, cn)) -> "partial from " ^ cn
 
 let subtype_prop env prop =
   let rec subtype_prop = function

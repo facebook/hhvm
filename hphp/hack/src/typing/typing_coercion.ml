@@ -107,10 +107,16 @@ let coerce_type_impl
          and ?dynamic are not considered Enforced.
          *)
       Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
-    | Unenforced
-    | PartiallyEnforced ->
+    | Unenforced ->
       Typing_utils.sub_type_res
         ~coerce:(Some Typing_logic.CoerceToDynamic)
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
+    | PartiallyEnforced (pek, cn) ->
+      Typing_utils.sub_type_res
+        ~coerce:(Some (Typing_logic.PartialCoerceFromDynamic (pek, cn)))
         env
         ty_have
         ty_expect.et_type

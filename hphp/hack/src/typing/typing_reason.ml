@@ -150,6 +150,9 @@ type _ t_ =
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
   | Rsound_dynamic_callable : Pos_or_decl.t -> 'phase t_
+  | Rdynamic_partial_enforcement :
+      Pos_or_decl.t * string * locl_phase t_
+      -> locl_phase t_
 
 type t = locl_phase t_
 
@@ -592,6 +595,9 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rdynamic_coercion r -> to_string prefix r
   | Rsound_dynamic_callable _ ->
     [(p, prefix ^ " because method must be callable in a dynamic context")]
+  | Rdynamic_partial_enforcement (p, cn, r_orig) ->
+    to_string prefix r_orig
+    @ [(p, "while allowing dynamic to flow into " ^ Utils.strip_all_ns cn)]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -694,6 +700,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rtypeconst (r, _, _, _) ->
     to_raw_pos r
   | Rdynamic_coercion r -> to_raw_pos r
+  | Rdynamic_partial_enforcement (p, _, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -821,6 +828,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rinterp_operand _ -> "Rinterp_operand"
   | Rdynamic_coercion _ -> "Rdynamic_coercion"
   | Rsound_dynamic_callable _ -> "Rsound_dynamic_callable"
+  | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
 
 let pp fmt r =
   let pos = to_raw_pos r in

@@ -373,7 +373,8 @@ let check_expected_ty
                     (match ty.et_enforced with
                     | Unenforced -> "unenforced"
                     | Enforced -> "enforced"
-                    | PartiallyEnforced -> "partially enforced"),
+                    | PartiallyEnforced (_, (_, cn)) ->
+                      "partially enforced " ^ cn),
                   [
                     Log_type ("inferred_ty", inferred_ty);
                     Log_type ("expected_ty", ty.et_type);

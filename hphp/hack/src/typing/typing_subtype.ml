@@ -107,7 +107,9 @@ let coercing_from_dynamic se =
 
 let coercing_to_dynamic se =
   match se.coerce with
-  | Some TL.CoerceToDynamic -> true
+  | Some TL.CoerceToDynamic
+  | Some (TL.PartialCoerceFromDynamic _) ->
+    true
   | _ -> false
 
 let make_subtype_env
@@ -231,6 +233,137 @@ let find_type_with_exact_negation env tyl =
         (env, Some non_ty, tyl' @ acc_tyl)
   in
   find env tyl []
+
+(* Replace dynamic in the type with class_name<dynamic>, class_name<arraykey>,
+   or class_name<arraykey, dynamic> depending on partial_enf_kind. However,
+   don't descend into the arguments to class types. This is used for partial
+   enforcement where a dynamic is being passed to (or returned from) an
+   enforced position with a partially enforced collection type (e.g., vec,
+   dict, keyset). We convert the dynamic into the enforced collection type.
+  *)
+let subst_for_dynamic partial_enf_kind (pos, class_name) (ty : internal_type) =
+  (* Return None to indicate that no dynamic was found, so that no unnecessary
+     allocation happens. *)
+  let rec subst_for_dynamic_locl (ty : locl_ty) : locl_ty option =
+    let orig_reason = get_reason ty in
+    match get_node ty with
+    | Tdynamic ->
+      Some
+        Typing_make_type.(
+          match partial_enf_kind with
+          | VecStyle ->
+            let r =
+              Typing_reason.Rdynamic_partial_enforcement
+                (pos, class_name ^ "<dynamic>", get_reason ty)
+            in
+            class_type r class_name [mk (r, Tdynamic)]
+          | DictStyle ->
+            let r =
+              Typing_reason.Rdynamic_partial_enforcement
+                (pos, class_name ^ "<arraykey, dynamic>", get_reason ty)
+            in
+            class_type r class_name [arraykey r; mk (r, Tdynamic)]
+          | KeysetStyle ->
+            let r =
+              Typing_reason.Rdynamic_partial_enforcement
+                (pos, class_name ^ "<arraykey>", get_reason ty)
+            in
+            class_type r class_name [arraykey r])
+    | Toption ty ->
+      (match subst_for_dynamic_locl ty with
+      | None -> None
+      | Some ty -> Some (mk (orig_reason, Toption ty)))
+    | Tunion tyl ->
+      (match subst_for_dynamic_locl_list tyl with
+      | None -> None
+      | Some tyl -> Some (mk (orig_reason, Tunion tyl)))
+    | Tintersection tyl ->
+      (match subst_for_dynamic_locl_list tyl with
+      | None -> None
+      | Some tyl -> Some (mk (orig_reason, Tintersection tyl)))
+    | Tany _
+    | Terr
+    | Tnonnull
+    | Tprim _
+    | Tfun _
+    | Ttuple _
+    | Tshape _
+    | Tvar _
+    | Tgeneric _
+    | Tdarray _
+    | Tvarray _
+    | Tvarray_or_darray _
+    | Tvec_or_dict _
+    | Taccess _
+    | Tunapplied_alias _
+    | Tnewtype _
+    | Tdependent _
+    | Tobject
+    | Tclass _ ->
+      None
+  and subst_for_dynamic_locl_list tyl =
+    match tyl with
+    | [] -> None
+    | ty :: tyl ->
+      (match (subst_for_dynamic_locl ty, subst_for_dynamic_locl_list tyl) with
+      | (None, None) -> None
+      | (None, Some tyl) -> Some (ty :: tyl)
+      | (Some ty, None) -> Some (ty :: tyl)
+      | (Some ty, Some tyl) -> Some (ty :: tyl))
+  in
+  match ty with
+  | ConstraintType _ -> ty
+  | LoclType ty' ->
+    (match subst_for_dynamic_locl ty' with
+    | None -> ty
+    | Some ty -> LoclType ty)
+
+let remove_partial_enforcement subtype_env =
+  match subtype_env.coerce with
+  | Some (TL.PartialCoerceFromDynamic _) ->
+    { subtype_env with coerce = Some TL.CoerceToDynamic }
+  | _ -> subtype_env
+
+let cov_dict_style =
+  ( DictStyle,
+    [(Ast_defs.Covariant, Aast.Erased); (Ast_defs.Covariant, Aast.Erased)] )
+
+let inv_dict_style =
+  ( DictStyle,
+    [(Ast_defs.Invariant, Aast.Erased); (Ast_defs.Invariant, Aast.Erased)] )
+
+let cov_map_style =
+  ( DictStyle,
+    [(Ast_defs.Invariant, Aast.Erased); (Ast_defs.Covariant, Aast.Erased)] )
+
+let cov_vec_style = (VecStyle, [(Ast_defs.Covariant, Aast.Erased)])
+
+let inv_vec_style = (VecStyle, [(Ast_defs.Invariant, Aast.Erased)])
+
+let cov_keyset_style = (KeysetStyle, [(Ast_defs.Covariant, Aast.Erased)])
+
+let inv_keyset_style = (KeysetStyle, [(Ast_defs.Invariant, Aast.Erased)])
+
+(* Special classes that subtype dynamic depending on their type arguments *)
+let dynamic_collection_types =
+  SMap.of_list
+    Naming_special_names.Collections.
+      [
+        (Naming_special_names.Classes.cAwaitable, cov_vec_style);
+        (cAnyArray, cov_dict_style);
+        (cVec, cov_vec_style);
+        (cDict, cov_dict_style);
+        (cKeyset, cov_keyset_style);
+        (cImmVector, cov_vec_style);
+        (cMutableVector, inv_vec_style);
+        (cVector, inv_vec_style);
+        (cImmMap, cov_map_style);
+        (cMutableMap, inv_dict_style);
+        (cMap, inv_dict_style);
+        (cImmSet, cov_keyset_style);
+        (cMutableSet, inv_keyset_style);
+        (cSet, inv_keyset_style);
+      ]
 
 let rec describe_ty_super env ty =
   let print ty =
@@ -539,6 +672,12 @@ and simplify_subtype_i
     ty_super;
   let (env, ety_super) = Env.expand_internal_type env ty_super in
   let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+  let ety_sub =
+    match subtype_env.coerce with
+    | Some (TL.PartialCoerceFromDynamic (pek, cn)) ->
+      subst_for_dynamic pek cn ety_sub
+    | _ -> ety_sub
+  in
   let fail_with_suffix suffix =
     let r_super = reason ety_super in
     let r_sub = reason ety_sub in
@@ -1266,34 +1405,36 @@ and simplify_subtype_i
             (* This should have been caught already in the naming phase *)
             valid env
           | Some class_sub ->
-            let class_name = Cls.name class_sub in
             if Cls.get_implements_dynamic class_sub then
               valid env
-            else if String.equal class_name SN.Collections.cKeyset then
-              (* No need to check the argument since it's an arraykey *)
-              valid env
-            else if String.equal class_name SN.Collections.cVec then
-              match tyargs with
-              | [tyarg] -> simplify_subtype ~subtype_env tyarg ty_super env
-              | _ ->
-                (* This ill-formed type should have been caught earlier *)
-                valid env
-            else if String.equal class_name SN.Collections.cDict then
-              match tyargs with
-              | [_tykey; tyval] ->
-                (* No need to check the key argument since it's an arraykey *)
-                simplify_subtype ~subtype_env tyval ty_super env
-              | _ ->
-                (* This ill-formed type should have been caught earlier *)
-                valid env
-            else if String.equal class_name SN.Classes.cAwaitable then
-              match tyargs with
-              | [tyarg] -> simplify_subtype ~subtype_env tyarg ty_super env
-              | _ ->
-                (* This ill-formed type should have been caught earlier *)
-                valid env
             else
-              default_subtype env)))
+              let class_name = Cls.name class_sub in
+              (match SMap.find_opt class_name dynamic_collection_types with
+              | Some (DictStyle, variance_reified_l) ->
+                simplify_subtype_variance
+                  ~subtype_env
+                  class_name
+                  variance_reified_l
+                  tyargs
+                  [MakeType.arraykey (get_reason ty_super); ty_super]
+                  env
+              | Some (VecStyle, variance_reified_l) ->
+                simplify_subtype_variance
+                  ~subtype_env
+                  class_name
+                  variance_reified_l
+                  tyargs
+                  [ty_super]
+                  env
+              | Some (KeysetStyle, variance_reified_l) ->
+                simplify_subtype_variance
+                  ~subtype_env
+                  class_name
+                  variance_reified_l
+                  tyargs
+                  [MakeType.arraykey (get_reason ty_super)]
+                  env
+              | None -> default_subtype env))))
     | (_, Tdynamic) ->
       (match ety_sub with
       | LoclType lty when is_dynamic lty -> valid env
@@ -1574,6 +1715,7 @@ and simplify_subtype_i
                         List.map (Cls.tparams class_sub) (fun t ->
                             (t.tp_variance, t.tp_reified))
                   in
+                  let subtype_env = remove_partial_enforcement subtype_env in
                   (* C<t1, .., tn> <: C<u1, .., un> iff
                    *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
                    * where vi is the variance of the i'th generic parameter of C,
@@ -1657,6 +1799,7 @@ and simplify_subtype_i
             | Tdarray (_, tv)
             | Tvarray_or_darray (_, tv)
             | Tvec_or_dict (_, tv) ) ) ->
+          let subtype_env = remove_partial_enforcement subtype_env in
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
@@ -2801,8 +2944,15 @@ and sub_type_inner
       ( "sub_type_inner"
       ^
       match subtype_env.coerce with
-      | Some TL.CoerceToDynamic -> " (including <: dynamic)"
-      | _ -> "" )
+      | Some TL.CoerceToDynamic -> " (dynamic aware)"
+      | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
+      | Some (TL.PartialCoerceFromDynamic (VecStyle, (_, cn))) ->
+        " (treat dynamic as " ^ cn ^ "<dynamic>)"
+      | Some (TL.PartialCoerceFromDynamic (DictStyle, (_, cn))) ->
+        " (treat dynamic as " ^ cn ^ "<arraykey, dynamic>)"
+      | Some (TL.PartialCoerceFromDynamic (KeysetStyle, (_, cn))) ->
+        " (treat dynamic as " ^ cn ^ ")"
+      | None -> "" )
     env
     ty_sub
     ty_super;

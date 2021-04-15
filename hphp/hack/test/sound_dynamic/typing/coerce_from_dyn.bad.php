@@ -14,13 +14,6 @@ function test_shape(dynamic $d) : void {
   f_shape($d);
 }
 
-function f_cont(vec<int> $v, dict<int, int> $d, keyset<arraykey> $ks,
-                darray<int, int> $da, varray<int> $va) : void {}
-
-function test_cont(dynamic $d) : void {
-  f_cont($d, $d, $d, $d, $d);
-}
-
 class C<+T> {}
 
 function f_generic(C<int> $c) : void {}

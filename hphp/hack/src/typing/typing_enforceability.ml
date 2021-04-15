@@ -18,60 +18,83 @@ let wrap_like ty =
   let r = Typing_reason.Renforceable (get_pos ty) in
   MakeType.like r ty
 
+let partially_enforced_types =
+  SMap.of_list
+    Naming_special_names.Collections.
+      [
+        (cTraversable, VecStyle);
+        (cKeyedContainer, DictStyle);
+        (cContainer, VecStyle);
+        (cAnyArray, DictStyle);
+        (cVec, VecStyle);
+        (cDict, DictStyle);
+        (cKeyset, KeysetStyle);
+      ]
+
 let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
     TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
   in
-  let rec is_enforceable include_dynamic env visited ty =
+  let rec enforcement include_dynamic env visited ty =
     match get_node ty with
-    | Tthis -> false
+    | Tthis -> Unenforced
     | Tapply ((_, name), _)
       when Env.is_enum env name
            && not (TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
-      false
+      Unenforced
     | Tapply ((_, name), tyl) ->
       (* Cyclic type definition error will be produced elsewhere *)
-      SSet.mem name visited
-      ||
-      begin
+      if SSet.mem name visited then
+        Enforced
+      else begin
         match Env.get_class_or_typedef env name with
         | Some
             (Env.TypedefResult
               { td_vis = Aast.Transparent; td_tparams; td_type; _ }) ->
           (* So that the check does not collide with reified generics *)
           let env = Env.add_generic_parameters env td_tparams in
-          is_enforceable include_dynamic env (SSet.add name visited) td_type
+          enforcement include_dynamic env (SSet.add name visited) td_type
         | Some (Env.ClassResult tc) ->
           begin
             match tyl with
-            | [] -> true
+            | [] -> Enforced
             | targs ->
-              List.Or_unequal_lengths.(
-                begin
-                  match
-                    List.fold2
-                      ~init:true
-                      targs
-                      (Cls.tparams tc)
-                      ~f:(fun acc targ tparam ->
-                        match get_node targ with
-                        | Tdynamic
-                        (* We accept the inner type being dynamic regardless of reification *)
-                        | Tlike _
-                          when not enable_sound_dynamic ->
-                          acc
-                        | _ ->
-                          (match tparam.tp_reified with
-                          | Aast.Erased -> false
-                          | Aast.SoftReified -> false
-                          | Aast.Reified ->
-                            is_enforceable true env visited targ && acc))
-                  with
-                  | Ok new_acc -> new_acc
-                  | Unequal_lengths -> true
-                end)
+              let cname = Cls.name tc in
+              let pos = get_pos ty in
+              (match SMap.find_opt cname partially_enforced_types with
+              | Some pek when enable_sound_dynamic ->
+                PartiallyEnforced (pek, (pos, cname))
+              | _ ->
+                List.Or_unequal_lengths.(
+                  begin
+                    match
+                      List.fold2
+                        ~init:Enforced
+                        targs
+                        (Cls.tparams tc)
+                        ~f:(fun acc targ tparam ->
+                          match get_node targ with
+                          | Tdynamic
+                          (* We accept the inner type being dynamic regardless of reification *)
+                          | Tlike _
+                            when not enable_sound_dynamic ->
+                            acc
+                          | _ ->
+                            (match tparam.tp_reified with
+                            | Aast.Erased -> Unenforced
+                            | Aast.SoftReified -> Unenforced
+                            | Aast.Reified ->
+                              (match acc with
+                              | Enforced -> enforcement true env visited targ
+                              | Unenforced
+                              | PartiallyEnforced _ ->
+                                Unenforced)))
+                    with
+                    | Ok new_acc -> new_acc
+                    | Unequal_lengths -> Enforced
+                  end))
           end
-        | _ -> false
+        | _ -> Unenforced
       end
     | Tgeneric _ ->
       (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
@@ -85,48 +108,51 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
        * Additionally, higher kinded generics (i.e., with type arguments) cannot
        * be enforced at the moment; they are disallowed to have upper bounds.
        *)
-      false
-    | Taccess _ -> false
-    | Tlike _ -> false
+      Unenforced
+    | Taccess _ -> Unenforced
+    | Tlike _ -> Unenforced
     | Tprim prim ->
       begin
         match prim with
         | Aast.Tvoid
         | Aast.Tnoreturn ->
-          false
-        | _ -> true
+          Unenforced
+        | _ -> Enforced
       end
-    | Tany _ -> true
-    | Terr -> true
-    | Tnonnull -> true
-    | Tdynamic -> (not enable_sound_dynamic) || include_dynamic
-    | Tfun _ -> false
-    | Ttuple _ -> false
-    | Tunion [] -> true
-    | Tunion _ -> false
-    | Tintersection _ -> false
-    | Tshape _ -> false
-    | Tmixed -> true
-    | Tvar _ -> false
-    | Tdarray _ -> false
-    | Tvarray _ -> false
+    | Tany _ -> Enforced
+    | Terr -> Enforced
+    | Tnonnull -> Enforced
+    | Tdynamic ->
+      if (not enable_sound_dynamic) || include_dynamic then
+        Enforced
+      else
+        Unenforced
+    | Tfun _ -> Unenforced
+    | Ttuple _ -> Unenforced
+    | Tunion [] -> Enforced
+    | Tunion _ -> Unenforced
+    | Tintersection _ -> Unenforced
+    | Tshape _ -> Unenforced
+    | Tmixed -> Enforced
+    | Tvar _ -> Unenforced
+    | Tdarray _ -> Unenforced
+    | Tvarray _ -> Unenforced
     (* With no parameters, we enforce varray_or_darray just like array *)
     | Tvec_or_dict (_, ty)
     | Tvarray_or_darray (_, ty) ->
-      is_any ty
-    | Toption ty -> is_enforceable include_dynamic env visited ty
-    (* TODO(T36532263) make sure that this is what we want *)
+      if is_any ty then
+        Enforced
+      else
+        Unenforced
+    | Toption ty -> enforcement include_dynamic env visited ty
   in
-  if is_enforceable false env SSet.empty ty then
-    Enforced
-  else
-    Unenforced
+  enforcement false env SSet.empty ty
 
 let is_enforceable (env : env) (ty : decl_ty) =
   match get_enforcement env ty with
   | Enforced -> true
   | Unenforced
-  | PartiallyEnforced ->
+  | PartiallyEnforced _ ->
     false
 
 let make_locl_like_type env ty =
@@ -136,18 +162,18 @@ let make_locl_like_type env ty =
   else
     (env, ty)
 
-let is_enforced env ~explicitly_untrusted ty =
-  let enforceable = is_enforceable env ty in
-  enforceable
-  && (not @@ Pos_or_decl.is_hhi @@ get_pos ty)
-  && not explicitly_untrusted
+let get_enforced env ~explicitly_untrusted ty =
+  if explicitly_untrusted || (Pos_or_decl.is_hhi @@ get_pos ty) then
+    Unenforced
+  else
+    get_enforcement env ty
 
 let pessimize_type env { et_type; et_enforced } =
   let is_fully_enforced e =
     match e with
     | Enforced -> true
     | Unenforced
-    | PartiallyEnforced ->
+    | PartiallyEnforced _ ->
       false
   in
   let et_type =
@@ -161,12 +187,7 @@ let pessimize_type env { et_type; et_enforced } =
   { et_type; et_enforced }
 
 let compute_enforced_ty env ?(explicitly_untrusted = false) (ty : decl_ty) =
-  let et_enforced =
-    if is_enforced env ~explicitly_untrusted ty then
-      Enforced
-    else
-      Unenforced
-  in
+  let et_enforced = get_enforced env ~explicitly_untrusted ty in
   { et_type = ty; et_enforced }
 
 let compute_enforced_and_pessimize_ty

@@ -12,6 +12,7 @@ open Typing_defs
 type coercion_direction =
   | CoerceToDynamic
   | CoerceFromDynamic
+  | PartialCoerceFromDynamic of collection_style * pos_id
 
 (* Logical proposition about types *)
 type subtype_prop =

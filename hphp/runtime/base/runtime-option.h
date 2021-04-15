@@ -1117,7 +1117,7 @@ struct RuntimeOption {
    *     Logging arrays are only created before RTA has begun. */       \
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, BespokeEscalationSampleRate, 0)                           \
-  F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
+  F(uint64_t, EmitLoggingArraySampleRate, 17)                           \
   F(string, ExportLoggingArrayDataPath, "")                             \
   /* Should we use structs? If so, how big can they get? Due to how we  \
    * represent structs, we can't make any with more than 255 keys. */   \

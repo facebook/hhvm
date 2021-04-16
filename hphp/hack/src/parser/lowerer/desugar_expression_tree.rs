@@ -1,6 +1,6 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::classes;
+use naming_special_names_rust::{classes, pseudo_functions};
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
@@ -521,6 +521,10 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
 
                 match &recv.1 {
                     Id(sid) => {
+                        if is_typechecker_fun_name(&sid.1) {
+                            return Ok(());
+                        }
+
                         let pos = sid.0.clone();
                         let fp = Expr::new(
                             pos.clone(),
@@ -780,6 +784,9 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                             ));
                         }
                     }
+                }
+                Id(sid) if is_typechecker_fun_name(&sid.1) => {
+                    Expr::new(e.0.clone(), Call(call.clone()))
                 }
                 // Convert expr( ... )(args) to `$v->visitCall(new ExprPos(..), rewrite_expr(expr), vec[args])`
                 _ => {
@@ -1208,4 +1215,18 @@ fn hint_name(hint: &aast::Hint) -> String {
         }
     };
     name.into()
+}
+
+/// Is this is a typechecker pseudo function like `hh_show` that
+/// shouldn't be desugared?
+fn is_typechecker_fun_name(name: &str) -> bool {
+    strip_ns(name) == strip_ns(pseudo_functions::HH_SHOW)
+        || strip_ns(name) == strip_ns(pseudo_functions::HH_SHOW_ENV)
+}
+
+fn strip_ns(name: &str) -> &str {
+    match name.chars().next() {
+        Some('\\') => &name[1..],
+        _ => name,
+    }
 }

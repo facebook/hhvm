@@ -1,0 +1,3 @@
+Warning: Call to rx() requires [defaults] coeffects but main() provided [] in %s on line 8
+
+Warning: Call to write_props() requires [write_props] coeffects but main() provided [] in %s on line 9

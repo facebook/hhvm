@@ -181,12 +181,16 @@ void CoeffectsConfig::initEnforcementLevel(
   // enforcement otherwise the whole coeffect system breaks
   s_instance->m_pureLevel = 0;
   s_instance->m_rxLevel = 0;
+  s_instance->m_writePropsLevel = 0;
   s_instance->m_policiedLevel = 0;
   for (auto const [name, level] : map) {
     if (name == C::s_rx) s_instance->m_rxLevel = level;
+    else if (name == C::s_write_props) s_instance->m_writePropsLevel = level;
     else if (name == C::s_policied) s_instance->m_policiedLevel = level;
     s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);
   }
+  s_instance->m_writePropsLevel = std::max(s_instance->m_writePropsLevel,
+                                           s_instance->m_rxLevel);
 }
 
 void CoeffectsConfig::initCapabilities() {
@@ -282,7 +286,9 @@ void CoeffectsConfig::initCapabilities() {
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
       warningMask = (rxPure | policiedPure);
     } else {
-      if (CoeffectsConfig::rxEnforcementLevel() == 1) warningMask |= rxPure;
+      if (CoeffectsConfig::writePropsEnforcementLevel() == 1) {
+        warningMask |= rxPure;
+      }
       if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
         warningMask |= policiedPure;
       }
@@ -298,6 +304,7 @@ std::string CoeffectsConfig::mangle() {
   return folly::to<std::string>(
     C::s_pure, std::to_string(s_instance->m_pureLevel),
     C::s_rx, std::to_string(s_instance->m_rxLevel),
+    C::s_write_props, std::to_string(s_instance->m_writePropsLevel),
     C::s_policied, std::to_string(s_instance->m_policiedLevel)
   );
 }
@@ -320,9 +327,12 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
   if (!CoeffectsConfig::enabled()) return finish();
 
   if (!CoeffectsConfig::rxEnforcementLevel()) {
+    if (!CoeffectsConfig::writePropsEnforcementLevel() ||
+        coeffect != C::s_write_props) {
 #define X(x) if (coeffect == C::s_##x) return finish();
   RX_COEFFECTS
 #undef X
+    }
   }
 
   if (!CoeffectsConfig::policiedEnforcementLevel()) {

@@ -449,6 +449,7 @@
     tast_provider
     typing
     typing_service_api
+    typing_check_job
     utils_core
     version
     watchman_utils

@@ -1,9 +1,24 @@
 (library
+  (name typing_service_types)
+  (wrapped false)
+  (modules 
+    typing_service_types)
+  (libraries
+    biglist
+    core_kernel
+    errors
+    hg
+    relative_path
+    typechecker_options
+    typing_deps
+  )
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_service_api)
   (wrapped false)
   (modules
     typing_service_delegate_sig
-    typing_service_types
   )
   (libraries
     artifact_store
@@ -15,5 +30,6 @@
     relative_path
     typechecker_options
     typing_deps
+    typing_service_types
   )
   (preprocess (pps ppx_deriving.std)))

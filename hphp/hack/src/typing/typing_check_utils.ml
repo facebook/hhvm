@@ -15,30 +15,29 @@ let type_file_with_global_tvenvs
     Errors.do_with_context fn Errors.Typing (fun () ->
         let (fs, f_global_tvenvs) =
           List.map funs ~f:snd
-          |> List.filter_map ~f:(fun x ->
-                 Typing_check_service.type_fun tcopt fn x)
+          |> List.filter_map ~f:(fun x -> Typing_check_job.type_fun tcopt fn x)
           |> List.unzip
         in
         let (cs, c_global_tvenvs) =
           List.map classes ~f:snd
           |> List.filter_map ~f:(fun x ->
-                 Typing_check_service.type_class tcopt fn x)
+                 Typing_check_job.type_class tcopt fn x)
           |> List.unzip
         in
         let rs =
           List.map record_defs ~f:snd
           |> List.filter_map ~f:(fun x ->
-                 Typing_check_service.type_record_def tcopt fn x)
+                 Typing_check_job.type_record_def tcopt fn x)
         in
         let ts =
           List.map typedefs ~f:snd
           |> List.filter_map ~f:(fun x ->
-                 Typing_check_service.check_typedef tcopt fn x)
+                 Typing_check_job.check_typedef tcopt fn x)
         in
         let gcs =
           List.map consts ~f:snd
           |> List.filter_map ~f:(fun x ->
-                 Typing_check_service.check_const tcopt fn x)
+                 Typing_check_job.check_const tcopt fn x)
         in
         ( fs @ cs @ rs @ ts @ gcs,
           lazy (List.concat (f_global_tvenvs :: c_global_tvenvs)) ))

@@ -17,27 +17,6 @@ type process_file_results = {
 val should_enable_deferring :
   GlobalOptions.t -> Typing_service_types.check_file_computation -> bool
 
-val type_fun :
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  (Tast.def * Typing_inference_env.t_global_with_pos) option
-
-val type_class :
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  (Tast.def * Typing_inference_env.t_global_with_pos list) option
-
-val type_record_def :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
-
-val check_typedef :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
-
-val check_const :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
-
 val process_file :
   Relative_path.Set.t ->
   Provider_context.t ->

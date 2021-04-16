@@ -240,11 +240,26 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name typing_check_job)
+  (wrapped false)
+  (modules
+    typing_check_job
+    typing_check_utils)
+  (libraries
+    core_kernel
+    errors
+    file_info
+    nast
+    heap_global_storage
+    typing
+    typing_deps)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_check)
   (wrapped false)
   (modules
-    typing_check_service
-    typing_check_utils)
+    typing_check_service)
   (libraries
     biglist
     cgroup
@@ -262,6 +277,7 @@
     typing
     typing_defs
     typing_deps
+    typing_check_job
     typing_service_api
     typing_service_api_stubs
     vfs)

@@ -777,6 +777,8 @@ val bitwise_math_invalid_argument : typing_error_callback
 
 val inc_dec_invalid_argument : typing_error_callback
 
+val math_invalid_argument : typing_error_callback
+
 val using_error : Pos.t -> bool -> typing_error_callback
 
 val static_redeclared_as_dynamic :

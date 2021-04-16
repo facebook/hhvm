@@ -3548,6 +3548,8 @@ let bitwise_math_invalid_argument =
 
 let inc_dec_invalid_argument = maybe_unify_error Typing.IncDecInvalidArgument
 
+let math_invalid_argument = maybe_unify_error Typing.MathInvalidArgument
+
 let using_error pos has_await ?code:_ claim reasons =
   let (note, cls) =
     if has_await then

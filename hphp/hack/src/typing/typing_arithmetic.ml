@@ -141,21 +141,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Minus
   | Ast_defs.Star
     when not contains_any ->
-    let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num
-        env
-        p
-        ty1
-        (Reason.Rarith p1)
+    let err =
+      if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
+        Errors.math_invalid_argument
+      else
         Errors.unify_error
     in
+    let (env, is_dynamic1) =
+      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) err
+    in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num
-        env
-        p
-        ty2
-        (Reason.Rarith p2)
-        Errors.unify_error
+      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) err
     in
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
      * result if *either* operand is dynamic
@@ -245,21 +241,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Slash
   | Ast_defs.Starstar
     when not contains_any ->
-    let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num
-        env
-        p
-        ty1
-        (Reason.Rarith p1)
+    let err =
+      if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
+        Errors.math_invalid_argument
+      else
         Errors.unify_error
     in
+    let (env, is_dynamic1) =
+      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) err
+    in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num
-        env
-        p
-        ty2
-        (Reason.Rarith p2)
-        Errors.unify_error
+      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) err
     in
     let (env, result_ty) =
       if is_float_or_like_float env ty1 then
@@ -297,7 +289,11 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       match bop with
-      | Ast_defs.Percent -> Errors.unify_error
+      | Ast_defs.Percent ->
+        if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
+          Errors.math_invalid_argument
+        else
+          Errors.unify_error
       | _ ->
         if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
           Errors.bitwise_math_invalid_argument

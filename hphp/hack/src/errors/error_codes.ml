@@ -621,6 +621,7 @@ module Typing = struct
     | PrivateDynamicWrite [@value 4426]
     | IncDecInvalidArgument [@value 4427]
     | ReadonlyClosureCall [@value 4428]
+    | MathInvalidArgument [@value 4429]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -9,7 +9,7 @@ function test(): void {
   $et = Code`1`;
   $pos = $et->getExprPos();
   if ($pos !== null) {
-    $output = sprintf("%s: (%d, %d)-(%d, %d)\n", $pos->filepath, $pos->begin_line, $pos->begin_col, $pos->end_line, $pos->end_col);
+    $output = sprintf("%s: (%d, %d)-(%d, %d)\n", $pos['path'], $pos['start_line'], $pos['start_column'], $pos['end_line'], $pos['end_column']);
     echo($output);
   } else {
     echo("Position is null\n");

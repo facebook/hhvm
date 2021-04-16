@@ -31,7 +31,7 @@ use oxidized::{
 ///
 ///   return MyDsl::makeTree(
 ///     // At runtime, expression tree visitors know the position of the literal.
-///     new ExprPos("whatever.php", ...),
+///     shape('path' => 'whatever.php', 'start_line' => 123, ...),
 ///
 ///     // Pass the splices outside of the visitor, so visitors can access the
 ///     // spliced values without having to re-run the visit function.
@@ -41,7 +41,7 @@ use oxidized::{
 ///     // they see each piece of syntax. They might build an AST, or construct a
 ///     // SQL query.
 ///     function (MyDsl $v) {
-///       // (ignoring ExprPos arguments for brevity)
+///       // (ignoring position arguments for brevity)
 ///       return $v->visitMethCall(
 ///         $v->visitCall(
 ///           $v->splice('$0splice0', $0splice0),
@@ -724,13 +724,13 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
 
     let pos = exprpos(&e.0);
     let e = match &e.1 {
-        // Convert `$x` to `$v->visitLocal(new ExprPos(...), "$x")` (note the quoting).
+        // Convert `$x` to `$v->visitLocal(shape(...), "$x")` (note the quoting).
         Lvar(lid) => v_meth_call(
             "visitLocal",
-            vec![pos, string_literal(e.0.clone(), &((lid.1).1))],
+            vec![pos, string_literal((lid.0).clone(), &((lid.1).1))],
             &e.0,
         ),
-        // Convert `... = ...` to `$v->visitAssign(new ExprPos(...), $v->..., $v->...)`.
+        // Convert `... = ...` to `$v->visitAssign(shape(...), $v->..., $v->...)`.
         Binop(bop) => match &**bop {
             (Bop::Eq(None), lhs, rhs) => v_meth_call(
                 "visitAssign",
@@ -744,7 +744,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                 ));
             }
         },
-        // Convert ... ? ... : ... to `$v->visitTernary(new ExprPos(...), $v->..., $v->..., $v->...)`
+        // Convert ... ? ... : ... to `$v->visitTernary(shape(...), $v->..., $v->..., $v->...)`
         Eif(eif) => {
             let (e1, e2o, e3) = &**eif;
             let e2 = if let Some(e2) = e2o {
@@ -762,7 +762,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
             let (recv, _, args, _) = &**call;
             match &recv.1 {
                 // Convert `$foo->bar(args)` to
-                // `$v->visitMethCall(new ExprPos(...), $foo, 'bar', vec[args])`
+                // `$v->visitMethCall(shape(...), $foo, 'bar', vec[args])`
                 // Parenthesized expressions e.g. `($foo->bar)(args)` unsupported.
                 ObjGet(objget) if !objget.as_ref().3 => {
                     let (receiver, meth, _, _) = &**objget;
@@ -799,7 +799,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                 }
             }
         }
-        // Convert `($x) ==> { ... }` to `$v->visitLambda(new ExprPos(...), vec["$x"], vec[...])`.
+        // Convert `($x) ==> { ... }` to `$v->visitLambda(shape(...), vec["$x"], vec[...])`.
         Lfun(lf) => {
             let fun_ = &lf.0;
 
@@ -821,7 +821,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                 &e.0,
             )
         }
-        // Convert `${ expr }` to `$v->splice(new ExprPos(...), "\$var_name", expr )`
+        // Convert `${ expr }` to `$v->splice(shape(...), "\$var_name", expr )`
         ETSplice(e) => {
             // Assumes extract and replace has already occurred
             let s = if let Lvar(lid) = &e.1 {
@@ -874,7 +874,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
     let e = match &s.1 {
         Expr(e) => Some(rewrite_expr(env, &e)?),
         Return(e) => match &**e {
-            // Convert `return ...;` to `$v->visitReturn(new ExprPos(...), $v->...)`.
+            // Convert `return ...;` to `$v->visitReturn(shape(...), $v->...)`.
             Some(e) => Some(v_meth_call(
                 "visitReturn",
                 vec![pos, rewrite_expr(env, &e)?],
@@ -888,7 +888,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             }
         },
         // Convert `if (...) {...} else {...}` to
-        // `$v->visitIf(new ExprPos(...), $v->..., vec[...], vec[...])`.
+        // `$v->visitIf(shape(...), $v->..., vec[...], vec[...])`.
         If(if_stmt) => {
             let (e, then_block, else_block) = &**if_stmt;
             let then_stmts = rewrite_stmts(env, then_block)?;
@@ -906,7 +906,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             ))
         }
         // Convert `while (...) {...}` to
-        // `$v->visitWhile(new ExprPos(...), $v->..., vec[...])`.
+        // `$v->visitWhile(shape(...), $v->..., vec[...])`.
         While(w) => {
             let (e, body) = &**w;
             let body_stmts = rewrite_stmts(env, body)?;
@@ -918,7 +918,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             ))
         }
         // Convert `for (...; ...; ...) {...}` to
-        // `$v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])`.
+        // `$v->visitFor(shape(...), vec[...], ..., vec[...], vec[...])`.
         For(w) => {
             let (init, cond, incr, body) = &**w;
             let init_exprs = rewrite_exprs(env, init)?;
@@ -942,9 +942,9 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
                 &s.0,
             ))
         }
-        // Convert `break;` to `$v->visitBreak(new ExprPos(...))`
+        // Convert `break;` to `$v->visitBreak(shape(...))`
         Break => Some(v_meth_call("visitBreak", vec![pos], &s.0)),
-        // Convert `continue;` to `$v->visitContinue(new ExprPos(...))`
+        // Convert `continue;` to `$v->visitContinue(shape(...))`
         Continue => Some(v_meth_call("visitContinue", vec![pos], &s.0)),
         Noop => None,
         _ => {
@@ -992,26 +992,6 @@ fn dict_literal(pos: Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
 
 fn make_id(pos: Pos, name: &str) -> ast::Id {
     ast::Id(pos, name.into())
-}
-
-/// Build `new classname(args)`
-fn new_obj(pos: &Pos, classname: &str, args: Vec<Expr>) -> Expr {
-    Expr::new(
-        pos.clone(),
-        Expr_::New(Box::new((
-            ClassId(
-                pos.clone(),
-                ClassId_::CIexpr(Expr::new(
-                    pos.clone(),
-                    Expr_::Id(Box::new(Id(pos.clone(), classname.to_string()))),
-                )),
-            ),
-            vec![],
-            args,
-            None,
-            pos.clone(),
-        ))),
-    )
 }
 
 fn visitor_variable() -> String {
@@ -1162,29 +1142,57 @@ fn temp_lvar(pos: &Pos, num: usize) -> Expr {
     Expr::mk_lvar(pos, &temp_lvar_string(num))
 }
 
-/// Given a Pos, returns `new ExprPos(...)`
-/// In case of Pos.none or invalid position, all elements set to 0
+/// Given a Pos, returns a shape literal expression representing it.
+///
+/// ```
+/// shape(
+///   'path' => __FILE__,
+///   'start_line' => 1,
+///   'end_line' => 10,
+///   'start_column' => 0,
+///   'end_column' => 80,
+/// )
+/// ```
+///
+/// If this Pos is Pos.none or invalid, return a literal null instead.
 fn exprpos(pos: &Pos) -> Expr {
     if pos.is_none() || !pos.is_valid() {
         null_literal(pos.clone())
     } else {
         let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
             pos.to_start_and_end_lnum_bol_cnum();
-        new_obj(
-            &pos,
-            "\\ExprPos",
-            vec![
+
+        let fields = vec![
+            (
+                "path",
                 Expr::new(
-                    pos.clone(),
+                    Pos::make_none(),
                     Expr_::Id(Box::new(make_id(pos.clone(), "__FILE__"))),
                 ),
-                int_literal(pos.clone(), start_lnum),
+            ),
+            ("start_line", int_literal(pos.clone(), start_lnum)),
+            ("end_line", int_literal(pos.clone(), end_lnum)),
+            (
+                "start_column",
                 int_literal(pos.clone(), start_cnum - start_bol),
-                int_literal(pos.clone(), end_lnum),
-                int_literal(pos.clone(), end_cnum - end_bol),
-            ],
-        )
+            ),
+            ("end_column", int_literal(pos.clone(), end_cnum - end_bol)),
+        ];
+
+        shape_literal(pos, fields)
     }
+}
+
+fn shape_literal(pos: &Pos, fields: Vec<(&str, Expr)>) -> Expr {
+    let shape_fields: Vec<_> = fields
+        .into_iter()
+        .map(|(name, value)| {
+            let bs = BString::from(name);
+            let field_name = ShapeFieldName::SFlitStr((pos.clone(), bs));
+            (field_name, value)
+        })
+        .collect();
+    Expr::new(pos.clone(), Expr_::Shape(shape_fields))
 }
 
 /// Wrap `stmts` in a lambda that's immediately called.

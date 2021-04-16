@@ -256,15 +256,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   }
 }
 
-final class ExprPos {
-  public function __construct(
-    public string $filepath,
-    public int $begin_line,
-    public int $begin_col,
-    public int $end_line,
-    public int $end_col,
-  ) {}
-}
+type ExprPos = shape(...);
 
 abstract class ExampleMixed {
   public abstract function __tripleEquals(ExampleMixed $_): ExampleBool;

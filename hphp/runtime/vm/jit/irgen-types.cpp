@@ -704,7 +704,7 @@ SSATmp* resolveTypeStructureAndCacheInRDS(
   bool typeStructureCouldBeNonStatic
 ) {
   if (typeStructureCouldBeNonStatic) return resolveTypeStruct();
-  auto const handle = RDSHandleData { rds::alloc<ArrayData*>().handle() };
+  auto const handle = RDSHandleData { rds::alloc<TypedValue>().handle() };
   auto const type = TPtrToOtherDict;
   auto const addr = gen(env, LdRDSAddr, handle, type);
   ifThen(

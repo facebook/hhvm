@@ -1684,28 +1684,13 @@ let class_def_ env c tc =
           begin
             match Cls.kind parent_type with
             | Ast_defs.Cnormal
-            | Ast_defs.Cabstract ->
-              (* ensure that we implement dynamic if we are a subclass of a class that implements dynamic
-               * upward well-formedness checks are performed in Typing_extends *)
+            | Ast_defs.Cabstract
+            | Ast_defs.Cinterface ->
+              (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
+               * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
               if
                 Cls.get_implements_dynamic parent_type
                 && not c.c_implements_dynamic
-              then
-                error_parent_implements_dynamic
-                  parent_type
-                  c.c_implements_dynamic
-            | Ast_defs.Cinterface ->
-              if
-                (not c.c_implements_dynamic)
-                && Cls.get_implements_dynamic parent_type
-              then
-                error_parent_implements_dynamic parent_type false
-              else if
-                Ast_defs.is_c_interface c.c_kind
-                && not
-                     (Bool.equal
-                        (Cls.get_implements_dynamic parent_type)
-                        c.c_implements_dynamic)
               then
                 error_parent_implements_dynamic
                   parent_type

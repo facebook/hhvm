@@ -1,4 +1,2 @@
 File "interfaces_2.bad.php", line 9, characters 11-12:
 Interface `I2` must extend dynamic because it extends interface `I1` which does (Typing[4402])
-File "interfaces_2.bad.php", line 13, characters 11-12:
-Interface `I4` cannot extend dynamic because it extends interface `I3` which does not (Typing[4402])

@@ -561,34 +561,46 @@ let check_members
           && not (Cls.get_implements_dynamic parent_class)
           (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
         then
-          match mem_source with
-          | `FromMethod ->
-            if not (Typing_defs.get_ce_sound_dynamic_callable parent_class_elt)
-            then
-              (* since the attribute is missing run the inter check *)
-              let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
-              (match get_node ty with
-              | Tfun fun_ty ->
+          match Cls.kind parent_class with
+          | Ast_defs.Cabstract
+          | Ast_defs.Cnormal
+          | Ast_defs.Ctrait ->
+            begin
+              match mem_source with
+              | `FromMethod ->
                 if
                   not
-                    (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
-                       env
-                       fun_ty)
+                    (Typing_defs.get_ce_sound_dynamic_callable parent_class_elt)
                 then
-                  Errors.method_is_not_dynamically_callable
-                    class_pos
-                    member_name
-                    (Cls.name class_)
-                    false
-                    (Some
-                       ( Lazy.force parent_class_elt.ce_pos,
-                         parent_class_elt.ce_origin ))
-                    None
-              | _ -> ())
-          | `FromSMethod
-          | `FromSProp
-          | `FromProp
-          | `FromConstructor ->
+                  (* since the attribute is missing run the inter check *)
+                  let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
+                  (match get_node ty with
+                  | Tfun fun_ty ->
+                    if
+                      not
+                        (Typing_dynamic
+                         .sound_dynamic_interface_check_from_fun_ty
+                           env
+                           fun_ty)
+                    then
+                      Errors.method_is_not_dynamically_callable
+                        class_pos
+                        member_name
+                        (Cls.name class_)
+                        false
+                        (Some
+                           ( Lazy.force parent_class_elt.ce_pos,
+                             parent_class_elt.ce_origin ))
+                        None
+                  | _ -> ())
+              | `FromSMethod
+              | `FromSProp
+              | `FromProp
+              | `FromConstructor ->
+                ()
+            end
+          | Ast_defs.Cinterface
+          | Ast_defs.Cenum ->
             () );
         env)
 

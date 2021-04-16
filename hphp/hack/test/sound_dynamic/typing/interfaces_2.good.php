@@ -8,3 +8,7 @@
 interface I1 {}
 <<__SoundDynamicCallable>>
 interface I2 extends I1 {}   // this is OK
+
+interface I3 {}
+<<__SoundDynamicCallable>>
+interface I4 extends I3 {}   // this is also OK

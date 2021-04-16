@@ -55,43 +55,11 @@ let opt f env = function
     let (env, x) = f env x in
     (env, Some x)
 
-let opt_fold f env = function
-  | None -> env
-  | Some x -> f env x
-
 let singleton_if cond x =
   if cond then
     [x]
   else
     []
-
-let smap_inter m1 m2 =
-  SMap.fold
-    (fun x y acc ->
-      if SMap.mem x m2 then
-        SMap.add x y acc
-      else
-        acc)
-    m1
-    SMap.empty
-
-let imap_inter m1 m2 =
-  IMap.fold
-    (fun x y acc ->
-      if IMap.mem x m2 then
-        IMap.add x y acc
-      else
-        acc)
-    m1
-    IMap.empty
-
-let smap_inter_list = function
-  | [] -> SMap.empty
-  | x :: rl -> List.fold_left rl ~f:smap_inter ~init:x
-
-let imap_inter_list = function
-  | [] -> IMap.empty
-  | x :: rl -> List.fold_left rl ~f:imap_inter ~init:x
 
 let rec wfold_left2 f env l1 l2 =
   match (l1, l2) with
@@ -116,40 +84,11 @@ let unsafe_opt_note note = function
 
 let unsafe_opt x = unsafe_opt_note "unsafe_opt got None" x
 
-let inter_list = function
-  | [] -> SSet.empty
-  | x :: rl -> List.fold_left rl ~f:SSet.inter ~init:x
-
-let rec list_last f1 f2 = function
-  | [] -> ()
-  | [x] -> f2 x
-  | x :: rl ->
-    f1 x;
-    list_last f1 f2 rl
-
-let is_prefix_dir dir fn =
-  let prefix = dir ^ Filename.dir_sep in
-  String.length fn > String.length prefix
-  && String.equal (String.sub fn 0 (String.length prefix)) prefix
-
-let try_with_channel
-    (oc : Out_channel.t) (f1 : Out_channel.t -> 'a) (f2 : exn -> 'a) : 'a =
-  try
-    let result = f1 oc in
-    Out_channel.close oc;
-    result
-  with e ->
-    Out_channel.close oc;
-    f2 e
-
 let try_with_stack (f : unit -> 'a) : ('a, exn * callstack) result =
   try Ok (f ())
   with exn ->
     let stack = Callstack (Printexc.get_backtrace ()) in
     Error (exn, stack)
-
-let map_of_list list =
-  List.fold_left ~f:(fun m (k, v) -> SMap.add k v m) ~init:SMap.empty list
 
 let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
@@ -202,8 +141,6 @@ let split_ns_from_name (s : string) : string * string =
     (namespace_part, name_part)
   | None -> ("\\", s)
 
-let double_colon = Str.regexp_string "::"
-
 (* Expands a namespace using the namespace map, a list of (string, string) tuples
  * Ensures the beginning backslash is present
  *
@@ -225,24 +162,6 @@ let expand_namespace (ns_map : (string * string) list) (s : string) : string =
   | None -> add_ns s
   | Some (_, expanded) -> add_ns (expanded ^ "\\" ^ name)
 
-(*
- * "A::B" -> Some "A" * "B"
- * "::B" "A::" "Abc" -> None
- *)
-let split_class_from_method (s : string) : (string * string) option =
-  try
-    let i = Str.search_forward double_colon s 0 in
-    let len = String.length s in
-    let class_part = String.sub s 0 i in
-    Printf.printf "Class part is [%s]\n" class_part;
-    let meth_part = String.sub s (i + 2) (len - i - 2) in
-    Printf.printf "Meth part is [%s]\n" meth_part;
-    if String.equal class_part "" || String.equal meth_part "" then
-      None
-    else
-      Some (class_part, meth_part)
-  with _ -> None
-
 (*****************************************************************************)
 (* Same as List.iter2, except that we only iterate as far as the shortest
  * of both lists.
@@ -257,20 +176,6 @@ let rec iter2_shortest f l1 l2 =
   | (x1 :: rl1, x2 :: rl2) ->
     f x1 x2;
     iter2_shortest f rl1 rl2
-
-let fold2_shortest l1 l2 ~init ~f =
-  let rec fold acc l1 l2 =
-    match (l1, l2) with
-    | ([], _)
-    | (_, []) ->
-      acc
-    | (x1 :: rl1, x2 :: rl2) ->
-      let acc = f acc x1 x2 in
-      fold acc rl1 rl2
-  in
-  fold init l1 l2
-
-let fold_fun_list acc fl = List.fold_left fl ~f:( |> ) ~init:acc
 
 let compose f g x = f (g x)
 

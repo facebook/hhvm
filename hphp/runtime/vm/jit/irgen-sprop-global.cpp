@@ -140,7 +140,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
 
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
-    if (opts.disallowConst && lookup.constant) return false;
+    if (opts.writeMode && lookup.constant) return false;
     if (mustBeMutable && lookup.readonly) return false;
     if (mustBeReadOnly && !lookup.readonly) return false;
     return true;
@@ -165,7 +165,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     ssaName,
     ctxTmp,
     cns(env, opts.ignoreLateInit),
-    cns(env, opts.disallowConst),
+    cns(env, opts.writeMode),
     cns(env, mustBeMutable),
     cns(env, mustBeReadOnly)
   );

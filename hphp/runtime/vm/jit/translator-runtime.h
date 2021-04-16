@@ -128,14 +128,14 @@ TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool ignoreLateInit,
-                           bool disallowConst,
+                           bool writeMode,
                            bool mustBeMutable,
                            bool mustBeReadOnly);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
                             bool ignoreLateInit,
-                            bool disallowConst,
+                            bool writeMode,
                             bool mustBeMutable,
                             bool mustBeReadOnly);
 

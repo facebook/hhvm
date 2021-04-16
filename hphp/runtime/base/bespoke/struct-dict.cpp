@@ -35,7 +35,7 @@ uint8_t s_numStructLayouts = 0;
 folly::SharedMutex s_keySetLock;
 std::unordered_map<KeyOrder, LayoutIndex, KeyOrderHash> s_keySetToIdx;
 
-const LayoutFunctions* structArrayVtable() {
+const LayoutFunctions* structDictVtable() {
   static auto const result = fromArray<StructDict>();
   return &result;
 }
@@ -106,6 +106,14 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
 
   auto constexpr kMaxIndex = std::numeric_limits<uint8_t>::max();
   if (s_numStructLayouts == kMaxIndex) return nullptr;
+
+  // We only construct this layout if it has at least one child, in order
+  // to satisfy invariants in FinalizeHierarchy().
+  if (s_numStructLayouts == 0) {
+    new TopStructLayout();
+    s_numStructLayouts++;
+  }
+
   auto const index = Index(s_numStructLayouts++);
   auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
   auto const result = new (malloc(bytes)) StructLayout(index, ko);
@@ -123,8 +131,7 @@ const StructLayout* StructLayout::Deserialize(
 
 StructLayout::StructLayout(LayoutIndex index, const KeyOrder& ko)
   : ConcreteLayout(index, describeStructLayout(ko),
-                   {AbstractLayout::GetBespokeTopIndex()},
-                   structArrayVtable())
+                   {TopStructLayout::Index()}, structDictVtable())
   , m_key_order(ko)
 {
   Slot i = 0;
@@ -210,30 +217,6 @@ size_t StructDict::valueOffsetInValueSize() const {
 const StructLayout* StructLayout::As(const Layout* l) {
   assertx(dynamic_cast<const StructLayout*>(l));
   return reinterpret_cast<const StructLayout*>(l);
-}
-
-using namespace jit;
-
-std::pair<Type, bool> StructLayout::elemType(Type key) const {
-  if (key <= TInt) return {TBottom, false};
-  if (key.hasConstVal(TStr)) {
-    auto const keyVal = key.strVal();
-    auto const slot = keySlot(keyVal);
-    return slot == kInvalidSlot ? std::pair{TBottom, false} :
-                                  std::pair{TInitCell, false};
-  }
-  return {TInitCell, false};
-}
-
-ArrayLayout StructLayout::setType(Type key, Type val) const {
-  if (key.maybe(TInt)) return ArrayLayout::Vanilla();
-  if (!key.maybe(TStr)) return ArrayLayout::Top();
-  if (!val.maybe(TInitCell)) return ArrayLayout::Bottom();
-  if (!key.hasConstVal()) return ArrayLayout::Top();
-  auto const keyStr = key.strVal();
-  auto const slot = keySlot(keyStr);
-  if (slot == kInvalidSlot) return ArrayLayout::Vanilla();
-  return ArrayLayout(this);
 }
 
 StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
@@ -666,6 +649,79 @@ Slot StructDict::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
   assertx(pos < RO::EvalBespokeStructDictMaxNumKeys);
   return rawPositions()[pos];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+TopStructLayout::TopStructLayout()
+  : AbstractLayout(Index(), "StructDict<Top>",
+                   {AbstractLayout::GetBespokeTopIndex()}, structDictVtable())
+{}
+
+LayoutIndex TopStructLayout::Index() {
+  return StructLayout::Index(0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+using namespace jit;
+
+ArrayLayout StructLayout::appendType(Type val) const {
+  return ArrayLayout::Vanilla();
+}
+
+ArrayLayout StructLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout StructLayout::setType(Type key, Type val) const {
+  if (key <= TInt) return ArrayLayout::Vanilla();
+  if (!key.hasConstVal(TStr)) return ArrayLayout::Top();
+  auto const slot = keySlot(key.strVal());
+  return slot == kInvalidSlot ? ArrayLayout::Vanilla() : ArrayLayout(this);
+}
+
+std::pair<Type, bool> StructLayout::elemType(Type key) const {
+  if (key <= TInt) return {TBottom, false};
+  if (!key.hasConstVal(TStr)) return {TInitCell, false};
+  auto const slot = keySlot(key.strVal());
+  return slot == kInvalidSlot ? std::pair{TBottom, false}
+                              : std::pair{TInitCell, false};
+}
+
+std::pair<Type, bool> StructLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? TStaticStr : TInitCell, false};
+}
+
+Type StructLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? TStaticStr : TInitCell;
+}
+
+ArrayLayout TopStructLayout::appendType(Type val) const {
+  return ArrayLayout::Vanilla();
+}
+
+ArrayLayout TopStructLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout TopStructLayout::setType(Type key, Type val) const {
+  return ArrayLayout::Top();
+}
+
+std::pair<Type, bool> TopStructLayout::elemType(Type key) const {
+  return key <= TInt ? std::pair{TBottom, false}
+                     : std::pair{TInitCell, false};
+}
+
+std::pair<Type, bool> TopStructLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? TStaticStr : TInitCell, false};
+}
+
+Type TopStructLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? TStaticStr : TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////////////

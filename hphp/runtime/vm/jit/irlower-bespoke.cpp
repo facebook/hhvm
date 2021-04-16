@@ -430,8 +430,24 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////////////
 // StructDict
 
+namespace {
+
 using bespoke::StructDict;
 using bespoke::StructLayout;
+
+// Returns none if the layout is an abstract struct layout.
+folly::Optional<Slot> getStructSlot(const SSATmp* arr, const SSATmp* key) {
+  assertx(key->hasConstVal(TStr));
+  auto const layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
+
+  if (!layout.bespokeLayout()->isConcrete()) return folly::none;
+
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+  return slayout->keySlot(key->strVal());
+}
+
+}
 
 void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<AllocBespokeStructDict>();
@@ -469,41 +485,37 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdStructDictElem(IRLS& env, const IRInstruction* inst) {
-  auto const rarr = srcLoc(env, inst, 0).reg();
   auto const arr = inst->src(0);
-  auto layout = arr->type().arrSpec().layout();
-  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
   auto const key = inst->src(1);
-  assertx(key->hasConstVal());
-  auto const slot = slayout->keySlot(key->strVal());
-  if (slot == kInvalidSlot) {
-    assertx(inst->dst()->isA(TUninit));
+  auto const slot = getStructSlot(arr, key);
+
+  if (!slot) return cgBespokeGet(env, inst);
+
+  if (*slot == kInvalidSlot) {
+    always_assert(inst->dst()->isA(TUninit));
     return;
   }
-  auto const type = rarr[slayout->typeOffsetForSlot(slot)];
-  auto const value = rarr[slayout->valueOffsetForSlot(slot)];
-  loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
-         type, value);
+
+  auto const layout = arr->type().arrSpec().layout();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const type = rarr[slayout->typeOffsetForSlot(*slot)];
+  auto const data = rarr[slayout->valueOffsetForSlot(*slot)];
+  loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0), type, data);
 }
 
 void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
-  auto layout = arr->type().arrSpec().layout();
-  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
   auto const key = inst->src(1);
-  assertx(key->hasConstVal());
+  auto const slot = getStructSlot(arr, key);
+
+  if (!slot || (*slot == kInvalidSlot)) return cgBespokeSet(env, inst);
+
   auto& v = vmain(env);
-  auto const keyStr = key->strVal();
-  auto const slot = slayout->keySlot(keyStr);
-  if (slot != kInvalidSlot) {
-    auto const target = CallSpec::direct(bespoke::StructDict::SetStrInSlot);
-    auto const args = argGroup(env, inst).ssa(0).imm(slot).typedValue(2);
-    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-  } else {
-    auto const target = CallSpec::direct(bespoke::StructDict::SetStrMove);
-    auto const args = argGroup(env, inst).ssa(0).immPtr(keyStr).typedValue(2);
-    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-  }
+  auto const target = CallSpec::direct(bespoke::StructDict::SetStrInSlot);
+  auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 //////////////////////////////////////////////////////////////////////////////

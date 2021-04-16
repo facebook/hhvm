@@ -393,7 +393,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   // because they are the only dynamically-constructed layouts.
   std::vector<const StructLayout*> layouts;
   bespoke::eachLayout([&](auto const& layout) {
-    if (!ArrayLayout(&layout).is_struct()) return;
+    if (!layout.isConcrete() || !ArrayLayout(&layout).is_struct()) return;
     layouts.push_back(StructLayout::As(&layout));
   });
   write_raw(ser, layouts.size());

@@ -122,8 +122,12 @@ struct StructLayout : public ConcreteLayout {
   size_t typeOffsetForSlot(Slot slot) const;
   size_t valueOffsetForSlot(Slot slot) const;
 
-  std::pair<Type, bool> elemType(Type key) const override;
+  ArrayLayout appendType(Type val) const override;
+  ArrayLayout removeType(Type key) const override;
   ArrayLayout setType(Type key, Type val) const override;
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
 
 private:
   // Callers must check whether the key is static before using one of these
@@ -161,6 +165,18 @@ private:
 
   // Variable-size array field; must be last in this struct.
   Field m_fields[1];
+};
+
+struct TopStructLayout : public AbstractLayout {
+  TopStructLayout();
+  static LayoutIndex Index();
+
+  ArrayLayout appendType(Type val) const override;
+  ArrayLayout removeType(Type key) const override;
+  ArrayLayout setType(Type key, Type val) const override;
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
 };
 
 }}

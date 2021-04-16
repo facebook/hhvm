@@ -377,6 +377,7 @@ jit::ArrayLayout LoggingProfile::getLayout() const {
 }
 
 void LoggingProfile::setLayout(jit::ArrayLayout layout) {
+  assertx(layout.vanilla() || layout.bespokeLayout()->isConcrete());
   this->layout.store(layout, std::memory_order_release);
   if (key.isRuntimeLocation() && layout.is_struct()) {
     // TODO(mcolavita): setLayout should trigger setStaticBespokeArray.

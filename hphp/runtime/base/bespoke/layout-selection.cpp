@@ -324,16 +324,23 @@ ArrayLayout selectSinkLayout(
 
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
+  uint64_t is_struct = 0;
   uint64_t total = 0;
+
+  std::unordered_map<const bespoke::Layout*, uint64_t> structs;
 
   for (auto const& it : profile.data->sources) {
     auto const layout = it.first->getLayout();
+    auto const count = it.second;
     if (layout.vanilla()) {
-      vanilla += it.second;
+      vanilla += count;
     } else if (layout.monotype()) {
-      monotype += it.second;
+      monotype += count;
+    } else if (layout.is_struct()) {
+      is_struct += count;
+      structs[layout.bespokeLayout()] += count;
     }
-    total += it.second;
+    total += count;
   }
 
   auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
@@ -346,6 +353,7 @@ ArrayLayout selectSinkLayout(
 
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
+  auto const p_is_struct = p_sampled * is_struct / total;
 
   if (p_vanilla >= p_cutoff) return ArrayLayout::Vanilla();
 
@@ -374,6 +382,14 @@ ArrayLayout selectSinkLayout(
         ? ArrayLayout(TopMonotypeDictLayout::Index(kt))
         : ArrayLayout(MonotypeDictLayout::Index(kt, dt));
     }
+  }
+
+  if (p_is_struct >= p_cutoff) {
+    for (auto const& pair : structs) {
+      auto const p_this_struct = p_sampled * pair.second / total;
+      if (p_this_struct >= p_cutoff) return ArrayLayout(pair.first);
+    }
+    return ArrayLayout(TopStructLayout::Index());
   }
 
   return ArrayLayout::Top();

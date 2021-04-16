@@ -200,7 +200,7 @@ function trigger_error(string $error_msg,
 <<__Native>>
 function trigger_sampled_error(string $error_msg,
                                int $sample_rate,
-                               int $error_type = E_USER_NOTICE): bool;
+                               int $error_type = E_USER_NOTICE)[]: bool;
 
 <<__Native>>
 function user_error(string $error_msg, int $error_type = E_USER_NOTICE): bool;

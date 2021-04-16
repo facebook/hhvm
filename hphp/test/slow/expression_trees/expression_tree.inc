@@ -99,12 +99,20 @@ class Code {
 
   // Symbols
   public static function liftSymbol<T>(
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $fp,
   ): ExprTree<Code, Code::TAst, T> {
+    if (HH\is_fun($fp)) {
+      $name = HH\fun_get_function($fp);
+    } else if (HH\is_class_meth($fp)) {
+      $name = HH\class_meth_get_class($fp)."::".HH\class_meth_get_method($fp);
+    } else {
+      throw new Exception("Invalid function pointer in symbol");
+    }
+
     return new ExprTree(
       null,
       dict[],
-      (Code $_) ==> "function_ptr",
+      (Code $_) ==> $name."()",
       () ==> {
         throw new Exception();
       },

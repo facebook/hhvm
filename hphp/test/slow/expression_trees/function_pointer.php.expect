@@ -1,0 +1,3 @@
+${foo()}(${"bar"})
+${MyParent::bar()}(${"hello"})
+${MyChild::bar()}(${"world"})

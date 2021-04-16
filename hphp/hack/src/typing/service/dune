@@ -29,6 +29,7 @@
     job_runner_stubs
     relative_path
     typechecker_options
+    typing_service_delegate_types
     typing_deps
     typing_service_types
   )

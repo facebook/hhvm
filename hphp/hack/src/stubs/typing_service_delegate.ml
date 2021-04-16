@@ -8,24 +8,15 @@
 
 open Hh_prelude
 
-type state = unit [@@deriving show]
+type state = Typing_service_delegate_types.state
 
-let default = ()
+let pp_state = Typing_service_delegate_types.pp_state
 
-let create
-    ~job_runner
-    ~artifact_store_config
-    ~max_batch_size
-    ~min_batch_size
-    ~initial_payload_size
-    ~raise_on_failure =
-  ignore
-    ( job_runner,
-      artifact_store_config,
-      max_batch_size,
-      min_batch_size,
-      initial_payload_size,
-      raise_on_failure )
+let show_state = Typing_service_delegate_types.show_state
+
+let default = Typing_service_delegate_types.default
+
+let create = Typing_service_delegate_types.create
 
 let start delegate_env state =
   ignore delegate_env;

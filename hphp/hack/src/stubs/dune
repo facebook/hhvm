@@ -80,12 +80,22 @@
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 
+
+(library
+  (name typing_service_delegate_types_stubs)
+  (wrapped false)
+  (modules
+    typing_service_delegate_types)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
 (library
   (name typing_service_api_stubs)
   (wrapped false)
   (modules
     typing_service_delegate)
   (libraries
+    typing_service_delegate_types_stubs
     typing_service_api)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))

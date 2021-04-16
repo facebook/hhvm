@@ -301,7 +301,10 @@ let make_env ~init_id ~deps_mode config =
     naming_table = Naming_table.empty;
     deps_mode;
     typing_service =
-      { delegate_state = Typing_service_delegate.default; enabled = false };
+      {
+        delegate_state = Typing_service_delegate_types.default;
+        enabled = false;
+      };
     errorl = Errors.empty;
     failed_naming = Relative_path.Set.empty;
     persistent_client = None;

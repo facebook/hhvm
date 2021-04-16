@@ -10,7 +10,7 @@ open Hh_prelude
 open Typing_service_types
 
 module type Delegate_sig = sig
-  type state [@@deriving show]
+  type state = Typing_service_delegate_types.state [@@deriving show]
 
   val default : state
 

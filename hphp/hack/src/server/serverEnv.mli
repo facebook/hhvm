@@ -34,7 +34,7 @@ type genv = {
 }
 
 type typing_service = {
-  delegate_state: Typing_service_delegate.state; [@opaque]
+  delegate_state: Typing_service_delegate_types.state; [@opaque]
   enabled: bool;
 }
 

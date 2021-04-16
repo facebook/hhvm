@@ -549,6 +549,12 @@ module FullCheckKind : CheckKindType = struct
         (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
         to_recheck
     in
+    let to_recheck =
+      if Relative_path.Set.is_empty env.remote_execution_files then
+        to_recheck
+      else
+        env.remote_execution_files
+    in
     (to_recheck, Relative_path.Set.empty)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
@@ -688,7 +694,10 @@ module LazyCheckKind : CheckKindType = struct
         (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
         to_recheck_now
     in
-    (to_recheck_now, to_recheck_later)
+    if Relative_path.Set.is_empty env.remote_execution_files then
+      (to_recheck_now, to_recheck_later)
+    else
+      (env.remote_execution_files, Relative_path.Set.empty)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
     {
@@ -1048,6 +1057,13 @@ functor
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
       let needs_recheck = Relative_path.Set.diff needs_recheck files_to_check in
+      let needs_recheck =
+        if Relative_path.Set.is_empty env.remote_execution_files then
+          needs_recheck
+        else
+          (* We never need to recheck in RE single mode *)
+          Relative_path.Set.empty
+      in
       let errors =
         Errors.(incremental_update_set errors errorl' files_to_check Typing)
       in

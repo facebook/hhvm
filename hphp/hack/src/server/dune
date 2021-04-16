@@ -120,7 +120,7 @@
   (wrapped false)
   (modules
     colorFile)
-  (libraries 
+  (libraries
     typing_defs
     ide_rpc_api_types
     utils_core
@@ -132,7 +132,7 @@
   (wrapped false)
   (modules
     fileOutline)
-  (libraries 
+  (libraries
     search
     utils_core
   )
@@ -415,6 +415,7 @@
     serverSignatureHelp
     serverStamp
     serverStatusSingle
+    serverStatusSingleRemoteExecution
     serverTypeCheck
     serverTypeDefinition
     serverWorker

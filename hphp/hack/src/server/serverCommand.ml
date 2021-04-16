@@ -53,6 +53,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
+  | STATUS_SINGLE_REMOTE_EXECUTION _ -> true
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
@@ -139,6 +140,15 @@ let full_recheck_if_needed' genv env reason profiling =
 let force_remote = function
   | Rpc (_metadata, STATUS status) -> status.remote
   | _ -> false
+
+let rpc_files : type a. a t -> Relative_path.Set.t = function
+  | STATUS_SINGLE_REMOTE_EXECUTION (fn, _) ->
+    Relative_path.Set.singleton (Relative_path.create_detect_prefix fn)
+  | _ -> Relative_path.Set.empty
+
+let force_remote_execution_files = function
+  | Rpc (_metadata, x) -> rpc_files x
+  | _ -> Relative_path.Set.empty
 
 let ignore_ide = function
   | Rpc (_metadata, STATUS status) -> status.ignore_ide
@@ -288,6 +298,12 @@ let handle
   ServerProgress.send_progress_to_monitor_w_timeout
     "%s"
     (ServerCommandTypesUtils.status_describe_cmd msg);
+  let env =
+    {
+      env with
+      ServerEnv.remote_execution_files = force_remote_execution_files msg;
+    }
+  in
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in

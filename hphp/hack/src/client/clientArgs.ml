@@ -644,6 +644,9 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x)),
         "<path> Return errors in file with provided name (give '-' for stdin)"
       );
+      ( "--single-remote-execution",
+        Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE_REMOTE_EXECUTION x)),
+        "<path> Return (errors, dep_edges) in file with provided name" );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),

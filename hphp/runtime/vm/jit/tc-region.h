@@ -32,7 +32,7 @@ struct RegionTranslator final : Translator {
   int optIndex{0};
   RegionDescPtr region{nullptr};
   bool hasLoop{false};
-  FPInvOffset spOff{};
+  SBInvOffset spOff{};
   jit::vector<RegionContext::LiveType> liveTypes{};
   int prevNumTranslations{-1};
   GrowableVector<IncomingBranch> tailBranches;

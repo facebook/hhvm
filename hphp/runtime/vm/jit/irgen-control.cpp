@@ -234,7 +234,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   auto data = JmpSwitchData{};
   data.cases = iv.size();
   data.targets = &targets[0];
-  data.spOffBCFromFP = spOffBCFromFP(env);
+  data.spOffBCFromStackBase = spOffBCFromStackBase(env);
   data.spOffBCFromIRSP = spOffBCFromIRSP(env);
 
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
@@ -272,7 +272,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.cases      = &cases[0];
   data.defaultSk  = SrcKey{curSrcKey(env),
                            bcOff(env) + iv.strvec()[iv.size() - 1].dest};
-  data.bcSPOff    = spOffBCFromFP(env);
+  data.bcSPOff    = spOffBCFromStackBase(env);
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast
@@ -324,7 +324,7 @@ void emitSelect(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitThrow(IRGS& env) {
-  auto const stackEmpty = spOffBCFromFP(env) == spOffEmpty(env) + 1;
+  auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
   auto const offset = findCatchHandler(curFunc(env), bcOff(env));
   auto const srcTy = topC(env)->type();
   auto const maybeThrowable =

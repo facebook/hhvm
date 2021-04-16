@@ -667,10 +667,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   }
   assertx(data->stublogue != EndCatchData::FrameMode::Stublogue);
   auto const numLocals = inst.func()->numLocals();
-  auto const numStackElems =
-    inst.marker().spOff().offset -
-    (inst.marker().resumeMode() != ResumeMode::None
-      ? 0 : inst.func()->numSlotsInFrame());
+  auto const numStackElems = inst.marker().bcSPOff() - SBInvOffset{0};
 
   if (numStackElems + numLocals > kMaxTrackedFrameElems) {
     FTRACE(4, "      non-reducible EndCatch - too many values\n");

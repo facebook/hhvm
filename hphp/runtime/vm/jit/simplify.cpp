@@ -3537,7 +3537,7 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
 
   auto const newExtra = ReqBindJmpData {
     extra.targets[indexVal],
-    extra.spOffBCFromFP,
+    extra.spOffBCFromStackBase,
     extra.spOffBCFromIRSP
   };
   return gen(env, ReqBindJmp, newExtra, sp, fp);

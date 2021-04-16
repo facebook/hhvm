@@ -117,13 +117,13 @@ ActRec* findVMFrameForDebug();
 //////////////////////////////////////////////////////////////////////
 
 struct Fixup {
-  static Fixup direct(int32_t pcOffset, FPInvOffset spOffset) {
+  static Fixup direct(int32_t pcOffset, SBInvOffset spOffset) {
     assertx(pcOffset >= 0);
     assertx(spOffset.offset >= 0);
     return Fixup{pcOffset, spOffset};
   }
 
-  static Fixup indirect(uint32_t qwordsPushed, FPInvOffset extraSpOffset) {
+  static Fixup indirect(uint32_t qwordsPushed, SBInvOffset extraSpOffset) {
     auto const ripOffset =
       kNativeFrameSize + AROFF(m_savedRip) + qwordsPushed * sizeof(uintptr_t);
     assertx(ripOffset > 0);
@@ -132,14 +132,14 @@ struct Fixup {
   }
 
   static Fixup none() {
-    return Fixup{0, FPInvOffset::invalid()};
+    return Fixup{0, SBInvOffset::invalid()};
   }
 
   bool isValid() const { return m_spOffset.isValid(); }
   bool isIndirect() const { assertx(isValid()); return m_pcOrRipOffset < 0; }
   uint32_t pcOffset() const { assertx(!isIndirect()); return m_pcOrRipOffset; }
   uint32_t ripOffset() const { assertx(isIndirect()); return -m_pcOrRipOffset; }
-  FPInvOffset spOffset() const { assertx(isValid()); return m_spOffset; }
+  SBInvOffset spOffset() const { assertx(isValid()); return m_spOffset; }
   std::string show() const;
 
   void adjustRipOffset(int off) {
@@ -155,13 +155,13 @@ struct Fixup {
   }
 
 private:
-  Fixup(int32_t pcOrRipOffset, FPInvOffset spOffset)
+  Fixup(int32_t pcOrRipOffset, SBInvOffset spOffset)
     : m_pcOrRipOffset{pcOrRipOffset}
     , m_spOffset{spOffset}
   {}
 
   int32_t m_pcOrRipOffset;
-  FPInvOffset m_spOffset;
+  SBInvOffset m_spOffset;
 };
 
 namespace FixupMap {

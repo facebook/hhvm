@@ -91,7 +91,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       auto const rblock = ret->addBlock(sk, length, spOffset);
       blockMap[b] = rblock->id();
       // flag SP offset as unknown for all but the first block
-      spOffset = FPInvOffset::invalid();
+      spOffset = SBInvOffset::invalid();
     }
   }
 

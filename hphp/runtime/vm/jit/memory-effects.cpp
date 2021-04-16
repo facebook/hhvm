@@ -359,15 +359,17 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
       auto const fp = canonical(inst.marker().fp());
       if (fp->inst()->is(BeginInlining)) {
         assertx(inst.marker().resumeMode() == ResumeMode::None);
-        auto const fpOffset = fp->inst()->extra<BeginInlining>()->spOffset;
-        auto const numStackElemsFromFP = inst.marker().spOff() - FPInvOffset{0};
-        return fpOffset - numStackElemsFromFP;
+        auto const extra = fp->inst()->extra<BeginInlining>();
+        auto const fpOffset = extra->spOffset;
+        auto const numSlotsInFrame = extra->func->numSlotsInFrame();
+        auto const numStackElems = inst.marker().bcSPOff() - SBInvOffset{0};
+        return fpOffset - numSlotsInFrame - numStackElems;
       }
 
       assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
       auto const sp = inst.marker().sp();
       auto const irSPOff = sp->inst()->extra<DefStackData>()->irSPOff;
-      return inst.marker().spOff().to<IRSPRelOffset>(irSPOff);
+      return inst.marker().bcSPOff().to<IRSPRelOffset>(irSPOff);
     }();
 
     auto const killed_stack = stack_below(offset);

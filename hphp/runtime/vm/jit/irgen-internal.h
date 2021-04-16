@@ -472,35 +472,30 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
   return tmp;
 }
 
-inline FPInvOffset offsetFromFP(const IRGS& env, IRSPRelOffset irSPRel) {
+inline IRSPRelOffset offsetFromIRSP(const IRGS& env, SBInvOffset sbRel) {
   auto const irSPOff = env.irb->fs().irSPOff();
-  return irSPRel.to<FPInvOffset>(irSPOff);
-}
-
-inline IRSPRelOffset offsetFromIRSP(const IRGS& env, FPInvOffset fpRel) {
-  auto const irSPOff = env.irb->fs().irSPOff();
-  return fpRel.to<IRSPRelOffset>(irSPOff);
+  return sbRel.to<IRSPRelOffset>(irSPOff);
 }
 
 inline IRSPRelOffset offsetFromIRSP(const IRGS& env, BCSPRelOffset bcSPRel) {
-  auto const fpRel = bcSPRel.to<FPInvOffset>(env.irb->fs().bcSPOff());
-  return offsetFromIRSP(env, fpRel);
+  auto const sbRel = bcSPRel.to<SBInvOffset>(env.irb->fs().bcSPOff());
+  return offsetFromIRSP(env, sbRel);
 }
 
-inline BCSPRelOffset offsetFromBCSP(const IRGS& env, FPInvOffset fpRel) {
+inline BCSPRelOffset offsetFromBCSP(const IRGS& env, SBInvOffset sbRel) {
   auto const bcSPOff = env.irb->fs().bcSPOff();
-  return fpRel.to<BCSPRelOffset>(bcSPOff);
+  return sbRel.to<BCSPRelOffset>(bcSPOff);
 }
 
 inline BCSPRelOffset offsetFromBCSP(const IRGS& env, IRSPRelOffset irSPRel) {
-  auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().irSPOff());
-  return offsetFromBCSP(env, fpRel);
+  auto const sbRel = irSPRel.to<SBInvOffset>(env.irb->fs().irSPOff());
+  return offsetFromBCSP(env, sbRel);
 }
 
 /*
  * Offset of the bytecode stack pointer.
  */
-inline FPInvOffset spOffBCFromFP(const IRGS& env) {
+inline SBInvOffset spOffBCFromStackBase(const IRGS& env) {
   return env.irb->fs().bcSPOff();
 }
 inline IRSPRelOffset spOffBCFromIRSP(const IRGS& env) {
@@ -510,10 +505,11 @@ inline IRSPRelOffset spOffBCFromIRSP(const IRGS& env) {
 /*
  * Offset of empty evaluation stack.
  */
-inline FPInvOffset spOffEmpty(const IRGS& env) {
-  return FPInvOffset{
-    resumeMode(env) == ResumeMode::None ? curFunc(env)->numSlotsInFrame() : 0
-  };
+inline SBInvOffset spOffEmpty(const IRGS& env) {
+  // Stublogue context operates on behalf of the caller and does not know
+  // the evaluation stack size.
+  assertx(!env.irb->fs().stublogue());
+  return SBInvOffset{0};
 }
 
 inline SSATmp* pop(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
@@ -595,7 +591,7 @@ inline SSATmp* apparate(IRGS& env, Type type) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(IRGS& env, SrcKey sk) {
-  auto const stackOff = spOffBCFromFP(env);
+  auto const stackOff = spOffBCFromStackBase(env);
   FTRACE(2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
 
   return BCMarker {
@@ -883,7 +879,7 @@ Block* create_catch_block(
   auto const marker = env.irb->curMarker();
   auto const newMarker = [&] {
     if (offsetToAdjustSPForCall == 0) return marker;
-    auto const newSPOff = marker.spOff() - offsetToAdjustSPForCall;
+    auto const newSPOff = marker.bcSPOff() - offsetToAdjustSPForCall;
     return marker.adjustSPOff(newSPOff);
   }();
   env.irb->setCurMarker(newMarker);
@@ -913,7 +909,7 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key);
 /*
  * Define fp(env) and sp(env).
  */
-void defineFrameAndStack(IRGS& env, FPInvOffset bcSPOff);
+void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -32,7 +32,7 @@ TRACE_SET_MOD(pgo);
  * that have been popped given the current SP offset from FP.
  */
 static void discardPoppedTypes(TypedLocations& pConds,
-                               FPInvOffset curSpOffset) {
+                               SBInvOffset curSpOffset) {
   for (auto it = pConds.begin(); it != pConds.end(); ) {
     if (it->location.tag() == LTag::Stack &&
         it->location.stackIdx() > curSpOffset) {

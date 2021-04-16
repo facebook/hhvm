@@ -164,7 +164,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) != ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
-  // assertx(spOffBCFromFP(env) == spOffEmpty(env));
+  // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
   assertx(child->type() <= TObj);
 
   // Bind address at which the execution should resume after awaiting.
@@ -172,7 +172,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
   auto const suspendOff = cns(env, suspendOffset);
   auto const resumeAddr = [&]{
     auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async);
-    auto const bindData = LdBindAddrData { resumeSk, FPInvOffset{1} };
+    auto const bindData = LdBindAddrData { resumeSk, spOffEmpty(env) + 1 };
     return gen(env, LdBindAddr, bindData);
   };
 
@@ -252,7 +252,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset suspendOffset,
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
-  // assertx(spOffBCFromFP(env) == spOffEmpty(env));
+  // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
   assertx(child->isA(TObj));
   assertx(!isInlining(env));
 
@@ -268,8 +268,8 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset suspendOffset,
 
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::Async);
-  auto const data = LdBindAddrData { resumeSk, FPInvOffset{1} };
-  auto const resumeAddr = gen(env, LdBindAddr, data);
+  auto const bindData = LdBindAddrData { resumeSk, spOffEmpty(env) + 1 };
+  auto const resumeAddr = gen(env, LdBindAddr, bindData);
   gen(env, StArResumeAddr, SuspendOffset { suspendOffset }, fp(env),
       resumeAddr);
 
@@ -331,7 +331,7 @@ SSATmp* implYieldAGen(IRGS& env, SSATmp* key, SSATmp* value) {
 void implYield(IRGS& env, bool withKey) {
   assertx(resumeMode(env) != ResumeMode::None);
   assertx(curFunc(env)->isGenerator());
-  assertx(spOffBCFromFP(env) == spOffEmpty(env) + (withKey ? 2 : 1));
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + (withKey ? 2 : 1));
 
   if (resumeMode(env) == ResumeMode::Async) PUNT(Yield-AsyncGenerator);
 
@@ -343,8 +343,8 @@ void implYield(IRGS& env, bool withKey) {
   auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter);
-  auto const data = LdBindAddrData { resumeSk, FPInvOffset{1} };
-  auto const resumeAddr = gen(env, LdBindAddr, data);
+  auto const bindData = LdBindAddrData { resumeSk, spOffEmpty(env) + 1 };
+  auto const resumeAddr = gen(env, LdBindAddr, bindData);
   gen(env,
       StArResumeAddr,
       SuspendOffset { suspendOffset },
@@ -473,7 +473,7 @@ void emitWHResult(IRGS& env) {
 void emitAwait(IRGS& env) {
   auto const suspendOffset = bcOff(env);
   assertx(curFunc(env)->isAsync());
-  assertx(spOffBCFromFP(env) == spOffEmpty(env) + 1);
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + 1);
 
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) {
@@ -573,7 +573,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
-  assertx(spOffBCFromFP(env) == spOffEmpty(env));
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
 
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) {
@@ -640,14 +640,14 @@ void emitCreateCont(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(curFunc(env)->isGenerator());
-  assertx(spOffBCFromFP(env) == spOffEmpty(env));
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::GenIter);
-  auto const bind_data = LdBindAddrData { resumeSk, FPInvOffset{1} };
-  auto const resumeAddr = gen(env, LdBindAddr, bind_data);
+  auto const bindData = LdBindAddrData { resumeSk, spOffEmpty(env) + 1 };
+  auto const resumeAddr = gen(env, LdBindAddr, bindData);
   auto const cont =
     gen(env,
         curFunc(env)->isAsync() ? CreateAGen : CreateGen,

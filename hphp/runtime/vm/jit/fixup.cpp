@@ -94,7 +94,7 @@ struct FixupHash {
 TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
-                    FPInvOffset extraSpOffset, VMRegs* outRegs) {
+                    SBInvOffset extraSpOffset, VMRegs* outRegs) {
   assertx(!fixup.isIndirect());
   const Func* f = ar->func();
   assertx(f);
@@ -103,9 +103,7 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
   outRegs->fp = ar;
   outRegs->retAddr = tca;
 
-  auto const stackBase = UNLIKELY(isResumed(ar))
-    ? Stack::resumableStackBase(ar)
-    : (TypedValue*)ar;
+  auto const stackBase = Stack::anyFrameStackBase(ar);
   outRegs->sp = stackBase - fixup.spOffset().offset - extraSpOffset.offset;
 }
 
@@ -116,7 +114,7 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   auto fixup = s_fixups.find(tc::addrToOffset(tca));
   if (!fixup) return false;
 
-  auto extraSpOffset = FPInvOffset{0};
+  auto extraSpOffset = SBInvOffset{0};
   if (fixup->isIndirect()) {
     auto const ripAddr = reinterpret_cast<uintptr_t>(ar) + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);

@@ -213,7 +213,7 @@ struct InputInfoVec : public std::vector<InputInfo> {
 /*
  * Get input location info and flags for a NormalizedInstruction.
  */
-InputInfoVec getInputs(const NormalizedInstruction&, FPInvOffset bcSPOff);
+InputInfoVec getInputs(const NormalizedInstruction&, SBInvOffset bcSPOff);
 
 /*
  * Return the index of op's local immediate.

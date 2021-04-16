@@ -524,7 +524,7 @@ SrcRec* findSrcRec(SrcKey sk) {
   return srcDB().find(sk);
 }
 
-bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength) {
+bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength) {
   if (srcDB().find(sk)) return true;
 
   // We put retranslate requests at the end of our slab to more frequently

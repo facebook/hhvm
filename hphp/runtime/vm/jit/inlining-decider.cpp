@@ -603,7 +603,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   auto const entryOff = callee->getEntryForNumArgs(argTypes.size());
   RegionContext ctx{
     SrcKey { callee, entryOff, ResumeMode::None },
-    FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
+    SBInvOffset{0},
   };
 
   for (uint32_t i = 0; i < argTypes.size(); ++i) {

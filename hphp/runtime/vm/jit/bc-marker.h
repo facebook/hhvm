@@ -45,7 +45,7 @@ struct BCMarker {
   static BCMarker Dummy() {
     return BCMarker {
       SrcKey(FuncId::Dummy, 0, ResumeMode::None),
-      FPInvOffset{0},
+      SBInvOffset{0},
       false,
       TransIDSet{},
       nullptr,
@@ -55,10 +55,10 @@ struct BCMarker {
 
   BCMarker() = default;
 
-  BCMarker(SrcKey sk, FPInvOffset spOff, bool stublogue, const TransIDSet& tids,
-           SSATmp* fp, SSATmp* sp)
+  BCMarker(SrcKey sk, SBInvOffset bcSPOff, bool stublogue,
+           const TransIDSet& tids, SSATmp* fp, SSATmp* sp)
     : m_sk(sk)
-    , m_spOff(spOff)
+    , m_bcSPOff(bcSPOff)
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
@@ -70,7 +70,7 @@ struct BCMarker {
 
   bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
-           b.m_spOff == m_spOff &&
+           b.m_bcSPOff == m_bcSPOff &&
            b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
            b.m_fp == m_fp &&
@@ -87,7 +87,7 @@ struct BCMarker {
   Offset      bcOff()     const { assertx(valid()); return m_sk.offset();   }
   bool        hasThis()   const { assertx(valid()); return m_sk.hasThis();  }
   bool        prologue()  const { assertx(valid()); return m_sk.prologue(); }
-  FPInvOffset spOff()     const { assertx(valid()); return m_spOff;         }
+  SBInvOffset bcSPOff()   const { assertx(valid()); return m_bcSPOff;       }
   bool        stublogue() const { assertx(valid()); return m_stublogue;     }
   SSATmp*     fp()        const { assertx(valid()); return m_fp;            }
   SSATmp*     sp()        const { assertx(valid()); return m_sp;            }
@@ -115,12 +115,12 @@ struct BCMarker {
     return m_fixupSk.offset();
   }
 
-  // Return a copy of this marker with an updated spOff, fp, or fixupSK.
-  BCMarker adjustSPOff(FPInvOffset spOff) const {
-    return BCMarker { m_sk, spOff, m_stublogue, m_profTransIDs, m_fp, m_sp };
+  // Return a copy of this marker with an updated bcSPOff, fp, or fixupSK.
+  BCMarker adjustSPOff(SBInvOffset bcSPOff) const {
+    return BCMarker { m_sk, bcSPOff, m_stublogue, m_profTransIDs, m_fp, m_sp };
   }
   BCMarker adjustFP(SSATmp* fp) const {
-    return BCMarker { m_sk, m_spOff, m_stublogue, m_profTransIDs, fp, m_sp };
+    return BCMarker { m_sk, m_bcSPOff, m_stublogue, m_profTransIDs, fp, m_sp };
   }
   BCMarker adjustFixupSK(SrcKey sk) const {
     auto ret = *this;
@@ -130,7 +130,7 @@ struct BCMarker {
 
   void reset() {
     m_sk = SrcKey();
-    m_spOff = FPInvOffset{0};
+    m_bcSPOff = SBInvOffset{0};
     m_stublogue = false;
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
@@ -141,7 +141,7 @@ struct BCMarker {
 
 private:
   SrcKey      m_sk;
-  FPInvOffset m_spOff{0};
+  SBInvOffset m_bcSPOff{0};
   bool        m_stublogue;
   TransIDSet  m_profTransIDs;
   SSATmp*     m_fp{nullptr};

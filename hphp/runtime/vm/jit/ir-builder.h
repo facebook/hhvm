@@ -39,7 +39,7 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
-  FPInvOffset syncedSpLevel{0};
+  SBInvOffset syncedSpLevel{0};
 };
 
 /*

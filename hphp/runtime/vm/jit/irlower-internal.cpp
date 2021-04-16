@@ -136,14 +136,14 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   // fixup to obtain the real savedRip from the native frame. The stack base
   // of stublogues start at the fixup offset of their callers, so the SP offset
   // of the marker represents the additional SP offset that needs to be added.
-  if (marker.stublogue()) return Fixup::indirect(0, marker.spOff());
+  if (marker.stublogue()) return Fixup::indirect(0, marker.bcSPOff());
 
   // The rest of the prologue cannot throw exceptions, but may execute C++ code
   // that may need a fixup. Let it point to the first opcode of the function.
-  if (marker.prologue()) return Fixup::direct(0, marker.spOff());
+  if (marker.prologue()) return Fixup::direct(0, marker.bcSPOff());
 
   auto const bcOff = marker.fixupBcOff();
-  return Fixup::direct(bcOff, marker.spOff());
+  return Fixup::direct(bcOff, marker.bcSPOff());
 }
 
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,

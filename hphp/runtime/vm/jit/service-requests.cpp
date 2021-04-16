@@ -61,7 +61,7 @@ void emit_svcreq(CodeBlock& cb,
                  CGMeta& meta,
                  TCA start,
                  bool persist,
-                 FPInvOffset spOff,
+                 SBInvOffset spOff,
                  ServiceRequest sr,
                  const ArgVec& argv) {
   FTRACE(2, "svcreq @{} {}(spOff={}, ", start, to_name(sr), spOff.offset);
@@ -154,7 +154,7 @@ void emit_svcreq(CodeBlock& cb,
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                      FPInvOffset spOff, TCA jmp, SrcKey target) {
+                      SBInvOffset spOff, TCA jmp, SrcKey target) {
   return emit_ephemeral(
     cb,
     data,
@@ -168,7 +168,7 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 }
 
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                       FPInvOffset spOff, TCA* addr, SrcKey target) {
+                       SBInvOffset spOff, TCA* addr, SrcKey target) {
   // Right now it's possible that addr may not belong to the data segment,
   // as is the case with SSwitchMap (see #10347945) and thus may not be PIC
   // addressable. Passing a TCA generates an RIP relative address which can
@@ -200,7 +200,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 }
 
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                              FPInvOffset spOff, SrcKey sk) {
+                              SBInvOffset spOff, SrcKey sk) {
   return emit_persistent(
     cb,
     data,
@@ -217,7 +217,7 @@ namespace {
 std::atomic<bool> s_fullForStub{false};
 }
 
-TCA emit_interp_no_translate_stub(FPInvOffset spOff, SrcKey sk) {
+TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   FTRACE(2, "interp_no_translate_stub @{} {}\n", showShort(sk), spOff.offset);
 
   // No point on trying to emit if we already failed once.

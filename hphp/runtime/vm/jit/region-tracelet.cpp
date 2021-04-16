@@ -117,7 +117,7 @@ const Unit* curUnit(const Env& env) {
   return irgen::curUnit(env.irgs);
 }
 
-FPInvOffset curSpOffset(const Env& env) {
+SBInvOffset curSpOffset(const Env& env) {
   return env.irgs.irb->fs().bcSPOff();
 }
 
@@ -315,7 +315,7 @@ void visitGuards(IRUnit& unit, F func) {
           auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
 
           func(&inst,
-               Location::Stack{irSPRel.to<FPInvOffset>(irSPOff)},
+               Location::Stack{irSPRel.to<SBInvOffset>(irSPOff)},
                inst.typeParam());
           break;
         }

@@ -171,7 +171,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const marker = inst->marker();
   auto const fixupBcOff = marker.fixupBcOff();
   auto const fixupSpOff =
-    marker.spOff() - extra->numInputs() - kNumActRecCells - extra->numOut;
+    marker.bcSPOff() - extra->numInputs() - kNumActRecCells - extra->numOut;
   v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};
   v << unwind{done, label(env, inst->taken())};
   v = done;

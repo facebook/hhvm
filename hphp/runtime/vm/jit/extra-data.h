@@ -719,7 +719,7 @@ struct DefFPData : IRExtraData {
  * Stack pointer offset.
  */
 struct DefStackData : IRExtraData {
-  explicit DefStackData(FPInvOffset irSPOff, FPInvOffset bcSPOff)
+  explicit DefStackData(SBInvOffset irSPOff, SBInvOffset bcSPOff)
     : irSPOff(irSPOff)
     , bcSPOff(bcSPOff)
   {}
@@ -746,8 +746,8 @@ struct DefStackData : IRExtraData {
     );
   }
 
-  FPInvOffset irSPOff;  // offset from stack base to vmsp()
-  FPInvOffset bcSPOff;  // offset from stack base to top of the stack
+  SBInvOffset irSPOff;  // offset from stack base to vmsp()
+  SBInvOffset bcSPOff;  // offset from stack base to top of the stack
 };
 
 /*
@@ -790,7 +790,7 @@ struct IsAsyncData : IRExtraData {
 };
 
 struct LdBindAddrData : IRExtraData {
-  explicit LdBindAddrData(SrcKey sk, FPInvOffset bcSPOff)
+  explicit LdBindAddrData(SrcKey sk, SBInvOffset bcSPOff)
     : sk(sk)
     , bcSPOff(bcSPOff)
   {}
@@ -809,7 +809,7 @@ struct LdBindAddrData : IRExtraData {
   }
 
   SrcKey sk;
-  FPInvOffset bcSPOff;
+  SBInvOffset bcSPOff;
 };
 
 struct LdSSwitchData : IRExtraData {
@@ -858,7 +858,7 @@ struct LdSSwitchData : IRExtraData {
   int64_t     numCases;
   const Elm*  cases;
   SrcKey      defaultSk;
-  FPInvOffset bcSPOff;
+  SBInvOffset bcSPOff;
 };
 
 struct ProfileSwitchData : IRExtraData {
@@ -895,7 +895,7 @@ struct JmpSwitchData : IRExtraData {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
     sd->cases = cases;
     sd->targets = new (arena) SrcKey[cases];
-    sd->spOffBCFromFP = spOffBCFromFP;
+    sd->spOffBCFromStackBase = spOffBCFromStackBase;
     sd->spOffBCFromIRSP = spOffBCFromIRSP;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
@@ -908,14 +908,14 @@ struct JmpSwitchData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(cases),
-      std::hash<int32_t>()(spOffBCFromFP.offset),
+      std::hash<int32_t>()(spOffBCFromStackBase.offset),
       std::hash<int32_t>()(spOffBCFromIRSP.offset)
     );
   }
 
   bool equals(const JmpSwitchData& o) const {
     if (cases != o.cases) return false;
-    if (spOffBCFromFP != o.spOffBCFromFP) return false;
+    if (spOffBCFromStackBase != o.spOffBCFromStackBase) return false;
     if (spOffBCFromIRSP != o.spOffBCFromIRSP) return false;
     for (int64_t i = 0; i < cases; i++) {
       if (targets[i] != o.targets[i]) return false;
@@ -925,7 +925,7 @@ struct JmpSwitchData : IRExtraData {
 
   int32_t cases;       // number of cases
   SrcKey* targets;     // srckeys for all targets
-  FPInvOffset spOffBCFromFP;
+  SBInvOffset spOffBCFromStackBase;
   IRSPRelOffset spOffBCFromIRSP;
 };
 
@@ -949,7 +949,7 @@ struct LdTVAuxData : IRExtraData {
 
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
-                          FPInvOffset invSPOff,
+                          SBInvOffset invSPOff,
                           IRSPRelOffset irSPOff)
     : target(target)
     , invSPOff(invSPOff)
@@ -958,7 +958,7 @@ struct ReqBindJmpData : IRExtraData {
 
   std::string show() const {
     return folly::sformat(
-      "{}, FPInv {}, IRSP {}",
+      "{}, SBInv {}, IRSP {}",
       target.offset(), invSPOff.offset, irSPOff.offset
     );
   }
@@ -976,7 +976,7 @@ struct ReqBindJmpData : IRExtraData {
   }
 
   SrcKey target;
-  FPInvOffset invSPOff;
+  SBInvOffset invSPOff;
   IRSPRelOffset irSPOff;
 };
 

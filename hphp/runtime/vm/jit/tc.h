@@ -38,7 +38,6 @@
 namespace HPHP { namespace jit {
 
 struct AsmInfo;
-struct FPInvOffset;
 struct IncomingBranch;
 struct IRUnit;
 struct ProfTransRec;
@@ -318,7 +317,7 @@ SrcRec* findSrcRec(SrcKey sk);
  * is true, then false will be returned if there's not enough space
  * for any stubs. Otherwise true will be returned.
  */
-bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength = false);
+bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength = false);
 
 ////////////////////////////////////////////////////////////////////////////////
 

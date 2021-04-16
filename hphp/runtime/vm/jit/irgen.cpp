@@ -202,7 +202,7 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   }
   auto const data = ReqBindJmpData {
     nextSk,
-    spOffBCFromFP(env),
+    spOffBCFromStackBase(env),
     spOffBCFromIRSP(env)
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));

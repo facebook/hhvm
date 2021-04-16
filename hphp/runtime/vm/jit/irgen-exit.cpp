@@ -51,7 +51,7 @@ bool branchesToItself(SrcKey sk) {
  */
 void exitRequest(IRGS& env, SrcKey target) {
   auto const irSP = spOffBCFromIRSP(env);
-  auto const invSP = spOffBCFromFP(env);
+  auto const invSP = spOffBCFromStackBase(env);
   if (env.firstBcInst && target == curSrcKey(env)) {
     gen(
       env,

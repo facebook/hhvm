@@ -449,8 +449,8 @@ RegSet interp_one_cf_regs();
 /*
  * Emit code to `v' which jumps to interpHelper with the proper arguments.
  */
-void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff);
-void emitInterpReqNoTranslate(Vout& v, SrcKey sk, FPInvOffset spOff);
+void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff);
+void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff);
 
 ///////////////////////////////////////////////////////////////////////////////
 

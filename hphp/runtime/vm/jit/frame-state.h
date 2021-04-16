@@ -152,12 +152,12 @@ struct FrameState {
    * - `irSPOff` is an offset from the logical stack base to `spValue`
    */
   SSATmp* spValue{nullptr};
-  FPInvOffset irSPOff{0};
+  SBInvOffset irSPOff{0};
 
   /*
    * Depth of the in-memory eval stack.
    */
-  FPInvOffset bcSPOff{0};
+  SBInvOffset bcSPOff{0};
 
   /*
    * Tracks whether we are currently in the stublogue context. This is set in
@@ -314,8 +314,8 @@ struct FrameStateMgr final {
   SSATmp*     fp()                const { return cur().fpValue; }
   SSATmp*     sp()                const { return cur().spValue; }
   SSATmp*     ctx()               const { return cur().ctx; }
-  FPInvOffset irSPOff()           const { return cur().irSPOff; }
-  FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
+  SBInvOffset irSPOff()           const { return cur().irSPOff; }
+  SBInvOffset bcSPOff()           const { return cur().bcSPOff; }
   bool        stublogue()         const { return cur().stublogue; }
   bool        stackModified()     const { return cur().stackModified; }
 
@@ -329,7 +329,7 @@ struct FrameStateMgr final {
    *
    * @requires: inlineDepth() > 0
    */
-  FPInvOffset callerIRSPOff() const {
+  SBInvOffset callerIRSPOff() const {
     return caller().irSPOff;
   }
 
@@ -340,7 +340,7 @@ struct FrameStateMgr final {
    * frame.
    */
   void resetStackModified()             { cur().stackModified = false; }
-  void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
+  void setBCSPOff(SBInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
   void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
 
@@ -350,7 +350,7 @@ struct FrameStateMgr final {
    */
   const LocalState& local(uint32_t id) const;
   const StackState& stack(IRSPRelOffset off) const;
-  const StackState& stack(FPInvOffset off) const;
+  const StackState& stack(SBInvOffset off) const;
 
   /*
    * Generic accessors for LocationState members.
@@ -411,7 +411,7 @@ private:
   LocalState& localState(uint32_t);
   LocalState& localState(Location l); // @requires: l.tag() == LTag::Local
   StackState& stackState(IRSPRelOffset);
-  StackState& stackState(FPInvOffset);
+  StackState& stackState(SBInvOffset);
   StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
 
   /*
@@ -420,7 +420,7 @@ private:
   bool checkInvariants() const;
   void updateMInstr(const IRInstruction*);
   void updateMBase(const IRInstruction*);
-  void initStack(SSATmp* sp, FPInvOffset irSPOff, FPInvOffset bcSPOff);
+  void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
   void trackInlineCall(const IRInstruction* inst);
   void trackInlineReturn();

@@ -241,14 +241,13 @@ void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
 }
 
 void createSrcRecs(const Func* func) {
-  auto spOff = FPInvOffset { func->numSlotsInFrame() };
   auto const profData = globalProfData();
 
   auto create_one = [&] (Offset off) {
     auto const sk = SrcKey { func, off, ResumeMode::None };
     if (off == 0 ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
-      tc::createSrcRec(sk, spOff);
+      tc::createSrcRec(sk, SBInvOffset{0});
     }
   };
 

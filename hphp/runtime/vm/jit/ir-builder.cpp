@@ -502,7 +502,7 @@ void IRBuilder::exceptionStackBoundary() {
    * trace that the unwinder won't be able to see.
    */
   FTRACE(2, "exceptionStackBoundary()\n");
-  assertx(m_state.bcSPOff() == curMarker().spOff());
+  assertx(m_state.bcSPOff() == curMarker().bcSPOff());
   m_exnStack.syncedSpLevel = m_state.bcSPOff();
   m_state.resetStackModified();
 }
@@ -767,7 +767,7 @@ Location IRBuilder::loc(uint32_t id) const {
   return Location::Local { id };
 }
 Location IRBuilder::stk(IRSPRelOffset off) const {
-  auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
+  auto const fpRel = off.to<SBInvOffset>(m_state.irSPOff());
   return Location::Stack { fpRel };
 }
 

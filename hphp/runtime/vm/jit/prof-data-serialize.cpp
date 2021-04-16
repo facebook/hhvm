@@ -291,7 +291,7 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
   auto const id = read_raw<RegionDesc::BlockId>(ser);
   auto const start = read_srckey(ser);
   auto const length = read_raw<int>(ser);
-  auto const initialSpOffset = read_raw<FPInvOffset>(ser);
+  auto const initialSpOffset = read_raw<SBInvOffset>(ser);
 
   auto const block = std::make_shared<RegionDesc::Block>(id,
                                                          start.func(),

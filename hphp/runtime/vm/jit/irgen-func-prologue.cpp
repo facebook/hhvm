@@ -438,8 +438,8 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
 
   gen(env, DefFuncEntryFP, FuncData { callee },
       fp(env), sp(env), callFlags, ctx);
-  auto const irSPOff = FPInvOffset { 0 };
-  auto const bcSPOff = FPInvOffset { callee->numSlotsInFrame() };
+  auto const irSPOff = SBInvOffset { -callee->numSlotsInFrame() };
+  auto const bcSPOff = SBInvOffset { 0 };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
 
   // We have updated stack and entered the context of the callee.
@@ -537,7 +537,7 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
     ReqBindJmp,
     ReqBindJmpData {
       SrcKey { callee, callee->getEntryForNumArgs(argc), ResumeMode::None },
-      FPInvOffset { callee->numSlotsInFrame() },
+      SBInvOffset { 0 },
       spOffBCFromIRSP(env)
     },
     sp(env),
@@ -561,8 +561,8 @@ void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
   // points to the future ActRec. The stack contains additional `argc' inputs
   // below the ActRec.
   auto const cells = callee->numInOutParamsForArgs(argc) + kNumActRecCells;
-  auto const irSPOff = FPInvOffset { safe_cast<int32_t>(cells) };
-  auto const bcSPOff = FPInvOffset { safe_cast<int32_t>(cells + argc) };
+  auto const irSPOff = SBInvOffset { safe_cast<int32_t>(cells) };
+  auto const bcSPOff = SBInvOffset { safe_cast<int32_t>(cells + argc) };
   gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
 
   // Now that the stack is initialized, update the BC marker and perform

@@ -61,7 +61,7 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   return key;
 }
 
-void defineFrameAndStack(IRGS& env, FPInvOffset bcSPOff) {
+void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
   // Define FP and SP.
   if (resumeMode(env) != ResumeMode::None) {
     // - resumable frames live on the heap, so they do not have a stack position
@@ -76,11 +76,11 @@ void defineFrameAndStack(IRGS& env, FPInvOffset bcSPOff) {
   } else {
     // - frames of regular functions live on the stack
     // - fp(env) and sp(env) are backed by the same rvmfp() register
-    // - stack base is at sp(env)
+    // - stack base is numSlotsInFrame() away from sp(env)
     gen(env, DefFP, DefFPData { IRSPRelOffset { 0 } });
     updateMarker(env);
 
-    auto const irSPOff = FPInvOffset { 0 };
+    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   }
 

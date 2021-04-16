@@ -306,7 +306,7 @@ void interpOne(IRGS& env) {
     auto const out = getInstrInfo(sk.op()).out;
     auto const checkIdx = BCSPRelOffset{
       (out & InstrFlags::StackIns1) ? 1 : 0
-    }.to<FPInvOffset>(env.irb->fs().bcSPOff());
+    }.to<SBInvOffset>(env.irb->fs().bcSPOff());
 
     auto const loc = Location::Stack { checkIdx };
     checkType(env, loc, *checkTypeType, nextBcOff(env));

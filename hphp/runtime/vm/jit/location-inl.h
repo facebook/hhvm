@@ -25,7 +25,7 @@ inline uint32_t Location::localId() const {
   return m_local.locId;
 }
 
-inline FPInvOffset Location::stackIdx() const {
+inline SBInvOffset Location::stackIdx() const {
   assertx(m_tag == LTag::Stack);
   return m_stack.stackIdx;
 }

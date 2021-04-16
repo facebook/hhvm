@@ -127,7 +127,7 @@ struct RegionDesc {
   int64_t           blockProfCount(BlockId bid) const;
   double            blockProfCountScale(BlockId bid) const;
 
-  Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
+  Block*            addBlock(SrcKey sk, int length, SBInvOffset spOffset);
   void              addBlock(BlockPtr newBlock);
   bool              hasBlock(BlockId id) const;
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
@@ -281,7 +281,7 @@ struct PostConditions {
 struct RegionDesc::Block {
 
   Block(BlockId id, const Func* func, ResumeMode resumeMode,
-        Offset start, int length, FPInvOffset initSpOff);
+        Offset start, int length, SBInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -301,12 +301,12 @@ struct RegionDesc::Block {
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
-  FPInvOffset initialSpOffset()   const { return m_initialSpOffset; }
+  SBInvOffset initialSpOffset()   const { return m_initialSpOffset; }
   TransID     profTransID()       const { return m_profTransID; }
 
   void setID(BlockId id)                  { m_id = id; }
   void setProfTransID(TransID ptid)       { m_profTransID = ptid; }
-  void setInitialSpOffset(FPInvOffset sp) { m_initialSpOffset = sp; }
+  void setInitialSpOffset(SBInvOffset sp) { m_initialSpOffset = sp; }
 
   /*
    * Increase the length of the Block by 1.
@@ -361,7 +361,7 @@ private:
   const Offset     m_start;
   Offset           m_last;
   int              m_length;
-  FPInvOffset      m_initialSpOffset;
+  SBInvOffset      m_initialSpOffset;
   TransID          m_profTransID;
   GuardedLocations m_typePreConditions;
   PostConditions   m_postConds;
@@ -379,12 +379,12 @@ private:
 struct RegionContext {
   struct LiveType;
 
-  RegionContext(SrcKey sk, FPInvOffset spOff)
+  RegionContext(SrcKey sk, SBInvOffset spOff)
     : sk(sk), spOffset(spOff) {}
 
   SrcKey sk;
   jit::vector<LiveType> liveTypes;
-  FPInvOffset spOffset;
+  SBInvOffset spOffset;
 };
 
 /*

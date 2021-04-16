@@ -297,7 +297,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
       trackCall();
       // We consider popping an ActRec and args to be synced to memory.
-      assertx(cur().bcSPOff == inst->marker().spOff());
+      assertx(cur().bcSPOff == inst->marker().bcSPOff());
       cur().bcSPOff -= numCells;
     }
     break;
@@ -434,15 +434,15 @@ void FrameStateMgr::update(const IRInstruction* inst) {
      * the unwinder won't see what we expect.
      */
     always_assert_flog(
-      inst->extra<EndCatch>()->offset.to<FPInvOffset>(cur().irSPOff) ==
-        inst->marker().spOff(),
+      inst->extra<EndCatch>()->offset.to<SBInvOffset>(cur().irSPOff) ==
+        inst->marker().bcSPOff(),
       "EndCatch stack didn't seem right:\n"
       "                 spOff: {}\n"
       "       EndCatch offset: {}\n"
       "        marker's spOff: {}\n",
       cur().irSPOff.offset,
       inst->extra<EndCatch>()->offset.offset,
-      inst->marker().spOff().offset
+      inst->marker().bcSPOff().offset
     );
     break;
 
@@ -641,9 +641,9 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   }
   if (base.maybe(AStackAny)) {
     for (auto i = 0; i < cur().stack.size(); ++i) {
-      // The FPInvOffset of the stack slot is just its 1-indexed slot.
-      auto const fpRel = FPInvOffset{i + 1};
-      auto const spRel = fpRel.to<IRSPRelOffset>(irSPOff());
+      // The SBInvOffset of the stack slot is just its 1-indexed slot.
+      auto const sbRel = SBInvOffset{i + 1};
+      auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
       if (base.maybe(AStack::at(spRel))) {
         apply(stk(spRel));
       }
@@ -703,17 +703,17 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
 
     if (base.maybe(AStackAny) && stores.maybe(AStackAny)) {
       for (auto i = 0; i < cur().stack.size(); ++i) {
-        auto const fpRel = FPInvOffset{i + 1};
-        auto const spRel = fpRel.to<IRSPRelOffset>(irSPOff());
+        auto const sbRel = SBInvOffset{i + 1};
+        auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
         auto const astk = AStack::at(spRel);
 
         if (base.maybe(astk) && stores.maybe(astk)) {
           if (!updated) {
-            cur().mbase = stack(fpRel);
+            cur().mbase = stack(sbRel);
             cur().mbase.maybeChanged = true;
             updated = true;
           } else {
-            merge_into(cur().mbase, stack(fpRel));
+            merge_into(cur().mbase, stack(sbRel));
           }
         }
       }
@@ -781,16 +781,16 @@ PostConditions FrameStateMgr::collectPostConds() {
 
   if (sp() != nullptr) {
     for (int32_t i = 0; i < cur().stack.size(); i++) {
-      auto const fpRel = FPInvOffset{i + 1};
-      auto const type = stack(fpRel).type;
-      auto const changed = stack(fpRel).maybeChanged;
+      auto const sbRel = SBInvOffset{i + 1};
+      auto const type = stack(sbRel).type;
+      auto const changed = stack(sbRel).maybeChanged;
 
       if (changed || type < TCell) {
         FTRACE(1, "Stack({}, {}): {} ({})\n",
-               fpRel.to<BCSPRelOffset>(bcSPOff()).offset, fpRel.offset,
+               sbRel.to<BCSPRelOffset>(bcSPOff()).offset, sbRel.offset,
                type, changed ? "changed" : "refined");
         auto& vec = changed ? postConds.changed : postConds.refined;
-        vec.push_back({ Location::Stack{fpRel}, type });
+        vec.push_back({ Location::Stack{sbRel}, type });
       }
     }
   }
@@ -974,8 +974,8 @@ void FrameStateMgr::clearForUnprocessedPred() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FrameStateMgr::initStack(SSATmp* sp, FPInvOffset irSPOff,
-                              FPInvOffset bcSPOff) {
+void FrameStateMgr::initStack(SSATmp* sp, SBInvOffset irSPOff,
+                              SBInvOffset bcSPOff) {
   cur().spValue = sp;
   cur().irSPOff = irSPOff;
   cur().bcSPOff = bcSPOff;
@@ -985,8 +985,8 @@ void FrameStateMgr::initStack(SSATmp* sp, FPInvOffset irSPOff,
 
 void FrameStateMgr::uninitStack() {
   cur().spValue = nullptr;
-  cur().irSPOff = FPInvOffset{0};
-  cur().bcSPOff = FPInvOffset{0};
+  cur().irSPOff = SBInvOffset{0};
+  cur().bcSPOff = SBInvOffset{0};
   cur().stack.clear();
 }
 
@@ -997,7 +997,7 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
   auto const target     = extraBI->func;
   auto const calleeFP   = inst->src(0);
   auto const savedSPOff =
-    extra->spOffset.to<FPInvOffset>(irSPOff()) - kNumActRecCells;
+    extra->spOffset.to<SBInvOffset>(irSPOff()) - kNumActRecCells;
 
   /*
    * Push a new state for the inlined callee; saving the state we'll need to
@@ -1016,19 +1016,20 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
   /*
    * Set up the callee's stack.
    *
-   * To set up irSPOff, we want the FPInvOffset for the new fpValue and
-   * spValue.  We're not changing spValue while we inline, but we're changing
-   * fpValue, so this needs to change.  We know where the new fpValue is
-   * pointing (relative to the spValue, which we aren't changing).  So we just
-   * need to do a change of coordinates, which turns out to be an identity map
-   * here:
+   * We need to calculate the new `irSPOff`, which is an offset of `spValue`
+   * from the new stack base. It consists of two parts:
    *
-   *    fpValue = spValue + extra->spOffset (an IRSPRelOffset)
-   * So,
-   *    spValue = fpValue - extra->spOffset (an FPInvOffset)
+   * - the inverse offset of the new `fpValue` from the new stack base, given by
+   *   `-target->numSlotsInFrame()`
+   * - the inverse offset of `spValue` from the new `fpValue`, which is the same
+   *   numeric value as a regular offset of `fpValue` from `spValue`, given by
+   *   `extra->spOffset`
+   *
+   * The callee's stack starts empty, so `bcSPOff` is zero.
    */
-  auto const irSPOff = FPInvOffset{extra->spOffset.offset};
-  auto const bcSPOff = FPInvOffset{target->numSlotsInFrame()};
+  auto const irSPOff =
+    SBInvOffset{extra->spOffset.offset - target->numSlotsInFrame()};
+  auto const bcSPOff = SBInvOffset{0};
   initStack(caller().spValue, irSPOff, bcSPOff);
   FTRACE(6, "InlineCall setting irSPOff: {}\n", irSPOff.offset);
 
@@ -1113,8 +1114,8 @@ Location FrameStateMgr::loc(uint32_t id) const {
   return Location::Local { id };
 }
 Location FrameStateMgr::stk(IRSPRelOffset off) const {
-  auto const fpRel = off.to<FPInvOffset>(irSPOff());
-  return Location::Stack { fpRel };
+  auto const sbRel = off.to<SBInvOffset>(irSPOff());
+  return Location::Stack { sbRel };
 }
 
 LocalState& FrameStateMgr::localState(uint32_t id) {
@@ -1131,18 +1132,18 @@ LocalState& FrameStateMgr::localState(Location l) {
 }
 
 StackState& FrameStateMgr::stackState(IRSPRelOffset spRel) {
-  auto const fpRel = spRel.to<FPInvOffset>(irSPOff());
-  return stackState(fpRel);
+  auto const sbRel = spRel.to<SBInvOffset>(irSPOff());
+  return stackState(sbRel);
 }
 
-StackState& FrameStateMgr::stackState(FPInvOffset fpRel) {
-  auto const idx = fpRel.offset - 1;
+StackState& FrameStateMgr::stackState(SBInvOffset sbRel) {
+  auto const idx = sbRel.offset - 1;
 
   always_assert_flog(
     idx >= 0,
-    "stack idx went negative: irSPOff: {}, fpRel: {}\n",
+    "stack idx went negative: irSPOff: {}, sbRel: {}\n",
     cur().irSPOff.offset,
-    fpRel.offset
+    sbRel.offset
   );
   if (idx >= cur().stack.size()) {
     cur().stack.resize(idx + 1);
@@ -1169,7 +1170,7 @@ const LocalState& FrameStateMgr::local(uint32_t id) const {
 const StackState& FrameStateMgr::stack(IRSPRelOffset offset) const {
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
-const StackState& FrameStateMgr::stack(FPInvOffset offset) const {
+const StackState& FrameStateMgr::stack(SBInvOffset offset) const {
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
 

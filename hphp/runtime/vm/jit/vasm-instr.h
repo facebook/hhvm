@@ -387,7 +387,7 @@ struct Vunit;
 
 struct bindjmp {
   explicit bindjmp(SrcKey target,
-                   FPInvOffset spOff,
+                   SBInvOffset spOff,
                    RegSet args)
     : target{target}
     , spOff(spOff)
@@ -395,7 +395,7 @@ struct bindjmp {
   {}
 
   SrcKey target;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
   RegSet args;
 };
 
@@ -403,7 +403,7 @@ struct bindjcc {
   explicit bindjcc(ConditionCode cc,
                    VregSF sf,
                    SrcKey target,
-                   FPInvOffset spOff,
+                   SBInvOffset spOff,
                    RegSet args)
     : cc{cc}
     , sf{sf}
@@ -415,12 +415,12 @@ struct bindjcc {
   ConditionCode cc;
   VregSF sf;
   SrcKey target;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
   RegSet args;
 };
 
 struct bindaddr {
-  explicit bindaddr(VdataPtr<TCA> addr, SrcKey target, FPInvOffset spOff)
+  explicit bindaddr(VdataPtr<TCA> addr, SrcKey target, SBInvOffset spOff)
     : addr(addr)
     , target(target)
     , spOff(spOff)
@@ -428,12 +428,12 @@ struct bindaddr {
 
   VdataPtr<TCA> addr;
   SrcKey target;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
 };
 
 struct fallback {
   explicit fallback(SrcKey target,
-                    FPInvOffset spOff,
+                    SBInvOffset spOff,
                     RegSet args)
     : target{target}
     , spOff(spOff)
@@ -441,7 +441,7 @@ struct fallback {
   {}
 
   SrcKey target;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
   RegSet args;
 };
 
@@ -449,7 +449,7 @@ struct fallbackcc {
   explicit fallbackcc(ConditionCode cc,
                       VregSF sf,
                       SrcKey target,
-                      FPInvOffset spOff,
+                      SBInvOffset spOff,
                       RegSet args)
     : cc{cc}
     , sf{sf}
@@ -461,13 +461,13 @@ struct fallbackcc {
   ConditionCode cc;
   VregSF sf;
   SrcKey target;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
   RegSet args;
 };
 
 struct retransopt {
   explicit retransopt(SrcKey sk,
-                      FPInvOffset spOff,
+                      SBInvOffset spOff,
                       RegSet args)
     : sk(sk)
     , spOff(spOff)
@@ -475,7 +475,7 @@ struct retransopt {
   {}
 
   SrcKey sk;
-  FPInvOffset spOff;
+  SBInvOffset spOff;
   RegSet args;
 };
 

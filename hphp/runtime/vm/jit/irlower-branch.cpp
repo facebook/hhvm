@@ -312,7 +312,7 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
 
   auto const table = v.allocData<TCA>(extra->cases);
   for (int i = 0; i < extra->cases; i++) {
-    v << bindaddr{&table[i], extra->targets[i], extra->spOffBCFromFP};
+    v << bindaddr{&table[i], extra->targets[i], extra->spOffBCFromStackBase};
   }
 
   auto const t = v.makeReg();
@@ -434,7 +434,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   v << fallback{
     destSK,
-    inst->marker().spOff(),
+    inst->marker().bcSPOff(),
     cross_trace_args(inst->marker())
   };
 }
@@ -445,7 +445,7 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   v << retransopt{
     inst->marker().sk(),
-    inst->marker().spOff(),
+    inst->marker().bcSPOff(),
     cross_trace_args(inst->marker())
   };
 }

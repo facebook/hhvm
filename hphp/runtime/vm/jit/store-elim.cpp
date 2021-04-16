@@ -1434,19 +1434,24 @@ void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
   if (!inst.mayRaiseError() && !inst.is(BeginCatch)) return;
   auto const curFp = inst.marker().fp();
   assertx(curFp->inst()->is(BeginInlining));
-  auto const curOff = curFp->inst()->extra<BeginInlining>()->spOffset.offset;
-  auto const newOff = [&] {
+
+  auto const curBIData = curFp->inst()->extra<BeginInlining>();
+  auto const curStackBaseOffset =
+    curBIData->spOffset - curBIData->func->numSlotsInFrame();
+  auto const newStackBaseOffset = [&] {
     if (fp->inst()->is(BeginInlining)) {
-      return fp->inst()->extra<BeginInlining>()->spOffset.offset;
+      auto const newBIData = fp->inst()->extra<BeginInlining>();
+      return newBIData->spOffset - newBIData->func->numSlotsInFrame();
     }
+
     assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
     auto const defSP = curFp->inst()->src(0)->inst();
-    return defSP->extra<DefStackData>()->irSPOff.offset;
+    auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
+    return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
   }();
 
-  // Compute the difference in spoffset between the current and the previous
-  // marker fp.
-  auto const spAdj = newOff - curOff;
+  // Compute the difference between the current and the previous stack base.
+  auto const stackBaseDelta = newStackBaseOffset - curStackBaseOffset;
 
   // Find the source key for the last inlined call from a published frame.
   auto const callSK = [&] {
@@ -1457,9 +1462,10 @@ void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
     return next->inst()->marker().sk();
   }();
 
-  inst.marker() = inst.marker().adjustFP(fp)
-                               .adjustSPOff(inst.marker().spOff() + spAdj)
-                               .adjustFixupSK(callSK);
+  inst.marker() = inst.marker()
+    .adjustFP(fp)
+    .adjustSPOff(inst.marker().bcSPOff() + stackBaseDelta)
+    .adjustFixupSK(callSK);
 }
 
 void insert_eager_sync(Global& genv, IRInstruction& endCatch) {

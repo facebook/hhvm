@@ -779,13 +779,10 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     const int32_t budgetBCInstrs = ctx.kind == TransKind::Live
       ? RuntimeOption::EvalJitMaxLiveRegionInstrs
       : RuntimeOption::EvalJitMaxRegionInstrs;
+    // TODO: ctx contains caller info, make inlining cost calc caller agnostic
     unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
-    // We can pretend the caller's stack is empty, but we at least need to
-    // account for the locals, iters, and slots, etc.
-    // TODO: make inlining cost calculation caller agnostic
-    auto const bcSPOff = FPInvOffset{ctx.initSrcKey.func()->numSlotsInFrame()};
-    irgen::defineFrameAndStack(irgs, bcSPOff);
+    irgen::defineFrameAndStack(irgs, SBInvOffset{0});
     irgs.inlineState.conjure = true;
     if (hasTransID(entryBID)) {
       irgs.profTransIDs.clear();

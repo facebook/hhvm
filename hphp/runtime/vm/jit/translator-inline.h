@@ -40,12 +40,9 @@ inline bool liveHasThis() { return liveClass() && liveFrame()->hasThis(); }
 inline SrcKey liveSK() {
   return { liveFunc(), vmpc(), liveResumeMode() };
 }
-inline jit::FPInvOffset liveSpOff() {
-  TypedValue* fp = reinterpret_cast<TypedValue*>(vmfp());
-  if (isResumed(liveFrame())) {
-    fp = (TypedValue*)Stack::resumableStackBase((ActRec*)fp);
-  }
-  return jit::FPInvOffset{safe_cast<int32_t>(fp - vmsp())};
+inline jit::SBInvOffset liveSpOff() {
+  auto const stackBase = Stack::anyFrameStackBase(liveFrame());
+  return jit::SBInvOffset{safe_cast<int32_t>(stackBase - vmsp())};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

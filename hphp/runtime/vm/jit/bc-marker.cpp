@@ -33,7 +33,7 @@ std::string BCMarker::show() const {
     "--- bc {}, fp {}, spOff {} {}",
     showShort(m_sk),
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
-    m_spOff.offset,
+    m_bcSPOff.offset,
     m_profTransIDs.empty()
       ? ""
       : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))

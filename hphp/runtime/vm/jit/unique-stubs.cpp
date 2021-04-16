@@ -377,7 +377,7 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
         v.makeVcallArgs({{flags, func, numArgs, savedRip}}),
         v.makeTuple({numNewArgs}),
         {done, ctch},
-        Fixup::indirect(prs.qwordsPushed(), FPInvOffset{0}),
+        Fixup::indirect(prs.qwordsPushed(), SBInvOffset{0}),
         DestType::SSA
       };
 
@@ -916,7 +916,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       if (!fullFrame) {
         // The stub frame's saved RIP is at %rsp[8] before we saved the
         // caller-saved registers.
-        v << syncpoint{Fixup::indirect(prs.qwordsPushed(), FPInvOffset{0})};
+        v << syncpoint{Fixup::indirect(prs.qwordsPushed(), SBInvOffset{0})};
       }
     };
 
@@ -1023,7 +1023,7 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
   return vwrap(cb, data, [] (Vout& v) {
     storeVmfp(v);
 
-    // Combine ServiceRequest and FPInvOffset into one pushable 64-bit reg.
+    // Combine ServiceRequest and SBInvOffset into one pushable 64-bit reg.
     static_assert(folly::kIsLittleEndian,
         "Packing two 32-bit ints into one 64-bit for ReqInfo.");
     auto const spOffShifted = v.makeReg();
@@ -1416,17 +1416,19 @@ RegSet interp_one_cf_regs() {
   return vm_regs_with_sp() | rarg(2);
 }
 
-void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
+void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
   if (sk.resumeMode() == ResumeMode::None) {
-    v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
+    auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
+    v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << copy{v.cns(sk.pc()), rarg(0)};
   v << jmpi{tc::ustubs().interpHelper, arg_regs(1)};
 }
 
-void emitInterpReqNoTranslate(Vout& v, SrcKey sk, FPInvOffset spOff) {
+void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
   if (sk.resumeMode() == ResumeMode::None) {
-    v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
+    auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
+    v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
   v << jmpi{tc::ustubs().interpHelperNoTranslate, arg_regs(1)};

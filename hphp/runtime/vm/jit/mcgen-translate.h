@@ -25,7 +25,6 @@
 
 namespace HPHP { namespace jit {
 
-struct FPInvOffset;
 struct ProfTransRec;
 struct TransArgs;
 

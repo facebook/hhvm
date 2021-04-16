@@ -658,7 +658,7 @@ unsigned localRangeImmIdx(Op op) {
 /*
  * Get location metadata for the inputs of `ni'.
  */
-InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
+InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
   InputInfoVec inputs;
   if (isAlwaysNop(ni)) return inputs;
 
@@ -692,13 +692,13 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   if (flags & StackI) {
     inputs.emplace_back(Location::Stack {
       BCSPRelOffset{safe_cast<int32_t>(ni.imm[0].u_IVA)}.
-        to<FPInvOffset>(bcSPOff)
+        to<SBInvOffset>(bcSPOff)
     });
   }
   if (flags & StackI2) {
     inputs.emplace_back(Location::Stack {
       BCSPRelOffset{safe_cast<int32_t>(ni.imm[1].u_IVA)}.
-        to<FPInvOffset>(bcSPOff)
+        to<SBInvOffset>(bcSPOff)
     });
   }
 
@@ -790,7 +790,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       case MEC:
       case MPC:
         inputs.emplace_back(Location::Stack {
-          BCSPRelOffset{int32_t(mk.iva)}.to<FPInvOffset>(bcSPOff)
+          BCSPRelOffset{int32_t(mk.iva)}.to<SBInvOffset>(bcSPOff)
         });
         break;
       case MW:

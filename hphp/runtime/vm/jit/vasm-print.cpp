@@ -84,7 +84,7 @@ struct FormatVisitor {
     else str << folly::format("0x{:08x}", s.q());
   }
 
-  void imm(FPInvOffset off) { str << sep() << off.offset; }
+  void imm(SBInvOffset off) { str << sep() << off.offset; }
   void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
   void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
   void imm(TCA addr) {

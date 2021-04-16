@@ -45,10 +45,7 @@ std::string show(const IRGS& irgs) {
     out << folly::format("+{:-^102}+\n", str);
   };
 
-  const int32_t frameCells = resumeMode(irgs) != ResumeMode::None
-    ? 0
-    : curFunc(irgs)->numSlotsInFrame();
-  auto const stackDepth = irgs.irb->fs().bcSPOff().offset - frameCells;
+  auto const stackDepth = irgs.irb->fs().bcSPOff().offset;
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
@@ -78,7 +75,7 @@ std::string show(const IRGS& irgs) {
     }
 
     auto const irSPRel = BCSPRelOffset{i}
-      .to<FPInvOffset>(irgs.irb->fs().bcSPOff());
+      .to<SBInvOffset>(irgs.irb->fs().bcSPOff());
     auto const predicted = predictedType(irgs, Location::Stack { irSPRel });
 
     if (predicted < stkTy) {

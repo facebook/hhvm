@@ -182,7 +182,7 @@ TranslationResult getTranslation(SrcKey sk) {
  */
 TranslationResult bindJmp(TCA toSmash,
                           SrcKey destSk,
-                          FPInvOffset spOff,
+                          SBInvOffset spOff,
                           ServiceRequest req,
                           TCA oldStub,
                           bool& smashed) {
@@ -283,10 +283,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
   // later if we are going to use the resume helper.
   tl_regState = VMRegState::CLEAN;
-  vmsp() = (isResumed(vmfp())
-    ? Stack::resumableStackBase(vmfp())
-    : reinterpret_cast<TypedValue*>(vmfp())
-  ) - info.spOff.offset;
+  vmsp() = Stack::anyFrameStackBase(vmfp()) - info.spOff.offset;
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     Trace::ringbufferEntry(

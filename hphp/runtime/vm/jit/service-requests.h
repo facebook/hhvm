@@ -177,7 +177,7 @@ template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
                     CGMeta& meta,
-                    FPInvOffset spOff,
+                    SBInvOffset spOff,
                     ServiceRequest sr,
                     Args... args);
 template<typename... Args>
@@ -185,7 +185,7 @@ TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    CGMeta& meta,
                    TCA start,
-                   FPInvOffset spOff,
+                   SBInvOffset spOff,
                    ServiceRequest sr,
                    Args... args);
 /*
@@ -195,14 +195,14 @@ TCA emit_ephemeral(CodeBlock& cb,
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
-                    FPInvOffset spOff,
+                    SBInvOffset spOff,
                     ServiceRequest sr,
                     Args... args);
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    TCA start,
-                   FPInvOffset spOff,
+                   SBInvOffset spOff,
                    ServiceRequest sr,
                    Args... args);
 
@@ -210,11 +210,11 @@ TCA emit_ephemeral(CodeBlock& cb,
  * Helpers for emitting specific service requests.
  */
 TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                      FPInvOffset spOff, TCA jmp, SrcKey target);
+                      SBInvOffset spOff, TCA jmp, SrcKey target);
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                       FPInvOffset spOff, TCA* addr, SrcKey target);
+                       SBInvOffset spOff, TCA* addr, SrcKey target);
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                              FPInvOffset spOff, SrcKey sk);
+                              SBInvOffset spOff, SrcKey sk);
 
 /*
  * Emit a stub which syncs vmsp and vmpc and then calls
@@ -223,7 +223,7 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
  * returned if successful, nullptr otherwise (the creation can fail if
  * there's no space in the TC for it).
  */
-TCA emit_interp_no_translate_stub(FPInvOffset spOff, SrcKey sk);
+TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -300,7 +300,7 @@ struct ReqInfo {
   /*
    * Depth of the evaluation stack.
    */
-  FPInvOffset spOff;
+  SBInvOffset spOff;
 
   /*
    * Address of the service request's code stub for non-persistent requests.

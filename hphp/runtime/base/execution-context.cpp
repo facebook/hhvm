@@ -1127,7 +1127,8 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  tvDecRefGen(invokeFunc(ctor, params, o, nullptr, true, false, true));
+  tvDecRefGen(invokeFunc(ctor, params, o, nullptr, RuntimeCoeffects::fixme(),
+                         true, false, true, Array()));
   return o;
 }
 
@@ -1276,10 +1277,11 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Func::lookup(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, false
+        nullptr, nullptr, RuntimeCoeffects::fixme(), false
       );
     } else {
-      invokeFunc(it, init_null_variant, nullptr, nullptr, false);
+      invokeFunc(it, init_null_variant, nullptr, nullptr,
+                 RuntimeCoeffects::fixme(), false);
     }
   }
   return make_tv<KindOfInt64>(1);
@@ -1511,6 +1513,7 @@ ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t numArgsInclUnpack,
+                                            RuntimeCoeffects providedCoeffects,
                                             bool hasGenerics, bool dynamic,
                                             bool allowDynCallNoPointer) {
   assertx(f);
@@ -1528,7 +1531,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   calleeArgumentArityChecks(f, numArgsInclUnpack);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
   void* ctx = thiz ? (void*)thiz : (void*)cls;
-  calleeCoeffectChecks(f, RuntimeCoeffects::none(), numArgsInclUnpack, ctx);
+  calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
   calleeImplicitContextChecks(f);
   initFuncInputs(f, numArgsInclUnpack);
 
@@ -1592,6 +1595,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
                                         Class* cls /* = NULL */,
+                                        RuntimeCoeffects providedCoeffects
+                                              /* = RuntimeCoeffects::fixme() */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */,
                                         bool allowDynCallNoPointer
@@ -1635,8 +1640,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
-  return invokeFuncImpl(f, thiz, cls, numArgs, hasGenerics, dynamic,
-                        allowDynCallNoPointer);
+  return invokeFuncImpl(f, thiz, cls, numArgs, providedCoeffects,
+                        hasGenerics, dynamic, allowDynCallNoPointer);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(
@@ -1644,6 +1649,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   ExecutionContext::ThisOrClass thisOrCls,
   uint32_t numArgs,
   const TypedValue* argv,
+  RuntimeCoeffects providedCoeffects,
   bool dynamic /* = true */,
   bool allowDynCallNoPointer
   /* = false */
@@ -1683,6 +1689,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
+                        providedCoeffects,
                         false /* hasGenerics */, dynamic, false);
 }
 
@@ -1874,7 +1881,8 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
 
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokeFuncFew(func, nullptr, 0, nullptr, true, true)
+    g_context->invokeFuncFew(func, nullptr, 0, nullptr,
+                             RuntimeCoeffects::fixme(), true, true)
   );
   auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);
@@ -2077,7 +2085,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
-    auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls, false);
+    auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls,
+                                   RuntimeCoeffects::fixme(), false);
     assertx(isArrayLikeType(type(arr_tv)));
     assertx(val(arr_tv).parr->size() == f->numParams() + 1);
     Array arr = Array::attach(val(arr_tv).parr);

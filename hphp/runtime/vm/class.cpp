@@ -876,7 +876,8 @@ void Class::initProps() const {
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
-        *it, init_null_variant, nullptr, const_cast<Class*>(this), false
+        *it, init_null_variant, nullptr, const_cast<Class*>(this),
+        RuntimeCoeffects::fixme(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -977,14 +978,14 @@ void Class::initSProps() const {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        false
+        RuntimeCoeffects::fixme(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
     for (unsigned i = 0, n = m_linitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_linitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        false
+        RuntimeCoeffects::fixme(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -1693,6 +1694,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
                const_cast<Class*>(this),
                1,
                args,
+               RuntimeCoeffects::fixme(),
                false,
                false
              );

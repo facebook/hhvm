@@ -544,7 +544,8 @@ folly::Optional<Type> const_fold(ISS& env,
   return eval_cell(
     [&] {
       auto const retVal = g_context->invokeFuncFew(
-        func, cls, args.size(), args.data(), false, false);
+        func, cls, args.size(), args.data(), RuntimeCoeffects::fixme(),
+        false, false);
       assertx(tvIsPlausible(retVal));
       return retVal;
     }

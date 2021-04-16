@@ -45,7 +45,8 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
                  ERR_INVALID_DATA);
   }
   return Variant::attach(
-      g_context->invokeFuncFew(method, &adapter, 1, value.asTypedValue()));
+      g_context->invokeFuncFew(method, &adapter, 1, value.asTypedValue(),
+                               RuntimeCoeffects::fixme()));
 }
 
 } // namespace

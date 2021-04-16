@@ -301,7 +301,8 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls, ctx.dynamic);
+  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
+                        RuntimeCoeffects::fixme(), ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -334,7 +335,8 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls, ctx.dynamic);
+  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
+                        RuntimeCoeffects::fixme(), ctx.dynamic);
 }
 
 static Variant call_intercept_handler(
@@ -381,7 +383,7 @@ static Variant call_intercept_handler(
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
-                          callCtx.dynamic)
+                          RuntimeCoeffects::fixme(), callCtx.dynamic)
   );
 
   auto& arr = ret.asCArrRef();
@@ -436,8 +438,10 @@ static Variant call_intercept_handler_callback(
     return Array(val(generics).parr);
   }();
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls, callCtx.dynamic,
-                          false, false, std::move(reifiedGenerics))
+    g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
+                          RuntimeCoeffects::fixme(),
+                          callCtx.dynamic, false, false,
+                          std::move(reifiedGenerics))
   );
   return ret;
 }

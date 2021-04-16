@@ -208,22 +208,26 @@ inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
 
 inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
-  const Variant& args_
+  const Variant& args_,
+  RuntimeCoeffects providedCoeffects
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, ctx.dynamic);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls,
+                    providedCoeffects, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
-  ExecutionContext::ThisOrClass thisOrCls
+  ExecutionContext::ThisOrClass thisOrCls,
+  RuntimeCoeffects providedCoeffects
 ) {
-  return invokeFuncFew(f, thisOrCls, 0, nullptr);
+  return invokeFuncFew(f, thisOrCls, 0, nullptr, providedCoeffects);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const CallCtx& ctx,
   uint32_t numArgs,
-  const TypedValue* argv
+  const TypedValue* argv,
+  RuntimeCoeffects providedCoeffects
 ) {
   auto const thisOrCls = [&] () -> ExecutionContext::ThisOrClass {
     if (ctx.this_) return ctx.this_;
@@ -236,6 +240,7 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     thisOrCls,
     numArgs,
     argv,
+    providedCoeffects,
     ctx.dynamic
   );
 }
@@ -244,14 +249,15 @@ inline TypedValue ExecutionContext::invokeMethod(
   ObjectData* obj,
   const Func* meth,
   InvokeArgs args,
-  bool dynamic
+  RuntimeCoeffects providedCoeffects
 ) {
   return invokeFuncFew(
     meth,
     obj,
     args.size(),
     args.start(),
-    dynamic,
+    providedCoeffects,
+    false,
     false
   );
 }
@@ -260,10 +266,10 @@ inline Variant ExecutionContext::invokeMethodV(
   ObjectData* obj,
   const Func* meth,
   InvokeArgs args,
-  bool dynamic
+  RuntimeCoeffects providedCoeffects
 ) {
   // Construct variant without triggering incref.
-  return Variant::attach(invokeMethod(obj, meth, args, dynamic));
+  return Variant::attach(invokeMethod(obj, meth, args, providedCoeffects));
 }
 
 inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {

@@ -464,40 +464,46 @@ public:
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
+                        RuntimeCoeffects providedCoeffects =
+                          RuntimeCoeffects::fixme(),
                         bool dynamic = true,
                         bool checkRefAnnot = false,
                         bool allowDynCallNoPointer = false,
                         Array&& reifiedGenerics = Array());
 
   TypedValue invokeFunc(const CallCtx& ctx,
-                        const Variant& args_);
+                        const Variant& args_,
+                        RuntimeCoeffects providedCoeffects);
 
   TypedValue invokeFuncFew(const Func* f,
                            ThisOrClass thisOrCls,
                            uint32_t numArgs,
                            const TypedValue* argv,
+                           RuntimeCoeffects providedCoeffects,
                            bool dynamic = true,
                            bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
-                           ThisOrClass thisOrCls);
+                           ThisOrClass thisOrCls,
+                           RuntimeCoeffects providedCoeffects);
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
                            uint32_t numArgs,
-                           const TypedValue* argv);
+                           const TypedValue* argv,
+                           RuntimeCoeffects providedCoeffects);
 
   TypedValue invokeMethod(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs(),
-    bool dynamic = true
+    InvokeArgs args,
+    RuntimeCoeffects providedCoeffects
   );
 
   Variant invokeMethodV(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs(),
-    bool dynamic = true
+    InvokeArgs args,
+    RuntimeCoeffects providedCoeffects
   );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
@@ -511,7 +517,9 @@ public:
 
 private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
-                            uint32_t numArgsInclUnpack, bool hasGenerics,
+                            uint32_t numArgsInclUnpack,
+                            RuntimeCoeffects providedCoeffects,
+                            bool hasGenerics,
                             bool dynamic, bool allowDynCallNoPointer);
 
   struct ExcLoggerHook final : LoggerHook {

@@ -44,6 +44,12 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::fromValue(std::numeric_limits<storage_t>::max());
   }
 
+  // This function is a placeholder to indicate that the correct coeffect needs
+  // to be indentified and passed in its place
+  static RuntimeCoeffects fixme() {
+    return RuntimeCoeffects::none();
+  }
+
   uint16_t value() const { return m_data; }
 
   const std::string toString() const;

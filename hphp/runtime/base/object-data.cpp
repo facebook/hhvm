@@ -719,7 +719,7 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
     return Variant(Variant::NullInit());
   }
   return Variant::attach(
-    g_context->invokeFunc(ctx, params)
+    g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
   );
 }
 
@@ -762,7 +762,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
   }
 
   return Variant::attach(
-    g_context->invokeFuncFew(ctx, count, args)
+    g_context->invokeFuncFew(ctx, count, args, RuntimeCoeffects::fixme())
   );
 }
 
@@ -819,7 +819,8 @@ ObjectData* ObjectData::clone() {
     assertx(method);
     clone->unlockObject();
     SCOPE_EXIT { clone->lockObject(); };
-    g_context->invokeMethodV(clone.get(), method, InvokeArgs{}, false);
+    g_context->invokeMethodV(clone.get(), method, InvokeArgs{},
+                             RuntimeCoeffects::fixme());
   }
   return clone.detach();
 }
@@ -1020,7 +1021,8 @@ void ObjectData::setReifiedGenerics(Class* cls, ArrayData* reifiedTypes) {
   auto const arg = make_array_like_tv(reifiedTypes);
   auto const meth = cls->lookupMethod(s_86reifiedinit.get());
   assertx(meth != nullptr);
-  g_context->invokeMethod(this, meth, InvokeArgs(&arg, 1));
+  g_context->invokeMethod(this, meth, InvokeArgs(&arg, 1),
+                          RuntimeCoeffects::fixme());
 }
 
 // called from jit code
@@ -1604,7 +1606,8 @@ void ObjectData::raiseImplicitInvokeToString() const {
 Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name) {
   auto const meth = obj->methodNamed(name.get());
   return meth
-    ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, false)
+    ? g_context->invokeMethodV(obj, meth, InvokeArgs{},
+                               RuntimeCoeffects::fixme())
     : uninit_null();
 }
 
@@ -1646,7 +1649,8 @@ String ObjectData::invokeToString() {
   if (RuntimeOption::EvalNoticeOnImplicitInvokeToString) {
     raiseImplicitInvokeToString();
   }
-  auto const tv = g_context->invokeMethod(this, method, InvokeArgs{}, false);
+  auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
+                                          RuntimeCoeffects::fixme());
   if (!isStringType(tv.m_type) &&
       !isClassType(tv.m_type) &&
       !isLazyClassType(tv.m_type)) {

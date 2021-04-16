@@ -454,7 +454,7 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
   ctx.dynamic = true;
 
   return Variant::attach(
-    g_context->invokeFunc(ctx, params)
+    g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
   );
 }
 

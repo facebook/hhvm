@@ -1,0 +1,2 @@
+-vHack.Lang.DisableXHPElementMangling=false
+-vEval.HackCompilerUseCompilerPool=false

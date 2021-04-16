@@ -1277,7 +1277,7 @@ ParseFactsResult extract_facts(
     auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
       try {
         hackc_extract_as_json_ptr facts{
-          hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, false)
+          hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, true)
         };
         if (facts) {
           std::string facts_str{facts.get()};

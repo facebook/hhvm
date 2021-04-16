@@ -193,14 +193,10 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::PersistentClass:
     case APCKind::LazyClass:
     case APCKind::PersistentClsMeth:
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
     case APCKind::StaticString:
     case APCKind::UncountedString:
-    case APCKind::StaticVec:
-    case APCKind::UncountedVec:
-    case APCKind::StaticDict:
-    case APCKind::UncountedDict:
-    case APCKind::StaticKeyset:
-    case APCKind::UncountedKeyset:
       not_reached();
 
     case APCKind::FuncEntity:
@@ -279,10 +275,8 @@ void APCHandle::deleteShared() {
       return;
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::StaticArray:
     case APCKind::StaticString:
-    case APCKind::StaticVec:
-    case APCKind::StaticDict:
-    case APCKind::StaticKeyset:
     case APCKind::PersistentFunc:
     case APCKind::PersistentClass:
     case APCKind::LazyClass:
@@ -334,9 +328,7 @@ void APCHandle::deleteShared() {
       APCRClsMeth::Delete(this);
       return;
 
-    case APCKind::UncountedVec:
-    case APCKind::UncountedDict:
-    case APCKind::UncountedKeyset:
+    case APCKind::UncountedArray:
     case APCKind::UncountedString:
       assertx(false);
       return;
@@ -378,17 +370,11 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedString:
       assertx(m_type == KindOfPersistentString);
       return true;
-    case APCKind::StaticVec:
-    case APCKind::UncountedVec:
-      assertx(m_type == KindOfPersistentVec);
-      return true;
-    case APCKind::StaticDict:
-    case APCKind::UncountedDict:
-      assertx(m_type == KindOfPersistentDict);
-      return true;
-    case APCKind::StaticKeyset:
-    case APCKind::UncountedKeyset:
-      assertx(m_type == KindOfPersistentKeyset);
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
+      assertx(m_type == KindOfPersistentVec ||
+              m_type == KindOfPersistentDict ||
+              m_type == KindOfPersistentKeyset);
       return true;
     case APCKind::FuncEntity:
     case APCKind::ClassEntity:

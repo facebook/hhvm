@@ -294,8 +294,7 @@ Object APCObject::createObject() const {
 
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
-    assertx(dynProps->kind() == APCKind::StaticDict ||
-            dynProps->kind() == APCKind::UncountedDict ||
+    assertx(dynProps->type() == KindOfPersistentDict ||
             dynProps->kind() == APCKind::SharedDict);
     obj->setDynProps(dynProps->toLocal().asCArrRef());
   }

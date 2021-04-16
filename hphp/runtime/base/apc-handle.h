@@ -41,14 +41,10 @@ enum class APCKind: uint8_t {
   PersistentClass,
   LazyClass,
   PersistentClsMeth,
+  UncountedArray,
   UncountedString,
-  UncountedVec,
-  UncountedDict,
-  UncountedKeyset,
+  StaticArray,
   StaticString,
-  StaticVec,
-  StaticDict,
-  StaticKeyset,
   SharedString,
   SharedVec, SharedLegacyVec,
   SharedDict, SharedLegacyDict,
@@ -107,14 +103,10 @@ enum class APCKind: uint8_t {
  *  Bool              APCTypedValue   KindOfBool
  *  Int               APCTypedValue   KindOfInt64
  *  Double            APCTypedValue   KindOfDouble
+ *  StaticArray       APCTypedValue   (a persistent array type)
  *  StaticString      APCTypedValue   KindOfPersistentString
+ *  UncountedArray    APCTypedValue   (a persistent array type)
  *  UncountedString   APCTypedValue   KindOfPersistentString
- *  StaticVec         APCTypedValue   KindOfPersistentVec
- *  UncountedVec      APCTypedValue   KindOfPersistentVec
- *  StaticDict        APCTypedValue   KindOfPersistentDict
- *  UncountedDict     APCTypedValue   KindOfPersistentDict
- *  StaticKeyset      APCTypedValue   KindOfPersistentKeyset
- *  UncountedKeyset   APCTypedValue   KindOfPersistentKeyset
  *  SharedString      APCString       kInvalidDataType
  *  SharedVec         APCArray        kInvalidDataType
  *  SharedLegacyVec   APCArray        kInvalidDataType
@@ -244,21 +236,11 @@ struct APCHandle {
 
   /*
    * If true, this APCHandle is an APCTypedValue holding an "uncounted"
-   * string or array; (not static or refcounted).
+   * array-like or string (not a static or refcounted value).
    */
   bool isUncounted() const {
-    static_assert(APCKind::UncountedString <  APCKind::UncountedVec &&
-                  APCKind::UncountedVec < APCKind::UncountedDict &&
-                  APCKind::UncountedDict < APCKind::UncountedKeyset &&
-                  static_cast<int>(APCKind::UncountedKeyset) -
-                  static_cast<int>(APCKind::UncountedString) == 3,
-                  "The Uncounted APCKinds must be consecutive, and "
-                  "in the following order so that gcc can optimize "
-                  "this to a range check.");
-    return m_kind == APCKind::UncountedString ||
-           m_kind == APCKind::UncountedVec ||
-           m_kind == APCKind::UncountedDict ||
-           m_kind == APCKind::UncountedKeyset;
+    return m_kind == APCKind::UncountedArray ||
+           m_kind == APCKind::UncountedString;
   }
 
   bool isTypedValue() const {

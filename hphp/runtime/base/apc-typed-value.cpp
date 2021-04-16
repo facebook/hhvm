@@ -20,27 +20,13 @@
 
 namespace HPHP {
 
-namespace {
-APCKind getAPCKind(DataType dt, bool isStatic) {
-  switch (dt) {
-    case KindOfPersistentVec:
-      return isStatic ? APCKind::StaticVec : APCKind::UncountedVec;
-    case KindOfPersistentDict:
-      return isStatic ? APCKind::StaticDict : APCKind::UncountedDict;
-    case KindOfPersistentKeyset:
-      return isStatic ? APCKind::StaticKeyset : APCKind::UncountedKeyset;
-    default:
-      always_assert(false);
-  }
-}
-}
-
 APCTypedValue* APCTypedValue::ForArray(ArrayData* ad) {
   assertx(ad->isVanilla());
   assertx(!ad->isRefCounted());
 
   auto const dt = ad->toPersistentDataType();
-  auto const kind = getAPCKind(dt, ad->isStatic());
+  auto const kind = ad->isStatic() ? APCKind::StaticArray
+                                   : APCKind::UncountedArray;
 
   // Check if the "co-allocate array and APCTypedValue" optimization hit.
   // It hit if we a) made a new uncounted array and b) its flag is set.
@@ -96,17 +82,15 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::LazyClass: assertx(m_data.str->isStatic()); break;
 
-    case APCKind::StaticVec:
-    case APCKind::StaticDict:
-    case APCKind::StaticKeyset:
-    case APCKind::UncountedVec:
-    case APCKind::UncountedDict:
-    case APCKind::UncountedKeyset: {
-      DEBUG_ONLY auto const ad = m_data.arr;
-      DEBUG_ONLY auto const dt = ad->toPersistentDataType();
-      assertx(m_handle.kind() == getAPCKind(dt, ad->isStatic()));
+    case APCKind::StaticArray:
+      assertx(m_data.arr->isStatic());
+      assertx(m_data.arr->toPersistentDataType() == m_handle.type());
       break;
-    }
+
+    case APCKind::UncountedArray:
+      assertx(m_data.arr->isUncounted());
+      assertx(m_data.arr->toPersistentDataType() == m_handle.type());
+      break;
 
     case APCKind::FuncEntity:
     case APCKind::ClassEntity:
@@ -136,10 +120,7 @@ bool APCTypedValue::checkInvariants() const {
 void APCTypedValue::deleteUncounted() {
   assertx(m_handle.isUncounted());
   auto kind = m_handle.kind();
-  assertx(kind == APCKind::UncountedString ||
-          kind == APCKind::UncountedVec ||
-          kind == APCKind::UncountedDict ||
-          kind == APCKind::UncountedKeyset);
+  assertx(kind == APCKind::UncountedArray || kind == APCKind::UncountedString);
 
   static_assert(std::is_trivially_destructible<APCTypedValue>::value,
                 "APCTypedValue must be trivially destructible - "

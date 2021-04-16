@@ -115,21 +115,20 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::PersistentClsMeth:
     case APCKind::FuncEntity:
     case APCKind::ClsMeth:
+    case APCKind::StaticArray:
     case APCKind::StaticString:
-    case APCKind::StaticVec:
-    case APCKind::StaticDict:
-    case APCKind::StaticKeyset:
       return EntryInfo::Type::Uncounted;
     case APCKind::UncountedString:
       return EntryInfo::Type::UncountedString;
     case APCKind::SharedString:
       return EntryInfo::Type::APCString;
-    case APCKind::UncountedVec:
-      return EntryInfo::Type::UncountedVec;
-    case APCKind::UncountedDict:
-      return EntryInfo::Type::UncountedDict;
-    case APCKind::UncountedKeyset:
-      return EntryInfo::Type::UncountedKeyset;
+    case APCKind::UncountedArray:
+      switch (handle->type()) {
+        case KindOfPersistentVec:    return EntryInfo::Type::UncountedVec;
+        case KindOfPersistentDict:   return EntryInfo::Type::UncountedDict;
+        case KindOfPersistentKeyset: return EntryInfo::Type::UncountedKeyset;
+        default: always_assert(false);
+      }
     case APCKind::SerializedVec:
       return EntryInfo::Type::SerializedVec;
     case APCKind::SerializedDict:

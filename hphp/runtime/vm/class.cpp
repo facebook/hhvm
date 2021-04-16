@@ -54,6 +54,7 @@
 #include <folly/Bits.h>
 #include <folly/MapUtil.h>
 #include <folly/Optional.h>
+#include <folly/Random.h>
 
 #include <algorithm>
 #include <iostream>
@@ -1499,11 +1500,17 @@ const StaticString s_classname("classname");
 folly::Optional<RuntimeCoeffects>
 Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   auto const slot = m_constants.findIndex(name);
+  auto const coinflip = []{
+    auto const rate = RO::EvalContextConstantWarningSampleRate;
+    return rate > 0 && folly::Random::rand32(rate) == 0;
+  };
 
   if (slot == kInvalidSlot) {
     if (!failIsFatal) return folly::none;
-    // TODO: Once coeffect migration is done, convert this back to raise_error
-    raise_warning("Context constant %s does not exist", name->data());
+    if (coinflip()) {
+      // TODO: Once coeffect migration is done, convert this back to raise_error
+      raise_warning("Context constant %s does not exist", name->data());
+    }
     return RuntimeCoeffects::full();
   }
   auto const& cns = m_constants[slot];
@@ -1514,8 +1521,10 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   }
   if (cns.isAbstract()) {
     if (!failIsFatal) return folly::none;
-    // TODO: Once coeffect migration is done, convert this back to raise_error
-    raise_warning("Context constant %s is abstract", name->data());
+    if (coinflip()) {
+      // TODO: Once coeffect migration is done, convert this back to raise_error
+      raise_warning("Context constant %s is abstract", name->data());
+    }
     return RuntimeCoeffects::full();
   }
 

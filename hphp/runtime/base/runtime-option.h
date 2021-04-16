@@ -1278,6 +1278,7 @@ struct RuntimeOption {
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
   F(uint32_t, CoeffectViolationWarningSampleRate, 1)                    \
+  F(uint32_t, ContextConstantWarningSampleRate, 1)                      \
   /*                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \

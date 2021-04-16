@@ -245,6 +245,7 @@ let () =
       ignored_flag "--ignore-unsafe-cast";
       ignored_flag "--bitwise-math-new-code";
       ignored_flag "--inc-dec-new-code";
+      ignored_flag "--math-new-code";
     ]
     set_file
     usage;

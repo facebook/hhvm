@@ -293,6 +293,9 @@ type t = {
   tco_bitwise_math_new_code: bool;
   (* Use a new error code for post/pre increment and decrement operations *)
   tco_inc_dec_new_code: bool;
+  (* Use a new error code for math operations: addition, subtraction,
+  division, multiplication, exponentiation *)
+  tco_math_new_code: bool;
 }
 [@@deriving eq, show]
 
@@ -411,6 +414,7 @@ val make :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_bitwise_math_new_code:bool ->
   ?tco_inc_dec_new_code:bool ->
+  ?tco_math_new_code:bool ->
   unit ->
   t
 
@@ -675,3 +679,5 @@ val allowed_expression_tree_visitors : t -> string list
 val tco_bitwise_math_new_code : t -> bool
 
 val tco_inc_dec_new_code : t -> bool
+
+val tco_math_new_code : t -> bool

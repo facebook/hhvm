@@ -192,3 +192,5 @@ let allowed_expression_tree_visitors =
 let bitwise_math_new_code = GlobalOptions.tco_bitwise_math_new_code
 
 let inc_dec_new_code = GlobalOptions.tco_inc_dec_new_code
+
+let math_new_code = GlobalOptions.tco_math_new_code

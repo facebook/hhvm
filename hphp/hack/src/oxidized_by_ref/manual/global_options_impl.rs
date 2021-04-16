@@ -121,6 +121,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_allowed_expression_tree_visitors: &[],
     tco_bitwise_math_new_code: false,
     tco_inc_dec_new_code: false,
+    tco_math_new_code: false,
 };
 
 impl GlobalOptions<'static> {

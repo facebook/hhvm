@@ -123,6 +123,7 @@ type t = {
   tco_allowed_expression_tree_visitors: string list;
   tco_bitwise_math_new_code: bool;
   tco_inc_dec_new_code: bool;
+  tco_math_new_code: bool;
 }
 [@@deriving eq, show]
 
@@ -307,6 +308,7 @@ let default =
     tco_allowed_expression_tree_visitors = [];
     tco_bitwise_math_new_code = false;
     tco_inc_dec_new_code = false;
+    tco_math_new_code = false;
   }
 
 let make
@@ -445,6 +447,7 @@ let make
       default.tco_allowed_expression_tree_visitors)
     ?(tco_bitwise_math_new_code = default.tco_bitwise_math_new_code)
     ?(tco_inc_dec_new_code = default.tco_inc_dec_new_code)
+    ?(tco_math_new_code = default.tco_math_new_code)
     () =
   {
     tco_experimental_features;
@@ -562,6 +565,7 @@ let make
     tco_allowed_expression_tree_visitors;
     tco_bitwise_math_new_code;
     tco_inc_dec_new_code;
+    tco_math_new_code;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -823,3 +827,5 @@ let allowed_expression_tree_visitors t = t.tco_allowed_expression_tree_visitors
 let tco_bitwise_math_new_code t = t.tco_bitwise_math_new_code
 
 let tco_inc_dec_new_code t = t.tco_inc_dec_new_code
+
+let tco_math_new_code t = t.tco_math_new_code

@@ -267,6 +267,7 @@ let parse_options () =
   let ignore_unsafe_cast = ref false in
   let bitwise_math_new_code = ref false in
   let inc_dec_new_code = ref false in
+  let math_new_code = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -646,6 +647,11 @@ let parse_options () =
         Arg.Set inc_dec_new_code,
         "Use new error code in post- and pre-increment and decrement operations."
       );
+      ( "--math-new-code",
+        Arg.Set math_new_code,
+        "Use a new error code for math operations: addition, subtraction,
+        division, multiplication, exponentiation"
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -787,6 +793,7 @@ let parse_options () =
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ~tco_bitwise_math_new_code:!bitwise_math_new_code
       ~tco_inc_dec_new_code:!inc_dec_new_code
+      ~tco_math_new_code:!math_new_code
       ()
   in
   Errors.allowed_fixme_codes_strict :=

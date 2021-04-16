@@ -176,7 +176,7 @@ class ReflectionParameter implements Reflector {
       }
       $type .= ' ';
     }
-    $out = 'Parameter #'.$this->getPosition().' [ ';
+    $out = 'Parameter #'.(string)$this->getPosition().' [ ';
     $inout = '';
     $reference = '';
     if ($this->isInOut()) {
@@ -184,10 +184,10 @@ class ReflectionParameter implements Reflector {
     } else if ($this->isPassedByReference()) {
       $reference = '&';
     }
-    $param = $inout.$type.$reference.'$'.$this->getName();
+    $param = $inout.$type.$reference.'$'.(string)$this->getName();
     if ($this->isOptional()) {
       $default = var_export($this->getDefaultValue(), true);
-      $out .= '<optional> '.$param.' = '.$default;
+      $out .= '<optional> '.$param.' = '.(string)$default;
     } else {
       $out .= '<required> '.$param;
     }
@@ -676,7 +676,8 @@ class ReflectionProperty implements Reflector {
     if ($this->isStatic()) {
       $modifiers .= ' static';
     }
-    return "Property [ {$def}{$modifiers} \${$this->getName()} ]\n";
+    $name = (string)$this->getName();
+    return "Property [ {$def}{$modifiers} \${$name} ]\n";
   }
 
   // Prevent cloning
@@ -1015,8 +1016,10 @@ class ReflectionExtension implements Reflector {
      * Provide a placeholder string with the data we do have pending
      * changes to the Extension registry.
      */
-    return "Extension [ <persistent> extension #0 {$this->getName()} " .
-           "version {$this->getVersion()} \{\}\n";
+    $name = (string)$this->getName();
+    $version = (string)$this->getVersion();
+    return "Extension [ <persistent> extension #0 $name " .
+           "version $version \{\}\n";
   }
 
   // Prevent cloning

@@ -219,7 +219,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native, __Pure, __MaybeMutable>>
   private function getReturnTypeHint(): string;
 
-  
+
   public function getReturnTypeText()[] {
     return $this->getReturnTypeHint() ?: false;
   }
@@ -419,8 +419,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     $ret .= $this->getName() . " ] {\n";
 
     if ($this->getStartLine() > 0) {
-      $ret .= "  @@ {$this->getFileName()} " .
-              "{$this->getStartLine()} - {$this->getEndLine()}\n";
+      $file = (string)$this->getFileName();
+      $start = (string)$this->getStartLine();
+      $end = (string)$this->getEndLine();
+      $ret .= "  @@ $file $start - $end\n";
     }
 
     if ($this->isClosure()) {
@@ -1131,8 +1133,10 @@ class ReflectionClass implements Reflector {
     }
     $ret .= " ] {\n";
     if ($this->getStartLine() > 0) {
-      $ret .= "  @@ {$this->getFileName()} " .
-              "{$this->getStartLine()}-{$this->getEndLine()}\n";
+      $file = (string)$this->getFileName();
+      $start = (string)$this->getStartLine();
+      $end = (string)$this->getEndLine();
+      $ret .= "  @@ $file $start-$end\n";
     }
 
     $consts = $this->getConstants();
@@ -2278,7 +2282,8 @@ class ReflectionTypeConstant implements Reflector {
   public function __toString()[] {
     $abstract = $this->isAbstract() ? 'abstract ' : '';
 
-    $val = $this->isAbstract() ? '' : " = {$this->getAssignedTypeText()}";
+    $type_text = $this->getAssignedTypeText() ?? '';
+    $val = $this->isAbstract() ? '' : " = $type_text";
 
     return "TypeConstant [ {$abstract}const type {$this->getName()}{$val}]\n";
   }

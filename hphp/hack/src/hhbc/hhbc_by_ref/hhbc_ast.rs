@@ -61,17 +61,16 @@ pub struct FcallArgs<'arena>(
     pub NumParams,
     pub NumParams,
     pub ByRefs<'arena>,
-    pub Option<hhbc_by_ref_label::Label<'arena>>,
+    pub Option<hhbc_by_ref_label::Label>,
     pub Option<&'arena str>,
 );
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
-        _: &'arena bumpalo::Bump,
         flags: FcallFlags,
         num_rets: usize,
         inouts: &'arena [bool],
-        async_eager_label: Option<hhbc_by_ref_label::Label<'arena>>,
+        async_eager_label: Option<hhbc_by_ref_label::Label>,
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
@@ -299,18 +298,18 @@ pub enum Switchkind {
 
 #[derive(Clone, Debug)]
 pub enum InstructControlFlow<'arena> {
-    Jmp(hhbc_by_ref_label::Label<'arena>),
-    JmpNS(hhbc_by_ref_label::Label<'arena>),
-    JmpZ(hhbc_by_ref_label::Label<'arena>),
-    JmpNZ(hhbc_by_ref_label::Label<'arena>),
+    Jmp(hhbc_by_ref_label::Label),
+    JmpNS(hhbc_by_ref_label::Label),
+    JmpZ(hhbc_by_ref_label::Label),
+    JmpNZ(hhbc_by_ref_label::Label),
     /// bounded, base, offset vector
     Switch(
         Switchkind,
         isize,
-        bumpalo::collections::Vec<'arena, hhbc_by_ref_label::Label<'arena>>,
+        bumpalo::collections::Vec<'arena, hhbc_by_ref_label::Label>,
     ),
     /// litstr id / offset vector
-    SSwitch(bumpalo::collections::Vec<'arena, (&'arena str, hhbc_by_ref_label::Label<'arena>)>),
+    SSwitch(bumpalo::collections::Vec<'arena, (&'arena str, hhbc_by_ref_label::Label)>),
     RetC,
     RetCSuspended,
     RetM(NumParams),
@@ -480,8 +479,8 @@ pub enum InstructFinal<'arena> {
 
 #[derive(Clone, Debug)]
 pub enum InstructIterator<'arena> {
-    IterInit(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
-    IterNext(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
+    IterInit(IterArgs<'arena>, hhbc_by_ref_label::Label),
+    IterNext(IterArgs<'arena>, hhbc_by_ref_label::Label),
     IterFree(hhbc_by_ref_iterator::Id),
 }
 
@@ -549,12 +548,12 @@ pub enum InstructMisc<'arena> {
     CGetCUNop,
     UGetCUNop,
     MemoGet(
-        hhbc_by_ref_label::Label<'arena>,
+        hhbc_by_ref_label::Label,
         Option<(local::Type<'arena>, isize)>,
     ),
     MemoGetEager(
-        hhbc_by_ref_label::Label<'arena>,
-        hhbc_by_ref_label::Label<'arena>,
+        hhbc_by_ref_label::Label,
+        hhbc_by_ref_label::Label,
         Option<(local::Type<'arena>, isize)>,
     ),
     MemoSet(Option<(local::Type<'arena>, isize)>),
@@ -615,7 +614,7 @@ pub enum Instruct<'arena> {
     IIsset(InstructIsset<'arena>),
     IBase(InstructBase<'arena>),
     IFinal(InstructFinal<'arena>),
-    ILabel(hhbc_by_ref_label::Label<'arena>),
+    ILabel(hhbc_by_ref_label::Label),
     ITry(InstructTry),
     IComment(&'arena str),
     ISrcLoc(Srcloc),

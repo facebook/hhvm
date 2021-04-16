@@ -235,9 +235,9 @@ fn make_memoize_method_with_params_code<'a, 'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let mut param_count = hhas_params.len();
-    let notfound = emitter.label_gen_mut().next_regular(alloc);
-    let suspended_get = emitter.label_gen_mut().next_regular(alloc);
-    let eager_set = emitter.label_gen_mut().next_regular(alloc);
+    let notfound = emitter.label_gen_mut().next_regular();
+    let suspended_get = emitter.label_gen_mut().next_regular();
+    let eager_set = emitter.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_refied = usize::from(args.flags.contains(Flags::IS_REFIED));
@@ -257,17 +257,9 @@ fn make_memoize_method_with_params_code<'a, 'arena>(
             fcall_flags |= FcallFlags::HAS_GENERICS;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
-            FcallArgs::new(
-                alloc,
-                fcall_flags,
-                1,
-                &[],
-                Some(eager_set),
-                param_count,
-                None,
-            )
+            FcallArgs::new(fcall_flags, 1, &[], Some(eager_set), param_count, None)
         } else {
-            FcallArgs::new(alloc, fcall_flags, 1, &[], None, param_count, None)
+            FcallArgs::new(fcall_flags, 1, &[], None, param_count, None)
         }
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REFIED) {
@@ -377,9 +369,9 @@ fn make_memoize_method_no_params_code<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let notfound = emitter.label_gen_mut().next_regular(alloc);
-    let suspended_get = emitter.label_gen_mut().next_regular(alloc);
-    let eager_set = emitter.label_gen_mut().next_regular(alloc);
+    let notfound = emitter.label_gen_mut().next_regular();
+    let suspended_get = emitter.label_gen_mut().next_regular();
+    let eager_set = emitter.label_gen_mut().next_regular();
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -388,7 +380,6 @@ fn make_memoize_method_no_params_code<'a, 'arena>(
     )?;
 
     let fcall_args = FcallArgs::new(
-        alloc,
         FcallFlags::default(),
         1,
         &[],

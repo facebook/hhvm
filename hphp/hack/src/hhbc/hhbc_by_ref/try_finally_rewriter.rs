@@ -34,14 +34,10 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
     /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
     pub(super) fn collect(
         is: &'a InstrSeq<'arena>,
-        jt_gen: &mut jt::Gen<'arena>,
+        jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
         #[allow(clippy::needless_lifetimes)]
-        fn get_label_id<'arena>(
-            jt_gen: &mut jt::Gen<'arena>,
-            is_break: bool,
-            level: Level,
-        ) -> label::Id {
+        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
             use jt::ResolvedJumpTarget::*;
             match jt_gen.jump_targets().get_target_for_level(is_break, level) {
                 ResolvedRegular(target_label, _)
@@ -97,7 +93,7 @@ pub(super) fn cleanup_try_body<'arena>(
 
 pub(super) fn emit_jump_to_label<'arena>(
     alloc: &'arena bumpalo::Bump,
-    l: Label<'arena>,
+    l: Label,
     iters: Vec<iterator::Id>,
 ) -> InstrSeq<'arena> {
     if iters.is_empty() {
@@ -116,7 +112,7 @@ pub(super) fn emit_save_label_id<'arena>(
         alloc,
         vec![
             instr::int(alloc, id as isize),
-            instr::setl(alloc, local_gen.get_label().clone()),
+            instr::setl(alloc, *local_gen.get_label()),
             instr::popc(alloc),
         ],
     )
@@ -311,7 +307,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     jump_instrs: JumpInstructions<'b, 'arena>,
-    finally_end: Label<'arena>,
+    finally_end: Label,
 ) -> Result<InstrSeq<'arena>> {
     fn emit_instr<'a, 'arena>(
         e: &mut Emitter<'arena>,
@@ -390,7 +386,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena>(
                 // NOTE(hrust) looping is equivalent to recursing without consuming instr
                 done = (id as isize) == n;
                 let (label, body) = if done {
-                    let label = e.label_gen_mut().next_regular(alloc);
+                    let label = e.label_gen_mut().next_regular();
                     let body = InstrSeq::gather(
                         alloc,
                         vec![

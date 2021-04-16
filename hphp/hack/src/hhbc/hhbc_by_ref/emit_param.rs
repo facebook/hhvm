@@ -161,12 +161,10 @@ fn from_ast<'a, 'arena>(
     )
     .unwrap();
     let default_value = if generate_defaults {
-        param.expr.as_ref().map(|expr| {
-            (
-                emitter.label_gen_mut().next_default_arg(alloc),
-                expr.clone(),
-            )
-        })
+        param
+            .expr
+            .as_ref()
+            .map(|expr| (emitter.label_gen_mut().next_default_arg(), expr.clone()))
     } else {
         None
     };
@@ -221,9 +219,9 @@ pub fn emit_param_default_value_setter<'a, 'arena>(
     if setters.is_empty() {
         Ok((instr::empty(alloc), instr::empty(alloc)))
     } else {
-        let l = emitter.label_gen_mut().next_regular(alloc);
+        let l = emitter.label_gen_mut().next_regular();
         Ok((
-            instr::label(alloc, l.clone()),
+            instr::label(alloc, l),
             InstrSeq::gather(
                 alloc,
                 vec![InstrSeq::gather(alloc, setters), instr::jmpns(alloc, l)],

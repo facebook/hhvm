@@ -161,12 +161,12 @@ pub(crate) fn simplify_verify_type<'a, 'arena>(
     let aast::Hint(_, hint_) = hint;
     if let aast::Hint_::Hoption(ref hint) = **hint_ {
         let label_gen = e.label_gen_mut();
-        let done_label = label_gen.next_regular(alloc);
+        let done_label = label_gen.next_regular();
         Ok(InstrSeq::gather(
             alloc,
             vec![
                 check,
-                instr::jmpnz(alloc, done_label.clone()),
+                instr::jmpnz(alloc, done_label),
                 get_ts(e, hint)?,
                 verify_instr,
                 instr::label(alloc, done_label),

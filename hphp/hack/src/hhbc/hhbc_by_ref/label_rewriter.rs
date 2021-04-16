@@ -35,7 +35,7 @@ fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
     }
 }
 
-fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena Label<'arena>> {
+fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena Label> {
     use Instruct::*;
     use InstructCall::*;
     use InstructControlFlow::*;
@@ -109,7 +109,7 @@ fn create_label_ref_map<'arena>(
 
 fn relabel_instr<'arena, F>(instr: &mut Instruct<'arena>, relabel: &mut F)
 where
-    F: FnMut(&mut Label<'arena>),
+    F: FnMut(&mut Label),
 {
     use Instruct::*;
     use InstructCall::*;
@@ -166,7 +166,7 @@ fn rewrite_params_and_body<'arena>(
     };
     let mut rewrite_instr = |instr: &mut Instruct<'arena>| -> bool {
         if let Instruct::ILabel(ref mut l) = instr {
-            match l.option_map(alloc, relabel_define_label_id) {
+            match l.option_map(relabel_define_label_id) {
                 Ok(Some(new_l)) => {
                     *l = new_l;
                     true
@@ -198,36 +198,24 @@ pub fn relabel_function<'arena>(
 }
 
 pub fn clone_with_fresh_regular_labels<'arena>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     block: &mut InstrSeq<'arena>,
 ) {
-    let mut folder = |
-        (mut regular, mut named): (HashMap<Id, Label<'arena>>, HashMap<String, Label<'arena>>),
-        instr: &Instruct<'arena>,
-    | {
+    let mut folder = |mut regular: HashMap<Id, Label>, instr: &Instruct<'arena>| {
         match instr {
             Instruct::ILabel(Label::Regular(id)) => {
-                regular.insert(*id, emitter.label_gen_mut().next_regular(alloc));
-            }
-            Instruct::ILabel(Label::Named(name)) => {
-                named.insert(
-                    name.to_string(),
-                    emitter.label_gen_mut().next_regular(alloc),
-                );
+                regular.insert(*id, emitter.label_gen_mut().next_regular());
             }
             _ => {}
         }
-        (regular, named)
+        regular
     };
-    let (regular_labels, named_labels) =
-        block.fold_left(&mut folder, (HashMap::default(), HashMap::default()));
+    let regular_labels = block.fold_left(&mut folder, HashMap::default());
 
-    if !regular_labels.is_empty() || !named_labels.is_empty() {
-        let relabel = |l: &mut Label<'arena>| {
+    if !regular_labels.is_empty() {
+        let relabel = |l: &mut Label| {
             let new_label = match l {
                 Label::Regular(id) => regular_labels.get(id),
-                Label::Named(name) => named_labels.get(&name.to_string()),
                 _ => None,
             };
             if let Some(nl) = new_label {

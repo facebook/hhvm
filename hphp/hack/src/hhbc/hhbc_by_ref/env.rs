@@ -30,7 +30,7 @@ bitflags! {
 pub struct Env<'a, 'arena: 'a> {
     pub arena: &'arena bumpalo::Bump,
     pub flags: Flags,
-    pub jump_targets_gen: jump_targets::Gen<'arena>,
+    pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
     pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
@@ -94,8 +94,8 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_loop_body<R, F>(
         &mut self,
         e: &mut Emitter<'arena>,
-        label_break: Label<'arena>,
-        label_continue: Label<'arena>,
+        label_break: Label,
+        label_continue: Label,
         iterator: Option<hhbc_by_ref_iterator::Id>,
         b: &[tast::Stmt],
         f: F,
@@ -111,7 +111,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_switch_body<R, F>(
         &mut self,
         e: &mut Emitter<'arena>,
-        end_label: Label<'arena>,
+        end_label: Label,
         cases: &[tast::Case],
         f: F,
     ) -> R
@@ -125,7 +125,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_try_catch_body<R, F>(
         &mut self,
         e: &mut Emitter<'arena>,
-        finally_label: Label<'arena>,
+        finally_label: Label,
         try_block: &[tast::Stmt],
         catch_block: &[tast::Catch],
         f: F,
@@ -140,7 +140,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_try_body<R, F>(
         &mut self,
         e: &mut Emitter<'arena>,
-        finally_label: Label<'arena>,
+        finally_label: Label,
         block: &[tast::Stmt],
         f: F,
     ) -> R
@@ -167,7 +167,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_using_body<R, F>(
         &mut self,
         e: &mut Emitter<'arena>,
-        finally_label: Label<'arena>,
+        finally_label: Label,
         block: &[tast::Stmt],
         f: F,
     ) -> R

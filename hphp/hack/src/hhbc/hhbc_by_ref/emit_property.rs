@@ -112,7 +112,7 @@ pub fn from_ast<'ast, 'arena>(
                     (Some(tv), None, HhasPropertyFlags::empty())
                 }
                 _ => {
-                    let label = emitter.label_gen_mut().next_regular(alloc);
+                    let label = emitter.label_gen_mut().next_regular();
                     let (prolog, epilog) = if args.is_static {
                         (
                             instr::empty(alloc),

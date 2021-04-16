@@ -8,48 +8,48 @@ use hhbc_by_ref_label::Label;
 type Id = usize;
 
 #[derive(Clone, Debug)]
-pub struct LoopLabels<'arena> {
-    label_break: Label<'arena>,
-    label_continue: Label<'arena>,
+pub struct LoopLabels {
+    label_break: Label,
+    label_continue: Label,
     iterator: Option<hhbc_by_ref_iterator::Id>,
 }
 
 #[derive(Clone, Debug)]
-pub enum Region<'arena> {
-    Loop(LoopLabels<'arena>),
-    Switch(Label<'arena>),
-    TryFinally(Label<'arena>),
+pub enum Region {
+    Loop(LoopLabels),
+    Switch(Label),
+    TryFinally(Label),
     Finally,
     Function,
-    Using(Label<'arena>),
+    Using(Label),
 }
 
 #[derive(Debug)]
-pub struct ResolvedTryFinally<'arena> {
-    pub target_label: Label<'arena>,
-    pub finally_label: Label<'arena>,
+pub struct ResolvedTryFinally {
+    pub target_label: Label,
+    pub finally_label: Label,
     pub adjusted_level: usize,
     pub iterators_to_release: Vec<hhbc_by_ref_iterator::Id>,
 }
 
 #[derive(Debug)]
-pub enum ResolvedJumpTarget<'arena> {
+pub enum ResolvedJumpTarget {
     NotFound,
-    ResolvedTryFinally(ResolvedTryFinally<'arena>),
-    ResolvedRegular(Label<'arena>, Vec<hhbc_by_ref_iterator::Id>),
+    ResolvedTryFinally(ResolvedTryFinally),
+    ResolvedRegular(Label, Vec<hhbc_by_ref_iterator::Id>),
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct JumpTargets<'arena>(Vec<Region<'arena>>);
+pub struct JumpTargets(Vec<Region>);
 
-impl<'arena> JumpTargets<'arena> {
-    pub fn as_slice(&self) -> &[Region<'arena>] {
+impl JumpTargets {
+    pub fn as_slice(&self) -> &[Region] {
         self.0.as_slice()
     }
 
     pub fn get_closest_enclosing_finally_label(
         &self,
-    ) -> Option<(Label<'arena>, Vec<hhbc_by_ref_iterator::Id>)> {
+    ) -> Option<(Label, Vec<hhbc_by_ref_iterator::Id>)> {
         let mut iters = vec![];
         for r in self.0.iter().rev() {
             match r {
@@ -77,11 +77,7 @@ impl<'arena> JumpTargets<'arena> {
     }
 
     /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(
-        &self,
-        is_break: bool,
-        mut level: usize,
-    ) -> ResolvedJumpTarget<'arena> {
+    pub fn get_target_for_level(&self, is_break: bool, mut level: usize) -> ResolvedJumpTarget {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;
@@ -156,19 +152,19 @@ impl<'arena> JumpTargets<'arena> {
 }
 
 #[derive(Clone, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd, Debug)]
-pub enum IdKey<'arena> {
+pub enum IdKey {
     IdReturn,
-    IdLabel(Label<'arena>),
+    IdLabel(Label),
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct Gen<'arena> {
-    label_id_map: std::collections::BTreeMap<IdKey<'arena>, Id>,
-    jump_targets: JumpTargets<'arena>,
+pub struct Gen {
+    label_id_map: std::collections::BTreeMap<IdKey, Id>,
+    jump_targets: JumpTargets,
 }
 
-impl<'arena> Gen<'arena> {
-    pub fn new_id(&mut self, key: IdKey<'arena>) -> Id {
+impl Gen {
+    pub fn new_id(&mut self, key: IdKey) -> Id {
         match self.label_id_map.get(&key) {
             Some(id) => *id,
             None => {
@@ -182,7 +178,7 @@ impl<'arena> Gen<'arena> {
         }
     }
 
-    pub fn jump_targets(&self) -> &JumpTargets<'arena> {
+    pub fn jump_targets(&self) -> &JumpTargets {
         &self.jump_targets
     }
 
@@ -194,14 +190,14 @@ impl<'arena> Gen<'arena> {
         self.new_id(IdKey::IdReturn)
     }
 
-    pub fn get_id_for_label(&mut self, l: Label<'arena>) -> Id {
+    pub fn get_id_for_label(&mut self, l: Label) -> Id {
         self.new_id(IdKey::IdLabel(l))
     }
 
     pub fn with_loop(
         &mut self,
-        label_break: Label<'arena>,
-        label_continue: Label<'arena>,
+        label_break: Label,
+        label_continue: Label,
         iterator: Option<hhbc_by_ref_iterator::Id>,
     ) {
         self.jump_targets.0.push(Region::Loop(LoopLabels {
@@ -211,7 +207,7 @@ impl<'arena> Gen<'arena> {
         }))
     }
 
-    pub fn with_switch(&mut self, end_label: Label<'arena>) {
+    pub fn with_switch(&mut self, end_label: Label) {
         //let labels = self.collect_valid_target_labels_for_switch_cases(cases);
         // CONSIDER: now HHVM eagerly reserves state id for the switch end label
         // which does not seem to be necessary - do it for now for HHVM compatibility
@@ -219,11 +215,11 @@ impl<'arena> Gen<'arena> {
         self.jump_targets.0.push(Region::Switch(end_label));
     }
 
-    pub fn with_try_catch(&mut self, finally_label: Label<'arena>) {
+    pub fn with_try_catch(&mut self, finally_label: Label) {
         self.jump_targets.0.push(Region::TryFinally(finally_label));
     }
 
-    pub fn with_try(&mut self, finally_label: Label<'arena>) {
+    pub fn with_try(&mut self, finally_label: Label) {
         self.jump_targets.0.push(Region::TryFinally(finally_label));
     }
 
@@ -235,7 +231,7 @@ impl<'arena> Gen<'arena> {
         self.jump_targets.0.push(Region::Function);
     }
 
-    pub fn with_using(&mut self, finally_label: Label<'arena>) {
+    pub fn with_using(&mut self, finally_label: Label) {
         self.jump_targets.0.push(Region::Using(finally_label));
     }
 

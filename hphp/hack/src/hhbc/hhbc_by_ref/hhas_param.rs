@@ -15,11 +15,11 @@ pub struct HhasParam<'arena> {
     pub is_inout: bool,
     pub user_attributes: Vec<HhasAttribute<'arena>>,
     pub type_info: Option<Info>,
-    pub default_value: Option<(Label<'arena>, tast::Expr)>,
+    pub default_value: Option<(Label, tast::Expr)>,
 }
 
 impl<'arena> HhasParam<'arena> {
-    pub fn replace_default_value_label(&mut self, new_label: Label<'arena>) {
+    pub fn replace_default_value_label(&mut self, new_label: Label) {
         if let Some((label, _)) = self.default_value.as_mut() {
             *label = new_label;
         }

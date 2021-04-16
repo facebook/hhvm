@@ -248,13 +248,10 @@ fn emit_case<'c, 'a, 'arena>(
     case: &'c tast::Case,
 ) -> Result<(
     InstrSeq<'arena>,
-    (
-        Option<(&'c tast::Expr, Label<'arena>)>,
-        Option<Label<'arena>>,
-    ),
+    (Option<(&'c tast::Expr, Label)>, Option<Label>),
 )> {
     let alloc = env.arena;
-    let l = e.label_gen_mut().next_regular(alloc);
+    let l = e.label_gen_mut().next_regular();
     Ok(match case {
         tast::Case::Case(case_expr, b) => (
             InstrSeq::gather(alloc, vec![instr::label(alloc, l), emit_block(env, e, b)?]),
@@ -271,7 +268,7 @@ fn emit_check_case<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
     scrutinee_expr: &tast::Expr,
-    (case_expr, case_handler_label): (&tast::Expr, Label<'arena>),
+    (case_expr, case_handler_label): (&tast::Expr, Label),
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     Ok(if scrutinee_expr.1.is_lvar() {
@@ -284,7 +281,7 @@ fn emit_check_case<'a, 'arena>(
             ],
         )
     } else {
-        let next_case_label = e.label_gen_mut().next_regular(alloc);
+        let next_case_label = e.label_gen_mut().next_regular();
         InstrSeq::gather(
             alloc,
             vec![
@@ -386,7 +383,7 @@ fn emit_awaitall_multi<'a, 'arena>(
             locals
                 .iter()
                 .map(|l| {
-                    let label_done = e.label_gen_mut().next_regular(alloc);
+                    let label_done = e.label_gen_mut().next_regular();
                     InstrSeq::gather(
                         alloc,
                         vec![
@@ -519,8 +516,8 @@ fn emit_using<'a, 'arena>(
                     )
                 }
             };
-            let finally_start = e.label_gen_mut().next_regular(alloc);
-            let finally_end = e.label_gen_mut().next_regular(alloc);
+            let finally_start = e.label_gen_mut().next_regular();
+            let finally_end = e.label_gen_mut().next_regular();
             let body = env.do_in_using_body(e, finally_start, &using.block, emit_block)?;
             let jump_instrs = tfr::JumpInstructions::collect(&body, &mut env.jump_targets_gen);
             let jump_instrs_is_empty = jump_instrs.is_empty();
@@ -539,7 +536,7 @@ fn emit_using<'a, 'arena>(
                 is_block_scoped: bool,
             | -> InstrSeq<'arena> {
                 let (epilogue, async_eager_label) = if has_await {
-                    let after_await = e.label_gen_mut().next_regular(alloc);
+                    let after_await = e.label_gen_mut().next_regular();
                     (
                         InstrSeq::gather(
                             alloc,
@@ -570,7 +567,6 @@ fn emit_using<'a, 'arena>(
                         instr::fcallobjmethodd(
                             alloc,
                             FcallArgs::new(
-                                alloc,
                                 FcallFlags::empty(),
                                 1,
                                 bumpalo::vec![in alloc;].into_bump_slice(),
@@ -664,14 +660,14 @@ fn emit_switch<'a, 'arena>(
             instr::popc(alloc),
         )
     };
-    let break_label = e.label_gen_mut().next_regular(alloc);
+    let break_label = e.label_gen_mut().next_regular();
     let has_default = cl.iter().any(|c| c.is_default());
 
     let emit_cases = |
         env: &mut Env<'a, 'arena>,
         e: &mut Emitter<'arena>,
         cases: &[tast::Case],
-    | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, Label<'arena>)> {
+    | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, Label)> {
         match cases.split_last() {
             None => {
                 return Err(Unrecoverable(
@@ -693,7 +689,7 @@ fn emit_switch<'a, 'arena>(
                     // Otherwise, emit the last case with an added break
                     match last {
                         tast::Case::Case(expr, block) => {
-                            let l = e.label_gen_mut().next_regular(alloc);
+                            let l = e.label_gen_mut().next_regular();
                             res.push((
                                 InstrSeq::gather(
                                     alloc,
@@ -713,7 +709,7 @@ fn emit_switch<'a, 'arena>(
                         }
                     };
                     // ...and emit warning/exception for missing default
-                    let l = e.label_gen_mut().next_regular(alloc);
+                    let l = e.label_gen_mut().next_regular();
                     res.push((
                         InstrSeq::gather(
                             alloc,
@@ -733,10 +729,8 @@ fn emit_switch<'a, 'arena>(
                     Vec<InstrSeq<'arena>>,
                     Vec<_>,
                 ) = res.into_iter().unzip();
-                let (case_exprs, default_labels): (
-                    Vec<Option<(&tast::Expr, Label<'arena>)>>,
-                    Vec<_>,
-                ) = case_exprs_and_default_labels.into_iter().unzip();
+                let (case_exprs, default_labels): (Vec<Option<(&tast::Expr, Label)>>, Vec<_>) =
+                    case_exprs_and_default_labels.into_iter().unzip();
 
                 let default_label = match default_labels
                     .iter()
@@ -796,7 +790,7 @@ fn emit_try_catch_finally<'a, 'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let is_try_block_empty = false;
     let emit_try_block =
-        |env: &mut Env<'a, 'arena>, e: &mut Emitter<'arena>, finally_start: Label<'arena>| {
+        |env: &mut Env<'a, 'arena>, e: &mut Emitter<'arena>, finally_start: Label| {
             env.do_in_try_catch_body(e, finally_start, r#try, catch, |env, e, t, c| {
                 emit_try_catch(e, env, pos, t, c)
             })
@@ -813,7 +807,7 @@ fn emit_try_finally<'a, 'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let is_try_block_empty = is_empty_block(try_block);
     let emit_try_block =
-        |env: &mut Env<'a, 'arena>, e: &mut Emitter<'arena>, finally_start: Label<'arena>| {
+        |env: &mut Env<'a, 'arena>, e: &mut Emitter<'arena>, finally_start: Label| {
             env.do_in_try_body(e, finally_start, try_block, emit_block)
         };
     e.local_scope(|e| {
@@ -831,7 +825,7 @@ fn emit_try_finally<'a, 'arena>(
 fn emit_try_finally_<
     'a,
     'arena,
-    E: Fn(&mut Env<'a, 'arena>, &mut Emitter<'arena>, Label<'arena>) -> Result<InstrSeq<'arena>>,
+    E: Fn(&mut Env<'a, 'arena>, &mut Emitter<'arena>, Label) -> Result<InstrSeq<'arena>>,
 >(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
@@ -863,8 +857,8 @@ fn emit_try_finally_<
     // inside the try body into setting temp_local to an integer which indicates
     // what action the finally must perform when it is finished, followed by a
     // jump directly to the finally.
-    let finally_start = e.label_gen_mut().next_regular(alloc);
-    let finally_end = e.label_gen_mut().next_regular(alloc);
+    let finally_start = e.label_gen_mut().next_regular();
+    let finally_end = e.label_gen_mut().next_regular();
 
     let in_try = env.flags.contains(hhbc_by_ref_env::Flags::IN_TRY);
     env.flags.set(hhbc_by_ref_env::Flags::IN_TRY, true);
@@ -895,7 +889,7 @@ fn emit_try_finally_<
     let exn_local = e.local_gen_mut().get_unnamed();
     let finally_body = env.do_in_finally_body(e, finally_block, emit_block)?;
     let mut finally_body_for_catch = InstrSeq::clone(alloc, &finally_body);
-    label_rewriter::clone_with_fresh_regular_labels(alloc, e, &mut finally_body_for_catch);
+    label_rewriter::clone_with_fresh_regular_labels(e, &mut finally_body_for_catch);
 
     //  (3) Finally epilogue
     let finally_epilogue = tfr::emit_finally_epilogue(e, env, pos, jump_instrs, finally_end)?;
@@ -1000,7 +994,7 @@ fn emit_try_catch_<'a, 'arena>(
     if is_empty_block(&try_block) {
         return Ok(instr::empty(alloc));
     };
-    let end_label = e.label_gen_mut().next_regular(alloc);
+    let end_label = e.label_gen_mut().next_regular();
 
     let catch_instrs = InstrSeq::gather(
         alloc,
@@ -1029,13 +1023,13 @@ fn emit_catch<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    end_label: Label<'arena>,
+    end_label: Label,
     catch: &tast::Catch,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
-    let next_catch = e.label_gen_mut().next_regular(alloc);
+    let next_catch = e.label_gen_mut().next_regular();
     let id = hhbc_id::class::Type::from_ast_name_and_mangle(alloc, &(catch.0).1);
     Ok(InstrSeq::gather(
         alloc,
@@ -1088,9 +1082,9 @@ fn emit_foreach_<'a, 'arena>(
     let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
     scope::with_unnamed_locals_and_iterators(alloc, e, |alloc, e| {
         let iter_id = e.iterator_mut().get();
-        let loop_break_label = e.label_gen_mut().next_regular(alloc);
-        let loop_continue_label = e.label_gen_mut().next_regular(alloc);
-        let loop_head_label = e.label_gen_mut().next_regular(alloc);
+        let loop_break_label = e.label_gen_mut().next_regular();
+        let loop_continue_label = e.label_gen_mut().next_regular();
+        let loop_head_label = e.label_gen_mut().next_regular();
         let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
         let iter_args = IterArgs {
             iter_id,
@@ -1140,11 +1134,11 @@ fn emit_foreach_await<'a, 'arena>(
     let alloc = env.arena;
     let instr_collection = emit_expr::emit_expr(e, env, collection)?;
     scope::with_unnamed_local(alloc, e, |alloc, e, iter_temp_local| {
-        let input_is_async_iterator_label = e.label_gen_mut().next_regular(alloc);
-        let next_label = e.label_gen_mut().next_regular(alloc);
-        let exit_label = e.label_gen_mut().next_regular(alloc);
-        let pop_and_exit_label = e.label_gen_mut().next_regular(alloc);
-        let async_eager_label = e.label_gen_mut().next_regular(alloc);
+        let input_is_async_iterator_label = e.label_gen_mut().next_regular();
+        let next_label = e.label_gen_mut().next_regular();
+        let exit_label = e.label_gen_mut().next_regular();
+        let pop_and_exit_label = e.label_gen_mut().next_regular();
+        let async_eager_label = e.label_gen_mut().next_regular();
         let next_meth = hhbc_id::method::from_raw_string(alloc, "next");
         let iter_init = InstrSeq::gather(
             alloc,
@@ -1176,7 +1170,6 @@ fn emit_foreach_await<'a, 'arena>(
                 instr::fcallobjmethodd(
                     alloc,
                     FcallArgs::new(
-                        alloc,
                         FcallFlags::empty(),
                         1,
                         bumpalo::vec![in alloc;].into_bump_slice(),
@@ -1227,7 +1220,7 @@ fn emit_iterator_key_value_storage<'a, 'arena>(
 )> {
     use tast::AsExpr as A;
     let alloc = env.arena;
-    fn get_id_of_simple_lvar_opt(lvar: &tast::Expr_) -> Result<Option<String>> {
+    fn get_id_of_simple_lvar_opt(lvar: &tast::Expr_) -> Result<Option<&str>> {
         if let Some(tast::Lid(pos, id)) = lvar.as_lvar() {
             let name = local_id::get_name(&id);
             if name == special_idents::THIS {
@@ -1236,7 +1229,7 @@ fn emit_iterator_key_value_storage<'a, 'arena>(
                     "Cannot re-assign $this",
                 ));
             } else if !(superglobals::is_superglobal(&name)) {
-                return Ok(Some(name.into()));
+                return Ok(Some(name));
             }
         };
         Ok(None)
@@ -1248,14 +1241,8 @@ fn emit_iterator_key_value_storage<'a, 'arena>(
                 get_id_of_simple_lvar_opt(&v.1)?,
             ) {
                 (Some(key_id), Some(val_id)) => (
-                    Some(local::Type::Named(
-                        bumpalo::collections::String::from_str_in(key_id.as_str(), alloc)
-                            .into_bump_str(),
-                    )),
-                    local::Type::Named(
-                        bumpalo::collections::String::from_str_in(val_id.as_str(), alloc)
-                            .into_bump_str(),
-                    ),
+                    Some(local::Type::Named(alloc.alloc_str(key_id))),
+                    local::Type::Named(alloc.alloc_str(val_id)),
                     instr::empty(alloc),
                 ),
                 _ => {
@@ -1291,10 +1278,7 @@ fn emit_iterator_key_value_storage<'a, 'arena>(
         A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.1)? {
             Some(val_id) => (
                 None,
-                local::Type::Named(
-                    bumpalo::collections::String::from_str_in(val_id.as_str(), alloc)
-                        .into_bump_str(),
-                ),
+                local::Type::Named(alloc.alloc_str(val_id)),
                 instr::empty(alloc),
             ),
             None => {
@@ -1555,9 +1539,9 @@ fn emit_do<'a, 'arena>(
     cond: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let break_label = e.label_gen_mut().next_regular(alloc);
-    let cont_label = e.label_gen_mut().next_regular(alloc);
-    let start_label = e.label_gen_mut().next_regular(alloc);
+    let break_label = e.label_gen_mut().next_regular();
+    let cont_label = e.label_gen_mut().next_regular();
+    let start_label = e.label_gen_mut().next_regular();
     let jmpnz_instr = emit_expr::emit_jmpnz(e, env, cond, start_label)?.instrs;
     Ok(InstrSeq::gather(
         alloc,
@@ -1578,9 +1562,9 @@ fn emit_while<'a, 'arena>(
     body: &[tast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let break_label = e.label_gen_mut().next_regular(alloc);
-    let cont_label = e.label_gen_mut().next_regular(alloc);
-    let start_label = e.label_gen_mut().next_regular(alloc);
+    let break_label = e.label_gen_mut().next_regular();
+    let cont_label = e.label_gen_mut().next_regular();
+    let start_label = e.label_gen_mut().next_regular();
     /* TODO: This is *bizarre* codegen for a while loop.
              It would be better to generate this as
              instr_label continue_label;
@@ -1615,14 +1599,14 @@ fn emit_for<'a, 'arena>(
     body: &[tast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let break_label = e.label_gen_mut().next_regular(alloc);
-    let cont_label = e.label_gen_mut().next_regular(alloc);
-    let start_label = e.label_gen_mut().next_regular(alloc);
+    let break_label = e.label_gen_mut().next_regular();
+    let cont_label = e.label_gen_mut().next_regular();
+    let start_label = e.label_gen_mut().next_regular();
     fn emit_cond<'a, 'arena>(
         emitter: &mut Emitter<'arena>,
         env: &mut Env<'a, 'arena>,
         jmpz: bool,
-        label: Label<'arena>,
+        label: Label,
         cond: &Option<tast::Expr>,
     ) -> Result<InstrSeq<'arena>> {
         let alloc = env.arena;
@@ -1861,7 +1845,7 @@ fn emit_if<'a, 'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     if alternative.is_empty() || (alternative.len() == 1 && alternative[0].1.is_noop()) {
-        let done_label = e.label_gen_mut().next_regular(alloc);
+        let done_label = e.label_gen_mut().next_regular();
         let consequence_instr = emit_stmts(e, env, consequence)?;
         Ok(InstrSeq::gather(
             alloc,
@@ -1872,8 +1856,8 @@ fn emit_if<'a, 'arena>(
             ],
         ))
     } else {
-        let alternative_label = e.label_gen_mut().next_regular(alloc);
-        let done_label = e.label_gen_mut().next_regular(alloc);
+        let alternative_label = e.label_gen_mut().next_regular();
+        let done_label = e.label_gen_mut().next_regular();
         let consequence_instr = emit_stmts(e, env, consequence)?;
         let alternative_instr = emit_stmts(e, env, alternative)?;
         Ok(InstrSeq::gather(

@@ -2316,7 +2316,6 @@ fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
             w.write("DV")?;
             print_int(w, id)
         }
-        Label::Named(id) => w.write(id),
     }
 }
 

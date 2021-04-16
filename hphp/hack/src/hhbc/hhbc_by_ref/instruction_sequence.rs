@@ -203,7 +203,7 @@ pub mod instr {
     pub fn iterinit<'a>(
         alloc: &'a bumpalo::Bump,
         args: IterArgs<'a>,
-        label: Label<'a>,
+        label: Label,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -214,7 +214,7 @@ pub mod instr {
     pub fn iternext<'a>(
         alloc: &'a bumpalo::Bump,
         args: IterArgs<'a>,
-        label: Label<'a>,
+        label: Label,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -225,7 +225,7 @@ pub mod instr {
     pub fn iternextk<'a>(
         alloc: &'a bumpalo::Bump,
         id: IterId,
-        label: Label<'a>,
+        label: Label,
         value: local::Type<'a>,
         key: local::Type<'a>,
     ) -> InstrSeq<'a> {
@@ -248,22 +248,22 @@ pub mod instr {
         instr(alloc, Instruct::IAsync(AsyncFunctions::WHResult))
     }
 
-    pub fn jmp<'a>(alloc: &'a bumpalo::Bump, label: Label<'a>) -> InstrSeq<'a> {
+    pub fn jmp<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
         instr(alloc, Instruct::IContFlow(InstructControlFlow::Jmp(label)))
     }
 
-    pub fn jmpz<'a>(alloc: &'a bumpalo::Bump, label: Label<'a>) -> InstrSeq<'a> {
+    pub fn jmpz<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
         instr(alloc, Instruct::IContFlow(InstructControlFlow::JmpZ(label)))
     }
 
-    pub fn jmpnz<'a>(alloc: &'a bumpalo::Bump, label: Label<'a>) -> InstrSeq<'a> {
+    pub fn jmpnz<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::JmpNZ(label)),
         )
     }
 
-    pub fn jmpns<'a>(alloc: &'a bumpalo::Bump, label: Label<'a>) -> InstrSeq<'a> {
+    pub fn jmpns<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::JmpNS(label)),
@@ -295,7 +295,7 @@ pub mod instr {
 
     pub fn iter_break<'a>(
         alloc: &'a bumpalo::Bump,
-        label: Label<'a>,
+        label: Label,
         itrs: std::vec::Vec<IterId>,
     ) -> InstrSeq<'a> {
         let mut vec = bumpalo::collections::Vec::from_iter_in(
@@ -793,7 +793,7 @@ pub mod instr {
 
     pub fn switch<'a>(
         alloc: &'a bumpalo::Bump,
-        labels: bumpalo::collections::Vec<'a, Label<'a>>,
+        labels: bumpalo::collections::Vec<'a, Label>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -811,7 +811,7 @@ pub mod instr {
 
     pub fn sswitch<'a>(
         alloc: &'a bumpalo::Bump,
-        cases: bumpalo::collections::Vec<'a, (&'a str, Label<'a>)>,
+        cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -951,7 +951,7 @@ pub mod instr {
 
     pub fn memoget<'a>(
         alloc: &'a bumpalo::Bump,
-        label: Label<'a>,
+        label: Label,
         range: Option<(local::Type<'a>, isize)>,
     ) -> InstrSeq<'a> {
         instr(alloc, Instruct::IMisc(InstructMisc::MemoGet(label, range)))
@@ -959,8 +959,8 @@ pub mod instr {
 
     pub fn memoget_eager<'a>(
         alloc: &'a bumpalo::Bump,
-        label1: Label<'a>,
-        label2: Label<'a>,
+        label1: Label,
+        label2: Label,
         range: Option<(local::Type<'a>, isize)>,
     ) -> InstrSeq<'a> {
         instr(
@@ -1360,7 +1360,7 @@ pub mod instr {
         instr(alloc, Instruct::IAsync(AsyncFunctions::AwaitAll(range)))
     }
 
-    pub fn label<'a>(alloc: &'a bumpalo::Bump, label: Label<'a>) -> InstrSeq<'a> {
+    pub fn label<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
         instr(alloc, Instruct::ILabel(label))
     }
 
@@ -1621,21 +1621,21 @@ impl<'a> InstrSeq<'a> {
     pub fn create_try_catch(
         alloc: &'a bumpalo::Bump,
         label_gen: &mut hhbc_by_ref_label::Gen,
-        opt_done_label: Option<Label<'a>>,
+        opt_done_label: Option<Label>,
         skip_throw: bool,
         try_instrs: Self,
         catch_instrs: Self,
     ) -> Self {
         let done_label = match opt_done_label {
             Some(l) => l,
-            None => label_gen.next_regular(alloc),
+            None => label_gen.next_regular(),
         };
         InstrSeq::gather(
             alloc,
             vec![
                 instr::instr(alloc, Instruct::ITry(InstructTry::TryCatchBegin)),
                 try_instrs,
-                instr::jmp(alloc, done_label.clone()),
+                instr::jmp(alloc, done_label),
                 instr::instr(alloc, Instruct::ITry(InstructTry::TryCatchMiddle)),
                 catch_instrs,
                 if skip_throw {
@@ -1647,66 +1647,6 @@ impl<'a> InstrSeq<'a> {
                 instr::label(alloc, done_label),
             ],
         )
-    }
-
-    fn get_or_put_label<'i, 'm>(
-        alloc: &'a bumpalo::Bump,
-        label_gen: &mut hhbc_by_ref_label::Gen,
-        name_label_map: &'m mut hash::HashMap<std::string::String, Label<'a>>,
-        name: &'i str,
-    ) -> Label<'a> {
-        match name_label_map.get(name) {
-            Some(label) => label.clone(),
-            None => {
-                let l = label_gen.next_regular(alloc);
-                name_label_map.insert(name.to_string(), l.clone());
-                l
-            }
-        }
-    }
-
-    fn rewrite_user_labels_instr<'i, 'm>(
-        alloc: &'a bumpalo::Bump,
-        label_gen: &mut hhbc_by_ref_label::Gen,
-        i: &'i mut Instruct<'a>,
-        name_label_map: &'m mut hash::HashMap<std::string::String, Label<'a>>,
-    ) {
-        use Instruct::*;
-        let mut get_result = |x| InstrSeq::get_or_put_label(alloc, label_gen, name_label_map, x);
-        match i {
-            IContFlow(InstructControlFlow::Jmp(Label::Named(name))) => {
-                let label = get_result(name);
-                *i = Instruct::IContFlow(InstructControlFlow::Jmp(label));
-            }
-            IContFlow(InstructControlFlow::JmpNS(Label::Named(name))) => {
-                let label = get_result(name);
-                *i = Instruct::IContFlow(InstructControlFlow::JmpNS(label));
-            }
-            IContFlow(InstructControlFlow::JmpZ(Label::Named(name))) => {
-                let label = get_result(name);
-                *i = Instruct::IContFlow(InstructControlFlow::JmpZ(label));
-            }
-            IContFlow(InstructControlFlow::JmpNZ(Label::Named(name))) => {
-                let label = get_result(name);
-                *i = Instruct::IContFlow(InstructControlFlow::JmpNZ(label));
-            }
-            ILabel(Label::Named(name)) => {
-                let label = get_result(name);
-                *i = ILabel(label);
-            }
-            _ => {}
-        };
-    }
-
-    pub fn rewrite_user_labels(
-        &mut self,
-        alloc: &'a bumpalo::Bump,
-        label_gen: &mut hhbc_by_ref_label::Gen,
-    ) {
-        let name_label_map = &mut hash::HashMap::default();
-        self.map_mut(&mut |i| {
-            InstrSeq::rewrite_user_labels_instr(alloc, label_gen, i, name_label_map)
-        });
     }
 
     /// Test whether `i` is of case `Instruct::ISrcLoc`.

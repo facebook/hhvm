@@ -437,7 +437,7 @@ fn emit_reified_init_body<'a, 'arena>(
                 generic_arr,
                 instr::fcallclsmethodsd(
                     alloc,
-                    FcallArgs::new(alloc, FcallFlags::default(), 1, &[], None, 1, None),
+                    FcallArgs::new(FcallFlags::default(), 1, &[], None, 1, None),
                     SpecialClsRef::Parent,
                     method::from_raw_string(alloc, INIT_METH_NAME),
                 ),
@@ -740,7 +740,7 @@ pub fn emit_class<'a, 'arena>(
             | {
                 initializer_instrs
                     .as_ref()
-                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(alloc), instrs))
+                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
             },
         )
         .collect();
@@ -750,13 +750,9 @@ pub fn emit_class<'a, 'arena>(
         fn make_cinit_instrs<'arena>(
             alloc: &'arena bumpalo::Bump,
             e: &mut Emitter<'arena>,
-            default_label: label::Label<'arena>,
+            default_label: label::Label,
             pos: &Pos,
-            consts: &[(
-                &r#const::Type<'arena>,
-                label::Label<'arena>,
-                &InstrSeq<'arena>,
-            )],
+            consts: &[(&r#const::Type<'arena>, label::Label, &InstrSeq<'arena>)],
         ) -> InstrSeq<'arena> {
             match consts {
                 [] => InstrSeq::gather(
@@ -783,7 +779,7 @@ pub fn emit_class<'a, 'arena>(
                 ),
             }
         }
-        let default_label = emitter.label_gen_mut().next_regular(alloc);
+        let default_label = emitter.label_gen_mut().next_regular();
 
         let body_instrs = {
             let mut cases =

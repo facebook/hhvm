@@ -2548,7 +2548,6 @@ name = "hhbc_by_ref_instruction_sequence"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "hash",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_iterator",
  "hhbc_by_ref_label",
@@ -2567,9 +2566,6 @@ version = "0.0.0"
 [[package]]
 name = "hhbc_by_ref_label"
 version = "0.0.0"
-dependencies = [
- "bumpalo",
-]
 
 [[package]]
 name = "hhbc_by_ref_label_rewriter"

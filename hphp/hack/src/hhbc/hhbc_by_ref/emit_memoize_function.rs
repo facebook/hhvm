@@ -147,9 +147,9 @@ fn make_memoize_function_with_params_code<'a, 'arena>(
     is_reified: bool,
 ) -> Result<InstrSeq<'arena>> {
     let param_count = hhas_params.len();
-    let notfound = e.label_gen_mut().next_regular(alloc);
-    let suspended_get = e.label_gen_mut().next_regular(alloc);
-    let eager_set = e.label_gen_mut().next_regular(alloc);
+    let notfound = e.label_gen_mut().next_regular();
+    let suspended_get = e.label_gen_mut().next_regular();
+    let eager_set = e.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_refied = usize::from(is_reified);
@@ -163,7 +163,6 @@ fn make_memoize_function_with_params_code<'a, 'arena>(
         let mut fcall_flags = FcallFlags::default();
         fcall_flags.set(FcallFlags::HAS_GENERICS, is_reified);
         FcallArgs::new(
-            alloc,
             fcall_flags,
             1,
             &[],
@@ -257,13 +256,12 @@ fn make_memoize_function_no_params_code<'a, 'arena>(
     renamed_id: function::Type<'arena>,
     is_async: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let notfound = e.label_gen_mut().next_regular(alloc);
-    let suspended_get = e.label_gen_mut().next_regular(alloc);
-    let eager_set = e.label_gen_mut().next_regular(alloc);
+    let notfound = e.label_gen_mut().next_regular();
+    let suspended_get = e.label_gen_mut().next_regular();
+    let eager_set = e.label_gen_mut().next_regular();
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
     let fcall_args = FcallArgs::new(
-        alloc,
         FcallFlags::default(),
         1,
         &[],

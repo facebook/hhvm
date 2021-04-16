@@ -435,7 +435,6 @@ pub fn make_body<'a, 'arena>(
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<HhasBody<'arena>> {
-    body_instrs.rewrite_user_labels(alloc, emitter.label_gen_mut());
     emit_adata::rewrite_typed_values(alloc, emitter, &mut body_instrs)?;
     if emitter
         .options()
@@ -630,8 +629,8 @@ mod atom_helpers {
         pos: &Pos,
         cls_instrs: InstrSeq<'arena>,
         msg: &str,
-        label_not_a_class: Label<'arena>,
-        label_done: Label<'arena>,
+        label_not_a_class: Label,
+        label_done: Label,
     ) -> Result<InstrSeq<'arena>> {
         let param_name = &param.name;
         let loc =
@@ -676,8 +675,8 @@ fn atom_instrs<'a, 'arena>(
             "__Atom param type hint unavailable",
         )),
         TypeHint(_, Some(Hint(_, h))) => {
-            let label_done = emitter.label_gen_mut().next_regular(alloc);
-            let label_not_a_class = emitter.label_gen_mut().next_regular(alloc);
+            let label_done = emitter.label_gen_mut().next_regular();
+            let label_not_a_class = emitter.label_gen_mut().next_regular();
             match &**h {
                 Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\MemberOf" => {
                     match &vec[..] {
@@ -1020,7 +1019,6 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         instr::fcallfuncd(
                             alloc,
                             FcallArgs::new(
-                                alloc,
                                 FcallFlags::default(),
                                 1,
                                 bumpalo::vec![in alloc;].into_bump_slice(),

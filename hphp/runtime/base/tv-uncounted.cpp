@@ -147,27 +147,24 @@ ArrayData* MakeUncountedArrayWithoutEscalation(
 
 ArrayData* MakeUncountedArray(
     ArrayData* in, DataWalker::PointerMap* seen, bool hasApcTv) {
-  // We can take shortcuts if we're not co-allocating an ApcTypedValue.
-  if (!hasApcTv) {
-    if (in->persistentIncRef()) return in;
-    if (in->empty()) {
-      auto const legacy = in->isLegacyArray();
-      switch (in->toDataType()) {
-        case KindOfVec: return ArrayData::CreateVec(legacy);
-        case KindOfDict: return ArrayData::CreateDict(legacy);
-        case KindOfKeyset: return ArrayData::CreateKeyset();
-        default: always_assert(false);
-      }
+  if (in->empty()) {
+    auto const legacy = in->isLegacyArray();
+    switch (in->toDataType()) {
+      case KindOfVec: return ArrayData::CreateVec(legacy);
+      case KindOfDict: return ArrayData::CreateDict(legacy);
+      case KindOfKeyset: return ArrayData::CreateKeyset();
+      default: always_assert(false);
     }
   }
 
   if (in->isVanilla()) {
+    if (in->persistentIncRef()) return in;
     return MakeUncountedArrayWithoutEscalation(in, seen, hasApcTv);
   }
 
   auto const vad = BespokeArray::ToVanilla(in, "MakeUncountedArray");
+  if (vad->persistentIncRef()) return vad;
   SCOPE_EXIT { decRefArr(vad); };
-
   return MakeUncountedArrayWithoutEscalation(vad, seen, hasApcTv);
 }
 

@@ -40,6 +40,13 @@ void FreeUncounted(void* ptr, size_t bytes);
  * of one "uncounted refcount". For refcounted inputs, it creates a new value
  * with uncounted refcount 1, and for uncounted, it does an uncountedIncRef().
  * (Primitives and statics are not refcounted in any way.)
+ *
+ * These operations are guaranteed to return a data structure that does not
+ * (recursively) contain any bespoke arrays.
+ *
+ * "hasApcTv" is a request to leave space for an APCTypedValue just before the
+ * new uncounted array. We may not honor this request. For instance, if we can
+ * reuse an existing persistent array, or use a static empty one, we'll do so.
  */
 void ConvertTvToUncounted(tv_lval in, DataWalker::PointerMap* seen);
 ArrayData* MakeUncountedArray(ArrayData* in, DataWalker::PointerMap* seen,

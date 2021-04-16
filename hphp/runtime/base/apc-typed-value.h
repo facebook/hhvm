@@ -85,8 +85,6 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
-  explicit APCTypedValue(ArrayData* data);
-
   explicit APCTypedValue(DataType type)
     : m_handle(type == KindOfUninit ? APCKind::Uninit : APCKind::Null, type) {
     assertx(isNullType(type)); // Uninit or Null
@@ -131,34 +129,11 @@ struct APCTypedValue {
     return m_data.str;
   }
 
-  ArrayData* getVecData() const {
-    assertx(checkInvariants());
-    assertx(m_handle.kind() == APCKind::StaticVec ||
-           m_handle.kind() == APCKind::UncountedVec);
-    return m_data.arr;
-  }
+  ArrayData* getArrayData() const;
 
-  ArrayData* getDictData() const {
-    assertx(checkInvariants());
-    assertx(m_handle.kind() == APCKind::StaticDict ||
-           m_handle.kind() == APCKind::UncountedDict);
-    return m_data.arr;
-  }
+  TypedValue toTypedValue() const;
 
-  ArrayData* getKeysetData() const {
-    assertx(checkInvariants());
-    assertx(m_handle.kind() == APCKind::StaticKeyset ||
-           m_handle.kind() == APCKind::UncountedKeyset);
-    return m_data.arr;
-  }
-
-  TypedValue toTypedValue() const {
-    assertx(m_handle.isTypedValue());
-    TypedValue tv;
-    tv.m_data.num = m_data.num;
-    tv.m_type = m_handle.type();
-    return tv;
-  }
+  static APCTypedValue* ForArray(ArrayData* ad);
 
   static APCTypedValue* tvUninit();
   static APCTypedValue* tvNull();
@@ -168,8 +143,10 @@ struct APCTypedValue {
   void deleteUncounted();
 
   static APCHandle::Pair HandlePersistent(ArrayData* data) {
-    if (!data->persistentIncRef()) return {nullptr, 0};
-    auto const value = new APCTypedValue(data);
+    if (!data->isVanilla() || !data->persistentIncRef()) {
+      return {nullptr, 0};
+    }
+    auto const value = APCTypedValue::ForArray(data);
     return {value->getHandle(), sizeof(APCTypedValue)};
   }
 
@@ -187,6 +164,8 @@ struct APCTypedValue {
   }
 
 private:
+  APCTypedValue(ArrayData* ad, APCKind kind, DataType dt);
+
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;
   bool checkInvariants() const;
@@ -219,4 +198,3 @@ inline Variant APCHandle::toLocal() const {
 //////////////////////////////////////////////////////////////////////
 
 }
-

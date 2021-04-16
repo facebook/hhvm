@@ -21,22 +21,39 @@
 namespace HPHP {
 
 namespace {
-APCKind getAPCKind(const ArrayData* ad) {
-  switch (ad->toPersistentDataType()) {
+APCKind getAPCKind(DataType dt, bool isStatic) {
+  switch (dt) {
     case KindOfPersistentVec:
-      return ad->isStatic() ? APCKind::StaticVec : APCKind::UncountedVec;
+      return isStatic ? APCKind::StaticVec : APCKind::UncountedVec;
     case KindOfPersistentDict:
-      return ad->isStatic() ? APCKind::StaticDict : APCKind::UncountedDict;
+      return isStatic ? APCKind::StaticDict : APCKind::UncountedDict;
     case KindOfPersistentKeyset:
-      return ad->isStatic() ? APCKind::StaticKeyset : APCKind::UncountedKeyset;
+      return isStatic ? APCKind::StaticKeyset : APCKind::UncountedKeyset;
     default:
       always_assert(false);
   }
 }
 }
 
-APCTypedValue::APCTypedValue(ArrayData* ad)
-    : m_handle(getAPCKind(ad), ad->toPersistentDataType()) {
+APCTypedValue* APCTypedValue::ForArray(ArrayData* ad) {
+  assertx(ad->isVanilla());
+  assertx(!ad->isRefCounted());
+
+  auto const dt = ad->toPersistentDataType();
+  auto const kind = getAPCKind(dt, ad->isStatic());
+
+  // Check if the "co-allocate array and APCTypedValue" optimization hit.
+  // It hit if we a) made a new uncounted array and b) its flag is set.
+  if (ad->uncountedCowCheck() || !ad->hasApcTv()) {
+    return new APCTypedValue(ad, kind, dt);
+  }
+
+  auto const mem = reinterpret_cast<APCTypedValue*>(ad) - 1;
+  return new (mem) APCTypedValue(ad, kind, dt);
+}
+
+APCTypedValue::APCTypedValue(ArrayData* ad, APCKind kind, DataType dt)
+    : m_handle(kind, dt) {
   assertx(!ad->isRefCounted());
   m_data.arr = ad;
   assertx(checkInvariants());
@@ -78,30 +95,19 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::LazyClass: assertx(m_data.str->isStatic()); break;
+
     case APCKind::StaticVec:
-      assertx(m_data.arr->isVecType());
-      assertx(m_data.arr->isStatic());
-      break;
     case APCKind::StaticDict:
-      assertx(m_data.arr->isDictType());
-      assertx(m_data.arr->isStatic());
-      break;
     case APCKind::StaticKeyset:
-      assertx(m_data.arr->isKeysetType());
-      assertx(m_data.arr->isStatic());
-      break;
     case APCKind::UncountedVec:
-      assertx(m_data.arr->isVecType());
-      assertx(m_data.arr->isUncounted());
-      break;
     case APCKind::UncountedDict:
-      assertx(m_data.arr->isDictType());
-      assertx(m_data.arr->isUncounted());
+    case APCKind::UncountedKeyset: {
+      DEBUG_ONLY auto const ad = m_data.arr;
+      DEBUG_ONLY auto const dt = ad->toPersistentDataType();
+      assertx(m_handle.kind() == getAPCKind(dt, ad->isStatic()));
       break;
-    case APCKind::UncountedKeyset:
-      assertx(m_data.arr->isKeysetType());
-      assertx(m_data.arr->isUncounted());
-      break;
+    }
+
     case APCKind::FuncEntity:
     case APCKind::ClassEntity:
     case APCKind::ClsMeth:
@@ -151,6 +157,19 @@ void APCTypedValue::deleteUncounted() {
   }
 
   delete this;
+}
+
+ArrayData* APCTypedValue::getArrayData() const {
+  assertx(checkInvariants());
+  return m_data.arr;
+}
+
+TypedValue APCTypedValue::toTypedValue() const {
+  assertx(m_handle.isTypedValue());
+  TypedValue tv;
+  tv.m_type = m_handle.type();
+  tv.m_data.num = m_data.num;
+  return tv;
 }
 
 //////////////////////////////////////////////////////////////////////

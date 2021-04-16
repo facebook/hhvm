@@ -98,14 +98,11 @@ size_t getMemSize(const APCHandle* handle) {
       return getMemSize(APCString::fromHandle(handle));
 
     case APCKind::UncountedVec:
-      return sizeof(APCTypedValue) +
-             getMemSize(APCTypedValue::fromHandle(handle)->getVecData());
     case APCKind::UncountedDict:
-      return sizeof(APCTypedValue) +
-             getMemSize(APCTypedValue::fromHandle(handle)->getDictData());
-    case APCKind::UncountedKeyset:
-      return sizeof(APCTypedValue) +
-             getMemSize(APCTypedValue::fromHandle(handle)->getKeysetData());
+    case APCKind::UncountedKeyset: {
+      auto const ad = APCTypedValue::fromHandle(handle)->getArrayData();
+      return sizeof(APCTypedValue) + getMemSize(ad);
+    }
 
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:

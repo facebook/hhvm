@@ -62,8 +62,7 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
       return serialized(s.get());
     }
 
-    if (apcExtension::UseUncounted && !features.hasNonPersistable &&
-        !arr->empty()) {
+    if (apcExtension::UseUncounted && !features.hasNonPersistable) {
       auto const base_size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() :
         seenArrs.get() ? getMemSize(seenArrs.get()) :
@@ -179,9 +178,7 @@ APCHandle* APCArray::MakeUncountedArray(
     ArrayData* ad, DataWalker::PointerMap* seen) {
   assertx(apcExtension::UseUncounted);
   auto const data = ::HPHP::MakeUncountedArray(ad, seen, true);
-  auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-  auto const value = new (mem) APCTypedValue(data);
-  return value->getHandle();
+  return APCTypedValue::ForArray(data)->getHandle();
 }
 
 APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,

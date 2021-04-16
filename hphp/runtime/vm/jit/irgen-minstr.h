@@ -244,7 +244,8 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   Type typeToCheck = relaxToGuardable(reducedType);
 
-  if (typeToCheck == TCell) return tmp;
+  // Avoid the guard if it is going to always succeed or fail.
+  if (tmp->type() <= typeToCheck || !tmp->type().maybe(typeToCheck)) return tmp;
 
   SSATmp* ptmp{nullptr};
 

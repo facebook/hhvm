@@ -38,4 +38,6 @@ function hphp_debug_backtrace_hash(int $options = 0);
 <<__PHPStdLib>>
 function trigger_error(string $error_msg, int $error_type = E_USER_NOTICE)[];
 <<__PHPStdLib>>
+function trigger_sampled_error(string $error_msg, int $sample_rate, int $error_type = E_USER_NOTICE)[];
+<<__PHPStdLib>>
 function user_error(string $error_msg, int $error_type = E_USER_NOTICE);

@@ -9,4 +9,3 @@ path = "../../typed_value.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-oxidized = { path = "../../../../oxidized" }

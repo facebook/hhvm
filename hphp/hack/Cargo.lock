@@ -251,12 +251,10 @@ checksum = "e3b5ca7a04898ad4bcd41c90c5285445ff5b791899bb1b0abdd2a2aa791211d7"
 name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
- "bstr",
  "bumpalo",
  "core_utils_rust",
  "escaper",
  "hhbc_by_ref_ast_class_expr",
- "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_type_hint",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_adata",
@@ -283,7 +281,6 @@ dependencies = [
  "hhbc_by_ref_iterator",
  "hhbc_by_ref_label",
  "hhbc_by_ref_local",
- "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
  "indexmap",
  "itertools",
@@ -606,7 +603,6 @@ name = "deps_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
- "fnv",
  "im-rc",
  "ocamlrep",
  "ocamlrep_custom",
@@ -2608,7 +2604,6 @@ dependencies = [
 name = "hhbc_by_ref_options_serde"
 version = "0.0.0"
 dependencies = [
- "proc-macro2",
  "quote",
  "syn",
 ]
@@ -2645,7 +2640,6 @@ name = "hhbc_by_ref_runtime"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "oxidized",
 ]
 
 [[package]]
@@ -2693,10 +2687,7 @@ name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
  "ast_class_expr_rust",
- "ast_scope_rust",
- "bstr",
  "core_utils_rust",
- "emit_body_rust",
  "emit_type_hint_rust",
  "env",
  "escaper",
@@ -2729,7 +2720,6 @@ dependencies = [
  "local",
  "naming_special_names_rust",
  "ocaml_helper",
- "options",
  "oxidized",
  "regex",
  "runtime",
@@ -3144,8 +3134,6 @@ dependencies = [
 name = "ocamlrep_derive"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
- "ocamlrep",
  "proc-macro2",
  "quote",
  "syn",
@@ -3216,7 +3204,6 @@ dependencies = [
 name = "options_serde"
 version = "0.0.0"
 dependencies = [
- "proc-macro2",
  "quote",
  "syn",
 ]
@@ -3645,7 +3632,6 @@ name = "runtime"
 version = "0.0.0"
 dependencies = [
  "lazy_static",
- "oxidized",
 ]
 
 [[package]]

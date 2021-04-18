@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use md5::{Digest, Md5};
-use oxidized::file_info::{Id, Mode};
+use oxidized::file_info::Mode;
 use std::default::Default;
 
 use oxidized::naming_types::KindOfType;
@@ -65,6 +65,7 @@ impl FromSql for SqliteKindOfType {
 pub(crate) mod convert {
     use super::*;
 
+    #[allow(unused)]
     pub fn mode_to_i64(mode: Option<Mode>) -> Option<i64> {
         match mode {
             Some(mode) => Some(match mode {
@@ -76,6 +77,7 @@ pub(crate) mod convert {
         }
     }
 
+    #[allow(unused)]
     pub fn prefix_to_i64(prefix: Prefix) -> i64 {
         match prefix {
             Prefix::Root => 0,
@@ -97,6 +99,7 @@ pub(crate) mod convert {
         i64::from_ne_bytes(b)
     }
 
+    #[allow(unused)]
     pub fn name_to_hash(dep_type: typing_deps_hash::DepType, name: &str) -> i64 {
         // For naming we use 32-bit hashes, because we're only going to use
         // the LSBs anyways.

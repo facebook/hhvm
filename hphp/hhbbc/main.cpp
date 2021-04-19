@@ -370,7 +370,7 @@ void write_global_data(
       now.time_since_epoch()
     );
 
-  auto gd                        = Repo::GlobalData{};
+  auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
   gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;

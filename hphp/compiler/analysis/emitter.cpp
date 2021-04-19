@@ -134,7 +134,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
       now.time_since_epoch()
     );
 
-  auto gd                        = Repo::GlobalData{};
+  auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = true;

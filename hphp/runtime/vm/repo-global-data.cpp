@@ -22,7 +22,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const Repo::GlobalData& gd) {
+std::string show(const RepoGlobalData& gd) {
   std::string out;
 #define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
   SHOW(InitialNamedEntityTableSize);

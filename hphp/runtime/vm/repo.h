@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/record-emitter.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -49,8 +50,6 @@ struct FuncTable;
 }
 
 struct Repo : RepoProxy {
-  struct GlobalData;
-
   // Do not directly instantiate this class; a thread-local creates one per
   // thread on demand when Repo::get() is called.
   static Repo& get();
@@ -156,20 +155,20 @@ struct Repo : RepoProxy {
    * Pre: loadGlobalData() already called, and
    * RuntimeOption::RepoAuthoritative.
    */
-  static const GlobalData& global() {
+  static const RepoGlobalData& global() {
     assertx(RuntimeOption::RepoAuthoritative);
     return s_globalData;
   }
 
   /*
-   * Used during repo creation to associate the supplied GlobalData
-   * with the repo that was being built.  Also saves the global litstr
-   * table.
+   * Used during repo creation to associate the supplied
+   * RepoGlobalData with the repo that was being built.  Also saves
+   * the global litstr table.
    *
-   * No other threads may be reading or writing the repo GlobalData
-   * when this is called.
+   * No other threads may be reading or writing the repo
+   * RepoGlobalData when this is called.
    */
-  void saveGlobalData(GlobalData&& newData,
+  void saveGlobalData(RepoGlobalData&& newData,
                       const RepoAutoloadMapBuilder& autoloadMapBuilder);
 
  private:
@@ -263,7 +262,7 @@ struct Repo : RepoProxy {
 
 private:
   static std::string s_cliFile;
-  static GlobalData s_globalData;
+  static RepoGlobalData s_globalData;
 
   std::string m_localRepo;
   std::string m_centralRepo;
@@ -298,4 +297,3 @@ bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>&,
 //////////////////////////////////////////////////////////////////////
 
 }
-

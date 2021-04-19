@@ -15,7 +15,6 @@
 */
 #pragma once
 
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 
@@ -28,8 +27,8 @@ namespace HPHP {
  *
  * Only used in RepoAuthoritative mode.  See loadGlobalData().
  */
-struct Repo::GlobalData {
-  GlobalData() {}
+struct RepoGlobalData {
+  RepoGlobalData() = default;
 
   /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
@@ -206,7 +205,7 @@ struct Repo::GlobalData {
   }
 };
 
-std::string show(const Repo::GlobalData& gd);
+std::string show(const RepoGlobalData& gd);
 
 //////////////////////////////////////////////////////////////////////
 

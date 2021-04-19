@@ -47,7 +47,7 @@ const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
-Repo::GlobalData Repo::s_globalData;
+RepoGlobalData Repo::s_globalData;
 bool Repo::s_deleteLocalOnFailure;
 
 void initialize_repo() {
@@ -308,7 +308,7 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
   } else {
     // We should always have a global data section in RepoAuthoritative
     // mode, or the repo is messed up.
-    std::fprintf(stderr, "Failed to load Repo::GlobalData:\n");
+    std::fprintf(stderr, "Failed to load RepoGlobalData:\n");
     for (auto& f : failures) {
       std::fprintf(stderr, "  %s\n", f.c_str());
     }
@@ -318,7 +318,7 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
   exit(1);
 }
 
-void Repo::saveGlobalData(GlobalData&& newData,
+void Repo::saveGlobalData(RepoGlobalData&& newData,
                           const RepoAutoloadMapBuilder& autoloadMapBuilder) {
   s_globalData = std::move(newData);
 

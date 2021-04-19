@@ -181,17 +181,21 @@ struct FrameState {
   bool stackModified{false};
 
   /*
-   * The values in the eval stack in memory, either above or below the current
-   * spValue pointer.  These are indexed relative to the base of the eval stack
-   * for the whole function.
+   * Whether the tracking of all locals has been cleared since the unit's entry.
    */
-  jit::vector<StackState> stack;
+  bool localsCleared{false};
 
   /*
-   * Vector of local variable information; sized for numLocals on the curFunc
-   * (if the state is initialized).
+   * The values in the eval stack in memory, either above or below the current
+   * spValue pointer.  This is keyed by the offset to the base of the eval stack
+   * for the whole function.
    */
-  jit::vector<LocalState> locals;
+  jit::hash_map<uint32_t,StackState> stack;
+
+  /*
+   * Maps the local ids to local variable information.
+   */
+  jit::hash_map<uint32_t,LocalState> locals;
 
   /*
    * Values and types of the member base register and its pointee.
@@ -348,9 +352,20 @@ struct FrameStateMgr final {
    * Return the LocationState for local `id' or stack element at `off' in the
    * most-inlined frame.
    */
-  const LocalState& local(uint32_t id) const;
-  const StackState& stack(IRSPRelOffset off) const;
-  const StackState& stack(SBInvOffset off) const;
+  LocalState local(uint32_t id) const;
+  StackState stack(IRSPRelOffset off) const;
+  StackState stack(SBInvOffset off) const;
+
+  /*
+   * Return whether the given location is currently being tracked.
+   */
+  bool tracked(Location l) const;
+
+  /*
+   * Return whether the state of the locals have even been cleared since the
+   * unit's entry.
+   */
+  bool localsCleared() const { return cur().localsCleared; }
 
   /*
    * Generic accessors for LocationState members.
@@ -358,7 +373,7 @@ struct FrameStateMgr final {
   SSATmp* valueOf(Location l) const;
   Type typeOf(Location l) const;
   Type predictedTypeOf(Location l) const;
-  const TypeSourceSet& typeSrcsOf(Location l) const;
+  TypeSourceSet typeSrcsOf(Location l) const;
 
   /*
    * Return tracked state for the member base register.
@@ -494,4 +509,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
-

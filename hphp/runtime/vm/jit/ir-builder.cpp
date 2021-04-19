@@ -740,12 +740,12 @@ uint32_t IRBuilder::numGuards() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const LocalState& IRBuilder::local(uint32_t id, GuardConstraint gc) {
+LocalState IRBuilder::local(uint32_t id, GuardConstraint gc) {
   constrainLocal(id, gc, "");
   return m_state.local(id);
 }
 
-const StackState& IRBuilder::stack(IRSPRelOffset offset, GuardConstraint gc) {
+StackState IRBuilder::stack(IRSPRelOffset offset, GuardConstraint gc) {
   constrainStack(offset, gc);
   return m_state.stack(offset);
 }

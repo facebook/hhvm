@@ -274,7 +274,8 @@ inline int Func::line2() const {
 }
 
 inline const StringData* Func::docComment() const {
-  return shared()->m_docComment;
+  auto const ex = extShared();
+  return ex ? ex->m_docComment : staticEmptyString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

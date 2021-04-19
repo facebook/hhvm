@@ -315,10 +315,10 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   // Grow args, if necessary.
   if (qword) {
     if (bit == 0) {
-      shared()->m_inoutBitPtr = (uint64_t*)
-        realloc(shared()->m_inoutBitPtr, qword * sizeof(uint64_t));
+      extShared()->m_inoutBitPtr = (uint64_t*)
+        realloc(extShared()->m_inoutBitPtr, qword * sizeof(uint64_t));
     }
-    refBits = shared()->m_inoutBitPtr + qword - 1;
+    refBits = extShared()->m_inoutBitPtr + qword - 1;
   }
 
   if (bit == 0) {
@@ -337,7 +337,8 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assertx(m_paramCounts == 0);
-  assertx(fParams.size() || (!m_inoutBitVal && !shared()->m_inoutBitPtr));
+  assertx(fParams.size() || (!m_inoutBitVal &&
+                             (!extShared() || !extShared()->m_inoutBitPtr)));
 
   shared()->m_params = fParams;
   m_paramCounts = fParams.size() << 1;
@@ -496,7 +497,7 @@ bool Func::takesInOutParams() const {
     auto limit = argToQword(numParams() - 1);
     assertx(limit >= 0);
     for (int i = 0; i <= limit; ++i) {
-      if (shared()->m_inoutBitPtr[i]) {
+      if (extShared()->m_inoutBitPtr[i]) {
         return true;
       }
     }
@@ -511,7 +512,7 @@ bool Func::isInOut(int32_t arg) const {
     if (arg >= numParams()) {
       return false;
     }
-    ref = &shared()->m_inoutBitPtr[argToQword(arg)];
+    ref = &extShared()->m_inoutBitPtr[argToQword(arg)];
   }
   int bit = (uint32_t)arg % kBitsPerQword;
   return *ref & (1ull << bit);
@@ -524,7 +525,7 @@ uint32_t Func::numInOutParams() const {
     auto limit = argToQword(numParams() - 1);
     assertx(limit >= 0);
     for (int i = 0; i <= limit; ++i) {
-      count += folly::popcount(shared()->m_inoutBitPtr[i]);
+      count += folly::popcount(extShared()->m_inoutBitPtr[i]);
     }
   }
   return count;
@@ -742,13 +743,10 @@ void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
 
 Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
                              PreClass* preClass, int sn, int line1,
-                             int line2, bool isPhpLeafFn,
-                             const StringData* docComment)
+                             int line2, bool isPhpLeafFn)
   : m_bc((bc != nullptr) ? allocateBCRegion(bc, bclen) : nullptr)
   , m_preClass(preClass)
   , m_line1(line1)
-  , m_docComment(docComment)
-  , m_inoutBitPtr(0)
   , m_originalFilename(nullptr)
   , m_cti_base(0)
   , m_numLocals(0)
@@ -779,7 +777,6 @@ Func::SharedData::~SharedData() {
 
   Func::s_extendedLineInfo.erase(this);
   Func::s_lineTables.erase(this);
-  free(m_inoutBitPtr);
   if (m_cti_base) free_cti(m_cti_base, m_cti_size);
 }
 
@@ -789,6 +786,10 @@ void Func::SharedData::atomicRelease() {
   } else {
     delete this;
   }
+}
+
+Func::ExtendedSharedData::~ExtendedSharedData() {
+  free(m_inoutBitPtr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1170,8 +1170,8 @@ struct Func final {
     return offsetof(Func, m_u);
   }
 
-  static constexpr ptrdiff_t sharedInOutBitPtrOff() {
-    return offsetof(SharedData, m_inoutBitPtr);
+  static constexpr ptrdiff_t extSharedInOutBitPtrOff() {
+    return offsetof(ExtendedSharedData, m_inoutBitPtr);
   }
 
   static constexpr ptrdiff_t sharedAllFlags() {
@@ -1241,8 +1241,7 @@ private:
    */
   struct SharedData : AtomicCountable {
     SharedData(unsigned char const* bc, Offset bclen, PreClass* preClass,
-               int sn, int line1, int line2, bool isPhpLeafFn,
-               const StringData* docComment);
+               int sn, int line1, int line2, bool isPhpLeafFn);
     ~SharedData();
 
     /*
@@ -1260,10 +1259,6 @@ private:
     std::atomic<unsigned char const*> m_bc{nullptr};
     PreClass* m_preClass;
     int m_line1;
-    LowStringPtr m_docComment;
-    // Bits 64 and up of the inout-ness guards (the first 64 bits are in
-    // Func::m_inoutBitVal for faster access).
-    uint64_t* m_inoutBitPtr;
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
     EHEntVec m_ehtab;
@@ -1331,7 +1326,7 @@ private:
     uint16_t m_numIterators;
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 152 : 184>(), "");
+  static_assert(CheckSize<SharedData, use_lowptr ? 144 : 168>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1348,6 +1343,7 @@ private:
     }
     ExtendedSharedData(const ExtendedSharedData&) = delete;
     ExtendedSharedData(ExtendedSharedData&&) = delete;
+    ~ExtendedSharedData();
 
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
@@ -1361,8 +1357,12 @@ private:
     MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_shallowCoeffectsWithLocals{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
+    // Bits 64 and up of the inout-ness guards (the first 64 bits are in
+    // Func::m_inoutBitVal for faster access).
+    uint64_t* m_inoutBitPtr = nullptr;
+    LowStringPtr m_docComment;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 272 : 304>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 304>(), "");
 
   /*
    * SharedData accessors for internal use.

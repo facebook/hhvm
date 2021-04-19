@@ -277,6 +277,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
 
   bool const needsExtendedSharedData =
     isNative ||
+    params.size() > 64 ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     m_bclen >= Func::kSmallDeltaLimit ||
     m_sn >= Func::kSmallDeltaLimit ||
@@ -285,7 +286,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
     shallowCoeffectsWithLocals.value() != 0 ||
-    !coeffectRules.empty();
+    !coeffectRules.empty() ||
+    (docComment && !docComment->empty());
 
   const unsigned char* bc = nullptr;
   // If we created the FuncEmitter by loading from the repo we don't need the bytecode.
@@ -301,9 +303,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   f->m_shared.reset(
     needsExtendedSharedData
       ? new Func::ExtendedSharedData(bc, m_bclen, preClass, m_sn, line1, line2,
-                                     !containsCalls, docComment)
+                                     !containsCalls)
       : new Func::SharedData(bc, m_bclen, preClass, m_sn, line1, line2,
-                             !containsCalls, docComment)
+                             !containsCalls)
   );
 
   f->init(params.size());
@@ -322,6 +324,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_shallowCoeffectsWithLocals = shallowCoeffectsWithLocals;
+    ex->m_docComment = docComment;
   }
 
   std::vector<Func::ParamInfo> fParams;

@@ -471,4 +471,3 @@ struct FuncRepoProxy : public RepoProxy {
 #define incl_HPHP_VM_FUNC_EMITTER_INL_H_
 #include "hphp/runtime/vm/func-emitter-inl.h"
 #undef incl_HPHP_VM_FUNC_EMITTER_INL_H_
-

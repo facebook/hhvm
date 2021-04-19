@@ -472,7 +472,7 @@ void cgCheckInOuts(IRLS& env, const IRInstruction* inst)  {
     } else {
       auto const shared = v.makeReg();
       v << load{func[Func::sharedOff()], shared};
-      v << load{shared[Func::sharedInOutBitPtrOff()], bitsPtr};
+      v << load{shared[Func::extSharedInOutBitPtrOff()], bitsPtr};
       bitsOff -= sizeof(uint64_t);
     }
 

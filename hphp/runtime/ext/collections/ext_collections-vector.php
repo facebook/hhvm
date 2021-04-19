@@ -192,7 +192,7 @@ final class Vector implements \MutableVector {
   /** @param mixed $value
    * @return object
    */
-  public function append(mixed $value): this {
+  public function append(mixed $value)[write_props]: this {
     $result = $this;
     $result[] = $value;
     return $result;

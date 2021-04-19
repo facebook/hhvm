@@ -3,6 +3,7 @@
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/HH_FLAGS)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.good.php)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.good.php.exp)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.good.php.legacy_decl.exp))
@@ -21,6 +22,7 @@
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/HH_FLAGS)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.bad.php)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.bad.php.exp)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.bad.php.legacy_decl.exp))
@@ -39,6 +41,7 @@
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/HH_FLAGS)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.good.php)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.good.php.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing
@@ -53,6 +56,7 @@
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/HH_FLAGS)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.bad.php)
           (glob_files %{project_root}/test/sound_dynamic/typing/*.bad.php.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing

@@ -6,11 +6,16 @@
  *
  *)
 
-(** Positions in the decl heap are compressed and need to be resolved
-    before being used or printed. This type represent any position, either
-    a fully resolved position or a decl position.
-    TODO (catg) for now, it is transparantly equal to Pos.t, but its implementation
-    will change in the future. *)
+(** There are two kinds of positions: AST positions provided by the parser,
+    which are fully qualified with filename, line and column ranges, and
+    decl positions, which may be compressed and need resolving before being
+    used or printed.
+
+    AST positions are represented by Pos.t. Decl positions don't have their own
+    type yet but may have in the future.
+    This type is for either of these positions.
+    It's used in the decl heap and in places that can take any kind of positions,
+    e.g. error secondary positions. *)
 type t [@@deriving eq, ord, show]
 
 module Map : WrappedMap.S with type key = t

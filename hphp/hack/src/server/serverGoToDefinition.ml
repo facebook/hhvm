@@ -16,18 +16,18 @@ let go_quarantined
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
   let results = List.filter_map results ~f:Utils.unwrap_snd in
-  (* What's it like when we return multiple definitions? For instance, if you ask *)
-  (* for the definition of "new C()" then we've now got the definition of the     *)
-  (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
-  (* users would be happier to only have the definition of the constructor, so    *)
-  (* as to jump straight to it without the fuss of clicking to select which one.  *)
-  (* That indeed is what Typescript does -- it only gives the constructor.        *)
-  (* (VSCode displays multiple definitions with a peek view of them all;          *)
-  (* Atom displays them with a small popup showing just title+file+line of each). *)
-  (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
-  (* and a derived class "C" without a constructor, and click on "new C()", then  *)
-  (* Typescript and VS Code will pop up a little window with both options. This   *)
-  (* seems like a reasonable compromise, so Hack should do the same.              *)
+  (* What's it like when we return multiple definitions? For instance, if you ask
+   * for the definition of "new C()" then we've now got the definition of the
+   * class "\C" and also of the constructor "\\C::__construct". I think that
+   * users would be happier to only have the definition of the constructor, so
+   * as to jump straight to it without the fuss of clicking to select which one.
+   * That indeed is what Typescript does -- it only gives the constructor.
+   * (VSCode displays multiple definitions with a peek view of them all;
+   * Atom displays them with a small popup showing just title+file+line of each).
+   * There's one subtlety. If you declare a base class "B" with a constructor,
+   * and a derived class "C" without a constructor, and click on "new C()", then
+   * Typescript and VS Code will pop up a little window with both options. This
+   * seems like a reasonable compromise, so Hack should do the same. *)
   let cls =
     List.fold results ~init:`None ~f:(fun class_opt (occ, _) ->
         match (class_opt, SymbolOccurrence.enclosing_class occ) with

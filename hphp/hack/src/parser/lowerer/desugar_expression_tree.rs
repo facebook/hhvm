@@ -1166,7 +1166,7 @@ fn exprpos(pos: &Pos) -> Expr {
             (
                 "path",
                 Expr::new(
-                    Pos::make_none(),
+                    pos.clone(),
                     Expr_::Id(Box::new(make_id(pos.clone(), "__FILE__"))),
                 ),
             ),

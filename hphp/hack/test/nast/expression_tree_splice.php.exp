@@ -45,7 +45,7 @@
                                                [],
                                                [([4:8-26],
                                                  (Shape
-                                                    [((SFlit_str ([4:8-26], "path")), ([Pos.none], (Id ([4:8-26], "\\__FILE__")))); (
+                                                    [((SFlit_str ([4:8-26], "path")), ([4:8-26], (Id ([4:8-26], "\\__FILE__")))); (
                                                       (SFlit_str ([4:8-26], "start_line")), ([4:8-26], (Int "4"))); (
                                                       (SFlit_str ([4:8-26], "end_line")), ([4:8-26], (Int "4"))); (
                                                       (SFlit_str ([4:8-26], "start_column")), ([4:8-26], (Int "7"))); (
@@ -93,7 +93,7 @@
                                                                  [],
                                                                  [([4:8-26],
                                                                    (Shape
-                                                                    [((SFlit_str ([4:8-26], "path")), ([Pos.none], (Id ([4:8-26], "\\__FILE__"))));
+                                                                    [((SFlit_str ([4:8-26], "path")), ([4:8-26], (Id ([4:8-26], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:8-26], "start_line")), ([4:8-26], (Int "4"))); (
                                                                     (SFlit_str ([4:8-26], "end_line")), ([4:8-26], (Int "4"))); (
                                                                     (SFlit_str ([4:8-26], "start_column")), ([4:8-26], (Int "7"))); (
@@ -105,7 +105,7 @@
                                                                     [],
                                                                     [([4:8-14],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:8-14], "path")), ([Pos.none], (Id ([4:8-14], "\\__FILE__"))));
+                                                                    [((SFlit_str ([4:8-14], "path")), ([4:8-14], (Id ([4:8-14], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:8-14], "start_line")), ([4:8-14], (Int "4"))); (
                                                                     (SFlit_str ([4:8-14], "end_line")), ([4:8-14], (Int "4"))); (
                                                                     (SFlit_str ([4:8-14], "start_column")), ([4:8-14], (Int "7"))); (
@@ -116,7 +116,7 @@
                                                                     [],
                                                                     [([4:8-9],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:8-9], "path")), ([Pos.none], (Id ([4:8-9], "\\__FILE__"))));
+                                                                    [((SFlit_str ([4:8-9], "path")), ([4:8-9], (Id ([4:8-9], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:8-9], "start_line")), ([4:8-9], (Int "4"))); (
                                                                     (SFlit_str ([4:8-9], "end_line")), ([4:8-9], (Int "4"))); (
                                                                     (SFlit_str ([4:8-9], "start_column")), ([4:8-9], (Int "7"))); (
@@ -132,7 +132,7 @@
                                                                     [],
                                                                     [([4:12-14],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:12-14], "path")), ([Pos.none], (Id ([4:12-14], "\\__FILE__"))));
+                                                                    [((SFlit_str ([4:12-14], "path")), ([4:12-14], (Id ([4:12-14], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:12-14], "start_line")), ([4:12-14], (Int "4"))); (
                                                                     (SFlit_str ([4:12-14], "end_line")), ([4:12-14], (Int "4"))); (
                                                                     (SFlit_str ([4:12-14], "start_column")), ([4:12-14], (Int "11"))); (
@@ -149,7 +149,7 @@
                                                                     [],
                                                                     [([4:17-26],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:17-26], "path")), ([Pos.none], (Id ([4:17-26], "\\__FILE__"))));
+                                                                    [((SFlit_str ([4:17-26], "path")), ([4:17-26], (Id ([4:17-26], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:17-26], "start_line")), ([4:17-26], (Int "4"))); (
                                                                     (SFlit_str ([4:17-26], "end_line")), ([4:17-26], (Int "4"))); (
                                                                     (SFlit_str ([4:17-26], "start_column")), ([4:17-26], (Int "16"))); (

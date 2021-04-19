@@ -64,6 +64,8 @@ let current_context : (Relative_path.t * phase) ref =
 
 let current_span : Pos.t ref = ref Pos.none
 
+let ignore_pos_outside_current_span : bool ref = ref false
+
 let allow_errors_in_default_path = ref true
 
 module PhaseMap = Reordered_argument_map (WrappedMap.Make (struct
@@ -662,7 +664,8 @@ let check_pos_msg :
   (* If error is reported inside the current span, or no span has been set but the error
    * is reported in the current file, then accept the error *)
   if
-    Pos.contains current_span pos
+    !ignore_pos_outside_current_span
+    || Pos.contains current_span pos
     || Pos.equal current_span Pos.none
        && Relative_path.equal (Pos.filename pos) current_file
     || Relative_path.equal current_file Relative_path.default
@@ -5589,9 +5592,12 @@ let has_no_errors (f : unit -> 'a) : bool =
 
 let ignore_ f =
   let allow_errors_in_default_path_copy = !allow_errors_in_default_path in
+  let ignore_pos_outside_current_span_copy = !ignore_pos_outside_current_span in
   set_allow_errors_in_default_path true;
+  ignore_pos_outside_current_span := true;
   let (_, result) = do_ f in
   set_allow_errors_in_default_path allow_errors_in_default_path_copy;
+  ignore_pos_outside_current_span := ignore_pos_outside_current_span_copy;
   result
 
 let try_when f ~when_ ~do_ =

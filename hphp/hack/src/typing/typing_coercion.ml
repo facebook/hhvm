@@ -169,15 +169,17 @@ let try_coerce env ty_have ty_expect =
   let f = !Errors.is_hh_fixme in
   (Errors.is_hh_fixme := (fun _ _ -> false));
   let result =
+    let pos =
+      get_pos ty_have
+      |> Typing_env.fill_in_pos_filename_if_in_current_decl env
+      |> Option.value ~default:Pos.none
+    in
     Errors.try_
       (fun () ->
         Some
           ( result ~on_ok:Fn.id ~on_err:Fn.id
-          @@ coerce_type_impl
-               env
-               ty_have
-               ty_expect
-               (Errors.unify_error_at Pos.none) ))
+          @@ coerce_type_impl env ty_have ty_expect (Errors.unify_error_at pos)
+          ))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

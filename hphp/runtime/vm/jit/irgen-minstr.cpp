@@ -357,12 +357,10 @@ SSATmp* checkInitProp(IRGS& env,
                       SSATmp* baseAsObj,
                       SSATmp* propAddr,
                       SSATmp* key,
-                      bool doWarn,
-                      bool doDefine) {
+                      bool doWarn) {
   assertx(key->isA(TStaticStr));
   assertx(baseAsObj->isA(TObj));
   assertx(propAddr->type() <= TLvalToCell);
-  assertx(!doWarn || !doDefine);
 
   auto const needsCheck = doWarn && propAddr->type().deref().maybe(TUninit);
   if (!needsCheck) return propAddr;
@@ -396,7 +394,6 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
   MOpMode mode,
   PropInfo propInfo
 ) {
-  assertx(mode != MOpMode::Warn || mode != MOpMode::Unset);
   auto const doWarn   = mode == MOpMode::Warn;
   auto const doDefine = mode == MOpMode::Define || mode == MOpMode::Unset;
 
@@ -414,7 +411,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
         obj
       );
       return !propInfo.lateInit
-        ? checkInitProp(env, obj, addr, key, doWarn, doDefine)
+        ? checkInitProp(env, obj, addr, key, doWarn)
         : addr;
     }
 
@@ -1138,14 +1135,10 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
 
 SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
-  DEBUG_ONLY auto const warn = mode == MOpMode::Warn;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
   auto const baseType = env.irb->fs().mbase().type;
-
-  assertx(!define || !unset);
-  assertx(!define || !warn);
 
   if (baseType <= TVec)    return vecElemImpl(env, mode, baseType, key);
   if (baseType <= TDict)   return dictElemImpl(env, mode, baseType, key);

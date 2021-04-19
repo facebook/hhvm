@@ -4,7 +4,7 @@ open Procs_test_utils
 let pipe_path = ref ""
 
 let entry =
-  WorkerController.register_entry_point ~restore:(fun s ~(worker_id : int) ->
+  WorkerControllerEntryPoint.register ~restore:(fun s ~(worker_id : int) ->
       pipe_path := s;
       Hh_logger.set_id (Printf.sprintf "test_cancel_env %d" worker_id))
 

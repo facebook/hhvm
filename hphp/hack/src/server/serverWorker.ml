@@ -11,7 +11,7 @@
    at toplevel, in order to be executed before
    [Daemon.check_entry_point]. *)
 let entry =
-  WorkerController.register_entry_point ~restore:ServerGlobalState.restore
+  WorkerControllerEntryPoint.register ~restore:ServerGlobalState.restore
 
 (** We use the call_wrapper to classify some exceptions in all calls in the
  * same way. *)

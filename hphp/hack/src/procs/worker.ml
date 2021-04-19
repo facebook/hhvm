@@ -54,8 +54,6 @@ type job_outcome =
   ]
 
 let read_and_process_job ic oc : job_outcome =
-  (* Explicitly ensure that Folly is initialized (installs signal handlers) *)
-  Folly.ensure_folly_init ();
   let start_user_time = ref 0. in
   let start_system_time = ref 0. in
   let start_minor_words = ref 0. in

@@ -10,7 +10,7 @@
     parser
     process
     process_types
-    procs_procs
+    procs_entry_point
     search_utils
     sqlite_utils
     utils_hash))

@@ -21,7 +21,7 @@ module Ids =
     end)
 
 let entry =
-  WorkerController.register_entry_point ~restore:(fun () ~(worker_id : int) ->
+  WorkerControllerEntryPoint.register ~restore:(fun () ~(worker_id : int) ->
       Hh_logger.set_id (Printf.sprintf "test_workers %d" worker_id))
 
 let () =

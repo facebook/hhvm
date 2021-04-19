@@ -201,29 +201,6 @@ type 'a worker_params = {
 
 type 'a entry = ('a worker_params, request, void) Daemon.entry
 
-let entry_counter = ref 0
-
-let register_entry_point ~restore =
-  incr entry_counter;
-  let restore (st, gc_control, heap_handle, worker_id) =
-    restore st ~worker_id;
-    SharedMem.connect heap_handle ~worker_id;
-    Gc.set gc_control
-  in
-  let name = Printf.sprintf "subprocess_%d" !entry_counter in
-  let worker_main =
-    match Sys.win32 with
-    | true ->
-      (fun p -> win32_worker_main restore (p.entry_state, p.controller_fd))
-    | false ->
-      (function
-      | { longlived_workers = false; entry_state; controller_fd } ->
-        unix_worker_main restore (entry_state, controller_fd)
-      | { longlived_workers = true; entry_state; controller_fd } ->
-        unix_worker_main_no_clone restore (entry_state, controller_fd))
-  in
-  Daemon.register_entry_point name worker_main
-
 (**************************************************************************
  * Creates a pool of workers.
  *

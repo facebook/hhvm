@@ -18,7 +18,6 @@
     workerController)
   (libraries
     core_kernel
-    folly_stubs
     heap_shared_mem
     logging
     marshal_tools
@@ -27,3 +26,12 @@
     sys_utils
     utils_exit
     worker_cancel))
+
+(library
+  (name procs_entry_point)
+  (wrapped false)
+  (modules workerControllerEntryPoint)
+  (libraries
+    procs_procs
+    folly_stubs)
+  )

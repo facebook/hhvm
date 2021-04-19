@@ -25,7 +25,7 @@
     heap_shared_mem
     hhi
     naming
-    procs_procs
+    procs_entry_point
     relative_path
     tast
     typechecker_options

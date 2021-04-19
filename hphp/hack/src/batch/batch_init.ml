@@ -10,7 +10,7 @@ open Hh_prelude
 
 (* This should stay at toplevel in order to be executed before [Daemon.check_entry_point]. *)
 let entry =
-  WorkerController.register_entry_point ~restore:Batch_global_state.restore
+  WorkerControllerEntryPoint.register ~restore:Batch_global_state.restore
 
 let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
  fun f x ->

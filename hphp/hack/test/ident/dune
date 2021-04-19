@@ -37,7 +37,7 @@
     core_kernel
     heap_ident
     heap_shared_mem
-    procs_procs
+    procs_entry_point
     test_injector_config))
 
 (alias

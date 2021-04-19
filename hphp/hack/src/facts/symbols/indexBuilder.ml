@@ -167,7 +167,7 @@ let parallel_parse
     ~next:(MultiWorker.next workers files)
 
 let entry =
-  WorkerController.register_entry_point ~restore:(fun () ~(worker_id : int) ->
+  WorkerControllerEntryPoint.register ~restore:(fun () ~(worker_id : int) ->
       Hh_logger.set_id (Printf.sprintf "indexBuilder %d" worker_id))
 
 (* Create one worker per cpu *)

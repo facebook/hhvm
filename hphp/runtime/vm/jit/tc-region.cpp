@@ -224,7 +224,12 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());
       failedBytes += infoSize(finfo);
-      finfo.clear();
+      // Reset the translators.  This will cause the callers of the OptPrologues
+      // that are being skipped to be smashed to stop calling the corresponding
+      // ProfPrologues (see publishOptFuncCode).
+      for (auto& translator : finfo.translators) {
+        translator->reset();
+      }
       continue;
     }
     if (shouldLog) {

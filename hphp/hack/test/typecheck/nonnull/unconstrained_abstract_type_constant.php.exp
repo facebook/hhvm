@@ -1,6 +1,6 @@
 File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
-File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-Expected `nonnull`
-File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-But got `this::T`
+  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
+  Expected `nonnull`
+  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
+  But got `this::T as C::T`

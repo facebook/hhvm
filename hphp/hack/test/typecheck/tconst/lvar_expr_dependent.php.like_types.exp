@@ -17,7 +17,7 @@ Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 27, characters 5-6:
     where `<expr#1>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#2>::T`
+  But got `<expr#2>::T as C::T`
   File "lvar_expr_dependent.php", line 27, characters 13-20:
     where `<expr#2>` is a reference to this expression
 File "lvar_expr_dependent.php", line 28, characters 19-27:
@@ -27,7 +27,7 @@ Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 28, characters 5-12:
     where `<expr#2>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#1>::T`
+  But got `<expr#1>::T as C::T`
   File "lvar_expr_dependent.php", line 28, characters 19-20:
     where `<expr#1>` is a reference to this expression
 File "lvar_expr_dependent.php", line 42, characters 13-18:
@@ -37,6 +37,6 @@ Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 42, characters 5-6:
     where `<expr#3>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#1>::T`
+  But got `<expr#1>::T as C::T`
   File "lvar_expr_dependent.php", line 38, characters 14-15:
     where `<expr#1>` is a reference to this expression

@@ -3,6 +3,6 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "where_override_bad.php", line 16, characters 45-51:
   Expected `Derived`
   File "where_override_bad.php", line 15, characters 13-13:
-  But got `T`
+  But got `T as Base`
   File "where_override_bad.php", line 16, characters 40-40:
     via this generic `T`

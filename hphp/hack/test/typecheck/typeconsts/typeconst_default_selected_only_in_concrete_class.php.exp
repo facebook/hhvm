@@ -1,14 +1,14 @@
 File "typeconst_default_selected_only_in_concrete_class.php", line 22, characters 12-12:
 Invalid return type (Typing[4110])
-File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
-Expected `this::T`
-File "typeconst_default_selected_only_in_concrete_class.php", line 22, characters 12-12:
-But got `int`
+  File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
+  Expected `this::T`
+  File "typeconst_default_selected_only_in_concrete_class.php", line 22, characters 12-12:
+  But got `int`
 File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-17:
 Invalid return type (Typing[4110])
-File "typeconst_default_selected_only_in_concrete_class.php", line 29, characters 20-22:
-Expected `int`
-File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
-But got `B::T`
-File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-10:
-  where the class `B` was referenced here
+  File "typeconst_default_selected_only_in_concrete_class.php", line 29, characters 20-22:
+  Expected `int`
+  File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
+  But got `B::T as nonnull`
+  File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-10:
+    where the class `B` was referenced here

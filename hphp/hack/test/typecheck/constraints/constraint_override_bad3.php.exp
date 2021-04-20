@@ -3,6 +3,6 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "constraint_override_bad3.php", line 24, characters 73-73:
   Expected `B`
   File "constraint_override_bad3.php", line 23, characters 14-15:
-  But got `Tz`
+  But got `Tz as GB<Tz, Tf>`
   File "constraint_override_bad3.php", line 24, characters 67-68:
     via this generic `Tz`

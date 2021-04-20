@@ -1,6 +1,6 @@
 File "recursive_constraint_bad_5.php", line 5, characters 10-11:
 Invalid return type (Typing[4110])
-File "recursive_constraint_bad_5.php", line 4, characters 66-68:
-Expected `int`
-File "recursive_constraint_bad_5.php", line 4, characters 58-59:
-But got `Tx`
+  File "recursive_constraint_bad_5.php", line 4, characters 66-68:
+  Expected `int`
+  File "recursive_constraint_bad_5.php", line 4, characters 58-59:
+  But got `Tx = Ty`

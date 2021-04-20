@@ -3,6 +3,6 @@ Invalid return type (Typing[4110])
   File "contravariance_constraint_bad_2.php", line 39, characters 16-18:
   Expected `NAC\AAA`
   File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-  But got `T`
+  But got `T as NAC\BBB`
   File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
   This type argument to `NAC\CONTRA` only allows supertypes (it is contravariant)

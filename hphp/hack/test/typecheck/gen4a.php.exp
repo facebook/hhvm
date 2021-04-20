@@ -7,4 +7,4 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "gen4a.php", line 20, characters 28-28:
   Expected `B`
   File "gen4a.php", line 20, characters 23-23:
-  But got `T`
+  But got `T as A`

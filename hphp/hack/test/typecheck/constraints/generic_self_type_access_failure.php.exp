@@ -5,4 +5,4 @@ Some type constraint(s) here are violated (Typing[4323])
   File "generic_self_type_access_failure.php", line 11, characters 38-40:
   Expected `Box`
   File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `T`
+  But got `T = TX::T`

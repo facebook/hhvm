@@ -9,12 +9,12 @@ Invalid argument (Typing[4110])
   File "super_constraint_10.php", line 16, characters 14-16:
   Expected `Tk1`
   File "super_constraint_10.php", line 17, characters 14-16:
-  But got `Tk2`
+  But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
 File "super_constraint_10.php", line 20, characters 12-18:
 Invalid return type (Typing[4110])
   File "super_constraint_10.php", line 16, characters 14-16:
   Expected `Tk1`
   File "super_constraint_10.php", line 18, characters 10-12:
-  But got `Tk2`
+  But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
   File "super_constraint_10.php", line 18, characters 10-12:
   This type argument to `Map` must match exactly (it is invariant)

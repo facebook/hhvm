@@ -1,6 +1,6 @@
 File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
-File "super_constraint_5.php", line 8, characters 4-5:
-Expected `Tx`
-File "super_constraint_5.php", line 6, characters 3-4:
-But got `Ty`
+  File "super_constraint_5.php", line 8, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_5.php", line 6, characters 3-4:
+  But got `Ty as Ty1`

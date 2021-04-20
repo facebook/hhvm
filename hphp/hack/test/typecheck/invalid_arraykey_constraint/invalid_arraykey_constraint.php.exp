@@ -5,7 +5,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 34-41:
   Expected `arraykey`
   File "invalid_arraykey_constraint.php", line 20, characters 17-18:
-  But got `Ta`
+  But got `Ta as num`
 File "invalid_arraykey_constraint.php", line 21, characters 10-24:
 Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 28-29:
@@ -21,7 +21,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 34-41:
   Expected `arraykey`
   File "invalid_arraykey_constraint.php", line 22, characters 17-24:
-  But got `this::Tc`
+  But got `this::Tc as TestBadClass::Tc`
 File "invalid_arraykey_constraint.php", line 23, characters 10-30:
 Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 28-29:
@@ -29,7 +29,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 34-41:
   Expected `arraykey`
   File "invalid_arraykey_constraint.php", line 23, characters 17-24:
-  But got `this::Td`
+  But got `this::Td as TestBadClass::Td`
 File "invalid_arraykey_constraint.php", line 34, characters 3-20:
 Some type constraint(s) here are violated (Typing[4323])
   File "hackarray.hhi", line 23, characters 28-29:

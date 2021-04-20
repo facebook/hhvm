@@ -438,6 +438,29 @@ let rec describe_ty_super env ty =
         (describe_ty_super env (LoclType lty))
         (describe_ty_super env (ConstraintType cty)))
 
+let describe_ty_sub env ety =
+  let ty_descr =
+    Typing_print.with_blank_tyvars (fun () ->
+        Typing_print.full_strip_ns_i env ety)
+  in
+  let ty_constraints =
+    match ety with
+    | Typing_defs.LoclType ty -> Typing_print.constraints_for_type env ty
+    | Typing_defs.ConstraintType _ -> ""
+  in
+
+  let ( = ) = String.equal in
+  let ty_constraints =
+    (* Don't say `T as T` as it's not helpful (occurs in some coffect errors). *)
+    if ty_constraints = "as " ^ ty_descr then
+      ""
+    else if ty_constraints = "" then
+      ""
+    else
+      " " ^ ty_constraints
+  in
+  Markdown_lite.md_codify (ty_descr ^ ty_constraints)
+
 (** Process the constraint proposition. There should only be errors left now,
     i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
@@ -685,11 +708,7 @@ and simplify_subtype_i
       detect_attempting_dynamic_coercion_reason r_super ety_super
     in
     let ty_super_descr = describe_ty_super env ety_super in
-    let ty_sub_descr =
-      Markdown_lite.md_codify
-        (Typing_print.with_blank_tyvars (fun () ->
-             Typing_print.full_strip_ns_i env ety_sub))
-    in
+    let ty_sub_descr = describe_ty_sub env ety_sub in
     let (ty_super_descr, ty_sub_descr) =
       if String.equal ty_super_descr ty_sub_descr then
         ( "exactly the type " ^ ty_super_descr,

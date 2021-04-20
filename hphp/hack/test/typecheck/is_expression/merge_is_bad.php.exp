@@ -1,8 +1,8 @@
 File "merge_is_bad.php", line 27, characters 11-12:
 Invalid argument (Typing[4110])
-File "merge_is_bad.php", line 19, characters 18-18:
-Expected `J`
-File "merge_is_bad.php", line 22, characters 21-24:
-But got `T#2` from this `is` expression test
-File "merge_is_bad.php", line 11, characters 25-25:
-  via this generic `T`
+  File "merge_is_bad.php", line 19, characters 18-18:
+  Expected `J`
+  File "merge_is_bad.php", line 22, characters 21-24:
+  But got `T#2 as I` from this `is` expression test
+  File "merge_is_bad.php", line 11, characters 25-25:
+    via this generic `T`

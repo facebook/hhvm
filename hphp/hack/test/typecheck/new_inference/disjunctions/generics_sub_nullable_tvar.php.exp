@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "generics_sub_nullable_tvar.php", line 4, characters 26-28:
   Expected `null` or something of type `string`
   File "generics_sub_nullable_tvar.php", line 10, characters 28-29:
-  But got `T2`
+  But got `T2 as ?int`

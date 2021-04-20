@@ -1,6 +1,6 @@
 File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
 Invalid return type (Typing[4110])
-File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-Expected `nonnull`
-File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
-But got `this::T`
+  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
+  Expected `nonnull`
+  File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
+  But got `this::T as C::T`

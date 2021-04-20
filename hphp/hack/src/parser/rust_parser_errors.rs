@@ -106,7 +106,7 @@ impl UnstableFeatures {
             UnstableFeatures::ExpressionTrees => Unstable,
             UnstableFeatures::EnumAtom => Unstable,
             UnstableFeatures::IFC => Unstable,
-            UnstableFeatures::Readonly => Unstable,
+            UnstableFeatures::Readonly => Preview,
         }
     }
 }

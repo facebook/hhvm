@@ -87,7 +87,7 @@ function json_encode_with_error(
  * @return string - Returns the error message on success or NULL with
  *   wrong parameters.
  */
-<<__Native, __NonRx('Reads from a global')>>
+<<__Native>>
 function json_last_error_msg(): string;
 
 /**
@@ -107,5 +107,5 @@ function json_last_error_msg(): string;
  *   JSON_ERROR_UNSUPPORTED_TYPE A value of a type that cannot be encoded
  *   was given PHP 5.5.0
  */
-<<__Native, __NonRx('Reads from a global')>>
+<<__Native>>
 function json_last_error(): int;

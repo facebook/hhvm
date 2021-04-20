@@ -53,7 +53,7 @@ function preg_grep_with_error(
  *   PREG_RECURSION_LIMIT_ERROR (see also pcre.recursion_limit)
  *   PREG_BAD_UTF8_ERROR PREG_BAD_UTF8_OFFSET_ERROR (since PHP 5.3.0)
  */
-<<__Native, __NonRx('Reads from global')>>
+<<__Native>>
 function preg_last_error(): int;
 
 /**

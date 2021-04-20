@@ -1,6 +1,6 @@
 File "ctx_with_missing_generics.php", line 3, characters 36-46:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "coeffect/contexts.hhi", line 68, characters 8-18:
+  File "coeffect/contexts.hhi", line 113, characters 8-18:
   Definition is here
 File "ctx_with_missing_generics.php", line 7, characters 55-61:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])

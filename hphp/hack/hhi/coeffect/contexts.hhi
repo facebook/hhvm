@@ -9,6 +9,46 @@
  */
 
 /**
+ * Contexts and Capabilities:
+ * See full documentation at
+ * https://docs.hhvm.com/hack/contexts-and-capabilities/introduction
+ *
+ * Tl;dr, this framework allows a function to declare that the function
+ * "does something," so that other functions can be statically understood
+ * to do something (or not). The easiest example here is a side effect
+ * like writing to a member variable:
+ *
+ * public function setFoo(Foo $foo)[write_props]: this {
+ *   $this->foo = $foo;
+ *   return $this;
+ * }
+ *
+ * This simple setter method declares that it has a side effect, which is
+ * to [write_props] which means "write to properties" which means that it
+ * may alter the member variables.
+ *
+ * public function getFoo()[]: Foo {
+ *   return $this->foo;
+ * }
+ *
+ * This is declared to have no coeffects / side-effects; it doesn't do
+ * anything notable.
+ *
+ * public function getFoo()[]: Foo {
+ *   if ($this->foo is null) {
+ *     // set the default
+ *     $this->foo = Foo::getDefault();
+ *   }
+ *   return $this->foo;
+ * }
+ *
+ * This is a hack error, because it writes to a property, but claims not to.
+ *
+ * Why do we care about this? Because someone else, far away in the codebase,
+ * might call a getter and not realize that they're mutating the member.
+ */
+
+/**
  * To concisely model multiple capabilities, we use intersection types
  * (denoted by &). This is an exact approximation, unlike introducing
  * a new subtype via interface hierarchies and using multiple inheritance.
@@ -33,6 +73,7 @@ namespace HH\Contexts {
    * still present so that it may be directly used as [defaults]
    */
   type defaults = nothing; // an infinite set of all capabilities
+
   // TODO(coeffects) after implementing lower bounds on const ctx/type, do:
   /* = (
     \HH\Capabilities\WriteProperty &
@@ -40,6 +81,10 @@ namespace HH\Contexts {
     \HH\Capabilities\IO
   ); */
 
+  /**
+   * Described at the top of this file; this indicates that a method could
+   * mutate a member variable ("write" a "property").
+   */
   type write_props = \HH\Capabilities\WriteProperty;
 
   // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)

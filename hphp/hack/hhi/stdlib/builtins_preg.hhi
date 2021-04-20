@@ -9,7 +9,7 @@
  */
 
 <<__PHPStdLib>>
-function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0);
+function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0)[];
 <<__PHPStdLib>>
 function preg_grep_with_error(
   string $pattern,
@@ -28,7 +28,7 @@ function preg_grep_with_error(
  */
 <<__PHPStdLib>>
 function preg_match(string $pattern, string $subject,
-                    int $flags = 0, int $offset = 0): int;
+                    int $flags = 0, int $offset = 0)[]: int;
 <<__PHPStdLib>>
 function preg_match_with_error(
   string $pattern,
@@ -37,9 +37,9 @@ function preg_match_with_error(
   int $flags = 0,
   int $offset = 0,
 )[]: int;
-<<__PHPStdLib>> // not pure: puts error code in a global variable
+<<__PHPStdLib>>
 function preg_match_with_matches(string $pattern, string $subject, inout $matches,
-                                 int $flags = 0, int $offset = 0): int;
+                                 int $flags = 0, int $offset = 0)[]: int;
 <<__PHPStdLib>>
 function preg_match_with_matches_and_error(
   string $pattern,
@@ -51,7 +51,7 @@ function preg_match_with_matches_and_error(
 )[]: int;
 <<__PHPStdLib>>
 function preg_match_all(string $pattern, string $subject,
-                        int $flags = 0, int $offset = 0);
+                        int $flags = 0, int $offset = 0)[];
 <<__PHPStdLib>>
 function preg_match_all_with_error(
   string $pattern,
@@ -62,7 +62,7 @@ function preg_match_all_with_error(
 )[];
 <<__PHPStdLib>>
 function preg_match_all_with_matches(string $pattern, string $subject, inout $matches,
-                                     int $flags = 0, int $offset = 0);
+                                     int $flags = 0, int $offset = 0)[];
 <<__PHPStdLib>>
 function preg_match_all_with_matches_and_error(
   string $pattern,
@@ -73,7 +73,7 @@ function preg_match_all_with_matches_and_error(
   int $offset = 0,
 )[];
 <<__PHPStdLib>>
-function preg_replace($pattern, $replacement, $subject, int $limit = -1);
+function preg_replace($pattern, $replacement, $subject, int $limit = -1)[];
 <<__PHPStdLib>>
 function preg_replace_with_error(
   $pattern,
@@ -84,7 +84,7 @@ function preg_replace_with_error(
 )[];
 <<__PHPStdLib>>
 function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
-                                 inout ?int $count);
+                                 inout ?int $count)[];
 <<__PHPStdLib>>
 function preg_replace_with_count_and_error(
   $pattern,
@@ -96,7 +96,7 @@ function preg_replace_with_count_and_error(
 )[];
 <<__PHPStdLib>>
 function preg_replace_callback($pattern, $callback, $subject, int $limit,
-                               inout ?int $count);
+                               inout ?int $count)[defaults];
 <<__PHPStdLib>>
 function preg_replace_callback_with_error(
   $pattern,
@@ -105,10 +105,10 @@ function preg_replace_callback_with_error(
   int $limit,
   inout ?int $count,
   inout ?int $error,
-);
+)[defaults];
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
-                                     int $limit, inout ?int $count);
+                                     int $limit, inout ?int $count)[defaults];
 <<__PHPStdLib>>
 function preg_replace_callback_array_with_error(
   $patterns_and_callbacks,
@@ -116,7 +116,7 @@ function preg_replace_callback_array_with_error(
   int $limit,
   inout ?int $count,
   inout ?int $error,
-);
+)[defaults];
 <<__PHPStdLib>>
 function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0)[];
 <<__PHPStdLib>>

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![allow(unstable_name_collisions)]
 
 use ast_class_expr_rust::ClassExpr;
 use ast_constant_folder_rust as ast_constant_folder;

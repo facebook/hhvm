@@ -86,7 +86,7 @@ class SoapFault extends Exception {
    * @return     mixed   A string describing the SoapFault.
    */
   public function __toString() {
-    return "SoapFault exception: [" . $this->faultcode . "] " .
+    return "SoapFault exception: [" . (string)$this->faultcode . "] " .
            (string)$this->faultstring;
   }
 }

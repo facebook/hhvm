@@ -875,10 +875,7 @@ void SymbolMap<S>::updateDB(
     try {
       auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
       FTRACE_MOD(
-          Trace::facts,
-          2,
-          "Running ANALYZE on {}...\n",
-          m_dbPath.native());
+          Trace::facts, 2, "Running ANALYZE on {}...\n", m_dbPath.native());
       db.analyze();
       auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
       FTRACE_MOD(
@@ -1105,6 +1102,10 @@ template <typename S>
 void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
   typename PathToSymbolsMap<S, SymKind::Type>::SymbolSet types;
   for (auto& type : facts.m_types) {
+    always_assert(!type.m_name.empty());
+    // ':' is a valid character in XHP classnames, but not Hack
+    // classnames. We should have replaced ':' in the parser.
+    always_assert(type.m_name.find(':') == -1);
     auto typeName = Symbol<S, SymKind::Type>{type.m_name};
 
     types.insert(typeName);
@@ -1126,11 +1127,13 @@ void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
 
   typename PathToSymbolsMap<S, SymKind::Function>::SymbolSet functions;
   for (auto const& function : facts.m_functions) {
+    always_assert(!function.empty());
     functions.insert(Symbol<S, SymKind::Function>{function});
   }
 
   typename PathToSymbolsMap<S, SymKind::Constant>::SymbolSet constants;
   for (auto const& constant : facts.m_constants) {
+    always_assert(!constant.empty());
     constants.insert(Symbol<S, SymKind::Constant>{constant});
   }
 

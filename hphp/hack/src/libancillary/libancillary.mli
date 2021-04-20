@@ -7,7 +7,7 @@
  *
  *)
 
-exception Receiving_Fd_Exception
+exception Receiving_Fd_Exception of string
 
 (** Returns 0 for success, -1 on failure. *)
 val ancil_send_fd :

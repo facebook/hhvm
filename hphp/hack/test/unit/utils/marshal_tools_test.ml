@@ -60,8 +60,8 @@ let child_1_process socket_fd =
    * from child 2. *)
   let upward_fd_2 =
     try Libancillary.ancil_recv_fd socket_fd
-    with Libancillary.Receiving_Fd_Exception ->
-      Printf.eprintf "Child 1: Failed to received fd. Exiting.\n";
+    with Libancillary.Receiving_Fd_Exception err ->
+      Printf.eprintf "Child 1: Failed to receive fd: %s. Exiting.\n" err;
       exit 1
   in
   let msg : string = Marshal_tools.from_fd_with_preamble upward_fd_2 in
@@ -97,7 +97,7 @@ let continue_parent child_1_pid downward_fd_1 =
     Unix.close upward_fd_2;
   send_fd_and_wait child_1_pid downward_fd_1 downward_fd_2
 
-let () =
+let test_ok () =
   (* This socket lets parent send data to child 1. We will be using it to
    * send a file descriptor to child 1. *)
   let (upward_fd_1, downward_fd_1) =
@@ -117,3 +117,25 @@ let () =
     Unix.close upward_fd_1;
     continue_parent child_1_pid downward_fd_1
   )
+
+let test_err () =
+  (* Let's open and close a socket pair *)
+  let (upward_fd_1, downward_fd_1) =
+    Unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0
+  in
+  Unix.close upward_fd_1;
+  Unix.close downward_fd_1;
+
+  try
+    let _upward : Unix.file_descr = Libancillary.ancil_recv_fd upward_fd_1 in
+    Printf.eprintf "Expected an exception to be thrown: exiting\n";
+    exit 1
+  with Libancillary.Receiving_Fd_Exception err ->
+    Printf.eprintf "Failed to receive fd: %s; as expected.\n" err;
+    ()
+
+let () =
+  Printf.eprintf "** Testing error scenario.\n";
+  test_err ();
+  Printf.eprintf "** Testing success condition.\n";
+  test_ok ()

@@ -17,6 +17,9 @@
 #include <caml/callback.h>
 #undef CAML_NAME_SPACE
 
+#include <errno.h>
+#include <string.h>
+
 #include "hphp/hack/src/third-party/libancillary/ancillary.h"
 
 CAMLprim value stub_ancil_send_fd(value int_val_socket, value int_val_fd) {
@@ -29,13 +32,24 @@ CAMLprim value stub_ancil_send_fd(value int_val_socket, value int_val_fd) {
 /** Returns -1 on failure, or non-negative file descriptor on success. */
 CAMLprim value stub_ancil_recv_fd(value int_val_socket) {
   CAMLparam1(int_val_socket);
+  CAMLlocal3(ret, result_val, error_val);
   int fd = 0;
   int result;
   int socket = Int_val(int_val_socket);
+  int error_code;
+
   result = ancil_recv_fd(socket, &fd);
+  error_code = errno; /* read errno here to make sure we don't loose it */
+
   if (result >= 0) {
-    CAMLreturn(Val_int(fd));
+    error_val = caml_copy_string("");
+    result_val = Val_int(fd);
   } else {
-    CAMLreturn(Val_int(result));
+    error_val = caml_copy_string(strerror(error_code));
+    result_val = Val_int(result);
   }
+  ret = caml_alloc_tuple(2);
+  Store_field(ret, 0, result_val);
+  Store_field(ret, 1, error_val);
+  CAMLreturn(ret);
 }

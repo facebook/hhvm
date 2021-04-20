@@ -9,7 +9,7 @@
 
 let int_to_fd (i : int) : Unix.file_descr = Obj.magic i
 
-exception Receiving_Fd_Exception
+exception Receiving_Fd_Exception of string
 
 external ancil_send_fd :
   Unix.file_descr (* The fd of the socket to send the payload over *) ->
@@ -18,12 +18,13 @@ external ancil_send_fd :
 
 external ancil_recv_fd_ :
   Unix.file_descr (* The fd of the socket to receive the payload over *) ->
-  int (* The fd received *) = "stub_ancil_recv_fd"
+  int (* The fd received *) * string (* error message on error *)
+  = "stub_ancil_recv_fd"
 
 (** Receives a file descriptor from socket_fd. Throws exception on error. *)
 let ancil_recv_fd socket_fd =
-  let result = ancil_recv_fd_ socket_fd in
-  if result = -1 then
-    raise Receiving_Fd_Exception
+  let (fd, errmsg) = ancil_recv_fd_ socket_fd in
+  if fd = -1 then
+    raise (Receiving_Fd_Exception errmsg)
   else
-    int_to_fd result
+    int_to_fd fd

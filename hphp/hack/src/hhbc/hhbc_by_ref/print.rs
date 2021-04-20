@@ -1788,6 +1788,7 @@ fn print_readonly_op<W: Write>(w: &mut W, op: &ReadOnlyOp) -> Result<(), W::Erro
         ReadOnlyOp::ReadOnly => "ReadOnly",
         ReadOnlyOp::Mutable => "Mutable",
         ReadOnlyOp::Any => "Any",
+        ReadOnlyOp::CheckROCOW => "CheckROCOW",
     })
 }
 

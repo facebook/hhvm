@@ -61,7 +61,8 @@ constexpr size_t NumMemberCodes = MW + 1;
 #define READONLY_OPS    \
   OP(Any)               \
   OP(ReadOnly)          \
-  OP(Mutable)           
+  OP(Mutable)           \
+  OP(CheckROCOW)        
 
 enum class ReadOnlyOp : uint8_t {
 #define OP(name) name,

@@ -27,40 +27,43 @@ struct ArrayData;
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 
-inline TypeAlias TypeAlias::Invalid(const PreTypeAlias& alias) {
-  TypeAlias req;
-  req.unit = alias.unit;
+inline TypeAlias TypeAlias::Invalid(const PreTypeAlias* alias) {
+  TypeAlias req(alias);
   req.invalid = true;
   return req;
 }
 
-inline TypeAlias TypeAlias::From(const PreTypeAlias& alias) {
-  assertx(alias.type != AnnotType::Object);
+inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
+  assertx(alias->type != AnnotType::Object);
 
-  TypeAlias req;
-  req.unit = alias.unit;
-  req.name = alias.name;
-  req.type = alias.type;
-  req.nullable = alias.nullable;
-  req.typeStructure = alias.typeStructure;
-  req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDict());
+  TypeAlias req(alias);
+  req.type = alias->type;
+  req.nullable = alias->nullable;
   return req;
 }
 
-inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias& alias) {
-  assertx(alias.type == AnnotType::Object);
+inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
+  assertx(alias->type == AnnotType::Object);
 
-  req.unit = alias.unit;
+  req.m_preTypeAlias = alias;
   if (req.invalid) {
     return req; // Do nothing.
   }
-  req.name = alias.name;
-  req.nullable |= alias.nullable;
-  req.typeStructure = alias.typeStructure;
-  req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDict());
+  req.nullable |= alias->nullable;
   return req;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Serialization.
+
+inline bool TypeAlias::serialize() const {
+  if (m_serialized) return false;
+  m_serialized = true;
+  return true;
+}
+
+inline bool TypeAlias::wasSerialized() const {
+  return m_serialized;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

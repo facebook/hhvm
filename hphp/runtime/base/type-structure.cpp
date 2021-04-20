@@ -478,9 +478,9 @@ Array getAlias(TSEnv& env, const String& aliasName) {
   }
 
   // this returned type structure is unresolved.
-  assertx(typeAlias->typeStructure.isDict());
+  assertx(typeAlias->typeStructure().isDict());
   env.persistent &= persistentTA;
-  return typeAlias->typeStructure;
+  return typeAlias->typeStructure();
 }
 
 const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {

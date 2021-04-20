@@ -77,10 +77,9 @@ struct TypeAlias {
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAlias Invalid(const PreTypeAlias& alias);
-  static TypeAlias From(const PreTypeAlias& alias);
-  static TypeAlias From(TypeAlias req,
-                           const PreTypeAlias& alias);
+  static TypeAlias Invalid(const PreTypeAlias* alias);
+  static TypeAlias From(const PreTypeAlias* alias);
+  static TypeAlias From(TypeAlias req, const PreTypeAlias* alias);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -103,11 +102,37 @@ struct TypeAlias {
   LowPtr<Class> klass{nullptr};
   // Aliased RecordDesc; nullptr if type != Record.
   LowPtr<RecordDesc> rec{nullptr};
-  // Needed for error messages; nullptr if not defined.
-  LowStringPtr name{nullptr};
-  Array typeStructure{ArrayData::CreateDict()};
-  UserAttributeMap userAttrs;
-  Unit* unit{nullptr};
+
+  explicit TypeAlias(const PreTypeAlias* preTypeAlias)
+    : m_preTypeAlias(preTypeAlias)
+    , m_serialized(false)
+  {}
+
+  const PreTypeAlias* preTypeAlias() const { return m_preTypeAlias; }
+  const StringData* name() const { return m_preTypeAlias->name; }
+  const Unit* unit() const { return m_preTypeAlias->unit; }
+  UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
+  Array typeStructure() const { return m_preTypeAlias->typeStructure; }
+
+  /*
+   * Return true, and set the m_serialized flag, iff this Class hasn't
+   * been serialized yet (see prof-data-serialize.cpp).
+   *
+   * Not thread safe - caller is responsible for any necessary locking.
+   */
+  bool serialize() const;
+
+  /*
+   * Return true if this class was already serialized.
+   */
+  bool wasSerialized() const;
+
+private:
+  const PreTypeAlias* m_preTypeAlias{nullptr};
+  /*
+   * Whether this type alias has been serialized yet.
+   */
+  mutable bool m_serialized : 1;
 };
 
 bool operator==(const TypeAlias& l, const TypeAlias& r);

@@ -574,7 +574,7 @@ Array implTypeStructure(const Variant& cls_or_obj,
       raise_error("Non-existent type alias %s", name.get()->data());
     }
 
-    auto const typeStructure = typeAlias->typeStructure;
+    auto const typeStructure = typeAlias->typeStructure();
     assertx(!typeStructure.empty());
     assertx(typeStructure.isDict());
     Array resolved;
@@ -2071,13 +2071,13 @@ static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
   }
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAlias(typeAlias);
-  return String::attach(const_cast<StringData*>(typeAlias->name.get()));
+  return String::attach(const_cast<StringData*>(typeAlias->name()));
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
-  auto const typeStructure = req->typeStructure;
+  auto const typeStructure = req->typeStructure();
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDict());
   return typeStructure;
@@ -2086,7 +2086,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
 static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
-  auto const typeStructure = req->typeStructure;
+  auto const typeStructure = req->typeStructure();
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDict());
   return TypeStructure::toString(typeStructure,
@@ -2096,7 +2096,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
 static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
-  auto const userAttrs = req->userAttrs;
+  auto const userAttrs = req->userAttrs();
 
   DArrayInit ai(userAttrs.size());
   for (auto& attr : userAttrs) {
@@ -2108,7 +2108,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
 static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
-  auto file = req->unit->filepath();
+  auto file = req->unit()->filepath();
   if (!file) file = staticEmptyString();
   if (file->data()[0] != '/') {
     return SourceRootInfo::RelativeToPhpRoot(StrNR(file));

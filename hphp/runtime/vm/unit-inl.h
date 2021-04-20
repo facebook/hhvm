@@ -282,6 +282,16 @@ inline PreRecordDesc* Unit::lookupPreRecordId(Id id) const {
   return m_preRecords[id].get();
 }
 
+inline const Constant* Unit::lookupConstantId(Id id) const {
+  assertx(id < Id(m_constants.size()));
+  return &m_constants[id];
+}
+
+inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
+  assertx(id < Id(m_typeAliases.size()));
+  return &m_typeAliases[id];
+}
+
 inline Unit::FuncRange Unit::funcs() const {
   return mergeInfo()->funcs();
 }

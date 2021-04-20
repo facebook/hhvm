@@ -92,7 +92,7 @@ void NamedEntity::setCachedTypeAlias(const TypeAlias& td) {
 const TypeAlias* NamedEntity::getCachedTypeAlias() const {
   return m_cachedTypeAlias.bound() &&
          m_cachedTypeAlias.isInit() &&
-         m_cachedTypeAlias->name
+         m_cachedTypeAlias->name()
     ? m_cachedTypeAlias.get()
     : nullptr;
 }

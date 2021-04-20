@@ -470,15 +470,14 @@ Variant Unit::getCns(const StringData* name) {
   );
 }
 
-void Unit::defCns(Id id) {
-  assertx(id < m_constants.size());
-  auto constant = &m_constants[id];
+void Unit::defCns(const Constant* constant) {
   auto const cnsName = constant->name;
   FTRACE(3, "  Defining def {}\n", cnsName->data());
   auto const cnsVal = constant->val;
 
-  if (constant->attrs & Attr::AttrPersistent &&
-      bindPersistentCns(cnsName, cnsVal)) {
+  if (constant->attrs & Attr::AttrPersistent) {
+    DEBUG_ONLY auto res = bindPersistentCns(cnsName, cnsVal);
+    assertx(res);
     return;
   }
 
@@ -527,23 +526,16 @@ namespace {
 
 TypeAlias typeAliasFromRecordDesc(const PreTypeAlias* thisType,
                                   RecordDesc* rec) {
-  TypeAlias req;
-  req.unit = thisType->unit;
-  req.name = thisType->name;
+  TypeAlias req(thisType);
   req.nullable = thisType->nullable;
   req.type = AnnotType::Record;
   req.rec = rec;
-  req.userAttrs = thisType->userAttrs;
-  assertx(thisType->typeStructure.isDict());
-  req.typeStructure = thisType->typeStructure;
   return req;
 }
 
 TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
                              Class *klass) {
-  TypeAlias req;
-  req.unit = thisType->unit;
-  req.name = thisType->name;
+  TypeAlias req(thisType);
   req.nullable = thisType->nullable;
   if (isEnum(klass)) {
     // If the class is an enum, pull out the actual base type.
@@ -556,9 +548,6 @@ TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
     req.type = AnnotType::Object;
     req.klass = klass;
   }
-  req.userAttrs = thisType->userAttrs;
-  assertx(thisType->typeStructure.isDict());
-  req.typeStructure = thisType->typeStructure;
   return req;
 }
 
@@ -575,7 +564,7 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
    * ensure it exists at this point.
    */
   if (thisType->type != AnnotType::Object) {
-    return TypeAlias::From(*thisType);
+    return TypeAlias::From(thisType);
   }
 
   /*
@@ -600,7 +589,7 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAlias::From(*targetTd, *thisType);
+    return TypeAlias::From(*targetTd, thisType);
   }
 
   if (auto rec = Unit::lookupRecordDesc(targetNE)) {
@@ -614,14 +603,14 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAlias::From(*targetTd, *thisType);
+      return TypeAlias::From(*targetTd, thisType);
     }
     if (auto rec = Unit::lookupRecordDesc(targetNE)) {
       return typeAliasFromRecordDesc(thisType, rec);
     }
   }
 
-  return TypeAlias::Invalid(*thisType);
+  return TypeAlias::Invalid(thisType);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -653,9 +642,7 @@ const TypeAlias* Unit::loadTypeAlias(const StringData* name,
   return target;
 }
 
-Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
-  assertx(id < m_typeAliases.size());
-  auto thisType = &m_typeAliases[id];
+const TypeAlias* Unit::defTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   FTRACE(3, "  Defining type alias {}\n", thisType->name->data());
   auto nameList = NamedEntity::get(thisType->name);
   const StringData* typeName = thisType->value;
@@ -673,23 +660,23 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
       if (resolveTypeAlias(this, thisType) != *current) {
-        if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
+        if (!failIsFatal) return nullptr;
         raiseIncompatible();
       }
-      return Unit::DefTypeAliasResult::Persistent;
+      return current;
     }
     if (!current->compat(*thisType)) {
-      if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
+      if (!failIsFatal) return nullptr;
       raiseIncompatible();
     }
     assertx(!RO::RepoAuthoritative);
-    return Unit::DefTypeAliasResult::Normal;
+    return current;
   }
 
   // There might also be a class or record with this name already.
   auto existingKind = nameList->checkSameName<PreTypeAlias>();
   if (existingKind) {
-    if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
+    if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
     raise_error("The name %s is already defined as a %s",
                 thisType->name->data(), existingKind);
@@ -698,27 +685,27 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
 
   auto resolved = resolveTypeAlias(this, thisType);
   if (resolved.invalid) {
-    if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
+    if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
     raise_error("Unknown type or class %s", typeName->data());
     not_reached();
   }
 
-  auto const persistent = (thisType->attrs & AttrPersistent) &&
-    (!resolved.klass || classHasPersistentRDS(resolved.klass)) &&
-    (!resolved.rec || recordHasPersistentRDS(resolved.rec));
+  auto const isPersistent = (thisType->attrs & AttrPersistent);
+  if (isPersistent) {
+    assertx(!resolved.klass || classHasPersistentRDS(resolved.klass));
+    assertx(!resolved.rec || recordHasPersistentRDS(resolved.rec));
+  }
 
   nameList->m_cachedTypeAlias.bind(
-    persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
     rds::LinkName{"TypeAlias", thisType->name},
     &resolved
   );
-  if (nameList->m_cachedTypeAlias.isPersistent()) {
-    return Unit::DefTypeAliasResult::Persistent;
+  if (!nameList->m_cachedTypeAlias.isPersistent()) {
+    nameList->setCachedTypeAlias(resolved);
   }
-
-  nameList->setCachedTypeAlias(resolved);
-  return Unit::DefTypeAliasResult::Normal;
+  return nameList->getCachedTypeAlias();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1217,8 +1204,9 @@ void Unit::mergeImpl(MergeInfo* mi) {
         case MergeKind::Define: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
-          auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
-          defCns(constantId);
+          auto const constant = lookupConstantId(static_cast<Id>(intptr_t(obj)) >> 3);
+          assertx((!!(constant->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+          defCns(constant);
           madeProgress = true;
           define.reset(i);
           continue;
@@ -1227,17 +1215,12 @@ void Unit::mergeImpl(MergeInfo* mi) {
         case MergeKind::TypeAlias: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_typealias);
-          auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-          auto const def = defTypeAlias(aliasId, failIsFatal);
-          if (def == Unit::DefTypeAliasResult::Fail) continue;
-          if (def == Unit::DefTypeAliasResult::Normal) {
-            auto& attrs = m_typeAliases[aliasId].attrs;
-            if (attrs & AttrPersistent) {
-              attrs = static_cast<Attr>(attrs & ~AttrPersistent);
-            }
+          auto const typeAlias = lookupTypeAliasId(static_cast<Id>(intptr_t(obj)) >> 3);
+          assertx((!!(typeAlias->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+          if (defTypeAlias(typeAlias, failIsFatal)) {
+            madeProgress = true;
+            define.reset(i);
           }
-          madeProgress = true;
-          define.reset(i);
           continue;
         }
 

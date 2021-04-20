@@ -51,6 +51,7 @@ struct ProfDataSerializer {
   bool serialize(const Func* func);
   bool serialize(const Class* cls);
   bool serialize(const RecordDesc* rec);
+  bool serialize(const TypeAlias* td);
 
   template<typename T>
   bool serialize(const T* x) {
@@ -127,6 +128,7 @@ struct ProfDataDeserializer {
   Func*& getEnt(const Func* p);
   Class*& getEnt(const Class* p);
   RecordDesc*& getEnt(const RecordDesc* p);
+  const TypeAlias*& getEnt(const TypeAlias* p);
   const RepoAuthType::Array*& getEnt(const RepoAuthType::Array* p);
 
   bool done();
@@ -143,6 +145,7 @@ struct ProfDataDeserializer {
   EntMap<Func*>        funcMap;
   EntMap<Class*>       classMap;
   EntMap<RecordDesc*>  recordMap;
+  EntMap<const TypeAlias*>   typeAliasMap;
   EntMap<const RepoAuthType::Array*> ratMap;
   jit::fast_map<uint32_t, uint32_t> fidMap;
 
@@ -183,6 +186,8 @@ void write_lclass(ProfDataSerializer& ser, const LazyClassData cls);
 LazyClassData read_lclass(ProfDataDeserializer& ser);
 void write_record(ProfDataSerializer& ser, const RecordDesc* rec);
 RecordDesc* read_record(ProfDataDeserializer& ser);
+void write_typealias(ProfDataSerializer& ser, const TypeAlias* td);
+const TypeAlias* read_typealias(ProfDataDeserializer& ser);
 void write_func(ProfDataSerializer& ser, const Func* func);
 Func* read_func(ProfDataDeserializer& ser);
 void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth);

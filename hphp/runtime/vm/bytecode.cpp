@@ -1329,10 +1329,6 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
   tvCopy(cns, *c1);
 }
 
-OPTBLD_INLINE void iopDefCns(uint32_t cid) {
-  vmfp()->func()->unit()->defCns(cid);
-}
-
 OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
   auto const clsTV = vmStack().topC();
   if (!isClassType(clsTV->m_type)) {

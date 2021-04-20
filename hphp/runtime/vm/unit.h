@@ -453,6 +453,8 @@ public:
   Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
   PreRecordDesc* lookupPreRecordId(Id id) const;
+  const Constant* lookupConstantId(Id id) const;
+  const PreTypeAlias* lookupTypeAliasId(Id id) const;
 
   /*
    * Range over all Funcs or PreClasses or RecordDescs in the Unit.
@@ -529,7 +531,7 @@ public:
   /*
    * Define the constant given by `id'
    */
-  void defCns(Id id);
+  void defCns(const Constant* constant);
 
   static Variant getCns(const StringData* name);
 
@@ -601,12 +603,9 @@ public:
    * unless failIsFatal is unset
    *
    * Returns:
-   *   Persistent: Type alias is successfully defined and is persistent
-   *   Normal: Type alias is successfully defined and is not persistent
-   *   Fail: Type alias is not successfully defined
+   *   true if we succeeded otherwise false
    */
-  enum class DefTypeAliasResult { Fail, Normal, Persistent };
-  Unit::DefTypeAliasResult defTypeAlias(Id id, bool failIsFatal = true);
+  const TypeAlias* defTypeAlias(const PreTypeAlias* typeAlias, bool failIsFatal = true);
 
   /////////////////////////////////////////////////////////////////////////////
   // File attributes.

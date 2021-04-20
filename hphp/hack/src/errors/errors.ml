@@ -1925,6 +1925,12 @@ let interface_with_partial_typeconst tconst_pos =
     tconst_pos
     "An interface cannot contain a partially abstract type constant"
 
+let partially_abstract_typeconst_definition pos =
+  add
+    (NastCheck.err_code NastCheck.PartiallyAbstractTypeconstDefinition)
+    pos
+    "`as` constraints are only legal on abstract type constants"
+
 let mk_multiple_xhp_category pos =
   {
     code = NastCheck.err_code NastCheck.MultipleXhpCategory;

@@ -357,6 +357,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_complex_coercion:(bool_opt "complex_coercion" config)
       ?tco_disable_partially_abstract_typeconsts:
         (bool_opt "disable_partially_abstract_typeconsts" config)
+      ?tco_disallow_partially_abstract_typeconst_definitions:
+        (bool_opt "disallow_partially_abstract_typeconst_definitions" config)
       ~error_codes_treated_strictly:
         (prepare_error_codes_treated_strictly config)
       ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)

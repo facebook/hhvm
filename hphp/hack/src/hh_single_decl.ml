@@ -246,6 +246,7 @@ let () =
       ignored_flag "--bitwise-math-new-code";
       ignored_flag "--inc-dec-new-code";
       ignored_flag "--math-new-code";
+      ignored_flag "--disallow-partially-abstract-typeconst-definitions";
     ]
     set_file
     usage;

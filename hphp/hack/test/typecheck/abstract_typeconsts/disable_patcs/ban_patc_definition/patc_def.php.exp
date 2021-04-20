@@ -1,0 +1,2 @@
+File "patc_def.php", line 4, characters 14-14:
+`as` constraints are only legal on abstract type constants (NastCheck[3093])

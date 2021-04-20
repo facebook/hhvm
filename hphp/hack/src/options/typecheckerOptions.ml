@@ -125,6 +125,9 @@ let complex_coercion = GlobalOptions.tco_complex_coercion
 let disable_partially_abstract_typeconsts =
   GlobalOptions.tco_disable_partially_abstract_typeconsts
 
+let disallow_partially_abstract_typeconst_definitions =
+  GlobalOptions.tco_disallow_partially_abstract_typeconst_definitions
+
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
 
 let check_redundant_generics = GlobalOptions.tco_check_redundant_generics

@@ -1,16 +1,30 @@
-\A:
+Member Linearization \A:
   A (PAT)
+Ancestor Linearization \A:
+  A
 
-\B:
+Member Linearization \B:
+  B
+  A
+Ancestor Linearization \B:
   B
   A
 
-\C:
+Member Linearization \C:
   C (PAT)
   B
   A
+Ancestor Linearization \C:
+  C
+  B
+  A
 
-\D:
+Member Linearization \D:
+  D
+  C
+  B
+  A
+Ancestor Linearization \D:
   D
   C
   B

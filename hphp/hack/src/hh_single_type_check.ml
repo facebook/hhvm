@@ -1986,10 +1986,10 @@ let handle_mode
         List.iter classes ~f:(fun (_, classname) ->
             if not !is_first then Printf.printf "\n";
             is_first := false;
-            let { Decl_linearize.lin_members; _ } =
+            let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =
               Decl_linearize.get_linearizations ctx classname
             in
-            let linearization =
+            let member_linearization =
               Sequence.map lin_members (fun mro ->
                   let name = Utils.strip_ns mro.Decl_defs.mro_name in
                   let env =
@@ -2054,8 +2054,16 @@ let handle_mode
                         Printf.sprintf " (%s)" modifiers )))
               |> Sequence.to_list
             in
-            Printf.printf "%s:\n" classname;
-            List.iter linearization ~f:(Printf.printf "  %s\n")))
+            let ancestor_linearization =
+              Sequence.map lin_ancestors (fun mro ->
+                  let name = Utils.strip_ns mro.Decl_defs.mro_name in
+                  Printf.sprintf "%s" name)
+              |> Sequence.to_list
+            in
+            Printf.printf "Member Linearization %s:\n" classname;
+            List.iter member_linearization ~f:(Printf.printf "  %s\n");
+            Printf.printf "Ancestor Linearization %s:\n" classname;
+            List.iter ancestor_linearization ~f:(Printf.printf "  %s\n")))
 
 (*****************************************************************************)
 (* Main entry point *)

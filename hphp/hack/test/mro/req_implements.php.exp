@@ -1,23 +1,33 @@
-\A:
+Member Linearization \A:
+  A
+Ancestor Linearization \A:
   A
 
-\B:
+Member Linearization \B:
+  B
+Ancestor Linearization \B:
   B
 
-\IA:
+Member Linearization \IA:
   IA (PAT)
+Ancestor Linearization \IA:
+  IA
 
-\IB:
+Member Linearization \IB:
   IB (PAT)
+Ancestor Linearization \IB:
+  IB
 
-\X:
+Member Linearization \X:
   X (copy_private_members, PAT)
   IA (requirement, consts_only, PAT)
   IB (requirement, consts_only, PAT)
   IB (PAT)
   IA (PAT)
+Ancestor Linearization \X:
+  X
 
-\Y:
+Member Linearization \Y:
   Y (copy_private_members, PAT)
   IA (consts_only, PAT)
   X (copy_private_members, PAT)
@@ -25,3 +35,7 @@
   IB (requirement, consts_only, PAT)
   IB (PAT)
   IA (PAT)
+Ancestor Linearization \Y:
+  Y
+  IA
+  X

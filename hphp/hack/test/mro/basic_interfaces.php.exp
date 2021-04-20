@@ -1,18 +1,32 @@
-\Foo:
+Member Linearization \Foo:
+  Foo
+Ancestor Linearization \Foo:
   Foo
 
-\Bar:
+Member Linearization \Bar:
+  Bar
+  Foo
+Ancestor Linearization \Bar:
   Bar
   Foo
 
-\I:
+Member Linearization \I:
   I (PAT)
+Ancestor Linearization \I:
+  I
 
-\I2:
+Member Linearization \I2:
   I2 (PAT)
   I (PAT)
+Ancestor Linearization \I2:
+  I2
+  I
 
-\I3:
+Member Linearization \I3:
   I3 (PAT)
   I (PAT)
   I2 (PAT)
+Ancestor Linearization \I3:
+  I3
+  I
+  I2

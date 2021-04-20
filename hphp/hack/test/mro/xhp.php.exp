@@ -1,10 +1,17 @@
-\:x:
+Member Linearization \:x:
+  :x
+Ancestor Linearization \:x:
   :x
 
-\:h:
+Member Linearization \:h:
+  :h
+Ancestor Linearization \:h:
   :h
 
-\:g:
+Member Linearization \:g:
   :g
   :x (xhp_attrs_only)
+  :h
+Ancestor Linearization \:g:
+  :g
   :h

@@ -1,25 +1,43 @@
-\I:
+Member Linearization \I:
   I (PAT)
+Ancestor Linearization \I:
+  I
 
-\A:
+Member Linearization \A:
   A
   I<T> (consts_only)
+Ancestor Linearization \A:
+  A
+  I
 
-\T:
+Member Linearization \T:
   T (copy_private_members, PAT)
   A<mixed> (requirement)
   I<mixed> (synthesized, consts_only)
+Ancestor Linearization \T:
+  T
 
-\B:
+Member Linearization \B:
   B
   T (copy_private_members)
   A<int>
   I<int> (consts_only)
   A<mixed> (requirement)
+Ancestor Linearization \B:
+  B
+  A
+  I
+  T
 
-\C:
+Member Linearization \C:
   C
   B
   T
   A<int>
   I<int> (consts_only)
+Ancestor Linearization \C:
+  C
+  B
+  A
+  I
+  T

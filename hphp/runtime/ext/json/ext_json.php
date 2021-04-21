@@ -82,6 +82,19 @@ function json_encode_with_error(
 )[defaults]: mixed;
 
 /**
+ * Like json_encode_with_error but has pure coeffects.
+ * Encoding objects implementing JsonSerializable with an impure jsonSerialize
+ * will result in coeffect violations/
+ */
+<<__Native>>
+function json_encode_pure(
+  mixed $value,
+  inout ?(int, string) $error,
+  int $options = 0,
+  int $depth = 512,
+)[]: mixed;
+
+/**
  * Returns the error string of the last json_encode() or json_decode() call
  *
  * @return string - Returns the error message on success or NULL with

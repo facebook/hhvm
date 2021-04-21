@@ -349,6 +349,8 @@ struct JsonExtension final : Extension {
     HHVM_FE(json_last_error_msg);
     HHVM_FE(json_encode);
     HHVM_FE(json_encode_with_error);
+    // TODO T89333558 unsafe pending coeffect propagation
+    HHVM_FALIAS(json_encode_pure, json_encode_with_error);
     HHVM_FE(json_decode);
     HHVM_FE(json_decode_with_error);
 

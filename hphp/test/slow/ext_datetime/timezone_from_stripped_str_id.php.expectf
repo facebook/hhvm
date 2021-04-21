@@ -1,0 +1,6 @@
+object(DateTimeZone) (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(7) "Etc/GMT"
+}

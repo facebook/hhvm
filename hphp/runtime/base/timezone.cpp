@@ -314,7 +314,12 @@ TimeZone::TimeZone(const String& name) {
   m_tztype = dummy->zone_type;
   switch(dummy->zone_type) {
     case TIMELIB_ZONETYPE_ID: {
-      always_assert(false && TIMELIB_ZONETYPE_ID);
+      // It may seem this is redundant with the specially handled checks
+      // earlier in the function, but it is not.  `timelib_parse_zone` performs
+      // some amount of stripping before calling `GetTimeZoneInfoRaw`, so we
+      // hit this case when the stripping results in a valid timezone
+      // identifier.
+      m_tzi = dummy->tz_info;
       break;
     }
     case TIMELIB_ZONETYPE_OFFSET:

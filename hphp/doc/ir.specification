@@ -2706,6 +2706,14 @@ To string conversions:
   instruction other than StMBase or InterpOne (when interpreting a member
   instruction) to modify the member base register.
 
+| LdMROProp, D(Bool), NA, NF
+
+  Load the current value of the roProp field of MInstrState
+
+| LdMROPropAddr, D(PtrToMISBool), NA, NF
+
+  Load the address of the roProp field of MInstrState
+
 | FinishMemberOp, ND, NA, NF
 
   Mark the end of a member operation. This has no effect at runtime but exists

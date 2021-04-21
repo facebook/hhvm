@@ -54,6 +54,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BStack:          break;
   case A::BMITempBase:     break;
   case A::BMIBase:         break;
+  case A::BMIROProp:       break;
   case A::BRds:            break;
   case A::BFContext:       break;
   case A::BFFunc:          break;
@@ -83,6 +84,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BStack:          ret += "St"; break;
     case A::BMITempBase:     ret += "MiTB"; break;
     case A::BMIBase:         ret += "MiB"; break;
+    case A::BMIROProp:       ret += "MiROP"; break;
     case A::BRds:            ret += "Rds"; break;
     case A::BFContext:       ret += "Fc"; break;
     case A::BFFunc:          ret += "Ff"; break;

@@ -579,7 +579,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase
+      stack_kills | AMIStateTempBase | AMIStateBase | AMIStateROProp
     };
   }
 
@@ -587,7 +587,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EnterTCUnwind>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase
+      stack_kills | AMIStateTempBase | AMIStateBase | AMIStateROProp
     };
   }
 
@@ -980,6 +980,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StMBase:
     return PureStore { AMIStateBase, inst.src(0), nullptr };
+  
+  case LdMROProp:
+    return PureLoad { AMIStateROProp };
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
@@ -1601,6 +1604,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToInt:
   case DblAsBits:
   case LdMIStateAddr:
+  case LdMROPropAddr:
   case LdClsCns:
   case LdSubClsCns:
   case LdSubClsCnsClsName:

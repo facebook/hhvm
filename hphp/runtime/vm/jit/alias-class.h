@@ -297,11 +297,12 @@ struct AliasClass {
     // Have no specialization, put them last.
     BMITempBase = 1U << 10,
     BMIBase     = 1U << 11,
-    BFBasePtr   = 1U << 12,
+    BMIROProp   = 1U << 12,
+    BFBasePtr   = 1U << 13,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp,
-    BMIState   = BMITempBase | BMIBase,
+    BMIState   = BMITempBase | BMIBase | BMIROProp,
 
     BActRec = BFContext | BFFunc | BFMeta,
 
@@ -492,8 +493,9 @@ auto const AUnknownTV         = AliasClass{AliasClass::BUnknownTV};
 auto const AUnknown           = AliasClass{AliasClass::BUnknown};
 
 /* Alias classes for specific MInstrState fields. */
-auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
+auto const AMIStateROProp     = AliasClass{AliasClass::BMIROProp};
+auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 
 /* Alias class for the frame base register */
 auto const AFBasePtr          = AliasClass{AliasClass::BFBasePtr};
@@ -519,4 +521,3 @@ std::string show(AliasClass);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -63,6 +63,7 @@ namespace detail {
   T(TypedValue&, TPtrToCell)     \
   T(TypedValue*, TPtrToCell)     \
   T(TypedValue, TCell)           \
+  T(bool*, TPtrToBool)           \
   T(bool, TBool)                 \
   T(double, TDbl)                \
   T(int, TInt)                   \
@@ -393,4 +394,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -4281,7 +4281,10 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let (env, cap_ty, unsafe_cap_ty) =
             type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
           in
-          Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+          let (env, _) =
+            Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+          in
+          (env, cap_ty)
       in
       let ft =
         { ft with ft_implicit_params = { capability = CapTy capability } }

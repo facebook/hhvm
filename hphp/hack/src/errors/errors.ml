@@ -3290,11 +3290,10 @@ let fun_variadicity_hh_vs_php56
 let ellipsis_strict_mode ~require pos =
   let msg =
     match require with
-    | `Type -> "Cannot use `...` without a **type hint** in strict mode."
     | `Param_name ->
-      "Cannot use `...` without a **parameter name** in strict mode."
+      "Variadic function arguments require a name in strict mode, e.g. `...$args`."
     | `Type_and_param_name ->
-      "Cannot use `...` without a **type hint** and **parameter name** in strict mode."
+      "Variadic function arguments require a name and type in strict mode, e.g. `int ...$args`."
   in
   add (Typing.err_code Typing.EllipsisStrictMode) pos msg
 

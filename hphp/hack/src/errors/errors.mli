@@ -1281,7 +1281,7 @@ val illegal_destructor : Pos.t -> unit
 val ambiguous_lambda : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
 val ellipsis_strict_mode :
-  require:[< `Param_name | `Type | `Type_and_param_name ] -> Pos.t -> unit
+  require:[< `Param_name | `Type_and_param_name ] -> Pos.t -> unit
 
 val untyped_lambda_strict_mode : Pos.t -> unit
 

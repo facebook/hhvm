@@ -1,0 +1,2 @@
+File "ellipsis_lambda.php", line 4, characters 8-19:
+Variadic function arguments require a name in strict mode, e.g. `...$args`. (Typing[4223])

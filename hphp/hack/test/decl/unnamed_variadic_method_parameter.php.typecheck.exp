@@ -1,2 +1,2 @@
 File "unnamed_variadic_method_parameter.php", line 4, characters 19-19:
-Cannot use `...` without a **type hint** and **parameter name** in strict mode. (Typing[4223])
+Variadic function arguments require a name and type in strict mode, e.g. `int ...$args`. (Typing[4223])

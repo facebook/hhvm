@@ -3,8 +3,8 @@
 
 function default_context()[defaults]: void {}
 
-function rx_context()[rx]: void {
-  // verify the lambda inherits capability rx from the outer function
+function rx_context()[oldrx]: void {
+  // verify the lambda inherits capability Rx from the outer function
   $rx_lambda = () ==> rx_context(); // ok
   $rx_lambda2 = () ==> default_context(); // error
 }
@@ -14,21 +14,21 @@ function implicit_context(): void {
   $default_lambda = () ==> {
     implicit_context(); // ok
     default_context(); // ok
-    rx_context(); // ok (Rx <: Defaults)
+    rx_context(); // ok (Rx <: defaults)
   };
 
-  $rx_lambda = ()[rx] ==> {};
+  $rx_lambda = ()[oldrx] ==> {};
   $default_lambda = () ==> $rx_lambda(); // ok
 }
 
-function policied_context()[policied]: void {
-  // the lambda should be typed as having Output capability, not defaults
+function unrelated_context()[unrelated]: void {
+  // the lambda should be typed as having Unrelated capability, not defaults
   () ==> rx_context(); // error
 
-  ()[rx] ==> {
-    // the type-checker shouldn't close over the output capability
-    () ==> policied_context(); // error FIXME(coeffects)
+  ()[oldrx] ==> {
+    // the type-checker shouldn't close over unrelated
+    () ==> unrelated_context(); // error
 
-    () ==> rx_context(); // ok (since rx is in the enclosing scope / inherited)
+    () ==> rx_context(); // ok (since Rx is in the enclosing scope / inherited)
   };
 }

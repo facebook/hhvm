@@ -1,48 +1,48 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function rx_context()[rx]: void {
-  $more_permissive = ()[rx, policied] ==> {
+function rx_context()[oldrx]: void {
+  $more_permissive = ()[oldrx, unrelated] ==> {
     rx_context(); // ok
   };
 
   $less_permissive = ()[] ==> {
-    $more_permissive(); // error (missing output)
-    rx_context(); // error (pure </: rx)
+    $more_permissive(); // error (missing unrelated)
+    rx_context(); // error (pure </: oldrx)
   };
 
-  $equally_permissive = ()[rx] ==> {
-    $less_permissive(); // ok (rx <: pure)
+  $equally_permissive = ()[oldrx] ==> {
+    $less_permissive(); // ok (oldrx <: pure)
     rx_context(); // ok
-    $more_permissive(); // error (missing output)
+    $more_permissive(); // error (missing unrelated)
   };
 }
 
-function policied_context()[policied]: void {
-  // the type-checker shouldn't close over the Output capability
-  ()[rx] ==> policied_context(); // error
+function unrelated_context()[unrelated]: void {
+  // the type-checker shouldn't close over the Unrelated capability
+  ()[oldrx] ==> unrelated_context(); // error
 }
 
 function nesting_test()[]: void {
-  $rx_lambda = ()[rx] ==> {};
+  $rx_lambda = ()[oldrx] ==> {};
   $least_permissive = ()[] ==> {};
-  $policied = ()[policied] ==> {};
+  $unrelated = ()[unrelated] ==> {};
 
-  ()[policied] ==> {
+  ()[unrelated] ==> {
     $call_lp = ()[] ==> $least_permissive();
-    $call_rx = ()[rx] ==> {
+    $call_oldrx = ()[oldrx] ==> {
       $rx_lambda(); // ok
       $least_permissive(); // ok
-      $policied(); // error
+      $unrelated(); // error
     };
     ()[] ==> {
       $rx_lambda(); // error
-      $call_rx(); // error (verify inner lambda is typed properly)
+      $call_oldrx(); // error (verify inner lambda is typed properly)
 
       $least_permissive(); // ok
       $call_lp(); // ok (verify inner lambda is typed properly)
 
-      $policied(); // error
+      $unrelated(); // error
     };
   };
 }

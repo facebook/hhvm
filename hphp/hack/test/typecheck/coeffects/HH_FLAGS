@@ -1,1 +1,2 @@
 --no-strict-contexts
+--extra-builtin ../../hhi/coeffects.hhi

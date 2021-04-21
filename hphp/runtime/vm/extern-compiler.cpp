@@ -630,15 +630,16 @@ ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
 
 namespace {
 CompilerResult assemble_string_handle_errors(const char* code,
-                                             const std::string& hhas,
+                                             const char* hhas,
+                                             size_t hhas_size,
                                              const char* filename,
                                              const SHA1& sha1,
                                              const Native::FuncTable& nativeFuncs,
                                              bool& internal_error,
                                              CompileAbortMode mode) {
   try {
-    return assemble_string(hhas.data(),
-                           hhas.length(),
+    return assemble_string(hhas,
+                           hhas_size,
                            filename,
                            sha1,
                            nativeFuncs,
@@ -710,7 +711,8 @@ CompilerResult CompilerPool::compile(const char* code,
     hhas,
     [&] (const ExternCompiler::Hhas& s) -> CompilerResult {
       return assemble_string_handle_errors(code,
-                                           s.s,
+                                           s.s.data(),
+                                           s.s.size(),
                                            filename,
                                            sha1,
                                            nativeFuncs,
@@ -1130,9 +1132,9 @@ CompilerResult hackc_compile(
       hackc_compile_from_text(&native_env, code, &output, &error_buf)
     };
     if (hhas) {
-      std::string hhas_str{hhas.get()};
       return assemble_string_handle_errors(code,
-                                           hhas_str,
+                                           hhas.get(),
+                                           strlen(hhas.get()),
                                            filename,
                                            sha1,
                                            nativeFuncs,

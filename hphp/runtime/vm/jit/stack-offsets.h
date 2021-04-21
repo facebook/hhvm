@@ -232,6 +232,15 @@ struct SBInvOffset {
    */
   template<typename SPOff>
   SPOff to(SBInvOffset sp) const;
+
+  /*
+   * Hashing.
+   */
+  struct Hash {
+    size_t operator()(SBInvOffset o) const {
+      return o.offset;
+    }
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,4 +286,3 @@ SBInvOffset::to<IRSPRelOffset>(SBInvOffset sp) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

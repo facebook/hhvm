@@ -103,8 +103,7 @@ bool merge_into(LocationState<lt>& dst, const LocationState<rt>& src) {
   return changed;
 }
 
-bool merge_memory_stack_into(jit::hash_map<uint32_t,StackState>& dst,
-                             const jit::hash_map<uint32_t,StackState>& src) {
+bool merge_memory_stack_into(StackStateMap& dst, const StackStateMap& src) {
   auto changed = false;
   // Throw away any information only known in dst.
   for (auto& [dIdx, dState] : dst) {
@@ -660,8 +659,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   if (base.maybe(AStackAny)) {
     for (auto& it : cur().stack) {
       // The SBInvOffset of the stack slot is just its 1-indexed slot.
-      auto const idx = it.first;
-      auto const sbRel = SBInvOffset{int32_t(idx) + 1};
+      auto const sbRel = it.first;
       auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
       if (base.maybe(AStack::at(spRel))) {
         apply(stk(spRel));
@@ -721,9 +719,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
     }
 
     if (base.maybe(AStackAny) && stores.maybe(AStackAny)) {
-      auto const maxStackOff = bcSPOff().offset;
-      for (auto i = 0; i < maxStackOff; ++i) {
-        auto const sbRel = SBInvOffset{i + 1};
+      for (auto sbRel = bcSPOff(); sbRel > SBInvOffset{0}; sbRel--) {
         auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
         auto const astk = AStack::at(spRel);
 
@@ -801,9 +797,8 @@ PostConditions FrameStateMgr::collectPostConds() {
 
   if (sp() != nullptr) {
     for (auto& it : cur().stack) {
-      auto const i = it.first;
+      auto const sbRel = it.first;
       auto& state = it.second;
-      auto const sbRel = SBInvOffset{int32_t(i) + 1};
       auto const type = state.type;
       auto const changed = state.maybeChanged;
 
@@ -1165,16 +1160,14 @@ StackState& FrameStateMgr::stackState(IRSPRelOffset spRel) {
 }
 
 StackState& FrameStateMgr::stackState(SBInvOffset sbRel) {
-  auto const idx = sbRel.offset - 1;
-
   always_assert_flog(
-    idx >= 0,
-    "stack idx went negative: irSPOff: {}, sbRel: {}\n",
+    sbRel.offset >= 1,
+    "stack sbRel.offset went below 1: irSPOff: {}, sbRel: {}\n",
     cur().irSPOff.offset,
     sbRel.offset
   );
 
-  auto& ret = cur().stack[idx];
+  auto& ret = cur().stack[sbRel];
   assertx(ret.value == nullptr || ret.value->type() == ret.type);
   return ret;
 }
@@ -1196,8 +1189,7 @@ bool FrameStateMgr::tracked(Location l) const {
       return cur().locals.count(l.localId()) > 0;
     case LTag::Stack: {
       auto const sbRel = l.stackIdx();
-      auto const idx = sbRel.offset - 1;
-      return cur().stack.count(idx) > 0;
+      return cur().stack.count(sbRel) > 0;
     }
     case LTag::MBase:
       return true;
@@ -1215,9 +1207,8 @@ StackState FrameStateMgr::stack(IRSPRelOffset offset) const {
 }
 
 StackState FrameStateMgr::stack(SBInvOffset offset) const {
-  auto const idx = offset.offset - 1;
   auto const& curStack = cur().stack;
-  auto const it = curStack.find(idx);
+  auto const it = curStack.find(offset);
   return it != curStack.end() ? it->second : StackState{};
 }
 

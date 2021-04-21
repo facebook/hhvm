@@ -110,6 +110,9 @@ using LocalState = LocationState<LTag::Local>;
 using StackState = LocationState<LTag::Stack>;
 using MBaseState = LocationState<LTag::MBase>;
 
+using LocalStateMap = jit::hash_map<uint32_t,LocalState>;
+using StackStateMap = jit::hash_map<SBInvOffset,StackState,SBInvOffset::Hash>;
+
 /*
  * MBRState tracks the value and type of the member base register pointer.
  *
@@ -188,14 +191,14 @@ struct FrameState {
   /*
    * The values in the eval stack in memory, either above or below the current
    * spValue pointer.  This is keyed by the offset to the base of the eval stack
-   * for the whole function.
+   * for the whole function (SBInvOffset).
    */
-  jit::hash_map<uint32_t,StackState> stack;
+  StackStateMap stack;
 
   /*
    * Maps the local ids to local variable information.
    */
-  jit::hash_map<uint32_t,LocalState> locals;
+  LocalStateMap locals;
 
   /*
    * Values and types of the member base register and its pointee.

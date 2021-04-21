@@ -268,6 +268,7 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
+    ESCAPE_BRACE,
     DISABLE_ARRAY_CAST,
     DISABLE_ARRAY_TYPEHINT,
     DISABLE_ARRAY,
@@ -753,6 +754,9 @@ mod tests {
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
+  "hhvm.hack.lang.escape_brace": {
+    "global_value": false
+  },
   "hhvm.hack.lang.rust_emitter": {
     "global_value": false
   },
@@ -1172,5 +1176,7 @@ bitflags! {
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS = 1 << 59;
         const DISALLOW_INST_METH = 1 << 60;
+        const ENABLE_READONLY_ENFORCEMENT = 1 << 61;
+        const ESCAPE_BRACE = 1 << 62;
     }
 }

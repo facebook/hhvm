@@ -269,6 +269,8 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Disable parsing of inst_meth() *)
   po_disallow_inst_meth: bool;
+  (* Escape brace in \{$x} *)
+  po_escape_brace: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
   (* Enable ifc on the specified list of path prefixes
@@ -405,6 +407,7 @@ val make :
   ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?po_disallow_inst_meth:bool ->
+  ?po_escape_brace:bool ->
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
@@ -658,6 +661,8 @@ val po_disallow_hash_comments : t -> bool
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val po_disallow_inst_meth : t -> bool
+
+val po_escape_brace : t -> bool
 
 val tco_use_direct_decl_parser : t -> bool
 

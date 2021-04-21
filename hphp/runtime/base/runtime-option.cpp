@@ -409,6 +409,9 @@ std::uint32_t RepoOptions::getParserFlags() const {
   if (EnableReadonlyEnforcement) {
     parser_flags |= ENABLE_READONLY_ENFORCEMENT;
   }
+  if (EscapeBrace) {
+    parser_flags |= ESCAPE_BRACE;
+  }
   return parser_flags;
 }
 

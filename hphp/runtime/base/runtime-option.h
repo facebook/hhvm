@@ -110,6 +110,7 @@ struct RepoOptions {
   H(bool,           DisallowDynamicMethCallerArgs,    false)          \
   H(bool,           DisallowInstMeth,                 false)          \
   H(bool,           EnableReadonlyEnforcement,        false)          \
+  H(bool,           EscapeBrace,                      false)          \
   /**/
 
   /**/

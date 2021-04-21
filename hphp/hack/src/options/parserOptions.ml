@@ -143,6 +143,10 @@ let disallow_inst_meth = GlobalOptions.po_disallow_inst_meth
 let with_disallow_inst_meth po b =
   { po with GlobalOptions.po_disallow_inst_meth = b }
 
+let escape_brace = GlobalOptions.po_escape_brace
+
+let with_escape_brace po b = { po with GlobalOptions.po_escape_brace = b }
+
 let hack_arr_dv_arrs = GlobalOptions.po_hack_arr_dv_arrs
 
 let with_hack_arr_dv_arrs po b =
@@ -183,7 +187,8 @@ let make
     ~disallow_fun_and_cls_meth_pseudo_funcs
     ~hack_arr_dv_arrs
     ~interpret_soft_types_as_like_types
-    ~disallow_inst_meth =
+    ~disallow_inst_meth
+    ~escape_brace =
   GlobalOptions.
     {
       default with
@@ -217,11 +222,13 @@ let make
       po_hack_arr_dv_arrs = hack_arr_dv_arrs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       po_disallow_inst_meth = disallow_inst_meth;
+      po_escape_brace = escape_brace;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -270,4 +277,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disallow_fun_and_cls_meth_pseudo_funcs po,
     hack_arr_dv_arrs po,
     interpret_soft_types_as_like_types po,
-    disallow_inst_meth po )
+    disallow_inst_meth po,
+    escape_brace po )

@@ -273,6 +273,7 @@ prefixed_flags!(
     DISABLE_ARRAY,
     RUST_EMITTER,
     ENABLE_READONLY_ENFORCEMENT,
+    ESCAPE_BRACE,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
@@ -757,6 +758,9 @@ mod tests {
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
+  "hhvm.hack.lang.escape_brace": {
+    "global_value": false
+  },
   "hhvm.hack.lang.rust_emitter": {
     "global_value": false
   },
@@ -1178,5 +1182,6 @@ bitflags! {
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS = 1 << 59;
         const DISALLOW_INST_METH = 1 << 60;
         const ENABLE_READONLY_ENFORCEMENT = 1 << 61;
+        const ESCAPE_BRACE = 1 << 62;
     }
 }

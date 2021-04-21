@@ -518,6 +518,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
+        po_escape_brace: hack_lang_flags(LangFlags::ESCAPE_BRACE),
         ..Default::default()
     }
 }

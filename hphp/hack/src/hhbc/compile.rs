@@ -111,6 +111,7 @@ bitflags! {
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19;
         const ENABLE_READONLY_ENFORCEMENT=1 << 20;
+        const ESCAPE_BRACE=1 << 21;
   }
 }
 
@@ -510,6 +511,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_disallow_fun_and_cls_meth_pseudo_funcs =
         hack_lang_flags(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
     popt.po_disallow_inst_meth = hack_lang_flags(LangFlags::DISALLOW_INST_METH);
+    popt.po_escape_brace = hack_lang_flags(LangFlags::ESCAPE_BRACE);
     popt
 }
 

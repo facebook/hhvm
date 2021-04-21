@@ -496,6 +496,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsKeyset:
   case AllocBespokeStructDict:
   case AllocStructDict:
+  case AllocUninitBespokeStructDict:
   case AllocVec:
   case AndInt:
   case AssertLoc:
@@ -670,6 +671,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InitDictElem:
   case InitObjMemoSlots:
   case InitObjProps:
+  case InitStructElem:
   case InitThrowableFileAndLine:
   case InitVecElem:
   case InitVecElemLoop:

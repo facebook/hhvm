@@ -280,6 +280,7 @@ bool canDCE(IRInstruction* inst) {
   case ConstructClosure:
   case AllocBespokeStructDict:
   case AllocStructDict:
+  case AllocUninitBespokeStructDict:
   case AllocVec:
   case GetDictPtrIter:
   case AdvanceDictPtrIter:
@@ -443,6 +444,7 @@ bool canDCE(IRInstruction* inst) {
   case InitThrowableFileAndLine:
   case ConstructInstance:
   case InitDictElem:
+  case InitStructElem:
   case InitVecElem:
   case InitVecElemLoop:
   case NewKeysetArray:
@@ -1097,7 +1099,7 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, StClosureArg)) {
+        if (inst->is(InitVecElem, InitStructElem, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

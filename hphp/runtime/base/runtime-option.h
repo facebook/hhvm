@@ -930,6 +930,7 @@ struct RuntimeOption {
   /* How many elements to inline for packed- or mixed-array inits. */   \
   F(uint32_t, HHIRMaxInlineInitPackedElements, 8)                       \
   F(uint32_t, HHIRMaxInlineInitMixedElements,  4)                       \
+  F(uint32_t, HHIRMaxInlineInitStructElements, 8)                       \
   F(double, HHIROffsetArrayProfileThreshold, 0.85)                      \
   F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   F(double, HHIRMissingArrayProfileThreshold, 0.8)                      \

@@ -1071,21 +1071,41 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const imms = getImmVector(sk.pc());
   auto const size = safe_cast<uint32_t>(imms.size());
 
-  auto const data = [&]() -> NewBespokeStructData {
-    auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
-    auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
-    for (auto i = 0; i < size; i++) {
-      auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
-      slots[i] = slayout->keySlot(key);
-      assertx(slots[i] != kInvalidSlot);
-    }
-    return {layout, spOffBCFromIRSP(env), safe_cast<uint32_t>(size), slots};
-  }();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+  auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
+  for (auto i = 0; i < size; i++) {
+    auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
+    slots[i] = slayout->keySlot(key);
+    assertx(slots[i] != kInvalidSlot);
+  }
 
-  auto const arr = gen(env, NewBespokeStructDict, data, sp(env));
-  discard(env, size);
+  if (size > RuntimeOption::EvalHHIRMaxInlineInitStructElements) {
+    auto const data = NewBespokeStructData {layout,
+                                            spOffBCFromIRSP(env),
+                                            safe_cast<uint32_t>(size),
+                                            slots};
+    auto const arr = gen(env, NewBespokeStructDict, data, sp(env));
+    discard(env, size);
+    push(env, arr);
+    return true;
+  }
+  auto const data =
+    AllocUninitBespokeStructData {layout, safe_cast<uint32_t>(size), slots};
+  auto const arr = gen(env, AllocUninitBespokeStructDict, data);
+  for (auto i = 0; i < size; ++i) {
+    auto idx = size - i - 1;
+    auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[idx]);
+    gen(
+      env,
+      InitStructElem,
+      KeyedIndexData {slots[idx], key},
+      arr,
+      popC(env, DataTypeGeneric)
+    );
+  }
   push(env, arr);
   return true;
+
 }
 
 bool specializeSource(IRGS& env, SrcKey sk) {

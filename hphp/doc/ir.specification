@@ -1503,9 +1503,21 @@ To string conversions:
   and N stack elements at `offset` on stack S0 for values.  This op assumes it
   can move values from the stack without inc-reffing them.
 
-| AllocBespokeStructDict<layout>, DStructDict, NA, CRc
+| AllocBespokeStructDict<layout>, DStructDict, NA, PRc
 
   Allocate a new, empty dict with the bespoke StructLayout `layout`.
+
+| AllocUninitBespokeStructDict<layout,slots...>,   DStructDict, NA, PRc
+
+  Allocate a new dict with the bespoke StructLayout `layout` and insertion order
+  specified by `slots`. This instruction does not set the elements of the dict; 
+  use InitStructElem for that.
+
+| InitStructElem<slot,key>, ND, SStructDict S(Cell), CRc
+
+  Initialize the element at slot `slot` corresponding to `key` in StructDict S0 
+  with S1. This instruction assumes that S1 has already been inc-reffed. 
+  Used with the result of AllocUninitBespokeStructDict.
 
 | NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc
 

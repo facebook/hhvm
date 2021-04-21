@@ -460,6 +460,39 @@ void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
+void cgAllocUninitBespokeStructDict(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<AllocUninitBespokeStructDict>();
+  auto& v = vmain(env);
+
+  auto const n = static_cast<size_t>((extra->numSlots + 7) & ~7);
+  auto const slots = reinterpret_cast<uint8_t*>(v.allocData<uint64_t>(n / 8));
+  for (auto i = 0; i < extra->numSlots; i++) {
+    slots[i] = safe_cast<uint8_t>(extra->slots[i]);
+  }
+  for (auto i = extra->numSlots; i < n; i++) {
+    slots[i] = static_cast<uint8_t>(KindOfUninit);
+  }
+
+  auto const target = CallSpec::direct(StructDict::AllocUninitStructDict);
+  auto const args = argGroup(env, inst)
+    .imm(StructLayout::As(extra->layout.bespokeLayout()))
+    .imm(extra->numSlots)
+    .dataPtr(slots);
+
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
+void cgInitStructElem(IRLS& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const layout = arr->type().arrSpec().layout();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const slot = inst->extra<InitStructElem>()->index;
+  auto const type = rarr[slayout->typeOffsetForSlot(slot)];
+  auto const data = rarr[slayout->valueOffsetForSlot(slot)];
+  storeTV(vmain(env), inst->src(1)->type(), srcLoc(env, inst, 1), type, data);
+}
+
 void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewBespokeStructDict>();

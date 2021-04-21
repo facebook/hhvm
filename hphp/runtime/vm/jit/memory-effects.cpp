@@ -1058,6 +1058,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore { AElemS { arr, key }, val, arr };
   }
 
+  case InitStructElem: {
+    auto const arr = inst.src(0);
+    auto const val = inst.src(1);
+    auto const key = inst.extra<InitStructElem>()->key;
+    return PureStore { AElemS { arr, key }, val, arr };
+  }
+
   case LdMonotypeDictVal: {
     // TODO(mcolavita): When we have a type-array-elem method to get the key
     // of an arbitrary array-like type, use that to narrow this load.
@@ -1419,6 +1426,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AllocVec:
   case AllocStructDict:
   case AllocBespokeStructDict:
+  case AllocUninitBespokeStructDict:
   case ConvDblToStr:
   case ConvIntToStr:
     return IrrelevantEffects {};

@@ -58,6 +58,18 @@ std::string NewBespokeStructData::show() const {
   return os.str();
 }
 
+std::string AllocUninitBespokeStructData::show() const {
+  std::ostringstream os;
+  os << layout.describe() << ",(";
+  auto delimiter = "";
+  for (auto i = 0; i < numSlots; i++) {
+    os << delimiter << slots[i];
+    delimiter = ",";
+  }
+  os << ')';
+  return os.str();
+}
+
 size_t LoggingProfileData::stableHash() const {
   return profile ? profile->key.stableHash() : 0;
 }

@@ -1592,6 +1592,39 @@ struct NewBespokeStructData : IRExtraData {
   Slot* slots;
 };
 
+struct AllocUninitBespokeStructData : IRExtraData {
+  AllocUninitBespokeStructData(ArrayLayout layout,
+                               uint32_t numSlots,
+                               Slot* slots)
+    : layout(layout), numSlots(numSlots), slots(slots) {}
+
+  std::string show() const;
+
+  size_t stableHash() const {
+    auto hash = folly::hash::hash_combine(
+      std::hash<uint16_t>()(layout.toUint16()),
+      std::hash<uint32_t>()(numSlots)
+    );
+    for (auto i = 0; i < numSlots; i++) {
+      hash = folly::hash::hash_combine(hash, slots[i]);
+    }
+    return hash;
+  }
+
+  bool equals(const AllocUninitBespokeStructData& o) const {
+    if (layout != o.layout) return false;
+    if (numSlots != o.numSlots) return false;
+    for (auto i = 0; i < numSlots; i++) {
+      if (slots[i] != o.slots[i]) return false;
+    }
+    return true;
+  }
+
+  ArrayLayout layout;
+  uint32_t numSlots;
+  Slot* slots;
+};
+
 struct PackedArrayData : IRExtraData {
   explicit PackedArrayData(uint32_t size) : size(size) {}
   std::string show() const { return folly::format("{}", size).str(); }
@@ -2706,12 +2739,14 @@ X(NewStructDict,                NewStructData);
 X(NewRecord,                    NewStructData);
 X(AllocStructDict,              NewStructData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
+X(AllocUninitBespokeStructDict, AllocUninitBespokeStructData);
 X(NewBespokeStructDict,         NewBespokeStructData);
 X(AllocVec,                     PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);
 X(InitVecElemLoop,              InitPackedArrayLoopData);
 X(InitVecElem,                  IndexData);
 X(InitDictElem,                 KeyedIndexData);
+X(InitStructElem,               KeyedIndexData);
 X(CreateAAWH,                   CreateAAWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckDictOffset,              IndexData);

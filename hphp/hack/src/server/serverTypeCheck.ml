@@ -1165,7 +1165,7 @@ functor
       (* PARSING ***************************************************************)
       debug_print_path_set genv "files_to_parse" files_to_parse;
 
-      ServerProgress.send_progress_to_monitor_w_timeout
+      ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "parsing %d files"
         reparse_count;
@@ -1212,7 +1212,7 @@ functor
       in
 
       (* NAMING ****************************************************************)
-      ServerProgress.send_progress_to_monitor_w_timeout
+      ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "resolving symbol references";
       let logstring = "Naming" in
@@ -1254,7 +1254,7 @@ functor
       in
 
       (* REDECL PHASE 1 ********************************************************)
-      ServerProgress.send_progress_to_monitor_w_timeout
+      ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "determining changes";
       let count = Relative_path.Map.cardinal fast in
@@ -1336,7 +1336,7 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_now_end" ~start_time
       in
-      ServerProgress.send_progress_to_monitor_w_timeout
+      ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "evaluating type declarations of %d files"
         count;
@@ -1518,7 +1518,7 @@ functor
           ~changed_files:files_to_parse
           ~parse_t
       in
-      ServerProgress.send_progress_to_monitor_w_timeout
+      ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "typechecking %d files"
         to_recheck_count;

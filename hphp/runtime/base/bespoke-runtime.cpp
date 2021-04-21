@@ -115,6 +115,12 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     }
   }
 
+  // Validate that no keys are subject to intish cast.
+  for (auto const [_, str] : fields) {
+    int64_t i;
+    if (str.get()->isStrictlyInteger(i)) return nullptr;
+  }
+
   folly::SharedMutex::WriteHolder lock{s_mapLock};
   auto const rs = new RuntimeStruct(stableIdentifier.get(), fields);
   auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), rs);
@@ -294,6 +300,14 @@ void StructDictInit::set(int64_t key, const Variant& value) {
 
 void StructDictInit::setIntishCast(size_t idx, const String& key,
                                    const Variant& value) {
+  if (m_struct) {
+    // No keys registered with a RuntimeStruct will ever intish cast.
+    DEBUG_ONLY int64_t n;
+    assertx(!key.get()->isStrictlyInteger(n));
+    set(idx, key.get(), *value.asTypedValue());
+    return;
+  }
+
   int64_t n;
   if (ArrayData::IntishCastKey(key.get(), n)) {
     set(n, value);

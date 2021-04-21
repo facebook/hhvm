@@ -324,7 +324,7 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-using SSwitchMap = FixedStringMap<TCA,true>;
+using SSwitchMap = FixedStringMap<TCA>;
 
 TCA sswitchHelperFast(const StringData* val,
                       const SSwitchMap* table,

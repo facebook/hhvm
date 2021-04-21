@@ -27,32 +27,11 @@ namespace FSM {
 
 extern const StringData* null_key;
 
-bool is_in_request_context();
-void log_to_scuba(const StringData*, const StringData*);
+} // FSM
 
-template<bool CaseSensitive>
-inline bool strEqual(const StringData* sd1, const StringData* sd2) {
-  if (sd1 == sd2 || sd1->same(sd2)) return true;
-  if (CaseSensitive || !RO::EvalRaiseOnCaseInsensitiveLookup) return false;
-  // If keys are same case insensitively, raise a notice
-  if (sd1->isame(sd2)) {
-    if (is_in_request_context()) {
-      raise_notice("Invalid case sensitive method lookup: "
-                   "Searching for %s using %s",
-                   sd1->data(), sd2->data());
-    } else {
-      log_to_scuba(sd1, sd2);
-    }
-    return true;
-  }
-  return false;
-}
-
-}
-
-template<class V, bool CaseSensitive, class E>
+template<class V, class E>
 NEVER_INLINE
-void FixedStringMap<V,CaseSensitive,E>::clear() {
+void FixedStringMap<V,E>::clear() {
   if (m_table && m_table != (Elm*)&FSM::null_key + 1) {
     vm_free(m_table - m_mask - 1);
   }
@@ -60,9 +39,9 @@ void FixedStringMap<V,CaseSensitive,E>::clear() {
   m_mask = 0;
 }
 
-template<class V, bool CaseSensitive, class E>
+template<class V, class E>
 NEVER_INLINE
-void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
+void FixedStringMap<V,E>::init(int num, uint32_t numExtraBytes) {
   if (!num && !numExtraBytes) {
     m_table = (Elm*)&FSM::null_key + 1;
     m_mask = 0;
@@ -84,9 +63,9 @@ void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
   m_mask = capac - 1;
 }
 
-template<class V, bool CaseSensitive, class E>
+template<class V, class E>
 NEVER_INLINE
-void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
+void FixedStringMap<V,E>::add(const StringData* sd, const V& v) {
   assertx(sd->isStatic());
 
   Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
@@ -94,45 +73,45 @@ void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
   while (elm->sd) {
     assertx(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
-    if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) break;
+    if (elm->sd == sd || sd->same(elm->sd)) break;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
   }
   elm->sd = sd;
   elm->data = v;
 }
 
-template<class V, bool CaseSensitive, class E>
+template<class V, class E>
 NEVER_INLINE
-V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
+V* FixedStringMap<V,E>::find(const StringData* sd) const {
   Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
   UNUSED unsigned numProbes = 0;
   for(;;) {
     assertx(numProbes++ < m_mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
-    if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) return &elm->data;
+    if (elm->sd == sd || sd->same(elm->sd)) return &elm->data;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class T, class V, bool case_sensitive, class E>
+template<class T, class V, class E>
 inline
-T& FixedStringMapBuilder<T,V,case_sensitive,E>::operator[](V idx) {
+T& FixedStringMapBuilder<T,V,E>::operator[](V idx) {
   assertx(idx >= 0);
   assertx(size_t(idx) < m_list.size());
   return m_list[idx];
 }
 
-template<class T, class V, bool case_sensitive, class E>
+template<class T, class V, class E>
 inline
-const T& FixedStringMapBuilder<T,V,case_sensitive,E>::operator[](V idx) const {
+const T& FixedStringMapBuilder<T,V,E>::operator[](V idx) const {
   return (*const_cast<FixedStringMapBuilder*>(this))[idx];
 }
 
-template<class T, class V, bool case_sensitive, class E>
+template<class T, class V, class E>
 inline
-void FixedStringMapBuilder<T,V,case_sensitive,E>::add(const StringData* name,
+void FixedStringMapBuilder<T,V,E>::add(const StringData* name,
                                                       const T& t) {
   if (m_list.size() >= size_t(std::numeric_limits<V>::max())) {
     assertx(false && "FixedStringMap::Builder overflowed");
@@ -142,15 +121,15 @@ void FixedStringMapBuilder<T,V,case_sensitive,E>::add(const StringData* name,
   m_list.push_back(t);
 }
 
-template<class T, class V, bool case_sensitive, class E>
+template<class T, class V, class E>
 inline
-void FixedStringMapBuilder<T,V,case_sensitive,E>::addUnnamed(const T& t) {
+void FixedStringMapBuilder<T,V,E>::addUnnamed(const T& t) {
   m_list.push_back(t);
 }
 
-template<class T, class V, bool case_sensitive, class E>
+template<class T, class V, class E>
 inline
-void FixedStringMapBuilder<T,V,case_sensitive,E>::create(FSMap& map) {
+void FixedStringMapBuilder<T,V,E>::create(FSMap& map) {
   map.extra() = size();
   map.init(size(), 0);
   if (!size()) {

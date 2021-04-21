@@ -394,12 +394,12 @@ struct Class : AtomicCountable {
   /*
    * Container types.
    */
-  using MethodMap         = FixedStringMap<Slot, false, Slot>;
-  using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, false, Slot>;
-  using InterfaceMap      = IndexedStringMap<LowPtr<Class>, true, int>;
-  using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, true, int>;
+  using MethodMap         = FixedStringMap<Slot, Slot>;
+  using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, Slot>;
+  using InterfaceMap      = IndexedStringMap<LowPtr<Class>, int>;
+  using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, int>;
   using RequirementMap    = IndexedStringMap<
-                              const PreClass::ClassRequirement*, true, int>;
+                              const PreClass::ClassRequirement*, int>;
   using TraitAliasVec     = vm_vector<PreClass::TraitAliasRule::NamePair>;
 
   /*
@@ -727,9 +727,6 @@ public:
    * Look up a method by name.
    *
    * Return null if no such method exists.
-   *
-   * If the method name lookup matches case insensitively but not case
-   * sensitively, we raise a notice.
    */
   Func* lookupMethod(const StringData* methName) const;
 
@@ -1610,9 +1607,9 @@ private:
   // Internal types.
 
 private:
-  using ConstMap = IndexedStringMap<Const,true,Slot>;
-  using PropMap  = IndexedStringMap<Prop,true,Slot>;
-  using SPropMap = IndexedStringMap<SProp,true,Slot>;
+  using ConstMap = IndexedStringMap<Const,Slot>;
+  using PropMap  = IndexedStringMap<Prop,Slot>;
+  using SPropMap = IndexedStringMap<SProp,Slot>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Private methods.

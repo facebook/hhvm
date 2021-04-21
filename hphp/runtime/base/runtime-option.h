@@ -758,10 +758,8 @@ struct RuntimeOption {
   F(bool, HHBBCTestCompression,        false)                           \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
-  F(bool, RaiseOnCaseInsensitiveLookup,true)                            \
   F(bool, EnableHhbcByRef,             true)                            \
   F(bool, LogHackcMemStats,            false)                           \
-  F(uint32_t, RaiseOnCaseInsensitiveLookupSampleRate, 1)                \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

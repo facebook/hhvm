@@ -1229,7 +1229,7 @@ struct Func final {
   // SharedData.
 
 private:
-  using NamedLocalsMap = IndexedStringMap<LowStringPtr, true, Id>;
+  using NamedLocalsMap = IndexedStringMap<LowStringPtr, Id>;
 
   // Some 16-bit values in SharedData are stored as small deltas if they fit
   // under this limit.  If not, they're set to the limit value and an

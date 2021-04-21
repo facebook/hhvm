@@ -1621,6 +1621,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InstanceOfIfaceVtable:
   case IsTypeStructCached:
   case LdTVAux:
+  case MethodExists:
   case GetTime:
   case GetTimeNs:
   case ProfileInstanceCheck:
@@ -1632,9 +1633,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdLazyClsName:
   case DirFromFilepath:
     return IrrelevantEffects {};
-  case MethodExists:
-    if (!RO::EvalRaiseOnCaseInsensitiveLookup) return IrrelevantEffects {};
-    return may_load_store(AHeapAny, AHeapAny);
 
   case LookupClsCns:
   case LookupClsCtxCns:

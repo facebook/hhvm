@@ -86,7 +86,7 @@ struct RecordEmitter {
     UserAttributeMap m_userAttributes{};
   };
 
-  using FieldMap = IndexedStringMap<Field, true, Slot>;
+  using FieldMap = IndexedStringMap<Field, Slot>;
 
   RecordEmitter(UnitEmitter& ue, Id id, const std::string& name);
 

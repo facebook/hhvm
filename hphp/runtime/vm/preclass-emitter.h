@@ -182,8 +182,8 @@ struct PreClassEmitter {
     bool m_fromTrait;
   };
 
-  typedef IndexedStringMap<Prop, true, Slot> PropMap;
-  typedef IndexedStringMap<Const, true, Slot> ConstMap;
+  typedef IndexedStringMap<Prop, Slot> PropMap;
+  typedef IndexedStringMap<Const, Slot> ConstMap;
 
   PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name,
                   PreClass::Hoistable hoistable);

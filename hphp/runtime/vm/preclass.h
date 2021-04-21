@@ -279,9 +279,9 @@ struct PreClass : AtomicCountable {
   };
 
 private:
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+  typedef IndexedStringMap<Func*,Slot> MethodMap;
+  typedef IndexedStringMap<Prop,Slot> PropMap;
+  typedef IndexedStringMap<Const,Slot> ConstMap;
 
 public:
   typedef VMFixedVector<LowStringPtr> InterfaceVec;

@@ -91,7 +91,7 @@ struct PreRecordDesc : AtomicCountable {
   void atomicRelease();
 
 private:
-  using FieldMap = IndexedStringMap<Field,true,Slot>;
+  using FieldMap = IndexedStringMap<Field,Slot>;
   void checkDefaultValueType(const Field&) const;
 
 public:

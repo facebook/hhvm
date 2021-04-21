@@ -29,7 +29,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class V, bool case_sensitive, class ExtraType = int32_t>
+template<class V, class ExtraType = int32_t>
 struct FixedStringMap {
   explicit FixedStringMap(int num) : m_table(nullptr) { init(num); }
   FixedStringMap() : m_mask(0), m_table(nullptr) {}
@@ -77,16 +77,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T, class V, bool case_sensitive, class ExtraType = int32_t>
+template<class T, class V, class ExtraType = int32_t>
 struct FixedStringMapBuilder {
-  using EqObject = typename std::conditional<
-    case_sensitive,
-    string_data_same,
-    string_data_isame
-  >::type;
-
-  using Map = hphp_hash_map<const StringData*, V, string_data_hash, EqObject>;
-  using FSMap = FixedStringMap<V, case_sensitive, ExtraType>;
+  using Map =
+    hphp_hash_map<const StringData*, V, string_data_hash, string_data_same>;
+  using FSMap = FixedStringMap<V, ExtraType>;
 
   using const_iterator = typename Map::const_iterator;
   using iterator = typename Map::iterator;

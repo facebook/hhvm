@@ -35,7 +35,6 @@ namespace HPHP {
  * (since we use a FixedStringMap internally).
  */
 template<class T,
-         bool CaseSensitive,
          class Index,
          Index InvalidIndex = Index(-1)>
 struct IndexedStringMap {
@@ -121,21 +120,21 @@ struct IndexedStringMap {
 
   static constexpr ptrdiff_t vecOff() {
     return offsetof(IndexedStringMap, m_map) +
-      FixedStringMap<Index,CaseSensitive,Index>::tableOff();
+      FixedStringMap<Index,Index>::tableOff();
   }
   static constexpr ptrdiff_t sizeOff() {
     return offsetof(IndexedStringMap, m_map) +
-      FixedStringMap<Index,CaseSensitive,Index>::sizeOff();
+      FixedStringMap<Index,Index>::sizeOff();
   }
   static constexpr size_t sizeSize() {
-    return FixedStringMap<Index,CaseSensitive,Index>::sizeSize();
+    return FixedStringMap<Index,Index>::sizeSize();
   }
 
 private:
   uint32_t byteSize() const { return size() * sizeof(T); }
   void setSize(Index size) { m_map.extra() = size; }
 
-  FixedStringMap<Index,CaseSensitive,Index> m_map;
+  FixedStringMap<Index,Index> m_map;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -144,20 +143,14 @@ private:
  * Builder object for creating IndexedStringMaps.  Fill one of these
  * up, and then pass it to IndexedStringMap::create.
  */
-template<class T, bool CaseSensitive, class Index, Index InvalidIndex>
-struct IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>::Builder {
+template<class T, class Index, Index InvalidIndex>
+struct IndexedStringMap<T,Index,InvalidIndex>::Builder {
 private:
-  using EqObject = typename std::conditional<
-    CaseSensitive,
-    string_data_same,
-    string_data_isame
-  >::type;
-
   using Map = hphp_hash_map<
     const StringData*,
     Index,
     string_data_hash,
-    EqObject
+    string_data_same
   >;
 
 public:

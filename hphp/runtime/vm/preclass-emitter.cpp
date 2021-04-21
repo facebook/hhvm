@@ -107,12 +107,10 @@ PreClassEmitter::Prop::~Prop() {
 
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
                                  Id id,
-                                 const std::string& n,
-                                 PreClass::Hoistable hoistable)
+                                 const std::string& n)
   : m_ue(ue)
   , m_name(preClassName(n))
-  , m_id(id)
-  , m_hoistable(hoistable) {}
+  , m_id(id) {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
@@ -272,7 +270,7 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   int repoId = m_ue.m_repoId;
   int64_t usn = m_ue.m_sn;
   pcrp.insertPreClass[repoId]
-      .insert(*this, txn, usn, m_id, m_name, m_hoistable);
+      .insert(*this, txn, usn, m_id, m_name);
 
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
@@ -321,8 +319,7 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_name,
-    attrs, m_parent, m_docComment, m_id,
-    m_hoistable);
+    attrs, m_parent, m_docComment, m_id);
   pc->m_interfaces = m_interfaces;
   pc->m_includedEnums = m_enumIncludes;
   pc->m_usedTraits = m_usedTraits;
@@ -452,7 +449,7 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
 }
 
 template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
-  // NOTE: name, hoistable, and a few other fields currently
+  // NOTE: name and a few other fields currently
   // serialized outside of this.
   sd(m_line1)
     (m_line2)
@@ -496,7 +493,7 @@ void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
-      "(unitSn INTEGER, preClassId INTEGER, name TEXT, hoistable INTEGER, "
+      "(unitSn INTEGER, preClassId INTEGER, name TEXT, "
       " extraData BLOB, PRIMARY KEY (unitSn, preClassId));",
       m_repo.table(repoId, "PreClass"));
     txn.exec(createQuery);
@@ -506,12 +503,11 @@ void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 void PreClassRepoProxy::InsertPreClassStmt
                       ::insert(const PreClassEmitter& pce, RepoTxn& txn,
                                int64_t unitSn, Id preClassId,
-                               const StringData* name,
-                               PreClass::Hoistable hoistable) {
+                               const StringData* name) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} "
-      "VALUES(@unitSn, @preClassId, @name, @hoistable, @extraData);",
+      "VALUES(@unitSn, @preClassId, @name, @extraData);",
       m_repo.table(m_repoId, "PreClass"));
     txn.prepare(*this, insertQuery);
   }
@@ -522,7 +518,6 @@ void PreClassRepoProxy::InsertPreClassStmt
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@preClassId", preClassId);
   query.bindStringPiece("@name", nm);
-  query.bindInt("@hoistable", hoistable);
   const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
@@ -533,7 +528,7 @@ void PreClassRepoProxy::GetPreClassesStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT preClassId, name, hoistable, extraData "
+      "SELECT preClassId, name, extraData "
       "FROM {} "
       "WHERE unitSn == @unitSn ORDER BY preClassId ASC;",
       m_repo.table(m_repoId, "PreClass"));
@@ -546,10 +541,8 @@ void PreClassRepoProxy::GetPreClassesStmt
     if (query.row()) {
       Id preClassId;          /**/ query.getId(0, preClassId);
       std::string name;       /**/ query.getStdString(1, name);
-      int hoistable;          /**/ query.getInt(2, hoistable);
-      BlobDecoder extraBlob = /**/ query.getBlob(3, ue.useGlobalIds());
-      PreClassEmitter* pce = ue.newPreClassEmitter(
-        name, (PreClass::Hoistable)hoistable);
+      BlobDecoder extraBlob = /**/ query.getBlob(2, ue.useGlobalIds());
+      PreClassEmitter* pce = ue.newPreClassEmitter(name);
       pce->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited) {
         assertx(pce->attrs() & AttrPersistent);

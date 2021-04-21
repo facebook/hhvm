@@ -119,7 +119,6 @@ std::atomic<size_t> Unit::s_liveUnits{0};
 Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
   MergeInfo* mi = (MergeInfo*)malloc(
     sizeof(MergeInfo) + size * sizeof(void*));
-  mi->m_firstHoistablePreClass = 0;
   mi->m_firstMergeablePreClass = 0;
   mi->m_mergeablesSize = size;
   return mi;
@@ -815,17 +814,9 @@ void Unit::initialMerge() {
      * the pointer will be followed by a TypedValue representing
      * the value being defined/assigned.
      */
-    int ix = mi->m_firstHoistablePreClass;
-    int end = mi->m_firstMergeablePreClass;
-    while (ix < end) {
-      PreClass* pre = (PreClass*)mi->mergeableObj(ix++);
-      if (pre->attrs() & AttrUnique) {
-        needsCompact = true;
-      }
-    }
 
-    ix = mi->m_firstMergeablePreClass;
-    end = mi->m_mergeablesSize;
+    int ix = mi->m_firstMergeablePreClass;
+    int end = mi->m_mergeablesSize;
     while (ix < end) {
       void *obj = mi->mergeableObj(ix);
       auto k = MergeKind(uintptr_t(obj) & 7);
@@ -924,33 +915,11 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
   }
 
   if (out) {
-    oix = out->m_firstHoistablePreClass -= delta;
+    out->m_firstMergeablePreClass -= delta;
+    oix = out->m_firstMergeablePreClass;
   }
 
-  ix = in->m_firstHoistablePreClass;
-  end = in->m_firstMergeablePreClass;
-  for (; ix < end; ++ix) {
-    void* obj = in->mergeableObj(ix);
-    assertx((uintptr_t(obj) & 1) == 0);
-    PreClass* pre = (PreClass*)obj;
-    if (pre->attrs() & AttrUnique) {
-      Class* cls = pre->namedEntity()->clsList();
-      assertx(cls && !cls->m_next);
-      assertx(cls->preClass() == pre);
-      if (rds::isPersistentHandle(cls->classHandle())) {
-        delta++;
-      } else if (out) {
-        out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
-      }
-    } else if (out) {
-      out->mergeableObj(oix++) = obj;
-    }
-  }
-
-  if (out) {
-    out->m_firstMergeablePreClass = oix;
-  }
-
+  ix = in->m_firstMergeablePreClass;
   end = in->m_mergeablesSize;
   while (ix < end) {
     void* obj = in->mergeableObj(ix++);
@@ -1104,65 +1073,12 @@ void Unit::mergeImpl(MergeInfo* mi) {
     }
   }
 
-  int first = mi->m_firstHoistablePreClass;
-  int end = mi->m_firstMergeablePreClass;
-
+  int first = mi->m_firstMergeablePreClass;
   int ix = first;
 
-  FTRACE(3, "ix: {}, end: {}, total: {}\n", ix, end, mi->m_mergeablesSize);
+  FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize - first);
 
   boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);
-  // iterate over all the potentially hoistable classes
-  // with no fatals on failure
-  for (; ix < end; ++ix) {
-    // The first time this unit is merged, if the classes turn out to be all
-    // unique and defined, we replace the PreClass*'s with the corresponding
-    // Class*'s, with the low-order bit marked.
-    PreClass* pre = (PreClass*)mi->mergeableObj(ix);
-    if (LIKELY(uintptr_t(pre) & 1)) {
-      Stats::inc(Stats::UnitMerge_hoistable);
-      Class* cls = (Class*)(uintptr_t(pre) & ~1);
-      FTRACE(3, "  Merging cls {}\n", cls->name()->data());
-      auto const handle = cls->classHandle();
-      auto const handle_persistent = rds::isPersistentHandle(handle);
-      if (cls->isPersistent()) {
-        Stats::inc(Stats::UnitMerge_hoistable_persistent);
-      }
-      if (Stats::enabled() && handle_persistent) {
-        Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
-      }
-      if (Class* parent = cls->parent()) {
-        auto const parent_handle = parent->classHandle();
-        auto const parent_handle_persistent =
-          rds::isPersistentHandle(parent_handle);
-        if (parent->isPersistent()) {
-          Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
-        }
-        if (Stats::enabled() && parent_handle_persistent) {
-          Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
-        }
-        auto const parent_cls_present =
-          rds::isHandleInit(parent_handle) &&
-          rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(parent_handle);
-        if (UNLIKELY(!parent_cls_present)) {
-          define.set(ix - first);
-          continue;
-        }
-      }
-      if (handle_persistent) {
-        rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(handle) = cls;
-      } else {
-        assertx(rds::isNormalHandle(handle));
-        rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(handle) = cls;
-        rds::initHandle(handle);
-      }
-      if (debugger) phpDebuggerDefClassHook(cls);
-    } else {
-      if (UNLIKELY(!Class::def(pre, false))) define.set(ix - first);
-    }
-  }
-  // iterate over everything else and add to define set
-  assertx(ix == end);
   while (ix < mi->m_mergeablesSize) {
     void* obj = mi->mergeableObj(ix);
     auto k = MergeKind(uintptr_t(obj) & 7);
@@ -1180,24 +1096,8 @@ void Unit::mergeImpl(MergeInfo* mi) {
   while (!define.none()) {
     bool madeProgress = false;
     auto i = define.find_first();
-    if (failIsFatal) {
-      // If we are about to fail, we need to give the error message of first
-      // non hoistable in order maintain backwards compat
-      while (i != define.npos && i < end - first) i = define.find_next(i);
-      if (i == define.npos) i = define.find_first();
-    }
     for (; i != define.npos; i = define.find_next(i)) {
       void* obj = mi->mergeableObj(i + first);
-
-      // Consider the above optimization
-      if (i < end - first && UNLIKELY(uintptr_t(obj) & 1)) {
-        Class* cls = (Class*)(uintptr_t(obj) & ~1);
-        if (Class::def(cls->preClass(), failIsFatal)) {
-          madeProgress = true;
-          define.reset(i);
-        }
-        continue;
-      }
 
       auto k = MergeKind(uintptr_t(obj) & 7);
       switch (k) {

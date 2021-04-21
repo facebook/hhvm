@@ -500,12 +500,6 @@ struct Class : ClassBase {
   Unit* unit;
 
   /*
-   * Hoistability of this class.  See the description in class.h
-   * formation on hoistability.
-   */
-  PreClass::Hoistable hoistability;
-
-  /*
    * Name of the parent class.
    */
   LSString parentName;

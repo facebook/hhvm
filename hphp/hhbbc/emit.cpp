@@ -116,7 +116,7 @@ caller(F&&, Bc&&) {}
 Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
   auto cls = euState.unit->classes[id].get();
   euState.pceInfo.push_back(
-    { ue.newPreClassEmitter(cls->name->toCppString(), cls->hoistability), id }
+    { ue.newPreClassEmitter(cls->name->toCppString()), id }
   );
   return euState.pceInfo.back().pce->id();
 }

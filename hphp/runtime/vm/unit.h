@@ -193,7 +193,6 @@ public:
      */
     void*& mergeableObj(int idx);
 
-    unsigned m_firstHoistablePreClass;
     unsigned m_firstMergeablePreClass;
     unsigned m_mergeablesSize;
     void*    m_mergeables[1];

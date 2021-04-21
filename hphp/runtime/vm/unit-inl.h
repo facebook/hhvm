@@ -35,7 +35,7 @@ inline Func** Unit::MergeInfo::funcBegin() const {
 }
 
 inline Func** Unit::MergeInfo::funcEnd() const {
-  return funcBegin() + m_firstHoistablePreClass;
+  return funcBegin() + m_firstMergeablePreClass;
 }
 
 inline
@@ -268,7 +268,7 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 // Funcs and PreClasses and RecordDescs.
 
 inline Func* Unit::lookupFuncId(Id id) const {
-  assertx(id < Id(mergeInfo()->m_firstHoistablePreClass));
+  assertx(id < Id(mergeInfo()->m_firstMergeablePreClass));
   return mergeInfo()->funcBegin()[id];
 }
 

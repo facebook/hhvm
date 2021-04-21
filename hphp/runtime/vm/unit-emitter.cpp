@@ -84,7 +84,6 @@ UnitEmitter::UnitEmitter(const SHA1& sha1,
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
   , m_nextFuncSn(0)
-  , m_allClassesHoistable(true)
 {}
 
 UnitEmitter::~UnitEmitter() {
@@ -188,35 +187,21 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
 // PreClassEmitters.
 
 void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
-  if (pce->hoistability() && m_hoistablePreClassSet.count(pce->name())) {
-    pce->setHoistable(PreClass::Mergeable);
-  }
-  auto hoistable = pce->hoistability();
-  if (hoistable <= PreClass::Mergeable) m_allClassesHoistable = false;
-  if (hoistable >= PreClass::MaybeHoistable) {
-    m_hoistablePreClassSet.insert(pce->name());
-    m_hoistablePceIdList.push_back(pce->id());
-  }
-  if (hoistable >= PreClass::Mergeable &&
-      hoistable < PreClass::AlwaysHoistable) {
-    pushMergeableClass(pce);
-  }
+  pushMergeableClass(pce);
 }
 
 PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
-  const std::string& name,
-  PreClass::Hoistable hoistable
+  const std::string& name
 ) {
-  auto pce = new PreClassEmitter(*this, m_pceVec.size(), name, hoistable);
+  auto pce = new PreClassEmitter(*this, m_pceVec.size(), name);
   m_pceVec.push_back(pce);
   return pce;
 }
 
 PreClassEmitter* UnitEmitter::newPreClassEmitter(
-  const std::string& name,
-  PreClass::Hoistable hoistable
+  const std::string& name
 ) {
-  PreClassEmitter* pce = newBarePreClassEmitter(name, hoistable);
+  PreClassEmitter* pce = newBarePreClassEmitter(name);
   addPreClassEmitter(pce);
   return pce;
 }
@@ -260,31 +245,29 @@ Id UnitEmitter::addConstant(const Constant& c) {
 // Mergeables.
 
 void UnitEmitter::pushMergeableClass(PreClassEmitter* e) {
-  m_mergeableStmts.push_back(std::make_pair(MergeKind::Class, e->id()));
+  if (!PreClassEmitter::IsAnonymousClassName(e->name()->toCppString())) {
+    m_mergeableStmts.push_back(std::make_pair(MergeKind::Class, e->id()));
+  }
 }
 
 void UnitEmitter::pushMergeableId(Unit::MergeKind kind, const Id id) {
   m_mergeableStmts.push_back(std::make_pair(kind, id));
-  m_allClassesHoistable = false;
 }
 
 void UnitEmitter::insertMergeableId(Unit::MergeKind kind, int ix, const Id id) {
   assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
-  m_allClassesHoistable = false;
 }
 
 void UnitEmitter::pushMergeableRecord(const Id id) {
   m_mergeableStmts.push_back(std::make_pair(Unit::MergeKind::Record, id));
-  m_allClassesHoistable = false;
 }
 
 void UnitEmitter::insertMergeableRecord(int ix, const Id id) {
   assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(Unit::MergeKind::Record, id));
-  m_allClassesHoistable = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -482,8 +465,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_fileAttributes = m_fileAttributes;
   u->m_ICE = m_ICE;
 
-  size_t ix = m_fes.size() + m_hoistablePceIdList.size();
-  if (!m_allClassesHoistable) ix += m_mergeableStmts.size();
+  size_t ix = m_fes.size() + m_mergeableStmts.size();
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
@@ -492,27 +474,21 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  mi->m_firstHoistablePreClass = ix;
-  for (auto& id : m_hoistablePceIdList) {
-    mi->mergeableObj(ix++) = u->m_preClasses[id].get();
-  }
   mi->m_firstMergeablePreClass = ix;
-  if (!m_allClassesHoistable) {
-    for (auto& mergeable : m_mergeableStmts) {
-      switch (mergeable.first) {
-        case MergeKind::Class:
-          mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
-          break;
-        case MergeKind::Define:
-        case MergeKind::Record:
-        case MergeKind::TypeAlias:
-          mi->mergeableObj(ix++) =
-            (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
-          break;
-        case MergeKind::Done:
-        case MergeKind::UniqueDefinedClass:
-          not_reached();
-      }
+  for (auto& mergeable : m_mergeableStmts) {
+    switch (mergeable.first) {
+      case MergeKind::Class:
+        mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
+        break;
+      case MergeKind::Define:
+      case MergeKind::Record:
+      case MergeKind::TypeAlias:
+        mi->mergeableObj(ix++) =
+          (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
+        break;
+      case MergeKind::Done:
+      case MergeKind::UniqueDefinedClass:
+        not_reached();
     }
   }
   assertx(ix == mi->m_mergeablesSize);
@@ -598,7 +574,6 @@ void UnitEmitter::serde(SerDe& sd) {
   serdeMetaData(sd);
   // These are not touched by serdeMetaData:
   sd(m_ICE);
-  sd(m_allClassesHoistable);
 
   auto const seq = [&] (auto const& c, auto const& r, auto const& w) {
     if constexpr (SerDe::deserializing) {
@@ -665,17 +640,14 @@ void UnitEmitter::serde(SerDe& sd) {
     m_pceVec,
     [&] (auto& sd, size_t i) {
       std::string name;
-      int hoistable;
       sd(name);
-      sd(hoistable);
-      auto pce = newPreClassEmitter(name, (PreClass::Hoistable)hoistable);
+      auto pce = newPreClassEmitter(name);
       pce->serdeMetaData(sd);
       assertx(pce->id() == i);
     },
     [&] (auto& sd, PreClassEmitter* pce) {
       auto const nm = StripIdFromAnonymousClassName(pce->name()->slice());
       sd(nm.toString());
-      sd((int)pce->hoistability());
       pce->serdeMetaData(sd);
     }
   );

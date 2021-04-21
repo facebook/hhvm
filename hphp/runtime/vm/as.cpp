@@ -790,7 +790,6 @@ struct AsmState {
   std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
   int minStackDepth{0};
   int maxUnnamed{-1};
-  std::set<std::string,stdltistr> hoistables;
   Location::Range srcLoc{-1,-1,-1,-1};
   hphp_fast_map<SymbolRef,
                 CompactVector<std::string>,
@@ -3242,32 +3241,6 @@ void parse_record_body(AsmState& as) {
   as.in.expect('}');
 }
 
-PreClass::Hoistable compute_hoistable(AsmState& as,
-                                      const std::string &name,
-                                      const std::string &parentName) {
-  auto &pce = *as.pce;
-  bool system = pce.attrs() & AttrBuiltin;
-
-  if (pce.methods().size() == 1 && pce.methods()[0]->isClosureBody) {
-    return PreClass::NotHoistable;
-  }
-  if (!system) {
-    if (!pce.interfaces().empty() ||
-        !pce.usedTraits().empty() ||
-        !pce.requirements().empty() ||
-        (pce.attrs() & (AttrEnum|AttrEnumClass))) {
-      return PreClass::Mergeable;
-    }
-    if (!parentName.empty() && !as.hoistables.count(parentName)) {
-      return PreClass::MaybeHoistable;
-    }
-  }
-  as.hoistables.insert(name);
-
-  return pce.attrs() & AttrUnique ?
-    PreClass::AlwaysHoistable : PreClass::MaybeHoistable;
-}
-
 /*
  * directive-class : upper-bound-list ?"top" attribute-list identifier
  *                   ?line-range extension-clause implements-clause '{'
@@ -3347,7 +3320,7 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
+  as.pce = as.ue->newBarePreClassEmitter(name);
   as.pce->init(line0,
                line1,
                attrs,
@@ -3363,8 +3336,6 @@ void parse_class(AsmState& as) {
 
   as.in.expectWs('{');
   parse_class_body(as, attrs & AttrIsConst, ubs);
-
-  as.pce->setHoistable(compute_hoistable(as, name, parentName));
 
   as.finishClass();
 }

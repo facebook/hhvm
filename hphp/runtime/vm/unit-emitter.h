@@ -215,25 +215,19 @@ struct UnitEmitter {
 
   /*
    * Add a PreClassEmitter to the hoistability tracking data structures.
-   *
-   * @see: PreClass::Hoistable
    */
   void addPreClassEmitter(PreClassEmitter* pce);
 
   /*
    * Create a new PreClassEmitter and add it to all the PCE data structures.
-   *
-   * @see: PreClass::Hoistable
    */
-  PreClassEmitter* newPreClassEmitter(const std::string& name,
-                                      PreClass::Hoistable hoistable);
+  PreClassEmitter* newPreClassEmitter(const std::string& name);
   /*
    * Create a new PreClassEmitter without adding it to the hoistability
    * tracking data structures.
    * It should be added later with addPreClassEmitter.
    */
-  PreClassEmitter* newBarePreClassEmitter(const std::string& name,
-                                          PreClass::Hoistable hoistable);
+  PreClassEmitter* newBarePreClassEmitter(const std::string& name);
 
   RecordEmitter* newRecordEmitter(const std::string& name);
 
@@ -378,15 +372,6 @@ private:
    * RecordEmitter table.
    */
   std::vector<RecordEmitter*> m_reVec;
-
-  /*
-   * Hoistability tables.
-   */
-  bool m_allClassesHoistable;
-  hphp_hash_set<const StringData*,
-                string_data_hash,
-                string_data_isame> m_hoistablePreClassSet;
-  std::list<Id> m_hoistablePceIdList;
 
   /*
    * Mergeables tables.

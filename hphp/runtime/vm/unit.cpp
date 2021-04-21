@@ -1015,10 +1015,57 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
   return delta;
 }
 
+namespace {
+RDS_LOCAL(hphp_fast_set<const Unit*>, rl_mergedUnits);
+}
+
+void Unit::logTearing() {
+  assertx(!RO::RepoAuthoritative);
+  assertx(RO::EvalSampleRequestTearing);
+  assertx(g_context);
+
+  auto const repoOptions = g_context->getRepoOptionsForRequest();
+  auto repoRoot = folly::fs::path(repoOptions->path()).parent_path();
+
+  for (auto const u : *rl_mergedUnits) {
+    assertx(!u->isSystemLib());
+    auto const loaded = lookupUnit(const_cast<StringData*>(u->origFilepath()),
+                                   "", nullptr, Native::s_noNativeFuncs, true);
+
+    if (loaded != u && (!loaded || loaded->sha1() != u->sha1())) {
+      StructuredLogEntry ent;
+
+      auto const tpath = [&] () -> std::string {
+        auto const orig = folly::fs::path(u->origFilepath()->data());
+        if (repoRoot.size() > orig.size()) return orig.native();
+        if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
+          return orig.native();
+        }
+        return orig.lexically_relative(repoRoot).native();
+      }();
+      ent.setStr("filepath", tpath);
+      ent.setStr("same_bc",
+                 loaded && loaded->bcSha1() == u->bcSha1() ? "true" : "false");
+      ent.setStr("removed", loaded ? "false" : "true");
+
+      StructuredLog::log("hhvm_sandbox_file_tearing", ent);
+    }
+  }
+
+  rl_mergedUnits->clear();
+}
+
 template <bool debugger>
 void Unit::mergeImpl(MergeInfo* mi) {
   assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
   autoTypecheck(this);
+
+  if (!RO::RepoAuthoritative &&
+      !isSystemLib() &&
+      !origFilepath()->empty() &&
+      g_context && g_context->m_shouldSampleUnitTearing) {
+    rl_mergedUnits->emplace(this);
+  }
 
   FTRACE(1, "Merging unit {} ({} elements to define)\n",
          this->m_origFilepath->data(), mi->m_mergeablesSize);

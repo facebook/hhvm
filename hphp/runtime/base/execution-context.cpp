@@ -1450,6 +1450,11 @@ void ExecutionContext::requestInit() {
   // extension function in the VM; this is bad if systemlib itself hasn't been
   // merged.
   autoTypecheckRequestInit();
+
+  if (!RO::RepoAuthoritative && RO::EvalSampleRequestTearing) {
+    m_shouldSampleUnitTearing =
+      StructuredLog::coinflip(RO::EvalSampleRequestTearing);
+  }
 }
 
 void ExecutionContext::requestExit() {
@@ -1481,6 +1486,11 @@ void ExecutionContext::requestExit() {
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
+
+  if (!RO::RepoAuthoritative && m_shouldSampleUnitTearing) {
+    Unit::logTearing();
+    m_shouldSampleUnitTearing = false;
+  }
 }
 
 /**

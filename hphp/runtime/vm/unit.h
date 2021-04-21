@@ -662,6 +662,12 @@ public:
   void setInterpretOnly();
 
   /*
+   * Log any units which were changed on disk after having been loaded by the
+   * current request.
+   */
+  static void logTearing();
+
+  /*
    * Get parse/runtime failure information if this unit is created as
    * a result of one.
    */

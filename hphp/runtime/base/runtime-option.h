@@ -1391,6 +1391,7 @@ struct RuntimeOption {
   F(int32_t, NoticeOnCoerceForMath, 0)                                  \
   F(string, TaoMigrationOverride, std::string(""))                      \
   F(string, SRRouteMigrationOverride, std::string(""))                  \
+  F(int32_t, SampleRequestTearing, 0)                                   \
   /* */
 
 private:

@@ -632,6 +632,8 @@ public:
   req::vector<ImplicitContext*> m_implicitContexts;
 
   VMParserFrame* m_parserFrame{nullptr};
+
+  bool m_shouldSampleUnitTearing{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

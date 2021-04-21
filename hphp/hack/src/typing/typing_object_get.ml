@@ -201,6 +201,19 @@ let rec obj_get_concrete_ty
     concrete_ty
     (id_pos, id_str)
     on_error =
+  Typing_log.(
+    log_with_level env "obj_get" 2 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos id_pos)
+          env
+          [
+            Log_head
+              ( "obj_get_concrete_ty",
+                [
+                  Log_type ("concrete_ty", concrete_ty);
+                  Log_type ("this_ty", this_ty);
+                ] );
+          ]));
   let default () = (env, (Typing_utils.mk_tany env id_pos, [])) in
   (* We will substitute `this` in the function signature with `this_ty`. But first,
    * transform it according to the dependent kind dep_kind that was derived from the
@@ -663,26 +676,39 @@ and obj_get_inner
     ~is_parent_call
     ~dep_kind
     env
-    ty1
+    receiver_ty
     ((id_pos, id_str) as id)
     on_error =
+  Typing_log.(
+    log_with_level env "obj_get" 2 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos id_pos)
+          env
+          [
+            Log_head
+              ( "obj_get_inner",
+                [
+                  Log_type ("receiver_ty", receiver_ty);
+                  Log_type ("this_ty", this_ty);
+                ] );
+          ]));
   let (env, ety1) =
     if is_method then
       if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
-        Env.expand_type env ty1
+        Env.expand_type env receiver_ty
       else
         Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"an object"
           obj_pos
-          ty1
+          receiver_ty
     else
       Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
         (widen_class_for_obj_get ~is_method ~nullsafe id_str)
         obj_pos
-        ty1
+        receiver_ty
   in
   let nullable_obj_get ~read_context ty =
     nullable_obj_get
@@ -741,7 +767,7 @@ and obj_get_inner
       is_nonnull
       || Typing_solver.is_sub_type
            env
-           ty1
+           receiver_ty
            (Typing_make_type.nonnull Reason.none)
     in
     let (env, resultl) =
@@ -880,13 +906,13 @@ and obj_get_inner
       id
       on_error
 
-(* Look up the type of the property or method id in the type ty1 of the
+(* Look up the type of the property or method id in the type receiver_ty of the
  * receiver and use the function k to postprocess the result.
  * Return any fresh type variables that were substituted for generic type
  * parameters in the type of the property or method.
  *
- * Essentially, if ty1 is a concrete type, e.g., class C, then k is applied
- * to the type of the property id in C; and if ty1 is an unresolved type,
+ * Essentially, if receiver_ty is a concrete type, e.g., class C, then k is applied
+ * to the type of the property id in C; and if receiver_ty is an unresolved type,
  * e.g., a union of classes (C1 | ... | Cn), then k is applied to the type
  * of the property id in each Ci and the results are collected into an
  * unresolved type.
@@ -904,14 +930,23 @@ let obj_get
     ~on_error
     ?parent_ty
     env
-    ty =
+    receiver_ty =
+  Typing_log.(
+    log_with_level env "obj_get" 1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos obj_pos)
+          env
+          [Log_head ("obj_get", [Log_type ("receiver_ty", receiver_ty)])]));
   let dep_kind =
-    Typing_dependent_type.ExprDepTy.from_cid env (get_reason ty) class_id
+    Typing_dependent_type.ExprDepTy.from_cid
+      env
+      (get_reason receiver_ty)
+      class_id
   in
   let ty1 =
     match parent_ty with
     | Some ty -> ty
-    | None -> ty
+    | None -> receiver_ty
   in
   let is_parent_call = Nast.equal_class_id_ class_id Aast.CIparent in
   obj_get_inner
@@ -923,7 +958,7 @@ let obj_get
     ~coerce_from_ty
     ~is_nonnull:false
     ~is_parent_call
-    ~this_ty:ty
+    ~this_ty:receiver_ty
     ~dep_kind
     env
     ty1

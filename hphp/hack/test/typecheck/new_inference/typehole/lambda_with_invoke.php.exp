@@ -1,4 +1,8 @@
 File "lambda_with_invoke.php", line 21, characters 36-37:
 Was expecting an object but type is unknown (Typing[4297])
-File "lambda_with_invoke.php", line 21, characters 29-30:
-It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+  File "lambda_with_invoke.php", line 21, characters 3-5:
+  It is unknown because type parameter `T` of `add` could not be determined. Please add explicit type parameters to the invocation of `add`
+  File "lambda_with_invoke.php", line 4, characters 26-26:
+    via this generic `T`
+  File "lambda_with_invoke.php", line 4, characters 26-26:
+  This type argument to `Func` only allows supertypes (it is contravariant)

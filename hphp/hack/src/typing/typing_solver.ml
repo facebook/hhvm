@@ -552,38 +552,6 @@ let solve_all_unsolved_tyvars_gi env =
   let env = Env.set_allow_solve_globals env old_allow_solve_globals in
   env
 
-let unsolved_invariant_tyvars_under_union_and_intersection env ty =
-  let rec find_tyvars (env, tyvars) ty =
-    let (env, ty) = Env.expand_type env ty in
-    match get_node ty with
-    | Tvar v -> (env, (get_reason ty, v) :: tyvars)
-    | Toption ty -> find_tyvars (env, tyvars) ty
-    | Tunion tyl
-    | Tintersection tyl ->
-      List.fold tyl ~init:(env, tyvars) ~f:find_tyvars
-    | Terr
-    | Tany _
-    | Tdynamic
-    | Tnonnull
-    | Tprim _
-    | Tclass _
-    | Tobject
-    | Tgeneric _
-    | Tnewtype _
-    | Tdependent _
-    | Tvarray _
-    | Tdarray _
-    | Tvarray_or_darray _
-    | Tvec_or_dict _
-    | Ttuple _
-    | Tshape _
-    | Tfun _
-    | Taccess _
-    | Tunapplied_alias _ ->
-      (env, tyvars)
-  in
-  find_tyvars (env, []) ty
-
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
  * components of the type suitably "freshened". For example,
@@ -592,19 +560,22 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
  *    #1 := vec<#2>  where C <: #2
  *)
 let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
-  let (env, unsolved_invariant_tyvars) =
-    unsolved_invariant_tyvars_under_union_and_intersection env ty
-  in
+  let vars_solved_to_nothing = ref [] in
   let (env', ety) =
     Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
         let env = always_solve_tyvar_down ~freshen env r v in
-        Env.expand_var env r v)
+        let (env, ety) = Env.expand_var env r v in
+        (match get_node ety with
+        | Tunion [] ->
+          vars_solved_to_nothing := (r, v) :: !vars_solved_to_nothing
+        | _ -> ());
+        (env, ety))
   in
   let (env', ety) = Env.expand_type env' ety in
-  match (unsolved_invariant_tyvars, get_node ety) with
+  match (!vars_solved_to_nothing, get_node ety) with
   | (_ :: _, Tunion []) ->
     let env =
-      List.fold unsolved_invariant_tyvars ~init:env ~f:(fun env (r, v) ->
+      List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
           Errors.unknown_type
             description_of_expected
             p

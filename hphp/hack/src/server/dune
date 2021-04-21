@@ -376,6 +376,70 @@
 )
 
 (library
+  (name server_infer_type)
+  (wrapped false)
+  (modules serverInferType
+    serverInferTypeError)
+  (libraries
+    annotated_ast
+    ast
+    hh_json
+    pos
+    provider_context
+    server_command_types
+    tast
+    tast_provider
+    typing
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))
+)
+
+(library
+  (name server_docblock_at)
+  (wrapped false)
+  (modules serverDocblockAt)
+  (libraries
+    ast
+    collections
+    decl_provider
+    naming_provider
+    parser
+    pos
+    provider_context
+    relative_path
+    search
+    search_utils
+    server_command_types
+    server_services
+    symbol
+    typing_defs
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))
+)
+
+(library
+  (name server_hover)
+  (wrapped false)
+  (modules serverHover)
+  (libraries
+    decl_provider
+    naming_special_names
+    pos
+    provider_context
+    server_command_types
+    server_docblock_at
+    server_infer_type
+    server_services
+    symbol
+    tast
+    tast_provider
+    typing
+    utils_core
+    )
+  (preprocess (pps lwt_ppx ppx_deriving.std))
+)
+
+(library
   (name server)
   (wrapped false)
   (modules
@@ -389,7 +453,6 @@
     serverCoverageMetric
     serverConcatenateAll
     serverDebug
-    serverDocblockAt
     serverDynamicView
     serverError
     serverExtractStandalone
@@ -398,11 +461,8 @@
     serverFormat
     serverHotClasses
     serverHotClassesDescription
-    serverHover
     serverIdle
-    serverInferType
     serverInferTypeBatch
-    serverInferTypeError
     serverInvalidateUnits
     serverLint
     serverMethodJumps
@@ -438,8 +498,11 @@
     server_api
     server_codemod_type_printer
     server_coverage_metric_utils
+    server_docblock_at
     server_env
     server_find_refs
+    server_hover
+    server_infer_type
     server_prechecked_files
     server_remote_utils
     server_revision_tracker

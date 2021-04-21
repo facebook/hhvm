@@ -1915,6 +1915,10 @@ void ExecutionContext::enqueueAPCDeferredExpire(const String& key) {
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
   assertx(handle->isUncounted());
+  if (debug) {
+    HPHP::Trace::ringbufferAPCEnqueue(
+        handle, APCTypedValue::fromHandle(handle)->toTypedValue().m_data.parr);
+  }
   m_apcHandles.push_back(handle);
   m_apcMemSize += size;
 }
@@ -1927,6 +1931,10 @@ struct FreedAPCHandle {
   {}
   void operator()() {
     for (auto handle : m_apcHandles) {
+      if (debug) {
+        HPHP::Trace::ringbufferAPCDelete(
+          handle, APCTypedValue::fromHandle(handle)->toTypedValue().m_data.parr);
+      }
       APCTypedValue::fromHandle(handle)->deleteUncounted();
     }
     APCStats::getAPCStats().removePendingDelete(m_memSize);

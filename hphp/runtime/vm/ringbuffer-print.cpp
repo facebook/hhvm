@@ -85,6 +85,18 @@ void dumpEntry(const RingBufferEntry* e) {
       std::cerr << folly::format(msgFormat, info.name, info.data);
       break;
     }
+    case RBTypeAPCHandleEnqueue:
+    {
+      auto& info = e->apcHandleInfo;
+      std::cerr << "  (" << info.handle << ", " << info.value << ")\n";
+      break;
+    }
+    case RBTypeAPCHandleDelete:
+    {
+      auto& info = e->apcHandleInfo;
+      std::cerr << "  (" << info.handle << ", " << info.value << ")\n";
+      break;
+    }
     default: {
       auto& info = e->vmPoint;
       std::cerr <<

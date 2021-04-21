@@ -133,6 +133,18 @@ ringbufferEntryRip(RingBufferType t, uint64_t sk) {
   ringbufferEntry(t, sk, rip);
 }
 
+void ringbufferAPCEnqueue(void* handle, void* value) {
+  auto& info = allocEntry(RBTypeAPCHandleEnqueue)->apcHandleInfo;
+  info.handle = handle;
+  info.value = value;
+}
+
+void ringbufferAPCDelete(void* handle, void* value) {
+  auto& info = allocEntry(RBTypeAPCHandleDelete)->apcHandleInfo;
+  info.handle = handle;
+  info.value = value;
+}
+
 void ringbufferGeneric(const char* name, uint64_t data) {
   auto& info = allocEntry(RBTypeGeneric)->generic;
   info.name = name;

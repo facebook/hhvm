@@ -205,6 +205,14 @@ struct RequestInjectionData {
   bool shouldOOMAbort() const {
     return m_OOMAbort;
   }
+  /*
+   * Flags for request memory exceeded.  To differentiate from the above host
+   * level OOMs.
+   */
+  void setRequestOOMFlag() { m_requestOOM = true; }
+  void clearRequestOOMFlag() { m_requestOOM = false; }
+  bool requestOOMFlag() const { return m_requestOOM; }
+
 
   /*
    * Whether the JIT is enabled.
@@ -404,6 +412,9 @@ private:
    */
   std::atomic<bool> m_hostOutOfMemory{false};
   bool m_OOMAbort{false};
+
+  /* To differentiate request OOMs from host OOMs */
+  bool m_requestOOM{false};
 
   /* Pointer to surprise flags stored in RDS. */
   std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};

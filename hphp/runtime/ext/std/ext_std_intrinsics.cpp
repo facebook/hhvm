@@ -35,7 +35,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(trigger_oom, bool oom) {
-  if (oom) setSurpriseFlag(MemExceededFlag);
+  if (oom) {
+    setSurpriseFlag(MemExceededFlag);
+    RID().setRequestOOMFlag();
+  }
 }
 
 TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {

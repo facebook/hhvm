@@ -303,9 +303,8 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
 
   if (flags & MemExceededFlag) {
-    if (pendingException) {
-      setSurpriseFlag(MemExceededFlag);
-    } else if (p.hostOOMFlag()) {
+    assertx(MemExceededFlag & StickyFlags);
+    if (p.hostOOMFlag() && !pendingException) {
       // When the host is running out of memory, don't abort all requests.
       // Instead, only kill a request if it uses a nontrivial amount of memory.
       auto const currUsage = tl_heap->currentUsage();
@@ -328,7 +327,8 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
         // check again then.
         p.clearHostOOMFlag();
       }
-    } else {
+    }
+    if (p.requestOOMFlag() && !pendingException) {
       // Request exceeded memory limit, but the host is fine.
       pendingException = generate_memory_exceeded_exception(wh);
     }

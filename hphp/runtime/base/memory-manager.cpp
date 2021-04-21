@@ -218,6 +218,7 @@ void MemoryManager::resetExternalStats() {
 
 void MemoryManager::refreshStatsHelperExceeded() {
   setSurpriseFlag(MemExceededFlag);
+  RID().setRequestOOMFlag();
   m_couldOOM = false;
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
@@ -1027,6 +1028,7 @@ Sweepable::Sweepable() {
 
 void MemoryManager::resetCouldOOM(bool state) {
   clearSurpriseFlag(MemExceededFlag);
+  RID().clearRequestOOMFlag();
   m_couldOOM = state;
 }
 

@@ -611,6 +611,7 @@ static void handle_resource_exceeded_exception() {
     RID().triggerTimeout(TimeoutCPUTime);
   } catch (RequestMemoryExceededException&) {
     setSurpriseFlag(MemExceededFlag);
+    RID().setRequestOOMFlag();
   } catch (...) {}
 }
 

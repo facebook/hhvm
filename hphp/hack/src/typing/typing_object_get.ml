@@ -411,7 +411,25 @@ let rec obj_get_concrete_ty
                       env
                       ft)
                 in
-                let ft_ty = mk (Typing_reason.localize r, Tfun ft) in
+                let ft_ty =
+                  let lr = Typing_reason.localize r in
+                  if
+                    Typing_env_types.(
+                      env.in_sound_dynamic_callable_method_check)
+                    && ( get_ce_sound_dynamic_callable member_ce
+                       || Cls.get_implements_dynamic class_info )
+                  then
+                    mk
+                      ( Typing_reason.Rsound_dynamic_callable
+                          (Typing_reason.to_pos r),
+                        Tintersection
+                          [
+                            mk (lr, Tfun ft);
+                            mk (lr, Tfun (Typing_dynamic.build_dyn_fun_ty ft));
+                          ] )
+                  else
+                    mk (lr, Tfun ft)
+                in
                 (env, ft_ty, explicit_targs, Unenforced)
               | _ ->
                 let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in

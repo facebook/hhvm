@@ -1,0 +1,16 @@
+File "call_meth_1.bad.php", line 16, characters 19-21:
+Method  `foo` in class `Foo` is not dynamically callable. (Typing[4402])
+  File "call_meth_1.bad.php", line 17, characters 33-44:
+  Invalid argument
+  File "call_meth_1.bad.php", line 8, characters 51-53:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "call_meth_1.bad.php", line 17, characters 37-37:
+  But got `A<int>`
+File "call_meth_1.bad.php", line 19, characters 19-21:
+Method  `bar` in class `Foo` is not dynamically callable. (Typing[4402])
+  File "call_meth_1.bad.php", line 20, characters 29-40:
+  Invalid argument
+  File "call_meth_1.bad.php", line 8, characters 39-41:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "call_meth_1.bad.php", line 20, characters 33-33:
+  But got `A<int>`

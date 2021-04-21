@@ -28,6 +28,10 @@ type env = {
   in_case: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
+  (* Set to true when checking if a <<__SoundDynamicallyCallable>> method body
+  is well-typed under dyn..dyn->dyn assumptions, that is if it can be safely called
+  in a dynamic environment. *)
+  in_sound_dynamic_callable_method_check: bool;
   (* Tracing_info is a way, when we record telemetry on costs, to also record which
   area of the typing code should be considered the originator of that work,
   so we can add up which area contributed most to overall costs. *)

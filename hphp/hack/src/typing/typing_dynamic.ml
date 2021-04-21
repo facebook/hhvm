@@ -80,3 +80,29 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
          fun_ty.ft_ret.et_type)
   in
   sound_dynamic_interface_check env params_decl_ty ret_locl_ty
+
+let build_dyn_fun_ty ft_ty =
+  let make_dynamic pos =
+    Typing_make_type.dynamic (Reason.Rsound_dynamic_callable pos)
+  in
+  let make_dyn_fun_param fp =
+    {
+      fp_pos = fp.fp_pos;
+      fp_name = fp.fp_name;
+      fp_type = Typing_make_type.unenforced (make_dynamic fp.fp_pos);
+      fp_flags = fp.fp_flags;
+    }
+  in
+
+  {
+    ft_arity = ft_ty.ft_arity;
+    ft_tparams = [];
+    ft_where_constraints = [];
+    ft_params = List.map ft_ty.ft_params ~f:make_dyn_fun_param;
+    ft_implicit_params = ft_ty.ft_implicit_params;
+    ft_ret =
+      Typing_make_type.unenforced (make_dynamic (get_pos ft_ty.ft_ret.et_type));
+    (* Carries through the sync/async information from the aast *)
+    ft_flags = ft_ty.ft_flags;
+    ft_ifc_decl = ft_ty.ft_ifc_decl;
+  }

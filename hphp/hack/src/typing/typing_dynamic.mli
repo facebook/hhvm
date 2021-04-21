@@ -34,3 +34,8 @@ val sound_dynamic_interface_check :
 
 val sound_dynamic_interface_check_from_fun_ty :
   Typing_env_types.env -> Typing_defs.decl_ty Typing_defs.fun_type -> bool
+
+(* auxiliary function to build a dyn..dyn->dyn function type *)
+val build_dyn_fun_ty :
+  Typing_defs.locl_ty Typing_defs.fun_type ->
+  Typing_defs.locl_ty Typing_defs.fun_type

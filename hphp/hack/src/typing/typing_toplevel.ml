@@ -391,6 +391,7 @@ let fun_def ctx f :
 
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
+  let env = { env with in_sound_dynamic_callable_method_check = true } in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
       env

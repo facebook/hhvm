@@ -25,6 +25,19 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Global parameters for ConvertTvToUncounted and related methods.
+ *
+ *  - If `seen` is provided, we'll use it to de-dupe new uncounted arrays.
+ *
+ *  - If `allowBespokes` is false, the result will be (recursively) composed
+ *    of vanilla arrays - no bespoke array will be reachable from it.
+ */
+struct MakeUncountedEnv {
+  DataWalker::PointerMap* seen;
+  bool allowBespokes;
+};
+
+/*
  * Wrappers around uncounted_malloc, etc. that update APC stats.
  */
 void* AllocUncounted(size_t bytes);
@@ -41,17 +54,14 @@ void FreeUncounted(void* ptr, size_t bytes);
  * with uncounted refcount 1, and for uncounted, it does an uncountedIncRef().
  * (Primitives and statics are not refcounted in any way.)
  *
- * These operations are guaranteed to return a data structure that does not
- * (recursively) contain any bespoke arrays.
- *
  * "hasApcTv" is a request to leave space for an APCTypedValue just before the
  * new uncounted array. We may not honor this request. For instance, if we can
  * reuse an existing persistent array, or use a static empty one, we'll do so.
  */
-void ConvertTvToUncounted(tv_lval in, DataWalker::PointerMap* seen);
-ArrayData* MakeUncountedArray(ArrayData* in, DataWalker::PointerMap* seen,
+void ConvertTvToUncounted(tv_lval in, const MakeUncountedEnv& env);
+ArrayData* MakeUncountedArray(ArrayData* in, const MakeUncountedEnv& env,
                               bool hasApcTv = false);
-StringData* MakeUncountedString(StringData* in, DataWalker::PointerMap* seen);
+StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env);
 
 /*
  * The analogue of decRefAndRelease for an uncounted value. These helpers all

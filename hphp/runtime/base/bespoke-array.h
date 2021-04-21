@@ -129,7 +129,7 @@ public:
 
   // Bespoke arrays can be converted to uncounted values for APC.
   static ArrayData* MakeUncounted(
-      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
+      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
   static void ReleaseUncounted(ArrayData*);
 
 private:

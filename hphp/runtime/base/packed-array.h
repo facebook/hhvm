@@ -156,7 +156,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(
-      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
+      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc, bool isLegacy = false);
 

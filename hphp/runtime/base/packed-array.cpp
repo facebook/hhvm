@@ -714,7 +714,7 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
 }
 
 ArrayData* PackedArray::MakeUncounted(
-    ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
   assertx(!array->empty());
   assertx(array->isRefCounted());
   assertx(checkInvariants(array));
@@ -741,7 +741,7 @@ ArrayData* PackedArray::MakeUncounted(
   // array and convert refcounted objects to their uncounted types.
   memcpy16_inline(ad + 1, array + 1, bytes - sizeof(ArrayData));
   for (uint32_t i = 0; i < size; i++) {
-    ConvertTvToUncounted(LvalUncheckedInt(ad, i), seen);
+    ConvertTvToUncounted(LvalUncheckedInt(ad, i), env);
   }
 
   assertx(ad->kind() == array->kind());

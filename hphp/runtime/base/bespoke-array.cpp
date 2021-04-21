@@ -86,7 +86,7 @@ bool BespokeArray::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////////////
 
 ArrayData* BespokeArray::MakeUncounted(
-    ArrayData* ad, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* ad, const MakeUncountedEnv& env, bool hasApcTv) {
   assertx(ad->isRefCounted());
   auto const byte = getLayoutByte(ad);
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
@@ -102,7 +102,7 @@ ArrayData* BespokeArray::MakeUncounted(
   result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
   assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
-  g_layout_funcs.fnConvertToUncounted[byte](result, seen);
+  g_layout_funcs.fnConvertToUncounted[byte](result, env);
 
   return result;
 }

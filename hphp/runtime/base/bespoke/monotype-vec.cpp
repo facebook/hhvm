@@ -169,8 +169,8 @@ ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
   return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
 }
 
-void EmptyMonotypeVec::ConvertToUncounted(EmptyMonotypeVec*,
-                                          DataWalker::PointerMap*) {
+void EmptyMonotypeVec::ConvertToUncounted(
+    EmptyMonotypeVec* madIn, const MakeUncountedEnv& env) {
   // All EmptyMonotypeVecs are static, so we should never make them uncounted.
   always_assert(false);
 }
@@ -505,13 +505,13 @@ ArrayData* MonotypeVec::EscalateToVanilla(const MonotypeVec* mad,
   return mad->escalateWithCapacity(mad->size(), reason);
 }
 
-void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
-                                     DataWalker::PointerMap* seen) {
+void MonotypeVec::ConvertToUncounted(
+    MonotypeVec* madIn, const MakeUncountedEnv& env) {
   auto const oldType = madIn->type();
   for (uint32_t i = 0; i < madIn->size(); i++) {
     DataType dt = oldType;
     auto const lval = tv_lval(&dt, &madIn->rawData()[i]);
-    ConvertTvToUncounted(lval, seen);
+    ConvertTvToUncounted(lval, env);
     assertx(equivDataTypes(dt, madIn->type()));
   }
   auto const newType = hasPersistentFlavor(oldType)

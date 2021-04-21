@@ -139,7 +139,7 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
 }
 
 ArrayData* SetArray::MakeUncounted(
-    ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
   auto src = asSet(array);
   assertx(!src->empty());
   assertx(src->isRefCounted());
@@ -166,7 +166,7 @@ ArrayData* SetArray::MakeUncounted(
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
       auto& skey = elm.tv.m_data.pstr;
-      skey = MakeUncountedString(skey, seen);
+      skey = MakeUncountedString(skey, env);
     }
   }
 

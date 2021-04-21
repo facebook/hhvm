@@ -201,7 +201,7 @@ ArrayData* EmptyMonotypeDict::EscalateToVanilla(
   return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
 }
 void EmptyMonotypeDict::ConvertToUncounted(
-    Self* ad, DataWalker::PointerMap* seen) {
+    Self* madIn, const MakeUncountedEnv& env) {
   // All EmptyMonotypeDicts are static, so we should never make them uncounted.
   always_assert(false);
 }
@@ -1129,16 +1129,16 @@ ArrayData* MonotypeDict<Key>::EscalateToVanilla(
 
 template <typename Key>
 void MonotypeDict<Key>::ConvertToUncounted(
-    Self* mad, DataWalker::PointerMap* seen) {
+    Self* mad, const MakeUncountedEnv& env) {
   auto const dt = mad->type();
 
   mad->forEachElm([&](auto i, auto elm) {
     auto const elm_mut = const_cast<Elm*>(elm);
     if constexpr (std::is_same<Key, StringData*>::value) {
-      elm_mut->key = MakeUncountedString(elm_mut->key, seen);
+      elm_mut->key = MakeUncountedString(elm_mut->key, env);
     }
     auto dt_mut = dt;
-    ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), seen);
+    ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), env);
     assertx(equivDataTypes(dt_mut, dt));
   });
 

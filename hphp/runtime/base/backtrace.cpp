@@ -793,11 +793,10 @@ Array CompactTrace::extract() const {
     return Array(acc.get()->get());
   }
 
+  auto const env = MakeUncountedEnv {
+    /*seen=*/nullptr, /*allowBespokes=*/false };
   auto arr = m_backtrace->extract();
-  auto ins = CachedArray(
-    MakeUncountedArray(arr.get(), nullptr),
-    CacheDeleter()
-  );
+  auto ins = CachedArray(MakeUncountedArray(arr.get(), env), CacheDeleter());
   if (!s_cache.insert(m_backtrace, ins)) {
     return arr;
   }

@@ -199,8 +199,8 @@ inline void ArrayData::onSetEvalScalar() {
 
 NO_PROFILING
 inline ArrayData* ArrayData::makeUncounted(
-    DataWalker::PointerMap* seen, bool hasApcTv) {
-  return g_array_funcs.makeUncounted[kind()](this, seen, hasApcTv);
+    const MakeUncountedEnv& env, bool hasApcTv) {
+  return g_array_funcs.makeUncounted[kind()](this, env, hasApcTv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

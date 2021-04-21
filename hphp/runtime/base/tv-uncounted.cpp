@@ -54,7 +54,7 @@ void FreeUncounted(void* ptr, size_t bytes) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
+void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
   auto& data = source.val();
   auto& type = source.type();
 
@@ -76,7 +76,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
       type = KindOfPersistentString;
       // Intentional fall-through.
     case KindOfPersistentString:
-      data.pstr = MakeUncountedString(data.pstr, seen);
+      data.pstr = MakeUncountedString(data.pstr, env);
       break;
 
     case KindOfVec:
@@ -87,7 +87,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
-      data.parr = MakeUncountedArray(data.parr, seen);
+      data.parr = MakeUncountedArray(data.parr, env);
       break;
 
     case KindOfClsMeth: {
@@ -98,7 +98,7 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
       }
       tvCastToVecInPlace(source);
       type = KindOfPersistentVec;
-      data.parr = MakeUncountedArray(data.parr, seen);
+      data.parr = MakeUncountedArray(data.parr, env);
       break;
     }
 
@@ -129,24 +129,24 @@ void ConvertTvToUncounted(tv_lval source, DataWalker::PointerMap* seen) {
 
 namespace {
 ArrayData* MakeUncountedArrayWithoutEscalation(
-    ArrayData* in, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* in, const MakeUncountedEnv& env, bool hasApcTv) {
   HeapObject** seenArr = nullptr;
-  if (seen && in->hasMultipleRefs()) {
-    seenArr = &(*seen)[in];
+  if (env.seen && in->hasMultipleRefs()) {
+    seenArr = &(*env.seen)[in];
     if (auto const arr = static_cast<ArrayData*>(*seenArr)) {
       arr->uncountedIncRef();
       return arr;
     }
   }
 
-  auto const result = in->makeUncounted(seen, hasApcTv);
+  auto const result = in->makeUncounted(env, hasApcTv);
   if (seenArr) *seenArr = result;
   return result;
 }
 }
 
 ArrayData* MakeUncountedArray(
-    ArrayData* in, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* in, const MakeUncountedEnv& env, bool hasApcTv) {
   if (in->empty()) {
     auto const legacy = in->isLegacyArray();
     switch (in->toDataType()) {
@@ -157,25 +157,25 @@ ArrayData* MakeUncountedArray(
     }
   }
 
-  if (in->isVanilla()) {
+  if (env.allowBespokes || in->isVanilla()) {
     if (in->persistentIncRef()) return in;
-    return MakeUncountedArrayWithoutEscalation(in, seen, hasApcTv);
+    return MakeUncountedArrayWithoutEscalation(in, env, hasApcTv);
   }
 
   auto const vad = BespokeArray::ToVanilla(in, "MakeUncountedArray");
   if (vad->persistentIncRef()) return vad;
   SCOPE_EXIT { decRefArr(vad); };
-  return MakeUncountedArrayWithoutEscalation(vad, seen, hasApcTv);
+  return MakeUncountedArrayWithoutEscalation(vad, env, hasApcTv);
 }
 
-StringData* MakeUncountedString(StringData* in, DataWalker::PointerMap* seen) {
+StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {
   if (in->persistentIncRef()) return in;
   if (in->empty()) return staticEmptyString();
   if (auto const st = lookupStaticString(in)) return st;
 
   HeapObject** seenStr = nullptr;
-  if (seen && in->hasMultipleRefs()) {
-    seenStr = &(*seen)[in];
+  if (env.seen && in->hasMultipleRefs()) {
+    seenStr = &(*env.seen)[in];
     if (auto const st = static_cast<StringData*>(*seenStr)) {
       st->uncountedIncRef();
       return st;

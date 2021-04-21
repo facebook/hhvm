@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -39,6 +38,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
+struct MakeUncountedEnv;
 struct String;
 struct StringData;
 struct Variant;
@@ -470,7 +470,7 @@ public:
    * Return a new uncounted version of the given array. The array must be a
    * refcounted array - otherwise, we should call persistentIncRef() instead.
    */
-  ArrayData* makeUncounted(DataWalker::PointerMap* seen, bool hasApcTv);
+  ArrayData* makeUncounted(const MakeUncountedEnv& env, bool hasApcTv);
 
   /////////////////////////////////////////////////////////////////////////////
   // Other functions.
@@ -738,7 +738,7 @@ struct ArrayFunctions {
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*makeUncounted[NK])(
-    ArrayData*, DataWalker::PointerMap*, bool hasApcTv);
+    ArrayData*, const MakeUncountedEnv& env, bool hasApcTv);
 };
 
 extern const ArrayFunctions g_array_funcs;

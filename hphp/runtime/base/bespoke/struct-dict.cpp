@@ -355,11 +355,11 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
   return ad;
 }
 
-void StructDict::ConvertToUncounted(StructDict* sad,
-                                    DataWalker::PointerMap* seen) {
+void StructDict::ConvertToUncounted(
+    StructDict* sad, const MakeUncountedEnv& env) {
   for (Slot i = 0; i < sad->numFields(); i++) {
     auto const lval = tv_lval(&sad->rawTypes()[i], &sad->rawValues()[i]);
-    ConvertTvToUncounted(lval, seen);
+    ConvertTvToUncounted(lval, env);
   }
 }
 

@@ -308,9 +308,9 @@ ArrayData* LoggingArray::EscalateToVanilla(
 }
 
 void LoggingArray::ConvertToUncounted(
-    LoggingArray* lad, DataWalker::PointerMap* seen) {
+    LoggingArray* lad, const MakeUncountedEnv& env) {
   logEvent(lad, ArrayOp::ConvertToUncounted);
-  lad->wrapped = MakeUncountedArray(lad->wrapped, seen);
+  lad->wrapped = MakeUncountedArray(lad->wrapped, env);
 }
 
 void LoggingArray::ReleaseUncounted(LoggingArray* lad) {

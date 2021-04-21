@@ -181,7 +181,7 @@ public:
    * allocated in front of the returned pointer.
    */
   static ArrayData* MakeUncounted(
-      ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv);
+      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);

@@ -401,7 +401,7 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::MakeUncounted(
-    ArrayData* array, DataWalker::PointerMap* seen, bool hasApcTv) {
+    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
   auto a = asMixed(array);
   assertx(!a->empty());
   assertx(a->isRefCounted());
@@ -434,10 +434,10 @@ ArrayData* MixedArray::MakeUncounted(
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
     if (te.hasStrKey()) {
-      te.skey = MakeUncountedString(te.skey, seen);
+      te.skey = MakeUncountedString(te.skey, env);
       if (!te.skey->isStatic()) ad->mutableKeyTypes()->recordNonStaticStr();
     }
-    ConvertTvToUncounted(&te.data, seen);
+    ConvertTvToUncounted(&te.data, env);
   }
 
   assertx(ad->checkInvariants());

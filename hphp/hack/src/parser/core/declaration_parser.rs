@@ -1478,6 +1478,7 @@ where
         // This permits abstract variables to have an initializer, and vice-versa.
         // This is deliberate, and those errors will be detected after the syntax
         // tree is created.
+        self.sc_mut().begin_constant_declarator();
         let const_name = self.require_name_allow_all_keywords();
         let initializer_ = self.parse_simple_initializer_opt();
         S!(make_constant_declarator, self, const_name, initializer_)
@@ -2412,6 +2413,7 @@ where
 
         // TODO: We must allow TRUE to be a legal enum member name; here we allow
         // any keyword.  Consider making this more strict.
+        self.sc_mut().begin_enumerator();
         let name = self.require_name_allow_all_keywords();
         let equal = self.require_equal();
         let value = self.parse_expression();
@@ -2426,6 +2428,7 @@ where
         // Taken from parse_enumerator:
         // TODO: We must allow TRUE to be a legal enum member name; here we allow
         // any keyword.  Consider making this more strict.
+        self.sc_mut().begin_enum_class_enumerator();
         let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ true);
         let name = self.require_name_allow_all_keywords();
         let equal_ = self.require_equal();

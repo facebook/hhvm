@@ -52,6 +52,20 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_list(self, items, offset)
     }
 
+    fn begin_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_enumerator(self)
+    }
+
+    fn begin_enum_class_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_enum_class_enumerator(self)
+    }
+
+    fn begin_constant_declarator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_constant_declarator(self)
+    }
+
+
+
     fn make_end_of_file(&mut self, token: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_end_of_file(self, token)
     }

@@ -3451,6 +3451,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         }
     }
 
+    fn begin_constant_declarator(&mut self) {}
+
     fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
         if name.is_ignored() {
             Node::Ignored(SK::ConstantDeclarator)
@@ -4187,6 +4189,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::EnumUse(self.alloc(names))
     }
 
+    fn begin_enumerator(&mut self) {}
+
     fn make_enumerator(
         &mut self,
         name: Self::R,
@@ -4318,6 +4322,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
         Node::Ignored(SyntaxKind::EnumClassDeclaration)
     }
+
+    fn begin_enum_class_enumerator(&mut self) {}
 
     fn make_enum_class_enumerator(
         &mut self,

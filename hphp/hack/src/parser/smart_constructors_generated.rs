@@ -34,6 +34,11 @@ pub trait SmartConstructors: Clone {
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Token<Self>) -> Self::R;
     fn make_list(&mut self, arg0: Vec<Self::R>, offset: usize) -> Self::R;
+
+    fn begin_enumerator(&mut self) {}
+    fn begin_enum_class_enumerator(&mut self) {}
+    fn begin_constant_declarator(&mut self) {}
+
     fn make_end_of_file(&mut self, arg0 : Self::R) -> Self::R;
     fn make_script(&mut self, arg0 : Self::R) -> Self::R;
     fn make_qualified_name(&mut self, arg0 : Self::R) -> Self::R;

@@ -1319,6 +1319,11 @@ pub trait SmartConstructors: Clone {
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Token<Self>) -> Self::R;
     fn make_list(&mut self, arg0: Vec<Self::R>, offset: usize) -> Self::R;
+
+    fn begin_enumerator(&mut self) {}
+    fn begin_enum_class_enumerator(&mut self) {}
+    fn begin_constant_declarator(&mut self) {}
+
 MAKE_METHODS
 }
 "
@@ -1817,6 +1822,12 @@ pub trait FlattenSmartConstructors<'src, State>
         Self::zero(SyntaxKind::SyntaxList)
     }
 
+    fn begin_enumerator(&mut self) {}
+
+    fn begin_enum_class_enumerator(&mut self) {}
+
+    fn begin_constant_declarator(&mut self) {}
+
 CONSTRUCTOR_METHODS}
 "
 
@@ -1964,6 +1975,20 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
     fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_list(self, items, offset)
     }
+
+    fn begin_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_enumerator(self)
+    }
+
+    fn begin_enum_class_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_enum_class_enumerator(self)
+    }
+
+    fn begin_constant_declarator(&mut self) {
+        <Self as FlattenSmartConstructors<'src, Self>>::begin_constant_declarator(self)
+    }
+
+
 
 CONSTRUCTOR_METHODS}
 "

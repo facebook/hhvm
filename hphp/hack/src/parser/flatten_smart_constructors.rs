@@ -45,6 +45,12 @@ pub trait FlattenSmartConstructors<'src, State>
         Self::zero(SyntaxKind::SyntaxList)
     }
 
+    fn begin_enumerator(&mut self) {}
+
+    fn begin_enum_class_enumerator(&mut self) {}
+
+    fn begin_constant_declarator(&mut self) {}
+
     fn make_end_of_file(&mut self, arg0: Self::R) -> Self::R {
         if Self::is_zero(&arg0) {
           Self::zero(SyntaxKind::EndOfFile)

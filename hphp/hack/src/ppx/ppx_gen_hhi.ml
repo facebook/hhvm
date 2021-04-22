@@ -7,7 +7,9 @@
  *
  *)
 
-(* Ppxlib based PPX, used by DUNE *)
+(* Ppxlib based PPX, used by both dune and BUCK.
+ * This file is the dune entry point.
+ *)
 open Ppxlib
 
 (* This is identical to the version in ppx_gen_hhi_direct, however it needs to
@@ -27,28 +29,34 @@ let hhi_dir : string option ref = ref None
 
 let hsl_dir : string option ref = ref None
 
+let hhi_cache = ref None
+
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)
 let expand_function ~loc:_ ~path:_ =
-  let hhi_dir =
-    match !hhi_dir with
-    | None -> raise (Arg.Bad "-hhi-dir is mandatory")
-    | Some dir -> dir
-  in
-  let hsl_dir =
-    match !hsl_dir with
-    | None -> raise (Arg.Bad "-hsl-dir is mandatory")
-    | Some dir -> dir
-  in
-  get_hhi_contents hhi_dir hsl_dir
+  match !hhi_cache with
+  | Some result -> result
+  | None ->
+    let hhi_dir =
+      match !hhi_dir with
+      | None -> raise (Arg.Bad "-hhi-dir is mandatory")
+      | Some dir -> dir
+    in
+    let hsl_dir =
+      match !hsl_dir with
+      | None -> raise (Arg.Bad "-hsl-dir is mandatory")
+      | Some dir -> dir
+    in
+    let result = get_hhi_contents hhi_dir hsl_dir in
+    hhi_cache := Some result;
+    result
 
-let extension =
-  Extension.declare
-    "hhi_contents"
-    Extension.Context.expression
-    Ast_pattern.(pstr nil)
-    expand_function
-
-let rule = Context_free.Rule.extension extension
+let rule =
+  Context_free.Rule.extension
+    (Extension.declare
+       "hhi_contents"
+       Extension.Context.expression
+       Ast_pattern.(pstr nil)
+       expand_function)
 
 let set_hhi_dir dir = hhi_dir := Some dir
 

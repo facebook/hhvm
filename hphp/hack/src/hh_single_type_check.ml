@@ -266,7 +266,6 @@ let parse_options () =
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
-  let bitwise_math_new_code = ref false in
   let inc_dec_new_code = ref false in
   let math_new_code = ref false in
   let naming_table = ref None in
@@ -644,9 +643,6 @@ let parse_options () =
       ( "--ignore-unsafe-cast",
         Arg.Set ignore_unsafe_cast,
         "Ignore unsafe_cast and retain the original type of the expression" );
-      ( "--bitwise-math-new-code",
-        Arg.Set bitwise_math_new_code,
-        "Use new error code in bitwise math operations." );
       ( "--inc-dec-new-code",
         Arg.Set inc_dec_new_code,
         "Use new error code in post- and pre-increment and decrement operations."
@@ -797,7 +793,6 @@ let parse_options () =
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
-      ~tco_bitwise_math_new_code:!bitwise_math_new_code
       ~tco_inc_dec_new_code:!inc_dec_new_code
       ~tco_math_new_code:!math_new_code
       ()

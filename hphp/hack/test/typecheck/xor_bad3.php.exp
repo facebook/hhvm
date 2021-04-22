@@ -1,12 +1,12 @@
 File "xor_bad3.php", line 13, characters 3-9:
-Typing error (Typing[4110])
-File "xor_bad3.php", line 13, characters 3-4:
-Expected `int` because this is used in a bitwise operation
-File "xor_bad3.php", line 12, characters 14-19:
-But got `string`
+Typing error (Typing[4423])
+  File "xor_bad3.php", line 13, characters 3-4:
+  Expected `int` because this is used in a bitwise operation
+  File "xor_bad3.php", line 12, characters 14-19:
+  But got `string`
 File "xor_bad3.php", line 13, characters 3-9:
-Typing error (Typing[4110])
-File "xor_bad3.php", line 13, characters 8-9:
-Expected `int` because this is used in a bitwise operation
-File "xor_bad3.php", line 12, characters 25-30:
-But got `string`
+Typing error (Typing[4423])
+  File "xor_bad3.php", line 13, characters 8-9:
+  Expected `int` because this is used in a bitwise operation
+  File "xor_bad3.php", line 12, characters 25-30:
+  But got `string`

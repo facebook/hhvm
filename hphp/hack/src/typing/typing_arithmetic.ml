@@ -294,11 +294,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           Errors.math_invalid_argument
         else
           Errors.unify_error
-      | _ ->
-        if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
-          Errors.bitwise_math_invalid_argument
-        else
-          Errors.unify_error
+      | _ -> Errors.bitwise_math_invalid_argument
     in
     let (env, _) =
       check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) err
@@ -316,17 +312,21 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Amp
   | Ast_defs.Bar
     when not contains_any ->
-    let err =
-      if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
-        Errors.bitwise_math_invalid_argument
-      else
-        Errors.unify_error
-    in
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_int env p ty1 (Reason.Rbitwise p1) err
+      check_dynamic_or_enforce_int
+        env
+        p
+        ty1
+        (Reason.Rbitwise p1)
+        Errors.bitwise_math_invalid_argument
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_int env p ty2 (Reason.Rbitwise p2) err
+      check_dynamic_or_enforce_int
+        env
+        p
+        ty2
+        (Reason.Rbitwise p2)
+        Errors.bitwise_math_invalid_argument
     in
     let result_ty =
       if is_dynamic1 && is_dynamic2 then
@@ -459,15 +459,14 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te ty
     else
-      let err =
-        if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
-          Errors.bitwise_math_invalid_argument
-        else
-          Errors.unify_error
-      in
       (* args isn't any or a variant thereof so can actually do stuff *)
       let (env, is_dynamic) =
-        check_dynamic_or_enforce_int env p ty (Reason.Rbitwise p) err
+        check_dynamic_or_enforce_int
+          env
+          p
+          ty
+          (Reason.Rbitwise p)
+          Errors.bitwise_math_invalid_argument
       in
       let result_ty =
         if is_dynamic then

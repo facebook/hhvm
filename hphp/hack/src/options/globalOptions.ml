@@ -123,7 +123,6 @@ type t = {
   tco_readonly: bool;
   tco_enable_expression_trees: bool;
   tco_allowed_expression_tree_visitors: string list;
-  tco_bitwise_math_new_code: bool;
   tco_inc_dec_new_code: bool;
   tco_math_new_code: bool;
 }
@@ -310,7 +309,6 @@ let default =
     tco_readonly = false;
     tco_enable_expression_trees = false;
     tco_allowed_expression_tree_visitors = [];
-    tco_bitwise_math_new_code = false;
     tco_inc_dec_new_code = false;
     tco_math_new_code = false;
   }
@@ -452,7 +450,6 @@ let make
     ?(tco_enable_expression_trees = default.tco_enable_expression_trees)
     ?(tco_allowed_expression_tree_visitors =
       default.tco_allowed_expression_tree_visitors)
-    ?(tco_bitwise_math_new_code = default.tco_bitwise_math_new_code)
     ?(tco_inc_dec_new_code = default.tco_inc_dec_new_code)
     ?(tco_math_new_code = default.tco_math_new_code)
     () =
@@ -572,7 +569,6 @@ let make
     tco_readonly;
     tco_enable_expression_trees;
     tco_allowed_expression_tree_visitors;
-    tco_bitwise_math_new_code;
     tco_inc_dec_new_code;
     tco_math_new_code;
   }
@@ -837,8 +833,6 @@ let set_tco_enable_expression_trees t b =
 let expression_trees_enabled t = t.tco_enable_expression_trees
 
 let allowed_expression_tree_visitors t = t.tco_allowed_expression_tree_visitors
-
-let tco_bitwise_math_new_code t = t.tco_bitwise_math_new_code
 
 let tco_inc_dec_new_code t = t.tco_inc_dec_new_code
 

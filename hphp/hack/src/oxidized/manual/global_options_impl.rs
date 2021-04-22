@@ -123,7 +123,6 @@ impl Default for GlobalOptions {
             tco_readonly: false,
             tco_enable_expression_trees: false,
             tco_allowed_expression_tree_visitors: vec![],
-            tco_bitwise_math_new_code: false,
             tco_inc_dec_new_code: false,
             tco_math_new_code: false,
         }

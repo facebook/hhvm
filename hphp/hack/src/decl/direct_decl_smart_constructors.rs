@@ -4107,26 +4107,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         let key = id.1;
         let consts = self.slice(enumerators.iter().filter_map(|node| match node {
-            Node::ListItem(&(name, value)) => {
-                let id = name.as_id()?;
-                let refs = match value {
-                    Node::Expr(expr) => gather_constants(&self.arena, &expr),
-                    _ => &[],
-                };
-                Some(
-                    self.alloc(shallow_decl_defs::ShallowClassConst {
-                        abstract_: false,
-                        name: id.into(),
-                        type_: self
-                            .infer_const(name, value)
-                            .unwrap_or_else(|| self.tany_with_pos(id.0)),
-                        refs,
-                    }),
-                )
-            }
+            &Node::Const(const_) => Some(const_),
             _ => None,
         }));
-
         let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.arena);
         for attribute in attributes.iter() {
             match attribute {
@@ -4211,7 +4194,26 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        Node::ListItem(self.alloc((name, value)))
+        let id = match self.expect_name(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SyntaxKind::Enumerator),
+        };
+
+        let refs = match value {
+            Node::Expr(expr) => gather_constants(&self.arena, &expr),
+            _ => &[],
+        };
+
+        Node::Const(
+            self.alloc(ShallowClassConst {
+                abstract_: false,
+                name: id.into(),
+                type_: self
+                    .infer_const(name, value)
+                    .unwrap_or_else(|| self.tany_with_pos(id.0)),
+                refs,
+            }),
+        )
     }
 
     fn make_enum_class_declaration(

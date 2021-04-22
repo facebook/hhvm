@@ -104,6 +104,8 @@ private:
   static RuntimeStruct* deserialize(
       const StringData* stableIdentifier, FieldKeys&& fields);
 
+  void validateFieldsMatch(const FieldIndexVector& fields) const;
+
   const StringData* m_stableIdentifier;
   std::atomic<const bespoke::StructLayout*> m_assignedLayout;
   FieldKeys m_fields;

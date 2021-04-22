@@ -100,10 +100,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
       lock.unlock();
       // Validate that the fields provided in the query match the registered
       // fields to avoid catastrophic index mismatches.
-      always_assert(runtimeStruct->m_fieldCount == fields.size());
-      for (auto const [idx, str] : fields) {
-        always_assert(runtimeStruct->m_fields[idx]->same(str.get()));
-      }
+      runtimeStruct->validateFieldsMatch(fields);
       return runtimeStruct;
     }
   }
@@ -127,6 +124,30 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
   if (!pair.second) delete rs;
 
   return pair.first->second;
+}
+
+void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
+  SCOPE_ASSERT_DETAIL("RuntimeStruct::validateFieldsMatch") {
+    std::string ret =
+      folly::sformat("Field mismatch for struct {}\n", m_stableIdentifier);
+    ret += "Existing schema:\n";
+    for (size_t i = 0; i < m_fields.size(); i++) {
+      if (m_fields[i] == nullptr) continue;
+      ret += folly::sformat("  {}: {}\n", i, m_fields[i]);
+    }
+    ret += "New schema:\n";
+    auto newSchema = FieldIndexVector(fields);
+    std::sort(newSchema.begin(), newSchema.end());
+    for (auto const [idx, str] : newSchema) {
+      ret += folly::sformat("  {}: {}\n", idx, str);
+    }
+    return ret;
+  };
+
+  always_assert(m_fieldCount == fields.size());
+  for (auto const [idx, str] : fields) {
+    always_assert(m_fields[idx]->same(str.get()));
+  }
 }
 
 RuntimeStruct* RuntimeStruct::deserialize(

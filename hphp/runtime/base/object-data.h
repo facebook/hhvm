@@ -540,15 +540,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op = ReadOnlyOp::Any);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op = ReadOnlyOp::Any, bool* roProp = nullptr);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
+  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp = nullptr);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
+  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp);
 
   bool propIsset(const Class* ctx, const StringData* key);
 

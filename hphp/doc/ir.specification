@@ -1216,7 +1216,8 @@ To string conversions:
   is not already defined.
 
 | LdClsPropAddrOrNull, D(PtrToSPropCell|Nullptr),
-|                      S(Cls) S(Str) C(Cls|Nullptr) C(Bool) C(Bool) C(Bool) C(Bool),
+|                      S(Cls) S(Str) C(Cls|Nullptr) S(PtrToMISBool|Nullptr)
+|                      C(Bool) C(Bool) C(Bool) C(Bool) C(Bool),
 |                      NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
@@ -1229,7 +1230,8 @@ To string conversions:
   property is ReadOnly, or if S6 is true, and the property is not ReadOnly.
 
 | LdClsPropAddrOrRaise, D(PtrToSPropCell),
-|                       S(Cls) S(Str) C(Cls|Nullptr) C(Bool) C(Bool) C(Bool) C(Bool),
+|                       S(Cls) S(Str) C(Cls|Nullptr) S(PtrToMISBool|Nullptr)
+|                       C(Bool) C(Bool) C(Bool) C(Bool) C(Bool),
 |                       NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
@@ -2761,17 +2763,17 @@ fields of that struct for holding intermediate values.
   Get a base from global named S0. If it is not a defining BaseG it can also
   return the init_null_variant, so for now it returns a PtrToMembCell.
 
-| PropX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), NF
+| PropX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISBool) S(PtrToMISCell), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if
   the property is ReadOnly when it was required to be Mutable.
 
-| PropQ, D(LvalToMembCell), S(Obj,LvalToCell) S(StaticStr) S(PtrToMISCell), NF
+| PropQ, D(LvalToMembCell), S(Obj,LvalToCell) S(StaticStr) S(PtrToMISBool) S(PtrToMISCell), NF
 
   A nullsafe version of PropX, returns null if the base S0 is null. An exception
   is thrown if the property is ReadOnly when it was required to be Mutable.
 
-| PropDX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), MProp
+| PropDX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISBool) S(PtrToMISCell), MProp
 
   Like PropX, but used for intermediate element lookups that may modify the
   base. An exception is thrown if the property is ReadOnly when it was

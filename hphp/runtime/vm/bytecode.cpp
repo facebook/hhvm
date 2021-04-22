@@ -2600,8 +2600,14 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
     throw_cannot_modify_static_const_prop(class_->name()->data(),
       name->data());
   }
-  if (lookup.readonly && op == ReadOnlyOp::Mutable) {
-    throw_must_be_mutable(class_->name()->data(), name->data());
+
+  if (lookup.readonly && (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckROCOW)) {
+    if (op == ReadOnlyOp::CheckROCOW &&
+     (!isRefcountedType(lookup.val->m_type) || hasPersistentFlavor(lookup.val->m_type))) {
+      mstate.roProp = true;
+    } else {
+      throw_must_be_mutable(class_->name()->data(), name->data());   
+    }
   }
   mstate.base = tv_lval(lookup.val);
 }
@@ -2642,10 +2648,12 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp 
         return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
-          mstate.tvTempBase, ctx, mstate.base, key, op
+          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
         );
       case MOpMode::Unset:
-        return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key, op);
+        return Prop<MOpMode::Unset>(
+          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
+        );
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
@@ -2660,7 +2668,7 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadOnlyOp
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
   mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
-                             key.m_data.pstr, op);
+                             key.m_data.pstr, op, &mstate.roProp);
 }
 
 static OPTBLD_INLINE

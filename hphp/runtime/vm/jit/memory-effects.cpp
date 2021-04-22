@@ -120,6 +120,15 @@ AliasClass pointee(
       return APropAny;
     }
 
+    if (type <= TPtrToMISBool) {
+      if (ptr->hasConstVal() && ptr->rawVal() == 0) {
+        // nullptr roProp pointer, representing an instruction that doesn't use
+        // it.
+        return AEmpty;
+      }
+      return AMIStateROProp;
+    }
+
     if (type <= TMemToMISCell) {
       if (sinst->is(LdMIStateAddr)) {
         return mis_from_offset(sinst->src(0)->intVal());
@@ -195,7 +204,7 @@ AliasClass pointee(
   if (type.maybe(TMemToFrameCell))   ret = ret | ALocalAny;
   if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
   if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
-  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase;
+  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase | AMIStateROProp;
   if (type.maybe(TMemToClsInitCell)) ret = ret | AHeapAny;
   if (type.maybe(TMemToClsCnsCell))  ret = ret | AHeapAny;
   if (type.maybe(TMemToSPropCell))   ret = ret | ARdsAny;
@@ -466,12 +475,13 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  * Construct effects for member instructions that take &tvRef as their last
  * argument.
  *
- * These instructions never load tvRef, but they might store to it.
+ * These instructions never load tvRef or roProp, but they might store to it.
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
   auto const srcs = inst.srcs();
   assertx(srcs.back()->isA(TMemToMISCell));
-  auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1));
+  assertx(inst.src(2)->isA(TMemToMISBool));
+  auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 2));
   auto const stores = AHeapAny | all_pointees(inst);
   return may_load_store(loads, stores);
 }
@@ -1376,8 +1386,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
-   * operations above, these may take a pointer to MInstrState::tvRef, which
-   * they may store to (but not read from).
+   * operations above, these may take a pointer to MInstrState::tvRef and 
+   * MInstrState::roProp, which they may store to (but not read from).
    */
   case PropX:
   case PropDX:
@@ -1861,6 +1871,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
+    return may_load_store(
+      AHeapAny,
+      AHeapAny | all_pointees(inst)
+    );
   case Clone:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:

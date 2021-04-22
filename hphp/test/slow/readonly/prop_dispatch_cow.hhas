@@ -1,0 +1,128 @@
+
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+.adata A_0 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (15,26) <"HH\\void" N  > test() {
+  .declvars $a $e;
+  .srcloc 16:8,16:16;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 16:3,16:16;
+  SetL $a
+  .srcloc 16:3,16:17;
+  PopC
+  .srcloc 17:13,17:21;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $a Define
+  .srcloc 17:3,17:9;
+  SetM 0 PT:"foo" Any
+  .srcloc 17:3,17:22;
+  PopC
+  .srcloc 18:16,18:24;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $a Define
+  .srcloc 18:3,18:12;
+  SetM 0 PT:"ro_foo" Any
+  .srcloc 18:3,18:25;
+  PopC
+  .srcloc 19:22,19:23;
+  Int 10
+  .srcloc 19:3,19:18;
+  BaseL $a Define
+  Dim Define PT:"foo" Mutable
+  Dim Define PT:"c" CheckROCOW
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 19:3,19:24;
+  PopC
+  .try {
+    .srcloc 21:27,21:28;
+    Int 10
+    .srcloc 21:5,21:23;
+    BaseL $a Define
+    Dim Define PT:"ro_foo" Mutable
+    Dim Define PT:"c" CheckROCOW
+    Dim Define EI:0 Any
+    SetM 0 EI:0 Any
+    .srcloc 21:5,21:29;
+    PopC
+    .srcloc 20:3,24:109;
+    Jmp L0
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L1
+    SetL $e
+    PopC
+    .srcloc 23:5,23:30;
+    NullUninit
+    NullUninit
+    .srcloc 23:14,23:15;
+    CGetL $e
+    NullUninit
+    .srcloc 23:14,23:29;
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    .srcloc 23:5,23:30;
+    FCallFuncD <> 1 1 "0" - "" "var_dump"
+    PopC
+    .srcloc 20:3,24:109;
+    Jmp L0
+  L1:
+    Throw
+  }
+L0:
+  .srcloc 25:26,25:27;
+  Int 10
+  .srcloc 25:3,25:22;
+  BaseL $a Define
+  Dim Define PT:"foo" Mutable
+  Dim Define PT:"bad_c" CheckROCOW
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 25:3,25:28;
+  PopC
+  .srcloc 26:2,26:2;
+  Null
+  RetC
+}
+
+.class {}  Foo (4,7) {
+  .property [public readonly] <"HH\\vec<HH\\int>" "HH\\vec" extended_hint > c =
+    """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+  .property [public deep_init readonly] <"HH\\Vector<HH\\int>" "HH\\Vector" extended_hint > bad_c =
+    uninit;
+  .method{}{} [private static no_injection] (4,7) 86pinit() {
+    .srcloc 4:1,7:146;
+    CheckProp "bad_c"
+    JmpNZ L0
+    .srcloc 6:40,6:45;
+    Vec @A_0
+    ColFromArray Vector
+    .srcloc 4:1,7:146;
+    InitProp "bad_c" NonStatic
+  L0:
+    Null
+    RetC
+  }
+}
+
+.class {}  Bar (9,12) {
+  .property [public sys_initial_val] <"Foo" "Foo" extended_hint > foo =
+    """N;""";
+  .property [public readonly sys_initial_val] <"Foo" "Foo" extended_hint > ro_foo =
+    """N;""";
+}

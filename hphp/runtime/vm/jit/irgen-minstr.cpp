@@ -944,9 +944,10 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
   }
 
   auto const tvRef = propTvRefPtr(env, base, key);
-  if (nullsafe) return gen(env, PropQ, ReadOnlyData { rop }, base, key, tvRef);
+  auto const roProp = gen(env, LdMROPropAddr);
+  if (nullsafe) return gen(env, PropQ, ReadOnlyData { rop }, base, key, roProp, tvRef);
   auto const op = define ? PropDX : PropX;
-  return gen(env, op, PropData { mode, rop }, base, key, tvRef);
+  return gen(env, op, PropData { mode, rop }, base, key, roProp, tvRef);
 }
 
 SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp op) {
@@ -961,7 +962,8 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp
 
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
-  if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
+  if (!propInfo || propInfo->isConst || mode == MOpMode::Unset ||
+    (propInfo->readOnly && op == ReadOnlyOp::CheckROCOW)) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
   if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
@@ -1594,7 +1596,8 @@ void emitBaseSC(IRGS& env,
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
 
   const LdClsPropOptions opts { op, true, false, writeMode };
-  auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
+  auto const roProp = gen(env, LdMROPropAddr);
+  auto const spropPtr = ldClsPropAddr(env, cls, name, roProp, opts).propPtr;
   stMBase(env, spropPtr);
 }
 

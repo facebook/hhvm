@@ -127,17 +127,21 @@ tv_lval ldGblAddrDefHelper(StringData* name);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
+                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode,
                            bool mustBeMutable,
-                           bool mustBeReadOnly);
+                           bool mustBeReadOnly,
+                           bool checkROCOW);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
+                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode,
                             bool mustBeMutable,
-                            bool mustBeReadOnly);
+                            bool mustBeReadOnly,
+                            bool checkROCOW);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

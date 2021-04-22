@@ -75,5 +75,3 @@
   .property [public readonly sys_initial_val] <"Bar" "Bar" extended_hint > ro_c =
     """N;""";
 }
-
-# /data/users/voork/fbsource2/fbcode/hphp/test/slow/readonly/test.php ends here

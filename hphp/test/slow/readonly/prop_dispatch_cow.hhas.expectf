@@ -1,0 +1,4 @@
+string(45) "Property ro_foo of class Bar must be mutable."
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property bad_c of class Foo must be mutable.' in %s/prop_dispatch_cow.hhas:25
+%A

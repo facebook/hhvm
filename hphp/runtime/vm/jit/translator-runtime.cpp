@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -472,18 +473,26 @@ template TypedValue arrFirstLast<false, true>(ArrayData*);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
+                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode,
                            bool mustBeMutable,
-                           bool mustBeReadOnly) {
+                           bool mustBeReadOnly,
+                           bool checkROCOW) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  if (mustBeMutable && UNLIKELY(lookup.readonly)) {
-    throw_must_be_mutable(cls->name()->data(), name->data());
+  if (lookup.readonly) {
+    if (checkROCOW && (!isRefcountedType(lookup.val->m_type) ||
+      hasPersistentFlavor(lookup.val->m_type))) {
+      assertx(roProp);
+      *roProp = true;
+    } else if (mustBeMutable || checkROCOW) {
+      throw_must_be_mutable(cls->name()->data(), name->data());
+    }
   }
   if (mustBeReadOnly && UNLIKELY(!lookup.readonly)) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
@@ -496,12 +505,14 @@ TypedValue* getSPropOrNull(const Class* cls,
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
+                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode,
                             bool mustBeMutable,
-                            bool mustBeReadOnly) {
-  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit, writeMode,
-                              mustBeMutable, mustBeReadOnly);
+                            bool mustBeReadOnly,
+                            bool checkROCOW) {
+  auto sprop = getSPropOrNull(cls, name, ctx, roProp, ignoreLateInit, writeMode,
+                              mustBeMutable, mustBeReadOnly, checkROCOW);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

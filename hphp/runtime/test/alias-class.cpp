@@ -524,7 +524,7 @@ TEST(AliasClass, Pointees) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto ptr = unit.gen(LdMBase, bcctx, TLvalToCell)->dst();
   auto const acls = pointee(ptr);
-  EXPECT_EQ(AHeapAny | ALocalAny | AStackAny | AMIStateTempBase | ARdsAny, acls);
+  EXPECT_EQ(AHeapAny | ALocalAny | AStackAny | AMIStateTempBase | AMIStateROProp | ARdsAny, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

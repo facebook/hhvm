@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/object-data.h"
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
@@ -1216,7 +1217,8 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
-                             const StringData* key, const ReadOnlyOp op) {
+                             const StringData* key, const ReadOnlyOp op,
+                             bool* roProp) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
@@ -1230,8 +1232,14 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
             throwMutateConstProp(lookup.slot);
           }
         }
-        if (lookup.readonly && op == ReadOnlyOp::Mutable) {
-          throwMustBeMutable(lookup.slot);
+        if (lookup.readonly) {
+          if (op == ReadOnlyOp::CheckROCOW &&
+            (!isRefcountedType(lookup.val.type()) || hasPersistentFlavor(lookup.val.type()))) {
+            assertx(roProp);
+            *roProp = true;
+          } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckROCOW) {
+            throwMustBeMutable(lookup.slot);
+          }
         }
         return prop;
       };
@@ -1280,9 +1288,10 @@ tv_lval ObjectData::prop(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op
+  const ReadOnlyOp op,
+  bool* roProp
 ) {
-  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op);
+  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op, roProp);
 }
 
 tv_lval ObjectData::propW(
@@ -1298,18 +1307,20 @@ tv_lval ObjectData::propU(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op
+  const ReadOnlyOp op,
+  bool* roProp
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
 }
 
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op
+  const ReadOnlyOp op,
+  bool* roProp
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

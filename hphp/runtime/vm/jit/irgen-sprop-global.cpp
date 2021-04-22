@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
@@ -117,13 +118,14 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
                 "StaticPropData expected to only wrap TypedValue");
 }
 
-ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
-                            SSATmp* ssaName, const LdClsPropOptions& opts) {
+ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* roProp,
+                            const LdClsPropOptions& opts) {
   assertx(ssaCls->isA(TCls));
   assertx(ssaName->isA(TStr));
 
   auto const mustBeMutable = opts.readOnlyCheck == ReadOnlyOp::Mutable;
   auto const mustBeReadOnly = opts.readOnlyCheck == ReadOnlyOp::ReadOnly;
+  auto const checkROCOW = opts.readOnlyCheck == ReadOnlyOp::CheckROCOW;
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
@@ -141,7 +143,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
     if (opts.writeMode && lookup.constant) return false;
-    if (mustBeMutable && lookup.readonly) return false;
+    if ((mustBeMutable || checkROCOW) && lookup.readonly) return false;
     if (mustBeReadOnly && !lookup.readonly) return false;
     return true;
   }();
@@ -164,10 +166,12 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     ssaCls,
     ssaName,
     ctxTmp,
+    roProp,
     cns(env, opts.ignoreLateInit),
     cns(env, opts.writeMode),
     cns(env, mustBeMutable),
-    cns(env, mustBeReadOnly)
+    cns(env, mustBeReadOnly),
+    cns(env, checkROCOW)
   );
   return { propAddr, nullptr, nullptr, kInvalidSlot };
 }
@@ -182,7 +186,7 @@ void emitCGetS(IRGS& env, ReadOnlyOp op) {
   if (!ssaCls->isA(TCls))      PUNT(CGetS-NotClass);
 
   const LdClsPropOptions opts { op, true, false, false };
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, opts).propPtr;
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, cns(env, nullptr), opts).propPtr;
   auto const ldMem    = gen(env, LdMem, propAddr->type().deref(), propAddr);
 
   discard(env);
@@ -199,7 +203,7 @@ void emitSetS(IRGS& env, ReadOnlyOp op) {
 
   auto value  = popC(env, DataTypeGeneric);
   const LdClsPropOptions opts { op, true, true, true };
-  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, cns(env, nullptr), opts);
 
   if (lookup.tc) {
     verifyPropType(
@@ -232,7 +236,7 @@ void emitSetOpS(IRGS& env, SetOpOp op, ReadOnlyOp /*rop*/) {
 
   auto const rhs = popC(env);
   const LdClsPropOptions opts { ReadOnlyOp::Any, true, false, true };
-  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, cns(env, nullptr), opts);
 
   auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
                        lookup.propPtr);
@@ -283,7 +287,8 @@ void emitIssetS(IRGS& env) {
     env,
     [&] (Block* taken) {
       const LdClsPropOptions opts { ReadOnlyOp::Any, false, true, false };
-      auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, opts).propPtr;
+      auto const propAddr =
+        ldClsPropAddr(env, ssaCls, ssaPropName, cns(env, nullptr), opts).propPtr;
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
@@ -306,7 +311,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop, ReadOnlyOp /*op*/) {
   if (!ssaPropName->isA(TStr)) PUNT(IncDecS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(IncDecS-NotClass);
   const LdClsPropOptions opts { ReadOnlyOp::Any, true, false, true };
-  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, cns(env, nullptr), opts);
   auto const oldVal =
     gen(env, LdMem, lookup.propPtr->type().deref(), lookup.propPtr);
 

@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property bad_c of class Foo must be mutable.' in %s/basesc_unset_cow.hhas:12
+%A

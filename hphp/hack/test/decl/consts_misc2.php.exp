@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,209 +1,216 @@
+@@ -1,216 +1,216 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -94,17 +94,15 @@
          sc_consts =
          [{ Shallow_decl_defs.scc_abstract = false;
             scc_name = ([10:15-16], "A");
--           scc_type = (Rhint ([10:9-14]), Tmixed); scc_refs = [] };
-+           scc_type = (Rhint ([10:9-14]), Tmixed);
-+           scc_refs = [((Typing_defs.From "\\TestE"), "X")] };
+            scc_type = (Rhint ([10:9-14]), Tmixed);
+            scc_refs = [((Typing_defs.From "\\TestE"), "X")] };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([11:15-16], "B");
              scc_type = (Rhint ([11:9-14]), Tmixed);
--            scc_refs = [((Typing_defs.From "\\TestE"), "Y")] };
-+            scc_refs =
-+            [((Typing_defs.From "\\TestE"), "X");
-+              ((Typing_defs.From "\\TestE"), "Y")]
-+            };
+             scc_refs =
+             [((Typing_defs.From "\\TestE"), "X");
+               ((Typing_defs.From "\\TestE"), "Y")]
+             };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([12:15-16], "C");
              scc_type = (Rhint ([12:9-14]), Tmixed);
@@ -172,11 +170,12 @@
                    (Tapply (([20:9-10], "\\TestRefs2"), [])));
                    (Rhint ([20:3-8]), Tmixed)]
                  )));
--            scc_refs = [] };
-+            scc_refs =
+             scc_refs =
+-            [((Typing_defs.From "\\TestRefs2"), "K1");
+-              ((Typing_defs.From "\\TestRefs2"), "K2")]
 +            [(Typing_defs.Self, "K2");
 +              ((Typing_defs.From "\\TestRefs2"), "K1")]
-+            };
+             };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([21:9-10], "F");
              scc_type =

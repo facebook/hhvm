@@ -43,6 +43,15 @@ let gather_constants =
         | _ -> refs
       in
       CCRSet.union refs acc
+
+    method! on_SFclass_const acc (_, class_id) (_, name) =
+      (* TODO: recognize "self::F"... The shape key "shape(self::F => 1)" is
+      represented by SFclass_const with class_id just the string literal "self".
+      However, by the time this visitor is called, it has already been resolved
+      into a class-name. Therefore this place in the code is unable to properly
+      reconstruct "self::F" shape keys. *)
+      let ref = (From class_id, name) in
+      CCRSet.add ref acc
   end
 
 let class_const env (cc : Nast.class_const) =

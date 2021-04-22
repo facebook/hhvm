@@ -295,6 +295,7 @@ void ProxygenTransport::onHeadersComplete(
   }
 
   const auto& headers = m_request->getHeaders();
+  m_proxygenHeaders = &headers;
   headers.forEach([&] (const std::string &header, const std::string &val) {
       m_requestHeaders[header.c_str()].push_back(val.c_str());
     });
@@ -523,6 +524,10 @@ std::string ProxygenTransport::getHeader(const char *name) {
 
 const HeaderMap& ProxygenTransport::getHeaders() {
   return m_requestHeaders;
+}
+
+const proxygen::HTTPHeaders* ProxygenTransport::getProxygenHeaders() {
+  return m_proxygenHeaders;
 }
 
 void ProxygenTransport::addHeaderImpl(const char *name, const char *value) {

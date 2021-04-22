@@ -1,0 +1,31 @@
+Requesting 'test_proxygen_headers.php'
+string(%d) "vec(7) {
+  vec(2) {
+    string(4) "Host"
+    string(%d) "%s"
+  }
+  vec(2) {
+    string(10) "User-Agent"
+    string(%d) "%s"
+  }
+  vec(2) {
+    string(6) "Accept"
+    string(3) "*/*"
+  }
+  vec(2) {
+    string(5) "xyzzy"
+    string(2) "42"
+  }
+  vec(2) {
+    string(5) "XyZZy"
+    string(2) "43"
+  }
+  vec(2) {
+    string(5) "XYZZY"
+    string(2) "44"
+  }
+  vec(2) {
+    string(5) "xxxxx"
+    string(2) "45"
+  }
+}"

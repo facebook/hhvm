@@ -83,4 +83,15 @@ namespace HH {
 <<__Native>>
 function get_headers_secure(): darray<string, varray<string>>;
 
+/**
+ * Fetch all HTTP request names in the order they were received from proxygen
+ *
+ * @return array - An array of all the HTTP header names in the
+ *   current request.
+ * Note: if the same header name appears more than once in the request headers
+ * sent by client, it will appear more than once in this array.
+ */
+<<__Native>>
+function get_proxygen_headers(): varray<(string, string)>;
+
 }

@@ -23,7 +23,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/string-holder.h"
-
+#include "proxygen/lib/http/HTTPHeaders.h"
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -61,6 +61,7 @@ struct ITransportHeaders {
   virtual std::string getCommand() = 0; // URL with params stripped
   virtual std::string getHeader(const char *name) = 0;
   virtual const HeaderMap& getHeaders() = 0;
+  virtual const proxygen::HTTPHeaders* getProxygenHeaders() { return nullptr; }
   virtual Method getMethod() = 0;
   virtual const char *getMethodName() = 0;
   virtual const void *getPostData(size_t &size) = 0;
@@ -539,4 +540,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -63,6 +63,26 @@ Array HHVM_FUNCTION(apache_request_headers) {
   return empty_dict_array();
 }
 
+static Array get_raw_headers(const proxygen::HTTPHeaders &headers) {
+  VArrayInit ret(headers.size());
+  headers.forEach([&] (const std::string &header, const std::string &val) {
+    auto headerValPair = make_varray(header.c_str(), val.c_str());
+    ret.append(headerValPair);
+  });
+  return ret.toArray();
+}
+
+Array HHVM_FUNCTION(get_proxygen_headers) {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    auto const headers = transport->getProxygenHeaders();
+    if (headers) {
+      return get_raw_headers(*headers);
+    }
+  }
+  return empty_vec_array();
+}
+
 Array HHVM_FUNCTION(apache_response_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -133,6 +153,7 @@ void ApacheExtension::moduleInit() {
   HHVM_FALIAS(getallheaders, apache_request_headers);
   HHVM_FE(apache_get_config);
   HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
+  HHVM_FALIAS(HH\\get_proxygen_headers, get_proxygen_headers);
 
   HHVM_RC_INT(APACHE_MAP, 200);
 

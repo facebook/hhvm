@@ -156,6 +156,8 @@ struct ProxygenTransport final
   std::string getHeader(const char *name) override;
   const HeaderMap& getHeaders() override;
 
+  const proxygen::HTTPHeaders* getProxygenHeaders() override;
+
   /**
    * Get a description of the type of transport.
    */
@@ -380,6 +382,7 @@ struct ProxygenTransport final
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   bool m_egressError{false};
   int64_t m_maxPost{-1};
+  const proxygen::HTTPHeaders* m_proxygenHeaders = nullptr;
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit
@@ -401,4 +404,3 @@ using ProxygenTransportList =
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

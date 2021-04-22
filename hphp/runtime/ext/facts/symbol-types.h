@@ -103,7 +103,6 @@ template <typename S> struct Path {
 template <typename S, SymKind k> struct Symbol {
 
   explicit Symbol(StringPtr<S> name) : m_name{name} {
-    assertx(!m_name.empty());
   }
   explicit Symbol(const S& name) : Symbol{makeStringPtr<S>(name)} {
   }

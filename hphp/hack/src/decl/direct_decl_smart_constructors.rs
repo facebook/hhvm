@@ -3430,28 +3430,29 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 )
             }
             // Global consts.
-            Node::List([Node::ConstInitializer(&(name, initializer, _refs))]) => {
-                let Id(id_pos, id) = match self.elaborate_defined_id(name) {
-                    Some(id) => id,
-                    None => return Node::Ignored(SK::ConstDeclaration),
-                };
+            Node::List(consts) => {
+                // This case always returns Node::Ignored,
+                // but has the side effect of calling self.add_const
+
                 // Note: given "const int X=1,Y=2;", the legacy decl-parser
                 // allows both decls, and it gives them both an identical text-span -
                 // from start of "const" to end of semicolon. This is a bug but
                 // the code here preserves it.
-                // TODO(ljw) this match branch fails to match that case entirely.
-                // This is a bug that should be fixed.
-                let pos = Pos::merge(
-                    self.arena,
-                    self.get_pos(const_keyword),
-                    self.get_pos(semicolon),
-                )
-                .unwrap_or(id_pos);
-                let ty = self
-                    .node_to_ty(hint)
-                    .or_else(|| self.infer_const(name, initializer))
-                    .unwrap_or_else(|| self.tany_with_pos(id_pos));
-                self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
+                let pos = self.merge_positions(const_keyword, semicolon);
+                for cst in consts.iter() {
+                    match cst {
+                        Node::ConstInitializer(&(name, initializer, _refs)) => {
+                            if let Some(Id(id_pos, id)) = self.elaborate_defined_id(name) {
+                                let ty = self
+                                    .node_to_ty(hint)
+                                    .or_else(|| self.infer_const(name, initializer))
+                                    .unwrap_or_else(|| self.tany_with_pos(id_pos));
+                                self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
                 Node::Ignored(SK::ConstDeclaration)
             }
             _ => Node::Ignored(SK::ConstDeclaration),

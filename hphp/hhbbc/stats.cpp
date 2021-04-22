@@ -71,6 +71,7 @@ TRACE_SET_MOD(hhbbc_stats);
   X(arr_mapn, "array mapn", is_specialized_array_like_mapn)          \
   X(arr_map, "array map", is_specialized_array_like_map)             \
   X(str, "string", is_specialized_string)                            \
+  X(lazy_cls, "lazy class", is_specialized_lazycls)                  \
   X(int, "int", is_specialized_int)                                  \
   X(dbl, "double", is_specialized_double)                            \
   X(record, "record", is_specialized_record)                         \
@@ -246,7 +247,7 @@ bool is_sub_obj(const Type& t) {
 }
 bool is_exact_obj(const Type& t) {
   return
-    is_specialized_cls(t) &&
+    is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
     dobj_of(t).type == DObj::Exact;
 }

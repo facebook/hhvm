@@ -160,7 +160,14 @@ type shallow_class_const = {
   scc_abstract: bool;
   scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
+      (** This field is used for two different meanings in two different places...
+      enum class A:arraykey {int X="a";} -- here X.scc_type=\HH\MemberOf<A,int>
+      enum B:int as arraykey {X="a"; Y=1; Z=B::X;} -- here X.scc_type=string, Y.scc_type=int, Z.scc_type=TAny
+      In the later case, the scc_type is just a simple syntactic attempt to retrieve the type from the initializer. *)
   scc_refs: Typing_defs.class_const_ref list;
+      (** This is a list of all scope-resolution operators "A::B" that are mentioned in the const initializer,
+      for members of regular-enums and enum-class-enums to detect circularity of initializers.
+      We don't yet have a similar mechanism for top-level const initializers. *)
 }
 [@@deriving eq, show]
 

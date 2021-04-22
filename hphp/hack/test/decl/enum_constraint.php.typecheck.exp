@@ -6,7 +6,13 @@ File "enum_constraint.php", line 5, characters 6-6:
 Enums must be `int` or `string` or `arraykey`, not `IdOf<X>` (Typing[4024])
 File "enum_constraint.php", line 5, characters 6-6:
 Underlying type for enum is incompatible with constraint (Typing[4330])
-File "enum_constraint.php", line 5, characters 17-23:
-Expected `IdOf<X>`
-File "enum_constraint.php", line 5, characters 10-12:
-But got `int`
+  File "enum_constraint.php", line 5, characters 17-23:
+  Expected `IdOf<X>`
+  File "enum_constraint.php", line 5, characters 10-12:
+  But got `int`
+File "enum_constraint.php", line 11, characters 25-25:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "enum_constraint.php", line 11, characters 10-12:
+  Expected `int`
+  File "enum_constraint.php", line 11, characters 27-29:
+  But got `string`

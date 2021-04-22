@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6ef01e9b2758851cec3fb309445af26>>
+// @generated SignedSource<<78f951afa824b4eaadcb4f0bf04d2ef8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,7 +37,14 @@ pub use typing_defs::ConstDecl;
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
     pub name: typing_defs::PosId<'a>,
+    /// This field is used for two different meanings in two different places...
+    /// enum class A:arraykey {int X="a";} -- here X.scc_type=\HH\MemberOf<A,int>
+    /// enum B:int as arraykey {X="a"; Y=1; Z=B::X;} -- here X.scc_type=string, Y.scc_type=int, Z.scc_type=TAny
+    /// In the later case, the scc_type is just a simple syntactic attempt to retrieve the type from the initializer.
     pub type_: &'a Ty<'a>,
+    /// This is a list of all scope-resolution operators "A::B" that are mentioned in the const initializer,
+    /// for members of regular-enums and enum-class-enums to detect circularity of initializers.
+    /// We don't yet have a similar mechanism for top-level const initializers.
     pub refs: &'a [typing_defs::ClassConstRef<'a>],
 }
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}

@@ -3428,6 +3428,12 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
                 };
+                // Note: given "const int X=1,Y=2;", the legacy decl-parser
+                // allows both decls, and it gives them both an identical text-span -
+                // from start of "const" to end of semicolon. This is a bug but
+                // the code here preserves it.
+                // TODO(ljw) this match branch fails to match that case entirely.
+                // This is a bug that should be fixed.
                 let pos = Pos::merge(
                     self.arena,
                     self.get_pos(const_keyword),

@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/repo-autoload-map.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/util/assertions.h"
 
 TRACE_SET_MOD(repo_autoload);
@@ -78,30 +78,38 @@ static std::optional<String> getPathFromSymbol(
     return {StrNR(acc->second).asString()};
   }
 
-  std::optional<String> path;
-  try {
-    path = Repo::get().findPath(unitSn, RuntimeOption::SourceRoot);
-  } catch (RepoExc& re) {
-    FTRACE(1, "Failed loading because of repo error {} {}\n", name.data(), re.msg());
-    return {};
-  }
+  auto const path = [&] () -> const StringData* {
+    auto const relative = RepoFile::findUnitPath(unitSn);
+    always_assert(relative);
+    assertx(relative->isStatic());
+    if (RO::SourceRoot.empty() || relative->data()[0] == '/') return relative;
+    return makeStaticString(RO::SourceRoot + relative->data());
+  }();
+  unitToPathMap.insert(std::make_pair(unitSn, path));
 
-  always_assert(path.has_value());
-  auto spath = makeStaticString(path->get());
-  unitToPathMap.insert(std::make_pair(unitSn, spath));
-
-  FTRACE(1, "Success autoload {} {}\n", name.data(), spath->data());
-  return {StrNR(spath).asString()};
+  FTRACE(1, "Success autoload {} {}\n", name.data(), path->data());
+  return {StrNR(path).asString()};
 }
 
 template <typename Compare>
 Array getSymbolFromPath(
     const RepoAutoloadMap::Map<Compare>& map,
     const String& path) {
+
+  auto const unitSn = [&] {
+    auto const pathData = path.c_str();
+    if (pathData[0] == '/' && !RO::SourceRoot.empty() &&
+        !strncmp(RO::SourceRoot.c_str(), pathData, RO::SourceRoot.size())) {
+      auto const strippedPath =
+        makeStaticString(pathData + RO::SourceRoot.size());
+      auto const sn = RepoFile::findUnitSN(strippedPath);
+      if (sn >= 0) return sn;
+    }
+    return RepoFile::findUnitSN(makeStaticString(path));
+  }();
+
   auto ret = Array::CreateVec();
-  int64_t unitSn;
-  auto res = Repo::get().findUnit(path.c_str(), RuntimeOption::SourceRoot, unitSn);
-  if (res == RepoStatus::success) {
+  if (unitSn >= 0) {
     for (auto it = map.begin(); it != map.end(); ++it) {
       if (it->second == unitSn) {
         ret.append(StrNR(it->first).asString());

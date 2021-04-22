@@ -474,12 +474,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
-  // If RepoLocalMode gets set to rw, we'll read a cache of previously
-  // parsed units, and attempt to update it with any newly parsed
-  // units. If that repo is invalid, we want to delete it up front.
-  Repo::s_deleteLocalOnFailure = RuntimeOption::RepoLocalMode == RepoMode::ReadWrite;
-
-  initialize_repo();
 
   std::vector<std::string> badnodes;
   config.lint(badnodes);
@@ -596,7 +590,6 @@ int process(const CompilerOptions &po) {
   LitstrTable::init();
   LitstrTable::get().setWriting();
 
-  std::thread unit_cache_thread;
   {
     Timer timer2(Timer::WallTime, "parsing inputs");
     ar->setPackage(&package);
@@ -631,9 +624,7 @@ int process(const CompilerOptions &po) {
       }
     }
     if (po.target != "filecache") {
-      if (!package.parse(!po.force, unit_cache_thread)) {
-        return 1;
-      }
+      if (!package.parse(!po.force)) return 1;
 
       // nuke the compiler pool so we don't waste memory on ten gajillion
       // instances of hackc
@@ -667,10 +658,6 @@ int process(const CompilerOptions &po) {
     });
 
   SCOPE_EXIT {
-    if (unit_cache_thread.joinable()) {
-      unit_cache_thread.join();
-    }
-
     if (!po.filecache.empty()) {
       fileCacheThread.waitForEnd();
     }
@@ -742,14 +729,12 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     return 1;
   }
 
-  Repo::shutdown();
   RuntimeOption::RepoLocalMode = RepoMode::Closed;
   unlink(RuntimeOption::RepoCentralPath.c_str());
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
   RuntimeOption::RepoCommit = true;
-  Repo::get();
 
   // the function is only invoked in hhvm --hphp, which is supposed to be in
   // repo mode only. we are not setting it earlier in `compiler_main` since we
@@ -759,7 +744,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   RuntimeOption::RepoAuthoritative = true;
 
   Timer timer(Timer::WallTime, type);
-  // NOTE: Repo errors are ignored!
   Compiler::emitAllHHBC(std::move(ar));
 
   if (!po.syncDir.empty()) {

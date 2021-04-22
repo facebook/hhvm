@@ -36,7 +36,6 @@
 
 #include "hphp/util/build-info.h"
 
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 

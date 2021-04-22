@@ -16,10 +16,12 @@
 #ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
 #define incl_HPHP_HHVM_PROCESS_INIT_H_
 
+#include "hphp/compiler/analysis/emitter.h"
+
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
+
 #include "hphp/runtime/vm/runtime-compiler.h"
-#include "hphp/compiler/analysis/emitter.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {

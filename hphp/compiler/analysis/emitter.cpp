@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit.h"
@@ -51,7 +52,7 @@ namespace Compiler {
 namespace {
 
 void genText(UnitEmitter* ue, const std::string& outputPath) {
-  std::unique_ptr<Unit> unit(ue->create(true));
+  std::unique_ptr<Unit> unit(ue->create());
   auto const basePath = AnalysisResult::prepareFile(
     outputPath.c_str(),
     Option::UserFilePrefix + unit->filepath()->toCppString(),
@@ -126,8 +127,7 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
   }
 }
 
-void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
-                      const RepoAutoloadMapBuilder& autoloadMapBuilder) {
+RepoGlobalData getGlobalData() {
   auto const now = std::chrono::high_resolution_clock::now();
   auto const nanos =
     std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -183,10 +183,10 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
-    gd.ConstantFunctions.push_back(elm);
+    auto const s = internal_serialize(tvAsCVarRef(elm.second));
+    gd.ConstantFunctions.emplace_back(elm.first, s.toCppString());
   }
-  if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
-  Repo::get().saveGlobalData(std::move(gd), autoloadMapBuilder);
+  return gd;
 }
 
 }
@@ -216,38 +216,36 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         genText(ues_to_print, outputPath);
       };
 
-      auto commitSome = [&] (decltype(ues)& emitters) {
-        auto const DEBUG_ONLY err = batchCommitWithoutRetry(emitters, true);
-        always_assert(!err);
-        if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
-          std::move(emitters.begin(), emitters.end(),
-                    std::back_inserter(ues_to_print));
-        }
-        emitters.clear();
-      };
-
-      RepoAutoloadMapBuilder autoloadMapBuilder;
+      folly::Optional<RepoAutoloadMapBuilder> autoloadMapBuilder;
+      folly::Optional<RepoFileBuilder> repoBuilder;
+      if (Option::GenerateBinaryHHBC) {
+        autoloadMapBuilder.emplace();
+        repoBuilder.emplace(RuntimeOption::RepoCentralPath);
+      }
 
       auto program = std::move(ar->program());
       if (!program.get()) {
-        if (ues.size()) {
-          uint32_t id = 0;
-          for (auto& ue : ues) {
-            ue->m_symbol_refs.clear();
-            ue->m_sn = id;
-            ue->setSha1(SHA1 { id });
-            autoloadMapBuilder.addUnit(*ue);
-            id++;
+        uint32_t id = 0;
+        for (auto& ue : ues) {
+          ue->m_symbol_refs.clear();
+          ue->m_sn = id;
+          ue->setSha1(SHA1 { id });
+          if (repoBuilder) {
+            autoloadMapBuilder->addUnit(*ue);
+            repoBuilder->add(*ue);
           }
-          commitSome(ues);
+          if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
+            ues_to_print.emplace_back(std::move(ue));
+          }
+          id++;
         }
 
         ar->finish();
         ar.reset();
 
-        if (Option::GenerateBinaryHHBC) {
-          commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{},
-                           autoloadMapBuilder);
+        if (repoBuilder) {
+          Timer finalizeTime(Timer::WallTime, "finalizing repo");
+          repoBuilder->finish(getGlobalData(), *autoloadMapBuilder);
         }
         return;
       }
@@ -258,38 +256,15 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       ar.reset();
 
       HHBBC::UnitEmitterQueue ueq;
-      auto commitLoop = [&] {
-        folly::Optional<Timer> commitTime;
-        // kBatchSize needs to strike a balance between reducing
-        // transaction commit overhead (bigger batches are better), and
-        // limiting the cost incurred by failed commits due to identical
-        // units that require rollback and retry (smaller batches have
-        // less to lose).  Empirical results indicate that a value in
-        // the 2-10 range is reasonable.
-        static const unsigned kBatchSize = 8;
-
-        while (auto ue = ueq.pop()) {
-          if (!commitTime) {
-            commitTime.emplace(Timer::WallTime, "committing units to repo");
-          }
-          autoloadMapBuilder.addUnit(*ue);
-          ues.push_back(std::move(ue));
-          if (ues.size() == kBatchSize) {
-            commitSome(ues);
-          }
-        }
-        if (ues.size()) commitSome(ues);
-      };
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
       std::unique_ptr<ArrayTypeTable::Builder> arrTable;
       std::promise<void> arrTableReady;
       fut = arrTableReady.get_future();
 
-      wp_thread = std::thread([program = std::move(program),
-                               &ueq,
-                               &arrTable,
-                               &arrTableReady] () mutable {
+      wp_thread = std::thread(
+        [program = std::move(program), &ueq, &arrTable, &arrTableReady]
+        () mutable {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
           try {
@@ -302,12 +277,28 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
             arrTableReady.set_exception(std::current_exception());
             ueq.push(nullptr);
           }
-        });
-      {
-        commitLoop();
-        fut.wait();
-        if (arrTable) // Commit anyway if arrTable was initialised.
-          commitGlobalData(std::move(arrTable), autoloadMapBuilder);
+        }
+      );
+
+      folly::Optional<Timer> commitTime;
+      while (auto ue = ueq.pop()) {
+        if (!commitTime) {
+          commitTime.emplace(Timer::WallTime, "committing units to repo");
+        }
+        if (repoBuilder) {
+          autoloadMapBuilder->addUnit(*ue);
+          repoBuilder->add(*ue);
+        }
+        if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
+          ues_to_print.emplace_back(std::move(ue));
+        }
+      }
+
+      fut.wait();
+      Timer finalizeTime(Timer::WallTime, "finalizing repo");
+      if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
+      if (repoBuilder) {
+        repoBuilder->finish(getGlobalData(), *autoloadMapBuilder);
       }
     }
 
@@ -404,7 +395,9 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     }
 
     // NOTE: Repo errors are ignored!
-    Repo::get().commitUnit(ue.get(), unitOrigin, false);
+    if (!RO::RepoAuthoritative) {
+      Repo::get().commitUnit(ue.get(), unitOrigin, false);
+    }
 
     if (RO::EvalStressUnitSerde) ue = ue->stressSerde();
     unit = ue->create();
@@ -415,7 +408,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     } else {
       ue.reset();
 
-      if (unit->sn() == -1 && RuntimeOption::RepoCommit) {
+      if (unit->sn() == -1 && !RO::RepoAuthoritative && RO::RepoCommit) {
         // the unit was not committed to the Repo, probably because
         // another thread did it first. Try to use the winner.
         auto u = Repo::get().loadUnit(filename ? filename : "",

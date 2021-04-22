@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/litstr-table.h"
 
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -76,9 +76,7 @@ void LitstrTable::forEachLitstr(
 // Lazy loading.
 
 StringData* loadLitstrById(Id id) {
-  if (RuntimeOption::RepoAuthoritative) {
-    return Repo::get().lsrp().loadOne(id);
-  }
+  if (RuntimeOption::RepoAuthoritative) return RepoFile::loadLitstr(id);
   return nullptr;
 }
 

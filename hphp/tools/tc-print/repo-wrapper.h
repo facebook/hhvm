@@ -19,8 +19,9 @@
 
 #include <map>
 
+#include "hphp/runtime/vm/unit.h"
+
 #include "hphp/util/sha1.h"
-#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP { namespace jit {
 
@@ -28,7 +29,6 @@ struct RepoWrapper {
 private:
   typedef std::map<SHA1, Unit*> CacheType;
 
-  Repo* repo;
   CacheType unitCache;
 
   RepoWrapper(const RepoWrapper& other);

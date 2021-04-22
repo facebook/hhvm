@@ -172,6 +172,7 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 struct Func final {
   friend struct FuncEmitter;
   friend struct FuncRepoProxy;
+  friend struct UnitEmitter;
 
 #ifndef USE_LOWPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
@@ -448,8 +449,6 @@ struct Func final {
    */
   PC entry() const;
   Offset bclen() const;
-
-  PC loadBytecode();
 
   /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
@@ -1284,6 +1283,9 @@ struct Func final {
 private:
   using NamedLocalsMap = IndexedStringMap<LowStringPtr, Id>;
 
+  using BCPtr = TokenOrPtr<unsigned char>;
+  using LineTablePtr = TokenOrPtr<LineTable>;
+
   // Some 16-bit values in SharedData are stored as small deltas if they fit
   // under this limit.  If not, they're set to the limit value and an
   // ExtendedSharedData will be allocated for the full-width field.
@@ -1293,7 +1295,7 @@ private:
    * Properties shared by all clones of a Func.
    */
   struct SharedData : AtomicCountable {
-    SharedData(unsigned char const* bc, Offset bclen, PreClass* preClass,
+    SharedData(BCPtr bc, Offset bclen, PreClass* preClass,
                int sn, int line1, int line2, bool isPhpLeafFn);
     ~SharedData();
 
@@ -1309,7 +1311,7 @@ private:
      * here or reorder anything.
      */
     // (There's a 32-bit integer in the AtomicCountable base class here.)
-    std::atomic<unsigned char const*> m_bc{nullptr};
+    LockFreePtrWrapper<BCPtr> m_bc;
     PreClass* m_preClass;
     int m_line1;
     ParamInfoVec m_params;
@@ -1377,9 +1379,11 @@ private:
     uint32_t m_cti_size; // size of cti code
     uint16_t m_numLocals;
     uint16_t m_numIterators;
+
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
+    mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 144 : 168>(), "");
+  static_assert(CheckSize<SharedData, use_lowptr ? 152 : 176>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1415,7 +1419,7 @@ private:
     uint64_t* m_inoutBitPtr = nullptr;
     LowStringPtr m_docComment;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 304>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 312>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1460,15 +1464,8 @@ private:
     ExtendedLineInfo,
     pointer_hash<SharedData>
   >;
-  using LineTableStash = tbb::concurrent_hash_map<
-    const SharedData*,
-    LineTable,
-    pointer_hash<SharedData>
-  >;
 
   static ExtendedLineInfoCache s_extendedLineInfo;
-
-  static LineTableStash s_lineTables;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -1485,6 +1482,8 @@ private:
                    std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
   void setNamedEntity(const NamedEntity*);
+
+  PC loadBytecode();
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.
@@ -1666,7 +1665,8 @@ public:
    */
   bool getOffsetRange(Offset offset, OffsetRange& range) const;
 
-  void stashLineTable(LineTable table) const;
+  void setLineTable(LineTable);
+  void setLineTable(LineTablePtr::Token);
 
   void stashExtendedLineTable(SourceLocTable table) const;
 
@@ -1675,10 +1675,10 @@ public:
   LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
 
   const LineTable* getLineTable() const;
+  LineTable getOrLoadLineTableCopy() const;
 
 private:
-  const LineTable& loadLineTable() const;
-  void cleanupLocationCache() const;
+  const LineTable& getOrLoadLineTable() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
@@ -1828,8 +1828,7 @@ inline tracing::Props traceProps(const Func* f) {
  */
 size_t hhbc_arena_capacity();
 
-const unsigned char*
-allocateBCRegion(const unsigned char* bc, size_t bclen);
+unsigned char* allocateBCRegion(const unsigned char* bc, size_t bclen);
 void freeBCRegion(const unsigned char* bc, size_t bclen);
 
 ///////////////////////////////////////////////////////////////////////////////

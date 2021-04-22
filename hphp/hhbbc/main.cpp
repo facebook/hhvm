@@ -38,8 +38,8 @@
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -261,109 +261,26 @@ UNUSED void validate_options() {
 
 //////////////////////////////////////////////////////////////////////
 
-void open_repo(const std::string& path) {
-  RuntimeOption::RepoCentralPath = path;
-  // Make sure the changes take effect
-  Repo::shutdown();
-  Repo::get();
-}
-
 template<typename F> void load_input(F&& fun) {
   trace_time timer("load units");
 
-  open_repo(input_repo);
-  Repo::get().loadGlobalData();
-  SCOPE_EXIT { Repo::shutdown(); };
+  SCOPE_EXIT { RepoFile::destroy(); };
 
-  auto const& gd = Repo::get().global();
-  // When running hhbbc, these option is loaded from GD, and will override CLI.
-  // When running hhvm, these option is not loaded from GD, but read from CLI.
-  RO::EvalHackArrCompatNotices =
-    RO::EvalHackArrCompatCheckCompare =
-      gd.HackArrCompatNotices;
-  RO::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
-  RO::EvalForbidDynamicCallsToClsMeth =
-    gd.ForbidDynamicCallsToClsMeth;
-  RO::EvalForbidDynamicCallsToInstMeth =
-    gd.ForbidDynamicCallsToInstMeth;
-  RO::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
-  RO::EvalForbidDynamicCallsWithAttr =
-    gd.ForbidDynamicCallsWithAttr;
-  RO::EvalLogKnownMethodsAsDynamicCalls =
-    gd.LogKnownMethodsAsDynamicCalls;
-  RO::EvalNoticeOnBuiltinDynamicCalls =
-    gd.NoticeOnBuiltinDynamicCalls;
-  RO::EvalHackArrCompatIsVecDictNotices =
-    gd.HackArrCompatIsVecDictNotices;
-  RO::EvalHackArrCompatSerializeNotices =
-    gd.HackArrCompatSerializeNotices;
-  RO::EvalHackArrDVArrs = true; // TODO(kshaunak): Clean it up.
-  RO::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
-  RO::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
-  RO::EvalEmitClassPointers = gd.EmitClassPointers;
-  RO::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
-  RO::EvalIsVecNotices = gd.IsVecNotices;
-  RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
-  RO::EvalArrayProvenance = false; // TODO(kshaunak): Clean it up.
-  RO::EvalRaiseClassConversionWarning = gd.RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname = gd.ClassPassesClassname;
-  RO::EvalClassnameNotices = gd.ClassnameNotices;
-  RO::EvalRaiseClsMethConversionWarning = gd.RaiseClsMethConversionWarning;
-  RO::EvalNoticeOnCoerceForStrConcat = gd.NoticeOnCoerceForStrConcat;
-  RO::EvalNoticeOnCoerceForBitOp = gd.NoticeOnCoerceForBitOp;
-  RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
-  if (gd.HardGenericsUB) {
-    RO::EvalEnforceGenericsUB = 2;
-  } else {
-    RO::EvalEnforceGenericsUB = 1;
-  }
-
-  auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
+  auto const units = RepoFile::enumerateUnits();
   auto const size = units.size();
   fun(size, nullptr);
   parallel::for_each(
     units,
-    [&] (const std::pair<std::string,SHA1>& kv) {
+    [&] (const StringData* path) {
       fun(
         size,
-        Repo::get().urp().loadEmitter(
-          kv.first, kv.second, Native::s_noNativeFuncs
-        )
+        RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false)
       );
     }
   );
 }
 
-void write_units(UnitEmitterQueue& ueq,
-                 RepoAutoloadMapBuilder& autoloadMapBuilder) {
-  folly::Optional<trace_time> timer;
-
-  RuntimeOption::RepoCommit = true;
-  RuntimeOption::RepoDebugInfo = false; // Don't record UnitSourceLoc
-  open_repo(output_repo);
-  SCOPE_EXIT { Repo::shutdown(); };
-
-  std::vector<std::unique_ptr<UnitEmitter>> ues;
-  while (auto ue = ueq.pop()) {
-    if (!timer) timer.emplace("writing output repo");
-    autoloadMapBuilder.addUnit(*ue);
-    ues.push_back(std::move(ue));
-    if (ues.size() == 8) {
-      auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues, true);
-      always_assert(!err);
-      ues.clear();
-    }
-  }
-
-  auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues, true);
-  always_assert(!err);
-  ues.clear();
-}
-
-void write_global_data(
-  std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
-  const RepoAutoloadMapBuilder& autoloadMapBuilder) {
-
+RepoGlobalData get_global_data() {
   auto const now = std::chrono::high_resolution_clock::now();
   auto const nanos =
     std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -421,12 +338,11 @@ void write_global_data(
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
-    gd.ConstantFunctions.push_back(elm);
+    auto const s = internal_serialize(tvAsCVarRef(elm.second));
+    gd.ConstantFunctions.emplace_back(elm.first, s.toCppString());
   }
 
-  if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
-  // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
-  Repo::get().saveGlobalData(std::move(gd), autoloadMapBuilder);
+  return gd;
 }
 
 void compile_repo() {
@@ -460,10 +376,26 @@ void compile_repo() {
     }
   );
   wp_thread.start();
+
   {
     RepoAutoloadMapBuilder autoloadMapBuilder;
-    write_units(ueq, autoloadMapBuilder);
-    write_global_data(arrTable, autoloadMapBuilder);
+    RepoFileBuilder repoBuilder{output_repo};
+
+    folly::Optional<trace_time> timer;
+    while (auto ue = ueq.pop()) {
+      if (!timer) timer.emplace("writing output repo");
+      autoloadMapBuilder.addUnit(*ue);
+      repoBuilder.add(*ue);
+    }
+
+    if (!wp_thread_ex) {
+      trace_time timer2("finalizing repo");
+      if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
+      repoBuilder.finish(
+        get_global_data(),
+        autoloadMapBuilder
+      );
+    }
   }
 
   wp_thread.waitForEnd();
@@ -528,24 +460,15 @@ int main(int argc, char** argv) try {
     return 1;
   }
 
-  initialize_repo();
+  RepoFile::init(input_repo);
 
-  // We need to set this flag so Repo::global will let us access it.
-  RuntimeOption::RepoAuthoritative = true;
-
-  LitstrTable::init();
-  RuntimeOption::RepoLocalMode = RepoMode::Closed;
-  open_repo(input_repo);
-  Repo::get().loadGlobalData(false);
-  LitstrTable::fini();
-  auto const& gd = Repo::get().global();
+  auto const& gd = RepoFile::globalData();
+  gd.load(false);
   if (gd.InitialNamedEntityTableSize) {
-    RuntimeOption::EvalInitialNamedEntityTableSize =
-      gd.InitialNamedEntityTableSize;
+    RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
   }
   if (gd.InitialStaticStringTableSize) {
-    RuntimeOption::EvalInitialStaticStringTableSize =
-      gd.InitialStaticStringTableSize;
+    RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;
   }
 
   rds::local::init();
@@ -553,19 +476,14 @@ int main(int argc, char** argv) try {
 
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
-  RuntimeOption::Load(ini, config);
-  RuntimeOption::RepoLocalPath       = "/tmp/hhbbc.repo";
-  RuntimeOption::RepoCentralPath     = input_repo;
-  RuntimeOption::RepoLocalMode       = RepoMode::Closed;
-  RuntimeOption::RepoJournal         = "memory";
-  RuntimeOption::RepoCommit          = false;
-  RuntimeOption::EvalJit             = false;
-
+  RO::Load(ini, config);
+  RO::RepoAuthoritative   = true;
+  RO::EvalJit             = false;
+  RO::EvalLowStaticArrays = false;
+  RO::RepoDebugInfo       = false;
   if (!hack_compiler_extract_path.empty()) {
-    RuntimeOption::EvalHackCompilerExtractPath = hack_compiler_extract_path;
+    RO::EvalHackCompilerExtractPath = hack_compiler_extract_path;
   }
-
-  RuntimeOption::EvalLowStaticArrays = false;
 
   register_process_init();
 
@@ -573,7 +491,35 @@ int main(int argc, char** argv) try {
   LitstrTable::get().setWriting();
   SCOPE_EXIT { hphp_process_exit(); };
 
-  Repo::shutdown();
+  // When running hhbbc, these option is loaded from GD, and will override CLI.
+  // When running hhvm, these option is not loaded from GD, but read from CLI.
+  RO::EvalHackArrCompatNotices          = gd.HackArrCompatNotices;
+  RO::EvalHackArrCompatCheckCompare     = gd.HackArrCompatNotices;
+  RO::EvalForbidDynamicCallsToFunc      = gd.ForbidDynamicCallsToFunc;
+  RO::EvalForbidDynamicCallsToClsMeth   = gd.ForbidDynamicCallsToClsMeth;
+  RO::EvalForbidDynamicCallsToInstMeth  = gd.ForbidDynamicCallsToInstMeth;
+  RO::EvalForbidDynamicConstructs       = gd.ForbidDynamicConstructs;
+  RO::EvalForbidDynamicCallsWithAttr    = gd.ForbidDynamicCallsWithAttr;
+  RO::EvalLogKnownMethodsAsDynamicCalls = gd.LogKnownMethodsAsDynamicCalls;
+  RO::EvalNoticeOnBuiltinDynamicCalls   = gd.NoticeOnBuiltinDynamicCalls;
+  RO::EvalHackArrCompatIsVecDictNotices = gd.HackArrCompatIsVecDictNotices;
+  RO::EvalHackArrCompatSerializeNotices = gd.HackArrCompatSerializeNotices;
+  RO::EvalAbortBuildOnVerifyError       = gd.AbortBuildOnVerifyError;
+  RO::EnableArgsInBacktraces            = gd.EnableArgsInBacktraces;
+  RO::EvalEmitClassPointers             = gd.EmitClassPointers;
+  RO::EvalEmitClsMethPointers           = gd.EmitClsMethPointers;
+  RO::EvalIsVecNotices                  = gd.IsVecNotices;
+  RO::EvalIsCompatibleClsMethType       = gd.IsCompatibleClsMethType;
+  RO::EvalRaiseClassConversionWarning   = gd.RaiseClassConversionWarning;
+  RO::EvalClassPassesClassname          = gd.ClassPassesClassname;
+  RO::EvalClassnameNotices              = gd.ClassnameNotices;
+  RO::EvalRaiseClsMethConversionWarning = gd.RaiseClsMethConversionWarning;
+  RO::EvalNoticeOnCoerceForStrConcat    = gd.NoticeOnCoerceForStrConcat;
+  RO::EvalNoticeOnCoerceForBitOp        = gd.NoticeOnCoerceForBitOp;
+  RO::StrictArrayFillKeys               = gd.StrictArrayFillKeys;
+  RO::EvalHackArrDVArrs                 = true; // TODO(kshaunak): Clean it up.
+  RO::EvalArrayProvenance               = false; // TODO(kshaunak): Clean it up.
+  RO::EvalEnforceGenericsUB             = gd.HardGenericsUB ? 2 : 1;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();
@@ -581,7 +527,7 @@ int main(int argc, char** argv) try {
   }
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-  compile_repo(); // NOTE: errors ignored
+  compile_repo();
   return 0;
 }
 

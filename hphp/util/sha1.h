@@ -65,7 +65,7 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
     }
   }
 
-  explicit SHA1(uint64_t x) {
+  explicit SHA1(uint64_t x): q{} {
     q.at(kQNumWords - 2) = x >> 32;
     q.at(kQNumWords - 1) = x;
   }

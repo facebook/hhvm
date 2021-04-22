@@ -92,10 +92,10 @@ struct UnitEmitter {
   /*
    * Instatiate a runtime Unit*.
    */
-  std::unique_ptr<Unit> create(bool saveLineTable = false) const;
+  std::unique_ptr<Unit> create() const;
 
   template<typename SerDe> void serdeMetaData(SerDe&);
-  template<typename SerDe> void serde(SerDe&);
+  template<typename SerDe> void serde(SerDe&, bool lazy);
 
   /*
    * Serialize this emitter and then deserialize it into a new emitter
@@ -377,6 +377,8 @@ private:
    * Mergeables tables.
    */
   std::vector<std::pair<Unit::MergeKind, Id>> m_mergeableStmts;
+
+  mutable std::mutex m_verifyLock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -282,11 +282,8 @@ inline const StringData* Func::docComment() const {
 // Bytecode.
 
 inline PC Func::entry() const {
-  const auto pc = shared()->m_bc.load(std::memory_order_relaxed);
-  if (pc != nullptr) {
-    return pc;
-  }
-  return const_cast<Func*>(this)->loadBytecode();
+  auto const bc = shared()->m_bc.copy();
+  return bc.isPtr() ? bc.ptr() : const_cast<Func*>(this)->loadBytecode();
 }
 
 inline Offset Func::bclen() const {

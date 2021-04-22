@@ -195,9 +195,8 @@ struct BlobEncoder {
 
   void encode(const std::string& s) {
     uint32_t sz = s.size();
-    encode(sz + 1);
-    if (!sz) { return; }
-
+    encode(sz);
+    if (!sz) return;
     const size_t start = m_blob.size();
     m_blob.resize(start + sz);
     std::copy(s.data(), s.data() + sz, &m_blob[start]);
@@ -424,8 +423,11 @@ struct BlobDecoder {
   }
 
   void decode(std::string& s) {
-    String str(decodeString());
-    s = str.toCppString();
+    uint32_t sz;
+    decode(sz);
+    assertx(m_last - m_p >= sz);
+    s = std::string{m_p, m_p + sz};
+    m_p += sz;
   }
 
   void decode(TypedValue& tv) {
@@ -558,6 +560,18 @@ struct BlobDecoder {
     assertx(before >= size);
     f();
     assertx(before - remaining() == size);
+    return *this;
+  }
+
+  /*
+   * Skip over a block of data encoded with BlobEncoder::withSize.
+   */
+  BlobDecoder& skipWithSize() {
+    assertx(remaining() >= sizeof(uint64_t));
+    uint64_t size;
+    std::copy(m_p, m_p + sizeof(uint64_t), (unsigned char*)&size);
+    assertx(remaining() >= size + sizeof(uint64_t));
+    advance(sizeof(uint64_t) + size);
     return *this;
   }
 

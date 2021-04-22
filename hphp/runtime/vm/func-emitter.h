@@ -45,8 +45,6 @@ namespace Native {
 struct NativeFunctionInfo;
 }
 
-void freeBCRegion(const unsigned char* bc, size_t bclen);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -54,6 +52,7 @@ void freeBCRegion(const unsigned char* bc, size_t bclen);
  */
 struct FuncEmitter {
   friend struct FuncRepoProxy;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -103,13 +102,16 @@ struct FuncEmitter {
   /*
    * Instantiate a runtime Func*.
    */
-  Func* create(Unit& unit, PreClass* preClass = nullptr, bool saveLineTable = false) const;
+  Func* create(Unit& unit, PreClass* preClass = nullptr) const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Serialization.
 
   /////////////////////////////////////////////////////////////////////////////
   // Serialization.
 
   template<class SerDe> void serdeMetaData(SerDe&);
-  template<class SerDe> void serde(SerDe&);
+  template<class SerDe> void serde(SerDe&, bool lazy);
 
   // Deserializing just a LineTable, previously encoded by serde (the
   // BlobDecoder must be at the correct offset).
@@ -268,6 +270,8 @@ public:
    * bytecode stream before allocating a copy of `bc'.
    */
   void setBc(const unsigned char* bc, size_t bclen);
+  void setBcToken(Func::BCPtr::Token token, size_t bclen);
+  folly::Optional<Func::BCPtr::Token> loadBc();
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
@@ -343,7 +347,7 @@ private:
   int m_sn;
   Id m_id;
 
-  unsigned char* m_bc;
+  Func::BCPtr m_bc;
   size_t m_bclen;
   size_t m_bcmax;
 
@@ -406,7 +410,6 @@ private:
   Id m_numIterators;
   Id m_nextFreeIterator;
   bool m_ehTabSorted : 1;
-  bool m_loadedFromRepo: 1;
 
   /*
    * Source location tables.
@@ -420,8 +423,12 @@ private:
    * The m_lineTable is keyed by the past-the-end offset.  This is the
    * format we'll want it in when we go to create a Unit.
    */
+
+  void setLineTable(LineTable);
+  void setSourceLocTable(const SourceLocTable&);
+
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
-  LineTable m_lineTable;
+  Func::LineTablePtr m_lineTable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -449,11 +456,6 @@ struct FuncRepoProxy : public RepoProxy {
     void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
-  struct GetFuncLineTableStmt : public RepoProxy::Stmt {
-    GetFuncLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(int64_t unitSn, int64_t funcSn, LineTable& lineTable);
-  };
-
   struct InsertFuncSourceLocStmt : public RepoProxy::Stmt {
     InsertFuncSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, int64_t funcSn, Offset pastOffset, int line0,
@@ -464,17 +466,10 @@ struct FuncRepoProxy : public RepoProxy {
     RepoStatus get(int64_t unitSn, int64_t funcSn, SourceLocTable& sourceLocTab);
   };
 
-  struct GetBytecodeStmt : public RepoProxy::Stmt {
-    GetBytecodeStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(Func* func, PC& pc);
-  };
-
   InsertFuncStmt insertFunc[RepoIdCount];
   GetFuncsStmt getFuncs[RepoIdCount];
-  GetFuncLineTableStmt getFuncLineTable[RepoIdCount];
   InsertFuncSourceLocStmt insertFuncSourceLoc[RepoIdCount];
   GetSourceLocTabStmt getSourceLocTab[RepoIdCount];
-  GetBytecodeStmt getBytecode[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

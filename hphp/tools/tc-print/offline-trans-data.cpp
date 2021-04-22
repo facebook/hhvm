@@ -19,7 +19,7 @@
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/util/build-info.h"
-#include "hphp/runtime/vm/repo.h"
+
 #include <folly/Math.h>
 
 using std::string;

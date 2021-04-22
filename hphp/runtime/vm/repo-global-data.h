@@ -15,8 +15,10 @@
 */
 #pragma once
 
-#include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/repo-autoload-map.h"
+#include "hphp/runtime/base/config.h"
+
+#include <cstdint>
+#include <vector>
 
 namespace HPHP {
 
@@ -28,8 +30,6 @@ namespace HPHP {
  * Only used in RepoAuthoritative mode.  See loadGlobalData().
  */
 struct RepoGlobalData {
-  RepoGlobalData() = default;
-
   /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
@@ -53,7 +53,7 @@ struct RepoGlobalData {
    * This changes program behavior because this type hints that are checked
    * at runtime will enable additional HHBBC optimizations.
    */
-   bool HardGenericsUB = false;
+  bool HardGenericsUB = false;
 
   /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
@@ -163,7 +163,16 @@ struct RepoGlobalData {
    */
   HackStrictOption StrictArrayFillKeys = HackStrictOption::OFF;
 
-  std::vector<std::pair<std::string,TypedValue>> ConstantFunctions;
+  std::vector<std::pair<std::string,std::string>> ConstantFunctions;
+
+  // Load the appropriate options into their matching
+  // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
+  // ConstantFunctions and store it in RuntimeOptions (this can only
+  // be done if the memory manager is initialized).
+  void load(bool loadConstantFuncs = true) const;
+
+  // NB: Only use C++ types in this struct because we want to be able
+  // to serde it before memory manager and family are set up.
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)
@@ -199,6 +208,7 @@ struct RepoGlobalData {
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
       (NoticeOnCoerceForBitOp)
+      (ConstantFunctions)
       ;
   }
 };

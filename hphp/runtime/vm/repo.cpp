@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/runtime/server/xbox-server.h"
@@ -69,10 +70,12 @@ void initialize_repo() {
 THREAD_LOCAL(Repo, t_dh);
 
 Repo& Repo::get() {
+  assertx(!RO::RepoAuthoritative);
   return *t_dh.get();
 }
 
 void Repo::shutdown() {
+  assertx(!RO::RepoAuthoritative);
   t_dh.destroy();
 }
 
@@ -100,6 +103,7 @@ bool Repo::prefork() {
 
 void Repo::postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
+  RepoFile::postfork();
   XboxServer::Restart();
   if (pid == 0) {
     Logger::ResetPid();
@@ -122,7 +126,7 @@ Repo::Repo()
     m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_rrp(*this), m_frp(*this), m_lsrp(*this), m_numOpenRepos(0) {
-
+  assertx(!RO::RepoAuthoritative);
   ++s_nRepos;
   connect();
 }
@@ -300,7 +304,15 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
 
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
-      RuntimeOption::ConstantFunctions.insert(elm);
+      auto result = RuntimeOption::ConstantFunctions.emplace(
+        elm.first, make_tv<KindOfUninit>()
+      );
+      if (result.second) {
+        tvAsVariant(result.first->second) = unserialize_from_string(
+          elm.second, VariableUnserializer::Type::Internal
+        );
+        tvAsVariant(result.first->second).setEvalScalar();
+      }
     }
     return;
   }

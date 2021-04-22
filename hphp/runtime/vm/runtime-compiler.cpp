@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/zend/zend-string.h"
@@ -51,9 +50,6 @@ Unit* compile_string(const char* s,
   auto const name = fname ? fname : "";
   auto const sha1 = SHA1{
     mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), name, options)};
-  if (auto u = Repo::get().loadUnit(name, sha1, nativeFuncs).release()) {
-    return u;
-  }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.

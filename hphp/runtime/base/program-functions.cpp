@@ -80,6 +80,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -1005,6 +1006,25 @@ static bool set_execution_mode(folly::StringPiece mode) {
   return false;
 }
 
+static void init_repo_file() {
+  if (!RO::RepoAuthoritative) return;
+  auto const path = [] {
+    if (!RO::RepoLocalPath.empty())   return RO::RepoLocalPath;
+    if (!RO::RepoCentralPath.empty()) return RO::RepoCentralPath;
+    if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
+      std::string p{env};
+      replacePlaceholders(p);
+      return p;
+    }
+    always_assert(
+      false &&
+      "Either Repo.LocalPath or Repo.CentralPath must be set in "
+      "RepoAuthoritative mode"
+    );
+  }();
+  RepoFile::init(path);
+}
+
 /* Reads a file into the OS page cache, with rate limiting. */
 static bool readahead_rate(const char* path, int64_t mbPerSec) {
   int ret = open(path, O_RDONLY);
@@ -1077,6 +1097,9 @@ static int start_server(const std::string &username, int xhprof) {
 #endif
   // Include hugetlb pages in core dumps.
   Process::SetCoreDumpHugePages();
+
+  init_repo_file();
+  BootStats::mark("init_repo_file");
 
   hphp_process_init();
   SCOPE_EXIT {
@@ -1435,22 +1458,9 @@ std::vector<int> get_executable_lines(const Unit* compiled) {
   std::vector<int> lines;
 
   compiled->forEachFunc([&](const Func* func) {
-    auto loadedTable = LineTable{};
-    auto lineTable = func->getLineTable();
-
-    if (!lineTable) {
-      // If it's not in the repo we have no line information for this func so just continue.
-      if (compiled->repoID() == RepoIdInvalid) return false;
-
-      // Don't do loadLineTable here to avoid storing the line table in the cache,
-      // we likely won't access it again.
-      auto& frp = Repo::get().frp();
-      frp.getFuncLineTable[compiled->repoID()].get(compiled->sn(), func->sn(), loadedTable);
-      lineTable = &loadedTable;
-    }
-
-    lines.reserve(lines.size() + lineTable->size());
-    for (auto& ent : *lineTable) lines.push_back(ent.val());
+    auto const lineTable = func->getOrLoadLineTableCopy();
+    lines.reserve(lines.size() + lineTable.size());
+    for (auto& ent : lineTable) lines.push_back(ent.val());
     return false;
   });
 
@@ -2012,6 +2022,7 @@ static int execute_program_impl(int argc, char** argv) {
       tempFile = po.lint;
     }
 
+    init_repo_file();
     hphp_process_init();
     SCOPE_EXIT { hphp_process_exit(); };
 
@@ -2089,6 +2100,7 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     int ret = 0;
+    init_repo_file();
     hphp_process_init();
     SCOPE_EXIT { hphp_process_exit(); };
 

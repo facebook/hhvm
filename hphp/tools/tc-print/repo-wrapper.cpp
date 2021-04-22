@@ -25,7 +25,10 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP { namespace jit {
 
@@ -43,7 +46,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
 
   register_process_init();
-  initialize_repo();
   hphp_thread_init();
   g_context.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
@@ -55,19 +57,36 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
   RuntimeOption::Load(ini, config);
   RuntimeOption::RepoCommit = false;
-  hphp_compiler_init();
 
-  repo = &Repo::get();
+  {
+    auto const path = [] {
+      if (!RO::RepoLocalPath.empty())   return RO::RepoLocalPath;
+      if (!RO::RepoCentralPath.empty()) return RO::RepoCentralPath;
+      if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
+        std::string p{env};
+        replacePlaceholders(p);
+        return p;
+      }
+      always_assert(
+        false &&
+        "Either Repo.LocalPath or Repo.CentralPath must be set"
+      );
+    }();
+    RepoFile::init(path);
+  }
+
+  hphp_compiler_init();
 
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
   RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
+  RuntimeOption::RepoAuthoritative = true;
   Option::WholeProgram = false;
 
   LitstrTable::init();
-  RuntimeOption::RepoAuthoritative = repo->hasGlobalData();
-  repo->loadGlobalData();
+  RepoFile::loadGlobalTables(false);
+  RepoFile::globalData().load();
 
   std::string hhasLib;
   auto const phpLib = get_systemlib(&hhasLib);
@@ -101,7 +120,15 @@ void RepoWrapper::addUnit(Unit* unit) {
 Unit* RepoWrapper::getUnit(SHA1 sha1) {
   CacheType::const_iterator it = unitCache.find(sha1);
   if (it != unitCache.end()) return it->second;
-  auto unit = repo->loadUnit("", sha1, Native::s_noNativeFuncs).release();
+
+  auto const unit = [&] () -> Unit* {
+    auto const path = RepoFile::findUnitPath(sha1);
+    if (!path) return nullptr;
+    auto const ue =
+      RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false);
+    if (!ue) return nullptr;
+    return ue->create().release();
+  }();
 
   if (unit) unitCache.insert({sha1, unit});
   return unit;

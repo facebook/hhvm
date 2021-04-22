@@ -52,8 +52,8 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/property-profile.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unit.h"
@@ -1618,7 +1618,7 @@ std::string serializeProfData(const std::string& filename) {
     ProfDataSerializer ser{filename, ProfDataSerializer::FileMode::Create};
 
     write_raw(ser, kMagic);
-    write_raw(ser, Repo::get().global().Signature);
+    write_raw(ser, RepoFile::globalData().Signature);
     auto schema = repoSchemaId();
     write_raw(ser, schema.size());
     write_raw(ser, schema.begin(), schema.size());
@@ -1707,11 +1707,11 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     if (read_raw<decltype(kMagic)>(ser) != kMagic) {
       throw std::runtime_error("Not a profile-data dump");
     }
-    auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
-    if (signature != Repo::get().global().Signature) {
+    auto signature = read_raw<decltype(RepoFile::globalData().Signature)>(ser);
+    if (signature != RepoFile::globalData().Signature) {
       auto const msg =
         folly::sformat("Mismatched repo-schema (expected signature '{}')",
-          Repo::get().global().Signature);
+                       RepoFile::globalData().Signature);
 
       throw std::runtime_error(msg);
     }

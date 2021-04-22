@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/unit-cache.h"
 
+#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -37,6 +38,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -164,27 +166,68 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     return cu.cachedUnit();
   }
 
+  auto const create = [] (std::unique_ptr<UnitEmitter> ue) {
+#ifdef USE_JEMALLOC
+    if (RuntimeOption::TrackPerUnitMemory) {
+      size_t len = sizeof(uint64_t*);
+      uint64_t* alloc;
+      uint64_t* del;
+      mallctl("thread.allocatedp", static_cast<void*>(&alloc), &len, nullptr, 0);
+      mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
+      auto before = *alloc;
+      auto debefore = *del;
+      auto result = ue->create();
+      auto after = *alloc;
+      auto deafter = *del;
+
+      auto outputPath = folly::sformat("/tmp/units-{}.map", getpid());
+      auto change = (after - deafter) - (before - debefore);
+      auto str =
+        folly::sformat("{} {}\n", ue->m_filepath->toCppString(), change);
+      auto out = std::fopen(outputPath.c_str(), "a");
+      if (out) {
+        std::fwrite(str.data(), str.size(), 1, out);
+        std::fclose(out);
+      }
+      return result;
+    }
+#endif
+    auto unit = ue->create();
+    if (BuiltinSymbols::s_systemAr) {
+      assertx(ue->m_filepath->data()[0] == '/' &&
+              ue->m_filepath->data()[1] == ':');
+      BuiltinSymbols::RecordSystemlibFile(std::move(ue));
+    }
+    return unit;
+  };
+
+  auto const load = [&] {
+    auto const pathData = path->data();
+    if (pathData[0] == '/' && !RO::SourceRoot.empty() &&
+        !strncmp(RO::SourceRoot.c_str(), pathData, RO::SourceRoot.size())) {
+      auto const strippedPath =
+        makeStaticString(pathData + RO::SourceRoot.size());
+      if (auto ue = RepoFile::loadUnitEmitter(strippedPath,
+                                              path,
+                                              nativeFuncs,
+                                              true)) {
+        return ue;
+      }
+    }
+    return RepoFile::loadUnitEmitter(path, path, nativeFuncs, true);
+  };
+
   try {
     /*
      * We got the lock, so we're responsible for updating the entry.
      */
-    SHA1 sha1;
-    if (Repo::get().findFile(path->data(),
-                             RuntimeOption::SourceRoot,
-                             sha1) == RepoStatus::error) {
-      cu.unit.update_and_unlock(nullptr);
-      return cu.cachedUnit();
-    }
-
-    auto unit = Repo::get().loadUnit(
-        path->data(),
-        sha1,
-        nativeFuncs)
-      .release();
-    if (unit) {
+    if (auto ue = load()) {
+      auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
+      cu.unit.update_and_unlock(unit.release());
+    } else {
+      cu.unit.update_and_unlock(nullptr);
     }
-    cu.unit.update_and_unlock(std::move(unit));
   } catch (...) {
     cu.unit.unlock();
     s_repoUnitCache.erase(acc);
@@ -1305,7 +1348,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
-    + (needs_extended_line_table() ? '1' : '0')
+    + (RuntimeOption::RepoDebugInfo ? '1' : '0')
     + std::to_string(RuntimeOption::CheckIntOverflow)
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')

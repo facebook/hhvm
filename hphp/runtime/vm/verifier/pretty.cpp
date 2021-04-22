@@ -118,18 +118,10 @@ static void pretty_print(
   Offset stopOffset
 ) {
   const auto* it = &fe->bc()[startOffset];
-  int prevLineNum = -1;
   while (it < &fe->bc()[stopOffset]) {
     if (fe->offsetOf(it) == 0) {
       out.put('\n');
       pretty_print(fe, out);
-      prevLineNum = -1;
-    }
-
-    int lineNum = SourceLocation::getLineNumber(fe->lineTable(), fe->offsetOf(it));
-    if (lineNum != prevLineNum) {
-      out << "  // line " << lineNum << std::endl;
-      prevLineNum = lineNum;
     }
 
     out << ' '

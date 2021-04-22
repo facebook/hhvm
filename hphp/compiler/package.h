@@ -52,7 +52,7 @@ struct Package {
   void addStaticDirectory(const std::string& path);
   void addSourceDirectory(const std::string& path, bool force);
 
-  bool parse(bool check, std::thread& unit_emitter_thread);
+  bool parse(bool check);
   bool parseImpl(const std::string* fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
@@ -88,8 +88,6 @@ private:
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;
-  folly::Optional<HHBBC::UnitEmitterQueue> m_ueq;
-  hphp_fast_set<std::string> m_locally_cached_bytecode;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

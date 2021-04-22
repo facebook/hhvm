@@ -389,7 +389,7 @@ bool needs_extended_line_table() {
      RuntimeOption::EnableDebuggerServer);
 }
 
-std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
+std::unique_ptr<Unit> UnitEmitter::create() const {
   INC_TPC(unit_load);
 
   tracing::BlockNoTrace _{"unit-create"};
@@ -405,6 +405,33 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   const bool doVerify =
     kVerify || boost::ends_with(m_filepath->data(), ".hhas");
   if (doVerify) {
+    // The verifier needs the bytecode available, but we don't want to
+    // necessarily force it to load (otherwise it would defeat the
+    // point of lazy loading when we're using the verifier). So, load
+    // the bytecode for all functions, but reset it back to the tokens
+    // when we're done.
+    std::lock_guard lock{m_verifyLock};
+    std::vector<std::pair<FuncEmitter*, Func::BCPtr::Token>> tokens;
+    SCOPE_EXIT {
+      for (auto& p : tokens) {
+        p.first->setBcToken(p.second, p.first->bcPos());
+      }
+    };
+    if (RO::RepoAuthoritative) {
+      for (auto& fe : m_fes) {
+        auto const token = fe->loadBc();
+        if (!token) continue;
+        tokens.emplace_back(std::make_pair(fe.get(), *token));
+      }
+      for (auto& pce : m_pceVec) {
+        for (auto& fe : pce->methods()) {
+          auto const token = fe->loadBc();
+          if (!token) continue;
+          tokens.emplace_back(std::make_pair(fe, *token));
+        }
+      }
+    }
+
     auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
     if (!check(verbose)) {
       if (!verbose) {
@@ -425,7 +452,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           m_sha1,
           FatalOp::Parse,
           "A bytecode verification error was detected"
-        )->create(saveLineTable);
+        )->create();
       }
     }
     if (!isSystemLib && RuntimeOption::EvalVerifyOnly) {
@@ -445,14 +472,14 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     u->m_fatalInfo = std::make_unique<FatalInfo>(info);
   }
 
-  u->m_repoId = saveLineTable ? RepoIdInvalid : m_repoId;
+  u->m_repoId = RepoIdInvalid;
   u->m_sn = m_sn;
   u->m_origFilepath = m_filepath;
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
   u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
-    u->m_preClasses.push_back(PreClassPtr(pce->create(*u, saveLineTable)));
+    u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
   for (auto const& re : m_reVec) {
     u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
@@ -470,7 +497,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
   for (auto& fe : m_fes) {
-    auto const func = fe->create(*u, nullptr, saveLineTable);
+    auto const func = fe->create(*u, nullptr);
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
@@ -562,13 +589,14 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   }
 
   if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
+    assertx(!RO::RepoAuthoritative);
     /* May be different than the unit origin: e.g. for hhas files. */
     sd(m_filepath);
   }
 }
 
 template <typename SerDe>
-void UnitEmitter::serde(SerDe& sd) {
+void UnitEmitter::serde(SerDe& sd, bool lazy) {
   MemoryManager::SuppressOOM so(*tl_heap);
 
   serdeMetaData(sd);
@@ -772,7 +800,7 @@ void UnitEmitter::serde(SerDe& sd) {
     sd(total);
     for (size_t i = 0; i < total; ++i) {
       Id pceId;
-      const StringData* name;
+      LowStringPtr name;
       sd(pceId);
       sd(name);
 
@@ -786,7 +814,7 @@ void UnitEmitter::serde(SerDe& sd) {
         assertx(added);
       }
       assertx(fe->sn() == i);
-      fe->serde(sd);
+      fe->serde(sd, lazy);
       fe->setEHTabIsSorted();
       fe->finish();
     }
@@ -798,7 +826,7 @@ void UnitEmitter::serde(SerDe& sd) {
     auto const write = [&] (FuncEmitter* fe, Id pceId) {
       sd(pceId);
       sd(fe->name);
-      fe->serde(sd);
+      fe->serde(sd, false);
     };
     for (auto const& fe : m_fes) write(fe.get(), -1);
     for (auto const pce : m_pceVec) {
@@ -807,21 +835,21 @@ void UnitEmitter::serde(SerDe& sd) {
   }
 }
 
-template void UnitEmitter::serde<>(BlobDecoder&);
-template void UnitEmitter::serde<>(BlobEncoder&);
+template void UnitEmitter::serde<>(BlobDecoder&, bool);
+template void UnitEmitter::serde<>(BlobEncoder&, bool);
 
 std::unique_ptr<UnitEmitter> UnitEmitter::stressSerde() {
   assertx(RO::EvalStressUnitSerde);
   assertx(!RO::RepoAuthoritative);
   BlobEncoder encoder{m_useGlobalIds};
-  serde(encoder);
+  serde(encoder, false);
   auto ue = std::make_unique<UnitEmitter>(
     m_sha1, m_bcSha1, m_nativeFuncs, m_useGlobalIds
   );
   BlobDecoder decoder{encoder.data(), encoder.size(), m_useGlobalIds};
   ue->m_filepath = m_filepath;
   ue->m_sn = m_sn;
-  ue->serde(decoder);
+  ue->serde(decoder, false);
   return ue;
 }
 
@@ -931,6 +959,18 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     getUnitMergeables[repoId].get(*ue);
     m_repo.frp().getFuncs[repoId].get(*ue);
 
+    for (auto& fe : ue->m_fes) {
+      SourceLocTable table;
+      m_repo.frp().getSourceLocTab[repoId].get(ue->m_sn, fe->m_sn, table);
+      fe->setSourceLocTable(table);
+    }
+    for (auto& pce : ue->m_pceVec) {
+      for (auto& fe : pce->methods()) {
+        SourceLocTable table;
+        m_repo.frp().getSourceLocTab[repoId].get(ue->m_sn, fe->m_sn, table);
+        fe->setSourceLocTable(table);
+      }
+    }
   } catch (RepoExc& re) {
     TRACE(0,
           "Repo error loading '%s' (0x%s) from '%s': %s\n",

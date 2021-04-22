@@ -43,8 +43,8 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
@@ -562,7 +562,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
 
   unserializePropertyValue(t, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
-  if (!Repo::get().global().HardPrivatePropInference) return;
+  if (!RepoFile::globalData().HardPrivatePropInference) return;
 
   /*
    * We assume for performance reasons in repo authoriative mode that
@@ -1041,7 +1041,7 @@ void VariableUnserializer::unserializeVariant(
           bool hasSerializedNativeData = false;
           bool checkRepoAuthType =
             RuntimeOption::RepoAuthoritative &&
-            Repo::get().global().HardPrivatePropInference;
+            RepoFile::globalData().HardPrivatePropInference;
           Class* objCls = obj->getVMClass();
           // Try fast case.
           if (remainingProps >= objCls->numDeclProperties() -

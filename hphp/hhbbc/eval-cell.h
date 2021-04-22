@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
@@ -49,14 +48,7 @@ folly::Optional<Type> eval_cell(Pred p) {
     ThrowAllErrorsSetter taes;
 
     TypedValue c = p();
-    if (isRefcountedType(c.m_type)) {
-      if (c.m_type == KindOfString &&
-          c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
-        tvDecRefCountable(&c);
-        return TStr;
-      }
-      tvAsVariant(&c).setEvalScalar();
-    }
+    if (isRefcountedType(c.m_type)) tvAsVariant(&c).setEvalScalar();
 
     /*
      * We need to get rid of statics if we're not actually going to do

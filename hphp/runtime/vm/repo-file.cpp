@@ -335,7 +335,7 @@ void RepoFileBuilder::add(const UnitEmitter& ue) {
 
   BlobEncoder blob{ue.useGlobalIds()};
   blob(ue.useGlobalIds());
-  const_cast<UnitEmitter&>(ue).serde(blob);
+  const_cast<UnitEmitter&>(ue).serde(blob, false);
   auto const size = blob.size();
   always_assert(size <= kUnitEmitterSizeLimit);
   m_data->fd.write(blob.data(), size);
@@ -819,7 +819,7 @@ RepoFile::loadUnitEmitter(const StringData* searchPath,
   );
   ue->m_filepath = path;
   ue->m_sn = sn;
-  ue->serde(blob.decoder);
+  ue->serde(blob.decoder, lazy);
   blob.decoder.assertDone();
   return ue;
 }

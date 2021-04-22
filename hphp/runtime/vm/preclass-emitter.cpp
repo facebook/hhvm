@@ -284,7 +284,7 @@ const StaticString
   s_invoke("__invoke"),
   s_coeffectsProp("86coeffects");
 
-PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
+PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
       !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
@@ -359,7 +359,7 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
-    Func* f = (*it)->create(unit, pc.get(), saveLineTable);
+    Func* f = (*it)->create(unit, pc.get());
     if (f->attrs() & AttrTrait) {
       if (pc->m_numDeclMethods == -1) {
         pc->m_numDeclMethods = it - m_methods.begin();

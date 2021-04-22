@@ -255,7 +255,10 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       ar->finish();
       ar.reset();
 
-      HHBBC::UnitEmitterQueue ueq;
+      HHBBC::UnitEmitterQueue ueq{
+        repoBuilder ? &*autoloadMapBuilder : nullptr,
+        Option::GenerateTextHHBC || Option::GenerateHhasHHBC
+      };
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
       std::unique_ptr<ArrayTypeTable::Builder> arrTable;
@@ -275,22 +278,21 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
               &arrTableReady);
           } catch (...) {
             arrTableReady.set_exception(std::current_exception());
-            ueq.push(nullptr);
+            ueq.finish();
           }
         }
       );
 
       folly::Optional<Timer> commitTime;
-      while (auto ue = ueq.pop()) {
+      while (auto encoded = ueq.pop()) {
         if (!commitTime) {
           commitTime.emplace(Timer::WallTime, "committing units to repo");
         }
-        if (repoBuilder) {
-          autoloadMapBuilder->addUnit(*ue);
-          repoBuilder->add(*ue);
-        }
+        if (repoBuilder) repoBuilder->add(*encoded);
         if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
-          ues_to_print.emplace_back(std::move(ue));
+          if (auto ue = ueq.popUnitEmitter()) {
+            ues_to_print.emplace_back(std::move(ue));
+          }
         }
       }
 

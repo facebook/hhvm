@@ -25,6 +25,9 @@
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
+
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
@@ -94,17 +97,21 @@ void hard_constprop(bool);
 //////////////////////////////////////////////////////////////////////
 
 struct UnitEmitterQueue : Synchronizable {
-  // Add another ue. Adding nullptr marks us done.
+  explicit UnitEmitterQueue(RepoAutoloadMapBuilder* b = nullptr,
+                            bool storeUnitEmitters = false)
+    : m_storeUnitEmitters{storeUnitEmitters}
+    , m_repoBuilder{b} {}
+
   void push(std::unique_ptr<UnitEmitter> ue);
+  void finish();
   // Get the next ue, or nullptr to indicate we're done.
-  std::unique_ptr<UnitEmitter> pop();
-  // Fetch any remaining ues.
-  // Must be called in single threaded mode, after we've stopped adding ues.
-  void fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues);
-  // Clear done flag, and get us ready for reuse.
-  void reset();
+  folly::Optional<RepoFileBuilder::EncodedUE> pop();
+  std::unique_ptr<UnitEmitter> popUnitEmitter();
  private:
+  bool m_storeUnitEmitters;
+  std::deque<RepoFileBuilder::EncodedUE> m_encoded;
   std::deque<std::unique_ptr<UnitEmitter>> m_ues;
+  RepoAutoloadMapBuilder* m_repoBuilder;
   std::atomic<bool> m_done{};
 };
 

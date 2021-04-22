@@ -33,25 +33,25 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   for (size_t n = 0; n < ue.numPreClasses(); ++n) {
     auto pce = ue.pce(n);
     if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
-      m_types.insert(std::make_pair(pce->name(), unitSn));
+      m_types.emplace(pce->name(), unitSn);
     }
   }
   for (size_t n = 0; n < ue.numRecords(); ++n) {
     auto re = ue.re(n);
-    m_types.insert(std::make_pair(re->name(), unitSn));
+    m_types.emplace(re->name(), unitSn);
   }
   for (auto& fe : ue.fevec()) {
     if (!fe->isMethod()
         && !boost::ends_with(fe->name->slice(), "$memoize_impl")) {
-      m_funcs.insert(std::make_pair(fe->name, unitSn));
+      m_funcs.emplace(fe->name, unitSn);
     }
   }
   for (auto& te : ue.typeAliases()) {
-    m_typeAliases.insert(std::make_pair(te->name(), unitSn));
+    m_typeAliases.emplace(te->name(), unitSn);
   }
 
   for (auto& c : ue.constants()) {
-    m_constants.insert(std::make_pair(c.name, unitSn));
+    m_constants.emplace(c.name, unitSn);
   }
 }
 

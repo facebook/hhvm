@@ -17,11 +17,8 @@
 
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/util/hash-map.h"
-
-#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 
@@ -36,14 +33,15 @@ struct Constant;
 struct RepoAutoloadMapBuilder {
 
   template <typename Compare>
-  using Map = tbb::concurrent_hash_map<
+  using Map = folly_concurrent_hash_map_simd<
     const StringData*,
     int64_t,
+    string_data_hash,
     Compare
   >;
 
-  using CaseInsensitiveMap = Map<StringDataHashICompare>;
-  using CaseSensitiveMap = Map<StringDataHashCompare>;
+  using CaseInsensitiveMap = Map<string_data_isame>;
+  using CaseSensitiveMap = Map<string_data_same>;
 
   friend struct FuncEmitter;
 
@@ -53,17 +51,13 @@ struct RepoAutoloadMapBuilder {
   void addUnit(const UnitEmitter& ue);
 
 private:
-  template<class Compare>
-  static void serdeMap(BlobEncoder& sd, Map<Compare> map) {
+  template<typename Compare>
+  static void serdeMap(BlobEncoder& sd, const Map<Compare>& map) {
     sd(map.size());
-    for (auto it = map.begin(); it != map.end(); ++it) {
-      sd(it->first)
-        (it->second)
-        ;
-    }
+    for (auto const& kv : map) sd(kv.first)(kv.second);
   }
 
-  template<class Map>
+  template<typename Map>
   static Map serdeMap(BlobDecoder& sd) {
     size_t size;
     sd(size);
@@ -88,5 +82,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-
-

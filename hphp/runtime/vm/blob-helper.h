@@ -311,6 +311,8 @@ struct BlobEncoder {
   size_t size() const { return m_blob.size(); }
   const void* data() const { return &m_blob[0]; }
 
+  std::vector<char>&& take() { return std::move(m_blob); }
+
 private:
   template<class Cont>
   void encodeContainer(Cont& cont, const char* desc) {

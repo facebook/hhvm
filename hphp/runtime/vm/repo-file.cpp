@@ -320,25 +320,22 @@ RepoFileBuilder::RepoFileBuilder(const std::string& path)
 RepoFileBuilder::~RepoFileBuilder() {
 }
 
-void RepoFileBuilder::add(const UnitEmitter& ue) {
+void RepoFileBuilder::add(const EncodedUE& ue) {
   assertx(m_data);
-  assertx(ue.m_filepath->isStatic());
-  assertx(ue.m_sn >= 0);
+  assertx(ue.path->isStatic());
+  assertx(ue.sn >= 0);
 
   m_data->unitEmittersIndex.emplace_back(
     RepoFileBuilder::Data::UnitEmitterIndex{
-      ue.m_filepath,
-      ue.m_sn,
+      ue.path,
+      ue.sn,
       m_data->sizes.unitEmittersSize
     }
   );
 
-  BlobEncoder blob{ue.useGlobalIds()};
-  blob(ue.useGlobalIds());
-  const_cast<UnitEmitter&>(ue).serde(blob, false);
-  auto const size = blob.size();
+  auto const size = ue.blob.size();
   always_assert(size <= kUnitEmitterSizeLimit);
-  m_data->fd.write(blob.data(), size);
+  m_data->fd.write(ue.blob.data(), size);
   m_data->sizes.unitEmittersSize += size;
 }
 
@@ -438,6 +435,18 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
       source, dest, error
     );
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
+  : path{ue.m_filepath}
+  , sn{ue.m_sn}
+{
+  BlobEncoder encoder{ue.useGlobalIds()};
+  encoder(ue.useGlobalIds());
+  const_cast<UnitEmitter&>(ue).serde(encoder, false);
+  blob = encoder.take();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -360,7 +360,9 @@ void compile_repo() {
     }
   );
 
-  UnitEmitterQueue ueq;
+  RepoAutoloadMapBuilder autoloadMapBuilder;
+  UnitEmitterQueue ueq{&autoloadMapBuilder};
+
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
   std::exception_ptr wp_thread_ex = nullptr;
   VMWorker wp_thread(
@@ -371,20 +373,18 @@ void compile_repo() {
         whole_program(std::move(program), ueq, arrTable);
       } catch (...) {
         wp_thread_ex = std::current_exception();
-        ueq.push(nullptr);
+        ueq.finish();
       }
     }
   );
   wp_thread.start();
 
   {
-    RepoAutoloadMapBuilder autoloadMapBuilder;
     RepoFileBuilder repoBuilder{output_repo};
 
     folly::Optional<trace_time> timer;
     while (auto ue = ueq.pop()) {
       if (!timer) timer.emplace("writing output repo");
-      autoloadMapBuilder.addUnit(*ue);
       repoBuilder.add(*ue);
     }
 

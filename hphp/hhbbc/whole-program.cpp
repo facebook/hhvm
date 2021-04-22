@@ -484,16 +484,38 @@ void final_pass(Index& index,
 
 void UnitEmitterQueue::push(std::unique_ptr<UnitEmitter> ue) {
   assertx(!m_done.load(std::memory_order_relaxed));
-  Lock lock(this);
-  if (!ue) {
-    m_done.store(true, std::memory_order_relaxed);
-  } else {
-    m_ues.push_back(std::move(ue));
+
+  if (m_repoBuilder) m_repoBuilder->addUnit(*ue);
+  RepoFileBuilder::EncodedUE encoded{*ue};
+
+  {
+    Lock lock(this);
+    m_encoded.emplace_back(std::move(encoded));
+    if (m_storeUnitEmitters) m_ues.emplace_back(std::move(ue));
+    notify();
   }
+}
+
+void UnitEmitterQueue::finish() {
+  assertx(!m_done.load(std::memory_order_relaxed));
+  Lock lock(this);
+  m_done.store(true, std::memory_order_relaxed);
   notify();
 }
 
-std::unique_ptr<UnitEmitter> UnitEmitterQueue::pop() {
+folly::Optional<RepoFileBuilder::EncodedUE> UnitEmitterQueue::pop() {
+  Lock lock(this);
+  while (m_encoded.empty()) {
+    if (m_done.load(std::memory_order_relaxed)) return folly::none;
+    wait();
+  }
+  assertx(m_encoded.size() > 0);
+  auto encoded = std::move(m_encoded.front());
+  m_encoded.pop_front();
+  return encoded;
+}
+
+std::unique_ptr<UnitEmitter> UnitEmitterQueue::popUnitEmitter() {
   Lock lock(this);
   while (m_ues.empty()) {
     if (m_done.load(std::memory_order_relaxed)) return nullptr;
@@ -501,20 +523,8 @@ std::unique_ptr<UnitEmitter> UnitEmitterQueue::pop() {
   }
   assertx(m_ues.size() > 0);
   auto ue = std::move(m_ues.front());
-  assertx(ue != nullptr);
   m_ues.pop_front();
   return ue;
-}
-
-void UnitEmitterQueue::fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
-  assertx(m_done.load(std::memory_order_relaxed));
-  std::move(m_ues.begin(), m_ues.end(), std::back_inserter(ues));
-  m_ues.clear();
-}
-
-void UnitEmitterQueue::reset() {
-  m_ues.clear();
-  m_done.store(false, std::memory_order_relaxed);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -613,7 +623,7 @@ void whole_program(php::ProgramPtr program,
   if (arrTableReady != nullptr) {
     arrTableReady->set_value();
   }
-  ueq.push(nullptr);
+  ueq.finish();
   cleanup_pre.join();
   cleanup_post.join();
 

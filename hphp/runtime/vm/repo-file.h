@@ -63,10 +63,22 @@ struct RepoFileBuilder {
   explicit RepoFileBuilder(const std::string& path);
   ~RepoFileBuilder();
 
+  // Encoding an UnitEmitter is expensive, so one can do it ahead of
+  // time (in different threads), then add it directly.
+  struct EncodedUE {
+    explicit EncodedUE(const UnitEmitter& ue);
+   private:
+    friend struct RepoFileBuilder;
+    const StringData* path;
+    int64_t sn;
+    std::vector<char> blob;
+  };
+
   // Add the given UnitEmitter to the repo file. This will encode it
   // and then write it to disk. This can only be called before
   // finish() is called.
-  void add(const UnitEmitter& ue);
+  void add(const EncodedUE& ue);
+  void add(const UnitEmitter& ue) { add(EncodedUE{ue}); }
 
   // "Finish" the repo file by writing RepoGlobalData, the
   // RepoAutoloadMapBuilder, the literal string table, and indexing

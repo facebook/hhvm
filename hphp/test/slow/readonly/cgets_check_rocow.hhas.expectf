@@ -1,0 +1,3 @@
+Verification Error (unit %s/cgets_check_rocow.hhas func main): CheckROCOW immediate not supported on CGetS.
+
+Verification failed for unit %s/cgets_check_rocow.hhas. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

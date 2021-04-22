@@ -1,0 +1,5 @@
+Verification Error (unit %s/dup_check_rocow.hhas func test): CheckROCOW must only appear on the last prop access.
+
+Verification Error (unit %s/dup_check_rocow.hhas func test): Only property-flavored member keys may be marked CheckROCOW.
+
+Verification failed for unit %s/dup_check_rocow.hhas. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

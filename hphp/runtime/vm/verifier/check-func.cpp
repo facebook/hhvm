@@ -58,6 +58,7 @@ struct State {
   // was known to be Rx mutable
   bool mbrMustContainMutableLocalOrThis;
   bool afterDim; // has there been a Dim in the current minstr seqence
+  bool afterCheckROCOW; // has there been an instruction with CheckROCOW
 };
 
 /**
@@ -104,6 +105,7 @@ struct FuncChecker {
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkRxOp(State* cur, PC, Op, bool);
+  bool checkReadOnlyOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
@@ -111,6 +113,7 @@ struct FuncChecker {
   bool checkString(PC pc, Id id);
   bool checkExnEdge(State cur, Op op, Block* b);
   bool checkItersDead(const State& cur, Op op, Block* b, const char* info);
+  bool readOnlyImmNotSupported(ReadOnlyOp rop, Op op);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -608,7 +611,7 @@ bool FuncChecker::checkImmOAImpl(PC& pc, PC const /*instr*/) {
   return true;
 }
 
-bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
+bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
   static_assert(
       std::is_unsigned<typename std::underlying_type<MemberCode>::type>::value,
       "MemberCode is expected to be unsigned.");
@@ -619,6 +622,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
     return false;
   }
 
+  ReadOnlyOp rop = ReadOnlyOp::Any;
   auto ok = true;
   switch (mcode) {
     case MW:
@@ -627,22 +631,27 @@ bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
       decode_iva(pc);
       auto const loc = decode_iva(pc);
       ok &= checkLocal(pc, loc);
-      decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
       break;
     }
     case MEC: case MPC:
       decode_iva(pc);
-      decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
       break;
     case MEI:
       pc += sizeof(int64_t);
-      decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
       break;
     case MET: case MPT: case MQT:
       auto const id = decode_raw<Id>(pc);
       ok &= checkString(pc, id);
-      decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadOnlyOp>(pc);
       break;
+  }
+
+  auto const op = peek_op(instr);
+  if (op != Op::Dim && rop == ReadOnlyOp::CheckROCOW) {
+    return readOnlyImmNotSupported(rop, op);
   }
 
   return ok;
@@ -1403,6 +1412,31 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
 
+    case Op::SetOpS: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      decode_oa<SetOpOp>(new_pc);
+      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
+      if (rop == ReadOnlyOp::CheckROCOW) return readOnlyImmNotSupported(rop, op);
+      break;
+    }
+    case Op::IncDecS: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      decode_oa<IncDecOp>(new_pc);
+      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
+      if (rop == ReadOnlyOp::CheckROCOW) return readOnlyImmNotSupported(rop, op);
+      break;
+    }
+    case Op::SetS:
+    case Op::CGetS: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
+      if (rop == ReadOnlyOp::CheckROCOW) return readOnlyImmNotSupported(rop, op);
+      break;
+    }
+      
     default:
       break;
   }
@@ -1477,6 +1511,77 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
 
   return ok;
 }
+
+bool FuncChecker::readOnlyImmNotSupported(ReadOnlyOp rop, Op op) {
+  ferror("{} immediate not supported on {}.\n",
+    subopToName(rop), opcodeToName(op));
+  return false;
+}
+
+bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
+  auto const isPropFlavor = [&](MemberCode mcode) {
+    switch (mcode) {
+      case MEL: case MEC: case MET: case MEI: case MW:
+        return false;
+      case MPL: case MPC: case MPT: case MQT:
+        return true;
+    }
+    not_reached();
+  };
+  auto new_pc = pc;
+  if (isMemberBaseOp(op)) {
+    if (op == Op::BaseSC) {
+      decode_op(new_pc);
+      decode_iva(new_pc);
+      decode_iva(new_pc);
+      decode_oa<MOpMode>(new_pc);
+      cur->afterCheckROCOW = decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckROCOW;
+      return true;
+    } else {
+      cur->afterCheckROCOW = false;
+      return true;
+    }
+  } else if (isMemberDimOp(op)) {
+    decode_op(new_pc);
+    decode_oa<MOpMode>(new_pc);
+    auto const mcode = decode_raw<MemberCode>(new_pc);
+    switch (mcode) {
+      case MW:
+        return true;
+      case MEL: case MPL: {
+        decode_iva(new_pc);
+        decode_iva(new_pc);
+        break;
+      }
+      case MEC: case MPC: {
+        decode_iva(new_pc);
+        break;
+      }
+      case MEI: {
+        new_pc += sizeof(int64_t);
+        break;
+      }
+      case MET: case MPT: case MQT:
+        decode_raw<Id>(new_pc);
+        break;
+    }
+    auto const is_prop_flavor = isPropFlavor(mcode);
+    if (is_prop_flavor && cur->afterCheckROCOW) {
+      ferror("CheckROCOW must only appear on the last prop access.\n");
+      return false;
+    }
+    if (decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckROCOW) {
+      if (!is_prop_flavor) {
+        ferror("Only property-flavored member keys may be marked CheckROCOW.\n");
+        return false;
+      } else {
+        cur->afterCheckROCOW = true;
+      }
+    }
+  }
+  return true;
+}
+
 
 bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
   const auto type = pure ? "Pure" : "Rx";
@@ -1926,6 +2031,7 @@ void FuncChecker::initState(State* s) {
   s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
+  s->afterCheckROCOW = false;
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1940,6 +2046,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->guaranteedThis = from->guaranteedThis;
   to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
+  to->afterCheckROCOW = from->afterCheckROCOW;
 }
 
 bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
@@ -1984,6 +2091,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
+    ok &= checkReadOnlyOp(&cur, pc, op);
     if (m_verify_rx) ok &= checkRxOp(&cur, pc, op, false);
     if (m_verify_pure) ok &= checkRxOp(&cur, pc, op, true);
     prev_pc = pc;

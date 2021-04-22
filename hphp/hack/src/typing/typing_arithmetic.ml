@@ -484,15 +484,14 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te ty
     else
-      let err =
-        if TypecheckerOptions.inc_dec_new_code (Env.get_tcopt env) then
-          Errors.inc_dec_invalid_argument
-        else
-          Errors.unify_error
-      in
       (* args isn't any or a variant thereof so can actually do stuff *)
       let (env, is_dynamic) =
-        check_dynamic_or_enforce_num env p ty (Reason.Rarith p) err
+        check_dynamic_or_enforce_num
+          env
+          p
+          ty
+          (Reason.Rarith p)
+          Errors.inc_dec_invalid_argument
       in
       let result_ty =
         if is_dynamic then

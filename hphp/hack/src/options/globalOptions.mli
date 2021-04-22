@@ -293,8 +293,6 @@ type t = {
   tco_enable_expression_trees: bool;
   (* Allowed expression tree visitors when not enabled via unstable features flag *)
   tco_allowed_expression_tree_visitors: string list;
-  (* Use a new error code for post/pre increment and decrement operations *)
-  tco_inc_dec_new_code: bool;
   (* Use a new error code for math operations: addition, subtraction,
   division, multiplication, exponentiation *)
   tco_math_new_code: bool;
@@ -416,7 +414,6 @@ val make :
   ?tco_readonly:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
-  ?tco_inc_dec_new_code:bool ->
   ?tco_math_new_code:bool ->
   unit ->
   t
@@ -682,7 +679,5 @@ val set_tco_enable_expression_trees : t -> bool -> t
 val expression_trees_enabled : t -> bool
 
 val allowed_expression_tree_visitors : t -> string list
-
-val tco_inc_dec_new_code : t -> bool
 
 val tco_math_new_code : t -> bool

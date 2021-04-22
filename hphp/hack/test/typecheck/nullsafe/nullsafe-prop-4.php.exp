@@ -1,8 +1,8 @@
 File "nullsafe-prop-4.php", line 8, characters 3-8:
 `?->` operator is not allowed in write context (Parsing[1002])
 File "nullsafe-prop-4.php", line 8, characters 3-10:
-Typing error (Typing[4110])
-File "nullsafe-prop-4.php", line 8, characters 3-10:
-Expected `num` because this is used in an arithmetic operation
-File "nullsafe-prop-4.php", line 8, characters 3-8:
-But got `?int` (use of `?->` operator)
+Typing error (Typing[4427])
+  File "nullsafe-prop-4.php", line 8, characters 3-10:
+  Expected `num` because this is used in an arithmetic operation
+  File "nullsafe-prop-4.php", line 8, characters 3-8:
+  But got `?int` (use of `?->` operator)

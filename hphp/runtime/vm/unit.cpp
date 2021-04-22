@@ -783,7 +783,7 @@ void Unit::initialMerge() {
   m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
 
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
-  bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
+  bool allFuncsUnique = RuntimeOption::RepoAuthoritative || !SystemLib::s_inited;
   for (auto& func : mi->mutableFuncs()) {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
@@ -1199,6 +1199,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
           MergeState::NeedsCompact)) {
       return;
     }
+
     /*
      * All the classes are known to be unique, and we just got
      * here, so all were successfully defined. We can now go
@@ -1211,6 +1212,19 @@ void Unit::mergeImpl(MergeInfo* mi) {
      */
     size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
                                     m_constants, m_preRecords);
+
+    if (RuntimeOption::RepoAuthoritative) {
+      assertx(delta == mi->m_mergeablesSize);
+    } else if (!SystemLib::s_inited) {
+      if (!RuntimeOption::EvalJitEnableRenameFunction) {
+        assertx(delta == mi->m_mergeablesSize);
+      } else {
+        assertx(delta == mi->m_mergeablesSize - mi->m_firstMergeablePreClass);
+      }
+    } else {
+      assertx(delta == 0);
+    }
+
     MergeInfo* newMi = mi;
     if (delta) {
       newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
@@ -1233,6 +1247,13 @@ void Unit::mergeImpl(MergeInfo* mi) {
     }
     m_mergeState.fetch_and(~MergeState::NeedsCompact,
                            std::memory_order_relaxed);
+  } else {
+    // If the file was empty to start with we just want to mark merge state empty
+    if (mi->m_mergeablesSize == 0) {
+      m_mergeState.fetch_or(MergeState::Empty, std::memory_order_relaxed);
+    } else {
+      assertx(!RuntimeOption::RepoAuthoritative && (SystemLib::s_inited || RuntimeOption::EvalJitEnableRenameFunction));
+    }
   }
 }
 

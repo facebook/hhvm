@@ -771,7 +771,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(SetM,            TWO(IVA, KA),     C_MFINAL(1),     ONE(CV),    NF) \
-  O(SetRangeM,       FOUR(IVA, IVA, OA(SetRangeOp), OA(ReadOnlyOp)),    \
+  O(SetRangeM,       THREE(IVA, IVA, OA(SetRangeOp)),                   \
                                        C_MFINAL(3),     NOV,        NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \

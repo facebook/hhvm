@@ -2800,9 +2800,7 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopSetRangeM(
-  uint32_t nDiscard, uint32_t size, SetRangeOp op, ReadOnlyOp /*rop*/
-) {
+OPTBLD_INLINE void iopSetRangeM( uint32_t nDiscard, uint32_t size, SetRangeOp op) {
   auto& mstate = vmMInstrState();
   auto const count = tvCastToInt64(*vmStack().indC(0));
   auto const src = *vmStack().indC(1);

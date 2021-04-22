@@ -492,7 +492,7 @@ pub enum InstructFinal {
     IncDecM(NumParams, IncdecOp, MemberKey),
     SetOpM(NumParams, EqOp, MemberKey),
     UnsetM(NumParams, MemberKey),
-    SetRangeM(NumParams, isize, SetrangeOp, ReadOnlyOp),
+    SetRangeM(NumParams, isize, SetrangeOp),
 }
 
 #[derive(Clone, Debug)]

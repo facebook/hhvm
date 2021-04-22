@@ -475,7 +475,7 @@ pub enum InstructFinal<'arena> {
     IncDecM(NumParams, IncdecOp, MemberKey<'arena>),
     SetOpM(NumParams, EqOp, MemberKey<'arena>),
     UnsetM(NumParams, MemberKey<'arena>),
-    SetRangeM(NumParams, isize, SetrangeOp, ReadOnlyOp),
+    SetRangeM(NumParams, isize, SetrangeOp),
 }
 
 #[derive(Clone, Debug)]

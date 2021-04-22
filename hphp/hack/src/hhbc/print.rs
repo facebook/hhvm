@@ -1628,7 +1628,7 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal) -> Result<(), W::Error> {
             w.write(" ")?;
             print_member_key(w, mk)
         }
-        F::SetRangeM(i, s, op, rop) => {
+        F::SetRangeM(i, s, op) => {
             w.write("SetRangeM ")?;
             print_int(w, i)?;
             w.write(" ")?;
@@ -1637,9 +1637,7 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal) -> Result<(), W::Error> {
             w.write(match op {
                 SetrangeOp::Forward => "Forward",
                 SetrangeOp::Reverse => "Reverse",
-            })?;
-            w.write(" ")?;
-            print_readonly_op(w, rop)
+            })
         }
     }
 }

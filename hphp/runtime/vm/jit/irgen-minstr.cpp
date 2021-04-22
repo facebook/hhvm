@@ -1726,8 +1726,7 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 void emitSetRangeM(IRGS& env,
                    uint32_t nDiscard,
                    uint32_t size,
-                   SetRangeOp op,
-                   ReadOnlyOp /*rop*/) {
+                   SetRangeOp op) {
   auto const count = gen(env, ConvTVToInt, ConvNoticeData{}, topC(env));
   auto const src = topC(env, BCSPRelOffset{1});
   auto const offset = gen(env, ConvTVToInt, ConvNoticeData{}, topC(env, BCSPRelOffset{2}));

@@ -4503,7 +4503,6 @@ pub fn emit_set_range_expr(
                 .expect("StackIndex overflow"),
             kind.size.try_into().expect("Setrange size overflow"),
             kind.op,
-            ReadOnlyOp::Any,
         ))),
     ]))
 }

@@ -2665,7 +2665,7 @@ SetM <stack count> <member key>    [... C]  ->  [C]
 
   Set{Prop,Elem} or SetNewElem member operation.
 
-SetRangeM <stack count> <op> <elem size> <readonly op> [... C C C]  ->  []
+SetRangeM <stack count> <op> <elem size> [... C C C]  ->  []
 
   Store raw data into a string, optionally reversing the order of elements
   based on op, which may be Forward or Reverse.

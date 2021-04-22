@@ -164,9 +164,14 @@ size_t StructLayout::sizeIndex() const {
 }
 
 Slot StructLayout::keySlot(const StringData* key) const {
-  auto const it = key->isStatic()
-    ? m_key_to_slot.find(StaticKey{key})
-    : m_key_to_slot.find(NonStaticKey{key});
+  if (!key->isStatic()) return keySlotNonStatic(key);
+  auto const it = m_key_to_slot.find(StaticKey{key});
+  return it == m_key_to_slot.end() ? kInvalidSlot : it->second;
+}
+
+NEVER_INLINE
+Slot StructLayout::keySlotNonStatic(const StringData* key) const {
+  auto const it = m_key_to_slot.find(NonStaticKey{key});
   return it == m_key_to_slot.end() ? kInvalidSlot : it->second;
 }
 
@@ -501,7 +506,7 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) {
     auto const vad = sadIn->escalateWithCapacity(sadIn->size() + 1, __func__);
-    auto const res = vad->setMove(k, v);
+    auto const res = MixedArray::SetStrMove(vad, k, v);
     assertx(vad == res);
     if (sadIn->decReleaseCheck()) Release(sadIn);
     return res;
@@ -534,6 +539,7 @@ void StructDict::SetStrInSlotInPlace(StructDict* sad, Slot slot,
   oldVal = val(v);
 }
 
+NEVER_INLINE
 StructDict* StructDict::copy() const {
   auto const sizeIdx = sizeIndex();
   auto const sad = static_cast<StructDict*>(tl_heap->objMallocIndex(sizeIdx));
@@ -580,7 +586,7 @@ ArrayData* StructDict::RemoveStr(StructDict* sadIn, const StringData* k) {
 
 ArrayData* StructDict::AppendMove(StructDict* sad, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
-  auto const res = vad->appendMove(v);
+  auto const res = MixedArray::AppendMove(vad, v);
   assertx(vad == res);
   if (sad->decReleaseCheck()) Release(sad);
   return res;

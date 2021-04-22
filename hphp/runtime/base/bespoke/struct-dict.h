@@ -115,6 +115,7 @@ struct StructLayout : public ConcreteLayout {
   size_t numFields() const;
   size_t sizeIndex() const;
   Slot keySlot(const StringData* key) const;
+  Slot keySlotNonStatic(const StringData* key) const;
   const Field& field(Slot slot) const;
 
   KeyOrder keyOrder() const { return m_key_order; }

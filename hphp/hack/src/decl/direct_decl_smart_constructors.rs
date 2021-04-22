@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
 use bstr::BStr;
@@ -763,8 +763,8 @@ pub enum Node<'a> {
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Ty(&'a Ty<'a>),
     ListItem(&'a (Node<'a>, Node<'a>)),
-    Const(&'a ShallowClassConst<'a>),
-    ConstInitializer(&'a (Node<'a>, Node<'a>)), // Name, initializer expression
+    Const(&'a ShallowClassConst<'a>), // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}", and also for consts via make_const_declaration
+    ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])), // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and class-const "public const int X=1".
     FunParam(&'a FunParamDecl<'a>),
     Attribute(&'a UserAttributeNode<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
@@ -2244,52 +2244,6 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     }
 }
 
-/* gathering all constants that appear in a constant initializer expression */
-struct GatherConstants<'a>(BTreeSet<typing_defs::ClassConstRef<'a>>);
-
-impl<'a> oxidized_by_ref::nast_visitor::Visitor<'a> for GatherConstants<'a> {
-    fn object(&mut self) -> &mut dyn oxidized_by_ref::nast_visitor::Visitor<'a> {
-        self
-    }
-    fn visit_expr(&mut self, expr: &'a nast::Expr<'a>) {
-        use oxidized_by_ref::nast_visitor::Node;
-        expr.recurse(self.object());
-        if let aast::Expr_::ClassConst(&(cid, name)) = expr.1 {
-            match cid.1 {
-                nast::ClassId_::CI(sid) => {
-                    self.0.insert(typing_defs::ClassConstRef(
-                        typing_defs::ClassConstFrom::From(sid.1),
-                        name.1,
-                    ));
-                }
-                nast::ClassId_::CIself => {
-                    self.0.insert(typing_defs::ClassConstRef(
-                        typing_defs::ClassConstFrom::Self_,
-                        name.1,
-                    ));
-                }
-                // Not allowed
-                nast::ClassId_::CIparent
-                | nast::ClassId_::CIstatic
-                | nast::ClassId_::CIexpr(_) => {}
-            }
-        }
-    }
-}
-
-fn gather_constants<'a>(
-    arena: &'a Bump,
-    expr: &'a nast::Expr<'a>,
-) -> &'a [typing_defs::ClassConstRef<'a>] {
-    use oxidized_by_ref::nast_visitor::Visitor;
-    let mut visitor = GatherConstants(BTreeSet::new());
-    visitor.visit_expr(expr);
-    let acc = visitor.0;
-    let mut elements = bumpalo::collections::Vec::with_capacity_in(acc.len(), arena);
-    elements.extend(acc.into_iter());
-    elements.into_bump_slice()
-}
-
 impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     for DirectDeclSmartConstructors<'a>
 {
@@ -3456,16 +3410,12 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 let ty = self.node_to_ty(hint);
                 Node::List(
                     self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
-                        Node::ConstInitializer(&(name, initializer)) => {
+                        Node::ConstInitializer(&(name, initializer, refs)) => {
                             let id = name.as_id()?;
                             let ty = ty
                                 .or_else(|| self.infer_const(name, initializer))
                                 .unwrap_or_else(|| tany());
                             let modifiers = read_member_modifiers(modifiers.iter());
-                            let refs = match initializer {
-                                Node::Expr(expr) => gather_constants(&self.arena, &expr),
-                                _ => &[],
-                            };
                             Some(Node::Const(self.alloc(
                                 shallow_decl_defs::ShallowClassConst {
                                     abstract_: modifiers.is_abstract,
@@ -3480,7 +3430,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 )
             }
             // Global consts.
-            Node::List([Node::ConstInitializer(&(name, initializer))]) => {
+            Node::List([Node::ConstInitializer(&(name, initializer, _refs))]) => {
                 let Id(id_pos, id) = match self.elaborate_defined_id(name) {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
@@ -3513,11 +3463,14 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     }
 
     fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
-        let _refs = self.stop_accumulating_const_refs();
+        // The "X=1" part of either a member const "class C {const int X=1;}" or a top-level const "const int X=1;"
+        // Note: the the declarator itself doesn't yet know whether a type was provided by the user;
+        // that's only known in the parent, make_const_declaration
+        let refs = self.stop_accumulating_const_refs();
         if name.is_ignored() {
             Node::Ignored(SK::ConstantDeclarator)
         } else {
-            Node::ConstInitializer(self.alloc((name, initializer)))
+            Node::ConstInitializer(self.alloc((name, initializer, refs)))
         }
     }
 

@@ -4260,15 +4260,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let _refs = self.stop_accumulating_const_refs();
+        let refs = self.stop_accumulating_const_refs();
         let id = match self.expect_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SyntaxKind::Enumerator),
-        };
-
-        let refs = match value {
-            Node::Expr(expr) => gather_constants(&self.arena, &expr),
-            _ => &[],
         };
 
         Node::Const(
@@ -4395,10 +4390,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         type_: Self::R,
         name: Self::R,
         _equal: Self::R,
-        initial_value: Self::R,
+        _initial_value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let _refs = self.stop_accumulating_const_refs();
+        let refs = self.stop_accumulating_const_refs();
         let name = match self.expect_name(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -4418,10 +4413,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             bumpalo::vec![in self.arena; enum_class_ty, type_].into_bump_slice(),
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
-        let refs = match initial_value {
-            Node::Expr(expr) => gather_constants(&self.arena, &expr),
-            _ => &[],
-        };
         Node::Const(self.alloc(ShallowClassConst {
             abstract_: false,
             name: name.into(),

@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,209 +1,208 @@
+@@ -1,209 +1,211 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -167,7 +167,11 @@
                    (Tapply (([20:9-10], "\\TestRefs2"), [])));
                    (Rhint ([20:3-8]), Tmixed)]
                  )));
-             scc_refs = [] };
+-            scc_refs = [] };
++            scc_refs =
++            [(Typing_defs.Self, "K2");
++              ((Typing_defs.From "\\TestRefs2"), "K1")]
++            };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([21:9-10], "F");
              scc_type =
@@ -177,8 +181,7 @@
                    (Tapply (([21:9-10], "\\TestRefs2"), [])));
                    (Rhint ([21:3-8]), Tmixed)]
                  )));
--            scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
-+            scc_refs = [] };
+             scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([22:9-10], "G");
              scc_type =
@@ -188,8 +191,7 @@
                    (Tapply (([22:9-10], "\\TestRefs2"), [])));
                    (Rhint ([22:3-8]), Tmixed)]
                  )));
--            scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
-+            scc_refs = [] };
+             scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
            { Shallow_decl_defs.scc_abstract = false;
              scc_name = ([23:9-10], "H");
              scc_type =
@@ -199,7 +201,8 @@
                    (Tapply (([23:9-10], "\\TestRefs2"), [])));
                    (Rhint ([23:3-8]), Tmixed)]
                  )));
-             scc_refs = [] }
+-            scc_refs = [] }
++            scc_refs = [((Typing_defs.From "\\TestC"), "i")] }
            ];
          sc_typeconsts = []; sc_props = []; sc_sprops = [];
          sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -783,7 +783,8 @@ void Unit::initialMerge() {
   m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
 
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
-  bool allFuncsUnique = RuntimeOption::RepoAuthoritative || !SystemLib::s_inited;
+  bool allFuncsUnique = RuntimeOption::RepoAuthoritative
+    || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction);
   for (auto& func : mi->mutableFuncs()) {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
@@ -1039,15 +1040,11 @@ void Unit::mergeImpl(MergeInfo* mi) {
                 MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        assertx(func->isUnique());
+        assertx(func->isUnique() && func->isPersistent());
+
         auto const handle = func->funcHandle();
-        if (rds::isNormalHandle(handle)) {
-          rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle) = func;
-          rds::initHandle(handle);
-        } else {
-          assertx(rds::isPersistentHandle(handle));
-          rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
-        }
+        assertx(rds::isPersistentHandle(handle));
+        rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
 
         auto const ne = func->getNamedEntity();
         auto const f = ne->uniqueFunc();
@@ -1061,6 +1058,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } else {
       do {
         Func* func = *it;
+        assertx(func->isPersistent() == ((this->isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction) || RuntimeOption::RepoAuthoritative));
         Func::def(func, debugger);
       } while (++it != fend);
     }

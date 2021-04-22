@@ -64,6 +64,8 @@ pub struct DirectDeclSmartConstructors<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
+    // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
+    const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
     opts: &'a DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
@@ -95,6 +97,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             filename: arena.alloc(filename),
             file_mode,
             decls: Decls::empty(),
+            const_refs: None,
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
                 opts.auto_namespace_map,
                 opts.disable_xhp_element_mangling,
@@ -228,6 +231,60 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             result.push(item);
         }
         result.into_bump_slice()
+    }
+
+    fn start_accumulating_const_refs(&mut self) {
+        self.const_refs = Some(arena_collections::set::Set::empty());
+    }
+
+    fn accumulate_const_ref(
+        &mut self,
+        class_id: &'a aast::ClassId<&Pos, nast::FuncBodyAnn, (), ()>,
+        value_id: &Id<'a>,
+    ) {
+        // The decl for a class constant stores a list of all the scope-resolution expressions
+        // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
+        // (This is so we can detect cross-type circularity in constant initializers).
+        // TODO: Hack is the wrong place to detect circularity (because we can never do it completely soundly,
+        // and because it's a cross-body problem). The right place to do it is in a linter. All this should be
+        // removed from here and put into a linter.
+        if let Some(const_refs) = self.const_refs {
+            match class_id.1 {
+                nast::ClassId_::CI(sid) => {
+                    self.const_refs = Some(const_refs.add(
+                        self.arena,
+                        typing_defs::ClassConstRef(
+                            typing_defs::ClassConstFrom::From(sid.1),
+                            value_id.1,
+                        ),
+                    ));
+                }
+                nast::ClassId_::CIself => {
+                    self.const_refs = Some(const_refs.add(
+                        self.arena,
+                        typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, value_id.1),
+                    ));
+                }
+                // Not allowed
+                nast::ClassId_::CIparent
+                | nast::ClassId_::CIstatic
+                | nast::ClassId_::CIexpr(_) => {}
+            }
+        }
+    }
+
+    fn stop_accumulating_const_refs(&mut self) -> &'a [typing_defs::ClassConstRef<'a>] {
+        let const_refs = self.const_refs;
+        self.const_refs = None;
+        match const_refs {
+            Some(const_refs) => {
+                let mut elements: Vec<typing_defs::ClassConstRef> =
+                    bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
+                elements.extend(const_refs.into_iter());
+                elements.into_bump_slice()
+            }
+            None => &[],
+        }
     }
 }
 
@@ -3451,9 +3508,12 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         }
     }
 
-    fn begin_constant_declarator(&mut self) {}
+    fn begin_constant_declarator(&mut self) {
+        self.start_accumulating_const_refs();
+    }
 
     fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+        let _refs = self.stop_accumulating_const_refs();
         if name.is_ignored() {
             Node::Ignored(SK::ConstantDeclarator)
         } else {
@@ -4189,7 +4249,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::EnumUse(self.alloc(names))
     }
 
-    fn begin_enumerator(&mut self) {}
+    fn begin_enumerator(&mut self) {
+        self.start_accumulating_const_refs();
+    }
 
     fn make_enumerator(
         &mut self,
@@ -4198,6 +4260,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
+        let _refs = self.stop_accumulating_const_refs();
         let id = match self.expect_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SyntaxKind::Enumerator),
@@ -4323,7 +4386,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::Ignored(SyntaxKind::EnumClassDeclaration)
     }
 
-    fn begin_enum_class_enumerator(&mut self) {}
+    fn begin_enum_class_enumerator(&mut self) {
+        self.start_accumulating_const_refs();
+    }
 
     fn make_enum_class_enumerator(
         &mut self,
@@ -4333,6 +4398,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         initial_value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
+        let _refs = self.stop_accumulating_const_refs();
         let name = match self.expect_name(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -4522,6 +4588,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             Some(id) => id,
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
+        self.accumulate_const_ref(class_id, &value_id);
         Node::Expr(self.alloc(aast::Expr(
             pos,
             nast::Expr_::ClassConst(self.alloc((class_id, self.alloc((value_id.0, value_id.1))))),

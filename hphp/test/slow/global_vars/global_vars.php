@@ -11,6 +11,7 @@ function entrypoint_global_vars(): void {
 
   $args = varray['', 'G', 'P', 'E', 'S', 'ES', 'ESCGP', 'CG'];
 
+  $processes = vec[];
   foreach($args as $arg) {
     $descriptorspec = darray[
        0 => varray['pipe', 'r'],
@@ -29,10 +30,12 @@ function entrypoint_global_vars(): void {
       echo "Failed to open: $cmd\n";
       exit -1;
     }
+    $processes[] = tuple($proc, $pipes);
+  }
 
-    echo stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-
-    proc_close($proc);
+  foreach ($processes as $proc) {
+    echo stream_get_contents($proc[1][1]);
+    fclose($proc[1][1]);
+    proc_close($proc[0]);
   }
 }

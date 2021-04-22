@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -41,6 +40,8 @@ namespace HPHP {
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 static FactsFactory* s_mapFactory = nullptr;
+
+std::unique_ptr<RepoAutoloadMap> AutoloadHandler::s_repoAutoloadMap{};
 
 FactsFactory* FactsFactory::getInstance() {
   return s_mapFactory;
@@ -97,7 +98,8 @@ void AutoloadHandler::requestInit() {
   assertx(!m_req_map);
   m_facts = getFactsForRequest();
   if (RuntimeOption::RepoAuthoritative) {
-    m_map = Repo::get().global().AutoloadMap.get();
+    m_map = s_repoAutoloadMap.get();
+    assertx(m_map);
   } else {
     m_map = m_facts;
   }
@@ -500,6 +502,12 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
 
     return false;
   }
+}
+
+void AutoloadHandler::setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap> map) {
+  assertx(RO::RepoAuthoritative);
+  assertx(!s_repoAutoloadMap);
+  s_repoAutoloadMap = std::move(map);
 }
 
 //////////////////////////////////////////////////////////////////////

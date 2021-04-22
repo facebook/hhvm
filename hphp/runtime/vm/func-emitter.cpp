@@ -709,22 +709,23 @@ template<class SerDe>
 void FuncEmitter::serde(SerDe& sd) {
   serdeMetaData(sd);
 
-  sd(
-    m_lineTable,
-    [&] (const LineEntry& prev, const LineEntry& curDelta) {
-      if (SerDe::deserializing) {
-        return LineEntry {
-          curDelta.pastOffset() + prev.pastOffset(),
-          curDelta.val() + prev.val()
-        };
-      } else {
-        return LineEntry {
-          curDelta.pastOffset() - prev.pastOffset(),
-          curDelta.val() - prev.val()
-        };
+  if constexpr (SerDe::deserializing) {
+    deserializeLineTable(sd, m_lineTable);
+  } else {
+    sd.withSize(
+      [&] {
+        sd(
+          m_lineTable,
+          [&] (const LineEntry& prev, const LineEntry& curDelta) {
+            return LineEntry {
+              curDelta.pastOffset() - prev.pastOffset(),
+              curDelta.val() - prev.val()
+            };
+          }
+        );
       }
-    }
-  );
+    );
+  }
 
   sd(m_sourceLocTab);
 
@@ -740,6 +741,33 @@ void FuncEmitter::serde(SerDe& sd) {
 
 template void FuncEmitter::serde<>(BlobDecoder&);
 template void FuncEmitter::serde<>(BlobEncoder&);
+
+void FuncEmitter::deserializeLineTable(BlobDecoder& decoder,
+                                       LineTable& lineTable) {
+  decoder.withSize(
+    [&] {
+      decoder(
+        lineTable,
+        [&] (const LineEntry& prev, const LineEntry& curDelta) {
+          return LineEntry {
+            curDelta.pastOffset() + prev.pastOffset(),
+            curDelta.val() + prev.val()
+          };
+        }
+      );
+    }
+  );
+}
+
+size_t FuncEmitter::optDeserializeLineTable(BlobDecoder& decoder,
+                                            LineTable& lineTable) {
+  // We encoded the size of the line table along with the table. So,
+  // peek its size and bail if the decoder doesn't have enough data
+  // remaining.
+  auto const size = decoder.peekSize();
+  if (size <= decoder.remaining()) deserializeLineTable(decoder, lineTable);
+  return size;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // FuncRepoProxy.

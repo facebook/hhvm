@@ -36,6 +36,8 @@ namespace HPHP {
 
 bool is_valid_class_name(folly::StringPiece className);
 
+struct RepoAutoloadMap;
+
 struct AutoloadHandler final : RequestEventHandler {
 
   AutoloadHandler() = default;
@@ -109,6 +111,8 @@ struct AutoloadHandler final : RequestEventHandler {
 
   Array getSymbols(const String& path, AutoloadMap::KindOf kind);
 
+  static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
+
 private:
   /**
    * This method may return Success or Failure.
@@ -160,6 +164,8 @@ private:
   FactsStore* m_facts = nullptr;
   req::unique_ptr<UserAutoloadMap> m_req_map;
   AutoloadMap* m_map = nullptr;
+
+  static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };
 
 //////////////////////////////////////////////////////////////////////

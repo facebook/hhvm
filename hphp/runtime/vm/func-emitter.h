@@ -105,9 +105,21 @@ struct FuncEmitter {
    */
   Func* create(Unit& unit, PreClass* preClass = nullptr, bool saveLineTable = false) const;
 
-  template<class SerDe> void serdeMetaData(SerDe&);
+  /////////////////////////////////////////////////////////////////////////////
+  // Serialization.
 
+  template<class SerDe> void serdeMetaData(SerDe&);
   template<class SerDe> void serde(SerDe&);
+
+  // Deserializing just a LineTable, previously encoded by serde (the
+  // BlobDecoder must be at the correct offset).
+  static void deserializeLineTable(BlobDecoder&, LineTable&);
+
+  // Like deserializeLineTable, but allows for the BlobDecoder to not
+  // have enough data. Returns the size of the encoded LineTable. If
+  // the returned size is greater than the size of the given
+  // BlobDecoder, nothing is read.
+  static size_t optDeserializeLineTable(BlobDecoder&, LineTable&);
 
   /////////////////////////////////////////////////////////////////////////////
   // Metadata.

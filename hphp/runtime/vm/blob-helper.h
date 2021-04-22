@@ -289,6 +289,26 @@ struct BlobEncoder {
     return *this;
   }
 
+  /*
+   * Record the size of the data emitted during f(), which
+   * BlobDecoder::skipSize or BlobDecoder::peekSize can later read.
+   */
+  template <typename F>
+  BlobEncoder& withSize(F f) {
+    uint64_t start = m_blob.size();
+    m_blob.resize(start + sizeof(uint64_t));
+    // The size is stored before the data, but we don't know it yet,
+    // so store 0 and then patch it afterwards (this means we have to
+    // used a fixed size encoding).
+    std::memset(&m_blob[start], 0, sizeof(uint64_t));
+    f();
+    uint64_t size = m_blob.size() - start;
+    assertx(size >= sizeof(uint64_t));
+    size -= sizeof(uint64_t);
+    std::copy((char*)&size, (char*)&size + sizeof(uint64_t), &m_blob[start]);
+    return *this;
+  }
+
   size_t size() const { return m_blob.size(); }
   const void* data() const { return &m_blob[0]; }
 
@@ -317,8 +337,9 @@ struct BlobDecoder {
   static const bool deserializing = true;
 
   BlobDecoder(const void* vp, size_t sz, bool l)
-    : m_p(static_cast<const unsigned char*>(vp))
-    , m_last(m_p + sz)
+    : m_start{static_cast<const unsigned char*>(vp)}
+    , m_p{m_start}
+    , m_last{m_p + sz}
     , m_useGlobalIds{l}
   {}
 
@@ -332,6 +353,8 @@ struct BlobDecoder {
   size_t remaining() const {
     return m_p <= m_last ? (m_last - m_p) : 0;
   }
+
+  size_t advanced() const { return m_p - m_start; }
 
   // See encode() in BlobEncoder for why this only allows integral
   // types.
@@ -518,6 +541,52 @@ struct BlobDecoder {
     return *this;
   }
 
+  /*
+   * Read a block of data (using f()) which is previously encoded with
+   * BlobEncoder::withSize.
+   */
+  template <typename F>
+  BlobDecoder& withSize(F f) {
+    // Since we're going to read the data anyways, we don't actually
+    // need the size, but we'll assert if it doesn't match what we
+    // decode.
+    assertx(remaining() >= sizeof(uint64_t));
+    uint64_t size;
+    std::copy(m_p, m_p + sizeof(uint64_t), (unsigned char*)&size);
+    advance(sizeof(uint64_t));
+    auto const DEBUG_ONLY before = remaining();
+    assertx(before >= size);
+    f();
+    assertx(before - remaining() == size);
+    return *this;
+  }
+
+  /*
+   * Read the size encoded by BlobEncoder::withSize, without advancing
+   * the decoder state.
+   */
+  size_t peekSize() const {
+    assertx(remaining() >= sizeof(uint64_t));
+    uint64_t size;
+    std::copy(m_p, m_p + sizeof(uint64_t), (unsigned char*)&size);
+    return size + sizeof(uint64_t);
+  }
+
+  /*
+   * Skip over an encoded StringData*
+   */
+  BlobDecoder& skipString() {
+    uint32_t sz;
+    decode(sz);
+    if (sz < 2) return *this;
+    --sz;
+    assertx(remaining() >= sz);
+    advance(sz);
+    return *this;
+  }
+
+  void setUseGlobalIds(bool b) { m_useGlobalIds = b; }
+
 private:
   String decodeString() {
     uint32_t sz;
@@ -536,6 +605,7 @@ private:
   }
 
 private:
+  const unsigned char* m_start;
   const unsigned char* m_p;
   const unsigned char* const m_last;
   bool m_useGlobalIds;
@@ -544,4 +614,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

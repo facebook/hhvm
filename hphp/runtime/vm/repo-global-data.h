@@ -165,8 +165,6 @@ struct RepoGlobalData {
 
   std::vector<std::pair<std::string,TypedValue>> ConstantFunctions;
 
-  std::unique_ptr<RepoAutoloadMap> AutoloadMap = nullptr;
-
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)

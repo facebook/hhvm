@@ -20,10 +20,13 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
+
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+
 #include "hphp/runtime/server/xbox-server.h"
 
 #include "hphp/util/assertions.h"
@@ -235,7 +238,9 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
             throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
           }
           BlobDecoder decoder = query.getBlob(0, true);
-          s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
+          AutoloadHandler::setRepoAutoloadMap(
+            RepoAutoloadMapBuilder::serde(decoder)
+          );
         }
       }
 

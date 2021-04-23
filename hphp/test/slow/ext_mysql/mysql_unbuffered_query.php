@@ -1,8 +1,9 @@
 <?hh
-require_once('connect.inc');
 <<__EntryPoint>> function main(): void {
+require_once('connect.inc');
+list($host, $user, $passwd, $db) = connection_settings();
 $conn = mysql_connect($host, $user, $passwd);
-var_dump(create_test_table('un_query'));
+var_dump(create_test_table($db, 'un_query'));
 var_dump(mysql_query(
   "insert into test_un_query (name) values ('test'),('test2')"));
 

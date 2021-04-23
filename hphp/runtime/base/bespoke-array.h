@@ -52,9 +52,9 @@ struct LayoutTest {
 
   bool accepts(uint16_t val) const {
     switch (mode) {
-      case Mode::And1Byte: return ((val >> 8) & imm) == 0;
+      case Mode::And1Byte: return ((val >> 8) & uint8_t(imm)) == 0;
       case Mode::And2Byte: return (val & imm) == 0;
-      case Mode::Cmp1Byte: return (val >> 8) == imm;
+      case Mode::Cmp1Byte: return (val >> 8) == uint8_t(imm);
       case Mode::Cmp2Byte: return val == imm;
     }
     always_assert(false);

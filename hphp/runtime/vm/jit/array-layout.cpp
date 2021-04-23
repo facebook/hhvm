@@ -171,7 +171,7 @@ bool ArrayLayout::monotype() const {
 
 bool ArrayLayout::is_struct() const {
   auto const index = layoutIndex();
-  return index && index->byte() == bespoke::kStructLayoutByte;
+  return index && bespoke::StructLayout::IsStructLayout(*index);
 }
 
 const bespoke::Layout* ArrayLayout::bespokeLayout() const {

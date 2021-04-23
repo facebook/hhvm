@@ -34,6 +34,10 @@ namespace HPHP { namespace bespoke {
 // match the "layout byte" for its layout family. That means that we're limited
 // to 256 layouts for a given family.
 //
+// Struct dicts have multiple valid layout bytes. Any layout byte with bit 0
+// (the lowest bit) set and bit 7 (the highest bit) unset is a valid struct
+// layout byte, allowing us to create 64 * 256 struct layouts.
+//
 // This restriction helps us in two ways:
 //
 //   1. It lets us do bespoke vtable dispatch off this byte alone.
@@ -46,23 +50,18 @@ namespace HPHP { namespace bespoke {
 //  - Bit 2: unset iff subtype of MonotypeDict<Empty|Int,Top>
 //  - Bit 3: unset iff subtype of MonotypeDict<Empty|Str,Top>
 //
-// Bit 0 is less constrained. For MonotypeDict, when it is unset, it means the
+// Bit 4 is less constrained. For MonotypeDict, when it is unset, it means the
 // layout is one of the static-string keyed layouts. For MonotypeVec, when it
-// is unset, it means the layout is the empty singleton. We have space here to
-// add kStructLayoutByte = 0b1111.
+// is unset, it means the layout is the empty singleton.
 //
-// This encoding is the one that uses the fewest number of bits (resulting in
-// the smallest vtable) for our current set of layout families.
-//
-constexpr uint8_t kLoggingLayoutByte               = 0b1110;
-constexpr uint8_t kMonotypeVecLayoutByte           = 0b1101;
-constexpr uint8_t kEmptyMonotypeVecLayoutByte      = 0b1100;
-constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b1011;
-constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b0111;
-constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b0110;
-constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b0010;
-constexpr uint8_t kStructLayoutByte                = 0b1111;
-constexpr uint8_t kMaxLayoutByte = kStructLayoutByte;
+constexpr uint8_t kLoggingLayoutByte               = 0b10001110;
+constexpr uint8_t kMonotypeVecLayoutByte           = 0b10011100;
+constexpr uint8_t kEmptyMonotypeVecLayoutByte      = 0b10001100;
+constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b10011010;
+constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b10010110;
+constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b10000110;
+constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b10000010;
+constexpr uint8_t kBespokeVtableMask               = 0b00011111;
 
 // Log that we're calling the given function for the given array.
 void logBespokeDispatch(const BespokeArray* bad, const char* fn);
@@ -116,7 +115,8 @@ struct LayoutFunctions {
 };
 
 struct LayoutFunctionsDispatch {
-#define X(Return, Name, Args...) Return (*fn##Name[kMaxLayoutByte + 1])(Args);
+#define X(Return, Name, Args...) \
+  Return (*fn##Name[kBespokeVtableMask + 1])(Args);
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
   BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X

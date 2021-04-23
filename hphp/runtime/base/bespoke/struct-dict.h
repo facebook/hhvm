@@ -107,7 +107,9 @@ struct StructDict : public BespokeArray {
 struct StructLayout : public ConcreteLayout {
   struct Field { LowStringPtr key; };
 
-  static LayoutIndex Index(uint8_t raw);
+  static LayoutIndex Index(uint16_t raw);
+  static bool IsStructLayout(LayoutIndex index);
+
   static const StructLayout* As(const Layout*);
   static const StructLayout* GetLayout(const KeyOrder&, bool create);
   static const StructLayout* Deserialize(LayoutIndex index, const KeyOrder&);

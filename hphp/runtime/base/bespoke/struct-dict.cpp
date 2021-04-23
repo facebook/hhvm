@@ -31,9 +31,11 @@ namespace HPHP { namespace bespoke {
 
 namespace {
 
-uint8_t s_numStructLayouts = 0;
+size_t s_numStructLayouts = 0;
 folly::SharedMutex s_keySetLock;
 std::unordered_map<KeyOrder, LayoutIndex, KeyOrderHash> s_keySetToIdx;
+
+constexpr size_t kMaxNumStructLayouts = 1 << 14;
 
 const LayoutFunctions* structDictVtable() {
   static auto const result = fromArray<StructDict>();
@@ -42,10 +44,6 @@ const LayoutFunctions* structDictVtable() {
 
 uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
   return (static_cast<uint16_t>(idx) << 8) | aux;
-}
-
-bool isStructLayout(LayoutIndex index) {
-  return index.byte() == kStructLayoutByte;
 }
 
 std::string describeStructLayout(const KeyOrder& ko) {
@@ -74,7 +72,7 @@ bool StructDict::checkInvariants() const {
   assertx(layout()->numFields() == numFields());
   assertx(layout()->typeOffset() == typeOffset());
   assertx(layout()->valueOffset() == valueOffsetInValueSize() * sizeof(Value));
-  assertx(layoutIndex().byte() == kStructLayoutByte);
+  assertx(StructLayout::IsStructLayout(layoutIndex()));
   return true;
 }
 
@@ -86,9 +84,21 @@ size_t StructLayout::valueOffsetForSlot(Slot slot) const {
   return sizeof(StructDict) + valueOffset() + slot * sizeof(Value);
 }
 
-LayoutIndex StructLayout::Index(uint8_t idx) {
-  auto constexpr base = uint16_t(kStructLayoutByte << 8);
-  return LayoutIndex{uint16_t(base + idx)};
+// As documented in bespoke/layout.h, bespoke layout bytes are constrained to
+// have bit 0 (the low bit) set and bit 7 (the high bit) unset. Index() turns
+// a serialize index into this form; IsStructLayout checks it.
+
+LayoutIndex StructLayout::Index(uint16_t idx) {
+  auto const hi_byte = idx >> 8;
+  auto const lo_byte = idx & 0xff;
+  auto const result = safe_cast<uint16_t>((hi_byte << 9) + lo_byte + 0x100);
+  always_assert(IsStructLayout({result}));
+  return {result};
+}
+
+bool StructLayout::IsStructLayout(LayoutIndex index) {
+  auto const byte = index.byte();
+  return (byte & 0b10000001) == 0b00000001;
 }
 
 const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
@@ -104,8 +114,7 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
   auto const it = s_keySetToIdx.find(ko);
   if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
 
-  auto constexpr kMaxIndex = std::numeric_limits<uint8_t>::max();
-  if (s_numStructLayouts == kMaxIndex) return nullptr;
+  if (s_numStructLayouts == kMaxNumStructLayouts) return nullptr;
 
   // We only construct this layout if it has at least one child, in order
   // to satisfy invariants in FinalizeHierarchy().
@@ -114,7 +123,7 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
     s_numStructLayouts++;
   }
 
-  auto const index = Index(s_numStructLayouts++);
+  auto const index = Index(safe_cast<uint16_t>(s_numStructLayouts++));
   auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
   auto const result = new (malloc(bytes)) StructLayout(index, ko);
   s_keySetToIdx.emplace(ko, index);

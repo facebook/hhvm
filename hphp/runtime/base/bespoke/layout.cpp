@@ -44,7 +44,7 @@ using namespace jit;
 
 namespace {
 
-auto constexpr kMaxNumLayouts = ((kMaxLayoutByte + 1) << 8);
+auto constexpr kMaxNumLayouts = (1 << 16) - 1;
 
 std::atomic<size_t> s_topoIndex;
 std::array<Layout*, kMaxNumLayouts> s_layoutTable;
@@ -84,6 +84,20 @@ folly::Optional<LayoutTest> compute2ByteTest(
   if (checkLayoutTest(liveVec, deadVec, and)) return and;
 
   return folly::none;
+}
+
+std::string show(LayoutTest test) {
+  switch (test.mode) {
+    case LayoutTest::And1Byte:
+      return folly::sformat("AND {:02x}xx", test.imm & 0xff);
+    case LayoutTest::And2Byte:
+      return folly::sformat("AND {:04x}", test.imm);
+    case LayoutTest::Cmp1Byte:
+      return folly::sformat("CMP {:02x}xx", test.imm & 0xff);
+    case LayoutTest::Cmp2Byte:
+      return folly::sformat("CMP {:04x}", test.imm);
+  }
+  always_assert(false);
 }
 
 }
@@ -262,6 +276,7 @@ void Layout::FinalizeHierarchy() {
   // their children's masks if necessary.
   std::sort(allLayouts.begin(), allLayouts.end(), AncestorOrdering{});
   for (auto const layout : allLayouts) {
+    if (layout->index() == kBespokeTopIndex) continue;
     layout->m_layout_test = layout->computeLayoutTest();
   }
 
@@ -340,20 +355,9 @@ std::string Layout::dumpInformation() const {
   ss << folly::format("{:04x}: {} [{}]\n", m_index.raw, describe(),
                        concreteDesc(this));
 
-  auto const test = [&]{
-    switch (m_layout_test.mode) {
-      case LayoutTest::And1Byte:
-        return folly::sformat("AND {:02x}xx", m_layout_test.imm & 0xff);
-      case LayoutTest::And2Byte:
-        return folly::sformat("AND {:04x}", m_layout_test.imm);
-      case LayoutTest::Cmp1Byte:
-        return folly::sformat("CMP {:02x}xx", m_layout_test.imm & 0xff);
-      case LayoutTest::Cmp2Byte:
-        return folly::sformat("CMP {:04x}", m_layout_test.imm);
-    }
-    always_assert(false);
-  }();
-  ss << folly::format("  Type test: {}\n", test);
+  auto const top = index() == kBespokeTopIndex;
+  auto const type_test = top ? "kind() & 1" : show(m_layout_test);
+  ss << folly::format("  Type test: {}\n", type_test);
 
   ss << folly::format("  Ancestors:\n");
   for (auto const ancestor : m_ancestors) {
@@ -407,6 +411,22 @@ LayoutTest Layout::computeLayoutTest() const {
   auto constexpr kVanillaLayoutIndex = uint16_t(-1);
   deadVec.push_back(kVanillaLayoutIndex);
 
+  SCOPE_ASSERT_DETAIL("bespoke::Layout::computeLayoutTest") {
+    std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
+    ret += folly::sformat("  Live:\n");
+    for (auto const live : liveVec) {
+      auto const layout = s_layoutTable[live]->describe();
+      ret += folly::sformat("  - {:04x}: {}\n", live, layout);
+    }
+    ret += folly::sformat("  Dead:\n");
+    for (auto const dead : deadVec) {
+      auto const layout = dead == kVanillaLayoutIndex
+        ? "Vanilla" : s_layoutTable[dead]->describe();
+      ret += folly::sformat("  - {:04x}: {}\n", dead, layout);
+    }
+    return ret;
+  };
+
   // Try a 1-byte test on the layout's high byte. Fall back to a 2-byte test.
   auto const result = [&]{
     std::vector<uint16_t> live1ByteVec;
@@ -435,24 +455,10 @@ LayoutTest Layout::computeLayoutTest() const {
 
     if (auto const test = compute2ByteTest(liveVec, deadVec)) return *test;
 
-    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeLayoutTest") {
-      std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
-      ret += folly::sformat("  Live:\n");
-      for (auto const live : liveVec) {
-        auto const layout = s_layoutTable[live]->describe();
-        ret += folly::sformat("  - {:04x}: {}\n", live, layout);
-      }
-      ret += folly::sformat("  Dead:\n");
-      for (auto const dead : deadVec) {
-        auto const layout = dead == kVanillaLayoutIndex
-          ? "Vanilla" : s_layoutTable[dead]->describe();
-        ret += folly::sformat("  - {:04x}: {}\n", dead, layout);
-      }
-      return ret;
-    };
-
     always_assert(false);
   }();
+
+  SCOPE_ASSERT_DETAIL("selected layout test") { return show(result); };
 
   always_assert(checkLayoutTest(liveVec, deadVec, result));
 
@@ -460,6 +466,7 @@ LayoutTest Layout::computeLayoutTest() const {
 }
 
 LayoutTest Layout::getLayoutTest() const {
+  assertx(index() != kBespokeTopIndex);
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   return m_layout_test;
 }
@@ -524,10 +531,10 @@ ConcreteLayout::ConcreteLayout(LayoutIndex index,
   : Layout(index, std::move(description), std::move(parents), vtable)
 {
   assertx(vtable);
-  auto const byte = index.byte();
+  auto const vindex = index.byte() & kBespokeVtableMask;
 #define X(Return, Name, Args...) {                          \
     assertx(vtable->fn##Name);                              \
-    auto& entry = g_layout_funcs.fn##Name[byte];            \
+    auto& entry = g_layout_funcs.fn##Name[vindex];          \
     assertx(entry == nullptr || entry == vtable->fn##Name); \
     entry = vtable->fn##Name;                               \
   }

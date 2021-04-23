@@ -1,10 +1,10 @@
 <?hh
-print "Test 11: php:function Support\n";
   class foo {
        function foo() {}
        function __toString() { return "not a DomNode object";}
   }
-
+<<__EntryPoint>> function main(): void {
+print "Test 11: php:function Support\n";
 $dom = new domDocument();
   $dom->load(dirname(__FILE__)."/xslt011.xsl");
   $proc = new xsltprocessor;
@@ -14,6 +14,7 @@ $dom = new domDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
   $proc->registerPHPFunctions();
   print $proc->transformToXML($xml);
+}
 
   function foobar($id, $secondArg = "" ) {
     if (is_array($id)) {

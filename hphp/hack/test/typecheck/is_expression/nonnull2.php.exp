@@ -1,6 +1,6 @@
 File "nonnull2.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
-File "nonnull2.php", line 11, characters 21-23:
-Expected `int`
-File "nonnull2.php", line 4, characters 13-19:
-But got `nonnull`
+  File "nonnull2.php", line 11, characters 21-23:
+  Expected `int`
+  File "nonnull2.php", line 4, characters 13-19:
+  But got `nonnull`

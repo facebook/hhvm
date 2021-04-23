@@ -7415,10 +7415,7 @@ and condition
          && String.equal method_name SN.Shapes.keyExists ->
     key_exists env p shape field
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
-  | Aast.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
-    let (env, hint_ty) =
-      Phase.localize_hint_with_self env ~ignore_errors:false h
-    in
+  | Aast.Is (ivar, h) ->
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
       let (ivar_pos, ivar_ty) = fst ivar in
@@ -7429,13 +7426,25 @@ and condition
       let (env, refined_ty) = Inter.intersect env reason ivar_ty hint_ty in
       (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
     in
-    let (env, hint_ty) =
-      if not tparamet then
-        Inter.non env reason hint_ty ~approx:TUtils.ApproxUp
-      else
-        (env, hint_ty)
+    let (env, lset) =
+      match snd h with
+      | Aast.Hnonnull -> condition_nullity ~nonnull:tparamet env ivar
+      | Aast.Hprim Tnull -> condition_nullity ~nonnull:(not tparamet) env ivar
+      | _ -> (env, Local_id.Set.empty)
     in
-    refine_type env hint_ty
+    if is_instance_var (Tast.to_nast_expr ivar) then
+      let (env, hint_ty) =
+        Phase.localize_hint_with_self env ~ignore_errors:false h
+      in
+      let (env, hint_ty) =
+        if not tparamet then
+          Inter.non env reason hint_ty ~approx:TUtils.ApproxUp
+        else
+          (env, hint_ty)
+      in
+      refine_type env hint_ty
+    else
+      (env, lset)
   | _ -> (env, Local_id.Set.empty)
 
 (** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinement of

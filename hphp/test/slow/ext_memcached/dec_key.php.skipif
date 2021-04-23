@@ -5,6 +5,6 @@ $memc->addServer('localhost', 11211);
 $memc->addServer('localhost', 11212);
 $version = $memc->getVersion();
 if (count($version) !== 2 || $version["localhost:11211"] == "255.255.255" || $version["localhost:11212"] == "255.255.255") {
-  echo "SKIP Need two Memcached servers running (port 11211 and 11212)";
+  echo "skip Need two Memcached servers running (port 11211 and 11212)";
 }
 }

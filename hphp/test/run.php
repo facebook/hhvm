@@ -2371,19 +2371,21 @@ function should_skip_test_simple(
 function skipif_should_skip_test(
   darray<string, mixed> $options,
   string $test,
-): ?string {
+): RunifResult {
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
-    return null;
+    return shape('valid' => true, 'match' => true);
   }
 
-  // For now, run the .skipif in non-repo since building a repo for it is hard.
+  // Run the .skipif in non-repo mode since building a repo for it is
+  // inconvenient and the same features should be available. Pick the mode
+  // arbitrarily for the same reason.
   $options_without_repo = $options;
   unset($options_without_repo['repo']);
-
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
-  // running .skipif, arbitrarily picking a mode
   $hhvm = $hhvm[0];
+  // Remove any --count <n> from the command
+  $hhvm = preg_replace('/ --count[ =][\d+][\s]{0,}/', ' ', $hhvm);
 
   $descriptorspec = darray[
     0 => varray["pipe", "r"],
@@ -2393,26 +2395,30 @@ function skipif_should_skip_test(
   $pipes = null;
   $process = proc_open("$hhvm $test 2>&1", $descriptorspec, inout $pipes);
   if (!is_resource($process)) {
-    // This is weird. We can't run HHVM but we probably shouldn't skip the test
-    // since on a broken build everything will show up as skipped and give you a
-    // SHIPIT.
-    return null;
+    return shape(
+      'valid' => false,
+      'error' => 'proc_open failed while running skipif'
+    );
   }
 
   fclose($pipes[0]);
-  $output = stream_get_contents($pipes[1]);
+  $output = trim(stream_get_contents($pipes[1]));
   fclose($pipes[1]);
   proc_close($process);
 
-  // The standard php5 .skipif semantics is if the .skipif outputs ANYTHING
-  // then it should be skipped. This is a poor design, but I'll just add a
-  // small blacklist of things that are really bad if they are output so we
-  // surface the errors in the tests themselves.
-  if (stripos($output, 'segmentation fault') !== false) {
-    return null;
+  // valid output is empty or a single line starting with 'skip'
+  // everything else must result in a test failure
+  if ($output === '') {
+    return shape('valid' => true, 'match' => true);
   }
-
-  return strlen($output) === 0 ? null : 'skip-skipif';
+  if (preg_match('/^skip.*$/', $output)) {
+    return shape(
+      'valid' => true,
+      'match' => false,
+      'skip_reason' => 'skip-skipif',
+    );
+  }
+  return shape('valid' => false, 'error' => "invalid skipif output '$output'");
 }
 
 function comp_line($l1, $l2, $is_reg) {
@@ -2922,8 +2928,16 @@ function run_test($options, $test) {
   if ($skip_reason !== null) return $skip_reason;
 
   if (!($options['no-skipif'] ?? false)) {
-    $skip_reason = skipif_should_skip_test($options, $test);
-    if ($skip_reason !== null) return $skip_reason;
+    $result = skipif_should_skip_test($options, $test);
+    if (!$result['valid']) {
+      invariant($result['error'] is string, 'missing skipif error');
+      Status::writeDiff($test, $result['error']);
+      return false;
+    }
+    if (!$result['match']) {
+      invariant($result['skip_reason'] is string, 'missing skip_reason');
+      return $result['skip_reason'];
+    }
 
     $result = runif_should_skip_test($options, $test);
     if (!$result['valid']) {

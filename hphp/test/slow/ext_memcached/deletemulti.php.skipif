@@ -4,6 +4,6 @@ $memc = new Memcached();
 $memc->addServer('localhost', 11211);
 $version = $memc->getVersion();
 if ($version["localhost:11211"] == "255.255.255") {
-  echo "SKIP No Memcached running";
+  echo "skip No Memcached running";
 }
 }

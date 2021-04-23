@@ -7,6 +7,6 @@ $ret = idn_to_ascii(
   INTL_IDNA_VARIANT_UTS46
 );
 if ($ret === false && intl_get_error_code() == U_UNSUPPORTED_ERROR) {
-  echo "intl too old";
+  echo "skip intl too old";
 }
 }

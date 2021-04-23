@@ -295,8 +295,10 @@ let handle
   ClientProvider.track client ~key:Connection_tracker.Server_waiting_for_cmd;
   let msg = ClientProvider.read_client_msg client in
   ClientProvider.track client ~key:Connection_tracker.Server_got_cmd;
-  ServerProgress.send_to_monitor
-    (MonitorRpc.PROGRESS (ServerCommandTypesUtils.status_describe_cmd msg));
+  ServerProgress.send_progress
+    ~include_in_logs:false
+    "%s"
+    (ServerCommandTypesUtils.status_describe_cmd msg);
   let env =
     {
       env with

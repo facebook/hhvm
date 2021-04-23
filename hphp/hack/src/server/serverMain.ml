@@ -145,7 +145,7 @@ module Program = struct
 end
 
 let finalize_init init_env typecheck_telemetry init_telemetry =
-  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None);
+  ServerProgress.send_warning None;
   (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
   let heap_size = SharedMem.heap_size () in
@@ -711,15 +711,16 @@ let serve_one_iteration genv env client_provider =
    * And if the selected_client was a request, then once we discover the nature
    * of that request then ServerCommand.handle will send its own status updates too.
    *)
-  ServerProgress.send_to_monitor
-    (MonitorRpc.PROGRESS
-       (match selected_client with
-       | ClientProvider.Select_nothing ->
-         if env.ide_idle then
-           "ready"
-         else
-           "HackIDE:active"
-       | _ -> "working"));
+  ServerProgress.send_progress
+    ~include_in_logs:false
+    "%s"
+    (match selected_client with
+    | ClientProvider.Select_nothing ->
+      if env.ide_idle then
+        "ready"
+      else
+        "HackIDE:active"
+    | _ -> "working");
   let env =
     match selected_client with
     | ClientProvider.Select_nothing ->

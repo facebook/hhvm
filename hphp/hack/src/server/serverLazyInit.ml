@@ -881,7 +881,7 @@ let initialize_naming_table
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
-  ServerProgress.send_progress_to_monitor "%s" progress_message;
+  ServerProgress.send_progress "%s" progress_message;
   let (get_next, count, t) =
     match fnl with
     | Some fnl ->
@@ -1362,7 +1362,7 @@ let saved_state_init
         t
   in
 
-  ServerProgress.send_progress_to_monitor "loading saved state";
+  ServerProgress.send_progress "loading saved state";
 
   let ctx = Provider_utils.ctx_from_server_env env in
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
@@ -1407,7 +1407,7 @@ let saved_state_init
   match state_result with
   | Error err -> Error err
   | Ok state_result ->
-    ServerProgress.send_progress_to_monitor "loading saved state succeeded";
+    ServerProgress.send_progress "loading saved state succeeded";
     let (env, t) =
       post_saved_state_initialization ~state_result ~env ~genv profiling
     in

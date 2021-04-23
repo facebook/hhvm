@@ -54,7 +54,9 @@ let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) : unit =
         ()
     end
 
-let send_progress_to_monitor ?(include_in_logs = true) fmt =
+let send_warning s = send_to_monitor (MonitorRpc.PROGRESS_WARNING s)
+
+let send_progress ?(include_in_logs = true) fmt =
   let f s =
     if include_in_logs then Hh_logger.log "%s" s;
     send_to_monitor (MonitorRpc.PROGRESS s)
@@ -89,13 +91,13 @@ let make_percentage_progress_message
   | Some extra -> main_message ^ " " ^ extra
   | None -> main_message
 
-let send_percentage_progress_to_monitor
+let send_percentage_progress
     ~(operation : string)
     ~(done_count : int)
     ~(total_count : int)
     ~(unit : string)
     ~(extra : string option) : unit =
-  send_progress_to_monitor
+  send_progress
     ~include_in_logs:false
     "%s"
     (make_percentage_progress_message

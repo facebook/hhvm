@@ -39,7 +39,7 @@ let type_decl
     (env : ServerEnv.env)
     (fast : Naming_table.fast)
     (t : float) : ServerEnv.env * float =
-  ServerProgress.send_progress_to_monitor "evaluating type declarations";
+  ServerProgress.send_progress "evaluating type declarations";
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
   let errorl = Decl_service.go ~bucket_size ctx genv.workers fast in

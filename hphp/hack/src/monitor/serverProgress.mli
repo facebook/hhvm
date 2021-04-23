@@ -23,13 +23,13 @@ val read_from_server :
     annoying to thread it too *)
 val make_pipe_to_monitor : Unix.file_descr -> unit
 
-val send_to_monitor : MonitorRpc.server_to_monitor_message -> unit
+val send_warning : string option -> unit
 
 (* This is basically signature of "Printf.printf" *)
-val send_progress_to_monitor :
+val send_progress :
   ?include_in_logs:bool -> ('a, unit, string, unit) format4 -> 'a
 
-val send_percentage_progress_to_monitor :
+val send_percentage_progress :
   operation:string ->
   done_count:int ->
   total_count:int ->

@@ -188,8 +188,7 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
       stack;
     (match next_step with
     | Exit_status.No_error ->
-      ServerProgress.send_to_monitor
-        (MonitorRpc.PROGRESS_WARNING (Some user_message));
+      ServerProgress.send_warning (Some user_message);
       (* print the memory stats for saved-state init gathered before it failed *)
       CgroupProfiler.print_summary_memory_table ~event:`Init;
       let fall_back_to_full_init profiling =

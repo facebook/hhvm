@@ -1678,13 +1678,19 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         int_of_float (time -. ienv.first_start_time) |> string_of_int
     in
     (* TODO: better to report time that hh_server has spent initializing *)
-    let tracker = Connection_tracker.create () in
     let (progress, warning) =
-      match
-        ServerUtils.server_progress ~tracker ~timeout:3 (get_root_exn ())
-      with
-      | Error _ -> ("connecting", None)
-      | Ok (progress, warning) -> (progress, warning)
+      let open ServerCommandTypes in
+      match state with
+      | In_init { In_init_env.conn; _ }
+      | Main_loop { Main_env.conn; _ } ->
+        let server_progress_file =
+          conn.server_specific_files.ServerCommandTypes.server_progress_file
+        in
+        let server_progress =
+          ServerCommandTypesUtils.read_progress_file ~server_progress_file
+        in
+        (server_progress.server_progress, server_progress.server_warning)
+      | _ -> ("connecting", None)
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
     it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",

@@ -68,6 +68,18 @@ let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
 let sub_type_i x = !sub_type_i_ref x
 
+type sub_type_i_res =
+  env ->
+  internal_type ->
+  internal_type ->
+  Errors.error_from_reasons_callback ->
+  (env, env) result
+
+let (sub_type_i_res_ref : sub_type_i_res ref) =
+  ref (not_implemented "sub_type_i_res")
+
+let sub_type_i_res x = !sub_type_i_res_ref x
+
 type sub_type_with_dynamic_as_bottom =
   env -> locl_ty -> locl_ty -> Errors.error_from_reasons_callback -> env
 

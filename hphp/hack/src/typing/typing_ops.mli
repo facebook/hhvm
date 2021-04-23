@@ -16,6 +16,15 @@ val sub_type_i :
   Errors.typing_error_callback ->
   Typing_env_types.env
 
+val sub_type_i_res :
+  Pos.t ->
+  Typing_reason.ureason ->
+  Typing_env_types.env ->
+  Typing_defs.internal_type ->
+  Typing_defs.internal_type ->
+  Errors.typing_error_callback ->
+  (Typing_env_types.env, Typing_env_types.env) result
+
 val sub_type :
   Pos.t ->
   Typing_reason.ureason ->

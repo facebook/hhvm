@@ -3429,6 +3429,9 @@ let simplify_subtype_i env ty_sub ty_super ~on_error =
 (* Exporting *)
 (*****************************************************************************)
 
+let sub_type_i_res env ty1 ty2 on_error =
+  sub_type_i ~subtype_env:(make_subtype_env ~coerce:None on_error) env ty1 ty2
+
 let sub_type_i env ty1 ty2 on_error =
   sub_type_i ~subtype_env:(make_subtype_env ~coerce:None on_error) env ty1 ty2
   |> function
@@ -3473,6 +3476,7 @@ let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;
   Typing_utils.sub_type_res_ref := sub_type_res;
   Typing_utils.sub_type_i_ref := sub_type_i;
+  Typing_utils.sub_type_i_res_ref := sub_type_i_res;
   Typing_utils.sub_type_with_dynamic_as_bottom_ref :=
     sub_type_with_dynamic_as_bottom;
   Typing_utils.sub_type_with_dynamic_as_bottom_res_ref :=

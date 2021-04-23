@@ -304,7 +304,10 @@
             (Expr
                (([36:3-18], void),
                 (Call ((([36:3-11], (function(float $x, vec<int> $y, int $ys...): void)), (Id ([36:3-11], "\\unpack_b"))), 
-                   [], [], (Some (([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), (Lvar ([36:15-17], $f)))))))));
+                   [], [],
+                   (Some (([36:15-17], shape('a' => float, 'b' => int, 'c' => int)),
+                          (Hole ((([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)), ({suggest:nothing}), Typing))))
+                   )))));
            ([38:3-19],
             (Expr
                (([38:3-18], void),

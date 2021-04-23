@@ -82,6 +82,13 @@ val sub_type_i :
   Errors.error_from_reasons_callback ->
   env
 
+val sub_type_i_res :
+  env ->
+  internal_type ->
+  internal_type ->
+  Errors.error_from_reasons_callback ->
+  (env, env) result
+
 val add_constraint :
   env ->
   Ast_defs.constraint_kind ->

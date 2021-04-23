@@ -41,6 +41,12 @@ let sub_type_i
   Typing_utils.sub_type_i env ty_sub ty_super (fun ?code reasons ->
       on_error ?code (p, Reason.string_of_ureason ur) reasons)
 
+let sub_type_i_res
+    p ur env ty_sub ty_super (on_error : Errors.typing_error_callback) =
+  log_sub_type env p ty_sub ty_super;
+  Typing_utils.sub_type_i_res env ty_sub ty_super (fun ?code reasons ->
+      on_error ?code (p, Reason.string_of_ureason ur) reasons)
+
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 

@@ -7122,8 +7122,8 @@ and call
           in
           let (env, te, ty) = expr env e in
           (* Populate the type variables from the expression in the splat *)
-          let env =
-            Type.sub_type_i
+          let env_res =
+            Type.sub_type_i_res
               (fst e)
               Reason.URparam
               env
@@ -7131,44 +7131,59 @@ and call
               destructure_ty
               Errors.unify_error
           in
-          (* Use the type variables for the remaining parameters *)
-          let (env, err_opts) =
-            List.fold2_exn
-              ~init:(env, [])
-              d_required
-              required_params
-              ~f:(fun (env, errs) elt param ->
-                let (env, err_opt) =
-                  call_param env param (e, elt) ~is_variadic:false
-                in
-                (env, err_opt :: errs))
+          let (env, te) =
+            match env_res with
+            | Error env ->
+              (* Our type cannot be destructured, add a hole with `nothing`
+                 as expected type *)
+              let ty_expect =
+                MakeType.nothing
+                @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos pos)
+              in
+              (env, mk_hole te ~ty_have:ty ~ty_expect)
+            | Ok env ->
+              (* We have a type that can be destructured so continue and use
+                 the type variables for the remaining parameters *)
+              let (env, err_opts) =
+                List.fold2_exn
+                  ~init:(env, [])
+                  d_required
+                  required_params
+                  ~f:(fun (env, errs) elt param ->
+                    let (env, err_opt) =
+                      call_param env param (e, elt) ~is_variadic:false
+                    in
+                    (env, err_opt :: errs))
+              in
+              let (env, err_opts) =
+                List.fold2_exn
+                  ~init:(env, err_opts)
+                  d_optional
+                  optional_params
+                  ~f:(fun (env, errs) elt param ->
+                    let (env, err_opt) =
+                      call_param env param (e, elt) ~is_variadic:false
+                    in
+                    (env, err_opt :: errs))
+              in
+              let (env, var_err_opt) =
+                Option.map2 d_variadic var_param ~f:(fun v vp ->
+                    call_param env vp (e, v) ~is_variadic:true)
+                |> Option.value ~default:(env, None)
+              in
+              let subtyping_errs = (List.rev err_opts, var_err_opt) in
+              let te =
+                match (List.filter_map ~f:Fn.id err_opts, var_err_opt) with
+                | ([], None) -> te
+                | _ ->
+                  let ((pos, _), _) = te in
+                  hole_on_err
+                    te
+                    ~err_opt:(Some (ty, pack_errs pos ty subtyping_errs))
+              in
+              (env, te)
           in
-          let (env, err_opts) =
-            List.fold2_exn
-              ~init:(env, err_opts)
-              d_optional
-              optional_params
-              ~f:(fun (env, errs) elt param ->
-                let (env, err_opt) =
-                  call_param env param (e, elt) ~is_variadic:false
-                in
-                (env, err_opt :: errs))
-          in
-          let (env, var_err_opt) =
-            Option.map2 d_variadic var_param ~f:(fun v vp ->
-                call_param env vp (e, v) ~is_variadic:true)
-            |> Option.value ~default:(env, None)
-          in
-          let subtyping_errs = (List.rev err_opts, var_err_opt) in
-          let te =
-            match (List.filter_map ~f:Fn.id err_opts, var_err_opt) with
-            | ([], None) -> te
-            | _ ->
-              let ((pos, _), _) = te in
-              hole_on_err
-                te
-                ~err_opt:(Some (ty, pack_errs pos ty subtyping_errs))
-          in
+
           ( env,
             Some te,
             List.length el + List.length d_required,

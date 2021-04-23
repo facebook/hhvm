@@ -87,6 +87,7 @@ module Sent_fds_collector = struct
       Unix.close fd
 
   let collect_garbage () =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     if Sys_utils.is_apple_os () then
       ignore (Fd_scheduler.wait_and_run_ready (Unix.gettimeofday ()))
     else
@@ -127,8 +128,6 @@ struct
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
 
-  let fd_to_int (x : Unix.file_descr) : int = Obj.magic x
-
   let msg_to_channel fd msg =
     (* This FD will be passed to a server process, so avoid using Ocaml's
      * channels which have built-in buffering. Even though we are only writing
@@ -154,6 +153,7 @@ struct
     with _ -> Hh_logger.log "Failed to set signal handler"
 
   let sleep_and_check socket =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let (ready_socket_l, _, _) = Unix.select [socket] [] [] 1.0 in
     not (List.is_empty ready_socket_l)
 
@@ -273,6 +273,7 @@ struct
       start_new_server ?target_saved_state env exit_status
 
   let read_version fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let s : string = Marshal_tools.from_fd_with_preamble fd in
     let newline_byte = Bytes.create 1 in
     let _ = Unix.read fd newline_byte 0 1 in
@@ -360,6 +361,7 @@ struct
       server. *)
   let rec client_prehandoff
       ~tracker ~is_purgatory_client env handoff_options client_fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let module PH = Prehandoff in
     match env.server with
     | Alive server ->
@@ -384,7 +386,6 @@ struct
       in
       hand_off_client_connection_with_retries ~tracker server_fd 8 client_fd;
       log "handed off client fd to server" ~tracker;
-      HackEventLogger.client_connection_sent ();
       server.last_request_handoff := Unix.time ();
       { env with server = Alive server }
     | Died_unexpectedly (status, was_oom) ->
@@ -449,6 +450,7 @@ struct
         env
 
   let handle_monitor_rpc env client_fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let cmd : MonitorRpc.command =
       Marshal_tools.from_fd_with_preamble client_fd
     in
@@ -471,6 +473,7 @@ struct
       Exit.exit Exit_status.No_error
 
   let ack_and_handoff_client env client_fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     try
       let start_time = Unix.gettimeofday () in
       let json = read_version client_fd in
@@ -539,6 +542,7 @@ struct
     env
 
   let maybe_push_purgatory_clients env =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     match (env.server, Queue.length env.purgatory_clients) with
     | (Alive _, 0) -> env
     | (Died_config_changed, _) ->
@@ -596,6 +600,7 @@ struct
   let server_not_started env = { env with server = Not_yet_started }
 
   let update_status env monitor_config =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let (env, exit_status, server_state) = update_status_ env monitor_config in
     let informant_report = Informant.report env.informant server_state in
     let is_watchman_fresh_instance =
@@ -732,6 +737,9 @@ struct
     check_and_run_loop ~consecutive_throws env monitor_config socket
 
   and check_and_run_loop_ env monitor_config (socket : Unix.file_descr) =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
+    (* That's because HackEventLogger for the monitor is synchronous and takes 50ms/call. *)
+    (* But the monitor's non-failure inner loop must handle hundres of clients per second *)
     let lock_file = monitor_config.lock_file in
     if not (Lock.grab lock_file) then (
       Hh_logger.log "Lost lock; terminating.\n%!";
@@ -743,15 +751,13 @@ struct
     let has_client = sleep_and_check socket in
     let env = update_status env monitor_config in
     if not has_client then
+      (* Note: this call merely reads from disk; it doesn't go via the slow HackEventLogger. *)
       let () = EventLogger.recheck_disk_files () in
       env
     else
       try
         let (fd, _) = Unix.accept socket in
-        try
-          HackEventLogger.accepted_client_fd (fd_to_int fd);
-          ack_and_handoff_client env fd
-        with
+        try ack_and_handoff_client env fd with
         | Exit_status.Exit_with _ as e -> raise e
         | e ->
           let e = Exception.wrap e in

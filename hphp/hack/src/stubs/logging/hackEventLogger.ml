@@ -375,10 +375,6 @@ let accepting_on_socket_exception _ = ()
 
 let ack_and_handoff_exception _ = ()
 
-let accepted_client_fd _ = ()
-
-let client_connection_sent _ = ()
-
 let malformed_build_id _ = ()
 
 let send_fd_failure _ = ()

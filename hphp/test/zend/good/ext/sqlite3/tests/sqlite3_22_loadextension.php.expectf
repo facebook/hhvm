@@ -1,5 +1,5 @@
 
-Warning: %s/myext.txt.so: cannot open shared object file: No such file or directory in %s/sqlite3_22_loadExtension.php on line 5
+Warning: %s/myext.txt.so: cannot open shared object file: No such file or directory in %s/sqlite3_22_loadextension.php on line 5
 bool(false)
 bool(true)
 Done

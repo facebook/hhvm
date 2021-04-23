@@ -8,7 +8,7 @@ var_dump($db->exec('INSERT INTO test (time, id) VALUES(2, 1)'));
 
 echo 'Fetching number of columns' . PHP_EOL;
 $result = $db->query('SELECT id FROM test');
-try { var_dump($result->numColumns('time')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump($result->numcolumns('time')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo 'Done';
 }

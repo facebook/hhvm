@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
   $timenow = time();
 
   echo "Creating Table\n";
@@ -10,9 +10,9 @@ function main_entry(): void {
 
   echo "INSERT into table\n";
   var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . $timenow . ", 'a')"));
-  var_dump($db->lastInsertRowID());
+  var_dump($db->lastinsertrowid());
   var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . $timenow . ", 'b')"));
-  var_dump($db->lastInsertRowID());
+  var_dump($db->lastinsertrowid());
 
   echo "Closing database\n";
   var_dump($db->close());

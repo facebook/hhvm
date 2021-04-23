@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
   $timenow = time();
 
   echo "Creating Table\n";
@@ -13,8 +13,8 @@ function main_entry(): void {
   var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . $timenow . ", 'b')"));
 
   echo "SELECTING results\n";
-  var_dump($db->querySingle("SELECT id FROM test WHERE id = 'a'"));
-  var_dump($db->querySingle("SELECT id, time FROM test WHERE id = 'a'", true));
+  var_dump($db->querysingle("SELECT id FROM test WHERE id = 'a'"));
+  var_dump($db->querysingle("SELECT id, time FROM test WHERE id = 'a'", true));
 
   echo "Done";
 }

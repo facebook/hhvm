@@ -1,6 +1,6 @@
 <?hh
-
-require_once(dirname(__FILE__) . '/new_db.inc');
+<<__EntryPoint>> function test(): void {
+$db = new SQLite3(':memory:');
 
 echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
@@ -14,3 +14,4 @@ var_dump($db->exec('DROP TABLE test'));
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
+}

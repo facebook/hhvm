@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
 
   echo "Creating Table\n";
   var_dump($db->exec('CREATE TABLE foobar (id INTEGER, name STRING, city STRING)'));
@@ -25,7 +25,7 @@ function main_entry(): void {
   	$stmt = $db->prepare($query);
 
   	echo 'Param count for query ' . ($key + 1) . ":\n";
-  	var_dump($stmt->paramCount());
+  	var_dump($stmt->paramcount());
 
   	$result = $stmt->execute();
   }

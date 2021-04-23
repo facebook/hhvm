@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
   $timenow = time();
 
   echo "Creating Table\n";
@@ -14,10 +14,10 @@ function main_entry(): void {
 
   echo "SELECTING results\n";
   $result = $db->query("SELECT * FROM test ORDER BY id ASC");
-  while ($row = $result->fetchArray(SQLITE3_NUM)) {
-  	$totalColumns = $result->numColumns();
+  while ($row = $result->fetcharray(SQLITE3_NUM)) {
+  	$totalColumns = $result->numcolumns();
   	for ($i = 0; $i < $totalColumns; $i++) {
-  		echo "Name: " . $result->columnName($i) . " - Type: " . $result->columnType($i) . "\n";
+  		echo "Name: " . $result->columnname($i) . " - Type: " . $result->columntype($i) . "\n";
   	}
   }
   $result->finalize();

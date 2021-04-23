@@ -1,13 +1,14 @@
 <?hh
-
-require_once(dirname(__FILE__) . '/new_db.inc');
+<<__EntryPoint>> function test(): void {
+$db = new SQLite3(':memory:');
 
 echo "SELECTING from invalid table\n";
 $result = $db->query("SELECT * FROM non_existent_table");
 if (!$result) {
-	echo "Error Code: " . $db->lastErrorCode() . "\n";
-	echo "Error Msg: " . $db->lastErrorMsg() . "\n";
+	echo "Error Code: " . $db->lasterrorcode() . "\n";
+	echo "Error Msg: " . $db->lasterrormsg() . "\n";
 }
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
+}

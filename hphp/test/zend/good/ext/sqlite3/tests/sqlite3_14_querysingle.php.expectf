@@ -5,7 +5,7 @@ bool(true)
 bool(true)
 SELECTING results
 string(1) "a"
-darray(2) {
+dict(2) {
   ["id"]=>
   string(1) "a"
   ["time"]=>

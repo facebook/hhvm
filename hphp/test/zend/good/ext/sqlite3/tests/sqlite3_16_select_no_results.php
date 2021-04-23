@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
   $timenow = time();
 
   echo "Creating Table\n";
@@ -10,7 +10,7 @@ function main_entry(): void {
 
   echo "SELECTING results\n";
   $results = $db->query("SELECT * FROM test ORDER BY id ASC");
-  while ($result = $results->fetchArray(SQLITE3_NUM))
+  while ($result = $results->fetcharray(SQLITE3_NUM))
   {
   	var_dump($result);
   }

@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  require_once(dirname(__FILE__) . '/new_db.inc');
+  $db = new SQLite3(':memory:');
 
   $stmt = $db->prepare("SELECT 1");
 

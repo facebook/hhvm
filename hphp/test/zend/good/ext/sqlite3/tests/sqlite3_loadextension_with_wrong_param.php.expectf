@@ -1,3 +1,3 @@
 
-Warning: loadExtension() expects parameter 1 to be string, %rv?%rarray given in %s/sqlite3_loadExtension_with_wrong_param.php on line 3
+Warning: loadExtension() expects parameter 1 to be string, vec given in %s/sqlite3_loadextension_with_wrong_param.php on line 3
 Done

@@ -5,9 +5,9 @@ function aggregate_final ($var) { return $var; }
 <<__EntryPoint>> function main(): void {
 $db = new SQLite3(':memory:');
 
-$db->createAggregate ('TESTAGGREGATE', 'aggregate_test_step', 'aggregate_final');
-$db->createAggregate ('TESTAGGREGATE2', 'aggregate_step', 'aggregate_test_final');
-var_dump($db->createAggregate ('TESTAGGREGATE3', 'aggregate_step', 'aggregate_final'));
+$db->createaggregate ('TESTAGGREGATE', 'aggregate_test_step', 'aggregate_final');
+$db->createaggregate ('TESTAGGREGATE2', 'aggregate_step', 'aggregate_test_final');
+var_dump($db->createaggregate ('TESTAGGREGATE3', 'aggregate_step', 'aggregate_final'));
 
 $db->close();
 

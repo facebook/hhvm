@@ -4,13 +4,13 @@ INSERT into table
 bool(true)
 bool(true)
 SELECTING results
-darray(2) {
+dict(2) {
   [0]=>
   int(%d)
   [1]=>
   string(1) "a"
 }
-darray(2) {
+dict(2) {
   [0]=>
   int(%d)
   [1]=>

@@ -1,9 +1,9 @@
-Testing SQLite3 querySingle without parameters
+Testing SQLite3 querysingle without parameters
 
 Warning: SQLite3::querysingle() expects at least 1 parameter, 0 given in %s/sqlite3_querysingle_error.php on line 4
-Testing SQLite3 querySingle with one array parameter
+Testing SQLite3 querysingle with one array parameter
 
-Warning: querysingle() expects parameter 1 to be string, %rv?%rarray given in %s/sqlite3_querysingle_error.php on line 7
-Testing SQLite3 qeurySingle with empty string parameter
+Warning: querysingle() expects parameter 1 to be string, vec given in %s/sqlite3_querysingle_error.php on line 7
+Testing SQLite3 querysingle with empty string parameter
 bool(false)
 Done

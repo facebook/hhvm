@@ -2010,6 +2010,8 @@ function child_main(
  *   class <class_name> # matches if the named class is available
  *   method <class_name> <method name> # matches if the method is available
  *   const <constant_name> # matches if the named constant is available
+ *   # matches if any named locale is available for the named LC_* category
+ *   locale LC_<something> <locale name>[ <another locale name>]
  *
  * Several functions in this implementation return RunifResult. Valid sets of
  * keys are:
@@ -2219,6 +2221,34 @@ function runif_const_matches(
   );
 }
 
+function runif_locale_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) < 2) {
+    return shape('valid' => false, 'error' => "malformed 'locale' match");
+  }
+  $category = array_shift(inout $words);
+  if (!preg_match('/^LC_[A-Z]+$/', $category)) {
+    return shape('valid' => false, 'error' => "bad locale category '$category'");
+  }
+  $locale_args = implode(', ', array_map($word ==> "'$word'", $words));
+  $matches = runif_test_for_feature(
+    $options,
+    $test,
+    "defined('$category') && (false !== setlocale($category, $locale_args))",
+  );
+  if ($matches) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-locale',
+  );
+}
+
 function runif_should_skip_test(
   darray<string, mixed> $options,
   string $test,
@@ -2239,7 +2269,7 @@ function runif_should_skip_test(
       return shape('valid' => false, 'error' => "malformed line '$line'");
     }
     foreach ($words as $word) {
-      if (!preg_match('/^\w+$/', $word)) {
+      if (!preg_match('/^[\w.-]+$/', $word)) {
         return shape(
           'valid' => false,
           'error' => "bad word '$word' in line '$line'",
@@ -2270,6 +2300,9 @@ function runif_should_skip_test(
         break;
       case 'const':
         $result = runif_const_matches($options, $test, $words);
+        break;
+      case 'locale':
+        $result = runif_locale_matches($options, $test, $words);
         break;
       default:
         return shape('valid' => false, 'error' => "bad match type '$type'");

@@ -1,0 +1,2 @@
+function money_format
+locale LC_MONETARY en_US

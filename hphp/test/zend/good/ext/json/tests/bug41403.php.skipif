@@ -1,8 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('json')) die('skip');
-
-if (setlocale(LC_NUMERIC, "de_DE") === false) {
-    die("skip no de_DE locale");
-}
-}

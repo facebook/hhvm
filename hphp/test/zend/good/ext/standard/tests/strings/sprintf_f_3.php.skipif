@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if(false == setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8")) print "skip icelandic locale not supported";
-}

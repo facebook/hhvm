@@ -9,7 +9,7 @@
   Int 10
   BaseSC 2 1 Define Mutable
   .srcloc 15:3,15:12;
-  SetM 2 PT:"b" Mutable
+  SetM 2 PT:"b" Any
   .srcloc 15:3,15:18;
   PopC
   .srcloc 16:2,16:2;

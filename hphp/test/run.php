@@ -2928,10 +2928,10 @@ function run_test($options, $test) {
   if ($skip_reason !== null) return $skip_reason;
 
   if (!($options['no-skipif'] ?? false)) {
-    $result = skipif_should_skip_test($options, $test);
+    $result = runif_should_skip_test($options, $test);
     if (!$result['valid']) {
-      invariant($result['error'] is string, 'missing skipif error');
-      Status::writeDiff($test, $result['error']);
+      invariant($result['error'] is string, 'missing runif error');
+      Status::writeDiff($test, 'Invalid .runif file: ' . $result['error']);
       return false;
     }
     if (!$result['match']) {
@@ -2939,10 +2939,10 @@ function run_test($options, $test) {
       return $result['skip_reason'];
     }
 
-    $result = runif_should_skip_test($options, $test);
+    $result = skipif_should_skip_test($options, $test);
     if (!$result['valid']) {
-      invariant($result['error'] is string, 'missing runif error');
-      Status::writeDiff($test, 'Invalid .runif file: ' . $result['error']);
+      invariant($result['error'] is string, 'missing skipif error');
+      Status::writeDiff($test, $result['error']);
       return false;
     }
     if (!$result['match']) {

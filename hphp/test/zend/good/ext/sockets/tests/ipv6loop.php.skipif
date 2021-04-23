@@ -1,4 +1,0 @@
-<?hh
-if (!extension_loaded('sockets')) {
-  die('skip sockets extension not available.');
-}

@@ -1,0 +1,2 @@
+extension sysvsem
+extension pcntl

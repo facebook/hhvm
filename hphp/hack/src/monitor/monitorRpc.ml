@@ -26,3 +26,4 @@ type command =
 type server_to_monitor_message =
   | PROGRESS of string
   | PROGRESS_WARNING of string option
+[@@deriving eq]

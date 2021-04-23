@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type pipe_from_server = Unix.file_descr
 
 let make_pipe_from_server (fd : Unix.file_descr) : pipe_from_server = fd
@@ -15,10 +17,9 @@ let read_from_server (fd : pipe_from_server) :
     MonitorRpc.server_to_monitor_message option =
   try
     let (readable, _, _) = Unix.select [fd] [] [] 0.0 in
-    if readable = [] then
-      None
-    else
-      Some (Marshal_tools.from_fd_with_preamble fd)
+    match readable with
+    | [] -> None
+    | _ -> Some (Marshal_tools.from_fd_with_preamble fd)
   with e ->
     (* If something went wrong here, the system is likely in broken state
      * (the server died). We'll keep going so that monitor
@@ -43,7 +44,8 @@ let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) : unit =
   | Some fd ->
     begin
       match (msg, !previous_message) with
-      | (msg, Some previous_message) when msg = previous_message ->
+      | (msg, Some previous_message)
+        when MonitorRpc.equal_server_to_monitor_message msg previous_message ->
         (* Avoid sending the same message repeatedly. *)
         ()
       | _ ->
@@ -68,7 +70,7 @@ let make_percentage_progress_message
     ~(unit : string)
     ~(extra : string option) : string =
   let unit =
-    if unit = "" then
+    if String.equal unit "" then
       unit
     else
       unit ^ " "

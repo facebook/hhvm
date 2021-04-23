@@ -6,14 +6,14 @@
 use crate::Result;
 
 use ocamlrep::rc::RcOc;
-use oxidized::file_info::FileInfo;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::file_info::FileInfo;
 use rusqlite::{params, Connection};
 
 #[derive(Debug)]
-pub(crate) struct FileInfoItem {
+pub(crate) struct FileInfoItem<'a> {
     path: RcOc<RelativePath>,
-    file_info: FileInfo,
+    file_info: FileInfo<'a>,
 }
 
 pub fn create_table(connection: &Connection) -> Result<()> {

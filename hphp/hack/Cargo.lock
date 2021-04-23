@@ -3027,6 +3027,7 @@ dependencies = [
  "md-5",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
  "rusqlite",
  "typing_deps_hash",
 ]

@@ -472,12 +472,22 @@ struct
 
   let ack_and_handoff_client env client_fd =
     try
+      let start_time = Unix.gettimeofday () in
       let json = read_version client_fd in
       let client_version =
         match Hh_json_helpers.Jget.string_opt (Some json) "client_version" with
         | Some client_version -> client_version
         | None -> raise (Malformed_build_id "Missing client_version")
       in
+      let tracker_id =
+        Hh_json_helpers.Jget.string_opt (Some json) "tracker_id"
+        |> Option.value ~default:"t#?"
+      in
+      Hh_logger.log
+        "[%s] read_version: got version %s, started at %s"
+        tracker_id
+        (Hh_json.json_to_string json)
+        (start_time |> Utils.timestring);
       if
         (not env.ignore_hh_version)
         && not (String.equal client_version Build_id.build_revision)
@@ -488,6 +498,7 @@ struct
           Build_id.build_revision;
         client_out_of_date env client_fd ServerMonitorUtils.current_build_info
       ) else (
+        Hh_logger.log "[%s] sending Connection_ok..." tracker_id;
         msg_to_channel client_fd Connection_ok;
         handle_monitor_rpc env client_fd
       )

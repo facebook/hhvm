@@ -30,10 +30,16 @@ let wait_on_server_restart ic =
     (* Server has exited and hung up on us *)
     ()
 
-let send_version oc =
-  Marshal_tools.to_fd_with_preamble
-    (Unix.descr_of_out_channel oc)
-    Build_id.build_revision
+let send_version ~(tracker : Connection_tracker.t) oc =
+  let json =
+    Hh_json.JSON_Object
+      [
+        ("client_version", Hh_json.JSON_String Build_id.build_revision);
+        ("tracker_id", Hh_json.JSON_String (Connection_tracker.log_id tracker));
+      ]
+    |> Hh_json.json_to_string
+  in
+  Marshal_tools.to_fd_with_preamble (Unix.descr_of_out_channel oc) json
   |> ignore;
 
   (* For backwards-compatibility, newline has always followed the version *)
@@ -86,7 +92,7 @@ let get_cstate
       ServerMonitorUtils.connection_error )
     result =
   try
-    send_version oc;
+    send_version ~tracker oc;
     let tracker = Connection_tracker.(track tracker ~key:Client_sent_version) in
     let cstate : connection_state = from_channel_without_buffering ic in
     let tracker = Connection_tracker.(track tracker ~key:Client_got_cstate) in

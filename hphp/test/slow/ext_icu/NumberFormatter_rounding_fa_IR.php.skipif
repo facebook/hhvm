@@ -1,0 +1,5 @@
+<?hh
+<<__EntryPoint>> function skip(): void {
+  require_once('skip_unless_locale_fa_IR_present.inc');
+  skip_unless_locale_fa_IR_present();
+}

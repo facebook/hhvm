@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_number_formatter_rounding_fa_ir() {
-include (__DIR__ . '/../NumberFormatter_rounding.inc');
+include('NumberFormatter_rounding.inc');
 
 // TODO(t5921532) Add tests for ar_AE once icu has been updated to 53.1 or newer
 

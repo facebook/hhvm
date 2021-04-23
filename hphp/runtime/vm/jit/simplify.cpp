@@ -3219,6 +3219,7 @@ SSATmp* simplifyBespokeIterLastPos(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
+  auto const spec = arr->type().arrSpec();
 
   if (arr->hasConstVal()) {
     auto const pos = arr->type().arrLikeVal()->iter_end();
@@ -3229,10 +3230,14 @@ SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
     return gen(env, CountVec, arr);
   }
 
-  if (arr->isA(TDict) && arr->type().arrSpec().monotype()) {
+  if (arr->isA(TDict) && spec.monotype()) {
     auto const size = gen(env, CountDict, arr);
     auto const tombstones = gen(env, LdMonotypeDictTombstones, arr);
     return gen(env, AddInt, size, tombstones);
+  }
+
+  if (arr->isA(TDict) && spec.is_struct()) {
+    return gen(env, CountDict, arr);
   }
 
   return nullptr;

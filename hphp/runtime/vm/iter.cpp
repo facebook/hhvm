@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 
 namespace HPHP {
 
@@ -46,6 +46,8 @@ namespace {
 static_assert(sizeof(IterImpl) == 32, "");
 static_assert(sizeof(Iter) == 32, "");
 
+using bespoke::StructDict;
+
 const StaticString
   s_rewind("rewind"),
   s_valid("valid"),
@@ -53,8 +55,12 @@ const StaticString
   s_key("key"),
   s_current("current");
 
-bool isMonotypeVec(const BespokeArray* bad) {
-  return bespoke::isMonotypeVecLayout(bad->layoutIndex());
+const std::string& describe(const BespokeArray* bad) {
+  return bespoke::Layout::FromIndex(bad->layoutIndex())->describe();
+}
+
+bool isStructDict(const BespokeArray* bad) {
+  return bespoke::StructLayout::IsStructLayout(bad->layoutIndex());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -132,9 +138,9 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(arr->isVanillaDict());
     assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
-  } else if (m_nextHelperIdx == IterNextIndex::MonotypeVec) {
+  } else if (m_nextHelperIdx == IterNextIndex::StructDict) {
     assertx(!arr->isVanilla());
-    assertx(isMonotypeVec(BespokeArray::asBespoke(arr)));
+    assertx(isStructDict(BespokeArray::asBespoke(arr)));
   } else {
     // We'd like to assert the converse, too: a packed or mixed array should
     // a next helper that makes use of its layout. However, this condition
@@ -419,9 +425,8 @@ NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   return 0;
 }
 
-NEVER_INLINE int64_t iter_next_free_monotype_vec(
-    Iter* iter, bespoke::MonotypeVec* mad) {
-  bespoke::MonotypeVec::Release(mad);
+NEVER_INLINE int64_t iter_next_free_struct_dict(Iter* iter, StructDict* sad) {
+  StructDict::Release(sad);
   iter->kill();
   return 0;
 }
@@ -487,12 +492,13 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   if (BaseConst && !ad->isVanilla()) {
     auto const bad = BespokeArray::asBespoke(ad);
-    if (isMonotypeVec(bad)) {
+    TRACE(2, "%s: Got bespoke array: %s\n", __func__, describe(bad).data());
+    if (isStructDict(bad)) {
       aiter.m_pos = 0;
       aiter.m_end = size;
-      aiter.setArrayNext(IterNextIndex::MonotypeVec);
-      auto const mad = bespoke::MonotypeVec::As(ad);
-      tvDup(bespoke::MonotypeVec::GetPosVal(mad, 0), *valOut);
+      aiter.setArrayNext(IterNextIndex::StructDict);
+      auto const sad = StructDict::As(ad);
+      tvDup(StructDict::GetPosVal(sad, 0), *valOut);
       return 1;
     }
   }
@@ -565,13 +571,14 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (BaseConst && !ad->isVanilla()) {
     auto const bad = BespokeArray::asBespoke(ad);
-    if (isMonotypeVec(bad)) {
+    TRACE(2, "%s: Got bespoke array: %s\n", __func__, describe(bad).data());
+    if (isStructDict(bad)) {
       aiter.m_pos = 0;
       aiter.m_end = size;
-      aiter.setArrayNext(IterNextIndex::MonotypeVec);
-      auto const mad = bespoke::MonotypeVec::As(ad);
-      tvDup(bespoke::MonotypeVec::GetPosVal(mad, 0), *valOut);
-      tvCopy(make_tv<KindOfInt64>(0), *keyOut);
+      aiter.setArrayNext(IterNextIndex::StructDict);
+      auto const sad = StructDict::As(ad);
+      tvDup(StructDict::GetPosVal(sad, 0), *valOut);
+      tvCopy(StructDict::GetPosKey(sad, 0), *keyOut);
       return 1;
     }
   }
@@ -893,26 +900,26 @@ int64_t iter_next_mixed_impl(Iter* it, TypedValue* valOut,
   return 1;
 }
 
-// "virtual" method implementation of *IterNext* for MonotypeVec iterators.
-// See iter_next_packed_impl for docs for template args and return value.
+// "virtual" method implementation of *IterNext* for StructDict iterators.
+// See iter_next_mixed_impl for docs for template args and return value.
 template<bool HasKey, bool Local>
-int64_t iter_next_monotype_vec(Iter* it, TypedValue* valOut,
-                               TypedValue* keyOut, ArrayData* ad) {
+int64_t iter_next_struct_dict(Iter* it, TypedValue* valOut,
+                              TypedValue* keyOut, ArrayData* ad) {
   auto& iter = *unwrap(it);
-  auto const mad = bespoke::MonotypeVec::As(ad);
+  auto const sad = StructDict::As(ad);
 
   ssize_t pos = iter.getPos() + 1;
   if (UNLIKELY(pos == iter.getEnd())) {
-    if (!Local && mad->decReleaseCheck()) {
-      return iter_next_free_monotype_vec(it, mad);
+    if (!Local && sad->decReleaseCheck()) {
+      return iter_next_free_struct_dict(it, sad);
     }
     iter.kill();
     return 0;
   }
 
   iter.setPos(pos);
-  setOutputLocal(bespoke::MonotypeVec::GetPosVal(mad, pos), valOut);
-  if constexpr (HasKey) setOutputLocal(make_tv<KindOfInt64>(pos), keyOut);
+  setOutputLocal(StructDict::GetPosVal(sad, pos), valOut);
+  if constexpr (HasKey) setOutputLocal(StructDict::GetPosKey(sad, pos), keyOut);
   return 1;
 }
 
@@ -983,7 +990,7 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
 VTABLE_METHODS(ArrayPacked,        iter_next_packed_impl);
 VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
 VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
-VTABLE_METHODS(MonotypeVec,        iter_next_monotype_vec);
+VTABLE_METHODS(StructDict,         iter_next_struct_dict);
 
 #undef VTABLE_METHODS
 
@@ -998,7 +1005,7 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArray,
   &iterNextObject,
   &iterNextArrayMixedPointer,
-  &iterNextMonotypeVec,
+  &iterNextStructDict,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
@@ -1007,7 +1014,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
   &iterNextKArrayMixedPointer,
-  &iterNextKMonotypeVec,
+  &iterNextKStructDict,
 };
 
 const LIterNextHelper g_literNextHelpers[] = {
@@ -1016,7 +1023,7 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextArray,
   &literNextObject,
   &literNextArrayMixedPointer,
-  &literNextMonotypeVec,
+  &literNextStructDict,
 };
 
 const LIterNextKHelper g_literNextKHelpers[] = {
@@ -1025,7 +1032,7 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArray,
   &literNextKObject,
   &literNextKArrayMixedPointer,
-  &literNextKMonotypeVec,
+  &literNextKStructDict,
 };
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut) {

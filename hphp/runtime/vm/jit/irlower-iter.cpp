@@ -200,8 +200,11 @@ Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
 int32_t iteratorType(const IterTypeData& data) {
   auto const nextHelperIndex = [&]{
     using S = IterSpecialization;
-    // TODO(kshaunak): Add specialized native helpers for some bespoke arrays.
-    if (data.type.bespoke) return IterNextIndex::Array;
+    if (data.type.bespoke) {
+      if (!data.type.base_const) return IterNextIndex::Array;
+      if (data.layout.is_struct()) return IterNextIndex::StructDict;
+      return IterNextIndex::Array;
+    }
     switch (data.type.base_type) {
       case S::Vec: {
         return IterNextIndex::ArrayPacked;

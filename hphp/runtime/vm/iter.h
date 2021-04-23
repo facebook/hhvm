@@ -51,7 +51,7 @@ enum class IterNextIndex : uint8_t {
   ArrayMixedPointer,
 
   // Helpers specific to bespoke array-likes.
-  MonotypeVec,
+  StructDict,
 };
 
 // For iterator specialization, we pack all the information we need to generate

@@ -1,5 +1,9 @@
 <?hh
-include('skipif.inc');
-if (@iconv("ascii","UCS-4LE", "abcd") == '') {
-	die("skip conversion to UCS-4LE not supported"); 
+<<__EntryPoint>> function skip(): void {
+  include('skipif.inc');
+  skip_if_no_iconv();
+
+  if (@iconv("ascii","UCS-4LE", "abcd") == '') {
+    die("skip conversion to UCS-4LE not supported");
+  }
 }

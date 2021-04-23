@@ -1,2 +1,0 @@
-<?hh 
-include('skipif.inc');

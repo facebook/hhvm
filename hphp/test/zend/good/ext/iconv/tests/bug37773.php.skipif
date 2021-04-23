@@ -1,8 +1,11 @@
 <?hh 
-include('skipif.inc'); 
+<<__EntryPoint>> function skip(): void {
+  include('skipif.inc');
+  skip_if_no_iconv();
 
-$test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
-if ($test === false) {
-	die("skip UTF-8 is not supported?");
+  $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
+  if ($test === false) {
+    die("skip UTF-8 is not supported?");
+  }
 }
 

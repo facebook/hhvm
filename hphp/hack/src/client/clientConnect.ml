@@ -53,7 +53,7 @@ type conn = {
   t_received_hello: float;
   t_sent_connection_type: float;
   channels: Timeout.in_channel * Out_channel.t;
-  server_finale_file: string;
+  server_specific_files: ServerCommandTypes.server_specific_files;
   conn_progress_callback: (string option -> unit) option;
   conn_root: Path.t;
   conn_deadline: float option;
@@ -143,7 +143,7 @@ let rec wait_for_server_message
     ~(expected_message : 'a ServerCommandTypes.message_type option)
     ~(ic : Timeout.in_channel)
     ~(deadline : float option)
-    ~(server_finale_file : string)
+    ~(server_specific_files : ServerCommandTypes.server_specific_files)
     ~(progress_callback : (string option -> unit) option)
     ~(root : Path.t) : 'a ServerCommandTypes.message_type Lwt.t =
   check_for_deadline deadline;
@@ -161,7 +161,7 @@ let rec wait_for_server_message
       ~expected_message
       ~ic
       ~deadline
-      ~server_finale_file
+      ~server_specific_files
       ~progress_callback
       ~root
   ) else
@@ -197,14 +197,17 @@ let rec wait_for_server_message
           ~expected_message
           ~ic
           ~deadline
-          ~server_finale_file
+          ~server_specific_files
           ~progress_callback
           ~root
       )
     with
     | (End_of_file | Sys_error _) as e ->
       let e = Exception.wrap e in
-      let finale_data = get_finale_data server_finale_file in
+      let finale_data =
+        get_finale_data
+          server_specific_files.ServerCommandTypes.server_finale_file
+      in
       log
         ~connection_log_id
         "wait_for_server_message: %s\nfinale_data: %s"
@@ -220,7 +223,7 @@ let wait_for_server_hello
     (connection_log_id : string)
     (ic : Timeout.in_channel)
     (deadline : float option)
-    (server_finale_file : string)
+    (server_specific_files : ServerCommandTypes.server_specific_files)
     (progress_callback : (string option -> unit) option)
     (root : Path.t) : unit Lwt.t =
   let%lwt (_ : 'a ServerCommandTypes.message_type) =
@@ -229,7 +232,7 @@ let wait_for_server_hello
       ~expected_message:(Some ServerCommandTypes.Hello)
       ~ic
       ~deadline
-      ~server_finale_file
+      ~server_specific_files
       ~progress_callback
       ~root
   in
@@ -280,7 +283,7 @@ let rec connect
   let t_connected_to_monitor = Unix.gettimeofday () in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
-  | Ok (ic, oc, server_finale_file) ->
+  | Ok (ic, oc, server_specific_files) ->
     log
       ~connection_log_id
       "ClientConnect.connect: successfully connected to monitor.";
@@ -291,7 +294,7 @@ let rec connect
           connection_log_id
           ic
           env.deadline
-          server_finale_file
+          server_specific_files
           env.progress_callback
           env.root
       else
@@ -341,7 +344,7 @@ let rec connect
           t_sent_connection_type = 0.;
           (* placeholder, until we actually send it *)
           channels = (ic, oc);
-          server_finale_file;
+          server_specific_files;
           conn_progress_callback = env.progress_callback;
           conn_root = env.root;
           conn_deadline = env.deadline;
@@ -514,7 +517,7 @@ let rpc :
        t_received_hello;
        t_sent_connection_type;
        channels = (ic, oc);
-       server_finale_file;
+       server_specific_files;
        conn_progress_callback = progress_callback;
        conn_root;
        conn_deadline = deadline;
@@ -534,7 +537,7 @@ let rpc :
       ~expected_message:None
       ~ic
       ~deadline
-      ~server_finale_file
+      ~server_specific_files
       ~progress_callback
       ~root:conn_root
   in

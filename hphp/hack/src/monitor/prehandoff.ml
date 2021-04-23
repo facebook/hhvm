@@ -14,7 +14,7 @@ type exit_status = {
 
 type msg =
   (* Last of the prehandoff messages; includes finale_file_name of server. *)
-  | Sentinel of string
+  | Sentinel of ServerCommandTypes.server_specific_files
   (* The monitor keeps a queue of connections that will need to be passed
    * onto the next server instance. This queue has a size limit that has been
    * reached. *)

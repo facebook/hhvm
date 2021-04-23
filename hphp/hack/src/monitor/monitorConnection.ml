@@ -147,13 +147,15 @@ let verify_cstate ~tracker ic cstate =
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
     ~(timeout : Timeout.t) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
-    ( Timeout.in_channel * Stdlib.out_channel * string,
+    ( Timeout.in_channel
+      * Stdlib.out_channel
+      * ServerCommandTypes.server_specific_files,
       ServerMonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
   let m : PH.msg = from_channel_without_buffering ~timeout ic in
   match m with
-  | PH.Sentinel finale_file -> Ok (ic, oc, finale_file)
+  | PH.Sentinel server_specific_files -> Ok (ic, oc, server_specific_files)
   | PH.Server_dormant_connections_limit_reached ->
     Printf.eprintf
     @@ "Connections limit on dormant server reached."
@@ -186,7 +188,9 @@ let rec consume_prehandoff_messages
 
 let consume_prehandoff_messages
     ~(timeout : int) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
-    ( Timeout.in_channel * Stdlib.out_channel * string,
+    ( Timeout.in_channel
+      * Stdlib.out_channel
+      * ServerCommandTypes.server_specific_files,
       ServerMonitorUtils.connection_error )
     result =
   Timeout.with_timeout

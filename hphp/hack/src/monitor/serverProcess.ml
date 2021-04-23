@@ -9,7 +9,7 @@
 
 type process_data = {
   pid: int;  (** Process ID. *)
-  finale_file: string;
+  server_specific_files: ServerCommandTypes.server_specific_files;
   start_t: float;
   in_fd: Unix.file_descr;
       (** Get occasional updates about status/busyness from typechecker here. *)

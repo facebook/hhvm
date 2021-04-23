@@ -88,7 +88,7 @@ type server_message = {
 type server_conn = {
   ic: Timeout.in_channel;
   oc: Out_channel.t;
-  server_finale_file: string;
+  server_specific_files: ServerCommandTypes.server_specific_files;
   pending_messages: server_message Queue.t;
       (** ones that arrived during current rpc *)
 }
@@ -1205,12 +1205,12 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       }
     in
     try%lwt
-      let%lwt ClientConnect.{ channels = (ic, oc); server_finale_file; _ } =
+      let%lwt ClientConnect.{ channels = (ic, oc); server_specific_files; _ } =
         ClientConnect.connect env_connect
       in
       can_autostart_after_mismatch := false;
       let pending_messages = Queue.create () in
-      Lwt.return { ic; oc; pending_messages; server_finale_file }
+      Lwt.return { ic; oc; pending_messages; server_specific_files }
     with Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
       (* Raised when the server was running an old version. We'll retry once.   *)
       log "connect_client: build_id_mismatch";
@@ -4821,7 +4821,8 @@ let main (env : env) : Exit_status.t Lwt.t =
           match !state with
           | Main_loop { Main_env.conn; _ }
           | In_init { In_init_env.conn; _ } ->
-            ClientConnect.get_finale_data conn.server_finale_file
+            ClientConnect.get_finale_data
+              conn.server_specific_files.ServerCommandTypes.server_finale_file
           | _ -> None
         in
         let server_finale_stack =

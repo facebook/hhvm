@@ -14,7 +14,7 @@ val connect_once :
   timeout:int ->
   ServerMonitorUtils.monitor_config ->
   MonitorRpc.handoff_options ->
-  ( Timeout.in_channel * out_channel * string,
+  ( Timeout.in_channel * out_channel * ServerCommandTypes.server_specific_files,
     ServerMonitorUtils.connection_error )
   result
 

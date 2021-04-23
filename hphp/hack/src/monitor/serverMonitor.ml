@@ -382,7 +382,7 @@ struct
         ~tracker
         handoff_options.MonitorRpc.pipe_name
         (t_ready -. !(server.last_request_handoff));
-      msg_to_channel client_fd (PH.Sentinel server.finale_file);
+      msg_to_channel client_fd (PH.Sentinel server.server_specific_files);
       let tracker =
         Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
       in

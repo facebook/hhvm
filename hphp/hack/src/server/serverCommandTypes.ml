@@ -486,3 +486,7 @@ type 'a message_type =
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout
+
+type server_specific_files = {
+  server_finale_file: string;  (** just before exit, server will write here *)
+}

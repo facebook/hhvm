@@ -54,11 +54,46 @@ let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) : unit =
         ()
     end
 
-let send_warning s = send_to_monitor (MonitorRpc.PROGRESS_WARNING s)
+(** latest_progress is the progress message we most recently wrote to server_progress_file *)
+let latest_progress : string ref = ref "server about to start up"
+
+(** latest_warning is the warning message we most recently wrote to server_progress_file *)
+let latest_warning : string option ref = ref None
+
+let write_progress_file () =
+  let pid = Unix.getpid () in
+  let server_progress_file = ServerFiles.server_progress_file pid in
+  let server_progress =
+    ServerCommandTypes.
+      {
+        server_progress = !latest_progress;
+        server_warning = !latest_warning;
+        server_timestamp = Unix.gettimeofday ();
+      }
+  in
+  ServerCommandTypesUtils.write_progress_file
+    ~server_progress_file
+    ~server_progress;
+  ()
+
+let send_warning s =
+  begin
+    match (!latest_warning, s) with
+    | (Some latest, Some s) when String.equal latest s -> ()
+    | (None, None) -> ()
+    | (_, _) ->
+      latest_warning := s;
+      write_progress_file ()
+  end;
+  send_to_monitor (MonitorRpc.PROGRESS_WARNING s)
 
 let send_progress ?(include_in_logs = true) fmt =
   let f s =
     if include_in_logs then Hh_logger.log "%s" s;
+    if not (String.equal !latest_progress s) then begin
+      latest_progress := s;
+      write_progress_file ()
+    end;
     send_to_monitor (MonitorRpc.PROGRESS s)
   in
   Printf.ksprintf f fmt

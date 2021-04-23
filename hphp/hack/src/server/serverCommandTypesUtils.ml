@@ -1,3 +1,4 @@
+open Hh_prelude
 open ServerCommandTypes
 
 let debug_describe_t : type a. a t -> string = function
@@ -111,3 +112,51 @@ let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
   | ServerCommandTypes.LabelledFileContent { filename; content } ->
     let path = Relative_path.create_detect_prefix filename in
     (path, ServerCommandTypes.FileContent content)
+
+(** This writes to the specified progress file. In case of failure,
+it logs but is silent. That's on the principle that defects in
+progress-reporting should never break hh_server. *)
+let write_progress_file
+    ~(server_progress_file : string)
+    ~(server_progress : ServerCommandTypes.server_progress) : unit =
+  let open Hh_json in
+  let json =
+    JSON_Object
+      [
+        ( "warning",
+          Option.value_map
+            server_progress.ServerCommandTypes.server_warning
+            ~default:JSON_Null
+            ~f:string_ );
+        ("progress", string_ server_progress.ServerCommandTypes.server_progress);
+        ("timestamp", float_ server_progress.ServerCommandTypes.server_timestamp);
+      ]
+    |> json_to_multiline
+  in
+  try
+    Sys_utils.with_umask 0o000 (fun () ->
+        (* umask is so we can create with the permissions we desire *)
+        let fd =
+          Unix.openfile
+            server_progress_file
+            [Unix.O_RDWR; Unix.O_CREAT; Unix.O_TRUNC]
+            0o666
+        in
+        Utils.try_finally
+          ~f:(fun () ->
+            (* we'll block until we gain a writer-lock. This depends on readers not holding
+          it for long, in read_progress_file below. *)
+            Unix.lockf fd Unix.F_LOCK 0;
+            let _written =
+              Unix.write_substring fd json 0 (String.length json)
+            in
+            ())
+          ~finally:(fun () -> Unix.close fd))
+  with exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.error
+      "SERVER_PROGRESS_EXCEPTION(write) %s\n%s"
+      (Exception.get_ctor_string e)
+      (Exception.get_backtrace_string e |> Exception.clean_stack);
+    HackEventLogger.server_progress_write_exn ~server_progress_file e;
+    ()

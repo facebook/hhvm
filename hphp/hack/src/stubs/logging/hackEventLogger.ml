@@ -409,6 +409,10 @@ let search_symbol_index
 
 let shallow_decl_errors_emitted _ = ()
 
+let server_progress_write_exn ~server_progress_file:_ _ = ()
+
+let server_progress_read_exn ~server_progress_file:_ _ = ()
+
 module ProfileTypeCheck = struct
   let process_file ~recheck_id:_ ~path:_ ~telemetry:_ = ()
 

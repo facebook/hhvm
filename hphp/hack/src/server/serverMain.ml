@@ -1316,6 +1316,14 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let server_finale_file = ServerFiles.server_finale_file pid in
   let server_progress_file = ServerFiles.server_progress_file pid in
   Exit.prepare_server_specific_files ~server_finale_file ~server_progress_file;
+  ServerCommandTypesUtils.write_progress_file
+    ~server_progress_file
+    ~server_progress:
+      {
+        ServerCommandTypes.server_warning = None;
+        server_progress = "starting up";
+        server_timestamp = Unix.gettimeofday ();
+      };
   Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in

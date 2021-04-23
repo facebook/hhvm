@@ -13,20 +13,20 @@ Ancestor Linearization \Bar:
 Member Linearization \I:
   I (PAT)
 Ancestor Linearization \I:
-  I
+  I (PAT)
 
 Member Linearization \I2:
   I2 (PAT)
   I (PAT)
 Ancestor Linearization \I2:
-  I2
-  I
+  I2 (PAT)
+  I (PAT)
 
 Member Linearization \I3:
   I3 (PAT)
   I (PAT)
   I2 (PAT)
 Ancestor Linearization \I3:
-  I3
-  I
-  I2
+  I3 (PAT)
+  I (PAT)
+  I2 (PAT)

@@ -1,21 +1,21 @@
 Member Linearization \I:
   I (PAT)
 Ancestor Linearization \I:
-  I
+  I (PAT)
 
 Member Linearization \A:
   A
   I<T> (consts_only)
 Ancestor Linearization \A:
   A
-  I
+  I<T> (consts_only)
 
 Member Linearization \T:
   T (copy_private_members, PAT)
   A<mixed> (requirement)
   I<mixed> (synthesized, consts_only)
 Ancestor Linearization \T:
-  T
+  T (copy_private_members, PAT)
 
 Member Linearization \B:
   B
@@ -25,9 +25,9 @@ Member Linearization \B:
   A<mixed> (requirement)
 Ancestor Linearization \B:
   B
-  A
-  I
-  T
+  A<int>
+  I<int> (consts_only)
+  T (copy_private_members)
 
 Member Linearization \C:
   C
@@ -38,6 +38,6 @@ Member Linearization \C:
 Ancestor Linearization \C:
   C
   B
-  A
-  I
+  A<int>
+  I<int> (consts_only)
   T

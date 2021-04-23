@@ -1,21 +1,21 @@
 Member Linearization \A:
   A (PAT)
 Ancestor Linearization \A:
-  A
+  A (PAT)
 
 Member Linearization \B:
   B (PAT)
   A<bool, T1> (PAT)
 Ancestor Linearization \B:
-  B
-  A
+  B (PAT)
+  A<bool, T1> (PAT)
 
 Member Linearization \C:
   C (PAT)
   A<string, T1> (PAT)
 Ancestor Linearization \C:
-  C
-  A
+  C (PAT)
+  A<string, T1> (PAT)
 
 Member Linearization \D:
   D (PAT)
@@ -24,7 +24,7 @@ Member Linearization \D:
   C<int> (PAT)
   A<string, int> (PAT)
 Ancestor Linearization \D:
-  D
-  B
-  A
-  C
+  D (PAT)
+  B<float> (PAT)
+  A<bool, float> (PAT)
+  C<int> (PAT)

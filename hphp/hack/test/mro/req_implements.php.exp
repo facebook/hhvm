@@ -11,12 +11,12 @@ Ancestor Linearization \B:
 Member Linearization \IA:
   IA (PAT)
 Ancestor Linearization \IA:
-  IA
+  IA (PAT)
 
 Member Linearization \IB:
   IB (PAT)
 Ancestor Linearization \IB:
-  IB
+  IB (PAT)
 
 Member Linearization \X:
   X (copy_private_members, PAT)
@@ -25,7 +25,7 @@ Member Linearization \X:
   IB (PAT)
   IA (PAT)
 Ancestor Linearization \X:
-  X
+  X (copy_private_members, PAT)
 
 Member Linearization \Y:
   Y (copy_private_members, PAT)
@@ -36,6 +36,6 @@ Member Linearization \Y:
   IB (PAT)
   IA (PAT)
 Ancestor Linearization \Y:
-  Y
-  IA
-  X
+  Y (copy_private_members, PAT)
+  IA (consts_only, PAT)
+  X (copy_private_members, PAT)

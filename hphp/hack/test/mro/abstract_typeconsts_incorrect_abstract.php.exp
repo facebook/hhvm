@@ -1,7 +1,7 @@
 Member Linearization \A:
   A (PAT)
 Ancestor Linearization \A:
-  A
+  A (PAT)
 
 Member Linearization \B:
   B
@@ -15,7 +15,7 @@ Member Linearization \C:
   B
   A
 Ancestor Linearization \C:
-  C
+  C (PAT)
   B
   A
 

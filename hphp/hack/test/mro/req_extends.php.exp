@@ -1,7 +1,7 @@
 Member Linearization \I:
   I (PAT)
 Ancestor Linearization \I:
-  I
+  I (PAT)
 
 Member Linearization \C:
   C
@@ -14,12 +14,12 @@ Member Linearization \T:
   I (PAT)
   C (requirement)
 Ancestor Linearization \T:
-  T
+  T (copy_private_members, PAT)
 
 Member Linearization \T2:
   T2 (copy_private_members, PAT)
 Ancestor Linearization \T2:
-  T2
+  T2 (copy_private_members, PAT)
 
 Member Linearization \D:
   D
@@ -32,5 +32,5 @@ Member Linearization \D:
 Ancestor Linearization \D:
   D
   C
-  I
-  T
+  I (consts_only)
+  T (copy_private_members)

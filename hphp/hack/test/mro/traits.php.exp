@@ -1,17 +1,17 @@
 Member Linearization \T1:
   T1 (copy_private_members, PAT)
 Ancestor Linearization \T1:
-  T1
+  T1 (copy_private_members, PAT)
 
 Member Linearization \T2:
   T2 (copy_private_members, PAT)
 Ancestor Linearization \T2:
-  T2
+  T2 (copy_private_members, PAT)
 
 Member Linearization \T3:
   T3 (copy_private_members, PAT)
 Ancestor Linearization \T3:
-  T3
+  T3 (copy_private_members, PAT)
 
 Member Linearization \C:
   C
@@ -20,18 +20,18 @@ Member Linearization \C:
   T1 (copy_private_members)
 Ancestor Linearization \C:
   C
-  T1
-  T2
-  T3
+  T1 (copy_private_members)
+  T2 (copy_private_members)
+  T3 (copy_private_members)
 
 Member Linearization \T:
   T (copy_private_members, PAT)
   T3 (copy_private_members, PAT)
   T2 (copy_private_members, PAT)
 Ancestor Linearization \T:
-  T
-  T2
-  T3
+  T (copy_private_members, PAT)
+  T2 (copy_private_members, PAT)
+  T3 (copy_private_members, PAT)
 
 Member Linearization \D:
   D
@@ -41,10 +41,10 @@ Member Linearization \D:
   T2 (copy_private_members)
 Ancestor Linearization \D:
   D
-  T
-  T2
-  T3
-  T3
+  T (copy_private_members)
+  T2 (copy_private_members)
+  T3 (copy_private_members)
+  T3 (copy_private_members, trait reuse via \T3)
 
 Member Linearization \E:
   E
@@ -74,25 +74,25 @@ Ancestor Linearization \F:
   T1
   T2
   T3
-  T3
+  T3 (copy_private_members, trait reuse via \T3)
 
 Member Linearization \I:
   I (PAT)
 Ancestor Linearization \I:
-  I
+  I (PAT)
 
 Member Linearization \I2:
   I2 (PAT)
 Ancestor Linearization \I2:
-  I2
+  I2 (PAT)
 
 Member Linearization \Timplements:
   Timplements (copy_private_members, PAT)
   I (consts_only, PAT)
   I (PAT)
 Ancestor Linearization \Timplements:
-  Timplements
-  I
+  Timplements (copy_private_members, PAT)
+  I (consts_only, PAT)
 
 Member Linearization \A:
   A
@@ -102,6 +102,6 @@ Member Linearization \A:
   I
 Ancestor Linearization \A:
   A
-  I2
-  Timplements
-  I
+  I2 (consts_only)
+  Timplements (copy_private_members)
+  I (consts_only)

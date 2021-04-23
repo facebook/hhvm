@@ -1978,76 +1978,71 @@ let handle_mode
             let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =
               Decl_linearize.get_linearizations ctx classname
             in
-            let member_linearization =
-              Sequence.map lin_members (fun mro ->
-                  let name = Utils.strip_ns mro.Decl_defs.mro_name in
-                  let env =
-                    Typing_env.empty ctx Relative_path.default ~droot:None
-                  in
-                  let targs =
-                    List.map
-                      mro.Decl_defs.mro_type_args
-                      (Typing_print.full_strip_ns_decl env)
-                  in
-                  let targs =
-                    if List.is_empty targs then
-                      ""
+            let display mro =
+              let name = Utils.strip_ns mro.Decl_defs.mro_name in
+              let env =
+                Typing_env.empty ctx Relative_path.default ~droot:None
+              in
+              let targs =
+                List.map
+                  mro.Decl_defs.mro_type_args
+                  (Typing_print.full_strip_ns_decl env)
+              in
+              let targs =
+                if List.is_empty targs then
+                  ""
+                else
+                  "<" ^ String.concat ~sep:", " targs ^ ">"
+              in
+              Decl_defs.(
+                let modifiers =
+                  [
+                    ( if Option.is_some mro.mro_required_at then
+                      Some "requirement"
+                    else if
+                    is_set mro_via_req_extends mro.mro_flags
+                    || is_set mro_via_req_impl mro.mro_flags
+                  then
+                      Some "synthesized"
                     else
-                      "<" ^ String.concat ~sep:", " targs ^ ">"
-                  in
-                  Decl_defs.(
-                    let modifiers =
-                      [
-                        ( if Option.is_some mro.mro_required_at then
-                          Some "requirement"
-                        else if
-                        is_set mro_via_req_extends mro.mro_flags
-                        || is_set mro_via_req_impl mro.mro_flags
-                      then
-                          Some "synthesized"
-                        else
-                          None );
-                        ( if is_set mro_xhp_attrs_only mro.mro_flags then
-                          Some "xhp_attrs_only"
-                        else
-                          None );
-                        ( if is_set mro_consts_only mro.mro_flags then
-                          Some "consts_only"
-                        else
-                          None );
-                        ( if is_set mro_copy_private_members mro.mro_flags then
-                          Some "copy_private_members"
-                        else
-                          None );
-                        ( if
-                          is_set
-                            mro_passthrough_abstract_typeconst
-                            mro.mro_flags
-                        then
-                          Some "PAT"
-                        else
-                          None );
-                        Option.map mro.mro_trait_reuse ~f:(fun c ->
-                            "trait reuse via " ^ c);
-                      ]
-                      |> List.filter_map ~f:(fun x -> x)
-                      |> String.concat ~sep:", "
-                    in
-                    Printf.sprintf
-                      "%s%s%s"
-                      name
-                      targs
-                      ( if String.equal modifiers "" then
-                        ""
-                      else
-                        Printf.sprintf " (%s)" modifiers )))
-              |> Sequence.to_list
+                      None );
+                    ( if is_set mro_xhp_attrs_only mro.mro_flags then
+                      Some "xhp_attrs_only"
+                    else
+                      None );
+                    ( if is_set mro_consts_only mro.mro_flags then
+                      Some "consts_only"
+                    else
+                      None );
+                    ( if is_set mro_copy_private_members mro.mro_flags then
+                      Some "copy_private_members"
+                    else
+                      None );
+                    ( if is_set mro_passthrough_abstract_typeconst mro.mro_flags
+                    then
+                      Some "PAT"
+                    else
+                      None );
+                    Option.map mro.mro_trait_reuse ~f:(fun c ->
+                        "trait reuse via " ^ c);
+                  ]
+                  |> List.filter_map ~f:(fun x -> x)
+                  |> String.concat ~sep:", "
+                in
+                Printf.sprintf
+                  "%s%s%s"
+                  name
+                  targs
+                  ( if String.equal modifiers "" then
+                    ""
+                  else
+                    Printf.sprintf " (%s)" modifiers ))
+            in
+            let member_linearization =
+              Sequence.map lin_members display |> Sequence.to_list
             in
             let ancestor_linearization =
-              Sequence.map lin_ancestors (fun mro ->
-                  let name = Utils.strip_ns mro.Decl_defs.mro_name in
-                  Printf.sprintf "%s" name)
-              |> Sequence.to_list
+              Sequence.map lin_ancestors display |> Sequence.to_list
             in
             Printf.printf "Member Linearization %s:\n" classname;
             List.iter member_linearization ~f:(Printf.printf "  %s\n");

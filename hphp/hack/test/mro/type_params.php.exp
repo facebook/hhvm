@@ -1,14 +1,14 @@
 Member Linearization \Ico:
   Ico (PAT)
 Ancestor Linearization \Ico:
-  Ico
+  Ico (PAT)
 
 Member Linearization \I2:
   I2 (PAT)
   Ico<mixed> (PAT)
 Ancestor Linearization \I2:
-  I2
-  Ico
+  I2 (PAT)
+  Ico<mixed> (PAT)
 
 Member Linearization \I3:
   I3 (PAT)
@@ -16,9 +16,9 @@ Member Linearization \I3:
   Ico<mixed> (PAT)
   Ico<num> (PAT)
 Ancestor Linearization \I3:
-  I3
-  I2
-  Ico
+  I3 (PAT)
+  I2 (PAT)
+  Ico<mixed> (PAT)
 
 Member Linearization \I4:
   I4 (PAT)
@@ -28,7 +28,7 @@ Member Linearization \I4:
   Ico<num> (PAT)
   Ico<int> (PAT)
 Ancestor Linearization \I4:
-  I4
-  I3
-  I2
-  Ico
+  I4 (PAT)
+  I3 (PAT)
+  I2 (PAT)
+  Ico<mixed> (PAT)

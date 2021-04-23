@@ -4,32 +4,32 @@
 5
 6
 2
-Array
+Dict
 (
     [name] => UTF-8
     [title] => UTF-8 (Unicode)
 )
-Array
+Dict
 (
     [name] => ISO8859-6
     [title] => ISO8859-6 (Arabic)
 )
-Array
+Dict
 (
     [name] => ISO8859-8
     [title] => ISO8859-8 (Hebrew)
 )
-Array
+Dict
 (
     [name] => CP1255
     [title] => CP1255 (MS Hebrew/Yiddish)
 )
-Array
+Dict
 (
     [name] => CP1256
     [title] => CP1256 (MS Arabic)
 )
-Array
+Dict
 (
     [name] => CapRTL
     [title] => CapRTL (Test)
@@ -47,7 +47,7 @@ CapRTL's character types:
   * 0x08 ^H ON    * 0x09 ^I ON    * 0x0a ^J ON    * 0x0b ^K ON  
   * 0x0c ^L ON    * 0x0d ^M BS    * 0x0e ^N RLO   * 0x0f ^O RLE 
   * 0x10 ^P LRO   * 0x11 ^Q LRE   * 0x12 ^R PDF   * 0x13 ^S WS  
-  * 0x14 ^T ON    * 0x15 ^U ON    * 0x16 ^V ON    * 0x17 ^W ON  
+  * 0x14 ^T LRI   * 0x15 ^U RLI   * 0x16 ^V FSI   * 0x17 ^W PDI 
   * 0x18 ^X ON    * 0x19 ^Y ON    * 0x1a ^Z ON    * 0x1b ^[ ON  
   * 0x1c ^\ ON    * 0x1d ^] ON    * 0x1e ^^ ON    * 0x1f ^_ ON  
   * 0x20    WS    * 0x21  ! ON    * 0x22  " ON    * 0x23  # ON  
@@ -84,6 +84,10 @@ Escape sequences:
     * _L  LRO
     * _R  RLO
     * _o  PDF
+    * _i  LRI
+    * _y  RLI
+    * _f  FSI
+    * _I  PDI
     * __  `_' itself
 
 

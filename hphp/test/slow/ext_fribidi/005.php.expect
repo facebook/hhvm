@@ -1,36 +1,21 @@
-array(5) {
-  [0]=>
+vec(5) {
   string(7) "def CBA"
-  [1]=>
   string(7) "CBA def"
-  [2]=>
   string(7) "def CBA"
-  [3]=>
   string(7) "def CBA"
-  [4]=>
   string(7) "def CBA"
 }
-array(5) {
-  [0]=>
+vec(5) {
   string(7) "abc FED"
-  [1]=>
   string(7) "abc FED"
-  [2]=>
   string(7) "FED abc"
-  [3]=>
   string(7) "abc FED"
-  [4]=>
   string(7) "abc FED"
 }
-array(5) {
-  [0]=>
+vec(5) {
   string(7) "123 456"
-  [1]=>
   string(7) "123 456"
-  [2]=>
   string(7) "456 123"
-  [3]=>
   string(7) "123 456"
-  [4]=>
   string(7) "456 123"
 }

@@ -12,7 +12,7 @@
  (name server_symbol_info_service_utils)
  (wrapped false)
  (modules symbolInfoServiceUtils)
- (libraries 
+ (libraries
   ast_provider
   naming
   server_command_types
@@ -26,7 +26,7 @@
  (name server_codemod_type_printer)
  (wrapped false)
  (modules codemodTypePrinter)
- (libraries 
+ (libraries
     typing_defs
     tast
     utils_core
@@ -37,7 +37,7 @@
  (name server_global_inference)
  (wrapped false)
  (modules serverGlobalInference)
- (libraries 
+ (libraries
    full_fidelity
    server_codemod_type_printer
    tast
@@ -193,10 +193,22 @@
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name server_files)
+  (wrapped false)
+  (modules
+    serverFiles)
+  (libraries
+    core_kernel
+    hhi
+    global_config
+    sys_utils
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name server_utils)
   (wrapped false)
   (modules
-    serverFiles
     serverUtils)
   (libraries
     core_kernel
@@ -204,10 +216,10 @@
     decl
     decl_class
     hhi
-    global_config
     procs_bucket
     procs_procs
     relative_path
+    server_files
     server_monitor
     sys_utils
     utils_core
@@ -365,7 +377,7 @@
   (wrapped false)
   (modules serverSearch)
   (preprocess (pps lwt_ppx ppx_deriving.std))
-  (libraries  
+  (libraries
     server_autocomplete_services
     search
     search_utils

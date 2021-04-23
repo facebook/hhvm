@@ -11,6 +11,7 @@
     messages
     relative_path
     server_command_types
+    server_files
     socket
     sys_utils
     utils_config_file

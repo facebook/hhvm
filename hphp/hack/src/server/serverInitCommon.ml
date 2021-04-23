@@ -26,7 +26,7 @@ let indexing ?hhi_filter (genv : ServerEnv.genv) :
   ServerProgress.send_progress "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
-    ServerFiles.make_next
+    ServerUtils.make_next
       ?hhi_filter
       ~indexer:(genv.indexer FindUtils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)

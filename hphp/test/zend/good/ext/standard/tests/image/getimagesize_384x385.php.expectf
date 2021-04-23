@@ -1,6 +1,6 @@
-darray(1) {
+dict(1) {
   ["384x385.png"]=>
-  darray(6) {
+  dict(6) {
     [0]=>
     int(384)
     [1]=>

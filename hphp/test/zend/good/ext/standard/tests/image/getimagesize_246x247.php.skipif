@@ -1,2 +1,0 @@
-<?hh
-	require_once('skipif_imagetype.inc');

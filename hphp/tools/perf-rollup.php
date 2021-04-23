@@ -95,6 +95,8 @@ function get_categories() {
       '/^HPHP::f_(.?.?sort|array)/',
       '/NameValueTable/',
       '/jit::dict/',
+      '/MInstrHelpers::dict/',
+      '/MInstrHelpers::keyset/',
     },
     'Objects' => Vector {
       '/::ObjectData::/',
@@ -111,6 +113,9 @@ function get_categories() {
       '/^HPHP::f_(explode|str|mb_strtolower|substr|preg_)/',
       '/^HPHP::conv_10/',
     },
+    'Memoization' => Vector {
+      '/^HPHP::memoCache/',
+    },
     'OBC' => Vector {
       '/::ObcStore::/',
       '/^HPHP::f_obc_/',
@@ -119,6 +124,7 @@ function get_categories() {
       '/^HPHP::f_/',
       '/^HPHP::thrift::f_/',
       '/^HPHP::math_mt_rand/',
+      '/^HPHP::\(anonymous namespace\)::f_/',
     },
     'Collections' => Vector {
       '/deepInitHelper/',

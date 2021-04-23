@@ -49,6 +49,9 @@ let monitor_log_link root = path_of_root root "monitor_log"
 let server_finale_file (pid : int) : string =
   Filename.concat GlobalConfig.tmp_dir (spf "%d.fin" pid)
 
+let server_progress_file (pid : int) : string =
+  Filename.concat GlobalConfig.tmp_dir (spf "progress.%d.json" pid)
+
 (* Return all the files that we need to typecheck *)
 let make_next
     ?(hhi_filter = FindUtils.is_hack)

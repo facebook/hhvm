@@ -94,7 +94,11 @@ let make_test test =
       let fake_process_data =
         {
           ServerProcess.pid = 0;
-          server_specific_files = { ServerCommandTypes.server_finale_file = "" };
+          server_specific_files =
+            {
+              ServerCommandTypes.server_finale_file = "";
+              server_progress_file = "";
+            };
           start_t = 0.0;
           in_fd = null_fd;
           out_fds = [];

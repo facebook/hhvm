@@ -25,4 +25,5 @@ val show_finale_data : finale_data -> string
 
 val exit : ?msg:string -> ?stack:string -> Exit_status.t -> 'a
 
-val set_finale_file_for_eventual_exit : string -> unit
+val prepare_server_specific_files :
+  server_finale_file:string -> server_progress_file:string -> unit

@@ -489,4 +489,5 @@ exception Read_command_timeout
 
 type server_specific_files = {
   server_finale_file: string;  (** just before exit, server will write here *)
+  server_progress_file: string;  (** server will write progress to this file *)
 }

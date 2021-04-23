@@ -22,35 +22,38 @@ let show_finale_data (data : finale_data) : string =
     (Option.value data.msg ~default:"")
     (Exception.clean_stack stack)
 
-let finale_file_for_eventual_exit : string option ref = ref None
+let server_specific_files : (string * string) option ref = ref None
 
-let set_finale_file_for_eventual_exit (finale_file : string) : unit =
-  begin
-    try Unix.unlink finale_file with _ -> ()
-  end;
-  finale_file_for_eventual_exit := Some finale_file
+let prepare_server_specific_files ~server_finale_file ~server_progress_file :
+    unit =
+  server_specific_files := Some (server_finale_file, server_progress_file);
+  (try Unix.unlink server_finale_file with _ -> ());
+  (try Unix.unlink server_progress_file with _ -> ());
+  ()
 
 let exit
     ?(msg : string option)
     ?(stack : string option)
     (exit_status : Exit_status.t) : 'a =
   let exit_code = Exit_status.exit_code exit_status in
-  match !finale_file_for_eventual_exit with
+  match !server_specific_files with
   | None -> Stdlib.exit exit_code
-  | Some finale_file ->
+  | Some (server_finale_file, server_progress_file) ->
+    (try Unix.unlink server_progress_file with _ -> ());
     let stack =
       Option.value
         ~default:
           (Exception.get_current_callstack_string 99 |> Exception.clean_stack)
         stack
     in
-    let finale_data = { exit_status; msg; stack = Utils.Callstack stack } in
-    let finale_file = finale_file in
+    let server_finale_data =
+      { exit_status; msg; stack = Utils.Callstack stack }
+    in
     begin
       try
         Sys_utils.with_umask 0o000 (fun () ->
-            let oc = Stdlib.open_out_bin finale_file in
-            Marshal.to_channel oc finale_data [];
+            let oc = Stdlib.open_out_bin server_finale_file in
+            Marshal.to_channel oc server_finale_data [];
             Stdlib.close_out oc)
       with _ -> ()
     end;

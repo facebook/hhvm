@@ -88,6 +88,7 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
           {
             ServerCommandTypes.server_finale_file =
               ServerFiles.server_finale_file pid;
+            server_progress_file = ServerFiles.server_progress_file pid;
           };
         in_fd = Daemon.descr_of_in_channel ic;
         out_fds =

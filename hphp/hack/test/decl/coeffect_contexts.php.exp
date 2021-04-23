@@ -1,0 +1,125 @@
+[("\\C",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
+       sc_name = ([3:16-17], "\\C"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts =
+       [{ Shallow_decl_defs.stc_abstract =
+          (Typing_defs.TCAbstract
+             (Some (Rhint ([4:27-29]), (Tintersection []))));
+          stc_as_constraint = None; stc_super_constraint = None;
+          stc_name = ([4:22-24], "C0"); stc_type = None;
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+         { Shallow_decl_defs.stc_abstract =
+           (Typing_defs.TCAbstract
+              (Some (Rhint ([5:27-45]),
+                     (Tintersection
+                        [(Rhint ([5:28-44]),
+                          (Tapply (
+                             ([5:28-44], "\\HH\\Contexts\\policied_shallow"),
+                             [])))
+                          ]))));
+           stc_as_constraint = None; stc_super_constraint = None;
+           stc_name = ([5:22-24], "C1"); stc_type = None;
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+         { Shallow_decl_defs.stc_abstract =
+           (Typing_defs.TCAbstract
+              (Some (Rhint ([6:27-57]),
+                     (Tintersection
+                        [(Rhint ([6:28-44]),
+                          (Tapply (
+                             ([6:28-44], "\\HH\\Contexts\\policied_shallow"),
+                             [])));
+                          (Rhint ([6:46-56]),
+                           (Tapply (
+                              ([6:46-56], "\\HH\\Contexts\\rx_shallow"), 
+                              [])))
+                          ]))));
+           stc_as_constraint = None; stc_super_constraint = None;
+           stc_name = ([6:22-24], "C2"); stc_type = None;
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+         ];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
+       sc_methods =
+       [{ Shallow_decl_defs.sm_name = ([8:28-30], "f0");
+          sm_type =
+          (Rwitness_from_decl ([8:28-30]),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (CapTy (Rhint ([8:32-34]), (Tintersection []))) };
+                ft_ret =
+                { et_enforced = Typing_defs_core.Unenforced;
+                  et_type = (Rhint ([8:36-40]), (Tprim Tvoid)) };
+                ft_flags =
+                (make_ft_flags FSync ~return_disposable:false
+                  ~returns_readonly:false ~readonly_this:false);
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
+          sm_visibility = Public; sm_deprecated = None; sm_flags = abstract };
+         { Shallow_decl_defs.sm_name = ([9:28-30], "f1");
+           sm_type =
+           (Rwitness_from_decl ([9:28-30]),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability =
+                   (CapTy (Rhint ([9:32-50]),
+                           (Tintersection
+                              [(Rhint ([9:33-49]),
+                                (Tapply (
+                                   ([9:33-49],
+                                    "\\HH\\Contexts\\policied_shallow"),
+                                   [])))
+                                ])))
+                   };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([9:52-56]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~readonly_this:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
+           };
+         { Shallow_decl_defs.sm_name = ([10:28-30], "f2");
+           sm_type =
+           (Rwitness_from_decl ([10:28-30]),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability =
+                   (CapTy (Rhint ([10:32-62]),
+                           (Tintersection
+                              [(Rhint ([10:33-49]),
+                                (Tapply (
+                                   ([10:33-49],
+                                    "\\HH\\Contexts\\policied_shallow"),
+                                   [])));
+                                (Rhint ([10:51-61]),
+                                 (Tapply (
+                                    ([10:51-61], "\\HH\\Contexts\\rx_shallow"),
+                                    [])))
+                                ])))
+                   };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([10:65-69]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~readonly_this:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
+           }
+         ];
+       sc_user_attributes = []; sc_enum_type = None }))
+  ]
+
+They matched!

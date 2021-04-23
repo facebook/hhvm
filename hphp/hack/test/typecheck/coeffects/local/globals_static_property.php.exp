@@ -12,7 +12,7 @@ Static property access requires the capability AccessStaticVariable, which is no
   Hack provides a list of supported contexts here
 File "globals_static_property.php", line 21, characters 13-14:
 Static property access requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "globals_static_property.php", line 19, characters 21-31:
+  File "globals_static_property.php", line 19, characters 20-32:
   The local (enclosing) context provides the capability WriteProperty
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

@@ -100,6 +100,9 @@ let class_const env (cc : Nast.class_const) =
     }
 
 let typeconst env c tc =
+  (* We keep contexts as intersection and do not simplify empty or singleton
+   * ones.
+   *)
   match c.c_kind with
   | Ast_defs.Cenum -> None
   | Ast_defs.Ctrait

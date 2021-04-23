@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,216 +1,216 @@
+@@ -1,219 +1,219 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -36,10 +36,13 @@
                    ];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([4:36-47]),
-                           (Tapply (
-                              ([4:36-47], "\\HH\\Contexts\\write_props"), 
-                              []))))
+                   (CapTy (Rhint ([4:35-48]),
+                           (Tintersection
+                              [(Rhint ([4:36-47]),
+                                (Tapply (
+                                   ([4:36-47], "\\HH\\Contexts\\write_props"),
+                                   [])))
+                                ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;

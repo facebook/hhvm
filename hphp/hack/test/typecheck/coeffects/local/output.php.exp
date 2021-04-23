@@ -12,7 +12,7 @@ File "output.php", line 10, characters 3-6:
   Hack provides a list of supported contexts here
 File "output.php", line 14, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
-  File "output.php", line 13, characters 24-34:
+  File "output.php", line 13, characters 23-35:
   The local (enclosing) context provides the capability WriteProperty
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

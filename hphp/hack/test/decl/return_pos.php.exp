@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,141 +1,141 @@
+@@ -1,142 +1,142 @@
  [("\\DeclPos",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -25,9 +25,7 @@
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([4:30-32]),
-                           (Toption (Rhint ([4:30-32]), Tnonnull))))
-                   };
+                   (CapTy (Rhint ([4:30-32]), (Tintersection []))) };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
@@ -128,10 +126,13 @@
                   ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability =
-                    (CapTy (Rhint ([9:31-41]),
-                            (Tapply (
-                               ([9:31-41], "\\HH\\Contexts\\rx_shallow"), 
-                               []))))
+                    (CapTy (Rhint ([9:30-42]),
+                            (Tintersection
+                               [(Rhint ([9:31-41]),
+                                 (Tapply (
+                                    ([9:31-41], "\\HH\\Contexts\\rx_shallow"),
+                                    [])))
+                                 ])))
                     };
                   ft_ret =
                   { et_enforced = Typing_defs_core.Unenforced;

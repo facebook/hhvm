@@ -1,46 +1,46 @@
 File "cipp.php", line 6, characters 3-24:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyShallow, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 7, characters 3-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
-  File "cipp.php", line 23, characters 31-44:
+  File "cipp.php", line 23, characters 30-45:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 8, characters 3-19:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 9, characters 3-27:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
-  File "cipp.php", line 42, characters 36-57:
+  File "cipp.php", line 42, characters 35-58:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfShallow<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 10, characters 3-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
-  File "cipp.php", line 51, characters 34-53:
+  File "cipp.php", line 51, characters 33-54:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfLocal<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 11, characters 3-12:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-32:
+  File "cipp.php", line 5, characters 24-33:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicy, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
@@ -48,31 +48,31 @@ This call is not allowed because its coeffects are incompatible with the context
   Hack provides a list of supported contexts here
 File "cipp.php", line 17, characters 3-19:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 18, characters 3-27:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
-  File "cipp.php", line 42, characters 36-57:
+  File "cipp.php", line 42, characters 35-58:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfShallow<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 19, characters 3-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
-  File "cipp.php", line 51, characters 34-53:
+  File "cipp.php", line 51, characters 33-54:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfLocal<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 20, characters 3-12:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
@@ -80,39 +80,39 @@ This call is not allowed because its coeffects are incompatible with the context
   Hack provides a list of supported contexts here
 File "cipp.php", line 35, characters 3-24:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
-  File "cipp.php", line 14, characters 33-48:
+  File "cipp.php", line 14, characters 32-49:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyShallow, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 36, characters 3-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
-  File "cipp.php", line 23, characters 31-44:
+  File "cipp.php", line 23, characters 30-45:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyLocal, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 37, characters 3-27:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
-  File "cipp.php", line 42, characters 36-57:
+  File "cipp.php", line 42, characters 35-58:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfShallow<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 38, characters 3-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
-  File "cipp.php", line 51, characters 34-53:
+  File "cipp.php", line 51, characters 33-54:
   But the function being called requires the capability set {AccessStaticVariable, IO, ImplicitPolicyOfLocal<A>, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 39, characters 3-12:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 33, characters 28-41:
+  File "cipp.php", line 33, characters 27-42:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOf<A>, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
@@ -120,7 +120,7 @@ This call is not allowed because its coeffects are incompatible with the context
   Hack provides a list of supported contexts here
 File "cipp.php", line 48, characters 3-12:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp.php", line 42, characters 36-57:
+  File "cipp.php", line 42, characters 35-58:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, IO, ImplicitPolicyOfLocal<A>, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}

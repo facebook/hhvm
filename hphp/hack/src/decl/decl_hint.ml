@@ -39,12 +39,25 @@ and aast_contexts_to_decl_capability env ctxs default_pos :
     Aast.pos * decl_ty capability =
   match ctxs with
   | Some (pos, hl) ->
-    let hl = List.map ~f:(hint env) hl in
-    ( pos,
-      CapTy
-        (Typing_make_type.intersection
-           (Reason.Rhint (Decl_env.make_decl_pos env pos))
-           hl) )
+    let dtys = List.map ~f:(hint env) hl in
+    (* For coeffect contexts, in general we do not simplify empty or singleton
+     * intersection, we keep them as is, so we don't use Typing_make_type
+     * on purpose.
+     * However the direct decl parser removes the intersection when the
+     * context was a single Hfun_context. Let's do the same here
+     *)
+    let reason = Reason.Rhint (Decl_env.make_decl_pos env pos) in
+    let dty =
+      match dtys with
+      | [dty] ->
+        begin
+          match get_node dty with
+          | Tgeneric _ -> dty
+          | _ -> mk (reason, Tintersection dtys)
+        end
+      | _ -> mk (reason, Tintersection dtys)
+    in
+    (pos, CapTy dty)
   | None -> (default_pos, CapDefaults (Decl_env.make_decl_pos env default_pos))
 
 and aast_tparam_to_decl_tparam env t =

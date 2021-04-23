@@ -1399,8 +1399,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
+        /* Note: do not simplify intersections, keep empty / singleton intersections
+         * for coeffect contexts
+         */
         let capability = match self.node_to_ty(capability) {
-            Some(Ty(_, Ty_::Tintersection(&[ty]))) => CapTy(ty),
             Some(ty) => CapTy(ty),
             None => CapDefaults(default_pos),
         };
@@ -3238,21 +3240,11 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 }
             }
         }));
-        // Simulating Typing_make_type.intersection here
-        let make_mixed = || {
-            let pos = Reason::hint(self.merge_positions(left_bracket, right_bracket));
-            Node::Ty(self.alloc(Ty(
-                self.alloc(pos),
-                Ty_::Toption(self.alloc(Ty(self.alloc(pos), Ty_::Tnonnull))),
-            )))
-        };
-        match tys {
-            [] => make_mixed(),
-            tys => {
-                let pos = self.merge_positions(left_bracket, right_bracket);
-                self.hint_ty(pos, Ty_::Tintersection(tys))
-            }
-        }
+        /* Like in as_fun_implicit_params, we keep the intersection as is: we do not simplify
+         * empty or singleton intersections.
+         */
+        let pos = self.merge_positions(left_bracket, right_bracket);
+        self.hint_ty(pos, Ty_::Tintersection(tys))
     }
 
     fn make_function_ctx_type_specifier(

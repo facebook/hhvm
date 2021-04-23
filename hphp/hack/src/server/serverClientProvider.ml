@@ -43,11 +43,17 @@ let accept_client
     (parent_in_fd : Unix.file_descr)
     (t_sleep_and_check : float)
     (t_monitor_fd_ready : float) : client =
-  let socket = Libancillary.ancil_recv_fd parent_in_fd in
-  let t_got_client_fd = Unix.gettimeofday () in
   let tracker : Connection_tracker.t =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
+  Hh_logger.log
+    "[%s] got tracker handoff from monitor"
+    (Connection_tracker.log_id tracker);
+  let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  let t_got_client_fd = Unix.gettimeofday () in
+  Hh_logger.log
+    "[%s] got client_fd handoff from monitor"
+    (Connection_tracker.log_id tracker);
   let tracker =
     let open Connection_tracker in
     tracker

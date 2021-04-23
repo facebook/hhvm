@@ -288,12 +288,12 @@ struct
       Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
   let hand_off_client_connection ~tracker server_fd client_fd =
+    let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
+    msg_to_channel server_fd tracker;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
-    if status = 0 then begin
-      let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
-      msg_to_channel server_fd tracker;
+    if status = 0 then
       Sent_fds_collector.cleanup_fd client_fd
-    end else begin
+    else begin
       Hh_logger.log "Failed to handoff FD to server.";
       raise (Send_fd_failure status)
     end

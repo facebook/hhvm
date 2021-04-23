@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -671,61 +670,9 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   return std::make_pair(frm.fp ? frm.fp->func() : nullptr, frm.pc);
 }
 
-namespace {
-
-struct CTKHasher final {
-  uint64_t hash(const CompactTraceData::Ptr& k) const {
-    if (!k) return 0;
-    return k->hash();
-  }
-  bool equal(const CompactTraceData::Ptr& k1,
-             const CompactTraceData::Ptr& k2) const;
-};
-
-struct CacheDeleter final {
-  void operator()(ArrayData* ad) const {
-    if (!ad->isUncounted()) return;
-    Treadmill::enqueue([ad] { DecRefUncountedArray(ad); });
-  }
-};
-
-using CachedArray = std::shared_ptr<ArrayData>;
-using Cache = ConcurrentScalableCache<CompactTraceData::Ptr,
-                                      CachedArray,CTKHasher>;
-Cache s_cache(1024);
-
-bool CTKHasher::equal(const CompactTraceData::Ptr& k1,
-                      const CompactTraceData::Ptr& k2) const {
-  assertx(k1 && k2);
-  if (k1->size() != k2->size() || k1->hash() != k2->hash()) {
-    return false;
-  }
-  for (int i = 0; i < k1->frames().size(); ++i) {
-    const auto& a = k1->frames()[i];
-    const auto& b = k2->frames()[i];
-    if (a.func != b.func || a.prevPcAndHasThis != b.prevPcAndHasThis) {
-      return false;
-    }
-  }
-  return true;
-}
-
-}
-
 IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 
-uint64_t CompactTraceData::hash() const {
-  if (m_hash != 0) return m_hash;
-  m_hash = 0xffffffff;
-  for (auto frame : m_frames) {
-    m_hash = hash_int64_pair(m_hash, frame.hash());
-  }
-  return m_hash;
-}
-
 void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
-  m_hash = 0;                           // invalidate
-
   m_frames.emplace_back(
     fp->func(),
     prevPc,
@@ -787,20 +734,7 @@ Array CompactTraceData::extract() const {
 
 Array CompactTrace::extract() const {
   if (size() <= 1) return Array::CreateVec();
-
-  Cache::ConstAccessor acc;
-  if (s_cache.find(acc, m_backtrace)) {
-    return Array(acc.get()->get());
-  }
-
-  auto const env = MakeUncountedEnv {
-    /*seen=*/nullptr, /*allowBespokes=*/false };
-  auto arr = m_backtrace->extract();
-  auto ins = CachedArray(MakeUncountedArray(arr.get(), env), CacheDeleter());
-  if (!s_cache.insert(m_backtrace, ins)) {
-    return arr;
-  }
-  return Array(ins.get());
+  return m_backtrace->extract();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

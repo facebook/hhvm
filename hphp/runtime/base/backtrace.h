@@ -70,7 +70,6 @@ struct CompactFrame final {
 struct CompactTraceData {
   Array extract() const;
   void insert(const ActRec* fp, int32_t prevPc);
-  uint64_t hash() const;
   const auto& frames() const { return m_frames; }
   auto size() const { return m_frames.size(); }
 
@@ -81,7 +80,6 @@ struct CompactTraceData {
 
  private:
   folly::small_vector<CompactFrame, 16> m_frames;
-  mutable uint64_t m_hash{0};
 };
 
 struct CompactTrace : SweepableResourceData {

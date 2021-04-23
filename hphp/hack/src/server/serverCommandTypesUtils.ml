@@ -160,3 +160,39 @@ let write_progress_file
       (Exception.get_backtrace_string e |> Exception.clean_stack);
     HackEventLogger.server_progress_write_exn ~server_progress_file e;
     ()
+
+(** This reads the specified progress file, which is assumed to exist.
+If there are failures, we log, and return a human-readable string that
+indicates why. *)
+let read_progress_file ~(server_progress_file : string) :
+    ServerCommandTypes.server_progress =
+  try
+    let fd = Unix.openfile server_progress_file [Unix.O_RDONLY] 0o666 in
+    Utils.try_finally
+      ~f:(fun () ->
+        (* we'll block until we gain a reader-lock. This depends on writers not holding
+        it for long, in write_progress_file above. *)
+        Unix.lockf fd Unix.F_RLOCK 0;
+        let json =
+          Some (Disk.cat server_progress_file |> Hh_json.json_of_string)
+        in
+        let server_progress = Hh_json_helpers.Jget.string_exn json "progress" in
+        let server_warning = Hh_json_helpers.Jget.string_opt json "warning" in
+        let server_timestamp =
+          Hh_json_helpers.Jget.float_exn json "timestamp"
+        in
+        ServerCommandTypes.{ server_progress; server_warning; server_timestamp })
+      ~finally:(fun () -> Unix.close fd)
+  with exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.error
+      "SERVER_PROGRESS_EXCEPTION(read) %s\n%s"
+      (Exception.get_ctor_string e)
+      (Exception.get_backtrace_string e |> Exception.clean_stack);
+    HackEventLogger.server_progress_read_exn ~server_progress_file e;
+    ServerCommandTypes.
+      {
+        server_progress = "unknown hh_server state";
+        server_warning = None;
+        server_timestamp = Unix.gettimeofday ();
+      }

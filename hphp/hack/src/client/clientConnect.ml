@@ -83,46 +83,65 @@ let tty_progress_reporter () =
           (Tty.spinner ~angery_reaccs_only ())
       : unit )
 
-(* what is the server doing? or None if nothing *)
-let progress : string ref = ref "connecting"
+(** What is the latest progress message written by the server into a file?
+We store this in a mutable variable, so we can know whether it's changed and hence whether
+to display the warning banner. *)
+let latest_server_progress : ServerCommandTypes.server_progress ref =
+  ref
+    ServerCommandTypes.
+      {
+        server_progress = "connecting";
+        server_warning = None;
+        server_timestamp = 0.;
+      }
 
-(* if the server has something not going right, what? *)
-let progress_warning : string option ref = ref None
-
-let check_progress (root : Path.t) : unit =
-  let tracker = Connection_tracker.create () in
-  log ~tracker "ClientConnect.check_progress...";
-  match ServerUtils.server_progress ~tracker ~timeout:3 root with
-  | Ok (msg, warning) ->
+(** This reads from the progress file and assigns into mutable variable "latest_status_progress",
+and returns whether there was new status. *)
+let check_progress ~(server_progress_file : string) : bool =
+  let open ServerCommandTypes in
+  let server_progress =
+    ServerCommandTypesUtils.read_progress_file ~server_progress_file
+  in
+  if
+    not
+      (Float.equal
+         server_progress.server_timestamp
+         !latest_server_progress.server_timestamp)
+  then begin
     log
-      ~tracker
-      "check_progress: %s / %s"
-      msg
-      (Option.value warning ~default:"[none]");
-    progress := msg;
-    progress_warning := warning
-  | Error e ->
-    log
-      ~tracker
-      "check_progress: %s"
-      (ServerMonitorUtils.show_connection_error e)
+      "check_progress: [%s] %s / %s"
+      (Utils.timestring server_progress.server_timestamp)
+      server_progress.server_progress
+      (Option.value server_progress.server_warning ~default:"[none]");
+    latest_server_progress := server_progress;
+    true
+  end else
+    false
 
 let delta_t : float = 3.0
 
-let query_and_show_progress
-    (progress_callback : string option -> unit) ~(root : Path.t) : unit =
-  let had_warning = Option.is_some !progress_warning in
-  check_progress root;
+let show_progress
+    (progress_callback : string option -> unit) ~(server_progress_file : string)
+    : unit =
+  let open ServerCommandTypes in
+  let had_warning = Option.is_some !latest_server_progress.server_warning in
+  let (_any_changes : bool) = check_progress ~server_progress_file in
   if not had_warning then
-    Option.iter !progress_warning ~f:(Printf.eprintf "\n%s\n%!");
-  let progress = !progress in
+    Option.iter
+      !latest_server_progress.server_warning
+      ~f:(Printf.eprintf "\n%s\n%!");
+  let progress = !latest_server_progress.server_progress in
   let final_suffix =
-    if Option.is_some !progress_warning then
+    if Option.is_some !latest_server_progress.server_warning then
       " - this can take a long time, see warning above]"
     else
       "]"
   in
-  progress_callback (Some ("[" ^ progress ^ final_suffix))
+  (* We always show progress, even if there were no changes, just so the user
+  can see the spinner keep turning around. It looks better that way for things
+  like "loading saved-state" which would otherwise look stuck for 30s. *)
+  progress_callback (Some ("[" ^ progress ^ final_suffix));
+  ()
 
 let check_for_deadline deadline_opt =
   let now = Unix.time () in
@@ -146,6 +165,9 @@ let rec wait_for_server_message
     ~(server_specific_files : ServerCommandTypes.server_specific_files)
     ~(progress_callback : (string option -> unit) option)
     ~(root : Path.t) : 'a ServerCommandTypes.message_type Lwt.t =
+  let server_progress_file =
+    server_specific_files.ServerCommandTypes.server_progress_file
+  in
   check_for_deadline deadline;
   let%lwt (readable, _, _) =
     Lwt_utils.select
@@ -155,7 +177,7 @@ let rec wait_for_server_message
       1.0
   in
   if List.is_empty readable then (
-    Option.iter progress_callback ~f:(query_and_show_progress ~root);
+    Option.iter progress_callback ~f:(show_progress ~server_progress_file);
     wait_for_server_message
       ~connection_log_id
       ~expected_message
@@ -191,7 +213,7 @@ let rec wait_for_server_message
           "wait_for_server_message: didn't want %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
         if not is_ping then
-          Option.iter progress_callback ~f:(query_and_show_progress ~root);
+          Option.iter progress_callback ~f:(show_progress ~server_progress_file);
         wait_for_server_message
           ~connection_log_id
           ~expected_message

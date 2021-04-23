@@ -1989,7 +1989,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
-  case DebugBacktraceFast:
     return may_load_store(AHeapAny|ALocalAny|AStackAny, AHeapAny);
 
   // This instruction doesn't touch memory we track, except that it may

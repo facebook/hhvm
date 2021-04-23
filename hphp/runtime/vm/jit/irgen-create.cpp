@@ -92,38 +92,10 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     [&] {
       // sprop is an integer, load it
       auto const opts = gen(env, LdMem, TInt, sprop);
-      return cond(
-        env,
-        [&] (Block* taken) {
-          if (!RuntimeOption::EnableArgsInBacktraces) {
-            auto const filterOpts =
-              gen(env, AndInt, opts, cns(env, ~k_DEBUG_BACKTRACE_IGNORE_ARGS));
-
-            gen(env, JmpNZero, taken, filterOpts);
-          } else {
-            auto const safe =
-              gen(env, EqInt, opts, cns(env, k_DEBUG_BACKTRACE_IGNORE_ARGS));
-            gen(env, JmpZero, taken, safe);
-          }
-        },
-        [&] {
-          // traceOpts is default value, use fast lazy construction
-          if (RuntimeOption::EvalEnableCompactBacktrace) {
-            return gen(env, DebugBacktraceFast);
-          }
-          return gen(env, DebugBacktrace, cns(env, 0));
-        },
-        [&] {
-          // Call debug_backtrace(traceOpts)
-          return gen(env, DebugBacktrace, opts);
-        });
+      return gen(env, DebugBacktrace, opts);
     },
     [&] {
       // sprop is a garbage, use default traceOpts value (0)
-      if (!RuntimeOption::EnableArgsInBacktraces &&
-          RuntimeOption::EvalEnableCompactBacktrace) {
-        return gen(env, DebugBacktraceFast);
-      }
       return gen(env, DebugBacktrace, cns(env, 0));
     }
   );

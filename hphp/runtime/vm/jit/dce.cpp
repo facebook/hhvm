@@ -443,7 +443,6 @@ bool canDCE(IRInstruction* inst) {
   case InitObjMemoSlots:
   case LockObj:
   case DebugBacktrace:
-  case DebugBacktraceFast:
   case InitThrowableFileAndLine:
   case ConstructInstance:
   case InitDictElem:

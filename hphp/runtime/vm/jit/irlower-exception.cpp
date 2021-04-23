@@ -146,7 +146,6 @@ void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)
-IMPL_OPCODE_CALL(DebugBacktraceFast)
 
 ///////////////////////////////////////////////////////////////////////////////
 

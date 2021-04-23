@@ -2,7 +2,7 @@ int(1)
 float(1.5)
 string(3) "foo"
 bool(false)
-resource(5) of type (stream)
+resource(%d) of type (stream)
 object(stdClass) (0) {
 }
 vec(3) {

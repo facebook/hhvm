@@ -594,7 +594,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DbgTrashStk:
   case DblAsBits:
   case DebugBacktrace:
-  case DebugBacktraceFast:
   case DecRef:
   case DecRefNZ:
   case DefCallCtx:

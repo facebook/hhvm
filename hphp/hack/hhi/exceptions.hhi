@@ -49,7 +49,6 @@ class Error implements Throwable {
   final public function getFile()[]: string;
   final public function getLine()[]: int;
   final public function getTrace()[]: varray<mixed>;
-  final public function getTraceUntagged()[]: varray<mixed>;
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
@@ -84,7 +83,6 @@ class Exception implements Throwable {
   final public function getFile()[]: string;
   final public function getLine()[]: int;
   final public function getTrace()[]: varray<mixed>;
-  final public function getTraceUntagged()[]: varray<mixed>;
   final protected function __prependTrace(Container<mixed> $trace): void;
   final public function getTraceAsString()[]: string;
   public function __toString(): string;

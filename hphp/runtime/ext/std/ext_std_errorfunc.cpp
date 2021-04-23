@@ -74,10 +74,6 @@ ArrayData* debug_backtrace_jit(int64_t options) {
   return HHVM_FN(debug_backtrace)(options).detach();
 }
 
-ResourceHdr* debug_backtrace_fast() {
-  return createCompactBacktrace().detach()->hdr();
-}
-
 /**
  * hphp_debug_caller_info - returns an array of info about the "caller"
  *

@@ -317,22 +317,10 @@ void throwable_init(ObjectData* throwable) {
   assertx(throwable_has_expected_props());
 
   auto const trace_lval = throwable->propLvalAtOffset(s_traceSlot);
-  auto opts = exception_get_trace_options();
-  auto const filterOpts = opts & ~k_DEBUG_BACKTRACE_IGNORE_ARGS;
-  if (
-    !RuntimeOption::EvalEnableCompactBacktrace || filterOpts ||
-    (RuntimeOption::EnableArgsInBacktraces &&
-     opts != k_DEBUG_BACKTRACE_IGNORE_ARGS)
-    ) {
-    auto trace = HHVM_FN(debug_backtrace)(opts);
-    auto tv = make_array_like_tv(trace.detach());
-    tvMove(tv, trace_lval);
-  } else {
-    tvMove(
-      make_tv<KindOfResource>(createCompactBacktrace().detach()->hdr()),
-      trace_lval
-    );
-  }
+  auto const opts = exception_get_trace_options();
+  auto trace = HHVM_FN(debug_backtrace)(opts);
+  auto tv = make_array_like_tv(trace.detach());
+  tvMove(tv, trace_lval);
 
   VMRegAnchor _;
   auto const fp = vmfp();

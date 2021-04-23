@@ -11,7 +11,7 @@
 1
 0
 -1
-varray(2) {
+vec(2) {
   object(GMP) (1) {
     ["num"]=>
     string(7) "4920955"

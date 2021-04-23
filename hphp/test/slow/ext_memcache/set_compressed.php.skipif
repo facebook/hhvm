@@ -1,9 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-$memcache = new Memcache;
-$memcache->addserver('localhost', 11211);
-$version = $memcache->getversion();
-if (!$version) {
-  echo "skip: No Memcached running";
-}
-}

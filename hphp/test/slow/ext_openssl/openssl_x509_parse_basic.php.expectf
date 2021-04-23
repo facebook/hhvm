@@ -1,8 +1,8 @@
-darray(13) {
+dict(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
-  darray(5) {
+  dict(5) {
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
@@ -17,7 +17,7 @@ darray(13) {
   ["hash"]=>
   string(8) "%s"
   ["issuer"]=>
-  darray(5) {
+  dict(5) {
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
@@ -44,64 +44,64 @@ darray(13) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  darray(9) {
+  dict(9) {
     [1]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(9) "sslclient"
     }
     [2]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(9) "sslserver"
     }
     [3]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(11) "nssslserver"
     }
     [4]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(9) "smimesign"
     }
     [5]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(12) "smimeencrypt"
     }
     [6]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(7) "crlsign"
     }
     [7]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(3) "any"
     }
     [8]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(10) "ocsphelper"
     }
     [9]=>
-    varray(3) {
+    vec(3) {
       bool(false)
       bool(true)
       string(13) "timestampsign"
     }
   }
   ["extensions"]=>
-  darray(3) {
+  dict(3) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
@@ -113,11 +113,11 @@ serial:AE:C5:56:CC:72:37:50:A2
     string(7) "CA:TRUE"
   }
 }
-darray(13) {
+dict(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
-  darray(5) {
+  dict(5) {
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
@@ -132,7 +132,7 @@ darray(13) {
   ["hash"]=>
   string(8) "%s"
   ["issuer"]=>
-  darray(5) {
+  dict(5) {
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
@@ -159,64 +159,64 @@ darray(13) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  darray(9) {
+  dict(9) {
     [1]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(10) "SSL client"
     }
     [2]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(10) "SSL server"
     }
     [3]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(19) "Netscape SSL server"
     }
     [4]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(14) "S/MIME signing"
     }
     [5]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(17) "S/MIME encryption"
     }
     [6]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(11) "CRL signing"
     }
     [7]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(11) "Any Purpose"
     }
     [8]=>
-    varray(3) {
+    vec(3) {
       bool(true)
       bool(true)
       string(11) "OCSP helper"
     }
     [9]=>
-    varray(3) {
+    vec(3) {
       bool(false)
       bool(true)
       string(18) "Time Stamp signing"
     }
   }
   ["extensions"]=>
-  darray(3) {
+  dict(3) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>

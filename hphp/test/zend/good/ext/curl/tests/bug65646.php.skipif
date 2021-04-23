@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-if (ini_get('open_basedir')) exit("skip open_basedir is set");
-}

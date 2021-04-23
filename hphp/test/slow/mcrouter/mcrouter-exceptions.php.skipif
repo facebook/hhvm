@@ -1,0 +1,6 @@
+<?hh
+<<__EntryPoint>> function skip(): void {
+if (!getenv('HPHP_TEST_MCROUTER')) {
+  echo 'skip';
+}
+}

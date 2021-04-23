@@ -123,10 +123,6 @@ struct
       Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
-    (* What server is doing now *)
-    server_progress: string;
-    (* Why what it is doing now might not be going as well as it could *)
-    server_progress_warning: string option;
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
@@ -473,10 +469,6 @@ struct
       kill_server_with_check env.server;
       wait_for_server_exit_with_check env.server kill_signal_time;
       Exit.exit Exit_status.No_error
-    | MonitorRpc.SERVER_PROGRESS _tracker ->
-      msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
-      Unix.close client_fd;
-      env
 
   let ack_and_handoff_client env client_fd =
     try
@@ -549,21 +541,6 @@ struct
     | (Died_unexpectedly _, _) ->
       env
 
-  let rec read_server_messages process env =
-    let msg =
-      ServerProgress.(make_pipe_from_server process.in_fd |> read_from_server)
-    in
-    match msg with
-    | None -> env
-    | Some msg ->
-      let env =
-        match msg with
-        | MonitorRpc.PROGRESS msg -> { env with server_progress = msg }
-        | MonitorRpc.PROGRESS_WARNING msg ->
-          { env with server_progress_warning = msg }
-      in
-      read_server_messages process env
-
   (* Kill command from client is handled by server server, so the monitor
    * needs to check liveness of the server process to know whether
    * to stop itself. *)
@@ -575,7 +552,7 @@ struct
         (match (pid, proc_stat) with
         | (0, _) ->
           (* "pid=0" means the pid we waited for (i.e. process) hasn't yet died/stopped *)
-          read_server_messages process env
+          env
         | (_, _) ->
           (* "pid<>0" means the pid has died or received a stop signal *)
           let oom_code = Exit_status.(exit_code Out_of_shared_memory) in
@@ -587,24 +564,10 @@ struct
           SC.on_server_exit monitor_config;
           ServerProcessTools.check_exit_status proc_stat process monitor_config;
           { env with server = Died_unexpectedly (proc_stat, was_oom) })
-      | Not_yet_started ->
-        {
-          env with
-          server_progress = "server is currently stopped";
-          server_progress_warning = None;
-        }
-      | Died_config_changed ->
-        {
-          env with
-          server_progress = "server stopped because its configuration changed";
-          server_progress_warning = None;
-        }
+      | Not_yet_started
+      | Died_config_changed
       | Died_unexpectedly _ ->
-        {
-          env with
-          server_progress = "server stopped because of an error";
-          server_progress_warning = None;
-        }
+        env
     in
 
     let (exit_status, server_state) =
@@ -848,8 +811,6 @@ struct
         watchman_retries = 0;
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
-        server_progress_warning = None;
-        server_progress = "server status is unknown";
       }
     in
     (env, monitor_config, socket)

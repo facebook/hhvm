@@ -55,12 +55,6 @@ let shut_down_server ~tracker root =
 let connect_to_monitor ~tracker ~timeout root =
   MC.connect_once ~tracker ~timeout (hh_monitor_config root)
 
-let server_progress ~tracker ~timeout root =
-  MC.connect_to_monitor_and_get_server_progress
-    ~tracker
-    ~timeout
-    (hh_monitor_config root)
-
 let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
   let telemetry = Telemetry.create () in
   let unwrap (result : (Telemetry.t, Telemetry.t) result) : Telemetry.t =

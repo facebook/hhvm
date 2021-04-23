@@ -55,19 +55,6 @@ let send_shutdown_rpc ~tracker oc =
     (MonitorRpc.SHUT_DOWN tracker)
   |> ignore
 
-let send_server_progress_rpc ~tracker oc =
-  log "send_server_process_rpc" ~tracker;
-  let (_ : int) =
-    Marshal_tools.to_fd_with_preamble
-      (Unix.descr_of_out_channel oc)
-      (MonitorRpc.SERVER_PROGRESS tracker)
-  in
-  ()
-
-let read_server_progress ~tracker ic : string * string option =
-  log "read_server_progress" ~tracker;
-  from_channel_without_buffering ic
-
 let establish_connection ~timeout config =
   let sock_name = Socket.get_path config.socket_file in
   let sockaddr =
@@ -387,14 +374,3 @@ let connect_once ~tracker ~timeout config handoff_options =
   let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
   let timeout = max (timeout - elapsed_t) 1 in
   consume_prehandoff_messages ~timeout ic oc
-
-let connect_to_monitor_and_get_server_progress ~tracker ~timeout config :
-    (string * string option, ServerMonitorUtils.connection_error) result =
-  let open Result.Monad_infix in
-  connect_to_monitor ~tracker ~timeout config
-  >>= fun (ic, oc, cstate, tracker) ->
-  verify_cstate ~tracker ic cstate >>= fun () ->
-  (* This is similar to connect_once up to this point, where instead of
-    * being handed off to server we just get our answer from monitor *)
-  send_server_progress_rpc ~tracker oc;
-  Ok (read_server_progress ~tracker ic)

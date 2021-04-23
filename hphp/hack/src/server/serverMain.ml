@@ -1534,13 +1534,11 @@ let daemon_main
       monitor_pid,
       priority_in_fd,
       force_dormant_start_only_in_fd )
-    (default_ic, default_oc) =
+    (default_ic, _default_oc) =
   (* Avoid leaking this fd further *)
   let () = Unix.set_close_on_exec priority_in_fd in
   let () = Unix.set_close_on_exec force_dormant_start_only_in_fd in
   let default_in_fd = Daemon.descr_of_in_channel default_ic in
-  let default_out_fd = Daemon.descr_of_out_channel default_oc in
-  ServerProgress.make_pipe_to_monitor default_out_fd;
 
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state 0;

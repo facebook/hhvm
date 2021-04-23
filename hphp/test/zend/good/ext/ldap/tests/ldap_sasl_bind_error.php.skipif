@@ -1,3 +1,0 @@
-<?hh require_once('skipif.inc');
-require_once('skipifbindfailure.inc');
-if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support");

@@ -1,3 +1,3 @@
 
-Warning: ldap_parse_result() expects exactly 6 parameters, 2 given in %s/ldap_parse_result_error.php on line 3
+Warning: ldap_parse_result() expects exactly 6 parameters, 2 given in %s/ldap_parse_result_error.php on line 4
 ===DONE===

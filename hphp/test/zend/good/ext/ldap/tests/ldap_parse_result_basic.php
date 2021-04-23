@@ -4,11 +4,11 @@ require "connect.inc";
 $link = ldap_connect_and_bind(test_host(), test_port(), test_user(), test_passwd(), test_protocol_version());
 $base = test_base();
 insert_dummy_data($link, $base);
-ldap_add($link, "cn=userref,$base", array(
-        "objectClass" => array("extensibleObject", "referral"),
+ldap_add($link, "cn=userref,$base", dict[
+        "objectClass" => vec["extensibleObject", "referral"],
         "cn" => "userref",
         "ref" => "cn=userA,$base",
-));
+]);
 $result = ldap_search($link, "cn=userref,$base", "(cn=user*)");
 $errcode = $dn = $errmsg = $refs =  null;
 var_dump(

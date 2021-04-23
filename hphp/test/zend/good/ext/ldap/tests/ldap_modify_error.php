@@ -4,27 +4,35 @@ require "connect.inc";
 $link = ldap_connect_and_bind(test_host(), test_port(), test_user(), test_passwd(), test_protocol_version());
 $base = test_base();
 // Too few parameters
-var_dump(ldap_modify());
-var_dump(ldap_modify($link));
-var_dump(ldap_modify($link, "$base"));
+try {
+  var_dump(ldap_modify());
+} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try {
+  var_dump(ldap_modify($link));
+} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try {
+  var_dump(ldap_modify($link, "$base"));
+} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Too many parameters
-var_dump(ldap_modify($link, "$base", array(), "Additional data"));
+try {
+  var_dump(ldap_modify($link, "$base", dict[], "Additional data"));
+} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // DN not found
-var_dump(ldap_modify($link, "cn=not-found,$base", array()));
+var_dump(ldap_modify($link, "cn=not-found,$base", dict[]));
 
 // Invalid DN
-var_dump(ldap_modify($link, "weirdAttribute=val", array()));
+var_dump(ldap_modify($link, "weirdAttribute=val", dict[]));
 
-$entry = array(
-    "objectClass"   => array(
+$entry = dict[
+    "objectClass"   => vec[
         "top",
         "dcObject",
-        "organization"),
+        "organization"],
     "dc"            => "my-domain",
     "o"             => "my-domain",
-);
+];
 
 ldap_add($link, "dc=my-domain,$base", $entry);
 

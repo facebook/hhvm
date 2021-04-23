@@ -1,7 +1,7 @@
 
-Warning: ldap_err2str() expects exactly 1 parameter, 0 given in %s/ldap_err2str_error.php on line 3
+Warning: ldap_err2str() expects exactly 1 parameter, 0 given in %s/ldap_err2str_error.php on line 4
 
-Warning: ldap_err2str() expects exactly 1 parameter, 2 given in %s/ldap_err2str_error.php on line 6
+Warning: ldap_err2str() expects exactly 1 parameter, 2 given in %s/ldap_err2str_error.php on line 7
 
-Warning: ldap_err2str() expects parameter 1 to be integer, string given in %s/ldap_err2str_error.php on line 8
+Warning: ldap_err2str() expects parameter 1 to be integer, string given in %s/ldap_err2str_error.php on line 9
 ===DONE===

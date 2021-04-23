@@ -1,2 +1,7 @@
-<?hh require_once('skipif.inc');
-require_once('skipifbindfailure.inc');
+<?hh
+// Note that this directory also has a config.runif file that gates this test
+<<__EntryPoint>> function skipif(): void {
+  require_once('connect.inc');
+  require_once('skipifbindfailure.inc');
+  skip_if_bind_failure();
+}

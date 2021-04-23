@@ -7,16 +7,17 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(cn=user*)";
 $cookie = '';
-var_dump(
-    ldap_control_paged_result($link, 2, true, $cookie),
-    $result = ldap_search($link, $dn, $filter, array('cn')),
-    ldap_get_entries($link, $result),
-    $estimated = null;
-    ldap_control_paged_result_response($link, $result, inout $cookie, inout $estimated),
-    ldap_control_paged_result($link, 20, true, $cookie),
-    $result = ldap_search($link, $dn, $filter, array('cn')),
-    ldap_get_entries($link, $result)
-);
+var_dump(ldap_control_paged_result($link, 2, true, $cookie));
+$result = ldap_search($link, $dn, $filter, vec['cn']);
+var_dump($result);
+var_dump(ldap_get_entries($link, $result));
+$estimated = null;
+var_dump(ldap_control_paged_result_response($link, $result, inout $cookie, inout $estimated));
+var_dump($estimated);
+var_dump(ldap_control_paged_result($link, 20, true, $cookie));
+$result = ldap_search($link, $dn, $filter, vec['cn']);
+var_dump($result);
+var_dump(ldap_get_entries($link, $result));
 echo "===DONE===\n";
 //--remove_dummy_data($link, $base);
 }

@@ -1,4 +1,4 @@
-array(4) {
+dict(4) {
   ["count"]=>
   int(3)
   [0]=>
@@ -8,7 +8,7 @@ array(4) {
   [2]=>
   string(6) "dc=com"
 }
-array(5) {
+dict(5) {
   ["count"]=>
   int(4)
   [0]=>
@@ -20,7 +20,7 @@ array(5) {
   [3]=>
   string(6) "dc=com"
 }
-array(4) {
+dict(4) {
   ["count"]=>
   int(3)
   [0]=>
@@ -30,7 +30,7 @@ array(4) {
   [2]=>
   string(3) "com"
 }
-array(5) {
+dict(5) {
   ["count"]=>
   int(4)
   [0]=>

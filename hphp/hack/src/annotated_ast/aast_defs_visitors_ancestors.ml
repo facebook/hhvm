@@ -28,6 +28,8 @@ class ['self] iter_defs_base =
         : 'a. ('env -> 'a -> unit) -> 'env -> 'a LM.t -> unit =
       (fun f env -> LM.iter (fun _ -> f env))
 
+    method private on_xhp_enum_value _ _ : unit = ()
+
     method on_'fb _ _ = ()
 
     method on_'ex _ _ = ()
@@ -59,6 +61,8 @@ class virtual ['self] reduce_defs_base =
       fun f env x ->
         LM.fold (fun _ d acc -> self#plus acc (f env d)) x self#zero
 
+    method private on_xhp_enum_value _ _ = self#zero
+
     method on_'fb _env _ = self#zero
 
     method on_'ex _env _ = self#zero
@@ -85,6 +89,8 @@ class ['self] map_defs_base =
     method private on_local_id_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
       (fun f env -> LM.map (f env))
+
+    method private on_xhp_enum_value _env xev = xev
   end
 
 class ['self] endo_defs_base =
@@ -106,4 +112,6 @@ class ['self] endo_defs_base =
     method private on_local_id_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
       (fun f env -> LM.map (f env))
+
+    method private on_xhp_enum_value _env xev = xev
   end

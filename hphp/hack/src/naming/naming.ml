@@ -1038,7 +1038,14 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   let hint_ = ((), hint_) in
   let hint_ = Aast.type_hint_option_map hint_ ~f:(hint env) in
   let (expr, _) = class_prop_expr_is_xhp env cv in
-  let xhp_attr_info = Some { N.xai_tag = tag } in
+  let enum_values =
+    match cv.Aast.cv_xhp_attr with
+    | Some xai -> xai.Aast.xai_enum_values
+    | None -> []
+  in
+  let xhp_attr_info =
+    Some { N.xai_tag = tag; N.xai_enum_values = enum_values }
+  in
   {
     N.cv_final = cv.Aast.cv_final;
     N.cv_xhp_attr = xhp_attr_info;
@@ -1173,7 +1180,7 @@ and class_prop_expr_is_xhp env cv =
   (expr, is_xhp)
 
 and make_xhp_attr = function
-  | true -> Some { N.xai_tag = None }
+  | true -> Some { N.xai_tag = None; N.xai_enum_values = [] }
   | false -> None
 
 and class_prop_static env cv =

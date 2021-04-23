@@ -15,8 +15,8 @@
               ]
             )))
          ];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([9:7-8], "A");
@@ -56,8 +56,8 @@
                ]
              )));
           (Rhint ([12:27-29]), (Tapply (([12:27-29], "\\EE"), [])))];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
@@ -101,8 +101,8 @@
                ]
              )))
           ];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;

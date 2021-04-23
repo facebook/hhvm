@@ -60,8 +60,6 @@ let additional_derives ty : (string option * string) list =
   match ty with
   | "aast::EmitId" when is_by_box () ->
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
-  | "aast::XhpAttrInfo" when is_by_box () ->
-    [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
   | _ -> []
 
 let derive_blacklist ty =

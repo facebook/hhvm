@@ -922,7 +922,10 @@ and ('ex, 'fb, 'en, 'hi) class_typeconst_def = {
   c_tconst_is_ctx: bool;
 }
 
-and xhp_attr_info = { xai_tag: xhp_attr_tag option }
+and xhp_attr_info = {
+  xai_tag: xhp_attr_tag option;
+  xai_enum_values: Ast_defs.xhp_enum_value list;
+}
 
 and ('ex, 'fb, 'en, 'hi) class_var = {
   cv_final: bool;

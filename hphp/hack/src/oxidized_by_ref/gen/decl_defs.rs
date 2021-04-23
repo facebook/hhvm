@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74f801ede66ced0325fc5b74b58ab83a>>
+// @generated SignedSource<<2a6842e9fa4aa3dfe3be2d26ff275c94>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -162,6 +162,7 @@ pub struct DeclClassType<'a> {
     pub extends: s_set::SSet<'a>,
     pub sealed_whitelist: Option<s_set::SSet<'a>>,
     pub xhp_attr_deps: s_set::SSet<'a>,
+    pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
     pub enum_type: Option<&'a EnumType<'a>>,
     pub decl_errors: Option<&'a errors::Errors<'a>>,
     /// this field is used to prevent condition types being filtered

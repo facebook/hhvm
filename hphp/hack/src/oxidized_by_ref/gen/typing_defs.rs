@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c61962a3037f3e2b93584705f2bb1ac>>
+// @generated SignedSource<<7fa88c13df798164ab39192f331510ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -299,6 +299,7 @@ pub struct ClassType<'a> {
     pub extends: s_set::SSet<'a>,
     pub enum_type: Option<&'a EnumType<'a>>,
     pub sealed_whitelist: Option<s_set::SSet<'a>>,
+    pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
     pub decl_errors: Option<&'a errors::Errors<'a>>,
 }
 impl<'a> TrivialDrop for ClassType<'a> {}

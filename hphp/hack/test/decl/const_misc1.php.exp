@@ -15,8 +15,8 @@
               ]
             )))
          ];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([4:7-8], "X");
@@ -58,8 +58,8 @@
           (Tapply (([8:6-7], "\\HH\\BuiltinEnum"),
              [(Rhint ([8:6-7]), (Tapply (([8:6-7], "\\B"), [])))])))
           ];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([9:3-4], "X");
@@ -104,8 +104,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([17:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([18:13-15], "IC");

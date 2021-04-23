@@ -11,7 +11,6 @@ lazy::Lazy
 method_flags::MethodFlags
 prop_flags::PropFlags
 shallow_decl_defs::Visibility
-shallow_decl_defs::XhpAttr
 tany_sentinel::TanySentinel
 tast::FunTastInfo
 typing_cont_key::TypingContKey

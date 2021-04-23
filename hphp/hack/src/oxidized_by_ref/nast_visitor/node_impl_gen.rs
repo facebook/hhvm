@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<975354aec542b70777426262d25bec18>>
+// @generated SignedSource<<ff9a350e4e595b5ed7cd4246390d9f6c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1887,15 +1887,21 @@ impl<'a> Node<'a> for XhpAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBody
         }
     }
 }
-impl<'a> Node<'a> for XhpAttrInfo {
+impl<'a> Node<'a> for XhpAttrInfo<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_xhp_attr_info(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             XhpAttrInfo {
-                xai_tag: ref __binding_0,
-            } => __binding_0.accept(v),
+                tag: ref __binding_0,
+                enum_values: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }
@@ -1945,6 +1951,17 @@ impl<'a> Node<'a> for XhpChildOp {
             XhpChildOp::ChildStar => {}
             XhpChildOp::ChildPlus => {}
             XhpChildOp::ChildQuestion => {}
+        }
+    }
+}
+impl<'a> Node<'a> for XhpEnumValue<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_xhp_enum_value(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            XhpEnumValue::XEVInt(ref __binding_0) => __binding_0.accept(v),
+            XhpEnumValue::XEVString(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

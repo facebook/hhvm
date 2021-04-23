@@ -26,6 +26,7 @@ aast::XhpAttribute
 ast_defs::Bop
 ast_defs::Id
 ast_defs::ShapeFieldName
+ast_defs::XhpEnumValue
 decl_defs::ConditionTypeName
 decl_defs::LinearizationKind
 decl_defs::MethodReactivity

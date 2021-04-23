@@ -8,11 +8,12 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([5:9-16], "\\MyClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
   ("\\MyNamespace\\MyNamespaceType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [9:8-23]; td_vis = Transparent; td_tparams = [];
@@ -24,11 +25,12 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([10:9-16], "\\MyNamespace\\MyClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }))
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }))
   ]
 
 They matched!

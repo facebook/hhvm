@@ -4616,13 +4616,33 @@ where
                                 Pos::btw(&p, &Self::p_pos(&c.initializer, env))
                                     .map_err(Error::Failwith)?
                             };
-                            let (hint, enum_) = match &c.type_.children {
+                            let (hint, enum_values, enum_) = match &c.type_.children {
                                 XHPEnumType(c1) => {
                                     let p = Self::p_pos(&c.type_, env);
                                     let vals = Self::could_map(Self::p_expr, &c1.values, env)?;
-                                    (None, Some((p, vals)))
+                                    let mut enum_vals = vec![];
+                                    for val in vals.clone() {
+                                        match val {
+                                            ast::Expr(_, E_::String(xev)) => enum_vals.push(
+                                                ast::XhpEnumValue::XEVString(xev.to_string()),
+                                            ),
+                                            ast::Expr(_, E_::Int(xev)) => match xev.parse() {
+                                                Ok(n) => {
+                                                    enum_vals.push(ast::XhpEnumValue::XEVInt(n))
+                                                }
+                                                Err(_) =>
+                                                    // Since we have parse checks for
+                                                    // malformed integer literals already,
+                                                    // we assume this won't happen and ignore
+                                                    // the case.
+                                                    {}
+                                            },
+                                            _ => {}
+                                        }
+                                    }
+                                    (None, enum_vals, Some((p, vals)))
                                 }
-                                _ => (Some(Self::p_hint(&c.type_, env)?), None),
+                                _ => (Some(Self::p_hint(&c.type_, env)?), vec![], None),
                             };
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, &c.initializer, env)?;
@@ -4630,7 +4650,10 @@ where
                                 ast::TypeHint((), hint.clone()),
                                 ast::ClassVar {
                                     final_: false,
-                                    xhp_attr: Some(ast::XhpAttrInfo { xai_tag: req }),
+                                    xhp_attr: Some(ast::XhpAttrInfo {
+                                        tag: req,
+                                        enum_values,
+                                    }),
                                     abstract_: false,
                                     readonly: false,
                                     visibility: ast::Visibility::Public,

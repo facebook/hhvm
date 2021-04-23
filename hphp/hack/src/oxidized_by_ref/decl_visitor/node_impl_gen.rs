@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aadc2600a7a32f85e577fd9d39891c0b>>
+// @generated SignedSource<<173675f57ecb74114c294c5a937a0fc6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -503,19 +503,20 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 extends: ref __binding_8,
                 uses: ref __binding_9,
                 xhp_attr_uses: ref __binding_10,
-                req_extends: ref __binding_11,
-                req_implements: ref __binding_12,
-                implements: ref __binding_13,
-                implements_dynamic: ref __binding_14,
-                consts: ref __binding_15,
-                typeconsts: ref __binding_16,
-                props: ref __binding_17,
-                sprops: ref __binding_18,
-                constructor: ref __binding_19,
-                static_methods: ref __binding_20,
-                methods: ref __binding_21,
-                user_attributes: ref __binding_22,
-                enum_type: ref __binding_23,
+                xhp_enum_values: ref __binding_11,
+                req_extends: ref __binding_12,
+                req_implements: ref __binding_13,
+                implements: ref __binding_14,
+                implements_dynamic: ref __binding_15,
+                consts: ref __binding_16,
+                typeconsts: ref __binding_17,
+                props: ref __binding_18,
+                sprops: ref __binding_19,
+                constructor: ref __binding_20,
+                static_methods: ref __binding_21,
+                methods: ref __binding_22,
+                user_attributes: ref __binding_23,
+                enum_type: ref __binding_24,
             } => {
                 {
                     __binding_0.accept(v)
@@ -586,7 +587,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_22.accept(v)
                 }
-                { __binding_23.accept(v) }
+                {
+                    __binding_23.accept(v)
+                }
+                { __binding_24.accept(v) }
             }
         }
     }
@@ -1120,6 +1124,17 @@ impl<'a> Node<'a> for XhpAttrTag {
         match self {
             XhpAttrTag::Required => {}
             XhpAttrTag::Lateinit => {}
+        }
+    }
+}
+impl<'a> Node<'a> for XhpEnumValue<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_xhp_enum_value(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            XhpEnumValue::XEVInt(ref __binding_0) => __binding_0.accept(v),
+            XhpEnumValue::XEVString(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

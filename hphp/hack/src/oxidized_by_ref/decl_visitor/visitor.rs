@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<98b3e35b22e84d28cc8cf37654b89e24>>
+// @generated SignedSource<<604a38ce3eb75db5ae110a17f48cc97a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -176,6 +176,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_xhp_attr_tag(&mut self, p: &'a XhpAttrTag) {
+        p.recurse(self.object())
+    }
+    fn visit_xhp_enum_value(&mut self, p: &'a XhpEnumValue<'a>) {
         p.recurse(self.object())
     }
 }

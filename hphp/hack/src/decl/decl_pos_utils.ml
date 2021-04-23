@@ -263,6 +263,7 @@ struct
       dc_extends = dc.dc_extends;
       dc_sealed_whitelist = dc.dc_sealed_whitelist;
       dc_xhp_attr_deps = dc.dc_xhp_attr_deps;
+      dc_xhp_enum_values = dc.dc_xhp_enum_values;
       dc_req_ancestors = List.map dc.dc_req_ancestors requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
       dc_tparams = List.map dc.dc_tparams type_param;
@@ -320,6 +321,7 @@ struct
       sc_extends = List.map sc.sc_extends ty;
       sc_uses = List.map sc.sc_uses ty;
       sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ty;
+      sc_xhp_enum_values = sc.sc_xhp_enum_values;
       sc_req_extends = List.map sc.sc_req_extends ty;
       sc_req_implements = List.map sc.sc_req_implements ty;
       sc_implements = List.map sc.sc_implements ty;

@@ -82,6 +82,7 @@ let to_class_type
         dc_extends;
         dc_sealed_whitelist;
         dc_xhp_attr_deps = _;
+        dc_xhp_enum_values;
         dc_enum_type;
         dc_decl_errors;
         dc_condition_types = _;
@@ -190,5 +191,6 @@ let to_class_type
     tc_extends = dc_extends;
     tc_enum_type = dc_enum_type;
     tc_sealed_whitelist = dc_sealed_whitelist;
+    tc_xhp_enum_values = dc_xhp_enum_values;
     tc_decl_errors = dc_decl_errors;
   }

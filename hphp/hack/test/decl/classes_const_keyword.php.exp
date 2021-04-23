@@ -4,8 +4,9 @@
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
        sc_name = ([4:7-17], "\\DictConsts"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-       sc_implements = []; sc_implements_dynamic = false;
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_implements_dynamic = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false;
           scc_name = ([5:27-32], "CDICT");
@@ -54,8 +55,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
         sc_name = ([12:16-30], "\\AbstractConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = true;
            scc_name = ([13:22-35], "CABSTRACT_INT");
@@ -70,8 +72,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([16:7-16], "\\VecConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([17:18-22], "CVEC");
@@ -101,8 +104,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([21:7-18], "\\ArrayConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([22:29-36], "CDARRAY");
@@ -141,8 +145,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([28:7-18], "\\BinopConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([29:13-17], "CINT");
@@ -166,8 +171,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([35:7-18], "\\ShapeConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([36:47-53], "CSHAPE");
@@ -192,8 +198,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([40:7-18], "\\TupleConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([41:33-40], "COPTION");
@@ -219,8 +226,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([44:7-22], "\\ClassnameConsts"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false;
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([45:32-42], "CCLASSNAME");

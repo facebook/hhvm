@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34f655b22c3c4d78e19d6a446e4a8fa9>>
+// @generated SignedSource<<48a713fa115701455db4b28f01e0fedd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1649,7 +1649,24 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 {
 }
 
-pub use oxidized::aast::XhpAttrInfo;
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct XhpAttrInfo<'a> {
+    pub tag: Option<oxidized::aast::XhpAttrTag>,
+    pub enum_values: &'a [ast_defs::XhpEnumValue<'a>],
+}
+impl<'a> TrivialDrop for XhpAttrInfo<'a> {}
 
 #[derive(
     Clone,
@@ -1666,7 +1683,7 @@ pub use oxidized::aast::XhpAttrInfo;
 )]
 pub struct ClassVar<'a, Ex, Fb, En, Hi> {
     pub final_: bool,
-    pub xhp_attr: Option<&'a oxidized::aast::XhpAttrInfo>,
+    pub xhp_attr: Option<&'a XhpAttrInfo<'a>>,
     pub abstract_: bool,
     pub readonly: bool,
     pub visibility: oxidized::aast::Visibility,

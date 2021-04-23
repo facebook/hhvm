@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed7cc613e4f0c8aa427140921885a219>>
+// @generated SignedSource<<30b0666251552fb642fd406be3f416d4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -803,6 +803,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node mut XhpChildOp,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_xhp_enum_value(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node mut XhpEnumValue,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

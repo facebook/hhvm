@@ -29,7 +29,6 @@ oxidized::aast::TypedefVisibility
 oxidized::aast::UseAsVisibility
 oxidized::aast::VcKind
 oxidized::aast::Visibility
-oxidized::aast::XhpAttrInfo
 oxidized::aast::XhpAttrTag
 oxidized::ast_defs::ClassKind
 oxidized::ast_defs::ConstraintKind

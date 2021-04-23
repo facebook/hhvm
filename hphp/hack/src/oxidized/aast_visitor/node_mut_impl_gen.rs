@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c14e203dd7bee35a57ef6956b41b112>>
+// @generated SignedSource<<17f694300f9b55748a3e0b2d55c0f209>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2225,7 +2225,8 @@ impl<P: Params> NodeMut<P> for XhpAttrInfo {
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
-        self.xai_tag.accept(c, v)?;
+        self.tag.accept(c, v)?;
+        self.enum_values.accept(c, v)?;
         Ok(())
     }
 }
@@ -2325,6 +2326,31 @@ impl<P: Params> NodeMut<P> for XhpChildOp {
             XhpChildOp::ChildStar => Ok(()),
             XhpChildOp::ChildPlus => Ok(()),
             XhpChildOp::ChildQuestion => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for XhpEnumValue {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_xhp_enum_value(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            XhpEnumValue::XEVInt(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            XhpEnumValue::XEVString(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
         }
     }
 }

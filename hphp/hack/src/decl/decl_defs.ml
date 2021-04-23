@@ -195,6 +195,7 @@ type decl_class_type = {
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
+  dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   dc_enum_type: enum_type option;
   dc_decl_errors: Errors.t option; [@opaque]
   dc_condition_types: SSet.t;

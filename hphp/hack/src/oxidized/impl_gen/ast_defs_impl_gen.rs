@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e99cd2d613ce1861ba0c1a826152af6>>
+// @generated SignedSource<<f52f8164f7f5efcb0299276148c33ae7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -625,6 +625,62 @@ impl Visibility {
         match self {
             Visibility::Protected => true,
             _ => false,
+        }
+    }
+}
+impl XhpEnumValue {
+    pub fn mk_xevint(p0: isize) -> Self {
+        XhpEnumValue::XEVInt(p0)
+    }
+    pub fn mk_xevstring(p0: String) -> Self {
+        XhpEnumValue::XEVString(p0)
+    }
+    pub fn is_xevint(&self) -> bool {
+        match self {
+            XhpEnumValue::XEVInt(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_xevstring(&self) -> bool {
+        match self {
+            XhpEnumValue::XEVString(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_xevint(&self) -> Option<&isize> {
+        match self {
+            XhpEnumValue::XEVInt(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_xevstring(&self) -> Option<&String> {
+        match self {
+            XhpEnumValue::XEVString(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_xevint_mut(&mut self) -> Option<&mut isize> {
+        match self {
+            XhpEnumValue::XEVInt(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_xevstring_mut(&mut self) -> Option<&mut String> {
+        match self {
+            XhpEnumValue::XEVString(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_xevint_into(self) -> Option<isize> {
+        match self {
+            XhpEnumValue::XEVInt(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_xevstring_into(self) -> Option<String> {
+        match self {
+            XhpEnumValue::XEVString(p0) => Some(p0),
+            _ => None,
         }
     }
 }

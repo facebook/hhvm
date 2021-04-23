@@ -119,6 +119,7 @@ and class_type = {
   tc_extends: SSet.t;
   tc_enum_type: enum_type option;
   tc_sealed_whitelist: SSet.t option;
+  tc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   tc_decl_errors: Errors.t option; [@opaque]
 }
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<90d5df1e603b8e764f9b4769927c6909>>
+// @generated SignedSource<<0a2867b220a11db176ceecfd7ca04c95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1548,12 +1548,10 @@ pub struct ClassTypeconstDef<Ex, Fb, En, Hi> {
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -1563,7 +1561,8 @@ pub struct ClassTypeconstDef<Ex, Fb, En, Hi> {
     ToOcamlRep
 )]
 pub struct XhpAttrInfo {
-    pub xai_tag: Option<XhpAttrTag>,
+    pub tag: Option<XhpAttrTag>,
+    pub enum_values: Vec<ast_defs::XhpEnumValue>,
 }
 
 #[derive(

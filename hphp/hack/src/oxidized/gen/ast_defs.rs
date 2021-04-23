@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e14de26f8c384fdbf7fe318bcd73e87>>
+// @generated SignedSource<<e072dae33b73f4c61f52bc34d4053afa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -321,3 +321,27 @@ pub enum Visibility {
     Protected,
 }
 impl TrivialDrop for Visibility {}
+
+/// Literal values that can occur in XHP enum properties.
+///
+/// class :my-xhp-class {
+///   attribute enum {'big', 'small'} my-prop;
+/// }
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum XhpEnumValue {
+    XEVInt(isize),
+    XEVString(String),
+}

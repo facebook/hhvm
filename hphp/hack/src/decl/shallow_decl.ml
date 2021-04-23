@@ -300,6 +300,14 @@ let method_ env m =
         ~sound_dynamic_callable;
   }
 
+let xhp_enum_values props =
+  List.fold props ~init:SMap.empty ~f:(fun acc prop ->
+      match prop.cv_xhp_attr with
+      | Some { xai_enum_values = []; _ } -> acc
+      | Some { xai_enum_values; _ } ->
+        SMap.add (snd prop.cv_id) xai_enum_values acc
+      | None -> acc)
+
 let class_ ctx c =
   let (errs, result) =
     Errors.do_ @@ fun () ->
@@ -309,6 +317,7 @@ let class_ ctx c =
     let hint = Decl_hint.hint env in
     let (req_extends, req_implements) = split_reqs c in
     let (static_vars, vars) = split_vars c in
+    let sc_xhp_enum_values = xhp_enum_values vars in
     let (constructor, statics, rest) = split_methods c in
     let sc_extends = List.map ~f:hint c.c_extends in
     let sc_uses = List.map ~f:hint c.c_uses in
@@ -338,6 +347,7 @@ let class_ ctx c =
       sc_extends;
       sc_uses;
       sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
+      sc_xhp_enum_values;
       sc_req_extends;
       sc_req_implements;
       sc_implements;

@@ -21,7 +21,9 @@ use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use oxidized_by_ref::{
     aast,
-    ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
+    ast_defs::{
+        Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance, XhpEnumValue,
+    },
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
     file_info::Mode,
@@ -653,6 +655,7 @@ pub struct PropertyNode<'a> {
 
 #[derive(Debug)]
 pub struct XhpClassAttributeDeclarationNode<'a> {
+    xhp_attr_enum_values: &'a [(&'a str, &'a [XhpEnumValue<'a>])],
     xhp_attr_decls: &'a [ShallowProp<'a>],
     xhp_attr_uses_decls: &'a [Node<'a>],
 }
@@ -762,6 +765,7 @@ pub enum Node<'a> {
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Ty(&'a Ty<'a>),
+    XhpEnumTy(&'a (&'a Ty<'a>, &'a [XhpEnumValue<'a>])),
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>), // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}", and also for consts via make_const_declaration
     ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])), // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and class-const "public const int X=1".
@@ -3557,6 +3561,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
         let mut uses_len = 0;
         let mut xhp_attr_uses_len = 0;
+        let mut xhp_enum_values = SMap::empty();
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
         let mut consts_len = 0;
@@ -3580,9 +3585,14 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 Node::XhpClassAttributeDeclaration(&XhpClassAttributeDeclarationNode {
                     xhp_attr_decls,
                     xhp_attr_uses_decls,
+                    xhp_attr_enum_values,
                 }) => {
                     props_len += xhp_attr_decls.len();
                     xhp_attr_uses_len += xhp_attr_uses_decls.len();
+
+                    for (name, values) in xhp_attr_enum_values {
+                        xhp_enum_values = xhp_enum_values.add(self.arena, name, *values);
+                    }
                 }
                 Node::TypeConstant(..) => typeconsts_len += 1,
                 Node::RequireClause(require) => match require.require_type.token_kind() {
@@ -3647,6 +3657,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 Node::XhpClassAttributeDeclaration(&XhpClassAttributeDeclarationNode {
                     xhp_attr_decls,
                     xhp_attr_uses_decls,
+                    ..
                 }) => {
                     xhp_props.extend(xhp_attr_decls);
                     xhp_attr_uses.extend(
@@ -3741,6 +3752,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             extends,
             uses,
             xhp_attr_uses,
+            xhp_enum_values,
             req_extends,
             req_implements,
             implements,
@@ -3833,6 +3845,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         attributes: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
+        let mut xhp_attr_enum_values = Vec::new_in(self.arena);
+
         let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
             let node = match node {
                 Node::XhpClassAttribute(x) => x,
@@ -3841,7 +3855,14 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             let Id(pos, name) = node.name;
             let name = prefix_colon(self.arena, name);
 
-            let type_ = self.node_to_ty(node.hint);
+            let (type_, enum_values) = match node.hint {
+                Node::XhpEnumTy((ty, values)) => (Some(*ty), Some(values)),
+                _ => (self.node_to_ty(node.hint), None),
+            };
+            if let Some(enum_values) = enum_values {
+                xhp_attr_enum_values.push((name, *enum_values));
+            };
+
             let type_ = if node.nullable && node.tag.is_none() {
                 type_.and_then(|x| match x {
                     // already nullable
@@ -3852,6 +3873,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             } else {
                 type_
             };
+
             let mut flags = PropFlags::empty();
             flags.set(PropFlags::NEEDS_INIT, node.needs_init);
             Some(ShallowProp {
@@ -3872,11 +3894,18 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         }));
 
         Node::XhpClassAttributeDeclaration(self.alloc(XhpClassAttributeDeclarationNode {
+            xhp_attr_enum_values: xhp_attr_enum_values.into_bump_slice(),
             xhp_attr_decls,
             xhp_attr_uses_decls,
         }))
     }
 
+    /// Handle XHP attribute enum declarations.
+    ///
+    ///   class :foo implements XHPChild {
+    ///     attribute
+    ///       enum {'big', 'small'} size; // this line
+    ///   }
     fn make_xhp_enum_type(
         &mut self,
         enum_keyword: Self::R,
@@ -3884,12 +3913,36 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         xhp_enum_values: Self::R,
         right_brace: Self::R,
     ) -> Self::R {
-        let ty_opt = xhp_enum_values
+        // Infer the type hint from the first value.
+        // TODO: T88207956 consider all the values.
+        let ty = xhp_enum_values
             .iter()
             .next()
-            .and_then(|x| self.node_to_ty(*x));
-        match ty_opt {
-            Some(ty) => self.hint_ty(self.merge_positions(enum_keyword, right_brace), ty.1),
+            .and_then(|node| self.node_to_ty(*node))
+            .and_then(|node_ty| {
+                let pos = self.merge_positions(enum_keyword, right_brace);
+                let ty_ = node_ty.1;
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
+            });
+
+        let mut values = Vec::new_in(self.arena);
+        for node in xhp_enum_values.iter() {
+            // XHP enum values may only be string or int literals.
+            match node {
+                Node::IntLiteral(&(s, _)) => {
+                    let i = s.parse::<isize>().unwrap_or(0);
+                    values.push(XhpEnumValue::XEVInt(i));
+                }
+                Node::StringLiteral(&(s, _)) => {
+                    let owned_str = std::string::String::from_utf8_lossy(s);
+                    values.push(XhpEnumValue::XEVString(self.arena.alloc_str(&owned_str)));
+                }
+                _ => {}
+            };
+        }
+
+        match ty {
+            Some(ty) => Node::XhpEnumTy(self.alloc((&ty, values.into_bump_slice()))),
             None => Node::Ignored(SK::XHPEnumType),
         }
     }
@@ -4076,6 +4129,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             extends: bumpalo::vec![in self.arena; extends].into_bump_slice(),
             uses: &[],
             xhp_attr_uses: &[],
+            xhp_enum_values: SMap::empty(),
             req_extends: &[],
             req_implements: &[],
             implements: &[],
@@ -4212,6 +4266,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             extends,
             uses: &[],
             xhp_attr_uses: &[],
+            xhp_enum_values: SMap::empty(),
             req_extends: &[],
             req_implements: &[],
             implements: &[],

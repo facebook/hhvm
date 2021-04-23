@@ -9,8 +9,8 @@
          (Tapply (([4:6-7], "\\HH\\BuiltinEnum"),
             [(Rhint ([4:6-7]), (Tapply (([4:6-7], "\\E"), [])))])))
          ];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");

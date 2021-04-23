@@ -4,11 +4,12 @@
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
        sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None }));
   ("\\returns_readonly",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -61,9 +62,9 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([14:7-10], "\\Bar"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-        sc_typeconsts = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([15:23-25], "x"); sp_xhp_attr = None;
            sp_type =

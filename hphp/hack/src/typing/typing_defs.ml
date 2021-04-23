@@ -181,6 +181,7 @@ and class_type = {
   tc_extends: SSet.t;
   tc_enum_type: enum_type option;
   tc_sealed_whitelist: SSet.t option;
+  tc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   tc_decl_errors: Errors.t option; [@opaque]
 }
 
@@ -1193,7 +1194,7 @@ let get_ce_sound_dynamic_callable ce =
 let xhp_attr_to_ce_flags xa =
   match xa with
   | None -> 0x0
-  | Some { xa_tag; xa_has_default } ->
+  | Some { xa_tag; xa_has_default; _ } ->
     Int.bit_or
       ( if xa_has_default then
         ce_flags_xa_has_default

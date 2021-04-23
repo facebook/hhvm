@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<646964493999b168c0b1424c87b54eaf>>
+// @generated SignedSource<<6c90ac99438860f2b72ebce610347981>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -128,3 +128,28 @@ impl<'a> TrivialDrop for Bop<'a> {}
 pub use oxidized::ast_defs::Uop;
 
 pub use oxidized::ast_defs::Visibility;
+
+/// Literal values that can occur in XHP enum properties.
+///
+/// class :my-xhp-class {
+///   attribute enum {'big', 'small'} my-prop;
+/// }
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum XhpEnumValue<'a> {
+    XEVInt(isize),
+    XEVString(&'a str),
+}
+impl<'a> TrivialDrop for XhpEnumValue<'a> {}

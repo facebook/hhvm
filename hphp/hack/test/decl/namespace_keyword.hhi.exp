@@ -14,8 +14,8 @@
          (Tapply (([5:36-51], "\\HH\\Traversable"),
             [(Rhint ([5:52-54]), (Tgeneric ("Tv", [])))])))
          ];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -36,8 +36,8 @@
           (Tapply (([7:33-54], "\\HH\\Rx\\Traversable"),
              [(Rhint ([7:55-57]), (Tgeneric ("Tv", [])))])))
           ];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

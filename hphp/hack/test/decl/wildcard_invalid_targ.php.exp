@@ -9,11 +9,12 @@
           tp_reified = Reified; tp_user_attributes = [] }
          ];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -23,8 +24,8 @@
         sc_extends =
         [(Rhint ([6:17-21]),
           (Tapply (([6:17-18], "\\C"), [(Rhint ([6:19-20]), Terr)])))];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -42,8 +43,8 @@
                (Tapply (([7:19-20], "\\C"), [(Rhint ([7:21-22]), Terr)])))]
              )))
           ];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

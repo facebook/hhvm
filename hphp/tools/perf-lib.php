@@ -10,8 +10,8 @@ function filter_func_raw(string $func): string {
   return trim(shell_exec("echo '$func' | c++filt"));
 }
 
-# If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
-# off any trailing junk first.
+// If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
+// off any trailing junk first.
 function filter_func(string $func): string {
   if (strncmp($func, '_Z', 2) === 0) {
     $matches = null;
@@ -27,8 +27,8 @@ function filter_func(string $func): string {
   return $func;
 }
 
-# Read perf samples from the given file stream into a Vector of stack traces.
-# The stream should contain the output of "perf script -f comm,ip,sym".
+// Read perf samples from the given file stream into a Vector of stack traces.
+// The stream should contain the output of "perf script -f comm,ip,sym".
 function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
   $samples = Vector {};
   $skip_sample = false;

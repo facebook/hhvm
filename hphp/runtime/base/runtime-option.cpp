@@ -3013,15 +3013,8 @@ void RuntimeOption::Load(
 
   // Bespoke array-likes
 
-  // If we're going to construct bespoke array-likes at runtime, ensure that
-  // we JIT checks for these types as well. We support JIT-ing these checks
-  // even if there are no runtime bespokes as way to test our guard logic.
-  if (RO::EvalBespokeArrayLikeMode == 0) {
-    bespoke::setLoggingEnabled(false);
-  } else {
-    auto const log = !isJitDeserializing();
-    bespoke::setLoggingEnabled(log);
-  }
+  auto const enable_logging = RO::EvalBespokeArrayLikeMode != 0;
+  bespoke::setLoggingEnabled(enable_logging);
   specializeVanillaDestructors();
 
   // Hack Array Compats

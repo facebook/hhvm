@@ -338,6 +338,12 @@ struct Layout {
    */
   static void FinalizeHierarchy();
 
+  /*
+   * Returns true if we've finalized layout decisions and sealed the bespoke
+   * type lattice. (The latter must happen after layout selection.)
+   */
+  static bool HierarchyFinalized();
+
   bool operator<=(const Layout& other) const;
   const Layout* operator|(const Layout& other) const;
   const Layout* operator&(const Layout& other) const;

@@ -283,6 +283,10 @@ void Layout::FinalizeHierarchy() {
   s_hierarchyFinal.store(true, std::memory_order_release);
 }
 
+bool Layout::HierarchyFinalized() {
+  return s_hierarchyFinal.load(std::memory_order_acquire);;
+}
+
 bool Layout::operator<=(const Layout& other) const {
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   auto const res = std::binary_search(m_ancestors.begin(), m_ancestors.end(),

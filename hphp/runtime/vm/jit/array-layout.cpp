@@ -426,6 +426,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
 }
 
 void deserializeBespokeLayouts(ProfDataDeserializer& des) {
+  bespoke::setLoggingEnabled(false);
   auto const layouts = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);

@@ -417,6 +417,10 @@ ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
 }
 
 void selectBespokeLayouts() {
+  // On successfully deserializing layout decisions, a jumpstart consumer
+  // will take care of finalizing the layout hierarchy.
+  if (Layout::HierarchyFinalized()) return;
+
   setLoggingEnabled(false);
   auto const sar = []{
     if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();

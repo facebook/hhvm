@@ -124,6 +124,8 @@ struct
       Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
+    (* After we handoff FD to server, how many seconds to wait before closing? 0 means "close immediately" *)
+    monitor_fd_close_delay: int;
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
@@ -783,6 +785,7 @@ struct
       ~current_version
       ~waiting_client
       ~max_purgatory_clients
+      ~monitor_fd_close_delay
       server_start_options
       informant_init_env
       monitor_config =
@@ -828,6 +831,7 @@ struct
         watchman_retries = 0;
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
+        monitor_fd_close_delay;
       }
     in
     (env, monitor_config, socket)
@@ -836,6 +840,7 @@ struct
       ~current_version
       ~waiting_client
       ~max_purgatory_clients
+      ~monitor_fd_close_delay
       server_start_options
       informant_init_env
       monitor_config =
@@ -844,6 +849,7 @@ struct
         ~current_version
         ~waiting_client
         ~max_purgatory_clients
+        ~monitor_fd_close_delay
         server_start_options
         informant_init_env
         monitor_config

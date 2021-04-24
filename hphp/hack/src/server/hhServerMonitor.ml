@@ -105,13 +105,13 @@ let monitor_daemon_main
           | _ -> false);
       }
     in
-    let max_purgatory_clients =
-      local_config.ServerLocalConfig.max_purgatory_clients
-    in
     SM.start_monitoring
       ~current_version
       ~waiting_client
-      ~max_purgatory_clients
+      ~max_purgatory_clients:
+        local_config.ServerLocalConfig.max_purgatory_clients
+      ~monitor_fd_close_delay:
+        local_config.ServerLocalConfig.monitor_fd_close_delay
       options
       informant_options
       ServerMonitorUtils.

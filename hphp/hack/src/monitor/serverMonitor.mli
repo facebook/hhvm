@@ -17,6 +17,7 @@ module Make_monitor
     current_version:Config_file.version ->
     waiting_client:Unix.file_descr option ->
     max_purgatory_clients:int ->
+    monitor_fd_close_delay:int ->
     SC.server_start_options ->
     Informant.init_env ->
     ServerMonitorUtils.monitor_config ->
@@ -31,6 +32,7 @@ module Make_monitor
     current_version:Config_file.version ->
     waiting_client:Unix.file_descr option ->
     max_purgatory_clients:int ->
+    monitor_fd_close_delay:int ->
     SC.server_start_options ->
     Informant.init_env ->
     ServerMonitorUtils.monitor_config ->

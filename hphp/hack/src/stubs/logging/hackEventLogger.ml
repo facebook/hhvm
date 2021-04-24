@@ -23,6 +23,7 @@ type rollout_flags = {
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
   max_times_to_defer_type_checking: int option;
+  monitor_fd_close_delay: int;
 }
 
 let flush () = ()

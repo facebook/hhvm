@@ -67,31 +67,38 @@ module Sent_fds_collector = struct
    an EOF from being read by the server).
    *)
 
-  module Fd_scheduler = Scheduler.Make (struct
-    type t = (* Unix.time *) float
-  end)
+  type handed_off_fd_to_close = {
+    time_to_close: float;
+    tracker: Connection_tracker.t;
+    fd: Unix.file_descr;
+  }
 
-  let cleanup_fd fd =
-    if Sys_utils.is_apple_os () then
-      (* Close it 2 seconds later. *)
-      let trigger = Unix.gettimeofday () +. 2.0 in
-      Fd_scheduler.wait_for_fun
-        ~once:true
-        ~priority:1
-        (fun time -> Float.(time >= trigger))
-        (fun x ->
-          let () = Printf.eprintf "Closing client fd\n" in
-          let () = Unix.close fd in
-          x)
-    else
+  let handed_off_fds_to_close : handed_off_fd_to_close list ref = ref []
+
+  let cleanup_fd ~tracker ~monitor_fd_close_delay fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
+    if monitor_fd_close_delay = 0 then begin
+      log "closing client fd immediately after handoff" ~tracker;
       Unix.close fd
+    end else
+      let time_to_close =
+        Unix.gettimeofday () +. float_of_int monitor_fd_close_delay
+      in
+      handed_off_fds_to_close :=
+        { time_to_close; tracker; fd } :: !handed_off_fds_to_close
 
   let collect_garbage () =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    if Sys_utils.is_apple_os () then
-      ignore (Fd_scheduler.wait_and_run_ready (Unix.gettimeofday ()))
-    else
-      ()
+    let t = Unix.gettimeofday () in
+    let (ready, notready) =
+      List.partition_tf !handed_off_fds_to_close (fun { time_to_close; _ } ->
+          time_to_close <= t)
+    in
+    List.iter ready ~f:(fun { tracker; fd; _ } ->
+        log "closing client fd, after delay" ~tracker;
+        Unix.close fd);
+    handed_off_fds_to_close := notready;
+    ()
 end
 
 exception Malformed_build_id of string
@@ -289,12 +296,16 @@ struct
     else
       Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
-  let hand_off_client_connection ~tracker server_fd client_fd =
+  let hand_off_client_connection ~tracker env server_fd client_fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
     msg_to_channel server_fd tracker;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then
-      Sent_fds_collector.cleanup_fd client_fd
+      Sent_fds_collector.cleanup_fd
+        ~tracker
+        ~monitor_fd_close_delay:env.monitor_fd_close_delay
+        client_fd
     else begin
       Hh_logger.log "Failed to handoff FD to server.";
       raise (Send_fd_failure status)
@@ -303,15 +314,17 @@ struct
   (* Sends the client connection FD to the server process then closes the
    * FD. *)
   let rec hand_off_client_connection_with_retries
-      ~tracker server_fd retries client_fd =
+      ~tracker env server_fd retries client_fd =
+    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
     if not (List.is_empty ready_l) then
-      try hand_off_client_connection ~tracker server_fd client_fd
+      try hand_off_client_connection ~tracker env server_fd client_fd
       with e ->
         if retries > 0 then (
           log "Retrying FD handoff" ~tracker;
           hand_off_client_connection_with_retries
             ~tracker
+            env
             server_fd
             (retries - 1)
             client_fd
@@ -324,6 +337,7 @@ struct
       log "server socket not yet ready. Retrying." ~tracker;
       hand_off_client_connection_with_retries
         ~tracker
+        env
         server_fd
         (retries - 1)
         client_fd
@@ -386,7 +400,7 @@ struct
       let tracker =
         Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
       in
-      hand_off_client_connection_with_retries ~tracker server_fd 8 client_fd;
+      hand_off_client_connection_with_retries ~tracker env server_fd 8 client_fd;
       log "handed off client fd to server" ~tracker;
       server.last_request_handoff := Unix.time ();
       { env with server = Alive server }

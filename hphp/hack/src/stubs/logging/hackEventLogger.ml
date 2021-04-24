@@ -123,15 +123,15 @@ let client_set_mode _ = ()
 
 let serverless_ide_set_root _ = ()
 
-let client_check () = ()
-
 let client_start _ = ()
 
 let client_stop _ = ()
 
 let client_restart ~data:_ = ()
 
-let client_check_finish _ _ = ()
+let client_check_start () = ()
+
+let client_check _ _ = ()
 
 let client_lsp_method_handled
     ~root:_

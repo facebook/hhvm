@@ -212,7 +212,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from args.from;
   HackEventLogger.client_set_mode mode_s;
 
-  HackEventLogger.client_check ();
+  HackEventLogger.client_check_start ();
 
   let%lwt (exit_status, telemetry) =
     match args.mode with
@@ -917,5 +917,5 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
       Lwt.return (Exit_status.No_error, telemetry)
   in
-  HackEventLogger.client_check_finish exit_status telemetry;
+  HackEventLogger.client_check exit_status telemetry;
   Lwt.return exit_status

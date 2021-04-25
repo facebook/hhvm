@@ -155,6 +155,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
       let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
       find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
       |> Option.value ~default:[]
+  | Tdependent (_, ty) ->
+    (* Dependent types have an upper bound that's a class or generic *)
+    grab_class_elts_from_ty ~static ~seen env ty prop_id
   (* TODO: Handle more complex types *)
   | _ -> []
 

@@ -1,0 +1,12 @@
+File "dependent_types.php", line 14, characters 5-14:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "dependent_types.php", line 14, characters 12-14:
+This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "dependent_types.php", line 8, characters 29-32:
+  The property is defined here.
+File "dependent_types.php", line 16, characters 5-11:
+Invalid property assignment (Typing[4411])
+  File "dependent_types.php", line 16, characters 15-32:
+  This expression is readonly
+  File "dependent_types.php", line 9, characters 16-19:
+  But it's being assigned to a mutable property

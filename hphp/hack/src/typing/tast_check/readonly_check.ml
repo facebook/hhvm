@@ -92,6 +92,101 @@ let lenv_eq l1 l2 =
     l1
     l2
 
+(* Check that function calls which return readonly are wrapped in readonly *)
+let check_readonly_return_call pos caller_ty is_readonly =
+  let open Typing_defs in
+  match get_node caller_ty with
+  | Tfun fty when get_ft_returns_readonly fty ->
+    if not is_readonly then
+      Errors.explicit_readonly_cast
+        "function call"
+        pos
+        (Typing_defs.get_pos caller_ty)
+  | _ -> ()
+
+let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
+  let open Typing_defs in
+  (* Given a list of types, find recurse on the first type that
+  has the property and return the result *)
+  let find_first_in_list ~seen tyl =
+    List.find_map
+      ~f:(fun ty ->
+        match grab_class_elts_from_ty ~static ~seen env ty prop_id with
+        | [] -> None
+        | tyl -> Some tyl)
+      tyl
+  in
+  match get_node ty with
+  | Tclass (id, _exact, _args) ->
+    let provider_ctx = Tast_env.get_ctx env in
+    let class_decl = Decl_provider.get_class provider_ctx (snd id) in
+    (match class_decl with
+    | Some class_decl ->
+      let prop =
+        if static then
+          Cls.get_sprop class_decl (snd prop_id)
+        else
+          Cls.get_prop class_decl (snd prop_id)
+      in
+      Option.to_list prop
+    | None -> [])
+  (* Accessing a property off of an intersection type
+    should involve exactly one kind of readonlyness, since for
+    the intersection type to exist, the property must be related
+    by some subtyping relationship anyways, and property readonlyness
+    is invariant. Thus we just grab the first one from the list where the prop exists. *)
+  | Tintersection [] -> []
+  | Tintersection tyl ->
+    find_first_in_list ~seen tyl |> Option.value ~default:[]
+  (* A union type is more interesting, where we must return all possible cases
+  and be conservative in our use case. *)
+  | Tunion tyl ->
+    List.concat_map
+      ~f:(fun ty -> grab_class_elts_from_ty ~static ~seen env ty prop_id)
+      tyl
+  (* Generic types can be treated similarly to an intersection type
+    where we find the first prop that works from the upper bounds *)
+  | Tgeneric (name, tyargs) ->
+    (* Avoid circular generics with a set *)
+    if SSet.mem name seen then
+      []
+    else
+      let new_seen = SSet.add name seen in
+      let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+      find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
+      |> Option.value ~default:[]
+  (* TODO: Handle more complex types *)
+  | _ -> []
+
+(* Return a list of possible static prop elts given a class_get expression *)
+let get_static_prop_elts env class_id get =
+  let (_, ty) = fst class_id in
+  match get with
+  | CGstring prop_id -> grab_class_elts_from_ty ~static:true env ty prop_id
+  (* An expression is dynamic, so there's no way to tell the type generally *)
+  | CGexpr _ -> []
+
+(* Return a list of possible prop elts given an obj get expression *)
+let get_prop_elts env obj get =
+  let ty = Tast.get_type obj in
+  match get with
+  | (_, Id prop_id) -> grab_class_elts_from_ty ~static:false env ty prop_id
+  (* TODO: Handle more complex  cases *)
+  | _ -> []
+
+let check_readonly_property env obj get obj_ro =
+  let prop_elts = get_prop_elts env obj get in
+  (* If there's any property in the list of possible properties that could be readonly,
+      it must be explicitly cast to readonly *)
+  let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
+  match (readonly_prop, obj_ro) with
+  | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
+    Errors.explicit_readonly_cast
+      "property"
+      (Tast.get_position get)
+      (Lazy.force elt.Typing_defs.ce_pos)
+  | _ -> ()
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
@@ -158,7 +253,7 @@ let check =
         | Readonly -> Readonly
         | Mut ->
           (* In the mut case, we need to check if the property is marked readonly *)
-          let prop_elts = self#get_prop_elts env e1 e2 in
+          let prop_elts = get_prop_elts env e1 e2 in
           let readonly_prop =
             List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
           in
@@ -170,7 +265,7 @@ let check =
       | Array_get (_, None) -> Mut
       | Class_get (class_id, expr, _is_prop_call) ->
         (* If any of the static props could be readonly, treat the expression as readonly *)
-        let class_elts = self#get_static_prop_elts env class_id expr in
+        let class_elts = get_static_prop_elts env class_id expr in
         (* Note that the empty list case (when the prop doesn't exist) returns Mut *)
         if List.exists class_elts ~f:Typing_defs.get_ce_readonly_prop then
           Readonly
@@ -319,7 +414,7 @@ let check =
           | (Mut, Mut) -> ()
         end
       | (_, Class_get (id, expr, _)) ->
-        let prop_elts = self#get_static_prop_elts env id expr in
+        let prop_elts = get_static_prop_elts env id expr in
         check_prop_assignment prop_elts rval
       | (_, Obj_get (obj, get, _, _)) ->
         begin
@@ -327,7 +422,7 @@ let check =
           | Readonly -> Errors.readonly_modified (Tast.get_position obj)
           | Mut -> ()
         end;
-        let prop_elts = self#get_prop_elts env obj get in
+        let prop_elts = get_prop_elts env obj get in
         (* If there's a mutable prop, then there's a chance we're assigning to one *)
         check_prop_assignment prop_elts rval
       | (_, Lvar (_, lid)) ->
@@ -391,17 +486,6 @@ let check =
           Errors.readonly_closure_call pos f_pos suggestion
         | _ -> ()
       in
-      (* Check that function calls which return readonly are wrapped in readonly *)
-      let check_readonly_return_call caller_ty is_readonly =
-        match get_node caller_ty with
-        | Tfun fty when get_ft_returns_readonly fty ->
-          if not is_readonly then
-            Errors.explicit_readonly_cast
-              "function call"
-              pos
-              (Typing_defs.get_pos caller_ty)
-        | _ -> ()
-      in
       (* Checks a single arg against a parameter *)
       let check_arg param arg =
         let param_rty = param_to_rty param in
@@ -435,7 +519,7 @@ let check =
         | _ -> ()
       in
       check_readonly_closure caller_ty caller_rty;
-      check_readonly_return_call caller_ty is_readonly;
+      check_readonly_return_call pos caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
 
     method is_value_collection_ty env ty =
@@ -451,93 +535,6 @@ let check =
       in
       Typing_utils.is_sub_type env ty hackarray
       || Typing_utils.is_sub_type env ty shape
-
-    method grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
-      let open Typing_defs in
-      (* Given a list of types, find recurse on the first type that
-        has the property and return the result *)
-      let find_first_in_list ~seen tyl =
-        List.find_map
-          ~f:(fun ty ->
-            match self#grab_class_elts_from_ty ~static ~seen env ty prop_id with
-            | [] -> None
-            | tyl -> Some tyl)
-          tyl
-      in
-      match get_node ty with
-      | Tclass (id, _exact, _args) ->
-        let provider_ctx = Tast_env.get_ctx env in
-        let class_decl = Decl_provider.get_class provider_ctx (snd id) in
-        (match class_decl with
-        | Some class_decl ->
-          let prop =
-            if static then
-              Cls.get_sprop class_decl (snd prop_id)
-            else
-              Cls.get_prop class_decl (snd prop_id)
-          in
-          Option.to_list prop
-        | None -> [])
-      (* Accessing a property off of an intersection type
-        should involve exactly one kind of readonlyness, since for
-        the intersection type to exist, the property must be related
-        by some subtyping relationship anyways, and property readonlyness
-        is invariant. Thus we just grab the first one from the list where the prop exists. *)
-      | Tintersection [] -> []
-      | Tintersection tyl ->
-        find_first_in_list ~seen tyl |> Option.value ~default:[]
-      (* A union type is more interesting, where we must return all possible cases
-      and be conservative in our use case. *)
-      | Tunion tyl ->
-        List.concat_map
-          ~f:(fun ty ->
-            self#grab_class_elts_from_ty ~static ~seen env ty prop_id)
-          tyl
-      (* Generic types can be treated similarly to an intersection type
-        where we find the first prop that works from the upper bounds *)
-      | Tgeneric (name, tyargs) ->
-        if SSet.mem name seen then
-          []
-        else
-          let new_seen = SSet.add name seen in
-          let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
-          find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
-          |> Option.value ~default:[]
-      (* TODO: Handle more complex types *)
-      | _ -> []
-
-    (* Return a list of possible static prop elts given a class_get expression *)
-    method get_static_prop_elts env class_id get =
-      let (_, ty) = fst class_id in
-      match get with
-      | CGstring prop_id ->
-        self#grab_class_elts_from_ty ~static:true env ty prop_id
-      (* An expression is dynamic, so there's no way to tell the type generally *)
-      | CGexpr _ -> []
-
-    (* Return a list of possible prop elts given an obj get expression *)
-    method get_prop_elts env obj get =
-      let ty = Tast.get_type obj in
-      match get with
-      | (_, Id prop_id) ->
-        self#grab_class_elts_from_ty ~static:false env ty prop_id
-      (* TODO: Handle more complex  cases *)
-      | _ -> []
-
-    method obj_get env obj get =
-      let prop_elts = self#get_prop_elts env obj get in
-      (* If there's any property in the list of possible properties that could be readonly,
-        it must be explicitly cast to readonly *)
-      let readonly_prop =
-        List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
-      in
-      match (readonly_prop, self#ty_expr env obj) with
-      | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
-        Errors.explicit_readonly_cast
-          "property"
-          (Tast.get_position get)
-          (Lazy.force elt.Typing_defs.ce_pos)
-      | _ -> ()
 
     (* TODO: support obj get on generics, aliases and expression dependent types *)
     method! on_method_ env m =
@@ -697,7 +694,7 @@ let check =
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call
       | (_, Obj_get (obj, get, _nullable, _is_prop_call)) ->
-        self#obj_get env obj get;
+        check_readonly_property env obj get (self#ty_expr env obj);
         super#on_expr env e
       | (_, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
@@ -839,4 +836,45 @@ let handler =
         check#on_fun_def env f
       else
         ()
+
+    (*
+        The following error checks are ones that need to run even if
+        readonly analysis is not enabled by the file attribute.
+
+        TODO(readonly): When the user has not enabled readonly
+        and theres a readonly keyword, this will incorrectly error
+        an extra time on top of the parsing error. Fixing this
+        extra error at this stage will require a bunch of added complexity
+        and perf cost, and since this will only occur while the
+        feature is unstable, we allow the extra error it for now.
+      *)
+    method! at_Call env caller _tal _el _unpacked_element =
+      let tcopt = Tast_env.get_tcopt env in
+      (* this check is already handled by the readonly analysis,
+        which handles cases when there's a readonly keyword *)
+      if TypecheckerOptions.readonly tcopt then
+        ()
+      else
+        let caller_pos = Tast.get_position caller in
+        let caller_ty = Tast.get_type caller in
+        check_readonly_return_call caller_pos caller_ty false
+
+    method! at_expr env e =
+      let tcopt = Tast_env.get_tcopt env in
+      (* this check is already handled by the readonly analysis,
+      which handles cases when there's a readonly keyword *)
+      let check =
+        if TypecheckerOptions.readonly tcopt then
+          fun _e ->
+        ()
+        else
+          fun e ->
+        match e with
+        (* Assume obj is mutable here since you can't have a readonly thing
+            without readonly keyword/analysis *)
+        | (_, Obj_get (obj, get, _, _)) ->
+          check_readonly_property env obj get Mut
+        | _ -> ()
+      in
+      check e
   end

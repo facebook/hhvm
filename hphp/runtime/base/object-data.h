@@ -37,27 +37,6 @@ namespace HPHP {
 
 struct TypedValue;
 
-#define INVOKE_FEW_ARGS_COUNT 6
-#define INVOKE_FEW_ARGS_DECL3                        \
-  const Variant& a0 = uninit_variant,                \
-  const Variant& a1 = uninit_variant,                \
-  const Variant& a2 = uninit_variant
-#define INVOKE_FEW_ARGS_DECL6                        \
-  INVOKE_FEW_ARGS_DECL3,                             \
-  const Variant& a3 = uninit_variant,                \
-  const Variant& a4 = uninit_variant,                \
-  const Variant& a5 = uninit_variant
-#define INVOKE_FEW_ARGS_DECL10                       \
-  INVOKE_FEW_ARGS_DECL6,                             \
-  const Variant& a6 = uninit_variant,                \
-  const Variant& a7 = uninit_variant,                \
-  const Variant& a8 = uninit_variant,                \
-  const Variant& a9 = uninit_variant
-#define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
-#define INVOKE_FEW_ARGS(kind,num) \
-  INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
-#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
-
 void deepInitHelper(ObjectProps* propVec,
                     const Class::PropInitVec* propInitVec,
                     size_t nProps);
@@ -402,7 +381,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // vm_decode_function() instead.
   Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
   Variant o_invoke_few_args(const String& s, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
+                            const Variant& a0 = uninit_variant,
+                            const Variant& a1 = uninit_variant,
+                            const Variant& a2 = uninit_variant,
+                            const Variant& a3 = uninit_variant,
+                            const Variant& a4 = uninit_variant);
 
   ObjectData* clone();
 
@@ -501,10 +484,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-  
+
   [[noreturn]] NEVER_INLINE
   void throwMustBeMutable(Slot prop) const;
-  
+
   [[noreturn]] NEVER_INLINE
   void throwMustBeReadOnly(Slot prop) const;
 

@@ -724,38 +724,23 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   );
 }
 
-#define INVOKE_FEW_ARGS_IMPL3                        \
-  const Variant& a0, const Variant& a1, const Variant& a2
-#define INVOKE_FEW_ARGS_IMPL6                        \
-  INVOKE_FEW_ARGS_IMPL3,                             \
-  const Variant& a3, const Variant& a4, const Variant& a5
-#define INVOKE_FEW_ARGS_IMPL10                       \
-  INVOKE_FEW_ARGS_IMPL6,                             \
-  const Variant& a6, const Variant& a7, const Variant& a8, const Variant& a9
-#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
-
 Variant ObjectData::o_invoke_few_args(const String& s, int count,
-                                      INVOKE_FEW_ARGS_IMPL_ARGS) {
+                                      const Variant& a0 /* = uninit_variant*/,
+                                      const Variant& a1 /* = uninit_variant*/,
+                                      const Variant& a2 /* = uninit_variant*/,
+                                      const Variant& a3 /* = uninit_variant*/,
+                                      const Variant& a4 /* = uninit_variant*/) {
 
   CallCtx ctx;
   if (!decode_invoke(s, this, true, ctx)) {
     return Variant(Variant::NullInit());
   }
 
-  TypedValue args[INVOKE_FEW_ARGS_COUNT];
+  TypedValue args[5];
   switch(count) {
     default: not_implemented();
-#if INVOKE_FEW_ARGS_COUNT > 6
-    case 10: tvCopy(*a9.asTypedValue(), args[9]);
-    case  9: tvCopy(*a8.asTypedValue(), args[8]);
-    case  8: tvCopy(*a7.asTypedValue(), args[7]);
-    case  7: tvCopy(*a6.asTypedValue(), args[6]);
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 3
-    case  6: tvCopy(*a5.asTypedValue(), args[5]);
     case  5: tvCopy(*a4.asTypedValue(), args[4]);
     case  4: tvCopy(*a3.asTypedValue(), args[3]);
-#endif
     case  3: tvCopy(*a2.asTypedValue(), args[2]);
     case  2: tvCopy(*a1.asTypedValue(), args[1]);
     case  1: tvCopy(*a0.asTypedValue(), args[0]);

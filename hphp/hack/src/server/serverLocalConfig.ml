@@ -1309,17 +1309,8 @@ let load ~silent ~current_version config_overrides =
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.
     {
-      search_chunk_size = options.search_chunk_size;
-      max_bucket_size = options.max_bucket_size;
-      use_full_fidelity_parser = options.use_full_fidelity_parser;
       use_direct_decl_parser = options.use_direct_decl_parser;
-      interrupt_on_watchman = options.interrupt_on_watchman;
-      interrupt_on_client = options.interrupt_on_client;
       longlived_workers = options.longlived_workers;
-      prechecked_files = options.prechecked_files;
-      predeclare_ide = options.predeclare_ide;
-      max_typechecker_worker_memory_mb =
-        options.max_typechecker_worker_memory_mb;
       max_times_to_defer_type_checking =
         options.max_times_to_defer_type_checking;
       monitor_fd_close_delay = options.monitor_fd_close_delay;

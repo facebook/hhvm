@@ -12,16 +12,8 @@ type serialized_globals = Serialized_globals
 let serialize_globals () = Serialized_globals
 
 type rollout_flags = {
-  search_chunk_size: int;
-  max_bucket_size: int;
-  use_full_fidelity_parser: bool;
   use_direct_decl_parser: bool;
-  interrupt_on_watchman: bool;
-  interrupt_on_client: bool;
   longlived_workers: bool;
-  prechecked_files: bool;
-  predeclare_ide: bool;
-  max_typechecker_worker_memory_mb: int option;
   max_times_to_defer_type_checking: int option;
   monitor_fd_close_delay: int;
 }

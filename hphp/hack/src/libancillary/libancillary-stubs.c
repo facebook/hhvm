@@ -19,6 +19,8 @@
 
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
+
 
 #include "hphp/hack/src/third-party/libancillary/ancillary.h"
 
@@ -37,6 +39,7 @@ CAMLprim value stub_ancil_recv_fd(value int_val_socket) {
   int result;
   int socket = Int_val(int_val_socket);
   int error_code;
+  char errmsg[64];
 
   result = ancil_recv_fd(socket, &fd);
   error_code = errno; /* read errno here to make sure we don't loose it */
@@ -45,7 +48,8 @@ CAMLprim value stub_ancil_recv_fd(value int_val_socket) {
     error_val = caml_copy_string("");
     result_val = Val_int(fd);
   } else {
-    error_val = caml_copy_string(strerror(error_code));
+    snprintf(errmsg, sizeof(errmsg), "(errno=%d) %s", error_code, strerror(error_code));
+    error_val = caml_copy_string(errmsg);
     result_val = Val_int(result);
   }
   ret = caml_alloc_tuple(2);

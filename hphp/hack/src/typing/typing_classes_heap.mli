@@ -85,6 +85,8 @@ module Api : sig
 
   val enum_type : t -> enum_type option
 
+  val xhp_enum_values : t -> Ast_defs.xhp_enum_value list SMap.t
+
   val sealed_whitelist : t -> SSet.t option
 
   val decl_errors : t -> Errors.t option

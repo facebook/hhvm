@@ -43,6 +43,7 @@ type subdecl_kind =
   | Tparams
   | Where_constraints
   | Enum_type
+  | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
   | Implements_dynamic

@@ -203,6 +203,12 @@ module ApiShallow = struct
     | Lazy (sc, _lc) -> sc.sc_enum_type
     | Eager c -> c.tc_enum_type
 
+  let xhp_enum_values (decl, t) =
+    Decl_counters.count_subdecl decl Decl_counters.Xhp_enum_values @@ fun () ->
+    match t with
+    | Lazy (sc, _lc) -> sc.sc_xhp_enum_values
+    | Eager c -> c.tc_xhp_enum_values
+
   let sealed_whitelist (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Sealed_whitelist @@ fun () ->
     let get_sealed_whitelist sc =

@@ -240,6 +240,9 @@ let autocomplete_member ~is_static env class_ cid id =
     )
   )
 
+(*
+  Autocompletion for XHP attribute names in an XHP literal.
+*)
 let autocomplete_xhp_attributes env class_ cid id =
   (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
@@ -284,7 +287,56 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
     )
   end
 
-let autocomplete_xhp_enum_value attr_ty id_id env =
+(*
+  Autocompletion for the value of an attribute in an XHP literals with the enum type,
+  defined with the following syntax:
+  attribute enum {"some value", "some other value"} my-attribute;
+*)
+let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
+  if is_auto_complete (snd id_id) then begin
+    ac_env := Some env;
+    argument_global_type := Some Acprop;
+    autocomplete_identifier := Some id_id;
+
+    let attr_origin =
+      Cls.props cls
+      |> List.find ~f:(fun (name, _) -> String.equal (":" ^ attr_name) name)
+      |> Option.map ~f:(fun (_, { ce_origin = n; _ }) -> n)
+      |> Option.bind ~f:(fun cls_name ->
+             Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
+    in
+
+    let enum_values = match attr_origin with
+      | Some cls -> Cls.xhp_enum_values cls
+      | None -> SMap.empty
+    in
+
+    let add_enum_value_result xev =
+      let suggestion = function
+        | Ast_defs.XEV_Int value -> string_of_int value
+        | Ast_defs.XEV_String value -> "\"" ^ value ^ "\""
+      in
+      add_partial_result
+        (suggestion xev)
+        (Phase.locl ty)
+        SearchUtils.SI_Enum
+        None
+    in
+    match SMap.find_opt (":" ^ attr_name) enum_values with
+    | Some enum_values -> List.iter enum_values add_enum_value_result
+    | None -> ()
+  end
+
+(*
+  Autocompletion for the value of an attribute in an XHP literals
+  with type that is an enum class. i.e.
+
+    enum MyEnum {}
+    class :foo {
+      attribute MyEnum my-attribute;
+    }
+*)
+let autocomplete_xhp_enum_class_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
     ac_env := Some env;
     argument_global_type := Some Acprop;
@@ -616,7 +668,13 @@ let visitor =
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
                         *)
-                     autocomplete_xhp_enum_value ty id_id env;
+                     autocomplete_xhp_enum_attribute_value
+                       (snd id)
+                       ty
+                       id_id
+                       env
+                       c;
+                     autocomplete_xhp_enum_class_value ty id_id env;
                      autocomplete_xhp_bool_value ty id_id env
                    | _ -> ());
                    if Cls.is_xhp c then

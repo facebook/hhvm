@@ -40,6 +40,7 @@ type subdecl_kind =
   | Tparams
   | Where_constraints
   | Enum_type
+  | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
   | Implements_dynamic
@@ -127,6 +128,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Tparams
   | Where_constraints
   | Enum_type
+  | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
   | Implements_dynamic ->

@@ -627,8 +627,8 @@ pub mod instr {
         instr(Instruct::IMutator(InstructMutator::IncDecG(op)))
     }
 
-    pub fn incdecs(op: IncdecOp, rop: ReadOnlyOp) -> InstrSeq {
-        instr(Instruct::IMutator(InstructMutator::IncDecS(op, rop)))
+    pub fn incdecs(op: IncdecOp) -> InstrSeq {
+        instr(Instruct::IMutator(InstructMutator::IncDecS(op)))
     }
 
     pub fn setopg(op: EqOp) -> InstrSeq {
@@ -639,8 +639,8 @@ pub mod instr {
         instr(Instruct::IMutator(InstructMutator::SetOpL(local, op)))
     }
 
-    pub fn setops(op: EqOp, rop: ReadOnlyOp) -> InstrSeq {
-        instr(Instruct::IMutator(InstructMutator::SetOpS(op, rop)))
+    pub fn setops(op: EqOp) -> InstrSeq {
+        instr(Instruct::IMutator(InstructMutator::SetOpS(op)))
     }
 
     pub fn issetl(local: local::Type) -> InstrSeq {

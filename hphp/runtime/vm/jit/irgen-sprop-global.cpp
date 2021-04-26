@@ -227,7 +227,7 @@ void emitSetS(IRGS& env, ReadOnlyOp op) {
   bindMem(env, lookup.propPtr, value);
 }
 
-void emitSetOpS(IRGS& env, SetOpOp op, ReadOnlyOp /*rop*/) {
+void emitSetOpS(IRGS& env, SetOpOp op) {
   auto const ssaCls      = topC(env, BCSPRelOffset{1});
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
@@ -304,7 +304,7 @@ void emitIssetS(IRGS& env) {
   push(env, ret);
 }
 
-void emitIncDecS(IRGS& env, IncDecOp subop, ReadOnlyOp /*op*/) {
+void emitIncDecS(IRGS& env, IncDecOp subop) {
   auto const ssaCls      = topC(env);
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 

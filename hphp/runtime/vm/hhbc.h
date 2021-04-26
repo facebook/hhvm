@@ -647,13 +647,11 @@ constexpr uint32_t kMaxConcatN = 4;
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetOpS,          TWO(OA(SetOpOp), OA(ReadOnlyOp)),                  \
-                                       THREE(CV,CV,CV), ONE(CV),    NF) \
+  O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,CV,CV), ONE(CV),    NF) \
   O(IncDecL,         TWO(NLA, OA(IncDecOp)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IncDecS,         TWO(OA(IncDecOp), OA(ReadOnlyOp)),                 \
-                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(IncDecS,         ONE(OA(IncDecOp)),TWO(CV,CV),      ONE(CV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \

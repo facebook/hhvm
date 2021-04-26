@@ -1432,23 +1432,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
-    case Op::SetOpS: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      decode_oa<SetOpOp>(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop == ReadOnlyOp::CheckROCOW) return readOnlyImmNotSupported(rop, op);
-      break;
-    }
-    case Op::IncDecS: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      decode_oa<IncDecOp>(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop == ReadOnlyOp::CheckROCOW) return readOnlyImmNotSupported(rop, op);
-      break;
-    }
     case Op::SetS: {
       auto new_pc = pc;
       decode_op(new_pc);

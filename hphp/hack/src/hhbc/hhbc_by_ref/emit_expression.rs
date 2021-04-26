@@ -6176,8 +6176,8 @@ fn emit_final_static_op<'arena>(
     use LValOp as L;
     Ok(match op {
         L::Set => instr::sets(alloc, ReadOnlyOp::Any),
-        L::SetOp(op) => instr::setops(alloc, op, ReadOnlyOp::Any),
-        L::IncDec(op) => instr::incdecs(alloc, op, ReadOnlyOp::Any),
+        L::SetOp(op) => instr::setops(alloc, op),
+        L::IncDec(op) => instr::incdecs(alloc, op),
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))

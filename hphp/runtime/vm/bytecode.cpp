@@ -3451,7 +3451,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(SetOpOp op, ReadOnlyOp /*op*/) {
+OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   TypedValue* fr = vmStack().topC();
   TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -3520,7 +3520,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   tvCopy(IncDecBody(op, gbl), *nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecS(IncDecOp op, ReadOnlyOp /*rop*/) {
+OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",

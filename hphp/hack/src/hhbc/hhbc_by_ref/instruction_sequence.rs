@@ -651,15 +651,8 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::IncDecG(op)))
     }
 
-    pub fn incdecs<'a>(
-        alloc: &'a bumpalo::Bump,
-        op: IncdecOp,
-        readonly_op: ReadOnlyOp,
-    ) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IMutator(InstructMutator::IncDecS(op, readonly_op)),
-        )
+    pub fn incdecs<'a>(alloc: &'a bumpalo::Bump, op: IncdecOp) -> InstrSeq<'a> {
+        instr(alloc, Instruct::IMutator(InstructMutator::IncDecS(op)))
     }
 
     pub fn setopg<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
@@ -673,11 +666,8 @@ pub mod instr {
         )
     }
 
-    pub fn setops<'a>(alloc: &'a bumpalo::Bump, op: EqOp, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IMutator(InstructMutator::SetOpS(op, readonly_op)),
-        )
+    pub fn setops<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
+        instr(alloc, Instruct::IMutator(InstructMutator::SetOpS(op)))
     }
 
     pub fn issetl<'a>(alloc: &'a bumpalo::Bump, local: local::Type<'a>) -> InstrSeq<'a> {

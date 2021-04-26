@@ -1530,7 +1530,7 @@ SetOpG <op>    [C C]  ->  [C]
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
-SetOpS <op> <readonly op>    [C C:Class C]  ->  [C]
+SetOpS <op>    [C C:Class C]  ->  [C]
 
   Set op static property. This instruction first computes x = (string)$3. Next
   it checks if class $2 has an accessible static property named x. If it
@@ -1580,7 +1580,7 @@ IncDecG <op>    [C]  ->  [C]
   If op is PostDec, this instruction pushes v onto the stack and then it
   executes --v.
 
-IncDecS <op> <readonly op>    [C C:Class]  ->  [C]
+IncDecS <op>    [C C:Class]  ->  [C]
 
   Increment/decrement static property. This instruction first computes x =
   (string)$2. Next it checks if class $1 has an accessible static property

@@ -1717,11 +1717,9 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("SetOpG ")?;
             print_eq_op(w, op)
         }
-        M::SetOpS(op, rop) => {
+        M::SetOpS(op) => {
             w.write("SetOpS ")?;
-            print_eq_op(w, op)?;
-            w.write(" ")?;
-            print_readonly_op(w, rop)
+            print_eq_op(w, op)
         }
         M::IncDecL(id, op) => {
             w.write("IncDecL ")?;
@@ -1733,11 +1731,9 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("IncDecG ")?;
             print_incdec_op(w, op)
         }
-        M::IncDecS(op, rop) => {
+        M::IncDecS(op) => {
             w.write("IncDecS ")?;
-            print_incdec_op(w, op)?;
-            w.write(" ")?;
-            print_readonly_op(w, rop)
+            print_incdec_op(w, op)
         }
         M::UnsetL(id) => {
             w.write("UnsetL ")?;

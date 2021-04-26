@@ -5323,8 +5323,8 @@ fn emit_final_static_op(cid: &tast::ClassId, prop: &tast::ClassGetExpr, op: LVal
     use LValOp as L;
     Ok(match op {
         L::Set => instr::sets(ReadOnlyOp::Any),
-        L::SetOp(op) => instr::setops(op, ReadOnlyOp::Any),
-        L::IncDec(op) => instr::incdecs(op, ReadOnlyOp::Any),
+        L::SetOp(op) => instr::setops(op),
+        L::IncDec(op) => instr::incdecs(op),
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))

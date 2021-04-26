@@ -1,0 +1,12 @@
+APure sleeps safely.
+APure wakes up safely.
+ANonPure sleeps safely.
+ANonPure wakes up safely.
+APure sleeps safely.
+APure wakes up safely.
+
+Warning: Call to ANonPure::__sleep() requires [defaults] coeffects but serialize_pure() provided [] in %s on line 30
+ANonPure sleeps safely.
+
+Warning: Call to ANonPure::__wakeup() requires [defaults] coeffects but unserialize_pure() provided [] in %s on line 30
+ANonPure wakes up safely.

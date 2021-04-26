@@ -318,21 +318,25 @@ String f_serialize(const Variant& value);
 String serialize_keep_dvarrays(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       const Array& options = null_array);
+                       const Array& options = null_array,
+                       bool pure = false);
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       const Array& options = null_array);
+                       const Array& options = null_array,
+                       bool pure = false);
 
 inline Variant unserialize_from_buffer(const char* str, int len,
                                        VariableUnserializer::Type type,
-                                       const Array& options = null_array) {
-  return unserialize_ex(str, len, type, options);
+                                       const Array& options = null_array,
+                                       bool pure = false) {
+  return unserialize_ex(str, len, type, options, pure);
 }
 
 inline Variant unserialize_from_string(const String& str,
                                        VariableUnserializer::Type type,
-                                       const Array& options = null_array) {
-  return unserialize_from_buffer(str.data(), str.size(), type, options);
+                                       const Array& options = null_array,
+                                       bool pure = false) {
+  return unserialize_from_buffer(str.data(), str.size(), type, options, pure);
 }
 
 String resolve_include(const String& file, const char* currentDir,

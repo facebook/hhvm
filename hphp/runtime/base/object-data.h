@@ -394,12 +394,13 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   String invokeToString();
   bool hasToString();
 
-  Variant invokeSleep();
+  Variant invokeSleep(RuntimeCoeffects);
   Variant invokeToDebugDisplay();
-  Variant invokeWakeup();
+  Variant invokeWakeup(RuntimeCoeffects);
   Variant invokeDebugInfo();
 
-  Variant static InvokeSimple(ObjectData* data, const StaticString& name);
+  Variant static InvokeSimple(ObjectData* data, const StaticString& name,
+                              RuntimeCoeffects);
 
   /*
    * Returns whether this object has any dynamic properties.

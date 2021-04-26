@@ -2131,7 +2131,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     }
     if (obj->getVMClass()->rtAttribute(Class::HasSleep)) {
       handleSleep = true;
-      ret = const_cast<ObjectData*>(obj)->invokeSleep();
+      auto const providedCoeffects =
+        m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+      ret = const_cast<ObjectData*>(obj)->invokeSleep(providedCoeffects);
     }
     if (obj->hasNativeData()) {
       auto* ndi = cls->getNativeDataInfo();

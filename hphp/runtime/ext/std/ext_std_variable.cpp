@@ -421,7 +421,8 @@ struct SerializeOptions {
 };
 
 ALWAYS_INLINE String serialize_impl(const Variant& value,
-                                    const SerializeOptions& opts) {
+                                    const SerializeOptions& opts,
+                                    bool pure) {
   switch (value.getType()) {
     case KindOfClass:
     case KindOfLazyClass:
@@ -472,6 +473,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (opts.warnOnPHPArrays)     vs.setPHPWarn();
   if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
   if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
+  if (pure) vs.setPure();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
@@ -479,7 +481,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
 }
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
-  return serialize_impl(value, SerializeOptions());
+  return serialize_impl(value, SerializeOptions(), false);
+}
+
+String HHVM_FUNCTION(serialize_pure, const Variant& value) {
+  return serialize_impl(value, SerializeOptions(), true);
 }
 
 const StaticString
@@ -506,20 +512,20 @@ String HHVM_FUNCTION(HH_serialize_with_options,
   opts.serializeProvenanceAndLegacy =
     options.exists(s_serializeProvenanceAndLegacy) &&
     options[s_serializeProvenanceAndLegacy].toBoolean();
-  return serialize_impl(value, opts);
+  return serialize_impl(value, opts, false);
 }
 
 String serialize_keep_dvarrays(const Variant& value) {
   SerializeOptions opts;
   opts.keepDVArrays = true;
-  return serialize_impl(value, opts);
+  return serialize_impl(value, opts, false);
 }
 
 String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
                      const Variant& value) {
   SerializeOptions opts;
   opts.keepDVArrays = true;
-  return serialize_impl(value, opts);
+  return serialize_impl(value, opts, false);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -528,6 +534,16 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
     str,
     VariableUnserializer::Type::Serialize,
     options
+  );
+}
+
+Variant HHVM_FUNCTION(unserialize_pure, const String& str,
+                                        const Array& options) {
+  return unserialize_from_string(
+    str,
+    VariableUnserializer::Type::Serialize,
+    options,
+    true
   );
 }
 
@@ -631,7 +647,9 @@ void StandardExtension::initVariable() {
   HHVM_FE(debug_zval_dump);
   HHVM_FE(var_dump);
   HHVM_FE(serialize);
+  HHVM_FE(serialize_pure);
   HHVM_FE(unserialize);
+  HHVM_FE(unserialize_pure);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);

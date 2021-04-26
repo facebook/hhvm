@@ -85,6 +85,9 @@ struct VariableUnserializer {
     m_unitFilename = name;
   }
 
+  // Should we be calling the pure callbacks
+  void setPure() { m_pure = true; }
+
  private:
   /*
    * Used to object property values that are overwritten by later entries.
@@ -168,6 +171,7 @@ private:
   const char* const m_begin;
   bool m_forceDArrays;
   bool m_markLegacyArrays;
+  bool m_pure{false};            // should we call the pure callbacks?
   /* unitFilename should be set when we are deserializing
    * an adata from the repo--it is needed to *re*construct the
    * correct provenance tag */

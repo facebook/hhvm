@@ -341,8 +341,10 @@ Variant VariableUnserializer::unserialize() {
     StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
   }
 
+  auto const providedCoeffects =
+    m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
   for (auto& obj : m_sleepingObjects) {
-    obj->invokeWakeup();
+    obj->invokeWakeup(providedCoeffects);
   }
 
   return v;

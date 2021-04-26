@@ -1601,30 +1601,30 @@ void ObjectData::raiseImplicitInvokeToString() const {
   raise_notice("Implicitly invoked %s::__toString", m_cls->name()->data());
 }
 
-Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name) {
+Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name,
+                                 RuntimeCoeffects providedCoeffects) {
   auto const meth = obj->methodNamed(name.get());
   return meth
-    ? g_context->invokeMethodV(obj, meth, InvokeArgs{},
-                               RuntimeCoeffects::fixme())
+    ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, providedCoeffects)
     : uninit_null();
 }
 
-Variant ObjectData::invokeSleep() {
-  return InvokeSimple(this, s___sleep);
+Variant ObjectData::invokeSleep(RuntimeCoeffects provided) {
+  return InvokeSimple(this, s___sleep, provided);
 }
 
 Variant ObjectData::invokeToDebugDisplay() {
-  return InvokeSimple(this, s___toDebugDisplay);
+  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::fixme());
 }
 
-Variant ObjectData::invokeWakeup() {
+Variant ObjectData::invokeWakeup(RuntimeCoeffects provided) {
   unlockObject();
   SCOPE_EXIT { lockObject(); };
-  return InvokeSimple(this, s___wakeup);
+  return InvokeSimple(this, s___wakeup, provided);
 }
 
 Variant ObjectData::invokeDebugInfo() {
-  return InvokeSimple(this, s___debugInfo);
+  return InvokeSimple(this, s___debugInfo, RuntimeCoeffects::fixme());
 }
 
 String ObjectData::invokeToString() {

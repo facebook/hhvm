@@ -1042,12 +1042,14 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
 
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       const Array& options /* = null_array */) {
+                       const Array& options /* = null_array */,
+                       bool pure /* = false */) {
   if (str == nullptr || len <= 0) {
     return false;
   }
 
   VariableUnserializer vu(str, len, type, true, options);
+  if (pure) vu.setPure();
   Variant v;
   try {
     v = vu.unserialize();
@@ -1068,8 +1070,9 @@ Variant unserialize_ex(const char* str, int len,
 
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       const Array& options /* = null_array */) {
-  return unserialize_ex(str.data(), str.size(), type, options);
+                       const Array& options /* = null_array */,
+                       bool pure /* = false */) {
+  return unserialize_ex(str.data(), str.size(), type, options, pure);
 }
 
 String concat3(const String& s1, const String& s2, const String& s3) {

@@ -299,7 +299,7 @@ Object APCObject::createObject() const {
     obj->setDynProps(dynProps->toLocal().asCArrRef());
   }
 
-  if (!m_no_wakeup) obj->invokeWakeup();
+  if (!m_no_wakeup) obj->invokeWakeup(RuntimeCoeffects::fixme());
   return obj;
 }
 
@@ -343,7 +343,7 @@ Object APCObject::createObjectSlow() const {
     }
   }
 
-  obj->invokeWakeup();
+  obj->invokeWakeup(RuntimeCoeffects::fixme());
   return obj;
 }
 

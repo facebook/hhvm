@@ -149,11 +149,16 @@ function debug_zval_dump(mixed $variable): void;
  * code.
  */
 <<__IsFoldable, __Native>>
-function serialize(mixed $value)[]: string;
+function serialize(mixed $value): string;
 
-<<__Native, __Pure>>
-function unserialize(string $str,
-                     darray $options = darray[]): mixed;
+<<__IsFoldable, __Native>>
+function serialize_pure(mixed $value)[]: string;
+
+<<__Native>>
+function unserialize(string $str, darray $options = darray[]): mixed;
+
+<<__Native>>
+function unserialize_pure(string $str, darray $options = darray[])[]: mixed;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
  * you disabled register_globals, but would like to see some variables in the

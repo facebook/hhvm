@@ -392,7 +392,8 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
 String throwable_to_string(ObjectData* throwable) {
   if (throwable->instanceof(SystemLib::s_ThrowableClass)) {
     try {
-      auto result = ObjectData::InvokeSimple(throwable, s___toString);
+      auto result = ObjectData::InvokeSimple(throwable, s___toString,
+                                             RuntimeCoeffects::fixme());
       if (result.isString()) {
         return result.asCStrRef();
       }

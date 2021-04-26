@@ -1314,4 +1314,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       max_times_to_defer_type_checking =
         options.max_times_to_defer_type_checking;
       monitor_fd_close_delay = options.monitor_fd_close_delay;
+      enable_devx_dependency_graph = options.enable_devx_dependency_graph;
     }

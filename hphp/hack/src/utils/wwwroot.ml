@@ -7,6 +7,8 @@
  *
  *)
 
+(* Keep in sync with //hphp/hack/src/facebook/utils/repo_root.rs *)
+
 (**
  * Checks if x is a www directory by looking for ".hhconfig".
  *)

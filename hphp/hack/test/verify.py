@@ -310,14 +310,6 @@ def filter_ocaml_stacktrace(text: str) -> str:
     return "\n".join(out)
 
 
-def filter_version_field(text: str) -> str:
-    """given a string, remove the part that looks like the schema version"""
-    assert isinstance(text, str)
-    return re.sub(
-        r'"version":"\d{4}-\d{2}-\d{2}-\d{4}"', r'"version":"sanitised"', text, count=1
-    )
-
-
 def filter_temp_hhi_path(text: str) -> str:
     """The .hhi files are stored in a temporary directory whose name
     changes every time. Normalise it.
@@ -355,10 +347,8 @@ def check_result(
     output, or if a :default_expect_regex is provided,
     check that the output in :out contains the provided regex.
     """
-    expected = filter_temp_hhi_path(
-        filter_version_field(strip_lines(test_case.expected))
-    )
-    normalized_out = filter_temp_hhi_path(filter_version_field(strip_lines(out)))
+    expected = filter_temp_hhi_path(strip_lines(test_case.expected))
+    normalized_out = filter_temp_hhi_path(strip_lines(out))
     is_ok = (
         expected == normalized_out
         or (ignore_error_messages and compare_expected(expected, normalized_out))

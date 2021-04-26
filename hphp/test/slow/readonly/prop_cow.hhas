@@ -1,0 +1,81 @@
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+.adata A_0 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (15,20) <"HH\\void" N  > test() {
+  .declvars $b;
+  .srcloc 16:8,16:16;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  .srcloc 16:3,16:16;
+  SetL $b
+  .srcloc 16:3,16:17;
+  PopC
+  .srcloc 17:15,17:23;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  BaseL $b Define
+  .srcloc 17:3,17:11;
+  SetM 0 PT:"myFoo" Any
+  .srcloc 17:3,17:24;
+  PopC
+  .srcloc 18:27,18:28;
+  Int 10
+  .srcloc 18:3,18:23;
+  BaseL $b Define
+  Dim Define PT:"myFoo" Mutable
+  Dim Define PT:"c" CheckROCOW
+  Dim Define EI:0 Any
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 18:3,18:29;
+  PopC
+  .srcloc 19:31,19:32;
+  Int 20
+  .srcloc 19:3,19:27;
+  BaseL $b Define
+  Dim Define PT:"myFoo" Mutable
+  Dim Define PT:"bad_c" CheckROCOW
+  Dim Define EI:0 Any
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 19:3,19:33;
+  PopC
+  .srcloc 20:2,20:2;
+  Null
+  RetC
+}
+
+.class {}  Foo (4,8) {
+  .property [public readonly] <"HH\\vec<HH\\vec<HH\\vec<HH\\int>>>" "HH\\vec" extended_hint > c =
+    """v:1:{v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}}""";
+  .property [public deep_init readonly] <"HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" "HH\\vec" extended_hint > bad_c =
+    uninit;
+  .method{}{} [private static no_injection] (4,8) 86pinit() {
+    .srcloc 4:1,8:173;
+    CheckProp "bad_c"
+    JmpNZ L0
+    .srcloc 7:54,7:59;
+    Vec @A_0
+    ColFromArray Vector
+    .srcloc 7:50,7:83;
+    NewVec 1
+    .srcloc 4:1,8:173;
+    InitProp "bad_c" NonStatic
+  L0:
+    Null
+    RetC
+  }
+}
+
+.class {}  Bar (10,12) {
+  .property [public sys_initial_val] <"Foo" "Foo" extended_hint > myFoo =
+    """N;""";
+}

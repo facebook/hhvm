@@ -1,0 +1,44 @@
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+.adata A_0 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (10,13) <"HH\\void" N  > test() {
+  .srcloc 11:14,11:15;
+  String "c"
+  String "Foo"
+  ClassGetC
+  .srcloc 11:9,11:24;
+  BaseSC 1 0 Unset CheckROCOW
+  Dim Unset EI:0 Any
+  Dim Unset EI:0 Any
+  UnsetM 2 EI:0 Any
+  .srcloc 12:14,12:19;
+  String "bad_c"
+  String "Foo"
+  ClassGetC
+  .srcloc 12:9,12:28;
+  BaseSC 1 0 Unset CheckROCOW
+  Dim Unset EI:0 Any
+  Dim Unset EI:0 Any
+  UnsetM 2 EI:0 Any
+  .srcloc 13:2,13:2;
+  Null
+  RetC
+}
+
+.class {}  Foo (4,7) {
+  .property [public static readonly] <"HH\\vec<HH\\vec<HH\\vec<HH\\int>>>" "HH\\vec" extended_hint > c =
+    """v:1:{v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}}""";
+  .property [public static readonly] <"HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" "HH\\vec" extended_hint > bad_c =
+    uninit;
+  .method{}{} [private static no_injection] (4,7) 86sinit() {
+    .srcloc 6:61,6:66;
+    Vec @A_0
+    ColFromArray Vector
+    .srcloc 6:57,6:90;
+    NewVec 1
+    .srcloc 4:1,7:186;
+    InitProp "bad_c" Static
+    Null
+    RetC
+  }
+}

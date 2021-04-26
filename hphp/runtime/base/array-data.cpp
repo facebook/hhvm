@@ -45,6 +45,7 @@ namespace HPHP {
 
 const StaticString
   s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
+  s_ReadOnlyCollectionMutationMsg{"Read-Only collections cannot be mutated."},
   s_VarrayUnsetMsg{"varrays do not support unsetting non-end elements"},
   s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
 ///////////////////////////////////////////////////////////////////////////////
@@ -826,6 +827,10 @@ void throwOOBArrayKeyException(const StringData* key, const ArrayData* ad) {
 
 void throwInvalidKeysetOperation() {
   SystemLib::throwInvalidOperationExceptionObject(s_InvalidKeysetOperationMsg);
+}
+
+void throwReadOnlyCollectionMutation() {
+  SystemLib::throwInvalidOperationExceptionObject(s_ReadOnlyCollectionMutationMsg);
 }
 
 void throwVarrayUnsetException() {

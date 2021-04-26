@@ -381,9 +381,9 @@ ELEM_HELPER_TABLE(X)
   m(elemID,    KeyType::Int)  \
   m(elemSD,    KeyType::Str)  \
 
-#define X(nm, keyType)                                   \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  return ElemD<keyType>(base, key);                      \
+#define X(nm, keyType)                                                \
+inline tv_lval nm(tv_lval base, key_type<keyType> key, bool roProp) { \
+  return ElemD<keyType>(base, key, roProp);                           \
 }
 ELEMD_HELPER_TABLE(X)
 #undef X
@@ -394,9 +394,9 @@ ELEMD_HELPER_TABLE(X)
   m(elemIU,    KeyType::Int)  \
   m(elemSU,    KeyType::Str)  \
 
-#define X(nm, keyType)                                   \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  return ElemU<keyType>(base, key);                      \
+#define X(nm, keyType)                                                \
+inline tv_lval nm(tv_lval base, key_type<keyType> key, bool roProp) { \
+  return ElemU<keyType>(base, key, roProp);                           \
 }
 ELEMU_HELPER_TABLE(X)
 #undef X

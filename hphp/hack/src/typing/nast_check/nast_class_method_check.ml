@@ -13,9 +13,6 @@ module UA = Naming_special_names.UserAttributes
 let is_memoizable user_attributes =
   Naming_attributes.mem2 UA.uaMemoize UA.uaMemoizeLSB user_attributes
 
-let is_overridable user_attributes =
-  Naming_attributes.mem UA.uaOverride user_attributes
-
 let error_if_duplicate_method_names methods =
   let _ =
     List.fold_left

@@ -1197,7 +1197,7 @@ void VariableUnserializer::unserializeVariant(
         raise_warning("Class %s has no unserializer",
                       obj->getClassName().data());
       } else {
-        obj->o_invoke_few_args(s_unserialize, 1, serialized);
+        obj->o_invoke_few_args(s_unserialize, RuntimeCoeffects::fixme(), 1, serialized);
       }
 
       tvMove(make_tv<KindOfObject>(obj.detach()), self);

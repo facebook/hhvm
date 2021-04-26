@@ -70,7 +70,7 @@ const size_t SIZE = 8192;
 struct PHPOutputTransport {
 public:
   explicit PHPOutputTransport(const Object& protocol)
-    : m_transport(protocol->o_invoke_few_args(s_getTransport, 0).toObject())
+    : m_transport(protocol->o_invoke_few_args(s_getTransport, RuntimeCoeffects::fixme(), 0).toObject())
   {}
 
   ~PHPOutputTransport() {
@@ -150,13 +150,14 @@ public:
 
 private:
   void directFlush() {
-    m_transport->o_invoke_few_args(s_flush, 0);
+    m_transport->o_invoke_few_args(s_flush, RuntimeCoeffects::fixme(), 0);
   }
   void directOnewayFlush() {
-    m_transport->o_invoke_few_args(s_onewayFlush, 0);
+    m_transport->o_invoke_few_args(s_onewayFlush, RuntimeCoeffects::fixme(), 0);
   }
   void directWrite(const char* data, size_t len) {
-    m_transport->o_invoke_few_args(s_write, 1, String(data, len, CopyString));
+    m_transport->o_invoke_few_args(s_write, RuntimeCoeffects::fixme(),
+                                   1, String(data, len, CopyString));
   }
 
   char buffer[SIZE];
@@ -168,7 +169,9 @@ private:
 
 struct PHPInputTransport {
   explicit PHPInputTransport(const Object& protocol)
-    : m_transport(protocol->o_invoke_few_args(s_getTransport, 0).toObject())
+    : m_transport(protocol->o_invoke_few_args(s_getTransport,
+                                              RuntimeCoeffects::fixme(),
+                                              0).toObject())
   {}
 
   ~PHPInputTransport() {
@@ -189,7 +192,7 @@ struct PHPInputTransport {
 
   void put_back() {
     if (buffer_used) {
-      m_transport->o_invoke_few_args(s_putBack,
+      m_transport->o_invoke_few_args(s_putBack, RuntimeCoeffects::fixme(),
                            1, String(buffer_ptr, buffer_used, CopyString));
     }
     buffer = String();
@@ -253,7 +256,8 @@ private:
   void refill(size_t len) {
     assertx(buffer_used == 0);
     len = std::max<size_t>(len, SIZE);
-    buffer = m_transport->o_invoke_few_args(s_read, 1, (int64_t)len).toString();
+    buffer = m_transport->o_invoke_few_args(s_read, RuntimeCoeffects::fixme(),
+                                            1, (int64_t)len).toString();
     buffer_used = buffer.size();
     buffer_ptr = buffer.data();
   }

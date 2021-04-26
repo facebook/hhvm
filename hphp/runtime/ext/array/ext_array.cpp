@@ -1307,7 +1307,7 @@ int64_t HHVM_FUNCTION(count,
           return collections::getSize(obj.get());
         }
         if (obj.instanceof(SystemLib::s_CountableClass)) {
-          return obj->o_invoke_few_args(s_count, 0).toInt64();
+          return obj->o_invoke_few_args(s_count, RuntimeCoeffects::fixme(), 0).toInt64();
         }
       }
       return 1;

@@ -337,7 +337,7 @@ void serialize_memoize_obj(StringBuffer& sb, int depth, ObjectData* obj) {
   if (obj->isCollection()) {
     serialize_memoize_col(sb, depth, obj);
   } else if (obj->instanceof(s_IMemoizeParam)) {
-    Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
+    Variant ser = obj->o_invoke_few_args(s_getInstanceKey, RuntimeCoeffects::fixme(), 0);
     serialize_memoize_code(sb, SER_MC_OBJECT);
     serialize_memoize_string_data(sb, ser.toString().get());
   } else {

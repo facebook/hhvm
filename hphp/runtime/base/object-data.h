@@ -380,7 +380,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
   Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
-  Variant o_invoke_few_args(const String& s, int count,
+  Variant o_invoke_few_args(const String& s,
+                            RuntimeCoeffects providedCoeffects,
+                            int count,
                             const Variant& a0 = uninit_variant,
                             const Variant& a1 = uninit_variant,
                             const Variant& a2 = uninit_variant,

@@ -659,7 +659,7 @@ void VariableSerializer::write(const Object& v) {
 
     if (v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
-      Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
+      Variant ret = v->o_invoke_few_args(s_jsonSerialize, RuntimeCoeffects::fixme(), 0);
       // for non objects or when $this is not returned
       if (!ret.isObject() || ret.getObjectData() != v.get()) {
         if (ret.isArray() || ret.isObject()) {
@@ -2088,7 +2088,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     if (obj->instanceof(SystemLib::s_SerializableClass)) {
       assertx(!obj->isCollection());
       ret =
-        const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, 0);
+        const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, RuntimeCoeffects::fixme(), 0);
       if (ret.isString()) {
         writeSerializableObject(obj->getClassName(), ret.toString());
       } else if (ret.isNull()) {

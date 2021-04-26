@@ -108,7 +108,7 @@ static void ucnvToUCallback(ObjectData *objval,
   auto data = Native::data<IntlUConverter>(objval);
   String source(args->source, args->sourceLimit - args->source, CopyString);
   Variant ret = objval->o_invoke_few_args(
-    s_toUCallback, 4,
+    s_toUCallback, RuntimeCoeffects::fixme(), 4,
     reason, source, String(codeUnits, length, CopyString), *pErrorCode);
   if (ret.asCArrRef()[1].is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
@@ -169,7 +169,7 @@ static void ucnvFromUCallback(ObjectData *objval,
   }
   Variant ret =
     objval->o_invoke_few_args(
-      s_fromUCallback, 4,
+      s_fromUCallback, RuntimeCoeffects::fixme(), 4,
       reason, source, (int64_t)codePoint, *pErrorCode);
   if (ret.asCArrRef()[1].is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();

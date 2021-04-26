@@ -298,7 +298,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   Object obj(this);
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    auto iterator = obj->o_invoke_few_args(s_getIterator, 0);
+    auto iterator = obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::fixme(), 0);
     if (!iterator.isObject()) break;
     auto o = iterator.getObjectData();
     if (o->isIterator()) {
@@ -724,7 +724,9 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   );
 }
 
-Variant ObjectData::o_invoke_few_args(const String& s, int count,
+Variant ObjectData::o_invoke_few_args(const String& s,
+                                      RuntimeCoeffects providedCoeffects,
+                                      int count,
                                       const Variant& a0 /* = uninit_variant*/,
                                       const Variant& a1 /* = uninit_variant*/,
                                       const Variant& a2 /* = uninit_variant*/,
@@ -748,7 +750,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
   }
 
   return Variant::attach(
-    g_context->invokeFuncFew(ctx, count, args, RuntimeCoeffects::fixme())
+    g_context->invokeFuncFew(ctx, count, args, providedCoeffects)
   );
 }
 

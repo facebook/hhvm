@@ -512,7 +512,7 @@ static bool do_request(ObjectData* obj_client, xmlDoc *request,
   if (client->m_trace) {
     client->m_last_request = String((char*)buf, buf_size, CopyString);
   }
-  response = obj_client->o_invoke_few_args(s___dorequest, 5,
+  response = obj_client->o_invoke_few_args(s___dorequest, RuntimeCoeffects::fixme(), 5,
                                            String(buf, buf_size, CopyString),
                                            String(location, CopyString),
                                            String(action, CopyString),

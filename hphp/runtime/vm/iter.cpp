@@ -193,7 +193,7 @@ void IterImpl::objInit(ObjectData* obj) {
   setObject(obj);
   if (incRef) obj->incRefCount();
   try {
-    obj->o_invoke_few_args(s_rewind, 0);
+    obj->o_invoke_few_args(s_rewind, RuntimeCoeffects::fixme(), 0);
   } catch (...) {
     // Regardless of whether the incRef template parameter is true or false,
     // at this point, this IterImpl "owns" a reference to the object and is
@@ -232,22 +232,22 @@ IterImpl::~IterImpl() {
 
 bool IterImpl::endHelper() const  {
   auto obj = getObject();
-  return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
+  return !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
 }
 
 void IterImpl::nextHelper() {
   auto obj = getObject();
-  obj->o_invoke_few_args(s_next, 0);
+  obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
 }
 
 Variant IterImpl::firstHelper() {
   auto obj = getObject();
-  return obj->o_invoke_few_args(s_key, 0);
+  return obj->o_invoke_few_args(s_key, RuntimeCoeffects::fixme(), 0);
 }
 
 Variant IterImpl::second() {
   if (LIKELY(hasArrayData())) return getArrayData()->getValue(m_pos);
-  return getObject()->o_invoke_few_args(s_current, 0);
+  return getObject()->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0);
 }
 
 TypedValue IterImpl::secondVal() const {

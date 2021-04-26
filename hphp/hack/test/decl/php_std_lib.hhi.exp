@@ -14,7 +14,8 @@
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [4:10-11]; fe_php_std_lib = true }));
+       fe_pos = [4:10-11]; fe_php_std_lib = true;
+       fe_sound_dynamic_callable = false }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mhhi; sc_final = false;

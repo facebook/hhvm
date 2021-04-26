@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7fa88c13df798164ab39192f331510ab>>
+// @generated SignedSource<<1583e645abcc3f49b14e3de8f6175374>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -147,6 +147,7 @@ pub struct FunElt<'a> {
     pub type_: &'a Ty<'a>,
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub php_std_lib: bool,
+    pub sound_dynamic_callable: bool,
 }
 impl<'a> TrivialDrop for FunElt<'a> {}
 

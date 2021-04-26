@@ -15,7 +15,8 @@
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [4:10-22]; fe_php_std_lib = false }));
+       fe_pos = [4:10-22]; fe_php_std_lib = false;
+       fe_sound_dynamic_callable = false }));
   ("\\doubledouble",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -33,7 +34,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [7:10-22]; fe_php_std_lib = false }));
+        fe_pos = [7:10-22]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\singledouble",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -51,7 +53,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [10:10-22]; fe_php_std_lib = false }));
+        fe_pos = [10:10-22]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\singledoublesingle",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -69,7 +72,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [13:10-28]; fe_php_std_lib = false }));
+        fe_pos = [13:10-28]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\heredoc",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -87,7 +91,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [19:10-17]; fe_php_std_lib = false }));
+        fe_pos = [19:10-17]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\nowdoc",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -105,7 +110,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [25:10-16]; fe_php_std_lib = false }))
+        fe_pos = [25:10-16]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }))
   ]
 
 They matched!

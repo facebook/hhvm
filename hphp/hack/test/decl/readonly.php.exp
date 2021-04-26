@@ -32,7 +32,8 @@
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:true ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [6:16-32]; fe_php_std_lib = false }));
+        fe_pos = [6:16-32]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\returns_normal",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -55,7 +56,8 @@
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [10:16-30]; fe_php_std_lib = false }));
+        fe_pos = [10:16-30]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\Bar",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

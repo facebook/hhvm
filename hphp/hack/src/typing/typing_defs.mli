@@ -61,6 +61,7 @@ type fun_elt = {
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
+  fe_sound_dynamic_callable: bool;
 }
 [@@deriving show]
 

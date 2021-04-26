@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,81 +1,82 @@
+@@ -1,82 +1,83 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -17,7 +17,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [3:10-13]; fe_php_std_lib = false }));
+        fe_pos = [3:10-13]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
    ("\\Cls",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;

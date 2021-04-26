@@ -76,6 +76,11 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let fe_php_std_lib =
     Naming_attributes.mem SN.UserAttributes.uaPHPStdLib f.f_user_attributes
   in
+  let fe_sound_dynamic_callable =
+    Naming_attributes.mem
+      SN.UserAttributes.uaSoundDynamicCallable
+      f.f_user_attributes
+  in
   let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
@@ -98,7 +103,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
             ft_ifc_decl = ifc_decl;
           } )
   in
-  { fe_pos; fe_type; fe_deprecated; fe_php_std_lib }
+  { fe_pos; fe_type; fe_deprecated; fe_php_std_lib; fe_sound_dynamic_callable }
 
 (*****************************************************************************)
 (* Dealing with records *)

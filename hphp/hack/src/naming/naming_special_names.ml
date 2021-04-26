@@ -351,7 +351,7 @@ module UserAttributes = struct
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);
           (uaAtom, [parameter]);
-          (uaSoundDynamicCallable, [cls; mthd]);
+          (uaSoundDynamicCallable, [fn; cls; mthd]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

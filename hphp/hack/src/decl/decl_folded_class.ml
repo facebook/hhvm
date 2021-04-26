@@ -637,6 +637,7 @@ and build_constructor
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
       fe_php_std_lib = false;
+      fe_sound_dynamic_callable = false;
     }
   in
   (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
@@ -855,6 +856,7 @@ and method_decl_acc
       parent_vis
     | _ -> visibility (snd c.sc_name) m.sm_visibility
   in
+  let sound_dynamic_callable = sm_sound_dynamic_callable m in
   let elt =
     {
       elt_flags =
@@ -869,7 +871,7 @@ and method_decl_acc
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
           ~readonly_prop:false
-          ~sound_dynamic_callable:(sm_sound_dynamic_callable m);
+          ~sound_dynamic_callable;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
@@ -881,6 +883,7 @@ and method_decl_acc
       fe_deprecated = None;
       fe_type = m.sm_type;
       fe_php_std_lib = false;
+      fe_sound_dynamic_callable = sound_dynamic_callable;
     }
   in
   ( if write_shmem then

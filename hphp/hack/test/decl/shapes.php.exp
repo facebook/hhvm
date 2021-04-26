@@ -53,7 +53,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [5:10-21]; fe_php_std_lib = false }));
+        fe_pos = [5:10-21]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\returns_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -94,7 +95,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [9:10-23]; fe_php_std_lib = false }));
+        fe_pos = [9:10-23]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\generic_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -138,7 +140,8 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [15:10-23]; fe_php_std_lib = false }));
+        fe_pos = [15:10-23]; fe_php_std_lib = false;
+        fe_sound_dynamic_callable = false }));
   ("\\TaggedCoordinate",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [19:6-22]; td_vis = Transparent;

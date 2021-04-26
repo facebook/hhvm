@@ -3189,6 +3189,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
+                    sound_dynamic_callable: parsed_attributes.sound_dynamic_callable,
                 });
                 self.add_fun(name, fun_elt);
                 Node::Ignored(SK::FunctionDeclaration)

@@ -25,7 +25,8 @@
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [3:10-11]; fe_php_std_lib = false }))
+       fe_pos = [3:10-11]; fe_php_std_lib = false;
+       fe_sound_dynamic_callable = false }))
   ]
 
 They matched!

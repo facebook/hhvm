@@ -9,7 +9,7 @@ class C {
   public function f(
     Something $x1,
     (function()[_]: void) $x2,
-  )[$x1::C, ctx $x2, this::C, IO] {}
+  )[$x1::C, ctx $x2, this::C, IO, this::T1::T2::C2] {}
 }
 
 <<__EntryPoint>>

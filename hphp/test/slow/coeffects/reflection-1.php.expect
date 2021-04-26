@@ -8,9 +8,10 @@ vec(3) {
 vec(1) {
   string(8) "defaults"
 }
-vec(4) {
+vec(5) {
   string(2) "IO"
   string(7) "ctx $x2"
   string(6) "$x1::C"
   string(7) "this::C"
+  string(16) "this::T1::T2::C2"
 }

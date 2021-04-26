@@ -145,8 +145,11 @@ struct CoeffectRule final {
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
-  CoeffectRule(CCThis, const StringData* ctx_name)
+  CoeffectRule(CCThis,
+               std::vector<LowStringPtr> types,
+               const StringData* ctx_name)
     : m_type(Type::CCThis)
+    , m_types(types)
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
@@ -184,7 +187,8 @@ private:
 
   Type m_type{Type::Invalid};
   uint32_t m_index{0};
-  LowPtr<const StringData> m_name{nullptr};
+  std::vector<LowStringPtr> m_types{};
+  LowStringPtr m_name{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

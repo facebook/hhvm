@@ -99,8 +99,13 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
                                     f->localVarName(m_index)->toCppString(),
                                     "::",
                                     m_name->toCppString());
-    case Type::CCThis:
-      return folly::to<std::string>("this::", m_name->toCppString());
+    case Type::CCThis: {
+      std::vector<std::string> types;
+      for (auto type : m_types) {
+        types.push_back(folly::to<std::string>("::", type->toCppString()));
+      }
+      return folly::sformat("this{}::{}", folly::join("", types), m_name);
+    }
     case Type::ClosureInheritFromParent:
     case Type::GeneratorThis:
       return folly::none;
@@ -130,10 +135,16 @@ RuntimeCoeffects emitCCParam(const Func* f,
   return *cls->clsCtxCnsGet(name, true);
 }
 
-RuntimeCoeffects emitCCThis(const Func* f, const StringData* name,
+RuntimeCoeffects emitCCThis(const Func* f,
+                            const std::vector<LowStringPtr>& types,
+                            const StringData* name,
                             void* prologueCtx) {
   assertx(!f->isClosureBody());
   assertx(f->isMethod());
+  if (!types.empty()) {
+    // TODO: implement this
+    return RuntimeCoeffects::full();
+  }
   auto const cls = f->isStatic()
     ? reinterpret_cast<Class*>(prologueCtx)
     : reinterpret_cast<ObjectData*>(prologueCtx)->getVMClass();
@@ -208,7 +219,7 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
     case Type::CCParam:
       return emitCCParam(f, numArgsInclUnpack, m_index, m_name);
     case Type::CCThis:
-      return emitCCThis(f, m_name, prologueCtx);
+      return emitCCThis(f, m_types, m_name, prologueCtx);
     case Type::FunParam:
       return emitFunParam(f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:
@@ -237,10 +248,15 @@ std::string CoeffectRule::getDirectiveString() const {
       return folly::sformat(".coeffects_cc_param {} {};", m_index,
                             folly::cEscape<std::string>(
                               m_name->toCppString()));
-    case Type::CCThis:
+    case Type::CCThis: {
+      std::vector<std::string> names;
+      for (auto type : m_types) {
+        names.push_back(folly::cEscape<std::string>(type->toCppString()));
+      }
+      names.push_back(folly::cEscape<std::string>(m_name->toCppString()));
       return folly::sformat(".coeffects_cc_this {};",
-                            folly::cEscape<std::string>(
-                              m_name->toCppString()));
+                            folly::join(" ", names));
+    }
     case Type::ClosureInheritFromParent:
       return ".coeffects_closure_inherit_from_parent;";
     case Type::GeneratorThis:
@@ -255,6 +271,7 @@ template<class SerDe>
 void CoeffectRule::serde(SerDe& sd) {
   sd(m_type)
     (m_index)
+    (m_types)
     (m_name)
   ;
 }

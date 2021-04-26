@@ -1894,16 +1894,20 @@ void parse_coeffects_cc_param(AsmState& as) {
 }
 
 /*
- * directive-coeffects_cc_this : ctx-name* ';'
+ * directive-coeffects_cc_this : type-name* ctx-name ';'
  *                             ;
  */
 void parse_coeffects_cc_this(AsmState& as) {
-  while (true) {
-    as.in.skipWhitespace();
-    std::string name;
-    if (!as.in.readword(name)) break;
-    as.fe->coeffectRules.emplace_back(
-      CoeffectRule(CoeffectRule::CCThis{}, makeStaticString(name)));
+  std::vector<LowStringPtr> names;
+  std::string name;
+  while (as.in.readword(name)) {
+    auto sstr = makeStaticString(name);
+    if (as.in.peek() == ';') {
+      as.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCThis{}, names, sstr));
+      break;
+    }
+    names.push_back(sstr);
   }
   as.in.expectWs(';');
 }

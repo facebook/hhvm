@@ -70,7 +70,7 @@ pub struct HhasCoeffects {
     unenforced_static_coeffects: Vec<String>,
     fun_param: Vec<usize>,
     cc_param: Vec<(usize, String)>,
-    cc_this: Vec<String>,
+    cc_this: Vec<Vec<String>>,
     is_any_rx: bool,
     is_pure: bool,
     closure_inherit_from_parent: bool,
@@ -108,9 +108,11 @@ impl HhasCoeffects {
         {
             results.push(format!(".coeffects_cc_param {};", str));
         }
-        if let Some(str) = HhasCoeffects::vec_to_string(coeffects.get_cc_this(), |c| c.to_string())
-        {
-            results.push(format!(".coeffects_cc_this {};", str));
+        for v in coeffects.get_cc_this() {
+            match HhasCoeffects::vec_to_string(v.as_slice(), |c| c.to_string()) {
+                Some(str) => results.push(format!(".coeffects_cc_this {};", str)),
+                None => panic!("Not possible"),
+            }
         }
         if coeffects.is_closure_inherit_from_parent() {
             results.push(".coeffects_closure_inherit_from_parent;".to_string());
@@ -213,21 +215,19 @@ impl HhasCoeffects {
                         }
                     }
                     Hint_::HfunContext(name) => fun_param.push(get_arg_pos(name)),
-                    Hint_::Haccess(Hint(_, hint), sids) if sids.len() == 1 => {
-                        let Id(_, sid_name) = &sids[0];
-                        match &**hint {
-                            Hint_::Happly(Id(_, id), _)
-                                if strip_ns(id.as_str()) == sn::typehints::THIS =>
-                            {
-                                cc_this.push(sid_name.clone());
-                            }
-                            Hint_::Hvar(name) => {
-                                let pos = get_arg_pos(name);
-                                cc_param.push((pos, sid_name.clone()));
-                            }
-                            _ => {}
+                    Hint_::Haccess(Hint(_, hint), sids) => match &**hint {
+                        Hint_::Happly(Id(_, id), _)
+                            if strip_ns(id.as_str()) == sn::typehints::THIS && !sids.is_empty() =>
+                        {
+                            cc_this.push(sids.into_iter().map(|Id(_, id)| id.clone()).collect());
                         }
-                    }
+                        Hint_::Hvar(name) if sids.len() == 1 => {
+                            let pos = get_arg_pos(name);
+                            let Id(_, sid_name) = &sids[0];
+                            cc_param.push((pos, sid_name.clone()));
+                        }
+                        _ => {}
+                    },
                     _ => {}
                 }
             }
@@ -292,7 +292,7 @@ impl HhasCoeffects {
         self.cc_param.as_slice()
     }
 
-    pub fn get_cc_this(&self) -> &[String] {
+    pub fn get_cc_this(&self) -> &[Vec<String>] {
         self.cc_this.as_slice()
     }
 

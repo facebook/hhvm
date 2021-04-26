@@ -59,10 +59,16 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   );
 }
 
-SSATmp* emitCCThis(IRGS& env, const Func* f, const StringData* name,
+SSATmp* emitCCThis(IRGS& env, const Func* f,
+                   const std::vector<LowStringPtr>& types,
+                   const StringData* name,
                    SSATmp* prologueCtx) {
   assertx(!f->isClosureBody());
   assertx(f->isMethod());
+  if (!types.empty()) {
+    // TODO: implement this
+    return nullptr;
+  }
   auto const cls =
     f->isStatic() ? prologueCtx : gen(env, LdObjClass, prologueCtx);
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
@@ -240,7 +246,7 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
     case Type::CCParam:
       return emitCCParam(env, f, numArgsInclUnpack, m_index, m_name);
     case Type::CCThis:
-      return emitCCThis(env, f, m_name, prologueCtx);
+      return emitCCThis(env, f, m_types, m_name, prologueCtx);
     case Type::FunParam:
       return emitFunParam(env, f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:

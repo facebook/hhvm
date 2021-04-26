@@ -14,7 +14,6 @@ open String_utils
 open SearchUtils
 include AutocompleteTypes
 open Tast
-module Tast = Aast
 module Phase = Typing_phase
 module Cls = Decl_provider.Class
 
@@ -509,7 +508,7 @@ let visitor =
 
     method! on_Call env f targs args unpack_arg =
       (match args with
-      | ((p, _), Tast.EnumAtom n) :: _ when is_auto_complete n ->
+      | ((p, _), Aast.EnumAtom n) :: _ when is_auto_complete n ->
         autocomplete_enum_atom env f (p, n)
       | _ -> ());
 
@@ -533,8 +532,8 @@ let visitor =
 
     method! on_Class_get env cid mid in_parens =
       match mid with
-      | Tast.CGstring p -> autocomplete_static_member env cid p
-      | Tast.CGexpr _ -> super#on_Class_get env cid mid in_parens
+      | Aast.CGstring p -> autocomplete_static_member env cid p
+      | Aast.CGexpr _ -> super#on_Class_get env cid mid in_parens
 
     method! on_Class_const env cid mid =
       autocomplete_static_member env cid mid;
@@ -542,22 +541,22 @@ let visitor =
 
     method! on_Obj_get env obj mid ognf =
       (match mid with
-      | (_, Tast.Id mid) ->
+      | (_, Aast.Id mid) ->
         autocomplete_typed_member ~is_static:false env (get_type obj) None mid
       | _ -> ());
       super#on_Obj_get env obj mid ognf
 
     method! on_expr env expr =
       (match expr with
-      | (_, Tast.Array_get (arr, Some ((pos, _), key))) ->
+      | (_, Aast.Array_get (arr, Some ((pos, _), key))) ->
         let ty = get_type arr in
         let (_, ty) = Tast_env.expand_type env ty in
         begin
           match Typing_defs.get_node ty with
           | Typing_defs.Tshape (_, fields) ->
             (match key with
-            | Tast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid)
-            | Tast.String mid ->
+            | Aast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid)
+            | Aast.String mid ->
               (* autocomplete generally assumes that there's a token ending with the suffix; *)
               (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
               let offset =
@@ -610,10 +609,10 @@ let visitor =
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function
-                 | Tast.Xhp_simple
+                 | Aast.Xhp_simple
                      { Aast.xs_name = id; xs_expr = value; xs_type = ty } ->
                    (match value with
-                   | (_, Tast.Id id_id) ->
+                   | (_, Aast.Id id_id) ->
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
                         *)
@@ -624,11 +623,11 @@ let visitor =
                      autocomplete_xhp_attributes env c (Some cid) id
                    else
                      autocomplete_member ~is_static:false env c (Some cid) id
-                 | Tast.Xhp_spread _ -> ()));
+                 | Aast.Xhp_spread _ -> ()));
       super#on_Xml env sid attrs el
 
     method! on_class_ env cls =
-      List.iter cls.Tast.c_uses ~f:(fun hint ->
+      List.iter cls.Aast.c_uses ~f:(fun hint ->
           match snd hint with
           | Aast.Happly (sid, params) ->
             autocomplete_trait_only sid;
@@ -637,12 +636,12 @@ let visitor =
 
       (* If we don't clear out c_uses we'll end up overwriting the trait
        completion as soon as we get to on_Happly. *)
-      super#on_class_ env { cls with Tast.c_uses = [] }
+      super#on_class_ env { cls with Aast.c_uses = [] }
   end
 
 let auto_complete_suffix_finder =
   object
-    inherit [_] Tast.reduce
+    inherit [_] Aast.reduce
 
     method zero = false
 
@@ -678,7 +677,7 @@ class local_types =
 
     method! on_method_ env m =
       if method_contains_cursor m then (
-        if not m.Tast.m_static then
+        if not m.Aast.m_static then
           self#add Typing_defs.this (Tast_env.get_self_ty_exn env);
         super#on_method_ env m
       )
@@ -686,12 +685,12 @@ class local_types =
     method! on_expr env e =
       let ((_, ty), e_) = e in
       match e_ with
-      | Tast.Lvar (_, id) ->
+      | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then
           after_cursor <- true
         else
           self#add id ty
-      | Tast.Binop (Ast_defs.Eq _, e1, e2) ->
+      | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
          with its type after the assignment. *)
         self#on_expr env e2;
@@ -699,8 +698,8 @@ class local_types =
       | _ -> super#on_expr env e
 
     method! on_fun_param _ fp =
-      let id = Local_id.make_unscoped fp.Tast.param_name in
-      let (_, ty) = fp.Tast.param_annotation in
+      let id = Local_id.make_unscoped fp.Aast.param_name in
+      let (_, ty) = fp.Aast.param_annotation in
       self#add id ty
   end
 

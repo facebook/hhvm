@@ -11,7 +11,6 @@ open Hh_prelude
 open Coverage_level
 open Coverage_level_defs
 open Reordered_argument_collections
-module Tast = Aast
 
 let combine v1 v2 =
   SMap.merge ~f:(fun _ cs1 cs2 -> Option.merge cs1 cs2 merge_and_sum) v1 v2
@@ -29,13 +28,13 @@ class count_getter fixme_map =
       let ((pos, ty), e) = expr in
       let expr_kind_opt =
         match e with
-        | Tast.Array_get _ -> Some "array_get"
-        | Tast.Call _ -> Some "call"
-        | Tast.Class_get _ -> Some "class_get"
-        | Tast.Class_const _ -> Some "class_const"
-        | Tast.Lvar _ -> Some "lvar"
-        | Tast.New _ -> Some "new"
-        | Tast.Obj_get _ -> Some "obj_get"
+        | Aast.Array_get _ -> Some "array_get"
+        | Aast.Call _ -> Some "call"
+        | Aast.Class_get _ -> Some "class_get"
+        | Aast.Class_const _ -> Some "class_const"
+        | Aast.Lvar _ -> Some "lvar"
+        | Aast.New _ -> Some "new"
+        | Aast.Obj_get _ -> Some "obj_get"
         | _ -> None
       in
       match expr_kind_opt with

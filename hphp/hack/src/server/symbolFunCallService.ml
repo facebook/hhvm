@@ -9,7 +9,6 @@
 
 open Hh_prelude
 module SN = Naming_special_names
-module Tast = Aast
 open ServerCommandTypes.Symbol_info_service
 
 module Result_set = Caml.Set.Make (struct
@@ -77,7 +76,7 @@ class visitor =
       self#fun_call env target_type method_fullname pos
 
     method! on_fun_ env f =
-      let name = snd f.Tast.f_name in
+      let name = snd f.Aast.f_name in
       let is_anon = String.equal name ";anonymous" in
       if not is_anon then cur_caller <- Some (Utils.strip_ns name);
       let acc = super#on_fun_ env f in
@@ -85,7 +84,7 @@ class visitor =
       acc
 
     method! on_method_ env m =
-      cur_caller <- Some (snd m.Tast.m_name);
+      cur_caller <- Some (snd m.Aast.m_name);
       let acc = super#on_method_ env m in
       cur_caller <- None;
       acc
@@ -93,18 +92,18 @@ class visitor =
     method! on_expr env (((pos, ty), expr_) as expr) =
       let acc =
         match expr_ with
-        | Tast.New _ ->
+        | Aast.New _ ->
           let mid = (pos, SN.Members.__construct) in
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
-        | Tast.Fun_id (pos, name) -> self#fun_call env Function name pos
-        | Tast.Smethod_id (((_, ty), _), mid)
-        | Tast.Method_id (((_, ty), _), mid) ->
+        | Aast.Fun_id (pos, name) -> self#fun_call env Function name pos
+        | Aast.Smethod_id (((_, ty), _), mid)
+        | Aast.Method_id (((_, ty), _), mid) ->
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
-        | Tast.Method_caller ((_, cid), mid) ->
+        | Aast.Method_caller ((_, cid), mid) ->
           self#method_call env Method cid mid
         | _ -> self#zero
       in
@@ -112,10 +111,10 @@ class visitor =
         let special_fun id = self#fun_call env Function id pos in
         let module SF = SN.AutoimportedFunctions in
         match expr_ with
-        | Tast.Fun_id _ -> special_fun SF.fun_
-        | Tast.Method_id _ -> special_fun SF.inst_meth
-        | Tast.Smethod_id _ -> special_fun SF.class_meth
-        | Tast.Method_caller _ -> special_fun SF.meth_caller
+        | Aast.Fun_id _ -> special_fun SF.fun_
+        | Aast.Method_id _ -> special_fun SF.inst_meth
+        | Aast.Smethod_id _ -> special_fun SF.class_meth
+        | Aast.Method_caller _ -> special_fun SF.meth_caller
         | _ -> self#zero
       in
       let ( + ) = self#plus in
@@ -124,9 +123,9 @@ class visitor =
     method! on_Call env e hl el unpacked_element =
       let acc =
         match snd e with
-        | Tast.Id (pos, name) -> self#fun_call env Function name pos
-        | Tast.Class_const (((_, ty), _), mid)
-        | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _, _) ->
+        | Aast.Id (pos, name) -> self#fun_call env Function name pos
+        | Aast.Class_const (((_, ty), _), mid)
+        | Aast.Obj_get (((_, ty), _), (_, Aast.Id mid), _, _) ->
           let target_type =
             if String.equal (snd mid) SN.Members.__construct then
               Constructor

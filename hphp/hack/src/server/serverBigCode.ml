@@ -14,7 +14,6 @@ open Provider_context
 open Tast
 open Typing_defs
 module Nast = Aast
-module Tast = Aast
 module Cls = Decl_provider.Class
 module Syntax = Full_fidelity_positioned_syntax
 module TokenKind = Full_fidelity_token_kind
@@ -125,7 +124,7 @@ let extract ~(cst : Provider_context.PositionedSyntaxTree.t) : string option =
  *)
 let auto_complete_suffix_finder =
   object
-    inherit [_] Tast.reduce
+    inherit [_] Aast.reduce
 
     method zero = false
 
@@ -161,7 +160,7 @@ class local_types =
 
     method! on_method_ env m =
       if method_contains_cursor m then (
-        if not m.Tast.m_static then
+        if not m.Aast.m_static then
           self#add Typing_defs.this (Tast_env.get_self_ty_exn env);
         super#on_method_ env m
       )
@@ -169,12 +168,12 @@ class local_types =
     method! on_expr env e =
       let ((_, ty), e_) = e in
       match e_ with
-      | Tast.Lvar (_, id) ->
+      | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then
           after_cursor <- true
         else
           self#add id ty
-      | Tast.Binop (Ast_defs.Eq _, e1, e2) ->
+      | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
          with its type after the assignment. *)
         self#on_expr env e2;
@@ -182,8 +181,8 @@ class local_types =
       | _ -> super#on_expr env e
 
     method! on_fun_param _ fp =
-      let id = Local_id.make_unscoped fp.Tast.param_name in
-      let (_, ty) = fp.Tast.param_annotation in
+      let id = Local_id.make_unscoped fp.Aast.param_name in
+      let (_, ty) = fp.Aast.param_annotation in
       self#add id ty
   end
 
@@ -388,10 +387,10 @@ class visitor ~ctx ~entry ~filename ~source_text =
     method! on_Class_get env cid mid =
       let res = super#on_Class_get env cid mid in
       (match mid with
-      | Tast.CGstring p ->
+      | Aast.CGstring p ->
         self#autocomplete_static_member env cid;
         self#add_entry SearchUtils.Acclass_get (fst p) (snd p)
-      | Tast.CGexpr _ -> ());
+      | Aast.CGexpr _ -> ());
       res
 
     method! on_Class_const env cid mid =
@@ -402,7 +401,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
     method! on_Obj_get env obj mid ognf =
       let res = super#on_Obj_get env obj mid ognf in
       (match mid with
-      | (_, Tast.Id mid) ->
+      | (_, Aast.Id mid) ->
         self#autocomplete_typed_member ~is_static:false env (get_type obj) None;
         self#add_entry SearchUtils.Acclass_get (fst mid) (snd mid)
       | _ -> ());

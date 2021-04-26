@@ -29,6 +29,11 @@ TRACE_SET_MOD(coeffects);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+RuntimeCoeffects RuntimeCoeffects::pure() {
+  static RuntimeCoeffects pure = CoeffectsConfig::fromName("pure").toAmbient();
+  return pure;
+}
+
 const std::string RuntimeCoeffects::toString() const {
   // Pretend to be StaticCoeffects, this is safe since RuntimeCoeffects is a
   // subset of StaticCoeffects

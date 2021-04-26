@@ -659,7 +659,9 @@ void VariableSerializer::write(const Object& v) {
 
     if (v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
-      Variant ret = v->o_invoke_few_args(s_jsonSerialize, RuntimeCoeffects::fixme(), 0);
+      auto const providedCoeffects =
+        m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+      Variant ret = v->o_invoke_few_args(s_jsonSerialize, providedCoeffects, 0);
       // for non objects or when $this is not returned
       if (!ret.isObject() || ret.getObjectData() != v.get()) {
         if (ret.isArray() || ret.isObject()) {

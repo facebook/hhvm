@@ -1,0 +1,1 @@
+Warning: Call to ANonPure::jsonSerialize() requires [defaults] coeffects but json_encode_pure() provided [] in %s on line 23

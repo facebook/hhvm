@@ -127,6 +127,9 @@ struct VariableSerializer {
     m_serializeProvenanceAndLegacy = true;
   }
 
+  // Should we be calling the pure callbacks
+  void setPure() { m_pure = true; }
+
   // MarkedVArray and MarkedDArray are used for serialization formats, which
   // can distinguish between all 3 possible array states (unmarked varray,
   // unmarked vec, marked varray/vec).
@@ -288,6 +291,7 @@ private:
   bool m_hasEDWarned{false};     // have we already warned on empty darrays?
   bool m_hasVDWarned{false};     // have we already warned on vec-like darrays?
   bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?
+  bool m_pure{false};            // should we call the pure callbacks?
   RefCount m_refCount{OneReference}; // current variable's reference count
   String m_objClass;             // for object serialization
   char m_objCode{0};             // for object serialization

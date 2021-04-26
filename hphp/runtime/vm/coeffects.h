@@ -50,6 +50,13 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::none();
   }
 
+  static RuntimeCoeffects defaults() {
+    // TODO: Once defaults is no longer all zeros, update this
+    return RuntimeCoeffects::none();
+  }
+
+  static RuntimeCoeffects pure();
+
   uint16_t value() const { return m_data; }
 
   const std::string toString() const;

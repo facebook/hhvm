@@ -84,7 +84,7 @@ function json_encode_with_error(
 /**
  * Like json_encode_with_error but has pure coeffects.
  * Encoding objects implementing JsonSerializable with an impure jsonSerialize
- * will result in coeffect violations/
+ * will result in coeffect violations.
  */
 <<__Native>>
 function json_encode_pure(

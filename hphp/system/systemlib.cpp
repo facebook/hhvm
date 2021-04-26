@@ -354,9 +354,7 @@ Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrDynamicallyCallable));
-  auto const coeffects = CoeffectsConfig::fromName("pure");
-  assertx(coeffects.toShallowWithLocals().value() == 0);
-  clone->setRequiredCoeffects(coeffects.toRequired());
+  clone->setRequiredCoeffects(RuntimeCoeffects::pure());
   return clone;
 }
 

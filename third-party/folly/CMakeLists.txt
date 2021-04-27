@@ -71,8 +71,12 @@ ExternalProject_add(
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_LIST_DIR}/include"
       "<INSTALL_DIR>/include" &&
-    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
-    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
+# Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
+#    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
+#    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
+# Legacy way:
+    ${CMAKE_COMMAND} -DCOMPONENT=dev -P cmake_install.cmake --config ${CMAKE_BUILD_TYPE} &&
+    ${CMAKE_COMMAND} -DCOMPONENT=lib -P cmake_install.cmake --config ${CMAKE_BUILD_TYPE}
 )
 ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
 add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd double-conversion)

@@ -56,6 +56,7 @@ let test_init_common ?(hhi_files = []) () =
   else
     did_init := true;
 
+  Unix.putenv "HH_TEST_MODE" "1";
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);

@@ -162,7 +162,8 @@ module Profiling = struct
       )
     in
     fun memory ->
-      if SMap.cardinal !memory.results > 0 then (
+      if SMap.cardinal !memory.results > 0 && not (Sys_utils.is_test_mode ())
+      then (
         print_header !memory.event;
         print_finished ~indent:2 memory
       )

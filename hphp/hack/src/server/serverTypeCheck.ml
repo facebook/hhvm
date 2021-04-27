@@ -1745,7 +1745,7 @@ let type_check_unsafe genv env kind start_time profiling =
 
   (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind *)
   HackEventLogger.with_check_kind check_kind @@ fun () ->
-  Printf.eprintf "******************************************\n";
+  Hh_logger.log "******************************************";
   match kind with
   | Lazy_check ->
     Hh_logger.log

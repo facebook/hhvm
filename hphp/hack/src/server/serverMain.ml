@@ -296,7 +296,7 @@ let report_persistent_exception
     try ClientProvider.send_push_message_to_client client push with _ -> ()
   end;
   EventLogger.master_exception e stack;
-  Printf.eprintf "Error: %s\n%s\n%!" message stack
+  Hh_logger.error "Error: %s\n%s" message stack
 
 (* Same as handle_connection_try, but for persistent clients *)
 [@@@warning "-52"]

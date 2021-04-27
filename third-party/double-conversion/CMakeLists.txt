@@ -32,8 +32,8 @@ if(DOUBLE_CONVERSION_FOUND)
     double-conversion
     PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${DOUBLE_CONVERSION_INCLUDE_DIR}"
-    INTERFACE_LINK_LIBRARIES "${DOUBLE_CONVERSION_LIBRARY}"
   )
+  target_link_libraries(double-conversion INTERFACE "${DOUBLE_CONVERSION_LIBRARY}")
 else()
   add_dependencies(double-conversion bundled_double-conversion)
   ExternalProject_Get_Property(bundled_double-conversion INSTALL_DIR)

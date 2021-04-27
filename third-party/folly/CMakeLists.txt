@@ -89,7 +89,8 @@ target_include_directories(
   "${INSTALL_DIR}/include"
   "${CMAKE_CURRENT_LIST_DIR}/include"
 )
-target_link_libraries(folly INTERFACE
+target_link_libraries(folly
+  INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   # referred to by folly's headers, so anything using folly needs to find them
   boost

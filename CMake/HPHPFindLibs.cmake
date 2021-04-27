@@ -416,8 +416,6 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  target_link_libraries(${target} double-conversion)
-
   target_link_libraries(${target} lz4)
   target_link_libraries(${target} libzip)
 

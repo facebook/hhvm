@@ -101,6 +101,11 @@ target_link_libraries(folly
   libsodium
   jemalloc
   zstd
-  ${LIBELF_LIBRARIES}
-  ${LIBDWARF_LIBRARIES}
 )
+
+if(UNIX AND NOT APPLE)
+  # symbolizer implementation details
+  find_package(Libiberty)
+  target_link_libraries(folly INTERFACE ${LIBIBERTY_LIBRARIES} ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES})
+  target_include_directories(folly INTERFACE ${LIBIBERTY_INCLUDE_DIRS})
+endif()

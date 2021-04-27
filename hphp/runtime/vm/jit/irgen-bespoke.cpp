@@ -1026,7 +1026,7 @@ LoggingProfileData makeLoggingProfileData(bespoke::LoggingProfile* profile) {
   return LoggingProfileData(profile, isStatic);
 }
 
-void emitProfileArrLikeProps(IRGS& env) {
+void profileArrLikeProps(IRGS& env) {
   auto const obj = topC(env);
   auto const cls = obj->type().clsSpec().exactCls();
 
@@ -1057,6 +1057,19 @@ void emitProfileArrLikeProps(IRGS& env) {
   }
 }
 
+void profileSource(IRGS& env, SrcKey sk) {
+  DEBUG_ONLY auto const op = sk.op();
+  assertx(isArrLikeConstructorOp(op) || isArrLikeCastOp(op));
+  auto const newArr = topC(env);
+  assertx(newArr->type().isKnownDataType());
+  if (!arrayTypeCouldBeBespoke(newArr->type().toDataType())) return;
+
+  auto const profile = bespoke::getLoggingProfile(sk);
+  if (!profile) return;
+  auto const data = makeLoggingProfileData(profile);
+  push(env, gen(env, NewLoggingArray, data, popC(env)));
+}
+
 bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const op = sk.op();
   assertx(op == Op::NewDictArray || op == Op::NewStructDict);
@@ -1080,39 +1093,32 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   }
 
   if (size > RuntimeOption::EvalHHIRMaxInlineInitStructElements) {
-    auto const data = NewBespokeStructData {layout,
-                                            spOffBCFromIRSP(env),
-                                            safe_cast<uint32_t>(size),
-                                            slots};
+    auto const data = NewBespokeStructData {
+        layout, spOffBCFromIRSP(env), safe_cast<uint32_t>(size), slots};
     auto const arr = gen(env, NewBespokeStructDict, data, sp(env));
     discard(env, size);
     push(env, arr);
     return true;
   }
-  auto const data =
-    AllocUninitBespokeStructData {layout, safe_cast<uint32_t>(size), slots};
+
+  auto const data = AllocUninitBespokeStructData {
+      layout, safe_cast<uint32_t>(size), slots };
   auto const arr = gen(env, AllocUninitBespokeStructDict, data);
   for (auto i = 0; i < size; ++i) {
-    auto idx = size - i - 1;
+    auto const idx = size - i - 1;
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[idx]);
-    gen(
-      env,
-      InitStructElem,
-      KeyedIndexData {slots[idx], key},
-      arr,
-      popC(env, DataTypeGeneric)
-    );
+    auto const kid = KeyedIndexData { slots[idx], key };
+    gen(env, InitStructElem, kid, arr, popC(env, DataTypeGeneric));
   }
   push(env, arr);
   return true;
-
 }
 
 bool specializeSource(IRGS& env, SrcKey sk) {
+  DEBUG_ONLY auto const op = sk.op();
+  assertx(isArrLikeConstructorOp(op) || isArrLikeCastOp(op));
   auto const kind = env.context.kind;
   if (kind != TransKind::Live && kind != TransKind::Optimize) return false;
-  auto const op = sk.op();
-  if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return false;
   auto const profile = bespoke::getLoggingProfile(sk);
   auto const layout = profile ? profile->getLayout() : ArrayLayout::Top();
   if (!layout.bespoke()) return false;
@@ -1128,31 +1134,70 @@ bool specializeSource(IRGS& env, SrcKey sk) {
   return specializeStructSource(env, sk, layout);
 }
 
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
-                         std::function<void(IRGS&)> emitVanilla) {
-  if (!allowBespokeArrayLikes()) return emitVanilla(env);
-  auto const sk = ni.source;
-  if (specializeSource(env, sk)) return;
-  auto const loc = getLocationToGuard(env, sk);
-  if (!loc) return emitVanilla(env);
+/*
+ * Handle a bespoke array source.
+ *
+ * Arrays that are property initial values are easy to handle, because we only
+ * need to emit code here when profiling. If we select a bespoke layout for a
+ * property initial value, we'll update the object's static initial value and
+ * regular irgen will do the right thing.
+ *
+ * Otherwise, we have an array-like constructor or cast op:
+ *
+ *  - When profiling, emit the vanilla IR, then conditionally wrap the result
+ *    in a LoggingArray via a call to NewLoggingArray.
+ *
+ *  - When optimizing, look up the source's layout, and if it's bespoke, emit
+ *    IR to construct an array of that layout instead of a vanilla one.
+ */
+bool handleSource(IRGS& env, SrcKey sk,
+                  std::function<void(IRGS&)> emitVanilla) {
+  auto const op = sk.op();
+  auto const profile = env.context.kind == TransKind::Profile ||
+                       shouldTestBespokeArrayLikes();
+  if (profile && (op == Op::NewObjD || op == Op::NewObjRD)) {
+    emitVanilla(env);
+    profileArrLikeProps(env);
+    return true;
+  }
 
-  auto const type = env.irb->typeOf(*loc, DataTypeGeneric);
+  if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return false;
+  if (!profile) return specializeSource(env, sk);
+
+  emitVanilla(env);
+  profileSource(env, sk);
+  return true;
+}
+
+/*
+ * Handle a bespoke sink that takes an array-like input at `loc`. Some ops are
+ * handled specially, but the basic flow is:
+ *
+ *  - When profiling, update the sink profile via a LogArrayReach call. Then
+ *    branch on whether the array is bespoke, emitting a diamond with vanilla
+ *    IR on one side and BespokeTop IR on the other.
+ *
+ *  - When optimizing, look up the sink's layout and specialize code for it.
+ *    Call into vanilla IR if the selected layout is vanilla.
+ */
+void handleSink(IRGS& env, const NormalizedInstruction& ni,
+                std::function<void(IRGS&)> emitVanilla, Location loc) {
+  auto const sk = ni.source;
+  auto const type = env.irb->typeOf(loc, DataTypeGeneric);
   assertx(type <= TArrLike);
   if (type.isKnownDataType() && !arrayTypeCouldBeBespoke(type.toDataType())) {
-    assertTypeLocation(env, *loc, TVanillaArrLike);
+    assertTypeLocation(env, loc, TVanillaArrLike);
     return emitVanilla(env);
   }
 
-  emitLogArrayReach(env, *loc, sk);
+  emitLogArrayReach(env, loc, sk);
 
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
   } else if (isFCall(sk.op())) {
-    guardToLayout(env, sk, *loc, type);
+    guardToLayout(env, sk, loc, type);
     translateDispatchBespoke(env, ni);
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
@@ -1160,12 +1205,12 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
     if (type.arrSpec().vanilla()) {
       emitVanilla(env);
     } else {
-      emitLoggingDiamond(env, ni, *loc, emitVanilla);
+      emitLoggingDiamond(env, ni, loc, emitVanilla);
     }
   } else {
     // In an optimized or live translation, we guard to a specialized layout
     // and then emit either vanilla or bespoke code.
-    auto const layout = guardToLayout(env, sk, *loc, type);
+    auto const layout = guardToLayout(env, sk, loc, type);
     if (layout.vanilla()) {
       emitVanilla(env);
     } else {
@@ -1174,26 +1219,16 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
   }
 }
 
-void handleVanillaOutputs(IRGS& env, SrcKey sk) {
-  if (!allowBespokeArrayLikes()) return;
-  if (env.context.kind != TransKind::Profile &&
-      !shouldTestBespokeArrayLikes()) {
-    return;
-  }
+}
 
-  auto const op = sk.op();
-  if (op == Op::NewObjD || op == Op::NewObjRD) {
-    emitProfileArrLikeProps(env);
-  } else if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
-    auto const newArr = topC(env);
-    assertx(newArr->type().isKnownDataType());
-    if (!arrayTypeCouldBeBespoke(newArr->type().toDataType())) return;
+///////////////////////////////////////////////////////////////////////////////
 
-    auto const profile = bespoke::getLoggingProfile(sk);
-    if (!profile) return;
-    auto const data = makeLoggingProfileData(profile);
-    push(env, gen(env, NewLoggingArray, data, popC(env)));
-  }
+void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni,
+                              std::function<void(IRGS&)> emitVanilla) {
+  if (!allowBespokeArrayLikes()) return emitVanilla(env);
+  if (handleSource(env, ni.source, emitVanilla)) return;
+  auto const loc = getLocationToGuard(env, ni.source);
+  return loc ? handleSink(env, ni, emitVanilla, *loc) : emitVanilla(env);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

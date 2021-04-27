@@ -1228,9 +1228,8 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
 
   if (ni.forceSurpriseCheck) surpriseCheck(irgs);
 
-  handleBespokeInputs(irgs, ni, [&](irgen::IRGS& env) {
+  translateDispatchBespoke(irgs, ni, [&](irgen::IRGS& env) {
     translateDispatch(env, ni);
-    handleVanillaOutputs(env, ni.source);
   });
 
   FTRACE(3, "\nTranslated {}: {} with state:\n{}\n",

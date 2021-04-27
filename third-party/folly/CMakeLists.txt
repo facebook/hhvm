@@ -28,22 +28,21 @@ else()
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 
-if ("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
-  set(PARALLEL_FLAG "--parallel")
-endif()
+include(ProcessorCount)
+ProcessorCount(CPU_COUNT)
 
 ExternalProject_add(
   bundled_folly
   ${FOLLY_SOURCE_ARGS}
   PATCH_COMMAND
-    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/folly-cmake-fixup.patch" || true &&
-    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/folly-install-component.patch" || true &&
-    patch -p1 --force < "${CMAKE_CURRENT_LIST_DIR}/disable-gflags.patch" || true
+    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   LIST_SEPARATOR "!!"
   CMAKE_ARGS
     "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
-    -DWITHOUT_GFLAGS=TRUE
+    -DWITHOUT_GFLAGS=ON
+    -DWITHOUT_LIBLZMA=ON
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
@@ -66,7 +65,10 @@ ExternalProject_add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
-    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
+# Prefered, but needs CMake 3.12 or above. Revist when Ubuntu 18.04 support is removed
+#    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly --parallel
+# Legacy:
+    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly -- -j ${CPU_COUNT}
   INSTALL_COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_LIST_DIR}/include"

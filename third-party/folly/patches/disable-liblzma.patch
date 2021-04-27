@@ -1,0 +1,24 @@
+diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
+index 25b42eb4d..02b54ceaa 100644
+--- a/CMake/folly-deps.cmake
++++ b/CMake/folly-deps.cmake
+@@ -97,11 +97,14 @@ if (BZIP2_FOUND)
+   list(APPEND FOLLY_LINK_LIBRARIES ${BZIP2_LIBRARIES})
+ endif()
+ 
+-find_package(LibLZMA MODULE)
+-set(FOLLY_HAVE_LIBLZMA ${LIBLZMA_FOUND})
+-if (LIBLZMA_FOUND)
+-  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIRS})
+-  list(APPEND FOLLY_LINK_LIBRARIES ${LIBLZMA_LIBRARIES})
++option(WITHOUT_LIBLZMA "Disable LZMA support" OFF)
++if(NOT WITHOUT_LIBLZMA)
++  find_package(LibLZMA MODULE)
++  set(FOLLY_HAVE_LIBLZMA ${LIBLZMA_FOUND})
++  if (LIBLZMA_FOUND)
++    list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIRS})
++    list(APPEND FOLLY_LINK_LIBRARIES ${LIBLZMA_LIBRARIES})
++  endif()
+ endif()
+ 
+ find_package(LZ4 MODULE)

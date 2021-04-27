@@ -46,7 +46,7 @@ set -e
 
 cat "$QUILT_PATCHES/series" | while read PATCH_FILE; do
   echo "Applying patch $PATCH_FILE..."
-  patch -p1 < "$QUILT_PATCHES/$PATCH_FILE"
+  patch -p1 --force < "$QUILT_PATCHES/$PATCH_FILE" || true
   echo "... applied patch $PATCH_FILE."
 done
 echo "Applied all patches!"

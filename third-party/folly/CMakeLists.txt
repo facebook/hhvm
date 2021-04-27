@@ -92,6 +92,10 @@ target_include_directories(
 target_link_libraries(folly INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   # referred to by folly's headers, so anything using folly needs to find them
+  boost
   double-conversion
   fmt
+  libsodium
+  jemalloc
+  zstd
 )

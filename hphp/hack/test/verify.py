@@ -356,6 +356,7 @@ def check_result(
         or (
             default_expect_regex is not None
             and re.search(default_expect_regex, normalized_out) is not None
+            and expected == ""
         )
     )
 

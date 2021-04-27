@@ -53,15 +53,9 @@ inline bool equal(const Variant& v1, double  v2) {
 inline bool equal(const Variant& v1, const StringData* v2) {
   return tvEqual(*v1.asTypedValue(), v2);
 }
-inline bool equal(const Variant& v1, const String& v2) {
-  if (!v2.get()) return tvEqual(*v1.asTypedValue(), false);
-  return tvEqual(*v1.asTypedValue(), v2.get());
-}
+inline bool equal(const Variant& v1, const String& v2) = delete;
 inline bool equal(const Variant& v1, const char* v2) = delete;
-inline bool equal(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return tvEqual(*v1.asTypedValue(), false);
-  return tvEqual(*v1.asTypedValue(), v2.get());
-}
+inline bool equal(const Variant& v1, const Array& v2) = delete;
 inline bool equal(const Variant& v1, const Object& v2) = delete;
 inline bool equal(const Variant& v1, const Resource& v2) = delete;
 inline bool equal(const Variant& v1, const Variant& v2) {
@@ -81,15 +75,9 @@ inline bool less(const Variant& v1, double v2) {
 inline bool less(const Variant& v1, const StringData* v2) {
   return tvLess(*v1.asTypedValue(), v2);
 }
-inline bool less(const Variant& v1, const String& v2) {
-  if (!v2.get()) return tvLess(*v1.asTypedValue(), false);
-  return tvLess(*v1.asTypedValue(), v2.get());
-}
+inline bool less(const Variant& v1, const String& v2) = delete;
 inline bool less(const Variant& v1, const char* v2) = delete;
-inline bool less(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return tvLess(*v1.asTypedValue(), false);
-  return tvLess(*v1.asTypedValue(), v2.get());
-}
+inline bool less(const Variant& v1, const Array& v2) = delete;
 inline bool less(const Variant& v1, const Object& v2) = delete;
 inline bool less(const Variant& v1, const Resource& v2) = delete;
 inline bool less(const Variant& v1, const Variant& v2) {
@@ -109,15 +97,9 @@ inline bool more(const Variant& v1, double v2) {
 inline bool more(const Variant& v1, const StringData* v2) {
   return tvGreater(*v1.asTypedValue(), v2);
 }
-inline bool more(const Variant& v1, const String& v2) {
-  if (!v2.get()) return tvGreater(*v1.asTypedValue(), false);
-  return tvGreater(*v1.asTypedValue(), v2.get());
-}
+inline bool more(const Variant& v1, const String& v2) = delete;
 inline bool more(const Variant& v1, const char* v2) = delete;
-inline bool more(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return tvGreater(*v1.asTypedValue(), false);
-  return tvGreater(*v1.asTypedValue(), v2.get());
-}
+inline bool more(const Variant& v1, const Array& v2) = delete;
 inline bool more(const Variant& v1, const Object& v2) = delete;
 inline bool more(const Variant& v1, const Resource& v2) = delete;
 inline bool more(const Variant& v1, const Variant& v2) {
@@ -591,7 +573,7 @@ inline bool equal(const String& v1, const Array& v2) {
 }
 inline bool equal(const String& v1, const Object& v2) = delete;
 inline bool equal(const String& v1, const Resource& v2) = delete;
-inline bool equal(const String& v1, const Variant& v2) { return equal(v2, v1); }
+inline bool equal(const String& v1, const Variant& v2) = delete;
 
 inline bool less(const String& v1, bool    v2) { return more(v2, v1); }
 inline bool less(const String& v1, int     v2) = delete;
@@ -607,7 +589,7 @@ inline bool less(const String& v1, const Array& v2) {
 }
 inline bool less(const String& v1, const Object& v2) = delete;
 inline bool less(const String& v1, const Resource& v2) = delete;
-inline bool less(const String& v1, const Variant& v2) { return more(v2, v1); }
+inline bool less(const String& v1, const Variant& v2) = delete;
 
 inline bool more(const String& v1, bool    v2) { return less(v2, v1); }
 inline bool more(const String& v1, int     v2) = delete;
@@ -623,7 +605,7 @@ inline bool more(const String& v1, const Array& v2) {
 }
 inline bool more(const String& v1, const Object& v2) = delete;
 inline bool more(const String& v1, const Resource& v2) = delete;
-inline bool more(const String& v1, const Variant& v2) { return less(v2, v1); }
+inline bool more(const String& v1, const Variant& v2) = delete;
 
 ///////////////////////////////////////////////////////////////////////////////
 // const char* as first arg (deprecated)
@@ -915,4 +897,3 @@ inline int64_t compare(const ResourceHdr* v1, const ResourceHdr* v2) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

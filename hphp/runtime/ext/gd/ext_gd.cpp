@@ -2768,7 +2768,7 @@ static Variant php_imagettftext_common(int mode, int extended,
       Variant key = iter.first();
       if (!key.isString()) continue;
       Variant item = iter.second();
-      if (equal(key, s_linespacing)) {
+      if (equal(key, s_linespacing.get())) {
         strex.flags |= gdFTEX_LINESPACE;
         strex.linespacing = item.toDouble();
       }

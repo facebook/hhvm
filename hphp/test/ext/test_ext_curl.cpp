@@ -221,11 +221,11 @@ bool TestExtCurl::test_curl_error() {
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   Variant err = HHVM_FN(curl_error)(c.toResource());
-  VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'")) ||
+  VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'").get()) ||
          equal(err, String("Could not resolve host: www.thereisnosuchanurl"
-                " (Domain name not found)")) ||
+                " (Domain name not found)").get()) ||
          equal(err, String("Could not resolve: www.thereisnosuchanurl"
-                " (Domain name not found)")));
+                " (Domain name not found)").get()));
   return Count(true);
 }
 

@@ -70,7 +70,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[0], String("test")));
+  EXPECT_TRUE(equal(arr[0], String("test").get()));
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -82,7 +82,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr[0].toArray().size() == 1);
-  EXPECT_TRUE(equal(arr[0], arrCopy));
+  EXPECT_TRUE(equal(arr[0], arrCopy.get()));
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -120,11 +120,11 @@ TEST(Array, Iteration) {
   int i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("n1")));
-      EXPECT_TRUE(equal(iter.second(), String("v1")));
+      EXPECT_TRUE(equal(iter.first(), String("n1").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("n2")));
-      EXPECT_TRUE(equal(iter.second(), String("v2")));
+      EXPECT_TRUE(equal(iter.first(), String("n2").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -134,10 +134,10 @@ TEST(Array, Iteration) {
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
       EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(0)));
-      EXPECT_TRUE(equal(iter.second(), String("v1")));
+      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
     } else {
       EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(1)));
-      EXPECT_TRUE(equal(iter.second(), String("v2")));
+      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -146,11 +146,11 @@ TEST(Array, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("k1")));
-      EXPECT_TRUE(equal(iter.second(), String("v1")));
+      EXPECT_TRUE(equal(iter.first(), String("k1").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("k2")));
-      EXPECT_TRUE(equal(iter.second(), String("v2")));
+      EXPECT_TRUE(equal(iter.first(), String("k2").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -159,11 +159,11 @@ TEST(Array, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("v1")));
-      EXPECT_TRUE(equal(iter.second(), String("v1")));
+      EXPECT_TRUE(equal(iter.first(), String("v1").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("v2")));
-      EXPECT_TRUE(equal(iter.second(), String("v2")));
+      EXPECT_TRUE(equal(iter.first(), String("v2").get()));
+      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);

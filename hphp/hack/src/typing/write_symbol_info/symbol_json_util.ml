@@ -15,8 +15,7 @@ open Hh_prelude
 open Symbol_builder_types
 
 let get_next_elem_id () =
-  let x = ref 500_000 in
-  (* Glean requires IDs to start with high numbers *)
+  let x = ref 1 in
   fun () ->
     let r = !x in
     x := !x + 1;

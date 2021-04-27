@@ -41,7 +41,10 @@ else()
     double-conversion
     PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${INSTALL_DIR}/include"
-    INTERFACE_LINK_LIBRARIES
+  )
+  target_link_libraries(
+    double-conversion
+    INTERFACE
     "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}double-conversion${CMAKE_STATIC_LIBRARY_SUFFIX}"
   )
 endif()

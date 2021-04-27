@@ -233,6 +233,10 @@ SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
   );
 }
 
+SSATmp* emitCaller(SSATmp* provided) {
+  return provided;
+}
+
 } // namespace
 } // irgen
 } // jit
@@ -240,7 +244,8 @@ SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
 jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
                                    const Func* f,
                                    uint32_t numArgsInclUnpack,
-                                   jit::SSATmp* prologueCtx) const {
+                                   jit::SSATmp* prologueCtx,
+                                   jit::SSATmp* providedCoeffects) const {
   using namespace jit::irgen;
   switch (m_type) {
     case Type::CCParam:
@@ -253,6 +258,8 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
       return emitClosureInheritFromParent(env, f, prologueCtx);
     case Type::GeneratorThis:
       return emitGeneratorThis(env, f, prologueCtx);
+    case Type::Caller:
+      return emitCaller(providedCoeffects);
     case Type::Invalid:
       always_assert(false);
   }

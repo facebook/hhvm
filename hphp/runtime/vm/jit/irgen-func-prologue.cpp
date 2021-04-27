@@ -265,11 +265,20 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     }
     return;
   }
+
+  // If ambient coeffects are directly provided use them, otherwise extract
+  // them from callFlags
+  if (!providedCoeffects) {
+    providedCoeffects =
+      gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+  }
+
   auto const requiredCoeffects = [&] {
     auto required = cns(env, callee->requiredCoeffects().value());
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
-      if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx)) {
+      if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx,
+                                             providedCoeffects)) {
         required = gen(env, AndInt, required, coeffect);
       }
     }
@@ -280,13 +289,6 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     }
     return required;
   }();
-
-  // If ambient coeffects are directly provided use them, otherwise extract
-  // them from callFlags
-  if (!providedCoeffects) {
-    providedCoeffects =
-      gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
-  }
 
   ifThen(
     env,

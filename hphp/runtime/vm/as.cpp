@@ -1922,9 +1922,20 @@ void parse_coeffects_closure_inherit_from_parent(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-coeffects_generator_this ';'
+ */
 void parse_coeffects_generator_this(AsmState& as) {
   assertx(!SystemLib::s_inited);
   as.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-coeffects_caller ';'
+ */
+void parse_coeffects_caller(AsmState& as) {
+  as.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::Caller{}));
   as.in.expectWs(';');
 }
 
@@ -2218,6 +2229,10 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       }
       if (word == ".coeffects_generator_this") {
         parse_coeffects_generator_this(as);
+        continue;
+      }
+      if (word == ".coeffects_caller") {
+        parse_coeffects_caller(as);
         continue;
       }
       as.error("unrecognized directive `" + word + "' in function");

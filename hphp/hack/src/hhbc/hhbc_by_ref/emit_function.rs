@@ -96,7 +96,10 @@ pub fn emit_function<'a, 'arena>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
     }
 
-    let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params);
+    let mut coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params);
+    if is_meth_caller {
+        coeffects = coeffects.with_caller()
+    }
     let (ast_body, rx_body) = {
         if !coeffects.is_any_rx() {
             (&f.body.ast, false)

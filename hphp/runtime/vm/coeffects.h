@@ -128,6 +128,7 @@ struct CoeffectRule final {
   struct CCThis {};
   struct ClosureInheritFromParent {};
   struct GeneratorThis {};
+  struct Caller {};
 
   CoeffectRule() = default;
 
@@ -161,9 +162,13 @@ struct CoeffectRule final {
     : m_type(Type::GeneratorThis)
   {}
 
-  RuntimeCoeffects emit(const Func*, uint32_t, void*) const;
+  explicit CoeffectRule(Caller)
+    : m_type(Type::Caller)
+  {}
+
+  RuntimeCoeffects emit(const Func*, uint32_t, void*, RuntimeCoeffects) const;
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*,
-                       uint32_t, jit::SSATmp*) const;
+                       uint32_t, jit::SSATmp*, jit::SSATmp*) const;
 
   bool isClosureInheritFromParent() const;
   bool isGeneratorThis() const;
@@ -183,6 +188,7 @@ private:
     CCThis,
     ClosureInheritFromParent,
     GeneratorThis,
+    Caller,
   };
 
   Type m_type{Type::Invalid};

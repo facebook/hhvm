@@ -75,6 +75,7 @@ pub struct HhasCoeffects {
     is_pure: bool,
     closure_inherit_from_parent: bool,
     generator_this: bool,
+    caller: bool,
 }
 
 impl HhasCoeffects {
@@ -119,6 +120,9 @@ impl HhasCoeffects {
         }
         if coeffects.generator_this() {
             results.push(".coeffects_generator_this;".to_string());
+        }
+        if coeffects.caller() {
+            results.push(".coeffects_caller;".to_string());
         }
         results
     }
@@ -276,6 +280,13 @@ impl HhasCoeffects {
         }
     }
 
+    pub fn with_caller(&self) -> Self {
+        Self {
+            caller: true,
+            ..self.clone()
+        }
+    }
+
     pub fn get_static_coeffects(&self) -> &[Ctx] {
         self.static_coeffects.as_slice()
     }
@@ -308,12 +319,17 @@ impl HhasCoeffects {
         self.generator_this
     }
 
+    pub fn caller(&self) -> bool {
+        self.caller
+    }
+
     fn has_coeffect_rules(&self) -> bool {
         !self.fun_param.is_empty()
             || !self.cc_param.is_empty()
             || !self.cc_this.is_empty()
             || self.closure_inherit_from_parent
             || self.generator_this
+            || self.caller
     }
 
     pub fn has_coeffects_local(&self) -> bool {

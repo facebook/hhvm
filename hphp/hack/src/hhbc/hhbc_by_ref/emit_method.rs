@@ -166,6 +166,15 @@ pub fn from_ast<'a, 'arena>(
             _ => {}
         }
     }
+    if emitter.systemlib() {
+        match (class.name.1.as_str(), method.name.1.as_str()) {
+            ("\\__SystemLib\\MethCallerHelper", "__invoke")
+            | ("\\__SystemLib\\DynMethCallerHelper", "__invoke") => {
+                coeffects = coeffects.with_caller()
+            }
+            _ => {}
+        }
+    }
     let (ast_body_block, is_rx_body, rx_disabled) = if !coeffects.is_any_rx() {
         (&method.body.ast, false, false)
     } else {

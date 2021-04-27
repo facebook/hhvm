@@ -227,6 +227,9 @@ struct State {
   BlockSet spRecordedIn{};
   BlockSet spRecordedOut{};
 
+  // Whether each block contain an unrecordbasenativesp
+  BlockSet hasUnrecordbasenativesp{};
+
   // All physical registers (including ignored), which have a def in a
   // block
   jit::vector<RegSet> physDefs;
@@ -930,6 +933,7 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
     assertx(state.physChangedBefore.size() == unit.blocks.size());
     assertx(state.spRecordedIn.size() == unit.blocks.size());
     assertx(state.spRecordedOut.size() == unit.blocks.size());
+    assertx(state.hasUnrecordbasenativesp.size() == unit.blocks.size());
     assertx(changed->size() == unit.blocks.size());
   } else {
     state.liveIn.resize(unit.blocks.size());
@@ -941,6 +945,7 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
     state.physChangedBefore.resize(unit.blocks.size());
     state.spRecordedIn.resize(unit.blocks.size());
     state.spRecordedOut.resize(unit.blocks.size());
+    state.hasUnrecordbasenativesp.resize(unit.blocks.size());
   }
 
   auto const processBlock = [&] (Vlabel b,
@@ -948,7 +953,8 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
                                  VregSet& k,
                                  VregSet& u,
                                  RegSet& r,
-                                 bool& spRecorded) {
+                                 bool& spRecorded,
+                                 bool& hasUnrecordbasenativesp) {
     auto& block = unit.blocks[b];
     for (auto& inst : boost::adaptors::reverse(block.code)) {
       auto const& defs = defs_set_cached(state, inst);
@@ -962,6 +968,9 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
         assert_flog(!spRecorded, "Block B{} {} initiailizes native SP, "
                     "but already initialized.", b, show(unit, inst));
         spRecorded = true;
+      }
+      if (inst.op == Vinstr::unrecordbasenativesp) {
+        hasUnrecordbasenativesp = true;
       }
     }
     g -= state.flags;
@@ -980,12 +989,14 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       auto& u = state.uses[b];
       auto& r = state.physDefs[b];
       bool spRecorded = state.spRecordedIn[b];
+      bool hasUnrecordbasenativesp = false;
       g.reset();
       k.reset();
       u.reset();
       r = RegSet{};
-      processBlock(b, g, k, u, r, spRecorded);
+      processBlock(b, g, k, u, r, spRecorded, hasUnrecordbasenativesp);
       state.spRecordedOut[b] = spRecorded;
+      state.hasUnrecordbasenativesp[b] = hasUnrecordbasenativesp;
       for (auto const succ : succs(unit.blocks[b])) {
         state.spRecordedIn[succ] = spRecorded;
       }
@@ -995,7 +1006,8 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       VregSet u;
       RegSet r;
       bool spRecorded = state.spRecordedIn[b];
-      processBlock(b, g, k, u, r, spRecorded);
+      bool hasUnrecordbasenativesp = false;
+      processBlock(b, g, k, u, r, spRecorded, hasUnrecordbasenativesp);
       always_assert(g == state.gens[b]);
       always_assert(k == state.defs[b]);
       always_assert(u == state.uses[b]);
@@ -1004,6 +1016,8 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       for (auto const succ : succs(unit.blocks[b])) {
         always_assert(state.spRecordedIn[succ] == spRecorded);
       }
+      always_assert(state.hasUnrecordbasenativesp[b] ==
+                    hasUnrecordbasenativesp);
     }
 
     state.liveIn[b].reset();
@@ -6052,6 +6066,46 @@ ProcessCopyResults process_copy_spills(State& state,
   return {addedBefore + addedAfter, addedBefore};
 }
 
+size_t process_unrecordbasenativesp_spills(State& state,
+                                           Vlabel b,
+                                           size_t instIdx,
+                                           SpillerState& spiller,
+                                           SpillerResults& results) {
+  auto rematAvail = spiller.gp.inReg | spiller.simd.inReg;
+  auto const reloads = spiller.inMem();
+  size_t added = 0;
+  results.ssaize |= reloads;
+  spiller.dropDead(reloads, nullptr, b, instIdx);
+  for (auto const r : reloads) {
+    auto s = spiller.forReg(r);
+    s->inMem.remove(r);
+    s->inReg.add(r);
+  }
+  vmodify(
+    state.unit, b, instIdx,
+    [&] (Vout& v) {
+      for (auto const r : reloads) {
+        assertx(!r.isPhys());
+        auto const inst = reload_with_remat(
+          state,
+          b,
+          instIdx,
+          rematAvail,
+          r,
+          r
+        );
+        if (inst.op != Vinstr::reload) results.rematerialized.add(r);
+        v << inst;
+        ++added;
+        rematAvail.add(r);
+      }
+      return 0;
+    }
+  );
+  results.changed[b] = true;
+  return added;
+}
+
 // Run spiller logic for normal instructions (not phis or copies). Return the
 // number of instructions inserted.
 size_t process_inst_spills(State& state,
@@ -6369,6 +6423,7 @@ SpillerResults process_spills(State& state,
     };
 
     if (!needsSpilling.perBlock[b].any &&
+        !state.hasUnrecordbasenativesp[b] &&
         !state.uses[b].intersects(spiller.inMem())) {
       // Be efficient if there's no potential spills to worry about.
       process_spills_skip(state, b, spiller, results);
@@ -6394,12 +6449,21 @@ SpillerResults process_spills(State& state,
         // not use any spilled registers, we can process it more
         // efficiently.
         if (!needsSpilling.perBlock[b](instIdx - addedInsts) &&
-            !uses_set_cached(state, inst).intersects(spiller.inMem())) {
+            !uses_set_cached(state, inst).intersects(spiller.inMem()) &&
+            inst.op != Vinstr::unrecordbasenativesp) {
           process_inst_spills_fast(state, inst, b, instIdx, spiller, results);
           continue;
         }
 
         switch (inst.op) {
+          case Vinstr::unrecordbasenativesp: {
+            auto const added =
+              process_unrecordbasenativesp_spills(state, b, instIdx,
+                                                  spiller, results);
+            addedInsts += added;
+            instIdx += added;
+            break;
+          }
           case Vinstr::phijmp: {
             auto const added =
               process_phijmp_spills(state, b, instIdx, inst, spiller, results);

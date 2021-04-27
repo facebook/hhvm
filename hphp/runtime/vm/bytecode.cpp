@@ -1593,21 +1593,24 @@ void maybeMakeLoggingArrayAfterCast(TypedValue* tv) {
 }
 }
 
+OPTBLD_INLINE void iopCastVec() {
+  TypedValue* c1 = vmStack().topC();
+  if (tvIsVec(c1)) return;
+  tvCastToVecInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
+}
+
 OPTBLD_INLINE void iopCastDict() {
   TypedValue* c1 = vmStack().topC();
+  if (tvIsDict(c1)) return;
   tvCastToDictInPlace(c1);
   maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastKeyset() {
   TypedValue* c1 = vmStack().topC();
+  if (tvIsKeyset(c1)) return;
   tvCastToKeysetInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
-}
-
-OPTBLD_INLINE void iopCastVec() {
-  TypedValue* c1 = vmStack().topC();
-  tvCastToVecInPlace(c1);
   maybeMakeLoggingArrayAfterCast(c1);
 }
 
@@ -2606,7 +2609,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
      (!isRefcountedType(lookup.val->m_type) || hasPersistentFlavor(lookup.val->m_type))) {
       mstate.roProp = true;
     } else {
-      throw_must_be_mutable(class_->name()->data(), name->data());   
+      throw_must_be_mutable(class_->name()->data(), name->data());
     }
   }
   mstate.base = tv_lval(lookup.val);
@@ -2664,7 +2667,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp 
 static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadOnlyOp op) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
-  
+
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
   mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
@@ -2675,7 +2678,7 @@ static OPTBLD_INLINE
 void elemDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto const b = mstate.base;
-  
+
   auto const baseValueToLval = [&](TypedValue base) {
     mstate.tvTempBase = base;
     return tv_lval { &mstate.tvTempBase };

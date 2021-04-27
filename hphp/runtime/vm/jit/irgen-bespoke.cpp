@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -1070,6 +1071,28 @@ void profileSource(IRGS& env, SrcKey sk) {
   push(env, gen(env, NewLoggingArray, data, popC(env)));
 }
 
+void skipTrivialCast(IRGS& env, Op op) {
+  assertx(isArrLikeCastOp(op));
+  auto const type = [&]{
+    switch (op) {
+      case OpCastVec:    return TVec;
+      case OpCastDict:   return TDict;
+      case OpCastKeyset: return TKeyset;
+      default: always_assert(false);
+    }
+  }();
+
+  auto const input = topC(env);
+  if (!input->type().maybe(type)) return;
+
+  auto const next = getBlock(env, nextBcOff(env));
+  if (input->isA(type)) gen(env, Jmp, next);
+  ifThen(env,
+    [&](Block* taken) { gen(env, CheckType, type, taken, input); },
+    [&]{ gen(env, Jmp, next); }
+  );
+}
+
 bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const op = sk.op();
   assertx(op == Op::NewDictArray || op == Op::NewStructDict);
@@ -1166,6 +1189,9 @@ bool handleSource(IRGS& env, SrcKey sk,
   if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return false;
   if (!profile) return specializeSource(env, sk);
 
+  if (isArrLikeCastOp(op)) {
+    skipTrivialCast(env, op);
+  }
   emitVanilla(env);
   profileSource(env, sk);
   return true;

@@ -12,6 +12,9 @@ open SaveStateServiceTypes
 
 let get_errors_filename (filename : string) : string = filename ^ ".err"
 
+let get_errors_filename_json (filename : string) : string =
+  filename ^ ".err.json"
+
 let get_legacy_decls_filename (filename : string) : string = filename ^ ".decls"
 
 let get_shallow_decls_filename (filename : string) : string =
@@ -213,6 +216,28 @@ let dump_naming_errors_decls
 
   if save_decls then dump_class_decls genv env ~base_filename:output_filename
 
+(** Dumps the errors in a JSON format. An empty JSON list will be dumped if
+there are no errors.*)
+let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
+  let errors_in_phases =
+    List.map
+      ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
+      [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
+  in
+  let errors = fold_error_files errors_in_phases in
+  let errors_json =
+    Hh_json.(
+      JSON_Array
+        (Relative_path.Set.fold
+           ~init:[]
+           ~f:(fun relative_path acc ->
+             JSON_String (Relative_path.suffix relative_path) :: acc)
+           errors))
+  in
+  let chan = Stdlib.open_out (get_errors_filename_json output_filename) in
+  Hh_json.json_to_output chan errors_json;
+  Stdlib.close_out chan
+
 let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
   let t = Unix.gettimeofday () in
   match SharedMem.loaded_dep_table_filename () with
@@ -335,6 +360,7 @@ let save_state
     dump_dep_graph_32bit ~db_name ~replace_state_after_saving
   | Typing_deps_mode.CustomMode _ ->
     let incremental_info_file = output_filename ^ "_incremental_info.json" in
+    dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;
     dump_dep_graph_64bit
       ~mode:env.ServerEnv.deps_mode

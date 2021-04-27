@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!file_exists("./test/dso_test/dso_test.so")) {
-  echo "skip";
-}
-}

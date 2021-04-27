@@ -2004,6 +2004,7 @@ function child_main(
  *
  * Currently supported operations:
  *   os [not] <os_name> # matches if we are (or are not) on the named OS
+ *   file <path> # matches if the file at the (possibly relative) path exists
  *   euid [not] root # matches if we are (or are not) running as root (euid==0)
  *   extension <extension_name> # matches if the named extension is available
  *   function <function_name> # matches if the named function is available
@@ -2065,6 +2066,28 @@ function runif_os_matches(varray<string> $words): RunifResult {
     'valid' => true,
     'match' => false,
     'skip_reason' => 'skip-runif-os-' . implode('-', $words)
+  );
+}
+
+function runif_file_matches(varray<string> $words): RunifResult {
+  /* This implementation has a trade-off. On the one hand, we could get more
+   * accurate results if we do the check in a process with the same configs as
+   * the test via runif_test_for_feature (e.g. if config differences make a
+   * file we can see invisible to the test). However, this check was added to
+   * skip tests where the test configs depend on a file that may be absent, in
+   * which case hhvm configured the same way as the test cannot run. By doing
+   * the check ourselves we can successfully skip such tests.
+   */
+  if (count($words) !== 1) {
+    return shape('valid' => false, 'error' => "malformed 'file' match");
+  }
+  if (file_exists($words[0])) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-file',
   );
 }
 
@@ -2269,7 +2292,7 @@ function runif_should_skip_test(
       return shape('valid' => false, 'error' => "malformed line '$line'");
     }
     foreach ($words as $word) {
-      if (!preg_match('/^[\w.-]+$/', $word)) {
+      if (!preg_match('|^[\w/.-]+$|', $word)) {
         return shape(
           'valid' => false,
           'error' => "bad word '$word' in line '$line'",
@@ -2282,6 +2305,9 @@ function runif_should_skip_test(
     switch ($type) {
       case 'os':
         $result = runif_os_matches($words);
+        break;
+      case 'file':
+        $result = runif_file_matches($words);
         break;
       case 'euid':
         $result = runif_euid_matches($options, $test, $words);

@@ -27,6 +27,8 @@ namespace HH\Contexts\Unsafe {
   // = \HH\Capabilities\RxLocal & \HH\Capabilities\ImplicitPolicyLocal;
 
   type write_props = mixed;
+  type read_globals = \HH\Capabilities\ReadGlobals;
+  type globals = \HH\Capabilities\AccessGlobals;
 
   type policied = mixed;
   type policied_shallow = \HH\Capabilities\ImplicitPolicyLocal;

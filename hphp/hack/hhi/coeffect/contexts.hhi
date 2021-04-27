@@ -132,6 +132,7 @@ namespace HH\Contexts {
   );
 
   type read_globals = \HH\Capabilities\ReadGlobals;
+  type globals = \HH\Capabilities\AccessGlobals;
 
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);

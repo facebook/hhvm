@@ -2771,6 +2771,8 @@ fn get_call_builtin_func_info(id: impl AsRef<str>) -> Option<(usize, Instruct)> 
         "HH\\dict" => Some((1, IOp(CastDict))),
         "HH\\varray" => Some((1, IOp(CastVec))),
         "HH\\darray" => Some((1, IOp(CastDict))),
+        // TODO: enforce that this returns readonly
+        "HH\\global_readonly_get" => Some((1, IGet(CGetG))),
         "HH\\global_get" => Some((1, IGet(CGetG))),
         "HH\\global_isset" => Some((1, IIsset(IssetG))),
         _ => None,

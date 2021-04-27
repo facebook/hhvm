@@ -453,11 +453,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${READLINE_LIBRARY})
   endif()
 
-  if (NOT WINDOWS)
-    target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
-    target_link_libraries(${target} ${LIBELF_LIBRARIES})
-  endif()
-
   if (LINUX)
     target_link_libraries(${target})
   endif()

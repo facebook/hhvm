@@ -101,4 +101,6 @@ target_link_libraries(folly
   libsodium
   jemalloc
   zstd
+  ${LIBELF_LIBRARIES}
+  ${LIBDWARF_LIBRARIES}
 )

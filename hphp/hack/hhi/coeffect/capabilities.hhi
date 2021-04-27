@@ -31,8 +31,12 @@
  * a subtype of the callee's capability type.
  */
 namespace HH\Capabilities {
+
+  <<__Sealed(AccessGlobals::class)>>
+  interface ReadGlobals {}
+
   <<__Sealed()>>
-  interface AccessStaticVariable {}
+  interface AccessGlobals extends ReadGlobals {}
 
   <<__Sealed()>>
   interface IO {}

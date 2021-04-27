@@ -1915,4 +1915,4 @@ let coeffects env ty =
   with
   | UndesugarableCoeffect _ -> to_string ty
   | Defaults ->
-    "the default capability set {AccessStaticVariable, Output, WriteProperty}"
+    "the default capability set {AccessGlobals, Output, WriteProperty}"

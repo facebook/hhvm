@@ -2,10 +2,10 @@ File "syntax_elaboration.php", line 16, characters 43-55:
 Unbound name: `HH\Contexts\Unsafe\WriteProperty` (Naming[2049])
 File "syntax_elaboration.php", line 16, characters 43-55:
 Unbound name: `HH\Contexts\WriteProperty` (Naming[2049])
-File "syntax_elaboration.php", line 31, characters 34-53:
-Unbound name: `HH\Contexts\AccessStaticVariable` (Naming[2049])
-File "syntax_elaboration.php", line 31, characters 34-53:
-Unbound name: `HH\Contexts\Unsafe\AccessStaticVariable` (Naming[2049])
+File "syntax_elaboration.php", line 31, characters 34-46:
+Unbound name: `HH\Contexts\AccessGlobals` (Naming[2049])
+File "syntax_elaboration.php", line 31, characters 34-46:
+Unbound name: `HH\Contexts\Unsafe\AccessGlobals` (Naming[2049])
 File "syntax_elaboration.php", line 13, characters 5-34:
 Illegal context: `\HH\Capabilities\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
@@ -16,13 +16,13 @@ Illegal context: `\HH\Contexts\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "syntax_elaboration.php", line 28, characters 3-39:
-Illegal context: `\HH\Capabilities\AccessStaticVariable`
+File "syntax_elaboration.php", line 28, characters 3-32:
+Illegal context: `\HH\Capabilities\AccessGlobals`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "syntax_elaboration.php", line 31, characters 33-54:
-Illegal context: `\HH\Contexts\AccessStaticVariable`
+File "syntax_elaboration.php", line 31, characters 33-47:
+Illegal context: `\HH\Contexts\AccessGlobals`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

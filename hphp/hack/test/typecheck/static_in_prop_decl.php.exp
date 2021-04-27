@@ -3,7 +3,7 @@ Cannot use `static` or `parent::class` in property declaration (Parsing[1002])
 File "static_in_prop_decl.php", line 6, characters 26-35:
 Expected constant expression for initializer (Parsing[1002])
 File "static_in_prop_decl.php", line 6, characters 34-35:
-Static property access requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
   File "static_in_prop_decl.php", line 6, characters 26-35:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:

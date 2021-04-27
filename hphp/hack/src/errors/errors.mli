@@ -195,6 +195,8 @@ val has_no_errors : (unit -> 'a) -> bool
 
 val currently_has_errors : unit -> bool
 
+val try_if_no_errors : (unit -> 'a) -> ('a -> 'a) -> 'a
+
 val to_absolute : error -> finalized_error
 
 val to_absolute_for_test : error -> finalized_error
@@ -1523,6 +1525,7 @@ val op_coeffect_error :
   available_pos:Pos_or_decl.t ->
   err_code:int ->
   required:string ->
+  ?suggestion:(Pos_or_decl.t * string) list ->
   string ->
   Pos.t ->
   unit

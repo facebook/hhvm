@@ -5043,17 +5043,24 @@ let call_coeffect_error
     ]
 
 let op_coeffect_error
-    ~locally_available ~available_pos ~err_code ~required op op_pos =
+    ~locally_available
+    ~available_pos
+    ~err_code
+    ~required
+    ?(suggestion = [])
+    op
+    op_pos =
   add_list
     err_code
     ( op_pos,
       op ^ " requires " ^ required ^ ", which is not provided by the context."
     )
-    [
-      ( available_pos,
-        "The local (enclosing) context provides " ^ locally_available );
-      context_definitions_msg ();
-    ]
+    ( [
+        ( available_pos,
+          "The local (enclosing) context provides " ^ locally_available );
+      ]
+    @ suggestion
+    @ [context_definitions_msg ()] )
 
 let abstract_function_pointer cname meth_name call_pos decl_pos =
   let cname = strip_ns cname in
@@ -5590,6 +5597,21 @@ let has_no_errors (f : unit -> 'a) : bool =
       let _ = f () in
       true)
     (fun _ -> false)
+
+(* Runs f2 on the result only if f1 returns has no errors. *)
+let try_if_no_errors f1 f2 =
+  let (result, error_opt) =
+    try_with_result
+      (fun () ->
+        let result = f1 () in
+        (result, None))
+      (fun (result, _none) error -> (result, Some error))
+  in
+  match error_opt with
+  | Some err ->
+    add_error err;
+    result
+  | None -> f2 result
 
 (*****************************************************************************)
 (* Do. *)

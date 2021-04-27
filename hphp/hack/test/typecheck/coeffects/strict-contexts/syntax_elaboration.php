@@ -25,10 +25,10 @@ function fun_explicit_defaults_ctx()[defaults]: void {
 }
 
 function fully_qualified_but_wrong_ns()[
-  \HH\Capabilities\AccessStaticVariable
+  \HH\Capabilities\AccessGlobals
 ]: void {}
 
-function namespaceless_cap_bad()[AccessStaticVariable]: void {}
+function namespaceless_cap_bad()[AccessGlobals]: void {}
 
 function fully_qualified_but_right_ns()[
   \HH\Contexts\write_props

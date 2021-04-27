@@ -77,7 +77,7 @@ namespace HH\Contexts {
   // TODO(coeffects) after implementing lower bounds on const ctx/type, do:
   /* = (
     \HH\Capabilities\WriteProperty &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\AccessGlobals &
     \HH\Capabilities\IO
   ); */
 
@@ -91,45 +91,47 @@ namespace HH\Contexts {
 
   type policied = (
     \HH\Capabilities\ImplicitPolicy &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
   // type policied_shallow = (\HH\Capabilities\ImplicitPolicyShallow & policied);
   type policied_shallow = (
     \HH\Capabilities\ImplicitPolicyShallow &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
   // type policied_local = (\HH\Capabilities\ImplicitPolicyLocal & policied_shallow);
   type policied_local = (
     \HH\Capabilities\ImplicitPolicyLocal &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
   // type policied_of<T> = (\HH\Capabilities\ImplicitPolicyOf<T> & policied);
   type policied_of<T> = (
     \HH\Capabilities\ImplicitPolicyOf<T> &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
   // type policied_of_shallow<T> = (\HH\Capabilities\ImplicitPolicyOfShallow<T> & policied_of<T>);
   type policied_of_shallow<T> = (
     \HH\Capabilities\ImplicitPolicyOfShallow<T> &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
   // type policied_of_local<T> = (\HH\Capabilities\ImplicitPolicyOfLocal<T> & policied_of_shallow<T>);
   type policied_of_local<T> = (
     \HH\Capabilities\ImplicitPolicyOfLocal<T> &
-    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
+
+  type read_globals = \HH\Capabilities\ReadGlobals;
 
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);

@@ -781,7 +781,9 @@ module Capabilities = struct
 
   let writeProperty = prefix ^ "WriteProperty"
 
-  let accessStaticVariable = prefix ^ "AccessStaticVariable"
+  let accessGlobals = prefix ^ "AccessGlobals"
+
+  let readGlobals = prefix ^ "ReadGlobals"
 
   let io = prefix ^ "IO"
 

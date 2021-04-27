@@ -26,6 +26,7 @@ let check_local_capability (mk_required : env -> env * locl_ty) callback env =
 let enforce_local_capability
     ?((* Run-time enforced ops must have the default as it's unfixmeable *)
     err_code = Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
+    ?(suggestion = [])
     (mk_required : env -> env * locl_ty)
     (op : string)
     (op_pos : Pos.t)
@@ -38,6 +39,7 @@ let enforce_local_capability
         ~available_pos:(Typing_defs.get_pos available)
         ~required:(Typing_print.coeffects env required)
         ~err_code
+        ~suggestion
         op
         op_pos)
     env
@@ -54,8 +56,21 @@ end
 
 let enforce_static_property_access =
   enforce_local_capability
-    Capabilities.(mk accessStaticVariable)
-    "Static property access"
+    Capabilities.(mk readGlobals)
+    "Reading static properties"
+
+let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
+  let suggestion =
+    match msg with
+    | Some msg -> [(Pos_or_decl.of_raw_pos op_pos, msg)]
+    | None -> []
+  in
+  enforce_local_capability
+    Capabilities.(mk accessGlobals)
+    ~suggestion
+    "Creating mutable references to static properties"
+    op_pos
+    env
 
 let enforce_io =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"
@@ -65,7 +80,7 @@ let enforce_rx_is_enabled =
 
 let enforce_awaitable_immediately_awaited =
   enforce_local_capability
-    Capabilities.(mk accessStaticVariable)
+    Capabilities.(mk accessGlobals)
     "Not immediately `await`ing `Awaitable`-typed values"
 
 let enforce_enum_class_variant =
@@ -201,6 +216,17 @@ let check_assignment env ((append_pos_opt, _), te_) =
   match te_ with
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
   | Aast.Binop (Eq _, te1, _) ->
+    let env =
+      match te1 with
+      | (_, Aast.Class_get _) ->
+        (* Assigning static properties requires specific caps *)
+        enforce_local_capability
+          Capabilities.(mk accessGlobals)
+          "Modifying static properties"
+          append_pos_opt
+          env
+      | _ -> env
+    in
     check_local_capability
       Capabilities.(mk writeProperty)
       (check_assignment_or_unset_target

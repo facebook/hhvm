@@ -212,10 +212,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
       | Some cls ->
         let tc_tparams = Cls.tparams cls in
         let ety_env =
-          {
-            (TUtils.env_with_self env ~on_error:Errors.ignore_error) with
-            substs = Subst.make_locl tc_tparams tyl;
-          }
+          { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
         in
         iter2_shortest
           begin

@@ -258,18 +258,6 @@ let (localize_ref : localize ref) =
 
 let localize x = !localize_ref x
 
-type env_with_self =
-  ?report_cycle:Pos.t * string ->
-  env ->
-  on_error:Errors.error_from_reasons_callback ->
-  expand_env
-
-let env_with_self_ref : env_with_self ref =
-  ref (fun ?report_cycle:_ _ ~on_error:_ ->
-      (not_implemented "env_with_self" () : _))
-
-let env_with_self ?report_cycle x = !env_with_self_ref ?report_cycle x
-
 (*****************************************************************************)
 (* Returns true if a type is optional *)
 (*****************************************************************************)

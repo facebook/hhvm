@@ -337,6 +337,17 @@ type expand_env = {
   on_error: Errors.error_from_reasons_callback;
 }
 
+let empty_expand_env =
+  {
+    type_expansions = Type_expansions.empty_w_cycle_report ~report_cycle:None;
+    substs = SMap.empty;
+    this_ty =
+      mk (Reason.none, Tgeneric (Naming_special_names.Typehints.this, []));
+    on_error = Errors.ignore_error;
+  }
+
+let empty_expand_env_with_on_error on_error = { empty_expand_env with on_error }
+
 let add_type_expansion_check_cycles env exp =
   let (type_expansions, has_cycle) =
     Type_expansions.add_and_check_cycles env.type_expansions exp

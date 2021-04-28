@@ -85,15 +85,6 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-let env_with_self ?report_cycle _env ~on_error =
-  {
-    type_expansions =
-      Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
-    substs = SMap.empty;
-    this_ty = MakeType.this Reason.none;
-    on_error;
-  }
-
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
  * common operations that are necessary for this operation, specifically:
@@ -793,8 +784,8 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
 
 (* Like localize_with_self, but uses the supplied kind, enabling support
    for higher-kinded types *)
-let localize_with_self_and_kind env ~on_error ?report_cycle ty kind =
-  let ety_env = env_with_self env ~on_error ?report_cycle in
+let localize_with_self_and_kind env ~on_error ty kind =
+  let ety_env = empty_expand_env_with_on_error on_error in
   localize_with_kind ~ety_env env ty kind
 
 (** Localize an explicit type argument to a constructor or function. We
@@ -955,7 +946,14 @@ let localize_targs
  * Env.get_self env
  *)
 let localize_with_self_ env ~on_error ?report_cycle ty =
-  let ety_env = env_with_self env ~on_error ?report_cycle in
+  let ety_env =
+    {
+      empty_expand_env with
+      type_expansions =
+        Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
+      on_error;
+    }
+  in
   localize env ty ~ety_env
 
 let localize_hint_with_self env ~ignore_errors ?report_cycle h =
@@ -1088,13 +1086,11 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
     List.map tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
   let ety_env =
-    env_with_self
-      env
-      ~on_error:
-        ( if ignore_errors then
-          Errors.ignore_error
-        else
-          Env.invalid_type_hint_assert_primary_pos_in_current_decl env )
+    empty_expand_env_with_on_error
+      ( if ignore_errors then
+        Errors.ignore_error
+      else
+        Env.invalid_type_hint_assert_primary_pos_in_current_decl env )
   in
   let env = localize_and_add_generic_parameters ~ety_env env tparams in
   let env = localize_and_add_where_constraints ~ety_env env where_constraints in
@@ -1103,5 +1099,3 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
 let () = TUtils.localize_with_self_ref := localize_with_self
 
 let () = TUtils.localize_ref := localize
-
-let () = TUtils.env_with_self_ref := env_with_self

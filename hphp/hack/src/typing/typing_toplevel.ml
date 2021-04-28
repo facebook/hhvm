@@ -715,10 +715,8 @@ let method_def env cls m =
            * late static type
            *)
           let ety_env =
-            Phase.env_with_self
-              env
-              ~on_error:
-                (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+            empty_expand_env_with_on_error
+              (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
           in
           Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
@@ -1667,9 +1665,8 @@ let class_def_ env c tc =
       ~use_pos:pc
       ~definition_pos:(Pos_or_decl.of_raw_pos pc)
       ~ety_env:
-        (Phase.env_with_self
-           env
-           ~on_error:(Env.unify_error_assert_primary_pos_in_current_decl env))
+        (empty_expand_env_with_on_error
+           (Env.unify_error_assert_primary_pos_in_current_decl env))
       env
       (Cls.where_constraints tc)
   in
@@ -1686,10 +1683,8 @@ let class_def_ env c tc =
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           {
-            (Phase.env_with_self
-               env
-               ~on_error:
-                 (Env.unify_error_assert_primary_pos_in_current_decl env))
+            (empty_expand_env_with_on_error
+               (Env.unify_error_assert_primary_pos_in_current_decl env))
             with
             substs = Subst.make_locl tc_tparams tyl;
           }

@@ -195,6 +195,11 @@ type expand_env = {
   on_error: Errors.error_from_reasons_callback;
 }
 
+val empty_expand_env : expand_env
+
+val empty_expand_env_with_on_error :
+  Errors.error_from_reasons_callback -> expand_env
+
 (** Returns:
     - [None] if there was no cycle
     - [Some None] if there was a cycle which did not involve the first

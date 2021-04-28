@@ -14,12 +14,6 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-val env_with_self :
-  ?report_cycle:Pos.t * string ->
-  env ->
-  on_error:Errors.error_from_reasons_callback ->
-  expand_env
-
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
     into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
     Performs no substitutions of generics and initializes the late static bound

@@ -66,9 +66,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->
-        let ety_env =
-          Typing_phase.env_with_self env ~on_error:Errors.ignore_error
-        in
+        let ety_env = empty_expand_env in
         let instantiation =
           Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
         in

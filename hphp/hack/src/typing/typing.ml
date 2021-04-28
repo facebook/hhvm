@@ -816,7 +816,7 @@ let fun_type_of_id env x tal el =
       let ft =
         Typing_special_fun.transform_special_fun_ty ft x (List.length el)
       in
-      let ety_env = Phase.env_with_self env ~on_error:Errors.ignore_error in
+      let ety_env = empty_expand_env in
       let (env, tal) =
         Phase.localize_targs
           ~check_well_kinded:true
@@ -2825,7 +2825,7 @@ and expr_
       in
       let ety_env =
         {
-          (Phase.env_with_self env ~on_error:(Errors.invalid_type_hint pos)) with
+          (empty_expand_env_with_on_error (Errors.invalid_type_hint pos)) with
           substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
         }
       in
@@ -3351,10 +3351,8 @@ and expr_
         in
         let ety_env =
           {
-            (Phase.env_with_self
-               env
-               ~on_error:
-                 (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
+            (empty_expand_env_with_on_error
+               (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
             with
             substs = Subst.make_locl tparaml tparams;
           }
@@ -3755,9 +3753,8 @@ and expr_
      * of the current enclosing class
      *)
     let ety_env =
-      Phase.env_with_self
-        env
-        ~on_error:(Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+      empty_expand_env_with_on_error
+        (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
     in
     let (env, declared_ft) =
       Phase.(
@@ -4438,11 +4435,8 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
                * late static type
                *)
               let ety_env =
-                Phase.env_with_self
-                  env
-                  ~on_error:
-                    (Env.invalid_type_hint_assert_primary_pos_in_current_decl
-                       env)
+                empty_expand_env_with_on_error
+                  (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
               in
               Typing_return.make_return_type (Phase.localize ~ety_env) env ret
           in

@@ -124,10 +124,7 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
            * recursion
            *)
           let ety_env =
-            {
-              (Phase.env_with_self env ~on_error:Errors.ignore_error) with
-              substs = Subst.make_locl tc_tparams tyl;
-            }
+            { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
           in
           iter2_shortest
             begin

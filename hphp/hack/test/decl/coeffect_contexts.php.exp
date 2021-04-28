@@ -8,39 +8,46 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract =
+       [{ Shallow_decl_defs.stc_name = ([4:22-24], "C0");
+          stc_kind =
           (Typing_defs.TCAbstract
-             (Some (Rhint ([4:27-29]), (Tintersection []))));
-          stc_as_constraint = None; stc_super_constraint = None;
-          stc_name = ([4:22-24], "C0"); stc_type = None;
+             { Typing_defs.atc_as_constraint = None;
+               atc_super_constraint = None;
+               atc_default = (Some (Rhint ([4:27-29]), (Tintersection []))) });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-         { Shallow_decl_defs.stc_abstract =
+         { Shallow_decl_defs.stc_name = ([5:22-24], "C1");
+           stc_kind =
            (Typing_defs.TCAbstract
-              (Some (Rhint ([5:27-45]),
-                     (Tintersection
-                        [(Rhint ([5:28-44]),
-                          (Tapply (
-                             ([5:28-44], "\\HH\\Contexts\\policied_shallow"),
-                             [])))
-                          ]))));
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([5:22-24], "C1"); stc_type = None;
+              { Typing_defs.atc_as_constraint = None;
+                atc_super_constraint = None;
+                atc_default =
+                (Some (Rhint ([5:27-45]),
+                       (Tintersection
+                          [(Rhint ([5:28-44]),
+                            (Tapply (
+                               ([5:28-44], "\\HH\\Contexts\\policied_shallow"),
+                               [])))
+                            ])))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-         { Shallow_decl_defs.stc_abstract =
+         { Shallow_decl_defs.stc_name = ([6:22-24], "C2");
+           stc_kind =
            (Typing_defs.TCAbstract
-              (Some (Rhint ([6:27-57]),
-                     (Tintersection
-                        [(Rhint ([6:28-44]),
-                          (Tapply (
-                             ([6:28-44], "\\HH\\Contexts\\policied_shallow"),
-                             [])));
-                          (Rhint ([6:46-56]),
-                           (Tapply (
-                              ([6:46-56], "\\HH\\Contexts\\rx_shallow"), 
-                              [])))
-                          ]))));
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([6:22-24], "C2"); stc_type = None;
+              { Typing_defs.atc_as_constraint = None;
+                atc_super_constraint = None;
+                atc_default =
+                (Some (Rhint ([6:27-57]),
+                       (Tintersection
+                          [(Rhint ([6:28-44]),
+                            (Tapply (
+                               ([6:28-44], "\\HH\\Contexts\\policied_shallow"),
+                               [])));
+                            (Rhint ([6:46-56]),
+                             (Tapply (
+                                ([6:46-56], "\\HH\\Contexts\\rx_shallow"), 
+                                [])))
+                            ])))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;

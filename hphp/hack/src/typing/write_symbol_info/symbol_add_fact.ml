@@ -239,7 +239,7 @@ let add_type_const_defn_fact ctx source_map tc decl_id progress =
     ]
   in
   let json_fields =
-    (* TODO(typeconsts) should the default of an abstract type constant be used 
+    (* TODO(T88552052) should the default of an abstract type constant be used 
      * as a value here *)
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }

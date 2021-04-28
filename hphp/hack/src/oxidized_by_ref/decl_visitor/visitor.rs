@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<604a38ce3eb75db5ae110a17f48cc97a>>
+// @generated SignedSource<<2887ee24d22cb628d76cc92d29e4b5b3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,6 +16,9 @@ use crate::{
 };
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
+    fn visit_abstract_typeconst(&mut self, p: &'a AbstractTypeconst<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_arg_position(&mut self, p: &'a ArgPosition) {
         p.recurse(self.object())
     }
@@ -38,6 +41,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_collection_style(&mut self, p: &'a CollectionStyle) {
+        p.recurse(self.object())
+    }
+    fn visit_concrete_typeconst(&mut self, p: &'a ConcreteTypeconst<'a>) {
         p.recurse(self.object())
     }
     fn visit_const_decl(&mut self, p: &'a ConstDecl<'a>) {
@@ -86,6 +92,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_ifc_fun_decl(&mut self, p: &'a IfcFunDecl<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_partially_abstract_typeconst(&mut self, p: &'a PartiallyAbstractTypeconst<'a>) {
         p.recurse(self.object())
     }
     fn visit_pos_byte_string(&mut self, p: &'a PosByteString<'a>) {
@@ -151,7 +160,7 @@ pub trait Visitor<'a> {
     fn visit_ty_(&mut self, p: &'a Ty_<'a>) {
         p.recurse(self.object())
     }
-    fn visit_typeconst_abstract_kind(&mut self, p: &'a TypeconstAbstractKind<'a>) {
+    fn visit_typeconst(&mut self, p: &'a Typeconst<'a>) {
         p.recurse(self.object())
     }
     fn visit_typedef_type(&mut self, p: &'a TypedefType<'a>) {

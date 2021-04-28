@@ -286,7 +286,10 @@ let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
              cls.sc_enum_type
              Option.(
                get_typeconst Naming_special_names.FB.tInner >>= fun t ->
-               t.ttc_type)
+               match t.ttc_kind with
+               | TCConcrete { tc_type } -> Some tc_type
+               | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
+               | TCAbstract { atc_default; _ } -> atc_default)
              get_ancestor) )
   in
   let consts_and_typeconst_structures =
@@ -369,12 +372,14 @@ let make_typeconst_cache class_name lin =
     ~get_single_seq
     ~is_canonical:(fun t ->
       String.equal t.ttc_origin class_name
-      || equal_typeconst_abstract_kind t.ttc_abstract TCConcrete
-         && not t.ttc_concretized)
+      ||
+      match t.ttc_kind with
+      | TCConcrete _ -> not t.ttc_concretized
+      | _ -> false)
     ~merge:
       begin
         fun ~earlier:descendant_tc ~later:ancestor_tc ->
-        match (descendant_tc.ttc_abstract, ancestor_tc.ttc_abstract) with
+        match (descendant_tc.ttc_kind, ancestor_tc.ttc_kind) with
         (* This covers the following case:
          *
          * interface I1 { abstract const type T; }
@@ -384,7 +389,7 @@ let make_typeconst_cache class_name lin =
          *
          * Then C::T == I2::T since I2::T is not abstract.
          *)
-        | (TCAbstract _, (TCConcrete | TCPartiallyAbstract)) -> ancestor_tc
+        | (TCAbstract _, (TCConcrete _ | TCPartiallyAbstract _)) -> ancestor_tc
         (* NB: The following comment (written in D1825740) claims that this arm is
          necessary to cover the example it describes. But this example does not
          exercise this arm--the interface appears earlier in the linearization
@@ -406,7 +411,7 @@ let make_typeconst_cache class_name lin =
          * Then C::T == I::T since P::T has a constraint and thus can be
          * overridden by its child, while I::T cannot be overridden.
          *)
-        | (TCPartiallyAbstract, TCConcrete) -> ancestor_tc
+        | (TCPartiallyAbstract _, TCConcrete _) -> ancestor_tc
         (* This covers the following case
          *
          * interface I {
@@ -422,7 +427,9 @@ let make_typeconst_cache class_name lin =
          * C::T must come from A, not I, as A provides the default that will synthesize
          * into a concrete type constant in C.
          *)
-        | (TCAbstract None, TCAbstract (Some _)) -> ancestor_tc
+        | ( TCAbstract { atc_default = None; _ },
+            TCAbstract { atc_default = Some _; _ } ) ->
+          ancestor_tc
         (* When a type constant is declared in multiple parents we need to make a
          * subtle choice of what type we inherit. For example, in:
          *
@@ -436,10 +443,10 @@ let make_typeconst_cache class_name lin =
          * and requires the user to explicitly declare T in C.
          *)
         | (TCAbstract _, TCAbstract _)
-        | (TCPartiallyAbstract, (TCAbstract _ | TCPartiallyAbstract))
-        | (TCConcrete, (TCAbstract _ | TCPartiallyAbstract)) ->
+        | (TCPartiallyAbstract _, (TCAbstract _ | TCPartiallyAbstract _))
+        | (TCConcrete _, (TCAbstract _ | TCPartiallyAbstract _)) ->
           descendant_tc
-        | (TCConcrete, TCConcrete) ->
+        | (TCConcrete _, TCConcrete _) ->
           if descendant_tc.ttc_concretized && not ancestor_tc.ttc_concretized
           then
             ancestor_tc

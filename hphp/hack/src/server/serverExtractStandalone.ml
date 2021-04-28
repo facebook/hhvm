@@ -673,12 +673,7 @@ end = struct
               do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
               let cls = Decl.get_class_exn ctx class_name in
               (match Decl_provider.Class.get_typeconst cls tconst with
-              | Some
-                  Typing_defs.
-                    { ttc_type; ttc_as_constraint; ttc_super_constraint; _ } ->
-                Option.iter
-                  ttc_type
-                  ~f:(add_dep ctx ~this:(Some class_name) env);
+              | Some Typing_defs.{ ttc_kind; _ } ->
                 let add_cstr_dep tc_type =
                   (* What does 'this' refer to inside of T? *)
                   let this =
@@ -689,18 +684,28 @@ end = struct
                   let taccess = make_taccess r tc_type tconsts in
                   add_dep ctx ~this env taccess
                 in
-                if not (List.is_empty tconsts) then (
-                  match (ttc_type, ttc_as_constraint, ttc_super_constraint) with
-                  | (None, Some as_tc_type, Some super_tc_type) ->
-                    add_cstr_dep as_tc_type;
-                    add_cstr_dep super_tc_type
-                  (* TODO(coeffects) double-check this *)
-                  | (Some tc_type, _, _)
-                  | (None, Some tc_type, _)
-                  | (None, _, Some tc_type) ->
-                    add_cstr_dep tc_type
-                  | (None, None, None) -> ()
-                )
+                (* TODO(coeffects) double-check this *)
+                (* TODO(T88552052) I've kept the existing logic the same in the refactor
+                 * but it exposed clear gaps in which constraints get added. *)
+                let open Typing_defs in
+                (match ttc_kind with
+                | TCConcrete { tc_type } ->
+                  add_dep ctx ~this:(Some class_name) env tc_type;
+                  if not (List.is_empty tconsts) then add_cstr_dep tc_type
+                | TCPartiallyAbstract
+                    { patc_constraint = _ (* TODO *); patc_type } ->
+                  add_dep ctx ~this:(Some class_name) env patc_type;
+                  if not (List.is_empty tconsts) then add_cstr_dep patc_type
+                | TCAbstract
+                    {
+                      atc_as_constraint;
+                      atc_super_constraint;
+                      atc_default = _ (* TODO *);
+                    } ->
+                  if not (List.is_empty tconsts) then (
+                    Option.iter ~f:add_cstr_dep atc_as_constraint;
+                    Option.iter ~f:add_cstr_dep atc_super_constraint
+                  ))
               | None -> ())
           in
           match Typing_defs.get_node root with
@@ -784,14 +789,26 @@ end = struct
               | None -> raise (DependencyNotFound description)))
           | Const (_, name) ->
             (match Class.get_typeconst cls name with
-            | Some Typing_defs.{ ttc_type; ttc_as_constraint; ttc_origin; _ } ->
+            | Some Typing_defs.{ ttc_kind; ttc_origin; _ } ->
               if not (String.equal cls_name ttc_origin) then
                 do_add_dep ctx env (Const (ttc_origin, name));
 
               Option.iter ~f:(add_tyconst_attr_deps ctx env)
               @@ Nast_helper.get_typeconst ctx ttc_origin name;
-              Option.iter ttc_type ~f:add_dep;
-              Option.iter ttc_as_constraint ~f:add_dep
+              (* TODO(T88552052) Missing lots of deps here *)
+              let open Typing_defs in
+              (match ttc_kind with
+              | TCConcrete { tc_type } -> add_dep tc_type
+              | TCPartiallyAbstract { patc_type; patc_constraint } ->
+                add_dep patc_type;
+                add_dep patc_constraint
+              | TCAbstract
+                  {
+                    atc_default = _;
+                    atc_super_constraint = _;
+                    atc_as_constraint;
+                  } ->
+                Option.iter atc_as_constraint ~f:add_dep)
             | None ->
               let Typing_defs.{ cc_type; _ } =
                 value_or_not_found description @@ Class.get_const cls name

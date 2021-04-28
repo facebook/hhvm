@@ -1112,13 +1112,15 @@ let check_extend_abstract_prop ~is_final p seq =
  *)
 let check_extend_abstract_typeconst ~is_final p seq =
   List.iter seq (fun (x, tc) ->
-      if Option.is_none tc.ttc_type then
+      match tc.ttc_kind with
+      | TCAbstract _ ->
         Errors.implement_abstract
           ~is_final
           p
           (fst tc.ttc_name)
           "type constant"
-          x)
+          x
+      | _ -> ())
 
 let check_extend_abstract_const ~is_final p seq =
   List.iter seq (fun (x, cc) ->
@@ -1274,7 +1276,7 @@ let typeconst_def
     | _ -> env
   in
 
-  (* TODO(typeconsts): should this check be happening for defaults
+  (* TODO(T88552052): should this check be happening for defaults
    * Does this belong here at all? *)
   let env =
     match c_tconst_kind with

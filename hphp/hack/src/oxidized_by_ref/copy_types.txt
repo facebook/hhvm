@@ -160,7 +160,7 @@ typing_defs::PosString
 typing_defs::RecordFieldReq
 typing_defs::ShapeKind
 typing_defs::Ty_
-typing_defs::TypeconstAbstractKind
+typing_defs::Typeconst
 typing_defs::ValKind
 typing_defs::XhpAttr
 typing_defs::XhpAttrTag

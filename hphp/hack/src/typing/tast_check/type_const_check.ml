@@ -49,9 +49,10 @@ let handler =
             | None -> ()
             | Some tc ->
               begin
-                match (tc.ttc_abstract, tc.ttc_type) with
-                | (TCAbstract (Some ty), _)
-                | ((TCPartiallyAbstract | TCConcrete), Some ty) ->
+                match tc.ttc_kind with
+                | TCAbstract { atc_default = Some ty; _ }
+                | TCPartiallyAbstract { patc_type = ty; _ }
+                | TCConcrete { tc_type = ty } ->
                   let (pos, enforceable) =
                     Option.value_exn (Cls.get_typeconst_enforceability cls name)
                   in

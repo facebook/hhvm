@@ -1538,12 +1538,9 @@ module PrintClass = struct
   let typeconst
       ctx
       {
-        ttc_abstract = _;
         ttc_synthesized = synthetic;
         ttc_name = tc_name;
-        ttc_as_constraint = as_constraint;
-        ttc_super_constraint = super_constraint;
-        ttc_type = tc_type;
+        ttc_kind = kind;
         ttc_origin = origin;
         ttc_enforceable = (_, enforceable);
         ttc_reifiable = reifiable;
@@ -1551,25 +1548,22 @@ module PrintClass = struct
       } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl ctx x in
-    let as_constraint =
-      match as_constraint with
-      | None -> ""
-      | Some x -> " as " ^ ty x
-    in
-    let super_constraint =
-      match super_constraint with
-      | None -> ""
-      | Some x -> " super " ^ ty x
-    in
-    let type_ =
-      match tc_type with
-      | None -> ""
-      | Some x -> " = " ^ ty x
+    let type_info =
+      match kind with
+      | TCConcrete { tc_type = t } -> Printf.sprintf " = %s" (ty t)
+      | TCPartiallyAbstract { patc_constraint = c; patc_type = t } ->
+        Printf.sprintf " as %s = %s" (ty c) (ty t)
+      | TCAbstract
+          { atc_as_constraint = a; atc_super_constraint = s; atc_default = d }
+        ->
+        let m = Option.value_map ~default:"" in
+        let a = m a (fun x -> Printf.sprintf " as %s" (ty x)) in
+        let s = m s (fun x -> Printf.sprintf " super %s" (ty x)) in
+        let d = m d (fun x -> Printf.sprintf " = %s" (ty x)) in
+        a ^ s ^ d
     in
     name
-    ^ as_constraint
-    ^ super_constraint
-    ^ type_
+    ^ type_info
     ^ " (origin:"
     ^ origin
     ^ ")"

@@ -335,15 +335,12 @@ and synthesize_defaults
     ((typeconsts, consts) :
       Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t) :
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
-  match tc.ttc_abstract with
-  | TCAbstract (Some default) ->
+  match tc.ttc_kind with
+  | TCAbstract { atc_default = Some default; _ } ->
     let concrete =
       {
         tc with
-        ttc_abstract = TCConcrete;
-        ttc_as_constraint = None;
-        ttc_super_constraint = None;
-        ttc_type = Some default;
+        ttc_kind = TCConcrete { tc_type = default };
         ttc_concretized = true;
       }
     in
@@ -477,7 +474,14 @@ and class_decl
     Decl_enum.rewrite_class
       c.sc_name
       enum
-      Option.(enum_inner_ty >>= fun t -> t.ttc_type)
+      Option.(
+        enum_inner_ty >>= fun t ->
+        (* TODO(T88552052) can make logic more explicit now, enum members appear to
+         * only need abstract without default and concrete type consts *)
+        match t.ttc_kind with
+        | TCConcrete { tc_type } -> Some tc_type
+        | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
+        | TCAbstract { atc_default; _ } -> atc_default)
       (fun x -> SMap.find_opt x impl)
       consts
   in
@@ -774,7 +778,7 @@ and typeconst_structure
     mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
   in
   let abstract =
-    match stc.stc_abstract with
+    match stc.stc_kind with
     | TCAbstract _ -> true
     | _ -> false
   in
@@ -822,12 +826,9 @@ and typeconst_fold
     in
     let tc =
       {
-        ttc_abstract = stc.stc_abstract;
         ttc_synthesized = false;
         ttc_name = stc.stc_name;
-        ttc_as_constraint = stc.stc_as_constraint;
-        ttc_super_constraint = stc.stc_super_constraint;
-        ttc_type = stc.stc_type;
+        ttc_kind = stc.stc_kind;
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;

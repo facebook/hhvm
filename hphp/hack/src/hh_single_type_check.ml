@@ -1919,38 +1919,37 @@ let handle_mode
             Printf.sprintf " from %s" (Utils.strip_ns origin)
         in
         let ty =
-          match ttc.Typing_defs.ttc_abstract with
-          | Typing_defs.TCConcrete ->
-            (match ttc.Typing_defs.ttc_type with
-            | None -> "= None"
-            | Some ty -> "= " ^ ty_to_string ty)
-          | Typing_defs.TCAbstract default ->
+          let open Typing_defs in
+          match ttc.ttc_kind with
+          | TCConcrete { tc_type = ty } -> "= " ^ ty_to_string ty
+          | TCAbstract
+              {
+                atc_as_constraint = as_cstr;
+                atc_super_constraint = _;
+                atc_default = default;
+              } ->
             String.concat
               ~sep:" "
               (List.filter_map
                  [
-                   Option.map ttc.Typing_defs.ttc_as_constraint ~f:(fun ty ->
-                       "as " ^ ty_to_string ty);
+                   Option.map as_cstr ~f:(fun ty -> "as " ^ ty_to_string ty);
                    Option.map default ~f:(fun ty -> "= " ^ ty_to_string ty);
                  ]
                  ~f:(fun x -> x))
-          | Typing_defs.TCPartiallyAbstract ->
+          | TCPartiallyAbstract { patc_constraint; patc_type } ->
             String.concat
               ~sep:" "
-              (List.filter_map
-                 [
-                   Option.map ttc.Typing_defs.ttc_as_constraint ~f:(fun ty ->
-                       "as " ^ ty_to_string ty);
-                   Option.map ttc.Typing_defs.ttc_type ~f:(fun ty ->
-                       "= " ^ ty_to_string ty);
-                 ]
-                 ~f:(fun x -> x))
+              [
+                "as " ^ ty_to_string patc_constraint;
+                "= " ^ ty_to_string patc_type;
+              ]
         in
         let abstract =
-          match ttc.Typing_defs.ttc_abstract with
-          | Typing_defs.TCConcrete -> ""
-          | Typing_defs.TCAbstract _ -> "abstract "
-          | Typing_defs.TCPartiallyAbstract -> "partially abstract "
+          Typing_defs.(
+            match ttc.ttc_kind with
+            | TCConcrete _ -> ""
+            | TCAbstract _ -> "abstract "
+            | TCPartiallyAbstract _ -> "partially abstract ")
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())

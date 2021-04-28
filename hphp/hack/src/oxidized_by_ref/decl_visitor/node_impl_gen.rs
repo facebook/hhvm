@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0202f11e524df9466869931cc680be60>>
+// @generated SignedSource<<bebdff85a4c3619030e0d4edfc530c29>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,6 +16,28 @@ use crate::{
     aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
     typing_defs::*, typing_defs_core::*, typing_reason::*,
 };
+impl<'a> Node<'a> for AbstractTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_abstract_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            AbstractTypeconst {
+                as_constraint: ref __binding_0,
+                super_constraint: ref __binding_1,
+                default: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
 impl<'a> Node<'a> for ArgPosition {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_arg_position(self)
@@ -111,6 +133,18 @@ impl<'a> Node<'a> for CollectionStyle {
             CollectionStyle::VecStyle => {}
             CollectionStyle::DictStyle => {}
             CollectionStyle::KeysetStyle => {}
+        }
+    }
+}
+impl<'a> Node<'a> for ConcreteTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_concrete_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ConcreteTypeconst {
+                tc_type: ref __binding_0,
+            } => __binding_0.accept(v),
         }
     }
 }
@@ -384,6 +418,24 @@ impl<'a> Node<'a> for IfcFunDecl<'a> {
         match self {
             IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
             IfcFunDecl::FDInferFlows => {}
+        }
+    }
+}
+impl<'a> Node<'a> for PartiallyAbstractTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_partially_abstract_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PartiallyAbstractTypeconst {
+                constraint: ref __binding_0,
+                type_: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }
@@ -691,13 +743,10 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ShallowTypeconst {
-                abstract_: ref __binding_0,
-                as_constraint: ref __binding_1,
-                super_constraint: ref __binding_2,
-                name: ref __binding_3,
-                type_: ref __binding_4,
-                enforceable: ref __binding_5,
-                reifiable: ref __binding_6,
+                name: ref __binding_0,
+                kind: ref __binding_1,
+                enforceable: ref __binding_2,
+                reifiable: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
@@ -708,16 +757,7 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
                 {
                     __binding_2.accept(v)
                 }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                { __binding_6.accept(v) }
+                { __binding_3.accept(v) }
             }
         }
     }
@@ -988,15 +1028,15 @@ impl<'a> Node<'a> for Ty_<'a> {
         }
     }
 }
-impl<'a> Node<'a> for TypeconstAbstractKind<'a> {
+impl<'a> Node<'a> for Typeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_typeconst_abstract_kind(self)
+        v.visit_typeconst(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TypeconstAbstractKind::TCAbstract(ref __binding_0) => __binding_0.accept(v),
-            TypeconstAbstractKind::TCPartiallyAbstract => {}
-            TypeconstAbstractKind::TCConcrete => {}
+            Typeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
+            Typeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
+            Typeconst::TCPartiallyAbstract(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

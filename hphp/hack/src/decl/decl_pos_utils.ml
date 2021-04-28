@@ -214,19 +214,24 @@ struct
       cc_refs = cc.cc_refs;
     }
 
-  and typeconst_abstract_kind = function
-    | TCAbstract default -> TCAbstract (ty_opt default)
-    | TCPartiallyAbstract -> TCPartiallyAbstract
-    | TCConcrete -> TCConcrete
+  and typeconst = function
+    | TCAbstract { atc_as_constraint; atc_super_constraint; atc_default } ->
+      TCAbstract
+        {
+          atc_as_constraint = ty_opt atc_as_constraint;
+          atc_super_constraint = ty_opt atc_super_constraint;
+          atc_default = ty_opt atc_default;
+        }
+    | TCPartiallyAbstract { patc_constraint; patc_type } ->
+      TCPartiallyAbstract
+        { patc_constraint = ty patc_constraint; patc_type = ty patc_type }
+    | TCConcrete { tc_type } -> TCConcrete { tc_type = ty tc_type }
 
-  and typeconst tc =
+  and typeconst_type tc =
     {
-      ttc_abstract = typeconst_abstract_kind tc.ttc_abstract;
       ttc_synthesized = tc.ttc_synthesized;
       ttc_name = positioned_id tc.ttc_name;
-      ttc_as_constraint = ty_opt tc.ttc_as_constraint;
-      ttc_super_constraint = ty_opt tc.ttc_super_constraint;
-      ttc_type = ty_opt tc.ttc_type;
+      ttc_kind = typeconst tc.ttc_kind;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos_or_decl tc.ttc_enforceable;
       ttc_reifiable = Option.map tc.ttc_reifiable pos_or_decl;
@@ -276,7 +281,7 @@ struct
           end
           dc.dc_substs;
       dc_consts = SMap.map class_const dc.dc_consts;
-      dc_typeconsts = SMap.map typeconst dc.dc_typeconsts;
+      dc_typeconsts = SMap.map typeconst_type dc.dc_typeconsts;
       dc_props = dc.dc_props;
       dc_sprops = dc.dc_sprops;
       dc_methods = dc.dc_methods;
@@ -347,11 +352,8 @@ struct
 
   and shallow_typeconst stc =
     {
-      stc_abstract = typeconst_abstract_kind stc.stc_abstract;
-      stc_as_constraint = Option.map stc.stc_as_constraint ty;
-      stc_super_constraint = Option.map stc.stc_super_constraint ty;
+      stc_kind = typeconst stc.stc_kind;
       stc_name = positioned_id stc.stc_name;
-      stc_type = Option.map stc.stc_type ty;
       stc_enforceable =
         (pos_or_decl (fst stc.stc_enforceable), snd stc.stc_enforceable);
       stc_reifiable = Option.map stc.stc_reifiable pos_or_decl;

@@ -21,6 +21,9 @@ val instantiate_cc :
   Decl_subst.decl_subst -> Typing_defs.class_const -> Typing_defs.class_const
 
 val instantiate_typeconst :
+  Decl_subst.decl_subst -> Typing_defs.typeconst -> Typing_defs.typeconst
+
+val instantiate_typeconst_type :
   Decl_subst.decl_subst ->
   Typing_defs.typeconst_type ->
   Typing_defs.typeconst_type

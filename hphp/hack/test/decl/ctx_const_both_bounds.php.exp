@@ -8,19 +8,22 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-          stc_as_constraint =
-          (Some (Rhint ([4:44-48]),
-                 (Tintersection
-                    [(Rhint ([4:45-47]),
-                      (Tapply (([4:45-47], "\\HH\\Contexts\\rx"), [])))])));
-          stc_super_constraint =
-          (Some (Rhint ([4:30-40]),
-                 (Tintersection
-                    [(Rhint ([4:31-39]),
-                      (Tapply (([4:31-39], "\\HH\\Contexts\\defaults"), [])))
-                      ])));
-          stc_name = ([4:22-23], "C"); stc_type = None;
+       [{ Shallow_decl_defs.stc_name = ([4:22-23], "C");
+          stc_kind =
+          (Typing_defs.TCAbstract
+             { Typing_defs.atc_as_constraint =
+               (Some (Rhint ([4:44-48]),
+                      (Tintersection
+                         [(Rhint ([4:45-47]),
+                           (Tapply (([4:45-47], "\\HH\\Contexts\\rx"), [])))])));
+               atc_super_constraint =
+               (Some (Rhint ([4:30-40]),
+                      (Tintersection
+                         [(Rhint ([4:31-39]),
+                           (Tapply (([4:31-39], "\\HH\\Contexts\\defaults"),
+                              [])))
+                           ])));
+               atc_default = None });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -36,21 +39,25 @@
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
-        [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-           stc_as_constraint =
-           (Some (Rhint ([8:27-40]),
-                  (Tintersection
-                     [(Rhint ([8:28-39]),
-                       (Tapply (([8:28-39], "\\HH\\Contexts\\write_props"),
-                          [])))
-                       ])));
-           stc_super_constraint =
-           (Some (Rhint ([8:47-57]),
-                  (Tintersection
-                     [(Rhint ([8:48-56]),
-                       (Tapply (([8:48-56], "\\HH\\Contexts\\defaults"), [])))
-                       ])));
-           stc_name = ([8:22-23], "C"); stc_type = None;
+        [{ Shallow_decl_defs.stc_name = ([8:22-23], "C");
+           stc_kind =
+           (Typing_defs.TCAbstract
+              { Typing_defs.atc_as_constraint =
+                (Some (Rhint ([8:27-40]),
+                       (Tintersection
+                          [(Rhint ([8:28-39]),
+                            (Tapply (
+                               ([8:28-39], "\\HH\\Contexts\\write_props"), 
+                               [])))
+                            ])));
+                atc_super_constraint =
+                (Some (Rhint ([8:47-57]),
+                       (Tintersection
+                          [(Rhint ([8:48-56]),
+                            (Tapply (([8:48-56], "\\HH\\Contexts\\defaults"),
+                               [])))
+                            ])));
+                atc_default = None });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;

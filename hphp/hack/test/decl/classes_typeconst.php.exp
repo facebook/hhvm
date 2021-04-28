@@ -8,15 +8,15 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-          stc_as_constraint = None; stc_super_constraint = None;
-          stc_name = ([5:14-15], "T");
-          stc_type = (Some (Rhint ([5:18-21]), (Tprim Tint)));
+       [{ Shallow_decl_defs.stc_name = ([5:14-15], "T");
+          stc_kind =
+          (Typing_defs.TCConcrete
+             { Typing_defs.tc_type = (Rhint ([5:18-21]), (Tprim Tint)) });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-         { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([15:14-16], "T2");
-           stc_type = (Some (Rhint ([15:19-25]), (Tprim Tstring)));
+         { Shallow_decl_defs.stc_name = ([15:14-16], "T2");
+           stc_kind =
+           (Typing_defs.TCConcrete
+              { Typing_defs.tc_type = (Rhint ([15:19-25]), (Tprim Tstring)) });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -72,11 +72,12 @@
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
-        [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-           stc_as_constraint =
-           (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
-           stc_super_constraint = None;
-           stc_name = ([19:23-33], "TConstType"); stc_type = None;
+        [{ Shallow_decl_defs.stc_name = ([19:23-33], "TConstType");
+           stc_kind =
+           (Typing_defs.TCAbstract
+              { Typing_defs.atc_as_constraint =
+                (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
+                atc_super_constraint = None; atc_default = None });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;

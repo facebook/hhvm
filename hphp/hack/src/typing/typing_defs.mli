@@ -124,18 +124,28 @@ and class_type = {
   tc_decl_errors: Errors.t option; [@opaque]
 }
 
-and typeconst_abstract_kind =
-  | TCAbstract of decl_ty option
-  | TCPartiallyAbstract
-  | TCConcrete
+and abstract_typeconst = {
+  atc_as_constraint: decl_ty option;
+  atc_super_constraint: decl_ty option;
+  atc_default: decl_ty option;
+}
+
+and concrete_typeconst = { tc_type: decl_ty }
+
+and partially_abstract_typeconst = {
+  patc_constraint: decl_ty;
+  patc_type: decl_ty;
+}
+
+and typeconst =
+  | TCAbstract of abstract_typeconst
+  | TCConcrete of concrete_typeconst
+  | TCPartiallyAbstract of partially_abstract_typeconst
 
 and typeconst_type = {
-  ttc_abstract: typeconst_abstract_kind;
   ttc_synthesized: bool;
   ttc_name: pos_id;
-  ttc_as_constraint: decl_ty option;
-  ttc_super_constraint: decl_ty option;
-  ttc_type: decl_ty option;
+  ttc_kind: typeconst;
   ttc_origin: string;
   ttc_enforceable: Pos_or_decl.t * bool;
   ttc_reifiable: Pos_or_decl.t option;
@@ -406,8 +416,7 @@ val equal_decl_ft_params :
 val equal_decl_ft_implicit_params :
   decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool
 
-val equal_typeconst_abstract_kind :
-  typeconst_abstract_kind -> typeconst_abstract_kind -> bool
+val equal_typeconst : typeconst -> typeconst -> bool
 
 val equal_enum_type : enum_type -> enum_type -> bool
 

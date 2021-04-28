@@ -155,30 +155,21 @@ let instantiate_cc subst ({ cc_type = x; _ } as cc) =
   let x = instantiate subst x in
   { cc with cc_type = x }
 
-let instantiate_typeconst
-    subst
-    ( {
-        ttc_abstract = abs;
-        ttc_type;
-        ttc_as_constraint;
-        ttc_super_constraint;
-        _;
-      } as tc ) =
-  let abs =
-    match abs with
-    | TCAbstract default_opt ->
-      TCAbstract (Option.map default_opt (instantiate subst))
-    | _ -> abs
-  in
-  let ttc_as_constraint = Option.map ttc_as_constraint (instantiate subst) in
-  let ttc_super_constraint =
-    Option.map ttc_super_constraint (instantiate subst)
-  in
-  let ttc_type = Option.map ttc_type (instantiate subst) in
-  {
-    tc with
-    ttc_abstract = abs;
-    ttc_type;
-    ttc_as_constraint;
-    ttc_super_constraint;
-  }
+(* TODO(T88552052) is this necessary? Type consts are not allowed to
+   reference type parameters, which is the substitution which is happening here *)
+let instantiate_typeconst subst = function
+  | TCAbstract
+      { atc_as_constraint = a; atc_super_constraint = s; atc_default = d } ->
+    TCAbstract
+      {
+        atc_as_constraint = Option.map a (instantiate subst);
+        atc_super_constraint = Option.map s (instantiate subst);
+        atc_default = Option.map d (instantiate subst);
+      }
+  | TCPartiallyAbstract { patc_constraint = a; patc_type = t } ->
+    TCPartiallyAbstract
+      { patc_constraint = instantiate subst a; patc_type = instantiate subst t }
+  | TCConcrete { tc_type = t } -> TCConcrete { tc_type = instantiate subst t }
+
+let instantiate_typeconst_type subst tc =
+  { tc with ttc_kind = instantiate_typeconst subst tc.ttc_kind }

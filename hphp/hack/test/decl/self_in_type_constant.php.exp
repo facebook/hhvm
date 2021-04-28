@@ -8,19 +8,20 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-          stc_as_constraint = None; stc_super_constraint = None;
-          stc_name = ([4:14-15], "T");
-          stc_type = (Some (Rhint ([4:18-21]), (Tprim Tint)));
+       [{ Shallow_decl_defs.stc_name = ([4:14-15], "T");
+          stc_kind =
+          (Typing_defs.TCConcrete
+             { Typing_defs.tc_type = (Rhint ([4:18-21]), (Tprim Tint)) });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-         { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([5:14-15], "U");
-           stc_type =
-           (Some (Rhint ([5:18-25]),
-                  (Taccess
-                     ((Rhint ([5:18-25]), (Tapply (([3:7-8], "\\C"), []))),
-                      [([5:24-25], "T")]))));
+         { Shallow_decl_defs.stc_name = ([5:14-15], "U");
+           stc_kind =
+           (Typing_defs.TCConcrete
+              { Typing_defs.tc_type =
+                (Rhint ([5:18-25]),
+                 (Taccess
+                    ((Rhint ([5:18-25]), (Tapply (([3:7-8], "\\C"), []))),
+                     [([5:24-25], "T")])))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -36,19 +37,20 @@
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
-        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([9:14-15], "V");
-           stc_type = (Some (Rhint ([9:18-21]), (Tprim Tint)));
+        [{ Shallow_decl_defs.stc_name = ([9:14-15], "V");
+           stc_kind =
+           (Typing_defs.TCConcrete
+              { Typing_defs.tc_type = (Rhint ([9:18-21]), (Tprim Tint)) });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-          { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-            stc_as_constraint = None; stc_super_constraint = None;
-            stc_name = ([10:14-15], "W");
-            stc_type =
-            (Some (Rhint ([10:18-25]),
-                   (Taccess
-                      ((Rhint ([10:18-25]), (Tapply (([8:11-12], "\\I"), []))),
-                       [([10:24-25], "V")]))));
+          { Shallow_decl_defs.stc_name = ([10:14-15], "W");
+            stc_kind =
+            (Typing_defs.TCConcrete
+               { Typing_defs.tc_type =
+                 (Rhint ([10:18-25]),
+                  (Taccess
+                     ((Rhint ([10:18-25]), (Tapply (([8:11-12], "\\I"), []))),
+                      [([10:24-25], "V")])))
+                 });
             stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;

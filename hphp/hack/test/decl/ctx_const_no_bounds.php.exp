@@ -8,9 +8,11 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-          stc_as_constraint = None; stc_super_constraint = None;
-          stc_name = ([4:22-23], "C"); stc_type = None;
+       [{ Shallow_decl_defs.stc_name = ([4:22-23], "C");
+          stc_kind =
+          (Typing_defs.TCAbstract
+             { Typing_defs.atc_as_constraint = None;
+               atc_super_constraint = None; atc_default = None });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -27,10 +29,11 @@
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
-        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([8:13-14], "C");
-           stc_type = (Some (Rhint ([8:17-19]), (Tintersection [])));
+        [{ Shallow_decl_defs.stc_name = ([8:13-14], "C");
+           stc_kind =
+           (Typing_defs.TCConcrete
+              { Typing_defs.tc_type = (Rhint ([8:17-19]), (Tintersection []))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;

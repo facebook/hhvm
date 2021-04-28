@@ -109,21 +109,28 @@ let typeconst env c tc =
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
   | Ast_defs.Cnormal ->
-    let (abstract, as_constraint, super_constraint, ty) =
+    let stc_kind =
       match tc.c_tconst_kind with
       | Aast.TCAbstract
-          { c_atc_as_constraint; c_atc_super_constraint; c_atc_default } ->
-        ( TCAbstract (Option.map ~f:(Decl_hint.hint env) c_atc_default),
-          Option.map ~f:(Decl_hint.hint env) c_atc_as_constraint,
-          Option.map ~f:(Decl_hint.hint env) c_atc_super_constraint,
-          None )
-      | Aast.TCConcrete { c_tc_type } ->
-        (TCConcrete, None, None, Some (Decl_hint.hint env c_tc_type))
-      | Aast.TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-        ( TCPartiallyAbstract,
-          Some (Decl_hint.hint env c_patc_constraint),
-          None,
-          Some (Decl_hint.hint env c_patc_type) )
+          {
+            c_atc_as_constraint = a;
+            c_atc_super_constraint = s;
+            c_atc_default = d;
+          } ->
+        Typing_defs.TCAbstract
+          {
+            atc_as_constraint = Option.map ~f:(Decl_hint.hint env) a;
+            atc_super_constraint = Option.map ~f:(Decl_hint.hint env) s;
+            atc_default = Option.map ~f:(Decl_hint.hint env) d;
+          }
+      | Aast.TCConcrete { c_tc_type = t } ->
+        Typing_defs.TCConcrete { tc_type = Decl_hint.hint env t }
+      | Aast.TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
+        Typing_defs.TCPartiallyAbstract
+          {
+            patc_constraint = Decl_hint.hint env c;
+            patc_type = Decl_hint.hint env t;
+          }
     in
     let attributes = tc.c_tconst_user_attributes in
     let enforceable =
@@ -138,11 +145,8 @@ let typeconst env c tc =
     in
     Some
       {
-        stc_abstract = abstract;
         stc_name = Decl_env.make_decl_posed env tc.c_tconst_name;
-        stc_as_constraint = as_constraint;
-        stc_super_constraint = super_constraint;
-        stc_type = ty;
+        stc_kind;
         stc_enforceable = enforceable;
         stc_reifiable = Option.map ~f:(Decl_env.make_decl_pos env) reifiable;
       }

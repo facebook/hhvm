@@ -8,10 +8,11 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCPartiallyAbstract;
-          stc_as_constraint = (Some (Rhint ([4:19-24]), Tmixed));
-          stc_super_constraint = None; stc_name = ([4:14-15], "T");
-          stc_type = (Some (Rhint ([4:27-30]), (Tprim Tnum)));
+       [{ Shallow_decl_defs.stc_name = ([4:14-15], "T");
+          stc_kind =
+          (Typing_defs.TCPartiallyAbstract
+             { Typing_defs.patc_constraint = (Rhint ([4:19-24]), Tmixed);
+               patc_type = (Rhint ([4:27-30]), (Tprim Tnum)) });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;

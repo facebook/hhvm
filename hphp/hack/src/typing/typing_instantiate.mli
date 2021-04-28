@@ -40,4 +40,4 @@ val instantiate : subst -> decl_ty -> decl_ty
 
 val instantiate_ce : subst -> class_elt -> class_elt
 
-val instantiate_typeconst : subst -> typeconst_type -> typeconst_type
+val instantiate_typeconst_type : subst -> typeconst_type -> typeconst_type

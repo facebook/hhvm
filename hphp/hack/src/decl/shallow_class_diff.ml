@@ -67,15 +67,14 @@ let diff_typeconst tc1 tc2 : member_change option =
   let tc2 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc2 in
   if equal_shallow_typeconst tc1 tc2 then
     None
-  else if
-    not
-      (Typing_defs.equal_typeconst_abstract_kind
-         tc1.stc_abstract
-         tc2.stc_abstract)
-  then
-    Some Changed_inheritance
   else
-    Some Modified
+    let open Typing_defs in
+    match (tc1.stc_kind, tc2.stc_kind) with
+    | (TCAbstract _, TCAbstract _)
+    | (TCPartiallyAbstract _, TCPartiallyAbstract _)
+    | (TCConcrete _, TCConcrete _) ->
+      Some Modified
+    | _ -> Some Changed_inheritance
 
 let diff_prop p1 p2 : member_change option =
   let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in

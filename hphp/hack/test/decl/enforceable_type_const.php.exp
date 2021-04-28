@@ -8,11 +8,13 @@
        sc_req_implements = []; sc_implements = [];
        sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
-       [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-          stc_as_constraint = (Some (Rhint ([4:46-54]), (Tprim Tarraykey)));
-          stc_super_constraint = None; stc_name = ([4:41-42], "T");
-          stc_type = None; stc_enforceable = ([4:5-18], true);
-          stc_reifiable = None }
+       [{ Shallow_decl_defs.stc_name = ([4:41-42], "T");
+          stc_kind =
+          (Typing_defs.TCAbstract
+             { Typing_defs.atc_as_constraint =
+               (Some (Rhint ([4:46-54]), (Tprim Tarraykey)));
+               atc_super_constraint = None; atc_default = None });
+          stc_enforceable = ([4:5-18], true); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

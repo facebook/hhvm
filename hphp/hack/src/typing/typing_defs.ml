@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2015, Facebook, Inc.
+ * Copyrighd (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
@@ -185,18 +185,28 @@ and class_type = {
   tc_decl_errors: Errors.t option; [@opaque]
 }
 
-and typeconst_abstract_kind =
-  | TCAbstract of decl_ty option
-  | TCPartiallyAbstract
-  | TCConcrete
+and abstract_typeconst = {
+  atc_as_constraint: decl_ty option;
+  atc_super_constraint: decl_ty option;
+  atc_default: decl_ty option;
+}
+
+and concrete_typeconst = { tc_type: decl_ty }
+
+and partially_abstract_typeconst = {
+  patc_constraint: decl_ty;
+  patc_type: decl_ty;
+}
+
+and typeconst =
+  | TCAbstract of abstract_typeconst
+  | TCConcrete of concrete_typeconst
+  | TCPartiallyAbstract of partially_abstract_typeconst
 
 and typeconst_type = {
-  ttc_abstract: typeconst_abstract_kind;
   ttc_synthesized: bool;
   ttc_name: pos_id;
-  ttc_as_constraint: decl_ty option;
-  ttc_super_constraint: decl_ty option;
-  ttc_type: decl_ty option;
+  ttc_kind: typeconst;
   ttc_origin: string;
   ttc_enforceable: Pos_or_decl.t * bool;
       (** If the typeconst had the <<__Enforceable>> attribute on its
@@ -1131,15 +1141,27 @@ let equal_decl_fun_type fty1 fty2 =
   && equal_decl_fun_arity fty1 fty2
   && Int.equal fty1.ft_flags fty2.ft_flags
 
-let equal_typeconst_abstract_kind ak1 ak2 =
-  match (ak1, ak2) with
-  | (TCAbstract ty1, TCAbstract ty2) -> Option.equal equal_decl_ty ty1 ty2
-  | (TCPartiallyAbstract, TCPartiallyAbstract) -> true
-  | (TCConcrete, TCConcrete) -> true
-  | (TCAbstract _, _)
-  | (TCPartiallyAbstract, _)
-  | (TCConcrete, _) ->
-    false
+let equal_abstract_typeconst at1 at2 =
+  Option.equal equal_decl_ty at1.atc_as_constraint at2.atc_as_constraint
+  && Option.equal
+       equal_decl_ty
+       at1.atc_super_constraint
+       at2.atc_super_constraint
+  && Option.equal equal_decl_ty at1.atc_default at2.atc_default
+
+let equal_partially_abstract_typeconst pat1 pat2 =
+  equal_decl_ty pat1.patc_constraint pat2.patc_constraint
+  && equal_decl_ty pat1.patc_type pat2.patc_type
+
+let equal_concrete_typeconst ct1 ct2 = equal_decl_ty ct1.tc_type ct2.tc_type
+
+let equal_typeconst t1 t2 =
+  match (t1, t2) with
+  | (TCAbstract at1, TCAbstract at2) -> equal_abstract_typeconst at1 at2
+  | (TCPartiallyAbstract pat1, TCPartiallyAbstract pat2) ->
+    equal_partially_abstract_typeconst pat1 pat2
+  | (TCConcrete ct1, TCConcrete ct2) -> equal_concrete_typeconst ct1 ct2
+  | _ -> false
 
 let equal_enum_type et1 et2 =
   equal_decl_ty et1.te_base et2.te_base

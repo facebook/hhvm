@@ -40,10 +40,11 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     t_shape_map::TShapeField,
     typing_defs::{
-        self, Capability::*, ConstDecl, Enforcement, EnumType, FunArity, FunElt, FunImplicitParams,
-        FunParam, FunParams, FunType, IfcFunDecl, ParamMode, PosByteString, PosId, PosString,
-        PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
-        TshapeFieldName, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        self, AbstractTypeconst, Capability::*, ConcreteTypeconst, ConstDecl, Enforcement,
+        EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
+        ParamMode, PartiallyAbstractTypeconst, PosByteString, PosId, PosString, PossiblyEnforcedTy,
+        RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_,
+        Typeconst, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -4808,39 +4809,40 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             _ => None,
         };
         let type_ = self.node_to_ty(type_);
-        let has_as_constraint = as_constraint.is_some();
-        let has_type = type_.is_some();
-        let (type_, abstract_) = match (has_abstract_keyword, has_as_constraint, has_type) {
-            // Has no assigned type. Technically illegal, so if the constraint
-            // is present, proceed as if the as-constraint was the assigned type.
-            //     const type TFoo;
-            //     const type TFoo as OtherType;
-            (false, _, false) => (as_constraint, TypeconstAbstractKind::TCConcrete),
-            // Has no constraint, but does have an assigned type.
-            //     const type TFoo = SomeType;
-            (false, false, true) => (type_, TypeconstAbstractKind::TCConcrete),
-            // Has both a constraint and an assigned type.
-            //     const type TFoo as OtherType = SomeType;
-            (false, true, true) => (type_, TypeconstAbstractKind::TCPartiallyAbstract),
-            // Has no default type.
-            //     abstract const type TFoo;
-            //     abstract const type TFoo as OtherType;
-            (true, _, false) => (type_, TypeconstAbstractKind::TCAbstract(None)),
-            // Has a default type.
-            //     abstract const Type TFoo = SomeType;
-            //     abstract const Type TFoo as OtherType = SomeType;
-            (true, _, true) => (None, TypeconstAbstractKind::TCAbstract(type_)),
+        let kind = if has_abstract_keyword {
+            // Abstract type constant:
+            //     abstract const type T [as X] [super Y] [= Z];
+            Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
+                as_constraint,
+                super_constraint: None,
+                default: type_,
+            }))
+        } else {
+            if let Some(t) = type_ {
+                if let Some(constraint) = as_constraint {
+                    // Partially abstract type constant:
+                    //     const type T as X = Z;
+                    Typeconst::TCPartiallyAbstract(self.alloc(PartiallyAbstractTypeconst {
+                        constraint,
+                        type_: t,
+                    }))
+                } else {
+                    // Concrete type constant:
+                    //     const type T = Z;
+                    Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
+                }
+            } else {
+                // concrete or partially abstract type constant requires a value
+                return Node::Ignored(SK::TypeConstDeclaration);
+            }
         };
         let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::TypeConstDeclaration),
         };
         Node::TypeConstant(self.alloc(ShallowTypeconst {
-            abstract_,
-            as_constraint,
-            super_constraint: None,
             name: name.into(),
-            type_,
+            kind,
             enforceable: match attributes.enforceable {
                 Some(pos) => (pos, true),
                 None => (Pos::none(), false),
@@ -4869,12 +4871,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
         let context = self.node_to_ty(ctx_list);
-        let (context, abstract_) = match (has_abstract_keyword, context) {
-            (false, None) => (context, TypeconstAbstractKind::TCConcrete),
-            (false, Some(_)) => (context, TypeconstAbstractKind::TCConcrete),
-            (true, None) => (context, TypeconstAbstractKind::TCAbstract(context)),
-            (true, Some(_)) => (None, TypeconstAbstractKind::TCAbstract(context)),
-        };
+
         // note: lowerer ensures that there's at most 1 constraint of each kind
         let mut as_constraint = None;
         let mut super_constraint = None;
@@ -4888,12 +4885,23 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 }
             }
         }
+        let kind = if has_abstract_keyword {
+            Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
+                as_constraint,
+                super_constraint,
+                default: context,
+            }))
+        } else {
+            if let Some(tc_type) = context {
+                Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type }))
+            } else {
+                /* Concrete type const must have a value */
+                return Node::Ignored(SK::TypeConstDeclaration);
+            }
+        };
         Node::TypeConstant(self.alloc(ShallowTypeconst {
-            abstract_,
             name: name.into(),
-            as_constraint,
-            super_constraint,
-            type_: context,
+            kind,
             enforceable: (Pos::none(), false),
             reifiable: None,
         }))

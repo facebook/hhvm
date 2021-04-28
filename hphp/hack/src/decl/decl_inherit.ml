@@ -143,7 +143,7 @@ let add_typeconst name sig_ typeconsts =
       else
         typeconsts
     in
-    (match (old_sig.ttc_abstract, sig_.ttc_abstract) with
+    (match (old_sig.ttc_kind, sig_.ttc_kind) with
     (* This covers the following case
      *
      * interface I1 { abstract const type T; }
@@ -153,8 +153,8 @@ let add_typeconst name sig_ typeconsts =
      *
      * Then C::T == I2::T since I2::T is not abstract
      *)
-    | (TCConcrete, TCAbstract _)
-    | (TCPartiallyAbstract, TCAbstract _) ->
+    | (TCConcrete _, TCAbstract _)
+    | (TCPartiallyAbstract _, TCAbstract _) ->
       typeconsts
     (* This covers the following case
      *
@@ -166,7 +166,7 @@ let add_typeconst name sig_ typeconsts =
      * Then C::T == I::T since P::T has a constraint and thus can be overridden
      * by it's child, while I::T cannot be overridden.
      *)
-    | (TCConcrete, TCPartiallyAbstract) -> typeconsts
+    | (TCConcrete _, TCPartiallyAbstract _) -> typeconsts
     (* This covers the following case
      *
      * interface I {
@@ -182,7 +182,9 @@ let add_typeconst name sig_ typeconsts =
      * C::T must come from A, not I, as A provides the default that will synthesize
      * into a concrete type constant in C.
      *)
-    | (TCAbstract (Some _), TCAbstract None) -> typeconsts
+    | ( TCAbstract { atc_default = Some _; _ },
+        TCAbstract { atc_default = None; _ } ) ->
+      typeconsts
     | (_, _) ->
       (* When a type constant is declared in multiple parents we need to make a
        * subtle choice of what type we inherit. For example in:
@@ -376,7 +378,7 @@ let inherit_hack_class
     | Ast_defs.Cenum -> parent
   in
   let typeconsts =
-    SMap.map (Inst.instantiate_typeconst subst) parent.dc_typeconsts
+    SMap.map (Inst.instantiate_typeconst_type subst) parent.dc_typeconsts
   in
   let consts = SMap.map (Inst.instantiate_cc subst) parent.dc_consts in
   let (cstr, constructor_consistency) = Decl_env.get_construct env parent in
@@ -426,7 +428,7 @@ let inherit_hack_class_constants_only class_type argl _parent_members =
   let instantiate = SMap.map (Inst.instantiate_cc subst) in
   let consts = instantiate class_type.dc_consts in
   let typeconsts =
-    SMap.map (Inst.instantiate_typeconst subst) class_type.dc_typeconsts
+    SMap.map (Inst.instantiate_typeconst_type subst) class_type.dc_typeconsts
   in
   let result = { empty with ih_consts = consts; ih_typeconsts = typeconsts } in
   result

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1583e645abcc3f49b14e3de8f6175374>>
+// @generated SignedSource<<4eedb12467d43b3c129808a10615b864>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -307,6 +307,63 @@ impl<'a> TrivialDrop for ClassType<'a> {}
 
 #[derive(
     Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct AbstractTypeconst<'a> {
+    pub as_constraint: Option<&'a Ty<'a>>,
+    pub super_constraint: Option<&'a Ty<'a>>,
+    pub default: Option<&'a Ty<'a>>,
+}
+impl<'a> TrivialDrop for AbstractTypeconst<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ConcreteTypeconst<'a> {
+    pub tc_type: &'a Ty<'a>,
+}
+impl<'a> TrivialDrop for ConcreteTypeconst<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct PartiallyAbstractTypeconst<'a> {
+    pub constraint: &'a Ty<'a>,
+    pub type_: &'a Ty<'a>,
+}
+impl<'a> TrivialDrop for PartiallyAbstractTypeconst<'a> {}
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Eq,
@@ -319,12 +376,12 @@ impl<'a> TrivialDrop for ClassType<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub enum TypeconstAbstractKind<'a> {
-    TCAbstract(Option<&'a Ty<'a>>),
-    TCPartiallyAbstract,
-    TCConcrete,
+pub enum Typeconst<'a> {
+    TCAbstract(&'a AbstractTypeconst<'a>),
+    TCConcrete(&'a ConcreteTypeconst<'a>),
+    TCPartiallyAbstract(&'a PartiallyAbstractTypeconst<'a>),
 }
-impl<'a> TrivialDrop for TypeconstAbstractKind<'a> {}
+impl<'a> TrivialDrop for Typeconst<'a> {}
 
 #[derive(
     Clone,
@@ -340,12 +397,9 @@ impl<'a> TrivialDrop for TypeconstAbstractKind<'a> {}
     ToOcamlRep
 )]
 pub struct TypeconstType<'a> {
-    pub abstract_: TypeconstAbstractKind<'a>,
     pub synthesized: bool,
     pub name: PosId<'a>,
-    pub as_constraint: Option<&'a Ty<'a>>,
-    pub super_constraint: Option<&'a Ty<'a>>,
-    pub type_: Option<&'a Ty<'a>>,
+    pub kind: Typeconst<'a>,
     pub origin: &'a str,
     /// If the typeconst had the <<__Enforceable>> attribute on its
     /// declaration, this will be [(position_of_declaration, true)].

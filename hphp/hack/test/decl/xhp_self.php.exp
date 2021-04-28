@@ -18,16 +18,17 @@
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
-        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_super_constraint = None;
-           stc_name = ([6:14-20], "TProps");
-           stc_type =
-           (Some (Rhint ([6:23-40]),
-                  (Tshape (Typing_defs_core.Closed_shape,
-                     { (Typing_defs_core.TSFlit_str ([6:29-32], "x")) ->
-                       { sft_optional = false;
-                         sft_ty = (Rhint ([6:36-39]), (Tprim Tint)) } }
-                     ))));
+        [{ Shallow_decl_defs.stc_name = ([6:14-20], "TProps");
+           stc_kind =
+           (Typing_defs.TCConcrete
+              { Typing_defs.tc_type =
+                (Rhint ([6:23-40]),
+                 (Tshape (Typing_defs_core.Closed_shape,
+                    { (Typing_defs_core.TSFlit_str ([6:29-32], "x")) ->
+                      { sft_optional = false;
+                        sft_ty = (Rhint ([6:36-39]), (Tprim Tint)) } }
+                    )))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
         sc_props =

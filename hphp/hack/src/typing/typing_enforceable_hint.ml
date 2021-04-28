@@ -36,7 +36,7 @@ let validator =
     method! on_tvar acc r _id = this#invalid acc r "an unknown type"
 
     method! on_typeconst acc class_ is_concrete typeconst =
-      match typeconst.ttc_abstract with
+      match typeconst.ttc_kind with
       | _
         when is_concrete
              (* get_typeconst_enforceability should always return Some here, since we

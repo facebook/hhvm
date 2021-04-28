@@ -741,14 +741,15 @@ let tconst_subsumption
     on_error =
   let (pos, name) = child_typeconst.ttc_name in
   let parent_pos = fst parent_typeconst.ttc_name in
-  match (parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract) with
-  | (TCAbstract (Some _), TCAbstract None) ->
+  match (parent_typeconst.ttc_kind, child_typeconst.ttc_kind) with
+  | ( TCAbstract { atc_default = Some _; _ },
+      TCAbstract { atc_default = None; _ } ) ->
     Errors.override_no_default_typeconst
       pos
       parent_pos
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
     env
-  | ((TCConcrete | TCPartiallyAbstract), TCAbstract _) ->
+  | ((TCConcrete _ | TCPartiallyAbstract _), TCAbstract _) ->
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See typecheck/tconst/subsume_tconst5.php test case for example. *)
@@ -774,7 +775,9 @@ let tconst_subsumption
 
     (* Check that the child's constraint is compatible with the parent. If the
      * parent has a constraint then the child must also have a constraint if it
-     * is abstract
+     * is abstract.
+     *
+     * Check that the child's assigned type satisifies parent constraint
      *)
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
@@ -786,43 +789,78 @@ let tconst_subsumption
            super
            ~f:(Typing_ops.sub_type_decl ~on_error pos reason env)
     in
-    let (child_super_cstr, child_as_cstr) =
-      match child_typeconst.ttc_abstract with
-      | TCAbstract _ ->
-        ( Some (Option.value child_typeconst.ttc_super_constraint ~default),
-          Some (Option.value child_typeconst.ttc_as_constraint ~default) )
-      | _ ->
-        (child_typeconst.ttc_super_constraint, child_typeconst.ttc_as_constraint)
-    in
+    (* TODO(T88552052) This can be greatly simplified by adopting the { A = S..T } representation
+     * from DOT and implementing the Typ-<:-Typ rule, Amin 2016 *)
     let env =
-      check_cstrs
-        Reason.URsubsume_tconst_cstr
-        env
-        child_as_cstr
-        parent_typeconst.ttc_as_constraint
-    in
-    let env =
-      check_cstrs
-        Reason.URsubsume_tconst_cstr
-        env
-        parent_typeconst.ttc_super_constraint
-        child_super_cstr
-    in
+      match parent_typeconst.ttc_kind with
+      | TCAbstract
+          {
+            atc_as_constraint = p_as_opt;
+            atc_super_constraint = p_super_opt;
+            _;
+          } ->
+        begin
+          match child_typeconst.ttc_kind with
+          | TCAbstract
+              {
+                atc_as_constraint = c_as_opt;
+                atc_super_constraint = c_super_opt;
+                _;
+              } ->
+            (* TODO(T88552052) this transformation can be done with mixed and nothing *)
+            let c_as_opt = Some (Option.value c_as_opt ~default) in
+            let c_super_opt = Some (Option.value c_super_opt ~default) in
 
-    (* Check that the child's assigned type satisifies parent constraint *)
-    let env =
-      check_cstrs
-        Reason.URtypeconst_cstr
-        env
-        child_typeconst.ttc_type
-        parent_typeconst.ttc_as_constraint
-    in
-    let env =
-      check_cstrs
-        Reason.URtypeconst_cstr
-        env
-        parent_typeconst.ttc_super_constraint
-        child_typeconst.ttc_type
+            let env =
+              check_cstrs Reason.URsubsume_tconst_cstr env c_as_opt p_as_opt
+            in
+            check_cstrs Reason.URsubsume_tconst_cstr env p_super_opt c_super_opt
+          | TCPartiallyAbstract { patc_constraint = c_as; patc_type = c_t } ->
+            let env =
+              check_cstrs Reason.URsubsume_tconst_cstr env (Some c_as) p_as_opt
+            in
+            let env =
+              check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
+            in
+            check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
+          | TCConcrete { tc_type = c_t } ->
+            let env =
+              check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
+            in
+            check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
+        end
+      | TCPartiallyAbstract { patc_constraint = p_as; _ } ->
+        (* TODO(T88552052) Can do abstract_concrete_override check here *)
+        begin
+          match child_typeconst.ttc_kind with
+          | TCPartiallyAbstract { patc_constraint = c_as; patc_type = c_t } ->
+            let env =
+              Typing_ops.sub_type_decl
+                ~on_error
+                pos
+                Reason.URsubsume_tconst_cstr
+                env
+                c_as
+                p_as
+            in
+            Typing_ops.sub_type_decl
+              ~on_error
+              pos
+              Reason.URtypeconst_cstr
+              env
+              c_t
+              p_as
+          | TCConcrete { tc_type = c_t } ->
+            Typing_ops.sub_type_decl
+              ~on_error
+              pos
+              Reason.URtypeconst_cstr
+              env
+              c_t
+              p_as
+          | _ -> env
+        end
+      | TCConcrete _ -> env
     in
 
     (* Don't recheck inherited type constants: errors will
@@ -830,13 +868,11 @@ let tconst_subsumption
     ( if inherited then
       ()
     else
-      match
-        ( child_typeconst.ttc_abstract,
-          child_typeconst.ttc_type,
-          parent_tconst_enforceable )
-      with
-      | (TCAbstract (Some ty), _, (pos, true))
-      | ((TCPartiallyAbstract | TCConcrete), Some ty, (pos, true)) ->
+      match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
+      | (TCAbstract { atc_default = Some ty; _ }, (pos, true))
+      | ( ( TCPartiallyAbstract { patc_type = ty; _ }
+          | TCConcrete { tc_type = ty } ),
+          (pos, true) ) ->
         let tast_env = Tast_env.typing_env_as_tast_env env in
         let emit_error =
           Errors.invalid_enforceable_type "constant" (pos, name)
@@ -857,11 +893,14 @@ let tconst_subsumption
     );
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
-     * the child's assigned type is compatible with the parent's *)
+     * the child's assigned type is compatible with the parent's
+     *
+     * TODO(T88552052) restrict concrete typeconst overriding
+     *)
     let parent_is_final =
-      match parent_typeconst.ttc_abstract with
-      | TCConcrete -> true
-      | TCPartiallyAbstract ->
+      match parent_typeconst.ttc_kind with
+      | TCConcrete _ -> true
+      | TCPartiallyAbstract _ ->
         TypecheckerOptions.disable_partially_abstract_typeconsts
           (Env.get_tcopt env)
       | TCAbstract _ -> false
@@ -884,10 +923,18 @@ let tconst_subsumption
           y
           x
     in
+    (* TODO(T88552052) this fetching of types is a temporary hack; this whole check will be eliminated *)
+    let opt_type__LEGACY t =
+      match t.ttc_kind with
+      | TCPartiallyAbstract { patc_type = t; _ }
+      | TCConcrete { tc_type = t } ->
+        Some t
+      | TCAbstract _ -> None
+    in
     Option.value ~default:env
     @@ Option.map2
-         parent_typeconst.ttc_type
-         child_typeconst.ttc_type
+         (opt_type__LEGACY parent_typeconst)
+         (opt_type__LEGACY child_typeconst)
          ~f:(check env)
 
 let check_typeconst_override
@@ -920,31 +967,32 @@ let check_typeconst_override
   in
   let (pos, name) = tconst.ttc_name in
   let parent_pos = fst parent_tconst.ttc_name in
-  (* Temporarily skip checks on context constants *)
+  (* Temporarily skip checks on context constants
+   *
+   * TODO(T89366955) elimninate this check *)
   let is_context_constant =
-    match (parent_tconst.ttc_abstract, tconst.ttc_abstract) with
-    | (TCAbstract (Some hint1), TCAbstract (Some hint2)) ->
+    match (parent_tconst.ttc_kind, tconst.ttc_kind) with
+    | ( TCAbstract { atc_default = Some hint1; _ },
+        TCAbstract { atc_default = Some hint2; _ } ) ->
       (match (deref hint1, deref hint2) with
       | ((_, Tintersection _), _)
       | (_, (_, Tintersection _)) ->
         true
       | _ -> false)
-    | (TCAbstract (Some hint), _)
-    | (_, TCAbstract (Some hint)) ->
+    | (TCAbstract { atc_default = Some hint; _ }, _)
+    | (_, TCAbstract { atc_default = Some hint; _ }) ->
       (match deref hint with
       | (_, Tintersection _) -> true
       | _ -> false)
     | _ -> false
   in
-  (match
-     ( parent_tconst.ttc_type,
-       tconst.ttc_type,
-       parent_tconst.ttc_abstract,
-       tconst.ttc_abstract )
-   with
-  | (Some _, Some _, _, _)
-  | (_, Some _, TCAbstract (Some _), _)
-  | (_, _, TCAbstract (Some _), TCAbstract (Some _)) ->
+  (match (parent_tconst.ttc_kind, tconst.ttc_kind) with
+  | ( (TCConcrete _ | TCPartiallyAbstract _),
+      (TCConcrete _ | TCPartiallyAbstract _) )
+  | ( TCAbstract { atc_default = Some _; _ },
+      (TCConcrete _ | TCPartiallyAbstract _) )
+  | ( TCAbstract { atc_default = Some _; _ },
+      TCAbstract { atc_default = Some _; _ } ) ->
     if
       (not is_context_constant)
       && (not tconst.ttc_synthesized)
@@ -959,10 +1007,10 @@ let check_typeconst_override
            name
     then
       let child_is_abstract =
-        match tconst.ttc_abstract with
-        | TCConcrete -> false
+        match tconst.ttc_kind with
+        | TCConcrete _ -> false
         | TCAbstract _
-        | TCPartiallyAbstract ->
+        | TCPartiallyAbstract _ ->
           true
       in
       Errors.interface_typeconst_multiple_defs

@@ -79,6 +79,14 @@ let rec check_expr env (_, e) =
           | Tclass ((_, c), _, _) -> check_prop env c id (Some bound)
           | _ -> ()
         end
+      | Tgeneric (name, targs) ->
+        let upper_bounds = Env.get_upper_bounds env name targs in
+        let check_class bound =
+          match get_node bound with
+          | Tclass ((_, c), _, _) -> check_prop env c id (Some bound)
+          | _ -> ()
+        in
+        Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
   | Call ((_, Id (_, f)), _, el, None)

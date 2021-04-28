@@ -187,6 +187,67 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
     in
     (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
 
+(* Return true if the `this` type appears in a covariant
+ * (resp. contravariant, if contra=true) position in ty.
+ *)
+let rec this_appears_covariantly ~contra env ty =
+  match get_node ty with
+  | Tthis -> not contra
+  | Ttuple tyl
+  | Tunion tyl
+  | Tintersection tyl ->
+    List.exists tyl (this_appears_covariantly ~contra env)
+  | Tfun ft ->
+    this_appears_covariantly ~contra env ft.ft_ret.et_type
+    || List.exists ft.ft_params (fun fp ->
+           this_appears_covariantly ~contra:(not contra) env fp.fp_type.et_type)
+  | Tshape (_, fm) ->
+    let fields = TShapeMap.elements fm in
+    List.exists fields (fun (_, f) ->
+        this_appears_covariantly ~contra env f.sft_ty)
+  | Taccess (ty, _)
+  | Tlike ty
+  | Toption ty
+  | Tvarray ty ->
+    this_appears_covariantly ~contra env ty
+  | Tdarray (ty1, ty2)
+  | Tvec_or_dict (ty1, ty2)
+  | Tvarray_or_darray (ty1, ty2) ->
+    this_appears_covariantly ~contra env ty1
+    || this_appears_covariantly ~contra env ty2
+  | Tapply (pos_name, tyl) ->
+    let rec this_appears_covariantly_params tparams tyl =
+      match (tparams, tyl) with
+      | (tp :: tparams, ty :: tyl) ->
+        begin
+          match tp.tp_variance with
+          | Ast_defs.Covariant -> this_appears_covariantly ~contra env ty
+          | Ast_defs.Contravariant ->
+            this_appears_covariantly ~contra:(not contra) env ty
+          | Ast_defs.Invariant ->
+            this_appears_covariantly ~contra env ty
+            || this_appears_covariantly ~contra:(not contra) env ty
+        end
+        || this_appears_covariantly_params tparams tyl
+      | _ -> false
+    in
+    let tparams =
+      match Typing_env.get_class_or_typedef env (snd pos_name) with
+      | Some (Typing_env.TypedefResult { td_tparams; _ }) -> td_tparams
+      | Some (Typing_env.ClassResult cls) -> Cls.tparams cls
+      | None -> []
+    in
+    this_appears_covariantly_params tparams tyl
+  | Tmixed
+  | Tany _
+  | Terr
+  | Tnonnull
+  | Tdynamic
+  | Tprim _
+  | Tvar _
+  | Tgeneric _ ->
+    false
+
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunion. *)
 let rec obj_get_concrete_ty
@@ -195,8 +256,9 @@ let rec obj_get_concrete_ty
     ~coerce_from_ty
     ?(explicit_targs = [])
     ~this_ty
-    ~dep_kind
+    ~this_ty_conjunct
     ~is_parent_call
+    ~dep_kind
     env
     concrete_ty
     (id_pos, id_str)
@@ -215,14 +277,6 @@ let rec obj_get_concrete_ty
                 ] );
           ]));
   let default () = (env, (Typing_utils.mk_tany env id_pos, [])) in
-  (* We will substitute `this` in the function signature with `this_ty`. But first,
-   * transform it according to the dependent kind dep_kind that was derived from the
-   * class_id in the original call to obj_get. See Typing_dependent_type.ml for
-   * more details.
-   *)
-  let (env, this_ty) =
-    Typing_dependent_type.ExprDepTy.make_with_dep_kind env dep_kind this_ty
-  in
   let mk_ety_env class_info paraml =
     {
       type_expansions = Typing_defs.Type_expansions.empty;
@@ -254,6 +308,7 @@ let rec obj_get_concrete_ty
         ~coerce_from_ty
         ~is_nonnull:true
         ~this_ty
+        ~this_ty_conjunct
         ~is_parent_call
         ~dep_kind
         env
@@ -368,26 +423,24 @@ let rec obj_get_concrete_ty
                     ce_origin;
                     _;
                   } ->
-                begin
-                  match get_node this_ty with
-                  | Tdependent (DTthis, _) -> ()
-                  | _ ->
-                    if not (String.equal member_ce.ce_origin ce_origin) then
-                      Errors.ambiguous_object_access
-                        id_pos
-                        id_str
-                        (get_pos member_)
-                        (TUtils.string_of_visibility old_vis)
-                        (get_pos old_member)
-                        self_id
-                        (snd x)
-                end
+                if not (String.equal member_ce.ce_origin ce_origin) then
+                  Errors.ambiguous_object_access
+                    id_pos
+                    id_str
+                    (get_pos member_)
+                    (TUtils.string_of_visibility old_vis)
+                    (get_pos old_member)
+                    self_id
+                    (snd x)
               | _ -> () );
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
             if is_parent_call && get_ce_abstract member_ce then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
+            let widen_this =
+              this_appears_covariantly ~contra:true env member_decl_ty
+            in
             let ety_env = mk_ety_env class_info paraml in
             let (env, member_ty, tal, et_enforced) =
               match deref member_decl_ty with
@@ -410,7 +463,7 @@ let rec obj_get_concrete_ty
                     env
                     ft
                 in
-                let (env, ft) =
+                let (env, ft1) =
                   Phase.(
                     localize_ft
                       ~instantiation:
@@ -424,7 +477,7 @@ let rec obj_get_concrete_ty
                       env
                       ft)
                 in
-                let ft_ty =
+                let ft_ty1 =
                   let lr = Typing_reason.localize r in
                   if
                     Typing_env_types.(
@@ -437,11 +490,37 @@ let rec obj_get_concrete_ty
                           (Typing_reason.to_pos r),
                         Tintersection
                           [
-                            mk (lr, Tfun ft);
-                            mk (lr, Tfun (Typing_dynamic.build_dyn_fun_ty ft));
+                            mk (lr, Tfun ft1);
+                            mk (lr, Tfun (Typing_dynamic.build_dyn_fun_ty ft1));
                           ] )
                   else
-                    mk (lr, Tfun ft)
+                    mk (lr, Tfun ft1)
+                in
+                let (env, ft_ty) =
+                  if widen_this then
+                    let ety_env = { ety_env with this_ty = this_ty_conjunct } in
+                    let (env, ft2) =
+                      Phase.(
+                        localize_ft
+                          ~instantiation:
+                            {
+                              use_name = strip_ns id_str;
+                              use_pos = id_pos;
+                              explicit_targs;
+                            }
+                          ~ety_env:
+                            { ety_env with on_error = Errors.ignore_error }
+                          ~def_pos:mem_pos
+                          env
+                          ft)
+                    in
+                    let ft_ty2 = mk (Typing_reason.localize r, Tfun ft2) in
+                    Inter.intersect_list
+                      env
+                      (Typing_reason.localize r)
+                      [ft_ty1; ft_ty2]
+                  else
+                    (env, ft_ty1)
                 in
                 (env, ft_ty, explicit_targs, Unenforced)
               | _ ->
@@ -579,6 +658,7 @@ and nullable_obj_get
     ~coerce_from_ty
     ~is_nonnull
     ~this_ty
+    ~this_ty_conjunct
     ~is_parent_call
     ~dep_kind
     env
@@ -599,6 +679,7 @@ and nullable_obj_get
         ~coerce_from_ty
         ~is_nonnull
         ~this_ty
+        ~this_ty_conjunct
         ~is_parent_call
         ~dep_kind
         env
@@ -673,6 +754,7 @@ and obj_get_inner
     ~is_nonnull
     ~explicit_targs
     ~this_ty
+    ~this_ty_conjunct
     ~is_parent_call
     ~dep_kind
     env
@@ -692,6 +774,8 @@ and obj_get_inner
                   Log_type ("this_ty", this_ty);
                 ] );
           ]));
+  let (env, ety1') = Env.expand_type env receiver_ty in
+  let was_var = is_tyvar ety1' in
   let (env, ety1) =
     if is_method then
       if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
@@ -710,6 +794,12 @@ and obj_get_inner
         obj_pos
         receiver_ty
   in
+  let (env, ety1) =
+    if was_var then
+      Typing_dependent_type.ExprDepTy.make_with_dep_kind env dep_kind ety1
+    else
+      (env, ety1)
+  in
   let nullable_obj_get ~read_context ty =
     nullable_obj_get
       ~inst_meth
@@ -720,6 +810,7 @@ and obj_get_inner
       ~coerce_from_ty
       ~is_nonnull
       ~this_ty:ty
+      ~this_ty_conjunct:ty
       ~is_parent_call
       ~dep_kind
       env
@@ -745,6 +836,7 @@ and obj_get_inner
             ~coerce_from_ty
             ~is_nonnull
             ~this_ty:ty
+            ~this_ty_conjunct:ty
             ~is_parent_call
             ~dep_kind
             env
@@ -781,6 +873,7 @@ and obj_get_inner
             ~coerce_from_ty
             ~is_nonnull
             ~this_ty
+            ~this_ty_conjunct:ty
             ~is_parent_call
             ~dep_kind
             env
@@ -798,28 +891,7 @@ and obj_get_inner
     let tyl = List.map ~f:fst resultl in
     let (env, ty) = Inter.intersect_list env r tyl in
     (env, (ty, tal))
-  | (r, Tdependent (dep, ty)) ->
-    let dep_kind =
-      ( r,
-        match dep with
-        | DTexpr id -> Typing_dependent_type.ExprDepTy.Dep_Expr id
-        | DTthis -> Typing_dependent_type.ExprDepTy.Dep_This )
-    in
-    obj_get_inner
-      ~inst_meth
-      ~obj_pos
-      ~is_method
-      ~nullsafe
-      ~explicit_targs
-      ~coerce_from_ty
-      ~is_nonnull
-      ~this_ty
-      ~is_parent_call
-      ~dep_kind
-      env
-      ty
-      id
-      on_error
+  | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner
       ~inst_meth
@@ -830,13 +902,14 @@ and obj_get_inner
       ~coerce_from_ty
       ~is_nonnull
       ~this_ty
+      ~this_ty_conjunct
       ~is_parent_call
       ~dep_kind
       env
       ty
       id
       on_error
-  | (r, Tgeneric _) ->
+  | (r, Tgeneric (_name, _)) ->
     let (env, tyl) = TUtils.get_concrete_supertypes env ety1 in
     if List.is_empty tyl then (
       let err =
@@ -874,6 +947,7 @@ and obj_get_inner
         ~coerce_from_ty
         ~is_nonnull
         ~this_ty
+        ~this_ty_conjunct
         ~is_parent_call
         ~dep_kind
         env
@@ -899,6 +973,7 @@ and obj_get_inner
       ~explicit_targs
       ~coerce_from_ty
       ~this_ty
+      ~this_ty_conjunct
       ~is_parent_call
       ~dep_kind
       env
@@ -937,13 +1012,40 @@ let obj_get
           (Pos_or_decl.of_raw_pos obj_pos)
           env
           [Log_head ("obj_get", [Log_type ("receiver_ty", receiver_ty)])]));
+  let (env, receiver_ty) =
+    if is_method then
+      if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
+        Env.expand_type env receiver_ty
+      else
+        Typing_solver.expand_type_and_solve
+          env
+          ~description_of_expected:"an object"
+          obj_pos
+          receiver_ty
+    else
+      Typing_solver.expand_type_and_narrow
+        env
+        ~description_of_expected:"an object"
+        (widen_class_for_obj_get ~is_method ~nullsafe (snd member_id))
+        obj_pos
+        receiver_ty
+  in
+
+  (* We will substitute `this` in the function signature with `this_ty`. But first,
+   * transform it according to the dependent kind dep_kind that was derived from the
+   * class_id in the original call to obj_get. See Typing_dependent_type.ml for
+   * more details.
+   *)
   let dep_kind =
     Typing_dependent_type.ExprDepTy.from_cid
       env
       (get_reason receiver_ty)
       class_id
   in
-  let ty1 =
+  let (env, receiver_ty) =
+    Typing_dependent_type.ExprDepTy.make_with_dep_kind env dep_kind receiver_ty
+  in
+  let receiver_or_parent_ty =
     match parent_ty with
     | Some ty -> ty
     | None -> receiver_ty
@@ -958,9 +1060,10 @@ let obj_get
     ~coerce_from_ty
     ~is_nonnull:false
     ~is_parent_call
-    ~this_ty:receiver_ty
     ~dep_kind
+    ~this_ty:receiver_ty
+    ~this_ty_conjunct:receiver_ty
     env
-    ty1
+    receiver_or_parent_ty
     member_id
     on_error

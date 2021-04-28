@@ -2,7 +2,7 @@ File "static_and_arrow.php", line 14, characters 12-13:
 No instance method `f2` in `Foo` (Typing[4053])
   File "static_and_arrow.php", line 16, characters 26-27:
   Did you mean static method `f2` instead?
-  File "static_and_arrow.php", line 14, characters 5-9:
+  File "static_and_arrow.php", line 12, characters 7-9:
   This is why I think it is an object of type Foo
   File "static_and_arrow.php", line 12, characters 7-9:
   Declaration of `Foo` is here

@@ -1,7 +1,7 @@
 File "class_prop_as_this.php", line 12, characters 5-23:
-  ~this as C
+  ~this where this as C
 File "class_prop_as_this.php", line 13, characters 5-21:
-  ~this as C
+  ~this where this as C
 File "class_prop_as_this.php", line 17, characters 5-19:
 Invalid assignment (Typing[4110])
   File "class_prop_as_this.php", line 7, characters 38-41:

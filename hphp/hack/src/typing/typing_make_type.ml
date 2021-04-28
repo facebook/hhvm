@@ -117,6 +117,8 @@ let tyvar r v = mk (r, Tvar v)
 
 let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
 
+let this r = mk (r, Tgeneric (SN.Typehints.this, []))
+
 let err r = mk (r, Terr)
 
 let taccess r ty id = mk (r, Taccess (ty, id))

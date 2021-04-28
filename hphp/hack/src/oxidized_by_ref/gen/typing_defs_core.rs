@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b1759cb58a21ef74050ac5eefe91530>>
+// @generated SignedSource<<87bd3445e35cd37e0cab5437943449f3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -320,7 +320,6 @@ impl TrivialDrop for ConsistentKind {}
     ToOcamlRep
 )]
 pub enum DependentType {
-    DTthis,
     DTexpr(ident::Ident),
 }
 impl TrivialDrop for DependentType {}

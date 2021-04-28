@@ -6,7 +6,3 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `this`
   File "partial_classes_bad_02.php", line 21, characters 42-42:
   But got `C`
-  File "partial_classes_bad_02.php", line 12, characters 7-7:
-  Since `C` is not final
-  File "partial_classes_bad_02.php", line 21, characters 42-42:
-  this might not be a `C`

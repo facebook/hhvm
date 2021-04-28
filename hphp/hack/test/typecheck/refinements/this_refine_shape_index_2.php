@@ -20,9 +20,10 @@ final class F {
 }
 trait TR {
   require implements I;
-  public function testit():int {
-    if ($this is A || $this is F) {
-      return $this->item['a'];
+  public function testit<Tthis as I>(this $a):int {
+    if ($a is A) {
+      $x = $a->item;
+      return $x['a'];
     }
     return 3;
   }

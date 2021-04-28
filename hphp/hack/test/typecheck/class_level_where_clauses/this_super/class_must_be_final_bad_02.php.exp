@@ -6,7 +6,3 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `this`
   File "class_must_be_final_bad_02.php", line 14, characters 19-27:
   But got `MustFinal`
-  File "class_must_be_final_bad_02.php", line 12, characters 7-15:
-  Since `MustFinal` is not final
-  File "class_must_be_final_bad_02.php", line 14, characters 19-27:
-  this might not be a `MustFinal`

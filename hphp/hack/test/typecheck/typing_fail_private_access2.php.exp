@@ -2,7 +2,7 @@ File "typing_fail_private_access2.php", line 18, characters 19-19:
 No instance method `f` in `Bar` (Typing[4053])
   File "typing_fail_private_access2.php", line 17, characters 19-19:
   Did you mean `x` instead?
-  File "typing_fail_private_access2.php", line 18, characters 12-16:
+  File "typing_fail_private_access2.php", line 16, characters 7-9:
   This is why I think it is an object of type Bar
   File "typing_fail_private_access2.php", line 16, characters 7-9:
   Declaration of `Bar` is here

@@ -2693,7 +2693,7 @@ and expr_
     if not accept_using_var then check_escaping_var env (p, this);
     let ty = Env.get_local env this in
     let r = Reason.Rwitness p in
-    let ty = mk (r, TUtils.this_of (mk (r, get_node ty))) in
+    let ty = mk (r, get_node ty) in
     make_result env p Aast.This ty
   | True -> make_result env p Aast.True (MakeType.bool (Reason.Rwitness p))
   | False -> make_result env p Aast.False (MakeType.bool (Reason.Rwitness p))
@@ -5245,6 +5245,7 @@ and dispatch_call
         []
         e1_
     in
+    let this_ty = MakeType.this (Reason.Rwitness fpos) in
     (* In static context, you can only call parent::foo() on static methods.
      * In instance context, you can call parent:foo() on static
      * methods as well as instance methods
@@ -5255,8 +5256,7 @@ and dispatch_call
       || class_contains_smethod env ty1 m
     in
     let (env, (fty, tal)) =
-      match Env.get_self_ty env with
-      | Some this_ty when not is_static ->
+      if not is_static then
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
          *)
@@ -5273,7 +5273,7 @@ and dispatch_call
           ~parent_ty:ty1
           env
           this_ty
-      | _ ->
+      else
         class_get
           ~coerce_from_ty:None
           ~is_method:true
@@ -6018,7 +6018,7 @@ and class_get
     else
       (env, cty)
   in
-  class_get_
+  class_get_inner
     ~is_method
     ~is_const
     ~this_ty
@@ -6031,7 +6031,7 @@ and class_get
     cty
     (p, mid)
 
-and class_get_
+and class_get_inner
     ~is_method
     ~is_const
     ~this_ty
@@ -6070,17 +6070,18 @@ and class_get_
   | (_, Tintersection tyl) ->
     let (env, pairs) =
       TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-          class_get
+          class_get_inner
             ~is_method
             ~is_const
+            ~this_ty
             ~explicit_targs
             ~incl_tc
             ~coerce_from_ty
             ~is_function_pointer
             env
+            cid
             ty
-            (p, mid)
-            cid)
+            (p, mid))
     in
     let (env, ty) =
       Inter.intersect_list env (get_reason cty) (List.map ~f:fst pairs)
@@ -6088,7 +6089,7 @@ and class_get_
     (env, (ty, []))
   | (_, Tnewtype (_, _, ty))
   | (_, Tdependent (_, ty)) ->
-    class_get_
+    class_get_inner
       ~is_method
       ~is_const
       ~this_ty
@@ -6112,7 +6113,7 @@ and class_get_
       (env, (err_witness env p, []))
     end else
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
-      class_get_
+      class_get_inner
         ~is_method
         ~is_const
         ~this_ty
@@ -6129,6 +6130,7 @@ and class_get_
     (match class_ with
     | None -> (env, (Typing_utils.mk_tany env p, []))
     | Some class_ ->
+      (* TODO akenn: Should we move this to the class_get original call? *)
       let (env, this_ty) = ExprDepTy.make env cid_ this_ty in
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
@@ -6150,7 +6152,7 @@ and class_get_
         let (env, inter_ty) =
           Inter.intersect_list env (Reason.Rwitness p) upper_bounds
         in
-        class_get_
+        class_get_inner
           ~is_method
           ~is_const
           ~this_ty
@@ -6276,10 +6278,8 @@ and class_get_
                     env
                     ft)
               in
-              ( env,
-                mk (Typing_reason.localize r, Tfun ft),
-                Unenforced,
-                explicit_targs )
+              let fty = mk (Typing_reason.localize r, Tfun ft) in
+              (env, fty, Unenforced, explicit_targs)
             (* unused *)
             | _ ->
               let { et_type; et_enforced } =
@@ -6445,11 +6445,10 @@ and static_class_id
           (* inside a trait, parent is SN.Typehints.this, but with the
            * type of the most concrete class that the trait has
            * "require extend"-ed *)
-          let r = Reason.Rwitness p in
           let (env, parent_ty) =
             Phase.localize_with_self env ~ignore_errors:true parent_ty
           in
-          make_result env [] Aast.CIparent (mk (r, TUtils.this_of parent_ty)))
+          make_result env [] Aast.CIparent parent_ty)
       | _ ->
         let parent =
           match Env.get_parent_ty env with
@@ -6458,16 +6457,11 @@ and static_class_id
             mk (Reason.none, Typing_defs.make_tany ())
           | Some parent -> parent
         in
-        let r = Reason.Rwitness p in
         let (env, parent) =
           Phase.localize_with_self env ~ignore_errors:true parent
         in
         (* parent is still technically the same object. *)
-        make_result
-          env
-          []
-          Aast.CIparent
-          (mk (r, TUtils.this_of (mk (r, get_node parent)))))
+        make_result env [] Aast.CIparent parent)
     | None ->
       let parent =
         match Env.get_parent_ty env with
@@ -6476,26 +6470,19 @@ and static_class_id
           mk (Reason.none, Typing_defs.make_tany ())
         | Some parent -> parent
       in
-      let r = Reason.Rwitness p in
       let (env, parent) =
         Phase.localize_with_self env ~ignore_errors:true parent
       in
       (* parent is still technically the same object. *)
-      make_result
-        env
-        []
-        Aast.CIparent
-        (mk (r, TUtils.this_of (mk (r, get_node parent)))))
+      make_result env [] Aast.CIparent parent)
   | CIstatic ->
-    let ty =
-      match Env.get_self_ty env with
-      | Some ty -> mk (Reason.Rwitness p, TUtils.this_of ty)
-      | None ->
-        (* Naming phase has already checked and replaced CIstatic with CI if outside a class *)
-        Errors.internal_error p "Unexpected CIstatic";
-        Typing_utils.mk_tany env p
+    let this =
+      if Option.is_some (Env.next_cont_opt env) then
+        MakeType.this (Reason.Rwitness p)
+      else
+        MakeType.nothing (Reason.Rwitness p)
     in
-    make_result env [] Aast.CIstatic ty
+    make_result env [] Aast.CIstatic this
   | CIself ->
     let ty =
       match Env.get_self_class_type env with
@@ -6598,10 +6585,10 @@ and static_class_id
 
 and call_construct p env class_ params el unpacked_element cid cid_ty =
   let cid_ty =
-    match Env.get_self_ty env with
-    | Some ty when Nast.equal_class_id_ cid CIparent ->
-      mk (Reason.Rwitness p, TUtils.this_of ty)
-    | _ -> cid_ty
+    if Nast.equal_class_id_ cid CIparent then
+      MakeType.this (Reason.Rwitness p)
+    else
+      cid_ty
   in
   let ety_env =
     {

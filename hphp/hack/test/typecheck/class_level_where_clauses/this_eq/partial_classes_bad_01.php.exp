@@ -2,8 +2,8 @@ File "partial_classes_bad_01.php", line 16, characters 13-14:
 A `where` type constraint is violated here (Typing[4323])
   File "partial_classes_bad_01.php", line 17, characters 7-14:
   This is the class with `where` type constraints
-  File "partial_classes_bad_01.php", line 16, characters 13-14:
-  Expected `C2`
+  File "partial_classes_bad_01.php", line 24, characters 35-38:
+  Expected `this`
   File "partial_classes_bad_01.php", line 24, characters 42-42:
   But got `C`
 File "partial_classes_bad_01.php", line 16, characters 13-14:
@@ -12,13 +12,13 @@ A `where` type constraint is violated here (Typing[4323])
   This is the class with `where` type constraints
   File "partial_classes_bad_01.php", line 24, characters 42-42:
   Expected `C`
-  File "partial_classes_bad_01.php", line 16, characters 13-14:
-  But got `C2`
+  File "partial_classes_bad_01.php", line 24, characters 35-38:
+  But got `this = C2`
 File "partial_classes_bad_01.php", line 28, characters 40-41:
 No instance method `me` in `PartialC` (Typing[4053])
   File "partial_classes_bad_01.php", line 28, characters 19-21:
   Did you mean `foo` instead?
-  File "partial_classes_bad_01.php", line 28, characters 33-37:
+  File "partial_classes_bad_01.php", line 24, characters 7-14:
   This is why I think it is an object of type PartialC
   File "partial_classes_bad_01.php", line 24, characters 7-14:
   Declaration of `PartialC` is here

@@ -133,20 +133,7 @@ type consistent_kind =
   | FinalClass
 [@@deriving eq, show]
 
-(* A dependent type consists of a base kind which indicates what the type is
- * dependent on. It is either dependent on:
- *  - The type 'this'
- *  - A class
- *  - An expression
- *
- * Dependent types also have a path component (derived from accessing a type
- * constant). Thus the dependent type (`expr 0, ['A', 'B', 'C']) roughly means
- * "The type resulting from accessing the type constant A then the type constant
- * B and then the type constant C on the expression reference by 0"
- *)
 type dependent_type =
-  (* Type that is the subtype of the late bound type within a class. *)
-  | DTthis
   (* A reference to some expression. For example:
    *
    *  $x->foo()

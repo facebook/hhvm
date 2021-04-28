@@ -6,11 +6,11 @@ File "trait_typehint.php", line 24, characters 5-13:
 Unbound name: `takes_kid` (a global function) (Naming[2049])
 File "trait_typehint.php", line 25, characters 14-18:
 Invalid argument (Typing[4110])
-File "trait_typehint.php", line 31, characters 19-34:
-Expected `Vector<KidTrait>`
-File "trait_typehint.php", line 25, characters 14-18:
-But got `KidTrait`
+  File "trait_typehint.php", line 31, characters 19-34:
+  Expected `Vector<KidTrait>`
+  File "trait_typehint.php", line 25, characters 14-18:
+  But got `this as KidTrait`
 File "trait_typehint.php", line 31, characters 26-33:
 `KidTrait` is uninstantiable (Typing[4002])
-File "trait_typehint.php", line 17, characters 7-14:
-Declaration is here
+  File "trait_typehint.php", line 17, characters 7-14:
+  Declaration is here

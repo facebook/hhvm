@@ -85,19 +85,12 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-let env_with_self ?report_cycle env ~on_error : expand_env =
-  let this_ty =
-    mk
-      ( Reason.none,
-        match Env.get_self_ty env with
-        | None -> TUtils.tany env (* Error already reported in naming phase *)
-        | Some ty -> TUtils.this_of ty )
-  in
+let env_with_self ?report_cycle _env ~on_error =
   {
     type_expansions =
       Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
     substs = SMap.empty;
-    this_ty;
+    this_ty = MakeType.this Reason.none;
     on_error;
   }
 

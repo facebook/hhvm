@@ -9,6 +9,4 @@ Invalid return type (Typing[4110])
   File "tconst_union_bad.php", line 9, characters 19-24:
   But got `string`
   File "tconst_union_bad.php", line 10, characters 26-33:
-    resulting from expanding the type constant `<expr#1> as D::TP`
-  File "tconst_union_bad.php", line 14, characters 10-11:
-    where `<expr#1>` is a reference to this expression
+    resulting from expanding the type constant `D::TP`

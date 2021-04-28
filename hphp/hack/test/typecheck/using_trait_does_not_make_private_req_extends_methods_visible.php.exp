@@ -2,7 +2,7 @@ File "using_trait_does_not_make_private_req_extends_methods_visible.php", line 1
 No instance method `f` in `Child` (Typing[4053])
   File "using_trait_does_not_make_private_req_extends_methods_visible.php", line 13, characters 19-19:
   Did you mean `g` instead?
-  File "using_trait_does_not_make_private_req_extends_methods_visible.php", line 13, characters 37-41:
+  File "using_trait_does_not_make_private_req_extends_methods_visible.php", line 11, characters 7-11:
   This is why I think it is an object of type Child
   File "using_trait_does_not_make_private_req_extends_methods_visible.php", line 11, characters 7-11:
   Declaration of `Child` is here

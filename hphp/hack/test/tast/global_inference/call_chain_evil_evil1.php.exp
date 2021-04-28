@@ -50,8 +50,7 @@
            [([5:5-26],
              (Return
                 (Some (([5:12-25], string),
-                       (Call ((([5:12-21], (function(string $x): string)), (Class_const ((([5:12-18], this), CIparent), ([5:20-21], "f")))), 
-                          [], [(([5:22-24], string), (Lvar ([5:22-24], $x)))], None))))))
+                       (Call ((([5:12-21], (function(string $x): string)), (Class_const ((([5:12-18], A), CIparent), ([5:20-21], "f")))), [], [(([5:22-24], string), (Lvar ([5:22-24], $x)))], None))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

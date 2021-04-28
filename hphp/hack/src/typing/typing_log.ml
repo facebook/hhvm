@@ -398,7 +398,8 @@ let continuations_map_as_value f m =
        m
        SMap.empty)
 
-let local_as_value env (ty, _pos, _expr_id) = type_as_value env ty
+let local_as_value env (ty, _pos, expr_id) =
+  Atom (Printf.sprintf "%s [expr_id=%d]" (Typing_print.debug env ty) expr_id)
 
 let per_cont_env_as_value env per_cont_env =
   continuations_map_as_value

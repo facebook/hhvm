@@ -60,6 +60,15 @@ let class_env ?origin ctx c =
       Typing_phase.localize_with_self env ~ignore_errors:true self
   in
   let env = Env.set_self env self_id self_ty in
+  let env =
+    Env.add_upper_bound env Naming_special_names.Typehints.this self_ty
+  in
+  let env =
+    if c.c_final then
+      Env.add_lower_bound env Naming_special_names.Typehints.this self_ty
+    else
+      env
+  in
   (* In order to type-check a class, we need to know what "parent"
    * refers to. Sometimes people write "parent::", when that happens,
    * we need to know the type of parent.

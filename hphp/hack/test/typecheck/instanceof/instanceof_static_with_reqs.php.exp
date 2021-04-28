@@ -3,7 +3,7 @@ File "instanceof_static_with_reqs.php", line 10, characters 5-19:
 File "instanceof_static_with_reqs.php", line 17, characters 5-19:
   this as BaseField<T>
 File "instanceof_static_with_reqs.php", line 26, characters 7-21:
-  (this as BaseField<T> & INeedsFoo<T#2>)
+  (this & INeedsFoo<T#2>) where this as BaseField<T>
 File "instanceof_static_with_reqs.php", line 30, characters 5-19:
   this as BaseField<T>
 No errors

@@ -5,8 +5,6 @@ Invalid argument (Typing[4110])
   File "this_param.php", line 17, characters 23-26:
     via this generic `this`
   File "this_param.php", line 21, characters 24-26:
-  But got `Foo`
-  File "this_param.php", line 12, characters 7-9:
-  Since `Foo` is not final
-  File "this_param.php", line 21, characters 24-26:
-  this might not be a `Foo`
+  But got `<expr#1> as Foo`
+  File "this_param.php", line 23, characters 16-19:
+    where `<expr#1>` is a reference to this expression

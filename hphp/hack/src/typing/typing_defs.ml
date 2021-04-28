@@ -10,7 +10,6 @@
 open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
-module SN = Naming_special_names
 
 (** Origin of Class Constant References:
     In order to be able to detect cycle definitions like
@@ -494,12 +493,13 @@ let get_param_mode callconv =
 
 module DependentKind = struct
   let to_string = function
-    | DTthis -> SN.Typehints.this
     | DTexpr i ->
       let display_id = Reason.get_expr_display_id i in
       "<expr#" ^ string_of_int display_id ^ ">"
 
-  let is_generic_dep_ty s = String_utils.is_substring "::" s
+  let is_generic_dep_ty s =
+    String_utils.is_substring "::" s
+    || String.equal s Naming_special_names.Typehints.this
 end
 
 module ShapeFieldMap = struct

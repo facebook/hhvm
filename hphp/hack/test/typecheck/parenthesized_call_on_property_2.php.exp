@@ -1,8 +1,8 @@
 File "parenthesized_call_on_property_2.php", line 6, characters 13-17:
 Typing error (Typing[4053])
-File "parenthesized_call_on_property_2.php", line 6, characters 20-23:
-No property `prop` in `Foo`
-File "parenthesized_call_on_property_2.php", line 6, characters 13-17:
-This is why I think it is an object of type Foo
-File "parenthesized_call_on_property_2.php", line 3, characters 7-9:
-Declaration of `Foo` is here
+  File "parenthesized_call_on_property_2.php", line 6, characters 20-23:
+  No property `prop` in `Foo`
+  File "parenthesized_call_on_property_2.php", line 3, characters 7-9:
+  This is why I think it is an object of type Foo
+  File "parenthesized_call_on_property_2.php", line 3, characters 7-9:
+  Declaration of `Foo` is here

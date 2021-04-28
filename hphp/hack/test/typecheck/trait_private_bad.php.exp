@@ -2,7 +2,7 @@ File "trait_private_bad.php", line 24, characters 19-21:
 No instance method `foo` in `B` (Typing[4053])
   File "trait_private_bad.php", line 23, characters 19-21:
   Did you mean `bar` instead?
-  File "trait_private_bad.php", line 24, characters 12-16:
+  File "trait_private_bad.php", line 22, characters 7-7:
   This is why I think it is an object of type B
   File "trait_private_bad.php", line 22, characters 7-7:
   Declaration of `B` is here

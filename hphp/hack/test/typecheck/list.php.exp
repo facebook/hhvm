@@ -4,7 +4,7 @@ File "list.php", line 16, characters 12-15:
 No instance method `list` in `A` (Typing[4053])
   File "list.php", line 13, characters 19-21:
   Did you mean `foo` instead?
-  File "list.php", line 16, characters 5-9:
+  File "list.php", line 12, characters 7-7:
   This is why I think it is an object of type A
   File "list.php", line 12, characters 7-7:
   Declaration of `A` is here

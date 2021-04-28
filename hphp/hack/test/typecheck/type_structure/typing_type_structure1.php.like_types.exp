@@ -17,5 +17,5 @@ File "typing_type_structure1.php", line 25, characters 5-30:
 File "typing_type_structure1.php", line 26, characters 5-30:
   ~(TypeStructure<Vector<C<int>>>)
 File "typing_type_structure1.php", line 27, characters 5-28:
-  ~classname<this as D>
+  ~classname<this>
 No errors

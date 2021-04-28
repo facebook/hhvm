@@ -1,2 +1,8 @@
 File "this_ret_bad1.php", line 12, characters 17-20:
 Cannot use `this` outside of a class (Naming[2045])
+File "this_ret_bad1.php", line 12, characters 31-31:
+Invalid return type (Typing[4110])
+  File "this_ret_bad1.php", line 12, characters 17-20:
+  Expected `this`
+  File "this_ret_bad1.php", line 12, characters 31-31:
+  But got `int`

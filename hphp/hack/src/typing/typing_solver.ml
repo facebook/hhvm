@@ -609,7 +609,7 @@ let widen env widen_concrete_type ty =
     (* Don't widen the `this` type, because the field type changes up the hierarchy
      * so we lose precision
      *)
-    | (_, Tdependent (DTthis, _)) -> (env, ty)
+    | (_, Tgeneric ("this", [])) -> (env, ty)
     (* For other abstract types, just widen to the bound, if possible *)
     | (_, Tdependent (_, ty))
     | (_, Tnewtype (_, _, ty)) ->

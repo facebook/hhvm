@@ -4,7 +4,7 @@ File "trait_use_aliasing_hack.php", line 15, characters 32-44:
 No instance method `genHelloTrait` in `HelloClass` (Typing[4053])
   File "trait_use_aliasing_hack.php", line 14, characters 25-32:
   Did you mean `genHello` instead?
-  File "trait_use_aliasing_hack.php", line 15, characters 25-29:
+  File "trait_use_aliasing_hack.php", line 8, characters 7-16:
   This is why I think it is an object of type HelloClass
   File "trait_use_aliasing_hack.php", line 8, characters 7-16:
   Declaration of `HelloClass` is here

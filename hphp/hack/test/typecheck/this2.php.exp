@@ -4,7 +4,3 @@ Invalid return type (Typing[4110])
   Expected `this`
   File "this2.php", line 14, characters 16-16:
   But got `X`
-  File "this2.php", line 12, characters 7-7:
-  Since `X` is not final
-  File "this2.php", line 14, characters 16-16:
-  this might not be a `X`

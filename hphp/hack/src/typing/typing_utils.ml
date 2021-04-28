@@ -270,17 +270,6 @@ let env_with_self_ref : env_with_self ref =
 
 let env_with_self ?report_cycle x = !env_with_self_ref ?report_cycle x
 
-let rec strip_this ty =
-  match get_node ty with
-  | Tdependent (DTthis, ty) -> ty
-  | Tunion tyl -> mk (get_reason ty, Tunion (List.map tyl strip_this))
-  | Tintersection tyl ->
-    mk (get_reason ty, Tintersection (List.map tyl strip_this))
-  | _ -> ty
-
-(* Convenience function for creating `this` types *)
-let this_of ty = Tdependent (DTthis, strip_this ty)
-
 (*****************************************************************************)
 (* Returns true if a type is optional *)
 (*****************************************************************************)

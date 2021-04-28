@@ -683,7 +683,7 @@ let method_def env cls m =
       let env =
         match Env.get_self_ty env with
         | Some ty when not (Env.is_static env) ->
-          Env.set_local env this ty Pos.none
+          Env.set_local env this (MakeType.this (get_reason ty)) Pos.none
         | _ -> env
       in
       let env =

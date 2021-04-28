@@ -1,5 +1,5 @@
 File "typing_type_structure2.php", line 13, characters 5-28:
-  classname<this as C>
+  classname<this>
 File "typing_type_structure2.php", line 14, characters 5-28:
   classname<Base>
 No errors

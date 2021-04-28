@@ -1,8 +1,8 @@
 File "xhp_attr_14.php", line 7, characters 14-18:
 Typing error (Typing[4053])
-File "xhp_attr_14.php", line 7, characters 21-30:
-No property `:undefined` in `:foo`
-File "xhp_attr_14.php", line 7, characters 14-18:
-This is why I think it is an object of type :foo
-File "xhp_attr_14.php", line 3, characters 7-10:
-Declaration of `:foo` is here
+  File "xhp_attr_14.php", line 7, characters 21-30:
+  No property `:undefined` in `:foo`
+  File "xhp_attr_14.php", line 3, characters 7-10:
+  This is why I think it is an object of type :foo
+  File "xhp_attr_14.php", line 3, characters 7-10:
+  Declaration of `:foo` is here

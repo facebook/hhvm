@@ -3,6 +3,6 @@ Invalid assignment (Typing[4110])
   File "this_member.php", line 13, characters 38-41:
   Expected `~<expr#1> as X` because it is an unenforceable type
   File "this_member.php", line 16, characters 13-17:
-  But got `this`
+  But got `this as X`
   File "this_member.php", line 13, characters 38-41:
     via this generic `this`

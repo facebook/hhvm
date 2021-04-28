@@ -2,7 +2,7 @@ File "method_dispatch_24.php", line 25, characters 12-13:
 No instance method `f2` in `B` (Typing[4053])
   File "method_dispatch_24.php", line 23, characters 26-27:
   Did you mean static method `f2` instead?
-  File "method_dispatch_24.php", line 25, characters 5-9:
+  File "method_dispatch_24.php", line 21, characters 7-7:
   This is why I think it is an object of type B
   File "method_dispatch_24.php", line 21, characters 7-7:
   Declaration of `B` is here

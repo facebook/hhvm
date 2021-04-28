@@ -6,7 +6,3 @@ Invalid argument (Typing[4110])
     via this generic `this`
   File "this_anon_bad.php", line 34, characters 15-17:
   But got `Foo`
-  File "this_anon_bad.php", line 13, characters 7-9:
-  Since `Foo` is not final
-  File "this_anon_bad.php", line 34, characters 15-17:
-  this might not be a `Foo`

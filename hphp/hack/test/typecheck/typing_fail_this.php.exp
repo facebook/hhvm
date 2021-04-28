@@ -1,8 +1,8 @@
 File "typing_fail_this.php", line 58, characters 5-9:
 Typing error (Typing[4053])
-File "typing_fail_this.php", line 58, characters 12-12:
-No property `l` in `MyDoubleList`
-File "typing_fail_this.php", line 58, characters 5-9:
-This is why I think it is an object of type MyDoubleList
-File "typing_fail_this.php", line 51, characters 7-18:
-Declaration of `MyDoubleList` is here
+  File "typing_fail_this.php", line 58, characters 12-12:
+  No property `l` in `MyDoubleList`
+  File "typing_fail_this.php", line 51, characters 7-18:
+  This is why I think it is an object of type MyDoubleList
+  File "typing_fail_this.php", line 51, characters 7-18:
+  Declaration of `MyDoubleList` is here

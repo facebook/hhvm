@@ -8,9 +8,7 @@ No instance method `xxx` in `A` (Typing[4053])
   Declaration of `A` is here
 File "new_static2.php", line 23, characters 12-23:
 Invalid return type (Typing[4110])
-  File "new_static2.php", line 22, characters 35-37:
-  Expected `int`
-  File "new_static2.php", line 22, characters 35-37:
-  This type argument to `A` must match exactly (it is invariant)
-  File "new_static2.php", line 13, characters 18-18:
-  But got `T`
+  File "new_static2.php", line 22, characters 33-38:
+  Expected `A<int>`
+  File "new_static2.php", line 23, characters 16-21:
+  But got `this as A<T>`

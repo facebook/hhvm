@@ -1208,7 +1208,7 @@ and simplify_subtype_i
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
-    | (r_super, Tdependent (d_sup, bound_sup)) ->
+    | (_r_super, Tdependent (d_sup, bound_sup)) ->
       let (env, bound_sup) = Env.expand_type env bound_sup in
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
@@ -1222,8 +1222,8 @@ and simplify_subtype_i
            * statically guarantee their runtime type.
            *)
           simplify_subtype ~subtype_env ~this_ty ty_sub bound_sup env
-        | ((r_sub, Tclass ((_, y), _, _)), Tclass (((_, x) as id), _, tyl_super))
-          ->
+        | ( (r_sub, Tclass ((_, y), _, _)),
+            Tclass (((_, x) as id), _, _tyl_super) ) ->
           let fail =
             if String.equal x y then
               fun () ->
@@ -1232,41 +1232,7 @@ and simplify_subtype_i
             else
               fail
           in
-
-          let class_def = Env.get_class env x in
-          (match (d_sup, class_def) with
-          | (DTthis, Some class_ty) ->
-            let tolerate_wrong_arity =
-              not (Partial.should_check_error (Env.get_mode env) 4029)
-            in
-            let tyl_super =
-              if List.is_empty tyl_super && tolerate_wrong_arity then
-                List.map (Cls.tparams class_ty) (fun _ ->
-                    mk (r_super, Typing_defs.make_tany ()))
-              else
-                tyl_super
-            in
-            let ety_env =
-              {
-                type_expansions = Typing_defs.Type_expansions.empty;
-                substs =
-                  TUtils.make_locl_subst_for_class_tparams class_ty tyl_super;
-                this_ty = Option.value this_ty ~default:ty_super;
-                on_error = Errors.ignore_error;
-              }
-            in
-            let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
-            let rec try_constraints lower_bounds_super env =
-              match lower_bounds_super with
-              | [] -> invalid_env_with env fail
-              | ty_super :: lower_bounds_super ->
-                let (env, ty_super) = Phase.localize ~ety_env env ty_super in
-                env
-                |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super
-                ||| try_constraints lower_bounds_super
-            in
-            try_constraints lower_bounds_super env
-          | _ -> invalid_env_with env fail)
+          invalid_env_with env fail
         | ((_, Tdependent (d_sub, bound_sub)), _) ->
           let this_ty = Option.first_some this_ty (Some ty_sub) in
           (* Dependent types are identical but bound might be different *)

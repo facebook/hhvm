@@ -1272,9 +1272,8 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
             env
           | _ -> env
         in
-        let rec find_class_name ty =
+        let find_class_name ty =
           match T.get_node ty with
-          | T.Tdependent (T.DTthis, ty) -> find_class_name ty
           | T.Tclass ((_, class_name), _, _) -> class_name
           | _ -> fail "unhandled method call on a non-class"
         in

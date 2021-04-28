@@ -1,5 +1,5 @@
 File "this_static_method.php", line 10, characters 5-18:
-  this as Foo
+  this = Foo
 File "this_static_method.php", line 6, characters 26-26:
 Invalid return type (Typing[4336])
   File "this_static_method.php", line 6, characters 31-33:

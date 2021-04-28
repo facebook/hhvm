@@ -1,8 +1,8 @@
 File "typing_fail_private_access.php", line 18, characters 12-16:
 Typing error (Typing[4053])
-File "typing_fail_private_access.php", line 18, characters 19-19:
-No property `a` in `Bar`
-File "typing_fail_private_access.php", line 18, characters 12-16:
-This is why I think it is an object of type Bar
-File "typing_fail_private_access.php", line 16, characters 7-9:
-Declaration of `Bar` is here
+  File "typing_fail_private_access.php", line 18, characters 19-19:
+  No property `a` in `Bar`
+  File "typing_fail_private_access.php", line 16, characters 7-9:
+  This is why I think it is an object of type Bar
+  File "typing_fail_private_access.php", line 16, characters 7-9:
+  Declaration of `Bar` is here

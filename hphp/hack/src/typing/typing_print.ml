@@ -472,18 +472,7 @@ module Full = struct
     | Tgeneric (s, tyl) ->
       to_doc s ^^ list "<" k tyl ">"
     | Tdependent (dep, cstr) ->
-      let cstr_info =
-        if
-          !debug_mode
-          ||
-          match dep with
-          | DTexpr _ -> true
-          | _ -> false
-        then
-          Concat [Space; text "as"; Space; k cstr]
-        else
-          Nothing
-      in
+      let cstr_info = Concat [Space; text "as"; Space; k cstr] in
       Concat [to_doc @@ DependentKind.to_string dep; cstr_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
@@ -841,9 +830,7 @@ module ErrorString = struct
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
     match dep with
-    | DTthis
-    | DTexpr _ ->
-      "the expression dependent type " ^ x
+    | DTexpr _ -> "the expression dependent type " ^ x
 
   and union env l =
     let (null, nonnull) =
@@ -962,11 +949,6 @@ module Json = struct
       obj
       @@ kind p "path"
       @ [("type", obj @@ kind (get_pos ty) "expr")]
-      @ as_type ty
-    | (p, Tdependent (DTthis, ty)) ->
-      obj
-      @@ kind p "path"
-      @ [("type", obj @@ kind (get_pos ty) "this")]
       @ as_type ty
     | (p, Toption ty) ->
       begin
@@ -1131,8 +1113,7 @@ module Json = struct
                   "Cannot deserialize path-dependent type involving an expression"
                 ~keytrace
             | "this" ->
-              aux_as json ~keytrace >>= fun as_ty ->
-              ty (Tdependent (DTthis, as_ty))
+              aux_as json ~keytrace >>= fun _as_ty -> ty (Tgeneric ("this", []))
             | path_kind ->
               deserialization_error
                 ~message:("Unknown path kind: " ^ path_kind)

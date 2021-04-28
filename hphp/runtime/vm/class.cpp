@@ -509,14 +509,8 @@ Class::~Class() {
     for (auto i = 0; i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-
-    auto const bytes = n * sizeof(*m_sPropCache);
-    if (m_useStaticMultiPropCache) {
-      auto const offset = getStaticMultiPropValuesOffset();
-      vm_sized_free(mutStaticMultiPropValues(), bytes + offset);
-    } else {
-      vm_sized_free(m_sPropCache, bytes);
-    }
+    using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
+    vm_sized_free(m_sPropCache, n * sizeof(LinkT));
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -644,11 +638,6 @@ void Class::releaseSProps() {
     if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
       unbindLink(&m_sPropCache[i], rds::SPropCache{this, i});
     }
-  }
-
-  if (m_useStaticMultiPropCache) {
-    auto const cache = mutStaticMultiPropCache();
-    unbindLink(&cache->link, rds::SMultiPropCache{this});
   }
 }
 
@@ -934,41 +923,35 @@ void Class::initSProps() const {
 
   initSPropHandles();
 
-  if (m_useStaticMultiPropCache) {
-    auto const cache = getStaticMultiPropCache();
-    auto const bytes = cache->count * sizeof(TypedValue);
-    memcpy16_inline(cache->link.get(), getStaticMultiPropValues(), bytes);
-  } else {
-    // Perform scalar inits.
-    for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
-      auto const& sProp = m_staticProperties[slot];
-      // TODO(T61738946): We can remove the temporary here once we no longer
-      // coerce class_meth types.
-      auto val = sProp.val;
+  // Perform scalar inits.
+  for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+    auto const& sProp = m_staticProperties[slot];
+    // TODO(T61738946): We can remove the temporary here once we no longer
+    // coerce class_meth types.
+    auto val = sProp.val;
 
-      if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
-          sProp.attrs & AttrLSB) {
-        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-            !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
-            sProp.val.m_type != KindOfUninit) {
-          if (sProp.typeConstraint.isCheckable()) {
-            sProp.typeConstraint.verifyStaticProperty(
-              &val,
-              this,
-              sProp.cls,
-              sProp.name
-            );
-          }
-          if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-            for (auto const& ub : sProp.ubs) {
-              if (ub.isCheckable()) {
-                ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
-              }
+    if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
+        sProp.attrs & AttrLSB) {
+      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+          !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
+          sProp.val.m_type != KindOfUninit) {
+        if (sProp.typeConstraint.isCheckable()) {
+          sProp.typeConstraint.verifyStaticProperty(
+            &val,
+            this,
+            sProp.cls,
+            sProp.name
+          );
+        }
+        if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+          for (auto const& ub : sProp.ubs) {
+            if (ub.isCheckable()) {
+              ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
             }
           }
         }
-        m_sPropCache[slot]->val = val;
       }
+      m_sPropCache[slot]->val = val;
     }
   }
 
@@ -1157,23 +1140,6 @@ void Class::initSPropHandles() const {
     }
   }
 
-  rds::Handle multiPropHandle = rds::kUninitHandle;
-  TypedValue* multiPropValues = nullptr;
-  auto cur = 0;
-
-  // Bind the multi-prop handle so we can use it to initialize individual props.
-  // TODO(kshaunak): Perhaps these initialize methods should not be const...
-  if (m_useStaticMultiPropCache) {
-    auto const cls = const_cast<Class*>(this);
-    auto const cache = cls->mutStaticMultiPropCache();
-    cache->link = rds::bind<StaticMultiPropData, rds::Mode::Local>(
-      rds::SMultiPropCache{this},
-      (cache->count - 1) * sizeof(TypedValue)
-    );
-    multiPropHandle = cache->link.handle();
-    multiPropValues = cls->mutStaticMultiPropValues();
-  }
-
   // Bind all the static prop handles.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto& propHandle = m_sPropCache[slot];
@@ -1188,14 +1154,7 @@ void Class::initSPropHandles() const {
         propHandle.bind(rds::Mode::Persistent, rds::SPropCache{this, slot}, tv);
       } else {
         allPersistentHandles = false;
-        if (m_useStaticMultiPropCache) {
-          using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
-          propHandle = LinkT(multiPropHandle + cur * sizeof(StaticPropData));
-          multiPropValues[cur] = sProp.val;
-          cur++;
-        } else {
-          propHandle.bind(rds::Mode::Local, rds::SPropCache{this, slot});
-        }
+        propHandle.bind(rds::Mode::Local, rds::SPropCache{this, slot});
       }
     } else {
       auto const realSlot = sProp.cls->lookupSProp(sProp.name);
@@ -2714,85 +2673,12 @@ void Class::sortOwnPropsInitVec(uint32_t first, uint32_t past,
   }
 }
 
-size_t Class::getStaticMultiPropValuesOffset() const {
-  auto const cache = getStaticMultiPropCache();
-  return cache->count * sizeof(TypedValue) + sizeof(StaticMultiPropCache);
-}
-
-const TypedValue* Class::getStaticMultiPropValues() const {
-  auto const offset = getStaticMultiPropValuesOffset();
-  return reinterpret_cast<const TypedValue*>(
-    reinterpret_cast<const char*>(m_sPropCache) - offset
-  );
-}
-
-const StaticMultiPropCache* Class::getStaticMultiPropCache() const {
-  assertx(m_useStaticMultiPropCache);
-  return reinterpret_cast<const StaticMultiPropCache*>(
-    reinterpret_cast<const char*>(m_sPropCache) - sizeof(StaticMultiPropCache)
-  );
-}
-
-TypedValue* Class::mutStaticMultiPropValues() {
-  return const_cast<TypedValue*>(getStaticMultiPropValues());
-}
-
-StaticMultiPropCache* Class::mutStaticMultiPropCache() {
-  return const_cast<StaticMultiPropCache*>(getStaticMultiPropCache());
-}
-
 void Class::setupSProps() {
-  m_useStaticMultiPropCache = false;
-
   auto const n = m_staticProperties.size();
   if (!n) return;
 
-  // Determine if we should use the multi-prop optimization for this class.
-  Slot numNonPersistentPropHandles = 0;
-  bool allNonPersistentSPropsSatisfyInitialTC = true;
-  auto const usePersistentHandles = shouldUsePersistentHandles(this);
-
-  for (Slot slot = 0; slot < n; ++slot) {
-    auto const& sProp = m_staticProperties[slot];
-
-    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
-      if (!(usePersistentHandles && (sProp.attrs & AttrPersistent))) {
-        if (!(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue))) {
-          allNonPersistentSPropsSatisfyInitialTC = false;
-          break;
-        }
-        ++numNonPersistentPropHandles;
-      }
-    }
-  }
-
-  m_useStaticMultiPropCache =
-    allNonPersistentSPropsSatisfyInitialTC &&
-    numNonPersistentPropHandles != 0;
-
   using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
-
-  auto const bytes = n * sizeof(LinkT);
-
-  if (m_useStaticMultiPropCache) {
-
-    // Pre-allocate space before m_sPropCache to store our optimization data.
-    auto const prefix =
-      numNonPersistentPropHandles * sizeof(TypedValue) +
-      sizeof(StaticMultiPropCache);
-    auto const ptr = reinterpret_cast<char*>(vm_malloc(bytes + prefix));
-    m_sPropCache = reinterpret_cast<LinkT*>(ptr + prefix);
-
-    // Initialize the optimization data, but don't bind the link - that's done
-    // lazily in initSPropHandles, like the single-prop links.
-    auto const cache = mutStaticMultiPropCache();
-    using MultiLinkT = std::remove_pointer<decltype(&cache->link)>::type;
-    new (&cache->link) MultiLinkT;
-    cache->count = numNonPersistentPropHandles;
-
-  } else {
-    m_sPropCache = reinterpret_cast<LinkT*>(vm_malloc(bytes));
-  }
+  m_sPropCache = reinterpret_cast<LinkT*>(vm_malloc(n * sizeof(LinkT)));
 
   for (unsigned i = 0; i < n; ++i) {
     new (&m_sPropCache[i]) LinkT;

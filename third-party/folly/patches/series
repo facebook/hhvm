@@ -3,3 +3,4 @@ disable-liblzma.patch
 folly-cmake-fixup.patch
 folly-install-component.patch
 series
+disable-libsnappy.patch

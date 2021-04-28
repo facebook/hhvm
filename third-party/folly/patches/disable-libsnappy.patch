@@ -1,0 +1,24 @@
+diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
+index 25b42eb4d..66cabfd9b 100644
+--- a/CMake/folly-deps.cmake
++++ b/CMake/folly-deps.cmake
+@@ -118,11 +118,14 @@ if(ZSTD_FOUND)
+   list(APPEND FOLLY_LINK_LIBRARIES ${ZSTD_LIBRARY})
+ endif()
+ 
+-find_package(Snappy MODULE)
+-set(FOLLY_HAVE_LIBSNAPPY ${SNAPPY_FOUND})
+-if (SNAPPY_FOUND)
+-  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${SNAPPY_INCLUDE_DIR})
+-  list(APPEND FOLLY_LINK_LIBRARIES ${SNAPPY_LIBRARY})
++option(WITHOUT_LIBSNAPPY "Disable Snappy support" OFF)
++if (NOT WITHOUT_LIBSNAPPY)
++  find_package(Snappy MODULE)
++  set(FOLLY_HAVE_LIBSNAPPY ${SNAPPY_FOUND})
++  if (SNAPPY_FOUND)
++    list(APPEND FOLLY_INCLUDE_DIRECTORIES ${SNAPPY_INCLUDE_DIR})
++    list(APPEND FOLLY_LINK_LIBRARIES ${SNAPPY_LIBRARY})
++  endif()
+ endif()
+ 
+ find_package(LibDwarf)

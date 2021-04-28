@@ -2,6 +2,12 @@
 
 type ExprTreeInferredType<T> = ?(function(): T);
 
+type ExprTreeInfo = shape(
+  'splices' => dict<string, mixed>,
+  'functions' => vec<mixed>,
+  'static_methods' => vec<mixed>,
+);
+
 function concat_arg_list(vec<string> $args): string {
   return implode(",", $args);
 }
@@ -15,11 +21,11 @@ class Code {
 
   public static function makeTree<TVisitor as Code, TInfer>(
     ?ExprPos $pos,
-    dict<string, mixed> $spliced_values,
+    ExprTreeInfo $metadata,
     (function(TVisitor): Code::TAst) $ast,
     ExprTreeInferredType<TInfer> $null,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
-    return new ExprTree($pos, $spliced_values, $ast, $null);
+    return new ExprTree($pos, $metadata, $ast, $null);
   }
 
   // Lifting literals.
@@ -28,7 +34,7 @@ class Code {
   ): ExprTree<Code, Code::TAst, ExampleInt> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> (string)$i,
       () ==> {
         throw new Exception();
@@ -41,7 +47,7 @@ class Code {
   ): ExprTree<Code, Code::TAst, ExampleFloat> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> (string)$f,
       () ==> {
         throw new Exception();
@@ -54,7 +60,7 @@ class Code {
   ): ExprTree<Code, Code::TAst, ExampleBool> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> $b ? "true" : "false",
       () ==> {
         throw new Exception();
@@ -67,7 +73,7 @@ class Code {
   ): ExprTree<Code, Code::TAst, ExampleString> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> "\"$s\"",
       () ==> {
         throw new Exception();
@@ -78,7 +84,7 @@ class Code {
   public static function liftNull(): ExprTree<Code, Code::TAst, null> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> "null",
       () ==> {
         throw new Exception();
@@ -89,7 +95,7 @@ class Code {
   public static function liftVoid(): ExprTree<Code, Code::TAst, ExampleVoid> {
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> "void",
       () ==> {
         throw new Exception();
@@ -111,7 +117,7 @@ class Code {
 
     return new ExprTree(
       null,
-      dict[],
+      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
       (Code $_) ==> $name."()",
       () ==> {
         throw new Exception();
@@ -238,7 +244,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   implements Spliceable<TVisitor, TResult, TInfer> {
   public function __construct(
     private ?ExprPos $pos,
-    private dict<string, mixed> $spliced_values,
+    private ExprTreeInfo $metadata,
     private (function(TVisitor): TResult) $ast,
     private ExprTreeInferredType<TInfer> $err,
   ) {}
@@ -252,7 +258,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   }
 
   public function getSplices(): dict<string, mixed> {
-    return $this->spliced_values;
+    return $this->metadata['splices'];
   }
 }
 

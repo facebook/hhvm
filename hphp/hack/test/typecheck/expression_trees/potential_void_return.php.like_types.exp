@@ -8,29 +8,29 @@ File "potential_void_return.php", line 17, characters 12-20:
 Typing error (Typing[4110])
   File "potential_void_return.php", line 17, characters 12-20:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 41, characters 38-76:
+  File "expr_tree.hhi", line 45, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "potential_void_return.php", line 19, characters 16-36:
 Typing error (Typing[4110])
   File "potential_void_return.php", line 19, characters 16-36:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 48, characters 6-34:
+  File "expr_tree.hhi", line 52, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "potential_void_return.php", line 33, characters 12-20:
 Typing error (Typing[4110])
   File "potential_void_return.php", line 33, characters 12-20:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 41, characters 38-76:
+  File "expr_tree.hhi", line 45, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "potential_void_return.php", line 35, characters 16-36:
 Typing error (Typing[4110])
   File "potential_void_return.php", line 35, characters 16-36:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 48, characters 6-34:
+  File "expr_tree.hhi", line 52, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "potential_void_return.php", line 39, characters 7-13:
 Typing error (Typing[4110])
   File "potential_void_return.php", line 39, characters 7-13:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 41, characters 38-76:
+  File "expr_tree.hhi", line 45, characters 38-76:
   But got `dynamic` because it is an unenforceable type

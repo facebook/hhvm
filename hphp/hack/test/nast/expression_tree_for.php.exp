@@ -65,13 +65,19 @@
                                                       (SFlit_str ([4:8-60], "start_column")), ([4:8-60], (Int "7"))); (
                                                       (SFlit_str ([4:8-60], "end_column")), ([4:8-60], (Int "59")))]));
                                                  ([4:8-60],
-                                                  (KeyValCollection (Dict, None,
-                                                     [(([4:26-27], (String "$0splice0")), ([4:26-27], (Lvar ([4:26-27], $0splice0))));
-                                                       (([4:29-33], (String "$0splice1")), ([4:29-33], (Lvar ([4:29-33], $0splice1))));
-                                                       (([4:45-46], (String "$0splice2")), ([4:45-46], (Lvar ([4:45-46], $0splice2))));
-                                                       (([4:50-53], (String "$0splice3")), ([4:50-53], (Lvar ([4:50-53], $0splice3))));
-                                                       (([4:8-60], (String "$0splice4")), ([4:8-60], (Lvar ([4:8-60], $0splice4))))]
-                                                     )));
+                                                  (Shape
+                                                     [((SFlit_str ([4:8-60], "splices")),
+                                                       ([4:8-60],
+                                                        (KeyValCollection (Dict, None,
+                                                           [(([4:26-27], (String "$0splice0")), ([4:26-27], (Lvar ([4:26-27], $0splice0))));
+                                                             (([4:29-33], (String "$0splice1")), ([4:29-33], (Lvar ([4:29-33], $0splice1))));
+                                                             (([4:45-46], (String "$0splice2")), ([4:45-46], (Lvar ([4:45-46], $0splice2))));
+                                                             (([4:50-53], (String "$0splice3")), ([4:50-53], (Lvar ([4:50-53], $0splice3))));
+                                                             (([4:8-60], (String "$0splice4")), ([4:8-60], (Lvar ([4:8-60], $0splice4))))]
+                                                           ))));
+                                                       ((SFlit_str ([4:8-60], "functions")),
+                                                        ([4:8-60], (ValCollection (Vec, None, [([4:50-53], (FunctionPointer ((FP_id ([4:50-53], "\\foo")), [])))]))));
+                                                       ((SFlit_str ([4:8-60], "static_methods")), ([4:8-60], (ValCollection (Vec, None, []))))]));
                                                  ([4:8-60],
                                                   (Lfun (
                                                      { f_span = [4:8-60]; 

@@ -14,5 +14,5 @@ File "void_return_errors3.php", line 8, characters 14-14:
 Typing error (Typing[4110])
   File "void_return_errors3.php", line 8, characters 14-14:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 20, characters 6-43:
+  File "expr_tree.hhi", line 24, characters 6-43:
   But got `dynamic` because it is an unenforceable type

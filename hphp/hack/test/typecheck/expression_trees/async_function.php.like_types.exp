@@ -8,5 +8,5 @@ File "async_function.php", line 22, characters 8-16:
 Typing error (Typing[4110])
   File "async_function.php", line 22, characters 8-16:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 48, characters 6-34:
+  File "expr_tree.hhi", line 52, characters 6-34:
   But got `dynamic` because it is an unenforceable type

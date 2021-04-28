@@ -51,11 +51,16 @@
                                                       (SFlit_str ([4:8-26], "start_column")), ([4:8-26], (Int "7"))); (
                                                       (SFlit_str ([4:8-26], "end_column")), ([4:8-26], (Int "25")))]));
                                                  ([4:8-26],
-                                                  (KeyValCollection (Dict, None,
-                                                     [(([4:8-9], (String "$0splice0")), ([4:8-9], (Lvar ([4:8-9], $0splice0))));
-                                                       (([4:12-14], (String "$0splice1")), ([4:12-14], (Lvar ([4:12-14], $0splice1))));
-                                                       (([4:19-25], (String "$0splice2")), ([4:19-25], (Lvar ([4:19-25], $0splice2))))]
-                                                     )));
+                                                  (Shape
+                                                     [((SFlit_str ([4:8-26], "splices")),
+                                                       ([4:8-26],
+                                                        (KeyValCollection (Dict, None,
+                                                           [(([4:8-9], (String "$0splice0")), ([4:8-9], (Lvar ([4:8-9], $0splice0))));
+                                                             (([4:12-14], (String "$0splice1")), ([4:12-14], (Lvar ([4:12-14], $0splice1))));
+                                                             (([4:19-25], (String "$0splice2")), ([4:19-25], (Lvar ([4:19-25], $0splice2))))]
+                                                           ))));
+                                                       ((SFlit_str ([4:8-26], "functions")), ([4:8-26], (ValCollection (Vec, None, []))));
+                                                       ((SFlit_str ([4:8-26], "static_methods")), ([4:8-26], (ValCollection (Vec, None, []))))]));
                                                  ([4:8-26],
                                                   (Lfun (
                                                      { f_span = [4:8-26]; 

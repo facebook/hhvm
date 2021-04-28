@@ -2,13 +2,13 @@ File "splice_err4.php", line 7, characters 15-15:
 Typing error (Typing[4110])
   File "splice_err4.php", line 7, characters 15-15:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 20, characters 6-43:
+  File "expr_tree.hhi", line 24, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "splice_err4.php", line 13, characters 13-13:
 Typing error (Typing[4110])
   File "splice_err4.php", line 13, characters 13-13:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 20, characters 6-43:
+  File "expr_tree.hhi", line 24, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "splice_err4.php", line 13, characters 17-21:
 Typing error (Typing[4110])
@@ -18,7 +18,7 @@ Typing error (Typing[4110])
   But got `int`
 File "splice_err4.php", line 13, characters 19-20:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 142, characters 5-35:
+  File "expr_tree.hhi", line 146, characters 5-35:
   Expected `Spliceable<Code, mixed, [unresolved]>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

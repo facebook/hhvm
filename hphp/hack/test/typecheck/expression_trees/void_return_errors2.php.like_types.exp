@@ -2,7 +2,7 @@ File "void_return_errors2.php", line 7, characters 23-29:
 Typing error (Typing[4110])
   File "void_return_errors2.php", line 7, characters 23-29:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 41, characters 38-76:
+  File "expr_tree.hhi", line 45, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "void_return_errors2.php", line 7, characters 23-29:
 You cannot return a value (Typing[4084])

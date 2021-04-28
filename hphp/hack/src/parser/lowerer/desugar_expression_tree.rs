@@ -6,7 +6,7 @@ use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, NodeMut, Visitor, VisitorMut},
     ast,
-    ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Stmt, Stmt_},
+    ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
     ast_defs::*,
     file_info,
     pos::Pos,
@@ -33,9 +33,13 @@ use oxidized::{
 ///     // At runtime, expression tree visitors know the position of the literal.
 ///     shape('path' => 'whatever.php', 'start_line' => 123, ...),
 ///
-///     // Pass the splices outside of the visitor, so visitors can access the
-///     // spliced values without having to re-run the visit function.
-///     dict['$0splice0' => $0splice0, '$0splice1' => $0splice1],
+///     // We provide metadata of values used inside the visitor, so users can access
+///     // spliced or called values without having to re-run the visit method.
+///     shape(
+///       'splices' => dict['$0splice0' => $0splice0, '$0splice1' => $0splice1],
+///       'functions' => vec[foo<>],
+///       'static_methods' => vec[],
+///     )
 ///
 ///     // The visit function itself. Visitors define what they want to do when
 ///     // they see each piece of syntax. They might build an AST, or construct a
@@ -60,6 +64,10 @@ use oxidized::{
 pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
     let visitor_name = hint_name(hint);
 
+    // Extract calls to functions and static methods before any
+    // desugaring occurs.
+    let (functions, static_methods) = extract_calls_as_fun_ptrs(&e);
+
     virtualize_expr_types(&visitor_name, &mut e)?;
     virtualize_void_returns(&visitor_name, &mut e);
     virtualize_expr_calls(&visitor_name, &mut e)?;
@@ -68,20 +76,12 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
     let splice_count = extracted_splices.len();
     let et_literal_pos = e.0.clone();
 
-    // Create dict of spliced values
-    let key_value_pairs = extracted_splices
-        .iter()
-        .enumerate()
-        .map(|(i, expr)| {
-            let key = Expr::new(
-                expr.0.clone(),
-                Expr_::String(BString::from(temp_lvar_string(i))),
-            );
-            let value = temp_lvar(&expr.0, i);
-            (key, value)
-        })
-        .collect();
-    let spliced_dict = dict_literal(et_literal_pos.clone(), key_value_pairs);
+    let metadata = maketree_metadata(
+        &et_literal_pos,
+        &extracted_splices,
+        functions,
+        static_methods,
+    );
 
     // Create assignments of extracted splices
     // `$0splice0 = spliced_expr0;`
@@ -146,7 +146,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             "makeTree",
             vec![
                 exprpos(&et_literal_pos),
-                spliced_dict,
+                metadata,
                 visitor_lambda,
                 inferred_type,
             ],
@@ -526,17 +526,10 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
                         }
 
                         let pos = sid.0.clone();
-                        let fp = Expr::new(
-                            pos.clone(),
-                            Expr_::FunctionPointer(Box::new((
-                                ast::FunctionPtrId::FPId((**sid).clone()),
-                                vec![],
-                            ))),
-                        );
                         let callee = mk_splice(static_meth_call(
                             self.visitor_name,
                             "liftSymbol",
-                            vec![fp],
+                            vec![global_func_ptr(&sid)],
                             &pos,
                         ));
 
@@ -564,14 +557,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
                                 "Expression trees only support function calls and static method calls on named classes.".into()));
                         };
 
-                        let fp = Expr::new(
-                            pos.clone(),
-                            Expr_::FunctionPointer(Box::new((
-                                aast::FunctionPtrId::FPClassConst(cid.clone(), s.clone()),
-                                vec![],
-                            ))),
-                        );
-
+                        let fp = static_meth_ptr(&pos, &cid, s);
                         let callee = mk_splice(static_meth_call(
                             self.visitor_name,
                             "liftSymbol",
@@ -972,21 +958,25 @@ fn int_literal(pos: Pos, i: usize) -> Expr {
 fn vec_literal(items: Vec<Expr>) -> Expr {
     let positions: Vec<_> = items.iter().map(|x| &x.0).collect();
     let position = merge_positions(&positions);
+    vec_literal_with_pos(&position, items)
+}
+
+fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
     let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
     Expr::new(
-        position.clone(),
-        Expr_::Collection(Box::new((make_id(position, "vec"), None, fields))),
+        pos.clone(),
+        Expr_::Collection(Box::new((make_id(pos.clone(), "vec"), None, fields))),
     )
 }
 
-fn dict_literal(pos: Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
+fn dict_literal(pos: &Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
     let fields = key_value_pairs
         .into_iter()
         .map(|(k, v)| ast::Afield::AFkvalue(k, v))
         .collect();
     Expr::new(
         pos.clone(),
-        Expr_::Collection(Box::new((make_id(pos, "dict"), None, fields))),
+        Expr_::Collection(Box::new((make_id(pos.clone(), "dict"), None, fields))),
     )
 }
 
@@ -1134,6 +1124,65 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
     }
 }
 
+/// Find all the calls in expression `e` and return a vec of the
+/// global function pointers and a vec of static method pointers.
+///
+/// For example, given the expression tree literal:
+///
+///     $et = Code`foo() + Bar::baz()`;
+///
+/// Our first vec contains foo<> and our second contains Bar::baz<>.
+fn extract_calls_as_fun_ptrs(e: &Expr) -> (Vec<Expr>, Vec<Expr>) {
+    let mut visitor = CallExtractor {
+        functions: vec![],
+        static_methods: vec![],
+    };
+    visitor
+        .visit_expr(&mut (), e)
+        .expect("CallExtractor should not error");
+
+    (visitor.functions, visitor.static_methods)
+}
+
+struct CallExtractor {
+    functions: Vec<Expr>,
+    static_methods: Vec<Expr>,
+}
+
+impl<'ast> Visitor<'ast> for CallExtractor {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &Expr) -> Result<(), ()> {
+        use aast::Expr_::*;
+        match &e.1 {
+            // Don't recurse into splices.
+            ETSplice(_) => {
+                return Ok(());
+            }
+
+            Call(call) => {
+                let (recv, _, _, _) = &**call;
+                match &recv.1 {
+                    Id(sid) => {
+                        self.functions.push(global_func_ptr(&sid));
+                    }
+                    ClassConst(cc) => {
+                        let (ref cid, ref s) = **cc;
+                        self.static_methods.push(static_meth_ptr(&recv.0, cid, s));
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        };
+        e.recurse(env, self)
+    }
+}
+
 fn temp_lvar_string(num: usize) -> String {
     format!("$0splice{}", num.to_string())
 }
@@ -1237,4 +1286,66 @@ fn strip_ns(name: &str) -> &str {
         Some('\\') => &name[1..],
         _ => name,
     }
+}
+
+/// Return a shape literal that describes the values inside this
+/// expression tree literal. For example, given the expression tree:
+///
+///     $et = Code`${ $x } + foo() + Bar::baz()`;
+///
+/// The metadata is:
+///
+///     shape(
+///       // Simplified: We actually use a temporary variable whose value is $x.
+///       'splices' => dict['$0splice0' => $x],
+///
+///       'functions' => vec[foo<>],
+///       'static_methods' => vec[Bar::baz<>],
+///     )
+fn maketree_metadata(
+    pos: &Pos,
+    splices: &[Expr],
+    functions: Vec<Expr>,
+    static_methods: Vec<Expr>,
+) -> Expr {
+    let key_value_pairs = splices
+        .iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            let key = Expr::new(
+                expr.0.clone(),
+                Expr_::String(BString::from(temp_lvar_string(i))),
+            );
+            let value = temp_lvar(&expr.0, i);
+            (key, value)
+        })
+        .collect();
+    let splices_dict = dict_literal(pos, key_value_pairs);
+
+    shape_literal(
+        pos,
+        vec![
+            ("splices", splices_dict),
+            ("functions", vec_literal_with_pos(&pos, functions)),
+            ("static_methods", vec_literal_with_pos(&pos, static_methods)),
+        ],
+    )
+}
+
+fn global_func_ptr(sid: &Sid) -> Expr {
+    let pos = sid.0.clone();
+    Expr::new(
+        pos.clone(),
+        Expr_::FunctionPointer(Box::new((ast::FunctionPtrId::FPId(sid.clone()), vec![]))),
+    )
+}
+
+fn static_meth_ptr(pos: &Pos, cid: &ClassId, meth: &Pstring) -> Expr {
+    Expr::new(
+        pos.clone(),
+        Expr_::FunctionPointer(Box::new((
+            aast::FunctionPtrId::FPClassConst(cid.clone(), meth.clone()),
+            vec![],
+        ))),
+    )
 }

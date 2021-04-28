@@ -47,10 +47,15 @@
                                                       (SFlit_str ([4:8-20], "start_column")), ([4:8-20], (Int "7"))); (
                                                       (SFlit_str ([4:8-20], "end_column")), ([4:8-20], (Int "19")))]));
                                                  ([4:8-20],
-                                                  (KeyValCollection (Dict, None,
-                                                     [(([4:9-10], (String "$0splice0")), ([4:9-10], (Lvar ([4:9-10], $0splice0))));
-                                                       (([4:13-15], (String "$0splice1")), ([4:13-15], (Lvar ([4:13-15], $0splice1))))]
-                                                     )));
+                                                  (Shape
+                                                     [((SFlit_str ([4:8-20], "splices")),
+                                                       ([4:8-20],
+                                                        (KeyValCollection (Dict, None,
+                                                           [(([4:9-10], (String "$0splice0")), ([4:9-10], (Lvar ([4:9-10], $0splice0))));
+                                                             (([4:13-15], (String "$0splice1")), ([4:13-15], (Lvar ([4:13-15], $0splice1))))]
+                                                           ))));
+                                                       ((SFlit_str ([4:8-20], "functions")), ([4:8-20], (ValCollection (Vec, None, []))));
+                                                       ((SFlit_str ([4:8-20], "static_methods")), ([4:8-20], (ValCollection (Vec, None, []))))]));
                                                  ([4:8-20],
                                                   (Lfun (
                                                      { f_span = [4:8-20]; 

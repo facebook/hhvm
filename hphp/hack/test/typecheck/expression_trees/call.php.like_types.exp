@@ -2,11 +2,11 @@ File "call.php", line 12, characters 20-22:
 Typing error (Typing[4110])
   File "call.php", line 12, characters 20-22:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 48, characters 6-34:
+  File "expr_tree.hhi", line 52, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "call.php", line 12, characters 24-28:
 Typing error (Typing[4110])
   File "call.php", line 12, characters 24-28:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 34, characters 5-45:
+  File "expr_tree.hhi", line 38, characters 5-45:
   But got `dynamic` because it is an unenforceable type

@@ -7,7 +7,11 @@ class Code {
 
   public static function makeTree<TVisitor as Code, TInfer>(
     ?ExprPos $pos,
-    dict<string, mixed> $spliced_values,
+    shape(
+      'splices' => dict<string, mixed>,
+      'functions' => vec<mixed>,
+      'static_methods' => vec<mixed>,
+    ) $metadata,
     (function(TVisitor): Code::TAst) $ast,
     ExprTreeInferredType<TInfer> $null,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
@@ -153,7 +157,11 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   implements Spliceable<TVisitor, TResult, TInfer> {
   public function __construct(
     private ?ExprPos $pos,
-    private dict<string, mixed> $spliced_values,
+    private shape(
+      'splices' => dict<string, mixed>,
+      'functions' => vec<mixed>,
+      'static_methods' => vec<mixed>,
+    ) $metadata,
     private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
   ) {}

@@ -90,7 +90,18 @@ ExternalProject_add(
     ${CMAKE_COMMAND} -DCOMPONENT=lib -P cmake_install.cmake --config ${CMAKE_BUILD_TYPE}
 )
 ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
-add_dependencies(bundled_folly boost fmt jemalloc libsodium zstd double-conversion)
+set(
+  FOLLY_DEPS
+  boost
+  double-conversion
+  fmt
+  libsodium
+  jemalloc
+  zstd
+)
+add_dependencies(bundled_folly ${FOLLY_DEPS})
+add_library(folly_deps INTERFACE)
+target_link_libraries(folly_deps INTERFACE ${FOLLY_DEPS})
 
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)
@@ -103,13 +114,7 @@ target_include_directories(
 target_link_libraries(folly
   INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
-  # referred to by folly's headers, so anything using folly needs to find them
-  boost
-  double-conversion
-  fmt
-  libsodium
-  jemalloc
-  zstd
+  folly_deps
 )
 
 if(UNIX AND NOT APPLE)

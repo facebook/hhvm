@@ -369,8 +369,6 @@ CoeffectsConfig::toStringList(const StaticCoeffects data) {
   for (auto it = getCapabilityVector().rbegin();
        it != getCapabilityVector().rend();
        it++) {
-    FTRACE(5, "Searching: current: {:016b}, looking at {}: {:016b}\n",
-           current, it->first, it->second);
     if ((current & it->second) == it->second) {
       capabilities.insert(it->first);
       current &= (~it->second);
@@ -378,9 +376,6 @@ CoeffectsConfig::toStringList(const StaticCoeffects data) {
   }
 
   always_assert(current == 0);
-
-  FTRACE(3, "Converting {:016b} to string, found capabilities: '{}', ",
-         data.value(), folly::join(", ", capabilities));
 
   std::vector<std::string> result;
   for (auto const& [name, caps] : s_coeffects_to_capabilities) {
@@ -396,8 +391,6 @@ CoeffectsConfig::toStringList(const StaticCoeffects data) {
   // Alphabetically sort them so that the contents of the error messages
   // always appear in the same order
   std::sort(result.begin(), result.end());
-
-  FTRACE(3, "coeffects: {}\n", folly::join(" ", result));
   return result;
 }
 

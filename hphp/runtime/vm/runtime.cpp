@@ -193,11 +193,11 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
 }
 
 void throwMustBeReadOnlyException(const Class* cls, const StringData* propName) {
-  throw_cannot_write_non_readonly_prop(cls->name()->data(), propName->data());                
+  throw_cannot_write_non_readonly_prop(cls->name()->data(), propName->data());
 }
 
 void throwMustBeMutableException(const Class* cls, const StringData* propName) {
-  throw_must_be_mutable(cls->name()->data(), propName->data());                
+  throw_must_be_mutable(cls->name()->data(), propName->data());
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
@@ -305,6 +305,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
     }),
     provided.toString()
   );
+
+  FTRACE_MOD(Trace::coeffects, 1, "{}\n {:016b} -> {:016b}\n",
+             errMsg, provided.value(), required.value());
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {

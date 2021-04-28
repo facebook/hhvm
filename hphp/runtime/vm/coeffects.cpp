@@ -58,7 +58,6 @@ const folly::Optional<std::string> StaticCoeffects::toString() const {
 
 RuntimeCoeffects StaticCoeffects::toAmbient() const {
   auto const val = m_data - locals();
-  FTRACE(5, "Converting {:016b} to ambient {:016b}\n", m_data, val);
   return RuntimeCoeffects::fromValue(val);
 }
 
@@ -68,7 +67,6 @@ RuntimeCoeffects StaticCoeffects::toRequired() const {
   // => m_data - locals + 2 * locals
   // => m_data + locals
   auto const val = m_data + locals();
-  FTRACE(5, "Converting {:016b} to required {:016b}\n", m_data, val);
   return RuntimeCoeffects::fromValue(val);
 }
 

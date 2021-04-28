@@ -168,7 +168,9 @@ struct AttributeFilterData {
     assertx(attrFilters);
     AttributeFilterData filters;
     IterateV(attrFilters, [&](TypedValue v) {
-      if (!tvIsArrayLike(v)) return;
+      if (!tvIsArrayLike(v)) {
+        return;
+      }
       filters.m_attrs.insert(createAttrFilterFromShape(v.m_data.parr));
     });
     return filters;

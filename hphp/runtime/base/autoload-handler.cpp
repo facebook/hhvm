@@ -82,7 +82,7 @@ FactsStore* getFactsForRequest() {
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
-    Logger::Error(
+    Logger::Info(
         "Failed to update native autoloader, not natively autoloading %s. %s\n",
         repoRoot.generic().c_str(),
         e.what());

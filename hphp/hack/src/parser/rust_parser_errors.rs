@@ -104,7 +104,7 @@ impl UnstableFeatures {
             UnstableFeatures::UnionIntersectionTypeHints => Unstable,
             UnstableFeatures::ClassLevelWhere => Unstable,
             UnstableFeatures::ExpressionTrees => Unstable,
-            UnstableFeatures::EnumAtom => Unstable,
+            UnstableFeatures::EnumAtom => Preview,
             UnstableFeatures::IFC => Unstable,
             UnstableFeatures::Readonly => Preview,
         }

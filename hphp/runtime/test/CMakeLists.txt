@@ -17,7 +17,7 @@ embed_all_systemlibs(hphp_runtime_test "${CMAKE_CURRENT_BINARY_DIR}/../.."
 
 auto_source_group("hphp_runtime_test" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${HEADER_SOURCES})
-add_dependencies(hphp_runtime_test hphp_system)
+target_link_libraries(hphp_runtime_test hphp_system)
 if (ENABLE_COTIRE)
   cotire(hphp_runtime_test)
 endif()

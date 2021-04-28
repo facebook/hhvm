@@ -26,6 +26,6 @@ endif()
 HHVM_PUBLIC_HEADERS(zend ${HEADER_SOURCES})
 
 add_library(hphp_zend STATIC ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
-add_dependencies(hphp_zend hphp_util)
+target_link_libraries(hphp_zend hphp_util)
 auto_source_group("hphp_zend" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})

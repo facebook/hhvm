@@ -42,7 +42,7 @@ add_object_library(hphp_runtime_ext
   ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
-add_dependencies(hphp_runtime_ext hphp_runtime_static)
+target_link_libraries(hphp_runtime_ext hphp_runtime_static hphp_system)
 object_library_ld_link_libraries(hphp_runtime_ext hphp_zend ${HRE_LINK_LIBRARIES})
 object_library_hphp_link(hphp_runtime_ext)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_ext)

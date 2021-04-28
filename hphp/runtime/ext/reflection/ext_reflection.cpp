@@ -866,9 +866,9 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
   return retTypeInfo.toArray();
 }
 
-static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
-  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  auto const& info = func->getReifiedGenericsInfo();
+namespace {
+
+const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
   VArrayInit arr(info.m_typeParamInfo.size());
   for (auto tparam : info.m_typeParamInfo) {
     DArrayInit tparamArr(3);
@@ -878,6 +878,13 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
     arr.append(tparamArr.toArray());
   }
   return arr.toArray();
+}
+
+} // namespace
+
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return reified_generics_info_to_array(func->getReifiedGenericsInfo());
 }
 
 const StaticString s_pure("pure");
@@ -1586,6 +1593,11 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
   return ret;
 }
 
+static Array HHVM_METHOD(ReflectionClass, getReifiedTypeParamInfo) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return reified_generics_info_to_array(cls->getReifiedGenericsInfo());
+}
+
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getClassPropertyInfo,
@@ -2230,6 +2242,8 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionClass, getAttributesNamespaced);
     HHVM_ME(ReflectionClass, getAttributesRecursiveNamespaced);
+
+    HHVM_ME(ReflectionClass, getReifiedTypeParamInfo);
 
     HHVM_STATIC_ME(ReflectionClass, getClassPropertyInfo);
     HHVM_ME(ReflectionClass, getDynamicPropertyInfos);

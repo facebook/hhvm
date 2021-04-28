@@ -1,0 +1,30 @@
+vec(0) {
+}
+vec(0) {
+}
+vec(3) {
+  dict(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  dict(3) {
+    ["is_reified"]=>
+    bool(false)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  dict(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(true)
+    ["is_warn"]=>
+    bool(true)
+  }
+}

@@ -2153,6 +2153,9 @@ class ReflectionClass implements Reflector {
   public function getAttributesRecursiveNamespaced(
   ): darray<string, varray<mixed>>;
 
+  <<__Native>>
+  public function getReifiedTypeParamInfo()[]: varray;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

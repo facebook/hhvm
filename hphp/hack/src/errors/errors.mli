@@ -1602,6 +1602,8 @@ val method_is_not_dynamically_callable :
   error option ->
   unit
 
+val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit
+
 val property_is_not_enforceable :
   Pos.t -> string -> string -> Pos_or_decl.t * string -> unit
 

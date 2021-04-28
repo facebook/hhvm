@@ -1,0 +1,8 @@
+File "top_level_1.bad.php", line 9, characters 19-21:
+Method  `bar` in class `C` is not dynamically callable. (Typing[4402])
+  File "top_level_1.bad.php", line 10, characters 9-10:
+  Invalid argument
+  File "top_level_1.bad.php", line 5, characters 14-19:
+  Expected `A<int>`
+  File "top_level_1.bad.php", line 9, characters 30-31:
+  But got `dynamic` because method must be callable in a dynamic context

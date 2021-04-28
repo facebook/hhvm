@@ -5269,6 +5269,14 @@ let parent_implements_dynamic
     else
       "" )
 
+let function_is_not_dynamically_callable pos function_name error =
+  let function_name = Markdown_lite.md_codify (strip_ns function_name) in
+  let nested_error_reason = claim_as_reason error.claim :: error.reasons in
+  add_list
+    (Typing.err_code Typing.ImplementsDynamic)
+    (pos, "Function  " ^ function_name ^ " is not dynamically callable.")
+    nested_error_reason
+
 let method_is_not_dynamically_callable
     pos
     method_name

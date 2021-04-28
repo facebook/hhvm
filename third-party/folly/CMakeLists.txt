@@ -28,8 +28,9 @@ else()
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 
-include(ProcessorCount)
-ProcessorCount(CPU_COUNT)
+if ("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
+  set(PARALLEL_FLAG "--parallel")
+endif()
 
 ExternalProject_add(
   bundled_folly
@@ -65,10 +66,7 @@ ExternalProject_add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
-# Prefered, but needs CMake 3.12 or above. Revist when Ubuntu 18.04 support is removed
-#    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly --parallel
-# Legacy:
-    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly -- -j ${CPU_COUNT}
+    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
   INSTALL_COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_LIST_DIR}/include"

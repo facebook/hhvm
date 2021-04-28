@@ -28,10 +28,18 @@ else()
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 
-if ("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
+if("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
   set(PARALLEL_FLAG "--parallel")
 endif()
 
+set(FOLLY_CXXFLAGS "-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include")
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+  if(IS_X64)
+    message(STATUS "Enabling SSE 4.2 for bundled folly")
+    set(FOLLY_CXXFLAGS "${FOLLY_CXXFLAGS} -msse4.2")
+  endif()
+endif()
 ExternalProject_add(
   bundled_folly
   ${FOLLY_SOURCE_ARGS}
@@ -40,7 +48,7 @@ ExternalProject_add(
     "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   LIST_SEPARATOR "!!"
   CMAKE_ARGS
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include"
+    "-DCMAKE_CXX_FLAGS=${FOLLY_CXXFLAGS}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
     -DWITHOUT_GFLAGS=ON
     -DWITHOUT_LIBLZMA=ON

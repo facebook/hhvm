@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/jit/tc.h"
 
-#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+# Make `get_target_property()` on a target that does not exist a fatal error
+# https://cmake.org/cmake/help/v3.0/policy/CMP0045.html
+cmake_policy(SET CMP0045 NEW)
+# ditto for add_dependencies(): https://cmake.org/cmake/help/v3.0/policy/CMP0046.html
+cmake_policy(SET CMP0046 NEW)
 
 # This needs to be done before any languages are enabled or
 # projects are created.

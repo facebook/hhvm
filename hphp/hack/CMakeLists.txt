@@ -109,7 +109,7 @@ function(invoke_dune name target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
-  add_dependencies(${name} ocaml rustc cargo zstd)
+  add_dependencies(${name} rustc cargo zstd)
   if (NOT SKIP_OPAM)
     add_dependencies(${name} opam_setup)
   endif()

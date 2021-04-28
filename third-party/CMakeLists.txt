@@ -37,10 +37,6 @@ endfunction()
 
 ##### easy stuff #####
 
-if(JEMALLOC_ENABLED)
-  list(APPEND THIRD_PARTY_MODULES jemalloc)
-endif()
-
 list(APPEND THIRD_PARTY_MODULES forks/libmbfl)
 list(APPEND EXTRA_INCLUDE_PATHS
   "${TP_DIR}/forks/libmbfl"
@@ -55,6 +51,8 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/timelib")
 add_subdirectory(double-conversion)
 add_subdirectory(boost)
 add_subdirectory(fmt)
+add_subdirectory(jemalloc)
+add_subdirectory(libsodium)
 add_subdirectory(zstd)
 
 add_subdirectory(folly)
@@ -137,9 +135,6 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
-##### libsodium #####
-
-add_subdirectory(libsodium)
 
 ##### rustc #####
 

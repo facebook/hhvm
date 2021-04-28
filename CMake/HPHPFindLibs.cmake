@@ -432,6 +432,7 @@ macro(hphp_link target)
 
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
+  target_link_libraries(${target} jemalloc)
   target_link_libraries(${target} wangle)
   target_link_libraries(${target} brotli)
   target_link_libraries(${target} libcompile_ffi_stubs)

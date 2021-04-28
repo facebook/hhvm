@@ -82,7 +82,6 @@ if (ENABLE_COTIRE)
       "${LIBC_INCLUDE_PATH}/resolv.h"
       "${ARCH_INCLUDE_PATH}"
       "${CCLIENT_INCLUDE_PATH}"
-      "${JEMALLOC_INCLUDE_DIR}/jemalloc"
       "${LIBPNG_INCLUDE_DIRS}/png.h"
       "${LDAP_INCLUDE_DIR}/ldap.h"
       "${LIBSQLITE3_INCLUDE_DIR}/sqlite3ext.h"
@@ -115,7 +114,6 @@ add_definitions("-DUSE_CMAKE")
 
 enable_language(ASM)
 
-link_libraries(folly)
 if (NOT PCRE_LIBRARY)
   link_libraries(pcre)
 endif()

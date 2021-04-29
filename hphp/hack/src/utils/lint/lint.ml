@@ -74,3 +74,20 @@ let shape_idx_access_required_field field_pos name =
     ^ Markdown_lite.md_codify name
     ^ " is required to exist in the shape. Consider using a subscript-expression instead, such as "
     ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']") )
+
+let opt_closed_shape_idx_missing_field method_name field_pos =
+  let msg =
+    match method_name with
+    | Some method_name ->
+      "You are calling "
+      ^ Markdown_lite.md_codify ("Shapes::" ^ method_name ^ "()")
+      ^ " on a field known to not exist, with a closed optional shape."
+    | None ->
+      "You are indexing a closed optional shape with"
+      ^ " a field known to not exist."
+  in
+  add
+    (Codes.to_enum Codes.OptClosedShapeIdxMissingField)
+    Lint_warning
+    field_pos
+    msg

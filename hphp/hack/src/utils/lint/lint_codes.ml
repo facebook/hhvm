@@ -11,7 +11,8 @@ type t =
   | LowercaseConstant [@value 5001]
   | UseCollectionLiteral
   | StaticString
-  | ShapeIdxRequiredField [@value 5005] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+  | ShapeIdxRequiredField [@value 5005]
+  | OptClosedShapeIdxMissingField [@value 5006] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 [@@deriving enum]
 
 let err_code = to_enum

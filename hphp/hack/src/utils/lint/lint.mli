@@ -49,6 +49,8 @@ val static_string : ?no_consts:bool -> Pos.t -> unit
 
 val shape_idx_access_required_field : Pos.t -> string -> unit
 
+val opt_closed_shape_idx_missing_field : string option -> Pos.t -> unit
+
 val do_ : (unit -> 'a) -> Pos.t t list * 'a
 
 val add_lint : Pos.t t -> unit

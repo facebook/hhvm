@@ -1,178 +1,162 @@
 plus<-10INF
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 19
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 27
 NAN
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 20
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 28
 
-Notice: Implicit null to int conversion for math in %s/literals.php on line 20
+Notice: Implicit null to int conversion for math in %s/literals.php on line 28
 0
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 21
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 29
 
-Notice: Implicit string to int conversion for math in %s/literals.php on line 21
+Notice: Implicit string to int conversion for math in %s/literals.php on line 29
 1
-Notice: Implicit object to int conversion for math in %s/literals.php on line 22
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 22
--INF>
+Object of class Foo could not be converted to int in %s/literals.php on line 31
+>
 pluseq<
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 32
-
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 33
-
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 34
-
-Notice: Implicit string to int conversion for math in %s/literals.php on line 35
-
-Notice: Implicit object to int conversion for math in %s/literals.php on line 36
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 36
-NAN>
-minus<10-INF
 Notice: Implicit bool to int conversion for math in %s/literals.php on line 45
-NAN
+
 Notice: Implicit bool to int conversion for math in %s/literals.php on line 46
 
-Notice: Implicit null to int conversion for math in %s/literals.php on line 46
-0
 Notice: Implicit resource to int conversion for math in %s/literals.php on line 47
 
-Notice: Implicit string to int conversion for math in %s/literals.php on line 47
+Notice: Implicit string to int conversion for math in %s/literals.php on line 48
+
+Object of class Foo could not be converted to int in %s/literals.php on line 50
+NAN>
+minus<10-INF
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 62
+NAN
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 63
+
+Notice: Implicit null to int conversion for math in %s/literals.php on line 63
+0
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/literals.php on line 64
 1
-Notice: Implicit object to int conversion for math in %s/literals.php on line 48
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 48
-INF>
+Object of class Foo could not be converted to int in %s/literals.php on line 66
+>
 minuseq<
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 58
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 79
 
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 59
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 80
 
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 60
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 81
 
-Notice: Implicit string to int conversion for math in %s/literals.php on line 61
+Notice: Implicit string to int conversion for math in %s/literals.php on line 82
 
-Notice: Implicit object to int conversion for math in %s/literals.php on line 62
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 62
+Object of class Foo could not be converted to int in %s/literals.php on line 84
 NAN>
 mul<0INF
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 71
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 96
 NAN
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 72
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 97
 
-Notice: Implicit null to int conversion for math in %s/literals.php on line 72
+Notice: Implicit null to int conversion for math in %s/literals.php on line 97
 0
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 73
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 98
 
-Notice: Implicit string to int conversion for math in %s/literals.php on line 73
+Notice: Implicit string to int conversion for math in %s/literals.php on line 98
 0
-Notice: Implicit object to int conversion for math in %s/literals.php on line 74
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 74
--INF>
+Object of class Foo could not be converted to int in %s/literals.php on line 100
+>
 muleq<
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 84
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 113
 
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 85
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 114
 
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 86
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 115
 
-Notice: Implicit string to int conversion for math in %s/literals.php on line 87
+Notice: Implicit string to int conversion for math in %s/literals.php on line 116
 
-Notice: Implicit object to int conversion for math in %s/literals.php on line 88
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 88
+Object of class Foo could not be converted to int in %s/literals.php on line 118
 NAN>
 div<00
-Notice: Implicit null to int conversion for math in %s/literals.php on line 97
+Notice: Implicit null to int conversion for math in %s/literals.php on line 130
 
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 97
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 130
 0
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 98
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 131
 NAN
-Notice: Implicit string to int conversion for math in %s/literals.php on line 99
+Notice: Implicit string to int conversion for math in %s/literals.php on line 132
 
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 99
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 132
 0
-Notice: Implicit object to int conversion for math in %s/literals.php on line 100
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 100
--INF>
+Object of class Foo could not be converted to int in %s/literals.php on line 134
+>
 diveq<
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 109
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 146
 
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 110
-
-Notice: Implicit string to int conversion for math in %s/literals.php on line 111
-
-Notice: Implicit object to int conversion for math in %s/literals.php on line 112
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 112
-NAN
-mod<0
-Notice: Implicit null to int conversion for math in %s/literals.php on line 120
-
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 120
-0
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 121
-0
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 122
-
-Notice: Implicit string to int conversion for math in %s/literals.php on line 122
-1
-Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 123
-
-Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 123
-0
-Notice: Implicit object to int conversion for math in %s/literals.php on line 124
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 124
-0>
-modeq<
-Notice: Implicit bool to int conversion for math in %s/literals.php on line 132
-
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 133
-
-Notice: Implicit string to int conversion for math in %s/literals.php on line 134
-
-Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 135
-
-Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 136
-
-Notice: Implicit object to int conversion for math in %s/literals.php on line 137
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 137
-0>
-pow<INFINF
-Notice: Implicit boolean to int conversion for math in %s/literals.php on line 146
-NAN
-Notice: Implicit boolean to int conversion for math in %s/literals.php on line 147
-
-Notice: Implicit null to int conversion for math in %s/literals.php on line 147
-1
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 148
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 147
 
 Notice: Implicit string to int conversion for math in %s/literals.php on line 148
-1
-Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 149
+
+Object of class Foo could not be converted to int in %s/literals.php on line 150
+NAN
+mod<0
+Notice: Implicit null to int conversion for math in %s/literals.php on line 161
+
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 161
 0
-Notice: Implicit object to int conversion for math in %s/literals.php on line 150
-
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 150
-1>
-poweq<
-Notice: Implicit boolean to int conversion for math in %s/literals.php on line 160
-
-Notice: Implicit boolean to int conversion for math in %s/literals.php on line 161
-
-Notice: Implicit resource to int conversion for math in %s/literals.php on line 162
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 162
+0
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 163
 
 Notice: Implicit string to int conversion for math in %s/literals.php on line 163
-
+1
 Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 164
 
-Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 165
-
+Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 164
+0
 Notice: Implicit object to int conversion for math in %s/literals.php on line 166
 
-Notice: Object of class Foo could not be converted to int in %s/literals.php on line 166
+Object of class Foo could not be converted to int in %s/literals.php on line 166
+>
+modeq<
+Notice: Implicit bool to int conversion for math in %s/literals.php on line 177
+
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 178
+
+Notice: Implicit string to int conversion for math in %s/literals.php on line 179
+
+Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 180
+
+Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 181
+
+Notice: Implicit object to int conversion for math in %s/literals.php on line 183
+
+Object of class Foo could not be converted to int in %s/literals.php on line 183
+0>
+pow<INFINF
+Notice: Implicit boolean to int conversion for math in %s/literals.php on line 195
+NAN
+Notice: Implicit boolean to int conversion for math in %s/literals.php on line 196
+
+Notice: Implicit null to int conversion for math in %s/literals.php on line 196
+1
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 197
+
+Notice: Implicit string to int conversion for math in %s/literals.php on line 197
+1
+Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 198
+0
+Notice: Implicit object to int conversion for math in %s/literals.php on line 200
+
+Object of class Foo could not be converted to int in %s/literals.php on line 200
+>
+poweq<
+Notice: Implicit boolean to int conversion for math in %s/literals.php on line 213
+
+Notice: Implicit boolean to int conversion for math in %s/literals.php on line 214
+
+Notice: Implicit resource to int conversion for math in %s/literals.php on line 215
+
+Notice: Implicit string to int conversion for math in %s/literals.php on line 216
+
+Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 217
+
+Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 218
+
+Notice: Implicit object to int conversion for math in %s/literals.php on line 220
+
+Object of class Foo could not be converted to int in %s/literals.php on line 220
 1>

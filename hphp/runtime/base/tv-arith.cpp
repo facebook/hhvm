@@ -153,9 +153,14 @@ TypedNum numericConvHelper(TypedValue cell) {
 
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);
-    case KindOfObject:
+    case KindOfObject: {
+      // do the conversion first as it often throws due to handling of the
+      // unconditional Object->num warning. Soon that should be an unconditional
+      // exception
+      const auto res = make_int(cell.m_data.pobj->toInt64());
       handleConvToIntNotice("object");
-      return make_int(cell.m_data.pobj->toInt64());
+      return res;
+    }
 
     case KindOfResource:
       handleConvToIntNotice("resource");

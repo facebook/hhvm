@@ -2,8 +2,16 @@
 
 class Foo {}
 
+function handler($_, $str, $file, $line) {
+  if (preg_match('/Object of class (.*) could not be converted to (float|int)/', $str)) {
+    throw new TypecastException($str." in $file on line $line");
+  }
+  return false;
+}
+
 <<__EntryPoint>>
 function main(): void {
+  set_error_handler(handler<>);
   plus();
   minus();
   mul();
@@ -19,7 +27,12 @@ function plus(): void {
   echo NAN + true;
   echo false + null;
   echo STDIN + "string";
-  echo new Foo() + -INF;
+  try {
+    echo new Foo() + -INF;
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+
   echo ">\n";
 
   $i = 1;
@@ -33,7 +46,11 @@ function plus(): void {
   $i += false;
   $i += STDIN;
   $i += "string";
-  $i += new Foo();
+  try {
+    $i += new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo ">\n";
 }
@@ -45,7 +62,11 @@ function minus(): void {
   echo NAN - true;
   echo false - null;
   echo STDIN - "string";
-  echo new Foo() - -INF;
+  try {
+    echo new Foo() - -INF;
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo ">\n";
 
   $i = 1;
@@ -59,7 +80,11 @@ function minus(): void {
   $i -= false;
   $i -= STDIN;
   $i -= "string";
-  $i -= new Foo();
+  try {
+    $i -= new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo ">\n";
 }
@@ -71,7 +96,11 @@ function mul(): void {
   echo NAN * true;
   echo false * null;
   echo STDIN * "string";
-  echo new Foo() * -INF;
+  try {
+    echo new Foo() * -INF;
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo ">\n";
 
   $i = 1;
@@ -85,7 +114,11 @@ function mul(): void {
   $i *= false;
   $i *= STDIN;
   $i *= "string";
-  $i *= new Foo();
+  try {
+    $i *= new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo ">\n";
 }
@@ -97,7 +130,11 @@ function div(): void {
   echo null / true;
   echo false / NAN;
   echo "string" / STDIN;
-  echo -INF / new Foo();
+  try {
+    echo -INF / new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo ">\n";
 
   $i = 1;
@@ -109,7 +146,11 @@ function div(): void {
   $i /= true;
   $i /= STDIN;
   $i /= "12string";
-  $i /= new Foo();
+  try {
+    $i /= new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo "\n";
 }
@@ -121,7 +162,11 @@ function mod(): void {
   echo false % NAN;
   echo STDIN % "12string";
   echo varray[42] % dict['foobar' => false];
-  echo -INF % new Foo();
+  try {
+    echo -INF % new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo ">\n";
 
   $i = 1;
@@ -134,7 +179,11 @@ function mod(): void {
   $i %= "12string";
   $i %= varray[42];
   $i %= dict['foobar' => false];
-  $i %= new Foo();
+  try {
+    $i %= new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo ">\n";
 }
@@ -147,7 +196,11 @@ function pow_(): void {
   echo false ** null;
   echo STDIN ** "string";
   echo varray[42] ** dict['foobar' => false];
-  echo new Foo() ** -INF;
+  try {
+    echo new Foo() ** -INF;
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo ">\n";
 
   $i = 1;
@@ -163,7 +216,11 @@ function pow_(): void {
   $i  **=  "string";
   $i  **=  varray[42];
   $i  **=  dict['foobar' => false];
-  $i  **=  new Foo();
+  try {
+    $i **= new Foo();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
   echo $i;
   echo ">\n";
 }

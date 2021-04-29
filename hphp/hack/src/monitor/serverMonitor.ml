@@ -27,46 +27,41 @@ open ServerMonitorUtils
 let log s ~tracker =
   Hh_logger.log ("[%s] " ^^ s) (Connection_tracker.log_id tracker)
 
+(** This module is to help using Unix "sendmsg" to handoff the client FD
+to the server. It's not entirely clear whether it's safe for us in the
+monitor to close the FD immediately after calling sendmsg, or whether
+we must wait until the server has actually received the FD upon recvmsg.
+
+We got reports from MacOs users that if the monitor closed the FD before
+the server had finished recvmsg, then the kernel thinks it was the last open
+descriptor for the pipe, and actually closes it; the server subsequently
+does recvmsg and reads on the FD and gets an EOF (even though it can write
+on the FD and succeed instead of getting EPIPE); the server subsequently
+closes its FD and a subsequent "select" by the client blocks forever.
+
+This module embodies three possible strategies, controlled by the hh.conf
+flag monitor_fd_close_delay:
+* Fd_close_immediate (monitor_fd_close_delay=0) is the traditional behavior of
+hack; it closes the FD immediately after calling sendmsg
+* Fd_close_after_time (monitor_fd_close_delay>0) is the behavior we implemented
+on MacOs since 2018, where monitor waits for the specified time delay, in seconds,
+after calling sendmsg before it closes the FD
+* Fd_close_upon_receipt (monitor_fd_close_delay=-1) is new behavior in 2021, where
+the monitor waits to close the FD until after the server has read it.
+
+We detect that the server has read it by having the server write the highest
+handoff number it has received to a "server_receipt_to_monitor_file", and the
+monitor polls this file to determine which handoff FD can be closed. It might
+be that the server receives two FD handoffs in quick succession, and the monitor
+only polls the file after the second, so the monitor treats the file as a
+"high water mark" and knows that it can close the specified FD plus all earlier ones.
+
+We did this protocol with a file because there aren't alternatives. If we tried
+instead to have the server send receipt over the monitor/server pipe, then it
+would deadlock if the monitor was also trying to handoff a subsequent FD.
+If we tried instead to have the server send receipt over the client/server pipe,
+then both monitor and client would be racing to see who receives that receipt first. *)
 module Sent_fds_collector = struct
-  (*
-   This module exists to fix an issue with libancillary (passing a file descriptor
-   to another process with sendmsg over Unix Domain Sockets) and certain operating
-   systems. It allows us to delay closing of a File Descriptor inside the Monitor
-   until it is safe to do so.
-
-   Normally:
-     Monitor sends client FD to Server process, and immediately closes the FD.
-     This is fine even if the Server is busy and hasn't "recv_fd" the FD yet
-     because this doesn't really "close" the file. The kernel still considers
-     it to be open by the receiving process. If the server closes the FD
-     then reads on the client will get an EOF. If the client closes the FD
-     then reads on the server will get an EOF.
-
-   Mac OS X:
-     EOF isn't showing up correctly on file descriptors passed between
-     processes.
-     When the Monitor closes the FD after sending it to the Server (and
-     before the Server receives it), the kernel thinks it is the last open
-     descriptor on the file and actually closes it. After the server
-     receieves the FD, it gets an EOF when reading from it (which it shouldn't
-     because the client is still there; aside: oddly enough, writing to it
-     succeeds instead of getting EPIPE). The server then closes that FD after
-     reading the EOF. Normally (as noted above) the client would read an
-     EOF after this. But (this is the bug) this EOF never shows up and the
-     client blocks forever on "select" instead.
-
-   To get around this problem, we want to close the FD in the monitor only
-   after the server has received it. Unfortunately, we don't actually
-   have a way to reliably detect that it has been received. So we just delay
-   closing by 2 seconds.
-
-   Note: It's not safe to detect the receiving by reading the
-   Hello message from the server (since it could/would be consumed
-   here instead of by the Client) nor by "select" (by a race condition
-   with the client, the select might miss the Hello, and could prevent
-   an EOF from being read by the server).
-   *)
-
   (** [sequence_number] is a monotonically increasing integer to identify which
   handoff message has been sent from monitor to server. The first sequence
   number is number 1. *)
@@ -804,10 +799,20 @@ struct
       HackEventLogger.lock_stolen lock_file;
       Exit.exit Exit_status.Lock_stolen
     );
+    let sequence_receipt_high_water_mark =
+      match env.server with
+      | ServerProcess.Alive process_data ->
+        let pid = process_data.ServerProcess.pid in
+        MonitorRpc.read_server_receipt_to_monitor_file
+          ~server_receipt_to_monitor_file:
+            (ServerFiles.server_receipt_to_monitor_file pid)
+        |> Option.value ~default:0
+      | _ -> 0
+    in
     let env = maybe_push_purgatory_clients env in
-    (* TODO(ljw): change the following once I implement receipts *)
+    (* The first sequence number we send is 1; hence, the default "0" will be a no-op *)
     let () =
-      Sent_fds_collector.collect_garbage ~sequence_receipt_high_water_mark:0
+      Sent_fds_collector.collect_garbage ~sequence_receipt_high_water_mark
     in
     let has_client = sleep_and_check socket in
     let env = update_status env monitor_config in

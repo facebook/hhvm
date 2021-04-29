@@ -51,6 +51,10 @@ let accept_client
     "[%s] got tracker handoff from monitor"
     (Connection_tracker.log_id tracker);
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  MonitorRpc.write_server_receipt_to_monitor_file
+    ~server_receipt_to_monitor_file:
+      (ServerFiles.server_receipt_to_monitor_file (Unix.getpid ()))
+    ~sequence_number_high_water_mark:msg.MonitorRpc.m2s_sequence_number;
   let t_got_client_fd = Unix.gettimeofday () in
   Hh_logger.log
     "[%s] got client_fd handoff from monitor"

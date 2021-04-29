@@ -380,14 +380,9 @@ using MethTabEntryPair = res::Func::MethTabEntryPair;
  * class with all unique derived classes, we will resolve the function
  * to a FuncFamily that contains references to all the possible
  * overriding-functions.
- *
- * Carefully pack it into 8 bytes, so that hphp_fast_map will use
- * F14VectorMap.
  */
 struct res::Func::FuncFamily {
   using PFuncVec = CompactVector<const MethTabEntryPair*>;
-  static_assert(sizeof(PFuncVec) == sizeof(uintptr_t),
-                "CompactVector must be layout compatible with a pointer");
 
   explicit FuncFamily(PFuncVec&& v) : m_v{std::move(v)} {}
   FuncFamily(FuncFamily&& o) noexcept : m_v(std::move(o.m_v)) {}
@@ -408,6 +403,21 @@ struct res::Func::FuncFamily {
 private:
   PFuncVec  m_v;
 };
+
+namespace {
+
+struct PFuncVecHasher {
+  size_t operator()(const FuncFamily::PFuncVec& v) const {
+    return folly::hash::hash_range(
+      v.begin(),
+      v.end(),
+      0,
+      pointer_hash<MethTabEntryPair>{}
+    );
+  }
+};
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -516,7 +526,10 @@ struct ClassInfo {
    * Invariant: methods on this class with AttrNoOverride or
    * AttrPrivate will not have an entry in this map.
    */
-  SStringToOneFastT<FuncFamily> methodFamilies;
+  SStringToOneFastT<FuncFamily*> methodFamilies;
+  // Resolutions to single entries do not require a FuncFamily (this
+  // saves space).
+  SStringToOneFastT<const MethTabEntryPair*> singleMethodFamilies;
 
   /*
    * Subclasses of this class, including this class itself.
@@ -1217,6 +1230,35 @@ struct Index::IndexData {
   // its mutations are left unchanged from the previous round.
   folly::ConcurrentHashMap<const php::Func*,
                            PublicSPropMutations> publicSPropMutations;
+
+  // All FuncFamilies. These are stored globally so we can avoid
+  // generating duplicates.
+  struct FuncFamilyPtrHasher {
+    using is_transparent = void;
+    size_t operator()(const std::unique_ptr<FuncFamily>& ff) const {
+      return PFuncVecHasher{}(ff->possibleFuncs());
+    }
+    size_t operator()(const FuncFamily::PFuncVec& pf) const {
+      return PFuncVecHasher{}(pf);
+    }
+  };
+  struct FuncFamilyPtrEquals {
+    using is_transparent = void;
+    bool operator()(const std::unique_ptr<FuncFamily>& a,
+                    const std::unique_ptr<FuncFamily>& b) const {
+      return a->possibleFuncs() == b->possibleFuncs();
+    }
+    bool operator()(const FuncFamily::PFuncVec& pf,
+                    const std::unique_ptr<FuncFamily>& ff) const {
+      return pf == ff->possibleFuncs();
+    }
+  };
+  folly_concurrent_hash_map_simd<
+    std::unique_ptr<FuncFamily>,
+    bool,
+    FuncFamilyPtrHasher,
+    FuncFamilyPtrEquals
+  > funcFamilies;
 
   /*
    * Map from interfaces to their assigned vtable slots, computed in
@@ -2841,32 +2883,36 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
 
   if (funcs.empty()) return false;
 
-  std::sort(begin(funcs), end(funcs),
-            [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
-              // We want a canonical order for the family. Putting the
-              // one corresponding to cinfo first makes sense, because
-              // the first one is used as the name for FCall*Method* hint,
-              // after that, sort by name so that different case spellings
-              // come in the same order.
-              if (a->second.func == b->second.func)   return false;
-              if (func) {
-                if (b->second.func == func) return false;
-                if (a->second.func == func) return true;
-              }
-              if (auto d = a->first->compare(b->first)) {
-                if (!func) {
-                  if (b->first == name) return false;
-                  if (a->first == name) return true;
-                }
-                return d < 0;
-              }
-              return std::less<const void*>{}(a->second.func, b->second.func);
-            });
+  std::sort(
+    begin(funcs), end(funcs),
+    [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
+      // We want a canonical order for the family. Putting the
+      // one corresponding to cinfo first makes sense, because
+      // the first one is used as the name for FCall*Method* hint,
+      // after that, sort by name so that different case spellings
+      // come in the same order.
+      if (a->second.func == b->second.func)   return false;
+      if (func) {
+        if (b->second.func == func) return false;
+        if (a->second.func == func) return true;
+      }
+      if (auto d = a->first->compare(b->first)) {
+        if (!func) {
+          if (b->first == name) return false;
+          if (a->first == name) return true;
+        }
+        return d < 0;
+      }
+      return std::less<const void*>{}(a->second.func, b->second.func);
+    }
+  );
   funcs.erase(
-    std::unique(begin(funcs), end(funcs),
-                [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
-                  return a->second.func == b->second.func;
-                }),
+    std::unique(
+      begin(funcs), end(funcs),
+      [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
+        return a->second.func == b->second.func;
+      }
+    ),
     end(funcs)
   );
 
@@ -2881,10 +2927,28 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
     }
   }
 
+  // Single func resolutions are stored separately. They don't need a
+  // FuncFamily and this saves space.
+  if (funcs.size() == 1) {
+    cinfo->singleMethodFamilies.emplace(name, funcs[0]);
+    return true;
+  }
+
+  // Otherwise re-use an existing identical FuncFamily, or create a
+  // new one.
+  auto const ff = [&] {
+    auto it = index.funcFamilies.find(funcs);
+    if (it != index.funcFamilies.end()) return it->first.get();
+    return index.funcFamilies.insert(
+      std::make_unique<FuncFamily>(std::move(funcs)),
+      false
+    ).first->first.get();
+  }();
+
   cinfo->methodFamilies.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(name),
-    std::forward_as_tuple(std::move(funcs))
+    std::forward_as_tuple(ff)
   );
 
   return true;
@@ -2911,6 +2975,7 @@ void build_abstract_func_families(IndexData& data, ClassInfo* cinfo) {
       if (!par.second.hasPrivateAncestor &&
           (par.second.attrs & AttrPublic) &&
           !cinfo->methodFamilies.count(par.first) &&
+          !cinfo->singleMethodFamilies.count(par.first) &&
           !cinfo->methods.count(par.first)) {
         extras.push_back(par.first);
       }
@@ -3397,7 +3462,10 @@ void check_invariants(const ClassInfo* cinfo) {
       always_assert(it != cinfo->methods.end());
       if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
       if (is_special_method_name(m->name)) continue;
-      always_assert(cinfo->methodFamilies.count(m->name));
+      always_assert(
+        cinfo->methodFamilies.count(m->name) ||
+        cinfo->singleMethodFamilies.count(m->name)
+      );
     }
   }
 
@@ -3430,14 +3498,19 @@ void check_invariants(const ClassInfo* cinfo) {
     always_assert(!info.thisHas || info.derivedHas);
   }
 
-  // Every FuncFamily is non-empty and contain functions with the same
-  // name (unless its a family of ctors).
+  // Every FuncFamily has more than function and contain functions
+  // with the same name (unless its a family of ctors). methodFamilies
+  // and singleMethodFamilies should have disjoint keys.
   for (auto const& mfam: cinfo->methodFamilies) {
-    always_assert(!mfam.second.possibleFuncs().empty());
-    auto const name = mfam.second.possibleFuncs().front()->first;
-    for (auto const pf : mfam.second.possibleFuncs()) {
+    always_assert(mfam.second->possibleFuncs().size() > 1);
+    auto const name = mfam.second->possibleFuncs().front()->first;
+    for (auto const pf : mfam.second->possibleFuncs()) {
       always_assert(pf->first->isame(name));
     }
+    always_assert(!cinfo->singleMethodFamilies.count(mfam.first));
+  }
+  for (auto const& mfam : cinfo->singleMethodFamilies) {
+    always_assert(!cinfo->methodFamilies.count(mfam.first));
   }
 }
 
@@ -4922,14 +4995,16 @@ res::Func Index::resolve_method(Context ctx,
   // method families are guaranteed to all be public so we can do this
   // lookup as a last gasp before resorting to name_only().
   auto const find_extra_method = [&] {
+    auto singleMethIt = cinfo->singleMethodFamilies.find(name);
+    if (singleMethIt != cinfo->singleMethodFamilies.end()) {
+      return res::Func { this, singleMethIt->second };
+    }
     auto methIt = cinfo->methodFamilies.find(name);
     if (methIt == end(cinfo->methodFamilies)) return name_only();
-    if (methIt->second.possibleFuncs().size() == 1) {
-      return res::Func { this, methIt->second.possibleFuncs().front() };
-    }
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
-    return res::Func { this, &methIt->second };
+    assertx(methIt->second->possibleFuncs().size() > 1);
+    return res::Func { this, methIt->second };
   };
 
   // Interfaces *only* have the extra methods defined for all
@@ -5008,11 +5083,14 @@ res::Func Index::resolve_method(Context ctx,
     if (!options.FuncFamilies) return name_only();
 
     {
-      auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(cinfo->methodFamilies)) {
-        return name_only();
+      auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
+      if (singleFamIt != cinfo->singleMethodFamilies.end()) {
+        return res::Func { this, singleFamIt->second };
       }
-      return res::Func { this, &famIt->second };
+      auto const famIt = cinfo->methodFamilies.find(name);
+      if (famIt == end(cinfo->methodFamilies)) return name_only();
+      assertx(famIt->second->possibleFuncs().size() > 1);
+      return res::Func { this, famIt->second };
     }
   }
   not_reached();
@@ -5035,9 +5113,14 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
 
   if (!options.FuncFamilies) return folly::none;
 
+  auto const singleFamIt = cinfo->singleMethodFamilies.find(s_construct.get());
+  if (singleFamIt != cinfo->singleMethodFamilies.end()) {
+    return res::Func { this, singleFamIt->second};
+  }
   auto const famIt = cinfo->methodFamilies.find(s_construct.get());
   if (famIt == end(cinfo->methodFamilies)) return folly::none;
-  return res::Func { this, &famIt->second };
+  assertx(famIt->second->possibleFuncs().size() > 1);
+  return res::Func { this, famIt->second };
 }
 
 res::Func
@@ -6666,6 +6749,7 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->privateStaticPropInfo);
   CLEAR_PARALLEL(m_data->unknownClassSProps);
   CLEAR_PARALLEL(m_data->publicSPropMutations);
+  CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->ifaceSlotMap);
   CLEAR_PARALLEL(m_data->closureUseVars);
 

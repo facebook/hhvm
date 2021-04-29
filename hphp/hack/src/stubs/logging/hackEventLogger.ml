@@ -73,6 +73,11 @@ let starting_first_server _ = ()
 
 let refuse_to_restart_server ~reason:_ ~server_state:_ ~version_matches:_ = ()
 
+let server_receipt_to_monitor_write_exn ~server_receipt_to_monitor_file:_ _ = ()
+
+let server_receipt_to_monitor_read_exn ~server_receipt_to_monitor_file:_ _ _ =
+  ()
+
 let init_lazy_end
     _
     ~informant_use_xdb:_

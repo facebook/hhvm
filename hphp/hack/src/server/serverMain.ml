@@ -1315,7 +1315,13 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let pid = Unix.getpid () in
   let server_finale_file = ServerFiles.server_finale_file pid in
   let server_progress_file = ServerFiles.server_progress_file pid in
-  Exit.prepare_server_specific_files ~server_finale_file ~server_progress_file;
+  let server_receipt_to_monitor_file =
+    ServerFiles.server_receipt_to_monitor_file pid
+  in
+  Exit.prepare_server_specific_files
+    ~server_finale_file
+    ~server_progress_file
+    ~server_receipt_to_monitor_file;
   ServerCommandTypesUtils.write_progress_file
     ~server_progress_file
     ~server_progress:

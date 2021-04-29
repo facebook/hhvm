@@ -22,13 +22,27 @@ let show_finale_data (data : finale_data) : string =
     (Option.value data.msg ~default:"")
     (Exception.clean_stack stack)
 
-let server_specific_files : (string * string) option ref = ref None
+type server_specific_files = {
+  server_finale_file: string;
+  server_progress_file: string;
+  server_receipt_to_monitor_file: string;
+}
 
-let prepare_server_specific_files ~server_finale_file ~server_progress_file :
+let server_specific_files : server_specific_files option ref = ref None
+
+let prepare_server_specific_files
+    ~server_finale_file ~server_progress_file ~server_receipt_to_monitor_file :
     unit =
-  server_specific_files := Some (server_finale_file, server_progress_file);
+  server_specific_files :=
+    Some
+      {
+        server_finale_file;
+        server_progress_file;
+        server_receipt_to_monitor_file;
+      };
   (try Unix.unlink server_finale_file with _ -> ());
   (try Unix.unlink server_progress_file with _ -> ());
+  (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
   ()
 
 let exit
@@ -38,8 +52,14 @@ let exit
   let exit_code = Exit_status.exit_code exit_status in
   match !server_specific_files with
   | None -> Stdlib.exit exit_code
-  | Some (server_finale_file, server_progress_file) ->
+  | Some
+      {
+        server_finale_file;
+        server_progress_file;
+        server_receipt_to_monitor_file;
+      } ->
     (try Unix.unlink server_progress_file with _ -> ());
+    (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
     let stack =
       Option.value
         ~default:

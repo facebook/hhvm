@@ -49,3 +49,8 @@ let server_finale_file (pid : int) : string =
 
 let server_progress_file (pid : int) : string =
   Filename.concat GlobalConfig.tmp_dir (spf "progress.%d.json" pid)
+
+let server_receipt_to_monitor_file (pid : int) : string =
+  Filename.concat
+    GlobalConfig.tmp_dir
+    (spf "server_receipt_to_monitor.%d.json" pid)

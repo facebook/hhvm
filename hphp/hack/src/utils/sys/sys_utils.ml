@@ -660,3 +660,42 @@ external get_gc_time : unit -> float * float = "hh_get_gc_time"
 module For_test = struct
   let find_oom_in_dmesg_output = find_oom_in_dmesg_output
 end
+
+let protected_read_exn (filename : string) : string =
+  (* We can't use the standard Disk.cat because we need to read from an existing (locked)
+  fd for the file; not open the file a second time and read from that. *)
+  let cat_from_fd (fd : Unix.file_descr) : string =
+    let total = Unix.lseek fd 0 Unix.SEEK_END in
+    let _0 = Unix.lseek fd 0 Unix.SEEK_SET in
+    let buf = Bytes.create total in
+    let rec rec_read offset =
+      if offset = total then
+        ()
+      else
+        let bytes_read = Unix.read fd buf offset (total - offset) in
+        if bytes_read = 0 then raise End_of_file;
+        rec_read (offset + bytes_read)
+    in
+    rec_read 0;
+    Bytes.to_string buf
+  in
+  let fd = Unix.openfile filename [Unix.O_RDONLY] 0o666 in
+  Utils.try_finally
+    ~f:(fun () ->
+      Unix.lockf fd Unix.F_RLOCK 0;
+      cat_from_fd fd)
+    ~finally:(fun () -> Unix.close fd)
+
+let protected_write_exn (filename : string) (content : string) : unit =
+  with_umask 0o000 (fun () ->
+      let fd =
+        Unix.openfile filename [Unix.O_RDWR; Unix.O_CREAT; Unix.O_TRUNC] 0o666
+      in
+      Utils.try_finally
+        ~f:(fun () ->
+          Unix.lockf fd Unix.F_LOCK 0;
+          let _written =
+            Unix.write_substring fd content 0 (String.length content)
+          in
+          ())
+        ~finally:(fun () -> Unix.close fd))

@@ -253,3 +253,13 @@ external get_gc_time : unit -> float * float = "hh_get_gc_time"
 module For_test : sig
   val find_oom_in_dmesg_output : int -> string -> string list -> bool
 end
+
+(** This will acquire a reader-lock on the file then read its content.
+Locks in unix are advisory, so this only works if writing is done by
+[protected_write_exn]. If the file doesn't exist, Unix.Unix_error(ENOENT). *)
+val protected_read_exn : string -> string
+
+(** This will acquire a writer-lock on the file then write content.
+Locks in unix are advisory, so this only works if reading is done by
+[protected_read_exn]. *)
+val protected_write_exn : string -> string -> unit

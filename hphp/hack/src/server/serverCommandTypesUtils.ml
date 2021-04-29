@@ -120,7 +120,7 @@ let write_progress_file
     ~(server_progress_file : string)
     ~(server_progress : ServerCommandTypes.server_progress) : unit =
   let open Hh_json in
-  let json =
+  let content =
     JSON_Object
       [
         ( "warning",
@@ -133,25 +133,7 @@ let write_progress_file
       ]
     |> json_to_multiline
   in
-  try
-    Sys_utils.with_umask 0o000 (fun () ->
-        (* umask is so we can create with the permissions we desire *)
-        let fd =
-          Unix.openfile
-            server_progress_file
-            [Unix.O_RDWR; Unix.O_CREAT; Unix.O_TRUNC]
-            0o666
-        in
-        Utils.try_finally
-          ~f:(fun () ->
-            (* we'll block until we gain a writer-lock. This depends on readers not holding
-          it for long, in read_progress_file below. *)
-            Unix.lockf fd Unix.F_LOCK 0;
-            let _written =
-              Unix.write_substring fd json 0 (String.length json)
-            in
-            ())
-          ~finally:(fun () -> Unix.close fd))
+  try Sys_utils.protected_write_exn server_progress_file content
   with exn ->
     let e = Exception.wrap exn in
     Hh_logger.error
@@ -166,29 +148,21 @@ If there are failures, we log, and return a human-readable string that
 indicates why. *)
 let read_progress_file ~(server_progress_file : string) :
     ServerCommandTypes.server_progress =
+  let content = ref "[not yet read content]" in
   try
-    let fd = Unix.openfile server_progress_file [Unix.O_RDONLY] 0o666 in
-    Utils.try_finally
-      ~f:(fun () ->
-        (* we'll block until we gain a reader-lock. This depends on writers not holding
-        it for long, in write_progress_file above. *)
-        Unix.lockf fd Unix.F_RLOCK 0;
-        let json =
-          Some (Disk.cat server_progress_file |> Hh_json.json_of_string)
-        in
-        let server_progress = Hh_json_helpers.Jget.string_exn json "progress" in
-        let server_warning = Hh_json_helpers.Jget.string_opt json "warning" in
-        let server_timestamp =
-          Hh_json_helpers.Jget.float_exn json "timestamp"
-        in
-        ServerCommandTypes.{ server_progress; server_warning; server_timestamp })
-      ~finally:(fun () -> Unix.close fd)
+    content := Sys_utils.protected_read_exn server_progress_file;
+    let json = Some (Disk.cat server_progress_file |> Hh_json.json_of_string) in
+    let server_progress = Hh_json_helpers.Jget.string_exn json "progress" in
+    let server_warning = Hh_json_helpers.Jget.string_opt json "warning" in
+    let server_timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in
+    ServerCommandTypes.{ server_progress; server_warning; server_timestamp }
   with exn ->
     let e = Exception.wrap exn in
     Hh_logger.error
-      "SERVER_PROGRESS_EXCEPTION(read) %s\n%s"
+      "SERVER_PROGRESS_EXCEPTION(read) %s\n%s\n%s"
       (Exception.get_ctor_string e)
-      (Exception.get_backtrace_string e |> Exception.clean_stack);
+      (Exception.get_backtrace_string e |> Exception.clean_stack)
+      !content;
     HackEventLogger.server_progress_read_exn ~server_progress_file e;
     ServerCommandTypes.
       {

@@ -1,0 +1,18 @@
+File "ctx-const-bounds_concrete.bad.php", line 4, characters 3-49:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 5, characters 3-46:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 6, characters 3-54:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 10, characters 3-49:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 11, characters 3-46:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 12, characters 3-54:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 16, characters 3-49:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 17, characters 3-46:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
+File "ctx-const-bounds_concrete.bad.php", line 18, characters 3-54:
+Constraints on a context constant requires it to be abstract (Parsing[1002])

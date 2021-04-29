@@ -1,5 +1,3 @@
-File "ctx-const-bounds_call-from-policied-of.php", line 9, characters 24-53:
-Constraints on ctx constants are not allowed (Parsing[1002])
 File "ctx-const-bounds_call-from-policied-of.php", line 18, characters 3-9:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "ctx-const-bounds_call-from-policied-of.php", line 17, characters 30-39:

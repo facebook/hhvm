@@ -3642,10 +3642,6 @@ where
             node,
             env,
         )?;
-        // TODO(coeffects) remove this check once typing of lower bounds works
-        if !constraints.is_empty() && env.is_typechecker() {
-            Self::raise_parsing_error(node, env, "Constraints on ctx constants are not allowed");
-        }
         let (super_constraint, as_constraint) = constraints.into_iter().partition_map(|x| x);
         let require_one = &mut |kind: &str, cs: Vec<_>| {
             if cs.len() > 1 {
@@ -4314,6 +4310,15 @@ where
                     })
                 } else {
                     if let Some(c_tc_type) = context {
+                        if env.is_typechecker()
+                            && (super_constraint.is_some() || as_constraint.is_some())
+                        {
+                            Self::raise_parsing_error(
+                                node,
+                                env,
+                                "Constraints on a context constant requires it to be abstract",
+                            )
+                        };
                         TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
                     } else {
                         Self::raise_hh_error(

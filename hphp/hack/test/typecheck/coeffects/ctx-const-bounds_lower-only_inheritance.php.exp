@@ -1,15 +1,5 @@
-File "ctx-const-bounds_lower-only_inheritance.php", line 4, characters 24-39:
-Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 24-36:
-Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 15-27:
-Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx-const-bounds_lower-only_inheritance.php", line 23, characters 24-31:
-Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 24-39:
-Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx-const-bounds_lower-only_inheritance.php", line 30, characters 24-36:
-Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 3-41:
+Constraints on a context constant requires it to be abstract (Parsing[1002])
 File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 13-13:
 Unable to satisfy constraint on this type constant (Typing[4110])
   File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 32-39:

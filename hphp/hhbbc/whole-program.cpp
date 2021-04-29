@@ -233,7 +233,7 @@ WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
               is_used_trait(*cls));
       return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
     }
-    case DependencyContextType::PropName:
+    case DependencyContextType::Prop:
     case DependencyContextType::FuncFamily:
       // We only record dependencies on these. We don't schedule any
       // work on their behalf.

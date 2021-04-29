@@ -88,9 +88,8 @@ enum class Dep : uintptr_t {
   /* This dependency should trigger when the bad initial prop value bit for a
    * class changes */
   PropBadInitialValues = (1u << 3),
-  /* This dependency should trigger when a public static property with a
-   * particular name changes */
-  PublicSPropName = (1u << 4),
+  /* This dependency should trigger when a public static property changes */
+  PublicSProp = (1u << 4),
   /* This dependency means that we refused to do inline analysis on
    * this function due to inline analysis depth. The dependency will
    * trigger if the target function becomes effect-free, or gets a
@@ -102,13 +101,13 @@ enum class Dep : uintptr_t {
 /*
  * A DependencyContext encodes enough of the context to record a dependency - a
  * php::Func, if we're doing private property analysis and its a suitable class,
- * a php::Class, or a public static property with a particular name.
+ * a php::Class, or a public static property.
  */
 
 enum class DependencyContextType : uint16_t {
   Func,
   Class,
-  PropName,
+  Prop,
   FuncFamily
 };
 

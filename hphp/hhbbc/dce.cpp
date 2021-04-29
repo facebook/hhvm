@@ -489,8 +489,9 @@ std::string DEBUG_ONLY show(const UseInfo& ui) {
   return folly::sformat("{}({})", show(ui.usage), show(ui.actions));
 }
 
-std::string DEBUG_ONLY loc_bits_string(const php::Func* func,
-                                       std::bitset<kMaxTrackedLocals> locs) {
+std::string DEBUG_ONLY loc_bits_string(
+    const php::Func* func,
+    const std::bitset<kMaxTrackedLocals>& locs) {
   std::ostringstream out;
   if (func->locals.size() < kMaxTrackedLocals) {
     for (auto i = func->locals.size(); i-- > 0;) {
@@ -509,9 +510,7 @@ struct Env {
   const Bytecode& op;
   InstrId id;
   LocalId loc;
-  const State& stateBefore;
-  const StepFlags& flags;
-  const State& stateAfter;
+  const PropagatedStates& states;
   /*
    * A local is "liveInside" an op if the local is used in the op, but is not
    * live before or after the op.  This is used to ensure the local slot is
@@ -592,8 +591,8 @@ bool shouldPopOutputs(Env& env, const Args&... args) {
 // query eval stack
 
 Type topT(Env& env, uint32_t idx = 0) {
-  assertx(idx < env.stateBefore.stack.size());
-  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1].type;
+  assertx(idx < env.states.stack().size());
+  return env.states.stack()[env.states.stack().size() - idx - 1];
 }
 
 Type topC(Env& env, uint32_t idx = 0) {
@@ -605,7 +604,7 @@ Type topC(Env& env, uint32_t idx = 0) {
 //////////////////////////////////////////////////////////////////////
 // locals
 void addInterference(LocalRemappingIndex* index,
-                     std::bitset<kMaxTrackedLocals> live) {
+                     const std::bitset<kMaxTrackedLocals>& live) {
   auto& li = index->localInterference;
   for (auto i = li.size(); i-- > 0;) {
     if (live[i]) {
@@ -614,13 +613,13 @@ void addInterference(LocalRemappingIndex* index,
   }
 }
 
-void addInterference(Env& env, std::bitset<kMaxTrackedLocals> live) {
+void addInterference(Env& env, const std::bitset<kMaxTrackedLocals>& live) {
   // We don't track interfrence until the optimize round of the global dce.
   if (!env.dceState.remappingIndex) return;
   addInterference(env.dceState.remappingIndex, live);
 }
 
-void pinLocals(Env& env, std::bitset<kMaxTrackedLocals> pinned) {
+void pinLocals(Env& env, const std::bitset<kMaxTrackedLocals>& pinned) {
   // We mark pinned locals to guarantee their index does not change during
   // remapping.
   if (!env.dceState.remappingIndex) return;
@@ -629,7 +628,7 @@ void pinLocals(Env& env, std::bitset<kMaxTrackedLocals> pinned) {
 }
 
 
-void addLocGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
+void addLocGenSet(Env& env, const std::bitset<kMaxTrackedLocals>& locs) {
   FTRACE(4, "      loc-conservative: {}\n",
          loc_bits_string(env.dceState.ainfo.ctx.func, locs));
   env.dceState.liveLocals |= locs;
@@ -683,7 +682,8 @@ bool isLocLive(Env& env, uint32_t id) {
 }
 
 Type locRaw(Env& env, LocalId loc) {
-  return env.stateBefore.locals[loc];
+  assertx(loc < env.states.locals().size());
+  return env.states.locals()[loc];
 }
 
 bool isLocVolatile(Env& env, uint32_t id) {
@@ -1055,7 +1055,7 @@ void pushRemovable(Env& env) {
 
 void pushRemovableIfNoThrow(Env& env) {
   stack_ops(env,[&] (const UseInfo& ui) {
-      return !env.flags.wasPEI && allUnused(ui)
+    return !env.states.wasPEI() && allUnused(ui)
              ? PushFlags::MarkUnused : PushFlags::MarkLive;
     });
 }
@@ -1286,9 +1286,11 @@ void dce(Env& env, const bc::NewDictArray&) {
 }
 
 void dce(Env& env, const bc::AddElemC& /*op*/) {
+  assertx(env.states.lastPush().has_value());
+
   stack_ops(env, [&] (UseInfo& ui) {
       // If the set might throw it needs to be kept.
-      if (env.flags.wasPEI) {
+      if (env.states.wasPEI()) {
         return PushFlags::MarkLive;
       }
 
@@ -1302,8 +1304,7 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         // dce, since we're going to recompute the FuncAnalysis anyway.
         return PushFlags::MarkLive;
       }
-
-      auto const& arrPost = env.stateAfter.stack.back().type;
+      auto const& arrPost = *env.states.lastPush();
       auto const& arrPre = topC(env, 2);
       auto const postSize = arr_size(arrPost);
       if (!postSize || postSize == arr_size(arrPre)) {
@@ -1345,7 +1346,7 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
 template<typename Op>
 void dceNewArrayLike(Env& env, const Op& op) {
   if (op.numPop() == 1 &&
-      !env.flags.wasPEI &&
+      !env.states.wasPEI() &&
       allUnusedIfNotLastRef(env.dceState.stack.back())) {
     // Just an optimization for when we have a single element array,
     // but we care about its lifetime. By killing the array, and
@@ -1551,7 +1552,7 @@ void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
 
 template<class Op>
 void no_dce(Env& env, const Op& op) {
-  addLocGenSet(env, env.flags.mayReadLocalSet);
+  addLocGenSet(env, env.states.mayReadLocalSet());
   push_outputs(env, op.numPush());
   pop_inputs(env, op.numPop());
 }
@@ -1560,7 +1561,7 @@ void dce(Env& env, const bc::AssertRATL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATStk& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Await& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AwaitAll& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
@@ -1617,19 +1618,19 @@ void dce(Env& env, const bc::JmpNZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LIterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGet& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::MemoGetEager& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::MemoSet& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::MemoSetEager& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::Method& op) { no_dce(env, op); }
@@ -1667,7 +1668,7 @@ void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetRangeM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Silence& op) {
-  pinLocals(env, env.flags.mayReadLocalSet);
+  pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
 void dce(Env& env, const bc::SSwitch& op) { no_dce(env, op); }
@@ -1782,7 +1783,7 @@ void minstr_dim(Env& env, const Op& op) {
 
 template<class Op>
 void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
-  addLocGenSet(env, env.flags.mayReadLocalSet);
+  addLocGenSet(env, env.states.mayReadLocalSet());
   if (op.mkey.mcode == MEL || op.mkey.mcode == MPL) {
     addLocNameUse(env, op.mkey.local);
   }
@@ -1830,17 +1831,18 @@ void dce(Env& env, const bc::BaseL& op) {
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
 
 void dce(Env& env, const bc::QueryM& op) {
-  if (!env.flags.wasPEI) {
+  assertx(env.states.lastPush().has_value());
+  if (!env.states.wasPEI()) {
     assertx(!env.dceState.minstrUI);
     auto ui = env.dceState.stack.back();
     if (!isLinked(ui)) {
       if (allUnused(ui)) {
-        addLocGenSet(env, env.flags.mayReadLocalSet);
+        addLocGenSet(env, env.states.mayReadLocalSet());
         ui.actions[env.id] = DceAction::Kill;
         ui.location.id = env.id.idx;
         env.dceState.minstrUI.emplace(std::move(ui));
-      } else if (auto const val = tv(env.stateAfter.stack.back().type)) {
-        addLocGenSet(env, env.flags.mayReadLocalSet);
+      } else if (auto const val = tv(*env.states.lastPush())) {
+        addLocGenSet(env, env.states.mayReadLocalSet());
         CompactVector<Bytecode> bcs { gen_constant(*val) };
         ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
         ui.location.id = env.id.idx;
@@ -1918,8 +1920,10 @@ void adjustMinstr(Bytecode& op, MaskType m) {
 }
 
 template<typename LocRaw>
-CompactVector<Bytecode> eager_unsets(std::bitset<kMaxTrackedLocals> candidates,
-                                     const php::Func* func, LocRaw type) {
+CompactVector<Bytecode> eager_unsets(
+    const std::bitset<kMaxTrackedLocals>& candidates,
+    const php::Func* func,
+    LocRaw type) {
   auto loc = std::min(safe_cast<uint32_t>(func->locals.size()),
                       safe_cast<uint32_t>(kMaxTrackedLocals));
   auto const end = RuntimeOption::EnableArgsInBacktraces
@@ -1928,7 +1932,7 @@ CompactVector<Bytecode> eager_unsets(std::bitset<kMaxTrackedLocals> candidates,
   CompactVector<Bytecode> bcs;
   while (loc-- > end) {
     if (candidates[loc] && !is_volatile_local(func, loc)) {
-      auto const t = type(loc);
+      auto const& t = type(loc);
       if (!t.subtypeOf(TUnc)) {
         bcs.emplace_back(bc::UnsetL { loc });
       }
@@ -1990,8 +1994,9 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
   auto& func = visit.func;
   auto const& fa = visit.ainfo;
   auto const ctx = AnalysisContext { fa.ctx.unit, func, fa.ctx.cls };
-  auto const states = locally_propagated_states(
-    visit.index, ctx, visit.collect, bid, stateIn);
+  auto states = locally_propagated_states(
+    visit.index, ctx, visit.collect, bid, stateIn
+  );
 
   auto dceState = DceState{ visit.index, fa };
   dceState.liveLocals = dceOutState.locLive;
@@ -2013,9 +2018,12 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
         // state.  Note that when dceState.dceStack is populated, we
         // already did the equivalent during global analysis (see
         // isCFPushTaken below).
-        return states[states.size() - 2].first.stack.size() + 1;
+        states.next();
+        return states.stack().size() + 1;
       default:
-        return states.back().first.stack.size();
+        auto const size = states.stack().size();
+        states.next();
+        return size;
     }
   }();
 
@@ -2031,20 +2039,20 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
 
     FTRACE(2, "  == #{} {}\n", idx, show(func, op));
 
+    if ((idx + 1) < blk->hhbcs.size()) states.next();
+
     auto visit_env = Env {
       dceState,
       op,
       { bid, idx },
       NoLocalId,
-      states[idx].first,
-      states[idx].second,
-      states[idx+1].first,
+      states,
       {},
     };
     auto const liveAfter = dceState.liveLocals;
     auto const handled = [&] {
       if (dceState.minstrUI) {
-        if (visit_env.flags.wasPEI) {
+        if (visit_env.states.wasPEI()) {
           dceState.minstrUI.reset();
           return false;
         }
@@ -2084,7 +2092,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
        * When we see a PEI, liveness must take into account the fact that we
        * could take an exception edge here by or-ing in the locLiveExn set.
        */
-      if (states[idx].second.wasPEI) {
+      if (states.wasPEI()) {
         FTRACE(2, "    <-- exceptions\n");
         dceState.liveLocals |= dceOutState.locLiveExn;
       }
@@ -2101,7 +2109,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
 
     // If we have a PEI instruction, we should try to unset the unsetable
     // locals at the start of the exception block.
-    if (states[idx].second.wasPEI && blk->throwExit != NoBlockId) {
+    if (states.wasPEI() && blk->throwExit != NoBlockId) {
       dceState.mayNeedUnsettingExn |= unsetable | liveAfter;
     }
     auto const opIsCntrlFlow = [&] {
@@ -2116,9 +2124,9 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
       // must be last).  So when the last op in a block needs something unset
       // we flag it as maybe needing to be unset in all successors.
       dceState.mayNeedUnsetting |= unsetable;
-    } else if (unsetable.any() && !visit_env.stateAfter.unreachable) {
+    } else if (unsetable.any() && !visit_env.states.unreachable()) {
       auto bcs = eager_unsets(unsetable, func, [&](uint32_t i) {
-        return visit_env.stateAfter.locals[i];
+        return states.localAfter(i);
       });
       if (!bcs.empty()) {
         dceState.actionMap.emplace(visit_env.id, DceAction(
@@ -2137,7 +2145,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
       if (op.UnsetL.loc1 < kMaxTrackedLocals) {
         dceState.willBeUnsetLocals[op.UnsetL.loc1] = true;
       }
-    } else if (visit_env.stateAfter.unreachable) {
+    } else if (visit_env.states.unreachable()) {
       dceState.willBeUnsetLocals.set();
     } else if (!(isMemberFinalOp(op.op) || isMemberDimOp(op.op))) {
       dceState.willBeUnsetLocals.reset();
@@ -2156,8 +2164,8 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
     FTRACE(4, "    interp stack: {}\n",
       [&] {
         using namespace folly::gen;
-        return from(states[idx].first.stack)
-          | map([&] (auto const& e) { return show(e.type); })
+        return from(states.stack())
+          | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(" ");
       }()
     );
@@ -2167,7 +2175,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
 
     // We're now at the state before this instruction, so the stack
     // sizes must line up.
-    assertx(dceState.stack.size() == states[idx].first.stack.size());
+    assertx(dceState.stack.size() == states.stack().size());
   }
 
   dceState.minstrUI.reset();
@@ -2416,8 +2424,9 @@ optimize_dce(VisitContext& visit, BlockId bid, const State& stateIn,
 
 //////////////////////////////////////////////////////////////////////
 
-void remove_unused_local_names(php::WideFunc& func,
-                               std::bitset<kMaxTrackedLocals> usedLocalNames) {
+void remove_unused_local_names(
+    php::WideFunc& func,
+    const std::bitset<kMaxTrackedLocals>& usedLocalNames) {
   if (!options.RemoveUnusedLocalNames) return;
   /*
    * Closures currently rely on name information being available.

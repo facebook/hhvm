@@ -243,6 +243,7 @@ void ensure_mutable(ISS& env, uint32_t id) {
  * previous instruction, just rewind.
  */
 int kill_by_slot(ISS& env, int slot) {
+  assertx(!env.undo);
   auto const id = id_from_slot(env, slot);
   assertx(id != StackElem::NoId);
   auto const sz = env.state.stack.size();
@@ -293,6 +294,7 @@ void insert_after_slot(ISS& env, int slot,
                        int numPop, int numPush, const Type* types,
                        const BytecodeVec& bcs) {
   assertx(can_insert_after_slot(env, slot));
+  assertx(!env.undo);
   auto const id = id_from_slot(env, slot);
   assertx(id != StackElem::NoId);
   ensure_mutable(env, id + 1);
@@ -333,6 +335,7 @@ void replace_last_op(ISS& env, Bytecode&& bc) {
   assertx(newPops <= oldPops);
 
   if (newPush != oldPush || newPops != oldPops) {
+    assertx(!env.undo);
     env.state.stack.rewind(oldPops - newPops, oldPush - newPush);
   }
   ITRACE(2, "(replace: {}->{}\n",
@@ -376,6 +379,7 @@ const Bytecode* last_op(ISS& env, int idx /* = 0 */) {
  * inputs, and commit a constant-generating bytecode.
  */
 void rewind(ISS& env, const Bytecode& bc) {
+  assertx(!env.undo);
   ITRACE(2, "(rewind: {}\n", show(env.ctx.func, bc));
   env.state.stack.rewind(numPop(bc), numPush(bc));
 }
@@ -391,6 +395,7 @@ void rewind(ISS& env, const Bytecode& bc) {
  */
 void rewind(ISS& env, int n) {
   assertx(n);
+  assertx(!env.undo);
   while (env.replacedBcs.size()) {
     rewind(env, env.replacedBcs.back());
     env.replacedBcs.pop_back();
@@ -954,6 +959,8 @@ void in(ISS& env, const bc::AddElemC&) {
   auto const promoteMayThrow = (promotion == Promotion::YesMightThrow);
 
   auto inTy = (env.state.stack.end() - 3).unspecialize();
+  // Unspecialize modifies the stack location
+  if (env.undo) env.undo->onStackWrite(env.state.stack.size() - 3, inTy);
 
   auto outTy = [&] (const Type& key) -> folly::Optional<Type> {
     if (!key.subtypeOf(BArrKey)) return folly::none;
@@ -1007,6 +1014,8 @@ void in(ISS& env, const bc::AddElemC&) {
 void in(ISS& env, const bc::AddNewElemC&) {
   auto v = topC(env);
   auto inTy = (env.state.stack.end() - 2).unspecialize();
+  // Unspecialize modifies the stack location
+  if (env.undo) env.undo->onStackWrite(env.state.stack.size() - 2, inTy);
 
   auto outTy = [&] () -> folly::Optional<Type> {
     if (inTy.subtypeOf(BVec | BKeyset)) {
@@ -2336,7 +2345,7 @@ void in(ISS& env, const bc::CGetS& op) {
   if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
     return throws();
   }
-  
+
   if (op.subop1 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
     return throws();
   }
@@ -5708,6 +5717,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       if (!env.reprocess) break;
       FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
       assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
+      assertx(!env.undo);
       retryOffset = env.unchangedBcs;
       retryBcs = std::move(env.replacedBcs);
       env.unchangedBcs = 0;

@@ -267,6 +267,9 @@ void setStackForBase(ISS& env, Type ty) {
   FTRACE(4, "      stk[{:02}] := {}\n", locSlot, show(ty));
   assertx(locSlot < env.state.stack.size());
 
+  if (env.undo) {
+    env.undo->onStackWrite(locSlot, std::move(env.state.stack[locSlot].type));
+  }
   env.state.stack[locSlot] = StackElem { std::move(ty), NoLocalId };
 }
 
@@ -996,7 +999,7 @@ Effects miProp(ISS& env, bool, MOpMode mode, Type key, ReadOnlyOp op) {
       if (elem && elem->attrs & AttrIsReadOnly && op == ReadOnlyOp::Mutable) {
         return Effects::AlwaysThrows;
       }
-      
+
       auto const ty = [&] {
         if (update) {
           if (elem) return elem->ty;
@@ -1401,7 +1404,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
       if (auto const t = thisPropAsCell(env, name)) {
         push(env, *t);
         if (mustBeMutable && isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
-          return Effects::Throws;  
+          return Effects::Throws;
         }
         if (t->subtypeOf(BBottom)) return Effects::AlwaysThrows;
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) return Effects::Throws;
@@ -1442,13 +1445,13 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
     push(env, std::move(ty));
     return Effects::Throws;
   };
-  
+
   auto const alwaysThrows = [&] {
     discard(env, nDiscard);
     push(env, TBottom);
     return Effects::AlwaysThrows;
   };
-  
+
   if (op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
     return alwaysThrows();
   }
@@ -2040,7 +2043,7 @@ void in(ISS& env, const bc::BaseSC& op) {
       // These don't mutate the base, so AttrConst does not apply
       break;
   }
-  
+
   // Whether we might potentially throw because of AttrIsReadOnly
   if (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
     return unreachable(env);

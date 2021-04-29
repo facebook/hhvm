@@ -204,18 +204,65 @@ FuncAnalysis analyze_func_inline(const Index&,
 ClassAnalysis analyze_class(const Index&, const Context&);
 
 /*
- * Propagate a block input State to each instruction in the block.
- *
- * Returns a vector that is parallel to the instruction array in the
- * block, with one extra element.  The vector contains a state before
- * each instruction, and the StepFlags for executing that instruction.
- *
- * The last element in the vector contains the state after the last
- * instruction in the block, with undefined StepFlags.
+ * Represents the various interp state at some particular instruction
+ * within a block, with an ability to "rewind" the state to previous
+ * instructions (up until the entry of the block).
+ */
+struct PropagatedStates {
+  // Initialize with the end of block state, and the gathered undo log
+  // corresponding to that block interp.
+  PropagatedStates(State&&, StateMutationUndo);
+
+  // Rewind the state one instruction. Must not be at the beginning of
+  // the block.
+  void next();
+
+  // Stack and local types:
+  const CompactVector<Type>& stack() const { return m_stack; }
+  const CompactVector<Type>& locals() const { return m_locals; }
+
+  // The type for a particular local *after* the current instruction
+  // runs.
+  const Type& localAfter(LocalId id) const {
+    for (auto const& p : m_afterLocals) {
+      if (p.first == id) return p.second;
+    }
+    assertx(id < m_locals.size());
+    return m_locals[id];
+  }
+
+  // The value pushed by current instruction (IE, the top of the stack
+  // before next()).
+  const folly::Optional<Type>& lastPush() const { return m_lastPush; }
+
+  // Interp flags for the current instruction.
+  bool wasPEI() const { return currentMark().wasPEI; }
+  bool unreachable() const { return currentMark().unreachable; }
+  auto const& mayReadLocalSet() const { return currentMark().mayReadLocalSet; }
+
+private:
+  const StateMutationUndo::Mark& currentMark() const {
+    assertx(!m_undos.events.empty());
+    auto const mark =
+      boost::get<StateMutationUndo::Mark>(&m_undos.events.back());
+    assertx(mark);
+    return *mark;
+  }
+
+  folly::Optional<Type> m_lastPush;
+  CompactVector<Type> m_stack;
+  CompactVector<Type> m_locals;
+  CompactVector<std::pair<LocalId, Type>> m_afterLocals;
+  StateMutationUndo m_undos;
+};
+
+/*
+ * Interpret a block and return a PropagatedStates corresponding to
+ * the state at the end of the block.
  *
  * Pre: stateIn.initialized == true
  */
-std::vector<std::pair<State,StepFlags>>
+PropagatedStates
 locally_propagated_states(const Index&,
                           const AnalysisContext&,
                           CollectedInfo& collect,
@@ -225,7 +272,7 @@ locally_propagated_states(const Index&,
 /*
  * Propagate a block input State to find the output state for a particular
  * target of the block.  This is used to update the in state for a block added
- * to the CFG in betwee analysis rounds.
+ * to the CFG in between analysis rounds.
  */
 State locally_propagated_bid_state(const Index& index,
                                    const AnalysisContext& ctx,

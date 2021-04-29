@@ -67,6 +67,7 @@ struct ISS {
     , bid(bag.bid)
     , blk(*bag.blk)
     , state(bag.state)
+    , undo(bag.undo)
     , propagate(propagate)
     , analyzeDepth(options.StrengthReduce ? 0 : 1)
   {}
@@ -77,6 +78,7 @@ struct ISS {
   const BlockId bid;
   const php::Block& blk;
   State& state;
+  StateMutationUndo* undo;
   StepFlags flags;
   PropagateFn propagate;
   bool recordUsedParams{true};
@@ -163,10 +165,6 @@ void impl(ISS& env, Ts&&... ts) {
  * a given bytecode could be replaced by some other bytecode
  * sequence.  Ensure that if you call reduce(), it is before any
  * state-affecting operations (like popC()).
- *
- * If env.collect.propagate_constants is set, the reduced bytecodes
- * will have been constant-propagated, and the canConstProp flag will
- * be clear; otherwise canConstProp will be set as for impl.
  */
 void reduce(ISS& env, BytecodeVec&& bcs) {
   impl_vec(env, true, std::move(bcs));
@@ -270,6 +268,7 @@ Type popT(ISS& env) {
   FTRACE(2, "    pop:  {}\n", show(ret));
   assertx(ret.subtypeOf(BCell));
   env.state.stack.pop_elem();
+  if (env.undo) env.undo->onPop(ret);
   return ret;
 }
 
@@ -294,9 +293,7 @@ Type popCU(ISS& env) {
 Type popCV(ISS& env) { return popT(env); }
 
 void discard(ISS& env, int n) {
-  for (auto i = 0; i < n; ++i) {
-    popT(env);
-  }
+  for (auto i = 0; i < n; ++i) popT(env);
 }
 
 const Type& topT(ISS& env, uint32_t idx = 0) {
@@ -315,6 +312,7 @@ void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));
   env.state.stack.push_elem(std::move(t), NoLocalId,
                             env.unchangedBcs + env.replacedBcs.size());
+  if (env.undo) env.undo->onPush();
 }
 
 void push(ISS& env, Type t, LocalId l) {
@@ -325,17 +323,7 @@ void push(ISS& env, Type t, LocalId l) {
   FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_elem(std::move(t), l,
                             env.unchangedBcs + env.replacedBcs.size());
-}
-
-void discardAR(ISS& env, uint32_t idx) {
-  assertx(topT(env, idx).subtypeOf(BUninit));
-  assertx(topT(env, idx + 1).subtypeOf(BUninit));
-  assertx(topT(env, idx + 2).subtypeOf(BCell));
-  auto& stack = env.state.stack;
-  stack.erase(stack.end() - idx - 3, stack.end() - idx);
-  if (idx && stack[stack.size() - idx].equivLoc == StackDupId) {
-    stack[stack.size() - idx].equivLoc = NoLocalId;
-  }
+  if (env.undo) env.undo->onPush();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -426,8 +414,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
       !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
-      (!env.collect.propagate_constants &&
-       any(env.collect.opts & CollectionOpts::Optimizing))) {
+      any(env.collect.opts & CollectionOpts::Optimizing)) {
     return false;
   }
 
@@ -735,6 +722,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
     always_assert_flog(current == TCell, "volatile local was not TCell");
     return;
   }
+  if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
   env.state.locals[l] = std::move(t);
 }
 
@@ -760,6 +748,7 @@ bool locCouldBeUninit(ISS& env, LocalId l) {
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
   if (!is_volatile_local(env.ctx.func, l) && v.subtypeOf(BCell)) {
+    if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
     env.state.locals[l] = std::move(t);
   }
 }
@@ -782,14 +771,16 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     return r1;
   };
   if (l == StackDupId) {
-    auto stk = env.state.stack.end();
+    auto stkIdx = env.state.stack.size();
     while (true) {
-      --stk;
-      stk->type = refine(std::move(stk->type));
-      if (stk->equivLoc != StackDupId) break;
-      assertx(stk != env.state.stack.begin());
+      --stkIdx;
+      auto& stk = env.state.stack[stkIdx];
+      if (env.undo) env.undo->onStackWrite(stkIdx, stk.type);
+      stk.type = refine(std::move(stk.type));
+      if (stk.equivLoc != StackDupId) break;
+      assertx(stkIdx > 0);
     }
-    l = stk->equivLoc;
+    l = env.state.stack[stkIdx].equivLoc;
   }
   if (l == StackThisId) {
     if (env.state.thisLoc != NoLocalId) {
@@ -856,7 +847,10 @@ LocalId findLocal(ISS& env, SString name) {
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
-  for (auto& l : env.state.locals) l = TCell;
+  for (size_t l = 0; l < env.state.locals.size(); ++l) {
+    if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
+    env.state.locals[l] = TCell;
+  }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);

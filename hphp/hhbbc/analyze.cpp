@@ -837,7 +837,60 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<std::pair<State,StepFlags>>
+PropagatedStates::PropagatedStates(State&& state, StateMutationUndo undos)
+  : m_locals{std::move(state.locals)}
+  , m_undos{std::move(undos)}
+{
+  for (size_t i = 0; i < state.stack.size(); ++i) {
+    m_stack.emplace_back(std::move(state.stack[i].type));
+  }
+}
+
+void PropagatedStates::next() {
+  // The undo log shouldn't be empty, and we should be at a mark
+  // (which marks instruction boundary).
+  assertx(!m_undos.events.empty());
+  assertx(boost::get<StateMutationUndo::Mark>(&m_undos.events.back()));
+
+  m_lastPush.clear();
+  m_afterLocals.clear();
+  m_undos.events.pop_back();
+
+  // Use the undo log to "unwind" the current state.
+  while (true) {
+    assertx(!m_undos.events.empty());
+    auto const stop = match<bool>(
+      m_undos.events.back(),
+      [] (const StateMutationUndo::Mark&) { return true; },
+      [this] (StateMutationUndo::Push) {
+        assertx(!m_stack.empty());
+        if (!m_lastPush) m_lastPush.emplace(std::move(m_stack.back()));
+        m_stack.pop_back();
+        return false;
+      },
+      [this] (StateMutationUndo::Pop& p) {
+        m_stack.emplace_back(std::move(p.t));
+        return false;
+      },
+      [this] (StateMutationUndo::Stack& s) {
+        assertx(s.idx < m_stack.size());
+        m_stack[s.idx] = std::move(s.t);
+        return false;
+      },
+      [this] (StateMutationUndo::Local& l) {
+        assertx(l.id < m_locals.size());
+        auto& old = m_locals[l.id];
+        m_afterLocals.emplace_back(std::make_pair(l.id, std::move(old)));
+        old = std::move(l.t);
+        return false;
+      }
+    );
+    if (stop) break;
+    m_undos.events.pop_back();
+  }
+}
+
+PropagatedStates
 locally_propagated_states(const Index& index,
                           const AnalysisContext& ctx,
                           CollectedInfo& collect,
@@ -846,21 +899,33 @@ locally_propagated_states(const Index& index,
   Trace::Bump bumper{Trace::hhbbc, 10};
 
   auto const blk = ctx.func.blocks()[bid].get();
-  auto interp = Interp { index, ctx, collect, bid, blk, state };
 
-  std::vector<std::pair<State,StepFlags>> ret;
-  ret.reserve(blk->hhbcs.size() + 1);
+  // Set up the undo log for the interp. We reserve it using this size
+  // heuristic which captures typical undo log sizes.
+  StateMutationUndo undos;
+  undos.events.reserve((blk->hhbcs.size() + 1) * 4);
 
-  for (auto& op : blk->hhbcs) {
-    ret.emplace_back(state, StepFlags{});
-    ret.back().second = step(interp, op);
+  auto interp = Interp { index, ctx, collect, bid, blk, state, &undos };
+
+  for (auto const& op : blk->hhbcs) {
+    auto const markIdx = undos.events.size();
+    // Record instruction boundary
+    undos.events.emplace_back(StateMutationUndo::Mark{});
+    // Interpret it. This appends more info to the undo log.
+    auto const stepFlags = step(interp, op);
+    // Store the step flags in the mark we recorded before the
+    // interpret.
+    auto& mark = boost::get<StateMutationUndo::Mark>(undos.events[markIdx]);
+    mark.wasPEI = stepFlags.wasPEI;
+    mark.mayReadLocalSet = stepFlags.mayReadLocalSet;
+    mark.unreachable = state.unreachable;
     state.stack.compact();
   }
-
-  ret.emplace_back(std::move(state), StepFlags{});
-  return ret;
+  // Add a final mark to maintain invariants (this will be popped
+  // immediately when the first next() is called).
+  undos.events.emplace_back(StateMutationUndo::Mark{});
+  return PropagatedStates{std::move(state), std::move(undos)};
 }
-
 
 State locally_propagated_bid_state(const Index& index,
                                    const AnalysisContext& ctx,

@@ -32,6 +32,7 @@ namespace HPHP { namespace HHBBC {
 struct PropertiesInfo;
 struct CollectedInfo;
 struct State;
+struct StateMutationUndo;
 struct StepFlags;
 struct Bytecode;
 struct ISS;
@@ -169,6 +170,7 @@ struct Interp {
   const BlockId bid;
   const php::Block* blk;
   State& state;
+  StateMutationUndo* undo = nullptr;
 };
 
 /*

@@ -24,6 +24,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/bc.h"
@@ -428,6 +429,45 @@ State with_throwable_only(const Index& env, const State&);
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Undo log for mutations to the interp state. If mutating state, this
+ * records enough information to undo that mutation and restore the
+ * state to the previous values.
+ */
+struct StateMutationUndo {
+  // Marks an instruction boundary, along with the flags during
+  // interp.
+  struct Mark {
+    bool wasPEI = true;
+    bool unreachable = false;
+    decltype(StepFlags::mayReadLocalSet) mayReadLocalSet;
+  };
+  // Push to the stack (undone by a pop)
+  struct Push {};
+  // Pop from the stack (undone by pushing the recorded type)
+  struct Pop { Type t; };
+  // Location modification (undone by changing the local slot to the
+  // recorded type)
+  struct Local { LocalId id; Type t; };
+  // Stack modification (undone by changing the stack slot to the
+  // recorded type).
+  struct Stack { size_t idx; Type t; };
+  using Events = boost::variant<Push, Pop, Local, Stack, Mark>;
+
+  std::vector<Events> events;
+
+  void onPush() { events.emplace_back(Push{}); }
+  void onPop(Type old) { events.emplace_back(Pop{ std::move(old) }); }
+  void onStackWrite(size_t idx, Type old) {
+    events.emplace_back(Stack{ idx, std::move(old) });
+  }
+  void onLocalWrite(LocalId l, Type old) {
+    events.emplace_back(Local{ l, std::move(old) });
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * PropertiesInfo packages the PropState for private instance and
  * static properties, which is cross-block information collected in
  * CollectedInfo.
@@ -520,8 +560,6 @@ struct CollectedInfo {
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};
-  bool (*propagate_constants)(const Bytecode& bc, State& state,
-                              BytecodeVec& out) = nullptr;
   /*
    * See FuncAnalysisResult for details.
    */

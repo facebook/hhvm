@@ -421,7 +421,7 @@ type t = {
    * for a server to be started because we don't want this to grow
    * unbounded. *)
   max_purgatory_clients: int;
-  (* Monitor: how many seconds the monitor waits after handoff before closing the FD *)
+  (* Monitor: how many seconds the monitor waits after handoff before closing the FD, or -1 to wait for server receipt *)
   monitor_fd_close_delay: int;
   search_chunk_size: int;
   io_priority: int;

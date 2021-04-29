@@ -67,9 +67,19 @@ module Sent_fds_collector = struct
    an EOF from being read by the server).
    *)
 
+  (** [sequence_number] is a monotonically increasing integer to identify which
+  handoff message has been sent from monitor to server. The first sequence
+  number is number 1. *)
+  let sequence_number : int ref = ref 0
+
+  let get_and_increment_sequence_number () : int =
+    sequence_number := !sequence_number + 1;
+    !sequence_number
+
   type fd_close_time =
     | Fd_close_immediate
     | Fd_close_after_time of float
+    | Fd_close_upon_receipt of int  (** this int is the sequence number *)
 
   type handed_off_fd_to_close = {
     fd_close_time: fd_close_time;
@@ -89,18 +99,31 @@ module Sent_fds_collector = struct
       handed_off_fds_to_close :=
         { fd_close_time; tracker; fd } :: !handed_off_fds_to_close
 
-  let collect_garbage () =
+  let collect_garbage ~sequence_receipt_high_water_mark =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let t_now = Unix.gettimeofday () in
     let (ready, notready) =
-      List.partition_tf !handed_off_fds_to_close (fun { fd_close_time; _ } ->
+      List.partition_tf
+        !handed_off_fds_to_close
+        (fun { fd_close_time; tracker; _ } ->
           match fd_close_time with
-          | Fd_close_immediate -> true
-          | Fd_close_after_time t -> t <= t_now)
+          | Fd_close_immediate ->
+            log "closing client fd, though should have been immediate" ~tracker;
+            true
+          | Fd_close_after_time t when t <= t_now ->
+            log "closing client fd, after delay" ~tracker;
+            true
+          | Fd_close_upon_receipt seq
+            when seq <= sequence_receipt_high_water_mark ->
+            log
+              "closing client fd #%d upon receipt of #%d"
+              ~tracker
+              seq
+              sequence_receipt_high_water_mark;
+            true
+          | _ -> false)
     in
-    List.iter ready ~f:(fun { tracker; fd; _ } ->
-        log "closing client fd, after delay" ~tracker;
-        Unix.close fd);
+    List.iter ready ~f:(fun { fd; _ } -> Unix.close fd);
     handed_off_fds_to_close := notready;
     ()
 end
@@ -135,7 +158,9 @@ struct
       Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
-    (* After we handoff FD to server, how many seconds to wait before closing? 0 means "close immediately" *)
+    (* After we handoff FD to server, how many seconds to wait before closing?
+     * 0 means "close immediately"
+     * -1 means "wait for server receipt" *)
     monitor_fd_close_delay: int;
   }
 
@@ -303,14 +328,22 @@ struct
   let hand_off_client_connection ~tracker env server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
-    let msg = MonitorRpc.{ m2s_tracker = tracker } in
+    let m2s_sequence_number =
+      Sent_fds_collector.get_and_increment_sequence_number ()
+    in
+    let msg = MonitorRpc.{ m2s_tracker = tracker; m2s_sequence_number } in
     msg_to_channel server_fd msg;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then
       let fd_close_time =
         if env.monitor_fd_close_delay = 0 then
+          (* delay 0 means "close immediately" *)
           Sent_fds_collector.Fd_close_immediate
+        else if env.monitor_fd_close_delay = -1 then
+          (* delay -1 means "close upon read receipt" *)
+          Sent_fds_collector.Fd_close_upon_receipt m2s_sequence_number
         else
+          (* delay >=1 means "close after this time" *)
           Sent_fds_collector.Fd_close_after_time
             (Unix.gettimeofday () +. float_of_int env.monitor_fd_close_delay)
       in
@@ -772,7 +805,10 @@ struct
       Exit.exit Exit_status.Lock_stolen
     );
     let env = maybe_push_purgatory_clients env in
-    let () = Sent_fds_collector.collect_garbage () in
+    (* TODO(ljw): change the following once I implement receipts *)
+    let () =
+      Sent_fds_collector.collect_garbage ~sequence_receipt_high_water_mark:0
+    in
     let has_client = sleep_and_check socket in
     let env = update_status env monitor_config in
     if not has_client then

@@ -22,4 +22,9 @@ type command =
   (* Shut down all servers and then the monitor. *)
   | SHUT_DOWN of Connection_tracker.t
 
-type monitor_to_server_handoff_msg = { m2s_tracker: Connection_tracker.t }
+(** Sent by monitor in ServerMonitor, received by server in ServerClientProvider *)
+type monitor_to_server_handoff_msg = {
+  m2s_tracker: Connection_tracker.t;
+  m2s_sequence_number: int;
+      (** serverMonitor stores a counter, and increments it for each handoff it sends *)
+}

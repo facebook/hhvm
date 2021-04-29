@@ -67,32 +67,36 @@ module Sent_fds_collector = struct
    an EOF from being read by the server).
    *)
 
+  type fd_close_time =
+    | Fd_close_immediate
+    | Fd_close_after_time of float
+
   type handed_off_fd_to_close = {
-    time_to_close: float;
+    fd_close_time: fd_close_time;
     tracker: Connection_tracker.t;
     fd: Unix.file_descr;
   }
 
   let handed_off_fds_to_close : handed_off_fd_to_close list ref = ref []
 
-  let cleanup_fd ~tracker ~monitor_fd_close_delay fd =
+  let cleanup_fd ~tracker ~fd_close_time fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    if monitor_fd_close_delay = 0 then begin
+    match fd_close_time with
+    | Fd_close_immediate ->
       log "closing client fd immediately after handoff" ~tracker;
       Unix.close fd
-    end else
-      let time_to_close =
-        Unix.gettimeofday () +. float_of_int monitor_fd_close_delay
-      in
+    | _ ->
       handed_off_fds_to_close :=
-        { time_to_close; tracker; fd } :: !handed_off_fds_to_close
+        { fd_close_time; tracker; fd } :: !handed_off_fds_to_close
 
   let collect_garbage () =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let t = Unix.gettimeofday () in
+    let t_now = Unix.gettimeofday () in
     let (ready, notready) =
-      List.partition_tf !handed_off_fds_to_close (fun { time_to_close; _ } ->
-          time_to_close <= t)
+      List.partition_tf !handed_off_fds_to_close (fun { fd_close_time; _ } ->
+          match fd_close_time with
+          | Fd_close_immediate -> true
+          | Fd_close_after_time t -> t <= t_now)
     in
     List.iter ready ~f:(fun { tracker; fd; _ } ->
         log "closing client fd, after delay" ~tracker;
@@ -303,10 +307,14 @@ struct
     msg_to_channel server_fd msg;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then
-      Sent_fds_collector.cleanup_fd
-        ~tracker
-        ~monitor_fd_close_delay:env.monitor_fd_close_delay
-        client_fd
+      let fd_close_time =
+        if env.monitor_fd_close_delay = 0 then
+          Sent_fds_collector.Fd_close_immediate
+        else
+          Sent_fds_collector.Fd_close_after_time
+            (Unix.gettimeofday () +. float_of_int env.monitor_fd_close_delay)
+      in
+      Sent_fds_collector.cleanup_fd ~tracker ~fd_close_time client_fd
     else begin
       Hh_logger.log "Failed to handoff FD to server.";
       raise (Send_fd_failure status)

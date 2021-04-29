@@ -554,6 +554,29 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
+const php::Func* ClassAnalysisWorklist::next() {
+  if (worklist.empty()) return nullptr;
+  auto f = worklist.front();
+  inWorklist.erase(f);
+  worklist.pop_front();
+  return f;
+}
+
+bool ClassAnalysisWorklist::schedule(const php::Func& f) {
+  auto const insert = inWorklist.emplace(&f);
+  if (!insert.second) return false;
+  worklist.emplace_back(&f);
+  return true;
+}
+
+void ClassAnalysisWorklist::scheduleForProp(SString name) {
+  auto const it = propDeps.find(name);
+  if (it == propDeps.end()) return;
+  for (auto const f : it->second) schedule(*f);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 FuncAnalysisResult::FuncAnalysisResult(AnalysisContext ctx)
   : ctx(ctx)
   , inferredReturn(TBottom)
@@ -592,7 +615,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   {
     Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-        is_systemlib_part(*ctx.unit)};
+      is_systemlib_part(*ctx.unit)};
     FTRACE(2, "{:#^70}\n", "Class");
   }
 
@@ -615,20 +638,12 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
   for (auto& prop : const_cast<php::Class*>(ctx.cls)->properties) {
     auto const cellTy = from_cell(prop.val);
 
-    if (is_closure(*ctx.cls) ||
-        (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) ||
-        (!cellTy.subtypeOf(TUninit) &&
-         index.satisfies_constraint(ctx, cellTy, prop.typeConstraint) &&
-         std::all_of(prop.ubs.begin(), prop.ubs.end(),
-                     [&](TypeConstraint ub) {
-                       applyFlagsToUB(ub, prop.typeConstraint);
-                       return index.satisfies_constraint(ctx, cellTy, ub);
-                     }))) {
-      prop.attrs |= AttrInitialSatisfiesTC;
-    } else {
+    if (prop_might_have_bad_initial_value(index, *ctx.cls, prop)) {
       prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
       // If Uninit, it will be determined in the 86[s,p]init function.
-      if (!cellTy.subtypeOf(TUninit)) clsAnalysis.badPropInitialValues = true;
+      if (!cellTy.subtypeOf(BUninit)) clsAnalysis.badPropInitialValues = true;
+    } else {
+      prop.attrs |= AttrInitialSatisfiesTC;
     }
 
     if (!(prop.attrs & AttrPrivate)) continue;
@@ -731,79 +746,106 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * fact that there are infinitely growing chains in our type lattice
    * under union_of.
    *
-   * So if we've visited the whole class some number of times and
-   * still aren't at a fixed point, we'll set the property state to
-   * the result of widening the old state with the new state, and then
-   * reset the counter.  This guarantees eventual termination.
+   * So if we've visited a func some number of times and still aren't
+   * at a fixed point, we'll set the property state to the result of
+   * widening the old state with the new state, and then reset the
+   * counter.  This guarantees eventual termination.
    */
-  auto totalVisits = uint32_t{0};
 
-  for (;;) {
-    auto const previousProps   = clsAnalysis.privateProperties;
-    auto const previousStatics = clsAnalysis.privateStatics;
+  ClassAnalysisWorklist work;
+  clsAnalysis.work = &work;
 
-    CompactVector<FuncAnalysis> methodResults;
-    CompactVector<FuncAnalysis> closureResults;
+  using FuncAnalysisMap = hphp_fast_map<const php::Func*, FuncAnalysis>;
+  FuncAnalysisMap methodResults;
+  FuncAnalysisMap closureResults;
 
-    // Analyze every method in the class until we reach a fixed point
-    // on the private property states.
-    for (auto& f : ctx.cls->methods) {
-      if (f->name->isame(s_86pinit.get()) ||
-          f->name->isame(s_86sinit.get()) ||
-          f->name->isame(s_86linit.get()) ||
-          f->name->isame(s_86cinit.get())) {
-        continue;
-      }
+  struct FuncMeta {
+    const php::Unit* unit;
+    const php::Class* cls;
+    FuncAnalysisMap* map;
+    size_t visits = 0;
+  };
+  hphp_fast_map<const php::Func*, FuncMeta> funcMeta;
 
-      auto const wf = php::WideFunc::cns(f.get());
-      auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
-      methodResults.push_back(do_analyze(index, context, &clsAnalysis));
+  // Build up the initial worklist:
+
+  for (auto const& f : ctx.cls->methods) {
+    if (f->name->isame(s_86pinit.get()) ||
+        f->name->isame(s_86sinit.get()) ||
+        f->name->isame(s_86linit.get()) ||
+        f->name->isame(s_86cinit.get())) {
+      continue;
     }
+    auto const DEBUG_ONLY inserted = work.schedule(*f);
+    assertx(inserted);
+    funcMeta.emplace(f.get(), FuncMeta{ctx.unit, ctx.cls, &methodResults});
+  }
 
-    if (associatedClosures) {
-      for (auto const c : *associatedClosures) {
-        auto const wf = php::WideFunc::cns(c->methods[0].get());
-        auto const context = AnalysisContext { ctx.unit, wf, c };
-        closureResults.push_back(do_analyze(index, context, &clsAnalysis));
-      }
+  if (associatedClosures) {
+    for (auto const c : *associatedClosures) {
+      auto const DEBUG_ONLY inserted = work.schedule(*c->methods[0]);
+      assertx(inserted);
+      funcMeta.emplace(
+        c->methods[0].get(),
+        FuncMeta{ctx.unit, c, &closureResults}
+      );
     }
-
-    if (associatedMethods) {
-      for (auto const m : *associatedMethods) {
-        // We throw the results of the analysis away. We're only doing
-        // this for the effects on the private properties, and the
-        // results aren't meaningful outside of this context.
-        auto const wf = php::WideFunc::cns(m);
-        auto const context = AnalysisContext { m->unit, wf, ctx.cls };
-        do_analyze(index, context, &clsAnalysis);
-      }
-    }
-
-    // Check if we've reached a fixed point yet.
-    if (previousProps   == clsAnalysis.privateProperties &&
-        previousStatics == clsAnalysis.privateStatics) {
-      clsAnalysis.methods.reserve(initResults.size() + methodResults.size());
-      for (auto& m : initResults) {
-        clsAnalysis.methods.push_back(std::move(m));
-      }
-      for (auto& m : methodResults) {
-        clsAnalysis.methods.push_back(std::move(m));
-      }
-      clsAnalysis.closures.reserve(closureResults.size());
-      for (auto& m : closureResults) {
-        clsAnalysis.closures.push_back(std::move(m));
-      }
-      break;
-    }
-
-    if (totalVisits++ >= options.analyzeClassWideningLimit) {
-      widen_props(clsAnalysis.privateProperties);
-      widen_props(clsAnalysis.privateStatics);
+  }
+  if (associatedMethods) {
+    for (auto const m : *associatedMethods) {
+      auto const DEBUG_ONLY inserted = work.schedule(*m);
+      assertx(inserted);
+      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr});
     }
   }
 
+  // Keep analyzing until we have more functions scheduled (the fixed
+  // point).
+  while (auto const f = work.next()) {
+    auto metaIt = funcMeta.find(f);
+    assertx(metaIt != funcMeta.end());
+
+    auto const unit = metaIt->second.unit;
+    auto const cls = metaIt->second.cls;
+    auto const map = metaIt->second.map;
+
+    auto const wf = php::WideFunc::cns(f);
+    auto const context = AnalysisContext { unit, wf, cls };
+    auto results = do_analyze(index, context, &clsAnalysis);
+    if (map) map->insert_or_assign(f, std::move(results));
+
+    if (metaIt->second.visits++ >= options.analyzeClassWideningLimit) {
+      for (auto& prop : clsAnalysis.privateProperties) {
+        auto wide = widen_type(prop.second.ty);
+        if (prop.second.ty.strictlyMoreRefined(wide)) {
+          prop.second.ty = std::move(wide);
+          work.scheduleForProp(prop.first);
+        }
+      }
+      for (auto& prop : clsAnalysis.privateStatics) {
+        auto wide = widen_type(prop.second.ty);
+        if (prop.second.ty.strictlyMoreRefined(wide)) {
+          prop.second.ty = std::move(wide);
+          work.scheduleForProp(prop.first);
+        }
+      }
+    }
+  }
+
+  clsAnalysis.methods.reserve(initResults.size() + methodResults.size());
+  for (auto& m : initResults) {
+    clsAnalysis.methods.push_back(std::move(m));
+  }
+  for (auto& kv : methodResults) {
+    clsAnalysis.methods.emplace_back(std::move(kv.second));
+  }
+  clsAnalysis.closures.reserve(closureResults.size());
+  for (auto& kv : closureResults) {
+    clsAnalysis.closures.emplace_back(std::move(kv.second));
+  }
+
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-      is_systemlib_part(*ctx.unit)};
+    is_systemlib_part(*ctx.unit)};
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {
@@ -832,6 +874,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     return ret;
   }());
 
+  clsAnalysis.work = nullptr;
   return clsAnalysis;
 }
 

@@ -481,17 +481,35 @@ struct StateMutationUndo {
 struct PropertiesInfo {
   PropertiesInfo(const Index&, Context, ClassAnalysis*);
 
-  PropState& privateProperties();
-  PropState& privateStatics();
-  const PropState& privateProperties() const;
-  const PropState& privateStatics() const;
+  const PropStateElem<>* readPrivateProp(SString name) const;
+  const PropStateElem<>* readPrivateStatic(SString name) const;
+
+  void mergeInPrivateProp(const Index& index,
+                          SString name,
+                          const Type& t);
+  void mergeInPrivateStatic(const Index& index,
+                            SString name,
+                            const Type& t,
+                            bool ignoreConst,
+                            bool mustBeReadOnly);
+
+  void mergeInPrivateStaticPreAdjusted(SString name, const Type& t);
+
+  void mergeInAllPrivateProps(const Index&, const Type&);
+  void mergeInAllPrivateStatics(const Index&, const Type&,
+                                bool ignoreConst,
+                                bool mustBeReadOnly);
 
   void setBadPropInitialValues();
+
+  const PropState& privatePropertiesRaw() const;
+  const PropState& privateStaticsRaw() const;
 
 private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
+  const php::Func* m_func;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -613,7 +631,6 @@ bool merge_into(State&, const State&);
  * See analyze.cpp for details on when this is needed.
  */
 bool widen_into(State&, const State&);
-void widen_props(PropState&);
 
 //////////////////////////////////////////////////////////////////////
 

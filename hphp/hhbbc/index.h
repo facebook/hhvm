@@ -1007,6 +1007,13 @@ struct Index {
   void init_public_static_prop_types();
 
   /*
+   * Initialize the initial "may have bad initial value" bit for
+   * properties. By initially setting this before analysis, we save
+   * redundant re-analyzes.
+   */
+  void preinit_bad_initial_prop_values();
+
+  /*
    * Refine the types of the class constants defined by an 86cinit,
    * based on a round of analysis.
    *

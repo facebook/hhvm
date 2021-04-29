@@ -142,6 +142,29 @@ struct FuncAnalysis : FuncAnalysisResult {
 };
 
 /*
+ * Store the worklist of functions to be analyzed during
+ * class-at-a-time analysis (along with inter-class dependencies).
+ */
+struct ClassAnalysisWorklist {
+  const php::Func* next();
+
+  void scheduleForProp(SString name);
+  void addPropDep(SString name, const php::Func& f) {
+    propDeps[name].emplace(&f);
+  }
+
+  // Put a func on the worklist. Return true if the func was
+  // scheduled, false if it was already on the list.
+  bool schedule(const php::Func& f);
+
+private:
+  hphp_fast_set<const php::Func*> inWorklist;
+  std::deque<const php::Func*> worklist;
+
+  hphp_fast_map<SString, hphp_fast_set<const php::Func*>> propDeps;
+};
+
+/*
  * The result of a class-at-a-time analysis.
  */
 struct ClassAnalysis {
@@ -162,6 +185,8 @@ struct ClassAnalysis {
   // Inferred types for private instance and static properties.
   PropState privateProperties;
   PropState privateStatics;
+
+  ClassAnalysisWorklist* work{nullptr};
 
   // Whether this class might have a bad initial value for a property.
   bool badPropInitialValues{false};

@@ -84,7 +84,15 @@ bool is_used_trait(const php::Class& cls);
  */
 std::string normalized_class_name(const php::Class& cls);
 
+/*
+ * Returns true if the property has an initial value which might
+ * possibly violate its type-hint. If it returns false, it is
+ * guaranteed to not violate the type-hint.
+ */
+bool prop_might_have_bad_initial_value(const Index& index,
+                                       const php::Class& cls,
+                                       const php::Prop& prop);
+
 //////////////////////////////////////////////////////////////////////
 
 }}
-

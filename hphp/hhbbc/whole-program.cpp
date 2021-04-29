@@ -591,6 +591,7 @@ void whole_program(php::ProgramPtr program,
     // Defer initializing public static property types until after the
     // constant pass, to try to get better initial values.
     index.init_public_static_prop_types();
+    index.preinit_bad_initial_prop_values();
     index.use_class_dependencies(options.HardPrivatePropInference);
     analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
     cleanup_pre = std::thread([&] { index.cleanup_for_final(); });

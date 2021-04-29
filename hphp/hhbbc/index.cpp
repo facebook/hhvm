@@ -4123,10 +4123,9 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
       }
       case AttrPrivate: {
         assertx(clsCtx == ci);
-        auto const& privateStatics = privateProps.privateStatics();
-        auto const it = privateStatics.find(prop.name);
-        if (it == end(privateStatics)) return TInitCell;
-        return remove_uninit(it->second.ty);
+        auto const elem = privateProps.readPrivateStatic(prop.name);
+        if (!elem) return TInitCell;
+        return remove_uninit(elem->ty);
       }
     }
     always_assert(false);
@@ -4294,12 +4293,10 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
         return effects;
       case AttrPrivate: {
         assertx(clsCtx == ci);
-        auto& statics = privateProps.privateStatics();
-        auto const it = statics.find(prop.name);
-        if (it != end(statics)) {
-          ITRACE(6, " {} |= {}\n", show(it->second.ty), show(effects.adjusted));
-          it->second.ty |= unctx(effects.adjusted);
-        }
+        privateProps.mergeInPrivateStaticPreAdjusted(
+          prop.name,
+          unctx(effects.adjusted)
+        );
         return effects;
       }
     }
@@ -5008,6 +5005,28 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
   }
 }
 
+void Index::preinit_bad_initial_prop_values() {
+  trace_time tracer("preinit bad initial prop values");
+  parallel::for_each(
+    m_data->allClassInfos,
+    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      if (is_used_trait(*cinfo->cls)) return;
+
+      cinfo->hasBadInitialPropValues = false;
+      for (auto& prop : const_cast<php::Class*>(cinfo->cls)->properties) {
+        if (prop_might_have_bad_initial_value(*this, *cinfo->cls, prop)) {
+          cinfo->hasBadInitialPropValues = true;
+          prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
+        } else {
+          prop.attrs |= AttrInitialSatisfiesTC;
+        }
+      }
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 const CompactVector<const php::Class*>*
 Index::lookup_closures(const php::Class* cls) const {
   auto const it = m_data->classClosureMap.find(cls);
@@ -5026,6 +5045,7 @@ Index::lookup_extra_methods(const php::Class* cls) const {
   }
   return nullptr;
 }
+
 //////////////////////////////////////////////////////////////////////
 
 template<typename T>
@@ -6325,19 +6345,8 @@ PropMergeResult<> Index::merge_static_type(
     return vname->m_data.pstr;
   }();
 
-  // To be conservative, say we might throw and be conservative about
-  // conversions.
-  auto const conservative = [&] {
-    return PropMergeResult<>{
-      loosen_likeness(val),
-      TriBool::Maybe
-    };
-  };
-
   // The case where we don't know `cls':
   auto const unknownCls = [&] {
-    auto& statics = privateProps.privateStatics();
-
     if (!sname) {
       // Very bad case. We don't know `cls' or the property name. This
       // mutation can be affecting anything, so merge it into all
@@ -6345,38 +6354,30 @@ PropMergeResult<> Index::merge_static_type(
       // properties).
       ITRACE(4, "unknown class and prop. merging everything\n");
       publicMutations.mergeUnknown(ctx);
+      privateProps.mergeInAllPrivateStatics(
+        *this, unctx(val), ignoreConst, mustBeReadOnly
+      );
+    } else {
+      // Otherwise we don't know `cls', but do know the property
+      // name. We'll store this mutation separately and union it in to
+      // any lookup with the same name.
+      ITRACE(4, "unknown class. merging all props with name {}\n", sname);
 
-      // Private properties can only be affected if they're accessible
-      // in the current context.
-      if (!ctx.cls) return conservative();
+      publicMutations.mergeUnknownClass(sname, unctx(val));
 
-      for (auto& kv : statics) {
-        if (!ignoreConst && (kv.second.attrs & AttrIsConst)) continue;
-        if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadOnly)) continue;
-        kv.second.ty |=
-          unctx(adjust_type_for_prop(*this, *ctx.cls, kv.second.tc, val));
-      }
-      return conservative();
+      // Assume that it could possibly affect any private property with
+      // the same name.
+      privateProps.mergeInPrivateStatic(
+        *this, sname, unctx(val), ignoreConst, mustBeReadOnly
+      );
     }
 
-    // Otherwise we don't know `cls', but do know the property
-    // name. We'll store this mutation separately and union it in to
-    // any lookup with the same name.
-    ITRACE(4, "unknown class. merging all props with name {}\n", sname);
-
-    publicMutations.mergeUnknownClass(sname, unctx(val));
-
-    // Assume that it could possibly affect any private property with
-    // the same name.
-    if (!ctx.cls) return conservative();
-    auto it = statics.find(sname);
-    if (it == end(statics)) return conservative();
-    if (!ignoreConst && (it->second.attrs & AttrIsConst)) return conservative();
-    if (mustBeReadOnly && !(it->second.attrs & AttrIsReadOnly)) return conservative();
-
-    it->second.ty |=
-      unctx(adjust_type_for_prop(*this, *ctx.cls, it->second.tc, val));
-    return conservative();
+    // To be conservative, say we might throw and be conservative about
+    // conversions.
+    return PropMergeResult<>{
+      loosen_likeness(val),
+      TriBool::Maybe
+    };
   };
 
   // check if we can determine the class.
@@ -6475,6 +6476,8 @@ void Index::use_class_dependencies(bool f) {
 }
 
 void Index::init_public_static_prop_types() {
+  trace_time tracer("init public static prop types");
+
   for (auto const& cinfo : m_data->allClassInfos) {
     for (auto const& prop : cinfo->cls->properties) {
       if (!(prop.attrs & (AttrPublic|AttrProtected)) ||

@@ -888,31 +888,34 @@ bool iterIsDead(ISS& env, IterId iter) {
  * here actually just union the new type into what we already had.
  */
 
-PropStateElem<>* thisPropRaw(ISS& env, SString name) {
-  auto& privateProperties = env.collect.props.privateProperties();
-  auto const it = privateProperties.find(name);
-  if (it != end(privateProperties)) {
-    return &it->second;
+folly::Optional<Type> thisPropType(ISS& env, SString name) {
+  if (auto const elem = env.collect.props.readPrivateProp(name)) {
+    return elem->ty;
   }
-  return nullptr;
-}
-
-bool isTrackedThisProp(ISS& env, SString name) {
-  return thisPropRaw(env, name);
+  return folly::none;
 }
 
 bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
-  auto const prop = thisPropRaw(env, name);
-  // Prop either doesn't exist, or is on an unflattened trait. Be conservative.
-  return prop ? prop->attrs & attr : true;
+  auto const& raw = env.collect.props.privatePropertiesRaw();
+  auto const it = raw.find(name);
+  // Prop either doesn't exist, or is on an unflattened trait. Be
+  // conservative.
+  if (it == raw.end()) return true;
+  return it->second.attrs & attr;
+}
+
+bool isDefinitelyThisPropAttr(ISS& env, SString name, Attr attr) {
+  auto const& raw = env.collect.props.privatePropertiesRaw();
+  auto const it = raw.find(name);
+  // Prop either doesn't exist, or is on an unflattened trait. Be
+  // conservative.
+  if (it == raw.end()) return false;
+  return it->second.attrs & attr;
 }
 
 void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
-  for (auto& kv : env.collect.props.privateProperties()) {
-    kv.second.ty |=
-      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
-  }
+  env.collect.props.mergeInAllPrivateProps(env.index, TCell);
 }
 
 /*
@@ -920,7 +923,7 @@ void killThisProps(ISS& env) {
  * that could result from reading a property $this->name.
  */
 folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
-  auto const elem = thisPropRaw(env, name);
+  auto const elem = env.collect.props.readPrivateProp(name);
   if (!elem) return folly::none;
   if (elem->ty.couldBe(BUninit) && !is_specialized_obj(thisType(env))) {
     return TInitCell;
@@ -939,12 +942,11 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
  * property type.
  */
 void mergeThisProp(ISS& env, SString name, Type type) {
-  auto const elem = thisPropRaw(env, name);
-  if (!elem) return;
-  auto adjusted = adjust_type_for_prop(
-    env.index, *env.ctx.cls, elem->tc,
-    loosen_vec_or_dict(loosen_all(type)));
-  elem->ty |= std::move(adjusted);
+  env.collect.props.mergeInPrivateProp(
+    env.index,
+    name,
+    loosen_vec_or_dict(loosen_all(std::move(type)))
+  );
 }
 
 /*
@@ -954,10 +956,12 @@ void mergeThisProp(ISS& env, SString name, Type type) {
  * The types given to the map function are the raw tracked types
  * (i.e. could be TUninit).
  */
-template<class MapFn>
+template<typename MapFn>
 void mergeEachThisPropRaw(ISS& env, MapFn fn) {
-  for (auto& kv : env.collect.props.privateProperties()) {
-    mergeThisProp(env, kv.first, fn(kv.second.ty));
+  for (auto const& kv : env.collect.props.privatePropertiesRaw()) {
+    auto const ty = thisPropType(env, kv.first);
+    assertx(ty.has_value());
+    mergeThisProp(env, kv.first, *ty);
   }
 }
 
@@ -966,9 +970,7 @@ void unsetThisProp(ISS& env, SString name) {
 }
 
 void unsetUnknownThisProp(ISS& env) {
-  for (auto& kv : env.collect.props.privateProperties()) {
-    mergeThisProp(env, kv.first, TUninit);
-  }
+  env.collect.props.mergeInAllPrivateProps(env.index, TUninit);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -979,10 +981,7 @@ void unsetUnknownThisProp(ISS& env) {
 
 void killPrivateStatics(ISS& env) {
   FTRACE(2, "    killPrivateStatics\n");
-  for (auto& kv : env.collect.props.privateStatics()) {
-    kv.second.ty |=
-      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TInitCell);
-  }
+  env.collect.props.mergeInAllPrivateStatics(env.index, TInitCell, true, false);
 }
 
 //////////////////////////////////////////////////////////////////////

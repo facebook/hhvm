@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
@@ -89,6 +90,31 @@ std::string normalized_class_name(const php::Class& cls) {
   auto const name = cls.name->toCppString();
   if (!PreClassEmitter::IsAnonymousClassName(name)) return name;
   return name.substr(0, name.find_last_of(';'));
+}
+
+bool prop_might_have_bad_initial_value(const Index& index,
+                                       const php::Class& cls,
+                                       const php::Prop& prop) {
+  assertx(!is_used_trait(cls));
+
+  if (is_closure(cls)) return false;
+  if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
+
+  auto const initial = from_cell(prop.val);
+  if (initial.subtypeOf(BUninit)) return true;
+
+  auto const ctx = Context{ cls.unit, nullptr, &cls };
+  if (!index.satisfies_constraint(ctx, initial, prop.typeConstraint)) {
+    return true;
+  }
+
+  return std::any_of(
+    prop.ubs.begin(), prop.ubs.end(),
+    [&] (TypeConstraint ub) {
+      applyFlagsToUB(ub, prop.typeConstraint);
+      return !index.satisfies_constraint(ctx, initial, ub);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -204,6 +204,7 @@ PropertiesInfo::PropertiesInfo(const Index& index,
                                Context ctx,
                                ClassAnalysis* cls)
   : m_cls(cls)
+  , m_func(ctx.func)
 {
   if (m_cls == nullptr && ctx.cls != nullptr) {
     m_privateProperties = index.lookup_private_props(ctx.cls);
@@ -211,26 +212,124 @@ PropertiesInfo::PropertiesInfo(const Index& index,
   }
 }
 
-PropState& PropertiesInfo::privateProperties() {
+const PropState& PropertiesInfo::privatePropertiesRaw() const {
   if (m_cls != nullptr) {
     return m_cls->privateProperties;
   }
   return m_privateProperties;
 }
 
-PropState& PropertiesInfo::privateStatics() {
+const PropState& PropertiesInfo::privateStaticsRaw() const {
   if (m_cls != nullptr) {
     return m_cls->privateStatics;
   }
   return m_privateStatics;
 }
 
-const PropState& PropertiesInfo::privateProperties() const {
-  return const_cast<PropertiesInfo*>(this)->privateProperties();
+const PropStateElem<>*
+PropertiesInfo::readPrivateProp(SString name) const {
+  if (m_cls != nullptr) {
+    auto const it = m_cls->privateProperties.find(name);
+    if (it == m_cls->privateProperties.end()) return nullptr;
+    if (m_cls->work) m_cls->work->addPropDep(name, *m_func);
+    return &it->second;
+  }
+  auto const it = m_privateProperties.find(name);
+  return it == m_privateProperties.end() ? nullptr : &it->second;
 }
 
-const PropState& PropertiesInfo::privateStatics() const {
-  return const_cast<PropertiesInfo*>(this)->privateStatics();
+const PropStateElem<>*
+PropertiesInfo::readPrivateStatic(SString name) const {
+  if (m_cls != nullptr) {
+    auto const it = m_cls->privateStatics.find(name);
+    if (it == m_cls->privateStatics.end()) return nullptr;
+    if (m_cls->work) m_cls->work->addPropDep(name, *m_func);
+    return &it->second;
+  }
+  auto const it = m_privateStatics.find(name);
+  return it == m_privateStatics.end() ? nullptr : &it->second;
+}
+
+void PropertiesInfo::mergeInPrivateProp(const Index& index,
+                                        SString name,
+                                        const Type& t) {
+  if (!m_cls || t.is(BBottom)) return;
+  auto it = m_cls->privateProperties.find(name);
+  if (it == m_cls->privateProperties.end()) return;
+  auto newT = union_of(
+    it->second.ty,
+    adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
+  );
+  if (it->second.ty.strictlyMoreRefined(newT)) {
+    it->second.ty = std::move(newT);
+    if (m_cls->work) m_cls->work->scheduleForProp(name);
+  }
+}
+
+void PropertiesInfo::mergeInPrivateStatic(const Index& index,
+                                          SString name,
+                                          const Type& t,
+                                          bool ignoreConst,
+                                          bool mustBeReadOnly) {
+  if (!m_cls || t.is(BBottom)) return;
+  auto it = m_cls->privateStatics.find(name);
+  if (it == m_cls->privateStatics.end()) return;
+  if (!ignoreConst && (it->second.attrs & AttrIsConst)) return;
+  if (mustBeReadOnly && !(it->second.attrs & AttrIsReadOnly)) return;
+  auto newT = union_of(
+    it->second.ty,
+    adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
+  );
+  if (it->second.ty.strictlyMoreRefined(newT)) {
+    it->second.ty = std::move(newT);
+    if (m_cls->work) m_cls->work->scheduleForProp(name);
+  }
+}
+
+void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
+                                                     const Type& t) {
+  if (!m_cls || t.is(BBottom)) return;
+  auto it = m_cls->privateStatics.find(name);
+  if (it == m_cls->privateStatics.end()) return;
+  auto newT = union_of(it->second.ty, t);
+  if (it->second.ty.strictlyMoreRefined(newT)) {
+    it->second.ty = std::move(newT);
+    if (m_cls->work) m_cls->work->scheduleForProp(name);
+  }
+}
+
+void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
+                                            const Type& t) {
+  if (!m_cls || t.is(BBottom)) return;
+  for (auto& kv : m_cls->privateProperties) {
+    auto newT = union_of(
+      kv.second.ty,
+      adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)
+    );
+    if (kv.second.ty.strictlyMoreRefined(newT)) {
+      kv.second.ty = std::move(newT);
+      if (m_cls->work) m_cls->work->scheduleForProp(kv.first);
+    }
+  }
+}
+
+void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
+                                              const Type& t,
+                                              bool ignoreConst,
+                                              bool mustBeReadOnly) {
+  if (!m_cls || t.is(BBottom)) return;
+  for (auto& kv : m_cls->privateStatics) {
+    if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;
+    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadOnly)) return;
+    auto newT = union_of(
+      kv.second.ty,
+      adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)
+    );
+    if (kv.second.ty.strictlyMoreRefined(newT)) {
+      kv.second.ty = std::move(newT);
+      if (m_cls->work) m_cls->work->scheduleForProp(kv.first);
+    }
+  }
 }
 
 void PropertiesInfo::setBadPropInitialValues() {
@@ -251,12 +350,6 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
   assertx(types.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
     current[i] |= std::move(types[i]);
-  }
-}
-
-void widen_props(PropState& props) {
-  for (auto& prop : props) {
-    prop.second.ty = widen_type(std::move(prop.second.ty));
   }
 }
 
@@ -621,10 +714,10 @@ std::string state_string(const php::Func& f, const State& st,
 std::string property_state_string(const PropertiesInfo& props) {
   std::string ret;
 
-  for (auto& kv : props.privateProperties()) {
+  for (auto const& kv : props.privatePropertiesRaw()) {
     folly::format(&ret, "$this->{: <14} :: {}\n", kv.first, show(kv.second.ty));
   }
-  for (auto& kv : props.privateStatics()) {
+  for (auto const& kv : props.privateStaticsRaw()) {
     folly::format(&ret, "self::${: <14} :: {}\n", kv.first, show(kv.second.ty));
   }
 

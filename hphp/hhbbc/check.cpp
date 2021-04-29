@@ -187,6 +187,7 @@ bool check(const php::Unit& u) {
 }
 
 bool check(const php::Program& p) {
+  trace_time tracer("check");
   for (DEBUG_ONLY auto& u : p.units) assertx(check(*u));
   return true;
 }

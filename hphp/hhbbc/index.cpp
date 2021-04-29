@@ -1572,14 +1572,74 @@ struct TMIOps {
 using TMIData = TraitMethodImportData<TraitMethod,
                                       TMIOps>;
 
+template<typename T>
+struct PreResolveUpdates {
+  TinyVector<std::unique_ptr<T>> newInfos;
+  TinyVector<T*> updateDeps;
+
+  struct CnsHash {
+    size_t operator()(const ClassInfo::ConstIndex& cns) const {
+      return hash_int64_pair((uintptr_t)cns.cls, cns.idx);
+    }
+  };
+  struct CnsEquals {
+    bool operator()(const ClassInfo::ConstIndex& cns1,
+                    const ClassInfo::ConstIndex& cns2) const {
+      return
+        cns1.cls == cns2.cls &&
+        cns1.idx == cns2.idx;
+    }
+  };
+
+  hphp_fast_set<ClassInfo::ConstIndex, CnsHash, CnsEquals> removeNoOverride;
+
+  hphp_hash_map<
+    const php::Class*,
+    hphp_fast_set<const php::Func*>
+  > extraMethods;
+  hphp_hash_map<
+    const php::Class*,
+    CompactVector<const php::Class*>
+  > closures;
+  CompactVector<const php::Class*> newClosures;
+  CompactVector<
+    std::tuple<std::unique_ptr<php::Class>, php::Unit*, uint32_t>
+  > newClasses;
+
+  struct UnitPtrHashCompare {
+    bool equal(const php::Unit* u1, const php::Unit* u2) const {
+      return u1 == u2;
+    }
+    size_t hash(const php::Unit* u) const {
+      return pointer_hash<const php::Unit>{}(u);
+    }
+  };
+
+  using UnitNumClasses =
+    tbb::concurrent_hash_map<const php::Unit*, uint32_t, UnitPtrHashCompare>;
+  UnitNumClasses* numClasses = nullptr;
+
+  uint32_t nextClass(const php::Unit& unit) {
+    typename UnitNumClasses::accessor acc;
+    numClasses->insert(
+      acc,
+      std::make_pair(&unit, unit.classes.size())
+    );
+    return acc->second++;
+  }
+};
+
+using RecPreResolveUpdates = PreResolveUpdates<RecordInfo>;
+using ClsPreResolveUpdates = PreResolveUpdates<ClassInfo>;
+
 /*
  * Make a flattened table of the constants on this class.
  */
-bool build_class_constants(ClassInfo* cinfo) {
-  auto const removeNoOverride = [&] (const php::Const* c) {
+bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
+  auto const removeNoOverride = [&] (ClassInfo::ConstIndex cns) {
     // During hhbbc/parse, all constants are pre-set to NoOverride
-    ITRACE(2, "Removing NoOverride on {}::{}\n", c->cls->name, c->name);
-    const_cast<php::Const*>(c)->isNoOverride = false;
+    ITRACE(2, "Removing NoOverride on {}::{}\n", cns->cls->name, cns->name);
+    if (cns->isNoOverride) updates.removeNoOverride.emplace(cns);
   };
 
   if (cinfo->parent) cinfo->clsConstants = cinfo->parent->clsConstants;
@@ -1643,7 +1703,7 @@ bool build_class_constants(ClassInfo* cinfo) {
 
       // Constants from traits silently lose
       if (fromTrait) {
-        removeNoOverride(cns.get());
+        removeNoOverride(cns);
         return true;
       }
 
@@ -1663,7 +1723,7 @@ bool build_class_constants(ClassInfo* cinfo) {
       }
     }
 
-    removeNoOverride(existing.get());
+    removeNoOverride(existing);
     existing = cns;
     if (fromTrait) {
       cinfo->preResolveState->constsFromTraits.emplace(cns->name);
@@ -1684,7 +1744,7 @@ bool build_class_constants(ClassInfo* cinfo) {
 
   for (uint32_t idx = 0; idx < cinfo->cls->constants.size(); ++idx) {
     auto const cns = ClassInfo::ConstIndex { cinfo->cls, idx };
-    if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns.get());
+    if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns);
     if (!add(cns, false)) return false;
   }
 
@@ -1895,13 +1955,15 @@ bool build_class_properties(ClassInfo* cinfo) {
  * fatal, but note that resolve_method needs to be pretty careful about
  * privates and overriding in general.
  */
-bool build_class_methods(IndexData& index, ClassInfo* cinfo) {
+bool build_class_methods(const IndexData& index,
+                         ClassInfo* cinfo,
+                         ClsPreResolveUpdates& updates) {
   if (cinfo->cls->attrs & AttrInterface) return true;
 
   auto const methodOverride = [&] (auto& it,
-                             const php::Func* meth,
-                             Attr attrs,
-                             SString name) {
+                                   const php::Func* meth,
+                                   Attr attrs,
+                                   SString name) {
     if (it->second.func->attrs & AttrFinal) {
       if (!is_mock_class(cinfo->cls)) {
         ITRACE(2,
@@ -1988,10 +2050,13 @@ bool build_class_methods(IndexData& index, ClassInfo* cinfo) {
         TraitMethod traitMethod { t, m->second.func, m->second.attrs };
         tmid.add(traitMethod, m->first);
       }
-      for (auto const c : index.classClosureMap[t->cls]) {
-        auto const invoke = find_method(c, s_invoke.get());
-        assertx(invoke);
-        index.classExtraMethodMap[cinfo->cls].insert(invoke);
+      if (auto const it = index.classClosureMap.find(t->cls);
+          it != index.classClosureMap.end()) {
+        for (auto const& c : it->second) {
+          auto const invoke = find_method(c, s_invoke.get());
+          assertx(invoke);
+          updates.extraMethods[cinfo->cls].emplace(invoke);
+        }
       }
     }
 
@@ -2032,7 +2097,7 @@ bool build_class_methods(IndexData& index, ClassInfo* cinfo) {
         }
         res.first->second.idx = idx++;
       }
-      index.classExtraMethodMap[cinfo->cls].insert(method);
+      updates.extraMethods[cinfo->cls].emplace(method);
     }
   } catch (TMIOps::TMIException& ex) {
     ITRACE(2,
@@ -2070,7 +2135,9 @@ bool enforce_in_maybe_sealed_parent_whitelist(
  * This function return false if instantiating the cinfo would be a
  * fatal at runtime.
  */
-bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
+bool build_cls_info(const IndexData& index,
+                    ClassInfo* cinfo,
+                    ClsPreResolveUpdates& updates) {
   if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, cinfo->parent)) {
     return false;
   }
@@ -2091,10 +2158,10 @@ bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
     }
   }
 
-  if (!build_class_constants(cinfo)) return false;
+  if (!build_class_constants(cinfo, updates)) return false;
   if (!build_class_impl_interfaces(cinfo)) return false;
   if (!build_class_properties(cinfo)) return false;
-  if (!build_class_methods(index, cinfo)) return false;
+  if (!build_class_methods(index, cinfo, updates)) return false;
   return true;
 }
 
@@ -2177,8 +2244,6 @@ folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T> struct NamingEnv;
-
 template<class T>
 struct PhpTypeHelper;
 
@@ -2194,9 +2259,12 @@ struct PhpTypeHelper<php::Class> {
 
   static std::string name() { return "class"; }
 
-  static void assert_bases(NamingEnv<php::Class>& env, const php::Class* cls);
-  static void try_flatten_traits(NamingEnv<php::Class>&,
-                                 const php::Class*, ClassInfo*);
+  static void assert_bases(const IndexData&, const php::Class* cls);
+  static void try_flatten_traits(const php::Program*, const IndexData&,
+                                 const php::Class*, ClassInfo*,
+                                 ClsPreResolveUpdates&);
+
+  using Info = ClassInfo;
 };
 
 template<>
@@ -2208,9 +2276,12 @@ struct PhpTypeHelper<php::Record> {
 
   static std::string name() { return "record"; }
 
-  static void assert_bases(NamingEnv<php::Record>& env, const php::Record* rec);
-  static void try_flatten_traits(NamingEnv<php::Record>&,
-                                 const php::Record*, RecordInfo*);
+  static void assert_bases(const IndexData&, const php::Record* rec);
+  static void try_flatten_traits(const php::Program*, const IndexData&,
+                                 const php::Record*, RecordInfo*,
+                                 RecPreResolveUpdates&);
+
+  using Info = RecordInfo;
 };
 
 template<typename T>
@@ -2325,40 +2396,24 @@ template<class T>
 using TypeInfo = typename std::conditional<std::is_same<T, php::Class>::value,
                                            ClassInfo, RecordInfo>::type;
 
-template<typename T>
-struct NamingEnv {
-  NamingEnv(php::Program* program, IndexData& index, TypeInfoData<T>& tid) :
-      program{program}, index{index}, tid{tid} {}
 
-  php::Program*                              program;
-  IndexData&                                 index;
-  TypeInfoData<T>&                           tid;
-  std::unordered_map<
-    const T*,
-    TypeInfo<T>*,
-    pointer_hash<T>>                         resolved;
-};
-
-using ClassNamingEnv = NamingEnv<php::Class>;
-using RecordNamingEnv = NamingEnv<php::Record>;
-
-void PhpTypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
+void PhpTypeHelper<php::Class>::assert_bases(const IndexData& index,
                                              const php::Class* cls) {
   if (cls->parentName) {
-    assertx(env.index.classInfo.count(cls->parentName));
+    assertx(index.classInfo.count(cls->parentName));
   }
   for (DEBUG_ONLY auto& i : cls->interfaceNames) {
-    assertx(env.index.classInfo.count(i));
+    assertx(index.classInfo.count(i));
   }
   for (DEBUG_ONLY auto& t : cls->usedTraitNames) {
-    assertx(env.index.classInfo.count(t));
+    assertx(index.classInfo.count(t));
   }
 }
 
-void PhpTypeHelper<php::Record>::assert_bases(NamingEnv<php::Record>& env,
+void PhpTypeHelper<php::Record>::assert_bases(const IndexData& index,
                                               const php::Record* rec) {
   if (rec->parentName) {
-    assertx(env.index.recordInfo.count(rec->parentName));
+    assertx(index.recordInfo.count(rec->parentName));
   }
 }
 
@@ -2367,18 +2422,22 @@ using ClonedClosureMap = hphp_hash_map<
   std::pair<std::unique_ptr<php::Class>, uint32_t>
 >;
 
+
 std::unique_ptr<php::Func> clone_meth_helper(
+  php::Unit* unit,
   php::Class* newContext,
   const php::Func* origMeth,
   std::unique_ptr<php::Func> cloneMeth,
   std::atomic<uint32_t>& nextFuncId,
-  uint32_t& nextClass,
-  ClonedClosureMap& clonedClosures);
+  ClsPreResolveUpdates& updates,
+  ClonedClosureMap& clonedClosures
+);
 
-std::unique_ptr<php::Class> clone_closure(php::Class* newContext,
+std::unique_ptr<php::Class> clone_closure(php::Unit* unit,
+                                          php::Class* newContext,
                                           php::Class* cls,
                                           std::atomic<uint32_t>& nextFuncId,
-                                          uint32_t& nextClass,
+                                          ClsPreResolveUpdates& updates,
                                           ClonedClosureMap& clonedClosures) {
   auto clone = std::make_unique<php::Class>(*cls);
   assertx(clone->closureContextCls);
@@ -2386,11 +2445,12 @@ std::unique_ptr<php::Class> clone_closure(php::Class* newContext,
   clone->unit = newContext->unit;
   auto i = 0;
   for (auto& cloneMeth : clone->methods) {
-    cloneMeth = clone_meth_helper(clone.get(),
+    cloneMeth = clone_meth_helper(unit,
+                                  clone.get(),
                                   cls->methods[i++].get(),
                                   std::move(cloneMeth),
                                   nextFuncId,
-                                  nextClass,
+                                  updates,
                                   clonedClosures);
     if (!cloneMeth) return nullptr;
   }
@@ -2398,11 +2458,12 @@ std::unique_ptr<php::Class> clone_closure(php::Class* newContext,
 }
 
 std::unique_ptr<php::Func> clone_meth_helper(
+  php::Unit* unit,
   php::Class* newContext,
   const php::Func* origMeth,
   std::unique_ptr<php::Func> cloneMeth,
   std::atomic<uint32_t>& nextFuncId,
-  uint32_t& nextClass,
+  ClsPreResolveUpdates& preResolveUpdates,
   ClonedClosureMap& clonedClosures) {
 
   cloneMeth->cls  = newContext;
@@ -2421,11 +2482,13 @@ std::unique_ptr<php::Func> clone_meth_helper(
     auto const cls = origMeth->unit->classes[*clsId].get();
     auto& elm = clonedClosures[cls];
     if (!elm.first) {
-      elm.first = clone_closure(newContext->closureContextCls ?
+      elm.first = clone_closure(unit,
+                                newContext->closureContextCls ?
                                 newContext->closureContextCls : newContext,
-                                cls, nextFuncId, nextClass, clonedClosures);
+                                cls, nextFuncId, preResolveUpdates,
+                                clonedClosures);
       if (!elm.first) return false;
-      elm.second = nextClass++;
+      elm.second = preResolveUpdates.nextClass(*unit);
     }
     *clsId = elm.second;
     return true;
@@ -2461,26 +2524,29 @@ std::unique_ptr<php::Func> clone_meth_helper(
   return cloneMeth;
 }
 
-std::unique_ptr<php::Func> clone_meth(php::Class* newContext,
+std::unique_ptr<php::Func> clone_meth(php::Unit* unit,
+                                      php::Class* newContext,
                                       const php::Func* origMeth,
                                       SString name,
                                       Attr attrs,
                                       std::atomic<uint32_t>& nextFuncId,
-                                      uint32_t& nextClass,
+                                      ClsPreResolveUpdates& updates,
                                       ClonedClosureMap& clonedClosures) {
 
   auto cloneMeth  = std::make_unique<php::Func>(*origMeth);
   cloneMeth->name = name;
   cloneMeth->attrs = attrs | AttrTrait;
-  return clone_meth_helper(newContext, origMeth, std::move(cloneMeth),
-                           nextFuncId, nextClass, clonedClosures);
+  return clone_meth_helper(unit, newContext, origMeth, std::move(cloneMeth),
+                           nextFuncId, updates, clonedClosures);
 }
 
 bool merge_inits(std::vector<std::unique_ptr<php::Func>>& clones,
-              ClassInfo* cinfo,
-              std::atomic<uint32_t>& nextFuncId,
-              uint32_t& nextClass,
-              ClonedClosureMap& clonedClosures, SString xinitName) {
+                 php::Unit* unit,
+                 ClassInfo* cinfo,
+                 std::atomic<uint32_t>& nextFuncId,
+                 ClsPreResolveUpdates& updates,
+                 ClonedClosureMap& clonedClosures,
+                 SString xinitName) {
   auto const cls = const_cast<php::Class*>(cinfo->cls);
   std::unique_ptr<php::Func> empty;
   auto& xinit = [&] () -> std::unique_ptr<php::Func>& {
@@ -2494,8 +2560,8 @@ bool merge_inits(std::vector<std::unique_ptr<php::Func>>& clones,
     if (!xinit) {
       ITRACE(5, "  - cloning {}::{} as {}::{}\n",
              func->cls->name, func->name, cls->name, xinitName);
-      xinit = clone_meth(cls, func, func->name, func->attrs, nextFuncId,
-                         nextClass, clonedClosures);
+      xinit = clone_meth(unit, cls, func, func->name, func->attrs, nextFuncId,
+                         updates, clonedClosures);
       return xinit != nullptr;
     }
 
@@ -2530,12 +2596,12 @@ bool merge_inits(std::vector<std::unique_ptr<php::Func>>& clones,
   return true;
 }
 
-
 bool merge_xinits(Attr attr,
                   std::vector<std::unique_ptr<php::Func>>& clones,
+                  php::Unit* unit,
                   ClassInfo* cinfo,
                   std::atomic<uint32_t>& nextFuncId,
-                  uint32_t& nextClass,
+                  ClsPreResolveUpdates& updates,
                   ClonedClosureMap& clonedClosures) {
   auto const xinitName = [&]() {
     switch (attr) {
@@ -2563,45 +2629,55 @@ bool merge_xinits(Attr attr,
       ITRACE(5, "merge_xinits: {}: Needs merge for {}{}prop `{}'\n",
               cinfo->cls->name, attr & AttrStatic ? "static " : "",
               attr & AttrLSB ? "lsb " : "", p.name);
-      return merge_inits(clones, cinfo, nextFuncId,
-                         nextClass, clonedClosures, xinitName);
+      return merge_inits(clones, unit, cinfo, nextFuncId,
+                         updates, clonedClosures, xinitName);
     }
   }
   return true;
 }
 
 bool merge_cinits(std::vector<std::unique_ptr<php::Func>>& clones,
+                  php::Unit* unit,
                   ClassInfo* cinfo,
                   std::atomic<uint32_t>& nextFuncId,
-                  uint32_t& nextClass,
+                  ClsPreResolveUpdates& updates,
                   ClonedClosureMap& clonedClosures) {
   auto const xinitName = s_86cinit.get();
   for (auto const& c : cinfo->traitConsts) {
     if (c.val && c.val->m_type == KindOfUninit) {
-      return merge_inits(clones, cinfo, nextFuncId,
-                         nextClass, clonedClosures, xinitName);
+      return merge_inits(clones, unit, cinfo, nextFuncId,
+                         updates, clonedClosures, xinitName);
     }
   }
   return true;
 }
 
-void rename_closure(ClassNamingEnv& env, php::Class* cls) {
+void rename_closure(const IndexData& index,
+                    php::Class* cls,
+                    ClsPreResolveUpdates& updates) {
   auto n = cls->name->slice();
   auto const p = n.find(';');
   if (p != std::string::npos) {
     n = n.subpiece(0, p);
   }
   auto const newName = makeStaticString(NewAnonymousClassName(n));
-  assertx(!env.index.classes.count(newName));
+  assertx(!index.classes.count(newName));
   cls->name = newName;
-  env.index.classes.emplace(newName, cls);
+  updates.newClosures.emplace_back(cls);
 }
 
-template <typename T> void preresolve(NamingEnv<T>& env, const T* type);
+template <typename T>
+void preresolve(const php::Program*,
+                const IndexData&,
+                const T*,
+                PreResolveUpdates<typename PhpTypeHelper<T>::Info>&);
 
-void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
+void flatten_traits(const php::Program* program,
+                    const IndexData& index,
+                    ClassInfo* cinfo,
+                    ClsPreResolveUpdates& updates) {
   bool hasConstProp = false;
-  for (auto t : cinfo->usedTraits) {
+  for (auto const t : cinfo->usedTraits) {
     if (t->usedTraits.size() && !(t->cls->attrs & AttrNoExpandTrait)) {
       ITRACE(5, "Not flattening {} because of {}\n",
              cinfo->cls->name, t->cls->name);
@@ -2625,15 +2701,15 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     methodsToAdd.push_back(mteFromElm(ent));
   }
 
-  auto const it = env.index.classExtraMethodMap.find(cinfo->cls);
+  auto const it = updates.extraMethods.find(cinfo->cls);
 
   if (!methodsToAdd.empty()) {
-    assertx(it != env.index.classExtraMethodMap.end());
+    assertx(it != updates.extraMethods.end());
     std::sort(begin(methodsToAdd), end(methodsToAdd),
               [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
                 return a->second.idx < b->second.idx;
               });
-  } else if (debug && it != env.index.classExtraMethodMap.end()) {
+  } else if (debug && it != updates.extraMethods.end()) {
     // When building the ClassInfos, we proactively added all closures
     // from usedTraits to classExtraMethodMap; but now we're going to
     // start from the used methods, and deduce which closures actually
@@ -2648,11 +2724,12 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
 
   std::vector<std::unique_ptr<php::Func>> clones;
   ClonedClosureMap clonedClosures;
-  uint32_t nextClassId = cls->unit->classes.size();
+  auto& nextFuncId = const_cast<php::Program*>(program)->nextFuncId;
+
   for (auto const ent : methodsToAdd) {
-    auto clone = clone_meth(cls, ent->second.func, ent->first,
-                            ent->second.attrs, env.program->nextFuncId,
-                            nextClassId, clonedClosures);
+    auto clone = clone_meth(cls->unit, cls, ent->second.func, ent->first,
+                            ent->second.attrs, nextFuncId,
+                            updates, clonedClosures);
     if (!clone) {
       ITRACE(5, "Not flattening {} because {}::{} could not be cloned\n",
              cls->name, ent->second.func->cls->name, ent->first);
@@ -2666,12 +2743,12 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
   }
 
   if (cinfo->traitProps.size()) {
-    if (!merge_xinits(AttrNone, clones, cinfo,
-                      env.program->nextFuncId, nextClassId, clonedClosures) ||
-        !merge_xinits(AttrStatic, clones, cinfo,
-                      env.program->nextFuncId, nextClassId, clonedClosures) ||
-        !merge_xinits(AttrLSB, clones, cinfo,
-                      env.program->nextFuncId, nextClassId, clonedClosures)) {
+    if (!merge_xinits(AttrNone, clones, cls->unit, cinfo,
+                      nextFuncId, updates, clonedClosures) ||
+        !merge_xinits(AttrStatic, clones, cls->unit, cinfo,
+                      nextFuncId, updates, clonedClosures) ||
+        !merge_xinits(AttrLSB, clones, cls->unit, cinfo,
+                      nextFuncId, updates, clonedClosures)) {
       ITRACE(5, "Not flattening {} because we couldn't merge the 86xinits\n",
              cls->name);
       return;
@@ -2680,7 +2757,7 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
 
   // flatten initializers for constants in traits
   if (cinfo->traitConsts.size()) {
-    if (!merge_cinits(clones, cinfo, env.program->nextFuncId, nextClassId,
+    if (!merge_cinits(clones, cls->unit, cinfo, nextFuncId, updates,
                       clonedClosures)) {
       ITRACE(5, "Not flattening {} because we couldn't merge the 86cinits\n",
              cls->name);
@@ -2690,7 +2767,7 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
 
   // We're now committed to flattening.
   ITRACE(3, "Flattening {}\n", cls->name);
-  if (it != env.index.classExtraMethodMap.end()) it->second.clear();
+  if (it != updates.extraMethods.end()) it->second.clear();
   for (auto const& p : cinfo->traitProps) {
     ITRACE(5, "  - prop {}\n", p.name);
     cls->properties.push_back(p);
@@ -2731,18 +2808,20 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     if (cinit) cls->methods.push_back(std::move(cinit));
 
     if (clonedClosures.size()) {
-      auto& classClosures = env.index.classClosureMap[cls];
-      cls->unit->classes.resize(nextClassId);
+      auto& closures = updates.closures[cls];
       for (auto& ent : clonedClosures) {
-        auto const clo = ent.second.first.get();
-        rename_closure(env, clo);
+        auto clo = ent.second.first.get();
+        rename_closure(index, clo, updates);
         ITRACE(5, "  - closure {} as {}\n", ent.first->name, clo->name);
         assertx(clo->closureContextCls == cls);
         assertx(clo->unit == cls->unit);
-        classClosures.push_back(clo);
-
-        cls->unit->classes[ent.second.second] = std::move(ent.second.first);
-        preresolve(env, clo);
+        closures.emplace_back(clo);
+        updates.newClasses.emplace_back(
+          std::move(ent.second.first),
+          cls->unit,
+          ent.second.second
+        );
+        preresolve(program, index, clo, updates);
       }
     }
   }
@@ -2777,18 +2856,19 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
  * Given a static representation of a Hack record, find a possible resolution
  * of the record along with all records in its hierarchy.
  */
-void resolve_combinations(RecordNamingEnv& env,
-                          const php::Record* rec) {
+RecordInfo* resolve_combinations(const IndexData& index,
+                                 const php::Record* rec,
+                                 RecPreResolveUpdates& updates) {
   auto rinfo = std::make_unique<RecordInfo>();
   rinfo->rec = rec;
   if (rec->parentName) {
-    auto const parent = env.index.recordInfo.at(rec->parentName);
+    auto const parent = index.recordInfo.at(rec->parentName);
     if (parent->rec->attrs & AttrFinal) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because "
              "its parent record `{}' is not abstract\n",
              rec->name, parent->rec->name);
-      return;
+      return nullptr;
     }
     rinfo->parent = parent;
     rinfo->baseList = rinfo->parent->baseList;
@@ -2796,21 +2876,23 @@ void resolve_combinations(RecordNamingEnv& env,
   rinfo->baseList.push_back(rinfo.get());
   rinfo->baseList.shrink_to_fit();
   ITRACE(2, "  resolved: {}\n", rec->name);
-  env.resolved.emplace(rec, rinfo.get());
-  auto const UNUSED it = env.index.recordInfo.emplace(rec->name, rinfo.get());
-  assertx(it.second);
-  env.index.allRecordInfos.push_back(std::move(rinfo));
+  updates.newInfos.emplace_back(std::move(rinfo));
+  return updates.newInfos.back().get();
 }
 
 /*
  * Given a static representation of a Hack class, find a possible resolution
  * of the class along with all classes, interfaces and traits in its hierarchy.
+ *
+ * Returns the resultant ClassInfo, or nullptr if the Hack class
+ * cannot be instantiated at runtime.
  */
-void resolve_combinations(ClassNamingEnv& env,
-                          const php::Class* cls) {
+ClassInfo* resolve_combinations(const IndexData& index,
+                                const php::Class* cls,
+                                ClsPreResolveUpdates& updates) {
   auto cinfo = std::make_unique<ClassInfo>();
   cinfo->cls = cls;
-  auto const& map = env.index.classInfo;
+  auto const& map = index.classInfo;
   if (cls->parentName) {
     cinfo->parent   = map.at(cls->parentName);
     cinfo->baseList = cinfo->parent->baseList;
@@ -2819,7 +2901,7 @@ void resolve_combinations(ClassNamingEnv& env,
              "Resolve combinations failed for `{}' because "
              "its parent `{}' is not a class\n",
              cls->name, cls->parentName);
-      return;
+      return nullptr;
     }
   }
   cinfo->baseList.push_back(cinfo.get());
@@ -2831,7 +2913,7 @@ void resolve_combinations(ClassNamingEnv& env,
              "Resolve combinations failed for `{}' because `{}' "
              "is not an interface\n",
              cls->name, iname);
-      return;
+      return nullptr;
     }
     cinfo->declInterfaces.push_back(iface);
   }
@@ -2845,7 +2927,7 @@ void resolve_combinations(ClassNamingEnv& env,
              "is not an enum{}\n",
              cls->name, included_enum_name,
              want_attr & AttrEnumClass ? " class" : "");
-      return;
+      return nullptr;
     }
     cinfo->includedEnums.push_back(included_enum);
   }
@@ -2857,13 +2939,13 @@ void resolve_combinations(ClassNamingEnv& env,
              "Resolve combinations failed for `{}' because `{}' "
              "is not a trait\n",
              cls->name, tname);
-      return;
+      return nullptr;
     }
     cinfo->usedTraits.push_back(trait);
   }
 
   cinfo->preResolveState = std::make_unique<ClassInfo::PreResolveState>();
-  if (!build_cls_info(env.index, cinfo.get())) return;
+  if (!build_cls_info(index, cinfo.get(), updates)) return nullptr;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
   if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
@@ -2875,65 +2957,55 @@ void resolve_combinations(ClassNamingEnv& env,
     }
   }
   cinfo->baseList.shrink_to_fit();
-  env.resolved.emplace(cls, cinfo.get());
-  auto const UNUSED it = env.index.classInfo.emplace(cls->name, cinfo.get());
-  assertx(it.second);
-  env.index.allClassInfos.push_back(std::move(cinfo));
+  updates.newInfos.emplace_back(std::move(cinfo));
+  return updates.newInfos.back().get();
 }
 
-void PhpTypeHelper<php::Record>::try_flatten_traits(NamingEnv<php::Record>&,
-                                                const php::Record*,
-                                                RecordInfo*) {}
+void PhpTypeHelper<php::Record>::try_flatten_traits(const php::Program*,
+                                                    const IndexData&,
+                                                    const php::Record*,
+                                                    RecordInfo*,
+                                                    RecPreResolveUpdates&) {}
 
-void PhpTypeHelper<php::Class>::try_flatten_traits(NamingEnv<php::Class>& env,
-                                                const php::Class* cls,
-                                                ClassInfo* cinfo) {
+void PhpTypeHelper<php::Class>::try_flatten_traits(
+    const php::Program* program,
+    const IndexData& index,
+    const php::Class* cls,
+    ClassInfo* cinfo,
+    ClsPreResolveUpdates& updates) {
   if (options.FlattenTraits &&
       !(cls->attrs & AttrNoExpandTrait) &&
       !cls->usedTraitNames.empty() &&
-      env.index.classes.count(cls->name) == 1) {
+      index.classes.count(cls->name) == 1) {
     Trace::Indent indent;
-    flatten_traits(env, cinfo);
+    flatten_traits(program, index, cinfo, updates);
   }
 }
 
 template <typename T>
-void preresolve(NamingEnv<T>& env, const T* type) {
-  assertx(!env.resolved.count(type));
-
+void preresolve(const php::Program* program,
+                const IndexData& index,
+                const T* type,
+                PreResolveUpdates<typename PhpTypeHelper<T>::Info>& updates) {
   ITRACE(2, "preresolve {}: {}:{}\n",
-      PhpTypeHelper<T>::name(), type->name, (void*)type);
-  {
+         PhpTypeHelper<T>::name(), type->name, (void*)type);
+
+  auto const resolved = [&] {
     Trace::Indent indent;
     if (debug) {
-      PhpTypeHelper<T>::assert_bases(env, type);
+      PhpTypeHelper<T>::assert_bases(index, type);
     }
-    resolve_combinations(env, type);
-  }
+    return resolve_combinations(index, type, updates);
+  }();
 
   ITRACE(3, "preresolve: {}:{} ({} resolutions)\n",
-         type->name, (void*)type, env.resolved.count(type));
+         type->name, (void*)type, resolved ? 1 : 0);
 
-  auto const it = env.resolved.find(type);
-  if (it != end(env.resolved)) {
-    auto const& users = env.tid.users[type->name];
-    for (auto const tu : users) {
-      auto const it = env.tid.depCounts.find(tu);
-      if (it == env.tid.depCounts.end()) {
-        assertx(env.tid.hasPseudoCycles);
-        continue;
-      }
-      auto& depCount = it->second;
-      assertx(depCount);
-      if (!--depCount) {
-        env.tid.depCounts.erase(it);
-        ITRACE(5, "  enqueue: {}:{}\n", tu->name, (void*)tu);
-        env.tid.queue[env.tid.cqBack++] = tu;
-      } else {
-        ITRACE(6, "  depcount: {}:{} = {}\n", tu->name, (void*)tu, depCount);
-      }
-    }
-    PhpTypeHelper<T>::try_flatten_traits(env, type, it->second);
+  if (resolved) {
+    updates.updateDeps.emplace_back(resolved);
+    PhpTypeHelper<T>::try_flatten_traits(
+      program, index, type, resolved, updates
+    );
   }
 }
 
@@ -3473,6 +3545,8 @@ bool has_magic_method(const ClassInfo* cinfo, SString name) {
 }
 
 void find_magic_methods(IndexData& index) {
+  trace_time tracer("find magic methods");
+
   for (auto& cinfo : index.allClassInfos) {
     bool any = false;
     for (const auto& mm : magicMethods) {
@@ -3485,6 +3559,8 @@ void find_magic_methods(IndexData& index) {
 }
 
 void find_mocked_classes(IndexData& index) {
+  trace_time tracer("find mocked classes");
+
   for (auto& cinfo : index.allClassInfos) {
     if (is_mock_class(cinfo->cls) && cinfo->parent) {
       cinfo->parent->isMocked = true;
@@ -3496,6 +3572,8 @@ void find_mocked_classes(IndexData& index) {
 }
 
 void mark_const_props(IndexData& index) {
+  trace_time tracer("mark const props");
+
   for (auto& cinfo : index.allClassInfos) {
     auto const hasConstProp = [&]() {
       if (cinfo->cls->hasConstProp) return true;
@@ -3518,6 +3596,8 @@ void mark_const_props(IndexData& index) {
 }
 
 void mark_no_override_classes(IndexData& index) {
+  trace_time tracer("mark no override classes");
+
   for (auto& cinfo : index.allClassInfos) {
     // We cleared all the NoOverride flags while building the
     // index. Set them as necessary.
@@ -3529,6 +3609,8 @@ void mark_no_override_classes(IndexData& index) {
 }
 
 void mark_no_override_methods(IndexData& index) {
+  trace_time tracer("mark no override methods");
+
   // We removed any AttrNoOverride flags from all methods while adding
   // the units to the index.  Now start by marking every
   // (non-interface, non-special) method as AttrNoOverride.
@@ -4391,12 +4473,124 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
   tid.queue.resize(tmap.size());
 }
 
+SString nameFromInfo(const RecordInfo* r) { return r->rec->name; }
+SString nameFromInfo(const ClassInfo* c)  { return c->cls->name; }
+
+template <typename T>
+void updatePreResolveDeps(
+    TypeInfoData<T>& tid,
+    const PreResolveUpdates<typename PhpTypeHelper<T>::Info>& updates) {
+  for (auto const info : updates.updateDeps) {
+    auto const& users = tid.users[nameFromInfo(info)];
+    for (auto const tu : users) {
+      auto const it = tid.depCounts.find(tu);
+      if (it == tid.depCounts.end()) {
+        assertx(tid.hasPseudoCycles);
+        continue;
+      }
+      auto& depCount = it->second;
+      assertx(depCount);
+      if (!--depCount) {
+        tid.depCounts.erase(it);
+        ITRACE(5, "  enqueue: {}:{}\n", tu->name, (void*)tu);
+        tid.queue[tid.cqBack++] = tu;
+      } else {
+        ITRACE(6, "  depcount: {}:{} = {}\n", tu->name, (void*)tu, depCount);
+      }
+    }
+  }
+}
+
+void commitPreResolveUpdates(IndexData& index,
+                             TypeInfoData<php::Record>& tid,
+                             std::vector<RecPreResolveUpdates>& updates) {
+  parallel::parallel(
+    [&] {
+      for (auto const& u : updates) updatePreResolveDeps(tid, u);
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (size_t i = 0; i < u.newInfos.size(); ++i) {
+          auto& rinfo = u.newInfos[i];
+          auto const UNUSED it =
+            index.recordInfo.emplace(rinfo->rec->name, rinfo.get());
+          assertx(it.second);
+          index.allRecordInfos.emplace_back(std::move(rinfo));
+        }
+      }
+    }
+  );
+}
+
+void commitPreResolveUpdates(IndexData& index,
+                             TypeInfoData<php::Class>& tid,
+                             std::vector<ClsPreResolveUpdates>& updates) {
+  parallel::parallel(
+    [&] {
+      for (auto const& u : updates) updatePreResolveDeps(tid, u);
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (size_t i = 0; i < u.newInfos.size(); ++i) {
+          auto& cinfo = u.newInfos[i];
+          auto const UNUSED it =
+            index.classInfo.emplace(cinfo->cls->name, cinfo.get());
+          assertx(it.second);
+          index.allClassInfos.emplace_back(std::move(cinfo));
+        }
+      }
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (auto& cns : u.removeNoOverride) {
+          const_cast<php::Const*>(cns.get())->isNoOverride = false;
+        }
+      }
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (auto const& p : u.extraMethods) {
+          index.classExtraMethodMap[p.first].insert(
+            p.second.begin(),
+            p.second.end()
+          );
+        }
+      }
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (auto const& p : u.closures) {
+          auto& map = index.classClosureMap[p.first];
+          map.insert(map.end(), p.second.begin(), p.second.end());
+        }
+      }
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (auto const c : u.newClosures) index.classes.emplace(c->name, c);
+      }
+    },
+    [&] {
+      for (auto& u : updates) {
+        for (auto& p : u.newClasses) {
+          auto unit = std::get<1>(p);
+          auto const idx = std::get<2>(p);
+          if (unit->classes.size() <= idx) unit->classes.resize(idx+1);
+          unit->classes[idx] = std::move(std::get<0>(p));
+        }
+      }
+    }
+  );
+}
+
 template<typename T>
-void preresolveTypes(NamingEnv<T>& env,
+void preresolveTypes(php::Program* program,
+                     IndexData& index,
+                     TypeInfoData<T>& tid,
                      const ISStringToOneT<TypeInfo<T>*>& tmap) {
-  while(true) {
-    auto const ix = env.tid.cqFront++;
-    if (ix == env.tid.cqBack) {
+  auto round = uint32_t{0};
+  while (true) {
+    if (tid.cqFront == tid.cqBack) {
       // we've consumed everything where all dependencies are
       // satisfied. There may still be some pseudo-cycles that can
       // be broken though.
@@ -4405,9 +4599,8 @@ void preresolveTypes(NamingEnv<T>& env,
       // A', and then end up here, since both A and B' still have
       // one dependency. But both A and B' can be resolved at this
       // point
-      for (auto it = env.tid.depCounts.begin();
-           it != env.tid.depCounts.end();
-          ) {
+      for (auto it = tid.depCounts.begin();
+           it != tid.depCounts.end();) {
         auto canResolve = true;
         auto const checkCanResolve = [&] (SString name) {
           if (canResolve) canResolve = tmap.count(name);
@@ -4416,28 +4609,56 @@ void preresolveTypes(NamingEnv<T>& env,
         if (canResolve) {
           FTRACE(2, "Breaking pseudo-cycle for {} {}:{}\n",
                  PhpTypeHelper<T>::name(), it->first->name, (void*)it->first);
-          env.tid.queue[env.tid.cqBack++] = it->first;
-          it = env.tid.depCounts.erase(it);
-          env.tid.hasPseudoCycles = true;
+          tid.queue[tid.cqBack++] = it->first;
+          it = tid.depCounts.erase(it);
+          tid.hasPseudoCycles = true;
         } else {
           ++it;
         }
       }
-      if (ix == env.tid.cqBack) {
-        break;
-      }
+      if (tid.cqFront == tid.cqBack) break;
     }
-    auto const t = env.tid.queue[ix];
-    Trace::Bump bumper{
-      Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*t->unit)
-    };
-    (void)bumper;
-    preresolve(env, t);
+
+    auto const workitems = tid.cqBack - tid.cqFront;
+    auto updates = [&] {
+      trace_time trace(
+        "preresolve",
+        folly::sformat("round {} -- {} work items", round, workitems)
+      );
+
+      using U = PreResolveUpdates<typename PhpTypeHelper<T>::Info>;
+      typename U::UnitNumClasses numClasses;
+
+      return parallel::gen(
+        workitems,
+        [&] (size_t idx) {
+          auto const t = tid.queue[idx + tid.cqFront];
+          Trace::Bump bumper{
+            Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*t->unit)
+          };
+          (void)bumper;
+          U updates;
+          updates.numClasses = &numClasses;
+          preresolve(program, index, t, updates);
+          return updates;
+        }
+      );
+    }();
+
+    ++round;
+    tid.cqFront += workitems;
+
+    trace_time trace("update");
+    commitPreResolveUpdates(index, tid, updates);
   }
 
-  for (auto& cinfo : env.index.allClassInfos) {
-    cinfo->preResolveState.reset();
-  }
+  trace_time trace("preresolve clear state");
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      cinfo->preResolveState.reset();
+    }
+  );
 }
 
 } //namespace
@@ -4466,8 +4687,7 @@ Index::Index(php::Program* program)
 
   {
     trace_time preresolve_records("preresolve records");
-    RecordNamingEnv env{program, *m_data, rid};
-    preresolveTypes(env, m_data->recordInfo);
+    preresolveTypes(program, *m_data, rid, m_data->recordInfo);
   }
 
   ClassInfoData cid;
@@ -4478,8 +4698,7 @@ Index::Index(php::Program* program)
 
   {
     trace_time preresolve_classes("preresolve classes");
-    ClassNamingEnv env{program, *m_data, cid};
-    preresolveTypes(env, m_data->classInfo);
+    preresolveTypes(program, *m_data, cid, m_data->classInfo);
   }
 
   m_data->funcInfo.resize(program->nextFuncId);

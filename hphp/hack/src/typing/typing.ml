@@ -7493,6 +7493,7 @@ and string2 env idl =
               r
               [
                 MakeType.arraykey r;
+                MakeType.dynamic r;
                 MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
               ]
           in

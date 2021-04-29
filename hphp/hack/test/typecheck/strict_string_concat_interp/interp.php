@@ -12,10 +12,12 @@ function bad_interp(bool $a, float $b, null $c, string $d): void {
 function ok_interp(
   string $a,
   int $b,
-  \HH\FormatString<\PlainSprintf> $c
+  \HH\FormatString<\PlainSprintf> $c,
+  dynamic $d
 ): void {
   "interp $a";
   "interp $b";
   "interp $c";
-  "interp $a $b $c";
+  "interp $d";
+  "interp $a $b $c $d";
 }

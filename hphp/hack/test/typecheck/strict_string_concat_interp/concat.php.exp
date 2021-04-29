@@ -22,3 +22,9 @@ String concatenation can only be performed on string and int arguments (Typing[4
   Expected `string` or `int`
   File "concat.php", line 10, characters 16-18:
   But got `Foo`
+File "concat.php", line 11, characters 8-11:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat.php", line 11, characters 8-11:
+  Expected `string` or `int`
+  File "concat.php", line 11, characters 8-11:
+  But got `null`

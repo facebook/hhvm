@@ -27,11 +27,10 @@ type key =
   | Monitor_ready
   | Monitor_sent_ack_to_client
   | Client_connected_to_monitor
-  | Monitor_sent_fd
   | Server_sleep_and_check
   | Server_monitor_fd_ready
-  | Server_got_client_fd
   | Server_got_tracker
+  | Server_got_client_fd
   | Server_start_recheck
   | Server_done_recheck
   | Server_sent_diagnostics

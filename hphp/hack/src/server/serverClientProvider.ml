@@ -46,26 +46,29 @@ let accept_client
   let msg : MonitorRpc.monitor_to_server_handoff_msg =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
+  let t_got_tracker = Unix.gettimeofday () in
   let tracker = msg.MonitorRpc.m2s_tracker in
   Hh_logger.log
-    "[%s] got tracker handoff from monitor"
-    (Connection_tracker.log_id tracker);
+    "[%s] got tracker #%d handoff from monitor"
+    (Connection_tracker.log_id tracker)
+    msg.MonitorRpc.m2s_sequence_number;
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  let t_got_client_fd = Unix.gettimeofday () in
   MonitorRpc.write_server_receipt_to_monitor_file
     ~server_receipt_to_monitor_file:
       (ServerFiles.server_receipt_to_monitor_file (Unix.getpid ()))
     ~sequence_number_high_water_mark:msg.MonitorRpc.m2s_sequence_number;
-  let t_got_client_fd = Unix.gettimeofday () in
   Hh_logger.log
-    "[%s] got client_fd handoff from monitor"
-    (Connection_tracker.log_id tracker);
+    "[%s] got FD#%d handoff from monitor"
+    (Connection_tracker.log_id tracker)
+    msg.MonitorRpc.m2s_sequence_number;
   let tracker =
     let open Connection_tracker in
     tracker
     |> track ~key:Server_sleep_and_check ~time:t_sleep_and_check
     |> track ~key:Server_monitor_fd_ready ~time:t_monitor_fd_ready
+    |> track ~key:Server_got_tracker ~time:t_got_tracker
     |> track ~key:Server_got_client_fd ~time:t_got_client_fd
-    |> track ~key:Server_got_tracker
   in
   Non_persistent_client
     {

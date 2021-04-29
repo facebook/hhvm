@@ -74,17 +74,18 @@ module Sent_fds_collector = struct
   type fd_close_time =
     | Fd_close_immediate
     | Fd_close_after_time of float
-    | Fd_close_upon_receipt of int  (** this int is the sequence number *)
+    | Fd_close_upon_receipt
 
   type handed_off_fd_to_close = {
     fd_close_time: fd_close_time;
     tracker: Connection_tracker.t;
     fd: Unix.file_descr;
+    m2s_sequence_number: int;
   }
 
   let handed_off_fds_to_close : handed_off_fd_to_close list ref = ref []
 
-  let cleanup_fd ~tracker ~fd_close_time fd =
+  let cleanup_fd ~tracker ~fd_close_time ~m2s_sequence_number fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     match fd_close_time with
     | Fd_close_immediate ->
@@ -92,7 +93,8 @@ module Sent_fds_collector = struct
       Unix.close fd
     | _ ->
       handed_off_fds_to_close :=
-        { fd_close_time; tracker; fd } :: !handed_off_fds_to_close
+        { fd_close_time; tracker; fd; m2s_sequence_number }
+        :: !handed_off_fds_to_close
 
   let collect_garbage ~sequence_receipt_high_water_mark =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
@@ -100,20 +102,23 @@ module Sent_fds_collector = struct
     let (ready, notready) =
       List.partition_tf
         !handed_off_fds_to_close
-        (fun { fd_close_time; tracker; _ } ->
+        (fun { fd_close_time; tracker; m2s_sequence_number; _ } ->
           match fd_close_time with
           | Fd_close_immediate ->
-            log "closing client fd, though should have been immediate" ~tracker;
+            log
+              "closing client FD#%d, though should have been immediate"
+              ~tracker
+              m2s_sequence_number;
             true
           | Fd_close_after_time t when t <= t_now ->
-            log "closing client fd, after delay" ~tracker;
+            log "closing client FD#%d, after delay" ~tracker m2s_sequence_number;
             true
-          | Fd_close_upon_receipt seq
-            when seq <= sequence_receipt_high_water_mark ->
+          | Fd_close_upon_receipt
+            when m2s_sequence_number <= sequence_receipt_high_water_mark ->
             log
-              "closing client fd #%d upon receipt of #%d"
+              "closing client FD#%d upon receipt of #%d"
               ~tracker
-              seq
+              m2s_sequence_number
               sequence_receipt_high_water_mark;
             true
           | _ -> false)
@@ -322,29 +327,34 @@ struct
 
   let hand_off_client_connection ~tracker env server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
     let m2s_sequence_number =
       Sent_fds_collector.get_and_increment_sequence_number ()
     in
     let msg = MonitorRpc.{ m2s_tracker = tracker; m2s_sequence_number } in
     msg_to_channel server_fd msg;
+    log "Handed off tracker #%d to server" ~tracker m2s_sequence_number;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
-    if status = 0 then
+    if status = 0 then begin
+      log "Handed off FD#%d to server" ~tracker m2s_sequence_number;
       let fd_close_time =
         if env.monitor_fd_close_delay = 0 then
           (* delay 0 means "close immediately" *)
           Sent_fds_collector.Fd_close_immediate
         else if env.monitor_fd_close_delay = -1 then
           (* delay -1 means "close upon read receipt" *)
-          Sent_fds_collector.Fd_close_upon_receipt m2s_sequence_number
+          Sent_fds_collector.Fd_close_upon_receipt
         else
           (* delay >=1 means "close after this time" *)
           Sent_fds_collector.Fd_close_after_time
             (Unix.gettimeofday () +. float_of_int env.monitor_fd_close_delay)
       in
-      Sent_fds_collector.cleanup_fd ~tracker ~fd_close_time client_fd
-    else begin
-      Hh_logger.log "Failed to handoff FD to server.";
+      Sent_fds_collector.cleanup_fd
+        ~tracker
+        ~fd_close_time
+        ~m2s_sequence_number
+        client_fd
+    end else begin
+      log "Failed to handoff FD#%d to server." ~tracker m2s_sequence_number;
       raise (Send_fd_failure status)
     end
 
@@ -438,7 +448,6 @@ struct
         Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
       in
       hand_off_client_connection_with_retries ~tracker env server_fd 8 client_fd;
-      log "handed off client fd to server" ~tracker;
       server.last_request_handoff := Unix.time ();
       { env with server = Alive server }
     | Died_unexpectedly (status, was_oom) ->

@@ -577,6 +577,13 @@ struct ClassInfo {
    */
   hphp_hash_map<SString,PublicSPropEntry> publicStaticProps;
 
+  struct PreResolveState {
+    hphp_fast_map<SString, std::pair<php::Prop, const ClassInfo*>> pbuildNoTrait;
+    hphp_fast_map<SString, std::pair<php::Prop, const ClassInfo*>> pbuildTrait;
+    hphp_fast_set<SString> constsFromTraits;
+  };
+  std::unique_ptr<PreResolveState> preResolveState;
+
   /*
    * Flags to track if this class is mocked, or if any of its dervied classes
    * are mocked.
@@ -1565,71 +1572,70 @@ struct TMIOps {
 using TMIData = TraitMethodImportData<TraitMethod,
                                       TMIOps>;
 
-struct BuildClsInfo {
-  IndexData& index;
-  ClassInfo* rleaf;
-  hphp_hash_map<SString, std::pair<php::Prop, const ClassInfo*>,
-                string_data_hash, string_data_same> pbuilder;
-};
-
 /*
  * Make a flattened table of the constants on this class.
  */
-bool build_class_constants(BuildClsInfo& info,
-                           const ClassInfo* rparent,
-                           bool fromTrait) {
+bool build_class_constants(ClassInfo* cinfo) {
   auto const removeNoOverride = [&] (const php::Const* c) {
     // During hhbbc/parse, all constants are pre-set to NoOverride
-    FTRACE(2, "Removing NoOverride on {}::{}\n", c->cls->name, c->name);
+    ITRACE(2, "Removing NoOverride on {}::{}\n", c->cls->name, c->name);
     const_cast<php::Const*>(c)->isNoOverride = false;
   };
 
-  for (uint32_t idx = 0; idx < rparent->cls->constants.size(); idx++) {
-    auto const& c = rparent->cls->constants[idx];
-    auto const& c_idx = info.rleaf->clsConstants.find(c.name);
-    if (c_idx == end(info.rleaf->clsConstants)) {
-      info.rleaf->clsConstants[c.name] = ClassInfo::ConstIndex {rparent->cls, idx};
-      continue;
-    }
+  if (cinfo->parent) cinfo->clsConstants = cinfo->parent->clsConstants;
 
-    auto const& existing = c_idx->second;
+  auto const add = [&] (const ClassInfo::ConstIndex& cns, bool fromTrait) {
+    auto insert = cinfo->clsConstants.emplace(cns->name, cns);
+    if (insert.second) {
+      if (fromTrait) {
+        cinfo->preResolveState->constsFromTraits.emplace(cns->name);
+      }
+      return true;
+    }
+    auto& existing = insert.first->second;
 
     // Same constant (from an interface via two different paths) is ok
-    if (existing->cls == rparent->cls) continue;
+    if (existing->cls == cns->cls) return true;
 
-    if (existing->kind != c.kind) {
-      ITRACE(2,
-             "build_cls_info_rec failed for `{}' because `{}' was defined by "
-             "`{}' as a {} and by `{}' as a {}\n",
-             info.rleaf->cls->name, c.name,
-             rparent->cls->name,
-             ConstModifiers::show(c.kind),
-             existing->cls->name,
-             ConstModifiers::show(existing->kind));
+    if (existing->kind != cns->kind) {
+      ITRACE(
+        2,
+        "build_class_constants failed for `{}' because `{}' was defined by "
+        "`{}' as a {} and by `{}' as a {}\n",
+        cinfo->cls->name,
+        cns->name,
+        cns->cls->name,
+        ConstModifiers::show(cns->kind),
+        existing->cls->name,
+        ConstModifiers::show(existing->kind)
+      );
       return false;
     }
 
     // Ignore abstract constants
-    if (c.isAbstract) continue;
+    if (cns->isAbstract) return true;
 
     if (existing->val) {
-
       // A constant from a declared interface collides with a constant
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
-      // declared interfaces will silently lose and not conflict in the runtime.
+      // declared interfaces will silently lose and not conflict in the runtime
       // Type and Context constants can be overriden.
-      if (c.kind != ConstModifiers::Kind::Type &&
-          c.kind != ConstModifiers::Kind::Context &&
+      if (cns->kind != ConstModifiers::Kind::Type &&
+          cns->kind != ConstModifiers::Kind::Context &&
           existing->cls->attrs & AttrInterface &&
-        !(c.cls->attrs & AttrInterface && fromTrait)) {
-        for (auto const& interface : info.rleaf->declInterfaces) {
+          !(cns->cls->attrs & AttrInterface && fromTrait)) {
+        for (auto const& interface : cinfo->declInterfaces) {
           if (existing->cls == interface->cls) {
-            ITRACE(2,
-               "build_cls_info_rec failed for `{}' because "
-               "`{}' was defined by both `{}' and `{}'\n",
-               info.rleaf->cls->name, c.name,
-               rparent->cls->name, existing->cls->name);
+            ITRACE(
+              2,
+              "build_class_constants failed for `{}' because "
+              "`{}' was defined by both `{}' and `{}'\n",
+              cinfo->cls->name,
+              cns->name,
+              cns->cls->name,
+              existing->cls->name
+            );
             return false;
           }
         }
@@ -1637,109 +1643,240 @@ bool build_class_constants(BuildClsInfo& info,
 
       // Constants from traits silently lose
       if (fromTrait) {
-        removeNoOverride(&c);
-        continue;
+        removeNoOverride(cns.get());
+        return true;
       }
 
       // A constant from an interface or from an included enum collides
       // with an existing constant.
-      if (rparent->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
-        ITRACE(2,
-               "build_cls_info_rec failed for `{}' because "
-               "`{}' was defined by both `{}' and `{}'\n",
-               info.rleaf->cls->name, c.name,
-               rparent->cls->name, existing->cls->name);
+      if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
+        ITRACE(
+          2,
+          "build_class_constants failed for `{}' because "
+          "`{}' was defined by both `{}' and `{}'\n",
+          cinfo->cls->name,
+          cns->name,
+          cns->cls->name,
+          existing->cls->name
+        );
         return false;
       }
     }
 
     removeNoOverride(existing.get());
-    info.rleaf->clsConstants[c.name].cls = rparent->cls;
-    info.rleaf->clsConstants[c.name].idx = idx;
+    existing = cns;
+    if (fromTrait) {
+      cinfo->preResolveState->constsFromTraits.emplace(cns->name);
+    } else {
+      cinfo->preResolveState->constsFromTraits.erase(cns->name);
+    }
+    return true;
+  };
+
+  for (auto const iface : cinfo->declInterfaces) {
+    for (auto const& cns : iface->clsConstants) {
+      if (!add(cns.second,
+               iface->preResolveState->constsFromTraits.count(cns.first))) {
+        return false;
+      }
+    }
   }
+
+  for (uint32_t idx = 0; idx < cinfo->cls->constants.size(); ++idx) {
+    auto const cns = ClassInfo::ConstIndex { cinfo->cls, idx };
+    if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns.get());
+    if (!add(cns, false)) return false;
+  }
+
+  for (auto const trait : cinfo->usedTraits) {
+    for (auto const& cns : trait->clsConstants) {
+      if (!add(cns.second, true)) return false;
+    }
+  }
+
+  for (auto const ienum : cinfo->includedEnums) {
+    for (auto const& cns : ienum->clsConstants) {
+      if (!add(cns.second, true)) return false;
+    }
+  }
+
+  auto const addTraitConst = [&] (const php::Const& c) {
+    /*
+     * Only copy in constants that win. Otherwise, in the runtime, if
+     * we have a constant from an interface implemented by a trait
+     * that wins over this fromTrait constant, we won't know which
+     * trait it came from, and therefore won't know which constant
+     * should win. Dropping losing constants here works because if
+     * they fatal with constants in declared interfaces, we catch that
+     * above.
+     */
+    auto const& existing = cinfo->clsConstants.find(c.name);
+    if (existing->second->cls == c.cls) {
+      cinfo->traitConsts.emplace_back(c);
+      cinfo->traitConsts.back().isFromTrait = true;
+    }
+  };
+  for (auto const t : cinfo->usedTraits) {
+    for (auto const& c : t->cls->constants) addTraitConst(c);
+    for (auto const& c : t->traitConsts)    addTraitConst(c);
+  }
+
   return true;
 }
 
-bool build_class_properties(BuildClsInfo& info,
-                            const ClassInfo* rparent) {
-  // There's no need to do this work if traits have been flattened
-  // already, or if the top level class has no traits.  In those
-  // cases, we might be able to rule out some ClassInfo
-  // instantiations, but it doesn't seem worth it.
-  if (info.rleaf->cls->attrs & AttrNoExpandTrait) return true;
-  if (info.rleaf->usedTraits.empty()) return true;
+bool build_class_impl_interfaces(ClassInfo* cinfo) {
+  if (cinfo->parent) cinfo->implInterfaces = cinfo->parent->implInterfaces;
 
-  auto addProp = [&] (const php::Prop& p, bool add) {
-    auto ent = std::make_pair(p, rparent);
-    auto res = info.pbuilder.emplace(p.name, ent);
+  for (auto const ienum : cinfo->includedEnums) {
+    cinfo->implInterfaces.insert(
+      ienum->implInterfaces.begin(),
+      ienum->implInterfaces.end()
+    );
+  }
+
+  for (auto const iface : cinfo->declInterfaces) {
+    cinfo->implInterfaces.insert(
+      iface->implInterfaces.begin(),
+      iface->implInterfaces.end()
+    );
+  }
+
+  for (auto const trait : cinfo->usedTraits) {
+    cinfo->implInterfaces.insert(
+      trait->implInterfaces.begin(),
+      trait->implInterfaces.end()
+    );
+  }
+
+  if (cinfo->cls->attrs & AttrInterface) {
+    cinfo->implInterfaces.emplace(cinfo->cls->name, cinfo);
+  }
+
+  return true;
+}
+
+bool build_class_properties(ClassInfo* cinfo) {
+  if (cinfo->parent) {
+    cinfo->preResolveState->pbuildNoTrait =
+      cinfo->parent->preResolveState->pbuildNoTrait;
+    cinfo->preResolveState->pbuildTrait =
+      cinfo->parent->preResolveState->pbuildNoTrait;
+  }
+
+  auto const add = [&] (auto& m,
+                        SString name,
+                        const php::Prop& p,
+                        const ClassInfo* cls,
+                        bool add) {
+    auto res = m.emplace(name, std::make_pair(p, cls));
     if (res.second) {
-      if (add) info.rleaf->traitProps.push_back(p);
+      if (add) cinfo->traitProps.emplace_back(p);
       return true;
     }
-    auto& prevProp = res.first->second.first;
-    if (rparent == res.first->second.second) {
-      assertx(rparent == info.rleaf);
-      if ((prevProp.attrs ^ p.attrs) &
+
+    auto const& prev = res.first->second.first;
+
+    if (cinfo == res.first->second.second) {
+      if ((prev.attrs ^ p.attrs) &
           (AttrStatic | AttrPublic | AttrProtected | AttrPrivate) ||
           (!(p.attrs & AttrSystemInitialValue) &&
-           !(prevProp.attrs & AttrSystemInitialValue) &&
-           !Class::compatibleTraitPropInit(prevProp.val, p.val))) {
+           !(prev.attrs & AttrSystemInitialValue) &&
+           !Class::compatibleTraitPropInit(prev.val, p.val))) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "
                "two declarations of `{}' at the same level had "
                "different attributes\n",
-               info.rleaf->cls->name, p.name);
+               cinfo->cls->name, p.name);
         return false;
       }
       return true;
     }
 
-    if (!(prevProp.attrs & AttrPrivate)) {
-      if ((prevProp.attrs ^ p.attrs) & AttrStatic) {
+    if (!(prev.attrs & AttrPrivate)) {
+      if ((prev.attrs ^ p.attrs) & AttrStatic) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "
                "`{}' was defined both static and non-static\n",
-               info.rleaf->cls->name, p.name);
+               cinfo->cls->name, p.name);
         return false;
       }
       if (p.attrs & AttrPrivate) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "
                "`{}' was re-declared private\n",
-               info.rleaf->cls->name, p.name);
+               cinfo->cls->name, p.name);
         return false;
       }
-      if (p.attrs & AttrProtected && !(prevProp.attrs & AttrProtected)) {
+      if (p.attrs & AttrProtected && !(prev.attrs & AttrProtected)) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "
                "`{}' was redeclared protected from public\n",
-               info.rleaf->cls->name, p.name);
+               cinfo->cls->name, p.name);
         return false;
       }
     }
-    if (add && res.first->second.second != rparent) {
-      info.rleaf->traitProps.push_back(p);
-    }
-    res.first->second = ent;
+
+    if (add) cinfo->traitProps.emplace_back(p);
+    res.first->second = std::make_pair(p, cls);
     return true;
   };
 
-  for (auto const& p : rparent->cls->properties) {
-    if (!addProp(p, false)) return false;
-  }
-
-  if (rparent == info.rleaf) {
-    for (auto t : rparent->usedTraits) {
-      for (auto const& p : t->cls->properties) {
-        if (!addProp(p, true)) return false;
-      }
-      for (auto const& p : t->traitProps) {
-        if (!addProp(p, true)) return false;
+  auto const merge = [&] (const ClassInfo::PreResolveState& src) {
+    for (auto const& p : src.pbuildNoTrait) {
+      if (!add(cinfo->preResolveState->pbuildNoTrait, p.first,
+               p.second.first, p.second.second, false)) {
+        return false;
       }
     }
-  } else {
-    for (auto const& p : rparent->traitProps) {
-      if (!addProp(p, false)) return false;
+    for (auto const& p : src.pbuildTrait) {
+      if (!add(cinfo->preResolveState->pbuildTrait, p.first,
+               p.second.first, p.second.second, false)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  for (auto const iface : cinfo->declInterfaces) {
+    if (!merge(*iface->preResolveState)) return false;
+  }
+
+  for (auto const trait : cinfo->usedTraits) {
+    if (!merge(*trait->preResolveState)) return false;
+  }
+
+  for (auto const ienum : cinfo->includedEnums) {
+    if (!merge(*ienum->preResolveState)) return false;
+  }
+
+  if (!(cinfo->cls->attrs & AttrInterface)) {
+    for (auto const& p : cinfo->cls->properties) {
+      if (!add(cinfo->preResolveState->pbuildNoTrait,
+               p.name, p, cinfo, false)) {
+        return false;
+      }
+    }
+
+    // There's no need to do this work if traits have been flattened
+    // already, or if the top level class has no traits.  In those
+    // cases, we might be able to rule out some ClassInfo
+    // instantiations, but it doesn't seem worth it.
+
+    if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
+      for (auto const trait : cinfo->usedTraits) {
+        for (auto const& p : trait->cls->properties) {
+          if (!add(cinfo->preResolveState->pbuildNoTrait,
+                   p.name, p, cinfo, true)) {
+            return false;
+          }
+        }
+        for (auto const& p : trait->traitProps) {
+          if (!add(cinfo->preResolveState->pbuildNoTrait,
+                   p.name, p, cinfo, true)) {
+            return false;
+          }
+        }
+      }
     }
   }
 
@@ -1758,25 +1895,26 @@ bool build_class_properties(BuildClsInfo& info,
  * fatal, but note that resolve_method needs to be pretty careful about
  * privates and overriding in general.
  */
-bool build_class_methods(BuildClsInfo& info) {
+bool build_class_methods(IndexData& index, ClassInfo* cinfo) {
+  if (cinfo->cls->attrs & AttrInterface) return true;
 
-  auto methodOverride = [&] (auto& it,
+  auto const methodOverride = [&] (auto& it,
                              const php::Func* meth,
                              Attr attrs,
                              SString name) {
     if (it->second.func->attrs & AttrFinal) {
-      if (!is_mock_class(info.rleaf->cls)) {
+      if (!is_mock_class(cinfo->cls)) {
         ITRACE(2,
                "build_class_methods failed for `{}' because "
                "it tried to override final method `{}::{}'\n",
-               info.rleaf->cls->name,
+               cinfo->cls->name,
                it->second.func->cls->name, name);
         return false;
       }
     }
     ITRACE(9,
            "  {}: overriding method {}::{} with {}::{}\n",
-           info.rleaf->cls->name,
+           cinfo->cls->name,
            it->second.func->cls->name, it->second.func->name,
            meth->cls->name, name);
     if (it->second.func->attrs & AttrPrivate) {
@@ -1788,33 +1926,33 @@ bool build_class_methods(BuildClsInfo& info) {
     it->second.topLevel = true;
     if (it->first != name) {
       auto mte = it->second;
-      info.rleaf->methods.erase(it);
-      it = info.rleaf->methods.emplace(name, mte).first;
+      cinfo->methods.erase(it);
+      it = cinfo->methods.emplace(name, mte).first;
     }
     return true;
   };
 
   // If there's a parent, start by copying its methods
-  if (auto const rparent = info.rleaf->parent) {
+  if (auto const rparent = cinfo->parent) {
     for (auto& mte : rparent->methods) {
       // don't inherit the 86* methods.
       if (HPHP::Func::isSpecial(mte.first)) continue;
-      auto const res = info.rleaf->methods.emplace(mte.first, mte.second);
+      auto const res = cinfo->methods.emplace(mte.first, mte.second);
       assertx(res.second);
       res.first->second.topLevel = false;
       ITRACE(9,
              "  {}: inheriting method {}::{}\n",
-             info.rleaf->cls->name,
+             cinfo->cls->name,
              rparent->cls->name, mte.first);
       continue;
     }
   }
 
-  uint32_t idx = info.rleaf->methods.size();
+  uint32_t idx = cinfo->methods.size();
 
   // Now add our methods.
-  for (auto& m : info.rleaf->cls->methods) {
-    auto res = info.rleaf->methods.emplace(
+  for (auto& m : cinfo->cls->methods) {
+    auto res = cinfo->methods.emplace(
       m->name,
       MethTabEntry { m.get(), m->attrs, false, true }
     );
@@ -1822,8 +1960,8 @@ bool build_class_methods(BuildClsInfo& info) {
       res.first->second.idx = idx++;
       ITRACE(9,
              "  {}: adding method {}::{}\n",
-             info.rleaf->cls->name,
-             info.rleaf->cls->name, m->name);
+             cinfo->cls->name,
+             cinfo->cls->name, m->name);
       continue;
     }
     if (m->attrs & AttrTrait && m->attrs & AttrAbstract) {
@@ -1834,11 +1972,11 @@ bool build_class_methods(BuildClsInfo& info) {
   }
 
   // If our traits were previously flattened, we're done.
-  if (info.rleaf->cls->attrs & AttrNoExpandTrait) return true;
+  if (cinfo->cls->attrs & AttrNoExpandTrait) return true;
 
   try {
     TMIData tmid;
-    for (auto const t : info.rleaf->usedTraits) {
+    for (auto const t : cinfo->usedTraits) {
       std::vector<const MethTabEntryPair*> methods(t->methods.size());
       for (auto& m : t->methods) {
         if (HPHP::Func::isSpecial(m.first)) continue;
@@ -1850,20 +1988,20 @@ bool build_class_methods(BuildClsInfo& info) {
         TraitMethod traitMethod { t, m->second.func, m->second.attrs };
         tmid.add(traitMethod, m->first);
       }
-      for (auto const c : info.index.classClosureMap[t->cls]) {
+      for (auto const c : index.classClosureMap[t->cls]) {
         auto const invoke = find_method(c, s_invoke.get());
         assertx(invoke);
-        info.index.classExtraMethodMap[info.rleaf->cls].insert(invoke);
+        index.classExtraMethodMap[cinfo->cls].insert(invoke);
       }
     }
 
-    for (auto const& precRule : info.rleaf->cls->traitPrecRules) {
-      tmid.applyPrecRule(precRule, info.rleaf);
+    for (auto const& precRule : cinfo->cls->traitPrecRules) {
+      tmid.applyPrecRule(precRule, cinfo);
     }
-    for (auto const& aliasRule : info.rleaf->cls->traitAliasRules) {
-      tmid.applyAliasRule(aliasRule, info.rleaf);
+    for (auto const& aliasRule : cinfo->cls->traitAliasRules) {
+      tmid.applyAliasRule(aliasRule, cinfo);
     }
-    auto traitMethods = tmid.finish(info.rleaf);
+    auto traitMethods = tmid.finish(cinfo);
     // Import the methods.
     for (auto const& mdata : traitMethods) {
       auto const method = mdata.tm.method;
@@ -1876,7 +2014,7 @@ bool build_class_methods(BuildClsInfo& info) {
         attrs = (Attr)((attrs         &  attrMask) |
                        (method->attrs & ~attrMask));
       }
-      auto res = info.rleaf->methods.emplace(
+      auto res = cinfo->methods.emplace(
         mdata.name,
         MethTabEntry { method, attrs, false, true }
       );
@@ -1884,93 +2022,30 @@ bool build_class_methods(BuildClsInfo& info) {
         res.first->second.idx = idx++;
         ITRACE(9,
                "  {}: adding trait method {}::{} as {}\n",
-               info.rleaf->cls->name,
+               cinfo->cls->name,
                method->cls->name, method->name, mdata.name);
       } else {
         if (attrs & AttrAbstract) continue;
-        if (res.first->second.func->cls == info.rleaf->cls) continue;
+        if (res.first->second.func->cls == cinfo->cls) continue;
         if (!methodOverride(res.first, method, attrs, mdata.name)) {
           return false;
         }
         res.first->second.idx = idx++;
       }
-      info.index.classExtraMethodMap[info.rleaf->cls].insert(method);
+      index.classExtraMethodMap[cinfo->cls].insert(method);
     }
   } catch (TMIOps::TMIException& ex) {
     ITRACE(2,
            "build_class_methods failed for `{}' importing traits: {}\n",
-           info.rleaf->cls->name, ex.what());
+           cinfo->cls->name, ex.what());
     return false;
-  }
-
-  return true;
-}
-
-bool enforce_in_maybe_sealed_parent_whitelist(
-  const ClassInfo* cls,
-  const ClassInfo* parent);
-
-bool build_cls_info_rec(BuildClsInfo& info,
-                        const ClassInfo* rparent,
-                        bool fromTrait) {
-  if (!rparent) return true;
-  if (!enforce_in_maybe_sealed_parent_whitelist(rparent, rparent->parent)) {
-    return false;
-  }
-  if (!build_cls_info_rec(info, rparent->parent, false)) {
-    return false;
-  }
-
-  for (auto const iface : rparent->declInterfaces) {
-    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, iface)) {
-      return false;
-    }
-    if (!build_cls_info_rec(info, iface, fromTrait)) {
-      return false;
-    }
-  }
-
-  // Need to add current class constants before looking at used traits
-  if (!build_class_constants(info, rparent, fromTrait)) return false;
-
-  for (auto const trait : rparent->usedTraits) {
-    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, trait)) {
-      return false;
-    }
-    if (!build_cls_info_rec(info, trait, true)) return false;
-  }
-
-  for (auto const included_enum : rparent->includedEnums) {
-    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, included_enum)) {
-      return false;
-    }
-    if (!build_cls_info_rec(info, included_enum, true)) return false;
-  }
-
-  if (rparent->cls->attrs & AttrInterface) {
-    /*
-     * Make a flattened table of all the interfaces implemented by the class.
-     */
-    info.rleaf->implInterfaces[rparent->cls->name] = rparent;
-  } else {
-    if (!fromTrait &&
-        !build_class_properties(info, rparent)) {
-      return false;
-    }
-
-    // We don't need a method table for interfaces, and rather than
-    // building the table recursively from scratch we just use the
-    // parent's already constructed method table, and this class's
-    // local method table (and traits if necessary).
-    if (rparent == info.rleaf) {
-      if (!build_class_methods(info)) return false;
-    }
   }
 
   return true;
 }
 
 const StaticString s___Sealed("__Sealed");
+
 bool enforce_in_maybe_sealed_parent_whitelist(
   const ClassInfo* cls,
   const ClassInfo* parent) {
@@ -1992,40 +2067,34 @@ bool enforce_in_maybe_sealed_parent_whitelist(
 }
 
 /*
- * Note: a cyclic inheritance chain will blow this up, but right now
- * we'll never get here in that case because hphpc currently just
- * modifies classes not to have that situation.  TODO(#3649211).
- *
- * This function return false if we are certain instantiating cinfo
- * would be a fatal at runtime.
+ * This function return false if instantiating the cinfo would be a
+ * fatal at runtime.
  */
 bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
-  auto info = BuildClsInfo{ index, cinfo };
-  if (!build_cls_info_rec(info, cinfo, false)) return false;
+  if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, cinfo->parent)) {
+    return false;
+  }
 
-  auto const addConst = [&] (const php::Const& c) {
-    /* Only copy in constants that win. Otherwise, in the runtime, if we have
-     * a constant from an interface implemented by a trait that wins over this
-     * fromTrait constant, we won't know which trait it came from, and therefore
-     * won't know which constant should win.
-     * Dropping losing constants here works because if they fatal with constants in
-     * declared interfaces, we catch that below in build_class_constants().
-     */
-    auto const& existing = cinfo->clsConstants.find(c.name);
-    if (existing->second->cls == c.cls) {
-      info.rleaf->traitConsts.push_back(c);
-      info.rleaf->traitConsts.back().isFromTrait = true;
-    }
-  };
-
-  for (auto t : cinfo->usedTraits) {
-    for (auto const& c : t->cls->constants) {
-      addConst(c);
-    }
-    for (auto const& c : t->traitConsts) {
-      addConst(c);
+  for (auto const iface : cinfo->declInterfaces) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, iface)) {
+      return false;
     }
   }
+  for (auto const trait : cinfo->usedTraits) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, trait)) {
+      return false;
+    }
+  }
+  for (auto const ienum : cinfo->includedEnums) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, ienum)) {
+      return false;
+    }
+  }
+
+  if (!build_class_constants(cinfo)) return false;
+  if (!build_class_impl_interfaces(cinfo)) return false;
+  if (!build_class_properties(cinfo)) return false;
+  if (!build_class_methods(index, cinfo)) return false;
   return true;
 }
 
@@ -2274,7 +2343,7 @@ using ClassNamingEnv = NamingEnv<php::Class>;
 using RecordNamingEnv = NamingEnv<php::Record>;
 
 void PhpTypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
-                                          const php::Class* cls) {
+                                             const php::Class* cls) {
   if (cls->parentName) {
     assertx(env.index.classInfo.count(cls->parentName));
   }
@@ -2287,7 +2356,7 @@ void PhpTypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
 }
 
 void PhpTypeHelper<php::Record>::assert_bases(NamingEnv<php::Record>& env,
-                                           const php::Record* rec) {
+                                              const php::Record* rec) {
   if (rec->parentName) {
     assertx(env.index.recordInfo.count(rec->parentName));
   }
@@ -2346,6 +2415,8 @@ std::unique_ptr<php::Func> clone_meth_helper(
   }
   cloneMeth->unit = newContext->unit;
 
+  if (!origMeth->hasCreateCl) return cloneMeth;
+
   auto const recordClosure = [&] (uint32_t* clsId) {
     auto const cls = origMeth->unit->classes[*clsId].get();
     auto& elm = clonedClosures[cls];
@@ -2380,7 +2451,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
     }
   }
 
-  for (auto elm : updates) {
+  for (auto const& elm : updates) {
     auto const blk = mf.blocks()[elm.first].mutate();
     for (auto const& ix : elm.second) {
       blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
@@ -2617,7 +2688,7 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     }
   }
 
- // We're now committed to flattening.
+  // We're now committed to flattening.
   ITRACE(3, "Flattening {}\n", cls->name);
   if (it != env.index.classExtraMethodMap.end()) it->second.clear();
   for (auto const& p : cinfo->traitProps) {
@@ -2632,6 +2703,7 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     cls->constants.push_back(c);
     cinfo->clsConstants[c.name].cls = cls;
     cinfo->clsConstants[c.name].idx = cls->constants.size()-1;
+    cinfo->preResolveState->constsFromTraits.erase(c.name);
   }
   cinfo->traitConsts.clear();
 
@@ -2790,6 +2862,7 @@ void resolve_combinations(ClassNamingEnv& env,
     cinfo->usedTraits.push_back(trait);
   }
 
+  cinfo->preResolveState = std::make_unique<ClassInfo::PreResolveState>();
   if (!build_cls_info(env.index, cinfo.get())) return;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
@@ -2807,8 +2880,6 @@ void resolve_combinations(ClassNamingEnv& env,
   assertx(it.second);
   env.index.allClassInfos.push_back(std::move(cinfo));
 }
-
-
 
 void PhpTypeHelper<php::Record>::try_flatten_traits(NamingEnv<php::Record>&,
                                                 const php::Record*,
@@ -4363,7 +4434,12 @@ void preresolveTypes(NamingEnv<T>& env,
     (void)bumper;
     preresolve(env, t);
   }
+
+  for (auto& cinfo : env.index.allClassInfos) {
+    cinfo->preResolveState.reset();
+  }
 }
+
 } //namespace
 
 Index::Index(php::Program* program)

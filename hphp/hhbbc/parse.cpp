@@ -270,6 +270,7 @@ void populate_block(ParseUnitState& puState,
                     php::Block& blk,
                     PC pc,
                     PC const past,
+                    bool& sawCreateCl,
                     FindBlock findBlock) {
   auto const& ue = fe.ue();
 
@@ -314,6 +315,7 @@ void populate_block(ParseUnitState& puState,
   };
 
   auto createcl = [&] (const Bytecode& b) {
+    sawCreateCl = true;
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
 
@@ -576,6 +578,7 @@ void build_cfg(ParseUnitState& puState,
 
   hphp_fast_map<BlockId, std::pair<int, int>> predSuccCounts;
 
+  bool sawCreateCl = false;
   for (auto it = begin(blockStarts);
        std::next(it) != end(blockStarts);
        ++it) {
@@ -591,12 +594,14 @@ void build_cfg(ParseUnitState& puState,
       block->throwExit = func.exnNodes[it->second].region.catchEntry;
     }
 
-    populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
+    populate_block(puState, fe, func, *block, bcStart, bcStop,
+                   sawCreateCl, findBlock);
     forEachNonThrowSuccessor(*block, [&] (BlockId blkId) {
         predSuccCounts[blkId].first++;
         predSuccCounts[bid].second++;
     });
   }
+  func.hasCreateCl = sawCreateCl;
 
   link_entry_points(func, fe, findBlock);
 
@@ -700,6 +705,9 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     for (auto& a : fe.params) if (a.isInOut()) return true;
     return false;
   }();
+
+  // Assume true, will be updated in build_cfg().
+  ret->hasCreateCl = true;
 
   for (auto& name : fe.staticCoeffects) ret->staticCoeffects.push_back(name);
   for (auto& rule : fe.coeffectRules) ret->coeffectRules.push_back(rule);

@@ -380,6 +380,8 @@ struct Func : FuncBase {
 
   bool sampleDynamicCalls : 1;
 
+  bool hasCreateCl : 1; // Function has CreateCl opcode
+
   /*
    * Type parameter upper bounds. May be enforced and used for optimizations.
    */

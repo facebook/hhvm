@@ -389,7 +389,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
       assertx(uc);
       try {
         tracing::BlockNoTrace _{"unit-compiler-run"};
-        ue = uc->compile();
+        bool ignore;
+        ue = uc->compile(ignore);
       } catch (const BadCompilerException& exc) {
         Logger::Error("Bad external compiler: %s", exc.what());
         return nullptr;

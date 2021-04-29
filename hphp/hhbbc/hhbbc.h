@@ -92,10 +92,6 @@ OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
 
 //////////////////////////////////////////////////////////////////////
 
-void hard_constprop(bool);
-
-//////////////////////////////////////////////////////////////////////
-
 struct UnitEmitterQueue : Synchronizable {
   explicit UnitEmitterQueue(RepoAutoloadMapBuilder* b = nullptr,
                             bool storeUnitEmitters = false)
@@ -127,10 +123,6 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
 
 /*
  * Perform whole-program optimization on a set of UnitEmitters.
- *
- * Currently this process relies on some information from HPHPc.  It
- * expects traits are already flattened (it might be wrong if they
- * aren't).
  */
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
@@ -148,4 +140,3 @@ int main(int argc, char** argv);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

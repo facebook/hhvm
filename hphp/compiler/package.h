@@ -24,6 +24,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/file-cache.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
 #include "hphp/hhbbc/hhbbc.h"
 
@@ -61,6 +62,9 @@ struct Package {
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}
 
+  size_t getTotalParses() const { return m_totalParses.load(); }
+  size_t getParseCacheHits() const { return m_parseCacheHits.load(); }
+
   void saveStatsToFile(const char *filename, int totalSeconds) const;
 
   const std::string& getRoot() const { return m_root;}
@@ -74,14 +78,18 @@ private:
     std::unique_ptr<UnitEmitter> org_ue);
 
   std::string m_root;
-  std::set<std::string> m_filesToParse;
-
+  folly_concurrent_hash_map_simd<
+    std::string, std::unique_ptr<std::string>
+  > m_filesToParse;
   void *m_dispatcher;
 
   Mutex m_mutex;
   AnalysisResultPtr m_ar;
   int m_lineCount;
   int m_charCount;
+
+  std::atomic<size_t> m_parseCacheHits;
+  std::atomic<size_t> m_totalParses;
 
   std::shared_ptr<FileCache> m_fileCache;
   std::map<std::string,bool> m_directories;

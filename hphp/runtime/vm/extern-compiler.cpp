@@ -1370,8 +1370,11 @@ UnitCompiler::create(const char* code,
   }
 }
 
-std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(CompileAbortMode mode) {
-  bool ice = false;
+std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
+    bool& cacheHit,
+    CompileAbortMode mode) {
+  auto ice = false;
+  cacheHit = false;
   auto res = hackc_compile(m_code,
                            m_codeLen,
                            m_filename,
@@ -1420,8 +1423,9 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(CompileAbortMode mode) {
 }
 
 std::unique_ptr<UnitEmitter>
-CacheUnitCompiler::compile(CompileAbortMode mode) {
+CacheUnitCompiler::compile(bool& cacheHit, CompileAbortMode mode) {
   assertx(g_unit_emitter_cache_hook);
+  cacheHit = true;
   return g_unit_emitter_cache_hook(
     m_filename,
     m_sha1,
@@ -1430,6 +1434,7 @@ CacheUnitCompiler::compile(CompileAbortMode mode) {
       if (!m_fallback) m_fallback = m_makeFallback();
       assertx(m_fallback);
       return m_fallback->compile(
+        cacheHit,
         wantsICE ? mode : CompileAbortMode::AllErrorsNull
       );
     },

@@ -60,7 +60,8 @@ const StaticString s___EntryPoint("__EntryPoint");
 ///////////////////////////////////////////////////////////////////////////////
 
 Package::Package(const char* root, bool /*bShortTags*/ /* = true */)
-    : m_dispatcher(nullptr), m_lineCount(0), m_charCount(0) {
+    : m_dispatcher(nullptr), m_lineCount(0), m_charCount(0)
+    , m_parseCacheHits{0}, m_totalParses{0} {
   m_root = FileUtil::normalizeDir(root);
   m_ar = std::make_shared<AnalysisResult>();
   m_fileCache = std::make_shared<FileCache>();
@@ -235,15 +236,22 @@ using ParserDispatcher = JobQueueDispatcher<ParserWorker>;
 void Package::addSourceFile(const std::string& fileName,
                             bool check /* = false */) {
   if (!fileName.empty()) {
-    auto canonFileName =
+    auto const canonFileName =
       FileUtil::canonicalize(String(fileName)).toCppString();
-    auto const file = [&] {
-      Lock lock(m_mutex);
-      auto const info = m_filesToParse.insert(canonFileName);
-      return info.second && m_dispatcher ? &*info.first : nullptr;
+
+    auto const file = [&] () -> const std::string* {
+      if (auto const it = m_filesToParse.find(canonFileName);
+          it != m_filesToParse.end()) {
+        return nullptr;
+      }
+      auto const result = m_filesToParse.insert(
+        canonFileName,
+        std::make_unique<std::string>(canonFileName)
+      );
+      return result.second ? result.first->second.get() : nullptr;
     }();
 
-    if (file) {
+    if (m_dispatcher && file) {
       static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({file, check});
     }
   }
@@ -290,6 +298,7 @@ bool Package::parse(bool check) {
 
   auto const threadCount = Option::ParserThreadCount <= 0 ?
     1 : Option::ParserThreadCount;
+  Logger::Info("parsing using %d threads", threadCount);
 
   // process system lib files which were deferred during process-init
   // (if necessary).
@@ -306,8 +315,8 @@ bool Package::parse(bool check) {
   auto const files = std::move(m_filesToParse);
 
   dispatcher.start();
-  for (auto const& file : files) {
-    addSourceFile(file, check);
+  for (auto const& p : files) {
+    addSourceFile(*p.second, check);
   }
   for (auto const& dir : m_directories) {
     addSourceDirectory(dir.first, dir.second);
@@ -423,6 +432,8 @@ bool Package::parseImpl(const std::string* fileName) {
       };
       SHA1 sha1{string_sha1(content)};
 
+      ++m_totalParses;
+
       std::unique_ptr<UnitEmitter> ue{
         assemble_string(content.data(), content.size(), fileName->c_str(), sha1,
                         Native::s_noNativeFuncs)
@@ -479,7 +490,10 @@ bool Package::parseImpl(const std::string* fileName) {
     Native::s_noNativeFuncs, false, options);
   assertx(uc);
   try {
-    auto ue = uc->compile(mode);
+    ++m_totalParses;
+    auto cacheHit = false;
+    auto ue = uc->compile(cacheHit, mode);
+    if (cacheHit) ++m_parseCacheHits;
     if (ue && !ue->m_ICE) {
       if (is_symlink) {
         ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));

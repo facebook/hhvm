@@ -626,6 +626,12 @@ int process(const CompilerOptions &po) {
     if (po.target != "filecache") {
       if (!package.parse(!po.force)) return 1;
 
+      Logger::Info(
+        "%ld total parses, %ld cache hits",
+        package.getTotalParses(),
+        package.getParseCacheHits()
+      );
+
       // nuke the compiler pool so we don't waste memory on ten gajillion
       // instances of hackc
       if (auto const new_workers = RO::EvalHackCompilerSecondaryWorkers) {

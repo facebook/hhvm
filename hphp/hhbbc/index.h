@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
+#include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {
@@ -623,7 +624,7 @@ struct Index {
    * Throw away data structures that won't be needed after the emit
    * stage.
    */
-  void cleanup_post_emit();
+  void cleanup_post_emit(php::ProgramPtr program);
 
   /*
    * The Index contains a Builder for an ArrayTypeTable.

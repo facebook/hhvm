@@ -282,6 +282,8 @@ void analyze_iteratively(Index& index, php::Program& program,
     }
   };
 
+  std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
+
   auto work = initial_work(program, mode);
   while (!work.empty()) {
     auto results = [&] {
@@ -312,8 +314,6 @@ void analyze_iteratively(Index& index, php::Program& program,
 
     ++round;
     trace_time update_time("updating");
-
-    std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
 
     auto update_func = [&] (FuncAnalysisResult& fa,
                             DependencyContextSet& deps) {
@@ -381,6 +381,7 @@ void analyze_iteratively(Index& index, php::Program& program,
             update_class(result->cls, deps_vec[worker]);
             break;
         }
+        result.reset();
       }
     );
 
@@ -402,6 +403,7 @@ void analyze_iteratively(Index& index, php::Program& program,
     work.clear();
     work.reserve(deps.size());
     for (auto& d : deps) work.push_back(work_item_for(d, mode));
+    deps.clear();
   }
 }
 
@@ -610,11 +612,11 @@ void whole_program(php::ProgramPtr program,
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   // running cleanup_for_emit can take a while... start it as early as
   // possible, and run in its own thread.
-  auto cleanup_post = std::thread([&] {
+  auto cleanup_post = std::thread([&, program = std::move(program)] () mutable {
       auto const enable =
         logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
-      index.cleanup_post_emit();
+      index.cleanup_post_emit(std::move(program));
     }
   );
 

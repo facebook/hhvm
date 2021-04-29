@@ -6807,7 +6807,7 @@ void refine_private_propstate(Container& cont,
     std::lock_guard<std::mutex> _{private_propstate_mutex};
     auto it = cont.find(cls);
     if (it == end(cont)) {
-      cont[cls] = state;
+      if (!state.empty()) cont[cls] = state;
       return nullptr;
     }
     return &*it;
@@ -7095,7 +7095,7 @@ void Index::freeze() {
  */
 #define CLEAR(x)                                \
   {                                             \
-    trace_time _{"Clearing " #x};               \
+    trace_time _{"clearing " #x};               \
     (x).clear();                                \
   }
 
@@ -7105,11 +7105,25 @@ void Index::cleanup_for_final() {
 }
 
 
-void Index::cleanup_post_emit() {
+void Index::cleanup_post_emit(php::ProgramPtr program) {
   trace_time _{"cleanup_post_emit"};
   {
-    trace_time t{"Reset allClassInfos"};
+    trace_time t{"reset allClassInfos"};
     parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
+  }
+  {
+    trace_time t{"reset funcInfo"};
+    parallel::for_each(
+      m_data->funcInfo,
+      [] (auto& u) {
+        u.returnTy = TBottom;
+        u.families.clear();
+      }
+    );
+  }
+  {
+    trace_time t{"reset program"};
+    parallel::for_each(program->units, [] (auto& u) { u.reset(); });
   }
   std::vector<std::function<void()>> clearers;
   #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));

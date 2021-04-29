@@ -1,12 +1,12 @@
-File "lambda_hof_bad.php", line 16, characters 21-26:
+File "lambda_hof_bad.php", line 16, characters 21-22:
 Typing error (Typing[4110])
-  File "lambda_hof_bad.php", line 16, characters 21-22:
+  File "lambda_hof_bad.php", line 16, characters 21-26:
   Expected `num` because this is used in an arithmetic operation
   File "lambda_hof_bad.php", line 15, characters 19-24:
   But got `string`
-File "lambda_hof_bad.php", line 17, characters 29-34:
+File "lambda_hof_bad.php", line 17, characters 29-30:
 Typing error (Typing[4110])
-  File "lambda_hof_bad.php", line 17, characters 29-30:
+  File "lambda_hof_bad.php", line 17, characters 29-34:
   Expected `num` because this is used in an arithmetic operation
   File "lambda_hof_bad.php", line 15, characters 19-24:
   But got `string`

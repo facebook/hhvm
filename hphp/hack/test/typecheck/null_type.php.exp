@@ -1,6 +1,6 @@
-File "null_type.php", line 15, characters 8-14:
-Typing error (Typing[4110])
 File "null_type.php", line 15, characters 8-9:
-Expected `num` because this is used in an arithmetic operation
-File "null_type.php", line 12, characters 14-17:
-But got `?int`
+Typing error (Typing[4110])
+  File "null_type.php", line 15, characters 8-14:
+  Expected `num` because this is used in an arithmetic operation
+  File "null_type.php", line 12, characters 14-17:
+  But got `?int`

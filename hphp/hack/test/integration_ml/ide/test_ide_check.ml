@@ -37,9 +37,9 @@ class A {
 
 let a_contents3_diagnostics =
   "/a.php:
-File \"/a.php\", line 4, characters 5-12:
+File \"/a.php\", line 4, characters 10-12:
 Typing error (Typing[4110])
-  File \"/a.php\", line 4, characters 10-12:
+  File \"/a.php\", line 4, characters 5-12:
   Expected `num` because this is used in an arithmetic operation
   File \"/a.php\", line 4, characters 10-12:
   But got `string`"

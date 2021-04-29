@@ -1,6 +1,6 @@
-File "foreach_vector.php", line 21, characters 10-17:
+File "foreach_vector.php", line 21, characters 10-13:
 Typing error (Typing[4110])
-  File "foreach_vector.php", line 21, characters 10-13:
+  File "foreach_vector.php", line 21, characters 10-17:
   Expected `num` because this is used in an arithmetic operation
   File "foreach_vector.php", line 18, characters 19-21:
   But got `Foo`

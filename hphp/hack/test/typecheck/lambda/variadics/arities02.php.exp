@@ -1,12 +1,12 @@
-File "arities02.php", line 23, characters 11-23:
+File "arities02.php", line 23, characters 11-15:
 Typing error (Typing[4110])
-  File "arities02.php", line 23, characters 11-15:
+  File "arities02.php", line 23, characters 11-23:
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
   But got `string`
-File "arities02.php", line 23, characters 11-23:
+File "arities02.php", line 23, characters 19-23:
 Typing error (Typing[4110])
-  File "arities02.php", line 23, characters 19-23:
+  File "arities02.php", line 23, characters 11-23:
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
   But got `string`

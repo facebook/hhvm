@@ -1,6 +1,6 @@
-File "default_with_type_error.php", line 10, characters 9-14:
-Typing error (Typing[4110])
 File "default_with_type_error.php", line 10, characters 9-10:
-Expected `num` because this is used in an arithmetic operation
-File "default_with_type_error.php", line 7, characters 19-21:
-But got `string`
+Typing error (Typing[4110])
+  File "default_with_type_error.php", line 10, characters 9-14:
+  Expected `num` because this is used in an arithmetic operation
+  File "default_with_type_error.php", line 7, characters 19-21:
+  But got `string`

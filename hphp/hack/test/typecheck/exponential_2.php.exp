@@ -1,6 +1,6 @@
-File "exponential_2.php", line 4, characters 8-18:
+File "exponential_2.php", line 4, characters 8-12:
 Typing error (Typing[4110])
-File "exponential_2.php", line 4, characters 8-12:
-Expected `num` because this is used in an arithmetic operation
-File "exponential_2.php", line 4, characters 8-12:
-But got `bool`
+  File "exponential_2.php", line 4, characters 8-18:
+  Expected `num` because this is used in an arithmetic operation
+  File "exponential_2.php", line 4, characters 8-12:
+  But got `bool`

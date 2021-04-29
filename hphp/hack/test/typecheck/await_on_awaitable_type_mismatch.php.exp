@@ -1,6 +1,6 @@
-File "await_on_awaitable_type_mismatch.php", line 14, characters 10-15:
-Typing error (Typing[4110])
 File "await_on_awaitable_type_mismatch.php", line 14, characters 14-15:
-Expected `num` because this is used in an arithmetic operation
-File "await_on_awaitable_type_mismatch.php", line 12, characters 37-42:
-But got `string`
+Typing error (Typing[4110])
+  File "await_on_awaitable_type_mismatch.php", line 14, characters 10-15:
+  Expected `num` because this is used in an arithmetic operation
+  File "await_on_awaitable_type_mismatch.php", line 12, characters 37-42:
+  But got `string`

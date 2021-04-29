@@ -1,8 +1,8 @@
 File "do_while_condition_typechange.php", line 16, characters 11-12:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "do_while_condition_typechange.php", line 15, characters 4-11:
-Typing error (Typing[4110])
 File "do_while_condition_typechange.php", line 15, characters 10-11:
-Expected `num` because this is used in an arithmetic operation
-File "do_while_condition_typechange.php", line 16, characters 16-19:
-But got `bool`
+Typing error (Typing[4110])
+  File "do_while_condition_typechange.php", line 15, characters 4-11:
+  Expected `num` because this is used in an arithmetic operation
+  File "do_while_condition_typechange.php", line 16, characters 16-19:
+  But got `bool`

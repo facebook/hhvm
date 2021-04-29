@@ -1,6 +1,6 @@
-File "mixed_lambda_ko.php", line 10, characters 16-21:
+File "mixed_lambda_ko.php", line 10, characters 16-17:
 Typing error (Typing[4110])
-  File "mixed_lambda_ko.php", line 10, characters 16-17:
+  File "mixed_lambda_ko.php", line 10, characters 16-21:
   Expected `num` because this is used in an arithmetic operation
   File "mixed_lambda_ko.php", line 5, characters 12-16:
   But got `mixed`

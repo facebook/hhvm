@@ -148,10 +148,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         Errors.unify_error
     in
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) err
+      check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) err
+      check_dynamic_or_enforce_num env p2 ty2 (Reason.Rarith p) err
     in
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
      * result if *either* operand is dynamic
@@ -248,10 +248,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         Errors.unify_error
     in
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) err
+      check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) err
+      check_dynamic_or_enforce_num env p2 ty2 (Reason.Rarith p) err
     in
     let (env, result_ty) =
       if is_float_or_like_float env ty1 then

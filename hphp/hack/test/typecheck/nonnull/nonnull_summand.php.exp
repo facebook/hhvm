@@ -1,6 +1,6 @@
-File "nonnull_summand.php", line 4, characters 8-13:
-Typing error (Typing[4110])
 File "nonnull_summand.php", line 4, characters 8-9:
-Expected `num` because this is used in an arithmetic operation
-File "nonnull_summand.php", line 3, characters 15-21:
-But got `nonnull`
+Typing error (Typing[4110])
+  File "nonnull_summand.php", line 4, characters 8-13:
+  Expected `num` because this is used in an arithmetic operation
+  File "nonnull_summand.php", line 3, characters 15-21:
+  But got `nonnull`

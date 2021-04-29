@@ -1,8 +1,8 @@
 File "typing_fail_instance_of.php", line 34, characters 16-18:
 Unbound name: `dyn` (Naming[2049])
-File "typing_fail_instance_of.php", line 40, characters 10-15:
-Typing error (Typing[4110])
 File "typing_fail_instance_of.php", line 40, characters 10-11:
-Expected `num` because this is used in an arithmetic operation
-File "typing_fail_instance_of.php", line 34, characters 16-18:
-But got `dyn`
+Typing error (Typing[4110])
+  File "typing_fail_instance_of.php", line 40, characters 10-15:
+  Expected `num` because this is used in an arithmetic operation
+  File "typing_fail_instance_of.php", line 34, characters 16-18:
+  But got `dyn`

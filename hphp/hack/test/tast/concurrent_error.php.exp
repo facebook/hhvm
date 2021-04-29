@@ -1,8 +1,8 @@
 Errors:
   [8:14-11:4] Statement without an `await` in a concurrent block
   [10:5-21] Statement without an `await` in a concurrent block
-  [12:10-19] Typing error
-  [12:16-19] Expected `num` because this is used in an arithmetic operation
+  [12:16-19] Typing error
+  [12:10-19] Expected `num` because this is used in an arithmetic operation
   [3:27-41] But got `Awaitable<int>`
 [(Fun
     { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 

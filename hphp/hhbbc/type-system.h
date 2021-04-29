@@ -304,7 +304,12 @@ struct HAMSandwich {
   static HAMSandwich FromSArr(SArray);
 
   // Create the most general HAMSandwich allowed for the given type.
-  static HAMSandwich TopForBits(trep);
+  static HAMSandwich TopForBits(trep b) {
+    using HPHP::HHBBC::couldBe;
+    return HAMSandwich {
+      couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
+    };
+  }
 
   // Return a new HAMSandwich refined based on the given type. For
   // example, if the given type no longer contains Vec or Dict, we
@@ -372,15 +377,36 @@ enum class Promotion {
 struct Type {
   Type() : Type{BBottom} {}
   explicit Type(trep t) : Type{t, HAMSandwich::TopForBits(t)} {}
-  Type(trep t, HAMSandwich h) : m_bits{t}, m_ham{h} {
+  Type(trep t, HAMSandwich h) : m_bits{t}, m_dataTag{DataTag::None}, m_ham{h} {
     assertx(checkInvariants());
   }
 
-  Type(const Type&) noexcept;
-  Type(Type&&) noexcept;
+  Type(const Type& o) noexcept
+    : m_raw{o.m_raw}
+    , m_ham{o.m_ham}
+  {
+    SCOPE_EXIT { assertx(checkInvariants()); };
+    if (LIKELY(m_dataTag == DataTag::None)) return;
+    copyData(o);
+  }
+
+  Type(Type&& o) noexcept
+    : m_raw{o.m_raw}
+    , m_ham{o.m_ham}
+  {
+    SCOPE_EXIT { assertx(o.checkInvariants()); };
+    if (LIKELY(m_dataTag == DataTag::None)) return;
+    moveData(std::move(o));
+  }
+
   Type& operator=(const Type&) noexcept;
   Type& operator=(Type&&) noexcept;
-  ~Type() noexcept;
+
+  ~Type() {
+    assertx(checkInvariants());
+    if (LIKELY(m_dataTag == DataTag::None)) return;
+    destroyData();
+  }
 
   /*
    * Exact equality or inequality of types, and hashing.
@@ -626,11 +652,20 @@ private:
   bool subtypeOfImpl(const Type& o) const;
   bool checkInvariants() const;
 
+  void copyData(const Type& o);
+  void moveData(Type&& o);
+  void destroyData();
+
 private:
-  uint64_t m_bits : kTRepBitsStored;
-  DataTag m_dataTag = DataTag::None;
-  Data m_data;
+  union {
+    struct {
+      uint64_t m_bits : kTRepBitsStored;
+      DataTag m_dataTag;
+    };
+    uint64_t m_raw;
+  };
   HAMSandwich m_ham;
+  Data m_data;
 };
 
 //////////////////////////////////////////////////////////////////////

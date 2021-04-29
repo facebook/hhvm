@@ -1891,13 +1891,6 @@ MapElem MapElem::KeyFromType(const Type& key, Type val) {
 
 //////////////////////////////////////////////////////////////////////
 
-HAMSandwich HAMSandwich::TopForBits(trep b) {
-  using HPHP::HHBBC::couldBe;
-  return HAMSandwich {
-    couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
-  };
-}
-
 HAMSandwich HAMSandwich::FromSArr(SArray a) {
   auto const mark = [&] {
     if (a->isKeysetType()) return LegacyMark::Bottom;
@@ -2076,43 +2069,6 @@ Type Type::unctxHelper(Type t, bool& changed) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type::Type(const Type& o) noexcept
-  : m_bits{o.m_bits}
-  , m_dataTag{o.m_dataTag}
-  , m_ham{o.m_ham}
-{
-  SCOPE_EXIT { assertx(checkInvariants()); };
-  switch (m_dataTag) {
-    case DataTag::None:   return;
-    #define DT(tag_name,type,name)              \
-      case DataTag::tag_name:                   \
-        construct(m_data.name, o.m_data.name);  \
-        return;
-    DATATAGS
-    #undef DT
-  }
-  not_reached();
-}
-
-Type::Type(Type&& o) noexcept
-  : m_bits{o.m_bits}
-  , m_dataTag(o.m_dataTag)
-  , m_ham{o.m_ham}
-{
-  SCOPE_EXIT { assertx(o.checkInvariants()); };
-  o.m_dataTag = DataTag::None;
-  switch (m_dataTag) {
-    case DataTag::None:   return;
-    #define DT(tag_name,type,name)                              \
-      case DataTag::tag_name:                                   \
-        construct(m_data.name, std::move(o.m_data.name));       \
-        return;
-    DATATAGS
-    #undef DT
-  }
-  not_reached();
-}
-
 Type& Type::operator=(const Type& o) noexcept {
   SCOPE_EXIT { assertx(checkInvariants()); };
   if (this == &o) return *this;
@@ -2128,21 +2084,6 @@ Type& Type::operator=(Type&& o) noexcept {
   destroy(*this);
   construct(*this, std::move(o));
   return *this;
-}
-
-Type::~Type() noexcept {
-  assertx(checkInvariants());
-
-  switch (m_dataTag) {
-    case DataTag::None: return;
-    #define DT(tag_name,type,name)              \
-      case DataTag::tag_name:                   \
-        destroy(m_data.name);                   \
-        return;
-    DATATAGS
-    #undef DT
-  }
-  not_reached();
 }
 
 const Type& Type::operator |= (const Type& other) {
@@ -2163,6 +2104,51 @@ const Type& Type::operator &= (const Type& other) {
 const Type& Type::operator &= (Type&& other) {
   *this = intersection_of(std::move(*this), std::move(other));
   return *this;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void Type::copyData(const Type& o) {
+  assertx(m_dataTag != DataTag::None);
+  switch (m_dataTag) {
+    case DataTag::None:   not_reached();
+    #define DT(tag_name,type,name)              \
+      case DataTag::tag_name:                   \
+        construct(m_data.name, o.m_data.name);  \
+        return;
+    DATATAGS
+    #undef DT
+  }
+  not_reached();
+}
+
+void Type::moveData(Type&& o) {
+  assertx(m_dataTag != DataTag::None);
+  o.m_dataTag = DataTag::None;
+  switch (m_dataTag) {
+    case DataTag::None:   not_reached();
+    #define DT(tag_name,type,name)                              \
+      case DataTag::tag_name:                                   \
+        construct(m_data.name, std::move(o.m_data.name));       \
+        return;
+    DATATAGS
+    #undef DT
+  }
+  not_reached();
+}
+
+void Type::destroyData() {
+  assertx(m_dataTag != DataTag::None);
+  switch (m_dataTag) {
+    case DataTag::None: not_reached();
+    #define DT(tag_name,type,name)              \
+      case DataTag::tag_name:                   \
+        destroy(m_data.name);                   \
+        return;
+    DATATAGS
+    #undef DT
+  }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

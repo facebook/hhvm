@@ -304,7 +304,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     return nl;
   };
 
-  auto set_expected_depth = [&] (BlockId block) {
+  auto const set_expected_depth = [&] (BlockId block) {
     auto& info = blockInfo[block];
 
     if (info.expectedStackDepth) {
@@ -314,7 +314,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     }
   };
 
-  auto make_member_key = [&] (MKey mkey) {
+  auto const make_member_key = [&] (MKey mkey) {
     switch (mkey.mcode) {
       case MEC: case MPC:
         return MemberKey{mkey.mcode, static_cast<int32_t>(mkey.idx), mkey.rop};
@@ -330,7 +330,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     not_reached();
   };
 
-  auto emit_inst = [&] (const Bytecode& inst) {
+  auto const emit_inst = [&] (const Bytecode& inst) {
     auto const startOffset = fe.bcPos();
     lastOff = startOffset;
 
@@ -339,7 +339,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 
     if (options.TraceBytecodes.count(inst.op)) traceBc = true;
 
-    auto emit_vsa = [&] (const CompactVector<LSString>& keys) {
+    auto const emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
       fe.emitIVA(n);
       for (size_t i = 0; i < n; ++i) {
@@ -347,7 +347,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       }
     };
 
-    auto emit_branch = [&] (BlockId id) {
+    auto const emit_branch = [&] (BlockId id) {
       auto& info = blockInfo[id];
       if (info.offset != kInvalidOffset) {
         fe.emitInt32(info.offset - startOffset);
@@ -357,7 +357,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       }
     };
 
-    auto emit_switch = [&] (const SwitchTab& targets) {
+    auto const emit_switch = [&] (const SwitchTab& targets) {
       fe.emitIVA(targets.size());
       for (auto t : targets) {
         set_expected_depth(t);
@@ -365,7 +365,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       }
     };
 
-    auto emit_sswitch = [&] (const SSwitchTab& targets) {
+    auto const emit_sswitch = [&] (const SSwitchTab& targets) {
       fe.emitIVA(targets.size());
       for (size_t i = 0; i < targets.size() - 1; ++i) {
         set_expected_depth(targets[i].second);
@@ -377,7 +377,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       emit_branch(targets[targets.size() - 1].second);
     };
 
-    auto emit_srcloc = [&] {
+    auto const emit_srcloc = [&] {
       auto const sl = srcLoc(*func, inst.srcLoc);
       auto const loc = sl.isValid() ?
         Location::Range(sl.start.line, sl.start.col, sl.past.line, sl.past.col)
@@ -385,19 +385,19 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       fe.recordSourceLocation(loc, startOffset);
     };
 
-    auto pop = [&] (int32_t n) {
+    auto const pop = [&] (int32_t n) {
       currentStackDepth -= n;
       assertx(currentStackDepth >= 0);
     };
-    auto push = [&] (int32_t n) {
+    auto const push = [&] (int32_t n) {
       currentStackDepth += n;
       ret.maxStackDepth =
         std::max<uint32_t>(ret.maxStackDepth, currentStackDepth);
     };
 
-    auto ret_assert = [&] { assertx(currentStackDepth == inst.numPop()); };
+    auto const ret_assert = [&] { assertx(currentStackDepth == inst.numPop()); };
 
-    auto createcl  = [&] (auto& data) {
+    auto const createcl  = [&] (auto& data) {
       auto& id = data.arg2;
       if (euState.classOffsets[id] != kInvalidOffset) {
         for (auto const& elm : euState.pceInfo) {
@@ -412,13 +412,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       id = recordClass(euState, ue, id);
     };
 
-    auto emit_lar  = [&](const LocalRange& range) {
+    auto const emit_lar  = [&](const LocalRange& range) {
       encodeLocalRange(fe, HPHP::LocalRange{
         map_local(range.first), range.count
       });
     };
 
-    auto emit_ita  = [&](IterArgs ita) {
+    auto const emit_ita  = [&](IterArgs ita) {
       if (ita.hasKey()) ita.keyId = map_local(ita.keyId);
       ita.valId = map_local(ita.valId);
       encodeIterArgs(fe, ita);
@@ -493,53 +493,54 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 #define PUSH_CMANY             push(data.arg1);
 #define PUSH_FCALL             push(data.fca.numRets());
 
-#define O(opcode, imms, inputs, outputs, flags)                 \
-    auto emit_##opcode = [&] (OpInfo<bc::opcode> data) {        \
-      if (RuntimeOption::EnableIntrinsicsExtension) {           \
-        if (Op::opcode == Op::FCallFuncD &&                     \
-            inst.FCallFuncD.str2->isame(                        \
-              s_hhbbc_fail_verification.get())) {               \
-          fe.emitOp(Op::CheckProp);                             \
-          fe.emitInt32(                                         \
-            ue.mergeLitstr(inst.FCallFuncD.str2));              \
-          fe.emitOp(Op::PopC);                                  \
-          ret.maxStackDepth++;                                  \
-        }                                                       \
-      }                                                         \
-      caller<Op::CreateCl>(createcl, data);                     \
-                                                                \
-      if (isRet(Op::opcode)) ret_assert();                      \
-      fe.emitOp(Op::opcode);                                    \
-      POP_##inputs                                              \
-                                                                \
-      size_t numTargets = 0;                                    \
-      std::array<BlockId, kMaxHhbcImms> targets;                \
-                                                                \
-      if (Op::opcode == Op::MemoGet) {                          \
-        IMM_##imms                                              \
-        assertx(numTargets == 1);                               \
-        set_expected_depth(targets[0]);                         \
-        PUSH_##outputs                                          \
-      } else if (Op::opcode == Op::MemoGetEager) {              \
-        IMM_##imms                                              \
-        assertx(numTargets == 2);                               \
-        set_expected_depth(targets[0]);                         \
-        PUSH_##outputs                                          \
-        set_expected_depth(targets[1]);                         \
-      } else {                                                  \
-        PUSH_##outputs                                          \
-        IMM_##imms                                              \
-        for (size_t i = 0; i < numTargets; ++i) {               \
-          set_expected_depth(targets[i]);                       \
-        }                                                       \
-      }                                                         \
-                                                                \
-      if (flags & TF) currentStackDepth = 0;                    \
-      emit_srcloc();                                            \
-    };
-
-    OPCODES
-
+#define O(opcode, imms, inputs, outputs, flags)                  \
+    case Op::opcode: {                                           \
+      if (Op::opcode == Op::Nop) break;                          \
+      OpInfo<bc::opcode> data{inst.opcode};                      \
+      if (RuntimeOption::EnableIntrinsicsExtension) {            \
+        if (Op::opcode == Op::FCallFuncD &&                      \
+            inst.FCallFuncD.str2->isame(                         \
+              s_hhbbc_fail_verification.get())) {                \
+          fe.emitOp(Op::CheckProp);                              \
+          fe.emitInt32(                                          \
+            ue.mergeLitstr(inst.FCallFuncD.str2));               \
+          fe.emitOp(Op::PopC);                                   \
+          ret.maxStackDepth++;                                   \
+        }                                                        \
+      }                                                          \
+      caller<Op::CreateCl>(createcl, data);                      \
+                                                                 \
+      if (isRet(Op::opcode)) ret_assert();                       \
+      fe.emitOp(Op::opcode);                                     \
+      POP_##inputs                                               \
+                                                                 \
+      size_t numTargets = 0;                                     \
+      std::array<BlockId, kMaxHhbcImms> targets;                 \
+                                                                 \
+      if (Op::opcode == Op::MemoGet) {                           \
+        IMM_##imms                                               \
+        assertx(numTargets == 1);                                \
+        set_expected_depth(targets[0]);                          \
+        PUSH_##outputs                                           \
+      } else if (Op::opcode == Op::MemoGetEager) {               \
+        IMM_##imms                                               \
+        assertx(numTargets == 2);                                \
+        set_expected_depth(targets[0]);                          \
+        PUSH_##outputs                                           \
+        set_expected_depth(targets[1]);                          \
+      } else {                                                   \
+        PUSH_##outputs                                           \
+        IMM_##imms                                               \
+        for (size_t i = 0; i < numTargets; ++i) {                \
+          set_expected_depth(targets[i]);                        \
+        }                                                        \
+      }                                                          \
+                                                                 \
+      if (flags & TF) currentStackDepth = 0;                     \
+      emit_srcloc();                                             \
+      break;                                                     \
+    }
+    switch (inst.op) { OPCODES }
 #undef O
 
 #undef IMM_MA
@@ -590,12 +591,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 #undef PUSH_CMANY
 #undef PUSH_FCALL
 
-#define O(opcode, ...)                                        \
-    case Op::opcode:                                          \
-      if (Op::opcode != Op::Nop) emit_##opcode(inst.opcode);  \
-      break;
-    switch (inst.op) { OPCODES }
-#undef O
   };
 
   ret.blockOrder        = order_blocks(func);

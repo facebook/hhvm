@@ -3490,52 +3490,54 @@ bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
   return unpackArgs.subtypeOf(BVec);
 }
 
-template<class FCallWithFCA>
+template<typename FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
   const FCallArgs& fca,
   const res::Func& func,
-  FCallWithFCA fcallWithFCA
+  FCallWithFCA fcallWithFCA,
+  folly::Optional<uint32_t> inOutNum
 ) {
-  auto const numOut = env.index.lookup_num_inout_params(env.ctx, func);
-  if (fca.enforceInOut() && numOut == fca.numRets() - 1) {
-    bool match = true;
-    for (auto i = 0; i < fca.numArgs(); ++i) {
-      auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
-      if (kind == PrepKind::Unknown) {
-        match = false;
-        break;
+  if (fca.enforceInOut()) {
+    if (inOutNum == fca.numRets() - 1) {
+      bool match = true;
+      for (auto i = 0; i < fca.numArgs(); ++i) {
+        auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
+        if (kind == PrepKind::Unknown) {
+          match = false;
+          break;
+        }
+
+        if (kind != (fca.isInOut(i) ? PrepKind::InOut : PrepKind::Val)) {
+          // The function/method may not exist, in which case we should raise a
+          // different error. Just defer the checks to the runtime.
+          if (!func.exactFunc()) return false;
+
+          // inout mismatch
+          auto const exCls = makeStaticString("InvalidArgumentException");
+          auto const err = makeStaticString(formatParamInOutMismatch(
+                                              func.name()->data(), i, !fca.isInOut(i)));
+
+          reduce(
+            env,
+            bc::NewObjD { exCls },
+            bc::Dup {},
+            bc::NullUninit {},
+            bc::String { err },
+            bc::FCallCtor { FCallArgs(1), staticEmptyString() },
+            bc::PopC {},
+            bc::LockObj {},
+            bc::Throw {}
+          );
+          return true;
+        }
       }
 
-      if (kind != (fca.isInOut(i) ? PrepKind::InOut : PrepKind::Val)) {
-        // The function/method may not exist, in which case we should raise a
-        // different error. Just defer the checks to the runtime.
-        if (!func.exactFunc()) return false;
-
-        // inout mismatch
-        auto const exCls = makeStaticString("InvalidArgumentException");
-        auto const err = makeStaticString(formatParamInOutMismatch(
-          func.name()->data(), i, !fca.isInOut(i)));
-
-        reduce(
-          env,
-          bc::NewObjD { exCls },
-          bc::Dup {},
-          bc::NullUninit {},
-          bc::String { err },
-          bc::FCallCtor { FCallArgs(1), staticEmptyString() },
-          bc::PopC {},
-          bc::LockObj {},
-          bc::Throw {}
-        );
+      if (match) {
+        // Optimize away the runtime inout-ness check.
+        reduce(env, fcallWithFCA(fca.withoutInOut()));
         return true;
       }
-    }
-
-    if (match) {
-      // Optimize away the runtime inout-ness check.
-      reduce(env, fcallWithFCA(fca.withoutInOut()));
-      return true;
     }
   }
 
@@ -3679,7 +3681,7 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-template<class FCallWithFCA>
+template<typename FCallWithFCA>
 void fcallKnownImpl(
   ISS& env,
   const FCallArgs& fca,
@@ -3687,7 +3689,8 @@ void fcallKnownImpl(
   Type context,
   bool nullsafe,
   uint32_t numExtraInputs,
-  FCallWithFCA fcallWithFCA
+  FCallWithFCA fcallWithFCA,
+  folly::Optional<uint32_t> inOutNum
 ) {
   auto const numArgs = fca.numArgs();
   auto returnType = [&] {
@@ -3718,8 +3721,10 @@ void fcallKnownImpl(
 
   // If there's a caller/callee inout mismatch, then the call will
   // always fail.
-  if (auto const numInOut = env.index.lookup_num_inout_params(env.ctx, func)) {
-    if (*numInOut + 1 != fca.numRets()) returnType = TBottom;
+  if (fca.enforceInOut()) {
+    if (inOutNum && (*inOutNum + 1 != fca.numRets())) {
+      returnType = TBottom;
+    }
   }
 
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
@@ -3771,7 +3776,11 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     return bc::FCallFuncD { std::move(fca), op.str2 };
   };
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : folly::none;
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
     return;
   }
@@ -3780,7 +3789,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     if (optimize_builtin(env, func, op.fca)) return;
   }
 
-  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 0, updateBC);
+  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 0, updateBC, numInOut);
 }
 
 namespace {
@@ -3830,8 +3839,12 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     return bc::FCallFunc { std::move(fca) };
   };
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC)) return;
-  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC);
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : folly::none;
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut)) return;
+  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
 }
 
 } // namespace
@@ -4051,8 +4064,12 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   auto const clsTy = objcls(ctxTy);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : folly::none;
+
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
                                extraInput ? 1 : 0))) {
     return;
@@ -4063,7 +4080,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   }
 
   fcallKnownImpl(env, op.fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
-                 updateBC);
+                 updateBC, numInOut);
   refineLoc();
 }
 
@@ -4142,7 +4159,11 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
   auto const ctx = getCallContext(env, op.fca);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : folly::none;
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
     return;
   }
@@ -4152,7 +4173,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
   }
 
   fcallKnownImpl(env, op.fca, rfunc, clsTy, false /* nullsafe */,
-                 numExtraInputs, updateBC);
+                 numExtraInputs, updateBC, numInOut);
 }
 
 } // namespace
@@ -4238,7 +4259,11 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
 
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : folly::none;
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
                    extraInput ? 1 : 0)) {
     return;
@@ -4249,7 +4274,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   }
 
   fcallKnownImpl(env, op.fca, rfunc, ctxCls(env), false /* nullsafe */,
-                 extraInput ? 1 : 0, updateBC);
+                 extraInput ? 1 : 0, updateBC, numInOut);
 }
 
 } // namespace
@@ -4438,8 +4463,12 @@ void in(ISS& env, const bc::FCallCtor& op) {
     return bc::FCallCtor { std::move(fca), op.str2 };
   };
 
+  auto const numInOut = op.fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, *rfunc)
+    : folly::none;
+
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA) ||
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut) ||
       (canFold && fcallTryFold(env, op.fca, *rfunc,
                                obj, false /* dynamic */, 0))) {
     return;
@@ -4451,7 +4480,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
   }
 
   fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, 0,
-                 updateFCA);
+                 updateFCA, numInOut);
 }
 
 void in(ISS& env, const bc::LockObj& op) {

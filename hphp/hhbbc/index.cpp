@@ -160,6 +160,14 @@ template<class T> using SStringToOneFastT =
     string_data_same
   >;
 
+template<class T> using SStringToOneFastT =
+  hphp_fast_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_same
+  >;
+
 /*
  * One-to-one case insensitive map, where the keys are static strings
  * and the values are some kind of pointer.
@@ -1156,7 +1164,7 @@ struct Index::IndexData {
 
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
-  SStringToOneT<uint64_t>                method_inout_params_by_name;
+  SStringToOneFastT<uint64_t>            method_inout_params_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;

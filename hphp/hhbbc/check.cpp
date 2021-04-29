@@ -25,6 +25,7 @@
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
@@ -188,7 +189,10 @@ bool check(const php::Unit& u) {
 
 bool check(const php::Program& p) {
   trace_time tracer("check");
-  for (DEBUG_ONLY auto& u : p.units) assertx(check(*u));
+  parallel::for_each(
+    p.units,
+    [] (const std::unique_ptr<php::Unit>& u) { assertx(check(*u)); }
+  );
   return true;
 }
 

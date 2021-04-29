@@ -3614,42 +3614,55 @@ void mark_no_override_methods(IndexData& index) {
   // We removed any AttrNoOverride flags from all methods while adding
   // the units to the index.  Now start by marking every
   // (non-interface, non-special) method as AttrNoOverride.
-  for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->cls->attrs & AttrInterface) continue;
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      if (cinfo->cls->attrs & AttrInterface) return;
 
-    for (auto& m : cinfo->methods) {
-      if (!(is_special_method_name(m.first))) {
-        FTRACE(9, "Pre-setting AttrNoOverride on {}::{}\n",
-               m.second.func->cls->name, m.first);
-        attribute_setter(m.second.attrs, true, AttrNoOverride);
-        attribute_setter(m.second.func->attrs, true, AttrNoOverride);
+      for (auto& m : cinfo->methods) {
+        if (!(is_special_method_name(m.first))) {
+          FTRACE(9, "Pre-setting AttrNoOverride on {}::{}\n",
+                 m.second.func->cls->name, m.first);
+          attribute_setter(m.second.attrs, true, AttrNoOverride);
+          attribute_setter(m.second.func->attrs, true, AttrNoOverride);
+        }
       }
     }
-  }
+  );
 
-  // Then run through every ClassInfo, and for each of its parent classes clear
-  // the AttrNoOverride flag if it has a different Func with the same name.
-  for (auto& cinfo : index.allClassInfos) {
-    for (auto& ancestor : cinfo->baseList) {
-      if (ancestor == cinfo.get()) continue;
+  // Then run through every ClassInfo, and for each of its parent
+  // classes clear the AttrNoOverride flag if it has a different Func
+  // with the same name.
+  auto const updates = parallel::map(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      hphp_fast_set<MethTabEntry*> changes;
 
-      auto removeNoOverride = [] (auto it) {
-        assertx(it->second.attrs & AttrNoOverride ||
-                !(it->second.func->attrs & AttrNoOverride));
-        if (it->second.attrs & AttrNoOverride) {
-          FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-                 it->second.func->cls->name, it->first);
-          attribute_setter(it->second.attrs, false, AttrNoOverride);
-          attribute_setter(it->second.func->attrs, false, AttrNoOverride);
+      for (auto const& ancestor : cinfo->baseList) {
+        if (ancestor == cinfo.get()) continue;
+
+        for (auto const& derivedMethod : cinfo->methods) {
+          auto const it = ancestor->methods.find(derivedMethod.first);
+          if (it == end(ancestor->methods)) continue;
+          if (it->second.func != derivedMethod.second.func) {
+            FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
+                   it->second.func->cls->name, it->first);
+            changes.emplace(&it->second);
+          }
         }
-      };
+      }
 
-      for (auto& derivedMethod : cinfo->methods) {
-        auto const it = ancestor->methods.find(derivedMethod.first);
-        if (it == end(ancestor->methods)) continue;
-        if (it->second.func != derivedMethod.second.func) {
-          removeNoOverride(it);
-        }
+      return changes;
+    }
+  );
+
+  for (auto const& u : updates) {
+    for (auto& mte : u) {
+      assertx(mte->attrs & AttrNoOverride ||
+              !(mte->func->attrs & AttrNoOverride));
+      if (mte->attrs & AttrNoOverride) {
+        attribute_setter(mte->attrs, false, AttrNoOverride);
+        attribute_setter(mte->func->attrs, false, AttrNoOverride);
       }
     }
   }
@@ -3669,11 +3682,11 @@ const StaticString s__Reified("__Reified");
  */
 void clean_86reifiedinit_methods(IndexData& index) {
   trace_time tracer("clean 86reifiedinit methods");
-  folly::F14FastSet<const php::Class*> needsinit;
+  hphp_fast_set<const php::Class*> needsinit;
 
   // Find all classes that still need their 86reifiedinit methods
-  for (auto& cinfo : index.allClassInfos) {
-    auto ual = cinfo->cls->userAttributes;
+  for (auto const& cinfo : index.allClassInfos) {
+    auto const& ual = cinfo->cls->userAttributes;
     // Each class that has at least one reified generic has an attribute
     // __Reified added by the emitter
     auto has_reification = ual.find(s__Reified.get()) != ual.end();
@@ -4447,8 +4460,7 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
     auto const t = elm.second;
     auto const addUser = [&] (SString rName) {
       tid.users[rName].push_back(t);
-      auto const count = tmap.count(rName);
-      tid.depCounts[t] += count ? count : 1;
+      ++tid.depCounts[t];
     };
     PhpTypeHelper<T>::process_bases(t, addUser);
 

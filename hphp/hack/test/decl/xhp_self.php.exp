@@ -29,7 +29,8 @@
                         sft_ty = (Rhint ([6:36-39]), (Tprim Tint)) } }
                     )))
                 });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false }
           ];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([8:41-46], ":props");

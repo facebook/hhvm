@@ -150,6 +150,7 @@ and typeconst_type = {
   ttc_enforceable: Pos_or_decl.t * bool;
   ttc_reifiable: Pos_or_decl.t option;
   ttc_concretized: bool;
+  ttc_is_ctx: bool;
 }
 
 and enum_type = {

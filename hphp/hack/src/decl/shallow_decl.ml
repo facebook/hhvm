@@ -149,6 +149,7 @@ let typeconst env c tc =
         stc_kind;
         stc_enforceable = enforceable;
         stc_reifiable = Option.map ~f:(Decl_env.make_decl_pos env) reifiable;
+        stc_is_ctx = tc.c_tconst_is_ctx;
       }
 
 let make_xhp_attr cv =

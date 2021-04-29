@@ -210,6 +210,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     stc_name = ttc_name;
     stc_enforceable = ttc_enforceable;
     stc_reifiable = ttc_reifiable;
+    stc_is_ctx = ttc_is_ctx;
   } =
     stc
   in
@@ -233,6 +234,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_origin;
         ttc_enforceable;
         ttc_reifiable;
+        ttc_is_ctx;
         ttc_concretized = true;
       }
     | _ ->
@@ -243,6 +245,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_origin;
         ttc_enforceable;
         ttc_reifiable;
+        ttc_is_ctx;
         ttc_concretized = false;
       }
   in

@@ -12,12 +12,14 @@
           stc_kind =
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type = (Rhint ([5:18-21]), (Tprim Tint)) });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = false };
          { Shallow_decl_defs.stc_name = ([15:14-16], "T2");
            stc_kind =
            (Typing_defs.TCConcrete
               { Typing_defs.tc_type = (Rhint ([15:19-25]), (Tprim Tstring)) });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
@@ -78,7 +80,8 @@
               { Typing_defs.atc_as_constraint =
                 (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
                 atc_super_constraint = None; atc_default = None });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];

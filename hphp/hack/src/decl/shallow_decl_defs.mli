@@ -85,6 +85,7 @@ type shallow_typeconst = {
   stc_kind: Typing_defs.typeconst;
   stc_enforceable: Pos_or_decl.t * bool;
   stc_reifiable: Pos_or_decl.t option;
+  stc_is_ctx: bool;
 }
 [@@deriving eq, show]
 

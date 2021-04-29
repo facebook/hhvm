@@ -12,7 +12,8 @@
           stc_kind =
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type = (Rhint ([4:18-21]), (Tprim Tint)) });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = false }
          ];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([6:21-23], "a"); sp_xhp_attr = None;

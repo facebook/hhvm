@@ -833,6 +833,7 @@ and typeconst_fold
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;
         ttc_concretized = false;
+        ttc_is_ctx = stc.stc_is_ctx;
       }
     in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in

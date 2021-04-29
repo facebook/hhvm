@@ -236,6 +236,7 @@ struct
       ttc_enforceable = Tuple.T2.map_fst ~f:pos_or_decl tc.ttc_enforceable;
       ttc_reifiable = Option.map tc.ttc_reifiable pos_or_decl;
       ttc_concretized = tc.ttc_concretized;
+      ttc_is_ctx = tc.ttc_is_ctx;
     }
 
   and user_attribute { ua_name; ua_classname_params } =
@@ -357,6 +358,7 @@ struct
       stc_enforceable =
         (pos_or_decl (fst stc.stc_enforceable), snd stc.stc_enforceable);
       stc_reifiable = Option.map stc.stc_reifiable pos_or_decl;
+      stc_is_ctx = stc.stc_is_ctx;
     }
 
   and shallow_prop sp =

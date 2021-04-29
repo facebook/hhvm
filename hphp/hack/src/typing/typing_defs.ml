@@ -229,6 +229,7 @@ and typeconst_type = {
           accessing this field directly. *)
   ttc_reifiable: Pos_or_decl.t option;
   ttc_concretized: bool;
+  ttc_is_ctx: bool;
 }
 
 and enum_type = {

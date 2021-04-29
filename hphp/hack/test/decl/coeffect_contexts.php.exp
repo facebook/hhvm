@@ -14,7 +14,8 @@
              { Typing_defs.atc_as_constraint = None;
                atc_super_constraint = None;
                atc_default = (Some (Rhint ([4:27-29]), (Tintersection []))) });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = true };
          { Shallow_decl_defs.stc_name = ([5:22-24], "C1");
            stc_kind =
            (Typing_defs.TCAbstract
@@ -29,7 +30,8 @@
                                [])))
                             ])))
                 });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = true };
          { Shallow_decl_defs.stc_name = ([6:22-24], "C2");
            stc_kind =
            (Typing_defs.TCAbstract
@@ -48,7 +50,8 @@
                                 [])))
                             ])))
                 });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = true }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];

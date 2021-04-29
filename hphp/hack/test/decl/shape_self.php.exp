@@ -25,7 +25,8 @@
                        sft_ty = (Rhint ([7:18-21]), (Tprim Tint)) } }
                    )))
                });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = false }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

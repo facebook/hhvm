@@ -12,7 +12,8 @@
           stc_kind =
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type = (Rhint ([4:18-21]), (Tprim Tint)) });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = false };
          { Shallow_decl_defs.stc_name = ([5:14-15], "U");
            stc_kind =
            (Typing_defs.TCConcrete
@@ -22,7 +23,8 @@
                     ((Rhint ([5:18-25]), (Tapply (([3:7-8], "\\C"), []))),
                      [([5:24-25], "T")])))
                 });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -41,7 +43,8 @@
            stc_kind =
            (Typing_defs.TCConcrete
               { Typing_defs.tc_type = (Rhint ([9:18-21]), (Tprim Tint)) });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false };
           { Shallow_decl_defs.stc_name = ([10:14-15], "W");
             stc_kind =
             (Typing_defs.TCConcrete
@@ -51,7 +54,8 @@
                      ((Rhint ([10:18-25]), (Tapply (([8:11-12], "\\I"), []))),
                       [([10:24-25], "V")])))
                  });
-            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+            stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+            stc_is_ctx = false }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

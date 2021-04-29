@@ -83,7 +83,8 @@
                 (Some (Rhint ([11:28-32]),
                        (Tlike (Rhint ([11:29-32]), (Tprim Tint)))));
                 atc_super_constraint = None; atc_default = None });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = false }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4fff3bc54e4589868cc1dea891714aa7>>
+// @generated SignedSource<<1c499800a6faf00febb8de97ef8462a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -67,6 +67,7 @@ pub struct ShallowTypeconst<'a> {
     pub kind: typing_defs::Typeconst<'a>,
     pub enforceable: (&'a pos_or_decl::PosOrDecl<'a>, bool),
     pub reifiable: Option<&'a pos_or_decl::PosOrDecl<'a>>,
+    pub is_ctx: bool,
 }
 impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
 

@@ -6,26 +6,26 @@ abstract class B {
 
 abstract class CAbstract extends B {
   // OK: moves the lower bound up toward pure ([])
-  abstract const ctx C super [rx];
+  abstract const ctx C super [oldrx];
 }
 
 class BadConcreteViolatingExplicitBound extends CAbstract {
-  // ERROR: [defaults] is not a supertype of [rx]
-  const ctx C super [rx] = [defaults];
+  // ERROR: [defaults] is not a supertype of [oldrx]
+  const ctx C super [oldrx] = [defaults];
 }
 class BadConcreteViolatingInheritedBound extends CAbstract {
-  // ERROR: [defaults] is not a supertype of [rx]
+  // ERROR: [defaults] is not a supertype of [oldrx]
   const ctx C = [defaults];
 }
 
-class GoodConcreteWellRefinedPure extends CAbstract {
-  // OK: further moves the lower bound up from [rx] to []
-  const ctx C super [] = [];
+abstract class GoodAbstractWellRefinedPure extends CAbstract {
+  // OK: further moves the lower bound up from [oldrx] to []
+  abstract const ctx C super [] = [];
 }
-class BadConcreteWronglyRefined extends CAbstract {
-  // ERROR: C was refined to be >: [rx]
-  const ctx C super [defaults] = [];
+abstract class BadAbstractWronglyRefined extends CAbstract {
+  // ERROR: C was refined to be >: [oldrx]
+  abstract const ctx C super [defaults];
 }
-class GoodConcreteRefinedNoop extends CAbstract {
-  const ctx C super [rx] = [];
+abstract class GoodAbstractRefinedImpure extends CAbstract {
+  abstract const ctx C super [oldrx];
 }

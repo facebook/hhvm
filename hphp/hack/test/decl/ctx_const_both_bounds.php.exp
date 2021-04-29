@@ -24,7 +24,8 @@
                               [])))
                            ])));
                atc_default = None });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = true }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -58,7 +59,8 @@
                                [])))
                             ])));
                 atc_default = None });
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+           stc_is_ctx = true }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

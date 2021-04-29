@@ -13,7 +13,8 @@
           (Typing_defs.TCPartiallyAbstract
              { Typing_defs.patc_constraint = (Rhint ([4:19-24]), Tmixed);
                patc_type = (Rhint ([4:27-30]), (Tprim Tnum)) });
-          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = false }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

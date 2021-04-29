@@ -4848,6 +4848,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 None => (Pos::none(), false),
             },
             reifiable: attributes.reifiable,
+            is_ctx: false,
         }))
     }
 
@@ -4904,6 +4905,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             kind,
             enforceable: (Pos::none(), false),
             reifiable: None,
+            is_ctx: true,
         }))
     }
 

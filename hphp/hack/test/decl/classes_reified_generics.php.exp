@@ -30,7 +30,7 @@
            (Typing_defs.TCConcrete
               { Typing_defs.tc_type = (Rhint ([7:21-24]), (Tprim Tint)) });
            stc_enforceable = ([Pos.none], false);
-           stc_reifiable = (Some [6:5-16]) };
+           stc_reifiable = (Some [6:5-16]); stc_is_ctx = false };
           { Shallow_decl_defs.stc_name = ([9:14-16], "X2");
             stc_kind =
             (Typing_defs.TCConcrete
@@ -43,7 +43,8 @@
                        ]
                      )))
                  });
-            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+            stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+            stc_is_ctx = false }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

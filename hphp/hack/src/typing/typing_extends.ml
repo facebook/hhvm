@@ -782,12 +782,15 @@ let tconst_subsumption
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
     in
+    let is_coeffect =
+      parent_typeconst.ttc_is_ctx || child_typeconst.ttc_is_ctx
+    in
     let check_cstrs reason env sub super =
       Option.value ~default:env
       @@ Option.map2
            sub
            super
-           ~f:(Typing_ops.sub_type_decl ~on_error pos reason env)
+           ~f:(Typing_ops.sub_type_decl ~is_coeffect ~on_error pos reason env)
     in
     (* TODO(T88552052) This can be greatly simplified by adopting the { A = S..T } representation
      * from DOT and implementing the Typ-<:-Typ rule, Amin 2016 *)

@@ -557,6 +557,8 @@ void whole_program(php::ProgramPtr program,
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
+    // Leave 2 threads free for writing UnitEmitters and for cleanup
+    parallel::final_threads = (num_threads > 2) ? (num_threads - 2) : 1;
   }
 
   state_after("parse", *program);
@@ -591,9 +593,7 @@ void whole_program(php::ProgramPtr program,
     analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
     cleanup_pre = std::thread([&] { index.cleanup_for_final(); });
     index.join_iface_vtable_thread();
-    if (parallel::num_threads > parallel::final_threads) {
-      parallel::num_threads = parallel::final_threads;
-    }
+    parallel::num_threads = parallel::final_threads;
     final_pass(index, *program, stats, emitUnit);
   } else {
     debug_dump_program(index, *program);

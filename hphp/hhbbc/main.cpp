@@ -104,6 +104,8 @@ void parse_options(int argc, char** argv) {
 
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
+  auto const defaultFinalThreadCount =
+    std::max<long>(defaultThreadCount - 2, 1);
 
   std::vector<std::string> interceptable_fns;
   std::vector<std::string> trace_fns;
@@ -143,7 +145,7 @@ void parse_options(int argc, char** argv) {
       "Number of threads to use for parallelism")
     ("parallel-final-threads",
       po::value(&parallel::final_threads)->default_value(
-        parallel::final_threads),
+        defaultFinalThreadCount),
       "Number of threads to use for the final pass")
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),

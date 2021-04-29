@@ -22,7 +22,7 @@ namespace HPHP { namespace HHBBC {
 namespace parallel {
 
 size_t num_threads = 31;
-size_t final_threads = 20;
+size_t final_threads = 31;
 size_t work_chunk  = 120;
 
 }

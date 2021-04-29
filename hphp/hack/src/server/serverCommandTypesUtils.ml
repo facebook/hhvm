@@ -113,8 +113,11 @@ let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
     let path = Relative_path.create_detect_prefix filename in
     (path, ServerCommandTypes.FileContent content)
 
-(** This writes to the specified progress file. In case of failure,
-it logs but is silent. That's on the principle that defects in
+(** This writes to the specified progress file. It first acquires
+an exclusive (writer) lock. (Locks on unix are advisory; we trust
+read_progress_file below to also acquire a lock). It overwrites
+whatever was there before. In case of failure, it logs but is
+silent. That's on the principle that defects in
 progress-reporting should never break hh_server. *)
 let write_progress_file
     ~(server_progress_file : string)
@@ -144,8 +147,10 @@ let write_progress_file
     ()
 
 (** This reads the specified progress file, which is assumed to exist.
-If there are failures, we log, and return a human-readable string that
-indicates why. *)
+It first acquires a non-exclusive (reader) lock. (Locks on unix are
+advisory; we trust write_progress_file above to also acquire a writer
+lock).  If there are failures, we log, and return a human-readable
+string that indicates why. *)
 let read_progress_file ~(server_progress_file : string) :
     ServerCommandTypes.server_progress =
   let content = ref "[not yet read content]" in

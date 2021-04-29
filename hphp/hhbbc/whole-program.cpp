@@ -234,8 +234,9 @@ WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
       return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
     }
     case DependencyContextType::PropName:
-      // We only record dependencies on static property names. We don't schedule
-      // any work on their behalf.
+    case DependencyContextType::FuncFamily:
+      // We only record dependencies on these. We don't schedule any
+      // work on their behalf.
       break;
   }
   always_assert(false);

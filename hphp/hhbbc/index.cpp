@@ -336,6 +336,11 @@ struct res::Func::FuncInfo {
    * VerifyParamType does not count as a use in this context.
    */
   std::bitset<64> unusedParams;
+
+  /*
+   * List of all func families this function belongs to.
+   */
+  CompactVector<FuncFamily*> families;
 };
 
 namespace {
@@ -1336,6 +1341,9 @@ DependencyContext make_dep(const php::Class* cls) {
 DependencyContext make_dep(SString name) {
   return DependencyContext{DependencyContextType::PropName, name};
 }
+DependencyContext make_dep(const FuncFamily* family) {
+  return DependencyContext{DependencyContextType::FuncFamily, family};
+}
 
 DependencyContext dep_context(IndexData& data, const Context& ctx) {
   if (!ctx.cls || !data.useClassDependencies) return make_dep(ctx.func);
@@ -1392,10 +1400,31 @@ void find_deps(IndexData& data,
                T src,
                Dep mask,
                DependencyContextSet& deps) {
-  DepMap::const_accessor acc;
-  if (data.dependencyMap.find(acc, make_dep(src))) {
-    for (auto& kv : acc->second) {
-      if (has_dep(kv.second, mask)) deps.insert(kv.first);
+  auto const srcDep = make_dep(src);
+
+  {
+    DepMap::const_accessor acc;
+    if (data.dependencyMap.find(acc, srcDep)) {
+      for (auto const& kv : acc->second) {
+        if (has_dep(kv.second, mask)) deps.insert(kv.first);
+      }
+    }
+  }
+
+  // If this is a Func dep, we need to also check if any FuncFamily
+  // dependencies need to be added.
+  if (srcDep.tag() != DependencyContextType::Func) return;
+
+  auto const fi = func_info(data, static_cast<const php::Func*>(srcDep.ptr()));
+  if (!fi->func) return;
+
+  // Add any associated FuncFamilies
+  for (auto const ff : fi->families) {
+    DepMap::const_accessor acc;
+    if (data.dependencyMap.find(acc, make_dep(ff))) {
+      for (auto const& kv : acc->second) {
+        if (has_dep(kv.second, mask)) deps.insert(kv.first);
+      }
     }
   }
 }
@@ -3062,6 +3091,33 @@ void define_func_families(IndexData& index) {
         build_abstract_func_families(index, cinfo.get());
       }
     }
+  );
+
+  // Now that all of the FuncFamilies have been created, generate the
+  // back links from FuncInfo to their FuncFamilies.
+  std::vector<FuncFamily*> work;
+  work.reserve(index.funcFamilies.size());
+  for (auto const& kv : index.funcFamilies) work.emplace_back(kv.first.get());
+
+  // Different threads can touch the same FuncInfo, so use sharded
+  // locking scheme.
+  std::array<std::mutex, 256> locks;
+
+  parallel::for_each(
+    work,
+    [&] (FuncFamily* ff) {
+      for (auto const pf : ff->possibleFuncs()) {
+        auto finfo = create_func_info(index, pf->second.func);
+        auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
+        std::lock_guard<std::mutex> _{lock};
+        finfo->families.emplace_back(ff);
+      }
+    }
+  );
+
+  parallel::for_each(
+    index.funcInfo,
+    [&] (FuncInfo& fi) { fi.families.shrink_to_fit(); }
   );
 }
 
@@ -5573,9 +5629,9 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc, Dep dep) const {
       return unctx(finfo->returnTy);
     },
     [&](FuncFamily* fam) {
+      add_dependency(*m_data, fam, ctx, dep);
       auto ret = TBottom;
       for (auto const pf : fam->possibleFuncs()) {
-        add_dependency(*m_data, pf->second.func, ctx, dep);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) return TInitCell;
         ret |= unctx(finfo->returnTy);
@@ -5610,9 +5666,9 @@ Type Index::lookup_return_type(Context caller,
                                            { finfo->func, args, context });
     },
     [&] (FuncFamily* fam) {
+      add_dependency(*m_data, fam, caller, dep);
       auto ret = TBottom;
       for (auto& pf : fam->possibleFuncs()) {
-        add_dependency(*m_data, pf->second.func, caller, dep);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) ret |= TInitCell;
         else ret |= return_with_context(finfo->returnTy, context);

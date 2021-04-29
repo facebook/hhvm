@@ -107,7 +107,8 @@ enum class Dep : uintptr_t {
 enum class DependencyContextType : uint16_t {
   Func,
   Class,
-  PropName
+  PropName,
+  FuncFamily
 };
 
 using DependencyContext = CompactTaggedPtr<const void, DependencyContextType>;

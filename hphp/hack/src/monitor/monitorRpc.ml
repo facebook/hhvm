@@ -21,3 +21,5 @@ type command =
   | HANDOFF_TO_SERVER of Connection_tracker.t * handoff_options
   (* Shut down all servers and then the monitor. *)
   | SHUT_DOWN of Connection_tracker.t
+
+type monitor_to_server_handoff_msg = { m2s_tracker: Connection_tracker.t }

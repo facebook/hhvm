@@ -43,9 +43,10 @@ let accept_client
     (parent_in_fd : Unix.file_descr)
     (t_sleep_and_check : float)
     (t_monitor_fd_ready : float) : client =
-  let tracker : Connection_tracker.t =
+  let msg : MonitorRpc.monitor_to_server_handoff_msg =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
+  let tracker = msg.MonitorRpc.m2s_tracker in
   Hh_logger.log
     "[%s] got tracker handoff from monitor"
     (Connection_tracker.log_id tracker);

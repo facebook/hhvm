@@ -299,7 +299,8 @@ struct
   let hand_off_client_connection ~tracker env server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
-    msg_to_channel server_fd tracker;
+    let msg = MonitorRpc.{ m2s_tracker = tracker } in
+    msg_to_channel server_fd msg;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then
       Sent_fds_collector.cleanup_fd

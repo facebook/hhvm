@@ -67,6 +67,7 @@
 #include "hphp/util/algorithm.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-set.h"
+#include "hphp/util/lock-free-lazy.h"
 #include "hphp/util/match.h"
 
 namespace HPHP { namespace HHBBC {
@@ -405,8 +406,9 @@ struct res::Func::FuncFamily {
   friend auto begin(const FuncFamily& ff) { return ff.m_v.begin(); }
   friend auto end(const FuncFamily& ff) { return ff.m_v.end(); }
 
-private:
   PFuncVec  m_v;
+  LockFreeLazy<Type> m_returnTy;
+  folly::Optional<uint32_t> m_numInOut;
 };
 
 namespace {
@@ -960,18 +962,18 @@ const php::Func* Func::exactFunc() const {
 }
 
 bool Func::isFoldable() const {
-  return match<bool>(val,
-                     [&](FuncName)   { return false; },
-                     [&](MethodName) { return false; },
-                     [&](FuncInfo* fi) {
-                       return fi->func->attrs & AttrIsFoldable;
-                     },
-                     [&](const MethTabEntryPair* mte) {
-                       return mte->second.func->attrs & AttrIsFoldable;
-                     },
-                     [&](FuncFamily* fa) {
-                       return false;
-                     });
+  return match<bool>(
+    val,
+    [&](FuncName)   { return false; },
+    [&](MethodName) { return false; },
+    [&](FuncInfo* fi) {
+      return fi->func->attrs & AttrIsFoldable;
+    },
+    [&](const MethTabEntryPair* mte) {
+      return mte->second.func->attrs & AttrIsFoldable;
+    },
+    [&](FuncFamily* fa) { return false; }
+  );
 }
 
 bool Func::couldHaveReifiedGenerics() const {
@@ -988,7 +990,8 @@ bool Func::couldHaveReifiedGenerics() const {
         if (pf->second.func->isReified) return true;
       }
       return false;
-    });
+    }
+  );
 }
 
 bool Func::mightCareAboutDynCalls() const {
@@ -1089,12 +1092,14 @@ uint32_t Func::maxNonVariadicParams() const {
 
 std::string show(const Func& f) {
   auto ret = f.name()->toCppString();
-  match<void>(f.val,
-              [&](Func::FuncName s) { if (s.renamable) ret += '?'; },
-              [&](Func::MethodName) {},
-              [&](FuncInfo* /*fi*/) { ret += "*"; },
-              [&](const MethTabEntryPair* /*mte*/) { ret += "*"; },
-              [&](FuncFamily* /*fa*/) { ret += "+"; });
+  match<void>(
+    f.val,
+    [&](Func::FuncName s)        { if (s.renamable) ret += '?'; },
+    [&](Func::MethodName)        {},
+    [&](FuncInfo*)               { ret += "*"; },
+    [&](const MethTabEntryPair*) { ret += "*"; },
+    [&](FuncFamily*)             { ret += "+"; }
+  );
   return ret;
 }
 
@@ -2070,6 +2075,35 @@ void add_system_constants_to_index(IndexData& index) {
     auto pc = new php::Constant { nullptr, cnsPair.first, cnsPair.second, AttrUnique | AttrPersistent };
     add_symbol(index.constants, pc, "constant");
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
+  if (!func->hasInOutArgs) return 0;
+  uint32_t count = 0;
+  for (auto& p : func->params) count += p.inout;
+  return count;
+}
+
+template<typename PossibleFuncRange>
+folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
+  if (begin(range) == end(range)) return 0;
+
+  struct FuncFind {
+    using F = const php::Func*;
+    static F get(std::pair<SString,F> p) { return p.second; }
+    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
+  };
+
+  folly::Optional<uint32_t> num;
+  for (auto const& item : range) {
+    auto const n = func_num_inout(FuncFind::get(item));
+    if (!n.hasValue()) return folly::none;
+    if (num.hasValue() && n != num) return folly::none;
+    num = n;
+  }
+  return num;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3106,6 +3140,7 @@ void define_func_families(IndexData& index) {
   parallel::for_each(
     work,
     [&] (FuncFamily* ff) {
+      ff->m_numInOut = num_inout_from_set(ff->possibleFuncs());
       for (auto const pf : ff->possibleFuncs()) {
         auto finfo = create_func_info(index, pf->second.func);
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
@@ -3695,17 +3730,6 @@ PrepKind func_param_prep(const php::Func* func,
   return func->params[paramId].inout ? PrepKind::InOut : PrepKind::Val;
 }
 
-folly::Optional<uint32_t> func_num_inout_default() {
-  return 0;
-}
-
-folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
-  if (!func->hasInOutArgs) return 0;
-  uint32_t count = 0;
-  for (auto& p : func->params) count += p.inout;
-  return count;
-}
-
 template<class PossibleFuncRange>
 PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
 
@@ -3740,34 +3764,6 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
     }
   }
   return *prep;
-}
-
-template<class PossibleFuncRange>
-folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
-
-  /*
-   * In single-unit mode, the range is not complete. Without konwing all
-   * possible resolutions, HHBBC cannot deduce anything about inout args.
-   * So the caller should make sure not calling this in single-unit mode.
-   */
-  if (begin(range) == end(range)) {
-    return func_num_inout_default();
-  }
-
-  struct FuncFind {
-    using F = const php::Func*;
-    static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
-  };
-
-  folly::Optional<uint32_t> num;
-  for (auto& item : range) {
-    auto const n = func_num_inout(FuncFind::get(item));
-    if (!n.hasValue()) return folly::none;
-    if (num.hasValue() && n != num) return folly::none;
-    num = n;
-  }
-  return num;
 }
 
 template<typename F> auto
@@ -4446,10 +4442,10 @@ Index::Index(php::Program* program)
   for (auto const fn : m_data->methods) {
     all_funcs.push_back(fn.second);
   }
-
-  parallel::for_each(all_funcs, [&] (const php::Func* f) {
-    init_return_type(f);
-  });
+  parallel::for_each(
+    all_funcs,
+    [&] (const php::Func* f) { init_return_type(f); }
+  );
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -5444,15 +5440,17 @@ bool Index::is_effect_free(res::Func rfunc) const {
     rfunc.val,
     [&](res::Func::FuncName)   { return false; },
     [&](res::Func::MethodName) { return false; },
-    [&](FuncInfo* finfo) {
-      return finfo->effectFree;
-    },
+    [&](FuncInfo* finfo)       { return finfo->effectFree; },
     [&](const MethTabEntryPair* mte) {
       return func_info(*m_data, mte->second.func)->effectFree;
     },
     [&](FuncFamily* fam) {
-      return false;
-    });
+      for (auto const mte : fam->possibleFuncs()) {
+        if (!func_info(*m_data, mte->second.func)->effectFree) return false;
+      }
+      return true;
+    }
+  );
 }
 
 const php::Const* Index::lookup_class_const_ptr(Context ctx,
@@ -5630,14 +5628,20 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc, Dep dep) const {
     },
     [&](FuncFamily* fam) {
       add_dependency(*m_data, fam, ctx, dep);
-      auto ret = TBottom;
-      for (auto const pf : fam->possibleFuncs()) {
-        auto const finfo = func_info(*m_data, pf->second.func);
-        if (!finfo->func) return TInitCell;
-        ret |= unctx(finfo->returnTy);
-      }
-      return ret;
-    });
+      return fam->m_returnTy.get(
+        [&] {
+          auto ret = TBottom;
+          for (auto const pf : fam->possibleFuncs()) {
+            auto const finfo = func_info(*m_data, pf->second.func);
+            if (!finfo->func) return TInitCell;
+            ret |= unctx(finfo->returnTy);
+            if (!ret.strictSubtypeOf(BInitCell)) return ret;
+          }
+          return ret;
+        }
+      );
+    }
+  );
 }
 
 Type Index::lookup_return_type(Context caller,
@@ -5667,13 +5671,19 @@ Type Index::lookup_return_type(Context caller,
     },
     [&] (FuncFamily* fam) {
       add_dependency(*m_data, fam, caller, dep);
-      auto ret = TBottom;
-      for (auto& pf : fam->possibleFuncs()) {
-        auto const finfo = func_info(*m_data, pf->second.func);
-        if (!finfo->func) ret |= TInitCell;
-        else ret |= return_with_context(finfo->returnTy, context);
-      }
-      return ret;
+      auto ret = fam->m_returnTy.get(
+        [&] {
+          auto ret = TBottom;
+          for (auto const pf : fam->possibleFuncs()) {
+            auto const finfo = func_info(*m_data, pf->second.func);
+            if (!finfo->func) return TInitCell;
+            ret |= finfo->returnTy;
+            if (!ret.strictSubtypeOf(BInitCell)) return ret;
+          }
+          return ret;
+        }
+      );
+      return return_with_context(std::move(ret), context);
     }
   );
 }
@@ -5717,7 +5727,7 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
        ? func_num_inout(it->second)
-       : func_num_inout_default();
+       : 0;
     },
     [&] (res::Func::MethodName s) -> folly::Optional<uint32_t> {
       auto const it = m_data->method_inout_params_by_name.find(s.name);
@@ -5736,7 +5746,7 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
       return func_num_inout(mte->second.func);
     },
     [&] (FuncFamily* fam) -> folly::Optional<uint32_t> {
-      return num_inout_from_set(fam->possibleFuncs());
+      return fam->m_numInOut;
     }
   );
 }
@@ -6312,7 +6322,7 @@ void Index::init_return_type(const php::Func* func) {
   auto const finfo = create_func_info(*m_data, func);
 
   auto tcT = make_type(func->retTypeConstraint);
-  if (tcT == TBottom) return;
+  if (tcT.is(BBottom)) return;
 
   if (func->hasInOutArgs) {
     std::vector<Type> types;
@@ -6320,7 +6330,7 @@ void Index::init_return_type(const php::Func* func) {
     for (auto& p : func->params) {
       if (!p.inout) continue;
       auto t = make_type(p.typeConstraint);
-      if (t == TBottom) return;
+      if (t.is(BBottom)) return;
       types.emplace_back(intersection_of(TInitCell, std::move(t)));
     }
     tcT = vec(std::move(types));
@@ -6358,7 +6368,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   auto const finfo = create_func_info(*m_data, func);
   auto const t = loosen_interfaces(fa.inferredReturn);
 
-  auto error_loc = [&] {
+  auto const error_loc = [&] {
     return folly::sformat(
         "{} {}{}",
         func->unit->filename,
@@ -6395,6 +6405,9 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   if (t.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinements + 1 < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
+      // We've modifed the return type, so reset any cached FuncFamily
+      // return types.
+      for (auto const ff : finfo->families) ff->m_returnTy.reset();
       ++finfo->returnRefinements;
       dep = is_scalar(t) ?
         Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;

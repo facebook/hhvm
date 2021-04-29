@@ -3783,11 +3783,12 @@ void check_invariants(IndexData& data) {
 //////////////////////////////////////////////////////////////////////
 
 Type context_sensitive_return_type(IndexData& data,
-                                   CallContext callCtx) {
+                                   CallContext callCtx,
+                                   Type returnType) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   auto const finfo = func_info(data, callCtx.callee);
-  auto returnType = return_with_context(finfo->returnTy, callCtx.context);
+  returnType = return_with_context(std::move(returnType), callCtx.context);
 
   auto checkParam = [&] (int i) {
     auto const constraint = finfo->func->params[i].typeConstraint;
@@ -5792,7 +5793,7 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   assertx(func_name && "func_name will never be nullptr");
 
   auto rfunc = resolve_func(ctx, func_name);
-  return lookup_return_type(ctx, rfunc, Dep::ConstVal);
+  return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
 }
 
 bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
@@ -5897,22 +5898,30 @@ Type Index::lookup_foldable_return_type(Context ctx,
   return contextType;
 }
 
-Type Index::lookup_return_type(Context ctx, res::Func rfunc, Dep dep) const {
+Type Index::lookup_return_type(Context ctx,
+                               MethodsInfo* methods,
+                               res::Func rfunc,
+                               Dep dep) const {
   return match<Type>(
     rfunc.val,
-    [&](res::Func::FuncName)   { return TInitCell; },
-    [&](res::Func::MethodName) { return TInitCell; },
-    [&](FuncInfo* finfo) {
+    [&] (res::Func::FuncName)   { return TInitCell; },
+    [&] (res::Func::MethodName) { return TInitCell; },
+    [&] (FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, ctx, dep);
       return unctx(finfo->returnTy);
     },
-    [&](const MethTabEntryPair* mte) {
+    [&] (const MethTabEntryPair* mte) {
+      if (methods) {
+        if (auto ret = methods->lookupReturnType(*mte->second.func)) {
+          return unctx(std::move(*ret));
+        }
+      }
       add_dependency(*m_data, mte->second.func, ctx, dep);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
       return unctx(finfo->returnTy);
     },
-    [&](FuncFamily* fam) {
+    [&] (FuncFamily* fam) {
       add_dependency(*m_data, fam, ctx, dep);
       return fam->m_returnTy.get(
         [&] {
@@ -5931,29 +5940,46 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc, Dep dep) const {
 }
 
 Type Index::lookup_return_type(Context caller,
+                               MethodsInfo* methods,
                                const CompactVector<Type>& args,
                                const Type& context,
                                res::Func rfunc,
                                Dep dep) const {
   return match<Type>(
     rfunc.val,
-    [&](res::Func::FuncName) {
-      return lookup_return_type(caller, rfunc);
+    [&] (res::Func::FuncName) {
+      return lookup_return_type(caller, methods, rfunc, dep);
     },
-    [&](res::Func::MethodName) {
-      return lookup_return_type(caller, rfunc);
+    [&] (res::Func::MethodName) {
+      return lookup_return_type(caller, methods, rfunc, dep);
     },
-    [&](FuncInfo* finfo) {
+    [&] (FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, caller, dep);
-      return context_sensitive_return_type(*m_data,
-                                           { finfo->func, args, context });
+      return context_sensitive_return_type(
+        *m_data,
+        { finfo->func, args, context },
+        finfo->returnTy
+      );
     },
-    [&](const MethTabEntryPair* mte) {
-      add_dependency(*m_data, mte->second.func, caller, dep);
+    [&] (const MethTabEntryPair* mte) {
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
-      return context_sensitive_return_type(*m_data,
-                                           { finfo->func, args, context });
+
+      auto returnType = [&] {
+        if (methods) {
+          if (auto ret = methods->lookupReturnType(*mte->second.func)) {
+            return *ret;
+          }
+        }
+        add_dependency(*m_data, mte->second.func, caller, dep);
+        return finfo->returnTy;
+      }();
+
+      return context_sensitive_return_type(
+        *m_data,
+        { finfo->func, args, context },
+        std::move(returnType)
+      );
     },
     [&] (FuncFamily* fam) {
       add_dependency(*m_data, fam, caller, dep);
@@ -5989,13 +6015,13 @@ Index::lookup_closure_use_vars(const php::Func* func,
   return it->second;
 }
 
-Type Index::lookup_return_type_raw(const php::Func* f) const {
+std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const {
   auto it = func_info(*m_data, f);
   if (it->func) {
     assertx(it->func == f);
-    return it->returnTy;
+    return { it->returnTy, it->returnRefinements };
   }
-  return TInitCell;
+  return { TInitCell, 0 };
 }
 
 bool Index::lookup_this_available(const php::Func* f) const {
@@ -6623,18 +6649,6 @@ void Index::init_return_type(const php::Func* func) {
   finfo->returnTy = std::move(tcT);
 }
 
-static bool moreRefinedForIndex(const Type& newType,
-                                const Type& oldType)
-{
-  if (newType.moreRefined(oldType)) return true;
-  if (!newType.subtypeOf(BOptObj) ||
-      !oldType.subtypeOf(BOptObj) ||
-      !is_specialized_obj(oldType)) {
-    return false;
-  }
-  return dobj_of(oldType).cls.mustBeInterface();
-}
-
 void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
   auto const& func = fa.ctx.func;
@@ -6643,11 +6657,11 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 
   auto const error_loc = [&] {
     return folly::sformat(
-        "{} {}{}",
-        func->unit->filename,
-        func->cls ?
-        folly::to<std::string>(func->cls->name->data(), "::") : std::string{},
-        func->name
+      "{} {}{}",
+      func->unit->filename,
+      func->cls ?
+      folly::to<std::string>(func->cls->name->data(), "::") : std::string{},
+      func->name
     );
   };
 
@@ -6676,25 +6690,28 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   }
 
   if (t.strictlyMoreRefined(finfo->returnTy)) {
-    if (finfo->returnRefinements + 1 < options.returnTypeRefineLimit) {
+    if (finfo->returnRefinements < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
       // We've modifed the return type, so reset any cached FuncFamily
       // return types.
       for (auto const ff : finfo->families) ff->m_returnTy.reset();
-      ++finfo->returnRefinements;
       dep = is_scalar(t) ?
         Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
+      finfo->returnRefinements += fa.localReturnRefinements + 1;
+      if (finfo->returnRefinements > options.returnTypeRefineLimit) {
+        FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
+      }
     } else {
       FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
     }
   } else {
     always_assert_flog(
-        moreRefinedForIndex(t, finfo->returnTy),
-        "Index return type invariant violated in {}.\n"
-        "   {} is not at least as refined as {}\n",
-        error_loc(),
-        show(t),
-        show(finfo->returnTy)
+      more_refined_for_index(t, finfo->returnTy),
+      "Index return type invariant violated in {}.\n"
+      "   {} is not at least as refined as {}\n",
+      error_loc(),
+      show(t),
+      show(finfo->returnTy)
     );
   }
 
@@ -6743,7 +6760,7 @@ bool Index::refine_closure_use_vars(const php::Class* cls,
       current[i] = vars[i];
     } else {
       always_assert_flog(
-        moreRefinedForIndex(vars[i], current[i]),
+        more_refined_for_index(vars[i], current[i]),
         "Index closure_use_var invariant violated in {}.\n"
         "   {} is not at least as refined as {}\n",
         cls->name,
@@ -6777,7 +6794,7 @@ void refine_private_propstate(Container& cont,
     auto& target = elm->second[kv.first];
     assertx(target.tc == kv.second.tc);
     always_assert_flog(
-      moreRefinedForIndex(kv.second.ty, target.ty),
+      more_refined_for_index(kv.second.ty, target.ty),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),

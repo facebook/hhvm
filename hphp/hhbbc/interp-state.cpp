@@ -159,6 +159,7 @@ CollectedInfo::CollectedInfo(const Index& index,
                              CollectionOpts opts,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
+    , methods{ctx, cls}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
 {
   if (fa) {
@@ -231,7 +232,7 @@ PropertiesInfo::readPrivateProp(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateProperties.find(name);
     if (it == m_cls->privateProperties.end()) return nullptr;
-    if (m_cls->work) m_cls->work->addPropDep(name, *m_func);
+    if (m_cls->work) m_cls->work->worklist.addPropDep(name, *m_func);
     return &it->second;
   }
   auto const it = m_privateProperties.find(name);
@@ -243,7 +244,7 @@ PropertiesInfo::readPrivateStatic(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateStatics.find(name);
     if (it == m_cls->privateStatics.end()) return nullptr;
-    if (m_cls->work) m_cls->work->addPropDep(name, *m_func);
+    if (m_cls->work) m_cls->work->worklist.addPropDep(name, *m_func);
     return &it->second;
   }
   auto const it = m_privateStatics.find(name);
@@ -256,13 +257,20 @@ void PropertiesInfo::mergeInPrivateProp(const Index& index,
   if (!m_cls || t.is(BBottom)) return;
   auto it = m_cls->privateProperties.find(name);
   if (it == m_cls->privateProperties.end()) return;
+  if (m_cls->work) {
+    m_cls->work->worklist.addPropMutateDep(name, *m_func);
+    m_cls->work->propMutators[m_func].emplace(name);
+  }
   auto newT = union_of(
     it->second.ty,
     adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
   );
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
-    if (m_cls->work) m_cls->work->scheduleForProp(name);
+    if (m_cls->work) {
+      m_cls->work->propsRefined = true;
+      m_cls->work->worklist.scheduleForProp(name);
+    }
   }
 }
 
@@ -276,13 +284,20 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
   if (it == m_cls->privateStatics.end()) return;
   if (!ignoreConst && (it->second.attrs & AttrIsConst)) return;
   if (mustBeReadOnly && !(it->second.attrs & AttrIsReadOnly)) return;
+  if (m_cls->work) {
+    m_cls->work->worklist.addPropMutateDep(name, *m_func);
+    m_cls->work->propMutators[m_func].emplace(name);
+  }
   auto newT = union_of(
     it->second.ty,
     adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
   );
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
-    if (m_cls->work) m_cls->work->scheduleForProp(name);
+    if (m_cls->work) {
+      m_cls->work->propsRefined = true;
+      m_cls->work->worklist.scheduleForProp(name);
+    }
   }
 }
 
@@ -291,10 +306,17 @@ void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
   if (!m_cls || t.is(BBottom)) return;
   auto it = m_cls->privateStatics.find(name);
   if (it == m_cls->privateStatics.end()) return;
+  if (m_cls->work) {
+    m_cls->work->worklist.addPropMutateDep(name, *m_func);
+    m_cls->work->propMutators[m_func].emplace(name);
+  }
   auto newT = union_of(it->second.ty, t);
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
-    if (m_cls->work) m_cls->work->scheduleForProp(name);
+    if (m_cls->work) {
+      m_cls->work->propsRefined = true;
+      m_cls->work->worklist.scheduleForProp(name);
+    }
   }
 }
 
@@ -302,13 +324,20 @@ void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
                                             const Type& t) {
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateProperties) {
+    if (m_cls->work) {
+      m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
+      m_cls->work->propMutators[m_func].emplace(kv.first);
+    }
     auto newT = union_of(
       kv.second.ty,
       adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)
     );
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
-      if (m_cls->work) m_cls->work->scheduleForProp(kv.first);
+      if (m_cls->work) {
+        m_cls->work->propsRefined = true;
+        m_cls->work->worklist.scheduleForProp(kv.first);
+      }
     }
   }
 }
@@ -321,19 +350,42 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
   for (auto& kv : m_cls->privateStatics) {
     if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;
     if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadOnly)) return;
+    if (m_cls->work) {
+      m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
+      m_cls->work->propMutators[m_func].emplace(kv.first);
+    }
     auto newT = union_of(
       kv.second.ty,
       adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)
     );
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
-      if (m_cls->work) m_cls->work->scheduleForProp(kv.first);
+      if (m_cls->work) {
+        m_cls->work->propsRefined = true;
+        m_cls->work->worklist.scheduleForProp(kv.first);
+      }
     }
   }
 }
 
 void PropertiesInfo::setBadPropInitialValues() {
   if (m_cls) m_cls->badPropInitialValues = true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MethodsInfo::MethodsInfo(Context ctx, ClassAnalysis* cls)
+  : m_cls{cls}
+  , m_func{ctx.func}
+{}
+
+folly::Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
+  if (!m_cls || !m_cls->work) return folly::none;
+  auto const& types = m_cls->work->returnTypes;
+  auto const it = types.find(&f);
+  if (it == types.end()) return folly::none;
+  m_cls->work->worklist.addReturnTypeDep(f, *m_func);
+  return it->second;
 }
 
 //////////////////////////////////////////////////////////////////////

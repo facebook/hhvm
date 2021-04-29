@@ -575,6 +575,18 @@ void ClassAnalysisWorklist::scheduleForProp(SString name) {
   for (auto const f : it->second) schedule(*f);
 }
 
+void ClassAnalysisWorklist::scheduleForPropMutate(SString name) {
+  auto const it = propMutateDeps.find(name);
+  if (it == propMutateDeps.end()) return;
+  for (auto const f : it->second) schedule(*f);
+}
+
+void ClassAnalysisWorklist::scheduleForReturnType(const php::Func& callee) {
+  auto const it = returnTypeDeps.find(&callee);
+  if (it == returnTypeDeps.end()) return;
+  for (auto const f : it->second) schedule(*f);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 FuncAnalysisResult::FuncAnalysisResult(AnalysisContext ctx)
@@ -752,23 +764,38 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * counter.  This guarantees eventual termination.
    */
 
-  ClassAnalysisWorklist work;
+  ClassAnalysisWork work;
   clsAnalysis.work = &work;
 
-  using FuncAnalysisMap = hphp_fast_map<const php::Func*, FuncAnalysis>;
-  FuncAnalysisMap methodResults;
-  FuncAnalysisMap closureResults;
+  clsAnalysis.methods.reserve(initResults.size() + ctx.cls->methods.size());
+  for (auto& m : initResults) {
+    clsAnalysis.methods.emplace_back(std::move(m));
+  }
+  if (associatedClosures) {
+    clsAnalysis.closures.reserve(associatedClosures->size());
+  }
+
+  auto const startPrivateProperties = clsAnalysis.privateProperties;
+  auto const startPrivateStatics = clsAnalysis.privateStatics;
 
   struct FuncMeta {
     const php::Unit* unit;
     const php::Class* cls;
-    FuncAnalysisMap* map;
+    CompactVector<FuncAnalysisResult>* output;
+    size_t startReturnRefinements;
+    size_t localReturnRefinements = 0;
+    int outputIdx = -1;
     size_t visits = 0;
   };
   hphp_fast_map<const php::Func*, FuncMeta> funcMeta;
 
-  // Build up the initial worklist:
+  auto const getMeta = [&] (const php::Func& f) -> FuncMeta& {
+    auto metaIt = funcMeta.find(&f);
+    assertx(metaIt != funcMeta.end());
+    return metaIt->second;
+  };
 
+  // Build up the initial worklist:
   for (auto const& f : ctx.cls->methods) {
     if (f->name->isame(s_86pinit.get()) ||
         f->name->isame(s_86sinit.get()) ||
@@ -776,72 +803,219 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
         f->name->isame(s_86cinit.get())) {
       continue;
     }
-    auto const DEBUG_ONLY inserted = work.schedule(*f);
+    auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
     assertx(inserted);
-    funcMeta.emplace(f.get(), FuncMeta{ctx.unit, ctx.cls, &methodResults});
+    auto [type, refinements] = index.lookup_return_type_raw(f.get());
+    work.returnTypes.emplace(f.get(), std::move(type));
+    funcMeta.emplace(
+      f.get(),
+      FuncMeta{ctx.unit, ctx.cls, &clsAnalysis.methods, refinements}
+    );
   }
 
   if (associatedClosures) {
     for (auto const c : *associatedClosures) {
-      auto const DEBUG_ONLY inserted = work.schedule(*c->methods[0]);
+      auto const f = c->methods[0].get();
+      auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
       assertx(inserted);
+      auto [type, refinements] = index.lookup_return_type_raw(f);
+      work.returnTypes.emplace(f, std::move(type));
       funcMeta.emplace(
-        c->methods[0].get(),
-        FuncMeta{ctx.unit, c, &closureResults}
+        f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
       );
     }
   }
   if (associatedMethods) {
     for (auto const m : *associatedMethods) {
-      auto const DEBUG_ONLY inserted = work.schedule(*m);
+      auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
       assertx(inserted);
-      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr});
+      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr, 0, 0});
     }
   }
 
   // Keep analyzing until we have more functions scheduled (the fixed
   // point).
-  while (auto const f = work.next()) {
-    auto metaIt = funcMeta.find(f);
-    assertx(metaIt != funcMeta.end());
+  while (!work.worklist.empty()) {
+    // First analyze funcs until we hit a fixed point for the
+    // properties. Until we reach that, the return types are *not*
+    // guaranteed to be correct.
+    while (auto const f = work.worklist.next()) {
+      auto& meta = getMeta(*f);
 
-    auto const unit = metaIt->second.unit;
-    auto const cls = metaIt->second.cls;
-    auto const map = metaIt->second.map;
+      auto const wf = php::WideFunc::cns(f);
+      auto const context = AnalysisContext { meta.unit, wf, meta.cls };
+      auto results = do_analyze(index, context, &clsAnalysis);
 
-    auto const wf = php::WideFunc::cns(f);
-    auto const context = AnalysisContext { unit, wf, cls };
-    auto results = do_analyze(index, context, &clsAnalysis);
-    if (map) map->insert_or_assign(f, std::move(results));
-
-    if (metaIt->second.visits++ >= options.analyzeClassWideningLimit) {
-      for (auto& prop : clsAnalysis.privateProperties) {
-        auto wide = widen_type(prop.second.ty);
-        if (prop.second.ty.strictlyMoreRefined(wide)) {
-          prop.second.ty = std::move(wide);
-          work.scheduleForProp(prop.first);
+      if (meta.output) {
+        if (meta.outputIdx < 0) {
+          meta.outputIdx = meta.output->size();
+          meta.output->emplace_back(std::move(results));
+        } else {
+          (*meta.output)[meta.outputIdx] = std::move(results);
         }
       }
-      for (auto& prop : clsAnalysis.privateStatics) {
-        auto wide = widen_type(prop.second.ty);
-        if (prop.second.ty.strictlyMoreRefined(wide)) {
-          prop.second.ty = std::move(wide);
-          work.scheduleForProp(prop.first);
+
+      if (meta.visits++ >= options.analyzeClassWideningLimit) {
+        for (auto& prop : clsAnalysis.privateProperties) {
+          auto wide = widen_type(prop.second.ty);
+          if (prop.second.ty.strictlyMoreRefined(wide)) {
+            prop.second.ty = std::move(wide);
+            work.worklist.scheduleForProp(prop.first);
+          }
+        }
+        for (auto& prop : clsAnalysis.privateStatics) {
+          auto wide = widen_type(prop.second.ty);
+          if (prop.second.ty.strictlyMoreRefined(wide)) {
+            prop.second.ty = std::move(wide);
+            work.worklist.scheduleForProp(prop.first);
+          }
         }
       }
     }
-  }
 
-  clsAnalysis.methods.reserve(initResults.size() + methodResults.size());
-  for (auto& m : initResults) {
-    clsAnalysis.methods.push_back(std::move(m));
-  }
-  for (auto& kv : methodResults) {
-    clsAnalysis.methods.emplace_back(std::move(kv.second));
-  }
-  clsAnalysis.closures.reserve(closureResults.size());
-  for (auto& kv : closureResults) {
-    clsAnalysis.closures.emplace_back(std::move(kv.second));
+    // We've hit a fixed point for the properties. Other local
+    // information (such as return type information) is now correct
+    // (but might not be optimal).
+
+    auto bail = false;
+
+    // Reflect any improved return types into the results. This will
+    // make them available for local analysis and they'll eventually
+    // be written back into the Index.
+    for (auto& kv : funcMeta) {
+      auto const f = kv.first;
+      auto& meta = kv.second;
+      if (!meta.output) continue;
+      assertx(meta.outputIdx >= 0);
+      auto& results = (*meta.output)[meta.outputIdx];
+
+      auto const oldTypeIt = work.returnTypes.find(f);
+      assertx(oldTypeIt != work.returnTypes.end());
+      auto& oldType = oldTypeIt->second;
+      results.inferredReturn =
+        loosen_interfaces(std::move(results.inferredReturn));
+
+      // Heed the return type refinement limit
+      if (results.inferredReturn.strictlyMoreRefined(oldType)) {
+        if (meta.startReturnRefinements + meta.localReturnRefinements
+            < options.returnTypeRefineLimit) {
+          oldType = results.inferredReturn;
+          work.worklist.scheduleForReturnType(*f);
+        } else if (meta.localReturnRefinements > 0) {
+          results.inferredReturn = oldType;
+        }
+        ++meta.localReturnRefinements;
+      } else if (!more_refined_for_index(results.inferredReturn, oldType)) {
+        // If we have a monotonicity violation, bail out immediately
+        // and let the Index complain.
+        bail = true;
+      }
+
+      results.localReturnRefinements = meta.localReturnRefinements;
+      if (results.localReturnRefinements > 0) --results.localReturnRefinements;
+    }
+    if (bail) break;
+
+    hphp_fast_set<const php::Func*> changed;
+
+    // We've made the return types available for local analysis. Now
+    // iterate again and see if we can improve them.
+    while (auto const f = work.worklist.next()) {
+      auto& meta = getMeta(*f);
+
+      auto const wf = php::WideFunc::cns(f);
+      auto const context = AnalysisContext { meta.unit, wf, meta.cls };
+
+      work.propsRefined = false;
+      auto results = do_analyze(index, context, &clsAnalysis);
+      assertx(!work.propsRefined);
+
+      if (!meta.output) continue;
+
+      auto returnTypeIt = work.returnTypes.find(f);
+      assertx(returnTypeIt != work.returnTypes.end());
+
+      auto& oldReturn = returnTypeIt->second;
+      results.inferredReturn =
+        loosen_interfaces(std::move(results.inferredReturn));
+
+      // Heed the return type refinement limit
+      if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
+        if (meta.startReturnRefinements + meta.localReturnRefinements
+            < options.returnTypeRefineLimit) {
+          oldReturn = results.inferredReturn;
+          work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
+        } else if (meta.localReturnRefinements > 0) {
+          results.inferredReturn = oldReturn;
+        }
+        ++meta.localReturnRefinements;
+      } else if (!more_refined_for_index(results.inferredReturn, oldReturn)) {
+        // If we have a monotonicity violation, bail out immediately
+        // and let the Index complain.
+        bail = true;
+      }
+
+      results.localReturnRefinements = meta.localReturnRefinements;
+      if (results.localReturnRefinements > 0) --results.localReturnRefinements;
+
+      assertx(meta.outputIdx >= 0);
+      (*meta.output)[meta.outputIdx] = std::move(results);
+    }
+    if (bail) break;
+
+    // Return types have reached a fixed point. However, this means
+    // that we might be able to further improve property types. So, if
+    // a method has an improved return return, examine the methods
+    // which depend on that return type. Drop any property info for
+    // properties those methods write to. Reschedule any methods which
+    // or write to those properties. The idea is we want to re-analyze
+    // all mutations of those properties again, since the refined
+    // returned types may result in better property types. This
+    // process may repeat multiple times, but will eventually reach a
+    // fixed point.
+
+    if (!work.propMutators.empty()) {
+      auto const resetProp = [&] (SString name,
+                                  const PropState& src,
+                                  PropState& dst) {
+        auto dstIt = dst.find(name);
+        auto const srcIt = src.find(name);
+        if (dstIt == dst.end()) {
+          assertx(srcIt == src.end());
+          return;
+        }
+        assertx(srcIt != src.end());
+        dstIt->second.ty = srcIt->second.ty;
+      };
+
+      hphp_fast_set<SString> retryProps;
+      for (auto const f : changed) {
+        auto const deps = work.worklist.depsForReturnType(*f);
+        if (!deps) continue;
+        for (auto const dep : *deps) {
+          auto const propsIt = work.propMutators.find(dep);
+          if (propsIt == work.propMutators.end()) continue;
+          for (auto const prop : propsIt->second) retryProps.emplace(prop);
+        }
+      }
+
+      // Schedule the funcs which mutate the props before the ones
+      // that read them.
+      for (auto const prop : retryProps) {
+        resetProp(prop, startPrivateProperties,
+                  clsAnalysis.privateProperties);
+        resetProp(prop, startPrivateStatics,
+                  clsAnalysis.privateStatics);
+        work.worklist.scheduleForPropMutate(prop);
+      }
+      for (auto const prop : retryProps) {
+        work.worklist.scheduleForProp(prop);
+      }
+    }
+
+    // This entire loop will eventually terminate when we cannot
+    // improve properties nor return types.
   }
 
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,

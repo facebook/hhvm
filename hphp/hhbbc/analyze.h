@@ -71,6 +71,13 @@ struct FuncAnalysisResult {
   Type inferredReturn;
 
   /*
+   * The number of times that inferredReturn was refined inside
+   * analyze_class. We need this to track accurately the total number
+   * of refinements.
+   */
+  size_t localReturnRefinements = 0;
+
+  /*
    * If the function returns one of its parameters, the index of that
    * parameter. MaxLocalId and above indicate that it doesn't return a
    * parameter.
@@ -143,25 +150,54 @@ struct FuncAnalysis : FuncAnalysisResult {
 
 /*
  * Store the worklist of functions to be analyzed during
- * class-at-a-time analysis (along with inter-class dependencies).
+ * class-at-a-time analysis (along with intra-class dependencies).
  */
 struct ClassAnalysisWorklist {
   const php::Func* next();
 
   void scheduleForProp(SString name);
+  void scheduleForPropMutate(SString name);
+  void scheduleForReturnType(const php::Func& callee);
+
   void addPropDep(SString name, const php::Func& f) {
     propDeps[name].emplace(&f);
   }
+  void addPropMutateDep(SString name, const php::Func& f) {
+    propMutateDeps[name].emplace(&f);
+  }
+  void addReturnTypeDep(const php::Func& callee, const php::Func& f) {
+    returnTypeDeps[&callee].emplace(&f);
+  }
+
+  bool empty() const { return worklist.empty(); }
 
   // Put a func on the worklist. Return true if the func was
   // scheduled, false if it was already on the list.
   bool schedule(const php::Func& f);
 
+  const hphp_fast_set<const php::Func*>*
+  depsForReturnType(const php::Func& f) const {
+    auto const it = returnTypeDeps.find(&f);
+    if (it == returnTypeDeps.end()) return nullptr;
+    return &it->second;
+  }
+
 private:
   hphp_fast_set<const php::Func*> inWorklist;
   std::deque<const php::Func*> worklist;
 
-  hphp_fast_map<SString, hphp_fast_set<const php::Func*>> propDeps;
+  template <typename T> using Deps =
+    hphp_fast_map<T, hphp_fast_set<const php::Func*>>;
+  Deps<SString> propDeps;
+  Deps<SString> propMutateDeps;
+  Deps<const php::Func*> returnTypeDeps;
+};
+
+struct ClassAnalysisWork {
+  ClassAnalysisWorklist worklist;
+  hphp_fast_map<const php::Func*, Type> returnTypes;
+  hphp_fast_map<const php::Func*, hphp_fast_set<SString>> propMutators;
+  bool propsRefined = false;
 };
 
 /*
@@ -186,7 +222,7 @@ struct ClassAnalysis {
   PropState privateProperties;
   PropState privateStatics;
 
-  ClassAnalysisWorklist* work{nullptr};
+  ClassAnalysisWork* work{nullptr};
 
   // Whether this class might have a bad initial value for a property.
   bool badPropInitialValues{false};

@@ -1109,7 +1109,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
   for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);
 
-  auto const retTy = state.index.lookup_return_type_raw(&func);
+  auto const retTy = state.index.lookup_return_type_raw(&func).first;
   if (!retTy.subtypeOf(BBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
     merge_repo_auth_type(fe.ue(), rat);

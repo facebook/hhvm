@@ -50,6 +50,7 @@ struct Context;
 struct ContextHash;
 struct CallContext;
 struct PropertiesInfo;
+struct MethodsInfo;
 
 extern const Type TCell;
 
@@ -825,7 +826,8 @@ struct Index {
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitCell at worst.
    */
-  Type lookup_return_type(Context, res::Func, Dep dep = Dep::ReturnTy) const;
+  Type lookup_return_type(Context, MethodsInfo*, res::Func,
+                          Dep dep = Dep::ReturnTy) const;
 
   /*
    * Return the best known return type for a resolved function, given
@@ -835,20 +837,24 @@ struct Index {
    * order to interpret the callee with these argument types.
    */
   Type lookup_return_type(Context caller,
+                          MethodsInfo*,
                           const CompactVector<Type>& args,
                           const Type& context,
                           res::Func,
                           Dep dep = Dep::ReturnTy) const;
 
   /*
-   * Look up the return type for an unresolved function.  The
-   * interpreter should not use this routine---it's for stats or debug
-   * dumps.
+   * Look up raw return type information for an unresolved
+   * function. This is the best known return type, and the number of
+   * refinements done to that type.
+   *
+   * This function does not register a dependency on the return type
+   * information.
    *
    * Nothing may be writing to the index when this function is used,
    * but concurrent readers are allowed.
    */
-  Type lookup_return_type_raw(const php::Func*) const;
+  std::pair<Type, size_t> lookup_return_type_raw(const php::Func*) const;
 
   /*
    * Return the best known types of a closure's used variables (on

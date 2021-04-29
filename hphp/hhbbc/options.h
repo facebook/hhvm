@@ -54,7 +54,7 @@ struct Options {
    * Flags for various limits on when to perform widening operations.
    * See analyze.cpp for details.
    */
-  uint32_t analyzeFuncWideningLimit = 12;
+  uint32_t analyzeFuncWideningLimit = 8;
   uint32_t analyzeClassWideningLimit = 6;
 
   /*
@@ -76,12 +76,12 @@ struct Options {
    *
    *   InitCell, CArrN(x:InitCell), CArrN(x:CArrN(x:InitCell)), ...
    */
-  uint32_t returnTypeRefineLimit = 15;
+  uint32_t returnTypeRefineLimit = 8;
 
   /*
    * Limit public static property refinement for the same reason.
    */
-  uint32_t publicSPropRefineLimit = 15;
+  uint32_t publicSPropRefineLimit = 8;
 
   /*
    * Whether to produce extended stats information.  (Takes extra
@@ -218,4 +218,3 @@ struct Options {
 extern Options options;
 
 }}
-

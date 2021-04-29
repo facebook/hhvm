@@ -365,7 +365,7 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
     ++stats.effectfulFuncs;
   }
 
-  auto const ty = index.lookup_return_type_raw(&func);
+  auto const ty = index.lookup_return_type_raw(&func).first;
   add_type(stats.returns, ty);
 
   auto const cf = php::WideFunc::cns(&func);

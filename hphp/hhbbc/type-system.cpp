@@ -4789,6 +4789,16 @@ Type widening_union(const Type& a, const Type& b) {
   return widen_type(union_of(a, b));
 }
 
+bool more_refined_for_index(const Type& a, const Type& b) {
+  if (a.moreRefined(b)) return true;
+  if (!a.subtypeOf(BOptObj) ||
+      !b.subtypeOf(BOptObj) ||
+      !is_specialized_obj(b)) {
+    return false;
+  }
+  return dobj_of(b).cls.mustBeInterface();
+}
+
 Type stack_flav(Type a) {
   if (a.subtypeOf(BUninit))   return TUninit;
   if (a.subtypeOf(BInitCell)) return TInitCell;

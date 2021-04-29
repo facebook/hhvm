@@ -1905,6 +1905,7 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
 
   auto retTy = env.index.lookup_return_type(
     env.ctx,
+    &env.collect.methods,
     args,
     ctxType,
     memo_impl_func
@@ -3701,8 +3702,10 @@ void fcallKnownImpl(
     }
 
     auto ty = fca.hasUnpack()
-      ? env.index.lookup_return_type(env.ctx, func)
-      : env.index.lookup_return_type(env.ctx, args, context, func);
+      ? env.index.lookup_return_type(env.ctx, &env.collect.methods, func)
+      : env.index.lookup_return_type(
+          env.ctx, &env.collect.methods, args, context, func
+        );
     if (nullsafe) ty = opt(std::move(ty));
     return ty;
   }();

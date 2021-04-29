@@ -515,6 +515,26 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Encapsulates information about the current class's methods during
+ * class-at-a-time analysis. This might be more refined than the
+ * information in the Index.
+ */
+struct MethodsInfo {
+  MethodsInfo(Context, ClassAnalysis*);
+
+  // Look up the best known return type for the current class's
+  // method, return folly::none if not known, or if the Func is not a
+  // method of the current class.
+  folly::Optional<Type> lookupReturnType(const php::Func&);
+
+private:
+  ClassAnalysis* m_cls;
+  const php::Func* m_func;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * Map from closure classes to types for each of their used vars.
  * Shows up in a few different interpreter structures.
  */
@@ -573,6 +593,7 @@ struct CollectedInfo {
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
+  MethodsInfo methods;
   hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
   bool effectFree{true};

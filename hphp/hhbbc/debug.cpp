@@ -130,7 +130,7 @@ void dump_func_state(std::ostream& out,
       )
     : folly::sformat("{}()", f->name->toCppString());
 
-  auto const retTy = index.lookup_return_type_raw(f);
+  auto const retTy = index.lookup_return_type_raw(f).first;
   out << name << " :: " << show(retTy) <<
     (index.is_effect_free(f) ? " (effect-free)\n" : "\n");
 }

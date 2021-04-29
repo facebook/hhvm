@@ -1201,6 +1201,13 @@ Type widening_union(const Type& a, const Type& b);
 Type widen_type(Type t);
 
 /*
+ * Check if the first type is more refined than the second type for
+ * the purposes of use in the Index. This is basically moreRefined()
+ * plus some additional rules for interfaces.
+ */
+bool more_refined_for_index(const Type&, const Type&);
+
+/*
  * Returns what we know about the emptiness of the type.
  */
 Emptiness emptiness(const Type&);

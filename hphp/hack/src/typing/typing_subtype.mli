@@ -42,6 +42,7 @@ val can_sub_type : env -> locl_ty -> locl_ty -> bool
 val sub_type :
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
+  ?is_coeffect:bool ->
   locl_ty ->
   locl_ty ->
   Errors.error_from_reasons_callback ->
@@ -77,6 +78,7 @@ val sub_type_with_dynamic_as_bottom_res :
 
 val sub_type_i :
   env ->
+  ?is_coeffect:bool ->
   internal_type ->
   internal_type ->
   Errors.error_from_reasons_callback ->
@@ -104,6 +106,7 @@ val add_constraints :
 val set_fun_refs : unit -> unit
 
 val simplify_subtype_i :
+  ?is_coeffect:bool ->
   env ->
   internal_type ->
   internal_type ->

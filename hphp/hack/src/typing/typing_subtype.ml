@@ -98,6 +98,11 @@ type subtype_env = {
    *)
   coerce: TL.coercion_direction option;
   on_error: Errors.error_from_reasons_callback;
+  (* A flag which, if set, indicates that coeffects are being subtyped.
+     Note: this is a short-term solution to provide pretty-printing of
+     `locl_ty`s that represent coeffects, since there is no good way to
+     tell apart coeffects from regular types *)
+  is_coeffect: bool;
 }
 
 let coercing_from_dynamic se =
@@ -116,12 +121,14 @@ let make_subtype_env
     ?(ignore_generic_params = false)
     ?(no_top_bottom = false)
     ?(coerce = None)
+    ?(is_coeffect = false)
     on_error =
   {
     ignore_generic_params;
     visited = VisitedGoals.empty;
     no_top_bottom;
     coerce;
+    is_coeffect;
     on_error;
   }
 
@@ -365,11 +372,23 @@ let dynamic_collection_types =
         (cSet, inv_keyset_style);
       ]
 
-let rec describe_ty_super env ty =
-  let print ty =
-    Typing_print.with_blank_tyvars (fun () ->
-        Typing_print.full_strip_ns_i env ty)
-  in
+let describe_ty_default env ty =
+  Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns_i env ty)
+
+let describe_ty ~is_coeffect : env -> internal_type -> string =
+  (* Optimization: specialize on partial application, i.e.
+  *    let describe_ty_sub = describe_ty ~is_coeffect in
+  *  will check the flag only once, not every time the function is called *)
+  if not is_coeffect then
+    describe_ty_default
+  else
+    fun env -> function
+  | LoclType ty -> Typing_print.coeffects env ty
+  | ty -> describe_ty_default env ty
+
+let rec describe_ty_super ~is_coeffect env ty =
+  let describe_ty_super = describe_ty_super ~is_coeffect in
+  let print = (describe_ty ~is_coeffect) env in
   let default () = print ty in
   match ty with
   | LoclType ty ->
@@ -438,11 +457,8 @@ let rec describe_ty_super env ty =
         (describe_ty_super env (LoclType lty))
         (describe_ty_super env (ConstraintType cty)))
 
-let describe_ty_sub env ety =
-  let ty_descr =
-    Typing_print.with_blank_tyvars (fun () ->
-        Typing_print.full_strip_ns_i env ety)
-  in
+let describe_ty_sub ~is_coeffect env ety =
+  let ty_descr = describe_ty ~is_coeffect env ety in
   let ty_constraints =
     match ety with
     | Typing_defs.LoclType ty -> Typing_print.constraints_for_type env ty
@@ -707,8 +723,9 @@ and simplify_subtype_i
     let (r_super, ety_super) =
       detect_attempting_dynamic_coercion_reason r_super ety_super
     in
-    let ty_super_descr = describe_ty_super env ety_super in
-    let ty_sub_descr = describe_ty_sub env ety_sub in
+    let is_coeffect = subtype_env.is_coeffect in
+    let ty_super_descr = describe_ty_super ~is_coeffect env ety_super in
+    let ty_sub_descr = describe_ty_sub ~is_coeffect env ety_sub in
     let (ty_super_descr, ty_sub_descr) =
       if String.equal ty_super_descr ty_sub_descr then
         ( "exactly the type " ^ ty_super_descr,
@@ -2682,9 +2699,14 @@ and sub_type_i
     Error (Env.log_env_change "sub_type" old_env old_env)
 
 and sub_type
-    env ?(coerce = None) (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
+    env
+    ?(coerce = None)
+    ?(is_coeffect = false)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error =
   sub_type_i
-    ~subtype_env:(make_subtype_env ~coerce on_error)
+    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce on_error)
     env
     (LoclType ty_sub)
     (LoclType ty_super)
@@ -3384,9 +3406,9 @@ let sub_type_with_dynamic_as_bottom
   | Ok env -> env
   | Error env -> env
 
-let simplify_subtype_i env ty_sub ty_super ~on_error =
+let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
   simplify_subtype_i
-    ~subtype_env:(make_subtype_env ~no_top_bottom:true on_error)
+    ~subtype_env:(make_subtype_env ~is_coeffect ~no_top_bottom:true on_error)
     ty_sub
     ty_super
     env
@@ -3398,8 +3420,12 @@ let simplify_subtype_i env ty_sub ty_super ~on_error =
 let sub_type_i_res env ty1 ty2 on_error =
   sub_type_i ~subtype_env:(make_subtype_env ~coerce:None on_error) env ty1 ty2
 
-let sub_type_i env ty1 ty2 on_error =
-  sub_type_i ~subtype_env:(make_subtype_env ~coerce:None on_error) env ty1 ty2
+let sub_type_i env ?(is_coeffect = false) ty1 ty2 on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce:None on_error)
+    env
+    ty1
+    ty2
   |> function
   | Ok env -> env
   | Error env -> env

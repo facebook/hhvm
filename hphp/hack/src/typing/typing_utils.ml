@@ -36,6 +36,7 @@ let expand_typedef x = !expand_typedef_ref x
 type sub_type =
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
+  ?is_coeffect:bool ->
   locl_ty ->
   locl_ty ->
   Errors.error_from_reasons_callback ->
@@ -59,6 +60,7 @@ let sub_type_res x = !sub_type_res_ref x
 
 type sub_type_i =
   env ->
+  ?is_coeffect:bool ->
   internal_type ->
   internal_type ->
   Errors.error_from_reasons_callback ->
@@ -66,7 +68,7 @@ type sub_type_i =
 
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
-let sub_type_i x = !sub_type_i_ref x
+let sub_type_i ?(is_coeffect = false) x = !sub_type_i_ref ~is_coeffect x
 
 type sub_type_i_res =
   env ->

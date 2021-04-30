@@ -17,6 +17,8 @@ get_target_property(FMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(FOLLY_INCLUDE_DIR folly INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
+set(WATCHMAN_DEPS folly boost fmt jemalloc double-conversion)
+
 ExternalProject_Add(
   bundled_watchman
   ${WATCHMAN_DOWNLOAD_ARGS}
@@ -36,12 +38,9 @@ ExternalProject_Add(
     "-DFOLLY_INCLUDE_DIR=${FOLLY_INCLUDE_DIR}"
     "-DJEMALLOC_INCLUDE_DIR=${JEMALLOC_INCLUDE_DIR}"
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
+  DEPENDS ${WATCHMAN_DEPS}
   EXCLUDE_FROM_ALL
 )
-
-add_library(watchman_deps INTERFACE)
-target_link_libraries(watchman_deps INTERFACE folly boost fmt jemalloc double-conversion)
-add_dependencies(bundled_watchman watchman_deps)
 
 find_package(libWatchmanClient)
 if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARIES)
@@ -51,6 +50,8 @@ else()
   add_dependencies(libwatchmanclient bundled_watchman)
   ExternalProject_Get_Property(bundled_watchman INSTALL_DIR)
   target_include_directories(libwatchmanclient INTERFACE "${INSTALL_DIR}/include")
+  add_library(watchman_deps INTERFACE)
+  target_link_libraries(watchman_deps INTERFACE ${WATCHMAN_DEPS})
   target_link_libraries(
     libwatchmanclient
     INTERFACE

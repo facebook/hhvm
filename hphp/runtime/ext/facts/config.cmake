@@ -6,4 +6,6 @@ HHVM_DEFINE_EXTENSION(
     ext_facts.h
   SYSTEMLIB
     ext_facts.php
+  DEPENDS
+    libwatchmanclient
 )

@@ -3,4 +3,6 @@ HHVM_DEFINE_EXTENSION("watchman" IMPLICIT
     ext_watchman.cpp
   SYSTEMLIB
     ext_watchman.php
+  DEPENDS
+    libwatchmanclient
 )

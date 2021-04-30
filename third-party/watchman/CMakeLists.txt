@@ -14,6 +14,8 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(FMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(FOLLY_INCLUDE_DIR folly INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 ExternalProject_Add(
   bundled_watchman
@@ -31,11 +33,12 @@ ExternalProject_Add(
     "-DBOOST_INCLUDE_DIR=${BOOST_INCLUDE_DIR}"
     "-DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}"
     "-DFMT_INCLUDE_DIR=${FMT_INCLUDE_DIR}"
-    "-DFOLLY_INCLUDE_DIR=${CMAKE_CURRENT_LIST_DIR}/../folly"
+    "-DFOLLY_INCLUDE_DIR=${FOLLY_INCLUDE_DIR}"
+    "-DJEMALLOC_INCLUDE_DIR=${JEMALLOC_INCLUDE_DIR}"
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
   EXCLUDE_FROM_ALL
 )
-add_dependencies(bundled_watchman folly boost fmt double-conversion)
+add_dependencies(bundled_watchman folly boost fmt jemalloc double-conversion)
 
 find_package(libWatchmanClient)
 if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARIES)

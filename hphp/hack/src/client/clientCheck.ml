@@ -612,9 +612,14 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           args.error_format
           args.max_errors
       in
-      Lwt.return
-        ( exit_status,
-          Telemetry.object_ telemetry ~key:"no_prechecked" ~value:telemetry1 )
+      let telemetry =
+        telemetry
+        |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
+        |> Telemetry.object_opt
+             ~key:"last_recheck_stats"
+             ~value:status.Rpc.Server_status.last_recheck_stats
+      in
+      Lwt.return (exit_status, telemetry)
     | MODE_STATUS_SINGLE filename ->
       let file_input =
         match filename with

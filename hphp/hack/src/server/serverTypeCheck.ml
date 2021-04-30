@@ -1121,8 +1121,18 @@ functor
       (* `start_time` is when the recheck_loop started and includes preliminaries like
        * reading about file-change notifications and communicating with client.
        * We record all our telemetry uniformally with respect to this start.
-       * `t` is legacy, used for ad-hoc duration reporting within this function. *)
-      let telemetry = Telemetry.create () in
+       * `t` is legacy, used for ad-hoc duration reporting within this function.
+       * For the following, env.int_env.why_needed_full_init is set to Some by
+       * ServerLazyInit, and we include it here, and then it's subsequently
+       * set to None at the end of this method by the call to [get_env_after_typing].
+       * Thus, if it's present here, it means the typecheck we're about to do is
+       * the initial one of a lazy init. *)
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.object_opt
+             ~key:"init"
+             ~value:env.ServerEnv.init_env.ServerEnv.why_needed_full_init
+      in
       let env =
         if CheckKind.is_full then
           { env with full_check_status = Full_check_started }

@@ -25,10 +25,10 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/hash-map.h"
 
 #include <folly/SharedMutex.h>
 #include <folly/String.h>
-#include <tbb/concurrent_hash_map.h>
 
 #include <algorithm>
 #include <atomic>
@@ -703,18 +703,31 @@ struct SinkOutputData {
   uint64_t weight = 0;
 };
 
+struct LoggingProfileKeyHash {
+  size_t operator()(const LoggingProfileKey& key) const {
+    return folly::hash::hash_combine(
+      hash_int64(key.ptr), key.slot, key.locationType);
+  }
+};
+
+struct SinkProfileKeyHash {
+  size_t operator()(const SinkProfileKey& key) const {
+    return folly::hash::hash_combine(
+      hash_int64(key.first), key.second.toAtomicInt());
+  }
+};
+
 using ProfileOutputData = std::vector<SourceOutputData>;
-using ProfileMap = tbb::concurrent_hash_map<LoggingProfileKey, LoggingProfile*,
-                                            LoggingProfileKey::TbbHashCompare>;
+using ProfileMap = folly_concurrent_hash_map_simd<
+  LoggingProfileKey, LoggingProfile*, LoggingProfileKeyHash,
+  std::equal_to<LoggingProfileKey>>;
+using SinkMap = folly_concurrent_hash_map_simd<
+  SinkProfileKey, SinkProfile*, SinkProfileKeyHash,
+  std::equal_to<SinkProfileKey>>;
 
-using SinkProfileKeyHashCompare = pairHashCompare<
-  TransID, SrcKey, integralHashCompare<TransID>, SrcKey::TbbHashCompare>;
-using SinkMap = tbb::concurrent_hash_map<
-  SinkProfileKey, SinkProfile*, SinkProfileKeyHashCompare>;
-
+std::thread s_exportProfilesThread;
 ProfileMap s_profileMap;
 SinkMap s_sinkMap;
-std::thread s_exportProfilesThread;
 
 template<typename... Ts>
 bool logToFile(FILE* file, Ts&&... args) {
@@ -1008,15 +1021,14 @@ bool shouldLogAtSrcKey(SrcKey sk) {
 LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   assertx(key.checkInvariants());
   assertx(allowBespokeArrayLikes());
-  auto const existing = [&]{
-    ProfileMap::const_accessor it;
-    return s_profileMap.find(it, key) ? it->second : nullptr;
-  }();
-  assertx(IMPLIES(existing, existing->key == key));
-  if (existing) return existing;
+  auto const it = s_profileMap.find(key);
+  if (it != s_profileMap.end()) {
+    assertx(it->second->key == key);
+    return it->second;
+  }
 
-  // Hold the read mutex for the duration of the mutation so that export
-  // cannot begin until the mutation is complete.
+  // Hold the read mutex while we're constructing the new profile so that we
+  // cannot stop profiling until this mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
@@ -1027,13 +1039,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
     profile->data->staticSampledArray = ad->makeSampledStaticArray();
   }
 
-  auto const result = [&]{
-    ProfileMap::accessor insert;
-    if (s_profileMap.insert(insert, key)) {
-      insert->second = profile.release();
-    }
-    return insert->second;
-  }();
+  auto const pair = s_profileMap.insert({key, profile.get()});
+  if (pair.second) profile.release();
 
   // If the array was static, we must either log the new static memory we used
   // or free that memory, depending on whether we won the race to set profile.
@@ -1047,6 +1054,7 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
     }
   }
 
+  auto const result = pair.first->second;
   assertx(result->key == key);
   return result;
 }
@@ -1075,29 +1083,22 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot) {
 SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
   assertx(allowBespokeArrayLikes());
   auto const key = SinkProfileKey { id, canonicalize(skRaw) };
-  auto const existing = [&]{
-    SinkMap::const_accessor it;
-    return s_sinkMap.find(it, key) ? it->second : nullptr;
-  }();
-  assertx(IMPLIES(existing, existing->key == key));
-  if (existing) return existing;
+  auto const it = s_sinkMap.find(key);
+  if (it != s_sinkMap.end()) {
+    assertx(it->second->key == key);
+    return it->second;
+  }
 
-  // Hold the read mutex for the duration of the mutation so that export cannot
-  // begin until the mutation is complete.
+  // Hold the read mutex while we're constructing the new profile so that we
+  // cannot stop profiling until this mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<SinkProfile>(key);
+  auto const pair = s_sinkMap.insert({key, profile.get()});
+  if (pair.second) profile.release();
 
-  auto const result = [&]{
-    SinkMap::accessor insert;
-    if (s_sinkMap.insert(insert, key)) {
-      insert->second = profile.release();
-    }
-    return insert->second;
-  }();
-
-  // Don't hold the lock while we free profile.
+  auto const result = pair.first->second;
   assertx(result->key == key);
   return result;
 }
@@ -1137,15 +1138,13 @@ void eachSink(std::function<void(SinkProfile& profile)> fn) {
 
 void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
   assertx(key.checkInvariants());
-  ProfileMap::accessor insert;
-  always_assert(s_profileMap.insert(insert, key));
-  insert->second = new LoggingProfile(key, layout);
+  auto const profile = new LoggingProfile(key, layout);
+  always_assert(s_profileMap.insert({key, profile}).second);
 }
 
 void deserializeSink(SinkProfileKey key, jit::ArrayLayout layout) {
-  SinkMap::accessor insert;
-  always_assert(s_sinkMap.insert(insert, key));
-  insert->second = new SinkProfile(key, layout);
+  auto const profile = new SinkProfile(key, layout);
+  always_assert(s_sinkMap.insert({key, profile}).second);
 }
 
 size_t countSources() {

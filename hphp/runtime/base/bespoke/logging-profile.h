@@ -91,8 +91,6 @@ using EventMap = folly::F14FastMap<uint64_t, CopyAtomic<size_t>>;
 
 // We profile some bytecodes (array constructors or casts) and prop init vals.
 struct LoggingProfileKey {
-  struct TbbHashCompare;
-
   explicit LoggingProfileKey(SrcKey sk)
     : sk(sk)
     , slot(kInvalidSlot)
@@ -185,15 +183,6 @@ struct LoggingProfileKey {
   // The logical slot of a property on cls. kInvalidSlot for other types.
   Slot slot;
   LocationType locationType;
-};
-
-struct LoggingProfileKey::TbbHashCompare {
-  static size_t hash(const LoggingProfileKey& key) {
-    return folly::hash::hash_combine(hash_int64(key.ptr), key.slot, key.locationType);
-  }
-  static bool equal(const LoggingProfileKey& a, const LoggingProfileKey& b) {
-    return a == b;
-  }
 };
 
 // We'll store a LoggingProfile for each array construction site SrcKey.

@@ -36,4 +36,4 @@ include(GNUInstallDirs)
 install(TARGETS watchmanclient LIBRARY ARCHIVE DESTINATION lib)
 
 file(GLOB HEADERS "*.h")
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/watchman)
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/watchman/cppclient)

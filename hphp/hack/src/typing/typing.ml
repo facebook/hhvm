@@ -403,13 +403,13 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
         | _ -> env)
 
 (** Do a subtype check of inferred type against expected type *)
-let check_expected_ty
+let check_expected_ty_res
     (message : string)
     (env : env)
     (inferred_ty : locl_ty)
-    (expected : ExpectedTy.t option) : env =
+    (expected : ExpectedTy.t option) : (env, env) result =
   match expected with
-  | None -> env
+  | None -> Ok env
   | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
     Typing_log.(
       log_with_level env "typing" 1 (fun () ->
@@ -431,7 +431,11 @@ let check_expected_ty
                     Log_type ("expected_ty", ty.et_type);
                   ] );
             ]));
-    Typing_coercion.coerce_type p ur env inferred_ty ty Errors.unify_error
+    Typing_coercion.coerce_type_res p ur env inferred_ty ty Errors.unify_error
+
+let check_expected_ty message env inferred_ty expected =
+  Result.fold ~ok:Fn.id ~error:Fn.id
+  @@ check_expected_ty_res message env inferred_ty expected
 
 let check_inout_return ret_pos env =
   let params = Local_id.Map.elements (Env.get_params env) in
@@ -2460,25 +2464,32 @@ and expr_
     in
     match get_node supertype with
     (* No need to check individual subtypes if expected type is mixed or any! *)
-    | Tany _ -> (env, supertype)
+    | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
     | _ ->
       let subtype_value env ty =
-        check_expected_ty
+        check_expected_ty_res
           "Collection"
           env
           ty
           (Some (ExpectedTy.make use_pos reason supertype))
       in
-      let env = List.fold_left tys ~init:env ~f:subtype_value in
+      let (env, rev_ty_err_opts) =
+        List.fold_left tys ~init:(env, []) ~f:(fun (env, errs) ty ->
+            Result.fold
+              ~ok:(fun env -> (env, None :: errs))
+              ~error:(fun env -> (env, Some (ty, supertype) :: errs))
+            @@ subtype_value env ty)
+      in
+
       if
         List.exists tys (fun ty ->
             equal_locl_ty_ (get_node ty) (Typing_utils.tany env))
       then
         (* If one of the values comes from PHP land, we have to be conservative
          * and consider that we don't know what the type of the values are. *)
-        (env, Typing_utils.mk_tany env p)
+        (env, Typing_utils.mk_tany env p, List.rev rev_ty_err_opts)
       else
-        (env, supertype)
+        (env, supertype, List.rev rev_ty_err_opts)
   in
   (*
    * Given a 'a list and a method to extract an expr and its ty from a 'a, this
@@ -2497,10 +2508,15 @@ and expr_
       List.map_env env l (extract_expr_and_ty ~expected)
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
-    let (env, supertype) =
+    let (env, supertype, err_opts) =
       compute_supertype ~expected ~reason ~use_pos r env tys
     in
-    (env, exprs, supertype)
+    ( env,
+      List.map2_exn
+        ~f:(fun te err_opt -> hole_on_err te ~err_opt)
+        exprs
+        err_opts,
+      supertype )
   in
   let forget_fake_members env p callexpr =
     (* Some functions are well known to not change the types of members, e.g.
@@ -3138,7 +3154,7 @@ and expr_
     let (env, te2, ty2) = expr ?expected:expected2 env e2 in
     let p1 = fst e1 in
     let p2 = fst e2 in
-    let (env, ty1) =
+    let (env, ty1, err_opt1) =
       compute_supertype
         ~expected:expected1
         ~reason:Reason.URpair_value
@@ -3147,7 +3163,7 @@ and expr_
         env
         [ty1]
     in
-    let (env, ty2) =
+    let (env, ty2, err_opt2) =
       compute_supertype
         ~expected:expected2
         ~reason:Reason.URpair_value
@@ -3157,7 +3173,14 @@ and expr_
         [ty2]
     in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
-    make_result env p (Aast.Pair (th, te1, te2)) ty
+    make_result
+      env
+      p
+      (Aast.Pair
+         ( th,
+           hole_on_err te1 ~err_opt:(Option.join @@ List.hd err_opt1),
+           hole_on_err te2 ~err_opt:(Option.join @@ List.hd err_opt2) ))
+      ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e valkind in
     let env = might_throw env in

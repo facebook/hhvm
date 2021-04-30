@@ -88,6 +88,6 @@ let opt_closed_shape_idx_missing_field method_name field_pos =
   in
   add
     (Codes.to_enum Codes.OptClosedShapeIdxMissingField)
-    Lint_warning
+    Lint_error
     field_pos
     msg

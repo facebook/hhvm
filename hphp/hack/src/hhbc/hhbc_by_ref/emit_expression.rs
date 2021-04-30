@@ -525,9 +525,11 @@ pub fn emit_expr<'a, 'arena>(
             pos,
             "list() can only be used as an lvar. Did you mean to use tuple()?",
         )),
-        Expr_::Tuple(_) => {
-            unimplemented!("TODO: generate Tuple nodes in lowerer and update codegen")
-        }
+        Expr_::Tuple(e) => Ok(emit_pos_then(
+            alloc,
+            pos,
+            emit_collection(emitter, env, expression, &mk_afvalues(&e), None)?,
+        )),
 
         Expr_::Any => Err(unrecoverable("Cannot codegen from an Any node")),
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
@@ -1518,6 +1520,7 @@ fn emit_dynamic_collection<'a, 'arena>(
         E_::Collection(v) if (v.0).1 == "vec" => {
             emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
         }
+        E_::Tuple(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
         E_::ValCollection(v) if v.0 == tast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewKeysetArray)
         }
@@ -5911,6 +5914,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::Yield(_)
         | E_::Cast(_)
         | E_::Eif(_)
+        | E_::Tuple(_)
         | E_::Varray(_)
         | E_::Darray(_)
         | E_::Collection(_)

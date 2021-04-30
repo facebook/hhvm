@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
-use std::{collections::HashSet, mem};
+use std::collections::HashSet;
 use unique_id_builder::*;
 
 use ast_constant_folder_rust as ast_constant_folder;
@@ -1549,18 +1549,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             {
                 add_var(env, &mut self.state, "$this");
                 let mut res = Expr_::Call(x);
-                res.recurse(env, self.object())?;
-                res
-            }
-            Expr_::Call(mut x)
-                if x.0
-                    .as_id()
-                    .map(|id| id.1.eq_ignore_ascii_case("tuple"))
-                    .unwrap_or_default() =>
-            {
-                // replace tuple with varray
-                let call_args = mem::replace(&mut x.2, vec![]);
-                let mut res = Expr_::mk_varray(None, call_args);
                 res.recurse(env, self.object())?;
                 res
             }

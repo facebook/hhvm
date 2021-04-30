@@ -399,6 +399,11 @@ pub fn expr_to_typed_value_(
                     .collect::<Result<_, _>>()?;
             Ok(TypedValue::Dict(update_duplicates_in_map(values)))
         }
+        Tuple(x) => Ok(TypedValue::Vec(
+            x.iter()
+                .map(|e| expr_to_typed_value(emitter, ns, e))
+                .collect::<Result<_, _>>()?,
+        )),
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
             Ok(TypedValue::Vec(
                 x.2.iter()

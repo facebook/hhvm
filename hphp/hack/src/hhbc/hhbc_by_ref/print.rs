@@ -2891,6 +2891,10 @@ fn print_expr<W: Write>(
         }
         E_::Varray(va) => print_expr_varray(ctx, w, env, &va.1),
         E_::Darray(da) => print_expr_darray(ctx, w, env, print_expr, &da.1),
+        E_::Tuple(t) => wrap_by_(w, "varray[", "]", |w| {
+            // A tuple is represented by a varray when using reflection.
+            concat_by(w, ", ", t, |w, i| print_expr(ctx, w, env, i))
+        }),
         E_::List(l) => wrap_by_(w, "list(", ")", |w| {
             concat_by(w, ", ", l, |w, i| print_expr(ctx, w, env, i))
         }),

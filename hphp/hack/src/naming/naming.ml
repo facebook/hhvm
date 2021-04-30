@@ -1285,11 +1285,10 @@ and check_constant_expr env (pos, e) =
   | Aast.Call ((_, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_
          || String.equal cn SN.AutoimportedFunctions.class_meth
-         || String.equal cn SN.StdlibFunctions.array_mark_legacy
-         (* Tuples are not really function calls, they are just parsed that way*)
-         || String.equal cn SN.SpecialFunctions.tuple ->
+         || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
     arg_unpack_unexpected unpacked_element;
     List.for_all el ~f:(check_constant_expr env)
+  | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
   | Aast.Collection (id, _, l) ->
     let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
@@ -2046,9 +2045,7 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         N.Any
     end
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.SpecialFunctions.tuple ->
-    arg_unpack_unexpected unpacked_element;
+  | Aast.Tuple el ->
     (match el with
     | [] ->
       Errors.naming_too_few_arguments p;
@@ -2093,7 +2090,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.FunctionPointer _ -> N.Any
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
-  | Aast.Tuple el -> N.Tuple (exprl env el)
   | Aast.List el -> N.List (exprl env el)
   | Aast.Cast (ty, e2) ->
     let ((p, x), hl) =

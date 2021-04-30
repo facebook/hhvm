@@ -389,8 +389,6 @@ pub mod attribute_kinds {
 pub mod special_functions {
     use lazy_static::lazy_static;
 
-    pub const TUPLE: &str = "tuple"; /* pseudo-function */
-
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
     pub const HHAS_ADATA: &str = "__hhas_adata";
@@ -398,7 +396,7 @@ pub mod special_functions {
     pub fn is_special_function(x: &str) -> bool {
         lazy_static! {
             static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
-                vec![TUPLE, ECHO, HHAS_ADATA,].into_iter().collect();
+                vec![ECHO, HHAS_ADATA,].into_iter().collect();
         }
         ALL_SPECIAL_FUNCTIONS.contains(&x)
     }

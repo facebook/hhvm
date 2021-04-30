@@ -454,6 +454,15 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
             .into_bump_slice();
             Ok(TypedValue::Dict(values))
         }
+        Tuple(x) => {
+            let v: Vec<_> = x
+                .iter()
+                .map(|e| expr_to_typed_value(alloc, emitter, e))
+                .collect::<Result<_, _>>()?;
+            let values =
+                bumpalo::collections::Vec::from_iter_in(v.into_iter(), alloc).into_bump_slice();
+            Ok(TypedValue::Vec(values))
+        }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
             let v: Vec<_> =
                 x.2.iter()

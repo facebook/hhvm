@@ -1653,7 +1653,7 @@ where
             }
             EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
             IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
-            TupleExpression(c) => p_special_call(&c.keyword, &c.items, env),
+            TupleExpression(c) => Ok(E_::mk_tuple(Self::could_map(Self::p_expr, &c.items, env)?)),
             FunctionCallExpression(c) => {
                 let recv = &c.receiver;
                 let args = &c.argument_list;
@@ -2252,12 +2252,6 @@ where
                     raise("Array-like class consts are not valid lvalues");
                 }
             }
-            Call(c) => match &(c.0).1 {
-                Id(sid) if sid.1 == "tuple" => {
-                    raise("Tuple cannot be used as an lvalue. Maybe you meant list?")
-                }
-                _ => raise("Invalid lvalue"),
-            },
             List(l) => {
                 for i in l.iter() {
                     Self::check_lvalue(i, env);
@@ -2267,7 +2261,7 @@ where
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
             | String(_) | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_)
             | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_)
-            | Is(_) | As(_) => raise("Invalid lvalue"),
+            | Is(_) | As(_) | Call(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }

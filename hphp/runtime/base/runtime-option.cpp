@@ -896,6 +896,8 @@ std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
 std::string RuntimeOption::AutoloadDBPath;
+std::string RuntimeOption::AutoloadDBPerms{"0644"};
+std::string RuntimeOption::AutoloadDBGroup;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
@@ -2505,8 +2507,11 @@ void RuntimeOption::Load(
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
-    Config::Bind(AutoloadDBPath, ini, config, "Autoload.DBPath");
-    Config::Bind(AutoloadRethrowExceptions, ini, config, "Autoload.RethrowExceptions", true);
+    Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
+    Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
+    Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
+    Config::Bind(AutoloadRethrowExceptions, ini, config,
+                 "Autoload.RethrowExceptions", true);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",

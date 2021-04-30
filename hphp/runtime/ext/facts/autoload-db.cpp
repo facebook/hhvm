@@ -17,12 +17,21 @@
 #include <atomic>
 #include <chrono>
 #include <exception>
+#include <fcntl.h>
+#include <grp.h>
+#include <string>
+#include <sys/types.h>
+#include <unistd.h>
 #include <utility>
 
+#include <folly/experimental/io/FsUtil.h>
 #include <folly/json.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(facts);
@@ -30,7 +39,64 @@ TRACE_SET_MOD(facts);
 namespace HPHP {
 namespace Facts {
 
+DBData::DBData(
+    folly::fs::path path, SQLite::OpenMode rwMode, ::gid_t gid, ::mode_t perms)
+    : m_path{std::move(path)}, m_rwMode{rwMode}, m_gid{gid}, m_perms{perms} {
+  always_assert(m_path.is_absolute());
+
+  // Coerce DB permissions into unix owner/group/other bits
+  FTRACE(
+      3,
+      "Coercing DB permission bits {} to {}\n",
+      m_perms,
+      (m_perms | 0600) & 0666);
+  m_perms |= 0600;
+  m_perms &= 0666;
+}
+
+bool DBData::operator==(const DBData& rhs) const {
+  return m_path == rhs.m_path && m_rwMode == rhs.m_rwMode &&
+         m_gid == rhs.m_gid && m_perms == rhs.m_perms;
+}
+
+std::string DBData::toString() const {
+  return folly::sformat("DBData({}, {}, {})", m_path.native(), m_gid, m_perms);
+}
+
+size_t DBData::hash() const {
+  return folly::hash::hash_combine(
+      hash_string_cs(m_path.native().c_str(), m_path.native().size()),
+      std::hash<gid_t>{}(m_gid),
+      std::hash<mode_t>{}(m_perms));
+}
+
 namespace {
+
+/**
+ * Create the given file if it doesn't exist, setting its group ownership and
+ * permissions along the way.
+ */
+void setFilePerms(const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
+  FTRACE(
+      3, "Creating {} with gid={} and perms={}\n", path.native(), gid, perms);
+  int dbFd = ::open(path.native().c_str(), O_CREAT, perms);
+  if (dbFd == -1) {
+    Logger::Warning(folly::sformat(
+        "Could not open DB at {}: errno={}", path.native(), errno));
+    return;
+  }
+  SCOPE_EXIT {
+    ::close(dbFd);
+  };
+  if (::fchown(dbFd, -1, gid) == -1) {
+    Logger::Warning(folly::sformat(
+        "Could not chown({}, -1, {}): errno={}", path.native(), gid, errno));
+  }
+  if (::fchmod(dbFd, perms) == -1) {
+    Logger::Warning(folly::sformat(
+        "Could not chmod({}, {}): errno={}", path.native(), perms, errno));
+  }
+}
 
 // Representation of inheritance kinds in the DB
 
@@ -440,17 +506,29 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   ~AutoloadDBImpl() override = default;
 
-  static AutoloadDBImpl
-  get(const folly::fs::path& path, SQLite::OpenMode mode) {
-    assertx(path.is_absolute());
+  static AutoloadDBImpl get(const DBData& dbData) {
+    assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
-        return SQLite::connect(path.native(), mode);
+        return SQLite::connect(dbData.m_path.native(), dbData.m_rwMode);
       } catch (SQLiteExc& e) {
         throw std::runtime_error{folly::sformat(
-            "Couldn't open or create native Facts DB at {}", path.native())};
+            "Couldn't open or create native Facts DB at {}",
+            dbData.m_path.native())};
       }
     }();
+    if (dbData.m_rwMode == SQLite::OpenMode::ReadWrite) {
+      // If writable, ensure the DB has the correct owner and permissions.
+      setFilePerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
+      setFilePerms(
+          folly::fs::path{dbData.m_path} += "-shm",
+          dbData.m_gid,
+          dbData.m_perms);
+      setFilePerms(
+          folly::fs::path{dbData.m_path} += "-wal",
+          dbData.m_gid,
+          dbData.m_perms);
+    }
     if (!db.isReadOnly()) {
       try {
         db.setJournalMode(SQLite::JournalMode::WAL);
@@ -472,7 +550,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       rebuildIndices(txn);
       db.setBusyTimeout(60'000);
       txn.commit();
-      FTRACE(3, "Connected to SQLite DB at {}.\n", path.native());
+      FTRACE(3, "Connected to SQLite DB at {}.\n", dbData.m_path.native());
     }
 
     return AutoloadDBImpl{std::move(db)};
@@ -911,12 +989,11 @@ AutoloadDB::~AutoloadDB() = default;
 
 THREAD_LOCAL(AutoloadDBThreadLocal, t_adb);
 
-AutoloadDB& getDB(const folly::fs::path& dbPath, SQLite::OpenMode mode) {
-  assertx(dbPath.is_absolute());
+AutoloadDB& getDB(const DBData& dbData) {
   AutoloadDBThreadLocal& dbVault = *t_adb.get();
-  auto& dbPtr = dbVault[{dbPath.native(), mode}];
+  auto& dbPtr = dbVault[{dbData.m_path.native(), dbData.m_rwMode}];
   if (!dbPtr) {
-    dbPtr = std::make_unique<AutoloadDBImpl>(AutoloadDBImpl::get(dbPath, mode));
+    dbPtr = std::make_unique<AutoloadDBImpl>(AutoloadDBImpl::get(dbData));
   }
   return *dbPtr;
 }

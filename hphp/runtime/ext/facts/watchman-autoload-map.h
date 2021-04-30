@@ -58,7 +58,7 @@ struct WatchmanAutoloadMap final
    */
   WatchmanAutoloadMap(
       folly::fs::path root,
-      folly::fs::path dbPath,
+      DBData dbData,
       folly::dynamic queryExpr,
       Watchman& watchmanClient);
 
@@ -66,7 +66,7 @@ struct WatchmanAutoloadMap final
    * Create in static mode, where we trust the DB at `dbPath` and never modify
    * it.
    */
-  WatchmanAutoloadMap(folly::fs::path root, folly::fs::path dbPath);
+  WatchmanAutoloadMap(folly::fs::path root, DBData dbData);
 
   ~WatchmanAutoloadMap() override;
   WatchmanAutoloadMap(const WatchmanAutoloadMap&) = delete;

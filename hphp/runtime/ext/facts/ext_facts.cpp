@@ -54,6 +54,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/user-info.h"
+#include "hphp/zend/zend-string.h"
 
 TRACE_SET_MOD(facts);
 
@@ -115,6 +116,69 @@ getDBPath(const folly::fs::path& root, const folly::dynamic& queryExpr) {
   return folly::fs::system_complete(dbPath);
 }
 
+::gid_t getGroup() {
+  // Resolve the group to a unix gid
+  if (RuntimeOption::AutoloadDBGroup.empty()) {
+    return -1;
+  }
+  try {
+    GroupInfo grp{RuntimeOption::AutoloadDBGroup.c_str()};
+    return grp.gr->gr_gid;
+  } catch (const Exception& e) {
+    Logger::Warning(folly::sformat(
+        "Can't resolve {} to a gid: {}",
+        RuntimeOption::AutoloadDBGroup,
+        e.what()));
+    return -1;
+  }
+}
+
+::mode_t getDBPerms() {
+  try {
+    ::mode_t res = std::stoi(RuntimeOption::AutoloadDBPerms, 0, 8);
+    FTRACE(3, "Converted {} to {}\n", RuntimeOption::AutoloadDBPerms, res);
+    return res;
+  } catch (const std::exception& e) {
+    Logger::Warning(folly::sformat(
+        "Error running std::stoi on \"Autoload.DB.Perms\": {}", e.what()));
+    return 0644;
+  }
+}
+
+DBData getDBData(
+    const folly::fs::path& root,
+    const folly::dynamic& queryExpr,
+    const RepoOptions& repoOptions) {
+  assertx(root.is_absolute());
+
+  auto trustedDBPath = [&]() -> folly::fs::path {
+    folly::fs::path trusted{repoOptions.trustedDBPath()};
+    if (trusted.empty()) {
+      return trusted;
+    }
+    // If the trustedDBPath is relative, make sure we resolve it relative
+    // to the repo root rather than the current working directory
+    if (trusted.is_relative()) {
+      trusted = root / trusted;
+    }
+    try {
+      return folly::fs::canonical(trusted);
+    } catch (const folly::fs::filesystem_error& e) {
+      throw RepoOptionsParseExc{folly::sformat(
+          "Error resolving Autoload.TrustedDBPath = {}: {}",
+          trusted.native().c_str(),
+          e.what())};
+    }
+  }();
+
+  if (trustedDBPath.empty()) {
+    ::gid_t gid = getGroup();
+    return DBData::readWrite(getDBPath(root, queryExpr), gid, getDBPerms());
+  } else {
+    return DBData::readOnly(std::move(trustedDBPath));
+  }
+}
+
 // Convenience wrapper for std::string_view
 inline strhash_t hash_string_view_cs(std::string_view s) {
   return hash_string_cs(s.data(), s.size());
@@ -143,55 +207,32 @@ struct WatchmanAutoloadMapKey {
       }
     }();
 
-    auto dbPath = getDBPath(root, queryExpr);
-
-    auto trustedDBPath = [&]() -> folly::fs::path {
-      folly::fs::path trusted{repoOptions.trustedDBPath()};
-      if (trusted.empty()) {
-        return trusted;
-      }
-      // If the trustedDBPath is relative, make sure we resolve it relative
-      // to the repo root rather than the current working directory
-      if (trusted.is_relative()) {
-        trusted = root / trusted;
-      }
-      try {
-        return folly::fs::canonical(trusted);
-      } catch (const folly::fs::filesystem_error& e) {
-        throw RepoOptionsParseExc{folly::sformat(
-            "Error resolving Autoload.TrustedDBPath = {}: {}",
-            trusted.native().c_str(),
-            e.what())};
-      }
-    }();
+    auto dbData = getDBData(root, queryExpr, repoOptions);
 
     return WatchmanAutoloadMapKey{
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
-        .m_dbPath = std::move(dbPath),
-        .m_trustedDBPath = std::move(trustedDBPath)};
+        .m_dbData = std::move(dbData)};
   }
 
   bool operator==(const WatchmanAutoloadMapKey& rhs) const noexcept {
     return m_root == rhs.m_root && m_queryExpr == rhs.m_queryExpr &&
-           m_dbPath == rhs.m_dbPath && m_trustedDBPath == rhs.m_trustedDBPath;
+           m_dbData == rhs.m_dbData;
   }
 
   std::string toString() const {
     return folly::sformat(
-        "WatchmanAutoloadMapKey({}, {}, {}, {})",
+        "WatchmanAutoloadMapKey({}, {}, {})",
         m_root.native(),
         folly::toJson(m_queryExpr),
-        m_dbPath.native(),
-        m_trustedDBPath.native());
+        m_dbData.toString());
   }
 
   strhash_t hash() const noexcept {
     return folly::hash::hash_combine(
         hash_string_view_cs(m_root.native()),
         m_queryExpr.hash(),
-        hash_string_view_cs(m_dbPath.native()),
-        hash_string_view_cs(m_trustedDBPath.native()));
+        m_dbData.hash());
   }
 
   /**
@@ -201,13 +242,13 @@ struct WatchmanAutoloadMapKey {
    * 2. Read an existing database file somewhere
    */
   bool isAutoloadableRepo() const {
-    return m_queryExpr.isObject() || !m_trustedDBPath.empty();
+    return m_queryExpr.isObject() ||
+           m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly;
   }
 
   folly::fs::path m_root;
   folly::dynamic m_queryExpr;
-  folly::fs::path m_dbPath;
-  folly::fs::path m_trustedDBPath;
+  DBData m_dbData;
 };
 
 } // namespace
@@ -367,7 +408,7 @@ struct Facts final : Extension {
     }
 
     if (RuntimeOption::AutoloadDBPath.empty()) {
-      FTRACE(1, "Autoload.DBPath was empty, not enabling native autoloader.\n");
+      FTRACE(1, "Autoload.DB.Path was empty, not enabling native autoloader.\n");
       return;
     }
 
@@ -495,25 +536,30 @@ private:
 FactsStore*
 WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
 
-  WatchmanAutoloadMapKey mapKey;
-  try {
-    mapKey = WatchmanAutoloadMapKey::get(options);
-  } catch (const RepoOptionsParseExc& e) {
-    Logger::Warning("%s\n", e.what());
-    return nullptr;
-  }
+  auto mapKey = [&]() -> std::optional<WatchmanAutoloadMapKey> {
+    try {
+      auto mk = WatchmanAutoloadMapKey::get(options);
+      if (!mk.isAutoloadableRepo()) {
+        return std::nullopt;
+      }
+      return {std::move(mk)};
+    } catch (const RepoOptionsParseExc& e) {
+      Logger::Warning("%s\n", e.what());
+      return std::nullopt;
+    }
+  }();
 
-  if (!mapKey.isAutoloadableRepo()) {
+  if (!mapKey) {
     return nullptr;
   }
 
   std::unique_lock g{m_mutex};
 
   // Mark the fact that we've accessed the map
-  m_lastUsed.insert_or_assign(mapKey, std::chrono::steady_clock::now());
+  m_lastUsed.insert_or_assign(*mapKey, std::chrono::steady_clock::now());
 
   // Try to return a corresponding WatchmanAutoloadMap
-  auto const it = m_maps.find(mapKey);
+  auto const it = m_maps.find(*mapKey);
   if (it != m_maps.end()) {
     return it->second.get();
   }
@@ -523,32 +569,32 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
-  if (!mapKey.m_trustedDBPath.empty()) {
+  if (mapKey->m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly) {
     FTRACE(
         3,
         "Loading {} from trusted Autoload DB at {}\n",
-        mapKey.m_root.native(),
-        mapKey.m_trustedDBPath.native());
+        mapKey->m_root.native(),
+        mapKey->m_dbData.m_path.native());
     return m_maps
         .insert(
-            {mapKey,
+            {*mapKey,
              std::make_shared<WatchmanAutoloadMap>(
-                 mapKey.m_root, mapKey.m_trustedDBPath)})
+                 mapKey->m_root, mapKey->m_dbData)})
         .first->second.get();
   }
 
-  assertx(mapKey.m_queryExpr.isObject());
+  assertx(mapKey->m_queryExpr.isObject());
   auto map = std::make_shared<WatchmanAutoloadMap>(
-      mapKey.m_root,
-      mapKey.m_dbPath,
-      mapKey.m_queryExpr,
-      s_ext.getWatchmanClient(mapKey.m_root));
+      mapKey->m_root,
+      mapKey->m_dbData,
+      mapKey->m_queryExpr,
+      s_ext.getWatchmanClient(mapKey->m_root));
 
   if (RuntimeOption::ServerExecutionMode()) {
     map->subscribe();
   }
 
-  return m_maps.insert({mapKey, std::move(map)}).first->second.get();
+  return m_maps.insert({*mapKey, std::move(map)}).first->second.get();
 }
 
 void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
@@ -628,20 +674,12 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   FTRACE(3, "Got options at {}\n", optionPath.native());
   auto const& repoOptions = RepoOptions::forFile(optionPath.native().c_str());
 
-  Facts::WatchmanAutoloadMapKey mapKey;
   try {
-    mapKey = Facts::WatchmanAutoloadMapKey::get(repoOptions);
+    return Variant{Facts::WatchmanAutoloadMapKey::get(repoOptions)
+                       .m_dbData.m_path.native()};
   } catch (const Facts::RepoOptionsParseExc& e) {
     throw_invalid_operation_exception(makeStaticString(e.what()));
   }
-
-  // Return the Autoload.TrustedDBPath setting if present
-  if (!mapKey.m_trustedDBPath.empty()) {
-    return Variant{mapKey.m_trustedDBPath.native()};
-  }
-
-  // Otherwise return the calculated DB path
-  return Variant{mapKey.m_dbPath.native()};
 }
 
 Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {

@@ -481,22 +481,21 @@ Array makeDictOfStringToString(PairContainer&& vector) {
 
 WatchmanAutoloadMap::WatchmanAutoloadMap(
     folly::fs::path root,
-    folly::fs::path dbPath,
+    DBData dbData,
     folly::dynamic queryExpr,
     Watchman& watchmanClient)
     : m_updateExec{1, make_thread_factory("Autoload update")}
     , m_root{std::move(root)}
-    , m_map{m_root, std::move(dbPath)}
+    , m_map{m_root, std::move(dbData)}
     , m_watchmanData{
           {.m_queryExpr = getQuery(std::move(queryExpr)),
            .m_watchmanClient = watchmanClient}} {
 }
 
-WatchmanAutoloadMap::WatchmanAutoloadMap(
-    folly::fs::path root, folly::fs::path dbPath)
+WatchmanAutoloadMap::WatchmanAutoloadMap(folly::fs::path root, DBData dbData)
     : m_updateExec{1, make_thread_factory("Autoload update")}
     , m_root{std::move(root)}
-    , m_map{m_root, std::move(dbPath), SQLite::OpenMode::ReadOnly} {
+    , m_map{m_root, std::move(dbData)} {
 }
 
 WatchmanAutoloadMap::~WatchmanAutoloadMap() {
@@ -603,6 +602,9 @@ folly::Future<folly::Unit> WatchmanAutoloadMap::updateImpl() {
                   "Got a watchman error: {}\n", folly::toJson(result))};
             }
 
+            // isFresh means we either didn't pass Watchman a "since" token,
+            // or it means that Watchman has restarted after the point in time
+            // that our "since" token represents.
             bool isFresh = [&]() {
               auto const& fresh = result["is_fresh_instance"];
               return fresh.isBool() && fresh.asBool();
@@ -611,12 +613,11 @@ folly::Future<folly::Unit> WatchmanAutoloadMap::updateImpl() {
             auto [alteredPathsAndHashes, deletedPaths] =
                 isFresh ? getFreshDelta(result) : getIncrementalDelta(result);
 
-            // In CLI standalone mode, empty updates to the SQLite DB
-            // can cause unacceptably slow "hello world" performance.
-            if (!RuntimeOption::ServerExecutionMode() && LIKELY(!isFresh) &&
-                LIKELY(alteredPathsAndHashes.empty()) &&
+            // We need to update the DB if Watchman has restarted or if
+            // something's changed on the filesystem. Otherwise, there's no
+            // need to update the DB.
+            if (LIKELY(!isFresh) && LIKELY(alteredPathsAndHashes.empty()) &&
                 LIKELY(deletedPaths.empty())) {
-              FTRACE(3, "CLI standalone mode, bailing early.\n");
               return;
             }
 

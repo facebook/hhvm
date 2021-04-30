@@ -128,7 +128,9 @@ protected:
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap<std::string>>(
-            std::move(root), std::move(dbPath)),
+            std::move(root),
+            DBData::readWrite(
+                std::move(dbPath), static_cast<::gid_t>(-1), 0644)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
   }

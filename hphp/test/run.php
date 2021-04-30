@@ -891,7 +891,7 @@ function hhvm_cmd_impl(
     ];
 
     if ($autoload_db_prefix !== null) {
-      $args[] = '-vAutoload.DBPath='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      $args[] = '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
     }
 
     if (isset($options['hackc'])) {
@@ -3441,7 +3441,7 @@ function start_server_proc($options, $config, $port) {
   $command = hhvm_cmd_impl(
     $options,
     $config,
-    null, // we do not pass Autoload.DBPath to the server process
+    null, // we do not pass Autoload.DB.Path to the server process
     '-m', 'server',
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",

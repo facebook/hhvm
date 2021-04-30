@@ -83,14 +83,13 @@ getPathSymMap(typename SymbolMap<S>::Data& data) {
 
 template <typename S>
 SymbolMap<S>::SymbolMap(
-    folly::fs::path root, folly::fs::path dbPath, SQLite::OpenMode dbMode)
+    folly::fs::path root, DBData dbData, SQLite::OpenMode dbMode)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
-    , m_dbPath{std::move(dbPath)}
+    , m_dbData{std::move(dbData)}
     , m_dbMode{dbMode} {
   assertx(m_root.is_absolute());
-  assertx(m_dbPath.is_absolute());
 }
 
 template <typename S> SymbolMap<S>::~SymbolMap() {
@@ -875,14 +874,17 @@ void SymbolMap<S>::updateDB(
     try {
       auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
       FTRACE_MOD(
-          Trace::facts, 2, "Running ANALYZE on {}...\n", m_dbPath.native());
+          Trace::facts,
+          2,
+          "Running ANALYZE on {}...\n",
+          m_dbData.m_path.native());
       db.analyze();
       auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
       FTRACE_MOD(
           Trace::facts,
           2,
           "Finished ANALYZE on {} in {:.3} seconds.\n",
-          m_dbPath.native(),
+          m_dbData.m_path.native(),
           static_cast<double>(
               std::chrono::duration_cast<std::chrono::milliseconds>(tf - t0)
                   .count()) /
@@ -892,14 +894,14 @@ void SymbolMap<S>::updateDB(
           Trace::facts,
           1,
           "Error while running ANALYZE on {}: {}\n",
-          m_dbPath.native(),
+          m_dbData.m_path.native(),
           e.what());
     } catch (std::exception& e) {
       FTRACE_MOD(
           Trace::facts,
           1,
           "Error while running ANALYZE on {}: {}\n",
-          m_dbPath.native(),
+          m_dbData.m_path.native(),
           e.what());
     }
   }
@@ -1176,7 +1178,7 @@ template <typename S> void SymbolMap<S>::waitForDBUpdate() {
 }
 
 template <typename S> AutoloadDB& SymbolMap<S>::getDB() const {
-  return HPHP::Facts::getDB(m_dbPath, m_dbMode);
+  return HPHP::Facts::getDB(m_dbData);
 }
 
 } // namespace Facts

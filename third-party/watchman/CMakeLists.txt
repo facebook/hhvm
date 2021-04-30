@@ -38,7 +38,10 @@ ExternalProject_Add(
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
   EXCLUDE_FROM_ALL
 )
-add_dependencies(bundled_watchman folly boost fmt jemalloc double-conversion)
+
+add_library(watchman_deps INTERFACE)
+target_link_libraries(watchman_deps INTERFACE folly boost fmt jemalloc double-conversion)
+add_dependencies(bundled_watchman watchman_deps)
 
 find_package(libWatchmanClient)
 if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARIES)
@@ -52,5 +55,6 @@ else()
     libwatchmanclient
     INTERFACE
     "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}watchmanclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    watchman_deps
   )
 endif()

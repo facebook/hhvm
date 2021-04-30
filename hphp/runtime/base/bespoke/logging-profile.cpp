@@ -268,6 +268,7 @@ LoggingProfile::LoggingProfile(LoggingProfileKey key, jit::ArrayLayout layout)
   , layout(layout)
   , staticBespokeArray(nullptr)
 {
+  assertx(!s_profiling.load(std::memory_order_acquire));
   if (layout.vanilla()) return;
   if (auto const ad = getStaticArray(key)) {
     setStaticBespokeArray(BespokeArray::asBespoke(layout.apply(ad)));
@@ -277,7 +278,6 @@ LoggingProfile::LoggingProfile(LoggingProfileKey key, jit::ArrayLayout layout)
 double LoggingProfile::getSampleCountMultiplier() const {
   assertx(data);
   if (data->loggingArraysEmitted == 0) return 0;
-
   return data->sampleCount / (double) data->loggingArraysEmitted;
 }
 
@@ -285,7 +285,6 @@ uint64_t LoggingProfile::getTotalEvents() const {
   assertx(data);
   size_t total = 0;
   for (auto const& event : data->events) total += event.second;
-
   return total;
 }
 
@@ -397,7 +396,9 @@ SinkProfile::SinkProfile(SinkProfileKey key)
 SinkProfile::SinkProfile(SinkProfileKey key, jit::ArrayLayout layout)
   : key(key)
   , layout(layout)
-{}
+{
+  assertx(!s_profiling.load(std::memory_order_acquire));
+}
 
 jit::ArrayLayout SinkProfile::getLayout() const {
   return layout.load(std::memory_order_acquire);
@@ -942,13 +943,9 @@ void stopProfiling() {
 
 namespace {
 void freeProfileData() {
-  if (shouldTestBespokeArrayLikes()) {
-    // When testing bespoke array-likes, we use the data struct to cache
-    // logging and monotype arrays. Therefore, we do not free them after layout
-    // selection.
-    return;
-  }
-
+  // When testing bespoke array-likes, we cache logging and monotype arrays
+  // in LoggingProfileData, so we do not free them after layout selection.
+  if (shouldTestBespokeArrayLikes()) return;
   eachSource([](auto& x) { x.releaseData(); });
   eachSink([](auto& x) { x.releaseData(); });
 }
@@ -986,12 +983,8 @@ void waitOnExportProfiles() {
 
 namespace {
 void freeStaticArray(ArrayData* ad) {
-  // TODO(T80237666): Make this code less fragile by moving this logic next
-  // to the corresponding allocation logic in HashTable::staticAlloc().
   assertx(ad->isStatic());
-  auto const extra = ad->hasStrKeyTable()
-    ? (sizeof(StrKeyTable) + 15) & ~15ull
-    : 0;
+  auto const extra = uncountedAllocExtra(ad, /*apc_tv=*/false);
   auto const alloc = reinterpret_cast<char*>(ad) - extra;
   RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
 }
@@ -1013,11 +1006,14 @@ bool shouldLogAtSrcKey(SrcKey sk) {
 }
 
 LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
+  assertx(key.checkInvariants());
   assertx(allowBespokeArrayLikes());
-  {
+  auto const existing = [&]{
     ProfileMap::const_accessor it;
-    if (s_profileMap.find(it, key)) return it->second;
-  }
+    return s_profileMap.find(it, key) ? it->second : nullptr;
+  }();
+  assertx(IMPLIES(existing, existing->key == key));
+  if (existing) return existing;
 
   // Hold the read mutex for the duration of the mutation so that export
   // cannot begin until the mutation is complete.
@@ -1050,6 +1046,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
       MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
     }
   }
+
+  assertx(result->key == key);
   return result;
 }
 }
@@ -1077,10 +1075,12 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot) {
 SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
   assertx(allowBespokeArrayLikes());
   auto const key = SinkProfileKey { id, canonicalize(skRaw) };
-  {
+  auto const existing = [&]{
     SinkMap::const_accessor it;
-    if (s_sinkMap.find(it, key)) return it->second;
-  }
+    return s_sinkMap.find(it, key) ? it->second : nullptr;
+  }();
+  assertx(IMPLIES(existing, existing->key == key));
+  if (existing) return existing;
 
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
@@ -1098,6 +1098,7 @@ SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
   }();
 
   // Don't hold the lock while we free profile.
+  assertx(result->key == key);
   return result;
 }
 
@@ -1120,15 +1121,22 @@ SrcKey getSrcKey() {
 
 void eachSource(std::function<void(LoggingProfile& profile)> fn) {
   assertx(!s_profiling.load(std::memory_order_acquire));
-  for (auto& it : s_profileMap) fn(*it.second);
+  for (auto& it : s_profileMap) {
+    assertx(it.first == it.second->key);
+    fn(*it.second);
+  }
 }
 
 void eachSink(std::function<void(SinkProfile& profile)> fn) {
   assertx(!s_profiling.load(std::memory_order_acquire));
-  for (auto& it : s_sinkMap) fn(*it.second);
+  for (auto& it : s_sinkMap) {
+    assertx(it.first == it.second->key);
+    fn(*it.second);
+  }
 }
 
 void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
+  assertx(key.checkInvariants());
   ProfileMap::accessor insert;
   always_assert(s_profileMap.insert(insert, key));
   insert->second = new LoggingProfile(key, layout);

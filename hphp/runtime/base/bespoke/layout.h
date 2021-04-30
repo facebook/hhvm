@@ -320,6 +320,15 @@ struct Layout {
   LayoutTest getLayoutTest() const;
 
   /*
+   * Coerce a vanilla array to have this layout. Returns nullptr on failure.
+   * This method is PRc. It does not consume a refcount on the input.
+   *
+   * This method does not work on LoggingLayout. Use one of the LoggingArray
+   * constructors directly, providing a profile, to make a LoggingArray.
+   */
+  BespokeArray* coerce(ArrayData* ad) const;
+
+  /*
    * Access to individual layouts, or debug access to all of them.
    */
   static const Layout* FromIndex(LayoutIndex index);

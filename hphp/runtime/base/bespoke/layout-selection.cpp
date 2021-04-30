@@ -172,11 +172,17 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // include casts here because non-trivial casts (from vec/varray/keyset
   // dict/darray) will rarely produce useful struct-like arrays.
   auto const type_okay = [&]{
-    auto const vad = profile.data->staticSampledArray;
-    if (vad != nullptr && vad->isDictType()) return true;
-    if (profile.key.isRuntimeLocation()) return true;
-    auto const op = profile.key.op();
-    return op == OpNewDictArray || op == OpNewStructDict;
+    switch (profile.key.locationType) {
+      case LocationType::Runtime:
+        return true;
+      case LocationType::Property:
+      case LocationType::SrcKey:
+        auto const vad = profile.data->staticSampledArray;
+        if (vad != nullptr && vad->isDictType()) return true;
+        auto const op = profile.key.op();
+        return op == OpNewDictArray || op == OpNewStructDict;
+    }
+    always_assert(false);
   }();
 
   // Add a node for this source to our union-find table if the type matches

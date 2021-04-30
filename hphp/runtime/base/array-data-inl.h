@@ -137,7 +137,6 @@ inline bool ArrayData::isSampledArray() const {
 }
 
 inline void ArrayData::setSampledArrayInPlace() {
-  assertx(hasExactlyOneRef());
   m_aux16 |= ArrayData::kSampledArray;
 }
 

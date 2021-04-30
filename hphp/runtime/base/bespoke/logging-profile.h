@@ -111,6 +111,16 @@ struct LoggingProfileKey {
     , locationType(LocationType::Runtime)
   {}
 
+  bool operator==(const LoggingProfileKey& o) const {
+    return locationType == o.locationType && ptr == o.ptr && slot == o.slot;
+  }
+
+  bool checkInvariants() const {
+    DEBUG_ONLY auto const prop = locationType == LocationType::Property;
+    assertx(prop == (slot != kInvalidSlot));
+    return true;
+  }
+
   bool isRuntimeLocation() const {
     return locationType == LocationType::Runtime;
   }
@@ -148,7 +158,7 @@ struct LoggingProfileKey {
       case LocationType::Property:
         return folly::sformat("NewObjD \"{}\"", cls->name());
       case LocationType::Runtime:
-        return runtimeStruct->toString()->toCppString();
+        return toString();
     }
     always_assert(false);
   }
@@ -171,7 +181,8 @@ struct LoggingProfileKey {
     RuntimeStruct* runtimeStruct;
     uintptr_t ptr;
   };
-  // The logical slot of a property on cls, or kInvalidSlot if sk is set.
+
+  // The logical slot of a property on cls. kInvalidSlot for other types.
   Slot slot;
   LocationType locationType;
 };
@@ -181,7 +192,7 @@ struct LoggingProfileKey::TbbHashCompare {
     return folly::hash::hash_combine(hash_int64(key.ptr), key.slot, key.locationType);
   }
   static bool equal(const LoggingProfileKey& a, const LoggingProfileKey& b) {
-    return a.ptr == b.ptr && a.slot == b.slot && a.locationType == b.locationType;
+    return a == b;
   }
 };
 
@@ -248,7 +259,7 @@ private:
   void logEventImpl(const EventKey& key);
 
 public:
-  LoggingProfileKey key;
+  const LoggingProfileKey key;
   std::unique_ptr<LoggingProfileData> data;
 
 private:
@@ -296,7 +307,7 @@ struct SinkProfile {
   void releaseData() { data.reset(); }
 
 public:
-  SinkProfileKey key;
+  const SinkProfileKey key;
   std::unique_ptr<SinkProfileData> data;
 
 private:

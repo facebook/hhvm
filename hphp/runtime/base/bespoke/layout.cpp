@@ -120,6 +120,18 @@ Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents,
   assertx(checkInvariants());
 }
 
+BespokeArray* Layout::coerce(ArrayData* ad) const {
+  assertx(ad->isVanilla());
+  auto const layout = ArrayLayout(this);
+
+  if (layout.monotype()) {
+    return maybeMonoify(ad);
+  } else if (layout.is_struct()) {
+    return StructDict::MakeFromVanilla(ad, StructLayout::As(this));
+  }
+  always_assert(false);
+}
+
 /*
  * A BFS implementation used to traverse the bespoke type lattice.
  */
@@ -383,8 +395,6 @@ std::string Layout::dumpInformation() const {
 }
 
 LayoutTest Layout::computeLayoutTest() const {
-  FTRACE_MOD(Trace::bespoke, 1, "Try: {}\n", describe());
-
   // The set of all concrete layouts that descend from the layout.
   std::vector<uint16_t> liveVec;
   for(auto const layout : m_descendants) {

@@ -383,16 +383,21 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
 
 void StructDict::ConvertToUncounted(
     StructDict* sad, const MakeUncountedEnv& env) {
-  for (Slot i = 0; i < sad->numFields(); i++) {
-    auto const lval = tv_lval(&sad->rawTypes()[i], &sad->rawValues()[i]);
+  auto const size = sad->size();
+  auto const types = sad->rawTypes();
+  auto const values = sad->rawValues();
+  for (auto pos = 0; pos < size; pos++) {
+    auto const slot = sad->getSlotInPos(pos);
+    auto const lval = tv_lval { &types[slot], &values[slot] };
     ConvertTvToUncounted(lval, env);
   }
 }
 
 void StructDict::ReleaseUncounted(StructDict* sad) {
-  for (Slot i = 0; i < sad->numFields(); i++) {
-    auto const tv = sad->typedValueUnchecked(i);
-    DecRefUncounted(tv);
+  auto const size = sad->size();
+  for (auto pos = 0; pos < size; pos++) {
+    auto const slot = sad->getSlotInPos(pos);
+    DecRefUncounted(sad->typedValueUnchecked(slot));
   }
 }
 

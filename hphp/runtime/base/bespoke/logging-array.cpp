@@ -32,8 +32,6 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include <tbb/concurrent_hash_map.h>
-
 #include <algorithm>
 #include <atomic>
 
@@ -100,6 +98,7 @@ ArrayData* makeSampledArray(ArrayData* vad) {
     if (vad->isVanillaDict())  return MixedArray::Copy(vad);
     return SetArray::Copy(vad);
   }();
+  assertx(result->hasExactlyOneRef());
   result->setSampledArrayInPlace();
   return result;
 }
@@ -234,7 +233,8 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
   assertx(ad->isVanilla());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
-  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());
+  auto const aux = ad->isLegacyArray() ? kLegacyArray : 0;
+  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, aux);
   lad->m_size = ad->size();
   lad->setLayoutIndex(kLayoutIndex);
   lad->wrapped = ad;
@@ -252,7 +252,8 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   auto const size = sizeof(LoggingArray);
   auto lad = static_cast<LoggingArray*>(
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, ad->auxBits());
+  auto const aux = ad->isLegacyArray() ? kLegacyArray : 0;
+  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, aux);
   lad->m_size = ad->size();
   lad->setLayoutIndex(kLayoutIndex);
   lad->wrapped = ad;

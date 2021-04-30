@@ -177,7 +177,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
 APCHandle* APCArray::MakeUncountedArray(
     ArrayData* ad, DataWalker::PointerMap* seen) {
   assertx(apcExtension::UseUncounted);
-  auto const env = MakeUncountedEnv { seen, /*allowBespokes=*/false };
+  auto const env = MakeUncountedEnv { seen };
   auto const data = ::HPHP::MakeUncountedArray(ad, env, true);
   return APCTypedValue::ForArray(data)->getHandle();
 }

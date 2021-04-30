@@ -25,16 +25,11 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 
 /*
- * Global parameters for ConvertTvToUncounted and related methods.
- *
- *  - If `seen` is provided, we'll use it to de-dupe new uncounted arrays.
- *
- *  - If `allowBespokes` is false, the result will be (recursively) composed
- *    of vanilla arrays - no bespoke array will be reachable from it.
+ * Global parameters for ConvertTvToUncounted and friends. Only one for now.
+ * If `seen` is provided, we'll use it to de-dupe new uncounted arrays.
  */
 struct MakeUncountedEnv {
   DataWalker::PointerMap* seen;
-  bool allowBespokes;
 };
 
 /*

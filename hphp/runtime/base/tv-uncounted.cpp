@@ -157,7 +157,7 @@ ArrayData* MakeUncountedArray(
     }
   }
 
-  if (env.allowBespokes || in->isVanilla()) {
+  if (in->isVanilla()) {
     if (in->persistentIncRef()) return in;
     return MakeUncountedArrayWithoutEscalation(in, env, hasApcTv);
   }

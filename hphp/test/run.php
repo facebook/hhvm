@@ -940,6 +940,7 @@ function hhvm_cmd_impl(
 
     if (isset($options['bespoke'])) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
+      $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
 
     if (!isset($options['repo'])) {

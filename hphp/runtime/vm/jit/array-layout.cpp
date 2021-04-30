@@ -215,12 +215,7 @@ ArrayData* ArrayLayout::apply(ArrayData* ad) const {
 
   auto const result = [&]() -> ArrayData* {
     if (vanilla() || logging()) return ad;
-    if (monotype()) return bespoke::maybeMonoify(ad);
-    if (is_struct()) {
-      auto const layout = bespoke::StructLayout::As(bespokeLayout());
-      return bespoke::StructDict::MakeFromVanilla(ad, layout);
-    }
-    return nullptr;
+    return bespokeLayout()->coerce(ad);
   }();
 
   SCOPE_ASSERT_DETAIL("ArrayLayout::apply") { return describe(); };
@@ -298,12 +293,13 @@ void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
       write_srckey(ser, key.sk);
       break;
     case bespoke::LocationType::Property:
-      write_raw(ser, key.slot);
       write_class(ser, key.cls);
+      write_raw(ser, key.slot);
       break;
     case bespoke::LocationType::Runtime:
       write_string(ser, key.runtimeStruct->getStableIdentifier());
       break;
+    default: always_assert(false);
   }
 }
 
@@ -313,18 +309,17 @@ LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
   switch (key.locationType) {
     case bespoke::LocationType::SrcKey:
       key.sk = read_srckey(des);
-      key.slot = kInvalidSlot;
       break;
     case bespoke::LocationType::Property:
-      read_raw(des, key.slot);
       key.cls = read_class(des);
+      read_raw(des, key.slot);
       break;
     case bespoke::LocationType::Runtime: {
       auto const stableIdentifier = read_string(des);
       key.runtimeStruct = RuntimeStruct::findById(stableIdentifier);
-      key.slot = kInvalidSlot;
       break;
     }
+    default: always_assert(false);
   }
   return key;
 }
@@ -402,7 +397,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
     write_key_order(ser, layout->keyOrder());
   }
 
-  // Serialize the runtime sources
+  // Serialize the runtime sources.
   std::vector<const RuntimeStruct*> runtimeStructs;
   RuntimeStruct::eachRuntimeStruct([&](RuntimeStruct* runtimeStruct) {
     runtimeStructs.push_back(runtimeStruct);
@@ -426,7 +421,12 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
 }
 
 void deserializeBespokeLayouts(ProfDataDeserializer& des) {
+  always_assert(bespoke::countSources() == 0);
+  always_assert(bespoke::countSinks() == 0);
   bespoke::setLoggingEnabled(false);
+  always_assert(bespoke::countSources() == 0);
+  always_assert(bespoke::countSinks() == 0);
+
   auto const layouts = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
@@ -438,13 +438,17 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   }
   auto const sources = read_raw<size_t>(des);
   for (auto i = 0; i < sources; i++) {
+    assertx(bespoke::countSources() == i);
     auto const key = read_source_key(des);
     bespoke::deserializeSource(key, read_layout(des));
+    assertx(bespoke::countSources() == i + 1);
   }
   auto const sinks = read_raw<size_t>(des);
   for (auto i = 0; i < sinks; i++) {
+    assertx(bespoke::countSinks() == i);
     auto const key = read_sink_key(des);
     bespoke::deserializeSink(key, read_layout(des));
+    assertx(bespoke::countSinks() == i + 1);
   }
   bespoke::Layout::FinalizeHierarchy();
 }

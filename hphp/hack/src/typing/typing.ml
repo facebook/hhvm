@@ -561,20 +561,38 @@ let as_expr env ty1 pe e =
   let rec distribute_union env ty =
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
-    | Tunion tyl -> List.fold tyl ~init:env ~f:distribute_union
+    | Tunion tyl ->
+      let (env, errs) =
+        List.fold tyl ~init:(env, []) ~f:(fun (env, errs) ty ->
+            let (env, err) = distribute_union env ty in
+            (env, err :: errs))
+      in
+      (env, union_coercion_errs errs)
     | _ ->
       if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
       then
         let env = SubType.sub_type env ty tk (Errors.unify_error_at pe) in
         let env = SubType.sub_type env ty tv (Errors.unify_error_at pe) in
-        env
+        (env, Ok ty)
       else
         let ur = Reason.URforeach in
-        Type.sub_type pe ur env ty expected_ty Errors.unify_error
+        let (env, err) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok ty))
+            ~error:(fun env -> (env, Error (ty, expected_ty)))
+          @@ Type.sub_type_res pe ur env ty expected_ty Errors.unify_error
+        in
+        (env, err)
   in
-  let env = distribute_union env ty1 in
+
+  let (env, err_res) = distribute_union env ty1 in
+  let err_opt =
+    match err_res with
+    | Ok _ -> None
+    | Error (act, exp) -> Some (act, exp)
+  in
   let env = Env.set_tyvar_variance env expected_ty in
-  (Typing_solver.close_tyvars_and_solve env, tk, tv)
+  (Typing_solver.close_tyvars_and_solve env, tk, tv, err_opt)
 
 (* These functions invoke special printing functions for Typing_env. They do not
  * appear in user code, but we still check top level function calls against their
@@ -2035,7 +2053,7 @@ and stmt_ env pos st =
     let (env, (te1, te2, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-          let (env, tk, tv) = as_expr env ty1 (fst e1) e2 in
+          let (env, tk, tv, err_opt) = as_expr env ty1 (fst e1) e2 in
           let (env, (te2, tb)) =
             infer_loop env (fun env ->
                 let env =
@@ -2051,7 +2069,7 @@ and stmt_ env pos st =
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
           in
-          (env, (te1, te2, tb)))
+          (env, (hole_on_err ~err_opt te1, te2, tb)))
     in
     (env, Aast.Foreach (te1, te2, tb))
   | Try (tb, cl, fb) ->

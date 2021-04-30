@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<17f694300f9b55748a3e0b2d55c0f209>>
+// @generated SignedSource<<448d9811506105bf9b3fce66197f4675>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -514,7 +514,7 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::Fb, P::En, P::Hi> {
         self.xhp_category.accept(c, v)?;
         self.reqs.accept(c, v)?;
         self.implements.accept(c, v)?;
-        self.implements_dynamic.accept(c, v)?;
+        self.support_dynamic_type.accept(c, v)?;
         self.where_constraints.accept(c, v)?;
         self.consts.accept(c, v)?;
         self.typeconsts.accept(c, v)?;

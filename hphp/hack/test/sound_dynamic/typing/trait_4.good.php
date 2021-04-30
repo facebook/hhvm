@@ -3,7 +3,7 @@
 
 class Box<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   use T;
 }
@@ -13,7 +13,7 @@ trait T {
     return $x;
   }
 
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function bar(Box<int> $x) : Box<int> {
     return $x;
   }

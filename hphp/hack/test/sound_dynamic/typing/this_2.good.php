@@ -5,7 +5,7 @@ class C<T> {}
 
 class E {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class D {
   public function bar(E $x) : int { return 1; }
 

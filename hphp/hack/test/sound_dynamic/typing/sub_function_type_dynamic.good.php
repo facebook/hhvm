@@ -3,7 +3,7 @@
 
 function expectDyn(dynamic $_):void { }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C { }
 
 function test1(

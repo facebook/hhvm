@@ -2,7 +2,7 @@
 
 class A<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 function foo() : A<int> {
   return new A<int>();
 }

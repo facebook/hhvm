@@ -4,7 +4,7 @@
 // A class that implements an interface that extends dynamic,
 // must itself implements dynamic
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 interface I {}
 
 class D implements I {}

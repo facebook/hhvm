@@ -98,7 +98,7 @@ type fun_elt = {
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
-  fe_sound_dynamic_callable: bool;
+  fe_support_dynamic_type: bool;
 }
 [@@deriving show]
 
@@ -175,7 +175,8 @@ and class_type = {
   tc_ancestors: decl_ty SMap.t;
       (** This includes all the classes, interfaces and traits this class is
        * using. *)
-  tc_implements_dynamic: bool;  (** Whether the class is coercible to dynamic *)
+  tc_support_dynamic_type: bool;
+      (** Whether the class is coercible to dynamic *)
   tc_req_ancestors: requirement list;
   tc_req_ancestors_extends: SSet.t;  (** the extends of req_ancestors *)
   tc_extends: SSet.t;
@@ -1223,8 +1224,8 @@ let get_ce_readonly_prop ce = is_set ce_flags_readonly_prop ce.ce_flags
 let get_ce_dynamicallycallable ce =
   is_set ce_flags_dynamicallycallable ce.ce_flags
 
-let get_ce_sound_dynamic_callable ce =
-  is_set ce_flags_sound_dynamic_callable ce.ce_flags
+let get_ce_support_dynamic_type ce =
+  is_set ce_flags_support_dynamic_type ce.ce_flags
 
 let xhp_attr_to_ce_flags xa =
   match xa with
@@ -1271,7 +1272,7 @@ let make_ce_flags
     ~lateinit
     ~dynamicallycallable
     ~readonly_prop
-    ~sound_dynamic_callable =
+    ~support_dynamic_type =
   let flags = 0 in
   let flags = set_bit ce_flags_abstract abstract flags in
   let flags = set_bit ce_flags_final final flags in
@@ -1284,7 +1285,7 @@ let make_ce_flags
   let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
   let flags = set_bit ce_flags_readonly_prop readonly_prop flags in
   let flags =
-    set_bit ce_flags_sound_dynamic_callable sound_dynamic_callable flags
+    set_bit ce_flags_support_dynamic_type support_dynamic_type flags
   in
   flags
 

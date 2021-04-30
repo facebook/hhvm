@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<87104f1c7c96a5c2c4b4dad6da2ca6b3>>
+// @generated SignedSource<<021bd5849e4f5d71de275ccb1e6e2487>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -147,7 +147,7 @@ pub struct FunElt<'a> {
     pub type_: &'a Ty<'a>,
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub php_std_lib: bool,
-    pub sound_dynamic_callable: bool,
+    pub support_dynamic_type: bool,
 }
 impl<'a> TrivialDrop for FunElt<'a> {}
 
@@ -293,7 +293,7 @@ pub struct ClassType<'a> {
     /// using.
     pub ancestors: s_map::SMap<'a, &'a Ty<'a>>,
     /// Whether the class is coercible to dynamic
-    pub implements_dynamic: bool,
+    pub support_dynamic_type: bool,
     pub req_ancestors: &'a [&'a Requirement<'a>],
     /// the extends of req_ancestors
     pub req_ancestors_extends: s_set::SSet<'a>,

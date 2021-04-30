@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff9a350e4e595b5ed7cd4246390d9f6c>>
+// @generated SignedSource<<a564a54b8068998e44e982907d496a83>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -418,7 +418,7 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyA
                 xhp_category: ref __binding_14,
                 reqs: ref __binding_15,
                 implements: ref __binding_16,
-                implements_dynamic: ref __binding_17,
+                support_dynamic_type: ref __binding_17,
                 where_constraints: ref __binding_18,
                 consts: ref __binding_19,
                 typeconsts: ref __binding_20,

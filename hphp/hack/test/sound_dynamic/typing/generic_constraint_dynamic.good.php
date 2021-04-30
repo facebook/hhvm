@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C<T as dynamic> {
   public function __construct(private T $item) { }
   public function get():T {

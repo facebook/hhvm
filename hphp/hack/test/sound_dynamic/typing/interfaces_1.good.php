@@ -6,8 +6,8 @@
 
 interface I1 {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 interface I2 {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class D implements I1, I2 {}

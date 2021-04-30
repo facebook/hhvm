@@ -1586,7 +1586,7 @@ val ifc_policy_mismatch :
   error_from_reasons_callback ->
   unit
 
-val parent_implements_dynamic :
+val parent_support_dynamic_type :
   Pos.t ->
   string * Ast_defs.class_kind ->
   string * Ast_defs.class_kind ->

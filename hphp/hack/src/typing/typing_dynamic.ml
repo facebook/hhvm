@@ -83,7 +83,7 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
 
 let build_dyn_fun_ty ft_ty =
   let make_dynamic pos =
-    Typing_make_type.dynamic (Reason.Rsound_dynamic_callable pos)
+    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
   in
   let make_dyn_fun_param fp =
     {

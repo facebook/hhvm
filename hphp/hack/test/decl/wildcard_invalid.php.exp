@@ -26,7 +26,7 @@
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-13]; fe_php_std_lib = false;
-       fe_sound_dynamic_callable = false }));
+       fe_support_dynamic_type = false }));
   ("\\bar",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -55,7 +55,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [6:10-13]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -64,7 +64,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([10:41-45], "foo");
            sp_xhp_attr = None; sp_type = (Some (Rhint ([10:39-40]), Terr));

@@ -1,6 +1,6 @@
 <?hh
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {}
 
 function f (dynamic $d) : dynamic {

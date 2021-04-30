@@ -10,7 +10,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
@@ -34,7 +34,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:12-16]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -43,7 +43,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = [];
         sc_user_attributes =

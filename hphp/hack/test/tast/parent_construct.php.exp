@@ -1,49 +1,49 @@
 [(Class
-    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-      c_name = ([3:7-8], "\\B"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+      c_name = ([3:7-8], "\\B"); c_tparams = []; c_extends = []; c_uses = [];
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
-      [{ m_span = [4:3-41]; m_annotation = (); m_final = false; m_abstract = false; 
-         m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
+      [{ m_span = [4:3-41]; m_annotation = (); m_final = false; m_abstract = false;
+         m_static = false; m_readonly_this = false; m_visibility = Public;
+         m_name = ([4:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:35-37], num); param_type_hint = ((num), (Some ([4:31-34], (Hprim Tnum)))); 
-            param_is_variadic = false; param_pos = [4:35-37]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+         [{ param_annotation = ([4:35-37], num); param_type_hint = ((num), (Some ([4:31-34], (Hprim Tnum))));
+            param_is_variadic = false; param_pos = [4:35-37]; param_name = "$x";
+            param_expr = None; param_readonly = None; param_callconv = None;
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((void), (Some ([4:19-30], (Hprim Tvoid)))); m_external = false; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
+         m_ret = ((void), (Some ([4:19-30], (Hprim Tvoid)))); m_external = false;
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [6:1-10:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-       c_name = ([6:7-8], "\\A"); c_tparams = []; c_extends = [([6:17-18], (Happly (([6:17-18], "\\B"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+     { c_span = [6:1-10:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+       c_name = ([6:7-8], "\\A"); c_tparams = []; c_extends = [([6:17-18], (Happly (([6:17-18], "\\B"), [])))];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
        c_methods =
-       [{ m_span = [7:3-9:4]; m_annotation = (); m_final = false; m_abstract = false; 
-          m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([7:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
+       [{ m_span = [7:3-9:4]; m_annotation = (); m_final = false; m_abstract = false;
+          m_static = false; m_readonly_this = false; m_visibility = Public;
+          m_name = ([7:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
           m_variadic = FVnonVariadic;
           m_params =
-          [{ param_annotation = ([7:35-37], int); param_type_hint = ((int), (Some ([7:31-34], (Hprim Tint)))); 
-             param_is_variadic = false; param_pos = [7:35-37]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+          [{ param_annotation = ([7:35-37], int); param_type_hint = ((int), (Some ([7:31-34], (Hprim Tint))));
+             param_is_variadic = false; param_pos = [7:35-37]; param_name = "$x";
+             param_expr = None; param_readonly = None; param_callconv = None;
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -55,15 +55,15 @@
                   (Call ((([8:5-24], (function(num $x): void)), (Class_const ((([8:5-11], B), CIparent), ([8:13-24], "__construct")))), [], [(([8:25-27], int), (Lvar ([8:25-27], $x)))], None)))))
               ];
             fb_annotation = () };
-          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = ((void), (Some ([7:19-30], (Hprim Tvoid)))); m_external = false; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
+          m_ret = ((void), (Some ([7:19-30], (Hprim Tvoid)))); m_external = false;
           m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_doc_comment = None; c_emit_id = None })

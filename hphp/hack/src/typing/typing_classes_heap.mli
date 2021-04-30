@@ -97,7 +97,7 @@ module Api : sig
 
   val requires_ancestor : t -> string -> bool
 
-  val get_implements_dynamic : t -> bool
+  val get_support_dynamic_type : t -> bool
 
   val extends : t -> string -> bool
 

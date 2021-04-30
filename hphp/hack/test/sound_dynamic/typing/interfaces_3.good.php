@@ -3,7 +3,7 @@
 
 class Evil<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 interface I {
   public function foo(Evil<int> $x) : Evil<string>;
 }

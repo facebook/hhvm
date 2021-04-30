@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   // Legal, as we don't check signatures for private members
   private vec<int> $items;

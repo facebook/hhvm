@@ -561,7 +561,7 @@ let env_as_value env =
     in_case;
     in_expr_tree;
     inside_constructor;
-    in_sound_dynamic_callable_method_check;
+    in_support_dynamic_type_method_check;
     global_tpenv;
     log_levels = _;
     allow_wildcards;
@@ -583,8 +583,8 @@ let env_as_value env =
       ("in_case", bool_as_value in_case);
       ("in_expr_tree", bool_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
-      ( "in_sound_dynamic_callable_method_check",
-        bool_as_value in_sound_dynamic_callable_method_check );
+      ( "in_support_dynamic_type_method_check",
+        bool_as_value in_support_dynamic_type_method_check );
       ("global_tpenv", tpenv_as_value env global_tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",

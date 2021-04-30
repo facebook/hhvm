@@ -515,7 +515,7 @@ and class_decl
       dc_smethods = SMap.map fst static_methods;
       dc_construct = Tuple.T2.map_fst ~f:(Option.map ~f:fst) cstr;
       dc_ancestors = impl;
-      dc_implements_dynamic = c.sc_implements_dynamic;
+      dc_support_dynamic_type = c.sc_support_dynamic_type;
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;
@@ -629,7 +629,7 @@ and build_constructor
           ~override:false
           ~dynamicallycallable:false
           ~readonly_prop:false
-          ~sound_dynamic_callable:false;
+          ~support_dynamic_type:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
@@ -641,7 +641,7 @@ and build_constructor
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
       fe_php_std_lib = false;
-      fe_sound_dynamic_callable = false;
+      fe_support_dynamic_type = false;
     }
   in
   (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
@@ -710,7 +710,7 @@ and prop_decl
           ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~sound_dynamic_callable:false;
+          ~support_dynamic_type:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -748,7 +748,7 @@ and static_prop_decl
           ~synthesized:false
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~sound_dynamic_callable:false;
+          ~support_dynamic_type:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -858,7 +858,7 @@ and method_decl_acc
       parent_vis
     | _ -> visibility (snd c.sc_name) m.sm_visibility
   in
-  let sound_dynamic_callable = sm_sound_dynamic_callable m in
+  let support_dynamic_type = sm_support_dynamic_type m in
   let elt =
     {
       elt_flags =
@@ -873,7 +873,7 @@ and method_decl_acc
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
           ~readonly_prop:false
-          ~sound_dynamic_callable;
+          ~support_dynamic_type;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
@@ -885,7 +885,7 @@ and method_decl_acc
       fe_deprecated = None;
       fe_type = m.sm_type;
       fe_php_std_lib = false;
-      fe_sound_dynamic_callable = sound_dynamic_callable;
+      fe_support_dynamic_type = support_dynamic_type;
     }
   in
   ( if write_shmem then

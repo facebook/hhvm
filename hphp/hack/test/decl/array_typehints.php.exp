@@ -19,7 +19,7 @@
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
-       fe_sound_dynamic_callable = false }));
+       fe_support_dynamic_type = false }));
   ("\\v0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -38,7 +38,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-12]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\v1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -59,7 +59,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [11:10-12]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\d0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -81,7 +81,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:10-12]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\d2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -103,7 +103,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:10-12]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\vd0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -126,7 +126,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [23:10-13]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\vd1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -149,7 +149,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [27:10-13]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\vd2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -171,7 +171,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [31:10-13]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\vd3",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -189,7 +189,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-13]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }))
+        fe_support_dynamic_type = false }))
   ]
 
 They matched!

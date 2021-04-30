@@ -4,16 +4,16 @@
 class A<T> {}
 
 class C {
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function expect_A_int(A<int> $a) : void {}
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class D {
   public function expect_A_int(A<int> $a) : void {}
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Foo {
   public function foo(A<int> $a) : void {
     (new C())->expect_A_int($a);

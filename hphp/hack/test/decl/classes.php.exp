@@ -6,7 +6,7 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
-       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:17-34], "instanceProperty");
           sp_xhp_attr = None;
@@ -151,7 +151,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
@@ -163,7 +163,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
@@ -175,7 +175,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
@@ -187,7 +187,7 @@
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;

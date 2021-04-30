@@ -6,7 +6,7 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
-       sc_implements_dynamic = false; sc_consts = [];
+       sc_support_dynamic_type = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_name = ([5:14-15], "T");
           stc_kind =
@@ -72,7 +72,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = [];
+        sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_name = ([19:23-33], "TConstType");
            stc_kind =

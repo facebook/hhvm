@@ -3,4 +3,4 @@ Method  `bar` in class `C` is not dynamically callable. (Typing[4402])
   File "trait_1.bad.php", line 12, characters 19-21:
   Method `bar` is defined in the super class `T` and is not overridden
   File "trait_1.bad.php", line 7, characters 7-7:
-  A parameter of `bar` is not enforceable. Try adding the <<__SoundDynamicCallable>> attribute to the method to check if its code is safe for dynamic calling.
+  A parameter of `bar` is not enforceable. Try adding the <<__SupportDynamicType>> attribute to the method to check if its code is safe for dynamic calling.

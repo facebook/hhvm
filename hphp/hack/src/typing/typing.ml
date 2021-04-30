@@ -810,7 +810,7 @@ let fun_type_of_id env x tal el =
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty, [])
-  | Some { fe_type; fe_pos; fe_deprecated; fe_sound_dynamic_callable; _ } ->
+  | Some { fe_type; fe_pos; fe_deprecated; fe_support_dynamic_type; _ } ->
     (match get_node fe_type with
     | Tfun ft ->
       let ft =
@@ -845,12 +845,10 @@ let fun_type_of_id env x tal el =
       in
       let fty =
         let r = get_reason fe_type |> Typing_reason.localize in
-        if
-          env.in_sound_dynamic_callable_method_check
-          && fe_sound_dynamic_callable
+        if env.in_support_dynamic_type_method_check && fe_support_dynamic_type
         then
           mk
-            ( Typing_reason.Rsound_dynamic_callable (Typing_reason.to_pos r),
+            ( Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r),
               Tintersection
                 [
                   mk (r, Tfun ft);

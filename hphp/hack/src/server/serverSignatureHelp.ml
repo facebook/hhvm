@@ -122,8 +122,8 @@ let get_occurrence_info
                  fe_type = Lazy.force class_elt.Typing_defs.ce_type;
                  fe_deprecated = class_elt.Typing_defs.ce_deprecated;
                  fe_php_std_lib = false;
-                 fe_sound_dynamic_callable =
-                   Typing_defs.get_ce_sound_dynamic_callable class_elt;
+                 fe_support_dynamic_type =
+                   Typing_defs.get_ce_support_dynamic_type class_elt;
                })
       in
       (ft, occurrence)

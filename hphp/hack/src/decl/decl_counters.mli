@@ -46,7 +46,7 @@ type subdecl_kind =
   | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
-  | Implements_dynamic
+  | Support_dynamic_type
   (* Lazy *)
   | Linearization
   | Construct

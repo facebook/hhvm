@@ -2,10 +2,10 @@
 
 class A<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 function foo(A<int> $a) : void {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   public function bar(A<int> $v) : void {
     foo($v);

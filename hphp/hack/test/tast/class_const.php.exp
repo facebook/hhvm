@@ -1,9 +1,9 @@
 [(Class
-    { c_span = [4:1-9:2]; c_annotation = (); c_mode = Mpartial; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-      c_name = ([4:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+    { c_span = [4:1-9:2]; c_annotation = (); c_mode = Mpartial; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+      c_name = ([4:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = [];
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
       c_where_constraints = [];
       c_consts =
       [{ cc_type = None; cc_id = ([5:9-12], "FOO");
@@ -12,11 +12,11 @@
                 (KeyValCollection (Dict, None, [((([6:5-8], string), (String "a")), (([6:12-13], int), (Int "1"))); ((([7:5-8], string), (String "b")), (([7:12-13], int), (Int "2")))]))));
          cc_doc_comment = None }
         ];
-      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None })

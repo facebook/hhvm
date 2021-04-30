@@ -602,7 +602,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_case = false;
     in_expr_tree = false;
     inside_constructor = false;
-    in_sound_dynamic_callable_method_check = false;
+    in_support_dynamic_type_method_check = false;
     decl_env = { mode; droot; ctx };
     tracing_info =
       Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });

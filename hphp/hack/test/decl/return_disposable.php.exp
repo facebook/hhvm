@@ -8,7 +8,7 @@
        sc_req_implements = [];
        sc_implements =
        [(Rhint ([3:28-39]), (Tapply (([3:28-39], "\\IDisposable"), [])))];
-       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
@@ -52,7 +52,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [8:16-19]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }))
+        fe_support_dynamic_type = false }))
   ]
 
 They matched!

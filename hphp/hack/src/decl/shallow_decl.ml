@@ -280,8 +280,8 @@ let method_ env m =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib m.m_user_attributes
   in
-  let sound_dynamic_callable =
-    Attrs.mem SN.UserAttributes.uaSoundDynamicCallable m.m_user_attributes
+  let support_dynamic_type =
+    Attrs.mem SN.UserAttributes.uaSupportDynamicType m.m_user_attributes
   in
   let ft = method_type env m in
   let sm_deprecated =
@@ -302,7 +302,7 @@ let method_ env m =
         ~override
         ~dynamicallycallable:has_dynamicallycallable
         ~php_std_lib
-        ~sound_dynamic_callable;
+        ~support_dynamic_type;
   }
 
 let xhp_enum_values props =
@@ -356,7 +356,7 @@ let class_ ctx c =
       sc_req_extends;
       sc_req_implements;
       sc_implements;
-      sc_implements_dynamic = c.c_implements_dynamic;
+      sc_support_dynamic_type = c.c_support_dynamic_type;
       sc_consts = List.filter_map c.c_consts (class_const env);
       sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
       sc_props = List.map ~f:(prop env) vars;

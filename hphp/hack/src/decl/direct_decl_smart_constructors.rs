@@ -946,7 +946,7 @@ struct Attributes<'a> {
     can_call: bool,
     atom: bool,
     soft: bool,
-    sound_dynamic_callable: bool,
+    support_dynamic_type: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1242,7 +1242,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             can_call: false,
             atom: false,
             soft: false,
-            sound_dynamic_callable: false,
+            support_dynamic_type: false,
         };
 
         let nodes = match node {
@@ -1325,8 +1325,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     "__Soft" => {
                         attributes.soft = true;
                     }
-                    "__SoundDynamicCallable" => {
-                        attributes.sound_dynamic_callable = true;
+                    "__SupportDynamicType" => {
+                        attributes.support_dynamic_type = true;
                     }
                     _ => {}
                 }
@@ -3190,7 +3190,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
-                    sound_dynamic_callable: parsed_attributes.sound_dynamic_callable,
+                    support_dynamic_type: parsed_attributes.support_dynamic_type,
                 });
                 self.add_fun(name, fun_elt);
                 Node::Ignored(SK::FunctionDeclaration)
@@ -3738,7 +3738,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let implements_dynamic = class_attributes.sound_dynamic_callable;
+        let support_dynamic_type = class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
 
@@ -3758,7 +3758,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             req_extends,
             req_implements,
             implements,
-            implements_dynamic,
+            support_dynamic_type,
             consts,
             typeconsts,
             props,
@@ -4135,7 +4135,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             req_extends: &[],
             req_implements: &[],
             implements: &[],
-            implements_dynamic: false,
+            support_dynamic_type: false,
             consts,
             typeconsts: &[],
             props: &[],
@@ -4272,7 +4272,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             req_extends: &[],
             req_implements: &[],
             implements: &[],
-            implements_dynamic: false,
+            support_dynamic_type: false,
             consts,
             typeconsts: &[],
             props: &[],

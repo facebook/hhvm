@@ -1,26 +1,26 @@
 [(Class
-    { c_span = [3:1-6:2]; c_annotation = (); c_mode = Mpartial; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-      c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+    { c_span = [3:1-6:2]; c_annotation = (); c_mode = Mpartial; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+      c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = [];
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((int), None); cv_id = ([4:17-19], "x"); 
-         cv_expr = (Some (([4:22-23], int), (Int "3"))); cv_user_attributes = []; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true; 
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false;
+         cv_visibility = Public; cv_type = ((int), None); cv_id = ([4:17-19], "x");
+         cv_expr = (Some (([4:22-23], int), (Int "3"))); cv_user_attributes = [];
+         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true;
          cv_span = [4:17-23] };
-        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-          cv_readonly = false; cv_visibility = Public; cv_type = ((string), None); 
-          cv_id = ([5:10-12], "y"); cv_expr = (Some (([5:15-23], string), (String "string"))); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+          cv_readonly = false; cv_visibility = Public; cv_type = ((string), None);
+          cv_id = ([5:10-12], "y"); cv_expr = (Some (([5:15-23], string), (String "string")));
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false;
           cv_is_static = false; cv_span = [5:10-23] }
         ];
       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None })

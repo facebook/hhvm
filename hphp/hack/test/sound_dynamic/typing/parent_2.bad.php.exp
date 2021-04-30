@@ -1,2 +1,2 @@
 File "parent_2.bad.php", line 7, characters 7-9:
-Class `Bar` must implement dynamic because it extends class `Foo` which does (Typing[4402])
+Class `Bar` must declare <<__SupportDynamicType>> because it extends class `Foo` which does (Typing[4402])

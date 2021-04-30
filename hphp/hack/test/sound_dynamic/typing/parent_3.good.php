@@ -4,11 +4,11 @@
 class Box<T> {}
 
 class Foo {
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function foo(Box<int> $x) : Box<int> {
     return $x;
   }
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Bar extends Foo {}

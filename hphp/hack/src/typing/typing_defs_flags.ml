@@ -72,7 +72,7 @@ let ce_flags_lateinit            = 1 lsl 7
 
 let ce_flags_dynamicallycallable = 1 lsl 8
 
-let ce_flags_sound_dynamic_callable = 1 lsl 9
+let ce_flags_support_dynamic_type = 1 lsl 9
 
 (* Three bits used to encode optional XHP attr.
  * Set 1<<10 (0x400) if xa_has_default=true

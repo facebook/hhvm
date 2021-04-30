@@ -1,16 +1,16 @@
 [(Class
-    { c_span = [12:1-40]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+    { c_span = [12:1-40]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
       c_name = ([12:7-19], "\\SingleConstr");
-      c_tparams = [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_implements_dynamic = false; c_where_constraints = [(([12:30-31], (Habstr ("T", []))), Constraint_eq, ([12:34-37], (Hprim Tint)))]; 
-      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+      c_tparams = [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+      c_support_dynamic_type = false; c_where_constraints = [(([12:30-31], (Habstr ("T", []))), Constraint_eq, ([12:34-37], (Hprim Tint)))];
+      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment =
@@ -18,77 +18,77 @@
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
       c_emit_id = None });
   (Class
-     { c_span = [14:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+     { c_span = [14:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
        c_name = ([14:7-18], "\\ListConstrs");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([14:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_implements_dynamic = false;
+       c_tparams = [{ tp_variance = Invariant; tp_name = ([14:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+       c_support_dynamic_type = false;
        c_where_constraints = [(([14:29-30], (Habstr ("T", []))), Constraint_eq, ([14:33-36], (Hprim Tint))); (([14:37-38], (Habstr ("T", []))), Constraint_eq, ([14:41-47], (Hprim Tstring)))];
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [16:1-66]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+     { c_span = [16:1-66]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
        c_name = ([16:7-19], "\\MultiConstrs");
        c_tparams =
        [{ tp_variance = Invariant; tp_name = ([16:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
          { tp_variance = Invariant; tp_name = ([16:24-26], "Tu"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_implements_dynamic = false;
+       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+       c_support_dynamic_type = false;
        c_where_constraints =
        [(([16:34-35], (Habstr ("T", []))), Constraint_eq, ([16:38-41], (Hprim Tint))); (
          ([16:43-45], (Habstr ("Tu", []))), Constraint_eq, ([16:48-54], (Hprim Tstring))); (
          ([16:55-57], (Habstr ("Tu", []))), Constraint_eq, ([16:60-63], (Hprim Tint)))];
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [18:1-37]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+     { c_span = [18:1-37]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
        c_name = ([18:7-15], "\\AsConstr");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([18:17-18], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_implements_dynamic = false; c_where_constraints = [(([18:26-27], (Habstr ("T", []))), Constraint_as, ([18:31-34], (Hprim Tint)))]; 
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_tparams = [{ tp_variance = Invariant; tp_name = ([18:17-18], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+       c_support_dynamic_type = false; c_where_constraints = [(([18:26-27], (Habstr ("T", []))), Constraint_as, ([18:31-34], (Hprim Tint)))];
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [20:1-43]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+     { c_span = [20:1-43]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
        c_name = ([20:7-18], "\\SuperConstr");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([20:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_implements_dynamic = false; c_where_constraints = [(([20:29-30], (Habstr ("T", []))), Constraint_super, ([20:37-40], (Hprim Tint)))]; 
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_tparams = [{ tp_variance = Invariant; tp_name = ([20:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+       c_support_dynamic_type = false; c_where_constraints = [(([20:29-30], (Habstr ("T", []))), Constraint_super, ([20:37-40], (Hprim Tint)))];
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_doc_comment = None; c_emit_id = None })

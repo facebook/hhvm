@@ -557,8 +557,8 @@ let check_members
         ( if
           TypecheckerOptions.enable_sound_dynamic
             (Provider_context.get_tcopt (Env.get_ctx env))
-          && Cls.get_implements_dynamic class_
-          && not (Cls.get_implements_dynamic parent_class)
+          && Cls.get_support_dynamic_type class_
+          && not (Cls.get_support_dynamic_type parent_class)
           (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
         then
           match Cls.kind parent_class with
@@ -569,8 +569,7 @@ let check_members
               match mem_source with
               | `FromMethod ->
                 if
-                  not
-                    (Typing_defs.get_ce_sound_dynamic_callable parent_class_elt)
+                  not (Typing_defs.get_ce_support_dynamic_type parent_class_elt)
                 then
                   (* since the attribute is missing run the inter check *)
                   let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
@@ -668,7 +667,7 @@ let default_constructor_ce class_ =
         ~synthesized:true
         ~dynamicallycallable:false
         ~readonly_prop:false
-        ~sound_dynamic_callable:false;
+        ~support_dynamic_type:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

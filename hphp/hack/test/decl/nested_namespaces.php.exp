@@ -53,7 +53,7 @@
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
@@ -73,7 +73,7 @@
       { Typing_defs.cd_pos = [24:3-50];
         cd_type =
         (Rhint ([24:9-33]),
-         (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), 
+         (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"),
             [])))
         }))
   ]

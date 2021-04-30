@@ -131,7 +131,7 @@ struct
     | Rconcat_operand p -> Rconcat_operand (pos p)
     | Rinterp_operand p -> Rinterp_operand (pos p)
     | Rdynamic_coercion r -> Rdynamic_coercion (reason r)
-    | Rsound_dynamic_callable p -> Rsound_dynamic_callable (pos_or_decl p)
+    | Rsupport_dynamic_type p -> Rsupport_dynamic_type (pos_or_decl p)
     | Rdynamic_partial_enforcement (p, cn, r) ->
       Rdynamic_partial_enforcement (pos_or_decl p, cn, reason r)
 
@@ -289,7 +289,7 @@ struct
       dc_smethods = dc.dc_smethods;
       dc_construct = dc.dc_construct;
       dc_ancestors = SMap.map ty dc.dc_ancestors;
-      dc_implements_dynamic = dc.dc_implements_dynamic;
+      dc_support_dynamic_type = dc.dc_support_dynamic_type;
       dc_enum_type = Option.map dc.dc_enum_type enum_type;
       dc_decl_errors = None;
       dc_condition_types = dc.dc_condition_types;
@@ -331,7 +331,7 @@ struct
       sc_req_extends = List.map sc.sc_req_extends ty;
       sc_req_implements = List.map sc.sc_req_implements ty;
       sc_implements = List.map sc.sc_implements ty;
-      sc_implements_dynamic = sc.sc_implements_dynamic;
+      sc_support_dynamic_type = sc.sc_support_dynamic_type;
       sc_consts = List.map sc.sc_consts shallow_class_const;
       sc_typeconsts = List.map sc.sc_typeconsts shallow_typeconst;
       sc_props = List.map sc.sc_props shallow_prop;

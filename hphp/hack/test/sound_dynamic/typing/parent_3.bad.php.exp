@@ -3,4 +3,4 @@ Method  `foo` in class `Bar` is not dynamically callable. (Typing[4402])
   File "parent_3.bad.php", line 7, characters 19-21:
   Method `foo` is defined in the super class `Foo` and is not overridden
   File "parent_3.bad.php", line 13, characters 7-9:
-  A parameter of `foo` is not enforceable. Try adding the <<__SoundDynamicCallable>> attribute to the method to check if its code is safe for dynamic calling.
+  A parameter of `foo` is not enforceable. Try adding the <<__SupportDynamicType>> attribute to the method to check if its code is safe for dynamic calling.

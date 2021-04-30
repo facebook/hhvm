@@ -1,6 +1,6 @@
 <?hh
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C<reify T> {}
 
 function expect_dynamic(dynamic $d) : void {}

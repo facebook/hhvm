@@ -6,7 +6,7 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
-       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
@@ -37,7 +37,7 @@
         [(Rhint ([8:7-15]), (Tapply (([8:7-15], "\\TMyTrait"), [])))];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
@@ -67,7 +67,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
@@ -100,7 +100,7 @@
           (Rhint ([19:7-16]), (Tapply (([19:7-16], "\\TMyTrait3"), [])))];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
-        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }))

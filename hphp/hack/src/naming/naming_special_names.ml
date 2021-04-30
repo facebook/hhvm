@@ -313,7 +313,7 @@ module UserAttributes = struct
 
   let uaAtom = "__Atom"
 
-  let uaSoundDynamicCallable = "__SoundDynamicCallable"
+  let uaSupportDynamicType = "__SupportDynamicType"
 
   let as_map =
     AttributeKinds.(
@@ -351,7 +351,7 @@ module UserAttributes = struct
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);
           (uaAtom, [parameter]);
-          (uaSoundDynamicCallable, [fn; cls; mthd]);
+          (uaSupportDynamicType, [fn; cls; mthd]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

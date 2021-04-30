@@ -480,13 +480,12 @@ let rec obj_get_concrete_ty
                 let ft_ty1 =
                   let lr = Typing_reason.localize r in
                   if
-                    Typing_env_types.(
-                      env.in_sound_dynamic_callable_method_check)
-                    && ( get_ce_sound_dynamic_callable member_ce
-                       || Cls.get_implements_dynamic class_info )
+                    Typing_env_types.(env.in_support_dynamic_type_method_check)
+                    && ( get_ce_support_dynamic_type member_ce
+                       || Cls.get_support_dynamic_type class_info )
                   then
                     mk
-                      ( Typing_reason.Rsound_dynamic_callable
+                      ( Typing_reason.Rsupport_dynamic_type
                           (Typing_reason.to_pos r),
                         Tintersection
                           [
@@ -584,8 +583,8 @@ let rec obj_get_concrete_ty
        *)
       match Env.get_self_class env with
       | Some self_class
-        when Cls.get_implements_dynamic self_class || not (Cls.final self_class)
-        ->
+        when Cls.get_support_dynamic_type self_class
+             || not (Cls.final self_class) ->
         (match Env.get_member is_method env self_class id_str with
         | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
           when not is_method ->

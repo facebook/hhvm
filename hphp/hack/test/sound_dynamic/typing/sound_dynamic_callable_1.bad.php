@@ -5,9 +5,9 @@ class Box<T> {
   public function  __construct(public T $x) {}
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function foo() : Box<int> {
     return new Box(42);
   }

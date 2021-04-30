@@ -5221,18 +5221,18 @@ let ifc_internal_error pos reason =
     ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
     )
 
-let parent_implements_dynamic
+let parent_support_dynamic_type
     pos
     (child_name, child_kind)
     (parent_name, parent_kind)
-    child_implements_dynamic =
-  let kind_to_strings = function
+    child_support_dynamic_type =
+  let kind_to_string = function
     | Ast_defs.Cabstract
     | Ast_defs.Cnormal ->
-      ("class ", "implement ")
-    | Ast_defs.Ctrait -> ("trait ", "implement ")
-    | Ast_defs.Cinterface -> ("interface ", "extend ")
-    | Ast_defs.Cenum -> (* cannot happen *) ("", "")
+      "class "
+    | Ast_defs.Ctrait -> "trait "
+    | Ast_defs.Cinterface -> "interface "
+    | Ast_defs.Cenum -> (* cannot happen *) ""
   in
   let kinds_to_use child_kind parent_kind =
     match (child_kind, parent_kind) with
@@ -5245,26 +5245,25 @@ let parent_implements_dynamic
     | (_, _) -> ""
   in
   let child_name = Markdown_lite.md_codify (strip_ns child_name) in
-  let (child_kind_s, action) = kind_to_strings child_kind in
+  let child_kind_s = kind_to_string child_kind in
   let parent_name = Markdown_lite.md_codify (strip_ns parent_name) in
-  let (parent_kind_s, _) = kind_to_strings parent_kind in
+  let parent_kind_s = kind_to_string parent_kind in
   add
     (Typing.err_code Typing.ImplementsDynamic)
     pos
     ( String.capitalize child_kind_s
     ^ child_name
-    ^ ( if child_implements_dynamic then
+    ^ ( if child_support_dynamic_type then
         " cannot "
       else
         " must " )
-    ^ action
-    ^ "dynamic because it "
+    ^ "declare <<__SupportDynamicType>> because it "
     ^ kinds_to_use child_kind parent_kind
     ^ parent_kind_s
     ^ parent_name
     ^ " which does"
     ^
-    if child_implements_dynamic then
+    if child_support_dynamic_type then
       " not"
     else
       "" )
@@ -5281,7 +5280,7 @@ let method_is_not_dynamically_callable
     pos
     method_name
     class_name
-    sound_dynamic_callable_attribute
+    support_dynamic_type_attribute
     parent_class_opt
     error_opt =
   let method_name = Markdown_lite.md_codify (strip_ns method_name) in
@@ -5311,7 +5310,7 @@ let method_is_not_dynamically_callable
   in
 
   let attribute_reason =
-    match sound_dynamic_callable_attribute with
+    match support_dynamic_type_attribute with
     | true -> []
     | false ->
       [
@@ -5320,7 +5319,7 @@ let method_is_not_dynamically_callable
           ^ method_name
           ^ " is not enforceable. "
           ^ "Try adding the <<"
-          ^ Naming_special_names.UserAttributes.uaSoundDynamicCallable
+          ^ Naming_special_names.UserAttributes.uaSupportDynamicType
           ^ ">> attribute to "
           ^ "the method to check if its code is safe for dynamic calling." );
       ]

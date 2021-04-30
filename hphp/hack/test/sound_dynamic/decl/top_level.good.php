@@ -1,4 +1,4 @@
 <?hh
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 function f(): void {}

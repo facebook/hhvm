@@ -1,11 +1,11 @@
 <?hh
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Box {
   public function __construct(public int $data) {}
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class D {
   public async function foo() : Awaitable<void> {
   }

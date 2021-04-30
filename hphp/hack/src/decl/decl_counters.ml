@@ -43,7 +43,7 @@ type subdecl_kind =
   | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
-  | Implements_dynamic
+  | Support_dynamic_type
   (* Lazy *)
   | Linearization
   | Construct
@@ -131,7 +131,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Xhp_enum_values
   | Sealed_whitelist
   | Decl_errors
-  | Implements_dynamic ->
+  | Support_dynamic_type ->
     "shallow"
   | Linearization
   | Construct

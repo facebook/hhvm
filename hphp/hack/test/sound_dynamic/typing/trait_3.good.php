@@ -4,7 +4,7 @@
 // A trait that does not implement dynamic cannot be used by a class that
 // implements dynamic
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   use T;
 }

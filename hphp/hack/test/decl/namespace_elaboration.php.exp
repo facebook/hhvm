@@ -32,7 +32,7 @@
                ~returns_readonly:false ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [31:10-12]; fe_php_std_lib = false;
-       fe_sound_dynamic_callable = false }));
+       fe_support_dynamic_type = false }));
   ("\\other_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -67,7 +67,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-18]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\braced_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -82,7 +82,7 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([39:20-32]),
-                    (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"), 
+                    (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"),
                        [])))
                    };
                  fp_flags =
@@ -103,7 +103,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [39:10-19]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }))
+        fe_support_dynamic_type = false }))
   ]
 
 They matched!

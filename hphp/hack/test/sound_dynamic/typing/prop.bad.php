@@ -4,9 +4,9 @@
   class C { }
   class G<T> { }
 
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   class D { }
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   class E {
     // This should be rejected, as it is not a subtype of dynamic
     public ?C $x;

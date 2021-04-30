@@ -5,7 +5,7 @@ interface I {
   public function foo(vec<int> $x):int;
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 interface J extends I {
   public function bar():string;
 }

@@ -3,7 +3,7 @@
 
 function f_tuple((int, int) $t) : void {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   public function foo((int, int) ...$x) : void {
     f_tuple($x[0]);

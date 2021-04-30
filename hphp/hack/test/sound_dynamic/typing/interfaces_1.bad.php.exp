@@ -1,2 +1,2 @@
 File "interfaces_1.bad.php", line 10, characters 7-7:
-Class `D` must implement dynamic because it implements interface `I` which does (Typing[4402])
+Class `D` must declare <<__SupportDynamicType>> because it implements interface `I` which does (Typing[4402])

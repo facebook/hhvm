@@ -3,7 +3,7 @@
 
 class C<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class D {
   public function bar(C<int> $x) : int { return 1; }
   public function foo(C<int> $x) : int { return $this->bar($x); }

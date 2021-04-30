@@ -1,35 +1,35 @@
 [(Class
-    { c_span = [3:1-10:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cabstract; 
-      c_name = ([3:16-17], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+    { c_span = [3:1-10:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cabstract;
+      c_name = ([3:16-17], "\\C"); c_tparams = []; c_extends = []; c_uses = [];
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
-      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:23-25], "Ta"); 
-         c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None }); 
+      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:23-25], "Ta");
+         c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None });
          c_tconst_span = [4:3-26]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([5:23-26], "Tac");
-          c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([5:30-33], (Hprim Tnum))); c_atc_super_constraint = None; c_atc_default = None }); 
+          c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([5:30-33], (Hprim Tnum))); c_atc_super_constraint = None; c_atc_default = None });
           c_tconst_span = [5:3-34]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([6:23-26], "Tad");
-          c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = (Some ([6:29-32], (Hprim Tint))) }); 
+          c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = (Some ([6:29-32], (Hprim Tint))) });
           c_tconst_span = [6:3-33]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([7:23-27], "Tacd");
           c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([7:31-34], (Hprim Tnum))); c_atc_super_constraint = None; c_atc_default = (Some ([7:37-40], (Hprim Tint))) });
           c_tconst_span = [7:3-41]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([8:14-17], "Tpa");
-          c_tconst_kind = (TCPartiallyAbstract { c_patc_constraint = ([8:21-24], (Hprim Tnum)); c_patc_type = ([8:27-30], (Hprim Tint)) }); 
+          c_tconst_kind = (TCPartiallyAbstract { c_patc_constraint = ([8:21-24], (Hprim Tnum)); c_patc_type = ([8:27-30], (Hprim Tint)) });
           c_tconst_span = [8:3-31]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
-        { c_tconst_user_attributes = []; c_tconst_name = ([9:14-16], "Tc"); 
-          c_tconst_kind = (TCConcrete { c_tc_type = ([9:19-22], (Hprim Tint)) }); 
+        { c_tconst_user_attributes = []; c_tconst_name = ([9:14-16], "Tc");
+          c_tconst_kind = (TCConcrete { c_tc_type = ([9:19-22], (Hprim Tint)) });
           c_tconst_span = [9:3-23]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
+      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
       c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None })

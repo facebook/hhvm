@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b80508677e37389ddf8fc6beaa125ece>>
+// @generated SignedSource<<77ae589d225cd38e490200a701775c03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -62,7 +62,7 @@ pub struct Env<'a> {
     pub in_case: bool,
     pub in_expr_tree: bool,
     pub inside_constructor: bool,
-    pub in_sound_dynamic_callable_method_check: bool,
+    pub in_support_dynamic_type_method_check: bool,
     pub tracing_info: Option<&'a decl_counters::TracingInfo<'a>>,
     pub global_tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
     pub log_levels: s_map::SMap<'a, isize>,

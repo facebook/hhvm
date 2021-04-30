@@ -149,7 +149,7 @@ type _ t_ =
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
-  | Rsound_dynamic_callable : Pos_or_decl.t -> 'phase t_
+  | Rsupport_dynamic_type : Pos_or_decl.t -> 'phase t_
   | Rdynamic_partial_enforcement :
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
@@ -187,7 +187,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rtconst_no_cstr id -> Rtconst_no_cstr id
   | Rdefault_capability p -> Rdefault_capability p
   | Rdynamic_coercion r -> Rdynamic_coercion r
-  | Rsound_dynamic_callable p -> Rsound_dynamic_callable p
+  | Rsupport_dynamic_type p -> Rsupport_dynamic_type p
   | Rglobal_type_variable_generics (p, tp, n) ->
     Rglobal_type_variable_generics (p, tp, n)
 
@@ -593,7 +593,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
   | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
   | Rdynamic_coercion r -> to_string prefix r
-  | Rsound_dynamic_callable _ ->
+  | Rsupport_dynamic_type _ ->
     [(p, prefix ^ " because method must be callable in a dynamic context")]
   | Rdynamic_partial_enforcement (p, cn, r_orig) ->
     to_string prefix r_orig
@@ -630,7 +630,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rglobal_type_variable_generics (p, _, _)
   | Ridx_vector_from_decl p
   | Rinout_param p
-  | Rsound_dynamic_callable p
+  | Rsupport_dynamic_type p
   | Rglobal_class_prop p ->
     p
   | Rwitness p
@@ -827,7 +827,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rconcat_operand _ -> "Rconcat_operand"
   | Rinterp_operand _ -> "Rinterp_operand"
   | Rdynamic_coercion _ -> "Rdynamic_coercion"
-  | Rsound_dynamic_callable _ -> "Rsound_dynamic_callable"
+  | Rsupport_dynamic_type _ -> "Rsupport_dynamic_type"
   | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
 
 let pp fmt r =

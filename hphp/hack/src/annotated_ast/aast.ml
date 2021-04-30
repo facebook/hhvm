@@ -830,7 +830,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * is_extends) list;
   c_implements: class_hint list;
-  c_implements_dynamic: bool;
+  c_support_dynamic_type: bool;
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
   c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst_def list;

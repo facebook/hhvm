@@ -9,5 +9,5 @@ class Foo {
   }
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Bar extends Foo {}

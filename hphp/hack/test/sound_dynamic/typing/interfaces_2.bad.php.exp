@@ -1,2 +1,2 @@
 File "interfaces_2.bad.php", line 9, characters 11-12:
-Interface `I2` must extend dynamic because it extends interface `I1` which does (Typing[4402])
+Interface `I2` must declare <<__SupportDynamicType>> because it extends interface `I1` which does (Typing[4402])

@@ -227,12 +227,12 @@ module ApiShallow = struct
     | Lazy _ -> None
     | Eager c -> c.tc_decl_errors
 
-  let get_implements_dynamic (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.Implements_dynamic
+  let get_support_dynamic_type (decl, t) =
+    Decl_counters.count_subdecl decl Decl_counters.Support_dynamic_type
     @@ fun () ->
     match t with
-    | Lazy (sc, _lc) -> sc.sc_implements_dynamic
-    | Eager c -> c.tc_implements_dynamic
+    | Lazy (sc, _lc) -> sc.sc_support_dynamic_type
+    | Eager c -> c.tc_support_dynamic_type
 
   let all_where_constraints_on_this t =
     (* tally is already done by where_constraints *)

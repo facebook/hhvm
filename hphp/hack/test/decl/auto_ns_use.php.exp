@@ -29,7 +29,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [8:12-21]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\get_value",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -70,7 +70,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:12-21]; fe_php_std_lib = false;
-        fe_sound_dynamic_callable = false }));
+        fe_support_dynamic_type = false }));
   ("\\MyDict",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [16:8-14]; td_vis = Transparent;

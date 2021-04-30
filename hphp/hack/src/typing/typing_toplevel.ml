@@ -243,7 +243,7 @@ let get_ctx_vars ctxs =
 
 let function_dynamically_callable
     env f params_decl_ty variadicity_decl_ty ret_locl_ty =
-  let env = { env with in_sound_dynamic_callable_method_check = true } in
+  let env = { env with in_support_dynamic_type_method_check = true } in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
       env
@@ -256,7 +256,7 @@ let function_dynamically_callable
      * The code below must be kept in sync with with the fun_def checks.
      *)
     let make_dynamic pos =
-      Typing_make_type.dynamic (Reason.Rsound_dynamic_callable pos)
+      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
     in
     let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
     let dynamic_return_info =
@@ -278,7 +278,7 @@ let function_dynamically_callable
                match hint with
                | Some ty when Typing_enforceability.is_enforceable env ty ->
                  Typing_make_type.intersection
-                   (Reason.Rsound_dynamic_callable Pos_or_decl.none)
+                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
@@ -466,15 +466,15 @@ let fun_def ctx f :
       let env = Typing_solver.close_tyvars_and_solve env in
       let env = Typing_solver.solve_all_unsolved_tyvars env in
 
-      let check_sound_dynamic_callable =
+      let check_support_dynamic_type =
         Naming_attributes.mem
-          SN.UserAttributes.uaSoundDynamicCallable
+          SN.UserAttributes.uaSupportDynamicType
           f.f_user_attributes
       in
       if
         TypecheckerOptions.enable_sound_dynamic
           (Provider_context.get_tcopt (Env.get_ctx env))
-        && check_sound_dynamic_callable
+        && check_support_dynamic_type
       then
         function_dynamically_callable
           sound_dynamic_check_saved_env
@@ -512,7 +512,7 @@ let fun_def ctx f :
 
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
-  let env = { env with in_sound_dynamic_callable_method_check = true } in
+  let env = { env with in_support_dynamic_type_method_check = true } in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
       env
@@ -525,7 +525,7 @@ let method_dynamically_callable
      * The code below must be kept in sync with with the method_def checks.
      *)
     let make_dynamic pos =
-      Typing_make_type.dynamic (Reason.Rsound_dynamic_callable pos)
+      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
     in
     let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
     let dynamic_return_info =
@@ -547,7 +547,7 @@ let method_dynamically_callable
                match hint with
                | Some ty when Typing_enforceability.is_enforceable env ty ->
                  Typing_make_type.intersection
-                   (Reason.Rsound_dynamic_callable Pos_or_decl.none)
+                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
@@ -597,10 +597,10 @@ let method_dynamically_callable
     in
 
     let env =
-      if Cls.get_implements_dynamic cls then
+      if Cls.get_support_dynamic_type cls then
         let this_ty =
           Typing_make_type.intersection
-            (Reason.Rsound_dynamic_callable Pos_or_decl.none)
+            (Reason.Rsupport_dynamic_type Pos_or_decl.none)
             [Env.get_local env this; make_dynamic Pos_or_decl.none]
         in
         Env.set_local env this this_ty Pos.none
@@ -633,9 +633,9 @@ let method_dynamically_callable
           (snd m.m_name)
           (Cls.name cls)
           ( Naming_attributes.mem
-              SN.UserAttributes.uaSoundDynamicCallable
+              SN.UserAttributes.uaSupportDynamicType
               m.m_user_attributes
-          || Cls.get_implements_dynamic cls )
+          || Cls.get_support_dynamic_type cls )
           None
           (Some error))
   in
@@ -806,19 +806,19 @@ let method_def env cls m =
       let env = Typing_solver.solve_all_unsolved_tyvars env in
 
       (* if the enclosing class implements dynamic, or the method is annotated with
-       * <<__SoundDynamicCallable>>, check that the method is dynamically callable *)
-      let check_sound_dynamic_callable =
+       * <<__SupportDynamicType>>, check that the method is dynamically callable *)
+      let check_support_dynamic_type =
         (not env.inside_constructor)
-        && ( Cls.get_implements_dynamic cls
+        && ( Cls.get_support_dynamic_type cls
              && not (Aast.equal_visibility m.m_visibility Private)
            || Naming_attributes.mem
-                SN.UserAttributes.uaSoundDynamicCallable
+                SN.UserAttributes.uaSupportDynamicType
                 m.m_user_attributes )
       in
       if
         TypecheckerOptions.enable_sound_dynamic
           (Provider_context.get_tcopt (Env.get_ctx env))
-        && check_sound_dynamic_callable
+        && check_support_dynamic_type
       then
         method_dynamically_callable
           sound_dynamic_check_saved_env
@@ -1528,7 +1528,7 @@ let class_var_def ~is_static cls env cv =
   if
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
-    && Cls.get_implements_dynamic cls
+    && Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
   then begin
     Option.iter decl_cty (fun ty ->
@@ -1788,8 +1788,8 @@ let class_def_ env c tc =
           | (_, Happly ((_, name), _)) -> Some name
           | _ -> None)
     in
-    let error_parent_implements_dynamic parent f =
-      Errors.parent_implements_dynamic
+    let error_parent_support_dynamic_type parent f =
+      Errors.parent_support_dynamic_type
         (fst c.c_name)
         (snd c.c_name, c.c_kind)
         (Cls.name parent, Cls.kind parent)
@@ -1806,12 +1806,12 @@ let class_def_ env c tc =
               (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
                * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
               if
-                Cls.get_implements_dynamic parent_type
-                && not c.c_implements_dynamic
+                Cls.get_support_dynamic_type parent_type
+                && not c.c_support_dynamic_type
               then
-                error_parent_implements_dynamic
+                error_parent_support_dynamic_type
                   parent_type
-                  c.c_implements_dynamic
+                  c.c_support_dynamic_type
             | _ -> ()
           end
         | None -> ()) );
@@ -1837,7 +1837,7 @@ let class_def_ env c tc =
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;
       Aast.c_implements = c.c_implements;
-      Aast.c_implements_dynamic = c.c_implements_dynamic;
+      Aast.c_support_dynamic_type = c.c_support_dynamic_type;
       Aast.c_where_constraints = c.c_where_constraints;
       Aast.c_consts = typed_consts;
       Aast.c_typeconsts = typed_typeconsts;

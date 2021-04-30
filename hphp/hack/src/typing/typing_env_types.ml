@@ -58,7 +58,7 @@ type env = {
   in_case: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
-  in_sound_dynamic_callable_method_check: bool;
+  in_support_dynamic_type_method_check: bool;
   tracing_info: Decl_counters.tracing_info option;
   (* A set of constraints that are global to a given method *)
   global_tpenv: Type_parameter_env.t;

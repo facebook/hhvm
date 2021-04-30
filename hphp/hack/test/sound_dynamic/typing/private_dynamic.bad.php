@@ -3,7 +3,7 @@
 
 class D { }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   // Legal, as we don't check signatures for private members
   private vec<int> $items;
@@ -22,7 +22,7 @@ class C {
   }
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Wrap {
   // Legal, as we don't check signatures for private members
   private D $item;
@@ -48,7 +48,7 @@ class NonDyn {
   }
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Dyn extends NonDyn { }
 
 // Demonstrates why we need the checks above

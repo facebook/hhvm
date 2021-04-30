@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0a2867b220a11db176ceecfd7ca04c95>>
+// @generated SignedSource<<b9355c76ac79b1e372ebeb039e9cbdcb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1299,7 +1299,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, IsExtends)>,
     pub implements: Vec<ClassHint>,
-    pub implements_dynamic: bool,
+    pub support_dynamic_type: bool,
     pub where_constraints: Vec<WhereConstraintHint>,
     pub consts: Vec<ClassConst<Ex, Fb, En, Hi>>,
     pub typeconsts: Vec<ClassTypeconstDef<Ex, Fb, En, Hi>>,

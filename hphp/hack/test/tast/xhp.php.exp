@@ -1,30 +1,30 @@
 [(Class
-    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = Cnormal; c_name = ([3:7-11], "\\:foo"); 
-      c_tparams = []; c_extends = [([3:20-27], (Happly (([3:20-27], "\\XHPTest"), [])))]; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = [([3:39-47], (Happly (([3:39-47], "\\XHPChild"), [])))]; 
-      c_implements_dynamic = false; c_where_constraints = []; c_consts = []; 
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = Cnormal; c_name = ([3:7-11], "\\:foo");
+      c_tparams = []; c_extends = [([3:20-27], (Happly (([3:20-27], "\\XHPTest"), [])))];
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = [([3:39-47], (Happly (([3:39-47], "\\XHPChild"), [])))];
+      c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
       c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [(Ast_defs.XEV_String "herp"); (Ast_defs.XEV_String "derp")] }); 
-         cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
-         cv_type = ((?string), (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring)))))); 
-         cv_id = ([4:35-38], ":bar"); cv_expr = None; cv_user_attributes = []; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
+      [{ cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [(Ast_defs.XEV_String "herp"); (Ast_defs.XEV_String "derp")] });
+         cv_abstract = false; cv_readonly = false; cv_visibility = Public;
+         cv_type = ((?string), (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring))))));
+         cv_id = ([4:35-38], ":bar"); cv_expr = None; cv_user_attributes = [];
+         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
          cv_span = [4:35-38] }
         ];
       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [7:1-19:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid)))); 
-       f_name = ([7:10-14], "\\main"); f_tparams = []; f_where_constraints = []; 
+     { f_span = [7:1-19:2]; f_readonly_this = None; f_annotation = ();
+       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid))));
+       f_name = ([7:10-14], "\\main"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
@@ -46,11 +46,11 @@
                    )))))
            ];
          fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
        f_doc_comment = None })

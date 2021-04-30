@@ -6,7 +6,7 @@ class Box<T> {
 }
 
 class C {
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function foo() : Box<int> {
     return new Box(42);
   }

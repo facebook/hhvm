@@ -3,7 +3,7 @@
 
 class Box<T> {}
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class C {
   use T;
 }

@@ -1407,7 +1407,7 @@ and simplify_subtype_i
             (* This should have been caught already in the naming phase *)
             valid env
           | Some class_sub ->
-            if Cls.get_implements_dynamic class_sub then
+            if Cls.get_support_dynamic_type class_sub then
               valid env
             else
               let class_name = Cls.name class_sub in

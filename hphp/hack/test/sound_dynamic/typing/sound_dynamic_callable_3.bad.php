@@ -4,7 +4,7 @@
 function expectVecInt(vec<int> $vi):void { }
 
 class C {
-  <<__SoundDynamicCallable>>
+  <<__SupportDynamicType>>
   public function foo(vec<int> $x):int {
     expectVecInt($x);
     return $x[0];

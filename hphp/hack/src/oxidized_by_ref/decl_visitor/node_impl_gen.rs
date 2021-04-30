@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0427c790cff2375101582b49766ffccf>>
+// @generated SignedSource<<023036b041e5e797105ccd84fb4850af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -298,7 +298,7 @@ impl<'a> Node<'a> for FunElt<'a> {
                 type_: ref __binding_1,
                 pos: ref __binding_2,
                 php_std_lib: ref __binding_3,
-                sound_dynamic_callable: ref __binding_4,
+                support_dynamic_type: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -562,7 +562,7 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 req_extends: ref __binding_12,
                 req_implements: ref __binding_13,
                 implements: ref __binding_14,
-                implements_dynamic: ref __binding_15,
+                support_dynamic_type: ref __binding_15,
                 consts: ref __binding_16,
                 typeconsts: ref __binding_17,
                 props: ref __binding_18,
@@ -896,7 +896,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),
-            T_::RsoundDynamicCallable(ref __binding_0) => __binding_0.accept(v),
+            T_::RsupportDynamicType(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicPartialEnforcement(ref __binding_0) => __binding_0.accept(v),
         }
     }

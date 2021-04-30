@@ -11,7 +11,7 @@ class C {
   public function expect_A(A<int> $a) : void {}
 }
 
-<<__SoundDynamicCallable>>
+<<__SupportDynamicType>>
 class Foo {
   public function foo(Evil<int> $x, B $a) : void {
     (new C())->expect_A($a);

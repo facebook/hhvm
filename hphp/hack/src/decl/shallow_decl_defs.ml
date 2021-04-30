@@ -101,21 +101,21 @@ module MethodFlags = struct
   let override_bit               = 1 lsl 2
   let dynamicallycallable_bit    = 1 lsl 3
   let php_std_lib_bit            = 1 lsl 4
-  let sound_dynamic_callable_bit = 1 lsl 5
+  let support_dynamic_type_bit = 1 lsl 5
 
   let get_abstract               = is_set abstract_bit
   let get_final                  = is_set final_bit
   let get_override               = is_set override_bit
   let get_dynamicallycallable    = is_set dynamicallycallable_bit
   let get_php_std_lib            = is_set php_std_lib_bit
-  let get_sound_dynamic_callable = is_set sound_dynamic_callable_bit
+  let get_support_dynamic_type = is_set support_dynamic_type_bit
 
   let set_abstract               = set_bit abstract_bit
   let set_final                  = set_bit final_bit
   let set_override               = set_bit override_bit
   let set_dynamicallycallable    = set_bit dynamicallycallable_bit
   let set_php_std_lib            = set_bit php_std_lib_bit
-  let set_sound_dynamic_callable = set_bit sound_dynamic_callable_bit
+  let set_support_dynamic_type = set_bit support_dynamic_type_bit
 
   let make
       ~abstract
@@ -123,7 +123,7 @@ module MethodFlags = struct
       ~override
       ~dynamicallycallable
       ~php_std_lib
-      ~sound_dynamic_callable
+      ~support_dynamic_type
       =
     empty
     |> set_abstract abstract
@@ -131,7 +131,7 @@ module MethodFlags = struct
     |> set_override override
     |> set_dynamicallycallable dynamicallycallable
     |> set_php_std_lib php_std_lib
-    |> set_sound_dynamic_callable sound_dynamic_callable
+    |> set_support_dynamic_type support_dynamic_type
 
   let pp fmt t =
     if t = empty then
@@ -214,7 +214,7 @@ type shallow_class = {
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_implements: decl_ty list;
-  sc_implements_dynamic: bool;
+  sc_support_dynamic_type: bool;
   sc_consts: shallow_class_const list;
   sc_typeconsts: shallow_typeconst list;
   sc_props: shallow_prop list;
@@ -251,8 +251,8 @@ let sm_dynamicallycallable sm = MethodFlags.get_dynamicallycallable sm.sm_flags
 
 let sm_php_std_lib sm = MethodFlags.get_php_std_lib sm.sm_flags
 
-let sm_sound_dynamic_callable sm =
-  MethodFlags.get_sound_dynamic_callable sm.sm_flags
+let sm_support_dynamic_type sm =
+  MethodFlags.get_support_dynamic_type sm.sm_flags
 
 type fun_decl = fun_elt [@@deriving show]
 

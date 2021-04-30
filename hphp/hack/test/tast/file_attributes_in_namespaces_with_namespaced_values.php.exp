@@ -2,29 +2,29 @@ Errors:
   [9:57-10:1] A semicolon `;` is expected here.
   [12:33-56] Attribute arguments must be literals
 [(Class
-    { c_span = [4:3-6:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-      c_name = ([4:9-30], "\\A\\MyStringFileAttribute"); c_tparams = []; 
-      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))]; 
-      c_implements_dynamic = false; c_where_constraints = []; c_consts = []; 
+    { c_span = [4:3-6:4]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+      c_name = ([4:9-30], "\\A\\MyStringFileAttribute"); c_tparams = [];
+      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))];
+      c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
       c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((string), (Some ([5:40-46], (Hprim Tstring)))); 
-         cv_id = ([5:47-58], "attr_value"); cv_expr = None; cv_user_attributes = []; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false;
+         cv_visibility = Public; cv_type = ((string), (Some ([5:40-46], (Hprim Tstring))));
+         cv_id = ([5:47-58], "attr_value"); cv_expr = None; cv_user_attributes = [];
+         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
          cv_span = [5:47-58] }
         ];
       c_methods =
-      [{ m_span = [5:5-63]; m_annotation = (); m_final = false; m_abstract = false; 
-         m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
+      [{ m_span = [5:5-63]; m_annotation = (); m_final = false; m_abstract = false;
+         m_static = false; m_readonly_this = false; m_visibility = Public;
+         m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([5:47-58], string); param_type_hint = ((string), (Some ([5:40-46], (Hprim Tstring)))); 
-            param_is_variadic = false; param_pos = [5:47-58]; param_name = "$attr_value"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+         [{ param_annotation = ([5:47-58], string); param_type_hint = ((string), (Some ([5:40-46], (Hprim Tstring))));
+            param_is_variadic = false; param_pos = [5:47-58]; param_name = "$attr_value";
+            param_expr = None; param_readonly = None; param_callconv = None;
             param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -37,15 +37,15 @@ Errors:
                     (([5:47-58], string), (Lvar ([5:47-58], $attr_value))))))));
              ([Pos.none], Noop)];
            fb_annotation = () };
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((void), (Some ([5:21-32], (Hprim Tvoid)))); m_external = false; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
+         m_ret = ((void), (Some ([5:21-32], (Hprim Tvoid)))); m_external = false;
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-        ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+        ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false;
         ns_disable_xhp_element_mangling = false };
       c_user_attributes = [];
       c_file_attributes =
@@ -54,28 +54,28 @@ Errors:
             ua_params = [(([12:33-56], string), (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
            ];
          fa_namespace =
-         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-           ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false; 
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+           ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false;
            ns_disable_xhp_element_mangling = false }
          }
         ];
       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-       c_name = ([8:9-16], "\\A\\MyClass"); c_tparams = []; c_extends = []; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
+     { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+       c_name = ([8:9-16], "\\A\\MyClass"); c_tparams = []; c_extends = [];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
        c_where_constraints = [];
        c_consts =
        [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_expr = (Some (([9:35-57], string), (String "my class const value"))); cc_doc_comment = None }];
-       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
        c_user_attributes = [];
        c_file_attributes =
@@ -84,25 +84,25 @@ Errors:
              ua_params = [(([12:33-56], string), (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
             ];
           fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false; 
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false;
             ns_disable_xhp_element_mangling = false }
           }
          ];
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
-       c_name = ([16:9-21], "\\B\\MyOtherClass"); c_tparams = []; c_extends = []; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_implements_dynamic = false; 
-       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
+     { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict; c_final = false;
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
+       c_name = ([16:9-21], "\\B\\MyOtherClass"); c_tparams = []; c_extends = [];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
+       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
        c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = (Some "B"); ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = (Some "B"); ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
        c_user_attributes = [];
        c_file_attributes =
@@ -111,9 +111,9 @@ Errors:
              ua_params = [(([12:33-56], string), (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
             ];
           fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false; 
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false;
             ns_disable_xhp_element_mangling = false }
           }
          ];

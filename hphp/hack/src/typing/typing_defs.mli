@@ -61,7 +61,7 @@ type fun_elt = {
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
-  fe_sound_dynamic_callable: bool;
+  fe_support_dynamic_type: bool;
 }
 [@@deriving show]
 
@@ -114,7 +114,7 @@ and class_type = {
   tc_smethods: class_elt SMap.t;
   tc_construct: class_elt option * consistent_kind;
   tc_ancestors: decl_ty SMap.t;
-  tc_implements_dynamic: bool;
+  tc_support_dynamic_type: bool;
   tc_req_ancestors: requirement list;
   tc_req_ancestors_extends: SSet.t;
   tc_extends: SSet.t;
@@ -452,7 +452,7 @@ val get_ce_readonly_prop : class_elt -> bool
 
 val get_ce_dynamicallycallable : class_elt -> bool
 
-val get_ce_sound_dynamic_callable : class_elt -> bool
+val get_ce_support_dynamic_type : class_elt -> bool
 
 val xhp_attr_to_ce_flags : xhp_attr option -> Hh_prelude.Int.t
 
@@ -471,7 +471,7 @@ val make_ce_flags :
   lateinit:bool ->
   dynamicallycallable:bool ->
   readonly_prop:bool ->
-  sound_dynamic_callable:bool ->
+  support_dynamic_type:bool ->
   Hh_prelude.Int.t
 
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a

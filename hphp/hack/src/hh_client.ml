@@ -108,7 +108,8 @@ let () =
     in
     Hh_logger.log
       ~lvl
-      "hh_client bad exit: %s - %s\n%s"
+      "CLIENT_BAD_EXIT client_command=%s exit_status=%s data=%s\n%s"
+      command_name
       (Exit_status.show es)
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack);

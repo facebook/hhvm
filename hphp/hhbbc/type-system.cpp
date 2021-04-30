@@ -5619,7 +5619,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   }
 
   if (testTy.is(BStr | BCls | BLazyCls)) {
-    return valTy.couldBe(BCls | BLazyCls);
+    return RO::EvalClassIsStringNotices && valTy.couldBe(BCls | BLazyCls);
   } else if (testTy.is(BVec) || testTy.is(BVec | BClsMeth)) {
     return mayLogClsMeth;
   } else if (testTy.is(BDict)) {

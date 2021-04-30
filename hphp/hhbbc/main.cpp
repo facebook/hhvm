@@ -331,6 +331,7 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNotices =
     RuntimeOption::EvalClassnameNotices;
+  gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
   gd.RaiseClsMethConversionWarning =
     RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;

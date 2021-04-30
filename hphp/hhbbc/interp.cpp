@@ -4910,7 +4910,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     // VerifyRetType will convert a TCls to a TStr implicitly
     // (and possibly warn)
     if (tcT.couldBe(BStr) && stackT.couldBe(BCls | BLazyCls)) {
-      stackT |= TStr;
+      stackT |= TSStr;
       dont_reduce = true;
     }
 

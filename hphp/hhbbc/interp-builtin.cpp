@@ -200,15 +200,26 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
     retTy |= TInt;
   }
   if (ty.couldBe(BCls)) {
-    if (ty.strictSubtypeOf(TCls)) {
-      auto cname = dcls_of(ty).cls.name();
-      retTy |= sval(cname);
+    if (is_specialized_cls(ty)) {
+      auto const dcls = dcls_of(ty);
+      if (dcls.type == DCls::Exact) {
+        auto cname = dcls_of(ty).cls.name();
+        retTy |= sval(cname);
+      } else {
+        retTy |= TSStr;
+      }
     } else {
-      retTy |= TStr;
+      retTy |= TSStr;
     }
   }
-  // TODO: T70712990: Specialize lazy class types
-  if (ty.couldBe(BLazyCls)) retTy |= TStr;
+  if (ty.couldBe(BLazyCls)) {
+    if (is_specialized_lazycls(ty)) {
+      auto cname = lazyclsval_of(ty);
+      retTy |= sval(cname);
+    } else {
+      retTy |= TSStr;
+    }
+  }
   if (ty.couldBe(BStr)) {
     retTy |= [&] {
       if (ty.subtypeOf(BSStr)) {

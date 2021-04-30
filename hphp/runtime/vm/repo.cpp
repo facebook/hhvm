@@ -293,6 +293,8 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
       s_globalData.ClassPassesClassname;
     RO::EvalClassnameNotices =
       s_globalData.ClassnameNotices;
+    RO::EvalClassIsStringNotices =
+      s_globalData.ClassIsStringNotices;
     RO::EvalRaiseClsMethConversionWarning =
       s_globalData.RaiseClsMethConversionWarning;
 

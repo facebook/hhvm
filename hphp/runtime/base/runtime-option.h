@@ -758,7 +758,6 @@ struct RuntimeOption {
   F(bool, HHBBCTestCompression,        false)                           \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
-  F(bool, EnableHhbcByRef,             true)                            \
   F(bool, LogHackcMemStats,            false)                           \
   /*
     CheckPropTypeHints:

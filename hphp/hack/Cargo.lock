@@ -34,14 +34,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "adata_state"
-version = "0.0.0"
-dependencies = [
- "hhas_adata_rust",
- "runtime",
-]
-
-[[package]]
 name = "ahash"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -101,53 +93,6 @@ dependencies = [
  "generic-array 0.13.3",
  "generic-array 0.14.4",
  "stable_deref_trait",
-]
-
-[[package]]
-name = "ast_body"
-version = "0.0.0"
-dependencies = [
- "itertools",
- "oxidized",
-]
-
-[[package]]
-name = "ast_class_expr_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "env",
- "hhbc_ast_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "ast_constant_folder_rust"
-version = "0.0.0"
-dependencies = [
- "ast_class_expr_rust",
- "ast_scope_rust",
- "env",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "indexmap",
- "itertools",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "ast_scope_rust"
-version = "0.0.0"
-dependencies = [
- "hhas_coeffects",
- "itertools",
- "oxidized",
 ]
 
 [[package]]
@@ -329,30 +274,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "closure_convert_rust"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "ast_constant_folder_rust",
- "ast_scope_rust",
- "decl_vars_rust",
- "emit_fatal_rust",
- "env",
- "global_state",
- "hhas_coeffects",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "itertools",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
- "unique_id_builder",
- "unique_list_rust",
-]
-
-[[package]]
 name = "cloudabi"
 version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -362,37 +283,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "compile"
-version = "0.0.0"
-dependencies = [
- "aast_parser",
- "anyhow",
- "bitflags",
- "elaborate_namespaces_visitor",
- "emit_program",
- "env",
- "hhas_program",
- "hhbc_ast_rust",
- "hhbc_hhas_rust",
- "instruction_sequence",
- "itertools",
- "ocamlrep",
- "ocamlrep_derive",
- "options",
- "oxidized",
- "parser_core_types",
- "profile_rust",
- "rewrite_program",
- "stack_limit",
-]
-
-[[package]]
 name = "compile_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
  "atty",
- "compile",
  "hhbc_by_ref_compile",
  "libc",
  "log",
@@ -577,18 +472,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_vars_rust"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "hhas_param_rust",
- "naming_special_names_rust",
- "oxidized",
- "unique_id_builder",
- "unique_list_rust",
-]
-
-[[package]]
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
@@ -673,483 +556,6 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
-]
-
-[[package]]
-name = "emit_adata_rust"
-version = "0.0.0"
-dependencies = [
- "adata_state",
- "env",
- "hhas_adata_rust",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "options",
- "runtime",
-]
-
-[[package]]
-name = "emit_attribute_rust"
-version = "0.0.0"
-dependencies = [
- "ast_constant_folder_rust",
- "emit_expression_rust",
- "emit_fatal_rust",
- "env",
- "escaper",
- "hhas_attribute_rust",
- "hhbc_id_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_body_rust"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "ast_class_expr_rust",
- "ast_scope_rust",
- "bitflags",
- "bstr",
- "decl_vars_rust",
- "emit_adata_rust",
- "emit_expression_rust",
- "emit_fatal_rust",
- "emit_param_rust",
- "emit_pos_rust",
- "emit_type_hint_rust",
- "env",
- "generator_rust",
- "hhas_body_rust",
- "hhas_param_rust",
- "hhas_type",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "indexmap",
- "instruction_sequence",
- "iterator",
- "itertools",
- "label_rewriter_rust",
- "label_rust",
- "lazy_static",
- "local",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
- "regex",
- "runtime",
- "scope_rust",
- "statement_state",
- "unique_id_builder",
-]
-
-[[package]]
-name = "emit_class_rust"
-version = "0.0.0"
-dependencies = [
- "emit_attribute_rust",
- "emit_body_rust",
- "emit_expression_rust",
- "emit_fatal_rust",
- "emit_memoize_method_rust",
- "emit_method_rust",
- "emit_pos_rust",
- "emit_property_rust",
- "emit_symbol_refs_rust",
- "emit_type_constant_rust",
- "emit_type_hint_rust",
- "emit_xhp_rust",
- "env",
- "hhas_attribute_rust",
- "hhas_class_rust",
- "hhas_coeffects",
- "hhas_constant_rust",
- "hhas_method_rust",
- "hhas_param_rust",
- "hhas_pos_rust",
- "hhas_property_rust",
- "hhas_type",
- "hhas_type_const",
- "hhas_xhp_attribute_rust",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "label_rust",
- "local",
- "naming_special_names_rust",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_constant_rust"
-version = "0.0.0"
-dependencies = [
- "core_utils_rust",
- "emit_body_rust",
- "emit_type_hint_rust",
- "env",
- "hhas_coeffects",
- "hhas_constant_rust",
- "hhas_function_rust",
- "hhas_pos_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_expression_rust"
-version = "0.0.0"
-dependencies = [
- "ast_class_expr_rust",
- "ast_constant_folder_rust",
- "bstr",
- "emit_adata_rust",
- "emit_fatal_rust",
- "emit_pos_rust",
- "emit_symbol_refs_rust",
- "emit_type_constant_rust",
- "env",
- "hhas_symbol_refs_rust",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "indexmap",
- "instruction_sequence",
- "itertools",
- "label_rust",
- "lazy_static",
- "local",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "regex",
- "runtime",
- "scope_rust",
-]
-
-[[package]]
-name = "emit_fatal_rust"
-version = "0.0.0"
-dependencies = [
- "emit_pos_rust",
- "hhbc_ast_rust",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_file_attributes_rust"
-version = "0.0.0"
-dependencies = [
- "emit_attribute_rust",
- "env",
- "hhas_attribute_rust",
- "instruction_sequence",
- "itertools",
- "oxidized",
-]
-
-[[package]]
-name = "emit_function_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "emit_attribute_rust",
- "emit_body_rust",
- "emit_memoize_helpers_rust",
- "emit_param_rust",
- "emit_pos_rust",
- "env",
- "hhas_attribute_rust",
- "hhas_body_rust",
- "hhas_coeffects",
- "hhas_function_rust",
- "hhas_param_rust",
- "hhas_pos_rust",
- "hhas_type",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "itertools",
- "local",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_memoize_helpers_rust"
-version = "0.0.0"
-dependencies = [
- "emit_fatal_rust",
- "hhas_param_rust",
- "instruction_sequence",
- "local",
- "oxidized",
-]
-
-[[package]]
-name = "emit_memoize_method_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "bitflags",
- "emit_attribute_rust",
- "emit_body_rust",
- "emit_fatal_rust",
- "emit_memoize_helpers_rust",
- "emit_param_rust",
- "emit_pos_rust",
- "env",
- "hhas_attribute_rust",
- "hhas_body_rust",
- "hhas_coeffects",
- "hhas_method_rust",
- "hhas_param_rust",
- "hhas_pos_rust",
- "hhas_type",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "local",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_method_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "emit_attribute_rust",
- "emit_body_rust",
- "emit_fatal_rust",
- "emit_memoize_helpers_rust",
- "emit_native_opcode_rust",
- "env",
- "hhas_attribute_rust",
- "hhas_coeffects",
- "hhas_method_rust",
- "hhas_pos_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "itertools",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
-]
-
-[[package]]
-name = "emit_native_opcode_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "emit_body_rust",
- "emit_fatal_rust",
- "emit_param_rust",
- "env",
- "hhas_body_rust",
- "instruction_sequence",
- "local",
- "oxidized",
-]
-
-[[package]]
-name = "emit_param_rust"
-version = "0.0.0"
-dependencies = [
- "ast_scope_rust",
- "emit_attribute_rust",
- "emit_expression_rust",
- "emit_fatal_rust",
- "emit_pos_rust",
- "emit_type_hint_rust",
- "env",
- "hhas_param_rust",
- "hhas_type",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "local",
- "options",
- "oxidized",
-]
-
-[[package]]
-name = "emit_pos_rust"
-version = "0.0.0"
-dependencies = [
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_program"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "emit_adata_rust",
- "emit_class_rust",
- "emit_constant_rust",
- "emit_file_attributes_rust",
- "emit_function_rust",
- "emit_record_def_rust",
- "emit_symbol_refs_rust",
- "emit_typedef_rust",
- "env",
- "hhas_program",
- "hhbc_ast_rust",
- "instruction_sequence",
- "ocamlrep",
- "oxidized",
-]
-
-[[package]]
-name = "emit_property_rust"
-version = "0.0.0"
-dependencies = [
- "ast_constant_folder_rust",
- "emit_attribute_rust",
- "emit_expression_rust",
- "emit_fatal_rust",
- "emit_pos_rust",
- "emit_type_hint_rust",
- "env",
- "hhas_property_rust",
- "hhas_type",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_record_def_rust"
-version = "0.0.0"
-dependencies = [
- "ast_constant_folder_rust",
- "emit_fatal_rust",
- "emit_type_hint_rust",
- "env",
- "hhas_pos_rust",
- "hhas_record_def_rust",
- "hhas_type",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_symbol_refs_rust"
-version = "0.0.0"
-dependencies = [
- "env",
- "hhas_symbol_refs_rust",
- "hhbc_id_rust",
- "symbol_refs_state",
-]
-
-[[package]]
-name = "emit_type_constant_rust"
-version = "0.0.0"
-dependencies = [
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_type_hint_rust"
-version = "0.0.0"
-dependencies = [
- "emit_fatal_rust",
- "hhas_type",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "emit_typedef_rust"
-version = "0.0.0"
-dependencies = [
- "emit_attribute_rust",
- "emit_body_rust",
- "emit_type_constant_rust",
- "emit_type_hint_rust",
- "env",
- "hhas_pos_rust",
- "hhas_type",
- "hhas_typedef_rust",
- "hhbc_id_rust",
- "instruction_sequence",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "emit_xhp_rust"
-version = "0.0.0"
-dependencies = [
- "emit_method_rust",
- "emit_property_rust",
- "env",
- "hhas_method_rust",
- "hhas_property_rust",
- "hhas_xhp_attribute_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "env"
-version = "0.0.0"
-dependencies = [
- "adata_state",
- "ast_body",
- "ast_scope_rust",
- "bitflags",
- "global_state",
- "iterator",
- "itertools",
- "label_rust",
- "local",
- "ocamlrep",
- "options",
- "oxidized",
- "statement_state",
- "symbol_refs_state",
 ]
 
 [[package]]
@@ -1251,14 +657,6 @@ name = "full_fidelity_schema_version_number"
 version = "0.0.0"
 
 [[package]]
-name = "generator_rust"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "oxidized",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1295,18 +693,6 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
-]
-
-[[package]]
-name = "global_state"
-version = "0.0.0"
-dependencies = [
- "hhas_coeffects",
- "lazy_static",
- "ocamlrep",
- "ocamlrep_derive",
- "oxidized",
- "unique_id_builder",
 ]
 
 [[package]]
@@ -1420,7 +806,6 @@ dependencies = [
  "anyhow",
  "atty",
  "bumpalo",
- "compile",
  "direct_decl_parser",
  "hhbc_by_ref_compile",
  "multifile_rust",
@@ -1479,203 +864,6 @@ version = "0.0.0"
 dependencies = [
  "names",
  "structopt",
-]
-
-[[package]]
-name = "hhas_adata_rust"
-version = "0.0.0"
-dependencies = [
- "runtime",
-]
-
-[[package]]
-name = "hhas_attribute_rust"
-version = "0.0.0"
-dependencies = [
- "naming_special_names_rust",
- "runtime",
-]
-
-[[package]]
-name = "hhas_body_rust"
-version = "0.0.0"
-dependencies = [
- "hhas_param_rust",
- "hhas_type",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_class_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhas_attribute_rust",
- "hhas_coeffects",
- "hhas_constant_rust",
- "hhas_method_rust",
- "hhas_pos_rust",
- "hhas_property_rust",
- "hhas_type",
- "hhas_type_const",
- "hhbc_id_rust",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_coeffects"
-version = "0.0.0"
-dependencies = [
- "hhbc_string_utils_rust",
- "naming_special_names_rust",
- "ocamlrep",
- "ocamlrep_derive",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_constant_rust"
-version = "0.0.0"
-dependencies = [
- "ast_constant_folder_rust",
- "emit_expression_rust",
- "env",
- "hhbc_id_rust",
- "instruction_sequence",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "hhas_function_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhas_attribute_rust",
- "hhas_body_rust",
- "hhas_coeffects",
- "hhas_param_rust",
- "hhas_pos_rust",
- "hhbc_id_rust",
-]
-
-[[package]]
-name = "hhas_method_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhas_attribute_rust",
- "hhas_body_rust",
- "hhas_coeffects",
- "hhas_pos_rust",
- "hhbc_id_rust",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_param_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhas_attribute_rust",
- "hhas_type",
- "label_rust",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_pos_rust"
-version = "0.0.0"
-dependencies = [
- "oxidized",
-]
-
-[[package]]
-name = "hhas_program"
-version = "0.0.0"
-dependencies = [
- "hhas_adata_rust",
- "hhas_attribute_rust",
- "hhas_class_rust",
- "hhas_constant_rust",
- "hhas_function_rust",
- "hhas_record_def_rust",
- "hhas_symbol_refs_rust",
- "hhas_typedef_rust",
- "hhbc_ast_rust",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_property_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhas_attribute_rust",
- "hhas_type",
- "hhbc_id_rust",
- "instruction_sequence",
- "oxidized",
- "runtime",
-]
-
-[[package]]
-name = "hhas_record_def_rust"
-version = "0.0.0"
-dependencies = [
- "hhas_pos_rust",
- "hhas_type",
- "hhbc_id_rust",
- "runtime",
-]
-
-[[package]]
-name = "hhas_symbol_refs_rust"
-version = "0.0.0"
-
-[[package]]
-name = "hhas_type"
-version = "0.0.0"
-dependencies = [
- "bitflags",
-]
-
-[[package]]
-name = "hhas_type_const"
-version = "0.0.0"
-dependencies = [
- "runtime",
-]
-
-[[package]]
-name = "hhas_typedef_rust"
-version = "0.0.0"
-dependencies = [
- "hhas_attribute_rust",
- "hhas_pos_rust",
- "hhas_type",
- "hhbc_id_rust",
- "runtime",
-]
-
-[[package]]
-name = "hhas_xhp_attribute_rust"
-version = "0.0.0"
-dependencies = [
- "oxidized",
-]
-
-[[package]]
-name = "hhbc_ast_rust"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "hhbc_id_rust",
- "iterator",
- "label_rust",
- "local",
- "runtime",
 ]
 
 [[package]]
@@ -2683,57 +1871,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hhbc_hhas_rust"
-version = "0.0.0"
-dependencies = [
- "ast_class_expr_rust",
- "core_utils_rust",
- "emit_type_hint_rust",
- "env",
- "escaper",
- "hhas_adata_rust",
- "hhas_attribute_rust",
- "hhas_body_rust",
- "hhas_class_rust",
- "hhas_coeffects",
- "hhas_constant_rust",
- "hhas_function_rust",
- "hhas_method_rust",
- "hhas_param_rust",
- "hhas_pos_rust",
- "hhas_program",
- "hhas_property_rust",
- "hhas_record_def_rust",
- "hhas_symbol_refs_rust",
- "hhas_type",
- "hhas_type_const",
- "hhas_typedef_rust",
- "hhbc_ast_rust",
- "hhbc_id_rust",
- "hhbc_string_utils_rust",
- "indexmap",
- "instruction_sequence",
- "iterator",
- "itertools",
- "label_rust",
- "lazy_static",
- "local",
- "naming_special_names_rust",
- "ocaml_helper",
- "oxidized",
- "regex",
- "runtime",
- "thiserror",
-]
-
-[[package]]
-name = "hhbc_id_rust"
-version = "0.0.0"
-dependencies = [
- "hhbc_string_utils_rust",
-]
-
-[[package]]
 name = "hhbc_string_utils_rust"
 version = "0.0.0"
 dependencies = [
@@ -2793,25 +1930,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "instruction_sequence"
-version = "0.0.0"
-dependencies = [
- "hhbc_ast_rust",
- "iterator",
- "itertools",
- "label_rust",
- "local",
- "oxidized",
- "pretty_assertions",
- "runtime",
- "thiserror",
-]
-
-[[package]]
-name = "iterator"
-version = "0.0.0"
-
-[[package]]
 name = "itertools"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2840,21 +1958,6 @@ name = "json"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-
-[[package]]
-name = "label_rewriter_rust"
-version = "0.0.0"
-dependencies = [
- "env",
- "hhas_param_rust",
- "hhbc_ast_rust",
- "instruction_sequence",
- "label_rust",
-]
-
-[[package]]
-name = "label_rust"
-version = "0.0.0"
 
 [[package]]
 name = "lazy_static"
@@ -2895,14 +1998,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
-]
-
-[[package]]
-name = "local"
-version = "0.0.0"
-dependencies = [
- "indexmap",
- "naming_special_names_rust",
 ]
 
 [[package]]
@@ -3605,37 +2700,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rewrite_program"
-version = "0.0.0"
-dependencies = [
- "closure_convert_rust",
- "emit_fatal_rust",
- "env",
- "instruction_sequence",
- "oxidized",
- "rewrite_xml",
-]
-
-[[package]]
-name = "rewrite_xml"
-version = "0.0.0"
-dependencies = [
- "emit_symbol_refs_rust",
- "env",
- "hhbc_id_rust",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "runtime"
-version = "0.0.0"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
 name = "rusqlite"
 version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3751,17 +2815,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "scope_rust"
-version = "0.0.0"
-dependencies = [
- "env",
- "instruction_sequence",
- "iterator",
- "label_rust",
- "local",
-]
-
-[[package]]
 name = "scopeguard"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3864,14 +2917,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "statement_state"
-version = "0.0.0"
-dependencies = [
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3923,13 +2968,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "symbol_refs_state"
-version = "0.0.0"
-dependencies = [
- "hhas_symbol_refs_rust",
 ]
 
 [[package]]
@@ -4104,17 +3142,6 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
-
-[[package]]
-name = "unique_id_builder"
-version = "0.0.0"
-
-[[package]]
-name = "unique_list_rust"
-version = "0.0.0"
-dependencies = [
- "indexmap",
-]
 
 [[package]]
 name = "vcpkg"

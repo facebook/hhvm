@@ -5,7 +5,7 @@
 
 use crate::utils;
 use ::anyhow::anyhow;
-use compile::{Env, EnvFlags, Profile};
+use hhbc_by_ref_compile::Profile;
 use multifile_rust as multifile;
 use options::Options;
 use oxidized::relative_path::{self, RelativePath};
@@ -60,9 +60,6 @@ pub struct Opts {
     /// Disable toplevel definition elaboration
     #[structopt(long)]
     disable_toplevel_elaboration: bool,
-
-    #[structopt(long)]
-    use_hhbc_by_ref: bool,
 
     #[structopt(long)]
     thread_num: Option<usize>,
@@ -142,35 +139,19 @@ fn process_single_file_impl(
 
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let mut output = String::new();
-    if opts.use_hhbc_by_ref {
-        let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
-        flags.set(
-            hhbc_by_ref_compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
-            opts.disable_toplevel_elaboration,
-        );
-        let env: hhbc_by_ref_compile::Env<String> = hhbc_by_ref_compile::Env {
-            filepath: rel_path,
-            config_jsons: vec![],
-            config_list: vec![],
-            flags,
-        };
-        hhbc_by_ref_compile::from_text(&env, stack_limit, &mut output, content)?;
-        Ok((output, None))
-    } else {
-        let mut flags = EnvFlags::empty();
-        flags.set(
-            EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
-            opts.disable_toplevel_elaboration,
-        );
-        let env: Env<String> = Env {
-            filepath: rel_path,
-            config_jsons: vec![],
-            config_list: vec![],
-            flags,
-        };
-        let profile = compile::from_text(&env, stack_limit, &mut output, content)?;
-        Ok((output, profile))
-    }
+    let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
+    flags.set(
+        hhbc_by_ref_compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        opts.disable_toplevel_elaboration,
+    );
+    let env: hhbc_by_ref_compile::Env<String> = hhbc_by_ref_compile::Env {
+        filepath: rel_path,
+        config_jsons: vec![],
+        config_list: vec![],
+        flags,
+    };
+    hhbc_by_ref_compile::from_text(&env, stack_limit, &mut output, content)?;
+    Ok((output, None))
 }
 
 fn process_single_file_with_retry(

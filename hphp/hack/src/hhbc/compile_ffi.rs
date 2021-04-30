@@ -275,55 +275,34 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
 
 #[no_mangle]
 extern "C" fn compile_from_text_ffi(
-    use_hhbc_by_ref: usize,
     env: usize,
     rust_output_config: usize,
     source_text: usize,
 ) -> usize {
-    let use_hhbc_by_ref = unsafe { bool::from_ocaml(use_hhbc_by_ref).unwrap() };
-
     ocamlrep_ocamlpool::catch_unwind_with_handler(
         || {
             let job_builder = move || {
                 move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-                    if use_hhbc_by_ref {
-                        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                        let output_config =
-                            unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                        let env = unsafe {
-                            hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap()
-                        };
-                        let mut w = String::new();
-                        match hhbc_by_ref_compile::from_text_(
-                            &env,
-                            stack_limit,
-                            &mut w,
-                            source_text,
-                            None,
-                        ) {
-                            Ok(profile) => print_output(
-                                w,
-                                output_config,
-                                &env.filepath,
-                                profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
-                            ),
-                            Err(e) => Err(anyhow!("{}", e)),
-                        }
-                    } else {
-                        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                        let output_config =
-                            unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                        let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                        let mut w = String::new();
-                        match compile::from_text_(&env, stack_limit, &mut w, source_text, None) {
-                            Ok(profile) => print_output(
-                                w,
-                                output_config,
-                                &env.filepath,
-                                profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
-                            ),
-                            Err(e) => Err(anyhow!("{}", e)),
-                        }
+                    let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+                    let output_config =
+                        unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
+                    let env =
+                        unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+                    let mut w = String::new();
+                    match hhbc_by_ref_compile::from_text_(
+                        &env,
+                        stack_limit,
+                        &mut w,
+                        source_text,
+                        None,
+                    ) {
+                        Ok(profile) => print_output(
+                            w,
+                            output_config,
+                            &env.filepath,
+                            profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
+                        ),
+                        Err(e) => Err(anyhow!("{}", e)),
                     }
                 }
             };
@@ -334,19 +313,11 @@ extern "C" fn compile_from_text_ffi(
                 // Not always printing warning here because this would fail some HHVM tests
                 if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                    if use_hhbc_by_ref {
-                        eprintln!(
-                            "[hrust] warning: hhbc_by_ref_compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                            (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                            source_text.file_path().path_str(),
-                        );
-                    } else {
-                        eprintln!(
-                            "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                            (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                            source_text.file_path().path_str(),
-                        );
-                    }
+                    eprintln!(
+                        "[hrust] warning: hhbc_by_ref_compile_from_text_ffi exceeded stack of {} KiB on: {}",
+                        (stack_size_tried - stack_slack(stack_size_tried)) / KI,
+                        source_text.file_path().path_str(),
+                    );
                 }
             };
             let job = stack_limit::retry::Job {
@@ -371,19 +342,11 @@ extern "C" fn compile_from_text_ffi(
                 unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
 
             let mut w = String::new();
-            if use_hhbc_by_ref {
-                let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                hhbc_by_ref_compile::emit_fatal_program(&env, &mut w, panic_msg)
-                    .and_then(|_| print_output(w, output_config, &env.filepath, None))
-                    .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
-                    .map_err(|e| e.to_string())
-            } else {
-                let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                compile::emit_fatal_program(&env, &mut w, panic_msg)
-                    .and_then(|_| print_output(w, output_config, &env.filepath, None))
-                    .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
-                    .map_err(|e| e.to_string())
-            }
+            let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+            hhbc_by_ref_compile::emit_fatal_program(&env, &mut w, panic_msg)
+                .and_then(|_| print_output(w, output_config, &env.filepath, None))
+                .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
+                .map_err(|e| e.to_string())
         },
     )
 }
@@ -429,7 +392,7 @@ fn print_output(
 }
 
 ocamlrep_ocamlpool::ocaml_ffi! {
-  fn desugar_and_print_expr_trees(env: compile::Env<OcamlStr>) {
-    compile::dump_expr_tree::desugar_and_print(&env);
+  fn desugar_and_print_expr_trees(env: hhbc_by_ref_compile::Env<OcamlStr>) {
+    hhbc_by_ref_compile::dump_expr_tree::desugar_and_print(&env);
   }
 }

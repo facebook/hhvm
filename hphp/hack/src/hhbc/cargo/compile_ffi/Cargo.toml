@@ -13,7 +13,6 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 anyhow = "1.0"
 atty = "0.2"
-compile = { path = "../compile" }
 hhbc_by_ref_compile = { path = "../../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 libc = "0.2.86"
 log = { version = "0.4.8", features = ["kv_unstable"] }

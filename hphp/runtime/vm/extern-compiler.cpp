@@ -890,7 +890,6 @@ void ExternCompiler::writeProgram(
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
     ("config_overrides", options.toDynamic())
-    ("use_hhbc_by_ref", RuntimeOption::EvalEnableHhbcByRef)
     ("log_hackc_mem_stats", RuntimeOption::EvalLogHackcMemStats);
   writeMessage(header, code);
 }

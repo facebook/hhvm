@@ -1,3 +1,2 @@
 -v Hack.Lang.AllowUnstableFeatures=1
 -v Hack.Lang.EnableReadonlyEnforcement=1
--v Eval.EnableHhbcByRef=0

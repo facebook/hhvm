@@ -48,7 +48,6 @@ type options = {
   include_header: bool;
   (* Experimental *)
   dump_desugared_expression_trees: bool;
-  use_hhbc_by_ref: bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -234,7 +233,6 @@ let parse_options () =
     disable_toplevel_elaboration = !disable_toplevel_elaboration;
     include_header = !include_header;
     dump_desugared_expression_trees = !dump_desugared_expression_trees;
-    use_hhbc_by_ref = true;
   }
 
 let fail_daemon file error =
@@ -427,13 +425,7 @@ let do_compile
             0 );
       }
   in
-  match
-    Compile_ffi.rust_from_text_ffi
-      compiler_options.use_hhbc_by_ref
-      env
-      rust_output_config
-      source_text
-  with
+  match Compile_ffi.rust_from_text_ffi env rust_output_config source_text with
   | Ok () -> ()
   | Error msg -> raise (Failure msg)
 
@@ -691,13 +683,9 @@ let decl_and_run_mode compiler_options =
                       fail_daemon None ("for_debugger_eval flag missing: " ^ af))
                     header
                 in
-                let use_hhbc_by_ref =
-                  get_field_opt (get_bool "use_hhbc_by_ref") header
-                  |> Option.value ~default:true
-                in
                 add_config_overrides header;
                 let compiler_options =
-                  { compiler_options with for_debugger_eval; use_hhbc_by_ref }
+                  { compiler_options with for_debugger_eval }
                 in
                 let result =
                   process_single_source_unit

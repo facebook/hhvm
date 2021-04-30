@@ -58,7 +58,8 @@ Errors:
           ([13:3-17],
            (Expr
               (([13:3-16], string),
-               (Binop ((Eq None), (([13:3-11], string), (Array_get ((([13:3-9], Vector<int>), (Lvar ([13:3-9], $items))), None))), (([13:14-16], string), (Lvar ([13:14-16], $s))))))));
+               (Binop ((Eq None), (([13:3-11], string), (Array_get ((([13:3-9], Vector<int>), (Lvar ([13:3-9], $items))), None))),
+                  (([13:14-16], string), (Hole ((([13:14-16], string), (Lvar ([13:14-16], $s))), (string), (int), Typing))))))));
           ([14:3-15], (Return (Some (([14:10-14], int), (Call ((([14:10-12], (function(): int)), (Lvar ([14:10-12], $f))), [], [], None))))))];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 

@@ -413,6 +413,17 @@ let run_on_intersection :
   in
   (env, resl)
 
+(** As above but allow functions which also return subtyping/coercion error
+    information *)
+let run_on_intersection_res env ~f tyl =
+  let g env ty =
+    let (env, a, b) = f env ty in
+    (env, (a, b))
+  in
+  let (env, pairs) = run_on_intersection env ~f:g tyl in
+  let (res, errs) = List.unzip pairs in
+  (env, res, errs)
+
 (*****************************************************************************)
 (* Dynamicism  *)
 (*****************************************************************************)

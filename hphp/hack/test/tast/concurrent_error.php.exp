@@ -33,7 +33,12 @@ Errors:
                        (([10:11-20], Awaitable<int>), (Call ((([10:11-18], (function(): Awaitable<int>)), (Id ([10:11-18], "\\gen_int"))), [], [], None))))))));
                 ([9:5-27], (Expr (([9:5-26], int), (Binop ((Eq None), (([9:5-8], int), (Lvar ([9:5-8], $v1))), (([9:11-26], int), (Lvar ([9:11-26], __tmp$1))))))))]
               )));
-           ([12:3-20], (Return (Some (([12:10-19], int), (Binop (Plus, (([12:10-13], int), (Lvar ([12:10-13], $v1))), (([12:16-19], Awaitable<int>), (Lvar ([12:16-19], $v2)))))))))];
+           ([12:3-20],
+            (Return
+               (Some (([12:10-19], int),
+                      (Binop (Plus, (([12:10-13], int), (Lvar ([12:10-13], $v1))),
+                         (([12:16-19], Awaitable<int>), (Hole ((([12:16-19], Awaitable<int>), (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))))))
+           ];
          fb_annotation = () };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
        f_external = false;

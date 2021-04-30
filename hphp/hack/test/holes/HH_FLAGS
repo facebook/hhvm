@@ -1,2 +1,3 @@
---allowed-fixme-codes-strict 4110,4323,4417
---allowed-decl-fixme-codes 4110,4323,4417
+--allowed-fixme-codes-strict 4110,4323,4417,4423
+--allowed-decl-fixme-codes 4110,4323,4417,4423
+--union-intersection-type-hints

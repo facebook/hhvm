@@ -1,0 +1,204 @@
+[(Class
+    { c_span = [3:1-42:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
+         cv_visibility = Private; cv_type = ((int), (Some ([4:18-21], (Hprim Tint)))); 
+         cv_id = ([4:22-27], "prop"); cv_expr = (Some (([4:30-31], int), (Int "0"))); 
+         cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+         cv_is_static = true; cv_span = [4:22-31] };
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private; cv_type = ((?int), (Some ([5:18-22], (Hoption ([5:19-22], (Hprim Tint)))))); 
+          cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some (([5:40-44], null), Null)); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [5:23-44] };
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private; cv_type = (((int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
+          cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (([6:45-57], (int, string)), (Tuple [(([6:51-52], int), (Int "0")); (([6:54-56], string), (String ""))]))); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [6:32-57] };
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private; cv_type = ((Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
+          cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some (([7:45-54], Vector<string>), (ValCollection (Vector, None, [])))); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [7:33-54] }
+        ];
+      c_methods =
+      [{ m_span = [9:3-12:4]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([9:19-27], "set_prop"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([9:35-37], string); param_type_hint = ((string), (Some ([9:28-34], (Hprim Tstring)))); 
+            param_is_variadic = false; param_pos = [9:35-37]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None;
+         m_body =
+         { fb_ast =
+           [([11:5-22],
+             (Expr
+                (([11:5-21], string),
+                 (Binop ((Eq None), (([11:5-16], int), (Class_get ((([11:5-9], C), CIself), (CGstring ([11:11-16], "$prop")), false))),
+                    (([11:19-21], string), (Hole ((([11:19-21], string), (Lvar ([11:19-21], $x))), (string), (int), Typing))))))))
+             ];
+           fb_annotation = () };
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([9:40-44], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None };
+        { m_span = [14:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([14:19-37], "set_prop_intersect"); m_tparams = []; 
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([14:54-56], (bool & string));
+             param_type_hint = (((bool & string)), (Some ([14:38-53], (Hintersection [([14:39-43], (Hprim Tbool)); ([14:46-52], (Hprim Tstring))])))); 
+             param_is_variadic = false; param_pos = [14:54-56]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([16:5-31],
+              (Expr
+                 (([16:5-30], (bool & string)),
+                  (Binop ((Eq None), (([16:5-25], ?int), (Class_get ((([16:5-9], C), CIself), (CGstring ([16:11-25], "$nullable_prop")), false))),
+                     (([16:28-30], (bool & string)), (Hole ((([16:28-30], (bool & string)), (Lvar ([16:28-30], $x))), ((bool & string)), (?int), Typing))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([14:59-63], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [19:3-22:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([19:19-33], "set_prop_union"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([19:49-51], (int | string)); param_type_hint = (((int | string)), (Some ([19:34-48], (Hunion [([19:35-38], (Hprim Tint)); ([19:41-47], (Hprim Tstring))]))));
+             param_is_variadic = false; param_pos = [19:49-51]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([21:5-22],
+              (Expr
+                 (([21:5-21], (int | string)),
+                  (Binop ((Eq None), (([21:5-16], int), (Class_get ((([21:5-9], C), CIself), (CGstring ([21:11-16], "$prop")), false))),
+                     (([21:19-21], (int | string)), (Hole ((([21:19-21], (int | string)), (Lvar ([21:19-21], $x))), ((int | string)), (int), Typing))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([19:54-58], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [23:3-26:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([23:19-32], "set_pair_prop"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([23:45-47], (int, bool)); param_type_hint = (((int, bool)), (Some ([23:33-44], (Htuple [([23:34-37], (Hprim Tint)); ([23:39-43], (Hprim Tbool))]))));
+             param_is_variadic = false; param_pos = [23:45-47]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([25:5-27],
+              (Expr
+                 (([25:5-26], (int, bool)),
+                  (Binop ((Eq None), (([25:5-21], (int, string)), (Class_get ((([25:5-9], C), CIself), (CGstring ([25:11-21], "$pair_prop")), false))),
+                     (([25:24-26], (int, bool)), (Hole ((([25:24-26], (int, bool)), (Lvar ([25:24-26], $x))), ((int, bool)), ((int, string)), Typing))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([23:50-54], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [28:3-31:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([28:19-34], "append_vec_prop"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([28:40-42], bool); param_type_hint = ((bool), (Some ([28:35-39], (Hprim Tbool)))); 
+             param_is_variadic = false; param_pos = [28:40-42]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([30:5-28],
+              (Expr
+                 (([30:5-27], bool),
+                  (Binop ((Eq None), (([30:5-22], bool), (Array_get ((([30:5-20], Vector<string>), (Class_get ((([30:5-9], C), CIself), (CGstring ([30:11-20], "$vec_prop")), false))), None))),
+                     (([30:25-27], bool), (Hole ((([30:25-27], bool), (Lvar ([30:25-27], $x))), (bool), (string), Typing))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([28:45-49], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [33:3-36:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([33:19-36], "set_pair_prop_fst"); m_tparams = []; 
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([33:42-44], bool); param_type_hint = ((bool), (Some ([33:37-41], (Hprim Tbool)))); 
+             param_is_variadic = false; param_pos = [33:42-44]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([35:5-30],
+              (Expr
+                 (([35:5-29], bool),
+                  (Binop ((Eq None),
+                     (([35:5-24], bool),
+                      (Array_get ((([35:5-21], (int, string)), (Class_get ((([35:5-9], C), CIself), (CGstring ([35:11-21], "$pair_prop")), false))), (Some (([35:22-23], int), (Int "0")))))),
+                     (([35:27-29], bool), (Lvar ([35:27-29], $x))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([33:47-51], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None };
+        { m_span = [38:3-41:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([38:19-36], "set_pair_prop_snd"); m_tparams = []; 
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([38:42-44], bool); param_type_hint = ((bool), (Some ([38:37-41], (Hprim Tbool)))); 
+             param_is_variadic = false; param_pos = [38:42-44]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([40:5-30],
+              (Expr
+                 (([40:5-29], bool),
+                  (Binop ((Eq None),
+                     (([40:5-24], bool),
+                      (Array_get ((([40:5-21], (int, string)), (Class_get ((([40:5-9], C), CIself), (CGstring ([40:11-21], "$pair_prop")), false))), (Some (([40:22-23], int), (Int "1")))))),
+                     (([40:27-29], bool), (Lvar ([40:27-29], $x))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([38:47-51], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None })

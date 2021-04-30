@@ -14,3 +14,16 @@ val apply_rules :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty) ->
   Typing_env_types.env * Typing_defs.locl_ty
+
+val apply_rules_with_err :
+  ?ignore_type_structure:bool ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  (Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env
+  * Typing_defs.locl_ty
+  * (Typing_defs.locl_ty, Typing_defs.locl_ty * Typing_defs.locl_ty) result) ->
+  Typing_env_types.env
+  * Typing_defs.locl_ty
+  * (Typing_defs.locl_ty * Typing_defs.locl_ty) option

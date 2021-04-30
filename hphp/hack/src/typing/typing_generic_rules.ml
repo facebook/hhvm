@@ -62,27 +62,63 @@ let is_arraykey t =
   | Tprim Aast.Tarraykey -> true
   | _ -> false
 
-let apply_rules ?(ignore_type_structure = false) env ty f =
+let apply_rules_with_err ?(ignore_type_structure = false) env ty f =
+  let fold_errs errs =
+    Result.map ~f:List.rev
+    @@ Result.map_error ~f:(fun (acts, exps) -> List.(rev acts, rev exps))
+    @@ List.fold_left errs ~init:(Ok []) ~f:(fun acc res ->
+           match (acc, res) with
+           | (Ok xs, Ok x) -> Ok (x :: xs)
+           | (Ok xs, Error (ty_actual, ty_expect)) ->
+             Error (ty_actual :: xs, ty_expect :: xs)
+           | (Error (xs, ys), Ok x) -> Error (x :: xs, x :: ys)
+           | (Error (xs, ys), Error (ty_actual, ty_expect)) ->
+             Error (ty_actual :: xs, ty_expect :: ys))
+  in
   let rec iter ~is_nonnull env ty =
     let (env, ety) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
     let default () = f env ty in
     match deref ety with
     (* For intersections, collect up all successful applications and compute
-     * the intersection of the types.
+     * the intersection of the types and intersection of errors
      *)
     | (r, Tintersection tyl) ->
       let is_nonnull =
         Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
       in
-      let (env, resl) =
-        Typing_utils.run_on_intersection env (iter ~is_nonnull) tyl
+      let (env, tys, errs) =
+        Typing_utils.run_on_intersection_res env (iter ~is_nonnull) tyl
       in
-      Typing_intersection.intersect_list env r resl
+      let err_res =
+        Result.fold
+          ~ok:(fun tys -> Ok (Typing_make_type.intersection Reason.none tys))
+          ~error:(fun (actuals, expects) ->
+            Error
+              ( Typing_make_type.intersection Reason.none actuals,
+                Typing_make_type.intersection Reason.none expects ))
+        @@ fold_errs errs
+      in
+      let (env, ty) = Typing_intersection.intersect_list env r tys in
+      (env, ty, err_res)
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
-      let (env, resl) = List.map_env env tyl (iter ~is_nonnull) in
-      Typing_union.union_list env r resl
+      let (env, tys, errs) =
+        List.fold_left tyl ~init:(env, [], []) ~f:(fun (env, tys, errs) ty ->
+            let (env, ty, err_res) = iter ~is_nonnull env ty in
+            (env, ty :: tys, err_res :: errs))
+      in
+      let err_res =
+        Result.fold
+          ~ok:(fun tys -> Ok (Typing_make_type.union Reason.none tys))
+          ~error:(fun (actuals, expects) ->
+            Error
+              ( Typing_make_type.union Reason.none actuals,
+                Typing_make_type.union Reason.none expects ))
+        @@ fold_errs errs
+      in
+      let (env, ty) = Typing_union.union_list env r tys in
+      (env, ty, err_res)
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
     | (_, Tnewtype (cid, _, bound))
@@ -112,4 +148,16 @@ let apply_rules ?(ignore_type_structure = false) env ty f =
         iter ~is_nonnull env ty
     | _ -> default ()
   in
-  iter ~is_nonnull:false env ty
+  let (env, ty, err_res) = iter ~is_nonnull:false env ty in
+  let err_opt =
+    Result.fold err_res ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
+  in
+  (env, ty, err_opt)
+
+let apply_rules ?ignore_type_structure env ty f =
+  let g env ty =
+    let (env, ty) = f env ty in
+    (env, ty, Ok ty)
+  in
+  let (env, ty, _) = apply_rules_with_err ?ignore_type_structure env ty g in
+  (env, ty)

@@ -56,6 +56,9 @@ let sub_type_i_res
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 
+let sub_type_res p ur env ty_sub ty_super on_error =
+  sub_type_i_res p ur env (LoclType ty_sub) (LoclType ty_super) on_error
+
 let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
   let localize_with_self =
     Typing_utils.localize_with_self ~ignore_errors:true

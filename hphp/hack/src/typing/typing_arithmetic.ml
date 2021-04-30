@@ -60,14 +60,18 @@ let is_super_num env t =
  *    (3) Check if it's dynamic
  *)
 let check_dynamic_or_enforce_num env p t r err =
-  let env =
-    Typing_coercion.coerce_type
-      p
-      Reason.URnone
-      env
-      t
-      { et_type = MakeType.num r; et_enforced = Enforced }
-      err
+  let et_type = MakeType.num r in
+  let (env, err_opt) =
+    Common.Result.fold
+      ~ok:(fun env -> (env, None))
+      ~error:(fun env -> (env, Some (t, et_type)))
+    @@ Typing_coercion.coerce_type_res
+         p
+         Reason.URnone
+         env
+         t
+         { et_type; et_enforced = Enforced }
+         err
   in
   let widen_for_arithmetic env ty =
     match get_node ty with
@@ -84,7 +88,7 @@ let check_dynamic_or_enforce_num env p t r err =
       p
       t
   in
-  (env, Typing_utils.is_dynamic env t)
+  (env, Typing_utils.is_dynamic env t, err_opt)
 
 (* Checking of numeric operands for arithmetic operators that work only
  * on integers:
@@ -92,16 +96,20 @@ let check_dynamic_or_enforce_num env p t r err =
  *   (2) Check if it's dynamic
  *)
 let check_dynamic_or_enforce_int env p t r err =
-  let env =
-    Typing_coercion.coerce_type
-      p
-      Reason.URnone
-      env
-      t
-      { et_type = MakeType.int r; et_enforced = Enforced }
-      err
+  let et_type = MakeType.int r in
+  let (env, err_opt) =
+    Common.Result.fold
+      ~ok:(fun env -> (env, None))
+      ~error:(fun env -> (env, Some (t, et_type)))
+    @@ Typing_coercion.coerce_type_res
+         p
+         Reason.URnone
+         env
+         t
+         { et_type; et_enforced = Enforced }
+         err
   in
-  (env, Typing_utils.is_dynamic env t)
+  (env, Typing_utils.is_dynamic env t, err_opt)
 
 (* Secondary check of numeric operand for arithmetic operators. We've
  * already enforced num and tried to infer a float. Now let's
@@ -124,10 +132,17 @@ let expand_type_and_narrow_to_int env p ty =
     p
     ty
 
+let hole_on_err (((pos, _), _) as expr) err_opt =
+  Option.value_map err_opt ~default:expr ~f:(fun (ty_have, ty_expect) ->
+      Tast.make_typed_expr pos ty_have
+      @@ Aast.(Hole (expr, ty_have, ty_expect, Typing)))
+
 let binop p env bop p1 te1 ty1 p2 te2 ty2 =
-  let make_result env te1 te2 ty =
-    (env, Tast.make_typed_expr p ty (Aast.Binop (bop, te1, te2)), ty)
+  let make_result env te1 err_opt1 te2 err_opt2 ty =
+    let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
+    (env, Tast.make_typed_expr p ty (Aast.Binop (bop, hte1, hte2)), ty)
   in
+
   let is_any = Typing_utils.is_any env in
   let contains_any = is_any ty1 || is_any ty2 in
   match bop with
@@ -147,10 +162,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       else
         Errors.unify_error
     in
-    let (env, is_dynamic1) =
+    let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
     in
-    let (env, is_dynamic2) =
+    let (env, is_dynamic2, err_opt2) =
       check_dynamic_or_enforce_num env p2 ty2 (Reason.Rarith p) err
     in
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
@@ -172,7 +187,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         else
           Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
       in
-      make_result env te1 te2 ty
+      make_result env te1 err_opt1 te2 err_opt2 ty
     else if is_float_or_like_float env ty2 then
       let ty =
         MakeType.float
@@ -185,7 +200,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         else
           Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
       in
-      make_result env te1 te2 ty
+      make_result env te1 err_opt1 te2 err_opt2 ty
     else
       let num1 = is_super_num env ty1 in
       if
@@ -201,11 +216,19 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         make_result
           env
           te1
+          err_opt1
           te2
+          err_opt2
           (MakeType.num (Reason.Rarith_ret_num (p, r, apos)))
       (* The only remaining cases return ~int, except for int + int = int and dynamic + dynamic = dynamic *)
       else if is_sub_dynamic env ty1 && is_sub_dynamic env ty2 then
-        make_result env te1 te2 (MakeType.dynamic (Reason.Rarith_dynamic p))
+        make_result
+          env
+          te1
+          err_opt1
+          te2
+          err_opt2
+          (MakeType.dynamic (Reason.Rarith_dynamic p))
       else if is_int_or_like_int env ty1 || is_int_or_like_int env ty2 then
         let ty = MakeType.int (Reason.Rarith_ret_int p) in
         let (env, ty) =
@@ -214,25 +237,37 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           else
             (env, ty)
         in
-        make_result env te1 te2 ty
+        make_result env te1 err_opt1 te2 err_opt2 ty
       else
         let is_global_inference_mode =
           TypecheckerOptions.global_inference (Env.get_tcopt env)
         in
         (* If ty1 is int, the result has the same type as ty2. *)
         if is_global_inference_mode && is_int env ty1 && is_num env ty2 then
-          make_result env te1 te2 ty2
+          make_result env te1 err_opt1 te2 err_opt2 ty2
         else if is_global_inference_mode && is_int env ty2 && is_num env ty1
         then
-          make_result env te1 te2 ty1
+          make_result env te1 err_opt1 te2 err_opt2 ty1
         else
           (* Otherwise try narrowing any type variable, with default int *)
           let (env, ty1) = expand_type_and_narrow_to_int env p ty1 in
           let (env, ty2) = expand_type_and_narrow_to_int env p ty2 in
           if is_int env ty1 && is_int env ty2 then
-            make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
+            make_result
+              env
+              te1
+              err_opt1
+              te2
+              err_opt2
+              (MakeType.int (Reason.Rarith_ret_int p))
           else
-            make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
+            make_result
+              env
+              te1
+              err_opt1
+              te2
+              err_opt2
+              (MakeType.num (Reason.Rarith_ret p))
   (* Type of division and exponentiation is essentially
    *    (float,num):float
    *  & (num,float):float
@@ -247,10 +282,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       else
         Errors.unify_error
     in
-    let (env, is_dynamic1) =
+    let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
     in
-    let (env, is_dynamic2) =
+    let (env, is_dynamic2, err_opt2) =
       check_dynamic_or_enforce_num env p2 ty2 (Reason.Rarith p) err
     in
     let (env, result_ty) =
@@ -282,7 +317,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         | Ast_defs.Slash -> (env, MakeType.num (Reason.Rret_div p))
         | _ -> (env, MakeType.num (Reason.Rarith_ret p))
     in
-    make_result env te1 te2 result_ty
+    make_result env te1 err_opt1 te2 err_opt2 result_ty
   | Ast_defs.Percent
   | Ast_defs.Ltlt
   | Ast_defs.Gtgt
@@ -296,10 +331,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           Errors.unify_error
       | _ -> Errors.bitwise_math_invalid_argument
     in
-    let (env, _) =
+    let (env, _, err_opt1) =
       check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) err
     in
-    let (env, _) =
+    let (env, _, err_opt2) =
       check_dynamic_or_enforce_int env p ty2 (Reason.Rarith p2) err
     in
     let r =
@@ -307,12 +342,12 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       | Ast_defs.Percent -> Reason.Rarith_ret_int p
       | _ -> Reason.Rbitwise_ret p
     in
-    make_result env te1 te2 (MakeType.int r)
+    make_result env te1 err_opt1 te2 err_opt2 (MakeType.int r)
   | Ast_defs.Xor
   | Ast_defs.Amp
   | Ast_defs.Bar
     when not contains_any ->
-    let (env, is_dynamic1) =
+    let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_int
         env
         p
@@ -320,7 +355,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         (Reason.Rbitwise p1)
         Errors.bitwise_math_invalid_argument
     in
-    let (env, is_dynamic2) =
+    let (env, is_dynamic2, err_opt2) =
       check_dynamic_or_enforce_int
         env
         p
@@ -334,12 +369,12 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       else
         MakeType.int (Reason.Rbitwise_ret p)
     in
-    make_result env te1 te2 result_ty
+    make_result env te1 err_opt1 te2 err_opt2 result_ty
   | Ast_defs.Eqeq
   | Ast_defs.Diff
   | Ast_defs.Eqeqeq
   | Ast_defs.Diff2 ->
-    make_result env te1 te2 (MakeType.bool (Reason.Rcomp p))
+    make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))
   | Ast_defs.Lt
   | Ast_defs.Lte
   | Ast_defs.Gt
@@ -395,7 +430,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         p
         (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
         (Reason.to_string ("This is " ^ tys2) (get_reason ty2)) );
-    make_result env te1 te2 ty_result
+    make_result env te1 None te2 None ty_result
   | Ast_defs.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
@@ -424,14 +459,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       in
       let env = sub_arraykey env p1 ty1 in
       let env = sub_arraykey env p2 ty2 in
-      make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
+      make_result env te1 None te2 None (MakeType.string (Reason.Rconcat_ret p))
     else
       let env = Typing_substring.sub_string p1 env ty1 in
       let env = Typing_substring.sub_string p2 env ty2 in
-      make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
+      make_result env te1 None te2 None (MakeType.string (Reason.Rconcat_ret p))
   | Ast_defs.Barbar
   | Ast_defs.Ampamp ->
-    make_result env te1 te2 (MakeType.bool (Reason.Rlogic_ret p))
+    make_result env te1 None te2 None (MakeType.bool (Reason.Rlogic_ret p))
   | Ast_defs.QuestionQuestion
   | Ast_defs.Eq _
     when not contains_any ->
@@ -439,29 +474,30 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | _ ->
     assert contains_any;
     if is_any ty1 then
-      make_result env te1 te2 ty1
+      make_result env te1 None te2 None ty1
     else
-      make_result env te1 te2 ty2
+      make_result env te1 None te2 None ty2
 
 let unop p env uop te ty =
-  let make_result env te result_ty =
-    (env, Tast.make_typed_expr p result_ty (Aast.Unop (uop, te)), result_ty)
+  let make_result env te err_opt result_ty =
+    let hte = hole_on_err te err_opt in
+    (env, Tast.make_typed_expr p result_ty (Aast.Unop (uop, hte)), result_ty)
   in
   let is_any = Typing_utils.is_any env in
   match uop with
   | Ast_defs.Unot ->
     if is_any ty then
-      make_result env te ty
+      make_result env te None ty
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
       (* !$x (logical not) works with any type, so we just return Tbool *)
-      make_result env te (MakeType.bool (Reason.Rlogic_ret p))
+      make_result env te None (MakeType.bool (Reason.Rlogic_ret p))
   | Ast_defs.Utild ->
     if is_any ty then
-      make_result env te ty
+      make_result env te None ty
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, is_dynamic) =
+      let (env, is_dynamic, err_opt) =
         check_dynamic_or_enforce_int
           env
           p
@@ -475,7 +511,7 @@ let unop p env uop te ty =
         else
           MakeType.int (Reason.Rbitwise_ret p)
       in
-      make_result env te result_ty
+      make_result env te err_opt result_ty
   | Ast_defs.Uincr
   | Ast_defs.Upincr
   | Ast_defs.Updecr
@@ -483,10 +519,10 @@ let unop p env uop te ty =
     (* increment and decrement operators modify the value,
      * check for immutability violation here *)
     if is_any ty then
-      make_result env te ty
+      make_result env te None ty
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, is_dynamic) =
+      let (env, is_dynamic, err_opt) =
         check_dynamic_or_enforce_num
           env
           p
@@ -505,14 +541,14 @@ let unop p env uop te ty =
         else
           MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
       in
-      make_result env te result_ty
+      make_result env te err_opt result_ty
   | Ast_defs.Uplus
   | Ast_defs.Uminus ->
     if is_any ty then
-      make_result env te ty
+      make_result env te None ty
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, _) =
+      let (env, _, err_opt) =
         check_dynamic_or_enforce_num
           env
           p
@@ -530,8 +566,8 @@ let unop p env uop te ty =
         else
           MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
       in
-      make_result env te result_ty
+      make_result env te err_opt result_ty
   | Ast_defs.Usilence ->
     (* Silencing does not change the type *)
     (* any check omitted because would return the same anyway *)
-    make_result env te ty
+    make_result env te None ty

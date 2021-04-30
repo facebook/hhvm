@@ -35,6 +35,15 @@ val sub_type :
   Errors.typing_error_callback ->
   Typing_env_types.env
 
+val sub_type_res :
+  Pos.t ->
+  Typing_reason.ureason ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty ->
+  Errors.typing_error_callback ->
+  (Typing_env_types.env, Typing_env_types.env) result
+
 val sub_type_decl :
   ?is_coeffect:bool ->
   on_error:Errors.error_from_reasons_callback ->

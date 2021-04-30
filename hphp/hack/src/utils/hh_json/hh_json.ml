@@ -559,16 +559,21 @@ let json_of_file ?strict filename =
 let int_ n = JSON_Number (string_of_int n)
 
 let float_ n =
-  let s = string_of_float n in
-  (* ocaml strings can end in '.', which isn't allowed in json *)
-  let len = String.length s in
-  let s =
-    if s.[len - 1] = '.' then
-      String.sub s 0 (len - 1)
-    else
-      s
-  in
-  JSON_Number s
+  if Float.is_infinite n || Float.is_nan n then
+    (* nan/infinite isn't a valid value in json and will result in something unparseable;
+    null is the best we can do. *)
+    JSON_Null
+  else
+    let s = string_of_float n in
+    (* ocaml strings can end in '.', which isn't allowed in json *)
+    let len = String.length s in
+    let s =
+      if s.[len - 1] = '.' then
+        String.sub s 0 (len - 1)
+      else
+        s
+    in
+    JSON_Number s
 
 let string_ s = JSON_String s
 

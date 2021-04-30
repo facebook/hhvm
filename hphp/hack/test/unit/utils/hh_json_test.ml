@@ -368,6 +368,41 @@ let test_hex_escape () =
     "unicode escape with caps";
   true
 
+let test_nan () =
+  Asserter.Hh_json_json_asserter.assert_equals
+    (Hh_json.JSON_Number "1")
+    (Hh_json.int_ 1)
+    "int";
+  Asserter.Hh_json_json_asserter.assert_equals
+    (Hh_json.JSON_Number "1")
+    (Hh_json.float_ 1.)
+    "float trailing dot";
+  Asserter.Hh_json_json_asserter.assert_equals
+    (Hh_json.JSON_Number "0.1")
+    (Hh_json.float_ 0.1)
+    "float";
+  Asserter.Hh_json_json_asserter.assert_equals
+    Hh_json.JSON_Null
+    (Hh_json.float_ Float.nan)
+    "nan";
+  Asserter.Hh_json_json_asserter.assert_equals
+    Hh_json.JSON_Null
+    (Hh_json.float_ (1.0 /. 0.0))
+    "+nan";
+  Asserter.Hh_json_json_asserter.assert_equals
+    Hh_json.JSON_Null
+    (Hh_json.float_ (-1.0 /. 0.0))
+    "-nan";
+  Asserter.Hh_json_json_asserter.assert_equals
+    Hh_json.JSON_Null
+    (Hh_json.float_ Float.infinity)
+    "infinity";
+  Asserter.Hh_json_json_asserter.assert_equals
+    Hh_json.JSON_Null
+    (Hh_json.float_ Float.neg_infinity)
+    "-infinity";
+  true
+
 let tests =
   [
     ("test_escape_unescape", test_escape_unescape);
@@ -388,6 +423,7 @@ let tests =
       test_access_3_keys_one_object_wrong_type_middle );
     ("test_truncate", test_truncate);
     ("test_hex_escape", test_hex_escape);
+    ("test_nan", test_nan);
   ]
 
 let () = Unit_test.run_all tests

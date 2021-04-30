@@ -1,0 +1,6 @@
+disable-gflags.patch
+disable-liblzma.patch
+folly-cmake-fixup.patch
+folly-install-component.patch
+disable-libsnappy.patch
+without-unwind-symbolizer.patch

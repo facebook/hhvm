@@ -37,10 +37,6 @@ endfunction()
 
 ##### easy stuff #####
 
-if(JEMALLOC_ENABLED)
-  list(APPEND THIRD_PARTY_MODULES jemalloc)
-endif()
-
 list(APPEND THIRD_PARTY_MODULES forks/libmbfl)
 list(APPEND EXTRA_INCLUDE_PATHS
   "${TP_DIR}/forks/libmbfl"
@@ -53,10 +49,13 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/timelib")
 
 # Required by folly
 add_subdirectory(double-conversion)
+add_subdirectory(boost)
+add_subdirectory(fmt)
+add_subdirectory(jemalloc)
+add_subdirectory(libsodium)
 add_subdirectory(zstd)
 
-list(APPEND THIRD_PARTY_MODULES folly)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/folly/src")
+add_subdirectory(folly)
 
 # Fatal is a header-only library, so there's nothing to build.
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
@@ -71,9 +70,6 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")
 
 list(APPEND THIRD_PARTY_MODULES proxygen)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")
-
-list(APPEND THIRD_PARTY_MODULES fmt)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fmt/fmt/include")
 
 list(APPEND THIRD_PARTY_MODULES thrift)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/src")
@@ -139,13 +135,6 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
-##### boost #####
-
-add_subdirectory(boost)
-
-##### libsodium #####
-
-add_subdirectory(libsodium)
 
 ##### rustc #####
 
@@ -155,13 +144,7 @@ add_subdirectory("rustc")
 
 foreach(MODULE ${THIRD_PARTY_MODULES})
   add_subdirectory(${MODULE})
-  # Install headers here, rather than in the individual submodules, so that we
-  # can easily control the destination. Put them in include/hphp/third-party.
-  if(MODULE STREQUAL folly)
-    TP_INSTALL_HEADERS(folly folly/src/folly folly)
-  else()
-    TP_INSTALL_HEADERS(${MODULE} ${MODULE} ${MODULE})
-  endif()
+  TP_INSTALL_HEADERS(${MODULE} ${MODULE} ${MODULE})
 endforeach()
 set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)
 

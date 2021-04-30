@@ -88,7 +88,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     )
   endif()
 
-  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") # using Clang
+  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
     if (IS_X64)
       list(APPEND GENERAL_OPTIONS
         # For unclear reasons, our detection for what crc32 intrinsics you have

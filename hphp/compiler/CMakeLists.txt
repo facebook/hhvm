@@ -29,12 +29,10 @@ endforeach()
 
 add_definitions(-DALWAYS_ASSERT=1)
 
-ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
+add_library(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_analysis" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
-target_link_libraries(hphp_analysis boost)
-add_dependencies(hphp_analysis hphp_parser)
-add_dependencies(hphp_analysis hphp_util)
+target_link_libraries(hphp_analysis boost hphp_parser hphp_util hphp_system)
 if (ENABLE_COTIRE)
   cotire(hphp_analysis)
 endif()

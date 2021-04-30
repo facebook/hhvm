@@ -352,7 +352,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  target_link_libraries(${target} boost)
   target_link_libraries(${target} libsodium)
 
   target_link_libraries(${target} ${PCRE_LIBRARY})
@@ -416,8 +415,6 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  target_link_libraries(${target} double-conversion)
-
   target_link_libraries(${target} lz4)
   target_link_libraries(${target} libzip)
 
@@ -435,6 +432,7 @@ macro(hphp_link target)
 
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
+  target_link_libraries(${target} jemalloc)
   target_link_libraries(${target} wangle)
   target_link_libraries(${target} brotli)
   target_link_libraries(${target} libcompile_ffi_stubs)
@@ -454,11 +452,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${EDITLINE_LIBRARIES})
   elseif (READLINE_LIBRARY)
     target_link_libraries(${target} ${READLINE_LIBRARY})
-  endif()
-
-  if (NOT WINDOWS)
-    target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
-    target_link_libraries(${target} ${LIBELF_LIBRARIES})
   endif()
 
   if (LINUX)

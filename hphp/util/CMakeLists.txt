@@ -60,7 +60,7 @@ if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()
 
-target_link_libraries(hphp_util brotli zstd)
+target_link_libraries(hphp_util brotli folly zstd)
 if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()

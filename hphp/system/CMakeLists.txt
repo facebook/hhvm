@@ -1,14 +1,10 @@
 set(CXX_SOURCES "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
-add_dependencies(hphp_system hphp_util hphp_proxygen)
+target_link_libraries(hphp_system hphp_util hphp_proxygen)
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 HHVM_PUBLIC_HEADERS(system ${files})
-
-add_dependencies(hphp_runtime_static hphp_system)
-add_dependencies(hphp_runtime_ext hphp_system)
-add_dependencies(hphp_analysis hphp_system)
 
 FILE(STRINGS "php.txt" SYSTEMLIB_CLASSES)
 set(SYSTEMLIB_SRCS)

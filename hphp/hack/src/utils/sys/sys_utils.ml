@@ -16,6 +16,8 @@ external is_nfs : string -> bool = "hh_is_nfs"
 
 external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
+external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
+
 let get_env name = (try Some (Sys.getenv name) with Caml.Not_found -> None)
 
 let getenv_user () =
@@ -699,3 +701,30 @@ let protected_write_exn (filename : string) (content : string) : unit =
           in
           ())
         ~finally:(fun () -> Unix.close fd))
+
+let redirect_stdout_and_stderr_to_file (filename : string) : unit =
+  let old_stdout = Unix.dup Unix.stdout in
+  let old_stderr = Unix.dup Unix.stderr in
+  Utils.try_finally
+    ~finally:(fun () ->
+      (* Those two old_* handles must be closed so as not to have dangling FDs.
+      Neither success nor failure path holds onto them: the success path ignores
+      then, and the failure path dups them. That's why we can close them here. *)
+      (try Unix.close old_stdout with _ -> ());
+      (try Unix.close old_stderr with _ -> ());
+      ())
+    ~f:(fun () ->
+      try
+        (* We want both stdout and stderr to be redirected to the same file.
+        Do not attempt to open a file that's already open:
+        https://wiki.sei.cmu.edu/confluence/display/c/FIO24-C.+Do+not+open+a+file+that+is+already+open
+        Use dup for this scenario instead:
+        https://stackoverflow.com/questions/15155314/redirect-stdout-and-stderr-to-the-same-file-and-restore-it *)
+        freopen filename "w" Unix.stdout;
+        Unix.dup2 Unix.stdout Unix.stderr;
+        ()
+      with exn ->
+        let e = Exception.wrap exn in
+        (try Unix.dup2 old_stdout Unix.stdout with _ -> ());
+        (try Unix.dup2 old_stderr Unix.stderr with _ -> ());
+        Exception.reraise e)

@@ -49,6 +49,18 @@
         unit_test
         utils_core))
 
+(library
+    (name sys_utils_test)
+    (wrapped false)
+    (modules sys_utils_test)
+    (libraries
+        asserter
+        string
+        test_injector_config
+        sys_utils
+        temp_file
+        unit_test))
+
 (executable
     (name errors_test)
     (modules errors_test)

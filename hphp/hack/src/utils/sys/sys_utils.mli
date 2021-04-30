@@ -12,6 +12,9 @@ external is_nfs : string -> bool = "hh_is_nfs"
 
 external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
+(** E.g. freopen "file.txt" "a" Unix.stdout will redirect stdout to the file. *)
+external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
+
 (** Option type intead of exception throwing. *)
 val get_env : string -> string option
 
@@ -263,3 +266,7 @@ val protected_read_exn : string -> string
 Locks in unix are advisory, so this only works if reading is done by
 [protected_read_exn]. *)
 val protected_write_exn : string -> string -> unit
+
+(** As it says, redirects stdout and stderr to this file, which it will
+open in "w" mode. If redirection fails then stdout+stderr are left unchanged.*)
+val redirect_stdout_and_stderr_to_file : string -> unit

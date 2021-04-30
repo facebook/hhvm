@@ -10,6 +10,10 @@
 #define CAML_NAME_SPACE
 #include <caml/fail.h>
 #include <caml/memory.h>
+#include <caml/unixsupport.h>
+
+#include <stdio.h>
+#include <errno.h>
 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -56,4 +60,25 @@ value hh_is_nfs(value filename_v) {
   }
 #endif
   CAMLreturn(Val_bool(0));
+}
+
+// C89 spec: "The primary use of the freopen function is to change the file associated
+// with a standard text stream (stderr, stdin, or stdout)" e.g. freopen("newout.txt", "a", stdout)
+// It returns NULL upon failure, or the third parameter upon success.
+// The right way to use freopen is to ignore the returned value in success case:
+// https://stackoverflow.com/questions/584868/rerouting-stdin-and-stdout-from-c/586416#586416
+void hh_freopen(value filename_v, value mode_v, value fd_v) {
+  CAMLparam3(filename_v, mode_v, fd_v);
+  char *filename = String_val(filename_v);
+  char *mode = String_val(mode_v);
+  int fd = Int_val(fd_v);
+  FILE *fp = fdopen(fd, mode);
+  if (fp == NULL) {
+    unix_error(errno, "fdopen", filename_v); // raises Unix.error
+  }
+  FILE *r = freopen(filename, mode, fp);
+  if (r == NULL) {
+    unix_error(errno, "freopen", filename_v); // raises Unix.error
+  }
+  CAMLreturn0;
 }

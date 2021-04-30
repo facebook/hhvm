@@ -1098,6 +1098,7 @@ void dce(Env& env, const bc::PopU2&)         {
 
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
+void dce(Env& env, const bc::LazyClass&)     { pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
 void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }
@@ -1540,6 +1541,9 @@ void dce(Env& env, const bc::LateBoundCls&)     { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Self&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Parent&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ClassName&)        { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::LazyClassFromClass&) {
+  pushRemovableIfNoThrow(env);
+}
 void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
 
 /*
@@ -1660,7 +1664,6 @@ void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClass& op) { no_dce(env, op); }
-void dce(Env& env, const bc::LazyClass& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpG& op) { no_dce(env, op); }

@@ -906,7 +906,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 
   uint32_t iva = 0;
   ReadOnlyOp rop = ReadOnlyOp::Any;
-  
+
   switch (mcode) {
     case MET: case MPT: case MQT: {
       auto const id = decode_raw<Id>(pc);
@@ -928,11 +928,11 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_iva(pc);
       rop = decode_oa<ReadOnlyOp>(pc);
       break;
-    case MEI:                               
+    case MEI:
       decode_raw<int64_t>(pc);
       rop = decode_oa<ReadOnlyOp>(pc);
       break;
-    case MW:                                
+    case MW:
       break;
   }
 
@@ -1752,6 +1752,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::ClassGetC:
     case Op::ClassGetTS:
     case Op::ClassName:
+    case Op::LazyClassFromClass:
     case Op::OODeclExists:
       return true;
 

@@ -1154,6 +1154,16 @@ OPTBLD_INLINE void iopClassName() {
   );
 }
 
+OPTBLD_INLINE void iopLazyClassFromClass() {
+  auto const cls  = vmStack().topC();
+  if (!isClassType(cls->m_type)) {
+    raise_error("Attempting to get name of non-class");
+  }
+  auto const cname = cls->m_data.pclass->name();
+  auto const lclass = LazyClassData::create(cname);
+  vmStack().replaceC<KindOfLazyClass>(lclass);
+}
+
 OPTBLD_INLINE void iopInt(int64_t imm) {
   vmStack().pushInt(imm);
 }

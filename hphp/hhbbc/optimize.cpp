@@ -206,6 +206,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::NewCol:
   case Op::NewPair:
   case Op::ClassName:
+  case Op::LazyClassFromClass:
   case Op::File:
   case Op::Dir:
   case Op::Concat:

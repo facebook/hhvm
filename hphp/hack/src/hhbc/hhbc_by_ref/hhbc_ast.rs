@@ -532,6 +532,7 @@ pub enum InstructMisc<'arena> {
     Parent,
     LateBoundCls,
     ClassName,
+    LazyClassFromClass,
     RecordReifiedGeneric,
     CheckReifiedGenericMismatch,
     NativeImpl,

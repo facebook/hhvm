@@ -3936,7 +3936,11 @@ fn emit_class_const(
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                instr::classname()
+                if e.options().emit_class_pointers() == 2 {
+                    instr::lazyclassfromclass()
+                } else {
+                    instr::classname()
+                }
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
@@ -3944,7 +3948,7 @@ fn emit_class_const(
                     string_utils::strip_global_ns(&id.1).to_string().into();
                 instr::clscns(const_id)
             };
-            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() > 0 {
+            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
                 emit_load_class_ref(e, env, pos, cexpr)
             } else {
                 Ok(InstrSeq::gather(vec![

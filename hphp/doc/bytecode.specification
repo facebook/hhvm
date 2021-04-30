@@ -963,6 +963,9 @@ ClassName    [C:Class] ->  [C:Static Str]
 
   Push the name of the class in $1 as a string.
 
+LazyClassFromClass    [C:Class] ->  [C:LazyClass]
+
+  Push the lazy class corresponding to the class in $1.
 
 3. Operator instructions
 ------------------------

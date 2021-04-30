@@ -722,6 +722,10 @@ pub mod instr {
         instr(alloc, Instruct::IMisc(InstructMisc::ClassName))
     }
 
+    pub fn lazyclassfromclass<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
+        instr(alloc, Instruct::IMisc(InstructMisc::LazyClassFromClass))
+    }
+
     pub fn self_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(alloc, Instruct::IMisc(InstructMisc::Self_))
     }

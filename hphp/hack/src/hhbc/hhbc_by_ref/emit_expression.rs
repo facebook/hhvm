@@ -4600,14 +4600,18 @@ fn emit_class_const<'a, 'arena>(
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                instr::classname(alloc)
+                if e.options().emit_class_pointers() == 2 {
+                    instr::lazyclassfromclass(alloc)
+                } else {
+                    instr::classname(alloc)
+                }
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type = (alloc, string_utils::strip_global_ns(&id.1)).into();
                 instr::clscns(alloc, const_id)
             };
-            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() > 0 {
+            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
                 emit_load_class_ref(e, env, pos, cexpr)
             } else {
                 Ok(InstrSeq::gather(

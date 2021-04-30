@@ -105,6 +105,7 @@ static const struct {
   { OpInt,         {None,             Stack1,       OutInt64        }},
   { OpDouble,      {None,             Stack1,       OutDouble       }},
   { OpString,      {None,             Stack1,       OutStringImm    }},
+  { OpLazyClass,   {None,             Stack1,       OutLazyClass    }},
   { OpDict,        {None,             Stack1,       OutDictImm      }},
   { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
   { OpVec,         {None,             Stack1,       OutVecImm       }},
@@ -126,6 +127,7 @@ static const struct {
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
   { OpClassName,   {Stack1,           Stack1,       OutString       }},
+  { OpLazyClassFromClass, {Stack1,    Stack1,       OutLazyClass    }},
   { OpFuncCred,    {None,             Stack1,       OutObject       }},
 
   /*** 3. Operator instructions ***/
@@ -362,7 +364,6 @@ static const struct {
 
   // TODO (T61651936): ResolveClass may return a classptr or a string
   { OpResolveClass,{None,             Stack1,       OutUnknown      }},
-  { OpLazyClass,   {None,             Stack1,       OutLazyClass    }},
 
   /*** 14. Generator instructions ***/
 
@@ -993,6 +994,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Mod:
   case Op::Pow:
   case Op::ClassName:
+  case Op::LazyClassFromClass:
   case Op::NativeImpl:
   case Op::NewCol:
   case Op::NewPair:

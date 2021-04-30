@@ -1841,6 +1841,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::Parent => w.write("Parent"),
         M::LateBoundCls => w.write("LateBoundCls"),
         M::ClassName => w.write("ClassName"),
+        M::LazyClassFromClass => w.write("LazyClassFromClass"),
         M::RecordReifiedGeneric => w.write("RecordReifiedGeneric"),
         M::CheckReifiedGenericMismatch => w.write("CheckReifiedGenericMismatch"),
         M::NativeImpl => w.write("NativeImpl"),

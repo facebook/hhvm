@@ -320,7 +320,7 @@ ArrayData* impl_type_structure_opts(ISS& env,
   auto const cns_sd = cns_name->m_data.pstr;
   if (!cls_or_obj) {
     if (auto const last = op_from_slot(env, 1)) {
-      if (last->op == Op::ClassName) {
+      if (last->op == Op::ClassName || last->op == Op::LazyClassFromClass) {
         if (auto const prev = op_from_slot(env, 1, 1)) {
           if (prev->op == Op::LateBoundCls) {
             if (!env.ctx.cls) return fail();

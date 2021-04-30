@@ -383,7 +383,10 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->inst()->is(LdClsName)) return inst->src(0)->inst()->src(0);
+  if (inst->src(0)->inst()->is(LdClsName) ||
+      inst->src(0)->inst()->is(LdLazyCls)) {
+    return inst->src(0)->inst()->src(0);
+  }
   return nullptr;
 }
 
@@ -3339,6 +3342,12 @@ SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
 }
 
+SSATmp* simplifyLdLazyCls(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  return src->hasConstVal(TCls) ?
+    cns(env, LazyClassData::create(src->clsVal()->name())) : nullptr;
+}
+
 SSATmp* simplifyLdLazyClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TLazyCls) ?
@@ -3738,6 +3747,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(HasReifiedGenerics)
       X(LdCls)
       X(LdClsName)
+      X(LdLazyCls)
       X(LdLazyClsName)
       X(LdWHResult)
       X(LdWHState)

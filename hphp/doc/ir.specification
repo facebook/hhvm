@@ -1274,6 +1274,10 @@ To string conversions:
 
   Load the name of the Class* in S0.
 
+| LdLazyCls, D(LazyCls), S(Cls), NF
+
+  Load a lazy class corresponding to the Class* in S0.
+
 | LdLazyClsName, D(StaticStr), S(LazyCls), NF
 
   Load the name of the LazyClass in S0.

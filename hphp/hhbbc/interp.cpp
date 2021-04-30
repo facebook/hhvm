@@ -1159,6 +1159,21 @@ void in(ISS& env, const bc::ClassName& op) {
   push(env, TSStr);
 }
 
+void in(ISS& env, const bc::LazyClassFromClass&) {
+  auto const ty = topC(env);
+  if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
+    auto const dcls = dcls_of(ty);
+    if (dcls.type == DCls::Exact) {
+      return reduce(env,
+                    bc::PopC {},
+                    bc::LazyClass { dcls.cls.name() });
+    }
+    effect_free(env);
+  }
+  popC(env);
+  push(env, TLazyCls);
+}
+
 void concatHelper(ISS& env, uint32_t n) {
   auto changed = false;
   auto side_effects = false;
@@ -3108,6 +3123,13 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
       );
     }
     if (auto const val = get_ts_this_type_access(a->m_data.parr)) {
+      auto const classconst_bc = []() -> Bytecode {
+        if (RuntimeOption::EvalEmitClassPointers == 2) {
+          return bc::LazyClassFromClass {};
+        } else {
+          return bc::ClassName {};
+        }
+      }();
       // Convert `$x is this::T` into
       // `$x is type_structure_no_throw(static::class, 'T')`
       // to take advantage of the caching that comes with the type_structure
@@ -3117,7 +3139,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         bc::NullUninit {},
         bc::NullUninit {},
         bc::LateBoundCls {},
-        bc::ClassName {},
+        classconst_bc,
         bc::String {val},
         bc::FCallFuncD {FCallArgs(2), s_hh_type_structure_no_throw.get()},
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }

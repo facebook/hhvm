@@ -695,6 +695,10 @@ pub mod instr {
         instr(Instruct::IMisc(InstructMisc::ClassName))
     }
 
+    pub fn lazyclassfromclass() -> InstrSeq {
+        instr(Instruct::IMisc(InstructMisc::LazyClassFromClass))
+    }
+
     pub fn self_() -> InstrSeq {
         instr(Instruct::IMisc(InstructMisc::Self_))
     }

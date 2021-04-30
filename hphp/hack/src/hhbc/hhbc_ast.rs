@@ -549,6 +549,7 @@ pub enum InstructMisc {
     Parent,
     LateBoundCls,
     ClassName,
+    LazyClassFromClass,
     RecordReifiedGeneric,
     CheckReifiedGenericMismatch,
     NativeImpl,

@@ -55,6 +55,17 @@ void cgLdClsName(IRLS& env, const IRInstruction* inst) {
                dst, sizeof(LowStringPtr));
 }
 
+void cgLdLazyCls(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const preclass = v.makeReg();
+  v << load{src[Class::preClassOff()], preclass};
+  emitLdLowPtr(v, preclass[PreClass::nameOffset()],
+               dst, sizeof(LowStringPtr));
+}
+
 void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const lazyClsData = srcLoc(env, inst, 0).reg();

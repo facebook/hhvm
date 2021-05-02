@@ -411,8 +411,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
       // If we got an expAcc it means that we are iterating over m_expQueue and
       // expiring things. But if the item is not expired yet we need to put it back
       // into the queue with the correct expire time. It happens if expire time was
-      // updated either by apc_extend_tll or by setting a new value with a TTL on
-      // an existing key
+      // updated either by apc_extend_ttl or by setting a new value with a TTL on
+      // an existing key.
       if (expAcc) {
         auto ikey = intptr_t(acc->first);
         m_expQueue.push({ ikey, expiry });
@@ -719,8 +719,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   s_hotCache.clearValue(sval);
 
   auto const ret = oldHandle->toLocal().toInt64() + step;
-  auto const pair = APCHandle::Create(VarNR{ret}, false,
-                                      APCHandleLevel::Outer, false);
+  auto const pair = APCHandle::Create(VarNR{ret}, APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.rawExpire() == 0, false);
@@ -750,8 +749,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
     return false;
   }
 
-  auto const pair = APCHandle::Create(VarNR{val}, false,
-                                      APCHandleLevel::Outer, false);
+  auto const pair = APCHandle::Create(VarNR{val}, APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.rawExpire() == 0, false);
@@ -861,7 +859,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   // We need to do this before we acquire any locks. Serializing objects can
   // reenter the VM (__sleep) and certain operations may cause us to throw for
   // types that cannot be serialized to APC.
-  auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
+  auto svar = APCHandle::Create(value, APCHandleLevel::Outer, false);
 
   char* const kcp = strdup(key.data());
 

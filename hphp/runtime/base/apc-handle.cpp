@@ -35,7 +35,6 @@ namespace HPHP {
 const StaticString s_invalidMethCaller("Cannot store meth_caller in APC");
 
 APCHandle::Pair APCHandle::Create(const_variant_ref source,
-                                  bool serialized,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
   auto const cell = source.asTypedValue();
@@ -102,11 +101,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfPersistentString:
     case KindOfString: {
       auto const s = val(cell).pstr;
-      if (serialized) {
-        // It is priming, and there might not be the right class definitions
-        // for unserialization.
-        return APCString::MakeSerializedObject(apc_reserialize(String{s}));
-      }
       if (auto const value = APCTypedValue::HandlePersistent(s)) {
         return value;
       }

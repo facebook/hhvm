@@ -31,7 +31,6 @@ APCRFunc::APCRFunc(RFuncData* rfuncData, APCHandle* generics):
 APCHandle::Pair APCRFunc::Construct(RFuncData* rfuncData) {
   auto const generics = VarNR{rfuncData->m_arr};
   auto const handle = APCHandle::Create(const_variant_ref{generics},
-                                        false,
                                         APCHandleLevel::Inner,
                                         true);
 

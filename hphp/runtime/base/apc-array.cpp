@@ -155,11 +155,11 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
     IterateKV(
       arr,
       [&](TypedValue k, TypedValue v) {
-        auto key = APCHandle::Create(VarNR(k), false,
-                                     APCHandleLevel::Inner, unserializeObj);
+        auto key = APCHandle::Create(VarNR(k), APCHandleLevel::Inner,
+                                     unserializeObj);
         size += key.size;
-        auto val = APCHandle::Create(VarNR(v), false,
-                                     APCHandleLevel::Inner, unserializeObj);
+        auto val = APCHandle::Create(VarNR(v), APCHandleLevel::Inner,
+                                     unserializeObj);
         size += val.size;
         ret->add(key.handle, val.handle);
         return false;
@@ -195,8 +195,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
     IterateV(
       arr,
       [&](TypedValue v) {
-        auto val = APCHandle::Create(VarNR(v), false,
-                                     APCHandleLevel::Inner, unserializeObj);
+        auto val = APCHandle::Create(VarNR(v), APCHandleLevel::Inner,
+                                     unserializeObj);
         size += val.size;
         ret->vals()[i++] = val.handle;
         return false;

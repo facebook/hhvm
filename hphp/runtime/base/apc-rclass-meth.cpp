@@ -29,7 +29,6 @@ APCRClsMeth::APCRClsMeth(RClsMethData* data, APCHandle* generics):
 APCHandle::Pair APCRClsMeth::Construct(RClsMethData* data) {
   auto const generics = VarNR{data->m_arr};
   auto const handle = APCHandle::Create(const_variant_ref{generics},
-                                        false,
                                         APCHandleLevel::Inner,
                                         true);
   auto const apcRClsMeth = new APCRClsMeth(data, handle.handle);

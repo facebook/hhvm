@@ -80,4 +80,38 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   return;
 }
 
+namespace {
+
+ServiceData::CounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    counters["mem.low-mapped"] = alloc::getLowMapped();
+
+    counters["mem.unit-size"] = MemoryStats::TotalSize(AllocKind::Unit);
+    counters["mem.func-size"] = MemoryStats::TotalSize(AllocKind::Func);
+    counters["mem.class-size"] = MemoryStats::TotalSize(AllocKind::Class);
+    counters["mem.unit-count"] = MemoryStats::Count(AllocKind::Unit);
+    counters["mem.func-count"] = MemoryStats::Count(AllocKind::Func);
+    counters["mem.class-count"] = MemoryStats::Count(AllocKind::Class);
+
+    counters["mem.static-string-count"] = makeStaticStringCount();
+    counters["mem.static-array-count"] = loadedStaticArrayCount();
+    counters["mem.static-string-size"] =
+      MemoryStats::TotalSize(AllocKind::StaticString);
+    counters["mem.static-array-size"] =
+      MemoryStats::TotalSize(AllocKind::StaticArray);
+
+    counters["mem.huge-tlb-pages-kb"] =
+      ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed);
+    counters["mem.vm-size-kb"] =
+      ProcStatus::VmSizeKb.load(std::memory_order_relaxed);
+    counters["mem.vm-rss-kb"] =
+      ProcStatus::VmRSSKb.load(std::memory_order_relaxed);
+    counters["mem.peak-usage-kb"] =
+      ProcStatus::VmHWMKb.load(std::memory_order_relaxed);
+    counters["mem.vm-swap-kb"] =
+      ProcStatus::VmSwapKb.load(std::memory_order_relaxed);
+  }
+);
+
+}
 }

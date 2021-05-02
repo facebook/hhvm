@@ -78,6 +78,12 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     return inst->hasDst() ? cns(env, TBottom) : nullptr;
   }
 
+  /*
+   * Now that we've verified we're in a reachable state (to rule out any Bottom
+   * types in scope), verify the types are correct.
+   */
+  assertx(checkOperandTypes(inst));
+
   if (inst->mayRaiseError() && inst->taken()) {
     FTRACE(1, "{}: asserting about catch block\n", inst->toString());
     /*

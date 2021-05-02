@@ -105,7 +105,6 @@ private:
    * Call the lambda on the initialized IRInstruction.
    */
   Ret stop(IRInstruction* inst) {
-    assertx(checkOperandTypes(inst));
     return func(inst);
   }
 

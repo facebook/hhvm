@@ -115,6 +115,7 @@ SSATmp* gen(State& env, Opcode op, BCContext bcctx, Args&&... args) {
           return cns(env, TBottom);
         }
 
+        assertx(checkOperandTypes(inst));
         inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
 

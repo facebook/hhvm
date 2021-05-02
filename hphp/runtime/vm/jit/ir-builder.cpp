@@ -98,6 +98,7 @@ bool IRBuilder::shouldConstrainGuards() const {
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   FTRACE(1, "  append {}\n", inst->toString());
   assertx(inst->marker().valid());
+  assertx(checkOperandTypes(inst));
   if (inst->is(Nop, DefConst)) return;
 
   if (shouldConstrainGuards()) {

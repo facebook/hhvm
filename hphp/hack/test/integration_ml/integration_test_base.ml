@@ -17,7 +17,7 @@ open Coverage_level
 open Coverage_level_defs
 open Int.Replace_polymorphic_compare
 
-exception Integration_test_tailure
+exception Integration_test_failure
 
 let root = "/"
 
@@ -189,7 +189,7 @@ let prepend_root x = root ^ x
 let fail x =
   print_endline x;
   Caml.Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
-  raise Integration_test_tailure
+  raise Integration_test_failure
 
 (******************************************************************************(
  * Utility functions to help format/throw errors for informative errors

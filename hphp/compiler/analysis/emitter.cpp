@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -190,6 +191,124 @@ RepoGlobalData getGlobalData() {
   return gd;
 }
 
+/*
+ * It's an invariant that symbols in the repo must be Unique and
+ * Persistent. Normally HHBBC verifies this for us, but if we're not
+ * using HHBBC and writing directly to the repo, we must do it
+ * ourself. Verify all relevant symbols are unique and set the
+ * appropriate Attrs.
+ *
+ * We use a common set of verification functions exported from HHBBC
+ * (to keep error messages identical), so we need store the data in a
+ * certain way it expects.
+ */
+struct SymbolSets {
+  struct Unit {
+    const StringData* filename;
+  };
+  struct Data {
+    const StringData* name;
+    std::unique_ptr<Unit> unit;
+    Attr attrs;
+  };
+
+  using IMap = hphp_fast_map<
+    const StringData*,
+    std::unique_ptr<Data>,
+    string_data_hash,
+    string_data_isame
+  >;
+  using Map = hphp_fast_map<
+    const StringData*,
+    std::unique_ptr<Data>,
+    string_data_hash,
+    string_data_same
+  >;
+
+  IMap enums;
+  IMap classes;
+  IMap funcs;
+  IMap typeAliases;
+  IMap records;
+  Map constants;
+
+  static std::unique_ptr<Data> make(const UnitEmitter* ue,
+                                    const StringData* name,
+                                    Attr attrs) {
+    assertx(name->isStatic());
+    assertx(!ue || ue->m_filepath->isStatic());
+    std::unique_ptr<Unit> unit;
+    if (ue) {
+      unit = std::make_unique<SymbolSets::Unit>();
+      unit->filename = ue->m_filepath;
+    }
+    auto data = std::make_unique<SymbolSets::Data>();
+    data->name = name;
+    data->unit = std::move(unit);
+    data->attrs = attrs;
+    return data;
+  }
+
+  SymbolSets() {
+    // These aren't stored in the repo, but we still need to check for
+    // collisions against them, so put them in the maps.
+    for (auto const& kv : Native::getConstants()) {
+      assertx(kv.second.m_type != KindOfUninit ||
+              kv.second.dynamic());
+      HHBBC::add_symbol(
+        constants,
+        make(nullptr, kv.first, AttrUnique | AttrPersistent),
+        "constant"
+      );
+    }
+  }
+};
+
+void writeUnit(UnitEmitter& ue,
+               RepoFileBuilder& repoBuilder,
+               RepoAutoloadMapBuilder& autoloadMapBuilder,
+               SymbolSets& sets) {
+  // Verify uniqueness of symbols, set Attrs, then write to actual
+  // repo.
+  auto const make = [&] (const StringData* name, Attr attrs) {
+    return SymbolSets::make(&ue, name, attrs);
+  };
+
+  for (size_t n = 0; n < ue.numPreClasses(); ++n) {
+    auto pce = ue.pce(n);
+    pce->setAttrs(pce->attrs() | AttrUnique | AttrPersistent);
+    if (pce->attrs() & AttrEnum) {
+      HHBBC::add_symbol(sets.enums, make(pce->name(), pce->attrs()), "enum");
+    }
+    HHBBC::add_symbol(sets.classes, make(pce->name(), pce->attrs()), "class",
+                      sets.records, sets.typeAliases);
+  }
+  for (auto& fe : ue.fevec()) {
+    // Dedup meth_caller wrappers
+    if (fe->attrs & AttrIsMethCaller && sets.funcs.count(fe->name)) continue;
+    fe->attrs |= AttrUnique | AttrPersistent;
+    HHBBC::add_symbol(sets.funcs, make(fe->name, fe->attrs), "function");
+  }
+  for (auto& te : ue.typeAliases()) {
+    te->setAttrs(te->attrs() | AttrUnique | AttrPersistent);
+    HHBBC::add_symbol(sets.typeAliases, make(te->name(), te->attrs()),
+                      "type alias", sets.classes, sets.records);
+  }
+  for (auto& c : ue.constants()) {
+    c.attrs |= AttrUnique | AttrPersistent;
+    HHBBC::add_symbol(sets.constants, make(c.name, c.attrs), "constant");
+  }
+  for (size_t n = 0; n < ue.numRecords(); ++n) {
+    auto const re = ue.re(n);
+    re->setAttrs(re->attrs() | AttrUnique | AttrPersistent);
+    HHBBC::add_symbol(sets.records, make(re->name(), re->attrs()), "record",
+                      sets.classes, sets.typeAliases);
+  }
+
+  autoloadMapBuilder.addUnit(ue);
+  repoBuilder.add(ue);
+}
+
 }
 
 /*
@@ -219,9 +338,11 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       folly::Optional<RepoAutoloadMapBuilder> autoloadMapBuilder;
       folly::Optional<RepoFileBuilder> repoBuilder;
+      folly::Optional<SymbolSets> symbolSets;
       if (Option::GenerateBinaryHHBC) {
         autoloadMapBuilder.emplace();
         repoBuilder.emplace(RuntimeOption::RepoCentralPath);
+        symbolSets.emplace();
       }
 
       auto program = std::move(ar->program());
@@ -232,8 +353,12 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           ue->m_sn = id;
           ue->setSha1(SHA1 { id });
           if (repoBuilder) {
-            autoloadMapBuilder->addUnit(*ue);
-            repoBuilder->add(*ue);
+            try {
+              writeUnit(*ue, *repoBuilder, *autoloadMapBuilder, *symbolSets);
+            } catch (const HHBBC::NonUniqueSymbolException&) {
+              ar->setFinish({});
+              throw;
+            }
           }
           if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
             ues_to_print.emplace_back(std::move(ue));

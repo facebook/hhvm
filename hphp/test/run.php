@@ -50,6 +50,9 @@ function get_expect_file_and_type($test, $options) {
     'hhvm.expectf',
   ];
   if (isset($options['repo'])) {
+    if (file_exists($test . '.hphpc_assert')) {
+      return varray[$test . '.hphpc_assert', 'expectf'];
+    }
     if (file_exists($test . '.hhbbc_assert')) {
       return varray[$test . '.hhbbc_assert', 'expectf'];
     }
@@ -2742,7 +2745,8 @@ function run_config_post($outputs, $test, $options) {
   file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
 
   $check_hhbbc_error = isset($options['repo'])
-    && file_exists($test . '.hhbbc_assert');
+    && (file_exists($test . '.hhbbc_assert') ||
+        file_exists($test . '.hphpc_assert'));
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
   if ($stderr && !$check_hhbbc_error) {
@@ -3015,7 +3019,10 @@ function run_test($options, $test) {
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
 
-    if (file_exists($test . '.hhbbc_assert')) {
+    if (file_exists($test . '.hphpc_assert')) {
+      $hphp = hphp_cmd($options, $test, $program);
+      return run_foreach_config($options, $test, varray[$hphp], $hhvm_env);
+    } else if (file_exists($test . '.hhbbc_assert')) {
       $hphp = hphp_cmd($options, $test, $program);
       if (repo_separate($options, $test)) {
         $result = exec_with_stack($hphp);

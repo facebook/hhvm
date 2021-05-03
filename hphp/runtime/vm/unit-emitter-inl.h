@@ -80,6 +80,10 @@ inline auto const& UnitEmitter::typeAliases() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
+inline std::vector<Constant>& UnitEmitter::constants() {
+  return m_constants;
+}
+
 inline const std::vector<Constant>& UnitEmitter::constants() const {
   return m_constants;
 }

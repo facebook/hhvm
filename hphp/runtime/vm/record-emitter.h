@@ -98,6 +98,7 @@ struct RecordEmitter {
   const StringData* name() const { return m_name; }
   const StringData* parentName() const { return m_parent; }
   Attr attrs() const { return m_attrs; }
+  void setAttrs(Attr attrs) { m_attrs = attrs; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
   void setUserAttributes(UserAttributeMap map) {
     m_userAttributes = std::move(map);
@@ -168,4 +169,3 @@ struct RecordRepoProxy : RepoProxy {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

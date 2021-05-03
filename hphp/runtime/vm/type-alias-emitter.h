@@ -47,6 +47,7 @@ struct TypeAliasEmitter {
   const StringData* name() const { return m_name; }
   const StringData* value() const { return m_value; }
   Attr attrs() const { return m_attrs; }
+  void setAttrs(Attr attrs) { m_attrs = attrs; }
   AnnotType type() const { return m_type; }
   bool nullable() const { return m_nullable; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
@@ -84,4 +85,3 @@ struct TypeAliasEmitter {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

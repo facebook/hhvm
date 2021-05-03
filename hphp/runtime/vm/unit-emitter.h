@@ -262,8 +262,9 @@ struct UnitEmitter {
   // Constants.
 
   /*
-   * Const reference to all of the Unit's type aliases.
+   * Reference to all of the Unit's type aliases.
    */
+  std::vector<Constant>& constants();
   const std::vector<Constant>& constants() const;
 
   /*

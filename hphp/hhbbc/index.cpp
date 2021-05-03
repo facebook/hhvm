@@ -2166,43 +2166,6 @@ bool build_cls_info(const IndexData& index,
   return true;
 }
 
-template <typename T>
-static const char* filename_from_symbol(const T* t) {
-  auto unit = t->unit;
-  if (!unit) return "BUILTIN";
-  return unit->filename->data();
-}
-
-template <typename T, typename R>
-static void add_symbol(R&& map, const T* t, const char* type) {
-  assertx(t->attrs & AttrUnique);
-  assertx(t->attrs & AttrPersistent);
-
-  auto ret = map.insert({t->name, t});
-  if (!ret.second) {
-    throw Index::NonUniqueSymbolException(folly::sformat(
-      "More than one {} with the name {}. In {} and {}", type,
-      t->name->data(), filename_from_symbol(t), filename_from_symbol(ret.first->second)));
-  }
-}
-
-template <typename T, typename E>
-static void validate_uniqueness(const T* t, E&& other_map) {
-  auto iter = other_map.find(t->name);
-  if (iter != other_map.end()) {
-    throw Index::NonUniqueSymbolException(folly::sformat(
-      "More than one symbol with the name {}. In {} and {}",
-      t->name->data(), filename_from_symbol(t), filename_from_symbol(iter->second)));
-  }
-}
-
-template <typename T, typename R, typename E, typename F>
-static void add_symbol(R&& map, const T* t, const char* type, E&& other_map1, F&& other_map2) {
-  validate_uniqueness(t, std::forward<E>(other_map1));
-  validate_uniqueness(t, std::forward<F>(other_map2));
-  add_symbol(std::forward<R>(map), t, type);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void add_system_constants_to_index(IndexData& index) {

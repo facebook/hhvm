@@ -565,14 +565,6 @@ std::string show(const Class&);
  * "update" step in between whole program analysis rounds).
  */
 struct Index {
-
-  struct NonUniqueSymbolException : std::exception {
-    explicit NonUniqueSymbolException(std::string msg) : msg(msg) {}
-    const char* what() const noexcept override { return msg.c_str(); }
-  private:
-    std::string msg;
-  };
-
   /*
    * Create an Index for a php::Program.  Performs some initial
    * analysis of the program.

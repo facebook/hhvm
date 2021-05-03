@@ -139,4 +139,72 @@ int main(int argc, char** argv);
 
 //////////////////////////////////////////////////////////////////////
 
+// Export set of functions to check for symbol uniqueness. This lets
+// hphpc use the same logic and keep the same error messages.
+
+struct NonUniqueSymbolException : std::exception {
+  explicit NonUniqueSymbolException(std::string msg) : msg(msg) {}
+  const char* what() const noexcept override { return msg.c_str(); }
+private:
+  std::string msg;
+};
+
+template <typename T, typename R>
+void add_symbol(R& map, T t, const char* type) {
+  assertx(t->attrs & AttrUnique);
+  assertx(t->attrs & AttrPersistent);
+
+  auto const name = t->name;
+  auto const ret = map.emplace(name, std::move(t));
+  if (ret.second) return;
+
+  auto const filename = [] (auto const& unit) -> std::string {
+    if (!unit) return "BUILTIN";
+    return unit->filename->toCppString();
+  };
+
+  throw NonUniqueSymbolException{
+    folly::sformat(
+      "More than one {} with the name {}. In {} and {}",
+      type,
+      t->name,
+      filename(t->unit),
+      filename(ret.first->second->unit)
+    )
+  };
+}
+
+template <typename T, typename E>
+void validate_uniqueness(const T& t, const E& other) {
+  auto const iter = other.find(t->name);
+  if (iter == other.end()) return;
+
+  auto const filename = [] (auto const& unit) -> std::string {
+    if (!unit) return "BUILTIN";
+    return unit->filename->toCppString();
+  };
+
+  throw NonUniqueSymbolException{
+    folly::sformat(
+      "More than one symbol with the name {}. In {} and {}",
+      t->name,
+      filename(t->unit),
+      filename(iter->second->unit)
+    ).c_str()
+  };
+}
+
+template <typename T, typename R, typename E, typename F>
+void add_symbol(R& map,
+                T t,
+                const char* type,
+                const E& other1,
+                const F& other2) {
+  validate_uniqueness(t, other1);
+  validate_uniqueness(t, other2);
+  add_symbol(map, std::move(t), type);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

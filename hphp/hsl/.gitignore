@@ -5,3 +5,4 @@
 # them in the main build directory, but if you're doing an in-source build,
 # the files will be here.
 hhi/
+.var/

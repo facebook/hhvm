@@ -213,12 +213,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function getDocComment()[]: mixed;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getRetTypeInfo(): dict;
+  <<__Native>>
+  private function getRetTypeInfo()[]: dict;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getReturnTypeHint(): string;
-
+  <<__Native>>
+  private function getReturnTypeHint()[]: string;
 
   public function getReturnTypeText()[] {
     return $this->getReturnTypeHint() ?: false;
@@ -373,8 +372,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   Returns the class on success or NULL on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getClosureScopeClass(): ?ReflectionClass {
+  public function getClosureScopeClass()[]: ?ReflectionClass {
     return null;
   }
 
@@ -603,8 +601,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return false;
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getClosureScopeClassname(object $closure): ?string;
+  <<__Native>>
+  private function getClosureScopeClassname(object $closure)[]: ?string;
 
   <<__Pure, __MaybeMutable>>
   public function getClosureScopeClass(): ?ReflectionClass {
@@ -907,8 +905,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   <<__Native>>
   public function isStatic()[]: bool;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function isStaticInPrologue(): bool;
+  <<__Native>>
+  private function isStaticInPrologue()[]: bool;
 
   /**
    * ( excerpt from
@@ -1250,8 +1248,8 @@ class ReflectionClass implements Reflector {
   <<__Native>>
   public function getName()[]: string;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getParentName(): string;
+  <<__Native>>
+  private function getParentName()[]: string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.innamespace.php
@@ -1293,8 +1291,8 @@ class ReflectionClass implements Reflector {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isHack(): bool;
+  <<__Native>>
+  public function isHack()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.isinternal.php )
@@ -1610,8 +1608,9 @@ class ReflectionClass implements Reflector {
   /**
    * Helper for the get{Traits,Interfaces,Requirements} methods
    */
-  <<__Pure, __MaybeMutable>>
-  private function getReflectionClassesFromNames(varray<string> $names) {
+  private function getReflectionClassesFromNames(
+    varray<string> $names
+  )[]: darray<string, ReflectionClass> {
     $ret = darray[];
     foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
@@ -1702,8 +1701,8 @@ class ReflectionClass implements Reflector {
     return is_a($obj, $this->getName());
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getConstructorName(): string;
+  <<__Native>>
+  private function getConstructorName()[]: string;
 
   /**
    * ( excerpt from

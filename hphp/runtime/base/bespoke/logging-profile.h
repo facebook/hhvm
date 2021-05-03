@@ -330,7 +330,8 @@ size_t countSources();
 size_t countSinks();
 
 // Accessors for logged events. TODO(kshaunak): Expose a better API.
-ArrayOp getArrayOp(uint64_t key);
+ArrayOp getEventArrayOp(uint64_t key);
+LowStringPtr getEventStrKey(uint64_t key);
 
 }}
 

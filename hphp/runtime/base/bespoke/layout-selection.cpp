@@ -46,7 +46,7 @@ double probabilityOfEscalation(const LoggingProfile& profile) {
 
   uint64_t escalated = 0;
   for (auto const& it : profile.data->events) {
-    auto const op = getArrayOp(it.first);
+    auto const op = getEventArrayOp(it.first);
     if (op == ArrayOp::EscalateToVanilla) escalated += it.second;
   }
   return 1.0 * std::min(escalated, logging) / logging;
@@ -117,6 +117,8 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
 //////////////////////////////////////////////////////////////////////////////
 // Struct helpers
 
+using KeyFrequencies = folly::F14FastMap<const StringData*, int64_t>;
+
 struct StructAnalysis {
   std::vector<KeyOrder> key_orders;
   std::vector<const SinkProfile*> merge_sinks;
@@ -142,6 +144,22 @@ void mergeValid(I&& begin, I&& end, UnionFind<T>& uf, F&& elem) {
     auto const& val = elem(*iter);
     if (uf.lookup(val)) uf.merge(root, val);
   }
+}
+
+// Sort keys in KeyOrder by descending order of frequency.
+KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
+  if (ko.empty() || !ko.valid()) return ko;
+  auto const frequency = [&](LowStringPtr key) {
+    auto const it = keys.find(key.get());
+    return it == keys.end() ? 0 : it->second;
+  };
+  KeyOrder::KeyOrderData sorted;
+  for (auto const key : ko) {
+    sorted.push_back(key);
+  }
+  std::sort(sorted.begin(), sorted.end(),
+            [&](auto a, auto b) { return frequency(a) > frequency(b); });
+  return KeyOrder::Make(sorted);
 }
 
 // Returns true if we treat the given sink as a "merge point" and union the
@@ -204,7 +222,8 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // Add a node for this source to our union-find table if the type matches
   // and there's a struct layout that's a good match for this source alone.
   if (!type_okay || profile.data->keyOrders.empty()) return;
-  auto const ko = pruneKeyOrder(profile.data->keyOrders, keyCoverageThreshold());
+  auto const threshold = keyCoverageThreshold();
+  auto const ko = pruneKeyOrder(profile.data->keyOrders, threshold);
   if (!ko.valid()) return;
   DEBUG_ONLY auto const index = sa.union_find.insert(&profile);
   assertx(index == sa.key_orders.size());
@@ -244,10 +263,17 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   StructAnalysisResult result;
   for (auto const& group : groups) {
     KeyOrderMap kom;
+    KeyFrequencies keys;
     for (auto const source : group.first) {
       mergeKeyOrderMap(kom, source->data->keyOrders);
+      auto const multiplier = source->getSampleCountMultiplier();
+      for (auto const& it : source->data->events) {
+        auto const key = getEventStrKey(it.first);
+        if (key != nullptr) keys[key.get()] += it.second * multiplier;
+      }
     }
-    auto const groupKO = pruneKeyOrder(kom, keyCoverageThreshold());
+    auto const threshold = keyCoverageThreshold();
+    auto const groupKO = sortKeyOrder(pruneKeyOrder(kom, threshold), keys);
     auto const groupLayout = StructLayout::GetLayout(groupKO, true);
     if (groupLayout != nullptr) {
       for (auto const source : group.first) {
@@ -298,9 +324,7 @@ ArrayLayout selectSourceLayout(
   // 3. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
 
-  if (profile.key.isRuntimeLocation()) {
-    return ArrayLayout::Vanilla();
-  }
+  if (profile.key.isRuntimeLocation()) return ArrayLayout::Vanilla();
 
   // 4. If we escalate too often, use a vanilla layout.
 

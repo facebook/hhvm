@@ -157,6 +157,11 @@ struct alignas(8) EventKey {
     return m_op;
   }
 
+  LowStringPtr getStrKey() const {
+    if (m_key_spec != Spec::Str32) return nullptr;
+    return (const StringData*)safe_cast<uintptr_t>(m_key);
+  }
+
   std::string toString() const;
 
 private:
@@ -1155,8 +1160,12 @@ size_t countSinks() {
   return s_sinkMap.size();
 }
 
-ArrayOp getArrayOp(uint64_t key) {
+ArrayOp getEventArrayOp(uint64_t key) {
   return EventKey(key).getOp();
+}
+
+LowStringPtr getEventStrKey(uint64_t key) {
+  return EventKey(key).getStrKey();
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1108,6 +1108,14 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const size = safe_cast<uint32_t>(imms.size());
 
   auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+
+  // Validate that the layout is compatible with the requested array.
+  // TODO(mcolavita): move to layout selection
+  for (auto i = 0; i < size; i++) {
+    auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
+    if (slayout->keySlot(key) == kInvalidSlot) return false;
+  }
+
   auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
   for (auto i = 0; i < size; i++) {
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);

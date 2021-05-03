@@ -1126,6 +1126,7 @@ struct RuntimeOption {
    * represent structs, we can't make any with more than 255 keys. */   \
   F(bool, EmitBespokeStructDicts, true)                                 \
   F(uint8_t, BespokeStructDictMaxNumKeys, 64)                           \
+  F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
   /* Choice of layout selection algorithms:                             \

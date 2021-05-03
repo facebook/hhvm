@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/types.h"
 
+#include <folly/container/F14Map.h>
+
 #include <vector>
 
 namespace HPHP {
@@ -43,6 +45,7 @@ struct KeyOrder {
   // but we typically won't want to make it a struct of its own.
   bool empty() const;
   bool valid() const;
+  bool contains(const StringData*) const;
 
   bool operator==(const KeyOrder& other) const;
   std::string toString() const;
@@ -63,6 +66,8 @@ private:
   static KeyOrderData trimKeyOrder(const KeyOrderData&);
 
   const KeyOrderData* m_keys = nullptr;
+
+  static const size_t kMaxTrackedKeyOrderSize = 1024;
 };
 
 struct KeyOrderHash {
@@ -78,6 +83,7 @@ struct KeyOrderHash {
 // TODO(kshaunak): Move this wrapper to a utilities file.
 template <typename T>
 struct CopyAtomic {
+  CopyAtomic(): value() {}
   /* implicit */ CopyAtomic(T value): value(value) {}
 
   CopyAtomic(const CopyAtomic<T>& other)
@@ -86,6 +92,7 @@ struct CopyAtomic {
 
   CopyAtomic& operator=(const CopyAtomic<T>& other) {
     value = other.value.load(std::memory_order_acquire);
+    return *this;
   }
 
   operator T() const {
@@ -103,5 +110,8 @@ using KeyOrderMap =
 // keys in the given map. If the map has too many keys, or keys of the wrong
 // type, this function will return an invalid KeyOrder.
 KeyOrder collectKeyOrder(const KeyOrderMap& map);
+KeyOrder pruneKeyOrder(const KeyOrderMap& keyOrderMap, double cutoff);
+
+void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src);
 
 }}

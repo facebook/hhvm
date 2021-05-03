@@ -23,6 +23,8 @@
 
 namespace HPHP { namespace bespoke {
 
+TRACE_SET_MOD(bespoke);
+
 namespace {
 
 const StaticString s_extraKey("...");
@@ -47,7 +49,7 @@ folly::SharedMutex s_keyOrderLock;
 
 KeyOrder KeyOrder::insert(const StringData* k) const {
   if (!k->isStatic() || !m_keys) return KeyOrder::MakeInvalid();
-  if (std::find(m_keys->begin(), m_keys->end(), k) != m_keys->end()) {
+  if (contains(k)) {
     return *this;
   }
   if (isTooLong()) return *this;
@@ -136,7 +138,7 @@ KeyOrder KeyOrder::MakeInvalid() {
 
 bool KeyOrder::isTooLong() const {
   assertx(m_keys);
-  return m_keys->size() > RO::EvalBespokeStructDictMaxNumKeys;
+  return m_keys->size() > kMaxTrackedKeyOrderSize;
 }
 
 size_t KeyOrder::size() const {
@@ -150,6 +152,11 @@ bool KeyOrder::empty() const {
 
 bool KeyOrder::valid() const {
   return m_keys && !isTooLong();
+}
+
+bool KeyOrder::contains(const StringData* val) const {
+  assertx(valid());
+  return std::find(m_keys->begin(), m_keys->end(), val) != m_keys->end();
 }
 
 KeyOrder::const_iterator KeyOrder::begin() const {
@@ -180,6 +187,121 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
   std::sort(sorted.begin(), sorted.end(),
             [](auto a, auto b) { return a->compare(b) < 0; });
   return KeyOrder::Make(sorted);
+}
+
+namespace {
+using KeyCountMap = folly::F14FastMap<const StringData*, size_t>;
+using KeyOrderFrequencyList = std::vector<std::pair<KeyOrder, size_t>>;
+/*
+ * Returns a map indicating, for each key in the KeyOrderMap, how many key
+ * order instances would be invalidated by removing it.
+ */
+KeyCountMap countKeyInstances(const KeyOrderFrequencyList& frequencyList) {
+  auto keyInstances = KeyCountMap{};
+  for (auto const& [keyOrder, count] : frequencyList) {
+    for (auto const& key : keyOrder) {
+      keyInstances[key] += count;
+    }
+  }
+
+  return keyInstances;
+}
+}
+
+KeyOrder pruneKeyOrder(const KeyOrderMap& keyOrderMap, double cutoff) {
+  auto workingSet = KeyOrderFrequencyList();
+  workingSet.reserve(keyOrderMap.size());
+  for (auto const& [keyOrder, count] : keyOrderMap) {
+    workingSet.emplace_back(keyOrder, count);
+  }
+
+  auto const sumCounts = [](auto begin, auto end) {
+    return std::accumulate(
+      begin, end,
+      size_t{0},
+      [&](auto const& a, auto const& b) { return a + b.second; }
+    );
+  };
+
+  // Compute the total number of key order instances we begin with.
+  auto const total = sumCounts(workingSet.begin(), workingSet.end());
+
+  // Immediately prune invalid key orders.
+  auto accepted = total;
+  {
+    auto const removeAt = std::partition(
+      workingSet.begin(), workingSet.end(),
+      [&](auto const& a) { return a.first.valid(); }
+    );
+    accepted -= sumCounts(removeAt, workingSet.end());
+    workingSet.erase(removeAt, workingSet.end());
+    assertx(accepted == sumCounts(workingSet.begin(), workingSet.end()));
+    FTRACE(2, "Prune invalid. Remain: {} / {}\n", accepted, total);
+  }
+
+  // If we're already below our cutoff, abort.
+  if (accepted < total * cutoff) return KeyOrder::MakeInvalid();
+
+  // Greedily remove the key which invalidates the least number of key order
+  // instances. Stop when doing so again would cross the cutoff.
+  auto keyInstances = countKeyInstances(workingSet);
+  while (!keyInstances.empty()) {
+    auto const keyAndCount = std::min_element(
+      keyInstances.cbegin(), keyInstances.cend(),
+      [](auto const& a, auto const& b) { return a.second < b.second; }
+    );
+
+    accepted -= keyAndCount->second;
+    if (accepted < total * cutoff) break;
+
+    FTRACE(2, "Prune key \"{}\". Remain: {} / {}\n", keyAndCount->first,
+           accepted, total);
+
+    // Remove all key orders invalidated by this removal, and update the
+    // instance counts.
+    auto removeAt = std::partition(
+      workingSet.begin(), workingSet.end(),
+      [&](auto const& a) { return !a.first.contains(keyAndCount->first); }
+    );
+    std::for_each(
+      removeAt, workingSet.end(),
+      [&](auto const& pair) {
+        for (auto const& key : pair.first) {
+          auto const iter = keyInstances.find(key);
+          assertx(iter != keyInstances.end());
+          iter->second -= pair.second;
+          if (iter->second == 0) {
+            keyInstances.erase(iter);
+          }
+        }
+      }
+    );
+
+    workingSet.erase(removeAt, workingSet.end());
+
+    assertx(accepted == sumCounts(workingSet.begin(), workingSet.end()));
+    assertx(keyInstances == countKeyInstances(workingSet));
+  }
+
+  // Assemble the final pruned key order.
+  auto prunedResult = KeyOrderMap();
+  for (auto const& [keyOrder, count] : workingSet) {
+    prunedResult.emplace(keyOrder, count);
+  }
+
+  auto const result = collectKeyOrder(prunedResult);
+  return result;
+}
+
+void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src) {
+  for (auto const& [key, count] : src) {
+    auto iter = dst.find(key);
+    if (iter == dst.end()) {
+      dst.emplace(key, count);
+    } else {
+      iter->second = iter->second + count;
+    }
+  }
 }
 
 }}

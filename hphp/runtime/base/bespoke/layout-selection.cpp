@@ -128,6 +128,22 @@ struct StructAnalysisResult {
   folly::F14FastMap<const SinkProfile*, const StructLayout*> sinks;
 };
 
+double keyCoverageThreshold() {
+  return RO::EvalBespokeStructDictKeyCoverageThreshold / 100;
+}
+
+template <typename T, typename I, typename F>
+void mergeValid(I&& begin, I&& end, UnionFind<T>& uf, F&& elem) {
+  auto iter = begin;
+  while (iter != end && !uf.lookup(elem(*iter))) iter++;
+  if (iter == end) return;
+  auto const& root = elem(*iter);
+  for (; iter!= end; iter++) {
+    auto const& val = elem(*iter);
+    if (uf.lookup(val)) uf.merge(root, val);
+  }
+}
+
 // Returns true if we treat the given sink as a "merge point" and union the
 // sets of sinks that are incident to that merge. These points are also the
 // only ones at which we'll JIT struct access code.
@@ -188,7 +204,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // Add a node for this source to our union-find table if the type matches
   // and there's a struct layout that's a good match for this source alone.
   if (!type_okay || profile.data->keyOrders.empty()) return;
-  auto const ko = collectKeyOrder(profile.data->keyOrders);
+  auto const ko = pruneKeyOrder(profile.data->keyOrders, keyCoverageThreshold());
   if (!ko.valid()) return;
   DEBUG_ONLY auto const index = sa.union_find.insert(&profile);
   assertx(index == sa.key_orders.size());
@@ -198,10 +214,8 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
 void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
   auto const& sources = profile.data->sources;
   if (sources.empty() || !mergeStructsAtSink(profile, sa)) return;
-  auto const root = profile.data->sources.begin()->first;
-  for (auto const& pair : sources) {
-    sa.union_find.merge(root, pair.first);
-  }
+  mergeValid(sources.begin(), sources.end(), sa.union_find,
+             [&](auto const& x) { return x.first; });
   sa.merge_sinks.push_back(&profile);
 }
 
@@ -231,20 +245,21 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   for (auto const& group : groups) {
     KeyOrderMap kom;
     for (auto const source : group.first) {
-      auto const index = sa.union_find.lookup(source);
-      kom.emplace(sa.key_orders[*index], 0).first->second.value++;
+      mergeKeyOrderMap(kom, source->data->keyOrders);
     }
-    auto const ko = collectKeyOrder(kom);
-    auto const layout = StructLayout::GetLayout(ko, true);
-    if (layout != nullptr) {
+    auto const groupKO = pruneKeyOrder(kom, keyCoverageThreshold());
+    auto const groupLayout = StructLayout::GetLayout(groupKO, true);
+    if (groupLayout != nullptr) {
       for (auto const source : group.first) {
-        result.sources.insert({source, layout});
+        // TODO(mcolavita): exclude sources likely to escalate with final layout
+        result.sources.insert({source, groupLayout});
       }
     }
   }
 
   // Assign sinks to layouts.
   for (auto const& sink : sa.merge_sinks) {
+    // TODO(mcolavita): exclude sinks likely to escalate with final layout
     assertx(!sink->data->sources.empty());
     auto const it = result.sources.find(sink->data->sources.begin()->first);
     if (it != result.sources.end()) result.sinks.insert({sink, it->second});
@@ -268,6 +283,9 @@ ArrayLayout selectSourceLayout(
     auto const vad = profile.data->staticSampledArray;
     if (vad != nullptr) {
       auto const sad = StructDict::MakeFromVanilla(vad, it->second);
+      // If the selected layout is incompatible with the static array, produce
+      // vanilla instead.
+      if (sad == nullptr) return ArrayLayout::Vanilla();
       profile.setStaticBespokeArray(sad);
     }
     return ArrayLayout(it->second);

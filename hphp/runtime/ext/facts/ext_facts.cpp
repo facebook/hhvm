@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
@@ -50,6 +51,7 @@
 #include "hphp/runtime/ext/facts/watchman-autoload-map.h"
 #include "hphp/runtime/ext/facts/watchman.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
@@ -65,7 +67,6 @@ namespace {
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";
 constexpr std::string_view kSchemaPlaceholder = "%{schema}";
 constexpr std::chrono::seconds kDefaultExpirationTime{30 * 60};
-constexpr size_t kDBVersion = 3;
 
 struct RepoOptionsParseExc : public std::runtime_error {
   explicit RepoOptionsParseExc(std::string msg)
@@ -81,15 +82,8 @@ folly::fs::path getRepoRoot(const RepoOptions& options) {
   return folly::fs::canonical(folly::fs::path{options.path()}.parent_path());
 }
 
-folly::fs::path
-getDBPath(const folly::fs::path& root, const folly::dynamic& queryExpr) {
-  std::stringstream schemaHash;
-  schemaHash << std::hex
-             << folly::hash::hash_combine(
-                    kDBVersion,
-                    queryExpr.hash(),
-                    std::hash<std::string_view>{}(root.native()));
-
+folly::fs::path getDBPath(const RepoOptions& repoOptions) {
+  always_assert(!RuntimeOption::AutoloadDBPath.empty());
   std::string pathTemplate{RuntimeOption::AutoloadDBPath};
 
   {
@@ -100,11 +94,15 @@ getDBPath(const folly::fs::path& root, const folly::dynamic& queryExpr) {
     }
   }
 
+  auto root = getRepoRoot(repoOptions);
+
   {
     size_t idx = pathTemplate.find(kSchemaPlaceholder);
     if (idx != std::string::npos) {
       pathTemplate.replace(
-          idx, kSchemaPlaceholder.size(), std::move(schemaHash).str());
+          idx,
+          kSchemaPlaceholder.size(),
+          mangleUnitSha1(root.native(), repoOptions.path(), repoOptions));
     }
   }
 
@@ -173,7 +171,7 @@ DBData getDBData(
 
   if (trustedDBPath.empty()) {
     ::gid_t gid = getGroup();
-    return DBData::readWrite(getDBPath(root, queryExpr), gid, getDBPerms());
+    return DBData::readWrite(getDBPath(repoOptions), gid, getDBPerms());
   } else {
     return DBData::readOnly(std::move(trustedDBPath));
   }

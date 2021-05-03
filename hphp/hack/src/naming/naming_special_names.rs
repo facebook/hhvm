@@ -741,6 +741,10 @@ pub mod coeffects {
     pub const POLICIED_OF: &str = "policied_of";
 
     pub const PURE: &str = "pure";
+
+    pub const READ_GLOBALS: &str = "read_globals";
+
+    pub const GLOBALS: &str = "globals";
 }
 
 pub mod shapes {

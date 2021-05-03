@@ -33,6 +33,9 @@ pub enum Ctx {
     PoliciedShallow,
     Policied,
 
+    ReadGlobals,
+    Globals,
+
     // Pure
     Pure,
 }
@@ -53,6 +56,8 @@ impl fmt::Display for Ctx {
             PoliciedShallow => write!(f, "{}", c::POLICIED_SHALLOW),
             Policied => write!(f, "{}", c::POLICIED),
             Pure => write!(f, "{}", c::PURE),
+            ReadGlobals => write!(f, "{}", c::READ_GLOBALS),
+            Globals => write!(f, "{}", c::GLOBALS),
         }
     }
 }

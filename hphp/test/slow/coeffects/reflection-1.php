@@ -1,7 +1,7 @@
 <?hh
 
 function f()[] {}
-function g()[rx, write_props, lol] {}
+function g()[rx, write_props, lol, read_globals, globals] {}
 function h() {}
 
 class Something {}

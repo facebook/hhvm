@@ -1,9 +1,11 @@
 vec(0) {
 }
-vec(3) {
+vec(5) {
   string(2) "rx"
   string(11) "write_props"
   string(3) "lol"
+  string(12) "read_globals"
+  string(7) "globals"
 }
 vec(1) {
   string(8) "defaults"

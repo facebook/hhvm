@@ -332,10 +332,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       | _ -> Errors.bitwise_math_invalid_argument
     in
     let (env, _, err_opt1) =
-      check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) err
+      check_dynamic_or_enforce_int env p1 ty1 (Reason.Rarith p) err
     in
     let (env, _, err_opt2) =
-      check_dynamic_or_enforce_int env p ty2 (Reason.Rarith p2) err
+      check_dynamic_or_enforce_int env p2 ty2 (Reason.Rarith p) err
     in
     let r =
       match bop with

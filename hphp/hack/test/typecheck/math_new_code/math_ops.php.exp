@@ -40,9 +40,9 @@ Typing error (Typing[4429])
   Expected `num` because this is used in an arithmetic operation
   File "math_ops.php", line 19, characters 27-29:
   But got `Foo`
-File "math_ops.php", line 25, characters 3-11:
+File "math_ops.php", line 25, characters 3-7:
 Typing error (Typing[4429])
-  File "math_ops.php", line 25, characters 3-7:
+  File "math_ops.php", line 25, characters 3-11:
   Expected `int` because this is used in an arithmetic operation
   File "math_ops.php", line 25, characters 3-7:
   But got `string`
@@ -64,9 +64,9 @@ Typing error (Typing[4429])
   Expected `num` because this is used in an arithmetic operation
   File "math_ops.php", line 19, characters 27-29:
   But got `Foo`
-File "math_ops.php", line 30, characters 3-10:
+File "math_ops.php", line 30, characters 3-4:
 Typing error (Typing[4429])
-  File "math_ops.php", line 30, characters 3-4:
+  File "math_ops.php", line 30, characters 3-10:
   Expected `int` because this is used in an arithmetic operation
   File "math_ops.php", line 29, characters 3-10:
   But got `num` because it is the result of a division `/`

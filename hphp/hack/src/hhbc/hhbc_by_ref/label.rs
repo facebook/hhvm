@@ -11,43 +11,18 @@ pub enum Label {
     DefaultArg(Id),
 }
 impl Label {
-    pub fn id(&self) -> std::result::Result<&Id, Error> {
+    pub fn id(&self) -> &Id {
         match self {
-            Label::Regular(id) => Ok(id),
-            Label::DefaultArg(id) => Ok(id),
+            Label::Regular(id) => id,
+            Label::DefaultArg(id) => id,
         }
     }
 
-    pub fn map<F: FnOnce(Id) -> Id>(&self, f: F) -> std::result::Result<Label, Error> {
-        match *self {
-            Label::Regular(id) => Ok(Label::Regular(f(id))),
-            Label::DefaultArg(id) => Ok(Label::DefaultArg(f(id))),
+    pub fn map<F: FnOnce(&Id) -> Id>(&self, f: F) -> Label {
+        match self {
+            Label::Regular(id) => Label::Regular(f(&id)),
+            Label::DefaultArg(id) => Label::DefaultArg(f(&id)),
         }
-    }
-
-    pub fn map_mut<F: FnOnce(&mut Id)>(&mut self, f: F) {
-        match *self {
-            Label::Regular(ref mut id) | Label::DefaultArg(ref mut id) => f(id),
-        }
-    }
-
-    pub fn option_map<F: FnOnce(Id) -> Option<Id>>(
-        &self,
-        f: F,
-    ) -> std::result::Result<Option<Label>, Error> {
-        match *self {
-            Label::Regular(id) => {
-                if let Some(l) = f(id) {
-                    return Ok(Some(Label::Regular(l)));
-                }
-            }
-            Label::DefaultArg(id) => {
-                if let Some(l) = f(id) {
-                    return Ok(Some(Label::DefaultArg(l)));
-                }
-            }
-        }
-        Ok(None)
     }
 }
 

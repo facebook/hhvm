@@ -16,12 +16,8 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id
     let mut folder =
         |(i, mut map): (usize, HashMap<Id, usize>), instr: &Instruct<'arena>| match instr {
             Instruct::ILabel(l) => {
-                if let Ok(id) = Label::id(l) {
-                    map.insert(*id, i);
-                    (i, map)
-                } else {
-                    panic!("Label should've been rewritten by this point")
-                }
+                map.insert(*l.id(), i);
+                (i, map)
             }
             _ => (i + 1, map),
         };
@@ -72,17 +68,14 @@ fn create_label_ref_map<'arena>(
 ) -> (HashSet<Id>, HashMap<Id, usize>) {
     let process_ref =
         |(mut n, (mut used, mut refs)): (usize, (HashSet<Id>, HashMap<Id, usize>)), l: &Label| {
-            if let Ok(id) = Label::id(l) {
-                let ix = lookup_def(id, defs);
-                if !refs.contains_key(ix) {
-                    used.insert(*id);
-                    refs.insert(*ix, n);
-                    n += 1;
-                }
-                (n, (used, refs))
-            } else {
-                panic!("Label should've been rewritten by this point")
+            let id = l.id();
+            let offset = lookup_def(id, defs);
+            if !refs.contains_key(offset) {
+                used.insert(*id);
+                refs.insert(*offset, n);
+                n += 1;
             }
+            (n, (used, refs))
         };
     let gather_using =
         |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instrseq: &InstrSeq<'arena>| {
@@ -152,35 +145,27 @@ fn rewrite_params_and_body<'arena>(
     params: &mut Vec<HhasParam<'arena>>,
     body: &mut InstrSeq<'arena>,
 ) {
-    let relabel_id = |id: &mut Id| {
-        *id = *refs
+    let relabel_id = |id: &Id| -> Id {
+        *(refs
             .get(lookup_def(&id, defs))
-            .expect("relabel_instrseq: offset not in refs")
-    };
-    let relabel_define_label_id = |id: Id| {
-        if used.contains(&id) {
-            refs.get(lookup_def(&id, defs)).copied()
-        } else {
-            None
-        }
+            .expect("relabel_instrseq: offset not in refs"))
     };
     let mut rewrite_instr = |instr: &mut Instruct<'arena>| -> bool {
         if let Instruct::ILabel(ref mut l) = instr {
-            match l.option_map(relabel_define_label_id) {
-                Ok(Some(new_l)) => {
-                    *l = new_l;
-                    true
-                }
-                _ => false,
+            if used.contains(l.id()) {
+                *l = l.map(relabel_id);
+                true
+            } else {
+                false
             }
         } else {
-            relabel_instr(instr, &mut |l| l.map_mut(relabel_id));
+            relabel_instr(instr, &mut |l| *l = l.map(relabel_id));
             true
         }
     };
     let rewrite_param = |param: &mut HhasParam<'arena>| {
         if let Some((l, _)) = &mut param.default_value {
-            l.map_mut(relabel_id);
+            *l = l.map(relabel_id);
         }
     };
     params.iter_mut().for_each(|param| rewrite_param(param));
@@ -222,6 +207,6 @@ pub fn clone_with_fresh_regular_labels<'arena>(
                 *l = nl.clone();
             }
         };
-        block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| relabel(l)))
+        block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| relabel(l)));
     }
 }

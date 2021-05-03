@@ -2022,24 +2022,59 @@ static int execute_program_impl(int argc, char** argv) {
       tempFile = po.lint;
     }
 
-    init_repo_file();
-    hphp_process_init();
-    SCOPE_EXIT { hphp_process_exit(); };
+    if (!registrationComplete) {
+      folly::SingletonVault::singleton()->registrationComplete();
+      registrationComplete = true;
+    }
+
+    compilers_start();
+    hphp_thread_init();
+    g_context.getCheck();
+    SCOPE_EXIT { hphp_thread_exit(); };
+
+    // Initialize compiler state
+    hphp_compiler_init();
+
+    SystemLib::s_inited = true;
+
+    // Ensure write to SystemLib::s_inited is visible by other threads.
+    std::atomic_thread_fence(std::memory_order_release);
 
     try {
-      auto const filename = makeStaticString(po.lint.c_str());
-      auto const unit = lookupUnit(filename, "", nullptr,
-                                   Native::s_noNativeFuncs, false);
-      if (unit == nullptr) {
-        throw FileOpenException(po.lint);
+      auto const file = [&] {
+        if (!FileUtil::isAbsolutePath(po.lint)) {
+          return SourceRootInfo::GetCurrentSourceRoot() + po.lint;
+        }
+        return po.lint;
+      }();
+
+      std::fstream fs{file, std::ios::in};
+      if (!fs) throw FileOpenException(po.lint);
+      std::stringstream contents;
+      contents << fs.rdbuf();
+
+      auto const repoOptions = RepoOptions::forFile(file.c_str());
+
+      auto const str = contents.str();
+      auto const sha1 =
+        SHA1{mangleUnitSha1(string_sha1(str), file, repoOptions)};
+
+      // Disable any cache hooks because they're generally not useful
+      // if we're just going to lint (and they might be expensive).
+      g_unit_emitter_cache_hook = nullptr;
+
+      auto const unit = compile_file(
+        str.c_str(), str.size(), sha1, file.c_str(),
+        Native::s_noNativeFuncs, repoOptions, nullptr
+      );
+      if (!unit) {
+        std::cerr << "Unable to compile \"" << file << "\"\n";
+        return 1;
       }
       if (auto const info = unit->getFatalInfo()) {
         raise_parse_error(unit->filepath(), info->m_fatalMsg.c_str(),
                           info->m_fatalLoc);
       }
-    } catch (FileOpenException& e) {
-      Logger::Error(e.getMessage());
-      return 1;
     } catch (const FatalErrorException& e) {
       RuntimeOption::CallUserHandlerOnFatals = false;
       RuntimeOption::AlwaysLogUnhandledExceptions = false;

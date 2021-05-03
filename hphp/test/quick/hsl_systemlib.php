@@ -5,5 +5,5 @@
 
 <<__EntryPoint>>
 function hsl_systemlib_main(): void {
-  var_dump(HH\Experimental\BuiltInLib\VecBI\map(vec[1, 2, 3], $x ==> $x * $x));
+  var_dump(HH\Lib\Vec\map(vec[1, 2, 3], $x ==> $x * $x));
 }

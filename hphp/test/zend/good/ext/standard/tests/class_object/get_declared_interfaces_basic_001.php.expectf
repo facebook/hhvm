@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(73) {
+vec(75) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(24) "HH\Rx\AsyncKeyedIterator"
@@ -43,6 +43,7 @@ vec(73) {
   string(16) "JsonSerializable"
   string(16) "HH\EnumAttribute"
   string(21) "HH\ClassLikeAttribute"
+  string(24) "HH\Lib\Str\SprintfFormat"
   string(32) "HH\Asio\ResultOrExceptionWrapper"
   string(16) "OutputCollection"
   string(13) "MutableVector"
@@ -62,6 +63,7 @@ vec(73) {
   string(16) "SeekableIterator"
   string(8) "MysqlRow"
   string(21) "HH\ParameterAttribute"
+  string(29) "HH\Lib\Str\SprintfFormatQuote"
   string(17) "HH\Rx\Traversable"
   string(17) "RecursiveIterator"
   string(16) "HH\FileAttribute"

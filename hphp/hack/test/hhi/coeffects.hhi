@@ -24,7 +24,7 @@ namespace HH\Contexts {
 
   namespace Unsafe {
     type oldrx = mixed;
-    type oldrx_shallow = mixed;
+    type oldrx_shallow = \HH\Capabilities\RxLocal;
     type oldrx_local = \HH\Contexts\defaults;
 
     type unrelated = mixed;

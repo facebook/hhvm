@@ -1,8 +1,8 @@
-File "closures_subtyping_implicit.bad.php", line 4, characters 10-32:
+File "closures_subtyping_implicit.bad.php", line 4, characters 10-35:
 Invalid return type (Typing[4403])
-  File "closures_subtyping_implicit.bad.php", line 3, characters 61-64:
+  File "closures_subtyping_implicit.bad.php", line 3, characters 64-70:
   Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_implicit.bad.php", line 3, characters 38-47:
+  File "closures_subtyping_implicit.bad.php", line 3, characters 38-50:
   But got a function that requires the capability set {RxLocal, WriteProperty}
 File "closures_subtyping_implicit.bad.php", line 8, characters 10-35:
 Invalid return type (Typing[4403])
@@ -10,11 +10,11 @@ Invalid return type (Typing[4403])
   Expected a function that requires the capability set {}
   File "closures_subtyping_implicit.bad.php", line 7, characters 36-48:
   But got a function that requires the capability WriteProperty
-File "closures_subtyping_implicit.bad.php", line 13, characters 12-34:
+File "closures_subtyping_implicit.bad.php", line 13, characters 12-37:
 Invalid return type (Typing[4403])
-  File "closures_subtyping_implicit.bad.php", line 12, characters 68-71:
+  File "closures_subtyping_implicit.bad.php", line 12, characters 71-77:
   Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_implicit.bad.php", line 12, characters 45-54:
+  File "closures_subtyping_implicit.bad.php", line 12, characters 45-57:
   But got a function that requires the capability set {RxLocal, WriteProperty}
 File "closures_subtyping_implicit.bad.php", line 17, characters 12-37:
 Invalid return type (Typing[4403])
@@ -24,7 +24,7 @@ Invalid return type (Typing[4403])
   But got a function that requires the capability WriteProperty
 File "closures_subtyping_implicit.bad.php", line 25, characters 22-23:
 Invalid argument (Typing[4403])
-  File "closures_subtyping_implicit.bad.php", line 21, characters 40-43:
+  File "closures_subtyping_implicit.bad.php", line 21, characters 40-46:
   Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_implicit.bad.php", line 23, characters 41-50:
+  File "closures_subtyping_implicit.bad.php", line 23, characters 41-53:
   But got a function that requires the capability set {RxLocal, WriteProperty}

@@ -9,7 +9,7 @@ function good_caller()[write_props]: void {
   callee();
 
   {
-    $l_unrelated = ()[rx] ==> {};
+    $l_unrelated = ()[globals] ==> {};
     callee();
   }
 }

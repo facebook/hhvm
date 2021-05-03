@@ -908,9 +908,8 @@ void Func::bind(Func *func) {
   assertx(!func->isMethod());
   auto const ne = func->getNamedEntity();
 
-  auto const persistent =
-    (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
-    (func->attrs() & AttrPersistent);
+  auto const persistent = func->isPersistent();
+  assertx(!persistent || (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
 
   auto const init_val = LowPtr<Func>(func);
 

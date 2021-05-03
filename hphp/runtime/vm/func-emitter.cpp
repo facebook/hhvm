@@ -248,14 +248,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (attrs & AttrIsMethCaller && RuntimeOption::RepoAuthoritative) {
     attrs |= AttrPersistent | AttrUnique;
   }
-  if (attrs & AttrPersistent && !preClass) {
+  if (attrs & (AttrPersistent | AttrUnique) && !preClass) {
     if ((RuntimeOption::EvalJitEnableRenameFunction ||
          attrs & AttrInterceptable ||
          (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
       if (attrs & AttrBuiltin) {
         SystemLib::s_anyNonPersistentBuiltins = true;
       }
-      attrs = Attr(attrs & ~AttrPersistent);
+      attrs = Attr(attrs & ~(AttrPersistent | AttrUnique));
     }
   } else {
     assertx(preClass || !(attrs & AttrBuiltin) || (attrs & AttrIsMethCaller));

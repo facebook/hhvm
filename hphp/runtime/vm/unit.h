@@ -205,11 +205,10 @@ public:
    */
   enum class MergeKind {
     Class               = 0,  // Class is required to be 0 for correctness.
-    UniqueDefinedClass  = 1,
-    Define              = 2,  // Toplevel scalar define.
-    TypeAlias           = 3,
-    Record              = 4,
-    Done                = 5,
+    Define              = 1,  // Toplevel scalar define.
+    TypeAlias           = 2,
+    Record              = 3,
+    Done                = 4,
     // We can add two more kind here; this has to fit in 3 bits.
   };
 

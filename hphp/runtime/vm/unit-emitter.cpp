@@ -344,7 +344,6 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
     for (int i = 0, n = m_mergeableStmts.size(); i < n; i++) {
       switch (m_mergeableStmts[i].first) {
         case MergeKind::Done:
-        case MergeKind::UniqueDefinedClass:
           not_reached();
         case MergeKind::Class:
           break;
@@ -514,7 +513,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
           (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
         break;
       case MergeKind::Done:
-      case MergeKind::UniqueDefinedClass:
         not_reached();
     }
   }
@@ -753,7 +751,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           break;
         case MergeKind::Class:
         case MergeKind::Done:
-        case MergeKind::UniqueDefinedClass:
           always_assert(false);
       }
     }
@@ -769,7 +766,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         case MergeKind::Class:
           break;
         case MergeKind::Done:
-        case MergeKind::UniqueDefinedClass:
           always_assert(false);
       }
     }
@@ -787,7 +783,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         case MergeKind::Class:
           break;
         case MergeKind::Done:
-        case MergeKind::UniqueDefinedClass:
           always_assert(false);
       }
     }

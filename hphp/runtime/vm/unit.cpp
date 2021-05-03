@@ -783,7 +783,8 @@ void Unit::initialMerge() {
   m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
 
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
-  bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
+  bool allFuncsUnique = RuntimeOption::RepoAuthoritative
+    || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction);
   for (auto& func : mi->mutableFuncs()) {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
@@ -821,7 +822,6 @@ void Unit::initialMerge() {
       void *obj = mi->mergeableObj(ix);
       auto k = MergeKind(uintptr_t(obj) & 7);
       switch (k) {
-        case MergeKind::UniqueDefinedClass:
         case MergeKind::Done:
           not_reached();
         case MergeKind::TypeAlias: {
@@ -928,15 +928,11 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
       case MergeKind::Class: {
         PreClass* pre = (PreClass*)obj;
         if (pre->attrs() & AttrUnique) {
-          Class* cls = pre->namedEntity()->clsList();
+          UNUSED Class* cls = pre->namedEntity()->clsList();
           assertx(cls && !cls->m_next);
           assertx(cls->preClass() == pre);
-          if (rds::isPersistentHandle(cls->classHandle())) {
-            delta++;
-          } else if (out) {
-            out->mergeableObj(oix++) = (void*)
-              (uintptr_t(cls) | uintptr_t(MergeKind::UniqueDefinedClass));
-          }
+          assertx(rds::isPersistentHandle(cls->classHandle()));
+          delta++;
         } else if (out) {
           out->mergeableObj(oix++) = obj;
         }
@@ -960,8 +956,6 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         }
         break;
       }
-      case MergeKind::UniqueDefinedClass:
-        not_reached();
       case MergeKind::Define: {
         auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
         if (constantInfo[constantId].attrs & AttrPersistent) {
@@ -1046,15 +1040,11 @@ void Unit::mergeImpl(MergeInfo* mi) {
                 MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        assertx(func->isUnique());
+        assertx(func->isUnique() && func->isPersistent());
+
         auto const handle = func->funcHandle();
-        if (rds::isNormalHandle(handle)) {
-          rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle) = func;
-          rds::initHandle(handle);
-        } else {
-          assertx(rds::isPersistentHandle(handle));
-          rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
-        }
+        assertx(rds::isPersistentHandle(handle));
+        rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
 
         auto const ne = func->getNamedEntity();
         auto const f = ne->uniqueFunc();
@@ -1068,6 +1058,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } else {
       do {
         Func* func = *it;
+        assertx(func->isPersistent() == ((this->isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction) || RuntimeOption::RepoAuthoritative));
         Func::def(func, debugger);
       } while (++it != fend);
     }
@@ -1110,41 +1101,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
             madeProgress = true;
             define.reset(i);
           }
-          continue;
-        }
-
-        case MergeKind::UniqueDefinedClass: {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_unique);
-          Class* other = nullptr;
-          Class* cls = (Class*)((char*)obj - (int)k);
-          FTRACE(3, "  Merging cls {}\n", cls->name()->data());
-          auto const handle = cls->classHandle();
-          auto const handle_persistent = rds::isPersistentHandle(handle);
-          if (cls->isPersistent()) {
-            Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
-          }
-          if (Stats::enabled() && handle_persistent) {
-            Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
-          }
-          Class::Avail avail = cls->avail(other, true);
-          if (UNLIKELY(avail == Class::Avail::Fail)) {
-            if (!failIsFatal) continue;
-            raise_error("unknown class %s", other->name()->data());
-          }
-          madeProgress = true;
-          define.reset(i);
-          assertx(avail == Class::Avail::True);
-          if (handle_persistent) {
-            rds::handleToRef<LowPtr<Class>,
-                             rds::Mode::Persistent>(handle) = cls;
-          } else {
-            assertx(rds::isNormalHandle(handle));
-            rds::handleToRef<LowPtr<Class>,
-                             rds::Mode::Normal>(handle) = cls;
-            rds::initHandle(handle);
-          }
-          if (debugger) phpDebuggerDefClassHook(cls);
           continue;
         }
 
@@ -1199,18 +1155,26 @@ void Unit::mergeImpl(MergeInfo* mi) {
           MergeState::NeedsCompact)) {
       return;
     }
+
     /*
-     * All the classes are known to be unique, and we just got
-     * here, so all were successfully defined. We can now go
-     * back and convert all MergeKind::Class entries to
-     * MergeKind::UniqueDefinedClass, and all hoistable
-     * classes to their Class*'s instead of PreClass*'s.
-     *
-     * We can also remove any Persistent Class/Func*'s,
+     * We can now remove any Persistent Class/Func*'s,
      * and any requires of modules that are (now) empty
      */
     size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
                                     m_constants, m_preRecords);
+
+    if (RuntimeOption::RepoAuthoritative) {
+      assertx(delta == mi->m_mergeablesSize);
+    } else if (!SystemLib::s_inited) {
+      if (!RuntimeOption::EvalJitEnableRenameFunction) {
+        assertx(delta == mi->m_mergeablesSize);
+      } else {
+        assertx(delta == mi->m_mergeablesSize - mi->m_firstMergeablePreClass);
+      }
+    } else {
+      assertx(delta == 0);
+    }
+
     MergeInfo* newMi = mi;
     if (delta) {
       newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
@@ -1233,6 +1197,13 @@ void Unit::mergeImpl(MergeInfo* mi) {
     }
     m_mergeState.fetch_and(~MergeState::NeedsCompact,
                            std::memory_order_relaxed);
+  } else {
+    // If the file was empty to start with we just want to mark merge state empty
+    if (mi->m_mergeablesSize == 0) {
+      m_mergeState.fetch_or(MergeState::Empty, std::memory_order_relaxed);
+    } else {
+      assertx(!RuntimeOption::RepoAuthoritative && (SystemLib::s_inited || RuntimeOption::EvalJitEnableRenameFunction));
+    }
   }
 }
 

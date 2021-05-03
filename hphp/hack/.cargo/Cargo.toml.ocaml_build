@@ -12,7 +12,6 @@ members = [
     "src/hh_fanout/cargo/hh_fanout_build_rust",
     "src/hh_fanout/cargo/hh_fanout_dep_graph_is_subgraph_rust",
     "src/hh_fanout/cargo/hh_fanout_dep_graph_stats_rust",
-    "src/hhbc/cargo/string_utils",
     "src/hhbc/cargo/compile_ffi",
     "src/hhbc/cargo/options_ffi",
     "src/name_index/sqlite",

@@ -598,7 +598,7 @@ dependencies = [
  "facts_parser",
  "facts_smart_constructors",
  "hex",
- "hhbc_string_utils_rust",
+ "hhbc_by_ref_hhbc_string_utils",
  "md-5",
  "ocamlrep",
  "oxidized",
@@ -1871,19 +1871,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hhbc_string_utils_rust"
-version = "0.0.0"
-dependencies = [
- "escaper",
- "lazy_static",
- "libc",
- "naming_special_names_rust",
- "ocaml_helper",
- "pretty_assertions",
- "regex",
-]
-
-[[package]]
 name = "html_entities"
 version = "0.0.0"
 dependencies = [
@@ -2731,7 +2718,7 @@ name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
  "facts_rust",
- "hhbc_string_utils_rust",
+ "hhbc_by_ref_hhbc_string_utils",
  "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",

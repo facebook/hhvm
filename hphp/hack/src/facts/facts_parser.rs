@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_string_utils_rust::mangle_xhp_id;
+use hhbc_by_ref_hhbc_string_utils::mangle_xhp_id;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::parser_env::ParserEnv;
@@ -446,7 +446,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hhbc_string_utils_rust::without_xhp_mangling;
+    use hhbc_by_ref_hhbc_string_utils::without_xhp_mangling;
 
     #[test]
     fn xhp_mangling() {

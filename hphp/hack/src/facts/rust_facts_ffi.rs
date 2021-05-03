@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use facts_rust as facts;
-use hhbc_string_utils_rust::without_xhp_mangling;
+use hhbc_by_ref_hhbc_string_utils::without_xhp_mangling;
 use libc::c_char;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi;

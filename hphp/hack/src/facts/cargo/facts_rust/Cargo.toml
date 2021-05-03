@@ -12,7 +12,7 @@ digest = "0.8"
 facts_parser = { path = "../../../parser/api/cargo/facts_parser" }
 facts_smart_constructors = { path = "../facts_smart_constructors" }
 hex = "0.4"
-hhbc_string_utils_rust = { path = "../../../hhbc/cargo/string_utils" }
+hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 md-5 = "0.8"
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }

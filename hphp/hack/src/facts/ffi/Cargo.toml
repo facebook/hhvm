@@ -12,7 +12,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 facts_rust = { path = "../cargo/facts_rust" }
-hhbc_string_utils_rust = { path = "../../hhbc/cargo/string_utils" }
+hhbc_by_ref_hhbc_string_utils = { path = "../../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 libc = "0.2.86"
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }

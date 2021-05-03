@@ -45,9 +45,13 @@ function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
 <<__PHPStdLib>>
-function serialize($value)[];
+function serialize($value)[defaults];
 <<__PHPStdLib>>
-function unserialize(string $str, darray $options = darray[]);
+function serialize_pure($value)[];
+<<__PHPStdLib>>
+function unserialize(string $str, darray $options = darray[])[defaults];
+<<__PHPStdLib>>
+function unserialize_pure(string $str, darray $options = darray[])[];
 <<__PHPStdLib>>
 function import_request_variables(string $types, string $prefix = "");
 }

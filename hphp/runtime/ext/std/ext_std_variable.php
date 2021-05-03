@@ -141,7 +141,8 @@ function var_dump(mixed $arg1, ...$argv): void;
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
 
-/* Generates a storable representation of a value  This is useful for storing
+/**
+ * Generates a storable representation of a value  This is useful for storing
  * or passing PHP values around without losing their type and structure.  To
  * make the serialized string into a PHP value again, use unserialize().
  *
@@ -151,12 +152,22 @@ function debug_zval_dump(mixed $variable): void;
 <<__IsFoldable, __Native>>
 function serialize(mixed $value): string;
 
+/**
+ * Pure variant of serialize.
+ * Serializing objects with impure implementations of the `__sleep` method will
+ * result in coeffect violations.
+ */
 <<__IsFoldable, __Native>>
 function serialize_pure(mixed $value)[]: string;
 
 <<__Native>>
 function unserialize(string $str, darray $options = darray[]): mixed;
 
+/**
+ * Pure variant of unserialize.
+ * Unserializing objects with impure implementations of the `__wakeup` method
+ * will result in coeffect violations.
+ */
 <<__Native>>
 function unserialize_pure(string $str, darray $options = darray[])[]: mixed;
 

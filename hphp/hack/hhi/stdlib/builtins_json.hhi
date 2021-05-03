@@ -62,6 +62,13 @@ function json_encode_with_error(
   int $depth = 512,
 )[defaults];
 <<__PHPStdLib>>
+function json_encode_pure(
+  mixed $value,
+  inout ?(int, string) $error,
+  int $options = 0,
+  int $depth = 512,
+)[];
+<<__PHPStdLib>>
 function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0)[];
 <<__PHPStdLib>>
 function json_decode_with_error(

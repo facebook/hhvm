@@ -389,6 +389,27 @@ void LoggingProfile::setLayout(jit::ArrayLayout layout) {
   }
 }
 
+std::vector<const StringData*> LoggingProfile::knownStructKeys() const {
+  std::vector<const StringData*> ret;
+  if (key.op() == Op::NewStructDict) {
+    auto const imms = getImmVector(key.sk.pc());
+    auto const size = safe_cast<uint32_t>(imms.size());
+    for (auto i = 0; i < size; ++i) {
+      auto const keyStr = key.sk.unit()->lookupLitstrId(imms.vec32()[i]);
+      ret.push_back(keyStr);
+    }
+    return ret;
+  }
+  auto const ad = data->staticSampledArray;
+  if (ad && ad->isVanillaDict()) {
+    MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto) {
+      if (tvIsString(k)) ret.push_back(val(k).pstr);
+    });
+    return ret;
+  }
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 SinkProfile::SinkProfile(SinkProfileKey key)

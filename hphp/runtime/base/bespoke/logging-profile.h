@@ -244,6 +244,11 @@ struct LoggingProfile {
   jit::ArrayLayout getLayout() const;
   void setLayout(jit::ArrayLayout layout);
 
+  // List of static string keys guaranteed to be present at a StructDict source.
+  // Note that this list is not exhaustive. For example, it does not capture
+  // the keys in a RuntimeStruct source.
+  std::vector<const StringData*> knownStructKeys() const;
+
 private:
   void logEventImpl(const EventKey& key);
 

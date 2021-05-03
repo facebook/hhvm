@@ -267,6 +267,7 @@ let parse_options () =
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
   let math_new_code = ref false in
+  let typeconst_concrete_concrete_error = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -647,6 +648,11 @@ let parse_options () =
         "Use a new error code for math operations: addition, subtraction,
         division, multiplication, exponentiation"
       );
+      ( "--typeconst-concrete-concrete-error",
+        Arg.Set typeconst_concrete_concrete_error,
+        "Raise an error when a concrete type constant is overridden by a concrete type constant
+        in a child class."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -789,6 +795,7 @@ let parse_options () =
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ~tco_math_new_code:!math_new_code
+      ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ()
   in
   Errors.allowed_fixme_codes_strict :=

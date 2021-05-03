@@ -246,6 +246,7 @@ let () =
       ignored_flag "--inc-dec-new-code";
       ignored_flag "--math-new-code";
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
+      ignored_flag "--typeconst-concrete-concrete-error";
     ]
     set_file
     usage;

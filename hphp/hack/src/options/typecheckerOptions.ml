@@ -193,3 +193,6 @@ let allowed_expression_tree_visitors =
   GlobalOptions.allowed_expression_tree_visitors
 
 let math_new_code = GlobalOptions.tco_math_new_code
+
+let typeconst_concrete_concrete_error =
+  GlobalOptions.tco_typeconst_concrete_concrete_error

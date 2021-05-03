@@ -1,0 +1,4 @@
+File "concrete_concrete_error.php", line 9, characters 14-14:
+Cannot re-declare this type constant (Typing[4430])
+  File "concrete_concrete_error.php", line 4, characters 14-14:
+  Previously defined here

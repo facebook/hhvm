@@ -124,6 +124,7 @@ type t = {
   tco_enable_expression_trees: bool;
   tco_allowed_expression_tree_visitors: string list;
   tco_math_new_code: bool;
+  tco_typeconst_concrete_concrete_error: bool;
 }
 [@@deriving eq, show]
 
@@ -309,6 +310,7 @@ let default =
     tco_enable_expression_trees = false;
     tco_allowed_expression_tree_visitors = [];
     tco_math_new_code = false;
+    tco_typeconst_concrete_concrete_error = false;
   }
 
 let make
@@ -449,6 +451,8 @@ let make
     ?(tco_allowed_expression_tree_visitors =
       default.tco_allowed_expression_tree_visitors)
     ?(tco_math_new_code = default.tco_math_new_code)
+    ?(tco_typeconst_concrete_concrete_error =
+      default.tco_typeconst_concrete_concrete_error)
     () =
   {
     tco_experimental_features;
@@ -567,6 +571,7 @@ let make
     tco_enable_expression_trees;
     tco_allowed_expression_tree_visitors;
     tco_math_new_code;
+    tco_typeconst_concrete_concrete_error;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -831,3 +836,6 @@ let expression_trees_enabled t = t.tco_enable_expression_trees
 let allowed_expression_tree_visitors t = t.tco_allowed_expression_tree_visitors
 
 let tco_math_new_code t = t.tco_math_new_code
+
+let tco_typeconst_concrete_concrete_error t =
+  t.tco_typeconst_concrete_concrete_error

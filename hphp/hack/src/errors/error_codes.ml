@@ -623,6 +623,7 @@ module Typing = struct
     | IncDecInvalidArgument [@value 4427]
     | ReadonlyClosureCall [@value 4428]
     | MathInvalidArgument [@value 4429]
+    | TypeconstConcreteConcreteOverride [@value 4430]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

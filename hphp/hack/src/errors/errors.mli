@@ -457,6 +457,12 @@ val interface_const_multiple_defs :
   error_from_reasons_callback ->
   unit
 
+val typeconst_concrete_concrete_override :
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  current_decl_and_file:Pos_or_decl.ctx ->
+  unit
+
 val interface_typeconst_multiple_defs :
   Pos_or_decl.t ->
   Pos_or_decl.t ->

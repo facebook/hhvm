@@ -296,6 +296,9 @@ type t = {
   (* Use a new error code for math operations: addition, subtraction,
   division, multiplication, exponentiation *)
   tco_math_new_code: bool;
+  (* Raise an error when a concrete type constant is overridden by a concrete type constant
+    in a child class. *)
+  tco_typeconst_concrete_concrete_error: bool;
 }
 [@@deriving eq, show]
 
@@ -415,6 +418,7 @@ val make :
   ?tco_enable_expression_trees:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
+  ?tco_typeconst_concrete_concrete_error:bool ->
   unit ->
   t
 
@@ -681,3 +685,5 @@ val expression_trees_enabled : t -> bool
 val allowed_expression_tree_visitors : t -> string list
 
 val tco_math_new_code : t -> bool
+
+val tco_typeconst_concrete_concrete_error : t -> bool

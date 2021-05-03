@@ -862,7 +862,22 @@ let tconst_subsumption
               p_as
           | _ -> env
         end
-      | TCConcrete _ -> env
+      | TCConcrete _ ->
+        begin
+          match child_typeconst.ttc_kind with
+          | TCConcrete _ ->
+            if
+              TypecheckerOptions.typeconst_concrete_concrete_error
+                (Env.get_tcopt env)
+              && not inherited
+            then
+              Errors.typeconst_concrete_concrete_override
+                ~current_decl_and_file:(Env.get_current_decl_and_file env)
+                pos
+                parent_pos
+          | _ -> ()
+        end;
+        env
     in
 
     (* Don't recheck inherited type constants: errors will

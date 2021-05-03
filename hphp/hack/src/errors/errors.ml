@@ -1649,6 +1649,14 @@ let interface_typeconst_multiple_defs
         ^ "." );
     ]
 
+let typeconst_concrete_concrete_override pos parent_pos =
+  add_error_assert_primary_pos_in_current_decl
+    (Typing.err_code Typing.TypeconstConcreteConcreteOverride)
+    [
+      (pos, "Cannot re-declare this type constant");
+      (parent_pos, "Previously defined here");
+    ]
+
 let const_without_typehint sid =
   let (pos, name) = sid in
   let msg =

@@ -52,8 +52,6 @@ final class HSLUnixSocketTest extends HackTest {
       expect($client_recv->value)->toEqual("foo\n");
       expect($server_recv->value)->toEqual("bar\n");
     } finally {
-      /* HH_IGNORE_ERROR[2049] PHPStdLib */
-      /* HH_IGNORE_ERROR[4107] PHPStdLib */
       \unlink($path);
     }
   }

@@ -19,19 +19,13 @@ function resolve_hostname(OS\AddressFamily $af, string $host): ?string {
   switch ($af) {
     case OS\AddressFamily::AF_INET:
       // if it's already a valid IP, it just returns the input.
-      /* HH_FIXME[2049] PHP stdlib */
-      /* HH_FIXME[4107] PHP stdlib */
       return \gethostbyname($host);
     case OS\AddressFamily::AF_INET6:
-      /* HH_FIXME[2049] PHP stdlib */
-      /* HH_FIXME[4107] PHP stdlib */
       if (\filter_var($host, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) {
         return $host;
       }
       $authns = null;
       $addtl = null;
-      /* HH_FIXME[2049] PHP stdlib */
-      /* HH_FIXME[4107] PHP stdlib */
       return \dns_get_record(
         $host,
         \DNS_AAAA,

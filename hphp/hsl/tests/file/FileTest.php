@@ -15,8 +15,6 @@ use type HH\__Private\MiniTest\HackTest;
 
 final class FileTest extends HackTest {
   public async function testExclusiveOpen(): Awaitable<void> {
-    /* HH_IGNORE_ERROR[2049] PHP Stdlib */
-    /* HH_IGNORE_ERROR[4107] PHP stdlib */
     $filename = sys_get_temp_dir().'/'.bin2hex(random_bytes(16));
     $f1 = File\open_write_only($filename, File\WriteMode::MUST_CREATE);
     await $f1->writeAllowPartialSuccessAsync('Hello, world!');
@@ -31,8 +29,6 @@ final class FileTest extends HackTest {
     $f2->close();
     expect($content)->toEqual('Hello, world!');
 
-    /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-    /* HH_IGNORE_ERROR[4107] __PHPStdLib */
     unlink($filename);
   }
 
@@ -41,8 +37,6 @@ final class FileTest extends HackTest {
       $f = $tf->getHandle();
       $path = $f->getPath();
       // Make sure we didn't get the template
-      /* HH_FIXME[2049] PHP stdlib */
-      /* HH_FIXME[4107] PHP stdlib*/
       expect(file_exists($path))->toBeTrue();
       expect($path)->toNotContainSubstring('XXXXXX');
 
@@ -51,22 +45,14 @@ final class FileTest extends HackTest {
       $content = file_get_contents($path);
       expect($content)->toEqual('Hello, world');
 
-      /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-      /* HH_IGNORE_ERROR[4107] __PHPStdLib */
       expect(Str\starts_with($path, sys_get_temp_dir()))->toBeTrue();
-      /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-      /* HH_IGNORE_ERROR[4107] __PHPStdLib */
       $mode = stat($path)['mode'];
-      /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-      /* HH_IGNORE_ERROR[4107] __PHPStdLib */
       expect($mode & 0777)->toEqual(
         0600,
         'File should only be readable/writable by current user',
       );
     }
-      /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-      /* HH_IGNORE_ERROR[4107] __PHPStdLib */
-    expect(file_exists($path))->toBeFalse();
+      expect(file_exists($path))->toBeFalse();
 
     using ($tf = File\temporary_file('foo', '.bar')) {
       $path = $tf->getHandle()->getPath();
@@ -75,11 +61,7 @@ final class FileTest extends HackTest {
       expect(Str\ends_with($path, '..bar'))->toBeFalse();
     }
 
-    /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-    /* HH_IGNORE_ERROR[4107] __PHPStdLib */
     $dir = sys_get_temp_dir().'/hsl-test-'.PseudoRandom\int(0, 99999999);
-    /* HH_IGNORE_ERROR[2049] __PHPStdLib */
-    /* HH_IGNORE_ERROR[4107] __PHPStdLib */
     mkdir($dir);
     using ($tf = File\temporary_file($dir.'/foo')) {
       expect(

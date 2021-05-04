@@ -23,8 +23,6 @@ use namespace HH\Lib\_Private\_OS;
 function inet_ntop_inet(in_addr $addr): string {
   // FIXME: add native builtin, use that instead
   // this actually takes a string and immediately converts to int
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   return \long2ip((string)$addr);
 }
 
@@ -36,8 +34,6 @@ function inet_ntop_inet(in_addr $addr): string {
  * @see `inet_ntop_inet` for an IPv4 version
  */
 function inet_ntop_inet6(in6_addr $addr): string {
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   return \inet_ntop($addr as string);
 }
 
@@ -74,8 +70,6 @@ function inet_ntop(AddressFamily $af, dynamic $addr): string {
       if (
         !(
           $addr is string &&
-          /* HH_FIXME[2049] PHP stdlib */
-          /* HH_FIXME[4107] PHP stdlib */
           \filter_var($addr, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)
         )
       ) {

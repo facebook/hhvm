@@ -24,11 +24,9 @@ async function from_async<Tv>(
 )[]: Awaitable<vec<Tv>> {
   $vec = cast_clear_legacy_array_mark($awaitables);
 
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromVec($vec);
   foreach ($vec as $index => $value) {
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $vec[$index] = \HH\Asio\result($value);
   }
@@ -84,17 +82,14 @@ async function map_async<Tv1, Tv2>(
 )[ctx $async_func]: Awaitable<vec<Tv2>> {
   $vec = cast_clear_legacy_array_mark($traversable);
   foreach ($vec as $i => $value) {
-    /* HH_FIXME[4401] need to make this safe to coeffects */
     $vec[$i] = $async_func($value);
   }
 
   /* HH_FIXME[4110] Okay to pass in Awaitable */
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromVec($vec);
   foreach ($vec as $index => $value) {
     /* HH_FIXME[4110] Reuse the existing vec to reduce peak memory. */
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $vec[$index] = \HH\Asio\result($value);
   }

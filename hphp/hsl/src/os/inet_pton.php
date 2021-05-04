@@ -22,8 +22,6 @@ use namespace HH\Lib\_Private\_OS;
  */
 function inet_pton_inet(string $addr): in_addr {
   // FIXME: add native builtin, use that instead
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   if (!\filter_var($addr, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) {
     _OS\throw_errno(
       Errno::EINVAL,
@@ -31,8 +29,6 @@ function inet_pton_inet(string $addr): in_addr {
       $addr,
     );
   }
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   return \ip2long($addr);
 }
 
@@ -46,8 +42,6 @@ function inet_pton_inet(string $addr): in_addr {
 
 function inet_pton_inet6(string $addr): in6_addr {
   // FIXME: add native builtin, use that instead.
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   if (!\filter_var($addr, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) {
     _OS\throw_errno(
       Errno::EINVAL,
@@ -55,8 +49,6 @@ function inet_pton_inet6(string $addr): in6_addr {
       $addr,
     );
   }
-  /* HH_FIXME[2049] PHP stdlib */
-  /* HH_FIXME[4107] PHP stdlib */
   return _OS\string_as_in6_addr_UNSAFE(\inet_pton($addr));
 }
 

@@ -70,7 +70,7 @@ final class COrderTest extends HackTest {
         'Sorting failed for a Traversable of type %s',
         is_object($t)
           ? get_class($t)
-          : /* HH_FIXME[2049] */ /* HH_FIXME[4107] */ gettype($t),
+          : gettype($t),
       );
     }
   }
@@ -114,7 +114,7 @@ final class COrderTest extends HackTest {
         'Sorting failed for a Traversable of type %s',
         is_object($t)
           ? get_class($t)
-          : /* HH_FIXME[2049] */ /* HH_FIXME[4107] */ gettype($t),
+          : gettype($t),
       );
     }
   }
@@ -167,7 +167,7 @@ final class COrderTest extends HackTest {
         'Sorting failed for a Traversable of type %s',
         is_object($cubes)
           ? get_class($cubes)
-          : /* HH_FIXME[2049] */ /* HH_FIXME[4107] */ gettype($cubes),
+          : gettype($cubes),
       );
     }
   }

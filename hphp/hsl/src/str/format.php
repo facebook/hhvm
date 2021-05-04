@@ -67,8 +67,5 @@ function format(
   SprintfFormatString $format_string,
   mixed ...$format_args
 )[]: string {
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
-  /* HH_FIXME[4200] __PHPStdLib */
   return \vsprintf($format_string, $format_args);
 }

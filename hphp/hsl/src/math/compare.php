@@ -60,8 +60,6 @@ function minva<T as num>(
  * One must always check for NAN using `is_nan` and not `$x === NAN`.
  */
 function is_nan(num $num)[]: bool {
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \is_nan((float)$num);
 }
 

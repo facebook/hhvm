@@ -22,8 +22,6 @@ function chunk(
   int $chunk_size = 1,
 )[]: vec<string> {
   invariant($chunk_size >= 1, 'Expected positive chunk size.');
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return vec(\str_split($string, $chunk_size));
 }
 
@@ -53,16 +51,11 @@ function split(
       invariant($limit > 1, 'Expected positive limit.');
       $result = chunk(\substr($string, 0, $limit - 1));
       $result[] = \substr($string, $limit - 1);
-      /* HH_FIXME[4110] Exposed because PHP\substr could return false; consider using Str::substr */
       return $result;
     }
   } else if ($limit === null) {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     return vec(\explode($delimiter, $string));
   } else {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     return vec(\explode($delimiter, $string, $limit));
   }
 }

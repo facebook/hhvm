@@ -23,11 +23,7 @@ function join(
   string $glue,
 )[]: string {
   if ($pieces is Container<_>) {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     return \implode($glue, $pieces);
   }
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \implode($glue, Vec\cast_clear_legacy_array_mark($pieces));
 }

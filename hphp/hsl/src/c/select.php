@@ -196,7 +196,6 @@ function last<T>(
     return _Private\Native\last($traversable);
   }
   if ($traversable is Iterable<_>) {
-    /* HH_FIXME[4387] reported here as of 2020.09.21, hack v4.51.0 */
     /* HH_FIXME[4390] need ctx constants */
     return $traversable->lastValue();
   }
@@ -258,7 +257,6 @@ function last_key<Tk, Tv>(
     return _Private\Native\last_key($traversable);
   }
   if ($traversable is KeyedIterable<_, _>) {
-    /* HH_FIXME[4387] reported here as of 2020.09.21, hack v4.51.0 */
     /* HH_FIXME[4390] need ctx constants */
     return $traversable->lastKey();
   }
@@ -346,9 +344,6 @@ function onlyx<T>(
             ? ' but got '.count($traversable)
             : '',
         )
-        /* HH_FIXME[2049] __PHPStdLib */
-        /* HH_FIXME[4107] __PHPStdLib */
-        /* HH_FIXME[4200] __PHPStdLib */
         : \vsprintf($format_string, $format_args),
     );
     $result = $value;
@@ -359,9 +354,6 @@ function onlyx<T>(
     '%s',
     $format_string === null
       ? 'Expected non-empty Traversable.'
-      /* HH_FIXME[2049] __PHPStdLib */
-      /* HH_FIXME[4107] __PHPStdLib */
-      /* HH_FIXME[4200] __PHPStdLib */
       : \vsprintf($format_string, $format_args),
   );
   /* HH_FIXME[4110] $first is false implies $result is set to T */
@@ -389,8 +381,6 @@ function pop_back<T as Container<Tv>, Tv>(
   if (is_empty($container)) {
     return null;
   }
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \array_pop(inout $container);
 }
 
@@ -417,8 +407,6 @@ function pop_backx<T as Container<Tv>, Tv>(
     '%s: Expected at least one element',
     __FUNCTION__,
   );
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \array_pop(inout $container);
 }
 
@@ -448,8 +436,6 @@ function pop_front<T as Container<Tv>, Tv>(inout T $container): ?Tv {
   if (is_empty($container)) {
     return null;
   }
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \array_shift(inout $container);
 }
 
@@ -462,9 +448,5 @@ function pop_frontx<T as Container<Tv>, Tv>(inout T $container): Tv {
     '%s: Expected at least one element',
     __FUNCTION__,
   );
-  /* HH_FIXME[4110] null is valid if Tv is nullable, otherwise it means that
-     there was no item in the array, which already threw */
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return \array_shift(inout $container);
 }

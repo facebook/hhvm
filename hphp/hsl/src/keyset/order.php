@@ -25,12 +25,8 @@ function sort<Tv as arraykey>(
 )[ctx $comparator]: keyset<Tv> {
   $keyset = keyset($traversable);
   if ($comparator) {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \uksort(inout $keyset, $comparator);
   } else {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \ksort(inout $keyset);
   }
   return keyset($keyset);

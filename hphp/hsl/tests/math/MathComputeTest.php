@@ -97,17 +97,11 @@ final class MathComputeTest extends HackTest {
   public function testBaseConvertIdentity(): void {
     $iters = 100;
     for ($i = 0; $i < $iters; $i++) {
-      /* HH_FIXME[2049] __PHPStdLib */
-      /* HH_FIXME[4107] __PHPStdLib */
       $length = mt_rand(1, 200);
-      /* HH_FIXME[2049] __PHPStdLib */
-      /* HH_FIXME[4107] __PHPStdLib */
       $base = mt_rand(2, 36);
       $alphabet = Str\slice(ALPHABET_ALPHANUMERIC, 0, $base);
       $random_string = '';
       for ($i = 0; $i < $length; ++$i) {
-        /* HH_FIXME[2049] __PHPStdLib */
-        /* HH_FIXME[4107] __PHPStdLib */
         $random_string .= Str\slice($alphabet, mt_rand($i === 0 && $length > 1 ? 1 : 0, $base - 1), 1);
       }
       expect(Math\base_convert($random_string, $base, $base))
@@ -387,11 +381,7 @@ final class MathComputeTest extends HackTest {
 
   <<DataProvider('provideTestLogNoBase')>>
   public function testLogNoBase(num $base): void {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     expect(Math\log($base))->toEqual(log((float) $base));
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     expect(Math\log($base, null))->toEqual(log((float) $base));
   }
 

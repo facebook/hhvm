@@ -45,8 +45,6 @@ function temporary_file(
       Str\starts_with($prefix, '../')
     )
   ) {
-    /* HH_IGNORE_ERROR[2049] PHP stdlib */
-    /* HH_IGNORE_ERROR[4107] PHP stdlib */
     $prefix = Str\trim_right(\sys_get_temp_dir(), '/').'/'.$prefix;
   }
   $pattern = $prefix.'XXXXXX'.$suffix;

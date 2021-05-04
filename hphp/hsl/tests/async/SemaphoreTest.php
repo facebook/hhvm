@@ -27,15 +27,11 @@ final class SemaphoreTest extends HackTest {
       await HH\Asio\usleep(self::USLEEP_BLOCK);
       return $i;
     });
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $start = microtime(true);
     $results = await Vec\map_async(
       Vec\range(0, 99),
       async $i ==> await $semaphore->waitForAsync($i),
     );
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $end = microtime(true);
     expect($end - $start)->toBeGreaterThan(self::SLEEP_BLOCK * 10);
     expect($results)->toEqual(Vec\range(0, 99));
@@ -55,15 +51,11 @@ final class SemaphoreTest extends HackTest {
       await HH\Asio\usleep(self::USLEEP_BLOCK);
       throw new \Exception();
     });
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $start = microtime(true);
     await Vec\map_async(
       Vec\range(0, 99),
       async $_ ==> await HH\Asio\wrap($semaphore->waitForAsync(42)),
     );
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $end = microtime(true);
     expect($end - $start)->toBeGreaterThan(self::SLEEP_BLOCK * 10);
   }
@@ -80,15 +72,11 @@ final class SemaphoreTest extends HackTest {
       return $i;
     });
 
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $start = microtime(true);
     $results = await Vec\map_async(
       Vec\range(0, 9),
       async $i ==> await $semaphore->waitForAsync($i),
     );
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $end = microtime(true);
     expect($checker->value)->toBeFalse();
     expect($end - $start)->toBeGreaterThan(self::SLEEP_BLOCK * 10);
@@ -109,15 +97,11 @@ final class SemaphoreTest extends HackTest {
       await HH\Asio\usleep(self::USLEEP_BLOCK);
       return $i;
     });
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $start = microtime(true);
     $results = await Vec\map_async(
       Vec\range(0, 9999),
       async $i ==> await $semaphore->waitForAsync($i),
     );
-    /* HH_FIXME[4107] PHP stdlib */
-    /* HH_FIXME[2049] PHP stdlib */
     $end = microtime(true);
     expect($end - $start)->toBeGreaterThan(self::SLEEP_BLOCK);
     expect($results)->toEqual(Vec\range(0, 9999));

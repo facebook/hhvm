@@ -54,14 +54,10 @@ function base_convert(string $value, int $from_base, int $to_base)[rx_local]: st
     $to_base,
   );
 
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   invariant(\bcscale(0) === true, 'Unexpected bcscale failure');
 
   $from_alphabet = Str\slice(ALPHABET_ALPHANUMERIC, 0, $from_base);
   $result_decimal = '0';
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   $place_value = \bcpow((string)$from_base, (string)(Str\length($value) - 1));
   foreach (Str\chunk($value) as $digit) {
     $digit_numeric = Str\search_ci($from_alphabet, $digit);
@@ -71,16 +67,10 @@ function base_convert(string $value, int $from_base, int $to_base)[rx_local]: st
       $digit,
       $from_base,
     );
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     $result_decimal = \bcadd(
       $result_decimal,
-      /* HH_FIXME[2049] calling stdlib directly */
-      /* HH_FIXME[4107] calling stdlib directly */
       \bcmul((string)$digit_numeric, $place_value),
     );
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     $place_value = \bcdiv((string)$place_value, (string)$from_base);
   }
 
@@ -91,15 +81,9 @@ function base_convert(string $value, int $from_base, int $to_base)[rx_local]: st
   $to_alphabet = Str\slice(ALPHABET_ALPHANUMERIC, 0, $to_base);
   $result = '';
   do {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     $result = $to_alphabet[\bcmod($result_decimal, (string)$to_base)].$result;
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     $result_decimal = \bcdiv((string)$result_decimal, (string)$to_base);
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
-  } while (\bccomp($result_decimal, '0') > 0);
+    } while (\bccomp($result_decimal, '0') > 0);
 
   return $result;
 }
@@ -111,8 +95,6 @@ function base_convert(string $value, int $from_base, int $to_base)[rx_local]: st
  * `Math\floor()`.
  */
 function ceil(num $value)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \ceil($value);
 }
 
@@ -123,8 +105,6 @@ function ceil(num $value)[]: float {
  * - To find the tangent, see `Math\tan()`.
  */
 function cos(num $arg)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \cos((float)$arg);
 }
 
@@ -158,8 +138,6 @@ function from_base(string $number, int $from_base)[]: int {
      * so is likely to be slightly faster out in the wild.
      * See D14491063 for details of benchmarks that were run.
      */
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     $oval = \ord($digit);
     // Branches sorted by guesstimated frequency of use. */
     if      (/* '0' - '9' */ $oval <= 57 && $oval >=  48) { $dval = $oval - 48; }
@@ -190,8 +168,6 @@ function from_base(string $number, int $from_base)[]: int {
  * To find the logarithm, see `Math\log()`.
  */
 function exp(num $arg)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \exp((float)$arg);
 }
 
@@ -204,8 +180,6 @@ function exp(num $arg)[]: float {
  *   `Math\int_div()`.
  */
 function floor(num $value)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \floor($value);
 }
 
@@ -218,8 +192,6 @@ function int_div(int $numerator, int $denominator)[]: int {
   if ($denominator === 0) {
     throw new \DivisionByZeroException();
   }
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \intdiv($numerator, $denominator);
 }
 
@@ -231,14 +203,10 @@ function int_div(int $numerator, int $denominator)[]: int {
 function log(num $arg, ?num $base = null)[]: float {
   invariant($arg > 0, 'Expected positive argument for log, got %f', $arg);
   if ($base === null) {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     return \log((float)$arg);
   }
   invariant($base > 0, 'Expected positive base for log, got %f', $base);
   invariant($base !== 1, 'Logarithm undefined for base 1');
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \log((float)$arg, (float)$base);
 }
 
@@ -249,8 +217,6 @@ function log(num $arg, ?num $base = null)[]: float {
  * the nearest tenth whereas a precision of -1 rounds to the nearest ten.
  */
 function round(num $val, int $precision = 0)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \round($val, $precision);
 }
 
@@ -261,8 +227,6 @@ function round(num $val, int $precision = 0)[]: float {
  * - To find the tangent, see `Math\tan()`.
  */
 function sin(num $arg)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \sin((float)$arg);
 }
 
@@ -271,8 +235,6 @@ function sin(num $arg)[]: float {
  */
 function sqrt(num $arg)[]: float {
   invariant($arg >= 0, 'Expected non-negative argument to sqrt, got %f', $arg);
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \sqrt((float)$arg);
 }
 
@@ -283,8 +245,6 @@ function sqrt(num $arg)[]: float {
  * - To find the sine, see `Math\sin()`.
  */
 function tan(num $arg)[]: float {
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   return \tan((float)$arg);
 }
 

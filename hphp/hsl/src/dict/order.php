@@ -65,12 +65,8 @@ function sort<Tk as arraykey, Tv>(
 )[ctx $value_comparator]: dict<Tk, Tv> {
   $result = cast_clear_legacy_array_mark($traversable);
   if ($value_comparator) {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \uasort(inout $result, $value_comparator);
   } else {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \asort(inout $result);
   }
   return dict($result);
@@ -123,12 +119,8 @@ function sort_by_key<Tk as arraykey, Tv>(
 )[ctx $key_comparator]: dict<Tk, Tv> {
   $result = cast_clear_legacy_array_mark($traversable);
   if ($key_comparator) {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \uksort(inout $result, $key_comparator);
   } else {
-    /* HH_FIXME[2049] __PHPStdLib */
-    /* HH_FIXME[4107] __PHPStdLib */
     \ksort(inout $result);
   }
   return dict($result);

@@ -18,7 +18,6 @@ function cast_clear_legacy_array_mark<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $x,
 )[]: dict<Tk, Tv> {
   return ($x is dict<_,_>)
-    /* HH_FIXME[4259] Rx doesn't understand array_unmark_legacy */
     ? dict(\HH\array_unmark_legacy($x))
     : dict($x);
 }

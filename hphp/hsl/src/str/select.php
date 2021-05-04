@@ -84,11 +84,7 @@ function trim(
   ?string $char_mask = null,
 )[]: string {
   return $char_mask === null
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     ? \trim($string)
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     : \trim($string, $char_mask);
 }
 
@@ -106,11 +102,7 @@ function trim_left(
   ?string $char_mask = null,
 )[]: string {
   return $char_mask === null
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     ? \ltrim($string)
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     : \ltrim($string, $char_mask);
 }
 
@@ -128,10 +120,6 @@ function trim_right(
   ?string $char_mask = null,
 )[]: string {
   return $char_mask === null
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     ? \rtrim($string)
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     : \rtrim($string, $char_mask);
 }

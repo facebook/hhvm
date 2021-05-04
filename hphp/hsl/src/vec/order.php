@@ -33,8 +33,6 @@ function range<Tv as num>(
   if ($step > Math\abs($end - $start)) {
     return vec[$start];
   }
-  /* HH_FIXME[2049] __PHPStdLib */
-  /* HH_FIXME[4107] __PHPStdLib */
   return vec(\range($start, $end, $step));
 }
 
@@ -70,8 +68,6 @@ function shuffle<Tv>(
   Traversable<Tv> $traversable,
 )[defaults]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
-  /* HH_FIXME[2049] calling stdlib directly */
-  /* HH_FIXME[4107] calling stdlib directly */
   \shuffle(inout $vec);
   return $vec;
 }
@@ -93,12 +89,8 @@ function sort<Tv>(
 )[ctx $comparator]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   if ($comparator) {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     \usort(inout $vec, $comparator);
   } else {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     \sort(inout $vec);
   }
   return $vec;
@@ -125,12 +117,8 @@ function sort_by<Tv, Ts>(
   $vec = cast_clear_legacy_array_mark($traversable);
   $order_by = Dict\map($vec, $scalar_func);
   if ($comparator) {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     \uasort(inout $order_by, $comparator);
   } else {
-    /* HH_FIXME[2049] calling stdlib directly */
-    /* HH_FIXME[4107] calling stdlib directly */
     \asort(inout $order_by);
   }
   return map_with_key($order_by, ($k, $v) ==> $vec[$k]);

@@ -26,11 +26,9 @@ async function from_async<Tk as arraykey, Tv>(
 )[]: Awaitable<dict<Tk, Tv>> {
   $dict = cast_clear_legacy_array_mark($awaitables);
 
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromDict($dict);
   foreach ($dict as $key => $value) {
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $dict[$key] = \HH\Asio\result($value);
   }
@@ -58,11 +56,9 @@ async function from_keys_async<Tk as arraykey, Tv>(
   /* HH_FIXME[4135] Unset local variable to reduce peak memory. */
   unset($keys);
 
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromDict($awaitables);
   foreach ($awaitables as $key => $value) {
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $awaitables[$key] = \HH\Asio\result($value);
   }
@@ -138,17 +134,14 @@ async function map_async<Tk as arraykey, Tv1, Tv2>(
 )[ctx $value_func]: Awaitable<dict<Tk, Tv2>> {
   $dict = cast_clear_legacy_array_mark($traversable);
   foreach ($dict as $key => $value) {
-    /* HH_FIXME[4401] need to make this safe to coeffects */
     $dict[$key] = $value_func($value);
   }
 
   /* HH_FIXME[4110] Okay to pass in Awaitable */
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromDict($dict);
   foreach ($dict as $key => $value) {
     /* HH_FIXME[4110] Reuse the existing dict to reduce peak memory. */
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $dict[$key] = \HH\Asio\result($value);
   }
@@ -173,11 +166,9 @@ async function map_with_key_async<Tk as arraykey, Tv1, Tv2>(
   /* HH_FIXME[4135] Unset local variable to reduce peak memory. */
   unset($traversable);
 
-  /* HH_FIXME[4387] Hide the magic from reactivity */
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromDict($awaitables);
   foreach ($awaitables as $index => $value) {
-    /* HH_FIXME[4387] Hide the magic from reactivity */
     /* HH_FIXME[4390] Magic Function */
     $awaitables[$index] = \HH\Asio\result($value);
   }

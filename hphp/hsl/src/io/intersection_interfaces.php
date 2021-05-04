@@ -46,8 +46,6 @@ namespace HH\Lib\_Private\_IO {
       if (C\count($parents) === 1) {
         continue;
       }
-      /* HH_FIXME[2049] PHP stdlib */
-      /* HH_FIXME[4107] PHP stdlib */
       \printf(
         "interface %sHandle extends %s {}\n",
         Str\join(Vec\keys($active), ''),

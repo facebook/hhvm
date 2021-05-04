@@ -27,7 +27,7 @@ add_dependencies(watchmanclient watchmanclient_include_dir_symlink)
 
 target_include_directories(watchmanclient PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
-foreach(DEP BOOST DOUBLE_CONVERSION FMT FOLLY GLOG JEMALLOC OPENSSL)
+foreach(DEP BOOST DOUBLE_CONVERSION FMT FOLLY GLOG JEMALLOC LIBEVENT OPENSSL)
   set("${DEP}_INCLUDE_DIR" "${DEP}_INCLUDE_DIR-notfound" CACHE PATH "Path to ${DEP}'s includes")
   target_include_directories(watchmanclient PRIVATE "${${DEP}_INCLUDE_DIR}")
 endforeach()

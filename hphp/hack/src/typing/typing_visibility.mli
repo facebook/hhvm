@@ -25,6 +25,9 @@ val check_obj_access :
 val check_inst_meth_access :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit
 
+val check_meth_caller_access :
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit
+
 val check_deprecated :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string option -> unit
 

@@ -530,6 +530,10 @@ val private_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val protected_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
+val private_meth_caller : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
+
+val protected_meth_caller : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
+
 val private_class_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val protected_class_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit

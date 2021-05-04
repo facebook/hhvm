@@ -654,6 +654,7 @@ let xhp_attribute_decl_ty env sid obj attr =
       ~obj_pos:(fst sid)
       ~is_method:false
       ~inst_meth:false
+      ~meth_caller:false
       ~nullsafe:None
       ~coerce_from_ty:None
       ~explicit_targs:[]
@@ -1663,6 +1664,7 @@ and has_dispose_method env has_await p e ty =
       ~obj_pos:(fst e)
       ~is_method:true
       ~inst_meth:false
+      ~meth_caller:false
       ~nullsafe:None
       ~coerce_from_ty:None
       ~explicit_targs:[]
@@ -2758,6 +2760,7 @@ and expr_
         ~obj_pos:(fst e)
         ~is_method:true
         ~inst_meth:false
+        ~meth_caller:false
         ~nullsafe:None
         ~coerce_from_ty:None
         ~explicit_targs:[]
@@ -2861,6 +2864,7 @@ and expr_
     let (env, (result, _tal)) =
       TOG.obj_get
         ~inst_meth:true
+        ~meth_caller:false
         ~obj_pos:p
         ~is_method:true
         ~nullsafe:None
@@ -2919,6 +2923,7 @@ and expr_
           ~is_method:true
           ~nullsafe:None
           ~inst_meth:false
+          ~meth_caller:true
           ~coerce_from_ty:None
           ~explicit_targs:[]
           ~class_id:(CI (pos, class_name))
@@ -5082,6 +5087,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
           ~is_method:false
           ~nullsafe
           ~inst_meth:false
+          ~meth_caller:false
           ~coerce_from_ty:(Some (p, ur, ty2))
           ~explicit_targs:[]
           ~class_id:(CIexpr e1)
@@ -5404,6 +5410,7 @@ and dispatch_call
          *)
         TOG.obj_get
           ~inst_meth:false
+          ~meth_caller:false
           ~is_method:true
           ~nullsafe:None
           ~obj_pos:pos
@@ -5980,6 +5987,7 @@ and dispatch_call
         ~obj_pos:(fst e1)
         ~is_method:true
         ~inst_meth:false
+        ~meth_caller:false
         ~nullsafe:(Option.map ~f:(fun p -> Reason.Rnullsafe_op p) nullsafe)
         ~coerce_from_ty:None
         ~explicit_targs

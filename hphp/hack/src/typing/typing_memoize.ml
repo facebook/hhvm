@@ -94,6 +94,7 @@ let check_param : env -> Nast.fun_param -> unit =
               ~obj_pos:param_pos
               ~is_method:true
               ~inst_meth:false
+              ~meth_caller:false
               ~nullsafe:None
               ~coerce_from_ty:None
               ~explicit_targs:[]

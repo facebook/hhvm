@@ -443,6 +443,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_math_new_code:(bool_opt "math_new_code" config)
       ?tco_typeconst_concrete_concrete_error:
         (bool_opt "typeconst_concrete_concrete_error" config)
+      ?tco_meth_caller_only_public_visibility:
+        (bool_opt "meth_caller_only_public_visibility" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

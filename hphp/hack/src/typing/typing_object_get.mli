@@ -21,6 +21,7 @@ val obj_get :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
   inst_meth:bool ->
+  meth_caller:bool ->
   nullsafe:Typing_reason.t option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
@@ -39,6 +40,7 @@ val obj_get_with_err :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
   inst_meth:bool ->
+  meth_caller:bool ->
   nullsafe:Typing_reason.t option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->

@@ -2172,6 +2172,7 @@ and simplify_subtype_has_member
               ~obj_pos:name_pos
               ~is_method
               ~inst_meth:false
+              ~meth_caller:false
               ~coerce_from_ty:None
               ~nullsafe
               ~explicit_targs

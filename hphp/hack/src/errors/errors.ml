@@ -2755,6 +2755,22 @@ let protected_inst_meth ~def_pos ~use_pos =
     )
     [(def_pos, "It is declared as `protected` here")]
 
+let private_meth_caller ~def_pos ~use_pos =
+  add_list
+    (Typing.err_code Typing.PrivateMethCaller)
+    ( use_pos,
+      "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
+    )
+    [(def_pos, "It is declared as `private` here")]
+
+let protected_meth_caller ~def_pos ~use_pos =
+  add_list
+    (Typing.err_code Typing.ProtectedMethCaller)
+    ( use_pos,
+      "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
+    )
+    [(def_pos, "It is declared as `protected` here")]
+
 let private_class_meth ~def_pos ~use_pos =
   add_list
     (Typing.err_code Typing.PrivateClassMeth)

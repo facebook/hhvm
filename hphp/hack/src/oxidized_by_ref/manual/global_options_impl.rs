@@ -123,6 +123,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_allowed_expression_tree_visitors: &[],
     tco_math_new_code: false,
     tco_typeconst_concrete_concrete_error: false,
+    tco_meth_caller_only_public_visibility: true,
 };
 
 impl GlobalOptions<'static> {

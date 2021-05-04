@@ -624,6 +624,8 @@ module Typing = struct
     | ReadonlyClosureCall [@value 4428]
     | MathInvalidArgument [@value 4429]
     | TypeconstConcreteConcreteOverride [@value 4430]
+    | PrivateMethCaller [@value 4431]
+    | ProtectedMethCaller [@value 4432]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

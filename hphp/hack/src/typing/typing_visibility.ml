@@ -194,6 +194,12 @@ let check_inst_meth_access ~use_pos ~def_pos vis =
   | Vprotected _ -> Errors.protected_inst_meth ~def_pos ~use_pos
   | _ -> ()
 
+let check_meth_caller_access ~use_pos ~def_pos vis =
+  match vis with
+  | Vprivate _ -> Errors.private_meth_caller ~def_pos ~use_pos
+  | Vprotected _ -> Errors.protected_meth_caller ~def_pos ~use_pos
+  | _ -> ()
+
 let check_class_access ~use_pos ~def_pos env (vis, lsb) cid class_ =
   match is_visible_for_class env (vis, lsb) cid class_ with
   | None -> ()

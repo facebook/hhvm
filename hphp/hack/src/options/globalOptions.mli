@@ -299,6 +299,8 @@ type t = {
   (* Raise an error when a concrete type constant is overridden by a concrete type constant
     in a child class. *)
   tco_typeconst_concrete_concrete_error: bool;
+  (* meth_caller can only reference public methods *)
+  tco_meth_caller_only_public_visibility: bool;
 }
 [@@deriving eq, show]
 
@@ -419,6 +421,7 @@ val make :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
+  ?tco_meth_caller_only_public_visibility:bool ->
   unit ->
   t
 
@@ -687,3 +690,5 @@ val allowed_expression_tree_visitors : t -> string list
 val tco_math_new_code : t -> bool
 
 val tco_typeconst_concrete_concrete_error : t -> bool
+
+val tco_meth_caller_only_public_visibility : t -> bool

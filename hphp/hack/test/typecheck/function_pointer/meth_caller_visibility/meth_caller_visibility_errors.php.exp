@@ -1,0 +1,12 @@
+File "meth_caller_visibility_errors.php", line 16, characters 34-39:
+Cannot access this protected member, you don't extend MyChild (Typing[4112])
+  File "meth_caller_visibility_errors.php", line 4, characters 22-25:
+  This member is protected
+File "meth_caller_visibility_errors.php", line 17, characters 34-38:
+Cannot access this protected member, you don't extend Foo (Typing[4112])
+  File "meth_caller_visibility_errors.php", line 8, characters 22-24:
+  This member is protected
+File "meth_caller_visibility_errors.php", line 18, characters 34-38:
+You cannot access this member (Typing[4112])
+  File "meth_caller_visibility_errors.php", line 10, characters 20-22:
+  This member is private

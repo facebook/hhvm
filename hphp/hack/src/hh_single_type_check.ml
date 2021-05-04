@@ -268,6 +268,7 @@ let parse_options () =
   let ignore_unsafe_cast = ref false in
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
+  let meth_caller_only_public_visibility = ref true in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -653,6 +654,9 @@ let parse_options () =
         "Raise an error when a concrete type constant is overridden by a concrete type constant
         in a child class."
       );
+      ( "--meth_caller_only_public_visibility",
+        Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
+        "Controls whether meth_caller can be used on non-public methods" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -796,6 +800,8 @@ let parse_options () =
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ~tco_math_new_code:!math_new_code
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
+      ~tco_meth_caller_only_public_visibility:
+        !meth_caller_only_public_visibility
       ()
   in
   Errors.allowed_fixme_codes_strict :=

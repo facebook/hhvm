@@ -252,6 +252,7 @@ let rec this_appears_covariantly ~contra env ty =
  * bounds, or a Tunion. *)
 let rec obj_get_concrete_ty
     ~inst_meth
+    ~meth_caller
     ~is_method
     ~coerce_from_ty
     ?(explicit_targs = [])
@@ -306,6 +307,7 @@ let rec obj_get_concrete_ty
       in
       obj_get_inner
         ~inst_meth
+        ~meth_caller
         ~is_method
         ~nullsafe:None
         ~obj_pos:(Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)
@@ -541,6 +543,12 @@ let rec obj_get_concrete_ty
             in
             if inst_meth then
               TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis;
+            if
+              meth_caller
+              && TypecheckerOptions.meth_caller_only_public_visibility
+                   (Env.get_tcopt env)
+            then
+              TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis;
             let (env, (member_ty, tal)) =
               if Cls.has_upper_bounds_on_this_from_constraints class_info then
                 let ((env, (ty, tal), _), succeed) =
@@ -659,6 +667,7 @@ let rec obj_get_concrete_ty
 
 and nullable_obj_get
     ~inst_meth
+    ~meth_caller
     ~obj_pos
     ~is_method
     ~nullsafe
@@ -680,6 +689,7 @@ and nullable_obj_get
     let (env, (method_, tal), err_res) =
       obj_get_inner
         ~inst_meth
+        ~meth_caller
         ~obj_pos
         ~is_method
         ~nullsafe
@@ -757,6 +767,7 @@ and nullable_obj_get
  *)
 and obj_get_inner
     ~inst_meth
+    ~meth_caller
     ~is_method
     ~nullsafe
     ~obj_pos
@@ -823,6 +834,7 @@ and obj_get_inner
   let nullable_obj_get ~read_context ty =
     nullable_obj_get
       ~inst_meth
+      ~meth_caller
       ~obj_pos
       ~is_method
       ~nullsafe
@@ -850,6 +862,7 @@ and obj_get_inner
           let (env, ty, err_res) =
             obj_get_inner
               ~inst_meth
+              ~meth_caller
               ~obj_pos
               ~is_method
               ~nullsafe
@@ -901,6 +914,7 @@ and obj_get_inner
       TUtils.run_on_intersection_res env tyl ~f:(fun env ty ->
           obj_get_inner
             ~inst_meth
+            ~meth_caller
             ~obj_pos
             ~is_method
             ~nullsafe
@@ -941,6 +955,7 @@ and obj_get_inner
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner
       ~inst_meth
+      ~meth_caller
       ~obj_pos
       ~is_method
       ~nullsafe
@@ -988,6 +1003,7 @@ and obj_get_inner
       in
       obj_get_inner
         ~inst_meth
+        ~meth_caller
         ~obj_pos
         ~is_method
         ~nullsafe
@@ -1017,6 +1033,7 @@ and obj_get_inner
   | (_, _) ->
     obj_get_concrete_ty
       ~inst_meth
+      ~meth_caller
       ~is_method
       ~explicit_targs
       ~coerce_from_ty
@@ -1045,6 +1062,7 @@ let obj_get_with_err
     ~obj_pos
     ~is_method
     ~inst_meth
+    ~meth_caller
     ~nullsafe
     ~coerce_from_ty
     ~explicit_targs
@@ -1102,6 +1120,7 @@ let obj_get_with_err
   let (env, ty, err_res_opt) =
     obj_get_inner
       ~inst_meth
+      ~meth_caller
       ~is_method
       ~nullsafe
       ~obj_pos
@@ -1143,6 +1162,7 @@ let obj_get
     ~obj_pos
     ~is_method
     ~inst_meth
+    ~meth_caller
     ~nullsafe
     ~coerce_from_ty
     ~explicit_targs
@@ -1157,6 +1177,7 @@ let obj_get
       ~obj_pos
       ~is_method
       ~inst_meth
+      ~meth_caller
       ~nullsafe
       ~coerce_from_ty
       ~explicit_targs

@@ -955,6 +955,8 @@ void Class::initSProps() const {
     }
   }
 
+  bespoke::profileArrLikeStaticProps(this);
+
   // If there are non-scalar initializers (i.e. 86sinit or 86linit methods),
   // run them now.
   // They will override the KindOfUninit values set by scalar initialization.

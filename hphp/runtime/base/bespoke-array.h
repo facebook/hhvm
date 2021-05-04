@@ -76,6 +76,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, RuntimeStruct*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
+void profileArrLikeStaticProps(const Class*);
 void profileArrLikeProps(ObjectData*);
 void setLoggingEnabled(bool);
 void selectBespokeLayouts();

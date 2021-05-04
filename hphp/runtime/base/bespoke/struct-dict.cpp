@@ -360,7 +360,7 @@ TypedValue StructDict::typedValueUnchecked(Slot slot) const {
 }
 
 ArrayData* StructDict::escalateWithCapacity(size_t capacity,
-                                             const char* reason) const {
+                                            const char* reason) const {
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 

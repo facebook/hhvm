@@ -80,19 +80,19 @@ ARRAY_OPS
 // Internal storage detail of EventMap.
 struct EventKey;
 
-// The type of location a profile is attached to.
-enum class LocationType : uint8_t {
-  SrcKey,
-  APCKey,
-  Property,
-  Runtime
-};
-
 struct APCKey { size_t hash; };
 
 using EventMap = folly::F14FastMap<uint64_t, CopyAtomic<size_t>>;
 
-// We profile some bytecodes (array constructors or casts) and prop init vals.
+// The type of location a profile is attached to.
+enum class LocationType : uint8_t {
+  SrcKey,
+  APCKey,
+  InstanceProperty,
+  StaticProperty,
+  Runtime,
+};
+
 struct LoggingProfileKey {
   explicit LoggingProfileKey(SrcKey sk)
     : sk(sk)
@@ -106,16 +106,17 @@ struct LoggingProfileKey {
     , locationType(LocationType::APCKey)
   {}
 
-  explicit LoggingProfileKey(const Class* cls, Slot slot)
-    : cls(cls)
-    , slot(slot)
-    , locationType(LocationType::Property)
-  {}
-
   explicit LoggingProfileKey(RuntimeStruct* runtimeStruct)
     : runtimeStruct(runtimeStruct)
     , slot(kInvalidSlot)
     , locationType(LocationType::Runtime)
+  {}
+
+  explicit LoggingProfileKey(const Class* cls, Slot slot, bool isStatic)
+    : cls(cls)
+    , slot(slot)
+    , locationType(isStatic ? LocationType::StaticProperty
+                            : LocationType::InstanceProperty)
   {}
 
   bool operator==(const LoggingProfileKey& o) const {
@@ -123,7 +124,9 @@ struct LoggingProfileKey {
   }
 
   bool checkInvariants() const {
-    DEBUG_ONLY auto const prop = locationType == LocationType::Property;
+    DEBUG_ONLY auto const prop =
+      locationType == LocationType::InstanceProperty ||
+      locationType == LocationType::StaticProperty;
     assertx(prop == (slot != kInvalidSlot));
     return true;
   }
@@ -136,10 +139,11 @@ struct LoggingProfileKey {
     switch (locationType) {
       case LocationType::SrcKey:
         return {sk.op()};
-      case LocationType::Property:
+      case LocationType::InstanceProperty:
         return {Op::NewObjD};
       case LocationType::APCKey:
       case LocationType::Runtime:
+      case LocationType::StaticProperty:
         return folly::none;
     }
     always_assert(false);
@@ -151,9 +155,13 @@ struct LoggingProfileKey {
         return folly::sformat("APC:{:08x}", ak.hash);
       case LocationType::SrcKey:
         return sk.getSymbol();
-      case LocationType::Property: {
+      case LocationType::InstanceProperty: {
         auto const& prop = cls->declProperties()[slot];
         return folly::sformat("{}->{}", cls->name(), prop.name);
+      }
+      case LocationType::StaticProperty: {
+        auto const& prop = cls->staticProperties()[slot];
+        return folly::sformat("{}::{}", cls->name(), prop.name);
       }
       case LocationType::Runtime:
         return runtimeStruct->toString()->toCppString();
@@ -165,27 +173,32 @@ struct LoggingProfileKey {
     switch (locationType) {
       case LocationType::SrcKey:
         return sk.showInst();
-      case LocationType::Property:
+      case LocationType::InstanceProperty:
         return folly::sformat("NewObjD \"{}\"", cls->name());
       case LocationType::APCKey:
       case LocationType::Runtime:
+      case LocationType::StaticProperty:
         return toString();
     }
     always_assert(false);
   }
 
   size_t stableHash() const {
-    switch (locationType) {
-      case LocationType::APCKey:
-        return ak.hash;
-      case LocationType::SrcKey:
-        return SrcKey::StableHasher()(sk);
-      case LocationType::Property:
-        return cls->stableHash() ^ slot;
-      case LocationType::Runtime:
-        return runtimeStruct->stableHash();
-    }
-    always_assert(false);
+    auto const base = [&]{
+      switch (locationType) {
+        case LocationType::APCKey:
+          return ak.hash;
+        case LocationType::SrcKey:
+          return SrcKey::StableHasher()(sk);
+        case LocationType::InstanceProperty:
+        case LocationType::StaticProperty:
+          return cls->stableHash() ^ slot;
+        case LocationType::Runtime:
+          return runtimeStruct->stableHash();
+      }
+      always_assert(false);
+    }();
+    return folly::hash::hash_combine(static_cast<size_t>(locationType), base);
   }
 
   union {
@@ -329,8 +342,8 @@ private:
 // profile this bytecode, this function will return nullptr.
 LoggingProfile* getLoggingProfile(SrcKey sk);
 LoggingProfile* getLoggingProfile(APCKey ak);
-LoggingProfile* getLoggingProfile(const Class* cls, Slot slot);
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.

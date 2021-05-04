@@ -190,6 +190,15 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   return lad;
 }
 
+void profileArrLikeLval(tv_lval lval, LoggingProfile* profile) {
+  assertx(tvIsArrayLike(lval));
+  if (!profile) return;
+  auto const ad = maybeMakeLoggingArray(lval.val().parr, profile);
+  if (ad->isRefCounted()) lval.type() = dt_with_rc(lval.type());
+  lval.val().parr = ad;
+  assertx(tvIsPlausible(*lval));
+}
+
 void profileArrLikeProps(ObjectData* obj) {
   if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
 
@@ -200,10 +209,22 @@ void profileArrLikeProps(ObjectData* obj) {
     if (cls->declProperties()[slot].attrs & AttrIsConst) continue;
     auto lval = obj->propLvalAtOffset(slot);
     if (!tvIsArrayLike(lval)) continue;
-    auto const profile = getLoggingProfile(cls, slot);
-    if (!profile) continue;
-    auto const arr = maybeMakeLoggingArray(lval.val().parr, profile);
-    tvCopy(make_array_like_tv(arr), lval);
+    profileArrLikeLval(lval, getLoggingProfile(cls, slot, false));
+  }
+}
+
+void profileArrLikeStaticProps(const Class* cls) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+
+  for (auto slot = 0; slot < cls->numStaticProperties(); slot++) {
+    auto const link = cls->sPropLink(slot);
+    auto const& prop = cls->staticProperties()[slot];
+    auto const owned = (prop.cls == cls && !link.isPersistent()) ||
+                       prop.attrs & AttrLSB;
+    if (!owned) continue;
+    auto lval = &link->val;
+    if (!tvIsArrayLike(lval)) continue;
+    profileArrLikeLval(lval, getLoggingProfile(cls, slot, true));
   }
 }
 

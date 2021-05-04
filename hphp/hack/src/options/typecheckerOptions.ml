@@ -199,3 +199,6 @@ let typeconst_concrete_concrete_error =
 
 let meth_caller_only_public_visibility =
   GlobalOptions.tco_meth_caller_only_public_visibility
+
+let require_extends_implements_ancestors =
+  GlobalOptions.tco_require_extends_implements_ancestors

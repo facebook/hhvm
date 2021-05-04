@@ -271,6 +271,7 @@ let parse_options () =
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
   let meth_caller_only_public_visibility = ref true in
+  let require_extends_implements_ancestors = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -669,6 +670,10 @@ let parse_options () =
             Arg.Int (fun column -> set_mode (Hover (!line, column)) ());
           ],
         "<pos> Display hover tooltip" );
+      ( "--require-extends-implements-ancestors",
+        Arg.Set require_extends_implements_ancestors,
+        "Consider `require extends` and `require implements` as ancestors when checking a class"
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -814,6 +819,8 @@ let parse_options () =
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_meth_caller_only_public_visibility:
         !meth_caller_only_public_visibility
+      ~tco_require_extends_implements_ancestors:
+        !require_extends_implements_ancestors
       ()
   in
   Errors.allowed_fixme_codes_strict :=

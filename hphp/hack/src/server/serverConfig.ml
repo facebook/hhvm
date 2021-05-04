@@ -445,6 +445,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "typeconst_concrete_concrete_error" config)
       ?tco_meth_caller_only_public_visibility:
         (bool_opt "meth_caller_only_public_visibility" config)
+      ?tco_require_extends_implements_ancestors:
+        (bool_opt "require_extends_implements_ancestors" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

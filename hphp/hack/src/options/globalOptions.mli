@@ -301,6 +301,8 @@ type t = {
   tco_typeconst_concrete_concrete_error: bool;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
+  (* Consider `require extends` and `require implements` as ancestors when checking a class *)
+  tco_require_extends_implements_ancestors: bool;
 }
 [@@deriving eq, show]
 
@@ -422,6 +424,7 @@ val make :
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_meth_caller_only_public_visibility:bool ->
+  ?tco_require_extends_implements_ancestors:bool ->
   unit ->
   t
 
@@ -692,3 +695,5 @@ val tco_math_new_code : t -> bool
 val tco_typeconst_concrete_concrete_error : t -> bool
 
 val tco_meth_caller_only_public_visibility : t -> bool
+
+val tco_require_extends_implements_ancestors : t -> bool

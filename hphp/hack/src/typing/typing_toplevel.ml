@@ -1653,7 +1653,6 @@ let class_def_ env c tc =
     | Some e -> check_cstr_dep (hints_and_decl_tys e.e_includes)
     | _ -> ()
   end;
-  let impl = extends @ implements @ uses in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -1700,6 +1699,16 @@ let class_def_ env c tc =
           (Cls.where_constraints cls)
       | _ -> env)
     | _ -> env
+  in
+  let impl = extends @ implements @ uses in
+  let impl =
+    if
+      TypecheckerOptions.require_extends_implements_ancestors
+        (Env.get_tcopt env)
+    then
+      impl @ req_extends @ req_implements
+    else
+      impl
   in
   let env = List.fold impl ~init:env ~f:check_where_constraints in
   check_parent env c tc;

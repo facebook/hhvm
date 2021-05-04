@@ -1,0 +1,16 @@
+File "abstract_concrete_override_from_interface.php", line 7, characters 23-23:
+Cannot re-declare this type constant as abstract (Typing[4142])
+  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
+  Previously defined here
+File "abstract_concrete_override_from_interface.php", line 11, characters 23-23:
+Cannot re-declare this type constant as abstract (Typing[4142])
+  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
+  Previously defined here
+File "abstract_concrete_override_from_interface.php", line 15, characters 23-23:
+Cannot re-declare this type constant as abstract (Typing[4142])
+  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
+  Previously defined here
+File "abstract_concrete_override_from_interface.php", line 20, characters 23-23:
+Cannot re-declare this type constant as abstract (Typing[4142])
+  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
+  Previously defined here

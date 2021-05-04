@@ -126,6 +126,7 @@ type t = {
   tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
   tco_meth_caller_only_public_visibility: bool;
+  tco_require_extends_implements_ancestors: bool;
 }
 [@@deriving eq, show]
 
@@ -313,6 +314,7 @@ let default =
     tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
     tco_meth_caller_only_public_visibility = true;
+    tco_require_extends_implements_ancestors = false;
   }
 
 let make
@@ -457,6 +459,8 @@ let make
       default.tco_typeconst_concrete_concrete_error)
     ?(tco_meth_caller_only_public_visibility =
       default.tco_meth_caller_only_public_visibility)
+    ?(tco_require_extends_implements_ancestors =
+      default.tco_require_extends_implements_ancestors)
     () =
   {
     tco_experimental_features;
@@ -577,6 +581,7 @@ let make
     tco_math_new_code;
     tco_typeconst_concrete_concrete_error;
     tco_meth_caller_only_public_visibility;
+    tco_require_extends_implements_ancestors;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -847,3 +852,6 @@ let tco_typeconst_concrete_concrete_error t =
 
 let tco_meth_caller_only_public_visibility t =
   t.tco_meth_caller_only_public_visibility
+
+let tco_require_extends_implements_ancestors t =
+  t.tco_require_extends_implements_ancestors

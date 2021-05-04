@@ -1,1 +1,2 @@
 --typeconst-concrete-concrete-error
+--require-extends-implements-ancestors

@@ -248,6 +248,7 @@ let () =
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
       ignored_arg "--meth_caller_only_public_visibility";
+      ignored_flag "--require-extends-implements-ancestors";
     ]
     set_file
     usage;

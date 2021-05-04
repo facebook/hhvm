@@ -1354,6 +1354,13 @@ end = struct
         @@ pp_hint ~is_ctx:false)
         ppf
         ((all_params, hf_ctxs), hf_return_ty)
+    | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map = [] }) ->
+      Fmt.(
+        prefix (const string "shape")
+        @@ parens
+        @@ cond ~pp_t:(const string "...") ~pp_f:nop)
+        ppf
+        nsi_allows_unknown_fields
     | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map }) ->
       Fmt.(
         prefix (const string "shape")

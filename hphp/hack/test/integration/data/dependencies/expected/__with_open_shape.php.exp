@@ -1,0 +1,3 @@
+<?hh
+
+function with_open_shape(shape(...) $x): void {}

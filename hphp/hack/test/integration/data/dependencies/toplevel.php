@@ -301,3 +301,7 @@ class WithWhereConstraint<T> {
 function with_where_constraint(): void {
     $z = new WithWhereConstraint(new DC());
 }
+
+
+
+function with_open_shape(shape(...) $x): void {}

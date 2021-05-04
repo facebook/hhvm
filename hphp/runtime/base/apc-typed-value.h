@@ -143,9 +143,7 @@ struct APCTypedValue {
   void deleteUncounted();
 
   static APCHandle::Pair HandlePersistent(ArrayData* data) {
-    if (!data->isVanilla() || !data->persistentIncRef()) {
-      return {nullptr, 0};
-    }
+    if (!data->persistentIncRef()) return {nullptr, 0};
     auto const value = APCTypedValue::ForArray(data);
     return {value->getHandle(), sizeof(APCTypedValue)};
   }

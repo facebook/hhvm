@@ -207,6 +207,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // dict/darray) will rarely produce useful struct-like arrays.
   auto const type_okay = [&]{
     switch (profile.key.locationType) {
+      case LocationType::APCKey:
       case LocationType::Runtime:
         return true;
       case LocationType::Property:

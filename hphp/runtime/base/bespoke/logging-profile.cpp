@@ -83,6 +83,7 @@ SrcKey canonicalize(SrcKey sk) {
 // If the given source always produces a particular static array, return it.
 ArrayData* getStaticArray(LoggingProfileKey key) {
   switch (key.locationType) {
+    case LocationType::APCKey:
     case LocationType::Runtime:
       return nullptr;
 
@@ -1089,6 +1090,10 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
 LoggingProfile* getLoggingProfile(SrcKey sk) {
   if (!shouldLogAtSrcKey(sk)) return nullptr;
   return getLoggingProfile(LoggingProfileKey(canonicalize(sk)));
+}
+
+LoggingProfile* getLoggingProfile(APCKey ak) {
+  return getLoggingProfile(LoggingProfileKey(ak));
 }
 
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct) {

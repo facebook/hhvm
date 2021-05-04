@@ -15,15 +15,16 @@
 */
 #include "hphp/runtime/base/apc-handle.h"
 
-#include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-bespoke.h"
+#include "hphp/runtime/base/apc-clsmeth.h"
 #include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/apc-named-entity.h"
+#include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-rclass-meth.h"
 #include "hphp/runtime/base/apc-rfunc.h"
-#include "hphp/runtime/base/apc-clsmeth.h"
+#include "hphp/runtime/base/apc-string.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -188,8 +189,10 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::LazyClass:
     case APCKind::PersistentClsMeth:
     case APCKind::StaticArray:
-    case APCKind::UncountedArray:
+    case APCKind::StaticBespoke:
     case APCKind::StaticString:
+    case APCKind::UncountedArray:
+    case APCKind::UncountedBespoke:
     case APCKind::UncountedString:
       not_reached();
 
@@ -322,7 +325,12 @@ void APCHandle::deleteShared() {
       APCRClsMeth::Delete(this);
       return;
 
+    case APCKind::StaticBespoke:
+      freeAPCBespoke(APCTypedValue::fromHandle(this));
+      return;
+
     case APCKind::UncountedArray:
+    case APCKind::UncountedBespoke:
     case APCKind::UncountedString:
       assertx(false);
       return;
@@ -365,7 +373,9 @@ bool APCHandle::checkInvariants() const {
       assertx(m_type == KindOfPersistentString);
       return true;
     case APCKind::StaticArray:
+    case APCKind::StaticBespoke:
     case APCKind::UncountedArray:
+    case APCKind::UncountedBespoke:
       assertx(m_type == KindOfPersistentVec ||
               m_type == KindOfPersistentDict ||
               m_type == KindOfPersistentKeyset);

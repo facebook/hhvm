@@ -83,9 +83,12 @@ struct EventKey;
 // The type of location a profile is attached to.
 enum class LocationType : uint8_t {
   SrcKey,
+  APCKey,
   Property,
   Runtime
 };
+
+struct APCKey { size_t hash; };
 
 using EventMap = folly::F14FastMap<uint64_t, CopyAtomic<size_t>>;
 
@@ -95,6 +98,12 @@ struct LoggingProfileKey {
     : sk(sk)
     , slot(kInvalidSlot)
     , locationType(LocationType::SrcKey)
+  {}
+
+  explicit LoggingProfileKey(APCKey ak)
+    : ak(ak)
+    , slot(kInvalidSlot)
+    , locationType(LocationType::APCKey)
   {}
 
   explicit LoggingProfileKey(const Class* cls, Slot slot)
@@ -129,6 +138,7 @@ struct LoggingProfileKey {
         return {sk.op()};
       case LocationType::Property:
         return {Op::NewObjD};
+      case LocationType::APCKey:
       case LocationType::Runtime:
         return folly::none;
     }
@@ -137,6 +147,8 @@ struct LoggingProfileKey {
 
   std::string toString() const {
     switch (locationType) {
+      case LocationType::APCKey:
+        return folly::sformat("APC:{:08x}", ak.hash);
       case LocationType::SrcKey:
         return sk.getSymbol();
       case LocationType::Property: {
@@ -155,6 +167,7 @@ struct LoggingProfileKey {
         return sk.showInst();
       case LocationType::Property:
         return folly::sformat("NewObjD \"{}\"", cls->name());
+      case LocationType::APCKey:
       case LocationType::Runtime:
         return toString();
     }
@@ -163,6 +176,8 @@ struct LoggingProfileKey {
 
   size_t stableHash() const {
     switch (locationType) {
+      case LocationType::APCKey:
+        return ak.hash;
       case LocationType::SrcKey:
         return SrcKey::StableHasher()(sk);
       case LocationType::Property:
@@ -175,6 +190,7 @@ struct LoggingProfileKey {
 
   union {
     SrcKey sk;
+    APCKey ak;
     const Class* cls;
     RuntimeStruct* runtimeStruct;
     uintptr_t ptr;
@@ -312,6 +328,7 @@ private:
 // exists, a new one is made. If we're done profiling or it's not useful to
 // profile this bytecode, this function will return nullptr.
 LoggingProfile* getLoggingProfile(SrcKey sk);
+LoggingProfile* getLoggingProfile(APCKey ak);
 LoggingProfile* getLoggingProfile(const Class* cls, Slot slot);
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
 

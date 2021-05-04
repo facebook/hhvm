@@ -116,6 +116,7 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::FuncEntity:
     case APCKind::ClsMeth:
     case APCKind::StaticArray:
+    case APCKind::StaticBespoke:
     case APCKind::StaticString:
       return EntryInfo::Type::Uncounted;
     case APCKind::UncountedString:
@@ -123,6 +124,7 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::SharedString:
       return EntryInfo::Type::APCString;
     case APCKind::UncountedArray:
+    case APCKind::UncountedBespoke:
       switch (handle->type()) {
         case KindOfPersistentVec:    return EntryInfo::Type::UncountedVec;
         case KindOfPersistentDict:   return EntryInfo::Type::UncountedDict;

@@ -42,8 +42,10 @@ enum class APCKind: uint8_t {
   LazyClass,
   PersistentClsMeth,
   UncountedArray,
+  UncountedBespoke,
   UncountedString,
   StaticArray,
+  StaticBespoke,
   StaticString,
   SharedString,
   SharedVec, SharedLegacyVec,
@@ -104,8 +106,10 @@ enum class APCKind: uint8_t {
  *  Int               APCTypedValue   KindOfInt64
  *  Double            APCTypedValue   KindOfDouble
  *  StaticArray       APCTypedValue   (a persistent array type)
+ *  StaticBespoke     APCTypedValue   (a persistent array type)
  *  StaticString      APCTypedValue   KindOfPersistentString
  *  UncountedArray    APCTypedValue   (a persistent array type)
+ *  UncountedBespoke  APCTypedValue   (a persistent array type)
  *  UncountedString   APCTypedValue   KindOfPersistentString
  *  SharedString      APCString       kInvalidDataType
  *  SharedVec         APCArray        kInvalidDataType
@@ -236,6 +240,7 @@ struct APCHandle {
    */
   bool isUncounted() const {
     return m_kind == APCKind::UncountedArray ||
+           m_kind == APCKind::UncountedBespoke ||
            m_kind == APCKind::UncountedString;
   }
 

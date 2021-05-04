@@ -1127,6 +1127,7 @@ struct RuntimeOption {
   F(bool, EmitBespokeStructDicts, true)                                 \
   F(uint8_t, BespokeStructDictMaxNumKeys, 64)                           \
   F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \
+  F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
   /* Choice of layout selection algorithms:                             \

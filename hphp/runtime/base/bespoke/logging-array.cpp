@@ -264,6 +264,28 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   return lad;
 }
 
+LoggingArray* LoggingArray::MakeUncounted(
+    ArrayData* ad, LoggingProfile* profile, bool hasApcTv) {
+  assertx(ad->isVanilla());
+  assertx(ad->isStatic() || ad->isUncounted());
+
+  auto const bytes = sizeof(LoggingArray);
+  auto const extra = uncountedAllocExtra(ad, hasApcTv);
+  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
+  auto const lad = reinterpret_cast<LoggingArray*>(mem + extra);
+  auto const aux = (ad->isLegacyArray() ? kLegacyArray : 0) |
+                   (hasApcTv ? kHasApcTv : 0);
+  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, aux);
+  lad->m_size = ad->size();
+  lad->setLayoutIndex(kLayoutIndex);
+  lad->wrapped = ad;
+  lad->profile = profile;
+  lad->entryTypes = EntryTypes::ForArray(ad);
+  lad->keyOrder = KeyOrder::ForArray(ad);
+  assertx(lad->checkInvariants());
+  return lad;
+}
+
 bool LoggingArray::checkInvariants() const {
   assertx(wrapped->isVanilla());
   assertx(wrapped->kindIsValid());

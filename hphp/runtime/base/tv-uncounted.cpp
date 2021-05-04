@@ -127,9 +127,20 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace {
-ArrayData* MakeUncountedArrayWithoutEscalation(
+ArrayData* MakeUncountedArray(
     ArrayData* in, const MakeUncountedEnv& env, bool hasApcTv) {
+  if (in->persistentIncRef()) return in;
+
+  if (in->empty()) {
+    auto const legacy = in->isLegacyArray();
+    switch (in->toDataType()) {
+      case KindOfVec: return ArrayData::CreateVec(legacy);
+      case KindOfDict: return ArrayData::CreateDict(legacy);
+      case KindOfKeyset: return ArrayData::CreateKeyset();
+      default: always_assert(false);
+    }
+  }
+
   HeapObject** seenArr = nullptr;
   if (env.seen && in->hasMultipleRefs()) {
     seenArr = &(*env.seen)[in];
@@ -142,30 +153,6 @@ ArrayData* MakeUncountedArrayWithoutEscalation(
   auto const result = in->makeUncounted(env, hasApcTv);
   if (seenArr) *seenArr = result;
   return result;
-}
-}
-
-ArrayData* MakeUncountedArray(
-    ArrayData* in, const MakeUncountedEnv& env, bool hasApcTv) {
-  if (in->empty()) {
-    auto const legacy = in->isLegacyArray();
-    switch (in->toDataType()) {
-      case KindOfVec: return ArrayData::CreateVec(legacy);
-      case KindOfDict: return ArrayData::CreateDict(legacy);
-      case KindOfKeyset: return ArrayData::CreateKeyset();
-      default: always_assert(false);
-    }
-  }
-
-  if (in->isVanilla()) {
-    if (in->persistentIncRef()) return in;
-    return MakeUncountedArrayWithoutEscalation(in, env, hasApcTv);
-  }
-
-  auto const vad = BespokeArray::ToVanilla(in, "MakeUncountedArray");
-  if (vad->persistentIncRef()) return vad;
-  SCOPE_EXIT { decRefArr(vad); };
-  return MakeUncountedArrayWithoutEscalation(vad, env, hasApcTv);
 }
 
 StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {

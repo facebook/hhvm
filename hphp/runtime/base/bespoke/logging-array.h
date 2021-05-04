@@ -35,9 +35,13 @@ struct LoggingArray : BespokeArray {
 
   static LoggingArray* As(ArrayData* ad);
   static const LoggingArray* As(const ArrayData* ad);
+
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
                             EntryTypes ms, const KeyOrder& ko);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
+  static LoggingArray* MakeUncounted(
+      ArrayData* ad, LoggingProfile* profile, bool hasApcTv);
+
   static void ZombieRelease(LoggingArray* lad);
 
   bool checkInvariants() const;

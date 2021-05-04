@@ -47,6 +47,7 @@ type mode =
   | Linearization
   | Go_to_impl of int * int
   | Dump_glean_deps
+  | Hover of int * int
 
 type options = {
   files: string list;
@@ -661,6 +662,13 @@ let parse_options () =
       ( "--meth_caller_only_public_visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         "Controls whether meth_caller can be used on non-public methods" );
+      ( "--hover",
+        Arg.Tuple
+          [
+            Arg.Int (fun x -> line := x);
+            Arg.Int (fun column -> set_mode (Hover (!line, column)) ());
+          ],
+        "<pos> Display hover tooltip" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -2132,6 +2140,16 @@ let handle_mode
             List.iter member_linearization ~f:(Printf.printf "  %s\n");
             Printf.printf "Ancestor Linearization %s:\n" classname;
             List.iter ancestor_linearization ~f:(Printf.printf "  %s\n")))
+  | Hover (line, column) ->
+    let filename = expect_single_file () in
+    let (ctx, entry) =
+      Provider_context.add_entry_if_missing ~ctx ~path:filename
+    in
+    let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
+    let print result =
+      Printf.printf "%s\n" (HoverService.string_of_result result)
+    in
+    List.iter results print
 
 (*****************************************************************************)
 (* Main entry point *)

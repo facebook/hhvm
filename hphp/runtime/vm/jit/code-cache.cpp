@@ -208,7 +208,7 @@ CodeCache::CodeCache()
     if (CodeCache::AutoTCShift) {
       allocationSize += kRoundUp;
     }
-    base = (uint8_t*)low_malloc(allocationSize);
+    base = (uint8_t*)lower_malloc(allocationSize);
     if (!base) {
       fprintf(stderr, "could not allocate %zd bytes for translation cache\n",
               allocationSize);

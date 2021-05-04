@@ -30,6 +30,7 @@ type mode =
   | Errors
   | Lint
   | Dump_deps
+  | Dump_dep_hashes
   | Identify_symbol of int * int
   | Find_local of int * int
   | Get_member of string
@@ -332,6 +333,9 @@ let parse_options () =
         Arg.String (fun s -> out_extension := s),
         "output file extension (default .out)" );
       ("--dump-deps", Arg.Unit (set_mode Dump_deps), " Print dependencies");
+      ( "--dump-dep-hashes",
+        Arg.Unit (set_mode Dump_dep_hashes),
+        " Print dependency hashes" );
       ( "--dump-glean-deps",
         Arg.Unit (set_mode Dump_glean_deps),
         " Print dependencies in the Glean format" );
@@ -1372,6 +1376,71 @@ let dump_debug_glean_deps
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
   | None -> Printf.printf "No dependencies\n"
 
+let dump_dep_hashes (nast : Nast.program) : unit =
+  let process_variant x =
+    let open Typing_deps in
+    let dep = Dep.make Typing_deps_mode.Hash64Bit x in
+    Printf.printf "%s %s\n" (Dep.to_hex_string dep) (Dep.variant_to_string x)
+  in
+  let handler =
+    let open Typing_deps.Dep in
+    let open Aast in
+    object
+      inherit [_] Aast.iter as super
+
+      method! on_fun_ env x =
+        process_variant @@ Fun (snd x.f_name);
+        process_variant @@ FunName (snd x.f_name);
+        super#on_fun_ env x
+
+      method! on_method_ cls x =
+        process_variant
+        @@
+        if x.m_static then
+          SMethod (Option.value_exn cls, snd x.m_name)
+        else
+          Method (Option.value_exn cls, snd x.m_name);
+        super#on_method_ cls x
+
+      method! on_class_ _cls x =
+        process_variant @@ Type (snd x.c_name);
+        process_variant @@ Cstr (snd x.c_name);
+        process_variant @@ Extends (snd x.c_name);
+        process_variant @@ AllMembers (snd x.c_name);
+        super#on_class_ (Some (snd x.c_name)) x
+
+      method! on_class_const cls x =
+        process_variant @@ Const (Option.value_exn cls, snd x.cc_id);
+        super#on_class_const cls x
+
+      method! on_class_typeconst_def cls x =
+        process_variant @@ Const (Option.value_exn cls, snd x.c_tconst_name);
+        super#on_class_typeconst_def cls x
+
+      method! on_class_var cls x =
+        process_variant
+        @@
+        if x.cv_is_static then
+          SProp (Option.value_exn cls, snd x.cv_id)
+        else
+          Prop (Option.value_exn cls, snd x.cv_id);
+        super#on_class_var cls x
+
+      method! on_typedef _cls x =
+        process_variant @@ Type (snd x.t_name);
+        super#on_typedef (Some (snd x.t_name)) x
+
+      method! on_gconst cls x =
+        process_variant @@ GConst (snd x.cst_name);
+        super#on_gconst cls x
+
+      method! on_record_def _cls x =
+        process_variant @@ Type (snd x.rd_name);
+        super#on_record_def (Some (snd x.rd_name)) x
+    end
+  in
+  handler#on_program None nast
+
 let handle_mode
     mode
     filenames
@@ -1530,6 +1599,10 @@ let handle_mode
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
     if Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
+  | Dump_dep_hashes ->
+    iter_over_files (fun _ ->
+        let nasts = create_nasts ctx files_info in
+        Relative_path.Map.iter nasts ~f:(fun _ nast -> dump_dep_hashes nast))
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);

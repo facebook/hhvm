@@ -29,7 +29,6 @@ val get_extend_deps : Typing_deps_mode.t -> DepSet.elt -> DepSet.t -> DepSet.t
 
 val get_classes_deps :
   ctx:Provider_context.t ->
-  conservative_redecl:bool ->
   Class.t option SMap.t ->
   Class.t option SMap.t ->
   SSet.t ->
@@ -37,7 +36,6 @@ val get_classes_deps :
 
 val get_funs_deps :
   ctx:Provider_context.t ->
-  conservative_redecl:bool ->
   Funs.t option SMap.t ->
   SSet.t ->
   DepSet.t * DepSet.t * DepSet.t
@@ -50,14 +48,12 @@ val get_types_deps :
 
 val get_gconsts_deps :
   ctx:Provider_context.t ->
-  conservative_redecl:bool ->
   GConsts.t option SMap.t ->
   SSet.t ->
   DepSet.t * DepSet.t * DepSet.t
 
 val get_record_defs_deps :
   ctx:Provider_context.t ->
-  conservative_redecl:bool ->
   Decl_heap.RecordDef.t option SMap.t ->
   SSet.t ->
   Typing_deps.DepSet.t * Typing_deps.DepSet.t * Typing_deps.DepSet.t

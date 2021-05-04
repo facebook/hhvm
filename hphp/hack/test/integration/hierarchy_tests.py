@@ -98,10 +98,9 @@ class Foo {
             )
         msgs = debug_sub.get_incremental_logs()
         self.assertEqual(set(msgs["to_redecl_phase1"]["files"]), set(["foo.php"]))
-        # FIXME: redeclaring qux.php is unnecessary
         self.assertEqual(
             set(msgs["to_redecl_phase2"]["files"]),
-            set(["foo.php", "bar.php", "baz.php", "qux.php"]),
+            set(["foo.php", "bar.php", "baz.php"]),
         )
         self.assertEqual(
             set(msgs["to_recheck"]["files"]),

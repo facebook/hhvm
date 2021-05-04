@@ -31,7 +31,6 @@ val redo_type_decl :
   Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
-  conservative_redecl:bool ->
   get_classes_in_file ->
   previously_oldified_defs:FileInfo.names ->
   defs:Naming_table.fast ->

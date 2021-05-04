@@ -611,7 +611,6 @@ let get_files_to_undecl_and_recheck
     ~defs:dirty_names;
   let { Decl_redecl_service.to_redecl; to_recheck; _ } =
     Decl_redecl_service.redo_type_decl
-      ~conservative_redecl:false
       ~bucket_size
       ctx
       genv.workers

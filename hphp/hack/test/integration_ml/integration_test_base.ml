@@ -602,8 +602,6 @@ let load_state
     ?(local_changes = [])
     ?(load_hhi_files = false)
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
-    ?(disable_conservative_redecl =
-      ServerLocalConfig.(default.disable_conservative_redecl))
     ?(load_decls_from_saved_state =
       ServerLocalConfig.(default.load_decls_from_saved_state))
     ?(enable_naming_table_fallback = false)
@@ -623,7 +621,6 @@ let load_state
           lazy_init = true;
           prechecked_files = use_precheked_files;
           predeclare_ide = true;
-          disable_conservative_redecl;
           load_decls_from_saved_state;
           naming_sqlite_path =
             ( if enable_naming_table_fallback then

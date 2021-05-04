@@ -453,19 +453,6 @@ type t = {
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
   hg_aware_recheck_restart_threshold: int;
-  (* Flag to disable conservative behavior in incremental-mode typechecks.
-   *
-   * By default, when a class has changed and we do not have access to the old
-   * version of its declaration (and thus cannot determine HOW it has changed),
-   * we conservatively redeclare the entire set of files where the class or any
-   * of its members were referenced. Likewise for definitions of functions or
-   * global constants.
-   *
-   * This flag disables that behavior--instead, when a class has changed, we
-   * only redeclare files with an Extends dependency on the class, and we do not
-   * redeclare any files when a function or global constant changes.
-   *)
-  disable_conservative_redecl: bool;
   (* forces Hulk *)
   force_remote_type_check: bool;
   ide_parser_cache: bool;
@@ -604,7 +591,6 @@ let default =
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
     hg_aware_recheck_restart_threshold = 0;
-    disable_conservative_redecl = false;
     ide_parser_cache = false;
     ide_tast_cache = false;
     store_decls_in_saved_state = false;
@@ -987,13 +973,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let disable_conservative_redecl =
-    bool_if_min_version
-      "disable_conservative_redecl"
-      ~default:default.disable_conservative_redecl
-      ~current_version
-      config
-  in
   let store_decls_in_saved_state =
     bool_if_min_version
       "store_decls_in_saved_state"
@@ -1259,7 +1238,6 @@ let load_ fn ~silent ~current_version overrides =
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;
-    disable_conservative_redecl;
     ide_parser_cache;
     ide_tast_cache;
     store_decls_in_saved_state;

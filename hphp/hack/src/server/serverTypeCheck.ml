@@ -878,9 +878,6 @@ functor
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
         @@ fun () ->
         Decl_redecl_service.redo_type_decl
-          ~conservative_redecl:
-            (not
-               genv.local_config.ServerLocalConfig.disable_conservative_redecl)
           ~bucket_size
           ctx
           genv.workers
@@ -942,9 +939,6 @@ functor
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
         @@ fun () ->
         Decl_redecl_service.redo_type_decl
-          ~conservative_redecl:
-            (not
-               genv.local_config.ServerLocalConfig.disable_conservative_redecl)
           ~bucket_size
           ctx
           genv.workers

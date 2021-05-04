@@ -296,29 +296,7 @@ let class_big_diff class1 class2 =
   || SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0
   || class1.dc_enum_type <> class2.dc_enum_type
 
-(** Originally, the policy here was "GET EVERYTHING--don't think, don't try to be
-    subtle, don't try to be smart whatsoever, just get EVERYTHING that ever used
-    the class with the given identifier in ANY way, then redeclare and recheck
-    all of those dependents".
-
-    Now, though (2018-09), we would like to be a little smarter, since this
-    policy leads to massive fanouts in some common circumstances. We can't work
-    out any reason why *redeclaring* the entire set of files where the class or
-    its members were referenced (this is what get_ideps gives us for a
-    Dep.Class) is necessary. If some file has a typing dependency on a changed
-    class (for example, because it invokes a method on an instance of that
-    class), we shouldn't need to *redeclare* it when that class changes; just
-    *recheck* it. Of course, we do need to redeclare classes which *extend* the
-    changed class, but we shouldn't need to redeclare anything else.
-
-    The conservative_redecl flag opts in to the redeclaration of all class
-    dependencies (and is enabled by default until we are confident that this is
-    safe). Even without conservative redecl, we still typecheck everything that
-    ever used the given class, and we still redeclare all classes which extend
-    it.
-*)
-and get_all_dependencies
-    ~mode ~conservative_redecl trace cid (changed, to_redecl, to_recheck) =
+and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Type cid in
   let cid_hash = Typing_deps.(Dep.make (hash_mode mode) dep) in
   (* Why can't we just use `Typing_deps.get_ideps dep` here? See test case
@@ -326,12 +304,6 @@ and get_all_dependencies
      for an example. *)
   let where_class_and_subclasses_were_used =
     Typing_deps.add_all_deps mode (DepSet.singleton mode cid_hash)
-  in
-  let to_redecl =
-    if conservative_redecl then
-      DepSet.union where_class_and_subclasses_were_used to_redecl
-    else
-      to_redecl
   in
   let to_recheck =
     DepSet.union where_class_and_subclasses_were_used to_recheck
@@ -347,8 +319,7 @@ let get_extend_deps mode cid_hash to_redecl =
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
-let get_fun_deps
-    ~mode ~conservative_redecl old_funs fid (changed, to_redecl, to_recheck) =
+let get_fun_deps ~mode old_funs fid (changed, to_redecl, to_recheck) =
   match (SMap.find fid old_funs, Decl_heap.Funs.get fid) with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
@@ -362,12 +333,6 @@ let get_fun_deps
     let where_fun_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_fun_is_used to_recheck in
     let fun_name = Typing_deps.get_ideps mode (Dep.FunName fid) in
-    let to_redecl =
-      if conservative_redecl then
-        DepSet.union fun_name to_redecl
-      else
-        to_redecl
-    in
     (add_changed mode changed dep, to_redecl, DepSet.union fun_name to_recheck)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
@@ -383,10 +348,10 @@ let get_fun_deps
         to_redecl,
         DepSet.union where_fun_is_used to_recheck )
 
-let get_funs_deps ~ctx ~conservative_redecl old_funs funs =
+let get_funs_deps ~ctx old_funs funs =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_fun_deps ~mode ~conservative_redecl old_funs)
+    (get_fun_deps ~mode old_funs)
     funs
     (DepSet.make mode, DepSet.make mode, DepSet.make mode)
 
@@ -427,12 +392,7 @@ let get_types_deps ~ctx old_types types =
  * changed.
  *)
 (*****************************************************************************)
-let get_gconst_deps
-    ~mode
-    ~conservative_redecl
-    old_gconsts
-    cst_id
-    (changed, to_redecl, to_recheck) =
+let get_gconst_deps ~mode old_gconsts cst_id (changed, to_redecl, to_recheck) =
   let cst1 = SMap.find cst_id old_gconsts in
   let cst2 = Decl_heap.GConsts.get cst_id in
   match (cst1, cst2) with
@@ -442,12 +402,6 @@ let get_gconst_deps
     let where_const_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_const_is_used to_recheck in
     let const_name = Typing_deps.get_ideps mode (Dep.GConstName cst_id) in
-    let to_redecl =
-      if conservative_redecl then
-        DepSet.union const_name to_redecl
-      else
-        to_redecl
-    in
     (add_changed mode changed dep, to_redecl, DepSet.union const_name to_recheck)
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
@@ -459,10 +413,10 @@ let get_gconst_deps
       let to_recheck = DepSet.union where_type_is_used to_recheck in
       (add_changed mode changed dep, to_redecl, to_recheck)
 
-let get_gconsts_deps ~ctx ~conservative_redecl old_gconsts gconsts =
+let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_gconst_deps ~mode ~conservative_redecl old_gconsts)
+    (get_gconst_deps ~mode old_gconsts)
     gconsts
     (DepSet.make mode, DepSet.make mode, DepSet.make mode)
 
@@ -475,37 +429,16 @@ let shallow_decl_enabled (ctx : Provider_context.t) : bool =
  *)
 (*****************************************************************************)
 let get_class_deps
-    ctx
-    ~conservative_redecl
-    old_classes
-    new_classes
-    trace
-    cid
-    (changed, to_redecl, to_recheck) =
+    ctx old_classes new_classes trace cid (changed, to_redecl, to_recheck) =
   let mode = Provider_context.get_deps_mode ctx in
   match (SMap.find cid old_classes, SMap.find cid new_classes) with
   | _ when shallow_decl_enabled ctx ->
-    get_all_dependencies
-      ~mode
-      ~conservative_redecl
-      trace
-      cid
-      (changed, to_redecl, to_recheck)
+    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
   | (None, _)
   | (_, None) ->
-    get_all_dependencies
-      ~mode
-      ~conservative_redecl
-      trace
-      cid
-      (changed, to_redecl, to_recheck)
+    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
   | (Some class1, Some class2) when class_big_diff class1 class2 ->
-    get_all_dependencies
-      ~mode
-      ~conservative_redecl
-      trace
-      cid
-      (changed, to_redecl, to_recheck)
+    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
   | (Some class1, Some class2) ->
     let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
     let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
@@ -554,12 +487,6 @@ let get_class_deps
       else
         changed
     in
-    let to_redecl =
-      if conservative_redecl then
-        DepSet.union deps to_redecl
-      else
-        to_redecl
-    in
     (* If just the type of an element has changed, we don't need to
        _redeclare_ descendants (the type is not copied, so descendant
        declarations do not need recomputing), but we do need to recheck them
@@ -567,22 +494,17 @@ let get_class_deps
        inference on them and rechecking method bodies may not be necessary,
        but decl-validation and typechecking happen in the same step. *)
     let to_recheck =
-      if (not conservative_redecl) && is_changed then
+      if is_changed then
         Typing_deps.get_extend_deps mode trace cid_hash to_recheck
       else
         to_recheck
     in
     (changed, to_redecl, DepSet.union deps to_recheck)
 
-let get_classes_deps ~ctx ~conservative_redecl old_classes new_classes classes =
+let get_classes_deps ~ctx old_classes new_classes classes =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_class_deps
-       ctx
-       ~conservative_redecl
-       old_classes
-       new_classes
-       (VisitedSet.make mode))
+    (get_class_deps ctx old_classes new_classes (VisitedSet.make mode))
     classes
     (DepSet.make mode, DepSet.make mode, DepSet.make mode)
 
@@ -592,12 +514,7 @@ let get_classes_deps ~ctx ~conservative_redecl old_classes new_classes classes =
  *)
 (*****************************************************************************)
 let get_record_def_deps
-    ~mode
-    ~conservative_redecl
-    old_record_defs
-    rdid
-    (changed, to_redecl, to_recheck) =
-  let _ = conservative_redecl in
+    ~mode old_record_defs rdid (changed, to_redecl, to_recheck) =
   match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)
   | (_, None) ->
@@ -614,9 +531,9 @@ let get_record_def_deps
       let to_recheck = DepSet.union where_record_is_used to_recheck in
       (add_changed mode changed dep, to_redecl, to_recheck)
 
-let get_record_defs_deps ~ctx ~conservative_redecl old_record_defs record_defs =
+let get_record_defs_deps ~ctx old_record_defs record_defs =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_record_def_deps ~mode ~conservative_redecl old_record_defs)
+    (get_record_def_deps ~mode old_record_defs)
     record_defs
     (DepSet.make mode, DepSet.make mode, DepSet.make mode)

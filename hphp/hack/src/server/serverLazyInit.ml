@@ -620,10 +620,27 @@ let get_files_to_undecl_and_recheck
       ~defs:fast
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
-  let deps = Typing_deps.DepSet.union deps to_recheck in
+  let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
+  let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
   let files_to_undecl = Typing_deps.Files.get_files to_redecl in
-  let files_to_recheck = Typing_deps.Files.get_files deps in
+  let files_to_recheck = Typing_deps.Files.get_files to_recheck_deps in
+  (* we use lazy here to avoid expensive string generation when logging
+       * is not enabled *)
+  Hh_logger.log_lazy ~category:"fanout_information"
+  @@ lazy
+       Hh_json.(
+         json_to_string
+         @@ JSON_Object
+              [
+                ("tag", string_ "saved_state_init_fanout");
+                ( "hashes",
+                  array_
+                    string_
+                    Typing_deps.(
+                      List.map ~f:Dep.to_hex_string
+                      @@ DepSet.elements to_recheck_deps) );
+              ]);
+
   (files_to_undecl, files_to_recheck)
 
 (* We start off with a list of files that have changed since the state was

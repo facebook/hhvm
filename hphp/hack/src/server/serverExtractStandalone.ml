@@ -2100,6 +2100,8 @@ end = struct
 
     val mk_method : bool -> Nast.method_ -> t
 
+    val is_method : t -> method_name:string -> bool
+
     val mk_target_method : Provider_context.t -> Cmd.target -> t
 
     val mk_prop :
@@ -2211,6 +2213,12 @@ end = struct
 
     let mk_method from_interface (Aast.{ m_name = (pos, _); _ } as method_) =
       EltMethod (from_interface, Pos.line pos, method_)
+
+    let is_method t ~method_name =
+      match t with
+      | EltMethod (_, _, Aast.{ m_name = (_, nm); _ }) ->
+        String.(nm = method_name)
+      | _ -> false
 
     let mk_prop
         ctx
@@ -2706,14 +2714,19 @@ end = struct
       | Some (Cmd.Function fun_name as tgt) ->
         let sgl = Single.mk_target_fun ctx (fun_name, tgt) in
         (Single sgl :: sgls, grps)
-      | Some (Cmd.Method (cls_name, _) as tgt) ->
+      | Some (Cmd.Method (cls_name, method_name) as tgt) ->
         ( sgls,
           SMap.update
             cls_name
             (function
               | Some (cls_ast, elts) ->
-                let elt = Class_elt.mk_target_method ctx tgt in
-                Some (cls_ast, elt :: elts)
+                let elt = Class_elt.mk_target_method ctx tgt
+                and elts' =
+                  List.filter
+                    ~f:(fun elt -> not @@ Class_elt.is_method ~method_name elt)
+                    elts
+                in
+                Some (cls_ast, elt :: elts')
               | _ ->
                 let cls_ast = Nast_helper.get_class_exn ctx cls_name
                 and elt = Class_elt.mk_target_method ctx tgt in

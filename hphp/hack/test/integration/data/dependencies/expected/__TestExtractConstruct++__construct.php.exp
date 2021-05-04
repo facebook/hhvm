@@ -1,0 +1,5 @@
+<?hh
+
+abstract class TestExtractConstruct {
+  public function __construct() {}
+}

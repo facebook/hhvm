@@ -135,3 +135,7 @@ class WithLateInit {
     $this->count = $count;
   }
 }
+
+abstract class TestExtractConstruct {
+    public function __construct() {}
+}

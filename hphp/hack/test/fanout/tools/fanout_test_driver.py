@@ -262,6 +262,7 @@ def _launch_hh_from_saved_state(
     bins: Binaries,
     repo_root: RepoRoot,
     saved_state_dir: SavedStateDir,
+    load_decls_from_saved_state: bool,
     changed_files: List[str],
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("Launching hh from saved-state for %s", repo_root.path)
@@ -276,7 +277,9 @@ def _launch_hh_from_saved_state(
             "--config",
             "lazy_parse=true",
             "--config",
-            "load_decls_from_saved_state=true",
+            "load_decls_from_saved_state={}".format(
+                "true" if load_decls_from_saved_state else "false"
+            ),
             "--with-mini-state",
             saved_state_dir.saved_state_spec(changed_files),
             "--config",
@@ -295,7 +298,6 @@ def _launch_hh_from_saved_state(
             repo_root.path,
         ]
     )
-    bins.exec_hh_stop(repo_root.path)
     return hh_result
 
 
@@ -356,11 +358,61 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
     (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
     changed_files = _make_repo_change(repo_root, test)
     hh_result_changed = _launch_hh_from_saved_state(
-        bins, repo_root, saved_state_dir, changed_files
+        bins,
+        repo_root,
+        saved_state_dir,
+        load_decls_from_saved_state=True,
+        changed_files=changed_files,
     )
+    bins.exec_hh_stop(repo_root.path)
 
     fanout_information = _extract_fanout_information(
         bins, repo_root, tags=["saved_state_init_fanout"]
+    )
+
+    _format_result(
+        repo_root=repo_root,
+        hh_result_base=hh_result_base,
+        hh_result_changed=hh_result_changed,
+        fanout_information=fanout_information,
+        fanout_hash_map=fanout_hash_map,
+    )
+
+    repo_root.cleanup()
+    saved_state_dir.cleanup()
+
+
+def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> None:
+    """Run the incremental fanout scenario with old decls unavailable.
+
+    This scenario involves calculating the fanout in an incremental change
+    scenario (i.e. after saved-state initialization was successful), but where
+    the old versions of the declarations are unavailable and thus fine-grained
+    decl diffing is impossible.
+
+    1. Build a saved-state for the base version
+    2. Kill hack
+    3. Initialize from the saved-state, but disabled cached decl loading
+    4. Make the change
+    5. Type check and extract fanout
+    """
+    repo_root = _prepare_repo_root(test)
+    fanout_hash_map = _build_fanout_hash_map(bins, test)
+    (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
+
+    _launch_hh_from_saved_state(
+        bins,
+        repo_root,
+        saved_state_dir,
+        load_decls_from_saved_state=False,
+        changed_files=[],
+    )
+    _make_repo_change(repo_root, test)
+    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh_stop(repo_root.path)
+
+    fanout_information = _extract_fanout_information(
+        bins, repo_root, tags=["incremental_fanout"]
     )
 
     _format_result(

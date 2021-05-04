@@ -10,7 +10,11 @@ from enum import Enum
 
 import attr
 
-from .fanout_test_driver import Binaries, run_scenario_saved_state_init
+from .fanout_test_driver import (
+    Binaries,
+    run_scenario_saved_state_init,
+    run_scenario_incremental_no_old_decls,
+)
 from .fanout_test_parser import FanoutTest
 
 logging.basicConfig(
@@ -67,7 +71,7 @@ def go(opts: Opts) -> None:
     elif opts.mode is Mode.INCREMENTAL_OLD_DECLS_ENABLED:
         raise AssertionError()
     elif opts.mode is Mode.INCREMENTAL_OLD_DECLS_DISABLED:
-        raise AssertionError()
+        run_scenario_incremental_no_old_decls(opts.to_bins(), test)
     else:
         raise AssertionError()
 

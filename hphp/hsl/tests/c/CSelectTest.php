@@ -9,11 +9,9 @@
  */
 
 use namespace HH\Lib\{C, Str, Vec};
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
-// @oss-disable: use InvariantViolationException as InvariantException;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class CSelectTest extends HackTest {
 
   public static function provideTestFind(

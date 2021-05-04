@@ -10,11 +10,9 @@
 
 use namespace HH\Lib\{File, OS, PseudoRandom, Str};
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 
-// @oss-disable: <<Oncalls('hack')>>
 final class FileTest extends HackTest {
   public async function testExclusiveOpen(): Awaitable<void> {
     /* HH_IGNORE_ERROR[2049] PHP Stdlib */

@@ -9,10 +9,9 @@
  */
 
 use namespace HH\Lib\Math;
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class MathCompareTest extends HackTest {
 
   public static function provideTestMaxva(): varray<mixed> {

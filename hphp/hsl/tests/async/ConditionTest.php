@@ -10,12 +10,10 @@
 
 use namespace HH\Lib\Async;
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 use function HH\Lib\_Private\stop_eager_execution;
 
-// @oss-disable: <<Oncalls('hphp_hphpi')>>
 final class ConditionTest extends HackTest {
 
   public async function testSucceedFirst(): Awaitable<void> {

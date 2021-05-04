@@ -10,11 +10,9 @@
 
 use namespace HH\Lib\Async;
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hphp_hphpi')>>
 final class PollTest extends HackTest {
   public async function testEmpty(): Awaitable<void> {
     foreach (Async\Poll::create() await as $value) {

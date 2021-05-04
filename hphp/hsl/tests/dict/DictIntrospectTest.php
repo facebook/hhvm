@@ -9,10 +9,9 @@
  */
 
 use namespace HH\Lib\Dict;
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class DictIntrospectTest extends HackTest {
 
   public static function provideTestEqual(): varray<mixed> {

@@ -9,11 +9,9 @@
  */
 
 use namespace HH\Lib\{Str, Vec};
-use function HH\__Private\MiniTest\expect; // @oss-enable
-// @oss-disable: use InvariantViolationException as InvariantException;
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class VecTransformTest extends HackTest {
 
   public static function provideTestChunk(): varray<mixed> {

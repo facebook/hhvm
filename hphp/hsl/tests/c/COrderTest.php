@@ -9,11 +9,10 @@
  *
  */
 
-use namespace HH\Lib\{C, Str, Vec}; // @oss-enable
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
+use namespace HH\Lib\{C, Str, Vec};
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class COrderTest extends HackTest {
 
   const type TCubeDimentions =

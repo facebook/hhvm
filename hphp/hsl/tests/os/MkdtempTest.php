@@ -10,11 +10,9 @@
 
 use namespace HH\Lib\{IO, OS, Str};
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 
-// @oss-disable: <<Oncalls('hack')>>
 final class MkdtempTest extends HackTest {
   public function testBasicUsage(): void {
     /* HH_FIXME[2049] PHP stdlib */

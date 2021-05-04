@@ -10,9 +10,8 @@
 
 use namespace HH\Lib\{C, Dict, Math, Str, Vec, _Private};
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
-// @oss-disable: use InvariantViolationException as InvariantException;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
 trait RandomTestTrait {
   require extends HackTest;

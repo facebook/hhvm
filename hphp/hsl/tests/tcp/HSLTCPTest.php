@@ -11,14 +11,12 @@
 use namespace HH\Lib\Vec;
 use namespace HH\Lib\{IO, Network, OS, Str, TCP};
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-use type HH\__Private\MiniTest\DataProvider; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
+use type HH\__Private\MiniTest\DataProvider;
 use type HH\Lib\Network\{IPProtocolBehavior, IPProtocolVersion};
 use type HH\Lib\Ref;
 
-// @oss-disable: <<Oncalls('hf')>>
 final class HSLTCPTest extends HackTest {
   public static function provideConnectionParameters(
   ): vec<(IPProtocolVersion, string, string, IPProtocolBehavior)> {

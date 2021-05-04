@@ -11,14 +11,12 @@
 use namespace HH\Lib\{Network, Unix};
 use namespace HH\Lib\{Math, PseudoRandom};
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-use type HH\__Private\MiniTest\DataProvider; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
+use type HH\__Private\MiniTest\DataProvider;
 use type HH\Lib\Network\{IPProtocolBehavior, IPProtocolVersion};
 use type \HH\Lib\Ref;
 
-// @oss-disable: <<Oncalls('hf')>>
 final class HSLUnixSocketTest extends HackTest {
   public async function testBasicConnectivity(): Awaitable<void> {
     // Not using sys_get_temp_dir() as on MacOS, that defaults to something too

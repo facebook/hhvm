@@ -9,11 +9,9 @@
  */
 
 use namespace HH\Lib\Math;
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use InvariantViolationException as InvariantException;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 
-// @oss-disable: <<Oncalls('hack')>>
 final class MathConstantsTest extends HackTest {
   const DELTA = .000001;
   public function testInt64Min(): void {

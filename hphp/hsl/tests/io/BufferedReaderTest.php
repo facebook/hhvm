@@ -11,12 +11,10 @@
 use namespace HH\Lib\{IO, OS, Str, Vec};
 use namespace HH\Lib\_Private\_IO;
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-use type HH\__Private\MiniTest\DataProvider; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
+use type HH\__Private\MiniTest\DataProvider;
 
-// @oss-disable: <<Oncalls('hack')>>
 final class BufferedReaderTest extends HackTest {
   public async function testReadByte(): Awaitable<void> {
     $r = new IO\BufferedReader(new IO\MemoryHandle('abc'));

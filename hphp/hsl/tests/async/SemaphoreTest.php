@@ -12,14 +12,11 @@ use namespace HH\Lib\Vec;
 use namespace HH\Lib\Async;
 use type HH\Lib\Ref;
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use type HackTest;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 use function HH\Lib\_Private\stop_eager_execution;
 
-// @oss-disable: <<
   // @oss-disable: Oncalls('hphp_hphpi')
-// @oss-disable: >>
 final class SemaphoreTest extends HackTest {
 
   const int USLEEP_BLOCK = 500000;

@@ -9,10 +9,9 @@
  */
 
 use namespace HH\Lib\{Keyset, Str, Vec};
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\{DataProvider, HackTest}; // @oss-enable
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
-// @oss-disable: <<Oncalls('hack')>>
 final class KeysetAsyncTest extends HackTest {
 
   public static function provideTestFromAsync(): varray<mixed> {

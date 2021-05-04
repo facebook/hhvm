@@ -11,9 +11,8 @@
 
 use namespace HH\Lib\PseudoRandom;
 use function HH\__Private\MiniTest\expect;
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
+use type HH\__Private\MiniTest\HackTest;
 
-// @oss-disable: <<Oncalls('hack')>>
 final class PseudoRandomTest extends HackTest {
   use RandomTestTrait;
 

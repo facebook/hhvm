@@ -8,11 +8,9 @@
  *
  */
 
-use function HH\__Private\MiniTest\expect; // @oss-enable
-use type HH\__Private\MiniTest\HackTest; // @oss-enable
-// @oss-disable: use InvariantViolationException as InvariantException;
+use function HH\__Private\MiniTest\expect;
+use type HH\__Private\MiniTest\HackTest;
 
-// @oss-disable: <<Oncalls('hf')>>
 final class RefTest extends HackTest {
   public function testRefiness(): void {
     $myref = new \HH\Lib\Ref(0);

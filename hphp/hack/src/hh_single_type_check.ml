@@ -660,7 +660,7 @@ let parse_options () =
         "Raise an error when a concrete type constant is overridden by a concrete type constant
         in a child class."
       );
-      ( "--meth_caller_only_public_visibility",
+      ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         "Controls whether meth_caller can be used on non-public methods" );
       ( "--hover",

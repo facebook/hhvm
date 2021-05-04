@@ -247,7 +247,7 @@ let () =
       ignored_flag "--math-new-code";
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
-      ignored_arg "--meth_caller_only_public_visibility";
+      ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
     ]
     set_file

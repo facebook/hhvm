@@ -15,7 +15,7 @@ function main() {
   $matches = null;
   // This will start failing if we get more closures in systemlib and
   // extensions; change the pattern and extend the switch if needed
-  $pat = '/^Closure\$main;([0123456789]|[123456][0123456789])$/';
+  $pat = '/^Closure\$main;[123456789][0123456789]{0,2}$/';
   if (preg_match_with_matches($pat, get_class($cl), inout $matches)) {
     $m = null;
     try {
@@ -98,6 +98,6 @@ function main() {
       echo "Caught!\n";
     }
   } else {
-    echo "ERROR: extend pattern\n";
+    echo "ERROR: extend pattern\n".get_class($cl);
   }
 }

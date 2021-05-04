@@ -5,8 +5,12 @@ abstract class HackTest {
     invariant_violation('%s', $message);
   }
 
+  protected static function markTestSkipped(string $message): noreturn {
+    throw new SkippedTestException($message);
+  }
+
   final public async function runAsync(): Awaitable<void> {
-    \printf("--- %s::%s\n", static::class, __METHOD__);
+    \printf("--- %s::%s()\n", static::class, __FUNCTION__);
     $rc = new \ReflectionClass($this);
     foreach ($rc->getMethods() as $method) {
       if (!$method->isPublic()) {
@@ -19,9 +23,13 @@ abstract class HackTest {
       \printf("-----   %s::%s()\n", static::class, $name);
       $dp = $method->getAttributeClass(DataProvider::class);
       if (!$dp) {
-        $ret = $method->invoke($this);
-        if ($ret is Awaitable<_>) {
-          await $ret;
+        try {
+          $ret = $method->invoke($this);
+          if ($ret is Awaitable<_>) {
+            await $ret;
+          }
+        } catch (SkippedTestException $ex) {
+          \printf("------- SKIPPED: %s\n", $ex->getMessage());
         }
       } else {
         try {
@@ -38,9 +46,13 @@ abstract class HackTest {
         $values = $dp->invoke($this);
         foreach($values as $k => $args) {
           \printf("-----     Invoking with data set %s...\n", \var_export($k, true));
-          $ret = $method->invokeArgs($this, $args);
-          if ($ret is Awaitable<_>) {
-            await $ret;
+          try {
+            $ret = $method->invokeArgs($this, $args);
+            if ($ret is Awaitable<_>) {
+              await $ret;
+            }
+          } catch (SkippedTestException $ex) {
+            \printf("------- SKIPPED: %s\n", $ex->getMessage());
           }
         }
       }

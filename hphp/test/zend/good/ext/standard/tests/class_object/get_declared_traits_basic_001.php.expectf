@@ -1,11 +1,17 @@
 *** Testing get_declared_traits() : basic functionality ***
 
 -- Testing get_declared_traits() function with Zero arguments --
-vec(8) {
+vec(14) {
+  string(44) "HH\Lib\IO\WriteHandleConvenienceMethodsTrait"
   string(24) "ReflectionTypedAttribute"
   string(19) "StrictKeyedIterable"
   string(14) "StrictIterable"
+  string(50) "HH\Lib\_Private\_IO\FileDescriptorWriteHandleTrait"
   string(17) "LazyKeyedIterable"
+  string(49) "HH\Lib\_Private\_IO\FileDescriptorReadHandleTrait"
+  string(57) "HH\Lib\_Private\_OS\ErrnoExceptionWithMultipleErrnosTrait"
+  string(43) "HH\Lib\IO\ReadHandleConvenienceMethodsTrait"
+  string(54) "HH\Lib\_Private\_OS\ErrnoExceptionWithSingleErrnoTrait"
   string(25) "ReflectionLegacyAttribute"
   string(25) "__SystemLib\BaseException"
   string(12) "LazyIterable"

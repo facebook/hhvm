@@ -332,16 +332,13 @@ let get_fun_deps ~mode old_funs fid (changed, to_redecl, to_recheck) =
     let dep = Dep.Fun fid in
     let where_fun_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_fun_is_used to_recheck in
-    let fun_name = Typing_deps.get_ideps mode (Dep.FunName fid) in
-    (add_changed mode changed dep, to_redecl, DepSet.union fun_name to_recheck)
+    (add_changed mode changed dep, to_redecl, to_recheck)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
     if Poly.( = ) fe1 fe2 then
       (changed, to_redecl, to_recheck)
     else
-      (* No need to add Dep.FunName stuff here -- we found a function with the
-       * right name already otherwise we'd be in the None case above. *)
       let dep = Dep.Fun fid in
       let where_fun_is_used = Typing_deps.get_ideps mode dep in
       ( add_changed mode changed dep,

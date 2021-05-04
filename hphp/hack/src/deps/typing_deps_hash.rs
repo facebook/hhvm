@@ -26,8 +26,7 @@ pub enum DepType {
     Method = 9,
     SMethod = 10,
     AllMembers = 11,
-    FunName = 12,
-    GConstName = 13,
+    GConstName = 12,
 }
 
 impl DepType {
@@ -48,8 +47,7 @@ impl DepType {
             9 => Some(DepType::Method),
             10 => Some(DepType::SMethod),
             11 => Some(DepType::AllMembers),
-            12 => Some(DepType::FunName),
-            13 => Some(DepType::GConstName),
+            12 => Some(DepType::GConstName),
             _ => None,
         }
     }

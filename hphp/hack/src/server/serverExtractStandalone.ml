@@ -419,7 +419,6 @@ end = struct
       | AllMembers cls -> Some cls
       | Extends cls -> Some cls
       | Fun _
-      | FunName _
       | GConst _
       | GConstName _ ->
         None)
@@ -427,9 +426,7 @@ end = struct
   let get_dep_pos ctx dep =
     let open Typing_deps.Dep in
     match dep with
-    | Fun name
-    | FunName name ->
-      Decl.get_fun_pos ctx name
+    | Fun name -> Decl.get_fun_pos ctx name
     | Type name
     | Const (name, _)
     | Method (name, _)
@@ -468,9 +465,7 @@ end = struct
   let get_mode ctx dep =
     let open Typing_deps.Dep in
     match dep with
-    | Fun name
-    | FunName name ->
-      get_fun_mode ctx name
+    | Fun name -> get_fun_mode ctx name
     | Type name
     | Const (name, _)
     | Method (name, _)
@@ -532,9 +527,7 @@ end = struct
       match target with
       | Function f ->
         (match dep with
-        | Typing_deps.Dep.Fun g
-        | Typing_deps.Dep.FunName g ->
-          String.equal f g
+        | Typing_deps.Dep.Fun g -> String.equal f g
         | _ -> false)
       (* We have to collect dependencies of the entire class because dependency collection is
       coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
@@ -842,8 +835,7 @@ end = struct
     | None ->
       Typing_deps.Dep.(
         (match obj with
-        | Fun f
-        | FunName f ->
+        | Fun f ->
           let Typing_defs.{ fe_type; _ } =
             value_or_not_found description @@ Decl_provider.get_fun ctx f
           in
@@ -1033,8 +1025,7 @@ end = struct
             Typing_check_job.type_fun ctx filename func
           in
           add_implementation_dependencies ctx env;
-          HashSet.remove env.dependencies (Fun func);
-          HashSet.remove env.dependencies (FunName func)
+          HashSet.remove env.dependencies (Fun func)
         | Cmd.Method (cls, m) ->
           let (_
                 : (Tast.def * Typing_inference_env.t_global_with_pos list)
@@ -2666,9 +2657,7 @@ end = struct
             @@ Option.map ~f:Class_elt.(mk_prop ctx)
             @@ Nast_helper.get_prop ctx cls_nm nm )
       (* -- Globals -- *)
-      | Fun nm
-      | FunName nm ->
-        PartSingle (Single.mk_gfun @@ Nast_helper.get_fun_exn ctx nm)
+      | Fun nm -> PartSingle (Single.mk_gfun @@ Nast_helper.get_fun_exn ctx nm)
       | GConst nm
       | GConstName nm ->
         PartSingle (Single.mk_gconst ctx @@ Nast_helper.get_gconst_exn ctx nm)

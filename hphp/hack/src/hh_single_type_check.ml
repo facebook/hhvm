@@ -1390,7 +1390,6 @@ let dump_dep_hashes (nast : Nast.program) : unit =
 
       method! on_fun_ env x =
         process_variant @@ Fun (snd x.f_name);
-        process_variant @@ FunName (snd x.f_name);
         super#on_fun_ env x
 
       method! on_method_ cls x =

@@ -26,7 +26,7 @@ module Dep = struct
 
   type dependency
 
-  (** NOTE: keep in sync with `typing_deps.rs`. *)
+  (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type _ variant =
     | GConst : string -> 'a variant
     | Fun : string -> 'a variant
@@ -39,7 +39,6 @@ module Dep = struct
     | Method : string * string -> dependency variant
     | SMethod : string * string -> dependency variant
     | AllMembers : string -> dependency variant
-    | FunName : string -> 'a variant
     | GConstName : string -> 'a variant
 
   external hash1 : Mode.hash_mode -> int -> string -> int = "hash1_ocaml"
@@ -67,7 +66,6 @@ module Dep = struct
     | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) ->
       String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
     | (GConstName lhs, GConstName rhs) -> String.(lhs = rhs)
-    | (FunName lhs, FunName rhs) -> String.(lhs = rhs)
     | (AllMembers lhs, AllMembers rhs) -> String.(lhs = rhs)
     | (Extends lhs, Extends rhs) -> String.(lhs = rhs)
     | (GConst _, _) -> false
@@ -80,13 +78,12 @@ module Dep = struct
     | (Method _, _) -> false
     | (SMethod _, _) -> false
     | (GConstName _, _) -> false
-    | (FunName _, _) -> false
     | (AllMembers _, _) -> false
     | (Extends _, _) -> false
 
   type t = int
 
-  (* Keep in sync with the tags for `DepType` in `typing_deps.rs`. *)
+  (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let make : type a. Mode.hash_mode -> a variant -> t =
    fun mode -> function
     | GConst name1 -> hash1 mode 0 name1
@@ -100,8 +97,7 @@ module Dep = struct
     | Method (name1, name2) -> hash2 mode 9 name1 name2
     | SMethod (name1, name2) -> hash2 mode 10 name1 name2
     | AllMembers name1 -> hash1 mode 11 name1
-    | FunName name1 -> hash1 mode 12 name1
-    | GConstName name1 -> hash1 mode 13 name1
+    | GConstName name1 -> hash1 mode 12 name1
 
   let is_class x = x land 1 = 1
 
@@ -115,7 +111,6 @@ module Dep = struct
     | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | Type s -> Utils.strip_ns s
     | Fun s -> Utils.strip_ns s
-    | FunName s -> Utils.strip_ns s
     | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | SProp (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | Method (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
@@ -137,9 +132,7 @@ module Dep = struct
     | GConst s
     | GConstName s ->
       Decl_reference.GlobalConstant s
-    | Fun s
-    | FunName s ->
-      Decl_reference.Function s
+    | Fun s -> Decl_reference.Function s
 
   let to_debug_string = string_of_int
 
@@ -158,7 +151,6 @@ module Dep = struct
       | Const _ -> "Const"
       | Type _ -> "Type"
       | Fun _ -> "Fun"
-      | FunName _ -> "FunName"
       | Prop _ -> "Prop"
       | SProp _ -> "SProp"
       | Method _ -> "Method"
@@ -356,7 +348,7 @@ end
 module NamingHash = struct
   type t = int64
 
-  (** NOTE: MUST KEEP IN SYNC with the implementation in `typing_deps.rs`.
+  (** NOTE: MUST KEEP IN SYNC with the implementation in `typing_deps_hash.rs`.
 
   In [Dep.make], we produce a 31-bit hash. In the naming table saved-state,
   we want to use a hash to identify entries, but to avoid collisions, we want
@@ -408,7 +400,6 @@ module NamingHash = struct
     | GConstName _ as variant -> unsupported variant
     | Const _ as variant -> unsupported variant
     | AllMembers _ as variant -> unsupported variant
-    | FunName _ as variant -> unsupported variant
     | Prop _ as variant -> unsupported variant
     | SProp _ as variant -> unsupported variant
     | Method _ as variant -> unsupported variant

@@ -555,7 +555,6 @@ let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
   let deps =
     add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make deps_mode)
   in
-  let deps = add_deps_of_sset (fun n -> Dep.FunName n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_record_defs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in

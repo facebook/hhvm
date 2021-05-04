@@ -56,9 +56,6 @@ module Dep : sig
         (** Represents something depending on all members of a class.
         Particularly useful for switch exhaustiveness-checking. We establish
         a dependency on all members of an enum in that case. *)
-    | FunName : string -> 'a variant
-        (** Like [Fun], but used only in conservative redecl. May not be
-        necessary anymore. *)
     | GConstName : string -> 'a variant
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)

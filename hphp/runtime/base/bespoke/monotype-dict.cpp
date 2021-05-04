@@ -710,7 +710,7 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   mad->setLayoutIndex(getLayoutIndex<Key>(dtp, layoutIndex()));
 
   static_assert(folly::kIsLittleEndian);
-  auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
+  auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_layout_index.raw);
   assertx(*type_ptr == mad->type());
   return arr_lval{mad, type_ptr, const_cast<Value*>(&elm->val)};
 }
@@ -1062,7 +1062,7 @@ const typename MonotypeDict<Key>::Index* MonotypeDict<Key>::indices() const {
 
 template <typename Key>
 DataType MonotypeDict<Key>::type() const {
-  return DataType(int8_t(m_extra_hi16 & 0xff));
+  return DataType(int8_t(m_layout_index.raw & 0xff));
 }
 
 template <typename Key>

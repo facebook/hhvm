@@ -155,7 +155,7 @@ struct MonotypeDict : BespokeArray {
   }
   static constexpr size_t typeOffset() {
     static_assert(folly::kIsLittleEndian);
-    return offsetof(Self, m_extra_hi16);
+    return offsetof(Self, m_layout_index);
   }
   // This bit is set in our layout index iff we have int keys.
   static constexpr LayoutIndex intKeyMask() {

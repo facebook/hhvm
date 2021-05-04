@@ -47,14 +47,14 @@ namespace HPHP {
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
 
-auto constexpr kDefaultVanillaArrayExtra = ArrayData::kDefaultVanillaArrayExtra;
+auto constexpr kVanillaLayoutIndex = ArrayData::kVanillaLayoutIndex;
 
 struct PackedArray::VecInitializer {
   VecInitializer() {
     auto const aux = packSizeIndexAndAuxBits(0, 0);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVec);
     ad->m_size = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
+    ad->m_layout_index = kVanillaLayoutIndex;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
     assertx(checkInvariants(ad));
   }
@@ -66,7 +66,7 @@ struct PackedArray::MarkedVecInitializer {
     auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVec);
     ad->m_size = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
+    ad->m_layout_index = kVanillaLayoutIndex;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
     assertx(checkInvariants(ad));
   }
@@ -92,7 +92,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(arr->isVanillaVec());
   assertx(arr->m_size <= MixedArray::MaxSize);
   assertx(arr->m_size <= capacity(arr));
-  assertx(arr->m_extra == kDefaultVanillaArrayExtra);
+  assertx(arr->m_layout_index == kVanillaLayoutIndex);
 
   // This loop is too slow for normal use, but can be enabled to debug
   // packed arrays.
@@ -118,10 +118,10 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const ad      = MixedArray::reqAlloc(scale);
   auto const kind    = HeaderKind::Dict;
   ad->initHeader_16(kind, OneReference, MixedArrayKeys::packIntsForAux());
-  ad->m_size         = oldSize;
-  ad->m_extra        = old->m_extra;
-  ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
-  ad->m_nextKI       = oldSize;
+  ad->m_size          = oldSize;
+  ad->m_layout_index  = old->m_layout_index;
+  ad->m_scale_used    = scale | uint64_t{oldSize} << 32; // used=oldSize
+  ad->m_nextKI        = oldSize;
 
   assertx(ad->m_size == oldSize);
   assertx(ad->isVanillaDict());
@@ -240,7 +240,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
   assertx(ad->kind() == adIn->kind());
   assertx(capacity(ad) > capacity(adIn));
   assertx(ad->hasExactlyOneRef());
-  assertx(ad->m_extra == adIn->m_extra);
+  assertx(ad->m_layout_index == adIn->m_layout_index);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -294,7 +294,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assertx(ad->isLegacyArray() == adIn->isLegacyArray());
   assertx(capacity(ad) == capacity(adIn));
   assertx(ad->m_size == adIn->m_size);
-  assertx(ad->m_extra == adIn->m_extra);
+  assertx(ad->m_layout_index == adIn->m_layout_index);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
   return ad;
@@ -318,7 +318,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assertx(ad->kind() == adIn->kind());
   assertx(capacity(ad) >= adIn->m_size);
   assertx(ad->m_size == adIn->m_size);
-  assertx(ad->m_extra == adIn->m_extra);
+  assertx(ad->m_layout_index == adIn->m_layout_index);
   assertx(ad->isStatic());
   assertx(checkInvariants(ad));
   return ad;
@@ -343,7 +343,7 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
 ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   auto ad = MakeReserveImpl(capacity, HeaderKind::Vec);
   ad->m_size = 0;
-  ad->m_extra = kDefaultVanillaArrayExtra;
+  ad->m_layout_index = kVanillaLayoutIndex;
   assertx(ad->isVanillaVec());
   assertx(ad->m_size == 0);
   assertx(checkInvariants(ad));
@@ -358,7 +358,7 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   assertx(size > 0);
   auto ad = MakeReserveImpl(size, hk);
   ad->m_size = size;
-  ad->m_extra = kDefaultVanillaArrayExtra;
+  ad->m_layout_index = kVanillaLayoutIndex;
 
   // Append values by moving; this function takes ownership of them.
   if (reverse) {
@@ -398,7 +398,7 @@ ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) 
 ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Vec);
   ad->m_size = size;
-  ad->m_extra = kDefaultVanillaArrayExtra;
+  ad->m_layout_index = kVanillaLayoutIndex;
   assertx(ad->isVanillaVec());
   assertx(ad->m_size == size);
   assertx(checkInvariants(ad));
@@ -734,7 +734,7 @@ ArrayData* PackedArray::MakeUncounted(
     (hasApcTv ? ArrayData::kHasApcTv : 0)
   );
   ad->m_size = array->m_size;
-  ad->m_extra = array->m_extra;
+  ad->m_layout_index = array->m_layout_index;
 
 
   // Do a raw copy without worrying about refcounts. Then, traverse the
@@ -747,7 +747,7 @@ ArrayData* PackedArray::MakeUncounted(
   assertx(ad->kind() == array->kind());
   assertx(capacity(ad) >= size);
   assertx(ad->m_size == size);
-  assertx(ad->m_extra == array->m_extra);
+  assertx(ad->m_layout_index == array->m_layout_index);
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
   return ad;

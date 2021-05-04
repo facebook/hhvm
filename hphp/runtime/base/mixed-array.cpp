@@ -80,10 +80,10 @@ struct MixedArray::DictInitializer {
   DictInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyDictArrayPtr);
     ad->initHash(1);
-    ad->m_size  = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
-    ad->m_scale_used = 1;
-    ad->m_nextKI = 0;
+    ad->m_size         = 0;
+    ad->m_layout_index = kVanillaLayoutIndex;
+    ad->m_scale_used   = 1;
+    ad->m_nextKI       = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, kHasStrKeyTable);
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
@@ -95,10 +95,10 @@ struct MixedArray::MarkedDictArrayInitializer {
   MarkedDictArrayInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyMarkedDictArrayPtr);
     ad->initHash(1);
-    ad->m_size = 0;
-    ad->m_extra = kDefaultVanillaArrayExtra;
-    ad->m_scale_used = 1;
-    ad->m_nextKI = 0;
+    ad->m_size          = 0;
+    ad->m_layout_index  = kVanillaLayoutIndex;
+    ad->m_scale_used    = 1;
+    ad->m_nextKI        = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue,
                       kLegacyArray | kHasStrKeyTable);
     ad->mutableStrKeyTable()->reset();
@@ -118,10 +118,10 @@ ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   ad->initHash(scale);
 
   ad->initHeader(HeaderKind::Dict, OneReference);
-  ad->m_size         = 0;
-  ad->m_extra        = kDefaultVanillaArrayExtra;
-  ad->m_scale_used   = scale; // used=0
-  ad->m_nextKI       = 0;
+  ad->m_size          = 0;
+  ad->m_layout_index  = kVanillaLayoutIndex;
+  ad->m_scale_used    = scale; // used=0
+  ad->m_nextKI        = 0;
 
   assertx(ad->m_size == 0);
   assertx(ad->hasExactlyOneRef());
@@ -142,7 +142,7 @@ MixedArray* MixedArray::MakeStructDict(uint32_t size,
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   ad->m_size             = size;
-  ad->m_extra            = kDefaultVanillaArrayExtra;
+  ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -182,7 +182,7 @@ MixedArray* MixedArray::AllocStructDict(uint32_t size, const int32_t* hash) {
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   ad->m_size             = size;
-  ad->m_extra            = kDefaultVanillaArrayExtra;
+  ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -212,7 +212,7 @@ MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
   ad->initHash(scale);
   ad->initHeader(HeaderKind::Dict, OneReference);
   ad->m_size             = size;
-  ad->m_extra            = kDefaultVanillaArrayExtra;
+  ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -272,7 +272,7 @@ MixedArray* MixedArray::MakeDictNatural(uint32_t size, const TypedValue* vals) {
   ad->initHash(scale);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   ad->m_size             = size;
-  ad->m_extra            = kDefaultVanillaArrayExtra;
+  ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = size;
 
@@ -357,7 +357,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other, AllocMode mode) {
     assertx(res->isLegacyArray() == other.isLegacyArray());
     assertx(res->keyTypes() == other.keyTypes());
     assertx(res->m_size == other.m_size);
-    assertx(res->m_extra == other.m_extra);
+    assertx(res->m_layout_index == other.m_layout_index);
     assertx(res->m_used == other.m_used);
     assertx(res->m_scale == scale);
     return res;
@@ -573,7 +573,7 @@ bool MixedArray::checkInvariants() const {
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(MixedArray::HashSize(m_scale) ==
           folly::nextPowTwo<uint64_t>(capacity()));
-  assertx(m_extra == kDefaultVanillaArrayExtra);
+  assertx(m_layout_index == kVanillaLayoutIndex);
 
   if (isZombie()) return true;
 
@@ -728,7 +728,7 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto const oldUsed = old->m_used;
   ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
   ad->m_size = old->m_size;
-  ad->m_extra = old->m_extra;
+  ad->m_layout_index = old->m_layout_index;
   ad->m_scale_used = newScale | uint64_t{oldUsed} << 32;
   ad->m_aux16 &= ~(ArrayData::kHasStrKeyTable);
 
@@ -1071,7 +1071,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   ad->initHeader_16(src->m_kind, OneReference, aux);
   ad->m_size            = src->m_size;
-  ad->m_extra           = src->m_extra;
+  ad->m_layout_index    = src->m_layout_index;
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1104,7 +1104,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   assertx(ad->kind() == src->kind());
   assertx(ad->m_size == src->m_size);
-  assertx(ad->m_extra == src->m_extra);
+  assertx(ad->m_layout_index == src->m_layout_index);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used <= oldUsed);
   assertx(ad->m_used == dstElm - ad->data());

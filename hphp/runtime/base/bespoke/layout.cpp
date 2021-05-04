@@ -421,9 +421,8 @@ LayoutTest Layout::computeLayoutTest() const {
     liveVec.cbegin(), liveVec.cend(),
     std::back_inserter(deadVec)
   );
-  static_assert(ArrayData::kDefaultVanillaArrayExtra == uint32_t(-1));
-  auto constexpr kVanillaLayoutIndex = uint16_t(-1);
-  deadVec.push_back(kVanillaLayoutIndex);
+  static_assert(ArrayData::kVanillaLayoutIndex.raw == uint16_t(-1));
+  deadVec.push_back(ArrayData::kVanillaLayoutIndex.raw);
 
   SCOPE_ASSERT_DETAIL("bespoke::Layout::computeLayoutTest") {
     std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
@@ -434,7 +433,7 @@ LayoutTest Layout::computeLayoutTest() const {
     }
     ret += folly::sformat("  Dead:\n");
     for (auto const dead : deadVec) {
-      auto const layout = dead == kVanillaLayoutIndex
+      auto const layout = dead == ArrayData::kVanillaLayoutIndex.raw
         ? "Vanilla" : s_layoutTable[dead]->describe();
       ret += folly::sformat("  - {:04x}: {}\n", dead, layout);
     }

@@ -52,7 +52,7 @@ struct MonotypeVec : public BespokeArray {
   static uint64_t entriesOffset() { return sizeof(MonotypeVec); }
   static uint64_t typeOffset() {
     static_assert(folly::kIsLittleEndian);
-    return offsetof(MonotypeVec, m_extra_hi16);
+    return offsetof(MonotypeVec, m_layout_index);
   }
 
 #define X(Return, Name, Args...) static Return Name(Args);

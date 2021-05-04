@@ -429,7 +429,7 @@ MonotypeVec* MonotypeVec::grow() {
 }
 
 DataType MonotypeVec::type() const {
-  return DataType(int8_t(m_extra_hi16 & 0xff));
+  return DataType(int8_t(m_layout_index.raw & 0xff));
 }
 
 MonotypeVec* MonotypeVec::prepareForInsert() {
@@ -583,7 +583,7 @@ arr_lval MonotypeVec::elemImpl(int64_t k, bool throwOnMissing) {
   mad->setLayoutIndex(getLayoutIndex(dt_modulo_persistence(dt)));
 
   static_assert(folly::kIsLittleEndian);
-  auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
+  auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_layout_index.raw);
   assertx(*type_ptr == mad->type());
   return arr_lval{mad, type_ptr, &mad->valueRefUnchecked(k)};
 }

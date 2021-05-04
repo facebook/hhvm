@@ -46,6 +46,19 @@ struct Variant;
 namespace bespoke {
   struct LoggingArray;
   struct MonotypeVec;
+
+  // Type-safe layout index, so that we can't mix it up with other ints.
+  struct LayoutIndex {
+    bool operator==(LayoutIndex o) const { return raw == o.raw; }
+    bool operator!=(LayoutIndex o) const { return raw != o.raw; }
+    bool operator<(LayoutIndex o) const { return raw < o.raw; }
+
+    // We use the high byte of the index for type tests and virtual dispatch.
+    uint8_t byte() const { return raw >> 8; }
+
+  public:
+    uint16_t raw;
+  };
 }
 
 /*
@@ -125,9 +138,9 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kSampledArray = 8;
 
   /*
-   * See notes on the m_extra field for constraints on this value.
+   * See notes on the m_layout_index field for constraints on this value.
    */
-  static auto constexpr kDefaultVanillaArrayExtra = uint32_t(-1);
+  static auto constexpr kVanillaLayoutIndex = bespoke::LayoutIndex { 0xffff };
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -506,7 +519,7 @@ public:
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
 
   static constexpr size_t offsetOfBespokeIndex() {
-    return offsetof(ArrayData, m_extra_hi16);
+    return offsetof(ArrayData, m_layout_index);
   }
 
   const StrKeyTable& missingKeySideTable() const {
@@ -613,18 +626,23 @@ protected:
    *
    * When the array is bespoke:
    *
-   *   m_extra_lo16: For private BespokeArray use. We don't constrain the value
-   *                 in this field - different layouts can use it differently.
+   *   m_extra_lo16,
+   *   m_extra_lo8/m_extra_hi8: For use by each concrete array class. We don't
+   *                            constrain the values in these fields - different
+   *                            layouts can use it differently.
    *
-   *   m_extra_hi16: The bespoke LayoutIndex.
+   *   m_layout_index: The bespoke LayoutIndex.
    */
-  union {
-    uint32_t m_extra;
-    struct {
-      /* NB the names are definitely little-endian centric but whatever */
+  struct {
+    /* NB the names are definitely little-endian centric but whatever */
+    union {
+      struct {
+        uint8_t m_extra_lo8;
+        uint8_t m_extra_hi8;
+      };
       uint16_t m_extra_lo16;
-      uint16_t m_extra_hi16;
     };
+    bespoke::LayoutIndex m_layout_index;
   };
 };
 

@@ -54,7 +54,7 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 bespoke::LayoutIndex BespokeArray::layoutIndex() const {
-  return {m_extra_hi16};
+  return m_layout_index;
 }
 
 const bespoke::LayoutFunctions* BespokeArray::vtable() const {
@@ -62,7 +62,7 @@ const bespoke::LayoutFunctions* BespokeArray::vtable() const {
 }
 
 void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
-  m_extra_hi16 = index.raw;
+  m_layout_index = index;
 }
 
 NO_PROFILING
@@ -84,9 +84,8 @@ bool BespokeArray::checkInvariants() const {
   assertx(!isVanilla());
   assertx(kindIsValid());
   assertx(!isSampledArray());
-  static_assert(ArrayData::kDefaultVanillaArrayExtra == uint32_t(-1));
-  DEBUG_ONLY auto constexpr kVanillaLayoutIndex = uint16_t(-1);
-  assertx(m_extra_hi16 != kVanillaLayoutIndex);
+  static_assert(ArrayData::kVanillaLayoutIndex.raw == uint16_t(-1));
+  assertx(m_layout_index != ArrayData::kVanillaLayoutIndex);
   return true;
 }
 

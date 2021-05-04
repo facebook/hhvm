@@ -213,7 +213,8 @@ StructDict* StructDict::MakeReserve(HeaderKind kind,
   auto const valueOffset = layout->valueOffset();
   assertx(valueOffset % 8 == 0);
   assertx((valueOffset / 8) <= std::numeric_limits<uint8_t>::max());
-  sad->m_extra_lo16 = numFields << 8 | (valueOffset / 8);
+  sad->m_extra_hi8 = numFields;
+  sad->m_extra_lo8 = (valueOffset / 8);
 
   memset(sad->rawTypes(), static_cast<int>(KindOfUninit), sad->numFields());
   assertx(sad->checkInvariants());
@@ -221,11 +222,11 @@ StructDict* StructDict::MakeReserve(HeaderKind kind,
 }
 
 size_t StructDict::numFields() const {
-  return (m_extra_lo16 >> 8) & 0xff;
+  return m_extra_hi8;
 }
 
 size_t StructDict::valueOffsetInValueSize() const {
-  return m_extra_lo16 & 0xff;
+  return m_extra_lo8;
 }
 
 const StructLayout* StructLayout::As(const Layout* l) {

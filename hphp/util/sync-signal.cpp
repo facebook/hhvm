@@ -57,30 +57,41 @@ namespace HPHP {
 
 namespace {
 
-pthread_t g_handler_thread{};
-std::atomic_bool g_handler_thread_started{false};
+struct SyncSignals {
+  ~SyncSignals() {
+    // Ignore all signals after exit().
+    ignore_sync_signals();
 
-// "Synchronous" signal handlers.  This must be initialized before the handler
-// thread starts, and cannot change afterwards.
-std::map<int, sighandler_sync_t> g_sync_handlers;
-// We could've called sigemptyset() to initialize it, but it just does zero
-// fill on both Linux and Mac.
-sigset_t g_sync_signals{};
+    // FIXME: gracefully shut down the m_handlerThread
+  }
 
-// A signal in `g_sync_signals` should be blocked in all threads. And its
+  pthread_t m_handlerThread{};
+  std::atomic_bool m_handlerThreadStarted{false};
+
+  // "Synchronous" signal handlers.  This must be initialized before the handler
+  // thread starts, and cannot change afterwards.
+  std::map<int, sighandler_sync_t> m_syncHandlers;
+  // We could've called sigemptyset() to initialize it, but it just does zero
+  // fill on both Linux and Mac.
+  sigset_t m_syncSignals{};
+};
+
+SyncSignals g_state;
+
+// A signal in `m_syncSignals` should be blocked in all threads. And its
 // handler should be `block_and_raise()`.  Usually, the signal handler is never
 // invoked (because the signal is blocked).  But in case thread changes its own
 // mask, we change it back here.
 void block_and_raise(int signo) {
 #ifndef NDEBUG
-  if (!g_sync_handlers.count(signo)) {
+  if (!g_state.m_syncHandlers.count(signo)) {
     abort();
   }
 #endif
-  pthread_sigmask(SIG_BLOCK, &g_sync_signals, nullptr);
+  pthread_sigmask(SIG_BLOCK, &g_state.m_syncSignals, nullptr);
   // Send the signal to the dedicated handling thread.
-  if (g_handler_thread_started.load(std::memory_order_acquire)) {
-    pthread_kill(g_handler_thread, signo);
+  if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
+    pthread_kill(g_state.m_handlerThread, signo);
   }
 }
 
@@ -89,15 +100,15 @@ void* handle_signals(void*) {
   if (!sigfillset(&all_signals)) {
     pthread_sigmask(SIG_BLOCK, &all_signals, nullptr);
   }
-  if (g_handler_thread_started.exchange(true)) {
+  if (g_state.m_handlerThreadStarted.exchange(true)) {
     Logger::Error("Cannot register more signal handlers "
                   "after the handler thread starts");
     return nullptr;
   }
   SCOPE_EXIT {
-    g_handler_thread_started.store(false, std::memory_order_release);
+    g_state.m_handlerThreadStarted.store(false, std::memory_order_release);
   };
-  if (g_sync_handlers.empty()) return nullptr;
+  if (g_state.m_syncHandlers.empty()) return nullptr;
 #ifdef __linux__
   prctl(PR_SET_NAME, "sig_handler");
   sched_param param{};
@@ -105,10 +116,10 @@ void* handle_signals(void*) {
   sched_setscheduler(0, SCHED_RR | SCHED_RESET_ON_FORK, &param);
 #endif
   int signo = 0;
-  while (!sigwait(&g_sync_signals, &signo)) {
+  while (!sigwait(&g_state.m_syncSignals, &signo)) {
     // dispatch signo
-    auto const iter = g_sync_handlers.find(signo);
-    if (iter == g_sync_handlers.end()) {
+    auto const iter = g_state.m_syncHandlers.find(signo);
+    if (iter == g_state.m_syncHandlers.end()) {
       Logger::FError("Cannot find handler for signal {}, ignoring", signo);
       continue;
     }
@@ -128,14 +139,14 @@ void* handle_signals(void*) {
 // Clear state in child process after fork().
 void postfork_clear() {
   reset_sync_signals();
-  g_handler_thread_started.store(false, std::memory_order_release);
-  g_handler_thread = pthread_t{};
+  g_state.m_handlerThreadStarted.store(false, std::memory_order_release);
+  g_state.m_handlerThread = pthread_t{};
 }
 
-// Block `g_sync_signals` and point handlers to block_and_raise().
+// Block `m_syncSignals` and point handlers to block_and_raise().
 void block_sync_signals() {
-  pthread_sigmask(SIG_BLOCK, &g_sync_signals, nullptr);
-  for (auto iter : g_sync_handlers) {
+  pthread_sigmask(SIG_BLOCK, &g_state.m_syncSignals, nullptr);
+  for (auto iter : g_state.m_syncHandlers) {
     signal(iter.first, block_and_raise);
   }
   // If we ever fork(), avoid affecting child processes.
@@ -150,43 +161,45 @@ void block_sync_signals() {
 //////////////////////////////////////////////////////////////////////
 
 bool sync_signal(int signo, sighandler_sync_t sync_handler) {
-  if (g_handler_thread_started.load(std::memory_order_acquire)) return false;
+  if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
+    return false;
+  }
   if (signo <= 0 || signo >= Process::kNSig) return false;
   // We don't support SIG_DFL here.  SIG_IGN is OK.
   if (sync_handler == (sighandler_sync_t)SIG_DFL) return false;
-  g_sync_handlers[signo] = sync_handler;
-  sigaddset(&g_sync_signals, signo);
+  g_state.m_syncHandlers[signo] = sync_handler;
+  sigaddset(&g_state.m_syncSignals, signo);
   return true;
 }
 
 bool is_sync_signal(int signo) {
-  return g_sync_handlers.count(signo);
+  return g_state.m_syncHandlers.count(signo);
 }
 
 void reset_sync_signals() {
-  for (auto const iter : g_sync_handlers) {
+  for (auto const iter : g_state.m_syncHandlers) {
     signal(iter.first, SIG_DFL);
   }
-  pthread_sigmask(SIG_UNBLOCK, &g_sync_signals, nullptr);
+  pthread_sigmask(SIG_UNBLOCK, &g_state.m_syncSignals, nullptr);
 }
 
 void ignore_sync_signals() {
-  for (auto const iter : g_sync_handlers) {
+  for (auto const iter : g_state.m_syncHandlers) {
     signal(iter.first, SIG_IGN);
   }
-  pthread_sigmask(SIG_UNBLOCK, &g_sync_signals, nullptr);
+  pthread_sigmask(SIG_UNBLOCK, &g_state.m_syncSignals, nullptr);
 }
 
 void block_sync_signals_and_start_handler_thread() {
-  if (g_sync_handlers.empty()) return;
+  if (g_state.m_syncHandlers.empty()) return;
   block_sync_signals();
-  if (g_handler_thread_started.load(std::memory_order_acquire)) {
+  if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
     Logger::Error("sync signal handler already started");
     return;
   }
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-  pthread_create(&g_handler_thread, &attr, &handle_signals, nullptr);
+  pthread_create(&g_state.m_handlerThread, &attr, &handle_signals, nullptr);
 }
 
 void postfork_restart_handler_thread() {

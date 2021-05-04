@@ -48,7 +48,13 @@
 namespace HPHP {
 namespace Facts {
 
-struct UpdateDBWorkItem;
+struct UpdateDBWorkItem {
+  std::string m_since;
+  std::string m_clock;
+  std::vector<folly::fs::path> m_alteredPaths;
+  std::vector<folly::fs::path> m_deletedPaths;
+  std::vector<FileFacts> m_alteredPathFacts;
+};
 
 /**
  * Stores and updates one PathToSymbolsMap for each kind of symbol.
@@ -508,14 +514,6 @@ private:
   const std::string m_schemaHash;
   const DBData m_dbData;
   const SQLite::OpenMode m_dbMode{SQLite::OpenMode::ReadWrite};
-};
-
-struct UpdateDBWorkItem {
-  std::string m_since;
-  std::string m_clock;
-  std::vector<folly::fs::path> m_alteredPaths;
-  std::vector<folly::fs::path> m_deletedPaths;
-  std::vector<FileFacts> m_alteredPathFacts;
 };
 
 } // namespace Facts

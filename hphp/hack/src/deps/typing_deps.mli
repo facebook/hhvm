@@ -81,6 +81,10 @@ module Dep : sig
 
   val of_debug_string : string -> t
 
+  val to_hex_string : t -> string
+
+  val of_hex_string : string -> t
+
   val variant_to_string : 'a variant -> string
 end
 

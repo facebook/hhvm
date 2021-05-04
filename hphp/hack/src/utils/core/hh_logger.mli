@@ -71,6 +71,8 @@ val log :
   ('a, unit, string, string, string, unit) format6 ->
   'a
 
+val log_lazy : ?lvl:Level.t -> ?category:string -> string lazy_t -> unit
+
 val log_duration : ?lvl:Level.t -> ?category:string -> string -> float -> float
 
 val fatal :

@@ -145,6 +145,10 @@ module Dep = struct
 
   let of_debug_string = int_of_string
 
+  let to_hex_string = Printf.sprintf "0x%016x"
+
+  let of_hex_string = int_of_string
+
   let variant_to_string : type a. a variant -> string =
    fun dep ->
     let prefix =

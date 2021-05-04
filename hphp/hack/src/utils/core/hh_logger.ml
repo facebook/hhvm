@@ -131,6 +131,9 @@ module Level : sig
     ('a, unit, string, string, string, unit) format6 ->
     'a
 
+  val log_lazy :
+    t -> ?category:string -> ?exn:Exception.t -> string lazy_t -> unit
+
   val log_duration : t -> ?category:string -> string -> float -> float
 end = struct
   type t =
@@ -204,6 +207,12 @@ end = struct
     | Some passes -> print_with_newline_internal ?category ~passes ?exn fmt
     | None -> Printf.ifprintf () fmt
 
+  let log_lazy level ?category ?exn s =
+    match passes level category with
+    | Some passes ->
+      print_with_newline_internal ?category ~passes ?exn "%s" (Lazy.force s)
+    | None -> ()
+
   let log_duration level ?category name t =
     let t2 = Unix.gettimeofday () in
     begin
@@ -217,6 +226,9 @@ end
 
 (* Default log instructions to INFO level *)
 let log ?(lvl = Level.Info) ?category fmt = Level.log lvl ?category fmt
+
+let log_lazy ?(lvl = Level.Info) ?category str =
+  Level.log_lazy lvl ?category str
 
 let log_duration ?(lvl = Level.Info) ?category fmt t =
   Level.log_duration lvl ?category fmt t

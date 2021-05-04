@@ -855,6 +855,7 @@ functor
       changed: Typing_deps.DepSet.t;
       oldified_defs: FileInfo.names;
       to_recheck1: Relative_path.Set.t;
+      to_recheck1_deps: Typing_deps.DepSet.t;
       to_redecl_phase2_deps: Typing_deps.DepSet.t;
     }
 
@@ -872,7 +873,7 @@ functor
         Decl_redecl_service.errors = _;
         changed;
         to_redecl = to_redecl_phase2_deps;
-        to_recheck = to_recheck1;
+        to_recheck = to_recheck1_deps;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
         @@ fun () ->
@@ -892,13 +893,23 @@ functor
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
-      let to_recheck1 = Typing_deps.Files.get_files to_recheck1 in
-      { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps }
+      let to_recheck1 = Typing_deps.Files.get_files to_recheck1_deps in
+      {
+        changed;
+        oldified_defs;
+        to_recheck1;
+        to_recheck1_deps;
+        to_redecl_phase2_deps;
+      }
 
     type redecl_phase2_result = {
       errors_after_phase2: Errors.t;
       needs_phase2_redecl: Relative_path.Set.t;
       to_recheck2: Relative_path.Set.t;
+      to_recheck2_deps: Typing_deps.DepSet.t;
+          (** Note that the intuitive property
+            [get_files to_recheck2_deps == to_recheck2] does NOT hold. That's
+            because in a lazy check, we might add files open in the IDE *)
     }
 
     let do_redecl_phase2
@@ -926,7 +937,7 @@ functor
         Decl_redecl_service.errors = errorl';
         changed = _;
         to_redecl = _;
-        to_recheck = to_recheck2;
+        to_recheck = to_recheck2_deps;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
         @@ fun () ->
@@ -952,7 +963,7 @@ functor
           (* Redeclarations completed now. *)
           fast_redecl_phase2_now
       in
-      let to_recheck2 = Typing_deps.Files.get_files to_recheck2 in
+      let to_recheck2 = Typing_deps.Files.get_files to_recheck2_deps in
       let to_recheck2 =
         Relative_path.Set.union
           to_recheck2
@@ -961,20 +972,55 @@ functor
              env
              ctx)
       in
-      { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 }
+      {
+        errors_after_phase2 = errors;
+        needs_phase2_redecl;
+        to_recheck2;
+        to_recheck2_deps;
+      }
 
     (** Merge the results of the two redecl phases. *)
     let merge_redecl_results
         ~(fast : FileInfo.names Relative_path.Map.t)
         ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
         ~(to_recheck1 : Relative_path.Set.t)
+        ~(to_recheck1_deps : Typing_deps.DepSet.t)
         ~(to_recheck2 : Relative_path.Set.t)
-        ~(to_redecl_phase2 : Relative_path.Set.t) :
-        Naming_table.fast * Relative_path.Set.t =
+        ~(to_recheck2_deps : Typing_deps.DepSet.t)
+        ~(to_redecl_phase2 : Relative_path.Set.t)
+        ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) :
+        Naming_table.fast * Relative_path.Set.t * Typing_deps.DepSet.t lazy_t =
       let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
-      let to_recheck = Relative_path.Set.union to_recheck1 to_recheck2 in
-      let to_recheck = Relative_path.Set.union to_recheck to_redecl_phase2 in
-      (fast, to_recheck)
+      (* I want to make sure the way we compute to_recheck in terms of files
+       * vs. in terms of toplevel symbol hashes does not diverge. Therefore,
+       * instead of duplicating the unioning logic, I put the logic in a
+       * polymorphic helper function *)
+      let calc_to_recheck
+          (type a)
+          ~(union : a -> a -> a)
+          ~(to_recheck1 : a)
+          ~(to_recheck2 : a)
+          ~(to_redecl_phase2 : a) =
+        let to_recheck = union to_recheck1 to_recheck2 in
+        let to_recheck = union to_recheck to_redecl_phase2 in
+        to_recheck
+      in
+      let to_recheck =
+        calc_to_recheck
+          ~union:Relative_path.Set.union
+          ~to_recheck1
+          ~to_recheck2
+          ~to_redecl_phase2
+      in
+      let to_recheck_deps =
+        lazy
+          (calc_to_recheck
+             ~union:Typing_deps.DepSet.union
+             ~to_recheck1:to_recheck1_deps
+             ~to_recheck2:to_recheck2_deps
+             ~to_redecl_phase2:to_redecl_phase2_deps)
+      in
+      (fast, to_recheck, to_recheck_deps)
 
     type type_checking_result = {
       env: ServerEnv.env;
@@ -1290,7 +1336,13 @@ functor
        only source of class information needing recomputing is linearizations.
        These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
        and are lazily recomputed as needed. *)
-      let { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
+      let {
+        changed;
+        oldified_defs;
+        to_recheck1;
+        to_recheck1_deps;
+        to_redecl_phase2_deps;
+      } =
         do_redecl_phase1 genv env ~fast ~naming_table ~oldified_defs ~profiling
       in
       let to_redecl_phase2 =
@@ -1388,11 +1440,19 @@ functor
        of changed classes.
 
        When shallow_class_decl is enabled, there is no need to do phase 2. *)
-      let (errors, needs_phase2_redecl, to_recheck2) =
+      let (errors, needs_phase2_redecl, to_recheck2, to_recheck2_deps) =
         if shallow_decl_enabled ctx then
-          (errors, Relative_path.Set.empty, Relative_path.Set.empty)
+          ( errors,
+            Relative_path.Set.empty,
+            Relative_path.Set.empty,
+            Typing_deps.DepSet.make env.deps_mode )
         else
-          let { errors_after_phase2; needs_phase2_redecl; to_recheck2 } =
+          let {
+            errors_after_phase2;
+            needs_phase2_redecl;
+            to_recheck2;
+            to_recheck2_deps;
+          } =
             do_redecl_phase2
               genv
               env
@@ -1404,7 +1464,10 @@ functor
               ~to_redecl_phase2_deps
               ~profiling
           in
-          (errors_after_phase2, needs_phase2_redecl, to_recheck2)
+          ( errors_after_phase2,
+            needs_phase2_redecl,
+            to_recheck2,
+            to_recheck2_deps )
       in
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_end" ~start_time
@@ -1414,13 +1477,16 @@ functor
        * changed too. *)
       Ide_tast_cache.invalidate ();
 
-      let (fast, to_recheck) =
+      let (fast, to_recheck, to_recheck_deps) =
         merge_redecl_results
           ~fast
           ~fast_redecl_phase2_now
           ~to_recheck1
+          ~to_recheck1_deps
           ~to_recheck2
+          ~to_recheck2_deps
           ~to_redecl_phase2
+          ~to_redecl_phase2_deps
       in
       let hs = SharedMem.heap_size () in
       HackEventLogger.second_redecl_end t hs;
@@ -1431,7 +1497,6 @@ functor
         |> Telemetry.duration ~key:"redecl2_end2_merge" ~start_time
         |> Telemetry.int_ ~key:"redecl2_end2_heap_size" ~value:hs
       in
-
       ServerRevisionTracker.typing_changed
         genv.local_config
         (Relative_path.Set.cardinal to_recheck);
@@ -1441,6 +1506,23 @@ functor
           ~key:"revtrack2_typing_changed_end"
           ~start_time
       in
+
+      (* we use lazy here to avoid expensive string generation when logging
+       * is not enabled *)
+      Hh_logger.log_lazy ~category:"fanout_information"
+      @@ lazy
+           Hh_json.(
+             json_to_string
+             @@ JSON_Object
+                  [
+                    ("tag", string_ "incremental_fanout");
+                    ( "hashes",
+                      array_
+                        string_
+                        Typing_deps.(
+                          List.map ~f:Dep.to_hex_string
+                          @@ DepSet.elements (Lazy.force to_recheck_deps)) );
+                  ]);
 
       let env =
         CheckKind.get_env_after_decl ~old_env:env ~naming_table ~failed_naming

@@ -584,6 +584,8 @@ let opt_ (to_json : 'a -> json) (x : 'a option) : json =
   | None -> JSON_Null
   | Some x -> to_json x
 
+let array_ (f : 'a -> json) (xs : 'a list) : json = JSON_Array (List.map ~f xs)
+
 let get_object_exn = function
   | JSON_Object o -> o
   | _ -> assert false

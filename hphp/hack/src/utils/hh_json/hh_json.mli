@@ -96,6 +96,8 @@ val bool_ : bool -> json
 
 val opt_ : ('a -> json) -> 'a option -> json
 
+val array_ : ('a -> json) -> 'a list -> json
+
 (* Types and functions for monadic API for traversing a JSON object. *)
 
 type json_type =

@@ -2106,7 +2106,9 @@ dependencies = [
 name = "names"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "md-5",
+ "no_pos_hash",
  "ocamlrep",
  "oxidized",
  "oxidized_by_ref",

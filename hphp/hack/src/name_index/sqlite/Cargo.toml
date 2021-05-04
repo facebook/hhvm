@@ -8,7 +8,9 @@ edition = "2018"
 path = "lib.rs"
 
 [dependencies]
+bumpalo = { version = "3.2.1", features = ["collections"] }
 md-5 = "0.8"
+no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }

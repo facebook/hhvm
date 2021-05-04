@@ -9,8 +9,14 @@ use std::path::Path;
 use oxidized::file_info::NameType;
 use oxidized::naming_types::KindOfType;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::{direct_decl_parser::Decls, file_info};
+
+use bumpalo::collections::Vec;
+
+use no_pos_hash::position_insensitive_hash;
 
 use crate::{consts, file_infos, funs, types, Result};
+use oxidized_by_ref::file_info::FileInfo;
 
 #[derive(Debug)]
 pub struct Names {
@@ -36,6 +42,74 @@ impl Names {
         types::create_table(connection)?;
         consts::create_table(connection)?;
         Ok(())
+    }
+
+    fn iter_to_arena_slice<'a, T>(
+        iter: impl Iterator<Item = T>,
+        arena: &'a bumpalo::Bump,
+    ) -> &'a [T] {
+        let mut result = match iter.size_hint().1 {
+            Some(upper_bound) => Vec::with_capacity_in(upper_bound, arena),
+            None => Vec::new_in(arena),
+        };
+        for item in iter {
+            result.push(item);
+        }
+        result.into_bump_slice()
+    }
+
+    pub fn decl_to_fileinfo<'a>(
+        decls: Decls<'a>,
+        file_mode: Option<file_info::Mode>,
+        arena: &'a bumpalo::Bump,
+    ) -> FileInfo<'a> {
+        let classes = Names::iter_to_arena_slice(
+            decls.classes().map(|(name, x)| {
+                &*arena.alloc((oxidized_by_ref::file_info::Pos::Full(x.name.0), name))
+            }),
+            arena,
+        );
+        let funs = Names::iter_to_arena_slice(
+            decls.funs().map(|(name, x)| {
+                &*arena.alloc((oxidized_by_ref::file_info::Pos::Full(x.pos), name))
+            }),
+            arena,
+        );
+        let typedefs = Names::iter_to_arena_slice(
+            decls.typedefs().map(|(name, x)| {
+                &*arena.alloc((oxidized_by_ref::file_info::Pos::Full(x.pos), name))
+            }),
+            arena,
+        );
+        let consts = Names::iter_to_arena_slice(
+            decls.consts().map(|(name, x)| {
+                &*arena.alloc((oxidized_by_ref::file_info::Pos::Full(x.pos), name))
+            }),
+            arena,
+        );
+        let record_defs = Names::iter_to_arena_slice(
+            decls.records().map(|(name, x)| {
+                &*arena.alloc((oxidized_by_ref::file_info::Pos::Full(x.pos), name))
+            }),
+            arena,
+        );
+        let hash = arena.alloc(Some(position_insensitive_hash(&decls) as isize));
+
+        FileInfo {
+            hash,
+            file_mode,
+            funs,
+            classes,
+            record_defs,
+            typedefs,
+            consts,
+            comments: None,
+        }
+    }
+
+    pub fn save_fileinfo(conn: &Connection, path_rel: &RelativePath, fileinfo: &FileInfo) {
+        let _ = file_infos::insert(conn, path_rel, fileinfo);
+        // todo reset of tables
     }
 
     pub fn get_path(&self, kind: NameType, name: &str) -> Result<Option<RelativePath>> {

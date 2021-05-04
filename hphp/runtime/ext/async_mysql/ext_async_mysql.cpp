@@ -405,7 +405,7 @@ static Object newAsyncMysqlConnectEvent(
     std::shared_ptr<am::AsyncMysqlClient> clientPtr) {
   auto event = new AsyncMysqlConnectEvent(op);
   try {
-    op->setCallback([event, clientPtr](am::ConnectOperation& /*op*/) {
+    op->setCallback([event, clientPtr](am::ConnectOperation& /* op */) {
       // Get current stats
       event->setClientStats(clientPtr->collectPerfStats());
 

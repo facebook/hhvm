@@ -139,3 +139,6 @@ class FanoutTest(object):
                 with open(fn, "w") as fp:
                     fp.write(contents)
         return changed_files
+
+    def all_base_php_files(self) -> List[str]:
+        return list(self.base_php_contents.keys())

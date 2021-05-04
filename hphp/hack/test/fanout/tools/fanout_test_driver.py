@@ -425,3 +425,49 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
 
     repo_root.cleanup()
     saved_state_dir.cleanup()
+
+
+def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) -> None:
+    """Run the incremental fanout scenario with old decls available.
+
+    This scenario involves calculating the fanout in an incremental change
+    scenario (i.e. after saved-state initialization was successful), and where
+    the old versions of the declarations are available and thus fine-grained
+    decl diffing is possible.
+
+    1. Build a saved-state for the base version
+    2. Kill hack
+    3. Initialize from the saved-state, forcing a re-typecheck of all files to
+       make sure all decls are present in shared memory.
+    4. Make the change
+    5. Type check and extract fanout
+    """
+    repo_root = _prepare_repo_root(test)
+    fanout_hash_map = _build_fanout_hash_map(bins, test)
+    (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
+
+    _launch_hh_from_saved_state(
+        bins,
+        repo_root,
+        saved_state_dir,
+        load_decls_from_saved_state=True,
+        changed_files=test.all_base_php_files(),
+    )
+    _make_repo_change(repo_root, test)
+    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh_stop(repo_root.path)
+
+    fanout_information = _extract_fanout_information(
+        bins, repo_root, tags=["incremental_fanout"]
+    )
+
+    _format_result(
+        repo_root=repo_root,
+        hh_result_base=hh_result_base,
+        hh_result_changed=hh_result_changed,
+        fanout_information=fanout_information,
+        fanout_hash_map=fanout_hash_map,
+    )
+
+    repo_root.cleanup()
+    saved_state_dir.cleanup()

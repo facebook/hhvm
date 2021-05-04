@@ -5,7 +5,7 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   BOOST_DOWNLOAD_ARGS
   SOURCE_URL
-  "https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2"
+  "https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.bz2"
   SOURCE_HASH
   "SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
 )

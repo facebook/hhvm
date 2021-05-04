@@ -16,8 +16,8 @@ class ExpectObj<T> {
     self::assert($this->value === $other, $message);
   }
 
-  public function toNotEqual(T $other): void {
-    self::assert($this->value !== $other);
+  public function toNotEqual(T $other, ?string $message = null): void {
+    self::assert($this->value !== $other, $message);
   }
 
   public function toBeNull<TInner>(): void where T = ?TInner{
@@ -37,8 +37,20 @@ class ExpectObj<T> {
     self::assert(!$this->value, $message);
   }
 
+  public function toContain<Tv>(Tv $val): void where T as Container<Tv> {
+    self::assert(\in_array($val, $this->value, /* strict = */ true));
+  }
+
   public function toContainKey<Tk as arraykey>(Tk $key): void where T as KeyedContainer<Tk, mixed> {
     self::assert(\array_key_exists($key, $this->value));
+  }
+
+  public function toContainSubstring(string $val): void where T = string {
+    self::assert(\strpos($this->value, $val) !== false);
+  }
+
+  public function toNotContainSubstring(string $val): void where T = string {
+    self::assert(\strpos($this->value, $val) === false);
   }
 
   // FIXME this really shouldn't be used in the HSL...
@@ -71,11 +83,11 @@ class ExpectObj<T> {
     self::assert($this->value <= $other);
   }
 
-  public function toThrow<TRet>(
-    classname<mixed> $ex,
+  public function toThrow<TEx as \Throwable>(
+    classname<TEx> $ex,
     ?string $ex_message = null,
     ?string $_failure_message = null,
-  ): void where T = (function(): TRet) {
+  ): TEx where T = (function(): mixed) {
     $thrown = null;
     try {
       $f = $this->value;
@@ -87,10 +99,18 @@ class ExpectObj<T> {
       $thrown = $t;
     }
     self::assert($thrown !== null);
-    self::assert(\get_class($thrown) === $ex);
+    self::assert(\is_a($thrown, $ex));
     if ($ex_message !== null) {
       self::assert(\strpos($thrown?->getMessage() ?? '', $ex_message) !== false);
     }
+    /* HH_FIXME[4110] verified with is_a() */
+    return $thrown;
+  }
+
+  public function toBeInstanceOf(
+    classname<mixed> $class
+  ): void {
+    self::assert(\is_a($this->value, $class));
   }
 
   public function notToThrow<TRet>(

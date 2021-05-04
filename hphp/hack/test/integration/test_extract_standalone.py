@@ -218,6 +218,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\opaque_with_user_attr",
             "\\transparent_with_user_attr",
             "\\with_constr_prop_with_user_attr",
+            "\\with_where_constraint",
         ]
 
         for function_name in function_names:

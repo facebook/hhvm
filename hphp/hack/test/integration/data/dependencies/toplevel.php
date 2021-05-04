@@ -282,3 +282,22 @@ final class MyUserAttr
     HH\TypeConstantAttribute {
   public function __construct(string $first, string ...$remainder)[] {}
 }
+
+
+interface IC {
+    public function foo(): void;
+}
+
+class DC implements IC {
+    public function foo(): void {}
+}
+
+class WithWhereConstraint<T> {
+    public function __construct(T $x) where T as IC {
+        $x->foo();
+    }
+}
+
+function with_where_constraint(): void {
+    $z = new WithWhereConstraint(new DC());
+}

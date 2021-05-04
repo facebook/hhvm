@@ -2261,6 +2261,19 @@ end = struct
     (* == Pretty printers =================================================== *)
 
     (* -- Methods ----------------------------------------------------------- *)
+    let pp_where_constraint ppf (h1, cstr_kind, h2) =
+      Fmt.(
+        pair ~sep:sp (pp_hint ~is_ctx:false)
+        @@ pair ~sep:sp pp_constraint_kind (pp_hint ~is_ctx:false))
+        ppf
+        (h1, (cstr_kind, h2))
+
+    let pp_where_constraints ppf = function
+      | [] -> ()
+      | cstrs ->
+        Fmt.(prefix (const string "where ") @@ list ~sep:sp pp_where_constraint)
+          ppf
+          cstrs
 
     let pp_method
         ppf
@@ -2278,12 +2291,13 @@ end = struct
               m_final;
               m_visibility;
               m_user_attributes;
+              m_where_constraints;
               _;
             } ) =
       Fmt.(
         pf
           ppf
-          "%a %a %a %a %a function %s%a%a%a%a%a"
+          "%a %a %a %a %a function %s%a%a%a%a%a%a"
           pp_user_attrs
           m_user_attributes
           (cond ~pp_t:(const string "abstract") ~pp_f:nop)
@@ -2303,6 +2317,8 @@ end = struct
           m_ctxs
           (pp_type_hint ~is_ret_type:true)
           m_ret
+          pp_where_constraints
+          m_where_constraints
           (cond
              ~pp_t:(const string ";")
              ~pp_f:(const string "{throw new \\Exception();}"))

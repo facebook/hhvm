@@ -1913,12 +1913,12 @@ void parse_coeffects_cc_this(AsmState& as) {
 }
 
 /*
- * directive-coeffects_closure_inherit_from_parent ';'
+ * directive-coeffects_closure_parent_scope ';'
  */
-void parse_coeffects_closure_inherit_from_parent(AsmState& as) {
+void parse_coeffects_closure_parent_scope(AsmState& as) {
   assertx(as.fe->isClosureBody);
   as.fe->coeffectRules.emplace_back(
-    CoeffectRule(CoeffectRule::ClosureInheritFromParent{}));
+    CoeffectRule(CoeffectRule::ClosureParentScope{}));
   as.in.expectWs(';');
 }
 
@@ -2223,8 +2223,8 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
       if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
-      if (word == ".coeffects_closure_inherit_from_parent") {
-        parse_coeffects_closure_inherit_from_parent(as);
+      if (word == ".coeffects_closure_parent_scope") {
+        parse_coeffects_closure_parent_scope(as);
         continue;
       }
       if (word == ".coeffects_generator_this") {

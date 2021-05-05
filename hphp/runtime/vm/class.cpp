@@ -1443,7 +1443,7 @@ bool Class::hasClosureCoeffectsProp() const {
   if (!(attrs() & AttrHasClosureCoeffectsProp)) return false;
   assertx(getCachedInvoke()->hasCoeffectRules());
   assertx(getCachedInvoke()->getCoeffectRules().size() == 1);
-  assertx(getCachedInvoke()->getCoeffectRules()[0].isClosureInheritFromParent());
+  assertx(getCachedInvoke()->getCoeffectRules()[0].isClosureParentScope());
   return true;
 }
 

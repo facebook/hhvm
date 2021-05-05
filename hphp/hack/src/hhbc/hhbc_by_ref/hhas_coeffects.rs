@@ -78,7 +78,7 @@ pub struct HhasCoeffects {
     cc_this: Vec<Vec<String>>,
     is_any_rx: bool,
     is_pure: bool,
-    closure_inherit_from_parent: bool,
+    closure_parent_scope: bool,
     generator_this: bool,
     caller: bool,
 }
@@ -120,8 +120,8 @@ impl HhasCoeffects {
                 None => panic!("Not possible"),
             }
         }
-        if coeffects.is_closure_inherit_from_parent() {
-            results.push(".coeffects_closure_inherit_from_parent;".to_string());
+        if coeffects.is_closure_parent_scope() {
+            results.push(".coeffects_closure_parent_scope;".to_string());
         }
         if coeffects.generator_this() {
             results.push(".coeffects_generator_this;".to_string());
@@ -267,7 +267,7 @@ impl HhasCoeffects {
         if self.has_coeffect_rules() {
             Self {
                 static_coeffects,
-                closure_inherit_from_parent: true,
+                closure_parent_scope: true,
                 ..HhasCoeffects::default()
             }
         } else {
@@ -332,7 +332,7 @@ impl HhasCoeffects {
         !self.fun_param.is_empty()
             || !self.cc_param.is_empty()
             || !self.cc_this.is_empty()
-            || self.closure_inherit_from_parent
+            || self.closure_parent_scope
             || self.generator_this
             || self.caller
     }
@@ -341,8 +341,8 @@ impl HhasCoeffects {
         self.has_coeffect_rules() && !self.generator_this()
     }
 
-    pub fn is_closure_inherit_from_parent(&self) -> bool {
-        self.closure_inherit_from_parent
+    pub fn is_closure_parent_scope(&self) -> bool {
+        self.closure_parent_scope
     }
 }
 

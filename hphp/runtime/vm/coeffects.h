@@ -126,7 +126,7 @@ struct CoeffectRule final {
   struct FunParam {};
   struct CCParam {};
   struct CCThis {};
-  struct ClosureInheritFromParent {};
+  struct ClosureParentScope {};
   struct GeneratorThis {};
   struct Caller {};
 
@@ -154,8 +154,8 @@ struct CoeffectRule final {
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
-  explicit CoeffectRule(ClosureInheritFromParent)
-    : m_type(Type::ClosureInheritFromParent)
+  explicit CoeffectRule(ClosureParentScope)
+    : m_type(Type::ClosureParentScope)
   {}
 
   explicit CoeffectRule(GeneratorThis)
@@ -170,7 +170,7 @@ struct CoeffectRule final {
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*,
                        uint32_t, jit::SSATmp*, jit::SSATmp*) const;
 
-  bool isClosureInheritFromParent() const;
+  bool isClosureParentScope() const;
   bool isGeneratorThis() const;
 
   folly::Optional<std::string> toString(const Func*) const;
@@ -186,7 +186,7 @@ private:
     FunParam,
     CCParam,
     CCThis,
-    ClosureInheritFromParent,
+    ClosureParentScope,
     GeneratorThis,
     Caller,
   };

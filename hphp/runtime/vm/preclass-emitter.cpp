@@ -310,7 +310,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs |= AttrIsClosureClass;
     if (!invoke->coeffectRules.empty()) {
       assertx(invoke->coeffectRules.size() == 1);
-      assertx(invoke->coeffectRules[0].isClosureInheritFromParent());
+      assertx(invoke->coeffectRules[0].isClosureParentScope());
       attrs |= AttrHasClosureCoeffectsProp;
     }
   }

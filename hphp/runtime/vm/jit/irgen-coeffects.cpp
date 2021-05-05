@@ -176,8 +176,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
 
 }
 
-SSATmp* emitClosureInheritFromParent(IRGS& env, const Func* f,
-                                     SSATmp* prologueCtx) {
+SSATmp* emitClosureParentScope(IRGS& env, const Func* f, SSATmp* prologueCtx) {
   assertx(prologueCtx);
   assertx(f->isClosureBody());
   auto const cls = f->implCls();
@@ -254,8 +253,8 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
       return emitCCThis(env, f, m_types, m_name, prologueCtx);
     case Type::FunParam:
       return emitFunParam(env, f, numArgsInclUnpack, m_index);
-    case Type::ClosureInheritFromParent:
-      return emitClosureInheritFromParent(env, f, prologueCtx);
+    case Type::ClosureParentScope:
+      return emitClosureParentScope(env, f, prologueCtx);
     case Type::GeneratorThis:
       return emitGeneratorThis(env, f, prologueCtx);
     case Type::Caller:

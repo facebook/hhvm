@@ -104,7 +104,7 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
       }
       return folly::sformat("this{}::{}", folly::join("", types), m_name);
     }
-    case Type::ClosureInheritFromParent:
+    case Type::ClosureParentScope:
     case Type::GeneratorThis:
     case Type::Caller:
       return folly::none;
@@ -185,8 +185,8 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
   return error();
 }
 
-RuntimeCoeffects emitClosureInheritFromParent(const Func* f,
-                                              void* prologueCtx) {
+RuntimeCoeffects emitClosureParentScope(const Func* f,
+                                        void* prologueCtx) {
   assertx(prologueCtx);
   assertx(f->isClosureBody());
   auto const closure = reinterpret_cast<c_Closure*>(prologueCtx);
@@ -226,8 +226,8 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
       return emitCCThis(f, m_types, m_name, prologueCtx);
     case Type::FunParam:
       return emitFunParam(f, numArgsInclUnpack, m_index);
-    case Type::ClosureInheritFromParent:
-      return emitClosureInheritFromParent(f, prologueCtx);
+    case Type::ClosureParentScope:
+      return emitClosureParentScope(f, prologueCtx);
     case Type::GeneratorThis:
       return emitGeneratorThis(f, prologueCtx);
     case Type::Caller:
@@ -238,8 +238,8 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
   not_reached();
 }
 
-bool CoeffectRule::isClosureInheritFromParent() const {
-  return m_type == Type::ClosureInheritFromParent;
+bool CoeffectRule::isClosureParentScope() const {
+  return m_type == Type::ClosureParentScope;
 }
 
 bool CoeffectRule::isGeneratorThis() const {
@@ -263,8 +263,8 @@ std::string CoeffectRule::getDirectiveString() const {
       return folly::sformat(".coeffects_cc_this {};",
                             folly::join(" ", names));
     }
-    case Type::ClosureInheritFromParent:
-      return ".coeffects_closure_inherit_from_parent;";
+    case Type::ClosureParentScope:
+      return ".coeffects_closure_parent_scope;";
     case Type::GeneratorThis:
       return ".coeffects_generator_this;";
     case Type::Caller:

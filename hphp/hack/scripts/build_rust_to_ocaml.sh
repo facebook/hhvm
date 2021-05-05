@@ -33,7 +33,7 @@ fi
   trap "[ -e ./Cargo.toml ] && rm ./Cargo.toml" EXIT
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
-  cp ./.cargo/Cargo.toml.ocaml_build ./Cargo.toml && \
+  sed '/\/facebook\//d' ./.cargo/Cargo.toml.ocaml_build > ./Cargo.toml && \
   cargo build \
     $LOCK_FLAG \
     --quiet \

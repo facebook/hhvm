@@ -34,7 +34,7 @@ function dune_build() {
   if [ -e "${HACK_ROOT}/${HACK_SUBDIR}/${TARGET}.rs" ]; then
     export CARGO_TARGET_DIR="${DUNE_BUILD_DIR}/cargo"
     (
-      cp "${HACK_ROOT}/.cargo/Cargo.toml.ocaml_build" "${HACK_ROOT}/Cargo.toml"
+      sed '/\/facebook\//d' "${HACK_ROOT}/.cargo/Cargo.toml.ocaml_build" > "${HACK_ROOT}/Cargo.toml"
       cd "${HACK_ROOT}/${HACK_SUBDIR}"
       "${CARGO}" build --bin "${TARGET}"
       [ -e "${HACK_ROOT}/Cargo.toml" ] && rm "${HACK_ROOT}/Cargo.toml"

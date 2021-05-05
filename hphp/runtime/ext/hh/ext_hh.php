@@ -142,7 +142,9 @@ function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 <<__Native>>
 function ffp_parse_string_native(string $program): string;
 
-function ffp_parse_string(string $program)[]: darray {
+newtype ParseTree = darray;
+
+function ffp_parse_string(string $program)[]: ParseTree {
   $json = ffp_parse_string_native($program);
   // 2048 is MAX_JSON_DEPTH to avoid making a global constant
   return \json_decode($json, true, 2048);

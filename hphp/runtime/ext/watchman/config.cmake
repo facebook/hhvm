@@ -4,6 +4,5 @@ HHVM_DEFINE_EXTENSION("watchman" IMPLICIT
   SYSTEMLIB
     ext_watchman.php
   DEPENDS
-    libFolly
-    libWatchmanClient
+    libwatchmanclient
 )

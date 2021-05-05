@@ -714,7 +714,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     if (it == m_derivedTypeStmts.end()) {
       return m_derivedTypeStmts
           .insert(
-              {{kinds, deriveKinds},
+              {std::make_tuple(kinds, deriveKinds),
                m_db.prepare(
                    getTransitiveDerivedTypesQueryStr(kinds, deriveKinds))})
           .first->second;

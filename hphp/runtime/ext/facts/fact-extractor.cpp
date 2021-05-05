@@ -186,7 +186,9 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
     const std::vector<PathAndHash>& pathsAndHashes) {
 
   folly::CPUThreadPoolExecutor exec{
-      std::min(RuntimeOption::EvalHackCompilerWorkers, pathsAndHashes.size()),
+      std::min(
+          RuntimeOption::EvalHackCompilerWorkers,
+          static_cast<uint64_t>(pathsAndHashes.size())),
       make_thread_factory("FactExtractor")};
 
   // If we defined a fancy memcache Extractor in closed-source code, use that.

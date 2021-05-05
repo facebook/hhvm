@@ -153,3 +153,5 @@ if(NOT PCRE_LIBRARY)
   target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
 endif()
 
+##### --- new style, but only depends on old style --- #####
+add_subdirectory(watchman)

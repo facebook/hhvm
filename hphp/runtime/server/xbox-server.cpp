@@ -245,6 +245,12 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 Resource XboxServer::TaskStart(const String& msg,
                                const String& reqInitDoc /* = "" */,
   ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
+  static auto xboxOverflowCounter =
+    ServiceData::createTimeSeries("xbox_overflow",
+                                  { ServiceData::StatsType::COUNT });
+  static auto xboxQueuedCounter =
+    ServiceData::createTimeSeries("xbox_queued",
+                                  { ServiceData::StatsType::COUNT });
   {
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
@@ -255,6 +261,7 @@ Resource XboxServer::TaskStart(const String& msg,
       auto task = req::make<XboxTask>(msg, reqInitDoc);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
+      xboxQueuedCounter->addValue(1);
 
       Transport *transport = g_context->getTransport();
       if (transport) {
@@ -272,11 +279,16 @@ Resource XboxServer::TaskStart(const String& msg,
       return Resource(std::move(task));
     }
   }
+
+  auto hasXbox = RuntimeOption::XboxServerThreadCount > 0;
   const char* errMsg =
-    (RuntimeOption::XboxServerThreadCount > 0 ?
+    (hasXbox ?
      "Cannot create new Xbox task because the Xbox queue has "
      "reached maximum capacity" :
      "Cannot create new Xbox task because the Xbox is not enabled");
+  if (hasXbox) {
+    xboxOverflowCounter->addValue(1);
+  }
 
   throw_exception(SystemLib::AllocExceptionObject(errMsg));
   return Resource();

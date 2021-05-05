@@ -1,4 +1,5 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -57,14 +58,14 @@ final class Vector implements \MutableVector {
   /** Returns true if the Vector is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool {
+  public readonly function isEmpty()[]: bool {
     return !$this->count();
   }
 
   /** Returns the number of values in the Vector.
    * @return int
    */
-  public function count()[]: int {
+  public readonly function count()[]: int {
     return \count(vec($this));
   }
 
@@ -78,7 +79,7 @@ final class Vector implements \MutableVector {
   /** Returns a Vector built from the keys of this Vector.
    * @return object
    */
-  public function keys()[]: this {
+  public readonly function keys()[]: this {
     return new self($this->toKeysArray());
   }
 
@@ -158,7 +159,7 @@ final class Vector implements \MutableVector {
   <<__Deprecated(
     "Use Vector::containsKey() for key search or Vector::linearSearch() for value search"
   )>>
-  public function contains(mixed $key): bool {
+  public readonly function contains(mixed $key): bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
@@ -172,7 +173,7 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return bool
    */
-  public function containsKey(mixed $key)[]: bool {
+  public readonly function containsKey(mixed $key)[]: bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
@@ -537,7 +538,7 @@ final class Vector implements \MutableVector {
   /** Returns the first key from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  public function firstKey()[]: mixed {
+  public readonly function firstKey()[]: mixed {
     return $this->count() ? 0 : null;
   }
 
@@ -552,7 +553,7 @@ final class Vector implements \MutableVector {
   /** Returns the last key from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  public function lastKey()[]: mixed {
+  public readonly function lastKey()[]: mixed {
     $count = $this->count();
     return $count ? ($count - 1) : null;
   }
@@ -577,7 +578,7 @@ final class Vector implements \MutableVector {
    * @param mixed $search_value
    * @return int
    */
-  public function linearSearch(mixed $search_value)[]: int {
+  public readonly function linearSearch(mixed $search_value)[]: int {
     foreach (vec($this) as $i => $value) {
       if ($value === $search_value) {
         return $i;
@@ -672,14 +673,14 @@ final class ImmVector implements \ConstVector {
   /** Returns true if the ImmVector is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool {
+  public readonly function isEmpty()[]: bool {
     return !$this->count();
   }
 
   /** Returns the number of values in the ImmVector.
    * @return int
    */
-  public function count()[]: int {
+  public readonly function count()[]: int {
     return \count(vec($this));
   }
 
@@ -695,7 +696,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return bool
    */
-  public function containsKey(mixed $key)[]: bool {
+  public readonly function containsKey(mixed $key)[]: bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
@@ -926,7 +927,7 @@ final class ImmVector implements \ConstVector {
    * empty.
    * @return mixed
    */
-  public function firstKey()[]: mixed {
+  public readonly function firstKey()[]: mixed {
     return $this->count() ? 0 : null;
   }
 
@@ -943,7 +944,7 @@ final class ImmVector implements \ConstVector {
    * empty.
    * @return mixed
    */
-  public function lastKey()[]: mixed {
+  public readonly function lastKey()[]: mixed {
     $count = $this->count();
     return $count ? ($count - 1) : null;
   }
@@ -1057,7 +1058,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $search_value
    * @return int
    */
-  public function linearSearch(mixed $search_value)[]: int {
+  public readonly function linearSearch(mixed $search_value)[]: int {
     foreach (vec($this) as $i => $value) {
       if ($value === $search_value) {
         return $i;

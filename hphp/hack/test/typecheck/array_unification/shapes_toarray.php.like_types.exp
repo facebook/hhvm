@@ -2,5 +2,5 @@ File "shapes_toarray.php", line 4, characters 10-28:
 Invalid return type (Typing[4110])
   File "shapes_toarray.php", line 3, characters 40-45:
   Expected `string`
-  File "Shapes.hhi", line 60, characters 15-22:
+  File "Shapes.hhi", line 62, characters 15-22:
   But got `arraykey`

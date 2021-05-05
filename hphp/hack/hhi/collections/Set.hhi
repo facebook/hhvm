@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -174,7 +175,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) containing the values of the
    *           current `Set`.
    */
-  public function keys()[]: Vector<arraykey>;
+  public readonly function keys()[]: Vector<arraykey>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -417,7 +418,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
-  public function firstKey()[]: ?arraykey;
+  public readonly function firstKey()[]: ?arraykey;
 
   /**
    * Returns the last value in the current `Set`.
@@ -437,21 +438,21 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
-  public function lastKey()[]: ?arraykey;
+  public readonly function lastKey()[]: ?arraykey;
 
   /**
    * Checks if the current `Set` is empty.
    *
    * @return - `true` if the current `Set` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Provides the number of elements in the current `Set`.
    *
    * @return - The number of elements in the current `Set`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Remove all the elements from the current `Set`.
@@ -470,7 +471,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - `true` if the specified value is present in the current `Set`;
    *           `false` otherwise.
    */
-  public function contains(arraykey $v)[]: bool;
+  public readonly function contains(arraykey $v)[]: bool;
 
   /**
    * Add the value to the current `Set`.

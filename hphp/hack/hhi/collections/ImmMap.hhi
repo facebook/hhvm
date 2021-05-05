@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -130,7 +131,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * @return - an ImmVector containing, as values, the keys of the current
    *           `ImmMap`.
    */
-  public function keys()[]: ImmVector<Tk>;
+  public readonly function keys()[]: ImmVector<Tk>;
 
   /**
    * Returns an `ImmMap` after an operation has been applied to each value in
@@ -351,7 +352,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * @return - The first key in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  public function firstKey()[]: ?Tk;
+  public readonly function firstKey()[]: ?Tk;
 
   /**
    * Returns the last value in the current `ImmMap`.
@@ -367,21 +368,21 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * @return - The last key in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  public function lastKey()[]: ?Tk;
+  public readonly function lastKey()[]: ?Tk;
 
   /**
    * Checks if the current `ImmMap` is empty.
    *
    * @return - `true` if the current `ImmMap` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Provides the number of elements in the current `ImmMap`.
    *
    * @return - The number of elements in current `ImmMap`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Returns the value at the specified key in the current `ImmMap`.
@@ -423,7 +424,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function contains(mixed $k)[]: bool;
+  public readonly function contains(mixed $k)[]: bool;
 
   /**
    * Determines if the specified key is in the current `ImmMap`.
@@ -437,7 +438,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 
   /**
    * Returns a new `ImmMap` with the keys that are in the current `ImmMap`, but

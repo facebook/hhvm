@@ -1,4 +1,5 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -56,7 +57,7 @@ final class Map implements \MutableMap {
   /** Returns true if the Map is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool {
+  public readonly function isEmpty()[]: bool {
     return !$this->count();
   }
 
@@ -64,7 +65,7 @@ final class Map implements \MutableMap {
    * @return int
    */
   <<__Native>>
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /** Returns an Iterable that produces the key/value Pairs from this Map.
    * @return object
@@ -76,7 +77,7 @@ final class Map implements \MutableMap {
   /** Returns a Vector built from the keys of this Map.
    * @return Vector
    */
-  public function keys()[]: \HH\Vector {
+  public readonly function keys()[]: \HH\Vector {
     $res = vec[];
     foreach (dict($this) as $k => $_) {
       $res[] = $k;
@@ -143,14 +144,14 @@ final class Map implements \MutableMap {
    * @return bool
    */
   <<__Native>>
-  public function contains(mixed $key)[]: bool;
+  public readonly function contains(mixed $key)[]: bool;
 
   /** Returns true if the specified key is present in the Map, false otherwise.
    * @param mixed $key
    * @return bool
    */
   <<__Native>>
-  public function containsKey(mixed $key)[]: bool;
+  public readonly function containsKey(mixed $key)[]: bool;
 
   /** Removes the specified key from this Map.
    * @param mixed $key
@@ -525,7 +526,7 @@ final class Map implements \MutableMap {
    * @return mixed
    */
   <<__Native>>
-  public function firstKey()[]: mixed;
+  public readonly function firstKey()[]: mixed;
 
   /** Returns the last value from this Map, or null if this Map is empty.
    * @return mixed
@@ -537,7 +538,7 @@ final class Map implements \MutableMap {
    * @return mixed
    */
   <<__Native>>
-  public function lastKey()[]: mixed;
+  public readonly function lastKey()[]: mixed;
 
   /** @return string
    */
@@ -586,7 +587,7 @@ final class ImmMap implements \ConstMap {
   /** Returns true if the ImmMap is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool {
+  public readonly function isEmpty()[]: bool {
     return !$this->count();
   }
 
@@ -594,7 +595,7 @@ final class ImmMap implements \ConstMap {
    * @return int
    */
   <<__Native>>
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /** Returns an Iterable that produces the key/value Pairs from this ImmMap.
    * @return object
@@ -606,7 +607,7 @@ final class ImmMap implements \ConstMap {
   /** Returns a ImmVector built from the keys of this ImmMap.
    * @return ImmVector
    */
-  public function keys()[]: \HH\ImmVector {
+  public readonly function keys()[]: \HH\ImmVector {
     $res = vec[];
     foreach (dict($this) as $k => $_) {
       $res[] = $k;
@@ -643,7 +644,7 @@ final class ImmMap implements \ConstMap {
    * @return bool
    */
   <<__Native>>
-  public function contains(mixed $key)[]: bool;
+  public readonly function contains(mixed $key)[]: bool;
 
   /** Returns true if the specified key is present in the ImmMap, false
    * otherwise.
@@ -651,7 +652,7 @@ final class ImmMap implements \ConstMap {
    * @return bool
    */
   <<__Native>>
-  public function containsKey(mixed $key)[]: bool;
+  public readonly function containsKey(mixed $key)[]: bool;
 
   public function toVArray()[]: varray {
     return $this->toValuesArray();
@@ -958,7 +959,7 @@ final class ImmMap implements \ConstMap {
    * @return mixed
    */
   <<__Native>>
-  public function firstKey()[]: mixed;
+  public readonly function firstKey()[]: mixed;
 
   /** Returns the last value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
@@ -970,7 +971,7 @@ final class ImmMap implements \ConstMap {
    * @return mixed
    */
   <<__Native>>
-  public function lastKey()[]: mixed;
+  public readonly function lastKey()[]: mixed;
 
   /** @return string
    */

@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of PHP's predefined functions
@@ -17,12 +18,12 @@
 namespace {
 
 <<__PHPStdLib>>
-function array_key_exists(mixed $key, ?KeyedContainer<arraykey, mixed> $search)[]: bool;
+function array_key_exists(mixed $key, readonly ?KeyedContainer<arraykey, mixed> $search)[]: bool;
 
 <<__PHPStdLib>>
-function array_sum/*<T>*/(/*Container<T>*/ $input)[]/*: num*/;
+function array_sum/*<T>*/(readonly /*Container<T>*/ $input)[]/*: num*/;
 <<__PHPStdLib>>
-function array_product/*<T>*/(/*Container<T>*/ $input)[]/*: num*/;
+function array_product/*<T>*/(readonly /*Container<T>*/ $input)[]/*: num*/;
 
 <<__PHPStdLib>>
 function sort<T as Container<mixed>>(
@@ -104,10 +105,10 @@ function darray<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr)[]: darray<Tk,
 
 function varray<Tv>(Traversable<Tv> $arr)[]: varray<Tv>;
 
-function is_php_array(mixed $input)[]: bool;
+function is_php_array(readonly mixed $input)[]: bool;
 
-function is_vec_or_varray(mixed $input)[]: bool;
+function is_vec_or_varray(readonly mixed $input)[]: bool;
 
-function is_dict_or_darray(mixed $input)[]: bool;
+function is_dict_or_darray(readonly mixed $input)[]: bool;
 
 }

@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -67,7 +68,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @return - an `array` with the integer keys from the current `Pair`.
    */
-  public function toKeysArray()[]: varray<int>;
+  public readonly function toKeysArray()[]: varray<int>;
 
  /**
    * Returns a `Vector` containing the elements of the current `Pair`.
@@ -160,7 +161,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an `ImmVector` containing the integer keys of the current
    *           `Pair` as values.
    */
-  public function keys()[]: ImmVector<int>;
+  public readonly function keys()[]: ImmVector<int>;
 
   /**
    * Returns an `ImmVector` containing the values after an operation has been
@@ -354,7 +355,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @return - 0
    */
-  public function firstKey()[]: int;
+  public readonly function firstKey()[]: int;
 
   /**
    * Returns the last value in the current `Pair`.
@@ -368,9 +369,9 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * The return will always be 1 since a `Pair` only has two keys, 0 and 1.
    *
-   * @return - 0
+   * @return - 1
    */
-  public function lastKey()[]: int;
+  public readonly function lastKey()[]: int;
 
   /**
    * Returns the index of the first element that matches the search value.
@@ -384,21 +385,21 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch(mixed $search_value)[]: int;
+  public readonly function linearSearch(mixed $search_value)[]: int;
 
   /**
    * Returns `false`; a `Pair` cannot be empty.
    *
    * @return - `false`
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Returns 2; a `Pair` always has two values.
    *
    * @return - 2
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Returns an `Iterable` view of the current `Pair`.
@@ -451,7 +452,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           otherwise. This will only return `true` if the provided key is
    *           0 or 1.
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 
   /**
    * Returns an iterator that points to beginning of the current `Pair`.

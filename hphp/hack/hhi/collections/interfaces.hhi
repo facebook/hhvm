@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -20,13 +21,13 @@ interface ConstCollection<+Te> extends HH\Rx\Countable {
    * @return - Returns `true` if the collection is empty; `false`
    *           otherswise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
   /**
    * Get the number of items in the collection. Cannot be negative.
    *
    * @return - Returns the number of items in the collection
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
   /**
    * Get access to the items in the collection. Can be empty.
    *
@@ -116,7 +117,7 @@ interface ConstSetAccess<+Tm as arraykey> {
    *
    * @return - `true` if the value is in the current `Set`; `false` otherwise.
    */
-  public function contains(arraykey $m)[]: bool;
+  public readonly function contains(arraykey $m)[]: bool;
 }
 
 /**
@@ -185,7 +186,7 @@ interface ConstIndexAccess<Tk, +Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 }
 
 /**
@@ -506,7 +507,7 @@ interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
    * @return - The first key in the current `ConstVector`, or `null` if the
    *           current `ConstVector` is empty.
    */
-  public function firstKey()[]: ?int;
+  public readonly function firstKey()[]: ?int;
   /**
    * Returns the last value in the current `ConstVector`.
    *
@@ -520,7 +521,7 @@ interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
    * @return - The last key in the current `ConstVector`, or `null` if the
    *           current `ConstVector` is empty.
    */
-  public function lastKey()[]: ?int;
+  public readonly function lastKey()[]: ?int;
   /**
    * Returns the index of the first element that matches the search value.
    *
@@ -533,7 +534,7 @@ interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch(mixed $search_value)[]: int;
+  public readonly function linearSearch(mixed $search_value)[]: int;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<int, Tv>;
@@ -567,7 +568,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - a `MutableVector` containing the integer keys of the current
    *           `MutableVector`.
    */
-  public function keys()[]: MutableVector<int>;
+  public readonly function keys()[]: MutableVector<int>;
   /**
    * Returns a `MutableVector` containing the values after an operation has been
    * applied to each value in the current `MutableVector`.
@@ -765,7 +766,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - The first key in the current `MutableVector`, or `null` if the
    *           current `MutableVector` is empty.
    */
-  public function firstKey()[]: ?int;
+  public readonly function firstKey()[]: ?int;
   /**
    * Returns the last value in the current `MutableVector`.
    *
@@ -779,7 +780,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - The last key in the current `MutableVector`, or `null` if the
    *           current `MutableVector` is empty.
    */
-  public function lastKey()[]: ?int;
+  public readonly function lastKey()[]: ?int;
   /**
    * Returns the index of the first element that matches the search value.
    *
@@ -792,7 +793,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch(mixed $search_value)[]: int;
+  public readonly function linearSearch(mixed $search_value)[]: int;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<int, Tv>;
@@ -823,7 +824,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
    *
    * @return - a `ConstVector` containing the keys of the current `ConstMap`.
    */
-  public function keys()[]: ConstVector<Tk>;
+  public readonly function keys()[]: ConstVector<Tk>;
   /**
    * Returns a `ConstMap` after an operation has been applied to each value in
    * the current `ConstMap`.
@@ -1031,7 +1032,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
    * @return - The first key in the current `ConstMap`, or `null` if the
    *           `ConstMap` is empty.
    */
-  public function firstKey()[]: ?Tk;
+  public readonly function firstKey()[]: ?Tk;
   /**
    * Returns the last value in the current `ConstMap`.
    *
@@ -1045,7 +1046,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
    * @return - The last key in the current `ConstMap`, or null if the `ConstMap`
    *           is empty.
    */
-  public function lastKey()[]: ?Tk;
+  public readonly function lastKey()[]: ?Tk;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tk, Tv>;
@@ -1079,7 +1080,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * @return - a `MutableVector` containing the keys of the current
    *           `MutableMap`.
    */
-  public function keys()[]: MutableVector<Tk>;
+  public readonly function keys()[]: MutableVector<Tk>;
   /**
    * Returns a `MutableMap` after an operation has been applied to each value
    * in the current `MutableMap`.
@@ -1289,7 +1290,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * @return - The first key in the current `MutableMap`, or `null` if the
    *           `MutableMap` is empty.
    */
-  public function firstKey()[]: ?Tk;
+  public readonly function firstKey()[]: ?Tk;
   /**
    * Returns the last value in the current `MutableMap`.
    *
@@ -1303,7 +1304,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * @return - The last key in the current `MutableMap`, or null if the
    *           `MutableMap` is empty.
    */
-  public function lastKey()[]: ?Tk;
+  public readonly function lastKey()[]: ?Tk;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tk, Tv>;
@@ -1340,7 +1341,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
    * @return - a `ConstVector` (integer-indexed) containing the values of the
    *           current `ConstSet`.
    */
-  public function keys()[]: ConstVector<arraykey>;
+  public readonly function keys()[]: ConstVector<arraykey>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each value in the current `ConstSet`.
@@ -1549,7 +1550,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
    * @return - The first value in the current `ConstSet`, or `null` if the
    *           `ConstSet` is empty.
    */
-  public function firstKey()[]: ?arraykey;
+  public readonly function firstKey()[]: ?arraykey;
   /**
    * Returns the last value in the current `ConstSet`.
    *
@@ -1567,7 +1568,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
    * @return - The last value in the current `ConstSet`, or `null` if the
    *           current `ConstSet` is empty.
    */
-  public function lastKey()[]: ?arraykey;
+  public readonly function lastKey()[]: ?arraykey;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tv, Tv>;
@@ -1605,7 +1606,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @return - a `MutableVector` (integer-indexed) containing the values of the
    *           current `MutableSet`.
    */
-  public function keys()[]: MutableVector<arraykey>;
+  public readonly function keys()[]: MutableVector<arraykey>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each value in the current `MutableSet`.
@@ -1811,7 +1812,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @return - The first value in the current `MutableSet`, or `null` if the
    *           `MutableSet` is empty.
    */
-  public function firstKey()[]: ?arraykey;
+  public readonly function firstKey()[]: ?arraykey;
   /**
    * Returns the last value in the current `MutableSet`.
    *
@@ -1829,7 +1830,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @return - The last value in the current `MutableSet`, or `null` if the
    *           current `MutableSet` is empty.
    */
-  public function lastKey()[]: ?arraykey;
+  public readonly function lastKey()[]: ?arraykey;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tv, Tv>;

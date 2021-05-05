@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -63,14 +64,14 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - `true` if the current `ImmVector` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Returns the number of elements in the current `ImmVector`.
    *
    * @return - The number of elements in the current `ImmVector`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Returns the value at the specified key in the current `ImmVector`.
@@ -108,7 +109,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 
   /**
    * Returns an `array` containing the values from the current `ImmVector`.
@@ -146,7 +147,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch(mixed $search_value)[]: int;
+  public readonly function linearSearch(mixed $search_value)[]: int;
 
   /**
    * Creates an `ImmVector` from the given `Traversable`, or an empty
@@ -291,7 +292,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` containing, as values, the integer keys of the
    *           current `ImmVector`.
    */
-  public function keys()[]: ImmVector<int>;
+  public readonly function keys()[]: ImmVector<int>;
 
   /**
    * Returns an `ImmVector` containing the results of applying an operation to
@@ -525,7 +526,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The first key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
-  public function firstKey()[]: ?int;
+  public readonly function firstKey()[]: ?int;
 
   /**
    * Returns the last value in the current `ImmVector`.
@@ -541,7 +542,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The last key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
-  public function lastKey()[]: ?int;
+  public readonly function lastKey()[]: ?int;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<int, Tv>;

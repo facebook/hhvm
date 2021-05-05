@@ -1,6 +1,6 @@
 File "shape_idx4.php", line 7, characters 15-16:
 Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 35, characters 6-15:
+  File "Shapes.hhi", line 37, characters 6-15:
   Expected `shape(...)`
   File "shape_idx4.php", line 6, characters 15-17:
   But got `int`

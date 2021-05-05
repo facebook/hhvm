@@ -1,4 +1,5 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -151,7 +152,7 @@ function array_flip(
 <<__Native, __IsFoldable>>
 function array_key_exists(
   mixed $key,
-  mixed $search,
+  readonly mixed $search,
 )[]: bool;
 
 /**
@@ -327,7 +328,7 @@ function array_pop(
  */
 <<__Native, __IsFoldable>>
 function array_product(
-  mixed $input,
+  readonly mixed $input,
 )[]: mixed;
 
 /**
@@ -526,7 +527,7 @@ function array_splice(
  */
 <<__Native, __IsFoldable>>
 function array_sum(
-  mixed $input,
+  readonly mixed $input,
 )[]: mixed;
 
 /**

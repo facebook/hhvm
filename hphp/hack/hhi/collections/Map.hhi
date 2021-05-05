@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -159,7 +160,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Vector` containing the keys of the current `Map`.
    */
-  public function keys()[]: Vector<Tk>;
+  public readonly function keys()[]: Vector<Tk>;
 
   /**
    * Returns a `Map` after an operation has been applied to each value in the
@@ -368,7 +369,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The first key in the current `Map`, or `null` if the `Map` is
    *           empty.
    */
-  public function firstKey()[]: ?Tk;
+  public readonly function firstKey()[]: ?Tk;
 
   /**
    * Returns the last value in the current `Map`.
@@ -384,21 +385,21 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The last key in the current `Map`, or `null` if the `Map` is
    *           empty.
    */
-  public function lastKey()[]: ?Tk;
+  public readonly function lastKey()[]: ?Tk;
 
   /**
    * Checks if the current `Map` is empty.
    *
    * @return - `true` if the current `Map` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Provides the number of elements in the current `Map`.
    *
    * @return - The number of elements in the current `Map`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Returns the value at the specified key in the current `Map`.
@@ -491,7 +492,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function contains(mixed $k)[]: bool;
+  public readonly function contains(mixed $k)[]: bool;
 
   /**
    * Determines if the specified key is in the current `Map`.
@@ -505,7 +506,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 
   /**
    * Add a key/value pair to the end of the current `Map`.

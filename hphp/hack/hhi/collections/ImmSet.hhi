@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -58,14 +59,14 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - `true` if the current `ImmSet` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Provides the number of elements in the current `ImmSet`.
    *
    * @return - The number of elements in the current `ImmSet`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Determines if the specified value is in the current `ImmSet`.
@@ -74,7 +75,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - `true` if the specified value is present in the current `ImmSet`;
    *           `false` otherwise.
    */
-  public function contains(arraykey $k)[]: bool;
+  public readonly function contains(arraykey $k)[]: bool;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.
@@ -223,7 +224,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
-  public function keys()[]: ImmVector<arraykey>;
+  public readonly function keys()[]: ImmVector<arraykey>;
 
   /**
    * Returns a lazy, access elements only when needed view of the current
@@ -458,7 +459,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The first value in the current `ImmSet`, or `null` if the
    *           current `ImmSet` is empty.
    */
-  public function firstKey()[]: ?arraykey;
+  public readonly function firstKey()[]: ?arraykey;
 
   /**
    * Returns the last value in the current `ImmSet`.
@@ -480,7 +481,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The last value in the current `ImmSet`, or `null` if the current
    *           `ImmSet` is empty.
    */
-  public function lastKey()[]: ?arraykey;
+  public readonly function lastKey()[]: ?arraykey;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tv, Tv>;

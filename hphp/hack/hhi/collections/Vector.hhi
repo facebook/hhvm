@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -154,7 +155,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *
    * @return - A `Vector` containing the integer keys of the current `Vector`.
    */
-  public function keys()[]: Vector<int>;
+  public readonly function keys()[]: Vector<int>;
 
   /**
    * Returns a `Vector` containing the results of applying an operation to each
@@ -381,7 +382,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - The first key (an integer) in the current `Vector`, or `null` if
    *           the `Vector` is empty.
    */
-  public function firstKey()[]: ?int;
+  public readonly function firstKey()[]: ?int;
 
   /**
    * Returns the last value in the current `Vector`.
@@ -397,21 +398,21 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - The last key (an integer) in the current `Vector`, or `null` if
    *           the `Vector` is empty.
    */
-  public function lastKey()[]: ?int;
+  public readonly function lastKey()[]: ?int;
 
   /**
    * Checks if the current `Vector` is empty.
    *
    * @return - `true` if the current `Vector` is empty; `false` otherwise.
    */
-  public function isEmpty()[]: bool;
+  public readonly function isEmpty()[]: bool;
 
   /**
    * Returns the number of elements in the current `Vector`.
    *
    * @return - The number of elements in the current `Vector`.
    */
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /**
    * Returns the value at the specified key in the current `Vector`.
@@ -498,7 +499,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey(mixed $k)[]: bool;
+  public readonly function containsKey(mixed $k)[]: bool;
 
   /**
    * Appends a value to the end of the current `Vector`, assigning it the next
@@ -668,7 +669,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch(mixed $search_value)[]: int;
+  public readonly function linearSearch(mixed $search_value)[]: int;
 
   /**
    * Shuffles the values of the current `Vector` randomly in place.

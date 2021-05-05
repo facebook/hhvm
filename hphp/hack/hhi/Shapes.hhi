@@ -1,4 +1,6 @@
 <?hh
+<<file:__EnableUnstableFeatures('readonly')>>
+
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -42,7 +44,7 @@ abstract final class Shapes {
    * Similar to array_key_exists, but for shapes.
    */
   public static function keyExists(
-    shape(...) $shape,
+    readonly shape(...) $shape,
     arraykey $index
   )[]: bool;
 

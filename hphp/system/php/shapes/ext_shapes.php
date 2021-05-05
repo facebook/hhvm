@@ -1,4 +1,5 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace HH {
   abstract final class Shapes {
@@ -20,7 +21,7 @@ namespace HH {
     }
 
     public static function keyExists(
-      darray $shape,
+      readonly darray $shape,
       arraykey $index,
     )[]: bool {
       return \array_key_exists($index, $shape);

@@ -1,4 +1,5 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -84,14 +85,14 @@ final class Pair implements \ConstVector {
    *
    * @return - `false`
    */
-  public function isEmpty()[]: bool { return false; }
+  public readonly function isEmpty()[]: bool { return false; }
 
   /**
    * Returns 2; a `Pair` always has two values.
    *
    * @return - 2
    */
-  public function count()[]: int { return 2; }
+  public readonly function count()[]: int { return 2; }
 
   /**
    * Returns an `Iterable` view of the current `Pair`.
@@ -115,7 +116,7 @@ final class Pair implements \ConstVector {
    * @return - an `ImmVector` containing the integer keys of the current
    *           `Pair` as values.
    */
-  public function keys()[]: ImmVector<int> {
+  public readonly function keys()[]: ImmVector<int> {
     return ImmVector { 0, 1 };
   }
 
@@ -529,7 +530,7 @@ final class Pair implements \ConstVector {
    *
    * @return - 0
    */
-  public function firstKey()[]: int { return 0; }
+  public readonly function firstKey()[]: int { return 0; }
 
   /**
    * Returns the last value in the current `Pair`.
@@ -545,7 +546,7 @@ final class Pair implements \ConstVector {
    *
    * @return - 0
    */
-  public function lastKey()[]: int { return 1; }
+  public readonly function lastKey()[]: int { return 1; }
 
   /**
    * Returns the value at the specified key in the current `Pair`.
@@ -590,7 +591,7 @@ final class Pair implements \ConstVector {
    *           otherwise. This will only return `true` if the provided key is
    *           0 or 1.
    */
-  public function containsKey<Tu super int>(Tu $key)[]: bool {
+  public readonly function containsKey<Tu super int>(Tu $key)[]: bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Pairs"

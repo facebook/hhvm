@@ -1,6 +1,6 @@
 Errors:
   [3:14-17] Wrong number of type arguments (expected 2, got 0)
-  [54:13-16] Definition is here
+  [55:13-16] Definition is here
 [(Fun
     { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), None); 

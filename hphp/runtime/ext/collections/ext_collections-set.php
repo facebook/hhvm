@@ -1,4 +1,5 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
@@ -100,7 +101,7 @@ final class Set implements \MutableSet {
    * @return bool
    */
   <<__Native>>
-  public function contains(mixed $val)[]: bool;
+  public readonly function contains(mixed $val)[]: bool;
 
   /** Removes the specified value from this Set.
    * @param mixed $val
@@ -379,7 +380,7 @@ final class Set implements \MutableSet {
   /** Returns the first key from this Set, or null if this Vector is empty.
    * @return mixed
    */
-  public function firstKey()[] {
+  public readonly function firstKey()[] {
     return $this->firstValue();
   }
 
@@ -392,7 +393,7 @@ final class Set implements \MutableSet {
   /** Returns the last key from this Set, or null if this Set is empty.
    * @return mixed
    */
-  public function lastKey()[] {
+  public readonly function lastKey()[] {
     return $this->lastValue();
   }
 
@@ -723,7 +724,7 @@ final class ImmSet implements \ConstSet {
   /** Returns the first key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  public function firstKey()[] {
+  public readonly function firstKey()[] {
     return $this->firstValue();
   }
 
@@ -736,7 +737,7 @@ final class ImmSet implements \ConstSet {
   /** Returns the last key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  public function lastKey()[] {
+  public readonly function lastKey()[] {
     return $this->lastValue();
   }
 

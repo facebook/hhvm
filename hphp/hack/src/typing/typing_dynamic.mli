@@ -35,7 +35,14 @@ val sound_dynamic_interface_check :
 val sound_dynamic_interface_check_from_fun_ty :
   Typing_env_types.env -> Typing_defs.decl_ty Typing_defs.fun_type -> bool
 
-(* auxiliary function to build a dyn..dyn->dyn function type *)
-val build_dyn_fun_ty :
-  Typing_defs.locl_ty Typing_defs.fun_type ->
-  Typing_defs.locl_ty Typing_defs.fun_type
+(* given a tfun type t1..tn -> t this returns
+ * - t1..tn -> t  if bool is false or if env says that we
+ *                are not typechecking a supportDynamicType body check
+ *  - t1..tn -> t & dyn1..dynn -> dyn  otherwise
+ *)
+val relax_method_type :
+  Typing_env_types.env ->
+  bool ->
+  Typing_reason.decl_t ->
+  Typing_defs.locl_ty Typing_defs_core.fun_type ->
+  Typing_defs.locl_ty

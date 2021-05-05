@@ -485,22 +485,12 @@ let rec obj_get_concrete_ty
                       ft)
                 in
                 let ft_ty1 =
-                  let lr = Typing_reason.localize r in
-                  if
-                    Typing_env_types.(env.in_support_dynamic_type_method_check)
-                    && ( get_ce_support_dynamic_type member_ce
-                       || Cls.get_support_dynamic_type class_info )
-                  then
-                    mk
-                      ( Typing_reason.Rsupport_dynamic_type
-                          (Typing_reason.to_pos r),
-                        Tintersection
-                          [
-                            mk (lr, Tfun ft1);
-                            mk (lr, Tfun (Typing_dynamic.build_dyn_fun_ty ft1));
-                          ] )
-                  else
-                    mk (lr, Tfun ft1)
+                  Typing_dynamic.relax_method_type
+                    env
+                    ( Cls.get_support_dynamic_type class_info
+                    || get_ce_support_dynamic_type member_ce )
+                    r
+                    ft1
                 in
                 let (env, ft_ty) =
                   if widen_this then

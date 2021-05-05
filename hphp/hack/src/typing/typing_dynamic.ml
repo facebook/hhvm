@@ -106,3 +106,12 @@ let build_dyn_fun_ty ft_ty =
     ft_flags = ft_ty.ft_flags;
     ft_ifc_decl = ft_ty.ft_ifc_decl;
   }
+
+let relax_method_type env relax r ft =
+  let lr = Typing_reason.localize r in
+  if Typing_env_types.(env.in_support_dynamic_type_method_check) && relax then
+    mk
+      ( Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r),
+        Tintersection [mk (lr, Tfun ft); mk (lr, Tfun (build_dyn_fun_ty ft))] )
+  else
+    mk (lr, Tfun ft)

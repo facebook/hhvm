@@ -918,18 +918,11 @@ let fun_type_of_id env x tal el =
             ft)
       in
       let fty =
-        let r = get_reason fe_type |> Typing_reason.localize in
-        if env.in_support_dynamic_type_method_check && fe_support_dynamic_type
-        then
-          mk
-            ( Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r),
-              Tintersection
-                [
-                  mk (r, Tfun ft);
-                  mk (r, Tfun (Typing_dynamic.build_dyn_fun_ty ft));
-                ] )
-        else
-          mk (r, Tfun ft)
+        Typing_dynamic.relax_method_type
+          env
+          fe_support_dynamic_type
+          (get_reason fe_type)
+          ft
       in
       TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
       (env, fty, tal)
@@ -6495,7 +6488,14 @@ and class_get_inner
                     env
                     ft)
               in
-              let fty = mk (Typing_reason.localize r, Tfun ft) in
+              let fty =
+                Typing_dynamic.relax_method_type
+                  env
+                  ( Cls.get_support_dynamic_type class_
+                  || get_ce_support_dynamic_type ce )
+                  r
+                  ft
+              in
               (env, fty, Unenforced, explicit_targs)
             (* unused *)
             | _ ->

@@ -1198,6 +1198,9 @@ void Unit::mergeImpl(MergeInfo* mi) {
     m_mergeState.fetch_and(~MergeState::NeedsCompact,
                            std::memory_order_relaxed);
   } else {
+    // Reload mergeInfo because some other thread may have done the compact work
+    // while we did merging
+    mi = mergeInfo();
     // If the file was empty to start with we just want to mark merge state empty
     if (mi->m_mergeablesSize == 0) {
       m_mergeState.fetch_or(MergeState::Empty, std::memory_order_relaxed);

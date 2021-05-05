@@ -699,6 +699,8 @@ const StaticString
   s_idx("idx"),
   s_keyExists("keyExists");
 
+// If this call is to a layout-sensitive callee, returns it. Does not do any
+// validation of e.g. whether we can inline the callee.
 folly::Optional<LayoutSensitiveCall>
 getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   if (sk.op() != Op::FCallClsMethodD) return folly::none;
@@ -715,12 +717,15 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   return folly::none;
 }
 
-bool canSpecializeCall(const IRGS& env, SrcKey sk, LayoutSensitiveCall call) {
+// If this call is layout-sensitive and we can specialize it, returns a pair
+// of locations to guard: {arr, key}. Otherwise, returns an empty vector.
+jit::vector<Location> guardsForLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
+  auto const call = getLayoutSensitiveCall(env, sk);
+  if (!call) return {};
   auto const fca = getImm(sk.pc(), 0).u_FCA;
-  FTRACE_MOD(Trace::hhir, 3, "Analyzing layout-sensitive call:\n");
 
-  if (fca.numRets != 1) return false;
-  if (fca.hasGenerics() || fca.hasUnpack()) return false;
+  if (fca.numRets != 1) return {};
+  if (fca.hasGenerics() || fca.hasUnpack()) return {};
 
   auto const hasInOut = [&]{
     if (!fca.enforceInOut()) return false;
@@ -729,20 +734,30 @@ bool canSpecializeCall(const IRGS& env, SrcKey sk, LayoutSensitiveCall call) {
     }
     return false;
   }();
-
-  if (hasInOut) return false;
+  if (hasInOut) return {};
 
   auto const numArgsOkay = [&]{
     if (fca.numRets != 1) return false;
     auto const is_shapes_idx = call == LayoutSensitiveCall::ShapesIdx;
     return fca.numArgs == 2 || (fca.numArgs == 3 && is_shapes_idx);
   }();
-
-  if (!numArgsOkay) return false;
+  if (!numArgsOkay) return {};
 
   auto const numArgs = safe_cast<int32_t>(fca.numArgs);
   auto const al = Location::Stack{env.irb->fs().bcSPOff() - numArgs + 1};
   auto const kl = Location::Stack{env.irb->fs().bcSPOff() - numArgs + 2};
+  return {al, kl};
+}
+
+// Check if we can specialize a layout-sensitive call. This method does all
+// checks on param counts, inouts, generics, etc. needed to allow inlining.
+bool canSpecializeCall(const IRGS& env, SrcKey sk) {
+  auto const locations = guardsForLayoutSensitiveCall(env, sk);
+  if (locations.empty()) return false;
+
+  assertx(locations.size() == 2);
+  auto const al = locations[0];
+  auto const kl = locations[1];
   auto const arr = env.irb->typeOf(al, DataTypeSpecific);
   auto const key = env.irb->typeOf(kl, DataTypeSpecific);
   FTRACE_MOD(Trace::hhir, 3, "Guarded arguments of layout-sensitive call:\n"
@@ -836,8 +851,7 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     }
 
     case Op::FCallClsMethodD: {
-      auto const call = getLayoutSensitiveCall(env, sk);
-      if (!call || !canSpecializeCall(env, sk, *call)) return folly::none;
+      if (!canSpecializeCall(env, sk)) return folly::none;
       auto const numArgs = safe_cast<int32_t>(getImm(sk.pc(), 0).u_FCA.numArgs);
       return {Location::Stack{soff - numArgs + 1}};
     }
@@ -1256,6 +1270,11 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+jit::vector<Location> guardsForBespoke(const IRGS& env, SrcKey sk) {
+  if (!allowBespokeArrayLikes()) return {};
+  return guardsForLayoutSensitiveCall(env, sk);
+}
 
 void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni,
                               std::function<void(IRGS&)> emitVanilla) {

@@ -26,6 +26,13 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Any extra locations that we should guard for a layout-sensitive bytecode.
+ * Right now, this method only considers FCall bytecodes, because all other
+ * layout-sensitive bytecodes already guard their inputs to DataTypeSpecific.
+ */
+jit::vector<Location> guardsForBespoke(const IRGS& env, SrcKey sk);
+
+/*
  * If this bytecode is a bespoke array source or sink, this dispatch method
  * will hijack irgen and emit bespoke IR (possibly in addition to vanilla IR).
  *
@@ -39,4 +46,3 @@ void translateDispatchBespoke(IRGS&, const NormalizedInstruction&,
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
-

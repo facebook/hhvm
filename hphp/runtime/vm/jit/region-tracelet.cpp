@@ -185,7 +185,11 @@ bool prepareInstruction(Env& env) {
   new (&env.inst) NormalizedInstruction(env.sk, curUnit(env));
   irgen::prepareForNextHHBC(env.irgs, env.sk);
 
-  auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
+  auto inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
+  for (auto const loc : irgen::guardsForBespoke(env.irgs, env.sk)) {
+    FTRACE(1, "prepareInstruction: adding bespoke guard: {}\n", show(loc));
+    inputInfos.emplace_back(loc);
+  }
 
   auto const op = env.inst.op();
   auto& fs = env.irgs.irb->fs();

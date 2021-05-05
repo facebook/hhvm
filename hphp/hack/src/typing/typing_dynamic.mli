@@ -6,6 +6,9 @@
  *
  *)
 
+val add_require_dynamic_bounds :
+  Typing_env_types.env -> Decl_provider.class_decl -> Typing_env_types.env
+
 val check_property_sound_for_dynamic_read :
   on_error:('a -> 'b -> 'c -> Pos_or_decl.t * string -> unit) ->
   Typing_env_types.env ->

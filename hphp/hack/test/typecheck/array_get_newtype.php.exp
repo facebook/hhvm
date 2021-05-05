@@ -1,24 +1,24 @@
 File "array_get_newtype.php--file1.php", line 3, characters 20-39:
 Some type constraint(s) here are violated (Typing[4323])
-  File "hackarray.hhi", line 23, characters 28-29:
+  File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 23, characters 34-41:
+  File "hackarray.hhi", line 24, characters 34-41:
   Expected `arraykey`
   File "array_get_newtype.php--file1.php", line 3, characters 27-31:
   But got `mixed`
 File "array_get_newtype.php--file2.php", line 2, characters 12-18:
 Some type constraint(s) here are violated (Typing[4323])
-  File "hackarray.hhi", line 23, characters 28-29:
+  File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 23, characters 34-41:
+  File "hackarray.hhi", line 24, characters 34-41:
   Expected `arraykey`
   File "array_get_newtype.php--file1.php", line 3, characters 27-31:
   But got `mixed`
 File "array_get_newtype.php--file2.php", line 2, characters 25-31:
 Some type constraint(s) here are violated (Typing[4323])
-  File "hackarray.hhi", line 23, characters 28-29:
+  File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 23, characters 34-41:
+  File "hackarray.hhi", line 24, characters 34-41:
   Expected `arraykey`
   File "array_get_newtype.php--file1.php", line 3, characters 27-31:
   But got `mixed`

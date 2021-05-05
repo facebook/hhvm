@@ -2,23 +2,23 @@ File "variadic_not_indexed.php", line 16, characters 35-37:
 No instance method `foo` in `vec` (Typing[4053])
   File "variadic_not_indexed.php", line 16, characters 23-24:
   This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Declaration of `vec` is here
 File "variadic_not_indexed.php", line 17, characters 37-39:
 No instance method `foo` in `vec` (Typing[4053])
   File "variadic_not_indexed.php", line 17, characters 25-26:
   This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Declaration of `vec` is here
 File "variadic_not_indexed.php", line 19, characters 29-31:
 No instance method `foo` in `vec` (Typing[4053])
   File "variadic_not_indexed.php", line 19, characters 17-18:
   This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Declaration of `vec` is here
 File "variadic_not_indexed.php", line 20, characters 31-33:
 No instance method `foo` in `vec` (Typing[4053])
   File "variadic_not_indexed.php", line 20, characters 19-20:
   This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Declaration of `vec` is here

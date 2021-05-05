@@ -1,16 +1,16 @@
 File "dict.php", line 4, characters 9-12:
 Wrong number of type arguments (expected 2, got 0) (Typing[4101])
-  File "hackarray.hhi", line 23, characters 22-25:
+  File "hackarray.hhi", line 24, characters 22-25:
   Definition is here
 File "dict.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "dict.php", line 22, characters 28-30:
   Expected `int`
-  File "hackarray.hhi", line 23, characters 34-41:
+  File "hackarray.hhi", line 24, characters 34-41:
   But got `arraykey`
 File "dict.php", line 12, characters 16-17:
 Invalid argument (Typing[4110])
   File "dict.php", line 22, characters 28-30:
   Expected `int`
-  File "hackarray.hhi", line 23, characters 34-41:
+  File "hackarray.hhi", line 24, characters 34-41:
   But got `arraykey`

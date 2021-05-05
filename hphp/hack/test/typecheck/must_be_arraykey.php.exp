@@ -1,8 +1,8 @@
 File "must_be_arraykey.php", line 5, characters 14-22:
 Some type constraint(s) here are violated (Typing[4323])
-  File "hackarray.hhi", line 24, characters 30-30:
+  File "hackarray.hhi", line 26, characters 30-30:
   `T` is a constrained type parameter
-  File "hackarray.hhi", line 24, characters 35-42:
+  File "hackarray.hhi", line 26, characters 35-42:
   Expected `arraykey`
   File "must_be_arraykey.php", line 5, characters 21-21:
   But got `I`

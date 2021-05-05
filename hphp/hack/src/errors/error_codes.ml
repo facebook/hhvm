@@ -626,6 +626,7 @@ module Typing = struct
     | TypeconstConcreteConcreteOverride [@value 4430]
     | PrivateMethCaller [@value 4431]
     | ProtectedMethCaller [@value 4432]
+    | BadConditionalSupportDynamic [@value 4433]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

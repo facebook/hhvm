@@ -5566,6 +5566,18 @@ let cyclic_class_constant pos class_name constant_name =
       ^ strip_ns class_name )
     []
 
+let bad_conditional_support_dynamic pos ~child ~parent statement reasons =
+  add_list
+    (Typing.err_code Typing.BadConditionalSupportDynamic)
+    ( pos,
+      "Class "
+      ^ strip_ns child
+      ^ " must support dynamic at least as often as "
+      ^ strip_ns parent
+      ^ ":\n"
+      ^ statement )
+    reasons
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

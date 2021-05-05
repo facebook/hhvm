@@ -12,6 +12,7 @@ type kind = {
   reified: Aast.reify_kind;
   enforceable: bool;
   newable: bool;
+  require_dynamic: bool;
   parameters: named_kind list;
 }
 
@@ -96,6 +97,7 @@ module Simple = struct
         reified;
         enforceable;
         newable;
+        require_dynamic = false;
         parameters = [];
       },
       NonLocalized [] )

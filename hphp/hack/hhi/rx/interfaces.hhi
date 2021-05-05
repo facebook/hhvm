@@ -638,5 +638,6 @@ interface KeyedIterable<Tk, +Tv>
 }
 
 interface Countable extends \Countable {
+  <<__SupportDynamicType>>
   public function count()[]: int;
 }

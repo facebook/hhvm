@@ -331,47 +331,6 @@ let remove_partial_enforcement subtype_env =
     { subtype_env with coerce = Some TL.CoerceToDynamic }
   | _ -> subtype_env
 
-let cov_dict_style =
-  ( DictStyle,
-    [(Ast_defs.Covariant, Aast.Erased); (Ast_defs.Covariant, Aast.Erased)] )
-
-let inv_dict_style =
-  ( DictStyle,
-    [(Ast_defs.Invariant, Aast.Erased); (Ast_defs.Invariant, Aast.Erased)] )
-
-let cov_map_style =
-  ( DictStyle,
-    [(Ast_defs.Invariant, Aast.Erased); (Ast_defs.Covariant, Aast.Erased)] )
-
-let cov_vec_style = (VecStyle, [(Ast_defs.Covariant, Aast.Erased)])
-
-let inv_vec_style = (VecStyle, [(Ast_defs.Invariant, Aast.Erased)])
-
-let cov_keyset_style = (KeysetStyle, [(Ast_defs.Covariant, Aast.Erased)])
-
-let inv_keyset_style = (KeysetStyle, [(Ast_defs.Invariant, Aast.Erased)])
-
-(* Special classes that subtype dynamic depending on their type arguments *)
-let dynamic_collection_types =
-  SMap.of_list
-    Naming_special_names.Collections.
-      [
-        (Naming_special_names.Classes.cAwaitable, cov_vec_style);
-        (cAnyArray, cov_dict_style);
-        (cVec, cov_vec_style);
-        (cDict, cov_dict_style);
-        (cKeyset, cov_keyset_style);
-        (cImmVector, cov_vec_style);
-        (cMutableVector, inv_vec_style);
-        (cVector, inv_vec_style);
-        (cImmMap, cov_map_style);
-        (cMutableMap, inv_dict_style);
-        (cMap, inv_dict_style);
-        (cImmSet, cov_keyset_style);
-        (cMutableSet, inv_keyset_style);
-        (cSet, inv_keyset_style);
-      ]
-
 let describe_ty_default env ty =
   Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns_i env ty)
 
@@ -1344,7 +1303,7 @@ and simplify_subtype_i
             | Taccess _ ) ) ->
           valid env
         | _ -> default_subtype env))
-    | (_, Tdynamic)
+    | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && coercing_to_dynamic subtype_env ->
       (match ety_sub with
@@ -1400,7 +1359,7 @@ and simplify_subtype_i
             ~f:(fun res sft ->
               res &&& simplify_subtype ~subtype_env sft.sft_ty ty_super)
             (TShapeMap.values sftl)
-        | (_, Tclass ((_, class_id), _, tyargs)) ->
+        | (_, Tclass (((_, class_id) as class_name), exact, tyargs)) ->
           let class_def_sub = Typing_env.get_class env class_id in
           (match class_def_sub with
           | None ->
@@ -1408,35 +1367,53 @@ and simplify_subtype_i
             valid env
           | Some class_sub ->
             if Cls.get_support_dynamic_type class_sub then
-              valid env
+              let rec replaceArgs tparams tyargs env =
+                match (tparams, tyargs) with
+                | ([], tyargs) -> tyargs
+                | (_, []) -> []
+                | (tp :: tparams, tyarg :: tyargs) ->
+                  let require_dynamic =
+                    not
+                      (Attributes.mem
+                         SN.UserAttributes.uaNoRequireDynamic
+                         tp.tp_user_attributes)
+                  in
+                  ( if require_dynamic then
+                    let upper_bounds =
+                      List.filter_map tp.tp_constraints (fun (c, ty) ->
+                          match c with
+                          | Ast_defs.Constraint_as ->
+                            let (_env, ty) =
+                              Phase.localize_with_self
+                                env
+                                ~ignore_errors:true
+                                ty
+                            in
+                            Some ty
+                          | _ -> None)
+                    in
+                    MakeType.intersection r_dynamic (ty_super :: upper_bounds)
+                  else
+                    tyarg )
+                  :: replaceArgs tparams tyargs env
+              in
+              (* If the class is marked <<__SupportDynamicType>> then for any
+               * type parameters not marked <<__NoRequireDynamic>> then the class does not
+               * unconditionally implement dynamic, but rather we must check that
+               * it is a subtype of the same type whose corresponding type arguments
+               * are replaced by dynamic, intersected with the parameter's upper bounds.
+               *
+               * For example, to check dict<int,float> <: dynamic
+               * we check dict<int,float> <: dict<arraykey,dynamic>
+               * which in turn requires int <: arraykey and float <: dynamic.
+               *)
+              let superargs = replaceArgs (Cls.tparams class_sub) tyargs env in
+              let super =
+                mk (r_dynamic, Tclass (class_name, exact, superargs))
+              in
+              env |> simplify_subtype ~subtype_env lty_sub super
             else
-              let class_name = Cls.name class_sub in
-              (match SMap.find_opt class_name dynamic_collection_types with
-              | Some (DictStyle, variance_reified_l) ->
-                simplify_subtype_variance
-                  ~subtype_env
-                  class_name
-                  variance_reified_l
-                  tyargs
-                  [MakeType.arraykey (get_reason ty_super); ty_super]
-                  env
-              | Some (VecStyle, variance_reified_l) ->
-                simplify_subtype_variance
-                  ~subtype_env
-                  class_name
-                  variance_reified_l
-                  tyargs
-                  [ty_super]
-                  env
-              | Some (KeysetStyle, variance_reified_l) ->
-                simplify_subtype_variance
-                  ~subtype_env
-                  class_name
-                  variance_reified_l
-                  tyargs
-                  [MakeType.arraykey (get_reason ty_super)]
-                  env
-              | None -> default_subtype env))))
+              default_subtype env)))
     | (_, Tdynamic) ->
       (match ety_sub with
       | LoclType lty when is_dynamic lty -> valid env
@@ -3252,7 +3229,11 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:(make_subtype_env ~ignore_generic_params:true on_error)
+      ~subtype_env:
+        (make_subtype_env
+           ~coerce:(Some TL.CoerceToDynamic)
+           ~ignore_generic_params:true
+           on_error)
       ~this_ty:None
       ty_sub
       ty_super
@@ -3269,6 +3250,8 @@ and decompose_subtype_add_prop env prop =
   | TL.Disj _ ->
     Typing_log.log_prop 2 env.function_pos "decompose_subtype_add_prop" env prop;
     env
+  | TL.Coerce (TL.CoerceToDynamic, ty1, ty2) ->
+    decompose_subtype_add_bound env ty1 ty2
   | TL.Coerce _ -> failwith "Coercions should have been resolved beforehand"
   | TL.IsSubtype (LoclType ty1, LoclType ty2) ->
     decompose_subtype_add_bound env ty1 ty2

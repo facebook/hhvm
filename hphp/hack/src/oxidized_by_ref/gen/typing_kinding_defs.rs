@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<223e79ebc7b8c988337005fcdc7c785c>>
+// @generated SignedSource<<0f68c67ea368c6176203ff7570ce0f23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,6 +42,7 @@ pub struct Kind<'a> {
     pub reified: oxidized::aast::ReifyKind,
     pub enforceable: bool,
     pub newable: bool,
+    pub require_dynamic: bool,
     pub parameters: &'a [&'a NamedKind<'a>],
 }
 impl<'a> TrivialDrop for Kind<'a> {}

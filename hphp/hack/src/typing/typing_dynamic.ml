@@ -9,11 +9,34 @@
 
 open Hh_prelude
 open Typing_defs
+module Env = Typing_env
+module SN = Naming_special_names
 module Reason = Typing_reason
 
-let is_dynamic_decl ty =
+(* Add `dynamic` lower and upper bound to any type parameters that are not marked <<__NoRequireDynamic>> *)
+let add_require_dynamic_bounds env cls =
+  List.fold_left (Decl_provider.Class.tparams cls) ~init:env ~f:(fun env tp ->
+      let require_dynamic =
+        not
+          (Attributes.mem
+             SN.UserAttributes.uaNoRequireDynamic
+             tp.tp_user_attributes)
+      in
+      if require_dynamic then
+        let dtype =
+          Typing_make_type.dynamic (Reason.Rwitness_from_decl (fst tp.tp_name))
+        in
+        Env.add_upper_bound
+          (Env.add_lower_bound env (snd tp.tp_name) dtype)
+          (snd tp.tp_name)
+          dtype
+      else
+        env)
+
+let is_dynamic_decl env ty =
   match get_node ty with
   | Tdynamic -> true
+  | Tgeneric (name, _) when Typing_env.get_require_dynamic env name -> true
   | _ -> false
 
 (* Check that a property type is a subtype of dynamic *)
@@ -37,7 +60,7 @@ let check_property_sound_for_dynamic_write ~on_error env classname id ty =
   (* If the property tyoe isn't enforceable, but is just dynamic,
      then the property will still be safe to write via a receiver expression of type
      dynamic. *)
-  if not (te_check || is_dynamic_decl ty) then
+  if not (te_check || is_dynamic_decl env ty) then
     on_error
       (fst id)
       (snd id)
@@ -53,7 +76,8 @@ let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
           (* If a parameter isn't enforceable, but is just typed as dynamic,
              the method will still be safe to call via a receiver expression of type
              dynamic. *)
-          Typing_enforceability.is_enforceable env dty || is_dynamic_decl dty
+          Typing_enforceability.is_enforceable env dty
+          || is_dynamic_decl env dty
         | None -> true)
   in
   let coercible_return_type =

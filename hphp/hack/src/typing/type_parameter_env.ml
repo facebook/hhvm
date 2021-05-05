@@ -120,6 +120,11 @@ let get_newable tpenv name =
   | None -> false
   | Some { newable; _ } -> newable
 
+let get_require_dynamic tpenv name =
+  match get name tpenv with
+  | None -> false
+  | Some { require_dynamic; _ } -> require_dynamic
+
 let get_pos tpenv name =
   match get_with_pos name tpenv with
   | None -> Pos_or_decl.none
@@ -154,6 +159,7 @@ let add_upper_bound_ tpenv name ty =
             reified = Aast.Erased;
             enforceable = false;
             newable = false;
+            require_dynamic = false;
             parameters = [];
           } )
       | Some (pos, tp) ->
@@ -177,6 +183,7 @@ let add_lower_bound_ tpenv name ty =
             reified = Aast.Erased;
             enforceable = false;
             newable = false;
+            require_dynamic = false;
             parameters = [];
           } )
       | Some (pos, tp) ->
@@ -222,11 +229,20 @@ let add_upper_bound ?intersect env_tpenv name ty =
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
+    let require_dynamic = get_require_dynamic env_tpenv name in
     let parameters = [] in
     add
       ~def_pos
       name
-      { lower_bounds; upper_bounds; reified; enforceable; newable; parameters }
+      {
+        lower_bounds;
+        upper_bounds;
+        reified;
+        enforceable;
+        newable;
+        require_dynamic;
+        parameters;
+      }
       tpenv
 
 (* Add a single new upper lower [ty] to generic parameter [name] in the
@@ -258,11 +274,20 @@ let add_lower_bound ?union env_tpenv name ty =
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
+    let require_dynamic = get_require_dynamic env_tpenv name in
     let parameters = [] in
     add
       ~def_pos
       name
-      { lower_bounds; upper_bounds; reified; enforceable; newable; parameters }
+      {
+        lower_bounds;
+        upper_bounds;
+        reified;
+        enforceable;
+        newable;
+        require_dynamic;
+        parameters;
+      }
       tpenv
 
 let remove_upper_bound tpenv name bound =
@@ -314,6 +339,10 @@ let add_generic_parameters tpenv tparaml =
     let newable =
       Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
+    let require_dynamic =
+      not
+        (Attributes.mem SN.UserAttributes.uaNoRequireDynamic tp_user_attributes)
+    in
     let nested_params =
       List.map tp_tparams ~f:(fun tp -> (tp.tp_name, make_param_info tp))
     in
@@ -324,6 +353,7 @@ let add_generic_parameters tpenv tparaml =
       reified = ast_tparam.tp_reified;
       enforceable;
       newable;
+      require_dynamic;
       parameters = nested_params;
     }
   in

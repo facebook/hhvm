@@ -1,4 +1,4 @@
 File "function_async_partial.php", line 4, characters 23-31:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "classes.hhi", line 138, characters 16-24:
+  File "classes.hhi", line 141, characters 16-24:
   Definition is here

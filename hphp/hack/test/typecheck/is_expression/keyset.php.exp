@@ -1,16 +1,16 @@
 File "keyset.php", line 4, characters 13-18:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 24, characters 22-27:
+  File "hackarray.hhi", line 26, characters 22-27:
   Definition is here
 File "keyset.php", line 6, characters 20-21:
 Invalid argument (Typing[4110])
   File "keyset.php", line 25, characters 32-37:
   Expected `string`
-  File "hackarray.hhi", line 24, characters 35-42:
+  File "hackarray.hhi", line 26, characters 35-42:
   But got `arraykey`
 File "keyset.php", line 13, characters 20-21:
 Invalid argument (Typing[4110])
   File "keyset.php", line 25, characters 32-37:
   Expected `string`
-  File "hackarray.hhi", line 24, characters 35-42:
+  File "hackarray.hhi", line 26, characters 35-42:
   But got `arraykey`

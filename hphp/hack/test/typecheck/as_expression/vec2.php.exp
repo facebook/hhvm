@@ -1,6 +1,6 @@
 File "vec2.php", line 12, characters 30-32:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Definition is here
 File "vec2.php", line 13, characters 15-32:
 Invalid argument (Typing[4110])
@@ -10,7 +10,7 @@ Invalid argument (Typing[4110])
   But got `mixed` from this "as" assertion
 File "vec2.php", line 13, characters 30-32:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Definition is here
 File "vec2.php", line 16, characters 15-35:
 Invalid argument (Typing[4110])

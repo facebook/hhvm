@@ -51,7 +51,7 @@ namespace HH {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
-
+<<__SupportDynamicType>>
 final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
   /**
    * Creates a `Map` from the given `KeyedTraversable`, or an empty `Map` if

@@ -1,7 +1,7 @@
 <?hh
 
 <<__SupportDynamicType>>
-class C<reify T> {}
+class C<<<__NoRequireDynamic>> reify T> {}
 
 function expect_dynamic(dynamic $d) : void {}
 

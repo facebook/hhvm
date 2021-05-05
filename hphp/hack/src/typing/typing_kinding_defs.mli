@@ -18,8 +18,13 @@ type kind = {
   lower_bounds: tparam_bounds;
   upper_bounds: tparam_bounds;
   reified: Aast.reify_kind;
+      (** = Reified if generic parameter is marked `reify`, = Erased otherwise *)
   enforceable: bool;
-  newable: bool;
+      (** Set if generic parameter has attribute <<__Enforceable>> *)
+  newable: bool;  (** Set if generic parameter has attribute <<__Newable>> *)
+  require_dynamic: bool;
+      (** Set if class is marked <<__SupportDynamicType>> and
+          generic parameter does *not* have attribute <<__NoRequireDynamic>> *)
   parameters: named_kind list;
 }
 

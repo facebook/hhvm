@@ -1,6 +1,6 @@
 <?hh
 
-class C<reify T> {}
+class C<<<__NoRequireDynamic>> reify T> {}
 
 function expect_Cdyn(C<dynamic> $c) : void { }
 

@@ -1,0 +1,8 @@
+File "generic_params_2.bad.php", line 10, characters 16-29:
+Invalid argument (Typing[4110])
+  File "generic_params_2.bad.php", line 5, characters 11-11:
+  Expected `T`
+  File "generic_params_2.bad.php", line 8, characters 23-23:
+    via this generic `T`
+  File "generic_params_2.bad.php", line 10, characters 16-18:
+  But got `(string & dynamic)` from this "as" assertion

@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "unpack_call12_infer.php", line 15, characters 16-20:
   But got `string`
-  File "hackarray.hhi", line 25, characters 52-52:
+  File "hackarray.hhi", line 28, characters 52-52:
     via this generic `T`
   File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`

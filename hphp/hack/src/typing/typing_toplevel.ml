@@ -513,9 +513,13 @@ let fun_def ctx f :
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
+  (* Add `dynamic` lower and upper bound to any type parameters that are not marked <<__NoRequireDynamic>> *)
+  let env_with_require_dynamic =
+    Typing_dynamic.add_require_dynamic_bounds env cls
+  in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
-      env
+      env_with_require_dynamic
       (variadicity_decl_ty :: params_decl_ty)
       ret_locl_ty
   in
@@ -1531,16 +1535,19 @@ let class_var_def ~is_static cls env cv =
     && Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
   then begin
+    let env_with_require_dynamic =
+      Typing_dynamic.add_require_dynamic_bounds env cls
+    in
     Option.iter decl_cty (fun ty ->
         Typing_dynamic.check_property_sound_for_dynamic_write
           ~on_error:Errors.property_is_not_enforceable
-          env
+          env_with_require_dynamic
           (Cls.name cls)
           cv.cv_id
           ty);
     Typing_dynamic.check_property_sound_for_dynamic_read
       ~on_error:Errors.property_is_not_dynamic
-      env
+      env_with_require_dynamic
       (Cls.name cls)
       cv.cv_id
       cv_type_ty
@@ -1713,6 +1720,70 @@ let class_def_ env c tc =
   let env = List.fold impl ~init:env ~f:check_where_constraints in
   check_parent env c tc;
   check_parents_sealed env c tc;
+  let _ =
+    if c.c_support_dynamic_type then
+      (* Any class that extends a class or implements an interface
+       * that declares <<__SupportDynamicType>> must itself declare
+       * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
+       * parameters are not marked <<__NoRequireDynamic>> then we must check that the
+       * conditional support for dynamic is sound.
+       * We require that
+       *    If t <: dynamic
+       *    and C<T1,..,Tn> extends t
+       *    then C<T1,...,Tn> <: dynamic
+       *)
+      let dynamic_ty =
+        MakeType.dynamic (Reason.Rdynamic_coercion (Reason.Rwitness pc))
+      in
+      let env =
+        List.fold (extends @ implements) ~init:env ~f:(fun env (_, ty) ->
+            let (env, lty) =
+              Phase.localize_with_self env ~ignore_errors:true ty
+            in
+            match get_node lty with
+            | Tclass ((_, name), _, _) ->
+              begin
+                match Env.get_class env name with
+                | Some c when Cls.get_support_dynamic_type c ->
+                  let env_with_assumptions =
+                    Typing_subtype.add_constraint
+                      env
+                      Ast_defs.Constraint_as
+                      lty
+                      dynamic_ty
+                      (Errors.unify_error_at pc)
+                  in
+                  begin
+                    match Env.get_self_ty env with
+                    | Some self_ty ->
+                      TUtils.sub_type
+                        ~coerce:(Some Typing_logic.CoerceToDynamic)
+                        env_with_assumptions
+                        self_ty
+                        dynamic_ty
+                        (fun ?code:_ reasons ->
+                          let message =
+                            Typing_print.full_strip_ns_decl env ty
+                            ^ " is subtype of dynamic implies "
+                            ^ Typing_print.full_strip_ns env self_ty
+                            ^ " is subtype of dynamic"
+                          in
+                          Errors.bad_conditional_support_dynamic
+                            pc
+                            ~child:c_name
+                            ~parent:name
+                            message
+                            reasons)
+                    | _ -> env
+                  end
+                | _ -> env
+              end
+            | _ -> env)
+      in
+      env
+    else
+      env
+  in
 
   let is_final = Cls.final tc in
   if

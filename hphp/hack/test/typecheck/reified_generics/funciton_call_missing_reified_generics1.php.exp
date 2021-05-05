@@ -1,6 +1,6 @@
 File "funciton_call_missing_reified_generics1.php", line 8, characters 7-9:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 25, characters 22-24:
+  File "hackarray.hhi", line 28, characters 22-24:
   Definition is here
 File "funciton_call_missing_reified_generics1.php", line 9, characters 7-9:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])

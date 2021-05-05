@@ -1677,3 +1677,11 @@ val returns_with_and_without_value :
 val cyclic_class_constant : Pos.t -> string -> string -> unit
 
 val readonly_closure_call : Pos.t -> Pos_or_decl.t -> string -> unit
+
+val bad_conditional_support_dynamic :
+  Pos.t ->
+  child:string ->
+  parent:string ->
+  string ->
+  (Pos_or_decl.t * string) list ->
+  unit

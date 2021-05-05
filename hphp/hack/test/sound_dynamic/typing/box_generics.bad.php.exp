@@ -10,7 +10,7 @@ Method  `get` in class `Box` is not dynamically callable. (Typing[4402])
   Invalid return type
   File "box_generics.bad.php", line 8, characters 27-27:
   Expected `dynamic` because method must be callable in a dynamic context
-  File "box_generics.bad.php", line 5, characters 11-11:
+  File "box_generics.bad.php", line 5, characters 35-35:
   But got `T`
   File "box_generics.bad.php", line 6, characters 39-39:
     via this generic `T`

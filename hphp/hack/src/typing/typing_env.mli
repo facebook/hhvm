@@ -303,6 +303,8 @@ val get_enforceable : env -> string -> bool
 
 val get_newable : env -> string -> bool
 
+val get_require_dynamic : env -> string -> bool
+
 val add_upper_bound :
   ?intersect:(locl_ty -> locl_ty list -> locl_ty list) ->
   env ->

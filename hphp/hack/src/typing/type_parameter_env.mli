@@ -54,6 +54,8 @@ val get_enforceable : t -> string -> bool
 
 val get_newable : t -> string -> bool
 
+val get_require_dynamic : t -> string -> bool
+
 val get_names : t -> string list
 
 val is_consistent : t -> bool

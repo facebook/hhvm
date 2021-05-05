@@ -392,6 +392,12 @@ let get_newable env name =
   let global = TPEnv.get_newable env.global_tpenv name in
   local || global
 
+let get_require_dynamic env name =
+  let tpenv = get_tpenv env in
+  let local = TPEnv.get_require_dynamic tpenv name in
+  let global = TPEnv.get_require_dynamic env.global_tpenv name in
+  local || global
+
 (* Get bounds that are both an upper and lower of a given generic *)
 let get_equal_bounds env name tyargs =
   let lower = get_lower_bounds env name tyargs in
@@ -516,6 +522,7 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
         reified;
         enforceable;
         newable;
+        require_dynamic = true;
         parameters = [];
       }
   in
@@ -561,6 +568,7 @@ let get_tpenv_tparams env =
               reified = _;
               enforceable = _;
               newable = _;
+              require_dynamic = _;
               (* FIXME what to do here? it seems dangerous to just traverse *)
               parameters = _;
             }

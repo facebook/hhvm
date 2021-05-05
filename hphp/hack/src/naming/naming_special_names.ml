@@ -315,6 +315,8 @@ module UserAttributes = struct
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
+  let uaNoRequireDynamic = "__NoRequireDynamic"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -352,6 +354,7 @@ module UserAttributes = struct
           (uaCanCall, [parameter]);
           (uaAtom, [parameter]);
           (uaSupportDynamicType, [fn; cls; mthd]);
+          (uaNoRequireDynamic, [typeparam]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

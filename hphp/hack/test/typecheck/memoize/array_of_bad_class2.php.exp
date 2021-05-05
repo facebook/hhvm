@@ -2,7 +2,7 @@ File "array_of_bad_class2.php", line 6, characters 36-39:
 Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
   File "array_of_bad_class2.php", line 6, characters 31-33:
   This is an object of type Bar
-  File "hackarray.hhi", line 25, characters 52-52:
+  File "hackarray.hhi", line 28, characters 52-52:
     via this generic `T`
   File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`

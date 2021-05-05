@@ -15,13 +15,16 @@ namespace HH {
  * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
  * Arrays (varray, darray).
  */
-<<__Sealed(dict::class, keyset::class, vec::class)>>
+<<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
 abstract class AnyArray<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {
   const ctx CMut = [];
 }
 
+<<__SupportDynamicType>>
 abstract final class dict<+Tk as arraykey, +Tv> extends AnyArray<Tk, Tv> {}
+<<__SupportDynamicType>>
 abstract final class keyset<+T as arraykey> extends AnyArray<T, T> {}
+<<__SupportDynamicType>>
 abstract final class vec<+T> extends AnyArray<int, T> {}
 
 } // namespace HH

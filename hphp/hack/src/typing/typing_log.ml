@@ -345,6 +345,7 @@ let rec tparam_info_as_value env tpinfo =
           reified;
           enforceable;
           newable;
+          require_dynamic;
           parameters;
         } =
     tpinfo
@@ -356,6 +357,7 @@ let rec tparam_info_as_value env tpinfo =
       ("reified", reify_kind_as_value reified);
       ("enforceable", bool_as_value enforceable);
       ("newable", bool_as_value newable);
+      ("require_dynamic", bool_as_value require_dynamic);
       ("parameters", named_tparam_info_list_as_value env parameters);
     ]
 

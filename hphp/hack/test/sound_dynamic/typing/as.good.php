@@ -1,7 +1,7 @@
 <?hh
 
 <<__SupportDynamicType>>
-class B<T> {
+class B<<<__NoRequireDynamic>> T> {
 }
 
 function f(B<int> $i, B<int> $j) : void {

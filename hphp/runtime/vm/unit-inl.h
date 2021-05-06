@@ -30,24 +30,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Unit::MergeInfo.
 
-inline Func** Unit::MergeInfo::funcBegin() const {
-  return (Func**)m_mergeables;
-}
-
-inline Func** Unit::MergeInfo::funcEnd() const {
-  return funcBegin() + m_firstMergeablePreClass;
-}
-
-inline
-Unit::MergeInfo::FuncRange Unit::MergeInfo::funcs() const {
-  return { funcBegin(), funcEnd() };
-}
-
-inline
-Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::mutableFuncs() const {
-  return { funcBegin(), funcEnd() };
-}
-
 inline void*& Unit::MergeInfo::mergeableObj(int idx) {
   return m_mergeables[idx];
 }
@@ -265,12 +247,7 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Funcs and PreClasses and RecordDescs.
-
-inline Func* Unit::lookupFuncId(Id id) const {
-  assertx(id < Id(mergeInfo()->m_firstMergeablePreClass));
-  return mergeInfo()->funcBegin()[id];
-}
+// PreClasses and RecordDescs.
 
 inline PreClass* Unit::lookupPreClassId(Id id) const {
   assertx(id < Id(m_preClasses.size()));
@@ -292,10 +269,6 @@ inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
   return &m_typeAliases[id];
 }
 
-inline Unit::FuncRange Unit::funcs() const {
-  return mergeInfo()->funcs();
-}
-
 inline folly::Range<PreClassPtr*> Unit::preclasses() {
   return { m_preClasses.data(), m_preClasses.size() };
 }
@@ -310,6 +283,22 @@ inline folly::Range<PreRecordDescPtr*> Unit::prerecords() {
 
 inline folly::Range<const PreRecordDescPtr*> Unit::prerecords() const {
   return { m_preRecords.data(), m_preRecords.size() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Funcs
+
+inline Func* Unit::lookupFuncId(Id id) const {
+  assertx(id < Id(m_funcs.size()));
+  return m_funcs[id];
+}
+
+inline folly::Range<Func**> Unit::funcs() {
+  return { m_funcs.begin(), m_funcs.end() };
+}
+
+inline folly::Range<Func* const*> Unit::funcs() const {
+  return { m_funcs.begin(), m_funcs.end() };
 }
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {

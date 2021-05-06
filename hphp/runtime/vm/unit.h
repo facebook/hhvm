@@ -181,27 +181,10 @@ public:
     static MergeInfo* alloc(size_t num);
 
     /*
-     * Iterators.
-     *
-     * funcNonMain() is in (funcBegin, funcEnd].
-     */
-    Func** funcBegin() const;
-    Func** funcEnd() const;
-
-    /*
-     * Ranges.
-     *
-     * All ranges end at funcEnd().
-     */
-    FuncRange funcs() const;
-    MutableFuncRange mutableFuncs() const;
-
-    /*
      * Get a reference or pointer to the mergeable at index `idx'.
      */
     void*& mergeableObj(int idx);
 
-    unsigned m_firstMergeablePreClass;
     unsigned m_mergeablesSize;
     void*    m_mergeables[1];
   };
@@ -228,6 +211,7 @@ public:
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
   using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
+  using FuncVec = VMCompactVector<Func*>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -463,13 +447,18 @@ public:
   const PreTypeAlias* lookupTypeAliasId(Id id) const;
 
   /*
-   * Range over all Funcs or PreClasses or RecordDescs in the Unit.
+   * Range over all PreClasses or RecordDescs in the Unit.
    */
-  FuncRange funcs() const;
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
   folly::Range<PreRecordDescPtr*> prerecords();
   folly::Range<const PreRecordDescPtr*> prerecords() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Funcs.
+
+  folly::Range<Func**> funcs();
+  folly::Range<Func* const*> funcs() const;
 
   // Return the cached EntryPoint
   Func* getCachedEntryPoint() const;
@@ -737,6 +726,7 @@ private:
   bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error
 
+  FuncVec m_funcs;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
   ConstantVec m_constants;

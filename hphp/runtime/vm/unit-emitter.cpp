@@ -491,16 +491,17 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_fileAttributes = m_fileAttributes;
   u->m_ICE = m_ICE;
 
-  size_t ix = m_fes.size() + m_mergeableStmts.size();
-  Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
-  u->m_mergeInfo.store(mi, std::memory_order_relaxed);
-  ix = 0;
+  size_t ix = 0;
   for (auto& fe : m_fes) {
     auto const func = fe->create(*u, nullptr);
     assertx(ix == fe->id());
-    mi->mergeableObj(ix++) = func;
+    u->m_funcs.push_back(func);
+    ix++;
   }
-  mi->m_firstMergeablePreClass = ix;
+
+  Unit::MergeInfo *mi = Unit::MergeInfo::alloc(m_mergeableStmts.size());
+  u->m_mergeInfo.store(mi, std::memory_order_relaxed);
+  ix = 0;
   for (auto& mergeable : m_mergeableStmts) {
     switch (mergeable.first) {
       case MergeKind::Class:

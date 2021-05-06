@@ -120,7 +120,6 @@ std::atomic<size_t> Unit::s_liveUnits{0};
 Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
   MergeInfo* mi = (MergeInfo*)malloc(
     sizeof(MergeInfo) + size * sizeof(void*));
-  mi->m_firstMergeablePreClass = 0;
   mi->m_mergeablesSize = size;
   return mi;
 }
@@ -148,7 +147,7 @@ Unit::~Unit() {
 
   auto const mi = mergeInfo();
   if (mi) {
-    for (auto const func : mi->mutableFuncs()) Func::destroy(func);
+    for (auto const func : funcs()) Func::destroy(func);
   }
 
   // ExecutionContext and the TC may retain references to Class'es, so
@@ -779,8 +778,7 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
-  for (auto& func : mi->mutableFuncs()) {
+  for (auto& func : funcs()) {
     Func::bind(func);
   }
 
@@ -880,7 +878,7 @@ void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
          this->m_origFilepath->data(), mi->m_mergeablesSize);
 
   if (mergeTypes & MergeTypes::Function) {
-    for (auto func : mi->mutableFuncs()) {
+    for (auto func : funcs()) {
       if (func->isUnique()) {
         assertx(func->isPersistent());
         auto const handle = func->funcHandle();
@@ -904,17 +902,16 @@ void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
   }
 
   if (mergeTypes & MergeTypes::NotFunction) {
-    int first = mi->m_firstMergeablePreClass;
-    int ix = first;
+    int ix = 0;
 
-    FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize - first);
+    FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize);
 
-    boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);
+    boost::dynamic_bitset<> define(mi->m_mergeablesSize);
     while (ix < mi->m_mergeablesSize) {
       void* obj = mi->mergeableObj(ix);
       auto k = MergeKind(uintptr_t(obj) & 7);
       if (k == MergeKind::Done) break;
-      define.set(ix - first);
+      define.set(ix);
       ix++;
     }
 
@@ -928,7 +925,7 @@ void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
       bool madeProgress = false;
       auto i = define.find_first();
       for (; i != define.npos; i = define.find_next(i)) {
-        void* obj = mi->mergeableObj(i + first);
+        void* obj = mi->mergeableObj(i);
 
         auto k = MergeKind(uintptr_t(obj) & 7);
         switch (k) {

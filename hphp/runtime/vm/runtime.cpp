@@ -296,13 +296,23 @@ void raiseCoeffectsCallViolation(const Func* callee,
                                  RuntimeCoeffects provided,
                                  RuntimeCoeffects required) {
   assertx(CoeffectsConfig::enabled());
+  auto const callerName = [&] {
+    VMRegAnchor _;
+    if (!vmfp()) {
+      // VM is entering to the first frame
+      return String{makeStaticString("[vm-entry]")};
+    }
+    return fromLeaf([] (const ActRec* fp, Offset) {
+      assertx(fp);
+      return fp->func()->fullNameWithClosureName();
+    });
+  }();
+
   auto const errMsg = folly::sformat(
     "Call to {}() requires [{}] coeffects but {}() provided [{}]",
     callee->fullNameWithClosureName(),
     required.toString(),
-    fromLeaf([] (const ActRec* fp, Offset) {
-      return fp->func()->fullNameWithClosureName();
-    }),
+    callerName,
     provided.toString()
   );
 

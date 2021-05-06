@@ -44,18 +44,15 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::fromValue(std::numeric_limits<storage_t>::max());
   }
 
+  static RuntimeCoeffects defaults();
+  static RuntimeCoeffects pure();
+
   // This function is a placeholder to indicate that the correct coeffect needs
   // to be indentified and passed in its place
   static RuntimeCoeffects fixme() {
-    return RuntimeCoeffects::none();
+    return RuntimeCoeffects::defaults();
   }
 
-  static RuntimeCoeffects defaults() {
-    // TODO: Once defaults is no longer all zeros, update this
-    return RuntimeCoeffects::none();
-  }
-
-  static RuntimeCoeffects pure();
 
   uint16_t value() const { return m_data; }
 
@@ -99,6 +96,7 @@ struct StaticCoeffects {
   static StaticCoeffects none() {
     return StaticCoeffects::fromValue(0);
   }
+  static StaticCoeffects defaults();
 
   // This operator is equivalent to & of [coeffectA & coeffectB]
   StaticCoeffects& operator|=(const StaticCoeffects);

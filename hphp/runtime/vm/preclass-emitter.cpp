@@ -410,10 +410,14 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     tvaux.constModifiers() = {};
     if (const_.kind() == ConstModifiers::Kind::Context) {
       tvaux.constModifiers().setIsAbstract(const_.isAbstract());
-      auto coeffects = StaticCoeffects::none();
-      for (auto const& coeffect : const_.coeffects()) {
-        coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
-      }
+      auto const coeffects = [&] {
+        if (const_.coeffects().empty()) return StaticCoeffects::defaults();
+        auto coeffects = StaticCoeffects::none();
+        for (auto const& coeffect : const_.coeffects()) {
+          coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
+        }
+        return coeffects;
+      }();
       tvaux.constModifiers().setCoeffects(coeffects);
     } else {
       if (const_.isAbstract()) {

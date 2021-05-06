@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/util/hash-set.h"
 #include "hphp/util/trace.h"
@@ -57,6 +58,9 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(write_props)
 
 #define POLICIED_COEFFECTS \
+  X(policied_of_local)     \
+  X(policied_of_shallow)   \
+  X(policied_of)           \
   X(policied_local)        \
   X(policied_shallow)      \
   X(policied)
@@ -77,9 +81,10 @@ struct Coeffects {
 struct Capabilities {
   static constexpr auto s_rx_defaults = "rx_defaults";
   static constexpr auto s_policied_defaults = "policied_defaults";
+  static constexpr auto s_policied_unreachable = "policied_unreachable";
 
   static constexpr auto s_rx_pure = "rx_pure";
-  static constexpr auto s_policied_pure = "policied_pure";
+  static constexpr auto s_policied_maybe = "policied_maybe";
 
 #define X(x) static constexpr auto s_##x = #x;
   COEFFECTS
@@ -91,7 +96,7 @@ using Cap = Capabilities;
 
 const hphp_fast_string_map<hphp_fast_set<std::string>> s_coeffects_to_capabilities{
   {C::s_defaults, {Cap::s_rx_defaults, Cap::s_policied_defaults}},
-  {C::s_pure, {Cap::s_rx_pure, Cap::s_policied_pure}},
+  {C::s_pure, {Cap::s_rx_pure, Cap::s_policied_maybe}},
 
 #define X(x) {C::s_##x, {Cap::s_##x, Cap::s_policied_defaults}},
   RX_COEFFECTS
@@ -159,9 +164,13 @@ void initCapabilityGraphs() {
            addEdges(createNode(Cap::s_write_props),
                     rx_pure));
 
-  addEdges(createNode(Cap::s_policied_defaults, false, true),
-           addEdges(createNode(Cap::s_policied, true),
-                    createNode(Cap::s_policied_pure)));
+  auto policied_maybe = createNode(Cap::s_policied_maybe);
+  addEdges(createNode(Cap::s_policied_unreachable, false, true),
+           addEdges(createNode(Cap::s_policied_defaults),
+                    policied_maybe),
+           addEdges(createNode(Cap::s_policied_of, true),
+                    addEdges(createNode(Cap::s_policied, true),
+                             policied_maybe)));
 }
 
 } //namespace
@@ -200,7 +209,7 @@ void CoeffectsConfig::initCapabilities() {
   auto const add = [] (const std::string& name, storage_t value) {
     getCapabilityMap().insert({name, value});
     getCapabilityVector().push_back({name, value});
-    FTRACE(1, "{:<18}: {:016b}\n", name, value);
+    FTRACE(1, "{:<21}: {:016b}\n", name, value);
   };
 
   for (auto cap_defaults : getCapabilityGraphs().entries) {
@@ -281,16 +290,16 @@ void CoeffectsConfig::initCapabilities() {
 
   if (CoeffectsConfig::enabled()) {
     storage_t rxPure = getCapabilityMap().find(Cap::s_rx_pure)->second;
-    storage_t policiedPure =
-      getCapabilityMap().find(Cap::s_policied_pure)->second;
+    storage_t policiedMaybe =
+      getCapabilityMap().find(Cap::s_policied_maybe)->second;
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
-      warningMask = (rxPure | policiedPure);
+      warningMask = (rxPure | policiedMaybe);
     } else {
       if (CoeffectsConfig::writePropsEnforcementLevel() == 1) {
         warningMask |= rxPure;
       }
       if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
-        warningMask |= policiedPure;
+        warningMask |= policiedMaybe;
       }
     }
   }
@@ -321,35 +330,35 @@ bool CoeffectsConfig::isAnyRx(const StringData* sd) {
 }
 
 StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
-  storage_t result = 0;
-  auto const finish = [&] { return StaticCoeffects::fromValue(result); };
-
-  if (!CoeffectsConfig::enabled()) return finish();
+  if (!CoeffectsConfig::enabled()) return StaticCoeffects::none();
 
   if (!CoeffectsConfig::rxEnforcementLevel()) {
     if (!CoeffectsConfig::writePropsEnforcementLevel() ||
         coeffect != C::s_write_props) {
-#define X(x) if (coeffect == C::s_##x) return finish();
+#define X(x) if (coeffect == C::s_##x) return StaticCoeffects::defaults();
   RX_COEFFECTS
 #undef X
     }
   }
 
   if (!CoeffectsConfig::policiedEnforcementLevel()) {
-#define X(x) if (coeffect == C::s_##x) return finish();
+#define X(x) if (coeffect == C::s_##x) return StaticCoeffects::defaults();
   POLICIED_COEFFECTS
 #undef X
   }
 
   auto const it = s_coeffects_to_capabilities.find(coeffect);
-  if (it != s_coeffects_to_capabilities.end()) {
-    for (auto const& capability: it->second) {
-      auto const itt = getCapabilityMap().find(capability);
-      always_assert(itt != getCapabilityMap().end());
-      result |= itt->second;
-    }
+  if (it == s_coeffects_to_capabilities.end() || it->second.empty()) {
+    return StaticCoeffects::defaults();
   }
-  return finish();
+
+  storage_t result = 0;
+  for (auto const& capability: it->second) {
+    auto const itt = getCapabilityMap().find(capability);
+    always_assert(itt != getCapabilityMap().end());
+    result |= itt->second;
+  }
+  return StaticCoeffects::fromValue(result);
 }
 
 StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,

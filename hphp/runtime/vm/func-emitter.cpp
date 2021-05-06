@@ -293,10 +293,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
 
-  auto coeffects = StaticCoeffects::none();
-  for (auto const& name : staticCoeffects) {
-    coeffects |= CoeffectsConfig::fromName(name->toCppString());
-  }
+  auto const coeffects = [&] {
+    if (staticCoeffects.empty()) return StaticCoeffects::defaults();
+    auto coeffects = StaticCoeffects::none();
+    for (auto const& name : staticCoeffects) {
+      coeffects |= CoeffectsConfig::fromName(name->toCppString());
+    }
+    return coeffects;
+  }();
   auto const shallowCoeffectsWithLocals = coeffects.toShallowWithLocals();
   f->m_requiredCoeffects = coeffects.toRequired();
 

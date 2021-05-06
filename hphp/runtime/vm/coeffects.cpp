@@ -29,6 +29,15 @@ TRACE_SET_MOD(coeffects);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticCoeffects StaticCoeffects::defaults() {
+  static StaticCoeffects defaults = CoeffectsConfig::fromName("defaults");
+  return defaults;
+}
+
+RuntimeCoeffects RuntimeCoeffects::defaults() {
+  return StaticCoeffects::defaults().toAmbient();
+}
+
 RuntimeCoeffects RuntimeCoeffects::pure() {
   static RuntimeCoeffects pure = CoeffectsConfig::fromName("pure").toAmbient();
   return pure;

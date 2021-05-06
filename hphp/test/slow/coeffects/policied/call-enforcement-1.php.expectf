@@ -1,0 +1,123 @@
+Warning: Call to main() requires [policied_of_shallow] coeffects but [vm-entry]() provided [defaults]
+non_policied -> non_policied: ok
+non_policied -> policied_local:
+Warning: Call to policied_local() requires [policied_shallow] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> policied_shallow:
+Warning: Call to policied_shallow() requires [policied_shallow] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> policied:
+Warning: Call to policied() requires [policied] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> policied_of_local:
+Warning: Call to policied_of_local() requires [policied_of_shallow] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> policied_of_shallow:
+Warning: Call to policied_of_shallow() requires [policied_of_shallow] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> policied_of:
+Warning: Call to policied_of() requires [policied_of] coeffects but non_policied() provided [defaults] in %s on line 4
+ ok
+non_policied -> pure: ok
+policied_local -> non_policied: ok
+policied_local -> policied_local: ok
+policied_local -> policied_shallow: ok
+policied_local -> policied: ok
+policied_local -> policied_of_local: ok
+policied_local -> policied_of_shallow: ok
+policied_local -> policied_of: ok
+policied_local -> pure: ok
+policied_shallow -> non_policied:
+Warning: Call to non_policied() requires [defaults] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+ ok
+policied_shallow -> policied_local: ok
+policied_shallow -> policied_shallow: ok
+policied_shallow -> policied: ok
+policied_shallow -> policied_of_local:
+Warning: Call to policied_of_local() requires [policied_of_shallow] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+ ok
+policied_shallow -> policied_of_shallow:
+Warning: Call to policied_of_shallow() requires [policied_of_shallow] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+ ok
+policied_shallow -> policied_of:
+Warning: Call to policied_of() requires [policied_of] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+ ok
+policied_shallow -> pure: ok
+policied -> non_policied:
+Warning: Call to non_policied() requires [defaults] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> policied_local:
+Warning: Call to policied_local() requires [policied_shallow] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> policied_shallow:
+Warning: Call to policied_shallow() requires [policied_shallow] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> policied: ok
+policied -> policied_of_local:
+Warning: Call to policied_of_local() requires [policied_of_shallow] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> policied_of_shallow:
+Warning: Call to policied_of_shallow() requires [policied_of_shallow] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> policied_of:
+Warning: Call to policied_of() requires [policied_of] coeffects but policied() provided [policied] in %s on line 16
+ ok
+policied -> pure: ok
+policied_of_local -> non_policied: ok
+policied_of_local -> policied_local: ok
+policied_of_local -> policied_shallow: ok
+policied_of_local -> policied: ok
+policied_of_local -> policied_of_local: ok
+policied_of_local -> policied_of_shallow: ok
+policied_of_local -> policied_of: ok
+policied_of_local -> pure: ok
+policied_of_shallow -> non_policied:
+Warning: Call to non_policied() requires [defaults] coeffects but policied_of_shallow() provided [policied_of_shallow] in %s on line 24
+ ok
+policied_of_shallow -> policied_local: ok
+policied_of_shallow -> policied_shallow: ok
+policied_of_shallow -> policied: ok
+policied_of_shallow -> policied_of_local: ok
+policied_of_shallow -> policied_of_shallow: ok
+policied_of_shallow -> policied_of: ok
+policied_of_shallow -> pure: ok
+policied_of -> non_policied:
+Warning: Call to non_policied() requires [defaults] coeffects but policied_of() provided [policied_of] in %s on line 28
+ ok
+policied_of -> policied_local:
+Warning: Call to policied_local() requires [policied_shallow] coeffects but policied_of() provided [policied_of] in %s on line 28
+ ok
+policied_of -> policied_shallow:
+Warning: Call to policied_shallow() requires [policied_shallow] coeffects but policied_of() provided [policied_of] in %s on line 28
+ ok
+policied_of -> policied: ok
+policied_of -> policied_of_local:
+Warning: Call to policied_of_local() requires [policied_of_shallow] coeffects but policied_of() provided [policied_of] in %s on line 28
+ ok
+policied_of -> policied_of_shallow:
+Warning: Call to policied_of_shallow() requires [policied_of_shallow] coeffects but policied_of() provided [policied_of] in %s on line 28
+ ok
+policied_of -> policied_of: ok
+policied_of -> pure: ok
+pure -> non_policied:
+Warning: Call to non_policied() requires [defaults] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied_local:
+Warning: Call to policied_local() requires [policied_shallow] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied_shallow:
+Warning: Call to policied_shallow() requires [policied_shallow] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied:
+Warning: Call to policied() requires [policied] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied_of_local:
+Warning: Call to policied_of_local() requires [policied_of_shallow] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied_of_shallow:
+Warning: Call to policied_of_shallow() requires [policied_of_shallow] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> policied_of:
+Warning: Call to policied_of() requires [policied_of] coeffects but pure() provided [] in %s on line 32
+ ok
+pure -> pure: ok

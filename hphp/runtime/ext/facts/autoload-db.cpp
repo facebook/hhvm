@@ -81,20 +81,18 @@ void setFilePerms(const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
       3, "Creating {} with gid={} and perms={}\n", path.native(), gid, perms);
   int dbFd = ::open(path.native().c_str(), O_CREAT, perms);
   if (dbFd == -1) {
-    Logger::Warning(folly::sformat(
-        "Could not open DB at {}: errno={}", path.native(), errno));
+    FTRACE(1, "Could not open DB at {}: errno={}", path.native(), errno);
     return;
   }
   SCOPE_EXIT {
     ::close(dbFd);
   };
   if (::fchown(dbFd, -1, gid) == -1) {
-    Logger::Warning(folly::sformat(
-        "Could not chown({}, -1, {}): errno={}", path.native(), gid, errno));
+    FTRACE(
+        1, "Could not chown({}, -1, {}): errno={}", path.native(), gid, errno);
   }
   if (::fchmod(dbFd, perms) == -1) {
-    Logger::Warning(folly::sformat(
-        "Could not chmod({}, {}): errno={}", path.native(), perms, errno));
+    FTRACE(1, "Could not chmod({}, {}): errno={}", path.native(), perms, errno);
   }
 }
 

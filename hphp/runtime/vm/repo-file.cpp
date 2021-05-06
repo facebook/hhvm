@@ -23,6 +23,9 @@
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/htonll.h"
+#include "hphp/util/lock-free-ptr-wrapper.h"
+
+#include "hphp/zend/zend-string.h"
 
 #include <folly/FileUtil.h>
 #include <folly/String.h>
@@ -357,7 +360,7 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
     for (auto const& index : m_data->unitEmittersIndex) {
       assertx(index.sn < m_data->unitEmittersIndex.size());
       assertx(seenSN.emplace(index.sn).second);
-      encoder(index.path)(index.sn)(index.offset);
+      encoder(index.path->toCppString())(index.sn)(index.offset);
     }
     m_data->fd.write(encoder.data(), encoder.size());
     m_data->sizes.unitEmittersIndexSize = encoder.size();
@@ -453,14 +456,25 @@ RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
 
 namespace {
 
+struct RepoFileData;
+
 struct Bounds {
   size_t offset = 0;
   size_t size = 0;
 };
 
+using StringOrToken = TokenOrPtr<const StringData>;
+
 struct UnitInfo {
-  const StringData* path = nullptr;
+  UnsafeLockFreePtrWrapper<StringOrToken> path;
   Bounds location;
+
+  bool valid() const { return path->isToken() || path->ptr(); }
+  const StringData* getPath(const RepoFileData&);
+};
+
+struct SHA1Hasher {
+  size_t operator()(const SHA1& s) const { return s.hash(); }
 };
 
 // Reader state
@@ -481,7 +495,7 @@ struct RepoFileData {
 
   RepoGlobalData globalData;
 
-  hphp_fast_map<const StringData*, int64_t> pathToSN;
+  hphp_fast_map<SHA1, int64_t, SHA1Hasher> pathToSN;
   std::vector<UnitInfo> unitInfo;
 
   std::vector<Bounds> literals;
@@ -491,6 +505,74 @@ struct RepoFileData {
 };
 
 std::unique_ptr<RepoFileData> s_repoFileData{};
+
+// Lazily load the unit's path
+const StringData* UnitInfo::getPath(const RepoFileData& data) {
+  assertx(valid());
+
+  auto wrapper = path.copy();
+  if (wrapper.isPtr()) return wrapper.ptr();
+
+  path.lock_for_update();
+
+  wrapper = path.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    path.unlock();
+    return wrapper.ptr();
+  }
+
+  try {
+    auto const loadedPath = [&] {
+      auto const token = wrapper.token();
+      assertx(token < data.sizes.unitEmittersIndexSize);
+
+      // We don't know how large the path actually is. Take an initial
+      // guess (enough to read the size). If the guess is
+      // insufficient, do another read with the proper size.
+      size_t actualSize;
+
+      {
+        auto const firstSize =
+          std::min<size_t>(data.sizes.unitEmittersIndexSize - token, 128);
+        auto blob = loadBlob(
+          data.fd,
+          data.unitEmittersIndexOffset + token,
+          firstSize,
+          true
+        );
+
+        actualSize = blob.decoder.peekStdStringSize();
+        if (actualSize <= firstSize) {
+          std::string pathStr;
+          blob.decoder(pathStr);
+          assertx(blob.decoder.advanced() == actualSize);
+          assertx(!pathStr.empty());
+          return makeStaticString(pathStr);
+        }
+      }
+
+      assertx(actualSize <= data.sizes.unitEmittersIndexSize - token);
+      auto blob = loadBlob(
+        data.fd,
+        data.unitEmittersIndexOffset + token,
+        actualSize,
+        true
+      );
+      std::string pathStr;
+      blob.decoder(pathStr);
+      blob.decoder.assertDone();
+      assertx(!pathStr.empty());
+      return makeStaticString(pathStr);
+    }();
+
+    path.update_and_unlock(StringOrToken::FromPtr(loadedPath));
+    return loadedPath;
+  } catch (...) {
+    path.unlock();
+    throw;
+  }
+}
 
 }
 
@@ -691,11 +773,12 @@ void RepoFile::loadGlobalTables(bool lazyLitstr) {
     data.unitInfo.resize(count);
 
     int64_t lastSN = -1;
-    auto const setSize = [&] (const StringData* path, size_t offset) {
+    std::string lastPath;
+    auto const setSize = [&] (const std::string& path, size_t offset) {
       if (lastSN < 0) return;
       auto const lastOffset = data.unitInfo[lastSN].location.offset;
       always_assert_flog(
-        !path || offset >= lastOffset,
+        path.empty() || offset >= lastOffset,
         "Invalid unit-emitter offset for {} in {}: "
         "{} is not monotonically increasing from previous offset {}",
         path, data.path, offset, lastOffset
@@ -705,18 +788,18 @@ void RepoFile::loadGlobalTables(bool lazyLitstr) {
         size <= kUnitEmitterSizeLimit,
         "Invalid unit-emitter for {} in {}: "
         "size {} exceeds maximum allowed of {}",
-        data.unitInfo[lastSN].path, data.path, size, kUnitEmitterSizeLimit
+        lastPath, data.path, size, kUnitEmitterSizeLimit
       );
       data.unitInfo[lastSN].location.size = size;
     };
 
     for (size_t i = 0; i < count; ++i) {
-      const StringData* path;
+      auto const pathOffset = blob.decoder.advanced();
+      std::string path;
       int64_t sn;
       size_t offset;
       blob.decoder(path)(sn)(offset);
-      assertx(path);
-      assertx(path->isStatic());
+      assertx(!path.empty());
       assertx(sn >= 0);
       assertx(sn < count);
 
@@ -729,17 +812,19 @@ void RepoFile::loadGlobalTables(bool lazyLitstr) {
 
       setSize(path, offset);
       lastSN = sn;
+      lastPath = path;
 
       auto& info = data.unitInfo[sn];
-      assertx(!info.path);
-      info.path = path;
+      assertx(!info.valid());
+      info.path = StringOrToken::FromToken(pathOffset);
       info.location = Bounds{offset, 0};
 
-      auto const DEBUG_ONLY insert = data.pathToSN.emplace(path, sn);
+      auto const DEBUG_ONLY insert =
+        data.pathToSN.emplace(SHA1{string_sha1(path)}, sn);
       assertx(insert.second);
     }
     blob.decoder.assertDone();
-    setSize(nullptr, data.sizes.unitEmittersSize);
+    setSize(std::string{}, data.sizes.unitEmittersSize);
     data.loadedUnitEmitterIndices.store(true);
   }
 
@@ -801,17 +886,19 @@ RepoFile::loadUnitEmitter(const StringData* searchPath,
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
 
-  auto const& data = *s_repoFileData;
+  auto& data = *s_repoFileData;
 
-  assertx(searchPath->isStatic());
   assertx(path->isStatic());
+  assertx(searchPath->isStatic());
 
-  auto const it = data.pathToSN.find(searchPath);
+  auto const it = data.pathToSN.find(SHA1{string_sha1(searchPath->slice())});
   if (it == data.pathToSN.end()) return nullptr;
   auto const sn = it->second;
+
   assertx(sn >= 0 && sn < data.unitInfo.size());
-  auto const& info = data.unitInfo[sn];
-  assertx(info.path);
+  auto& info = data.unitInfo[sn];
+  assertx(info.valid());
+  if (info.getPath(data) != searchPath) return nullptr;
 
   auto blob = loadBlob(
     data.fd,
@@ -843,7 +930,7 @@ void RepoFile::loadBytecode(int64_t unitSn,
   auto const& data = *s_repoFileData;
   assertx(unitSn < data.unitInfo.size());
   auto const& info = data.unitInfo[unitSn];
-  assertx(info.path);
+  assertx(info.valid());
   assertx(token + bclen <= info.location.size);
   data.fd.pread(
     bc, bclen, data.unitEmittersOffset + info.location.offset + token
@@ -855,10 +942,10 @@ LineTable RepoFile::loadLineTable(int64_t unitSn,
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
   assertx(unitSn >= 0);
-  auto const& data = *s_repoFileData;
+  auto& data = *s_repoFileData;
   assertx(unitSn < data.unitInfo.size());
-  auto const& info = data.unitInfo[unitSn];
-  assertx(info.path);
+  auto& info = data.unitInfo[unitSn];
+  assertx(info.valid());
 
   assertx(token <= info.location.size);
   auto const size = std::min<size_t>(info.location.size - token, 128);
@@ -880,13 +967,13 @@ LineTable RepoFile::loadLineTable(int64_t unitSn,
     actualSize <= kLineTableSizeLimit,
     "Invalid line table size for {} in {}: "
     "{} exceeds maximum line table size of {}",
-    info.path, data.path, actualSize, kLineTableSizeLimit
+    info.getPath(data), data.path, actualSize, kLineTableSizeLimit
   );
   always_assert_flog(
     actualSize <= info.location.size - token,
     "Invalid line table size for {} in {}: "
     "{} exceeds remaining unit-emitter size of {}",
-    info.path, data.path, actualSize, info.location.size - token
+    info.getPath(data), data.path, actualSize, info.location.size - token
   );
 
   auto blob = loadBlob(
@@ -905,20 +992,24 @@ int64_t RepoFile::findUnitSN(const StringData* path) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
   assertx(path->isStatic());
-  auto const& data = *s_repoFileData;
-  auto const it = data.pathToSN.find(path);
+  auto& data = *s_repoFileData;
+  auto const it = data.pathToSN.find(SHA1{string_sha1(path->slice())});
   if (it == data.pathToSN.end()) return -1;
   assertx(it->second >= 0 && it->second < data.unitInfo.size());
-  return it->second;
+  auto& info = data.unitInfo[it->second];
+  assertx(info.valid());
+  return info.getPath(data) == path ? it->second : -1;
 }
 
 const StringData* RepoFile::findUnitPath(int64_t unitSn) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
   assertx(unitSn >= 0);
-  auto const& data = *s_repoFileData;
+  auto& data = *s_repoFileData;
   if (unitSn >= data.unitInfo.size()) return nullptr;
-  return data.unitInfo[unitSn].path;
+  auto& info = data.unitInfo[unitSn];
+  if (!info.valid()) return nullptr;
+  return info.getPath(data);
 }
 
 const StringData* RepoFile::findUnitPath(const SHA1& sha1) {
@@ -940,10 +1031,15 @@ const StringData* RepoFile::findUnitPath(const SHA1& sha1) {
 std::vector<const StringData*> RepoFile::enumerateUnits() {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
-  auto const& data = *s_repoFileData;
+  auto& data = *s_repoFileData;
   std::vector<const StringData*> ret;
   ret.reserve(data.pathToSN.size());
-  for (auto const& kv : data.pathToSN) ret.emplace_back(kv.first);
+  for (auto const& kv : data.pathToSN) {
+    assertx(kv.second >= 0 && kv.second < data.unitInfo.size());
+    auto& info = data.unitInfo[kv.second];
+    assertx(info.valid());
+    ret.emplace_back(info.getPath(data));
+  }
   // Maintain deterministic order
   std::sort(
     ret.begin(), ret.end(),

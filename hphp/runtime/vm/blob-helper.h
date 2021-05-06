@@ -432,6 +432,15 @@ struct BlobDecoder {
     m_p += sz;
   }
 
+  size_t peekStdStringSize() {
+    auto const before = advanced();
+    uint32_t sz;
+    decode(sz);
+    auto const sizeBytes = advanced() - before;
+    m_p -= sizeBytes;
+    return sz + sizeBytes;
+  }
+
   void decode(TypedValue& tv) {
     tvWriteUninit(tv);
 

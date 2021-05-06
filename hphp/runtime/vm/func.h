@@ -96,56 +96,6 @@ struct EHEnt {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Represents either a pointer to T, or a RepoFile::Token. Does not do
-// any resource management of its own (it won't clone or delete the
-// memory pointed to by the T*). This always keeps the lower 2-bits
-// free so it can be used in a LockFreePtrWrapper.
-template <typename T>
-struct TokenOrPtr {
-  TokenOrPtr() : m_compact{toOpaquePtr(nullptr)} {}
-
-  using Token = RepoFile::Token;
-
-  bool isPtr() const { return getCompact().tag() == 0; }
-  bool isToken() const { return getCompact().tag() == 1; }
-
-  T* ptr() const {
-    assertx(isPtr());
-    return getCompact().ptr();
-  }
-  Token token() const {
-    assertx(isToken());
-    return (Token)(uintptr_t)getCompact().ptr();
-  }
-
-  static TokenOrPtr FromPtr(T* ptr) {
-    return TokenOrPtr{toOpaquePtr(ptr)};
-  }
-  static TokenOrPtr FromToken(Token token) {
-    return TokenOrPtr{toOpaqueToken(token)};
-  }
-private:
-  using Compact = CompactTaggedPtr<T, uint8_t>;
-  typename Compact::Opaque m_compact;
-
-  explicit TokenOrPtr(typename Compact::Opaque o) : m_compact{o} {}
-
-  Compact getCompact() const { return Compact{m_compact >> 2}; }
-
-  static typename Compact::Opaque toOpaquePtr(T* p) {
-    auto const c = Compact{0, p}.getOpaque();
-    assertx(((c << 2) >> 2) == c);
-    return c << 2;
-  }
-  static typename Compact::Opaque toOpaqueToken(Token token) {
-    auto const c = Compact{1, (T*)(uintptr_t)token}.getOpaque();
-    assertx(((c << 2) >> 2) == c);
-    return c << 2;
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 template <typename T, size_t Expected, size_t Actual = sizeof(T)>
 constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 

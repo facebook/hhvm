@@ -142,7 +142,7 @@ let force_remote = function
   | _ -> false
 
 let rpc_files : type a. a t -> Relative_path.Set.t = function
-  | STATUS_SINGLE_REMOTE_EXECUTION (fn, _) ->
+  | STATUS_SINGLE_REMOTE_EXECUTION fn ->
     Relative_path.Set.singleton (Relative_path.create_detect_prefix fn)
   | _ -> Relative_path.Set.empty
 

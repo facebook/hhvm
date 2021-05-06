@@ -320,9 +320,7 @@ type _ t =
   | STATUS_SINGLE :
       file_input * int option
       -> (Errors.finalized_error list * int) t
-  | STATUS_SINGLE_REMOTE_EXECUTION :
-      string * int option
-      -> (Errors.finalized_error list * int * string) t
+  | STATUS_SINGLE_REMOTE_EXECUTION : string -> (string * string) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool

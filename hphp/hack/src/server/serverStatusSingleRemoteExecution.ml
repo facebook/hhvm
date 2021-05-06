@@ -7,20 +7,11 @@
  *
  *)
 open Hh_prelude
-open Hh_json
 
 let go file_name ctx =
   let dep_edges = HashSet.create () in
   let single_remote_execution_trace root obj =
-    let dependent = Typing_deps.Dep.variant_to_string root in
-    let dependency = Typing_deps.Dep.variant_to_string obj in
-    HashSet.add
-      dep_edges
-      (Hh_json.JSON_Object
-         [
-           ("dependent", JSON_String dependent);
-           ("dependency", JSON_String dependency);
-         ])
+    HashSet.add dep_edges (root, obj)
   in
   Typing_deps.add_dependency_callback
     "single_remote_execution_trace"
@@ -36,8 +27,7 @@ let go file_name ctx =
   let errors =
     errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute
   in
-  let json_string =
-    JSON_Array (HashSet.fold dep_edges ~init:[] ~f:(fun x acc -> x :: acc))
-  in
-  Printf.eprintf "DEPS: %s\n" (Hh_json.json_to_string json_string);
-  (errors, Hh_json.json_to_string json_string)
+  let errors = Marshal.to_string errors [Marshal.No_sharing] in
+  let dep_edges = HashSet.to_list dep_edges in
+  let dep_edges = Marshal.to_string dep_edges [Marshal.No_sharing] in
+  (errors, dep_edges)

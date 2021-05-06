@@ -164,13 +164,13 @@ void initCapabilityGraphs() {
            addEdges(createNode(Cap::s_write_props),
                     rx_pure));
 
-  auto policied_maybe = createNode(Cap::s_policied_maybe);
+  auto policied = createNode(Cap::s_policied, true);
   addEdges(createNode(Cap::s_policied_unreachable, false, true),
            addEdges(createNode(Cap::s_policied_defaults),
-                    policied_maybe),
+                    policied),
            addEdges(createNode(Cap::s_policied_of, true),
-                    addEdges(createNode(Cap::s_policied, true),
-                             policied_maybe)));
+                    addEdges(policied,
+                             createNode(Cap::s_policied_maybe))));
 }
 
 } //namespace

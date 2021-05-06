@@ -120,9 +120,9 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
     auto const key = Array::GetPosKey(vin, pos);
     auto const val = Array::GetPosVal(vin, pos);
 
-    if (tvIsString(key)) {
-      hash = folly::hash::hash_combine(hash, key.val().pstr->hash());
-    }
+    // It's important to use a commutative function here, because we construct
+    // many APC arrays with the same structure but with different key orders.
+    if (tvIsString(key)) hash += key.val().pstr->hash();
 
     if (!tvIsArrayLike(val)) continue;
     auto const old_arr = val.val().parr;

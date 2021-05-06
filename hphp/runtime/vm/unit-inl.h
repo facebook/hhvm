@@ -379,7 +379,7 @@ inline const RecordDesc* Unit::lookupUniqueRecDesc(const StringData* name) {
 // Merge.
 
 inline bool Unit::isEmpty() const {
-  return m_mergeState.load(std::memory_order_relaxed) & MergeState::Empty;
+  return m_mergeState.load(std::memory_order_relaxed) == MergeState::Merged;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

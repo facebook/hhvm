@@ -33,6 +33,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "hphp/system/systemlib.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
@@ -778,82 +779,9 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  int state = 0;
-  bool needsCompact = false;
-  m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
-
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
-  bool allFuncsUnique = RuntimeOption::RepoAuthoritative
-    || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction);
   for (auto& func : mi->mutableFuncs()) {
-    if (allFuncsUnique) {
-      allFuncsUnique = (func->attrs() & AttrUnique);
-    }
     Func::bind(func);
-    if (rds::isPersistentHandle(func->funcHandle())) {
-      needsCompact = true;
-    }
-  }
-  if (allFuncsUnique) state |= MergeState::UniqueFuncs;
-
-  if (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) {
-    /*
-     * The mergeables array begins with the hoistable Func*s,
-     * followed by the (potentially) hoistable Class*s.
-     *
-     * If the Unit is merge only, it then contains enough information
-     * to simulate executing the pseudomain. Normally, this is just
-     * the Class*s that might not be hoistable. In RepoAuthoritative
-     * mode it also includes assignments of the form:
-     *  $GLOBALS[string-literal] = scalar;
-     * defines of the form:
-     *  define(string-literal, scalar);
-     * and requires.
-     *
-     * These cases are differentiated using the bottom 3 bits
-     * of the pointer. In the case of a define or a global,
-     * the pointer will be followed by a TypedValue representing
-     * the value being defined/assigned.
-     */
-
-    int ix = mi->m_firstMergeablePreClass;
-    int end = mi->m_mergeablesSize;
-    while (ix < end) {
-      void *obj = mi->mergeableObj(ix);
-      auto k = MergeKind(uintptr_t(obj) & 7);
-      switch (k) {
-        case MergeKind::Done:
-          not_reached();
-        case MergeKind::TypeAlias: {
-          auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-          if (m_typeAliases[aliasId].attrs & AttrPersistent) {
-            needsCompact = true;
-          }
-          break;
-        }
-        case MergeKind::Class:
-          if (static_cast<PreClass*>(obj)->attrs() & AttrUnique) {
-            needsCompact = true;
-          }
-          break;
-        case MergeKind::Record: {
-          auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
-          if (m_preRecords[recordId]->attrs() & AttrPersistent) {
-            needsCompact = true;
-          }
-          break;
-        }
-        case MergeKind::Define: {
-          auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
-          if (m_constants[constantId].attrs & AttrPersistent) {
-            needsCompact = true;
-          }
-          break;
-        }
-      }
-      ix++;
-    }
-    if (needsCompact) state |= MergeState::NeedsCompact;
   }
 
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
@@ -862,17 +790,13 @@ void Unit::initialMerge() {
       rds::LinkName{"UnitCoverage", origFilepath()}
     );
   }
-  m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
+
+  m_mergeState.store(MergeState::InitialMerged, std::memory_order_relaxed);
 }
 
 void Unit::merge() {
-  if (m_mergeState.load(std::memory_order_relaxed) & MergeState::Empty) {
+  if (LIKELY(m_mergeState.load(std::memory_order_relaxed) == MergeState::Merged)) {
     return;
-  }
-  if (UNLIKELY(!(m_mergeState.load(std::memory_order_relaxed) &
-                 MergeState::Merged))) {
-    SimpleLock lock(unitInitLock);
-    initialMerge();
   }
 
   if (m_fatalInfo) {
@@ -881,101 +805,23 @@ void Unit::merge() {
                       m_fatalInfo->m_fatalLoc);
   }
 
+  auto mergeTypes = MergeTypes::Everything;
+  if (UNLIKELY((m_mergeState.load(std::memory_order_relaxed) == MergeState::Unmerged))) {
+    SimpleLock lock(unitInitLock);
+    initialMerge();
+  } else if (!RuntimeOption::RepoAuthoritative && !SystemLib::s_inited && RuntimeOption::EvalJitEnableRenameFunction) {
+    mergeTypes = MergeTypes::Function;
+  }
+
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(mergeInfo());
+    mergeImpl<true>(mergeInfo(), mergeTypes);
   } else {
-    mergeImpl<false>(mergeInfo());
-  }
-}
-
-static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
-                               const Unit::TypeAliasVec& aliasInfo,
-                               const Unit::ConstantVec& constantInfo,
-                               const CompactVector<PreRecordDescPtr>& recordInfo) {
-  using MergeKind = Unit::MergeKind;
-
-  Func** it = in->funcBegin();
-  Func** fend = in->funcEnd();
-  Func** iout = nullptr;
-  unsigned ix, end, oix = 0;
-
-  if (out) {
-    if (in != out) memcpy(out, in, uintptr_t(it) - uintptr_t(in));
-    iout = out->funcBegin();
+    mergeImpl<false>(mergeInfo(), mergeTypes);
   }
 
-  size_t delta = 0;
-  while (it != fend) {
-    Func* func = *it++;
-    if (rds::isPersistentHandle(func->funcHandle())) {
-      delta++;
-    } else if (iout) {
-      *iout++ = func;
-    }
+  if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
+    m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
   }
-
-  if (out) {
-    out->m_firstMergeablePreClass -= delta;
-    oix = out->m_firstMergeablePreClass;
-  }
-
-  ix = in->m_firstMergeablePreClass;
-  end = in->m_mergeablesSize;
-  while (ix < end) {
-    void* obj = in->mergeableObj(ix++);
-    auto k = MergeKind(uintptr_t(obj) & 7);
-    switch (k) {
-      case MergeKind::Class: {
-        PreClass* pre = (PreClass*)obj;
-        if (pre->attrs() & AttrUnique) {
-          UNUSED Class* cls = pre->namedEntity()->clsList();
-          assertx(cls && !cls->m_next);
-          assertx(cls->preClass() == pre);
-          assertx(rds::isPersistentHandle(cls->classHandle()));
-          delta++;
-        } else if (out) {
-          out->mergeableObj(oix++) = obj;
-        }
-        break;
-      }
-      case MergeKind::Record: {
-        auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
-        if (recordInfo[recordId]->attrs() & AttrPersistent) {
-          delta++;
-        } else if (out) {
-          out->mergeableObj(oix++) = obj;
-        }
-        break;
-      }
-      case MergeKind::TypeAlias: {
-        auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-        if (aliasInfo[aliasId].attrs & AttrPersistent) {
-          delta++;
-        } else if (out) {
-          out->mergeableObj(oix++) = obj;
-        }
-        break;
-      }
-      case MergeKind::Define: {
-        auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
-        if (constantInfo[constantId].attrs & AttrPersistent) {
-          delta++;
-        } else if (out) {
-          out->mergeableObj(oix++) = obj;
-        }
-        break;
-      }
-
-      case MergeKind::Done:
-        not_reached();
-    }
-  }
-  if (out) {
-    // copy the MergeKind::Done marker
-    out->mergeableObj(oix) = in->mergeableObj(ix);
-    out->m_mergeablesSize = oix;
-  }
-  return delta;
 }
 
 namespace {
@@ -1019,8 +865,8 @@ void Unit::logTearing() {
 }
 
 template <bool debugger>
-void Unit::mergeImpl(MergeInfo* mi) {
-  assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
+void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
+  assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
 
   if (!RO::RepoAuthoritative &&
@@ -1033,15 +879,10 @@ void Unit::mergeImpl(MergeInfo* mi) {
   FTRACE(1, "Merging unit {} ({} elements to define)\n",
          this->m_origFilepath->data(), mi->m_mergeablesSize);
 
-  Func** it = mi->funcBegin();
-  Func** fend = mi->funcEnd();
-  if (it != fend) {
-    if (LIKELY((m_mergeState.load(std::memory_order_relaxed) &
-                MergeState::UniqueFuncs) != 0)) {
-      do {
-        Func* func = *it;
-        assertx(func->isUnique() && func->isPersistent());
-
+  if (mergeTypes & MergeTypes::Function) {
+    for (auto func : mi->mutableFuncs()) {
+      if (func->isUnique()) {
+        assertx(func->isPersistent());
         auto const handle = func->funcHandle();
         assertx(rds::isPersistentHandle(handle));
         rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
@@ -1053,159 +894,98 @@ void Unit::mergeImpl(MergeInfo* mi) {
           continue;
         }
         ne->setUniqueFunc(func);
+
         if (debugger) phpDebuggerDefFuncHook(func);
-      } while (++it != fend);
-    } else {
-      do {
-        Func* func = *it;
+      } else {
         assertx(func->isPersistent() == ((this->isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction) || RuntimeOption::RepoAuthoritative));
         Func::def(func, debugger);
-      } while (++it != fend);
+      }
     }
   }
 
-  int first = mi->m_firstMergeablePreClass;
-  int ix = first;
+  if (mergeTypes & MergeTypes::NotFunction) {
+    int first = mi->m_firstMergeablePreClass;
+    int ix = first;
 
-  FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize - first);
+    FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize - first);
 
-  boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);
-  while (ix < mi->m_mergeablesSize) {
-    void* obj = mi->mergeableObj(ix);
-    auto k = MergeKind(uintptr_t(obj) & 7);
-    if (k == MergeKind::Done) break;
-    define.set(ix - first);
-    ix++;
-  }
-
-  FTRACE(4, "  {} top level entities left to define\n", define.count());
-
-  // iterate over the define set until we can make no progress
-  // if there are still things left to be define, at that point just fatal.
-  bool failIsFatal = false;
-  // We'll exit this while loop either by defining everything or fataling
-  while (!define.none()) {
-    bool madeProgress = false;
-    auto i = define.find_first();
-    for (; i != define.npos; i = define.find_next(i)) {
-      void* obj = mi->mergeableObj(i + first);
-
+    boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);
+    while (ix < mi->m_mergeablesSize) {
+      void* obj = mi->mergeableObj(ix);
       auto k = MergeKind(uintptr_t(obj) & 7);
-      switch (k) {
-        case MergeKind::Class: {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_class);
-          auto cls = (PreClass*)obj;
-          assertx(cls->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-          if (Class::def(cls, failIsFatal)) {
+      if (k == MergeKind::Done) break;
+      define.set(ix - first);
+      ix++;
+    }
+
+    FTRACE(4, "  {} top level entities left to define\n", define.count());
+
+    // iterate over the define set until we can make no progress
+    // if there are still things left to be define, at that point just fatal.
+    bool failIsFatal = false;
+    // We'll exit this while loop either by defining everything or fataling
+    while (!define.none()) {
+      bool madeProgress = false;
+      auto i = define.find_first();
+      for (; i != define.npos; i = define.find_next(i)) {
+        void* obj = mi->mergeableObj(i + first);
+
+        auto k = MergeKind(uintptr_t(obj) & 7);
+        switch (k) {
+          case MergeKind::Class: {
+            Stats::inc(Stats::UnitMerge_mergeable);
+            Stats::inc(Stats::UnitMerge_mergeable_class);
+            auto cls = (PreClass*)obj;
+            assertx(cls->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+            if (Class::def(cls, failIsFatal)) {
+              madeProgress = true;
+              define.reset(i);
+            }
+            continue;
+          }
+
+          case MergeKind::Define: {
+            Stats::inc(Stats::UnitMerge_mergeable);
+            Stats::inc(Stats::UnitMerge_mergeable_define);
+            auto const constant = lookupConstantId(static_cast<Id>(intptr_t(obj)) >> 3);
+            assertx((!!(constant->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+            defCns(constant);
             madeProgress = true;
             define.reset(i);
+            continue;
           }
-          continue;
-        }
 
-        case MergeKind::Define: {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_define);
-          auto const constant = lookupConstantId(static_cast<Id>(intptr_t(obj)) >> 3);
-          assertx((!!(constant->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-          defCns(constant);
-          madeProgress = true;
-          define.reset(i);
-          continue;
-        }
-
-        case MergeKind::TypeAlias: {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_typealias);
-          auto const typeAlias = lookupTypeAliasId(static_cast<Id>(intptr_t(obj)) >> 3);
-          assertx((!!(typeAlias->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-          if (defTypeAlias(typeAlias, failIsFatal)) {
-            madeProgress = true;
-            define.reset(i);
+          case MergeKind::TypeAlias: {
+            Stats::inc(Stats::UnitMerge_mergeable);
+            Stats::inc(Stats::UnitMerge_mergeable_typealias);
+            auto const typeAlias = lookupTypeAliasId(static_cast<Id>(intptr_t(obj)) >> 3);
+            assertx((!!(typeAlias->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+            if (defTypeAlias(typeAlias, failIsFatal)) {
+              madeProgress = true;
+              define.reset(i);
+            }
+            continue;
           }
-          continue;
-        }
 
-        case MergeKind::Record: {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_record);
-          auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
-          auto const r = lookupPreRecordId(recordId);
-          assertx(r->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-          if (defRecordDesc(r, failIsFatal)) {
-            madeProgress = true;
-            define.reset(i);
+          case MergeKind::Record: {
+            Stats::inc(Stats::UnitMerge_mergeable);
+            Stats::inc(Stats::UnitMerge_mergeable_record);
+            auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
+            auto const r = lookupPreRecordId(recordId);
+            assertx(r->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+            if (defRecordDesc(r, failIsFatal)) {
+              madeProgress = true;
+              define.reset(i);
+            }
+            continue;
           }
-          continue;
+
+          case MergeKind::Done:
+            not_reached();
+            return;
         }
-
-        case MergeKind::Done:
-          not_reached();
-          return;
       }
-    }
-    if (!madeProgress) failIsFatal = true;
-  }
-
-  if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
-               MergeState::NeedsCompact)) {
-    SimpleLock lock(unitInitLock);
-    if (!(m_mergeState.load(std::memory_order_relaxed) &
-          MergeState::NeedsCompact)) {
-      return;
-    }
-
-    /*
-     * We can now remove any Persistent Class/Func*'s,
-     * and any requires of modules that are (now) empty
-     */
-    size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
-                                    m_constants, m_preRecords);
-
-    if (RuntimeOption::RepoAuthoritative) {
-      assertx(delta == mi->m_mergeablesSize);
-    } else if (!SystemLib::s_inited) {
-      if (!RuntimeOption::EvalJitEnableRenameFunction) {
-        assertx(delta == mi->m_mergeablesSize);
-      } else {
-        assertx(delta == mi->m_mergeablesSize - mi->m_firstMergeablePreClass);
-      }
-    } else {
-      assertx(delta == 0);
-    }
-
-    MergeInfo* newMi = mi;
-    if (delta) {
-      newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
-    }
-    /*
-     * In the case where mi == newMi, there's an apparent
-     * race here. Although we have a lock, so we're the only
-     * ones modifying this, there could be any number of
-     * readers. But thats ok, because it doesnt matter
-     * whether they see the old contents or the new.
-     */
-    compactMergeInfo(mi, newMi, m_typeAliases, m_constants, m_preRecords);
-    if (newMi != mi) {
-      this->m_mergeInfo.store(newMi, std::memory_order_release);
-      Treadmill::deferredFree(mi);
-      if (newMi->m_mergeablesSize == 0) {
-        m_mergeState.fetch_or(MergeState::Empty,
-                              std::memory_order_relaxed);
-      }
-    }
-    m_mergeState.fetch_and(~MergeState::NeedsCompact,
-                           std::memory_order_relaxed);
-  } else {
-    // Reload mergeInfo because some other thread may have done the compact work
-    // while we did merging
-    mi = mergeInfo();
-    // If the file was empty to start with we just want to mark merge state empty
-    if (mi->m_mergeablesSize == 0) {
-      m_mergeState.fetch_or(MergeState::Empty, std::memory_order_relaxed);
-    } else {
-      assertx(!RuntimeOption::RepoAuthoritative && (SystemLib::s_inited || RuntimeOption::EvalJitEnableRenameFunction));
+      if (!madeProgress) failIsFatal = true;
     }
   }
 }

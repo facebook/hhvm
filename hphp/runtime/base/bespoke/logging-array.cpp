@@ -127,6 +127,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, RuntimeStruct* structHandle) {
   if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
+  if (structHandle == nullptr) return ad;
 
   auto const profile = getLoggingProfile(structHandle);
   return profile ? maybeMakeLoggingArray(ad, profile) : ad;

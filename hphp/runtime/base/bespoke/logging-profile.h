@@ -128,6 +128,9 @@ struct LoggingProfileKey {
       locationType == LocationType::InstanceProperty ||
       locationType == LocationType::StaticProperty;
     assertx(prop == (slot != kInvalidSlot));
+    assertx(IMPLIES(
+      locationType == LocationType::Runtime,
+      runtimeStruct != nullptr));
     return true;
   }
 

@@ -62,13 +62,11 @@ const size_t
   s_function_idx(2),
   s_args_idx(3),
   s_class_idx(4),
-  s_type_idx(5),
-  s_object_idx(6),
+  s_object_idx(5),
+  s_type_idx(6),
   s_metadata_idx(7);
 
-static const StaticString
-  s_stableIdentifier("HPHP::createBacktrace"),
-  s_stableIdentifierCompact("HPHP::createBacktrace::compact");
+static const StaticString s_stableIdentifier("HPHP::createBacktrace");
 }
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -327,39 +325,6 @@ BTFrame getPrevActRec(
     : prev;
 }
 
-RuntimeStruct* getBTRuntimeStruct() {
-  static const RuntimeStruct::FieldIndexVector s_structFields = {
-    {s_file_idx, s_file},
-    {s_line_idx, s_line},
-    {s_function_idx, s_function},
-    {s_args_idx, s_args},
-    {s_class_idx, s_class},
-    {s_type_idx, s_type},
-    {s_object_idx, s_object},
-    {s_metadata_idx, s_metadata},
-  };
-  static auto const s_runtimeStruct =
-    RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
-
-  return s_runtimeStruct;
-}
-
-RuntimeStruct* getBTRuntimeStructCompact() {
-  static const RuntimeStruct::FieldIndexVector s_structFields = {
-    {s_file_idx, s_file},
-    {s_line_idx, s_line},
-    {s_function_idx, s_function},
-    {s_args_idx, s_args},
-    {s_class_idx, s_class},
-    {s_type_idx, s_type},
-  };
-  static auto const s_runtimeStruct =
-    RuntimeStruct::registerRuntimeStruct(s_stableIdentifierCompact,
-                                         s_structFields);
-
-  return s_runtimeStruct;
-}
-
 }
 
 using namespace backtrace_detail;
@@ -367,11 +332,22 @@ using namespace backtrace_detail;
 ///////////////////////////////////////////////////////////////////////////////
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
+  static const RuntimeStruct::FieldIndexVector s_structFields = {
+    {s_file_idx, s_file},
+    {s_line_idx, s_line},
+    {s_function_idx, s_function},
+    {s_args_idx, s_args},
+    {s_class_idx, s_class},
+    {s_object_idx, s_object},
+    {s_type_idx, s_type},
+    {s_metadata_idx, s_metadata},
+  };
+  static auto const s_runtimeStruct =
+    RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
+
   if (btArgs.isCompact()) {
     return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }
-
-  auto const runtimeStruct = getBTRuntimeStruct();
 
   auto bt = Array::CreateVec();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
@@ -379,7 +355,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   BTContext ctx;
 
   if (g_context->m_parserFrame) {
-    StructDictInit frame(runtimeStruct, 2);
+    StructDictInit frame(s_runtimeStruct, 2);
     frame.set(s_file_idx, s_file,
               Variant(VarNR(g_context->m_parserFrame->filename.get())));
     frame.set(s_line_idx, s_line, g_context->m_parserFrame->lineNumber);
@@ -388,7 +364,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
-    StructDictInit frame(runtimeStruct, 2);
+    StructDictInit frame(s_runtimeStruct, 2);
     frame.set(s_file_idx, s_file,
               Variant(VarNR(btArgs.m_parserFrame->filename.get())));
     frame.set(s_line_idx, s_line, btArgs.m_parserFrame->lineNumber);
@@ -444,7 +420,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const func = curFrm.fp->func();
       assertx(func);
 
-      StructDictInit frame(runtimeStruct, btArgs.m_parserFrame ? 4 : 2);
+      StructDictInit frame(s_runtimeStruct, btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file_idx, s_file,
                 Variant{const_cast<StringData*>(func->filename())});
       frame.set(s_line_idx, s_line, func->getLineNumber(curFrm.pc));
@@ -467,7 +443,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 
-    StructDictInit frame(runtimeStruct, 8);
+    StructDictInit frame(s_runtimeStruct, 8);
 
     auto const curUnit = fp->func()->unit();
 
@@ -705,11 +681,10 @@ void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
 }
 
 Array CompactTraceData::extract() const {
-  auto const runtimeStruct = getBTRuntimeStructCompact();
   VArrayInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    StructDictInit frame(runtimeStruct, 6);
+    DArrayInit frame(6);
     if (prev && !prev->func->isBuiltin()) {
       auto const prevFunc = prev->func;
       auto const prevUnit = prevFunc->unit();
@@ -719,8 +694,8 @@ Array CompactTraceData::extract() const {
       }
 
       auto const prevPc = prev->prevPc;
-      frame.set(s_file_idx, s_file, StrNR(prevFile).asString());
-      frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prevPc));
+      frame.set(s_file, StrNR(prevFile).asString());
+      frame.set(s_line, prevFunc->getLineNumber(prevPc));
     }
 
     auto const f = m_frames[idx].func;
@@ -733,22 +708,22 @@ Array CompactTraceData::extract() const {
       else funcname = s_include;
     }
 
-    frame.set(s_function_idx, s_function, funcname);
+    frame.set(s_function, funcname);
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = m_frames[idx].func->cls();
       if (ctx != nullptr && !f->isClosureBody()) {
-        frame.set(s_class_idx, s_class, Variant{const_cast<StringData*>(ctx->name())});
+        frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
         if (m_frames[idx].hasThis) {
-          frame.set(s_type_idx, s_type, s_arrow);
+          frame.set(s_type, s_arrow);
         } else {
-          frame.set(s_type_idx, s_type, s_double_colon);
+          frame.set(s_type, s_double_colon);
         }
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());
-      frame.set(s_args_idx, s_args, make_vec_array(filepath));
+      frame.set(s_args, make_vec_array(filepath));
     }
 
     aInit.append(frame.toVariant());

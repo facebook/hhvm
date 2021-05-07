@@ -161,53 +161,8 @@ private:
 
 public:
   /*
-   * Information on all the mergeable defs within a Unit.
-   *
-   * Allocated with a variable-length pointer array in m_mergeables, structured
-   * as follows:
-   *  - the Unit's pseudomain
-   *  - hoistable functions (i.e., toplevel functions that need to be available
-   *    from the beginning of the pseudomain)
-   *  - all other mergeable objects, with the bottom three bits of the pointer
-   *    tagged with a MergeKind
-   */
-  struct MergeInfo {
-    using FuncRange = folly::Range<Func* const*>;
-    using MutableFuncRange = folly::Range<Func**>;
-
-    /*
-     * Allocate a new MergeInfo with `num' mergeables.
-     */
-    static MergeInfo* alloc(size_t num);
-
-    /*
-     * Get a reference or pointer to the mergeable at index `idx'.
-     */
-    void*& mergeableObj(int idx);
-
-    unsigned m_mergeablesSize;
-    void*    m_mergeables[1];
-  };
-
-  /*
-   * Type of a mergeable object.
-   *
-   * This is encoded in the lowest three bits of a pointer to the object.
-   */
-  enum class MergeKind {
-    Class               = 0,  // Class is required to be 0 for correctness.
-    Define              = 1,  // Toplevel scalar define.
-    TypeAlias           = 2,
-    Record              = 3,
-    Done                = 4,
-    // We can add two more kind here; this has to fit in 3 bits.
-  };
-
-  /*
    * Range types.
    */
-  using FuncRange = MergeInfo::FuncRange;
-  using MutableFuncRange = MergeInfo::MutableFuncRange;
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
   using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
@@ -699,12 +654,9 @@ public:
 private:
   void initialMerge();
   template<bool debugger>
-  void mergeImpl(MergeInfo* mi, MergeTypes mergeTypes);
+  void mergeImpl(MergeTypes mergeTypes);
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
-  MergeInfo* mergeInfo() const {
-    return m_mergeInfo.load(std::memory_order_acquire);
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -713,7 +665,6 @@ private:
   // without checking perf!
 private:
   LowStringPtr m_origFilepath{nullptr};
-  std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};
   /*

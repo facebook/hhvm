@@ -1217,7 +1217,6 @@ void emit_record(UnitEmitter& ue, const php::Record& rec) {
         f.userAttributes
     );
   }
-  ue.pushMergeableRecord(re->id());
 }
 
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
@@ -1371,9 +1370,6 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
   );
   te->setUserAttributes(alias.userAttrs);
   te->setTypeStructure(alias.typeStructure);
-
-  auto const id = te->id();
-  ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
 }
 
 void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
@@ -1384,8 +1380,7 @@ void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
     constant.val,
     constant.attrs,
   };
-  auto const id = ue.addConstant(c);
-  ue.pushMergeableId(Unit::MergeKind::Define, id);
+  ue.addConstant(c);
 }
 
 //////////////////////////////////////////////////////////////////////

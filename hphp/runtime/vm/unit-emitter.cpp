@@ -71,8 +71,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-using MergeKind = Unit::MergeKind;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 UnitEmitter::UnitEmitter(const SHA1& sha1,
@@ -186,23 +184,11 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
 ///////////////////////////////////////////////////////////////////////////////
 // PreClassEmitters.
 
-void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
-  pushMergeableClass(pce);
-}
-
-PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
+PreClassEmitter* UnitEmitter::newPreClassEmitter(
   const std::string& name
 ) {
   auto pce = new PreClassEmitter(*this, m_pceVec.size(), name);
   m_pceVec.push_back(pce);
-  return pce;
-}
-
-PreClassEmitter* UnitEmitter::newPreClassEmitter(
-  const std::string& name
-) {
-  PreClassEmitter* pce = newBarePreClassEmitter(name);
-  addPreClassEmitter(pce);
   return pce;
 }
 
@@ -238,36 +224,6 @@ Id UnitEmitter::addConstant(const Constant& c) {
   TRACE(1, "Add Constant %d %s %d\n", id, c.name->data(), c.attrs);
   m_constants.push_back(c);
   return id;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Mergeables.
-
-void UnitEmitter::pushMergeableClass(PreClassEmitter* e) {
-  if (!PreClassEmitter::IsAnonymousClassName(e->name()->toCppString())) {
-    m_mergeableStmts.push_back(std::make_pair(MergeKind::Class, e->id()));
-  }
-}
-
-void UnitEmitter::pushMergeableId(Unit::MergeKind kind, const Id id) {
-  m_mergeableStmts.push_back(std::make_pair(kind, id));
-}
-
-void UnitEmitter::insertMergeableId(Unit::MergeKind kind, int ix, const Id id) {
-  assertx(size_t(ix) <= m_mergeableStmts.size());
-  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
-                          std::make_pair(kind, id));
-}
-
-void UnitEmitter::pushMergeableRecord(const Id id) {
-  m_mergeableStmts.push_back(std::make_pair(Unit::MergeKind::Record, id));
-}
-
-void UnitEmitter::insertMergeableRecord(int ix, const Id id) {
-  assertx(size_t(ix) <= m_mergeableStmts.size());
-  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
-                          std::make_pair(Unit::MergeKind::Record, id));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -339,23 +295,6 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
     }
     for (auto& re : m_reVec) {
       re->commit(txn);
-    }
-
-    for (int i = 0, n = m_mergeableStmts.size(); i < n; i++) {
-      switch (m_mergeableStmts[i].first) {
-        case MergeKind::Done:
-          not_reached();
-        case MergeKind::Class:
-          break;
-        case MergeKind::TypeAlias:
-        case MergeKind::Record:
-        case MergeKind::Define: {
-          urp.insertUnitMergeable[repoId].insert(
-            txn, usn, i,
-            m_mergeableStmts[i].first, m_mergeableStmts[i].second);
-          break;
-        }
-      }
     }
     return RepoStatus::success;
   } catch (RepoExc& re) {
@@ -498,27 +437,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     u->m_funcs.push_back(func);
     ix++;
   }
-
-  Unit::MergeInfo *mi = Unit::MergeInfo::alloc(m_mergeableStmts.size());
-  u->m_mergeInfo.store(mi, std::memory_order_relaxed);
-  ix = 0;
-  for (auto& mergeable : m_mergeableStmts) {
-    switch (mergeable.first) {
-      case MergeKind::Class:
-        mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
-        break;
-      case MergeKind::Define:
-      case MergeKind::Record:
-      case MergeKind::TypeAlias:
-        mi->mergeableObj(ix++) =
-          (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
-        break;
-      case MergeKind::Done:
-        not_reached();
-    }
-  }
-  assertx(ix == mi->m_mergeablesSize);
-  mi->mergeableObj(ix) = (void*)MergeKind::Done;
 
   if (u->m_extended) {
     auto ux = u->getExtended();
@@ -731,64 +649,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
     }
   );
 
-  // Mergeables (we cannot just serde the vector because some of the
-  // entries are populated when creating PreClassEmitters).
-  if constexpr (SerDe::deserializing) {
-    size_t size;
-    sd(size);
-
-    for (size_t i = 0; i < size; ++i) {
-      size_t idx;
-      decltype(m_mergeableStmts)::value_type v;
-      sd(idx);
-      sd(v);
-      switch (v.first) {
-        case MergeKind::Define:
-        case MergeKind::TypeAlias:
-          insertMergeableId(v.first, idx, v.second);
-          break;
-        case MergeKind::Record:
-          insertMergeableRecord(idx, v.second);
-          break;
-        case MergeKind::Class:
-        case MergeKind::Done:
-          always_assert(false);
-      }
-    }
-  } else {
-    size_t size = 0;
-    for (auto const& [k, _] : m_mergeableStmts) {
-      switch (k) {
-        case MergeKind::TypeAlias:
-        case MergeKind::Record:
-        case MergeKind::Define:
-          ++size;
-          break;
-        case MergeKind::Class:
-          break;
-        case MergeKind::Done:
-          always_assert(false);
-      }
-    }
-
-    sd(size);
-    for (size_t i = 0; i < m_mergeableStmts.size(); ++i) {
-      auto const& p = m_mergeableStmts[i];
-      switch (p.first) {
-        case MergeKind::TypeAlias:
-        case MergeKind::Record:
-        case MergeKind::Define:
-          sd(i);
-          sd(p);
-          break;
-        case MergeKind::Class:
-          break;
-        case MergeKind::Done:
-          always_assert(false);
-      }
-    }
-  }
-
   // Func emitters (we cannot use seq for these because they come from
   // both the pre-class emitters and m_fes.
   if constexpr (SerDe::deserializing) {
@@ -911,15 +771,6 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
       m_repo.table(repoId, "UnitArrayTypeTable"));
     txn.exec(createQuery);
   }
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} "
-      "(unitSn INTEGER, mergeableIx INTEGER, mergeableKind INTEGER, "
-      " mergeableId INTEGER, "
-      " PRIMARY KEY (unitSn, mergeableIx));",
-      m_repo.table(repoId, "UnitMergeables"));
-    txn.exec(createQuery);
-  }
 }
 
 std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
@@ -952,7 +803,6 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     m_repo.rrp().getRecords[repoId].get(*ue);
     getUnitTypeAliases[repoId].get(*ue);
     getUnitConstants[repoId].get(*ue);
-    getUnitMergeables[repoId].get(*ue);
     m_repo.frp().getFuncs[repoId].get(*ue);
 
     for (auto& fe : ue->m_fes) {
@@ -1216,64 +1066,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       ArrayData::GetScalarArray(&ad);
       Id id DEBUG_ONLY = ue.mergeArray(ad);
       assertx(id == arrayId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void UnitRepoProxy::InsertUnitMergeableStmt
-                  ::insert(RepoTxn& txn, int64_t unitSn,
-                           int ix, Unit::MergeKind kind, Id id) {
-  assertx(kind == MergeKind::TypeAlias ||
-          kind == MergeKind::Define ||
-          kind == MergeKind::Record);
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES("
-      " @unitSn, @mergeableIx, @mergeableKind, @mergeableId);",
-      m_repo.table(m_repoId, "UnitMergeables"));
-    txn.prepare(*this, insertQuery);
-  }
-
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@mergeableIx", ix);
-  query.bindInt("@mergeableKind", (int)kind);
-  query.bindId("@mergeableId", id);
-  query.exec();
-}
-
-void UnitRepoProxy::GetUnitMergeablesStmt
-                  ::get(UnitEmitter& ue) {
-  auto txn = RepoTxn{m_repo.begin()};
-  if (!prepared()) {
-    auto selectQuery = folly::sformat(
-      "SELECT mergeableIx, mergeableKind, mergeableId "
-      "FROM {} "
-      "WHERE unitSn == @unitSn ORDER BY mergeableIx ASC;",
-      m_repo.table(m_repoId, "UnitMergeables"));
-    txn.prepare(*this, selectQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.m_sn);
-  do {
-    query.step();
-    if (query.row()) {
-      int mergeableIx;           /**/ query.getInt(0, mergeableIx);
-      int mergeableKind;         /**/ query.getInt(1, mergeableKind);
-      Id mergeableId;            /**/ query.getInt(2, mergeableId);
-
-      auto k = MergeKind(mergeableKind);
-      switch (k) {
-        case MergeKind::Define:
-        case MergeKind::TypeAlias:
-          ue.insertMergeableId(k, mergeableIx, mergeableId);
-          break;
-        case MergeKind::Record:
-          ue.insertMergeableRecord(mergeableIx, mergeableId);
-          break;
-        default: break;
-      }
     }
   } while (!query.done());
   txn.commit();

@@ -649,7 +649,6 @@ struct AsmState {
 
   void finishClass() {
     assertx(!fe && !re);
-    ue->addPreClassEmitter(pce);
     pce = 0;
     enumTySet = false;
   }
@@ -3339,7 +3338,7 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newBarePreClassEmitter(name);
+  as.pce = as.ue->newPreClassEmitter(name);
   as.pce->init(line0,
                line1,
                attrs,
@@ -3411,7 +3410,6 @@ void parse_record(AsmState& as) {
   as.in.expectWs('{');
   parse_record_body(as);
 
-  as.ue->pushMergeableRecord(as.re->id());
   assertx(!as.fe && !as.pce);
   as.re = nullptr;
 }
@@ -3507,8 +3505,6 @@ void parse_alias(AsmState& as) {
     te->setTypeStructure(ArrNR(ArrayData::GetScalarArray(std::move(ts))));
   }
 
-  as.ue->pushMergeableId(Unit::MergeKind::TypeAlias, te->id());
-
   as.in.expectWs(';');
 }
 
@@ -3534,8 +3530,7 @@ void parse_constant(AsmState& as) {
   if (type(constant.val) == KindOfUninit) {
     constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
   }
-  auto const cid = as.ue->addConstant(constant);
-  as.ue->pushMergeableId(Unit::MergeKind::Define, cid);
+  as.ue->addConstant(constant);
 }
 
 /*

@@ -115,17 +115,6 @@ std::atomic<size_t> Unit::s_createdUnits{0};
 std::atomic<size_t> Unit::s_liveUnits{0};
 
 ///////////////////////////////////////////////////////////////////////////////
-// MergeInfo.
-
-Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
-  MergeInfo* mi = (MergeInfo*)malloc(
-    sizeof(MergeInfo) + size * sizeof(void*));
-  mi->m_mergeablesSize = size;
-  return mi;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Construction and destruction.
 
 Unit::Unit()
@@ -145,10 +134,7 @@ Unit::~Unit() {
     data_map::deregister(this);
   }
 
-  auto const mi = mergeInfo();
-  if (mi) {
-    for (auto const func : funcs()) Func::destroy(func);
-  }
+  for (auto const func : funcs()) Func::destroy(func);
 
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
@@ -173,8 +159,6 @@ Unit::~Unit() {
       }
     }
   }
-
-  free(mi);
 
   --s_liveUnits;
 }
@@ -813,9 +797,9 @@ void Unit::merge() {
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(mergeInfo(), mergeTypes);
+    mergeImpl<true>(mergeTypes);
   } else {
-    mergeImpl<false>(mergeInfo(), mergeTypes);
+    mergeImpl<false>(mergeTypes);
   }
 
   if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
@@ -885,7 +869,7 @@ static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, boo
 }
 
 template <bool debugger>
-void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
+void Unit::mergeImpl(MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
 
@@ -896,8 +880,9 @@ void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
     rl_mergedUnits->emplace(this);
   }
 
-  FTRACE(1, "Merging unit {} ({} elements to define)\n",
-         this->m_origFilepath->data(), mi->m_mergeablesSize);
+  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealieses, {} classes, {} records)\n",
+         this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
+         m_preClasses.size(), m_preRecords.size());
 
   if (mergeTypes & MergeTypes::Function) {
     for (auto func : funcs()) {

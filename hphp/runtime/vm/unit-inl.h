@@ -28,13 +28,6 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Unit::MergeInfo.
-
-inline void*& Unit::MergeInfo::mergeableObj(int idx) {
-  return m_mergeables[idx];
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Basic accessors.
 
 inline UnitExtended* Unit::getExtended() {
@@ -308,8 +301,7 @@ template<class Fn> void Unit::forEachFunc(Fn fn) const {
     }
   }
   for (auto& c : preclasses()) {
-    auto methods = FuncRange{c->methods(), c->methods() + c->numMethods()};
-    for (auto& method : methods) {
+    for (auto& method : c->allMethods()) {
       if (fn(method)) {
         return;
       }

@@ -15,4 +15,4 @@ Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 30, characters 32-38:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 33, characters 28-34:
-Expression trees only support comparison (`<`, `===` etc) and basic arithmetic operators (`+` etc). (Parsing[1002])
+Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])

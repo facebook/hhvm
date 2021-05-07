@@ -362,8 +362,37 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer<'_> {
                     Bop::Gtgt => *e = virtualize_binop(lhs, "__greaterThanGreaterThan", rhs, &e.0),
                     // Assignment is special and not virtualized
                     Bop::Eq(None) => {}
-                    _ => {
-                        return Err((pos, "Expression trees only support comparison (`<`, `===` etc) and basic arithmetic operators (`+` etc).".into()));
+                    // Explicit list of unsupported operators and error messages
+                    Bop::Starstar => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the exponent operator `**`.".into(),
+                        ));
+                    }
+                    Bop::Eqeq | Bop::Diff => {
+                        return Err((
+                            pos,
+                            "Expression trees only support strict equality operators `===` and `!==`".into(),
+                        ));
+                    }
+                    Bop::Cmp => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the spaceship operator `<=>`. Try comparison operators like `<` and `>=`".into(),
+                        ));
+                    }
+                    Bop::QuestionQuestion => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the null coalesce operator `??`."
+                                .into(),
+                        ));
+                    }
+                    Bop::Eq(_) => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),
+                        ));
                     }
                 }
             }
@@ -379,10 +408,30 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer<'_> {
                     Uop::Uminus => *e = virtualize_unop(operand, "__negate", &e.0),
                     // Allow bitwise complement
                     Uop::Utild => *e = virtualize_unop(operand, "__tilde", &e.0),
-                    _ => {
+                    // Currently not allowed operators
+                    Uop::Uplus => {
                         return Err((
                             pos,
-                            "Expression trees do not support this unary operator.".into(),
+                            "Expression trees do not support the unary plus operator.".into(),
+                        ));
+                    }
+                    Uop::Uincr | Uop::Upincr => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the increment operator `++`.".into(),
+                        ));
+                    }
+                    Uop::Udecr | Uop::Updecr => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the decrement operator `--`.".into(),
+                        ));
+                    }
+                    Uop::Usilence => {
+                        return Err((
+                            pos,
+                            "Expression trees do not support the error suppression operator `@`."
+                                .into(),
                         ));
                     }
                 }

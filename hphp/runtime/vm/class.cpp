@@ -1480,7 +1480,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
     raise_error("%s is a %s, looking for a context constant",
                 name->data(), ConstModifiers::show(cns.kind()));
   }
-  if (cns.isAbstract()) {
+  if (cns.isAbstractAndUninit()) {
     if (!failIsFatal) return folly::none;
     if (coinflip()) {
       // TODO: Once coeffect migration is done, convert this back to raise_error
@@ -1706,7 +1706,7 @@ const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
   always_assert(what != ConstModifiers::Kind::Context);
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) return nullptr;
-  if (m_constants[clsCnsInd].isAbstract()) return nullptr;
+  if (m_constants[clsCnsInd].isAbstractAndUninit()) return nullptr;
 
   auto const kind = m_constants[clsCnsInd].kind();
   if (kind != what) return nullptr;
@@ -1721,7 +1721,7 @@ Slot Class::clsCnsSlot(
 ) const {
   auto slot = m_constants.findIndex(name);
   if (slot == kInvalidSlot) return slot;
-  if (!allowAbstract && m_constants[slot].isAbstract()) return kInvalidSlot;
+  if (!allowAbstract && m_constants[slot].isAbstractAndUninit()) return kInvalidSlot;
   return m_constants[slot].kind() == want ? slot : kInvalidSlot;
 }
 
@@ -2271,11 +2271,11 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
                   existingConst.cls->name()->data());
     }
 
-    if (tConst.isAbstract()) {
+    if (tConst.isAbstractAndUninit()) {
       return;
     }
 
-    if (existingConst.isAbstract()) {
+    if (existingConst.isAbstractAndUninit()) {
       existingConst.cls = tConst.cls;
       existingConst.val = tConst.val;
       return;
@@ -2414,11 +2414,11 @@ void Class::setConstants() {
                     existingConst.cls->name()->data());
       }
 
-      if (iConst.isAbstract()) {
+      if (iConst.isAbstractAndUninit()) {
         continue;
       }
 
-      if (existingConst.isAbstract()) {
+      if (existingConst.isAbstractAndUninit()) {
         existingConst.cls = iConst.cls;
         existingConst.val = iConst.val;
         continue;
@@ -2473,8 +2473,8 @@ void Class::setConstants() {
           }
         }
       }
-      if (preConst->isAbstract() &&
-          !builder[it2->second].isAbstract()) {
+      if (preConst->isAbstractAndUninit() &&
+          !builder[it2->second].isAbstractAndUninit()) {
         raise_error("Cannot re-declare as abstract previously defined "
                     "%s %s::%s in %s",
                     ConstModifiers::show(builder[it2->second].kind()),
@@ -2509,7 +2509,7 @@ void Class::setConstants() {
   if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
     for (Slot i = 0; i < builder.size(); i++) {
       const Const& constant = builder[i];
-      if (constant.isAbstract()) {
+      if (constant.isAbstractAndUninit()) {
         raise_error("Class %s contains abstract %s (%s) and "
                     "must therefore be declared abstract or define "
                     "the remaining constants",
@@ -2525,7 +2525,7 @@ void Class::setConstants() {
     (attrs() & (AttrAbstract | AttrFinal)) == (AttrAbstract | AttrFinal)) {
     for (Slot i = 0; i < builder.size(); i++) {
       const Const& constant = builder[i];
-      if (constant.isAbstract()) {
+      if (constant.isAbstractAndUninit()) {
         raise_error(
           "Class %s contains abstract %s (%s) and "
           "therefore cannot be declared 'abstract final'",

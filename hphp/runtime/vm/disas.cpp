@@ -670,7 +670,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
     }
     not_reached();
   }();
-  if (cns->isAbstract()) {
+  if (cns->isAbstractAndUninit()) {
     out.fmtln(".const {}{} isAbstract;", cns->name(), kind);
     return;
   }

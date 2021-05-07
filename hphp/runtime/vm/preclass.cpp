@@ -253,7 +253,7 @@ void PreClass::Const::prettyPrint(std::ostream& out,
       out << "Context ";
       break;
   }
-  if (isAbstract()) {
+  if (isAbstractAndUninit()) {
     out << "Constant (abstract) "
         << preClass->name()->data() << "::" << m_name->data()
         << std::endl;

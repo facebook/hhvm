@@ -132,7 +132,7 @@ struct PreClass : AtomicCountable {
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
     bool isFromTrait()     const { return m_fromTrait; }
-    bool isAbstract()      const { return m_val.constModifiers().isAbstract(); }
+    bool isAbstractAndUninit()      const { return m_val.constModifiers().isAbstract(); }
     ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
     StaticCoeffects coeffects()  const;
 

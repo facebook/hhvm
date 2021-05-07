@@ -138,7 +138,7 @@ const EnumValues* EnumCache::loadEnumValues(
   auto const consts = klass->constants();
   bool persist = true;
   for (size_t i = 0; i < numConstants; i++) {
-    if (consts[i].isAbstract()
+    if (consts[i].isAbstractAndUninit()
         || consts[i].kind() != ConstModifiers::Kind::Value) {
       continue;
     }

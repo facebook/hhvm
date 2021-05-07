@@ -494,7 +494,7 @@ void CompletionsCommand::addClassConstantCompletions(
     // constants() includes type constants and abstract constants, neither of
     // which are particularly useful for debugger completion
     if (clsConst.kind() == ConstModifiers::Kind::Value
-        && !clsConst.isAbstract()) {
+        && !clsConst.isAbstractAndUninit()) {
       const std::string& name = clsConst.name->toCppString();
       addIfMatch(name, context.matchPrefix, CompletionTypeValue, targets);
     }

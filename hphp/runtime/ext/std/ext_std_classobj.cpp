@@ -121,7 +121,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
-    if (consts[i].cls == cls && !consts[i].isAbstract() &&
+    if (consts[i].cls == cls && !consts[i].isAbstractAndUninit() &&
         consts[i].kind() == ConstModifiers::Kind::Value) {
       auto const name  = const_cast<StringData*>(consts[i].name.get());
       TypedValue value = consts[i].val;

@@ -308,6 +308,7 @@ void StructDictInit::set(int64_t key, TypedValue value) {
   FTRACE(2, "StructDictInit set at integer key {}, escalate\n", key);
   auto const sad = StructDict::As(m_arr);
   m_arr = sad->escalateWithCapacity(m_escalateCapacity, "StructDictInit");
+  StructDict::Release(sad);
   assertx(m_arr->isVanillaDict());
   m_struct = nullptr;
 

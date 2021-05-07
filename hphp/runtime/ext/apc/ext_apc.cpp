@@ -399,7 +399,7 @@ bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
   if (!apcExtension::Enable) return false;
 
   if (new_ttl < 0) return false;
-  return apc_store().bumpTTL(key, new_ttl);
+  return apc_store().extendTTL(key, new_ttl);
 }
 
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {

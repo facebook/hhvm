@@ -790,8 +790,9 @@ int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
   return sval->dataSize;
 }
 
-static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
-  if (apcExtension::TTLLimit > 0 && !overwritePrime) {
+// Apply APC.TTLLimit, if it is configured.
+static int64_t apply_ttl_limit(int64_t ttl) {
+  if (apcExtension::TTLLimit > 0) {
     if (ttl == 0 || ttl > apcExtension::TTLLimit) {
       return apcExtension::TTLLimit;
     }
@@ -799,7 +800,7 @@ static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   return ttl;
 }
 
-bool ConcurrentTableSharedStore::bumpTTL(const String& key, int64_t new_ttl) {
+bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
   SharedMutex::ReadHolder l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -811,7 +812,7 @@ bool ConcurrentTableSharedStore::bumpTTL(const String& key, int64_t new_ttl) {
   auto old_expire = sval.rawExpire();
   if (!old_expire) return false; // Already infinite TTL
 
-  new_ttl = adjust_ttl(new_ttl, false);
+  new_ttl = apply_ttl_limit(new_ttl);
   // This API can't be used to breach the ttl cap.
   if (new_ttl == 0) {
     sval.expireTime.store(0, std::memory_order_release);
@@ -892,7 +893,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       APCStats::getAPCStats().addKey(keyLen);
     }
 
-    int64_t adjustedMaxTTL = adjust_ttl(max_ttl, !limit_ttl);
+    int64_t adjustedMaxTTL = limit_ttl ? apply_ttl_limit(max_ttl) : max_ttl;
     if (adjustedMaxTTL > apcExtension::TTLMaxFinite) {
       adjustedMaxTTL = 0;
     }

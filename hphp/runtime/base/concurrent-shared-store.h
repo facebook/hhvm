@@ -211,14 +211,12 @@ struct ConcurrentTableSharedStore {
    * Set the value for `key' to `val'.  If there was an existing value, it is
    * overwritten.
    *
-   * The requested ttl is limited by the ApcTTLLimit, unless we're overwriting
-   * a primed key.
+   * The requested ttl is limited by the ApcTTLLimit.
    */
   void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
 
   /*
-   * Set the value for `key' to `val', without any TTL, even if it wasn't
-   * a primed key.
+   * Set the value for `key' to `val', without any TTL.
    */
   void setWithoutTTL(const String& key, const Variant& val);
 
@@ -250,7 +248,7 @@ struct ConcurrentTableSharedStore {
    * it succeeds (the key exists in apc, is unexpired, and the expiration
    * was actually adjusted), false otherwise.
    */
-  bool bumpTTL(const String& key, int64_t new_ttl);
+  bool extendTTL(const String& key, int64_t new_ttl);
 
   /*
    * Returns the size of an entry if it exists. Sets `found` to true if it

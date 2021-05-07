@@ -125,14 +125,11 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
   return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
 }
 
-ArrayData* maybeMakeLoggingArray(
-    ArrayData* ad, RuntimeStruct* structHandle) {
+ArrayData* maybeMakeLoggingArray(ArrayData* ad, RuntimeStruct* structHandle) {
   if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
 
   auto const profile = getLoggingProfile(structHandle);
-  assertx(profile);
-
-  return maybeMakeLoggingArray(ad, profile);
+  return profile ? maybeMakeLoggingArray(ad, profile) : ad;
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {

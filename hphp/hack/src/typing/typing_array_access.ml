@@ -14,7 +14,6 @@ open Typing_defs
 module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
-module Union = Typing_union
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
 module Partial = Partial_provider
@@ -580,12 +579,6 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         let (env, ty) = error_assign_array_append env expr_pos ty1 in
         (env, ty, Ok ty2))
 
-let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
-  let (env, ty, _) =
-    assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2
-  in
-  (env, ty)
-
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
   Typing_log.(
     log_with_level env "typing" 1 (fun () ->
@@ -633,6 +626,11 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
       | _ -> (env, None)
     end
   | _ -> (env, None)
+
+(* Used for typing an assignment e1[key] = e2
+ * where e1 has type ty1, key has type tkey and e2 has type ty2.
+ * Return the new array type
+ *)
 
 let assign_array_get_with_err ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
   let (env, ety1) =
@@ -842,13 +840,3 @@ let assign_array_get_with_err ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           (Reason.to_pos r)
           (Typing_print.error env ety1);
         error)
-
-(* Used for typing an assignment e1[key] = e2
- * where e1 has type ty1, key has type tkey and e2 has type ty2.
- * Return the new array type
- *)
-let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
-  let (env, ty, _) =
-    assign_array_get_with_err ~array_pos ~expr_pos ur env ty1 key tkey ty2
-  in
-  (env, ty)

@@ -1925,6 +1925,15 @@ To string conversions:
   as specialized code for an iterator init or next which we may or may not use.
   If it survives irgen, it should be eliminated in the first DCE pass.
 
+| CheckFuncNeedsCoverage<Func>, ND, NA, B
+
+  Checks if Func needs to have coverage information recorded for the current
+  request.
+
+| RecordFuncCall<Func>, ND, NA, NF
+
+  Records a call to Func for a function call based code coverage report.
+
 13. Runtime helpers
 
 | VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), NF

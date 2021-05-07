@@ -1646,6 +1646,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileIsTypeStruct:
   case LdLazyClsName:
   case DirFromFilepath:
+  case CheckFuncNeedsCoverage:
+  case RecordFuncCall:
     return IrrelevantEffects {};
 
   case LookupClsCns:

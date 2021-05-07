@@ -521,6 +521,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckCold:
   case CheckDictKeys:
   case CheckDictOffset:
+  case CheckFuncNeedsCoverage:
   case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
@@ -879,6 +880,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileType:
   case RBTraceEntry:
   case RBTraceMsg:
+  case RecordFuncCall:
   case ReqBindJmp:
   case ReqRetranslate:
   case ReqRetranslateOpt:

@@ -1121,6 +1121,40 @@ struct Func final {
    */
   int8_t& maybeIntercepted() const;
 
+  /*
+   * When function call based coverage is enabled for the current request,
+   * records a call to `this`. The no check version asserts that function
+   * coverage has already been enabled and the function is both eligible to be
+   * covered and has not yet been seen.
+   */
+  void recordCall() const;
+  void recordCallNoCheck() const;
+
+  /*
+   * EnableCoverage enables recording of called functions for the current
+   * request.
+   */
+  static void EnableCoverage();
+
+  /*
+   * GetCoverage returns a keyset of called functions and disables further
+   * coverage for the current request until reenabled by EnableCoverage.
+   */
+  static Array GetCoverage();
+
+  /*
+   * RDS based counter (uint32_t) that when zero indicates coverage is disabled
+   * and when non-zero indicates an index which can be used to short circuit
+   * tests that functions have been covered.
+   */
+  static rds::Handle GetCoverageIndex();
+
+  /*
+   * Get an RDS counter (uint32_t) that can be compared against GetCoverageIndex
+   * to determine if the function has been covered in the current request.
+   */
+  rds::Handle getCoverageHandle() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Public setters.
   //

@@ -1179,4 +1179,151 @@ PC Func::loadBytecode() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Coverage
+
+namespace {
+RDS_LOCAL(uint32_t, tl_saved_coverage_index);
+RDS_LOCAL_NO_CHECK(Array, tl_called_functions);
+rds::Link<uint32_t, rds::Mode::Local> s_coverage_index;
+
+using CoverageLinkMap = tbb::concurrent_hash_map<
+  const StringData*,
+  rds::Link<uint32_t, rds::Mode::Local>
+>;
+
+struct EmbeddedCoverageLinkMap {
+  explicit operator bool() const { return inited; }
+
+  CoverageLinkMap* operator->() {
+    assertx(inited);
+    return reinterpret_cast<CoverageLinkMap*>(&data);
+  }
+  CoverageLinkMap& operator*() { assertx(inited); return *operator->(); }
+
+  void emplace(uint32_t size) {
+    assertx(!inited);
+    new (&data) CoverageLinkMap(size);
+    inited = true;
+  }
+
+  void clear() {
+    if (inited) {
+      operator*().~CoverageLinkMap();
+      inited = false;
+    }
+  }
+
+private:
+  typename std::aligned_storage<
+    sizeof(CoverageLinkMap),
+    alignof(CoverageLinkMap)
+  >::type data;
+  bool inited;
+};
+
+EmbeddedCoverageLinkMap s_covLinks;
+static InitFiniNode s_covLinksReinit([]{
+  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  s_covLinks.emplace(RO::EvalFuncCountHint);
+}, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
+
+InitFiniNode s_clear_called_functions([]{
+  tl_called_functions.nullOut();
+}, InitFiniNode::When::RequestFini, "tl_called_functions clear");
+}
+
+rds::Handle Func::GetCoverageIndex() {
+  if (!s_coverage_index.bound()) {
+    s_coverage_index.bind(rds::Mode::Local, rds::LinkID{"FuncCoverageIndex"});
+  }
+  return s_coverage_index.handle();
+}
+
+rds::Handle Func::getCoverageHandle() const {
+  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!isNoInjection() && !isMethCaller());
+
+  CoverageLinkMap::const_accessor cnsAcc;
+  if (s_covLinks->find(cnsAcc, fullName())) {
+    assertx(cnsAcc->second.bound());
+    return cnsAcc->second.handle();
+  }
+
+  CoverageLinkMap::accessor acc;
+  if (s_covLinks->insert(acc, fullName())) {
+    assertx(!acc->second.bound());
+    acc->second.bind(
+      rds::Mode::Local, rds::LinkName{"FuncCoverageFlag", fullName()}
+    );
+  }
+  assertx(acc->second.bound());
+  return acc->second.handle();
+}
+
+void Func::EnableCoverage() {
+  assertx(g_context);
+
+  if (RO::RepoAuthoritative) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot enable function call coverage in repo authoritative mode"
+    );
+  }
+  if (!RO::EvalEnableFuncCoverage) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot enable function call coverage (you must set "
+      "Eval.EnableFuncCoverage = true)"
+    );
+  }
+  if (!tl_called_functions.isNull()) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Function call coverage already enabled"
+    );
+  }
+
+  GetCoverageIndex(); // bind the handle
+  if (!*tl_saved_coverage_index) *tl_saved_coverage_index = 1;
+  *s_coverage_index = (*tl_saved_coverage_index)++;
+  tl_called_functions.emplace(Array::CreateDict());
+}
+
+Array Func::GetCoverage() {
+  if (tl_called_functions.isNull()) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Function call coverage not enabled"
+    );
+  }
+
+  auto const ret = std::move(*tl_called_functions.get());
+  *s_coverage_index = 0;
+  tl_called_functions.destroy();
+  return ret;
+}
+
+void Func::recordCall() const {
+  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (tl_called_functions.isNull()) return;
+  if (isNoInjection() || isMethCaller()) return;
+
+  auto const path = unit()->isSystemLib()
+    ? empty_string()
+    : StrNR{unit()->filepath()}.asString();
+
+  tl_called_functions->set(fullNameStr().asString(), std::move(path), true);
+}
+
+void Func::recordCallNoCheck() const {
+  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!tl_called_functions.isNull());
+  assertx(tl_called_functions->isDict());
+  assertx(!isNoInjection() && !isMethCaller());
+  assertx(!tl_called_functions->exists(fullNameStr().asString(), true));
+
+  auto const path = unit()->isSystemLib()
+    ? empty_string()
+    : StrNR{unit()->filepath()}.asString();
+
+  tl_called_functions->set(fullNameStr().asString(), std::move(path), true);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

@@ -3599,6 +3599,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
   calleeCoeffectChecks(func, callFlags.coeffects(), numArgsInclUnpack, ctx);
   calleeImplicitContextChecks(func);
+  func->recordCall();
   initFuncInputs(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();

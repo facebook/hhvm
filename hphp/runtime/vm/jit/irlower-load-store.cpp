@@ -405,6 +405,41 @@ void cgLdInitRDSAddr(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
+void cgCheckFuncNeedsCoverage(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const indexHandle = Func::GetCoverageIndex();
+  auto const flagHandle = inst->extra<FuncData>()->func->getCoverageHandle();
+
+  auto const index = v.makeReg();
+  auto const flag = v.makeReg();
+  auto const sf1 = v.makeReg();
+  auto const sf2 = v.makeReg();
+
+  v << loadw{rvmtl()[indexHandle], index};
+  v << testw{index, index, sf1};
+  ifThen(v, CC_NZ, sf1, [&] (Vout& v) {
+    v << loadw{rvmtl()[flagHandle], flag};
+    v << cmpw{index, flag, sf2};
+    v << jcc{CC_NE, sf2, {label(env, inst->next()), label(env, inst->taken())}};
+  });
+}
+
+void cgRecordFuncCall(IRLS& env, const IRInstruction* inst) {
+  auto const indexHandle = Func::GetCoverageIndex();
+  auto const flagHandle = inst->extra<FuncData>()->func->getCoverageHandle();
+
+  auto& v = vmain(env);
+  auto const index = v.makeReg();
+
+  v << loadw{rvmtl()[indexHandle], index};
+  v << storew{index, rvmtl()[flagHandle]};
+
+  cgCallHelper(v, env, CallSpec::method(&Func::recordCallNoCheck), kVoidDest,
+               SyncOptions::None,
+               argGroup(env, inst).immPtr(inst->extra<FuncData>()->func));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdTVAux(IRLS& env, const IRInstruction* inst) {

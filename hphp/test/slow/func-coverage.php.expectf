@@ -1,0 +1,556 @@
+a
+>>>>>> COVERAGE_START
+b
+c
+>>>>>> COVERAGE_STOP
+dict(4) {
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+T::i
+C::s
+>>>>>> COVERAGE_START
+T::j
+T::k
+P::q
+P::m
+C::q
+P::m
+>>>>>> COVERAGE_STOP
+dict(6) {
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+C::y
+T::h
+>>>>>> COVERAGE_START
+C::x
+C::z
+P::n
+T::f
+T::g
+P::x
+>>>>>> COVERAGE_STOP
+dict(7) {
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+>>>>>> COVERAGE_START
+a
+b
+c
+T::i
+T::j
+T::k
+P::q
+P::m
+C::q
+C::r
+C::s
+P::m
+T::i
+T::j
+T::k
+P::x
+P::n
+C::x
+C::y
+C::z
+P::n
+T::f
+T::g
+T::h
+>>>>>> COVERAGE_STOP
+dict(23) {
+  ["a"]=>
+  string(%d) "%s/func-coverage.php"
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::r"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::s"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::y"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::h"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+a
+>>>>>> COVERAGE_START
+b
+c
+>>>>>> COVERAGE_STOP
+dict(4) {
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+T::i
+C::s
+>>>>>> COVERAGE_START
+T::j
+T::k
+P::q
+P::m
+C::q
+P::m
+>>>>>> COVERAGE_STOP
+dict(6) {
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+C::y
+T::h
+>>>>>> COVERAGE_START
+C::x
+C::z
+P::n
+T::f
+T::g
+P::x
+>>>>>> COVERAGE_STOP
+dict(7) {
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+>>>>>> COVERAGE_START
+a
+b
+c
+T::i
+T::j
+T::k
+P::q
+P::m
+C::q
+C::r
+C::s
+P::m
+T::i
+T::j
+T::k
+P::x
+P::n
+C::x
+C::y
+C::z
+P::n
+T::f
+T::g
+T::h
+>>>>>> COVERAGE_STOP
+dict(23) {
+  ["a"]=>
+  string(%d) "%s/func-coverage.php"
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::r"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::s"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::y"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::h"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+a
+>>>>>> COVERAGE_START
+b
+c
+>>>>>> COVERAGE_STOP
+dict(4) {
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+T::i
+C::s
+>>>>>> COVERAGE_START
+T::j
+T::k
+P::q
+P::m
+C::q
+P::m
+>>>>>> COVERAGE_STOP
+dict(6) {
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+C::y
+T::h
+>>>>>> COVERAGE_START
+C::x
+C::z
+P::n
+T::f
+T::g
+P::x
+>>>>>> COVERAGE_STOP
+dict(7) {
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+>>>>>> COVERAGE_START
+a
+b
+c
+T::i
+T::j
+T::k
+P::q
+P::m
+C::q
+C::r
+C::s
+P::m
+T::i
+T::j
+T::k
+P::x
+P::n
+C::x
+C::y
+C::z
+P::n
+T::f
+T::g
+T::h
+>>>>>> COVERAGE_STOP
+dict(23) {
+  ["a"]=>
+  string(%d) "%s/func-coverage.php"
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::r"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::s"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::y"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::h"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+a
+>>>>>> COVERAGE_START
+b
+c
+>>>>>> COVERAGE_STOP
+dict(4) {
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+T::i
+C::s
+>>>>>> COVERAGE_START
+T::j
+T::k
+P::q
+P::m
+C::q
+P::m
+>>>>>> COVERAGE_STOP
+dict(6) {
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+C::y
+T::h
+>>>>>> COVERAGE_START
+C::x
+C::z
+P::n
+T::f
+T::g
+P::x
+>>>>>> COVERAGE_STOP
+dict(7) {
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}
+>>>>>> COVERAGE_START
+a
+b
+c
+T::i
+T::j
+T::k
+P::q
+P::m
+C::q
+C::r
+C::s
+P::m
+T::i
+T::j
+T::k
+P::x
+P::n
+C::x
+C::y
+C::z
+P::n
+T::f
+T::g
+T::h
+>>>>>> COVERAGE_STOP
+dict(23) {
+  ["a"]=>
+  string(%d) "%s/func-coverage.php"
+  ["b"]=>
+  string(%d) "%s/func-coverage.php"
+  ["c"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["T::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::m"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::q"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::r"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::s"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::i"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::j"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::k"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["P::n"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::x"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::y"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::z"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::f"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::g"]=>
+  string(%d) "%s/func-coverage.php"
+  ["C::h"]=>
+  string(%d) "%s/func-coverage.php"
+  ["HH\collect_function_coverage"]=>
+  string(0) ""
+}

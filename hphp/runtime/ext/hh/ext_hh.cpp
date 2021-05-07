@@ -1242,6 +1242,14 @@ int64_t HHVM_FUNCTION(hphp_get_logger_request_id) {
   return Logger::GetRequestId();
 }
 
+void HHVM_FUNCTION(enable_function_coverage) {
+  Func::EnableCoverage();
+}
+
+Array HHVM_FUNCTION(collect_function_coverage) {
+  return Func::GetCoverage();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1281,6 +1289,8 @@ static struct HHExtension final : Extension {
     X(set_implicit_context_by_index);
     X(get_executable_lines);
     X(hphp_get_logger_request_id);
+    X(enable_function_coverage);
+    X(collect_function_coverage);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

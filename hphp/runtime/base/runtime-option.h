@@ -715,6 +715,7 @@ struct RuntimeOption {
    *  2 - Code coverage enabled                                         \
    */                                                                   \
   F(uint32_t, EnableCodeCoverage,      0)                               \
+  F(bool, EnableFuncCoverage,          false)                           \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \

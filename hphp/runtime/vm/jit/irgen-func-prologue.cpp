@@ -332,6 +332,22 @@ void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
   );
 }
 
+void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
+  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (callee->isNoInjection() || callee->isMethCaller()) return;
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckFuncNeedsCoverage, FuncData{callee}, taken);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RecordFuncCall, FuncData{callee});
+    }
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -378,6 +394,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeDynamicCallChecks(env, callee, callFlags);
   emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, argc, prologueCtx);
   emitCalleeImplicitContextChecks(env, callee);
+  emitCalleeRecordFuncCoverage(env, callee);
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(callee, argc) == StackCheck::Early) {

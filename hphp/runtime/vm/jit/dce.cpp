@@ -709,6 +709,8 @@ bool canDCE(IRInstruction* inst) {
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case ProfileArrLikeProps:
+  case CheckFuncNeedsCoverage:
+  case RecordFuncCall:
     return false;
 
   case IsTypeStruct:

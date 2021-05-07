@@ -457,6 +457,26 @@ function get_executable_lines(string $file): mixed;
 <<__Native>>
 function hphp_get_logger_request_id(): int;
 
+/**
+ * Enables recording of called functions in the current request. The server must
+ * not be in repo authoritative mode and Eval.EnableFuncCoverage must be set,
+ * additionally coverage must not already have been enabled in the current
+ * request (or must have been disabled via a call to collect_function_coverage).
+ */
+<<__Native>>
+function enable_function_coverage(): void;
+
+/**
+ * Returns a dict keyed on functions called since enable_function_coverage was
+ * last called, with the paths of the files defining them as values,
+ * and disables collection of further function coverage.
+ *
+ * The enable_function_coverage function must have been called prior to this
+ * function.
+ */
+<<__Native>>
+function collect_function_coverage(): dict<string, string>;
+
 } // HH
 
 namespace HH\Rx {

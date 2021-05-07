@@ -2843,6 +2843,8 @@ X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(ConvTVToInt,                  ConvNoticeData);
 X(ConvObjToInt,                 ConvNoticeData);
+X(CheckFuncNeedsCoverage,       FuncData);
+X(RecordFuncCall,               FuncData);
 
 #undef X
 

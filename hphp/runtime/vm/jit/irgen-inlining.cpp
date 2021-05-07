@@ -244,6 +244,7 @@ void beginInlining(IRGS& env,
   emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
                            numArgsInclUnpack, ctx);
   emitCalleeImplicitContextChecks(env, target);
+  emitCalleeRecordFuncCoverage(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 
   auto const closure = target->isClosureBody()

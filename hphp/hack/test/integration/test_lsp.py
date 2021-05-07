@@ -3642,7 +3642,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "openClose": True,
                         "change": 2,
                         "willSave": False,
-                        "willSaveWaitUntil": False,
+                        "willSaveWaitUntil": True,
                         "save": {"includeText": False},
                     },
                     "hoverProvider": True,

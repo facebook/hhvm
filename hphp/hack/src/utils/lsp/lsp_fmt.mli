@@ -52,6 +52,8 @@ val parse_textEdit : Hh_json.json option -> Lsp.TextEdit.t option
 
 val print_textEdit : Lsp.TextEdit.t -> Hh_json.json
 
+val print_textEdits : Lsp.TextEdit.t list -> Hh_json.json
+
 val print_command : Lsp.Command.t -> Hh_json.json
 
 val parse_command : Hh_json.json option -> Lsp.Command.t
@@ -115,6 +117,9 @@ val print_completionItem : Lsp.Completion.completionItem -> Hh_json.json
 val parse_completion : Hh_json.json option -> Lsp.Completion.params
 
 val print_completion : Lsp.Completion.result -> Hh_json.json
+
+val parse_willSaveWaitUntil :
+  Hh_json.json option -> Lsp.WillSaveWaitUntil.params
 
 val parse_workspaceSymbol : Hh_json.json option -> Lsp.WorkspaceSymbol.params
 

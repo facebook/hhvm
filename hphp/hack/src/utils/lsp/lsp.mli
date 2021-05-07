@@ -30,6 +30,12 @@ type range = {
 }
 [@@deriving eq]
 
+type textDocumentSaveReason =
+  | Manual [@value 1]
+  | AfterDelay [@value 2]
+  | FocusOut [@value 3]
+[@@deriving enum]
+
 module Location : sig
   type t = {
     uri: documentUri;
@@ -448,6 +454,17 @@ module DidChange : sig
     rangeLength: int option;
     text: string;
   }
+end
+
+module WillSaveWaitUntil : sig
+  type params = willSaveWaitUntilTextDocumentParams
+
+  and willSaveWaitUntilTextDocumentParams = {
+    textDocument: TextDocumentIdentifier.t;
+    reason: textDocumentSaveReason;
+  }
+
+  and result = TextEdit.t list
 end
 
 module DidChangeWatchedFiles : sig
@@ -899,6 +916,7 @@ type lsp_request =
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
+  | WillSaveWaitUntilRequest of WillSaveWaitUntil.params
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -930,6 +948,7 @@ type lsp_result =
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
   | RegisterCapabilityRequestResult
+  | WillSaveWaitUntilResult of WillSaveWaitUntil.result
   | ErrorResult of Error.t
 
 type lsp_notification =

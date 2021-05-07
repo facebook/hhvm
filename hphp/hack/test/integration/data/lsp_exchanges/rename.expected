@@ -8,7 +8,7 @@
           "openClose": true,
           "change": 2,
           "willSave": false,
-          "willSaveWaitUntil": false,
+          "willSaveWaitUntil": true,
           "save": {
             "includeText": false
           }

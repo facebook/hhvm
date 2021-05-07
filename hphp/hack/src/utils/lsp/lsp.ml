@@ -66,6 +66,12 @@ type range = {
 }
 [@@deriving eq]
 
+type textDocumentSaveReason =
+  | Manual [@value 1]
+  | AfterDelay [@value 2]
+  | FocusOut [@value 3]
+[@@deriving enum]
+
 (* Represents a location inside a resource, such as a line inside a text file *)
 module Location = struct
   type t = {
@@ -667,6 +673,18 @@ module DidChange = struct
   }
 end
 
+(* WillSaveWaitUntilTextDocument request, method="textDocument/willSaveWaitUntil" *)
+module WillSaveWaitUntil = struct
+  type params = willSaveWaitUntilTextDocumentParams
+
+  and willSaveWaitUntilTextDocumentParams = {
+    textDocument: TextDocumentIdentifier.t;
+    reason: textDocumentSaveReason;
+  }
+
+  and result = TextEdit.t list
+end
+
 (* Watched files changed notification, method="workspace/didChangeWatchedFiles" *)
 module DidChangeWatchedFiles = struct
   type registerOptions = { watchers: fileSystemWatcher list }
@@ -1191,6 +1209,7 @@ type lsp_request =
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
+  | WillSaveWaitUntilRequest of WillSaveWaitUntil.params
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -1222,6 +1241,7 @@ type lsp_result =
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
   | RegisterCapabilityRequestResult
+  | WillSaveWaitUntilResult of WillSaveWaitUntil.result
   | ErrorResult of Error.t
 
 type lsp_notification =

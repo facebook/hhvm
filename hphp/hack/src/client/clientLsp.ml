@@ -3204,6 +3204,23 @@ let do_documentFormatting
     action
     params.options
 
+let do_willSaveWaitUntil
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : WillSaveWaitUntil.params) : WillSaveWaitUntil.result =
+  let uri = params.WillSaveWaitUntil.textDocument.TextDocumentIdentifier.uri in
+  let lsp_doc = UriMap.find uri editor_open_files in
+  let content = lsp_doc.Lsp.TextDocumentItem.text in
+  match Formatting.is_formattable content with
+  | true ->
+    let open DocumentFormatting in
+    do_documentFormatting
+      editor_open_files
+      {
+        textDocument = params.WillSaveWaitUntil.textDocument;
+        options = { tabSize = 2; insertSpaces = true };
+      }
+  | false -> []
+
 let do_signatureHelp
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -3402,7 +3419,7 @@ let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
               want_openClose = true;
               want_change = IncrementalSync;
               want_willSave = false;
-              want_willSaveWaitUntil = false;
+              want_willSaveWaitUntil = true;
               want_didSave = Some { includeText = false };
             };
           hoverProvider = true;
@@ -4244,6 +4261,15 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentOnTypeFormattingResult result);
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
+    (* textDocument/willSaveWaitUntil request *)
+    | (_, _, RequestMessage (id, WillSaveWaitUntilRequest params)) ->
+      let result = do_willSaveWaitUntil editor_open_files params in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (WillSaveWaitUntilResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* editor buffer events *)

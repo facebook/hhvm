@@ -1202,7 +1202,7 @@ bool handleSource(IRGS& env, SrcKey sk,
   auto const op = sk.op();
   auto const profile = env.context.kind == TransKind::Profile ||
                        shouldTestBespokeArrayLikes();
-  if (profile && (op == Op::NewObjD || op == Op::NewObjRD)) {
+  if (profile && isObjectConstructorOp(op)) {
     emitVanilla(env);
     profileArrLikeProps(env);
     return true;

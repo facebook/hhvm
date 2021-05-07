@@ -4339,6 +4339,7 @@ ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
     : ObjectData::newInstance<true>(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
+  bespoke::profileArrLikeProps(this_);
   return this_;
 }
 
@@ -4353,7 +4354,6 @@ void newObjDImpl(Id id, ArrayData* reified_types) {
   auto this_ = newObjImpl(cls, reified_types);
   if (reified_types) vmStack().popC();
   vmStack().pushObjectNoRc(this_);
-  bespoke::profileArrLikeProps(this_);
 }
 
 } // namespace

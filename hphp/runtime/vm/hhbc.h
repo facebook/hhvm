@@ -1018,6 +1018,15 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isObjectConstructorOp(Op opcode) {
+  return
+    opcode == Op::NewObj ||
+    opcode == Op::NewObjD ||
+    opcode == Op::NewObjR ||
+    opcode == Op::NewObjRD ||
+    opcode == Op::NewObjS;
+}
+
 constexpr bool isArrLikeConstructorOp(Op opcode) {
   return
     opcode == Op::Dict ||

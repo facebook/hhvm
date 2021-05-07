@@ -550,7 +550,7 @@ TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
   return req;
 }
 
-TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
+TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType, bool failIsFatal) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -595,7 +595,8 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
     return typeAliasFromRecordDesc(thisType, rec);
   }
 
-  if (AutoloadHandler::s_instance->autoloadNamedType(
+  if (failIsFatal &&
+      AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Class::lookup(targetNE)) {
@@ -658,7 +659,7 @@ const TypeAlias* Unit::defTypeAlias(const PreTypeAlias* thisType, bool failIsFat
     };
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
-      if (resolveTypeAlias(this, thisType) != *current) {
+      if (resolveTypeAlias(this, thisType, failIsFatal) != *current) {
         if (!failIsFatal) return nullptr;
         raiseIncompatible();
       }
@@ -682,7 +683,7 @@ const TypeAlias* Unit::defTypeAlias(const PreTypeAlias* thisType, bool failIsFat
     not_reached();
   }
 
-  auto resolved = resolveTypeAlias(this, thisType);
+  auto resolved = resolveTypeAlias(this, thisType, failIsFatal);
   if (resolved.invalid) {
     if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
@@ -862,6 +863,27 @@ void Unit::logTearing() {
   rl_mergedUnits->clear();
 }
 
+template <typename T, typename I>
+static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, bool failIsFatal, Stats::StatCounter counter, I lambda) {
+  auto i = define.find_first();
+  if (failIsFatal) {
+    if (i == define.npos) i = define.find_first();
+  }
+
+  bool madeProgress = false;
+  for (; i != define.npos; i = define.find_next(i)) {
+    auto& symbol = symbols[i];
+    Stats::inc(Stats::UnitMerge_mergeable);
+    Stats::inc(counter);
+    auto res = lambda(symbol);
+    if (res) {
+      define.reset(i);
+      madeProgress = true;
+    }
+  }
+  return madeProgress;
+}
+
 template <bool debugger>
 void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
@@ -902,88 +924,51 @@ void Unit::mergeImpl(MergeInfo* mi, MergeTypes mergeTypes) {
   }
 
   if (mergeTypes & MergeTypes::NotFunction) {
-    int ix = 0;
+    for (auto& constant : m_constants) {
+      Stats::inc(Stats::UnitMerge_mergeable);
+      Stats::inc(Stats::UnitMerge_mergeable_define);
 
-    FTRACE(3, "ix: {}, total: {}\n", ix, mi->m_mergeablesSize);
-
-    boost::dynamic_bitset<> define(mi->m_mergeablesSize);
-    while (ix < mi->m_mergeablesSize) {
-      void* obj = mi->mergeableObj(ix);
-      auto k = MergeKind(uintptr_t(obj) & 7);
-      if (k == MergeKind::Done) break;
-      define.set(ix);
-      ix++;
+      assertx((!!(constant.attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+      defCns(&constant);
     }
 
-    FTRACE(4, "  {} top level entities left to define\n", define.count());
+    boost::dynamic_bitset<> preClasses(m_preClasses.size());
+    preClasses.set();
+    boost::dynamic_bitset<> preRecords(m_preRecords.size());
+    preRecords.set();
+    boost::dynamic_bitset<> typeAliases(m_typeAliases.size());
+    typeAliases.set();
 
-    // iterate over the define set until we can make no progress
-    // if there are still things left to be define, at that point just fatal.
     bool failIsFatal = false;
-    // We'll exit this while loop either by defining everything or fataling
-    while (!define.none()) {
+    do {
       bool madeProgress = false;
-      auto i = define.find_first();
-      for (; i != define.npos; i = define.find_next(i)) {
-        void* obj = mi->mergeableObj(i);
+      madeProgress = defineSymbols(m_preClasses, preClasses, failIsFatal,
+                                   Stats::UnitMerge_mergeable_class,
+                                   [&](const PreClassPtr& preClass) {
+                                     // Anonymous classes doesn't need to be defined because they will be defined when used
+                                     if (PreClassEmitter::IsAnonymousClassName(preClass->name()->toCppString())) {
+                                       return true;
+                                     }
+                                     assertx(preClass->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+                                     return Class::def(preClass.get(), failIsFatal) != nullptr;
+                                   }) || madeProgress;
 
-        auto k = MergeKind(uintptr_t(obj) & 7);
-        switch (k) {
-          case MergeKind::Class: {
-            Stats::inc(Stats::UnitMerge_mergeable);
-            Stats::inc(Stats::UnitMerge_mergeable_class);
-            auto cls = (PreClass*)obj;
-            assertx(cls->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-            if (Class::def(cls, failIsFatal)) {
-              madeProgress = true;
-              define.reset(i);
-            }
-            continue;
-          }
+      madeProgress = defineSymbols(m_preRecords, preRecords, failIsFatal,
+                                   Stats::UnitMerge_mergeable_record,
+                                   [&](const PreRecordDescPtr& preRecord) {
+                                     assertx(preRecord->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+                                     return defRecordDesc(preRecord.get(), failIsFatal) != nullptr;
+                                   }) || madeProgress;
 
-          case MergeKind::Define: {
-            Stats::inc(Stats::UnitMerge_mergeable);
-            Stats::inc(Stats::UnitMerge_mergeable_define);
-            auto const constant = lookupConstantId(static_cast<Id>(intptr_t(obj)) >> 3);
-            assertx((!!(constant->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-            defCns(constant);
-            madeProgress = true;
-            define.reset(i);
-            continue;
-          }
-
-          case MergeKind::TypeAlias: {
-            Stats::inc(Stats::UnitMerge_mergeable);
-            Stats::inc(Stats::UnitMerge_mergeable_typealias);
-            auto const typeAlias = lookupTypeAliasId(static_cast<Id>(intptr_t(obj)) >> 3);
-            assertx((!!(typeAlias->attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-            if (defTypeAlias(typeAlias, failIsFatal)) {
-              madeProgress = true;
-              define.reset(i);
-            }
-            continue;
-          }
-
-          case MergeKind::Record: {
-            Stats::inc(Stats::UnitMerge_mergeable);
-            Stats::inc(Stats::UnitMerge_mergeable_record);
-            auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
-            auto const r = lookupPreRecordId(recordId);
-            assertx(r->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-            if (defRecordDesc(r, failIsFatal)) {
-              madeProgress = true;
-              define.reset(i);
-            }
-            continue;
-          }
-
-          case MergeKind::Done:
-            not_reached();
-            return;
-        }
-      }
+      // We do type alias last because they may depend on classes or records that needs to be define first
+      madeProgress = defineSymbols(m_typeAliases, typeAliases, failIsFatal,
+                                   Stats::UnitMerge_mergeable_typealias,
+                                   [&](const PreTypeAlias& typeAlias) {
+                                     assertx((!!(typeAlias.attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+                                     return defTypeAlias(&typeAlias, failIsFatal);
+                                   }) || madeProgress;
       if (!madeProgress) failIsFatal = true;
-    }
+    } while (typeAliases.any() || preClasses.any() || preRecords.any());
   }
 }
 

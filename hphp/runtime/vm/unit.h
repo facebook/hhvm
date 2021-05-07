@@ -524,7 +524,7 @@ public:
   folly::Range<const Constant*> constants() const;
 
   /*
-   * Define the constant given by `id'
+   * Define the constant
    */
   void defCns(const Constant* constant);
 

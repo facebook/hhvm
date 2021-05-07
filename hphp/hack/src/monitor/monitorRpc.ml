@@ -52,7 +52,7 @@ let write_server_receipt_to_monitor_file
   try Sys_utils.protected_write_exn server_receipt_to_monitor_file json
   with exn ->
     let e = Exception.wrap exn in
-    Hh_logger.error
+    Hh_logger.log
       "SERVER_RECEIPT_TO_MONITOR(write) %s\n%s"
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack);
@@ -80,7 +80,7 @@ let read_server_receipt_to_monitor_file
   | Unix.Unix_error (Unix.ENOENT, _, _) -> None
   | exn ->
     let e = Exception.wrap exn in
-    Hh_logger.error
+    Hh_logger.log
       "SERVER_RECEIPT_TO_MONITOR(read) %s\n%s\n%s"
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack)

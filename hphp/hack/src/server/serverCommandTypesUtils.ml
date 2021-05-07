@@ -139,7 +139,7 @@ let write_progress_file
   try Sys_utils.protected_write_exn server_progress_file content
   with exn ->
     let e = Exception.wrap exn in
-    Hh_logger.error
+    Hh_logger.log
       "SERVER_PROGRESS_EXCEPTION(write) %s\n%s"
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack);
@@ -163,7 +163,7 @@ let read_progress_file ~(server_progress_file : string) :
     ServerCommandTypes.{ server_progress; server_warning; server_timestamp }
   with exn ->
     let e = Exception.wrap exn in
-    Hh_logger.error
+    Hh_logger.log
       "SERVER_PROGRESS_EXCEPTION(read) %s\n%s\n%s"
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack)

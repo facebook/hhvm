@@ -139,16 +139,26 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
   }
 
   // Determine what layout we should apply to the result.
-  auto const logging = env.mode == APCBespokeMode::Logging;
   auto const vanilla = env.mode == APCBespokeMode::Vanilla;
   auto const doLookup = !vanilla && arrayTypeCouldBeBespoke(vin->toDataType());
   auto const profile = doLookup ? getLoggingProfile(APCKey{hash}) : nullptr;
   auto const layout = [&]{
-    if (!profile) return ArrayLayout::Vanilla();
-    if (!logging) return profile->getLayout();
-    return ArrayLayout(LoggingArray::GetLayoutIndex());
+    switch (env.mode) {
+      case APCBespokeMode::Vanilla: return ArrayLayout::Vanilla();
+      case APCBespokeMode::Logging: {
+        if (!profile) return ArrayLayout::Vanilla();
+        return ArrayLayout(LoggingArray::GetLayoutIndex());
+      }
+      case APCBespokeMode::Bespoke: {
+        if (profile) return profile->getLayout();
+        auto const incoming = ArrayLayout::FromArray(ain);
+        return incoming.logging() ? ArrayLayout::Vanilla() : incoming;
+      }
+    }
+    always_assert(false);
   }();
 
+  DEBUG_ONLY auto const logging = env.mode == APCBespokeMode::Logging;
   assertx(layout.vanilla() || layout.bespokeLayout()->isConcrete());
   assertx(IMPLIES(logging, layout.vanilla() || layout.logging()));
   assertx(IMPLIES(!logging, !layout.logging()));

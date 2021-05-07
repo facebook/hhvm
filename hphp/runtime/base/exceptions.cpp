@@ -255,36 +255,6 @@ namespace {
     assertx(throwable_has_expected_props());
 
     auto const trace_rval = throwable->propRvalAtOffset(s_traceSlot);
-
-    if (trace_rval.type() == KindOfResource) {
-      auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
-      assertx(bt);
-
-      for (auto& f : bt->frames()) {
-        if (!f.func || f.func->isBuiltin()) continue;
-
-        auto const ln = f.func->getLineNumber(f.prevPc);
-        tvSet(
-          make_tv<KindOfInt64>(ln),
-          throwable->propLvalAtOffset(s_lineSlot)
-        );
-
-        if (auto fn = f.func->originalFilename()) {
-          tvSet(
-            make_tv<KindOfPersistentString>(fn),
-            throwable->propLvalAtOffset(s_fileSlot)
-          );
-        } else {
-          tvSet(
-            make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
-            throwable->propLvalAtOffset(s_fileSlot)
-          );
-        }
-        return;
-      }
-      return;
-    }
-
     assertx(isArrayLikeType(trace_rval.type()));
     auto const trace = trace_rval.val().parr;
     for (ArrayIter iter(trace); iter; ++iter) {

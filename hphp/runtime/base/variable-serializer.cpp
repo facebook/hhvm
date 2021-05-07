@@ -1853,12 +1853,6 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   TypedValue tv = make_tv<KindOfResource>(const_cast<ResourceHdr*>(res->hdr()));
   if (UNLIKELY(incNestedLevel(&tv))) {
     writeOverflow(&tv);
-  } else if (auto trace = dynamic_cast<const CompactTrace*>(res)) {
-    auto const trace_array = Variant(trace->extract());
-    auto const raw = *trace_array.asTypedValue();
-    // We use a depth of 2 because backtrace arrays are varrays-of-darrays.
-    auto const marked = Variant::attach(arrprov::markTvToDepth(raw, true, 2));
-    serializeArray(marked.toArray().get());
   } else {
     serializeResourceImpl(res);
   }

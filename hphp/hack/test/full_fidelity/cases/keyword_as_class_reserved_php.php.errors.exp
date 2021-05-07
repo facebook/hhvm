@@ -7,6 +7,6 @@
 (25,7)-(25,11) Cannot use `this` as class name as it is reserved
 (26,7)-(26,11) Cannot use `true` as class name as it is reserved
 (27,7)-(27,13) Cannot use `varray` as class name as it is reserved
-(38,5)-(38,10) Unexpected node on right hand side of `new` or `instanceof`: `literal`
-(45,5)-(45,9) Unexpected node on right hand side of `new` or `instanceof`: `literal`
-(53,5)-(53,9) Unexpected node on right hand side of `new` or `instanceof`: `literal`
+(38,5)-(38,10) `new` requires a class name or local variable, but got: `literal`
+(45,5)-(45,9) `new` requires a class name or local variable, but got: `literal`
+(53,5)-(53,9) `new` requires a class name or local variable, but got: `literal`

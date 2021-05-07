@@ -2566,7 +2566,7 @@ where
             _ => {
                 self.errors.push(Self::make_error_from_node(
                     node,
-                    errors::instanceof_new_unknown_node(node.kind().to_string()),
+                    errors::new_unknown_node(node.kind().to_string()),
                 ));
             }
         }

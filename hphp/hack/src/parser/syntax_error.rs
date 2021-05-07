@@ -393,9 +393,9 @@ pub const instanceof_missing_subscript_index: Error = Cow::Borrowed(concat!(
     "A subscript expression `[]` on the right side of an ",
     "instanceof operator must have an index",
 ));
-pub fn instanceof_new_unknown_node(msg: &str) -> Error {
+pub fn new_unknown_node(msg: &str) -> Error {
     Cow::Owned(format!(
-        "Unexpected node on right hand side of `new` or `instanceof`: `{}`",
+        "`new` requires a class name or local variable, but got: `{}`",
         msg.to_string(),
     ))
 }

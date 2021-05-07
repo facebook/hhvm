@@ -116,124 +116,124 @@
 (62,7)-(62,12) Encountered unexpected token `while`.
 (63,7)-(63,7) A name is expected here.
 (63,7)-(63,12) Encountered unexpected token `yield`.
-(65,5)-(65,13) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(65,5)-(65,13) `new` requires a class name or local variable, but got: `token`
 (65,13)-(65,13) An expression is expected here.
-(67,5)-(67,7) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(67,5)-(67,7) `new` requires a class name or local variable, but got: `token`
 (67,7)-(67,7) An expression is expected here.
-(68,5)-(68,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(68,5)-(68,10) `new` requires a class name or local variable, but got: `token`
 (68,10)-(68,10) An expression is expected here.
-(69,5)-(69,9) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(69,5)-(69,9) `new` requires a class name or local variable, but got: `token`
 (69,9)-(69,9) An expression is expected here.
-(70,5)-(70,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(70,5)-(70,10) `new` requires a class name or local variable, but got: `token`
 (70,10)-(70,10) An expression is expected here.
 (72,5)-(72,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new clone()()`?
-(72,5)-(72,12) Unexpected node on right hand side of `new` or `instanceof`: `prefix_unary_expression`
+(72,5)-(72,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
 (72,12)-(72,12) An expression is expected here.
-(73,5)-(73,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(73,5)-(73,10) `new` requires a class name or local variable, but got: `token`
 (73,10)-(73,10) An expression is expected here.
-(74,5)-(74,13) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(74,5)-(74,13) `new` requires a class name or local variable, but got: `token`
 (74,13)-(74,13) An expression is expected here.
-(76,5)-(76,12) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(76,5)-(76,12) `new` requires a class name or local variable, but got: `token`
 (76,12)-(76,12) An expression is expected here.
-(77,5)-(77,7) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(77,5)-(77,7) `new` requires a class name or local variable, but got: `token`
 (77,7)-(77,7) An expression is expected here.
-(78,5)-(78,9) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(78,5)-(78,9) `new` requires a class name or local variable, but got: `token`
 (78,9)-(78,9) An expression is expected here.
-(79,5)-(79,9) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(79,5)-(79,9) `new` requires a class name or local variable, but got: `token`
 (79,9)-(79,9) An expression is expected here.
-(80,5)-(80,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(80,5)-(80,11) `new` requires a class name or local variable, but got: `token`
 (80,11)-(80,11) An expression is expected here.
 (81,5)-(81,5) The `empty()` expression has been removed from Hack.
-(81,5)-(81,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
-(82,5)-(82,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(81,5)-(81,10) `new` requires a class name or local variable, but got: `token`
+(82,5)-(82,11) `new` requires a class name or local variable, but got: `token`
 (82,11)-(82,11) An expression is expected here.
-(83,5)-(83,15) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(83,5)-(83,15) `new` requires a class name or local variable, but got: `token`
 (83,15)-(83,15) An expression is expected here.
-(85,5)-(85,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(85,5)-(85,10) `new` requires a class name or local variable, but got: `token`
 (85,10)-(85,10) An expression is expected here.
-(86,5)-(86,14) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(86,5)-(86,14) `new` requires a class name or local variable, but got: `token`
 (86,14)-(86,14) An expression is expected here.
-(87,5)-(87,13) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(87,5)-(87,13) `new` requires a class name or local variable, but got: `token`
 (87,13)-(87,13) An expression is expected here.
 (88,5)-(88,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new eval()()`?
-(88,5)-(88,11) Unexpected node on right hand side of `new` or `instanceof`: `eval_expression`
+(88,5)-(88,11) `new` requires a class name or local variable, but got: `eval_expression`
 (88,11)-(88,11) An expression is expected here.
-(89,5)-(89,12) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(89,5)-(89,12) `new` requires a class name or local variable, but got: `token`
 (89,12)-(89,12) An expression is expected here.
-(90,5)-(90,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(90,5)-(90,10) `new` requires a class name or local variable, but got: `token`
 (90,10)-(90,10) An expression is expected here.
-(91,5)-(91,12) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(91,5)-(91,12) `new` requires a class name or local variable, but got: `token`
 (91,12)-(91,12) An expression is expected here.
-(92,5)-(92,8) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(92,5)-(92,8) `new` requires a class name or local variable, but got: `token`
 (92,8)-(92,8) An expression is expected here.
-(93,5)-(93,12) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(93,5)-(93,12) `new` requires a class name or local variable, but got: `token`
 (93,12)-(93,12) An expression is expected here.
 (94,5)-(94,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new function();()`?
-(94,5)-(94,16) Unexpected node on right hand side of `new` or `instanceof`: `anonymous_function`
+(94,5)-(94,16) `new` requires a class name or local variable, but got: `anonymous_function`
 (94,16)-(95,1) A semicolon `;` is expected here.
-(95,5)-(95,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(95,5)-(95,11) `new` requires a class name or local variable, but got: `token`
 (95,11)-(95,11) An expression is expected here.
-(96,5)-(96,7) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(96,5)-(96,7) `new` requires a class name or local variable, but got: `token`
 (96,7)-(96,7) An expression is expected here.
-(97,5)-(97,15) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(97,5)-(97,15) `new` requires a class name or local variable, but got: `token`
 (97,15)-(97,15) An expression is expected here.
 (98,5)-(98,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include()()`?
-(98,5)-(98,14) Unexpected node on right hand side of `new` or `instanceof`: `inclusion_expression`
+(98,5)-(98,14) `new` requires a class name or local variable, but got: `inclusion_expression`
 (98,14)-(98,14) An expression is expected here.
 (99,5)-(99,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include_once()()`?
-(99,5)-(99,19) Unexpected node on right hand side of `new` or `instanceof`: `inclusion_expression`
+(99,5)-(99,19) `new` requires a class name or local variable, but got: `inclusion_expression`
 (99,19)-(99,19) An expression is expected here.
-(100,5)-(100,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(100,5)-(100,10) `new` requires a class name or local variable, but got: `token`
 (100,10)-(100,10) An expression is expected here.
-(101,5)-(101,15) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(101,5)-(101,15) `new` requires a class name or local variable, but got: `token`
 (101,15)-(101,15) An expression is expected here.
-(102,5)-(102,14) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(102,5)-(102,14) `new` requires a class name or local variable, but got: `token`
 (102,14)-(102,14) An expression is expected here.
 (104,5)-(104,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new isset()()`?
-(104,5)-(104,12) Unexpected node on right hand side of `new` or `instanceof`: `isset_expression`
+(104,5)-(104,12) `new` requires a class name or local variable, but got: `isset_expression`
 (105,5)-(105,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new list()()`?
-(105,5)-(105,11) Unexpected node on right hand side of `new` or `instanceof`: `list_expression`
-(106,5)-(106,14) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(105,5)-(105,11) `new` requires a class name or local variable, but got: `list_expression`
+(106,5)-(106,14) `new` requires a class name or local variable, but got: `token`
 (107,5)-(107,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new new()()`?
-(107,5)-(107,10) Unexpected node on right hand side of `new` or `instanceof`: `object_creation_expression`
+(107,5)-(107,10) `new` requires a class name or local variable, but got: `object_creation_expression`
 (107,8)-(107,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
 (107,10)-(107,10) An expression is expected here.
 (108,5)-(108,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new print()()`?
-(108,5)-(108,12) Unexpected node on right hand side of `new` or `instanceof`: `prefix_unary_expression`
+(108,5)-(108,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
 (108,12)-(108,12) An expression is expected here.
-(109,5)-(109,12) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(109,5)-(109,12) `new` requires a class name or local variable, but got: `token`
 (109,12)-(109,12) An expression is expected here.
-(110,5)-(110,14) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(110,5)-(110,14) `new` requires a class name or local variable, but got: `token`
 (110,14)-(110,14) An expression is expected here.
-(111,5)-(111,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(111,5)-(111,11) `new` requires a class name or local variable, but got: `token`
 (111,11)-(111,11) An expression is expected here.
 (112,5)-(112,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require()()`?
-(112,5)-(112,14) Unexpected node on right hand side of `new` or `instanceof`: `inclusion_expression`
+(112,5)-(112,14) `new` requires a class name or local variable, but got: `inclusion_expression`
 (112,14)-(112,14) An expression is expected here.
 (113,5)-(113,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require_once()()`?
-(113,5)-(113,19) Unexpected node on right hand side of `new` or `instanceof`: `inclusion_expression`
+(113,5)-(113,19) `new` requires a class name or local variable, but got: `inclusion_expression`
 (113,19)-(113,19) An expression is expected here.
-(114,5)-(114,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(114,5)-(114,11) `new` requires a class name or local variable, but got: `token`
 (114,11)-(114,11) An expression is expected here.
 (115,5)-(115,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new shape()()`?
-(115,5)-(115,12) Unexpected node on right hand side of `new` or `instanceof`: `shape_expression`
-(117,5)-(117,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(115,5)-(115,12) `new` requires a class name or local variable, but got: `shape_expression`
+(117,5)-(117,11) `new` requires a class name or local variable, but got: `token`
 (117,11)-(117,11) An expression is expected here.
-(118,5)-(118,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(118,5)-(118,10) `new` requires a class name or local variable, but got: `token`
 (118,10)-(118,10) An expression is expected here.
-(120,5)-(120,8) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(120,5)-(120,8) `new` requires a class name or local variable, but got: `token`
 (120,8)-(120,8) An expression is expected here.
-(121,5)-(121,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(121,5)-(121,10) `new` requires a class name or local variable, but got: `token`
 (121,10)-(121,10) An expression is expected here.
-(122,5)-(122,8) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(122,5)-(122,8) `new` requires a class name or local variable, but got: `token`
 (122,8)-(122,8) An expression is expected here.
-(123,5)-(123,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(123,5)-(123,10) `new` requires a class name or local variable, but got: `token`
 (123,10)-(123,10) An expression is expected here.
-(124,5)-(124,8) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(124,5)-(124,8) `new` requires a class name or local variable, but got: `token`
 (124,8)-(124,8) An expression is expected here.
-(125,5)-(125,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(125,5)-(125,10) `new` requires a class name or local variable, but got: `token`
 (125,10)-(125,10) An expression is expected here.
 (126,5)-(126,12) `yield` can only be used inside a function
 (126,5)-(126,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new yield()()`?
-(126,5)-(126,12) Unexpected node on right hand side of `new` or `instanceof`: `yield_expression`
+(126,5)-(126,12) `new` requires a class name or local variable, but got: `yield_expression`
 (126,12)-(126,12) An expression is expected here.

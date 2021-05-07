@@ -1,6 +1,6 @@
 (5,7)-(5,7) A name is expected here.
 (5,7)-(5,16) Keyword `Namespace` must be written in lowercase
 (8,12)-(8,21) Keyword `Namespace` must be written in lowercase
-(8,12)-(8,21) Unexpected node on right hand side of `new` or `instanceof`: `token`
+(8,12)-(8,21) `new` requires a class name or local variable, but got: `token`
 (11,10)-(11,19) Keyword `Namespace` must be written in lowercase
 (11,19)-(11,19) A name or `__construct` keyword is expected here.

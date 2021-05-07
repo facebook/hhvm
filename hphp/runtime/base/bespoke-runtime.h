@@ -144,12 +144,12 @@ struct StructDictInit {
 
   Variant toVariant();
   Array toArray();
-  ArrayData* create();
 
 private:
   ArrayData* m_arr;
   RuntimeStruct* m_struct;
-  size_t m_escalateCapacity;
+  uint32_t m_escalateCapacity;
+  bool m_vanilla;
 };
 
 }

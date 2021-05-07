@@ -201,6 +201,7 @@ size_t RuntimeStruct::stableHash() const {
 //////////////////////////////////////////////////////////////////////////////
 
 StructDictInit::StructDictInit(RuntimeStruct* structHandle, size_t n) {
+  m_struct = structHandle;
   if (allowBespokeArrayLikes() && structHandle) {
     auto const layout =
       structHandle->m_assignedLayout.load(std::memory_order_acquire);
@@ -208,15 +209,15 @@ StructDictInit::StructDictInit(RuntimeStruct* structHandle, size_t n) {
     if (layout) {
       // We have been assigned a layout; use it for the initializer.
       m_arr = StructDict::AllocStructDict(layout);
-      m_struct = structHandle;
-      m_escalateCapacity = n;
+      assertx(n <= std::numeric_limits<uint32_t>::max());
+      m_escalateCapacity = static_cast<uint32_t>(n);
+      m_vanilla = false;
       return;
     }
   }
 
-  auto const ad = MixedArray::MakeReserveDict(n);
-  m_arr = bespoke::maybeMakeLoggingArray(ad, structHandle);
-  m_struct = nullptr;
+  m_arr = MixedArray::MakeReserveDict(n);
+  m_vanilla = true;
 }
 
 StructDictInit::~StructDictInit() {
@@ -229,20 +230,13 @@ StructDictInit::~StructDictInit() {
 void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
   value = tvToInit(value);
 
-  if (!m_struct) {
-    if (m_arr->isVanilla()) {
-      // We have a vanilla MixedArray that must be properly sized. Set the
-      // field in place.
-      auto const DEBUG_ONLY res =
-        MixedArray::SetStrInPlace(m_arr, key, value);
-      assertx(res == m_arr);
-    } else {
-      // We have a LoggingArray that should update in place.
-      tvIncRefGen(value);
-      auto const DEBUG_ONLY res =
-        m_arr->setMove(key, value);
-      assertx(res == m_arr);
-    }
+  if (m_vanilla) {
+    assertx(m_arr->isVanilla());
+    // We have a vanilla MixedArray that must be properly sized. Set the
+    // field in place.
+    auto const DEBUG_ONLY res =
+      MixedArray::SetStrInPlace(m_arr, key, value);
+    assertx(res == m_arr);
     return;
   }
 
@@ -259,6 +253,7 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
     StructDict::Release(sad);
     assertx(m_arr->isVanillaDict());
     m_struct = nullptr;
+    m_vanilla = true;
 
     auto const DEBUG_ONLY res =
       MixedArray::SetStrInPlace(m_arr, key, value);
@@ -288,20 +283,13 @@ void StructDictInit::set(size_t idx, const String& key, const Variant& value) {
 void StructDictInit::set(int64_t key, TypedValue value) {
   value = tvToInit(value);
 
-  if (!m_struct) {
-    if (m_arr->isVanilla()) {
-      // We have a vanilla MixedArray that must be properly sized. Set the
-      // field in place.
-      auto const DEBUG_ONLY res =
-        MixedArray::SetIntInPlace(m_arr, key, value);
-      assertx(res == m_arr);
-    } else {
-      // We have a LoggingArray that should update in place.
-      tvIncRefGen(value);
-      auto const DEBUG_ONLY res =
-        m_arr->setMove(key, value);
-      assertx(res == m_arr);
-    }
+  if (m_vanilla) {
+    assertx(m_arr->isVanilla());
+    // We have a vanilla MixedArray that must be properly sized. Set the
+    // field in place.
+    auto const DEBUG_ONLY res =
+      MixedArray::SetIntInPlace(m_arr, key, value);
+    assertx(res == m_arr);
     return;
   }
 
@@ -311,6 +299,7 @@ void StructDictInit::set(int64_t key, TypedValue value) {
   StructDict::Release(sad);
   assertx(m_arr->isVanillaDict());
   m_struct = nullptr;
+  m_vanilla = true;
 
   auto const DEBUG_ONLY res = MixedArray::SetIntInPlace(m_arr, key, value);
   assertx(res == m_arr);
@@ -341,6 +330,9 @@ void StructDictInit::setIntishCast(size_t idx, const String& key,
 Variant StructDictInit::toVariant() {
   assertx(m_arr->hasExactlyOneRef());
   assertx(m_arr->isDictType());
+  if (m_vanilla && m_struct) {
+    m_arr = bespoke::maybeMakeLoggingArray(m_arr, m_struct);
+  }
   auto const ptr = m_arr;
   m_arr = nullptr;
   return Variant(ptr, KindOfDict, Variant::ArrayInitCtor{});
@@ -349,17 +341,12 @@ Variant StructDictInit::toVariant() {
 Array StructDictInit::toArray() {
   assertx(m_arr->hasExactlyOneRef());
   assertx(m_arr->isDictType());
+  if (m_vanilla && m_struct) {
+    m_arr = bespoke::maybeMakeLoggingArray(m_arr, m_struct);
+  }
   auto const ptr = m_arr;
   m_arr = nullptr;
   return Array(ptr, Array::ArrayInitCtor::Tag);
-}
-
-ArrayData* StructDictInit::create() {
-  assertx(m_arr->hasExactlyOneRef());
-  assertx(m_arr->isDictType());
-  auto const ptr = m_arr;
-  m_arr = nullptr;
-  return ptr;
 }
 
 }

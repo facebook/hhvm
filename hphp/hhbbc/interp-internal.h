@@ -961,7 +961,7 @@ void mergeEachThisPropRaw(ISS& env, MapFn fn) {
   for (auto const& kv : env.collect.props.privatePropertiesRaw()) {
     auto const ty = thisPropType(env, kv.first);
     assertx(ty.has_value());
-    mergeThisProp(env, kv.first, *ty);
+    mergeThisProp(env, kv.first, fn(*ty));
   }
 }
 

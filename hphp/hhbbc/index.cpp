@@ -1674,7 +1674,7 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
     }
 
     // Ignore abstract constants
-    if (cns->isAbstract) return true;
+    if (cns->isAbstract && !cns->val) return true;
 
     if (existing->val) {
       // A constant from a declared interface collides with a constant

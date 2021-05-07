@@ -229,7 +229,8 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* phpCode,
                                   const ConstModifiers::Kind kind,
                                   const bool fromTrait,
-                                  const Array& typeStructure) {
+                                  const Array& typeStructure,
+                                  const bool isAbstract) {
   assertx(kind == ConstModifiers::Kind::Value ||
           kind == ConstModifiers::Kind::Type);
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
@@ -244,8 +245,8 @@ bool PreClassEmitter::addConstant(const StringData* n,
   } else {
     tvVal = *val;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode,
-                             {}, kind, false, fromTrait);
+  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, {}, kind,
+                             isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -408,8 +409,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     const Const& const_ = m_constMap[i];
     TypedValueAux tvaux;
     tvaux.constModifiers() = {};
+    tvaux.constModifiers().setIsAbstract(const_.isAbstract());
     if (const_.kind() == ConstModifiers::Kind::Context) {
-      tvaux.constModifiers().setIsAbstract(const_.isAbstract());
       auto const coeffects = [&] {
         if (const_.coeffects().empty()) return StaticCoeffects::defaults();
         auto coeffects = StaticCoeffects::none();
@@ -420,12 +421,10 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       }();
       tvaux.constModifiers().setCoeffects(coeffects);
     } else {
-      if (const_.isAbstract()) {
-        tvWriteUninit(tvaux);
-        tvaux.constModifiers().setIsAbstract(true);
-      } else {
+      if (const_.valOption()) {
         tvCopy(const_.val(), tvaux);
-        tvaux.constModifiers().setIsAbstract(false);
+      } else {
+        tvWriteUninit(tvaux);
       }
     }
 

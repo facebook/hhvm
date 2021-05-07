@@ -1275,7 +1275,9 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         &cconst.val.value(),
         cconst.phpCode,
         cconst.kind,
-        cconst.isFromTrait
+        cconst.isFromTrait,
+        Array{},
+        cconst.isAbstract
       );
     }
   }

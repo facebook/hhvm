@@ -2999,7 +2999,9 @@ void parse_class_constant(AsmState& as) {
                       staticEmptyString(), &tvInit,
                       staticEmptyString(),
                       kind,
-                      false);
+                      false,
+                      Array{},
+                      isAbstract);
 }
 
 /*
@@ -3035,7 +3037,7 @@ void parse_context_constant(AsmState& as) {
 
   DEBUG_ONLY auto added =
     as.pce->addContextConstant(makeStaticString(name), std::move(coeffects),
-                               false /* isAbstract */);
+                               isAbstract);
   assertx(added);
 }
 

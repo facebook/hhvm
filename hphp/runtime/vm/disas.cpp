@@ -655,27 +655,41 @@ std::string member_tv_initializer(TypedValue cell) {
 }
 
 void print_class_constant(Output& out, const PreClass::Const* cns) {
-  if (cns->kind() == ConstModifiers::Kind::Context) {
-    auto const coeffect_str = cns->coeffects().toString();
-    out.fmtln(".ctx {} {};",
-              cns->name(),
-              coeffect_str ? *coeffect_str : std::string("defaults"));
-    return;
-  }
-  auto const kind = [&] {
-    switch (cns->kind()) {
-      case ConstModifiers::Kind::Value:   return "";
-      case ConstModifiers::Kind::Type:    return " isType";
-      case ConstModifiers::Kind::Context: not_reached();
+  switch (cns->kind()) {
+    case ConstModifiers::Kind::Context: {
+      auto const coeffect_str = cns->coeffects().toString();
+      out.indent();
+      out.fmt(".ctx {}", cns->name());
+      if (cns->isAbstract()) {
+        out.fmt(" isAbstract");
+      }
+      if (coeffect_str) {
+        out.fmt(" {}", *coeffect_str);
+      }
+      out.fmt(";");
+      out.nl();
+      break;
     }
-    not_reached();
-  }();
-  if (cns->isAbstractAndUninit()) {
-    out.fmtln(".const {}{} isAbstract;", cns->name(), kind);
-    return;
+    case ConstModifiers::Kind::Value:
+      if (cns->isAbstract()) {
+        out.fmtln(".const {} isAbstract;", cns->name());
+      } else {
+        // Class constants use uninit to indicate initialization with 86cinit
+        out.fmtln(".const {} = {};", cns->name(), member_tv_initializer(cns->val()));
+      }
+      break;
+    case ConstModifiers::Kind::Type:
+      out.indent();
+      out.fmt(".const {} isType", cns->name());
+      if (cns->isAbstract()) {
+        out.fmt(" isAbstract");
+      }
+      if (cns->val().is_init()) {
+        out.fmt(" = {}", member_tv_initializer(cns->val()));
+      }
+      out.fmt(";");
+      out.nl();
   }
-  out.fmtln(".const {}{} = {};", cns->name(), kind,
-    member_tv_initializer(cns->val()));
 }
 
 template<class T>

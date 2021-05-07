@@ -247,7 +247,8 @@ struct PreClassEmitter {
                    const ConstModifiers::Kind kind =
                     ConstModifiers::Kind::Value,
                    const bool fromTrait = false,
-                   const Array& typeStructure = Array{});
+                   const Array& typeStructure = Array{},
+                   const bool isAbstract = false);
   bool addContextConstant(const StringData* n,
                           Const::CoeffectsVec&& coeffects,
                           const bool isAbstract, const bool fromTrait = false);

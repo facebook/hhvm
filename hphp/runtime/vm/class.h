@@ -228,7 +228,12 @@ struct Class : AtomicCountable {
     StringData* pointedClsName;
 #endif
 
-    bool isAbstractAndUninit() const { return val.constModifiers().isAbstract(); }
+    bool isAbstractAndUninit() const {
+      return val.constModifiers().isAbstract() && !val.is_init();
+    }
+    bool isAbstract() const {
+      return val.constModifiers().isAbstract();
+    }
     ConstModifiers::Kind kind() const { return val.constModifiers().kind(); }
 
     StringData* getPointedClsName() const {

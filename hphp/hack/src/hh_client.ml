@@ -52,10 +52,24 @@ let () =
     | ClientCommand.CRage _ -> "Rage"
   in
 
-  (* Set up logging. *)
+  (* Just for logging, we'll read .hhconfig version= field *)
   let root = ClientArgs.root command in
+  let hhconfig_version =
+    match root with
+    | Some root ->
+      Path.concat root Config_file.file_path_relative_to_repo_root
+      |> Path.to_string
+      |> Config_file.parse_local_config ~silent:true
+      |> SMap.find_opt "version"
+      |> Config_file.parse_version
+      |> Config_file.version_to_string_opt
+    | None -> None
+  in
+
+  (* Set up logging. *)
   HackEventLogger.client_init
     ~init_id
+    ~hhconfig_version
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;

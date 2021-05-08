@@ -113,7 +113,7 @@ let out_of_date _ = ()
 
 let lock_stolen _ = ()
 
-let client_init ~init_id:_ ~custom_columns:_ _ = ()
+let client_init ~init_id:_ ~hhconfig_version:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
 

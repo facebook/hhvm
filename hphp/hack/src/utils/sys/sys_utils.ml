@@ -681,14 +681,30 @@ let protected_read_exn (filename : string) : string =
     rec_read 0;
     Bytes.to_string buf
   in
-  let fd = Unix.openfile filename [Unix.O_RDONLY] 0o666 in
-  Utils.try_finally
-    ~f:(fun () ->
-      Unix.lockf fd Unix.F_RLOCK 0;
-      cat_from_fd fd)
-    ~finally:(fun () -> Unix.close fd)
+  (* Unix has no way to atomically create a file and lock it; fnctl inherently
+  only works on an existing file. There's therefore a race where the writer
+  might create the file before locking it, but we get our read lock in first.
+  We'll work around this with a hacky sleep+retry. Other solutions would be
+  to have the file always exist, or to use a separate .lock file. *)
+  let rec retry_if_empty () =
+    let fd = Unix.openfile filename [Unix.O_RDONLY] 0o666 in
+    let content =
+      Utils.try_finally
+        ~f:(fun () ->
+          Unix.lockf fd Unix.F_RLOCK 0;
+          cat_from_fd fd)
+        ~finally:(fun () -> Unix.close fd)
+    in
+    if String.is_empty content then
+      let () = Unix.sleepf 0.001 in
+      retry_if_empty ()
+    else
+      content
+  in
+  retry_if_empty ()
 
 let protected_write_exn (filename : string) (content : string) : unit =
+  if String.is_empty content then failwith "Empty content not supported.";
   with_umask 0o000 (fun () ->
       let fd =
         Unix.openfile filename [Unix.O_RDWR; Unix.O_CREAT; Unix.O_TRUNC] 0o666

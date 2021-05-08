@@ -18,6 +18,15 @@ let server_exists lock_file = not (Lock.check lock_file)
 let from_channel_without_buffering ?timeout tic =
   Marshal_tools.from_fd_with_preamble ?timeout (Timeout.descr_of_in_channel tic)
 
+let hh_monitor_config root =
+  ServerMonitorUtils.
+    {
+      lock_file = ServerFiles.lock_file root;
+      socket_file = ServerFiles.socket_file root;
+      server_log_file = ServerFiles.log_link root;
+      monitor_log_file = ServerFiles.monitor_log_link root;
+    }
+
 let wait_on_server_restart ic =
   try
     while true do
@@ -108,7 +117,7 @@ let get_cstate
     if not (server_exists config.lock_file) then
       Error (Server_missing_exn e)
     else
-      Error (Monitor_connection_failure e)
+      Error (Monitor_connection_misc_exception e)
 
 let verify_cstate ~tracker ic cstate =
   match cstate with
@@ -248,8 +257,9 @@ let connect_to_monitor ~tracker ~timeout config =
         get_cstate ~tracker config (ic, oc)
       end
 
-let connect_and_shut_down ~tracker config =
+let connect_and_shut_down ~tracker root =
   let open Result.Monad_infix in
+  let config = hh_monitor_config root in
   connect_to_monitor ~tracker ~timeout:3 config
   >>= fun (ic, oc, cstate, tracker) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
@@ -364,8 +374,9 @@ let connect_and_shut_down ~tracker config =
           -> "hh_client lsp" -> raise Lsp.Error_server_start.
       | catch any exception -> unhandled.
 *)
-let connect_once ~tracker ~timeout config handoff_options =
+let connect_once ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
+  let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
   let tracker =
     Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)

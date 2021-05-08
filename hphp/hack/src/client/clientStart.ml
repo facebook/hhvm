@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module SMUtils = ServerMonitorUtils
 
 let get_hhserver () =
   let exe_name =
@@ -257,20 +256,22 @@ let should_start env =
     "[%s] ClientStart.should_start"
     (Connection_tracker.log_id tracker);
   match
-    ServerUtils.connect_to_monitor ~tracker ~timeout:3 env.root handoff_options
+    MonitorConnection.connect_once ~tracker ~timeout:3 env.root handoff_options
   with
   | Ok _conn -> false
   | Error
-      ( SMUtils.Server_missing_exn _ | SMUtils.Server_missing_timeout _
-      | SMUtils.Build_id_mismatched _ | SMUtils.Server_died ) ->
+      ( ServerMonitorUtils.Server_missing_exn _
+      | ServerMonitorUtils.Server_missing_timeout _
+      | ServerMonitorUtils.Build_id_mismatched _
+      | ServerMonitorUtils.Server_died ) ->
     true
-  | Error SMUtils.Server_dormant
-  | Error SMUtils.Server_dormant_out_of_retries ->
+  | Error ServerMonitorUtils.Server_dormant
+  | Error ServerMonitorUtils.Server_dormant_out_of_retries ->
     Printf.eprintf "Server already exists but is dormant";
     false
-  | Error (SMUtils.Monitor_socket_not_ready _)
-  | Error SMUtils.Monitor_establish_connection_timeout
-  | Error (SMUtils.Monitor_connection_failure _) ->
+  | Error (ServerMonitorUtils.Monitor_socket_not_ready _)
+  | Error ServerMonitorUtils.Monitor_establish_connection_timeout
+  | Error (ServerMonitorUtils.Monitor_connection_misc_exception _) ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root env.from;
     true

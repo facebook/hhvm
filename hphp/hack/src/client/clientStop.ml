@@ -9,7 +9,6 @@
 
 open Hh_prelude
 module MC = MonitorConnection
-module SMUtils = ServerMonitorUtils
 
 exception FailedToKill
 
@@ -37,22 +36,22 @@ let nice_kill env =
   let tracker = Connection_tracker.create () in
   Hh_logger.log "[%s] ClientStop.nice_kill" (Connection_tracker.log_id tracker);
   try
-    match ServerUtils.shut_down_server ~tracker env.root with
+    match MonitorConnection.connect_and_shut_down ~tracker env.root with
     | Ok shutdown_result ->
       begin
         match shutdown_result with
-        | SMUtils.SHUTDOWN_VERIFIED ->
+        | ServerMonitorUtils.SHUTDOWN_VERIFIED ->
           Printf.eprintf "Successfully killed server for %s\n%!" root_s
-        | SMUtils.SHUTDOWN_UNVERIFIED ->
+        | ServerMonitorUtils.SHUTDOWN_UNVERIFIED ->
           Printf.eprintf
             "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
             root_s;
           raise FailedToKill
       end
-    | Error (SMUtils.Build_id_mismatched _) ->
+    | Error (ServerMonitorUtils.Build_id_mismatched _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
-    | Error (SMUtils.Server_missing_exn _)
-    | Error (SMUtils.Server_missing_timeout _) ->
+    | Error (ServerMonitorUtils.Server_missing_exn _)
+    | Error (ServerMonitorUtils.Server_missing_timeout _) ->
       Printf.eprintf "No server to kill for %s\n%!" root_s
     | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;

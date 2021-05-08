@@ -125,7 +125,7 @@ type connection_error =
    *   correctly.
    *)
   | Build_id_mismatched of build_mismatch_info option
-  | Monitor_connection_failure of Exception.t
+  | Monitor_connection_misc_exception of Exception.t
 [@@deriving show]
 
 type connection_state =

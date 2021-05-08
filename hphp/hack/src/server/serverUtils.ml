@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module MC = MonitorConnection
 
 type 'env handle_command_result =
   (* Command was fully handled, and this is the new environment. *)
@@ -39,21 +38,6 @@ let shutdown_client (_ic, oc) =
     Unix.shutdown cli Unix.SHUTDOWN_ALL;
     Out_channel.close oc
   with _ -> ()
-
-let hh_monitor_config root =
-  ServerMonitorUtils.
-    {
-      lock_file = ServerFiles.lock_file root;
-      socket_file = ServerFiles.socket_file root;
-      server_log_file = ServerFiles.log_link root;
-      monitor_log_file = ServerFiles.monitor_log_link root;
-    }
-
-let shut_down_server ~tracker root =
-  MC.connect_and_shut_down ~tracker (hh_monitor_config root)
-
-let connect_to_monitor ~tracker ~timeout root =
-  MC.connect_once ~tracker ~timeout (hh_monitor_config root)
 
 let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
   let telemetry = Telemetry.create () in

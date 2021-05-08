@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module SMUtils = ServerMonitorUtils
 
 let log ?tracker ?connection_log_id s =
   let id =
@@ -117,8 +116,6 @@ let check_progress ~(server_progress_file : string) : bool =
     true
   end else
     false
-
-let delta_t : float = 3.0
 
 let show_progress
     (progress_callback : string option -> unit) ~(server_progress_file : string)
@@ -298,9 +295,11 @@ let rec connect
   in
   let tracker = Connection_tracker.create () in
   let connection_log_id = Connection_tracker.log_id tracker in
-  log ~connection_log_id "ClientConnect.connect: attempting connect_to_monitor";
+  log
+    ~connection_log_id
+    "ClientConnect.connect: attempting MonitorConnection.connect_once";
   let conn =
-    ServerUtils.connect_to_monitor ~tracker ~timeout:1 env.root handoff_options
+    MonitorConnection.connect_once ~tracker ~timeout:1 env.root handoff_options
   in
   let t_connected_to_monitor = Unix.gettimeofday () in
   HackEventLogger.client_connect_once connect_once_start_t;
@@ -381,12 +380,23 @@ let rec connect
       Printf.eprintf
         "For more detailed logs, try `tail -f $(hh_client --monitor-logname) $(hh_client --logname)`\n";
     (match e with
-    | SMUtils.Server_died
-    | SMUtils.Monitor_connection_failure _ ->
+    | ServerMonitorUtils.Monitor_establish_connection_timeout ->
+      (* This should only happen if the Monitor is being DDOSed or has
+       * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,
+       * we don't auto-retry a connection when the Monitor is busy .*)
+      HackEventLogger.client_connect_once_busy start_time;
+      Printf.eprintf "\nError: Monitor is busy. Giving up!\n%!";
+      raise Exit_status.(Exit_with Monitor_connection_failure)
+    | ServerMonitorUtils.Server_died
+    | ServerMonitorUtils.Monitor_connection_misc_exception _ ->
       Unix.sleepf 0.1;
       connect env start_time
-    | SMUtils.Server_missing_exn _
-    | SMUtils.Server_missing_timeout _ ->
+    | ServerMonitorUtils.Monitor_socket_not_ready _ ->
+      HackEventLogger.client_connect_once_busy start_time;
+      Unix.sleepf 0.1;
+      connect env start_time
+    | ServerMonitorUtils.Server_missing_exn _
+    | ServerMonitorUtils.Server_missing_timeout _ ->
       log ~tracker "connect: autostart=%b" env.autostart;
       if env.autostart then (
         let {
@@ -447,31 +457,20 @@ let rec connect
           );
         raise Exit_status.(Exit_with No_server_running_should_retry)
       )
-    | SMUtils.Server_dormant_out_of_retries ->
+    | ServerMonitorUtils.Server_dormant_out_of_retries ->
       Printf.eprintf
         ( "Ran out of retries while waiting for Mercurial to finish rebase. Starting "
         ^^ "the server in the middle of rebase is strongly not recommended and you should "
         ^^ "first finish the rebase before retrying. If you really "
         ^^ "know what you're doing, maybe try --force-dormant-start\n%!" );
       raise Exit_status.(Exit_with Out_of_retries)
-    | SMUtils.Server_dormant ->
+    | ServerMonitorUtils.Server_dormant ->
       Printf.eprintf
         ( "Error: No server running and connection limit reached for waiting"
         ^^ " on next server to be started. Please wait patiently. If you really"
         ^^ " know what you're doing, maybe try --force-dormant-start\n%!" );
       raise Exit_status.(Exit_with No_server_running_should_retry)
-    | SMUtils.Monitor_socket_not_ready _ ->
-      HackEventLogger.client_connect_once_busy start_time;
-      Unix.sleepf 0.1;
-      connect env start_time
-    | SMUtils.Monitor_establish_connection_timeout ->
-      (* This should only happen if the Monitor is being DDOSed or has
-       * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,
-       * we don't auto-retry a connection when the Monitor is busy .*)
-      HackEventLogger.client_connect_once_busy start_time;
-      Printf.eprintf "\nError: Monitor is busy. Giving up!\n%!";
-      raise Exit_status.(Exit_with Monitor_connection_failure)
-    | SMUtils.Build_id_mismatched mismatch_info_opt ->
+    | ServerMonitorUtils.Build_id_mismatched mismatch_info_opt ->
       ServerMonitorUtils.(
         Printf.eprintf
           "hh_server's version doesn't match the client's, so it will exit.\n";

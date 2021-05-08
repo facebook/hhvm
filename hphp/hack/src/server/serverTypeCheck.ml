@@ -1871,18 +1871,41 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    ( if is_full_check_done env.full_check_status then
-      let total = Errors.count env.ServerEnv.errorl in
-      let (is_truncated, shown) =
-        match env.ServerEnv.diag_subscribe with
-        | None -> (false, 0)
-        | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
-      in
-      let msg =
-        ServerCommandTypes.Done_global_typecheck { is_truncated; shown; total }
-      in
-      ServerBusyStatus.send env msg );
-    let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
+    let push_diagnostics_telemetry =
+      if is_full_check_done env.full_check_status then (
+        let total = Errors.count env.ServerEnv.errorl in
+        let (is_truncated, shown) =
+          match env.ServerEnv.diag_subscribe with
+          | None -> (false, 0)
+          | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
+        in
+        let msg =
+          ServerCommandTypes.Done_global_typecheck
+            { is_truncated; shown; total }
+        in
+        ServerBusyStatus.send env msg;
+        (* If an IDE client is connected [env.diag_subscribe], i.e. one that we pushed
+        diagnostics ("squiggles") to as part of our typecheck , let's log telemetry about
+        this fact. This way we can look at all recheck telemetry and determine how often
+        it's done with an IDE connected, hence presumably how long users wait in the IDE. *)
+        if Option.is_none env.ServerEnv.diag_subscribe then
+          None
+        else
+          Some
+            ( Telemetry.create ()
+            |> Telemetry.bool_ ~key:"is_truncated" ~value:is_truncated
+            |> Telemetry.int_ ~key:"shown" ~value:shown
+            |> Telemetry.int_ ~key:"total" ~value:total )
+      ) else
+        None
+    in
+    let telemetry =
+      telemetry
+      |> Telemetry.duration ~key:"sent_done" ~start_time
+      |> Telemetry.object_opt
+           ~key:"push_diagnostics"
+           ~value:push_diagnostics_telemetry
+    in
     (env, res, telemetry)
 
 let type_check genv env kind start_time profiling =

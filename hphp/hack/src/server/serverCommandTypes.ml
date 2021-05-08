@@ -460,9 +460,9 @@ and busy_status =
   | Done_local_typecheck
   | Doing_global_typecheck of global_typecheck_kind
   | Done_global_typecheck of {
-      is_truncated: bool;
-      shown: int;
-      total: int;
+      shown: int;  (** How many errors did we push in DIAGNOSTICS? *)
+      total: int;  (** How many errors total were there? *)
+      is_truncated: bool;  (** Whether shown DIAGNOSTICS weren't all of them *)
     }
 
 and global_typecheck_kind =

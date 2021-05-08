@@ -227,6 +227,7 @@ let rec wait_for_server_message
         get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
       in
+      (* log to file *)
       log
         ~connection_log_id
         "wait_for_server_message: %s\nfinale_data: %s"
@@ -235,7 +236,20 @@ let rec wait_for_server_message
            finale_data
            ~f:Exit.show_finale_data
            ~default:"[none]");
+      (* stderr *)
+      let msg =
+        match finale_data with
+        | None -> "Hack server disconnected suddenly. It might have crashed."
+        | Some finale_data ->
+          Printf.sprintf
+            "Hack server disconnected suddenly [%s]\n%s"
+            (Exit_status.show finale_data.Exit.exit_status)
+            (Option.value ~default:"" finale_data.Exit.msg)
+      in
+      Printf.eprintf "%s\n" msg;
+      (* spinner *)
       Option.iter progress_callback ~f:(fun callback -> callback None);
+      (* this exception will be caught by map_server_hung_up_exn_to_exit_status_exn *)
       raise (Server_hung_up finale_data)
 
 let wait_for_server_hello
@@ -257,21 +271,19 @@ let wait_for_server_hello
   in
   Lwt.return_unit
 
-let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
+let map_server_hung_up_exn_to_exit_status_exn (f : unit -> 'a Lwt.t) : 'a Lwt.t
+    =
   try%lwt f () with
-  | Server_hung_up (Some finale_data) ->
-    Printf.eprintf
-      "Hack server disconnected suddenly [%s]\n%s\n"
-      (Exit_status.show finale_data.Exit.exit_status)
-      (Option.value ~default:"" finale_data.Exit.msg);
-    (match finale_data.Exit.exit_status with
-    | Exit_status.Failed_to_load_should_abort
-    | Exit_status.Server_non_opt_build_mode ->
-      raise Exit_status.(Exit_with Server_hung_up_should_abort)
-    | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry))
-  | Server_hung_up None ->
-    Printf.eprintf "Hack server disconnected suddenly. It might have crashed.\n";
-    raise Exit_status.(Exit_with Server_hung_up_should_retry)
+  | Server_hung_up
+      (Some
+        {
+          Exit.exit_status =
+            ( Exit_status.Failed_to_load_should_abort
+            | Exit_status.Server_non_opt_build_mode );
+          _;
+        }) ->
+    raise Exit_status.(Exit_with Server_hung_up_should_abort)
+  | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry)
 
 let rec connect
     ?(first_attempt = false)
@@ -310,7 +322,7 @@ let rec connect
       "ClientConnect.connect: successfully connected to monitor.";
     let%lwt () =
       if env.do_post_handoff_handshake then
-        with_server_hung_up @@ fun () ->
+        map_server_hung_up_exn_to_exit_status_exn @@ fun () ->
         wait_for_server_hello
           connection_log_id
           ic
@@ -551,7 +563,7 @@ let rpc :
   Marshal.to_channel oc (ServerCommandTypes.Rpc (metadata, cmd)) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in
-  with_server_hung_up @@ fun () ->
+  map_server_hung_up_exn_to_exit_status_exn @@ fun () ->
   let%lwt res =
     wait_for_server_message
       ~connection_log_id

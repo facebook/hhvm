@@ -19,8 +19,6 @@ let log ?tracker ?connection_log_id s =
   | Some id -> Hh_logger.log ("[%s] [client-connect] " ^^ s) id
   | None -> Hh_logger.log ("[client-connect] " ^^ s)
 
-exception Server_hung_up of Exit.finale_data option
-
 type env = {
   root: Path.t;
   from: string;
@@ -227,11 +225,12 @@ let rec wait_for_server_message
         get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
       in
+      let client_stack = e |> Exception.to_string |> Exception.clean_stack in
       (* log to file *)
       log
         ~connection_log_id
         "wait_for_server_message: %s\nfinale_data: %s"
-        (e |> Exception.to_string |> Exception.clean_stack)
+        client_stack
         (Option.value_map
            finale_data
            ~f:Exit.show_finale_data
@@ -249,8 +248,21 @@ let rec wait_for_server_message
       Printf.eprintf "%s\n" msg;
       (* spinner *)
       Option.iter progress_callback ~f:(fun callback -> callback None);
-      (* this exception will be caught by map_server_hung_up_exn_to_exit_status_exn *)
-      raise (Server_hung_up finale_data)
+      (* exception, caught by hh_client.ml and logged.
+      In most cases we report that find_hh.sh should simply retry the failed command.
+      There are only two cases where we say it shouldn't. *)
+      let underlying_exit_status =
+        Option.map finale_data ~f:(fun d -> d.Exit.exit_status)
+      in
+      let external_exit_status =
+        match underlying_exit_status with
+        | Some
+            Exit_status.(
+              Failed_to_load_should_abort | Server_non_opt_build_mode) ->
+          Exit_status.Server_hung_up_should_abort
+        | _ -> Exit_status.Server_hung_up_should_retry
+      in
+      raise (Exit_status.Exit_with external_exit_status)
 
 let wait_for_server_hello
     (connection_log_id : string)
@@ -270,20 +282,6 @@ let wait_for_server_hello
       ~root
   in
   Lwt.return_unit
-
-let map_server_hung_up_exn_to_exit_status_exn (f : unit -> 'a Lwt.t) : 'a Lwt.t
-    =
-  try%lwt f () with
-  | Server_hung_up
-      (Some
-        {
-          Exit.exit_status =
-            ( Exit_status.Failed_to_load_should_abort
-            | Exit_status.Server_non_opt_build_mode );
-          _;
-        }) ->
-    raise Exit_status.(Exit_with Server_hung_up_should_abort)
-  | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry)
 
 let rec connect
     ?(first_attempt = false)
@@ -322,7 +320,6 @@ let rec connect
       "ClientConnect.connect: successfully connected to monitor.";
     let%lwt () =
       if env.do_post_handoff_handshake then
-        map_server_hung_up_exn_to_exit_status_exn @@ fun () ->
         wait_for_server_hello
           connection_log_id
           ic
@@ -563,7 +560,6 @@ let rpc :
   Marshal.to_channel oc (ServerCommandTypes.Rpc (metadata, cmd)) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in
-  map_server_hung_up_exn_to_exit_status_exn @@ fun () ->
   let%lwt res =
     wait_for_server_message
       ~connection_log_id

@@ -225,16 +225,20 @@ let rec wait_for_server_message
         get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
       in
-      let client_stack = e |> Exception.to_string |> Exception.clean_stack in
-      (* log to file *)
+      let client_exn = Exception.get_ctor_string e in
+      let client_stack =
+        e |> Exception.get_backtrace_string |> Exception.clean_stack
+      in
+      (* log to logfile *)
       log
         ~connection_log_id
-        "wait_for_server_message: %s\nfinale_data: %s"
-        client_stack
+        "SERVER_HUNG_UP [%s]\nfinale_data: %s\n%s"
+        client_exn
         (Option.value_map
            finale_data
            ~f:Exit.show_finale_data
-           ~default:"[none]");
+           ~default:"[none]")
+        client_stack;
       (* stderr *)
       let msg =
         match finale_data with
@@ -262,6 +266,17 @@ let rec wait_for_server_message
           Exit_status.Server_hung_up_should_abort
         | _ -> Exit_status.Server_hung_up_should_retry
       in
+      (* log to telemetry *)
+      HackEventLogger.server_hung_up
+        ~external_exit_status
+        ~underlying_exit_status
+        ~client_exn
+        ~client_stack
+        ~server_stack:
+          (Option.map
+             finale_data
+             ~f:(fun { Exit.stack = Utils.Callstack stack; _ } -> stack))
+        ~server_msg:(Option.bind finale_data ~f:(fun d -> d.Exit.msg));
       raise (Exit_status.Exit_with external_exit_status)
 
 let wait_for_server_hello

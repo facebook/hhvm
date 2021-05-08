@@ -172,6 +172,15 @@ let serverless_ide_destroy_ok _ = ()
 
 let serverless_ide_destroy_error _ _ _ = ()
 
+let server_hung_up
+    ~external_exit_status:_
+    ~underlying_exit_status:_
+    ~client_exn:_
+    ~client_stack:_
+    ~server_stack:_
+    ~server_msg:_ =
+  ()
+
 let client_bad_exit ~command_name:_ _ _ = ()
 
 let glean_globalrev_supplied ~globalrev:_ = ()

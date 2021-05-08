@@ -108,9 +108,10 @@ let () =
     in
     Hh_logger.log
       ~lvl
-      "CLIENT_BAD_EXIT client_command=%s exit_status=%s data=%s\n%s"
+      "CLIENT_BAD_EXIT client_command=%s exit_status=%s exit_code=%d exn=%s stack=%s"
       command_name
       (Exit_status.show es)
+      (Exit_status.exit_code es)
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack);
     HackEventLogger.client_bad_exit ~command_name es e;

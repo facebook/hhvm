@@ -1530,6 +1530,7 @@ static int execute_program_impl(int argc, char** argv) {
      "lint specified file")
     ("show,w", value<std::string>(&po.show),
      "output specified file and do nothing else")
+    ("check-repo", "attempt to load repo and then exit")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -2000,6 +2001,15 @@ static int execute_program_impl(int argc, char** argv) {
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);
+  }
+
+  if (vm.count("check-repo")) {
+    always_assert(RO::RepoAuthoritative);
+    init_repo_file();
+    LitstrTable::init();
+    RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
+    RepoFile::globalData().load();
+    return 0;
   }
 
   // Initialize compiler state

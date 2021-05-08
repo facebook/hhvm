@@ -720,6 +720,8 @@ let read_message_from_server (server : server_conn) : event Lwt.t =
       Lwt.return (Server_message { push; has_updated_server_state = false })
     | Hello -> Lwt.return Server_hello
     | Ping -> failwith "unexpected ping on persistent connection"
+    | Monitor_failed_to_handoff ->
+      failwith "unexpected monitor_failed_to_handoff on persistent connection"
   with e ->
     let message = Exn.to_string e in
     let stack = Printexc.get_backtrace () in

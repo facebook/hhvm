@@ -390,8 +390,9 @@ struct
         client_fd
     ) else (
       log
-        "server socket not yet ready. No more retries. Ignoring request."
+        "server socket not yet ready. No more retries. Sending Monitor_failed_to_handoff to client and closing client FD"
         ~tracker;
+      msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
       Unix.close client_fd
     )
 

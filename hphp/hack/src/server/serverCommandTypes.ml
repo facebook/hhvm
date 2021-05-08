@@ -471,16 +471,16 @@ and global_typecheck_kind =
   | Remote_blocking of string
 
 type 'a message_type =
-  (* Only sent to persistent connections. *)
-  | Push of push
-  (* records the time at which hh_server started handling *)
-  | Response of 'a * Connection_tracker.t
-  (* Hello is the first message sent after handoff. It's used for both *)
-  (* persistent and non-persistent connections. *)
   | Hello
-  (* Pings can be sent to non-persistent connection after Hello and before
-   * sending RPC response. *)
+      (** Hello is the first message sent to the client by the server, for both persistent and non-persistent *)
+  | Monitor_failed_to_handoff
+      (** However, if the handoff failed, this will be sent instead of Hello, and the connection terminated. *)
   | Ping
+      (** Server sometimes sends these, after Hello and before Response, to check if client fd is still open *)
+  | Response of 'a * Connection_tracker.t
+      (** Response message is the response to an RPC. For non-persistent, the server will close fd after this. *)
+  | Push of push
+      (** This is how errors are sent; only sent to persistent connections. *)
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

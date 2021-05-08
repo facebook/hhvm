@@ -182,20 +182,27 @@ let rec wait_for_server_message
       ~progress_callback
       ~root
   ) else
+    (* an inline module to define this exception type, used internally in the function *)
+    let module M = struct
+      exception Monitor_failed_to_handoff
+    end in
     try%lwt
       let fd = Timeout.descr_of_in_channel ic in
       let msg : 'a ServerCommandTypes.message_type =
         Marshal_tools.from_fd_with_preamble fd
       in
-      let is_ping =
+      let (is_ping, is_handoff_failed) =
         match msg with
-        | ServerCommandTypes.Ping -> true
-        | _ -> false
+        | ServerCommandTypes.Ping -> (true, false)
+        | ServerCommandTypes.Monitor_failed_to_handoff -> (false, true)
+        | _ -> (false, false)
       in
       let matches_expected =
         Option.value_map ~default:true ~f:(Poly.( = ) msg) expected_message
       in
-      if matches_expected && not is_ping then (
+      if is_handoff_failed then
+        raise M.Monitor_failed_to_handoff
+      else if matches_expected && not is_ping then (
         log
           ~connection_log_id
           "wait_for_server_message: got expected %s"
@@ -219,8 +226,8 @@ let rec wait_for_server_message
           ~root
       )
     with
-    | (End_of_file | Sys_error _) as e ->
-      let e = Exception.wrap e in
+    | (End_of_file | Sys_error _ | M.Monitor_failed_to_handoff) as exn ->
+      let e = Exception.wrap exn in
       let finale_data =
         get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
@@ -241,9 +248,11 @@ let rec wait_for_server_message
         client_stack;
       (* stderr *)
       let msg =
-        match finale_data with
-        | None -> "Hack server disconnected suddenly. It might have crashed."
-        | Some finale_data ->
+        match (exn, finale_data) with
+        | (M.Monitor_failed_to_handoff, None) -> "Hack server is too busy."
+        | (_, None) ->
+          "Hack server disconnected suddenly. It might have crashed."
+        | (_, Some finale_data) ->
           Printf.sprintf
             "Hack server disconnected suddenly [%s]\n%s"
             (Exit_status.show finale_data.Exit.exit_status)
@@ -604,6 +613,8 @@ let rpc :
   | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
   | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"
+  | ServerCommandTypes.Monitor_failed_to_handoff ->
+    failwith "unexpected 'monitor_failed_to_handoff' RPC response"
 
 let rpc_with_retry
     (conn_f : unit -> conn Lwt.t)

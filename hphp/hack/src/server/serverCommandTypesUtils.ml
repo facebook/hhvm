@@ -98,10 +98,11 @@ let status_describe_cmd : type a. a command -> string =
   | Debug -> "Debug"
 
 let debug_describe_message_type : type a. a message_type -> string = function
-  | Push _ -> "Push"
-  | Response _ -> "Response"
   | Hello -> "Hello"
+  | Monitor_failed_to_handoff -> "Monitor_failed_to_handoff"
   | Ping -> "Ping"
+  | Response _ -> "Response"
+  | Push _ -> "Push"
 
 let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
     Relative_path.t * ServerCommandTypes.file_input =

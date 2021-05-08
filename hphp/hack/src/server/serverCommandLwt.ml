@@ -23,6 +23,14 @@ let rec wait_for_rpc_response stack fd state callback =
     | Ping ->
       Lwt.return
         (Error (state, stack, Failure "unexpected ping on persistent connection"))
+    | Monitor_failed_to_handoff ->
+      Lwt.return
+        (Error
+           ( state,
+             stack,
+             Failure
+               "unexpected monitor_failed_to_handoff on persistent connection"
+           ))
   with e -> Lwt.return (Error (state, stack, e))
 
 (** Sends a message over the given `out_channel`, then listens for incoming

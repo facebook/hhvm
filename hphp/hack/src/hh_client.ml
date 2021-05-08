@@ -52,26 +52,8 @@ let () =
     | ClientCommand.CRage _ -> "Rage"
   in
 
-  (* Just for logging, we'll read .hhconfig version= field *)
+  (* We'll chose where Hh_logger.log gets sent *)
   let root = ClientArgs.root command in
-  let hhconfig_version =
-    match root with
-    | Some root ->
-      Path.concat root Config_file.file_path_relative_to_repo_root
-      |> Path.to_string
-      |> Config_file.parse_local_config ~silent:true
-      |> SMap.find_opt "version"
-      |> Config_file.parse_version
-      |> Config_file.version_to_string_opt
-    | None -> None
-  in
-
-  (* Set up logging. *)
-  HackEventLogger.client_init
-    ~init_id
-    ~hhconfig_version
-    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
-    (Option.value root ~default:Path.dummy_path);
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
@@ -94,6 +76,48 @@ let () =
   Hh_logger.log
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
+
+  (* To set up HackEventLogger, we need the .hhconfig version= field *)
+  Option.iter root ~f:(Relative_path.set_path_prefix Relative_path.Root);
+  let hhconfig_version =
+    match root with
+    | Some root ->
+      Path.concat root Config_file.file_path_relative_to_repo_root
+      |> Path.to_string
+      |> Config_file.parse_local_config ~silent:true
+      |> SMap.find_opt "version"
+      |> Config_file.parse_version
+      |> Config_file.version_to_string_opt
+    | None -> None
+  in
+  (* Also for HackEventLogger, we want rollout_options, which come from ServerLocalConfig *)
+  let rollout_flags =
+    match root with
+    | None -> None
+    | Some root ->
+      (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
+      It requires a ServerArgs structure, solely to pick out --config options. We
+      dont have ServerArgs (we only have client args!) but we do parse --config
+      options and will patch them onto a fake ServerArgs. *)
+      let fake_server_args =
+        ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
+      in
+      let fake_server_args =
+        match ClientArgs.config command with
+        | None -> fake_server_args
+        | Some config -> ServerArgs.set_config fake_server_args config
+      in
+      let (_, local_config) =
+        ServerConfig.load ~silent:true ServerConfig.filename fake_server_args
+      in
+      Some (ServerLocalConfig.to_rollout_flags local_config)
+  in
+  HackEventLogger.client_init
+    ~init_id
+    ~hhconfig_version
+    ~rollout_flags
+    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
+    (Option.value root ~default:Path.dummy_path);
 
   try
     let exit_status =

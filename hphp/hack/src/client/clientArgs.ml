@@ -1211,3 +1211,15 @@ let root = function
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
   | CLsp _ -> None
+
+let config = function
+  | CCheck { ClientEnv.config; _ }
+  | CStart { ClientStart.config; _ }
+  | CRestart { ClientStart.config; _ }
+  | CLsp { ClientLsp.config; _ } ->
+    Some config
+  | CStop _
+  | CDebug _
+  | CDownloadSavedState _
+  | CRage _ ->
+    None

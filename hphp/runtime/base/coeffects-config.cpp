@@ -63,7 +63,9 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(policied_of)           \
   X(policied_local)        \
   X(policied_shallow)      \
-  X(policied)
+  X(policied)              \
+  X(globals)               \
+  X(read_globals)
 
 #define COEFFECTS    \
   RX_COEFFECTS       \
@@ -165,12 +167,16 @@ void initCapabilityGraphs() {
                     rx_pure));
 
   auto policied = createNode(Cap::s_policied, true);
+  auto read_globals = createNode(Cap::s_read_globals);
   addEdges(createNode(Cap::s_policied_unreachable, false, true),
            addEdges(createNode(Cap::s_policied_defaults),
+                    addEdges(createNode(Cap::s_globals),
+                             read_globals),
                     policied),
            addEdges(createNode(Cap::s_policied_of, true),
                     addEdges(policied,
-                             createNode(Cap::s_policied_maybe))));
+                             addEdges(read_globals,
+                                      createNode(Cap::s_policied_maybe)))));
 }
 
 } //namespace

@@ -105,13 +105,6 @@ bool canDCE(IRInstruction* inst) {
   case SameStr:
   case NSameStr:
   case CmpStr:
-  case GtStrInt:
-  case GteStrInt:
-  case LtStrInt:
-  case LteStrInt:
-  case EqStrInt:
-  case NeqStrInt:
-  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
@@ -379,6 +372,13 @@ bool canDCE(IRInstruction* inst) {
   case LtArrLike:
   case LteArrLike:
   case CmpArrLike:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
+  case CmpStrInt:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:
@@ -524,6 +524,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
+  case RaiseBadComparisonViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:

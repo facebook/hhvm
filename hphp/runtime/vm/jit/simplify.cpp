@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/simplify.h"
 
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -294,6 +295,28 @@ bool handleConvNoticeLevel(
     return true;
   }
   if (notice_data->level == ConvNoticeLevel::Log) {
+    gen(env, RaiseNotice, trace, cns(env, str));
+  }
+  return false;
+}
+
+// return true if throws
+bool handleConvNoticeCmp(
+    State& env,
+    Block* trace,
+    const char* lhs,
+    const char* rhs) {
+  const auto level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+  if (LIKELY(level == ConvNoticeLevel::None)) return false;
+  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
+  const auto str = makeStaticString(folly::sformat(
+    "Comparing {} and {} using a relational operator", lhs, rhs));
+  if (level == ConvNoticeLevel::Throw) {
+    gen(env, ThrowInvalidOperation, trace, cns(env, str));
+    return true;
+  }
+  if (level == ConvNoticeLevel::Log) {
     gen(env, RaiseNotice, trace, cns(env, str));
   }
   return false;
@@ -1263,55 +1286,53 @@ SSATmp* cmpStrIntImpl(State& env,
   assertx(left->type() <= TStr);
   assertx(right->type() <= TInt);
 
-  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
-    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
-  };
+  if (!left->hasConstVal()) return nullptr;
 
   // If the string operand has a constant value, convert it to the appropriate
   // numeric and lower to a numeric comparison.
-  if (left->hasConstVal()) {
-    int64_t si;
-    double sd;
-    auto const type =
-      left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
-    if (type == KindOfDouble) {
-      auto const dblOpc = [](Opcode opcode) {
-        switch (opcode) {
-          case GtStrInt:  return GtDbl;
-          case GteStrInt: return GteDbl;
-          case LtStrInt:  return LtDbl;
-          case LteStrInt: return LteDbl;
-          case EqStrInt:  return EqDbl;
-          case NeqStrInt: return NeqDbl;
-          default: always_assert(false);
-        }
-      }(opc);
-      return newInst(
-        dblOpc,
-        cns(env, sd),
-        gen(env, ConvIntToDbl, right)
-      );
-    } else {
-      auto const intOpc = [](Opcode opcode) {
-        switch (opcode) {
-          case GtStrInt:  return GtInt;
-          case GteStrInt: return GteInt;
-          case LtStrInt:  return LtInt;
-          case LteStrInt: return LteInt;
-          case EqStrInt:  return EqInt;
-          case NeqStrInt: return NeqInt;
-          default: always_assert(false);
-        }
-      }(opc);
-      return newInst(
-        intOpc,
-        cns(env, type == KindOfNull ? (int64_t)0 : si),
-        right
-      );
+  int64_t si;
+  double sd;
+  auto const type =
+    left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
+  if (type == KindOfDouble) {
+    auto const dblOpc = [](Opcode opcode) {
+      switch (opcode) {
+        case GtStrInt:  return GtDbl;
+        case GteStrInt: return GteDbl;
+        case LtStrInt:  return LtDbl;
+        case LteStrInt: return LteDbl;
+        case EqStrInt:  return EqDbl;
+        case NeqStrInt: return NeqDbl;
+        default: always_assert(false);
+      }
+    }(opc);
+    const auto dblval = gen(env, ConvIntToDbl, right);
+    if (opc != EqStrInt && opc != NeqStrInt) {
+      if (handleConvNoticeCmp(env, inst->taken(), "string", "int")) {
+        return cns(env, TBottom);
+      }
     }
+    return gen(env, dblOpc, cns(env, sd), dblval);
+  } else {
+    auto const intOpc = [](Opcode opcode) {
+      switch (opcode) {
+        case GtStrInt:  return GtInt;
+        case GteStrInt: return GteInt;
+        case LtStrInt:  return LtInt;
+        case LteStrInt: return LteInt;
+        case EqStrInt:  return EqInt;
+        case NeqStrInt: return NeqInt;
+        default: always_assert(false);
+      }
+    }(opc);
+    if (opc != EqStrInt && opc != NeqStrInt) {
+      if (handleConvNoticeCmp(env, inst->taken(), "string", "int")) {
+        return cns(env, TBottom);
+      }
+    }
+    return gen(
+      env, intOpc, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
   }
-
-  return nullptr;
 }
 
 SSATmp* cmpObjImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
@@ -1554,33 +1575,20 @@ SSATmp* simplifyCmpStrInt(State& env, const IRInstruction* inst) {
   assertx(left->type() <= TStr);
   assertx(right->type() <= TInt);
 
-  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
-    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
-  };
+  if (!left->hasConstVal()) return nullptr;
 
   // If the string operand has a constant value, convert it to the appropriate
   // numeric and lower to a numeric comparison.
-  if (left->hasConstVal()) {
-    int64_t si;
-    double sd;
-    auto const type =
-      left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
-    if (type == KindOfDouble) {
-      return newInst(
-        CmpDbl,
-        cns(env, sd),
-        gen(env, ConvIntToDbl, right)
-      );
-    } else {
-      return newInst(
-        CmpInt,
-        cns(env, type == KindOfNull ? (int64_t)0 : si),
-        right
-      );
-    }
-  }
-
-  return nullptr;
+  int64_t si;
+  double sd;
+  auto const type =
+    left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
+  const auto ret = type == KindOfDouble
+    ? gen(env, CmpDbl, cns(env, sd), gen(env, ConvIntToDbl, right))
+    : gen(env, CmpInt, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
+  return handleConvNoticeCmp(env, inst->taken(), "string", "int")
+    ? cns(env, TBottom)
+    : ret;
 }
 
 SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {

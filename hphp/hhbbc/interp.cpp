@@ -1591,35 +1591,21 @@ void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
 void in(ISS& env, const bc::NSame&) { sameImpl<true>(env); }
 
 template<class Fun>
-void binOpBoolImpl(ISS& env, Fun fun) {
+void binOpBoolImpl(ISS& env, Fun fun, bool checkSameTypes) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2) {
-    if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
-      constprop(env);
-      return push(env, *r ? TTrue : TFalse);
+  if (t1 == t2 || !checkSameTypes) {
+    auto const v1 = tv(t1);
+    auto const v2 = tv(t2);
+    if (v1 && v2) {
+      if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
+        constprop(env);
+        return push(env, *r ? TTrue : TFalse);
+      }
     }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TBool);
-}
-
-template<class Fun>
-void binOpInt64Impl(ISS& env, Fun fun) {
-  auto const t1 = popC(env);
-  auto const t2 = popC(env);
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2) {
-    if (auto r = eval_cell_value([&]{ return ival(fun(*v2, *v1)); })) {
-      constprop(env);
-      return push(env, std::move(*r));
-    }
-  }
-  // TODO_4: evaluate when these can throw, non-constant type stuff.
-  push(env, TInt);
 }
 
 void in(ISS& env, const bc::Eq&) {
@@ -1629,7 +1615,7 @@ void in(ISS& env, const bc::Eq&) {
     discard(env, 2);
     return push(env, TTrue);
   }
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvEqual(c1, c2); }, false);
 }
 void in(ISS& env, const bc::Neq&) {
   auto rs = resolveSame<false>(env);
@@ -1638,19 +1624,32 @@ void in(ISS& env, const bc::Neq&) {
     discard(env, 2);
     return push(env, TFalse);
   }
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return !tvEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return !tvEqual(c1, c2); }, false);
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvLess(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvLess(c1, c2); }, true);
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvGreater(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvGreater(c1, c2); }, true);
 }
-void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual); }
-void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual); }
+void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual, true); }
+void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual, true); }
 
 void in(ISS& env, const bc::Cmp&) {
-  binOpInt64Impl(env, [&] (TypedValue c1, TypedValue c2) { return tvCompare(c1, c2); });
+  auto const t1 = popC(env);
+  auto const t2 = popC(env);
+  if (t1 == t2) {
+    auto const v1 = tv(t1);
+    auto const v2 = tv(t2);
+    if (v1 && v2) {
+      if (auto r = eval_cell_value([&]{ return ival(tvCompare(*v2, *v1)); })) {
+        constprop(env);
+        return push(env, std::move(*r));
+      }
+    }
+  }
+  // TODO_4: evaluate when these can throw, non-constant type stuff.
+  push(env, TInt);
 }
 
 void castBoolImpl(ISS& env, const Type& t, bool negate) {

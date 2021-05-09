@@ -1,0 +1,3 @@
+-vEval.JitMaxTranslations=500000
+-vEval.IsCompatibleClsMethType=1
+-vEval.NoticeOnCoerceForCmp=2

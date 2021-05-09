@@ -1178,6 +1178,10 @@ const char* convOpToName(ConvNoticeLevel level) {
   ];
 }
 
+namespace {
+void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str);
+}
+
 void handleConvNoticeLevel(
   ConvNoticeLevel level,
   const char* const from,
@@ -1185,14 +1189,35 @@ void handleConvNoticeLevel(
   const StringData* reason) {
   if (LIKELY(level == ConvNoticeLevel::None)) return;
   assertx(reason != nullptr);
+  handleConvNoticeLevelImpl(
+    level,
+    folly::sformat("Implicit {} to {} conversion for {}", from, to, reason));
+}
 
-  const auto str = folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to, reason);
+void handleConvNoticeForCmp(const char* lhs, const char* rhs) {
+  const auto level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+  if (LIKELY(level == ConvNoticeLevel::None)) return;
+  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
+  handleConvNoticeLevelImpl(
+    level,
+    folly::sformat("Comparing {} and {} using a relational operator", lhs, rhs));
+}
+
+void handleConvNoticeForCmp(TypedValue lhs, TypedValue rhs) {
+  handleConvNoticeForCmp(
+    describe_actual_type(&lhs).c_str(),
+    describe_actual_type(&rhs).c_str());
+}
+
+namespace {
+void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
   if (level == ConvNoticeLevel::Throw) {
     SystemLib::throwInvalidOperationExceptionObject(str);
   } else if (level == ConvNoticeLevel::Log) {
     raise_notice(str);
   }
+}
 }
 
 const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");

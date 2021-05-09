@@ -303,6 +303,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Clone:
   case CmpArrLike:
   case CmpObj:
+  case CmpStrInt:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:
@@ -345,7 +346,9 @@ bool opcodeMayRaise(Opcode opc) {
   case GtArrLike:
   case GteArrLike:
   case GteObj:
+  case GteStrInt:
   case GtObj:
+  case GtStrInt:
   case HandleRequestSurprise:
   case IncDecElem:
   case IncDecProp:
@@ -387,7 +390,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LtArrLike:
   case LteArrLike:
   case LteObj:
+  case LteStrInt:
   case LtObj:
+  case LtStrInt:
   case MapGet:
   case MapSet:
   case NativeImpl:
@@ -406,6 +411,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PropQ:
   case PropTypeRedefineCheck:
   case PropX:
+  case RaiseBadComparisonViolation:
   case RaiseClsMethPropConvertNotice:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
@@ -549,7 +555,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CmpInt:
   case CmpRes:
   case CmpStr:
-  case CmpStrInt:
   case ColIsEmpty:
   case ColIsNEmpty:
   case Conjure:
@@ -657,11 +662,9 @@ bool opcodeMayRaise(Opcode opc) {
   case GteInt:
   case GteRes:
   case GteStr:
-  case GteStrInt:
   case GtInt:
   case GtRes:
   case GtStr:
-  case GtStrInt:
   case HasReifiedGenerics:
   case HasToString:
   case IncCallCounter:
@@ -818,11 +821,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LteInt:
   case LteRes:
   case LteStr:
-  case LteStrInt:
   case LtInt:
   case LtRes:
   case LtStr:
-  case LtStrInt:
   case MapIsset:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:

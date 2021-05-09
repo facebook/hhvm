@@ -286,6 +286,8 @@ IMPL_OPCODE_CALL(LtRes);
 IMPL_OPCODE_CALL(LteRes);
 IMPL_OPCODE_CALL(CmpRes);
 
+IMPL_OPCODE_CALL(RaiseBadComparisonViolation);
+
 #define CMP_DATA_OPS        \
   CDO(Obj,  Same,   CC_E)   \
   CDO(Obj,  NSame,  CC_NE)  \

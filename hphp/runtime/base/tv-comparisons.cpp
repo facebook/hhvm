@@ -49,6 +49,14 @@ bool vecSameHelper(const ArrayData* ad1, const ArrayData* ad2) {
     : ArrayData::Same(ad1, ad2);
 }
 
+// helpers for coercion logging
+
+template<class Op> constexpr bool isEqualityOp();
+
+template<class Op> void handleConvNotice(const char* lhs, const char* rhs) {
+  if constexpr (!isEqualityOp<Op>()) handleConvNoticeForCmp(lhs, rhs);
+}
+
 /*
  * Family of relative op functions.
  *
@@ -61,8 +69,32 @@ bool vecSameHelper(const ArrayData* ad1, const ArrayData* ad2) {
  * See below for the implementations of the Op template parameter.
  */
 
+template<class Op> typename Op::RetType tvRelOpBoolImpl(
+  Op op, TypedValue cell, bool val, bool should_check_coercion);
+
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
+  return tvRelOpBoolImpl(op, cell, val, true);
+}
+
+template<class Op>
+typename Op::RetType tvRelOpNull(Op op, TypedValue cell) {
+  if (isStringType(cell.m_type)) {
+    handleConvNotice<Op>("string", "null");
+    return op(cell.m_data.pstr, staticEmptyString());
+  } else if (cell.m_type == KindOfObject) {
+    handleConvNotice<Op>("object", "null");
+    return op(true, false);
+  } else {
+    if (!isNullType(cell.m_type)) {
+      handleConvNotice<Op>(describe_actual_type(&cell).c_str(), "null");
+    }
+    return tvRelOpBoolImpl(op, cell, false, false);
+  }
+}
+
+template<class Op> typename Op::RetType tvRelOpBoolImpl(
+  Op op, TypedValue cell, bool val, bool should_check_coercion) {
   if (UNLIKELY(isArrayLikeType(cell.m_type))) {
     return op(cell.m_data.parr, val);
   } else if (UNLIKELY(isClsMethType(cell.m_type))) {
@@ -74,12 +106,16 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
   } else if (UNLIKELY(isRClsMethType(cell.m_type))) {
     return op(cell.m_data.prclsmeth, val);
   } else {
+    if (!isBoolType(cell.m_type) && should_check_coercion) {
+      handleConvNotice<Op>(describe_actual_type(&cell).c_str(), "bool");
+    }
     return op(tvToBool(cell), val);
   }
 }
 
 template<class Op, typename Num>
 auto strRelOp(Op op, TypedValue cell, Num val, const StringData* str) {
+  handleConvNotice<Op>("string", std::is_integral_v<Num> ? "int" : "float");
   auto const num = stringToNumeric(str);
   return num.m_type == KindOfInt64 ? op(num.m_data.num, val) :
          num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
@@ -93,9 +129,11 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "int");
       return op(false, !!val);
 
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "int");
       return op(!!cell.m_data.num, val != 0);
 
     case KindOfInt64:
@@ -121,11 +159,15 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
       return op.keysetVsNonKeyset();
 
     case KindOfObject:
-      return cell.m_data.pobj->isCollection()
-        ? op.collectionVsNonObj()
-        : op(cell.m_data.pobj->toInt64(), val);
-
+      if (cell.m_data.pobj->isCollection()) return op.collectionVsNonObj();
+      {
+        // do the conversion first since it throws most of the time
+        const auto res = op(cell.m_data.pobj->toInt64(), val);
+        handleConvNotice<Op>("object", "int");
+        return res;
+      }
     case KindOfResource:
+      handleConvNotice<Op>("resource", "int");
       return op(cell.m_data.pres->data()->o_toInt64(), val);
 
     case KindOfFunc:
@@ -160,9 +202,11 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "float");
       return op(false, val != 0);
 
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "float");
       return op(!!cell.m_data.num, val != 0);
 
     case KindOfInt64:
@@ -188,11 +232,15 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
       return op.keysetVsNonKeyset();
 
     case KindOfObject:
-      return cell.m_data.pobj->isCollection()
-        ? op.collectionVsNonObj()
-        : op(cell.m_data.pobj->toDouble(), val);
-
+      if (cell.m_data.pobj->isCollection()) return op.collectionVsNonObj();
+      {
+        // do the conversion first since it throws most of the time
+        const auto res = op(cell.m_data.pobj->toDouble(), val);
+        handleConvNotice<Op>("object", "float");
+        return res;
+      }
     case KindOfResource:
+      handleConvNotice<Op>("resource", "float");
       return op(cell.m_data.pres->data()->o_toDouble(), val);
 
     case KindOfFunc:
@@ -228,18 +276,22 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "string");
       return op(staticEmptyString(), val);
 
     case KindOfInt64: {
+      handleConvNotice<Op>("int", "string");
       auto const num = stringToNumeric(val);
       return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "string");
       return op(!!cell.m_data.num, val->toBoolean());
 
     case KindOfDouble: {
+      handleConvNotice<Op>("float", "string");
       auto const num = stringToNumeric(val);
       return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
@@ -269,10 +321,12 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
         String str(od->invokeToString());
         return op(str.get(), val);
       }
+      handleConvNotice<Op>("object", "string");
       return op(true, false);
     }
 
     case KindOfResource: {
+      handleConvNotice<Op>("resource", "string");
       auto const rd = cell.m_data.pres;
       return op(rd->data()->o_toDouble(), val->toDouble());
     }
@@ -312,24 +366,37 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
       String str(obj->invokeToString());
       return op(sd, str.get());
     }
+    handleConvNotice<Op>("string", "object");
     return op(false, true);
   };
 
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "object");
       return op(false, true);
 
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "object");
       return op(!!cell.m_data.num, od->toBoolean());
 
     case KindOfInt64:
-      return od->isCollection() ? op.collectionVsNonObj()
-                                : op(cell.m_data.num, od->toInt64());
+      if (od->isCollection()) return op.collectionVsNonObj();
+      {
+        // do the conversion first since it throws most of the time
+        const auto res = op(cell.m_data.num, od->toInt64());
+        handleConvNotice<Op>("int", "object");
+        return res;
+      }
 
     case KindOfDouble:
-      return od->isCollection() ? op.collectionVsNonObj()
-                                : op(cell.m_data.dbl, od->toDouble());
+      if (od->isCollection()) return op.collectionVsNonObj();
+      {
+        // do the conversion first since it throws most of the time
+        const auto res = op(cell.m_data.dbl, od->toDouble());
+        handleConvNotice<Op>("float", "object");
+        return res;
+      }
 
     case KindOfPersistentString:
     case KindOfString:
@@ -351,6 +418,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
       return op(cell.m_data.pobj, od);
 
     case KindOfResource:
+      handleConvNotice<Op>("resource", "object");
       return op(false, true);
 
     case KindOfFunc:
@@ -392,19 +460,24 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "resource");
       return op(false, true);
 
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "resource");
       return op(!!cell.m_data.num, rd->o_toBoolean());
 
     case KindOfInt64:
+      handleConvNotice<Op>("int", "resource");
       return op(cell.m_data.num, rd->o_toInt64());
 
     case KindOfDouble:
+      handleConvNotice<Op>("float", "resource");
       return op(cell.m_data.dbl, rd->o_toDouble());
 
     case KindOfPersistentString:
     case KindOfString: {
+      handleConvNotice<Op>("string", "resource");
       auto const str = cell.m_data.pstr;
       return op(str->toDouble(), rd->o_toDouble());
     }
@@ -422,6 +495,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
       return op.keysetVsNonKeyset();
 
     case KindOfObject:
+      handleConvNotice<Op>("object", "resource");
       return op(true, false);
 
     case KindOfResource:
@@ -433,11 +507,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
 
     case KindOfClass: {
       auto const str = classToStringHelper(cell.m_data.pclass);
+      handleConvNotice<Op>("string", "resource");
       return op(str->toDouble(), rd->o_toDouble());
     }
 
     case KindOfLazyClass: {
       auto const str = lazyClassToStringHelper(cell.m_data.plazyclass);
+      handleConvNotice<Op>("string", "resource");
       return op(str->toDouble(), rd->o_toDouble());
     }
 
@@ -650,18 +726,22 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, LazyClassData val) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "string");
       return op(staticEmptyString(), lazyClassToStringHelper(val));
 
     case KindOfInt64: {
+      handleConvNotice<Op>("int", "string");
       auto const num = stringToNumeric(lazyClassToStringHelper(val));
       return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "string");
       return op(!!cell.m_data.num, true);
 
     case KindOfDouble: {
+      handleConvNotice<Op>("double", "string");
       auto const num = stringToNumeric(lazyClassToStringHelper(val));
       return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
@@ -691,10 +771,12 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, LazyClassData val) {
         String str(od->invokeToString());
         return op(str.get(), lazyClassToStringHelper(val));
       }
+      handleConvNotice<Op>("object", "string");
       return op(true, false);
     }
 
     case KindOfResource: {
+      handleConvNotice<Op>("resource", "string");
       auto const rd = cell.m_data.pres;
       return op(rd->data()->o_toDouble(),
                 lazyClassToStringHelper(val)->toDouble());
@@ -732,18 +814,22 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNotice<Op>("null", "string");
       return op(staticEmptyString(), classToStringHelper(val));
 
     case KindOfInt64: {
+      handleConvNotice<Op>("int", "string");
       auto const num = stringToNumeric(classToStringHelper(val));
       return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
+      handleConvNotice<Op>("bool", "string");
       return op(!!cell.m_data.num, true);
 
     case KindOfDouble: {
+      handleConvNotice<Op>("double", "string");
       auto const num = stringToNumeric(classToStringHelper(val));
       return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
@@ -773,10 +859,12 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
         String str(od->invokeToString());
         return op(str.get(), classToStringHelper(val));
       }
+      handleConvNotice<Op>("object", "string");
       return op(true, false);
     }
 
     case KindOfResource: {
+      handleConvNotice<Op>("resource", "string");
       auto const rd = cell.m_data.pres;
       return op(rd->data()->o_toDouble(), classToStringHelper(val)->toDouble());
     }
@@ -812,11 +900,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
 
   switch (c2.m_type) {
   case KindOfUninit:
-  case KindOfNull:
-    return isStringType(c1.m_type) ? op(c1.m_data.pstr, staticEmptyString()) :
-           c1.m_type == KindOfObject ? op(true, false) :
-           tvRelOp(op, c1, false);
-
+  case KindOfNull:         return tvRelOpNull(op, c1);
   case KindOfInt64:        return tvRelOp(op, c1, c2.m_data.num);
   case KindOfBoolean:      return tvRelOp(op, c1, !!c2.m_data.num);
   case KindOfDouble:       return tvRelOp(op, c1, c2.m_data.dbl);
@@ -869,9 +953,13 @@ struct Eq {
     return sd1->equal(sd2);
   }
   bool operator()(const ArrayData* ad, bool val) const {
+    // @dizzy note to self, when dealign with eq notices, trigger a notice here
+    // and ensure we handle the null case with correct message
     return !ad->empty() == val;
   }
   bool operator()(bool val, const ArrayData* ad) const {
+    // @dizzy note to self, when dealign with eq notices, trigger a notice here
+    // and ensure we handle the null case with correct message
     return val == !ad->empty();
   }
 
@@ -1187,6 +1275,10 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
     return ArrayData::Compare(ad1, ad2);
   }
 };
+
+template<class Op> constexpr bool isEqualityOp() {
+  return std::is_same_v<Op, Eq>;
+}
 
 //////////////////////////////////////////////////////////////////////
 

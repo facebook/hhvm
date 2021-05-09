@@ -644,6 +644,10 @@ To string conversions:
   Perform comparison of resources using PHP semantics. Resource comparisons
   never re-enter or throw.
 
+| RaiseBadComparisonViolation, ND, S(Cell) S(Cell),                       NF
+
+  Raise a notice or throw an exception for comparing different types.
+
 | EqCls,                       D(Bool), S(Cls) S(Cls),                    NF
 
   Checks if two Class values are equal.
@@ -1512,13 +1516,13 @@ To string conversions:
 | AllocUninitBespokeStructDict<layout,slots...>,   DStructDict, NA, PRc
 
   Allocate a new dict with the bespoke StructLayout `layout` and insertion order
-  specified by `slots`. This instruction does not set the elements of the dict; 
+  specified by `slots`. This instruction does not set the elements of the dict;
   use InitStructElem for that.
 
 | InitStructElem<slot,key>, ND, SStructDict S(Cell), CRc
 
-  Initialize the element at slot `slot` corresponding to `key` in StructDict S0 
-  with S1. This instruction assumes that S1 has already been inc-reffed. 
+  Initialize the element at slot `slot` corresponding to `key` in StructDict S0
+  with S1. This instruction assumes that S1 has already been inc-reffed.
   Used with the result of AllocUninitBespokeStructDict.
 
 | NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc

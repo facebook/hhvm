@@ -381,6 +381,10 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {CmpRes,             static_cast<ResCmpFnInt>(compare), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
+    {RaiseBadComparisonViolation,
+                           static_cast<void (*)(TypedValue, TypedValue)>(
+                             handleConvNoticeForCmp), DNone, SSync,
+                          {{TV, 0}, {TV, 1}}},
 
     /* Static prop helpers */
     {LdClsPropAddrOrNull,

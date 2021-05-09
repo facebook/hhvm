@@ -1,0 +1,22 @@
+same    nsame   lt      lte     eq      neq     gte     gt      cmp
+
+ArrayIterator 1 cmp ArrayIterator 2:
+F       T       T       T       F       T       F       F       -1
+ArrayIterator 2 cmp ArrayIterator 1:
+F       T       F       F       F       T       T       T       1
+SimpleXMLElement 1 cmp SimpleXMLElement 2:
+F       T       T       T       F       T       F       F       -1
+SimpleXMLElement 2 cmp SimpleXMLElement 1:
+F       T       F       F       F       T       T       T       1
+Dynamic property a cmp Dynamic property b:
+F       T       F       F       F       T       F       F       1
+Dynamic property b cmp Dynamic property a:
+F       T       F       F       F       T       F       F       1
+Dynamic property a cmp Dynamic property NAN:
+F       T       Err     Err     F       T       Err     Err     Err
+Dynamic property NAN cmp Dynamic property a:
+F       T       Err     Err     F       T       Err     Err     Err
+Dynamic props (a, b) cmp Dynamic props (b, c):
+F       T       F       F       F       T       T       T       1
+Dynamic props (b, c) cmp Dynamic props (a, b):
+F       T       T       T       F       T       F       F       -1

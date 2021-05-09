@@ -71,6 +71,7 @@ bool equal(int64_t v1, const StringData *v2) {
 bool less(int64_t v1, const StringData *v2) {
   int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  handleConvNoticeForCmp("int", "string");
   if (ret == KindOfInt64) {
     return v1 < lval;
   } else if (ret == KindOfDouble) {
@@ -83,6 +84,7 @@ bool less(int64_t v1, const StringData *v2) {
 bool lessEqual(int64_t v1, const StringData *v2) {
   int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  handleConvNoticeForCmp("int", "string");
   if (ret == KindOfInt64) {
     return v1 <= lval;
   }
@@ -95,6 +97,7 @@ bool lessEqual(int64_t v1, const StringData *v2) {
 bool more(int64_t v1, const StringData *v2) {
   int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  handleConvNoticeForCmp("int", "string");
   if (ret == KindOfInt64) {
     return v1 > lval;
   } else if (ret == KindOfDouble) {
@@ -107,6 +110,7 @@ bool more(int64_t v1, const StringData *v2) {
 bool moreEqual(int64_t v1, const StringData *v2) {
   int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  handleConvNoticeForCmp("int", "string");
   if (ret == KindOfInt64) {
     return v1 >= lval;
   }
@@ -121,6 +125,7 @@ int64_t compare(const StringData* v1, int64_t v2) {
   int64_t lval;
   double dval;
   auto ret = v1->isNumericWithVal(lval, dval, 1);
+  handleConvNoticeForCmp("string", "int");
   if (ret == KindOfInt64) {
     return compare(lval, v2);
   } else if (ret == KindOfDouble) {

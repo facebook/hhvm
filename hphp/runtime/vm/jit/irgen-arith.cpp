@@ -41,6 +41,33 @@ ConvNoticeData getConvNoticeDataForMath() {
    };
 }
 
+bool handleConvNoticeCmp(
+  IRGS& env, Op op, const char* lhs, const char* rhs) {
+  if (op == Op::Eq || op == Op::Neq) return false;
+  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
+  const auto level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+  if (LIKELY(level == ConvNoticeLevel::None)) return false;
+  const auto str = makeStaticString(folly::sformat(
+    "Comparing {} and {} using a relational operator", lhs, rhs));
+  if (level == ConvNoticeLevel::Throw) {
+    gen(env, ThrowInvalidOperation, cns(env, str));
+    return true;
+  }
+  if (level == ConvNoticeLevel::Log) {
+    gen(env, RaiseNotice, cns(env, str));
+  }
+  return false;
+}
+
+void maybeRaiseBadComparisonViolation(IRGS& env, Op op, SSATmp* lhs, SSATmp* rhs) {
+  const auto level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+  if (op != Op::Eq && op != Op::Neq && level != ConvNoticeLevel::None) {
+    gen(env, RaiseBadComparisonViolation, lhs, rhs);
+  }
+}
+
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
     return ty.subtypeOfAny(TInt, TBool, TDbl);
@@ -365,6 +392,7 @@ SSATmp* emitCollectionCheck(IRGS& env, Op op, SSATmp* src, F f) {
           );
           // Dead-code, but needed to satisfy cond().
           return cns(env, false);
+        // @dizzy note that this does coerce on eq
         case Op::Eq: return cns(env, false);
         case Op::Neq: return cns(env, true);
         default: always_assert(false);
@@ -389,6 +417,7 @@ SSATmp* emitObjStrCmp(IRGS& env, Op op, SSATmp* obj, SSATmp* str) {
     [&] {
       // If there's no toString() method, than the object is always greater than
       // the string.
+      handleConvNoticeCmp(env, op, "object", "string");
       switch (op) {
         case Op::Neq:
         case Op::Gt:
@@ -436,6 +465,7 @@ SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
     }
     case Op::Eq:
     case Op::Neq:
+      // @dizzy note that this does coerce on eq
       return gen(env, toBoolCmpOpcode(op), gen(env, ConvTVToBool, arr), right);
     default: always_assert(false);
   }
@@ -582,6 +612,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   // Left operand is null.
 
   if (rightTy <= TStr) {
+    handleConvNoticeCmp(env, op, "null", "string");
     // Null converts to the empty string when being compared against a string.
     push(env,
          gen(env,
@@ -589,6 +620,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              cns(env, staticEmptyString()),
              right));
   } else if (rightTy <= TObj) {
+    handleConvNoticeCmp(env, op, "null", "object");
     // When compared to an object, null is treated as false, and the object as
     // true. We cannot use ConvObjToBool here because that has special behavior
     // in certain cases, which we do not want here. Also note that no collection
@@ -620,6 +652,9 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
   } else {
+    if (!(rightTy <= TNull)) {
+      maybeRaiseBadComparisonViolation(env, op, left, right);
+    }
     // Otherwise, convert both sides to booleans (with null becoming false).
     push(env,
          gen(env,
@@ -656,6 +691,9 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
   } else {
+    if (!(rightTy <= TBool)) {
+      maybeRaiseBadComparisonViolation(env, op, left, right);
+    }
     // Convert whatever is on the right to a boolean and compare. The conversion
     // may be a no-op if the right operand is already a bool.
     push(env,
@@ -677,6 +715,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env,
          gen(env,
              toDblCmpOpcode(op),
+             // @dizzy note to ban this for `eq`
              gen(env, ConvIntToDbl, left),
              right));
   } else if (rightTy <= TStr) {
@@ -691,6 +730,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {
+    handleConvNoticeCmp(env, op, "int", rightTy <= TNull ? "null" : "bool");
     // If compared against null or bool, convert both sides to bools.
     push(env,
          gen(env,
@@ -706,22 +746,22 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
-    push(
+    const auto ret = emitCollectionCheck(
       env,
-      emitCollectionCheck(
-        env,
-        op,
-        right,
-        [&]{
-          return gen(
-            env,
-            toIntCmpOpcode(op),
-            left,
-            gen(env, ConvObjToInt, ConvNoticeData{}, right)
-          );
-        }
-      )
+      op,
+      right,
+      [&]{
+        return gen(
+          env,
+          toIntCmpOpcode(op),
+          left,
+          gen(env, ConvObjToInt, ConvNoticeData{}, right)
+        );
+      }
     );
+    // do this after in case the comparison throws
+    handleConvNoticeCmp(env, op, "int", "object");
+    push(env, ret);
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -738,6 +778,9 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else {
     // For everything else, convert to an int. The conversion may be a no-op if
     // the right operand is already an int.
+    if (!(rightTy <= TInt || rightTy <= TDbl)) {
+      maybeRaiseBadComparisonViolation(env, op, left, right);
+    }
     push(env,
          gen(env,
              toIntCmpOpcode(op),
@@ -753,6 +796,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   // Left operand is a double.
 
   if (rightTy.subtypeOfAny(TNull, TBool)) {
+    handleConvNoticeCmp(env, op, "float", rightTy <= TNull ? "null" : "bool");
     // If compared against null or bool, convert both sides to bools.
     push(env,
          gen(env,
@@ -768,22 +812,22 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
-    push(
+    const auto ret = emitCollectionCheck(
       env,
-      emitCollectionCheck(
-        env,
-        op,
-        right,
-        [&]{
-          return gen(
-            env,
-            toDblCmpOpcode(op),
-            left,
-            gen(env, ConvObjToDbl, right)
-          );
-        }
-      )
+      op,
+      right,
+      [&]{
+        return gen(
+          env,
+          toDblCmpOpcode(op),
+          left,
+          gen(env, ConvObjToDbl, right)
+        );
+      }
     );
+    // do this after in case the comparison throws
+    handleConvNoticeCmp(env, op, "float", "object");
+    push(env, ret);
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -798,6 +842,9 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
   } else {
+    if (!(rightTy <= TInt || rightTy <= TDbl)) {
+      maybeRaiseBadComparisonViolation(env, op, left, right);
+    }
     // For everything else, convert to a double. The conversion may be a no-op
     // if the right operand is already a double.
     push(env,
@@ -983,6 +1030,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // No conversion needed.
     push(env, gen(env, toStrCmpOpcode(op), left, right));
   } else if (rightTy <= TNull) {
+    handleConvNoticeCmp(env, op, "string", "null");
     // Comparisons against null are turned into comparisons with the empty
     // string.
     push(env,
@@ -991,6 +1039,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              left,
              cns(env, staticEmptyString())));
   } else if (rightTy <= TBool) {
+    handleConvNoticeCmp(env, op, "string", "bool");
     // If compared against a bool, convert the string to a bool.
     push(env,
          gen(env,
@@ -1006,6 +1055,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              left,
              right));
   } else if (rightTy <= TDbl) {
+    handleConvNoticeCmp(env, op, "string", "float");
     // If compared against a double, convert the string to a double.
     push(env,
          gen(env,
@@ -1013,6 +1063,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              gen(env, ConvStrToDbl, left),
              right));
   } else if (rightTy <= TRes) {
+    handleConvNoticeCmp(env, op, "string", "resource");
     // Bizarrely, comparison against a resource is done by converting both the
     // string and the resource to a double and comparing the two.
     push(env,
@@ -1059,6 +1110,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       push(env, emitConstCmp(env, op, false, true));
     }
   } else {
+    maybeRaiseBadComparisonViolation(env, op, left, right);
     // Strings are less than anything else (usually arrays).
     push(env, emitConstCmp(env, op, false, true));
   }
@@ -1074,6 +1126,7 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // No conversion needed.
     push(env, gen(env, toObjCmpOpcode(op), left, right));
   } else if (rightTy <= TBool) {
+    handleConvNoticeCmp(env, op, "object", "bool");
     // If compared against a bool, convert to a bool.
     push(env,
          gen(env,
@@ -1083,41 +1136,41 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TInt) {
     // If compared against an integer, emit a collection check before doing the
     // comparison.
-    push(
+    const auto ret = emitCollectionCheck(
       env,
-      emitCollectionCheck(
-        env,
-        op,
-        left,
-        [&]{
-          return gen(
-            env,
-            toIntCmpOpcode(op),
-            gen(env, ConvObjToInt, ConvNoticeData{}, left),
-            right
-          );
-        }
-      )
+      op,
+      left,
+      [&]{
+        return gen(
+          env,
+          toIntCmpOpcode(op),
+          gen(env, ConvObjToInt, ConvNoticeData{}, left),
+          right
+        );
+      }
     );
+    // do this after in case the comparison throws
+    handleConvNoticeCmp(env, op, "object", "int");
+    push(env, ret);
   } else if (rightTy <= TDbl) {
     // If compared against a double, emit a collection check before performing
     // the comparison.
-    push(
+    const auto ret = emitCollectionCheck(
       env,
-      emitCollectionCheck(
-        env,
-        op,
-        left,
-        [&]{
-          return gen(
-            env,
-            toDblCmpOpcode(op),
-            gen(env, ConvObjToDbl, left),
-            right
-          );
-        }
-      )
+      op,
+      left,
+      [&]{
+        return gen(
+          env,
+          toDblCmpOpcode(op),
+          gen(env, ConvObjToDbl, left),
+          right
+        );
+      }
     );
+    // do this after in case the comparison throws
+    handleConvNoticeCmp(env, op, "object", "float");
+    push(env, ret);
   } else if (rightTy <= TStr) {
     // If compared against a string, first do a collection check, and then emit
     // an object-string comparison.
@@ -1186,6 +1239,7 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
     }
   } else {
+    maybeRaiseBadComparisonViolation(env, op, left, right);
     // For anything else, the object is always greater.
     push(env, emitConstCmp(env, op, true, false));
   }
@@ -1202,8 +1256,10 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, gen(env, toResCmpOpcode(op), left, right));
   } else if (rightTy <= TNull) {
     // Resources are always greater than nulls.
+    handleConvNoticeCmp(env, op, "resource", "null");
     push(env, emitConstCmp(env, op, true, false));
   } else if (rightTy <= TBool) {
+    handleConvNoticeCmp(env, op, "resource", "bool");
     // If compared against a boolean, convert to a boolean.
     push(env,
          gen(env,
@@ -1211,6 +1267,7 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              cns(env, true),
              right));
   } else if (rightTy <= TInt) {
+    handleConvNoticeCmp(env, op, "resource", "int");
     // If compared against an integer, convert to an integer.
     push(env,
          gen(env,
@@ -1218,6 +1275,7 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              gen(env, ConvResToInt, left),
              right));
   } else if (rightTy <= TDbl) {
+    handleConvNoticeCmp(env, op, "resource", "float");
     // If compared against a double, convert to a double.
     push(env,
          gen(env,
@@ -1225,6 +1283,7 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              gen(env, ConvResToDbl, left),
              right));
   } else if (rightTy <= TStr) {
+    handleConvNoticeCmp(env, op, "resource", "string");
     // Bizaarly, comparison against a string is done by converting both the
     // string and the resource to a double and comparing the two.
     push(env,
@@ -1253,6 +1312,7 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else {
     // Resources are always less than anything else.
+    maybeRaiseBadComparisonViolation(env, op, left, right);
     push(env, emitConstCmp(env, op, false, true));
   }
 }

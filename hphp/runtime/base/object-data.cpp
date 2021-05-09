@@ -914,7 +914,12 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     return DateTimeData::compare(this, &other);
   }
   // Return 1 for different classes to match PHP7 behavior.
-  if (getVMClass() != other.getVMClass()) return 1;
+  if (getVMClass() != other.getVMClass()) {
+    handleConvNoticeForCmp(
+      folly::sformat("object of class {}", classname_cstr()).c_str(),
+      folly::sformat("object of class {}", other.classname_cstr()).c_str());
+    return 1;
+  }
   if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement comparison");

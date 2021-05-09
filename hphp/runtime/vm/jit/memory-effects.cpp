@@ -990,7 +990,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StMBase:
     return PureStore { AMIStateBase, inst.src(0), nullptr };
-  
+
   case LdMROProp:
     return PureLoad { AMIStateROProp };
 
@@ -1974,6 +1974,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:
   case BespokeEscalateToVanilla:
+  case RaiseBadComparisonViolation:
     return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:

@@ -6,7 +6,7 @@
 use std::{cmp::Ordering, ops::Range, result::Result::*};
 
 use bumpalo::Bump;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_pos::FilePos;
@@ -17,30 +17,37 @@ use oxidized::pos_span_tiny::PosSpanTiny;
 
 use crate::relative_path::RelativePath;
 
-#[derive(Clone, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
+#[derive(Clone, Deserialize, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
 enum PosImpl<'a> {
     Small {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         file: &'a RelativePath<'a>,
         start: FilePosSmall,
         end: FilePosSmall,
     },
     Large {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         file: &'a RelativePath<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         start: &'a FilePosLarge,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         end: &'a FilePosLarge,
     },
     Tiny {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         file: &'a RelativePath<'a>,
         span: PosSpanTiny,
     },
 }
+arena_deserializer::impl_deserialize_in_arena!(PosImpl<'arena>);
 
 impl arena_trait::TrivialDrop for PosImpl<'_> {}
 
 use PosImpl::*;
 
-#[derive(Clone, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
-pub struct Pos<'a>(PosImpl<'a>);
+#[derive(Clone, Deserialize, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
+pub struct Pos<'a>(#[serde(deserialize_with = "arena_deserializer::arena", borrow)] PosImpl<'a>);
+arena_deserializer::impl_deserialize_in_arena!(Pos<'arena>);
 
 impl arena_trait::TrivialDrop for Pos<'_> {}
 

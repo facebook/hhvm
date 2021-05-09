@@ -26,4 +26,6 @@ use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 )]
 pub struct TanySentinel;
 
+arena_deserializer::impl_deserialize_in_arena!(TanySentinel);
+
 impl arena_trait::TrivialDrop for TanySentinel {}

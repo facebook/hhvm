@@ -22,6 +22,7 @@ pub struct FilePosLarge {
     /// Starts at 0.
     cnum: usize,
 }
+arena_deserializer::impl_deserialize_in_arena!(FilePosLarge);
 
 impl arena_trait::TrivialDrop for FilePosLarge {}
 

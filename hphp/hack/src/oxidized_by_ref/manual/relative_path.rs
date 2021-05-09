@@ -29,6 +29,7 @@ pub struct RelativePath<'a> {
     // to construct a Path in a const context.
     path: Option<&'a Path>,
 }
+arena_deserializer::impl_deserialize_in_arena!(RelativePath<'arena>);
 
 impl<'a> RelativePath<'a> {
     pub const fn empty() -> &'static RelativePath<'static> {

@@ -2315,6 +2315,7 @@ dependencies = [
 name = "oxidized"
 version = "0.0.0"
 dependencies = [
+ "arena_deserializer",
  "arena_trait",
  "bstr",
  "hh_autoimport_rust",
@@ -2332,6 +2333,7 @@ name = "oxidized_by_ref"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
+ "arena_deserializer",
  "arena_trait",
  "bitflags",
  "bstr",

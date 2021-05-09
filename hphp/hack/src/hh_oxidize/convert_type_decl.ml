@@ -16,6 +16,7 @@ open Output
 open State
 open Convert_longident
 open Convert_type
+open Rust_type
 
 let default_implements () =
   match Configuration.mode () with
@@ -42,7 +43,7 @@ let default_derives () =
       (Some "serde", "Serialize");
     ]
 
-let derive_copy ty = Convert_type.is_copy ty ""
+let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 
 let is_by_ref () =
   match Configuration.mode () with
@@ -161,6 +162,8 @@ let should_box_variant ty =
    should be two words or less (the size of a slice). *)
 let unbox_field ty =
   let open String in
+  let is_copy = Convert_type.is_copy ty in
+  let ty = Rust_type.rust_type_to_string ty in
   ty = "String"
   || ty = "bstr::BString"
   || is_prefix ty ~prefix:"Vec<"
@@ -176,10 +179,10 @@ let unbox_field ty =
     || ty = "ident::Ident"
     || ty = "ConditionTypeName<'a>"
     || ty = "ConstraintType<'a>"
-    || (is_prefix ty ~prefix:"Option<" && Convert_type.is_ty_copy ty)
-    || (is_prefix ty ~prefix:"std::cell::Cell<" && Convert_type.is_ty_copy ty)
-    || (is_prefix ty ~prefix:"std::cell::RefCell<" && Convert_type.is_ty_copy ty)
-    || Convert_type.is_primitive ty
+    || (is_prefix ty ~prefix:"Option<" && is_copy)
+    || (is_prefix ty ~prefix:"std::cell::Cell<" && is_copy)
+    || (is_prefix ty ~prefix:"std::cell::RefCell<" && is_copy)
+    || Convert_type.is_primitive ty []
   | Configuration.ByBox -> false
 
 let add_rcoc = [("aast", "Nsenv")]
@@ -263,31 +266,18 @@ let doc_comment_of_attribute_list attrs =
 
 let type_param (ct, _) = core_type ct
 
-let type_params ?bound name params =
-  if List.is_empty params then
+let type_params name params =
+  let params = List.map ~f:type_param params in
+  let lifetime =
     match Configuration.mode () with
     | Configuration.ByRef ->
       if Configuration.owned_type name then
-        ""
+        []
       else
-        "<'a>"
-    | Configuration.ByBox -> ""
-  else
-    let bound =
-      match bound with
-      | None -> ""
-      | Some bound -> ": " ^ bound
-    in
-    let params =
-      params |> map_and_concat ~f:(fun tp -> type_param tp ^ bound) ~sep:", "
-    in
-    match Configuration.mode () with
-    | Configuration.ByRef ->
-      if Configuration.owned_type name then
-        sprintf "<%s>" params
-      else
-        sprintf "<'a, %s>" params
-    | Configuration.ByBox -> sprintf "<%s>" params
+        [Rust_type.lifetime "a"]
+    | Configuration.ByBox -> []
+  in
+  (lifetime, params)
 
 let record_label_declaration ?(pub = false) ?(prefix = "") ld =
   let doc = doc_comment_of_attribute_list ld.pld_attributes in
@@ -301,9 +291,9 @@ let record_label_declaration ?(pub = false) ?(prefix = "") ld =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
   let ty = core_type ld.pld_type in
-  sprintf "%s%s%s: %s,\n" doc pub name ty
+  sprintf "%s%s%s: %s,\n" doc pub name (rust_type_to_string ty)
 
-let record_declaration ?(pub = false) labels =
+let declare_record_arguments ?(pub = false) labels =
   let prefix =
     labels |> List.map ~f:(fun ld -> ld.pld_name.txt) |> common_prefix_of_list
   in
@@ -320,35 +310,39 @@ let record_declaration ?(pub = false) labels =
   |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
   |> sprintf "{\n%s}"
 
-let constructor_arguments ?(box_fields = false) = function
-  | Pcstr_tuple types ->
-    if not box_fields then
-      tuple types
-    else (
-      match types with
-      | [] -> ""
-      | [ty] ->
-        let ty = core_type ty in
+let declare_constructor_arguments ?(box_fields = false) types =
+  if not box_fields then
+    if List.is_empty types then
+      ""
+    else
+      Rust_type.rust_type_to_string (tuple types)
+  else
+    match types with
+    | [] -> ""
+    | [ty] ->
+      let ty = core_type ty in
+      let ty =
         if unbox_field ty then
-          sprintf "(%s)" ty
-        else (
+          ty
+        else
           match Configuration.mode () with
-          | Configuration.ByRef -> sprintf "(&'a %s)" ty
-          | Configuration.ByBox -> sprintf "(Box<%s>)" ty
-        )
-      | _ ->
-        (match Configuration.mode () with
+          | Configuration.ByRef -> rust_ref (lifetime "a") ty
+          | Configuration.ByBox -> rust_type "Box" [] [ty]
+      in
+      Rust_type.rust_type_to_string ty |> sprintf "(%s)"
+    | _ ->
+      let ty =
+        match Configuration.mode () with
         | Configuration.ByRef ->
           let tys = tuple ~seen_indirection:true types in
-          sprintf "(&'a %s)" tys
-        | Configuration.ByBox -> sprintf "(Box<%s>)" (tuple types))
-    )
-  | Pcstr_record labels -> record_declaration labels
+          rust_ref (lifetime "a") tys
+        | Configuration.ByBox -> rust_type "Box" [] [tuple types]
+      in
+      Rust_type.rust_type_to_string ty |> sprintf "(%s)"
 
 let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
-  let args = constructor_arguments ~box_fields cd.pcd_args in
   let discriminant =
     (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
        and that all the variants are zero-argument (i.e., assume this is a
@@ -374,7 +368,14 @@ let variant_constructor_declaration ?(box_fields = false) cd =
         | _ -> None)
     |> Option.value ~default:""
   in
-  sprintf "%s%s%s%s,\n" doc name args discriminant
+  sprintf
+    "%s%s%s%s,\n"
+    doc
+    name
+    (match cd.pcd_args with
+    | Pcstr_tuple types -> declare_constructor_arguments ~box_fields types
+    | Pcstr_record labels -> declare_record_arguments labels)
+    discriminant
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
@@ -438,7 +439,7 @@ let type_declaration name td =
       []
     | (tparams, _) -> tparams
   in
-  let tparams = type_params name tparam_list in
+  let (lifetime, tparams) = type_params name tparam_list in
   let implements ~force_derive_copy =
     let traits = implements_traits name in
     let traits =
@@ -454,13 +455,12 @@ let type_declaration name td =
            Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
            trait)
     |> List.map ~f:(fun trait ->
-           let tparams_with_bound = type_params name tparam_list ~bound:trait in
            sprintf
              "\nimpl%s %s for %s%s {}"
-             tparams_with_bound
+             (type_params_to_string ~bound:trait lifetime tparams)
              trait
              name
-             tparams)
+             (type_params_to_string lifetime tparams))
     |> String.concat ~sep:""
   in
   match (td.ptype_kind, td.ptype_manifest) with
@@ -503,7 +503,11 @@ let type_declaration name td =
              ( "it is an alias to type t, which was already renamed to "
              ^ mod_name_as_type ))
       else
-        sprintf "%spub type %s%s = %s;" doc name tparams mod_name_as_type
+        sprintf
+          "%spub type %s = %s;"
+          doc
+          (rust_type name lifetime tparams |> rust_type_to_string)
+          mod_name_as_type
     | Ptyp_constr ({ txt = id; _ }, targs) ->
       let id = longident_to_string id in
       let ty_name = id |> String.split ~on:':' |> List.last_exn in
@@ -515,30 +519,40 @@ let type_declaration name td =
         let ty = core_type ty in
         if should_add_rcoc name then
           sprintf
-            "%spub type %s%s = ocamlrep::rc::RcOc<%s>;"
+            "%spub type %s = ocamlrep::rc::RcOc<%s>;"
             doc
-            name
-            tparams
-            ty
+            (rust_type name lifetime tparams |> rust_type_to_string)
+            (rust_type_to_string ty)
         else
-          let ty = Option.value (String.chop_prefix ty "&'a ") ~default:ty in
-          sprintf "%spub type %s%s = %s;" doc name tparams ty
+          sprintf
+            "%spub type %s = %s;"
+            doc
+            (rust_type name lifetime tparams |> rust_type_to_string)
+            (deref ty |> rust_type_to_string)
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
-        let ty = core_type ty in
-        let ty = Option.value (String.chop_prefix ty "&'a ") ~default:ty in
-        sprintf "%spub type %s%s = %s;" doc name tparams ty
+        let ty = core_type ty |> deref |> rust_type_to_string in
+        sprintf
+          "%spub type %s = %s;"
+          doc
+          (rust_type name lifetime tparams |> rust_type_to_string)
+          ty
       else
         let ty =
           match ty.ptyp_desc with
-          | Ptyp_tuple tys -> tuple tys ~pub:true
-          | _ -> sprintf "(pub %s)" @@ core_type ty
+          | Ptyp_tuple tys ->
+            map_and_concat
+              ~f:(fun ty ->
+                core_type ty |> rust_type_to_string |> sprintf "pub %s")
+              ~sep:","
+              tys
+            |> sprintf "(%s)"
+          | _ -> core_type ty |> rust_type_to_string |> sprintf "(pub %s)"
         in
         sprintf
-          "%s struct %s%s %s;%s"
+          "%s struct %s %s;%s"
           (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
-          name
-          tparams
+          (rust_type name lifetime tparams |> rust_type_to_string)
           ty
           (implements ~force_derive_copy:false))
   (* Variant types, including GADTs. *)
@@ -562,20 +576,18 @@ let type_declaration name td =
       map_and_concat ctors (variant_constructor_declaration ~box_fields)
     in
     sprintf
-      "%s enum %s%s {\n%s}%s"
+      "%s enum %s {\n%s}%s"
       (attrs_and_vis ~all_nullary ~force_derive_copy)
-      name
-      tparams
+      (rust_type name lifetime tparams |> rust_type_to_string)
       ctors
       (implements ~force_derive_copy)
   (* Record types. *)
   | (Ptype_record labels, None) ->
-    let labels = record_declaration labels ~pub:true in
+    let labels = declare_record_arguments labels ~pub:true in
     sprintf
-      "%s struct %s%s %s%s"
+      "%s struct %s %s%s"
       (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
-      name
-      tparams
+      (rust_type name lifetime tparams |> rust_type_to_string)
       labels
       (implements ~force_derive_copy:false)
   (* `type foo`; an abstract type with no specified implementation. This doesn't

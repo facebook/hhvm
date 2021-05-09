@@ -10,37 +10,30 @@ open Core_kernel
 open Asttypes
 open Longident
 open Parsetree
-open Printf
 open Reordered_argument_collections
 open Utils
 open State
+open Rust_type
 
 let primitives =
   [ "()"; "isize"; "usize"; "i64"; "u64"; "i32"; "u32"; "i16"; "u16"; "i8";
     "u8"; "f32"; "f64"; "char"; "bool" ]
   [@@ocamlformat "disable"]
 
-let is_primitive ty = List.mem primitives ty ~equal:String.equal
+let is_primitive ty args =
+  List.length args = 0 && List.mem primitives ty ~equal:String.equal
 
-let rec is_copy ty targs =
-  Configuration.is_known (Configuration.copy_type ty) true
-  || String.is_prefix ty ~prefix:"&"
-  || is_primitive ty
-  || ( String.equal ty "Option"
-     || String.equal ty "std::cell::Cell"
-     || String.equal ty "std::cell::RefCell" )
-     && is_single_targ_copy targs
-
-and is_single_targ_copy targ =
-  (* Remove outer angle brackets *)
-  let targ = String.sub targ 1 (String.length targ - 2) in
-  is_ty_copy targ
-
-and is_ty_copy ty =
-  (* Split on first inner angle bracket (if present) *)
-  match String.lsplit2 ty ~on:'<' with
-  | None -> is_copy ty ""
-  | Some (ty, targs) -> is_copy ty ("<" ^ targs)
+let rec is_copy ty =
+  if is_ref ty then
+    true
+  else
+    let (ty, targs) = type_name_and_params ty in
+    Configuration.is_known (Configuration.copy_type ty) true
+    || is_primitive ty targs
+    || ( String.equal ty "Option"
+       || String.equal ty "std::cell::Cell"
+       || String.equal ty "std::cell::RefCell" )
+       && is_copy (List.hd_exn targs)
 
 (* A list of (<module>, <ty1>, <ty2>) tuples where we need to add indirection.
    In the definition of <module>::<ty1>, instances of <ty2> need to be boxed
@@ -64,21 +57,23 @@ let add_indirection_between () =
 
 let equal_s3 = [%derive.eq: string * string * string]
 
-let should_add_indirection ~seen_indirection ty targs =
+let should_add_indirection ~seen_indirection (ty : Rust_type.t) =
   match Configuration.mode () with
   | Configuration.ByRef ->
-    if not (is_copy ty targs) then
+    if not (is_copy ty) then
       true
     else if seen_indirection then
       false
-    else if String.equal (self ()) ty then
+    else if String.equal (self ()) (type_name_and_params ty |> fst) then
       true
     else
+      let (ty, _) = type_name_and_params ty in
       List.mem
         (add_indirection_between ())
         (curr_module_name (), self (), ty)
         ~equal:equal_s3
   | Configuration.ByBox ->
+    let (ty, _) = type_name_and_params ty in
     (not seen_indirection)
     && ( String.equal (self ()) ty
        || List.mem
@@ -104,7 +99,7 @@ let owned_builtins =
 
 let is_owned_builtin = SSet.mem owned_builtins
 
-let rec core_type ?(seen_indirection = false) ct =
+let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
   let is_by_box =
     match Configuration.mode () with
     | Configuration.ByBox -> true
@@ -116,21 +111,28 @@ let rec core_type ?(seen_indirection = false) ct =
     | _ -> false
   in
   match ct.ptyp_desc with
-  | Ptyp_var "ty" when is_by_ref -> "&'a Ty<'a>"
-  | Ptyp_var name -> convert_type_name name
-  | Ptyp_alias (_, name) -> convert_type_name name
+  | Ptyp_var "ty" when is_by_ref ->
+    rust_ref (lifetime "a") (rust_type "Ty" [lifetime "a"] [])
+  | Ptyp_var name -> convert_type_name name |> rust_type_var
+  | Ptyp_alias (_, name) -> rust_type (convert_type_name name) [] []
   | Ptyp_tuple tys -> tuple tys
   | Ptyp_arrow _ -> raise (Skip_type_decl "it contains an arrow type")
   | Ptyp_constr ({ txt = Lident "list"; _ }, [arg]) when is_by_ref ->
     let arg = core_type ~seen_indirection:true arg in
-    sprintf "&'a [%s]" arg
-  | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_ref -> "&'a str"
+    rust_ref (lifetime "a") (rust_type "[]" [] [arg])
+  | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_ref ->
+    rust_ref (lifetime "a") (rust_simple_type "str")
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
-    "bstr::BString"
+    rust_type "bstr::BString" [] []
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
-    "&'a bstr::BStr"
+    rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
   | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->
-    "&'a bstr::BStr"
+    rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
+  | Ptyp_constr ({ txt = Ldot (Lident "Path", "t"); _ }, []) ->
+    if is_by_ref then
+      rust_ref (lifetime "a") (rust_simple_type "std::path::Path")
+    else
+      rust_simple_type "std::path::PathBuf"
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with
@@ -145,11 +147,6 @@ let rec core_type ?(seen_indirection = false) ct =
           | Configuration.ByRef -> "std::cell::Cell"
           | Configuration.ByBox -> "std::cell::RefCell"
         end
-      | Ldot (Lident "Path", "t") ->
-        if is_by_ref then
-          "&'a std::path::Path"
-        else
-          "std::path::PathBuf"
       | Ldot (Lident "Int64", "t") -> "isize"
       | id -> Convert_longident.longident_to_string id
     in
@@ -180,21 +177,30 @@ let rec core_type ?(seen_indirection = false) ct =
       && (not (is_owned_builtin id))
       && not (Configuration.owned_type id)
     in
-    let args = type_args ~seen_indirection ~add_lifetime args in
+    let lifetime =
+      if add_lifetime then
+        [lifetime "a"]
+      else
+        []
+    in
+    let args = List.map args ~f:(core_type ~seen_indirection) in
+
     if should_add_rcoc id then
-      sprintf "ocamlrep::rc::RcOc<%s%s>" id args
+      rust_type "ocamlrep::rc::RcOc" [] [rust_type id lifetime args]
     (* Direct or indirect recursion *)
-    else if should_add_indirection ~seen_indirection id args then
+    else if should_add_indirection ~seen_indirection (rust_type id [] args) then
       match Configuration.mode () with
       | Configuration.ByRef ->
         if String.equal id "Option" then
-          let args = String.sub args 1 (String.length args - 1) in
-          sprintf "Option<&'a %s" args
+          rust_type
+            "Option"
+            []
+            [rust_ref (Rust_type.lifetime "a") (List.hd_exn args)]
         else
-          sprintf "&'a %s%s" id args
-      | Configuration.ByBox -> sprintf "Box<%s%s>" id args
+          rust_ref (Rust_type.lifetime "a") (rust_type id lifetime args)
+      | Configuration.ByBox -> rust_type "Box" [] [rust_type id [] args]
     else
-      id ^ args
+      rust_type id lifetime args
   | Ptyp_any -> raise (Skip_type_decl "cannot convert type Ptyp_any")
   | Ptyp_object _ -> raise (Skip_type_decl "cannot convert type Ptyp_object")
   | Ptyp_class _ -> raise (Skip_type_decl "cannot convert type Ptyp_class")
@@ -204,28 +210,5 @@ let rec core_type ?(seen_indirection = false) ct =
   | Ptyp_extension _ ->
     raise (Skip_type_decl "cannot convert type Ptyp_extension")
 
-and type_args ?(seen_indirection = false) ?(add_lifetime = false) args =
-  let args = List.map args ~f:(core_type ~seen_indirection) in
-  let args =
-    if add_lifetime then
-      "'a" :: args
-    else
-      args
-  in
-  if List.is_empty args then
-    ""
-  else
-    sprintf "<%s>" (String.concat args ~sep:", ")
-
-and tuple ?(seen_indirection = false) ?(pub = false) types =
-  if List.is_empty types then
-    ""
-  else
-    let map_type =
-      if pub then
-        fun x ->
-      "pub " ^ core_type ~seen_indirection x
-      else
-        core_type ~seen_indirection
-    in
-    types |> map_and_concat ~f:map_type ~sep:", " |> sprintf "(%s)"
+and tuple ?(seen_indirection = false) types =
+  List.map ~f:(core_type ~seen_indirection) types |> rust_type "()" []

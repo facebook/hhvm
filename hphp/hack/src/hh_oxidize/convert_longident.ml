@@ -43,6 +43,7 @@ let rec flatten_longident = function
     | FLdot (id, strs) -> FLdot (id, str :: strs)
     | FLapply _ as id -> FLdot (id, [str]))
 
+(* [> `RustType of Rust_type.t | `Module of string ] = *)
 let to_string for_open id =
   let rec to_string id =
     match id with

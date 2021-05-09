@@ -12,6 +12,7 @@
     output
     hh_oxidize
     oxidized_module
+    rust_type
     state
     stringify
     utils)

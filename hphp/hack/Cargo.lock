@@ -67,12 +67,21 @@ checksum = "7825f6833612eb2414095684fcf6c635becf3ce97fe48cf6421321e93bfbd53c"
 name = "arena_collections"
 version = "0.0.0"
 dependencies = [
+ "arena_deserializer",
  "arena_trait",
  "bumpalo",
  "ocamlrep",
  "ocamlrep_derive",
  "quickcheck",
  "rand",
+ "serde",
+]
+
+[[package]]
+name = "arena_deserializer"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
  "serde",
 ]
 

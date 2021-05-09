@@ -25,7 +25,7 @@ use std::convert::From;
 use std::fmt::Debug;
 
 use bumpalo::Bump;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use arena_trait::TrivialDrop;
 use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
@@ -683,10 +683,16 @@ where
 ///   `SortedAssocList` from an `AssocListMut`, entries will be deduplicated by
 ///   key, and only the most recently inserted entry for each key will be
 ///   retained.
-#[derive(Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(bound(
+    deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[derive(Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SortedAssocList<'a, K: 'a, V: 'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     entries: &'a [(K, V)],
 }
+
+arena_deserializer::impl_deserialize_in_arena!(SortedAssocList<'arena, K, V>);
 
 impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// Returns the empty association list.

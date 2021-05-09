@@ -17,44 +17,78 @@ pub trait DeserializeInArena<'arena>: Sized {
 }
 
 #[macro_export]
-macro_rules! deserialize_without_arena {
-    ($($ty:ty),+ $(,)?) => {
-        $(
-            impl<'arena> $crate::DeserializeInArena<'arena> for $ty {
-                fn deserialize_in_arena<D>(
-                    arena: &'arena $crate::bumpalo::Bump,
-                    deserializer: D,
-                ) -> Result<Self, D::Error>
-                where
-                    D: $crate::serde::Deserializer<'arena>,
-                {
-                    let _ = arena;
-                    $crate::serde::Deserialize::deserialize(deserializer)
-                }
-            }
-
-            impl<'arena> $crate::DeserializeInArena<'arena> for &'arena $ty
+macro_rules! impl_deserialize_in_arena{
+    ($ty:ident < $($lt:lifetime),* $(,)? $($tp:ident),* >) => {
+            impl<'arena, $($tp : $crate::DeserializeInArena<'arena>),*> $crate::DeserializeInArena<'arena> for $ty<$($lt,)* $($tp,)* > {
+            fn deserialize_in_arena<__D>(
+                arena: &'arena $crate::bumpalo::Bump,
+                deserializer: __D,
+            ) -> Result<Self, __D::Error>
+            where
+                __D: $crate::serde::Deserializer<'arena>,
             {
-                fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>
-                where
-                    D: $crate::serde::Deserializer<'arena>,
-                {
-                    let value = <$ty>::deserialize(deserializer)?;
-                    Ok(arena.alloc(value))
-                }
+                let _ = arena;
+                $crate::serde::Deserialize::deserialize(deserializer)
             }
-        )+
+        }
+
+        impl<'arena, $($tp : $crate::DeserializeInArena<'arena>),*> $crate::DeserializeInArena<'arena> for &'arena $ty<$($lt,)* $($tp,)* > {
+            fn deserialize_in_arena<__D>(
+                arena: &'arena $crate::bumpalo::Bump,
+                deserializer: __D,
+            ) -> Result<Self, __D::Error>
+            where
+                __D: $crate::serde::Deserializer<'arena>,
+            {
+                let value = <$ty<$($tp,)*>>::deserialize(deserializer)?;
+                Ok(arena.alloc(value))
+            }
+        }
+    };
+    ($ty:ty) => {
+        impl<'arena> $crate::DeserializeInArena<'arena> for $ty {
+            fn deserialize_in_arena<__D>(
+                arena: &'arena $crate::bumpalo::Bump,
+                deserializer: __D,
+            ) -> Result<Self, __D::Error>
+            where
+                __D: $crate::serde::Deserializer<'arena>,
+            {
+                let _ = arena;
+                $crate::serde::Deserialize::deserialize(deserializer)
+            }
+        }
+
+        impl<'arena> $crate::DeserializeInArena<'arena> for &'arena $ty {
+            fn deserialize_in_arena<__D>(
+                arena: &'arena $crate::bumpalo::Bump,
+                deserializer: __D,
+            ) -> Result<Self, __D::Error>
+            where
+                __D: $crate::serde::Deserializer<'arena>,
+            {
+                let value = <$ty>::deserialize(deserializer)?;
+                Ok(arena.alloc(value))
+            }
+        }
     };
 }
 
-deserialize_without_arena! {
-    (),
-    bool,
-    i8, i16, i32, i64, isize,
-    u8, u16, u32, u64, usize,
-    f32, f64,
-    char, String,
-}
+impl_deserialize_in_arena!(());
+impl_deserialize_in_arena!(bool);
+impl_deserialize_in_arena!(i8);
+impl_deserialize_in_arena!(i16);
+impl_deserialize_in_arena!(i32);
+impl_deserialize_in_arena!(i64);
+impl_deserialize_in_arena!(isize);
+impl_deserialize_in_arena!(u8);
+impl_deserialize_in_arena!(u16);
+impl_deserialize_in_arena!(u32);
+impl_deserialize_in_arena!(u64);
+impl_deserialize_in_arena!(usize);
+impl_deserialize_in_arena!(f32);
+impl_deserialize_in_arena!(f64);
+impl_deserialize_in_arena!(char);
 
 impl<'arena> DeserializeInArena<'arena> for &'arena str {
     fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>

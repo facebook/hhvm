@@ -6,8 +6,9 @@
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::hash::{Hash, Hasher};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
+use arena_deserializer::impl_deserialize_in_arena;
 use arena_trait::{Arena, TrivialDrop};
 use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 use ocamlrep_derive::ToOcamlRep;
@@ -28,9 +29,17 @@ const MAX_DELTA: usize = 2;
 ///
 /// Since the whole Map is just a 1 word pointer, it implements the
 /// `Copy` trait.
-#[derive(Debug, Serialize)]
+
+#[serde(bound(
+    deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[derive(Debug, Deserialize, Serialize)]
 #[must_use]
-pub struct Map<'a, K, V>(Option<&'a Node<'a, K, V>>);
+pub struct Map<'a, K, V>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Option<&'a Node<'a, K, V>>,
+);
+
+impl_deserialize_in_arena!(Map<'arena, K, V>);
 
 impl<'a, K, V> TrivialDrop for Map<'a, K, V> {}
 
@@ -111,8 +120,19 @@ where
     }
 }
 
-#[derive(Debug, Serialize, ToOcamlRep)]
-struct Node<'a, K, V>(Map<'a, K, V>, K, V, Map<'a, K, V>, usize);
+#[serde(bound(
+    deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[derive(Debug, Deserialize, Serialize, ToOcamlRep)]
+struct Node<'a, K, V>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Map<'a, K, V>,
+    #[serde(deserialize_with = "arena_deserializer::arena")] K,
+    #[serde(deserialize_with = "arena_deserializer::arena")] V,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Map<'a, K, V>,
+    usize,
+);
+
+impl_deserialize_in_arena!(Node<'arena, K, V>);
 
 impl<'a, K, V> FromOcamlRepIn<'a> for Node<'a, K, V>
 where

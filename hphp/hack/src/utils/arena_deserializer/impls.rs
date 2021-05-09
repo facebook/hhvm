@@ -118,6 +118,53 @@ impl<'arena> DeserializeInArena<'arena> for &'arena str {
     }
 }
 
+impl<'arena> DeserializeInArena<'arena> for &'arena bstr::BStr {
+    fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'arena>,
+    {
+        struct BStrVisitor<'arena> {
+            arena: &'arena Bump,
+        }
+
+        impl<'arena, 'de> Visitor<'de> for BStrVisitor<'arena> {
+            type Value = &'arena bstr::BStr;
+
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("a borrowed byte string")
+            }
+
+            #[inline]
+            fn visit_seq<V: SeqAccess<'de>>(self, mut visitor: V) -> Result<Self::Value, V::Error> {
+                let len = std::cmp::min(visitor.size_hint().unwrap_or(0), 256);
+                let mut bytes = Vec::with_capacity(len);
+                while let Some(v) = visitor.next_element()? {
+                    bytes.push(v);
+                }
+                Ok((self.arena.alloc_slice_copy(bytes.as_slice()) as &[u8]).into())
+            }
+
+            #[inline]
+            fn visit_borrowed_bytes<E>(self, value: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok((self.arena.alloc_slice_copy(value) as &[u8]).into())
+            }
+
+            #[inline]
+            fn visit_borrowed_str<E>(self, value: &'de str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok((self.arena.alloc_str(value) as &str).into())
+            }
+        }
+
+        deserializer.deserialize_bytes(BStrVisitor { arena })
+    }
+}
+
 impl<'arena, T> DeserializeInArena<'arena> for &'arena [T]
 where
     T: DeserializeInArena<'arena>,

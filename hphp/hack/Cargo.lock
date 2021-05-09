@@ -81,6 +81,7 @@ dependencies = [
 name = "arena_deserializer"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
  "serde",
 ]

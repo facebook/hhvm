@@ -75,6 +75,8 @@ fn example() {
         Pair((&'a Num<'a, T>, &'a isize)),
         #[serde(deserialize_with = "arena_deserializer::arena")]
         T(T),
+        #[serde(deserialize_with = "arena_deserializer::arena")]
+        BStr(&'a bstr::BStr),
     }
 
     impl_deserialize_in_arena!(Num<'arena, T>);
@@ -122,6 +124,10 @@ fn example() {
     round_trip(x, &arena);
 
     let x = Num::T(true);
+    round_trip(x, &arena);
+
+    let s: &bstr::BStr = "abc".into();
+    let x: Num<'_, ()> = Num::BStr(s);
     round_trip(x, &arena);
 }
 

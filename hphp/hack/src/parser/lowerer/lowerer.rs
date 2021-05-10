@@ -780,10 +780,8 @@ where
         let binary = |kw, key, ty, env: &mut Env<'a, TF>| {
             let kw = Self::pos_name(kw, env)?;
             let key = Self::p_hint(key, env)?;
-            Ok(Happly(
-                kw,
-                Self::map_flatten_(&Self::p_hint, ty, env, vec![key])?,
-            ))
+            let value = Self::p_hint(ty, env)?;
+            Ok(Happly(kw, vec![key, value]))
         };
 
         match &node.children {
@@ -3059,66 +3057,17 @@ where
         Self::p_modifiers(|_, _| {}, (), node, env).map(|r| r.0)
     }
 
+    /// Apply `f` to every item in `node`, and build a vec of the values returned.
     fn could_map<R, F>(f: F, node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<R>>
     where
         F: Fn(S<'a, T, V>, &mut Env<'a, TF>) -> Result<R>,
     {
-        Self::map_flatten_(f, node, env, vec![])
-    }
-
-    fn map_flatten_<R, F>(
-        f: F,
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-        acc: Vec<R>,
-    ) -> Result<Vec<R>>
-    where
-        F: Fn(S<'a, T, V>, &mut Env<'a, TF>) -> Result<R>,
-    {
-        let op = |mut v: Vec<R>, a| {
-            v.push(a);
-            v
-        };
-        Self::map_fold(&f, &op, node, env, acc)
-    }
-
-    #[inline]
-    fn map_flatten_filter_<R, F>(
-        f: F,
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-        acc: (Vec<R>, bool),
-    ) -> Result<(Vec<R>, bool)>
-    where
-        F: Fn(S<'a, T, V>, &mut Env<'a, TF>) -> Result<Option<R>>,
-    {
-        let op = |mut v: (Vec<R>, bool), a| -> (Vec<R>, bool) {
-            match a {
-                Option::None => (v.0, true),
-                Option::Some(a) => {
-                    v.0.push(a);
-                    v
-                }
-            }
-        };
-        Self::map_fold(&f, &op, node, env, acc)
-    }
-
-    fn map_fold<A, R, F, O>(
-        f: &F,
-        op: &O,
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-        mut acc: A,
-    ) -> Result<A>
-    where
-        F: Fn(S<'a, T, V>, &mut Env<'a, TF>) -> Result<R>,
-        O: Fn(A, R) -> A,
-    {
-        for n in node.syntax_node_to_list_skip_separator() {
-            acc = op(acc, f(n, env)?);
+        let nodes = node.syntax_node_to_list_skip_separator();
+        let mut res = Vec::with_capacity(nodes.size_hint().0);
+        for n in nodes {
+            res.push(f(n, env)?);
         }
-        Ok(acc)
+        Ok(res)
     }
 
     fn p_visibility(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Option<ast::Visibility>> {
@@ -4028,16 +3977,8 @@ where
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
     ) -> Result<Vec<ast::UserAttribute>> {
-        Self::map_fold(
-            &Self::p_user_attribute,
-            &|mut acc: Vec<ast::UserAttribute>, mut x: Vec<ast::UserAttribute>| {
-                acc.append(&mut x);
-                acc
-            },
-            node,
-            env,
-            vec![],
-        )
+        let attributes = Self::could_map(&Self::p_user_attribute, node, env)?;
+        Ok(attributes.into_iter().flatten().collect())
     }
 
     fn mp_yielding<F, R>(p: F, node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<(R, bool)>
@@ -4198,8 +4139,8 @@ where
             ConstDeclaration(c) => {
                 // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
                 let type_ = Self::mp_optional(Self::p_hint, &c.type_specifier, env)?;
-                // using map_fold can save one Vec allocation, but ocaml's behavior is that
-                // if anything throw, it will discard all lowered elements. So adding to class
+                // ocaml's behavior is that if anything throw, it will
+                // discard all lowered elements. So adding to class
                 // must be at the last.
                 let mut class_consts = Self::could_map(
                     |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::ClassConst> {

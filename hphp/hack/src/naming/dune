@@ -43,6 +43,15 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name naming_ast_print)
+  (modules
+    naming_ast_print)
+  (libraries
+    nast
+    pos)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name nast_eval)
   (modules
     nast_eval)

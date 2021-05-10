@@ -60,6 +60,7 @@ type options = {
   batch_mode: bool;
   out_extension: string;
   verbosity: int;
+  should_print_position: bool;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -275,8 +276,12 @@ let parse_options () =
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
+  let print_position = ref true in
   let options =
     [
+      ( "--no-print-position",
+        Arg.Unit (fun _ -> print_position := false),
+        "Don't print positions while printing tasts and nasts" );
       ( "--naming-table",
         Arg.String (fun s -> naming_table := Some s),
         "Naming table, to look up undefined symbols; needs --root" );
@@ -863,6 +868,7 @@ let parse_options () =
       batch_mode = !batch_mode;
       out_extension = !out_extension;
       verbosity = !verbosity;
+      should_print_position = !print_position;
     },
     root,
     !naming_table,
@@ -1332,9 +1338,20 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   let tasts = Relative_path.Map.map tasts (Tast_expand.expand_program ctx) in
   (errors, tasts, gi_solved)
 
-let print_tasts tasts ctx =
-  let print_tast = Typing_ast_print.print_tast ctx in
-  Relative_path.Map.iter tasts (fun _k (tast : Tast.program) -> print_tast tast)
+let print_nasts ~should_print_position nasts filenames =
+  List.iter filenames (fun filename ->
+      let nast = Relative_path.Map.find nasts filename in
+      if should_print_position then
+        Naming_ast_print.print_nast nast
+      else
+        Naming_ast_print.print_nast_without_position nast)
+
+let print_tasts ~should_print_position tasts ctx =
+  Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
+      if should_print_position then
+        Typing_ast_print.print_tast ctx tast
+      else
+        Typing_ast_print.print_tast_without_position ctx tast)
 
 let typecheck_tasts tasts tcopt (filename : Relative_path.t) =
   let env = Typing_env.empty tcopt filename ~droot:None in
@@ -1469,6 +1486,7 @@ let handle_mode
     out_extension
     dbg_deps
     dbg_glean_deps
+    ~should_print_position
     ~verbosity =
   let expect_single_file () : Relative_path.t =
     match filenames with
@@ -1699,18 +1717,14 @@ let handle_mode
         in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
-    iter_over_files (fun filename ->
-        let nasts = create_nasts ctx files_info in
-        let nast = Relative_path.Map.find nasts filename in
-        let formatter = Format.formatter_of_out_channel Stdlib.stdout in
-        Format.pp_set_margin formatter 200;
-        Nast.pp_program formatter nast)
+    let nasts = create_nasts ctx files_info in
+    print_nasts ~should_print_position nasts filenames
   | Dump_tast ->
     let (errors, tasts, _gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents
     in
     print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
-    print_tasts tasts ctx
+    print_tasts ~should_print_position tasts ctx
   | Check_tast ->
     iter_over_files (fun filename ->
         let files_contents =
@@ -1720,7 +1734,7 @@ let handle_mode
         let (errors, tasts, _gi_solved) =
           compute_tasts_expand_types ctx ~verbosity files_info files_contents
         in
-        print_tasts tasts ctx;
+        print_tasts ~should_print_position tasts ctx;
         if not @@ Errors.is_empty errors then (
           print_errors error_format errors max_errors;
           Printf.printf "Did not typecheck the TAST as there are typing errors.";
@@ -2174,6 +2188,7 @@ let decl_and_run_mode
       batch_mode;
       out_extension;
       verbosity;
+      should_print_position;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2324,6 +2339,7 @@ let decl_and_run_mode
     out_extension
     dbg_deps
     dbg_glean_deps
+    ~should_print_position
     ~verbosity
 
 let main_hack

@@ -1,0 +1,8 @@
+File "attribute_position.bad.php", line 13, characters 1-74:
+`__Atom` attribute can only appear on the first parameter of a function (Parsing[1002])
+File "attribute_position.bad.php", line 17, characters 1-74:
+`__Atom` attribute can only appear on the first parameter of a function (Parsing[1002])
+File "attribute_position.bad.php", line 21, characters 1-198:
+`__Atom` attribute can only appear on the first parameter of a function (Parsing[1002])
+File "attribute_position.bad.php", line 34, characters 1-198:
+`__Atom` attribute can only appear on the first parameter of a function (Parsing[1002])

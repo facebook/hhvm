@@ -994,3 +994,6 @@ pub const lambda_effect_polymorphic: Error =
 
 pub const inst_meth_disabled: Error =
     Cow::Borrowed("`inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead");
+
+pub const invalid_atom_location: Error =
+    Cow::Borrowed("`__Atom` attribute can only appear on the first parameter of a function");

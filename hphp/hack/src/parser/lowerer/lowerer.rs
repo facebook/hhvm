@@ -3717,6 +3717,23 @@ where
                 let return_type = Self::mp_optional(Self::p_hint, type_, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(name, env)?;
+                // Detect if multiple __Atom attribute are used. At most one is allowed,
+                // and if present, it must be on the first parameter.
+                if !parameters.is_empty() {
+                    for param in parameters[1..].iter() {
+                        if param
+                            .user_attributes
+                            .iter()
+                            .any(|attr| attr.name.1 == special_attrs::ATOM)
+                        {
+                            Self::raise_parsing_error(
+                                node,
+                                env,
+                                &syntax_error::invalid_atom_location,
+                            )
+                        }
+                    }
+                }
                 Ok(FunHdr {
                     suspension_kind,
                     readonly_this,

@@ -150,34 +150,7 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
     end
   | _ -> ()
 
-let rec fun_ tenv f =
-  FunUtils.check_params f.f_params;
-  let env = { typedef_tparams = []; tenv } in
-  (* Add type parameters to typing environment and localize the bounds
-     and where constraints *)
-  let tenv =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env.tenv
-      ~ignore_errors:true
-      f.f_tparams
-      f.f_where_constraints
-  in
-  let env = { env with tenv } in
-  maybe hint env (hint_of_type_hint f.f_ret);
-
-  List.iter f.f_tparams (tparam env);
-  List.iter f.f_params (fun_param env);
-  variadic_param env f.f_variadic
-
-and tparam env t = List.iter t.tp_constraints (fun (_, h) -> hint env h)
-
-and where_constr env (h1, _, h2) =
-  hint env h1;
-  hint env h2
-
-and contexts env (_, hl) = List.iter ~f:(hint env) hl
-
-and hint ?(is_atom = false) env (p, h) =
+let rec hint ?(is_atom = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
   hint_ ~is_atom env p h
@@ -264,16 +237,43 @@ and hint_ ~is_atom env p h_ =
     (* TODO(coeffects) *)
     ()
 
-and fun_param env param =
+and contexts env (_, hl) = List.iter ~f:(hint env) hl
+
+let fun_param env param =
   let is_atom =
     Naming_attributes.mem SN.UserAttributes.uaAtom param.param_user_attributes
   in
   maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
 
-and variadic_param env vparam =
+let variadic_param env vparam =
   match vparam with
   | FVvariadicArg p -> fun_param env p
   | _ -> ()
+
+let tparam env t = List.iter t.Aast.tp_constraints (fun (_, h) -> hint env h)
+
+let where_constr env (h1, _, h2) =
+  hint env h1;
+  hint env h2
+
+let fun_ tenv f =
+  FunUtils.check_params f.f_params;
+  let env = { typedef_tparams = []; tenv } in
+  (* Add type parameters to typing environment and localize the bounds
+     and where constraints *)
+  let tenv =
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      env.tenv
+      ~ignore_errors:true
+      f.f_tparams
+      f.f_where_constraints
+  in
+  let env = { env with tenv } in
+  maybe hint env (hint_of_type_hint f.f_ret);
+
+  List.iter f.f_tparams (tparam env);
+  List.iter f.f_params (fun_param env);
+  variadic_param env f.f_variadic
 
 let enum env e =
   hint env e.e_base;

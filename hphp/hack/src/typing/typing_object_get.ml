@@ -542,10 +542,10 @@ let rec obj_get_concrete_ty
             let (env, (member_ty, tal)) =
               if Cls.has_upper_bounds_on_this_from_constraints class_info then
                 let ((env, (ty, tal), _), succeed) =
-                  Errors.try_with_error
+                  Errors.try_
                     (fun () ->
                       (get_member_from_constraints env class_info, true))
-                    (fun () ->
+                    (fun _ ->
                       (* No eligible functions found in constraints *)
                       ( (env, (MakeType.mixed Reason.Rnone, []), default_err_res),
                         false ))

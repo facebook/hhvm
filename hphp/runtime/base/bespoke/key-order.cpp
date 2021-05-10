@@ -49,12 +49,9 @@ folly::SharedMutex s_keyOrderLock;
 
 KeyOrder KeyOrder::insert(const StringData* k) const {
   if (!k->isStatic() || !m_keys) return KeyOrder::MakeInvalid();
-  if (contains(k)) {
-    return *this;
-  }
-  if (isTooLong()) return *this;
+  if (isTooLong() || contains(k)) return *this;
   KeyOrderData newOrder{*m_keys};
-  auto const full = m_keys->size() == RO::EvalBespokeStructDictMaxNumKeys;
+  auto const full = m_keys->size() == RO::EvalBespokeMaxTrackedKeys;
   newOrder.push_back(full ? s_extraKey.get() : k);
   return Make(newOrder);
 }
@@ -94,8 +91,8 @@ KeyOrder::KeyOrder(const KeyOrderData* keys)
 
 KeyOrder::KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
   KeyOrderData res{ko};
-  if (res.size() > RO::EvalBespokeStructDictMaxNumKeys) {
-    res.resize(RO::EvalBespokeStructDictMaxNumKeys);
+  if (res.size() > RO::EvalBespokeMaxTrackedKeys) {
+    res.resize(RO::EvalBespokeMaxTrackedKeys);
     res.push_back(s_extraKey.get());
   }
   return res;
@@ -138,7 +135,7 @@ KeyOrder KeyOrder::MakeInvalid() {
 
 bool KeyOrder::isTooLong() const {
   assertx(m_keys);
-  return m_keys->size() > kMaxTrackedKeyOrderSize;
+  return m_keys->size() > RO::EvalBespokeMaxTrackedKeys;
 }
 
 size_t KeyOrder::size() const {
@@ -160,12 +157,12 @@ bool KeyOrder::contains(const StringData* val) const {
 }
 
 KeyOrder::const_iterator KeyOrder::begin() const {
-  assertx(m_keys);
+  assertx(valid());
   return m_keys->begin();
 }
 
 KeyOrder::const_iterator KeyOrder::end() const {
-  assertx(m_keys);
+  assertx(valid());
   return m_keys->end();
 }
 

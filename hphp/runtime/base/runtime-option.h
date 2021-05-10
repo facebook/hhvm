@@ -1128,6 +1128,9 @@ struct RuntimeOption {
   F(bool, EmitBespokeStructDicts, true)                                 \
   F(uint8_t, BespokeStructDictMaxNumKeys, 250)                          \
   F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \
+  /* What is the maximum number of keys to track in key order           \
+   * profiles? */                                                       \
+  F(uint64_t, BespokeMaxTrackedKeys, 250)                               \
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \

@@ -66,8 +66,6 @@ private:
   static KeyOrderData trimKeyOrder(const KeyOrderData&);
 
   const KeyOrderData* m_keys = nullptr;
-
-  static const size_t kMaxTrackedKeyOrderSize = 1024;
 };
 
 struct KeyOrderHash {

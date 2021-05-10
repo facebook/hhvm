@@ -19,7 +19,7 @@ function hphpd_get_user_commands();
 function hphpd_break(bool $condition = true): void;
 function hphp_debug_break(bool $condition = true): bool;
 <<__PHPStdLib>>
-function hphp_debugger_attached(): bool;
+function hphp_debugger_attached()[read_globals]: bool;
 <<__PHPStdLib>>
 function hphpd_get_client($name = null);
 <<__PHPStdLib>>

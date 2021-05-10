@@ -44,7 +44,7 @@ namespace {
    * @return bool - TRUE if a debugger is attached, FALSE if not.
    */
   <<__Native("NoFCallBuiltin")>>
-  function hphp_debugger_attached(): bool;
+  function hphp_debugger_attached()[read_globals]: bool;
 
   /**
    * Invokes a hard breakpoint. This routine will break into the debugger if

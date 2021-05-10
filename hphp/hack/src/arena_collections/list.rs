@@ -5,14 +5,30 @@
 
 use std::fmt::Debug;
 
+use serde::{Deserialize, Serialize};
+
 use arena_trait::{Arena, TrivialDrop};
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
-#[derive(Eq, FromOcamlRepIn, Hash, PartialEq, Ord, PartialOrd, ToOcamlRep)]
+#[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+#[derive(
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    PartialEq,
+    PartialOrd,
+    Ord,
+    Serialize,
+    ToOcamlRep
+)]
 pub enum List<'a, T> {
     Nil,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Cons(&'a (T, List<'a, T>)),
 }
+arena_deserializer::impl_deserialize_in_arena!(List<'arena, T>);
+
 use List::*;
 
 impl<'a, T> List<'a, T> {

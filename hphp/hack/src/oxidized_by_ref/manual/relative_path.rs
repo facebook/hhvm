@@ -29,7 +29,7 @@ pub struct RelativePath<'a> {
     // to construct a Path in a const context.
     path: Option<&'a Path>,
 }
-arena_deserializer::impl_deserialize_in_arena!(RelativePath<'arena>);
+//arena_deserializer::impl_deserialize_in_arena!(RelativePath<'arena>);
 
 impl<'a> RelativePath<'a> {
     pub const fn empty() -> &'static RelativePath<'static> {
@@ -136,6 +136,31 @@ impl Serialize for RelativePath<'_> {
     }
 }
 
+fn parse(value: &str) -> Result<RelativePath, String> {
+    let mut split = value.splitn(2, '|');
+    let prefix_str = split.next();
+    let path_str = split.next();
+    assert!(split.next() == None, "splitn(2) should yield <=2 results");
+    let prefix = match prefix_str {
+        Some("root") => Prefix::Root,
+        Some("hhi") => Prefix::Hhi,
+        Some("tmp") => Prefix::Tmp,
+        Some("") => Prefix::Dummy,
+        _ => {
+            return Err(format!("unknown relative_path::Prefix: {:?}", value));
+        }
+    };
+    let path = match path_str {
+        Some(path_str) => path_str,
+        None => {
+            return Err(String::from(
+                "missing pipe or got empty string when deserializing RelativePath",
+            ));
+        }
+    };
+    Ok(RelativePath::make(prefix, path))
+}
+
 // See comment on impl of Serialize above.
 impl<'de> Deserialize<'de> for RelativePath<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -155,38 +180,7 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
             where
                 E: serde::de::Error,
             {
-                let mut split = value.splitn(2, '|');
-                let prefix_str = split.next();
-                let path_str = split.next();
-                assert!(split.next() == None, "splitn(2) should yield <=2 results");
-                let prefix = match prefix_str {
-                    Some("root") => Prefix::Root,
-                    Some("hhi") => Prefix::Hhi,
-                    Some("tmp") => Prefix::Tmp,
-                    Some("") => Prefix::Dummy,
-                    _ => {
-                        return Err(E::invalid_value(
-                            serde::de::Unexpected::Other(&format!(
-                                "unknown relative_path::Prefix: {:?}",
-                                value
-                            )),
-                            &self,
-                        ));
-                    }
-                };
-                let path = match path_str {
-                    Some(path_str) => path_str,
-                    None => {
-                        return Err(E::invalid_value(
-                            serde::de::Unexpected::Other(
-                                "missing pipe or got empty string \
-                                 when deserializing RelativePath",
-                            ),
-                            &self,
-                        ));
-                    }
-                };
-                Ok(RelativePath::make(prefix, path))
+                parse(value).map_err(|e| E::invalid_value(serde::de::Unexpected::Other(&e), &self))
             }
         }
 
@@ -194,8 +188,80 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
     }
 }
 
+impl<'arena> arena_deserializer::DeserializeInArena<'arena> for RelativePath<'arena> {
+    fn deserialize_in_arena<D>(
+        arena: &'arena bumpalo::Bump,
+        deserializer: D,
+    ) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'arena>,
+    {
+        struct Visitor<'a> {
+            arena: &'a bumpalo::Bump,
+        }
+
+        impl<'arena, 'de> serde::de::Visitor<'de> for Visitor<'arena> {
+            type Value = RelativePath<'arena>;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("[DeserializeInArena]a string for RelativePath")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<RelativePath<'arena>, E>
+            where
+                E: serde::de::Error,
+            {
+                let s = self.arena.alloc_str(value);
+                parse(s).map_err(|e| E::invalid_value(serde::de::Unexpected::Other(&e), &self))
+            }
+        }
+
+        deserializer.deserialize_str(Visitor { arena })
+    }
+}
+
+impl<'arena> arena_deserializer::DeserializeInArena<'arena> for &'arena RelativePath<'arena> {
+    fn deserialize_in_arena<D>(
+        arena: &'arena bumpalo::Bump,
+        deserializer: D,
+    ) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'arena>,
+    {
+        let r = RelativePath::deserialize_in_arena(arena, deserializer)?;
+        Ok(arena.alloc(r))
+    }
+}
+
 pub type Map<'a, T> = arena_collections::SortedAssocList<'a, RelativePath<'a>, T>;
 
 pub mod map {
     pub use super::Map;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use arena_deserializer::{ArenaDeserializer, DeserializeInArena};
+    use std::path::Path;
+
+    #[test]
+    fn test_serde() {
+        let x = RelativePath::new(Prefix::Dummy, Path::new("/tmp/foo.php"));
+        let se = serde_json::to_string(&x).unwrap();
+        let mut de = serde_json::Deserializer::from_str(&se);
+        let x1 = RelativePath::deserialize(&mut de).unwrap();
+        assert_eq!(x, x1);
+    }
+
+    #[test]
+    fn test_serde_with_arena() {
+        let x = RelativePath::new(Prefix::Dummy, Path::new("/tmp/foo.php"));
+        let se = serde_json::to_string(&x).unwrap();
+        let mut de = serde_json::Deserializer::from_str(&se);
+        let arena = bumpalo::Bump::new();
+        let de = ArenaDeserializer::new(&arena, &mut de);
+        let x1 = <&RelativePath>::deserialize_in_arena(&arena, de).unwrap();
+        assert_eq!(&x, x1);
+    }
 }

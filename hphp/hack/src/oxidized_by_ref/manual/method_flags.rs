@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 use bitflags::bitflags;
 
@@ -63,8 +63,15 @@ impl<'de> serde::Deserialize<'de> for MethodFlags {
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 write!(formatter, "a u8 for MethodFlags")
             }
+
             fn visit_u8<E: serde::de::Error>(self, value: u8) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(value))
+            }
+
+            fn visit_u64<E: serde::de::Error>(self, value: u64) -> Result<Self::Value, E> {
+                Ok(Self::Value::from_bits_truncate(
+                    u8::try_from(value).expect("expect an u8, but got u64"),
+                ))
             }
         }
         deserializer.deserialize_u8(Visitor)

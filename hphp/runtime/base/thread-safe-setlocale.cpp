@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/rds-local.h"
 
+#include <dlfcn.h>
+
 /*
  * This class reimplements the setlocale() and localeconv() functions
  * in a thread-safe manner and provides stronger symbols for them than
@@ -51,39 +53,101 @@ namespace HPHP {
 RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 RDS_LOCAL(struct lconv, g_thread_safe_localeconv_data);
 
+namespace {
+
 static const locale_t s_null_locale = (locale_t) 0;
 
-ThreadSafeLocaleHandler::ThreadSafeLocaleHandler() {
-#define FILL_IN_CATEGORY_LOCALE_MAP(category) \
-  {category, category ## _MASK, #category, ""}
-  m_category_locale_map = {
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_CTYPE),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_NUMERIC),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_TIME),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_COLLATE),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_MONETARY),
-      #ifndef _MSC_VER
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_MESSAGES),
-      #endif
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_ALL),
-      #if !defined(__APPLE__) && !defined(_MSC_VER)
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_PAPER),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_NAME),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_ADDRESS),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_TELEPHONE),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_MEASUREMENT),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_IDENTIFICATION),
-      #endif
-  };
-#undef FILL_IN_CATEGORY_LOCALE_MAP
+} // namespace
 
-#ifdef _MSC_VER
-  _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-  ::setlocale(LC_ALL, "C");
+#if defined(_MSC_VER)
+#define FILL_IN_CATEGORY_LOCALE_MAP() \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_TIME), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_COLLATE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MONETARY), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_ALL)
+#elif defined(__APPLE__)
+#define FILL_IN_CATEGORY_LOCALE_MAP() \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_TIME), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_COLLATE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MONETARY), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MESSAGES), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_ALL)
+#elif defined(__GLIBC__)
+#define FILL_IN_CATEGORY_LOCALE_MAP()  \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_TIME), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_COLLATE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MONETARY), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MESSAGES), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_ALL), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_PAPER), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_NAME), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_ADDRESS), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_TELEPHONE), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_MEASUREMENT), \
+      CATEGORY_LOCALE_MAP_ENTRY(LC_IDENTIFICATION)
 #else
-  m_locale = s_null_locale;
+#error "Unsupported platform"
 #endif
 
+ThreadSafeLocaleHandler::LocaleInfo& ThreadSafeLocaleHandler::getCLocale() {
+  static std::optional<ThreadSafeLocaleHandler::LocaleInfo> li;
+  if (li) {
+    return *li;
+  }
+  auto locale = newlocale(LC_ALL, "C", (locale_t) 0);
+
+  std::vector<CategoryAndLocaleMap> category_map = {
+#define CATEGORY_LOCALE_MAP_ENTRY(category) \
+  {category, category ## _MASK, #category, "C"}
+    FILL_IN_CATEGORY_LOCALE_MAP()
+#undef CATEGORY_LOCALE_MAP_ENTRY
+  };
+
+  li = std::make_tuple(locale, category_map);
+  return *li;
+}
+
+ThreadSafeLocaleHandler::LocaleInfo& ThreadSafeLocaleHandler::getEnvLocale() {
+  static std::optional<ThreadSafeLocaleHandler::LocaleInfo> li;
+  if (li) {
+    return *li;
+  }
+  auto locale = newlocale(LC_ALL, "", (locale_t) 0);
+  // Per POSIX, a processes' default locale is "C" until `setlocale()` is
+  // called; to use env from environment, `setlocale(LC_ALL, "")` should
+  // be called.
+  //
+  // Can't actually check that nothing in HHVM has set the locale yet, but
+  // this is pretty close.
+  //
+  // Asserting as we restore it later. The alternative would be to store
+  // the original locale for each category, but if we're setting process
+  // locale somewhere else, this should be re-reviewed anyway
+  auto real_setlocale = reinterpret_cast<decltype(&setlocale)>(dlsym(RTLD_NEXT, "setlocale"));
+  assertx(!strcmp((*real_setlocale)(LC_ALL, nullptr), "C"));
+  // ... but to find out what the env locale actually is, we need to use it
+  (*real_setlocale)(LC_ALL, "");
+  SCOPE_EXIT { (*real_setlocale)(LC_ALL, "C"); };
+
+  std::vector<CategoryAndLocaleMap> map = {
+#define CATEGORY_LOCALE_MAP_ENTRY(category) \
+  {category, category ## _MASK, #category, strdup((*real_setlocale)(category, nullptr))}
+    FILL_IN_CATEGORY_LOCALE_MAP()
+#undef CATEGORY_LOCALE_MAP_ENTRY
+  };
+
+  li = std::make_tuple(locale, map);
+  return *li;
+}
+
+ThreadSafeLocaleHandler::ThreadSafeLocaleHandler() {
+  m_locale = s_null_locale;
   reset();
 }
 
@@ -92,16 +156,12 @@ ThreadSafeLocaleHandler::~ThreadSafeLocaleHandler() {
 }
 
 void ThreadSafeLocaleHandler::reset() {
-#ifdef _MSC_VER
-  ::setlocale(LC_ALL, "C");
-#else
   if (m_locale != s_null_locale) {
     freelocale(m_locale);
-    m_locale = s_null_locale;
   }
-
-  uselocale(LC_GLOBAL_LOCALE);
-#endif
+  std::tie(m_locale, m_category_locale_map) = getCLocale();
+  m_locale = duplocale(m_locale);
+  uselocale(m_locale);
 }
 
 const char* ThreadSafeLocaleHandler::actuallySetLocale(
@@ -131,18 +191,24 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(
   if (::setlocale(category, locale_cstr) == nullptr)
     return nullptr;
 #else
+  // newlocale invalidates the old one, so let's make a copy
+  auto base_locale = m_locale ? duplocale(m_locale) : 0;
   locale_t new_locale = newlocale(
     m_category_locale_map[category].category_mask,
     locale_cstr,
-    m_locale
+    base_locale
   );
 
-  if (new_locale == s_null_locale) {
+  if (!new_locale) {
+    if (base_locale) {
+      freelocale(base_locale);
+    }
     return nullptr;
   }
 
+  uselocale(new_locale);
+  freelocale(m_locale);
   m_locale = new_locale;
-  uselocale(m_locale);
 #endif
 
   if (category == LC_ALL) {
@@ -185,19 +251,29 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(
          */
         for (auto &i : m_category_locale_map) {
           if (i.category_str == key) {
-            i.locale_str = value ? value : "";
+            i.locale_str = value ? value : "C";
             break;
           }
         }
       }
 
       free(locale_cstr_copy);
+    } else if (locale_cstr[0] == 0) {
+      auto& [_, env_map] = getEnvLocale();
+      m_category_locale_map = env_map;
+      // LC_CTYPE is arbitrary: as we've set LC_ALL, any works
+      locale_cstr = env_map[LC_CTYPE].locale_str.c_str();
     } else {
       /* Copy the locale into all categories */
       for (auto &i : m_category_locale_map) {
         i.locale_str = locale_cstr;
       }
     }
+  } else if (locale_cstr[0] == 0) {
+    auto& [_, env_map] = getEnvLocale();
+    auto& locale_str = env_map[category].locale_str;
+    m_category_locale_map[category].locale_str = locale_str;
+    locale_cstr = locale_str.c_str();
   } else {
     m_category_locale_map[category].locale_str = locale_cstr;
   }

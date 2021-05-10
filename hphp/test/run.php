@@ -1051,6 +1051,7 @@ function hhvm_cmd(
   }
 
   $env = $_ENV;
+  $env['LC_ALL'] = 'C';
 
   // Apply the --env option
   if (isset($options['env'])) {

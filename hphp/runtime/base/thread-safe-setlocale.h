@@ -47,6 +47,10 @@ private:
 #ifndef _MSC_VER
   locale_t m_locale;
 #endif
+
+  using LocaleInfo = std::tuple<locale_t, std::vector<CategoryAndLocaleMap> >;
+  static LocaleInfo& getCLocale();
+  static LocaleInfo& getEnvLocale();
 };
 
 extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);

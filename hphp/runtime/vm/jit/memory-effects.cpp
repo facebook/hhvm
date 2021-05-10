@@ -1386,7 +1386,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
-   * operations above, these may take a pointer to MInstrState::tvRef and 
+   * operations above, these may take a pointer to MInstrState::tvRef and
    * MInstrState::roProp, which they may store to (but not read from).
    */
   case PropX:
@@ -1464,6 +1464,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1),
       nullptr
     };
+
+  case StStkRange: {
+    auto const extra = inst.extra<StStkRange>();
+    auto const startOff = extra->start;
+    auto const count = extra->count;
+    return PureStore {
+      AStack::range(startOff, startOff + static_cast<int32_t>(count)),
+      inst.src(1),
+      nullptr
+    };
+  }
 
   case StOutValue:
     // Technically these writes affect the caller's stack, but there is no way

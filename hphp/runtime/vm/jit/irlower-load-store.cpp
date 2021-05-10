@@ -147,6 +147,45 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
   storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
 }
 
+void cgStStkRange(IRLS& env, const IRInstruction* inst) {
+  auto const range = inst->extra<StackRange>();
+  auto const count = range->count;
+  if (count == 0) return;
+
+  auto const startOff = range->start.offset;
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const val = inst->src(1);
+  auto const valType = val->type();
+  auto const valSrcLoc = srcLoc(env, inst, 1);
+  auto& v = vmain(env);
+
+  auto const typePtr = v.makeReg();
+  auto const dataPtr = v.makeReg();
+  auto const endPtr = v.makeReg();
+  v << lea{sp[cellsToBytes(startOff) + TVOFF(m_type)], typePtr};
+  v << lea{sp[cellsToBytes(startOff + count) + TVOFF(m_type)], endPtr};
+  v << lea{sp[cellsToBytes(startOff) + TVOFF(m_data)], dataPtr};
+
+  auto const tvSize = (int32_t)sizeof(TypedValue);
+
+  doWhile(v, CC_NE, {typePtr, dataPtr},
+    [&] (const VregList& in, const VregList& out) {
+      auto const typeIn = in[0];
+      auto const dataIn = in[1];
+      auto const typeOut = out[0];
+      auto const dataOut = out[1];
+      auto const sf = v.makeReg();
+
+      storeTV(v, valType, valSrcLoc, *typeIn, *dataIn);
+      v << addqi{tvSize, typeIn, typeOut, v.makeReg()};
+      v << addqi{tvSize, dataIn, dataOut, v.makeReg()};
+      v << cmpq{typeOut, endPtr, sf};
+      return sf;
+    },
+    count
+  );
+}
+
 void cgStOutValue(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(

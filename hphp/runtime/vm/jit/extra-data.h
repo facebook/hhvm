@@ -2172,6 +2172,29 @@ struct LocalIdRange : IRExtraData {
   uint32_t start, end;
 };
 
+struct StackRange : IRExtraData {
+  StackRange(IRSPRelOffset start, uint32_t count)
+    : start(start)
+    , count(count)
+  {}
+
+  std::string show() const {
+    return folly::sformat("[{}, {})", start.offset, start.offset + count);
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(std::hash<int32_t>()(start.offset),
+                                     std::hash<int32_t>()(count));
+  }
+
+  bool equals(const StackRange& o) const {
+    return start == o.start && count == o.count;
+  }
+
+  IRSPRelOffset start;
+  uint32_t count;
+};
+
 struct FuncEntryData : IRExtraData {
   FuncEntryData(const Func* func, uint32_t argc)
     : func(func)
@@ -2674,6 +2697,7 @@ X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
 X(CheckStk,                     IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
+X(StStkRange,                   StackRange);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
 X(AssertStk,                    IRSPRelOffsetData);

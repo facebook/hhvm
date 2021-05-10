@@ -917,6 +917,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StringIsset:
   case StructDictSet:
   case StStk:
+  case StStkRange:
   case SubDbl:
   case SubInt:
   case SubIntO:

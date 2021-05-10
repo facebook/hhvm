@@ -1762,6 +1762,10 @@ To string conversions:
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
 
+| StStkRange<offsets>, ND, S(StkPtr) S(Cell), NF
+
+  Store S1 to the stack slots at the given offsets from S0.
+
 | StOutValue<index>, ND, S(FramePtr) S(Cell), NF
 
   Store S1 in a caller allocated out-value vm stack cell index cells above

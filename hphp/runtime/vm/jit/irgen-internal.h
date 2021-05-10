@@ -554,6 +554,13 @@ inline SSATmp* push(IRGS& env, SSATmp* tmp) {
   return tmp;
 }
 
+inline void pushMany(IRGS& env, SSATmp* tmp, uint32_t count) {
+  if (count == 0) return;
+  env.irb->fs().incBCSPDepth(count);
+  auto const startOff = offsetFromIRSP(env, BCSPRelOffset{0});
+  gen(env, StStkRange, StackRange{startOff, count}, sp(env), tmp);
+}
+
 inline SSATmp* pushIncRef(IRGS& env, SSATmp* tmp,
                           GuardConstraint gc = DataTypeGeneric) {
   env.irb->constrainValue(tmp, gc);

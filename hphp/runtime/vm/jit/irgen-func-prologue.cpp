@@ -415,9 +415,18 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
   // Push Uninit for un-passed arguments.
   auto const numParams = callee->numNonVariadicParams();
-  while (argc < numParams) {
-    push(env, cns(env, TUninit));
-    ++argc;
+  if (argc < numParams) {
+    auto const kMaxArgsInitUnroll = 10;
+    auto const count = numParams - argc;
+    if (count <= kMaxArgsInitUnroll) {
+      while (argc < numParams) {
+        push(env, cns(env, TUninit));
+        ++argc;
+      }
+    } else {
+      pushMany(env, cns(env, TUninit), count);
+      argc = numParams;
+    }
   }
 
   if (argc < callee->numParams()) {

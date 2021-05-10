@@ -887,38 +887,70 @@ folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 //
 // In optimized translations, we use the layout chosen by layout selection,
 // emitting a check if necessary to refine the array's type to that layout.
-ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
+jit::ArrayLayout guardToLayout(
+    IRGS& env, const NormalizedInstruction& ni, Location loc,
+    Type type, std::function<void(IRGS&)> emitVanilla) {
   auto const kind = env.context.kind;
   assertx(!env.irb->guardFailBlock());
   if (kind != TransKind::Optimize) return type.arrSpec().layout();
 
-  auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
-  auto const target = TArrLike.narrowToLayout(layout);
-  if (!type.maybe(target)) {
-    // If the predicted type is incompatible with the known type, avoid
-    // generating an impossible CheckType followed by unreachable code.
-    assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
+  auto const sl = bespoke::layoutForSink(env.profTransIDs, ni.source);
+  auto const target = TArrLike.narrowToLayout(sl.layout);
+  if (type <= target || !type.maybe(target)) {
+    // If the type test would be trivial (either always taken or never taken),
+    // skip it and just emit code that works for the current layout.
     return type.arrSpec().layout();
   }
 
-  if (RO::EvalBespokeEscalationSampleRate) {
-    ifThen(
-      env,
-      [&](Block* taken) {
-        env.irb->setGuardFailBlock(taken);
-        checkType(env, loc, target, bcOff(env));
-        env.irb->resetGuardFailBlock();
-      },
-      [&]{
+  if (sl.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+    checkType(env, loc, target, bcOff(env));
+    return sl.layout;
+  }
+
+  auto const next_hint = env.irb->curBlock()->hint();
+
+  ifThen(
+    env,
+    [&](Block* taken) {
+      env.irb->setGuardFailBlock(taken);
+      checkType(env, loc, target, bcOff(env));
+      env.irb->resetGuardFailBlock();
+    },
+    [&]{
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter hinter(env.irb->unit(), Block::Hint::Unlikely);
+
+      // If the type check was for "vanilla" or "bespoke", we know we have
+      // the other kind in the taken branch, so assert that information.
+      auto const vanilla = TArrLike.narrowToLayout(ArrayLayout::Vanilla());
+      auto const bespoke = TArrLike.narrowToLayout(ArrayLayout::Bespoke());
+      if (target == vanilla) {
+        assertTypeLocation(env, loc, bespoke);
+      } else if (target == bespoke) {
+        assertTypeLocation(env, loc, vanilla);
+      }
+
+      // Side exit or do codegen as needed. Use emitVanilla if we have it.
+      if (sl.sideExit) {
+        assertx(RO::EvalBespokeEscalationSampleRate);
         auto const arr = loadLocation(env, loc);
         gen(env, LogGuardFailure, target, arr);
         gen(env, Jmp, makeExit(env, curSrcKey(env)));
+      } else {
+        if (emitVanilla && target == bespoke) {
+          emitVanilla(env);
+        } else {
+          translateDispatchBespoke(env, ni);
+        }
+        auto const next = [&]{
+          IRUnit::Hinter next_hinter(env.irb->unit(), next_hint);
+          return getBlock(env, nextBcOff(env));
+        }();
+        gen(env, Jmp, next);
       }
-    );
-  } else {
-    checkType(env, loc, target, bcOff(env));
-  }
-  return layout;
+    }
+  );
+  return sl.layout;
 }
 
 void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
@@ -1245,7 +1277,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
   } else if (isFCall(sk.op())) {
-    guardToLayout(env, sk, loc, type);
+    guardToLayout(env, ni, loc, type, nullptr);
     translateDispatchBespoke(env, ni);
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
@@ -1258,7 +1290,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
   } else {
     // In an optimized or live translation, we guard to a specialized layout
     // and then emit either vanilla or bespoke code.
-    auto const layout = guardToLayout(env, sk, loc, type);
+    auto const layout = guardToLayout(env, ni, loc, type, emitVanilla);
     if (layout.vanilla()) {
       emitVanilla(env);
     } else {

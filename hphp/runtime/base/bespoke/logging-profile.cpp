@@ -432,18 +432,18 @@ SinkProfile::SinkProfile(SinkProfileKey key)
   assertx(s_profiling.load(std::memory_order_acquire));
 }
 
-SinkProfile::SinkProfile(SinkProfileKey key, jit::ArrayLayout layout)
+SinkProfile::SinkProfile(SinkProfileKey key, SinkLayout layout)
   : key(key)
   , layout(layout)
 {
   assertx(!s_profiling.load(std::memory_order_acquire));
 }
 
-jit::ArrayLayout SinkProfile::getLayout() const {
+SinkLayout SinkProfile::getLayout() const {
   return layout.load(std::memory_order_acquire);
 }
 
-void SinkProfile::setLayout(jit::ArrayLayout layout) {
+void SinkProfile::setLayout(SinkLayout layout) {
   this->layout.store(layout, std::memory_order_release);
 }
 
@@ -866,8 +866,9 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
                   sk.getSymbol(), sink.sampledCount,
                   sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
-    LOG_OR_RETURN(file, "  Selected Layout: {}\n",
-                  sink.profile->getLayout().describe());
+    auto const sl = sink.profile->getLayout();
+    LOG_OR_RETURN(file, "  Selected Layout: {}\n", sl.layout.describe());
+    LOG_OR_RETURN(file, "  Guard: {}\n", sl.sideExit ? "side-exit" : "diamond");
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
@@ -1185,8 +1186,8 @@ void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
   always_assert(s_profileMap.insert({key, profile}).second);
 }
 
-void deserializeSink(SinkProfileKey key, jit::ArrayLayout layout) {
-  auto const profile = new SinkProfile(key, layout);
+void deserializeSink(SinkProfileKey key, SinkLayout sl) {
+  auto const profile = new SinkProfile(key, sl);
   always_assert(s_sinkMap.insert({key, profile}).second);
 }
 

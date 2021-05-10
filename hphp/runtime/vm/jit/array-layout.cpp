@@ -341,6 +341,18 @@ SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
   auto const trans = read_raw<TransID>(des);
   return SinkProfileKey(trans, read_srckey(des));
 }
+
+void write_sink_layout(ProfDataSerializer& ser, bespoke::SinkLayout sl) {
+  write_raw(ser, sl.layout);
+  write_raw(ser, sl.sideExit);
+}
+
+bespoke::SinkLayout read_sink_layout(ProfDataDeserializer& des) {
+  auto result = bespoke::SinkLayout{};
+  result.layout = read_layout(des);
+  read_raw(des, result.sideExit);
+  return result;
+}
 }
 
 struct RuntimeStructSerde {
@@ -424,7 +436,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   write_raw(ser, bespoke::countSinks());
   bespoke::eachSink([&](auto const& profile) {
     write_sink_key(ser, profile.key);
-    write_raw(ser, profile.getLayout());
+    write_sink_layout(ser, profile.getLayout());
   });
 }
 
@@ -455,7 +467,7 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   for (auto i = 0; i < sinks; i++) {
     assertx(bespoke::countSinks() == i);
     auto const key = read_sink_key(des);
-    bespoke::deserializeSink(key, read_layout(des));
+    bespoke::deserializeSink(key, read_sink_layout(des));
     assertx(bespoke::countSinks() == i + 1);
   }
   bespoke::Layout::FinalizeHierarchy();

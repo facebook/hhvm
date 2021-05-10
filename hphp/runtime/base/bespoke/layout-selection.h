@@ -28,7 +28,7 @@ namespace HPHP { namespace bespoke {
 // Layout selection. We'll call selectBespokeLayouts in RTA, and then we'll
 // be able to use layoutForSource / layoutForSink for optimized code.
 jit::ArrayLayout layoutForSource(SrcKey sk);
-jit::ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk);
+SinkLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk);
 void selectBespokeLayouts();
 
 }}

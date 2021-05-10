@@ -1142,9 +1142,26 @@ struct RuntimeOption {
    * 2 - Specialize sources on vanilla, but sinks on top. */            \
   F(int32_t, BespokeArraySpecializationMode, 0)                         \
   /* We will use specialized layouts for a given array if they cover    \
-   * the given percent of operations logged during profiling. */        \
+   * the given percent of operations logged during profiling.           \
+   *                                                                    \
+   * We can generate code for a bespoke sink in three ways:             \
+   *  1. We can do "top codegen" that handles any array layout.         \
+   *  2. We can specialize on a layout and fall back to top codegen.    \
+   *  3. We can specialize on a layout and side-exit on guard failure.  \
+   *                                                                    \
+   * We use a couple heuristics to choose between these options. If we  \
+   * see one layout that covers `SideExitThreshold` percent cases, and  \
+   * we saw at most `SideExitMaxSources` sources reach this sink, with  \
+   * at least `SideExitMinSampleCount` samples each, we'll side-exit.   \
+   *                                                                    \
+   * Else, if one layout covers `SpecializationThreshold` percent, we   \
+   * will specialize and fall back to top codegen. Otherwise, we'll do  \
+   * top codegen. */                                                    \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
-  F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
+  F(double, BespokeArraySinkSpecializationThreshold,   90.0)            \
+  F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
+  F(uint64_t, BespokeArraySinkSideExitMaxSources, 16)                   \
+  F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 16)               \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

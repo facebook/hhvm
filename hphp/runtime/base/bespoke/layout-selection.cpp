@@ -358,7 +358,7 @@ ArrayLayout selectSourceLayout(
   return ArrayLayout::Vanilla();
 }
 
-ArrayLayout selectSinkLayout(
+ArrayLayout makeSinkDecision(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
   auto const mode = RO::EvalBespokeArraySpecializationMode;
@@ -445,6 +445,22 @@ ArrayLayout selectSinkLayout(
   return ArrayLayout::Top();
 }
 
+SinkLayout selectSinkLayout(
+    const SinkProfile& profile, const StructAnalysisResult& sar) {
+  auto const layout = makeSinkDecision(profile, sar);
+  auto const sideExit = [&]{
+    auto const count = profile.data->sources.size();
+    if (count > RO::EvalBespokeArraySinkSideExitMaxSources) return false;
+
+    auto const min_samples = RO::EvalBespokeArraySinkSideExitMinSampleCount;
+    for (auto const& it : profile.data->sources) {
+      if (it.second < min_samples) return false;
+    }
+    return true;
+  }();
+  return {layout, sideExit};
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }
@@ -456,14 +472,19 @@ ArrayLayout layoutForSource(SrcKey sk) {
   return profile ? profile->getLayout() : ArrayLayout::Vanilla();
 }
 
-ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
-  if (ids.empty()) return ArrayLayout::Top();
-  auto result = ArrayLayout::Bottom();
+SinkLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
+  auto result = SinkLayout{};
   for (auto const id : ids) {
     auto const profile = getSinkProfile(id, sk);
-    if (profile) result = result | profile->getLayout();
+    if (!profile) continue;
+    auto const sl = profile->getLayout();
+    result.layout = result.layout | sl.layout;
+    result.sideExit &= sl.sideExit;
   }
-  return result == ArrayLayout::Bottom() ? ArrayLayout::Top() : result;
+  if (result.layout == ArrayLayout::Bottom()) {
+    return {ArrayLayout::Top(), false};
+  }
+  return result;
 }
 
 void selectBespokeLayouts() {

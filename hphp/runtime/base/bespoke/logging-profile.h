@@ -293,6 +293,12 @@ private:
   BespokeArray* staticBespokeArray = nullptr;
 };
 
+// The decision we make at each layout-sensitive sink.
+struct SinkLayout {
+  jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
+  bool sideExit = true;
+};
+
 // We split sinks by profiling tracelet so we can condition on array type.
 using SinkProfileKey = std::pair<TransID, SrcKey>;
 
@@ -322,13 +328,13 @@ struct SinkProfile {
     KeyOrderMap keyOrders;
   };
 
-  jit::ArrayLayout getLayout() const;
-  void setLayout(jit::ArrayLayout layout);
+  SinkLayout getLayout() const;
+  void setLayout(SinkLayout layout);
 
   void update(const ArrayData* ad);
 
   explicit SinkProfile(SinkProfileKey key);
-  SinkProfile(SinkProfileKey key, jit::ArrayLayout layout);
+  SinkProfile(SinkProfileKey key, SinkLayout layout);
 
   void releaseData() { data.reset(); }
 
@@ -337,7 +343,7 @@ public:
   std::unique_ptr<SinkProfileData> data;
 
 private:
-  std::atomic<jit::ArrayLayout> layout = jit::ArrayLayout::Bottom();
+  std::atomic<SinkLayout> layout = {};
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
@@ -363,7 +369,7 @@ void startExportProfiles();
 void eachSource(std::function<void(LoggingProfile& profile)> fn);
 void eachSink(std::function<void(SinkProfile& profile)> fn);
 void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout);
-void deserializeSink(SinkProfileKey key, jit::ArrayLayout layout);
+void deserializeSink(SinkProfileKey key, SinkLayout layout);
 size_t countSources();
 size_t countSinks();
 

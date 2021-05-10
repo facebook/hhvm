@@ -771,7 +771,8 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
     auto const dt = getArrType(iter_type).toDataType();
     if (!arrayTypeCouldBeBespoke(dt)) return ArrayLayout::Vanilla();
-    return bespoke::layoutForSink(env.profTransIDs, curSrcKey(env));
+    auto const sl = bespoke::layoutForSink(env.profTransIDs, curSrcKey(env));
+    return sl.sideExit ? sl.layout : ArrayLayout::Top();
   }();
   iter_type.bespoke = layout.bespoke();
   auto const accessor = getAccessor(iter_type, layout);

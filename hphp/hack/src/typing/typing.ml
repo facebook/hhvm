@@ -7187,6 +7187,7 @@ and call
           let (env, atom_type) =
             let is_atom = get_fp_is_atom param in
             let ety = param.fp_type.et_type in
+            let (env, ety) = Env.expand_type env ety in
             let is_label =
               match get_node ety with
               | Tnewtype (name, _, _) -> String.equal SN.Classes.cLabel name

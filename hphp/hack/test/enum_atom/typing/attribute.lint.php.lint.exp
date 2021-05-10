@@ -1,0 +1,10 @@
+File "attribute.lint.php", line 13, characters 19-19:
+Method `f` is also defined on `I`, but its first parameter is missing `<<__Atom>>`. (Lint[5632])
+File "attribute.lint.php", line 26, characters 19-19:
+Method `f` is also defined on `D`, but its first parameter is missing `<<__Atom>>`. (Lint[5632])
+File "attribute.lint.php", line 48, characters 19-19:
+Method `f` is also defined on `I`, but its first parameter is missing `<<__Atom>>`. (Lint[5632])
+File "attribute.lint.php", line 56, characters 19-19:
+Method `f` is also defined on `D`, but this method is missing `<<__Override>>`. (https://fburl.com/override-attribute-lint) (Lint[5616])
+File "attribute.lint.php", line 56, characters 19-19:
+Method `f` is also defined on `D`, but its first parameter is missing `<<__Atom>>`. (Lint[5632])

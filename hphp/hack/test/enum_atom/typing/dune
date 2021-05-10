@@ -33,7 +33,26 @@
     )))
 
 (alias
+    (name enum_atom_lint)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_atom/typing/*.lint.php)
+          (glob_files %{project_root}/test/enum_atom/typing/HH_FLAGS)
+          (glob_files %{project_root}/test/enum_atom/typing/*.lint.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_atom/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .lint.php
+    --out-extension .lint.out
+    --expect-extension .lint.exp
+    --flags
+    --error-format raw
+    --lint
+    )))
+
+(alias
     (name runtest)
     (deps
         (alias enum_atom)
+        (alias enum_atom_lint)
         (alias enum_atom_shallow_decl)))

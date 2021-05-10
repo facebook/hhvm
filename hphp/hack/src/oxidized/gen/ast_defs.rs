@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e072dae33b73f4c61f52bc34d4053afa>>
+// @generated SignedSource<<cebd03e4dbbb72cd9563028965a5b4c8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -89,6 +89,7 @@ pub enum Variance {
     Invariant,
 }
 impl TrivialDrop for Variance {}
+arena_deserializer::impl_deserialize_in_arena!(Variance);
 
 #[derive(
     Clone,
@@ -112,6 +113,7 @@ pub enum ConstraintKind {
     ConstraintSuper,
 }
 impl TrivialDrop for ConstraintKind {}
+arena_deserializer::impl_deserialize_in_arena!(ConstraintKind);
 
 pub type Reified = bool;
 
@@ -139,6 +141,7 @@ pub enum ClassKind {
     Cenum,
 }
 impl TrivialDrop for ClassKind {}
+arena_deserializer::impl_deserialize_in_arena!(ClassKind);
 
 #[derive(
     Clone,
@@ -160,6 +163,7 @@ pub enum ParamKind {
     Pinout,
 }
 impl TrivialDrop for ParamKind {}
+arena_deserializer::impl_deserialize_in_arena!(ParamKind);
 
 #[derive(
     Clone,
@@ -181,6 +185,7 @@ pub enum ReadonlyKind {
     Readonly,
 }
 impl TrivialDrop for ReadonlyKind {}
+arena_deserializer::impl_deserialize_in_arena!(ReadonlyKind);
 
 #[derive(
     Clone,
@@ -203,6 +208,7 @@ pub enum OgNullFlavor {
     OGNullsafe,
 }
 impl TrivialDrop for OgNullFlavor {}
+arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
 
 #[derive(
     Clone,
@@ -227,6 +233,7 @@ pub enum FunKind {
     FAsyncGenerator,
 }
 impl TrivialDrop for FunKind {}
+arena_deserializer::impl_deserialize_in_arena!(FunKind);
 
 #[derive(
     Clone,
@@ -298,6 +305,7 @@ pub enum Uop {
     Usilence,
 }
 impl TrivialDrop for Uop {}
+arena_deserializer::impl_deserialize_in_arena!(Uop);
 
 #[derive(
     Clone,
@@ -321,6 +329,7 @@ pub enum Visibility {
     Protected,
 }
 impl TrivialDrop for Visibility {}
+arena_deserializer::impl_deserialize_in_arena!(Visibility);
 
 /// Literal values that can occur in XHP enum properties.
 ///

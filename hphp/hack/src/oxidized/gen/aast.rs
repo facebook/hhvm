@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9355c76ac79b1e372ebeb039e9cbdcb>>
+// @generated SignedSource<<8458e355b2b4d26f5d24a74d551374a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -233,6 +233,7 @@ pub enum EnvAnnot {
     Refinement,
 }
 impl TrivialDrop for EnvAnnot {}
+arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
 
 #[derive(
     Clone,
@@ -1261,6 +1262,7 @@ pub enum EmitId {
     EmitId(isize),
     Anonymous,
 }
+arena_deserializer::impl_deserialize_in_arena!(EmitId);
 
 #[derive(
     Clone,
@@ -1343,6 +1345,7 @@ pub enum XhpAttrTag {
     LateInit,
 }
 impl TrivialDrop for XhpAttrTag {}
+arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
 
 #[derive(
     Clone,
@@ -1772,6 +1775,7 @@ pub enum NsKind {
     NSConst,
 }
 impl TrivialDrop for NsKind {}
+arena_deserializer::impl_deserialize_in_arena!(NsKind);
 
 #[derive(
     Clone,
@@ -1795,6 +1799,7 @@ pub enum HoleSource {
     EnforcedCast,
 }
 impl TrivialDrop for HoleSource {}
+arena_deserializer::impl_deserialize_in_arena!(HoleSource);
 
 #[derive(
     Clone,

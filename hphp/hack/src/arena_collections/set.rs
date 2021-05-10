@@ -24,6 +24,7 @@ impl<'a, K> Clone for Set<'a, K> {
         Set(self.0.clone())
     }
 }
+arena_deserializer::impl_deserialize_in_arena!(Set<'arena, K>);
 
 impl<'a, K> Copy for Set<'a, K> {}
 

@@ -19,7 +19,7 @@ pub trait DeserializeInArena<'arena>: Sized {
 #[macro_export]
 macro_rules! impl_deserialize_in_arena{
     ($ty:ident < $($lt:lifetime),* $(,)? $($tp:ident),* >) => {
-            impl<'arena, $($tp : $crate::DeserializeInArena<'arena>),*> $crate::DeserializeInArena<'arena> for $ty<$($lt,)* $($tp,)* > {
+            impl<'arena, $($tp : 'arena + $crate::DeserializeInArena<'arena>),*> $crate::DeserializeInArena<'arena> for $ty<$($lt,)* $($tp,)* > {
             fn deserialize_in_arena<__D>(
                 arena: &'arena $crate::bumpalo::Bump,
                 deserializer: __D,
@@ -40,7 +40,7 @@ macro_rules! impl_deserialize_in_arena{
             where
                 __D: $crate::serde::Deserializer<'arena>,
             {
-                let value = <$ty<$($tp,)*>>::deserialize(deserializer)?;
+                let value = <$ty<$($tp,)*>>::deserialize_in_arena(arena, deserializer)?;
                 Ok(arena.alloc(value))
             }
         }
@@ -257,6 +257,19 @@ where
             arena,
             marker: PhantomData,
         })
+    }
+}
+
+impl<'arena, T> DeserializeInArena<'arena> for &'arena Option<T>
+where
+    T: DeserializeInArena<'arena>,
+{
+    fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'arena>,
+    {
+        let v = <Option<T>>::deserialize_in_arena(arena, deserializer)?;
+        Ok(arena.alloc(v))
     }
 }
 

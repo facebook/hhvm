@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c90ac99438860f2b72ebce610347981>>
+// @generated SignedSource<<9ef711aec55224fc3a7f14d306c979e3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,6 +12,7 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -26,6 +27,7 @@ pub type Id_<'a> = str;
 #[derive(
     Clone,
     Copy,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -36,8 +38,12 @@ pub type Id_<'a> = str;
     Serialize,
     ToOcamlRep
 )]
-pub struct Id<'a>(pub &'a Pos<'a>, pub &'a Id_<'a>);
+pub struct Id<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Id_<'a>,
+);
 impl<'a> TrivialDrop for Id<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Id<'arena>);
 
 pub type Pstring<'a> = (&'a Pos<'a>, &'a str);
 
@@ -49,6 +55,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -60,11 +67,15 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     ToOcamlRep
 )]
 pub enum ShapeFieldName<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SFlitInt(&'a Pstring<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SFlitStr(&'a PositionedByteString<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SFclassConst(&'a (Id<'a>, &'a Pstring<'a>)),
 }
 impl<'a> TrivialDrop for ShapeFieldName<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeFieldName<'arena>);
 
 pub use oxidized::ast_defs::Variance;
 
@@ -86,6 +97,7 @@ pub use oxidized::ast_defs::FunKind;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -121,9 +133,11 @@ pub enum Bop<'a> {
     Xor,
     Cmp,
     QuestionQuestion,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Eq(Option<&'a Bop<'a>>),
 }
 impl<'a> TrivialDrop for Bop<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Bop<'arena>);
 
 pub use oxidized::ast_defs::Uop;
 
@@ -138,6 +152,7 @@ pub use oxidized::ast_defs::Visibility;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -150,6 +165,8 @@ pub use oxidized::ast_defs::Visibility;
 )]
 pub enum XhpEnumValue<'a> {
     XEVInt(isize),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     XEVString(&'a str),
 }
 impl<'a> TrivialDrop for XhpEnumValue<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(XhpEnumValue<'arena>);

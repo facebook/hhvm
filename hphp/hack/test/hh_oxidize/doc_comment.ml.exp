@@ -104,3 +104,4 @@ pub enum Variant {
     Bar,
 }
 impl TrivialDrop for Variant {}
+arena_deserializer::impl_deserialize_in_arena!(Variant);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<51e5c89c8f7e1801791b5b5f9988beac>>
+// @generated SignedSource<<af470de40f8dc9361c3f4424328c9d74>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,7 @@ use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -22,6 +23,7 @@ use crate::*;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -44,3 +46,4 @@ pub enum TypingContKey {
     Finally,
 }
 impl TrivialDrop for TypingContKey {}
+arena_deserializer::impl_deserialize_in_arena!(TypingContKey);

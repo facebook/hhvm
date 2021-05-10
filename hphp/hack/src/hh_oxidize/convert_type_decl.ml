@@ -18,6 +18,37 @@ open Convert_longident
 open Convert_type
 open Rust_type
 
+let rust_de_field_attr (tys : Rust_type.t list) : string =
+  let contains_ref = List.exists ~f:Rust_type.contains_ref tys in
+  (* deserialize a type contains any Cell causes a compilation error, see T90211775 *)
+  let contains_cell =
+    List.exists
+      ~f:(fun t ->
+        Rust_type.type_name_and_params t
+        |> fst
+        |> String.is_suffix ~suffix:"::Cell")
+      tys
+  in
+  if
+    contains_ref
+    || Configuration.mode () = Configuration.ByRef
+       && List.exists ~f:Rust_type.is_var tys
+  then
+    if contains_cell then
+      "#[serde(skip)]"
+    else
+      let borrow =
+        if contains_ref then
+          ", borrow"
+        else
+          ""
+      in
+      sprintf
+        "#[serde(deserialize_with = \"arena_deserializer::arena\" %s)]"
+        borrow
+  else
+    ""
+
 let default_implements () =
   match Configuration.mode () with
   | Configuration.ByRef -> [(Some "arena_trait", "TrivialDrop")]
@@ -41,6 +72,7 @@ let default_derives () =
       (Some "no_pos_hash", "NoPosHash");
       (Some "ocamlrep_derive", "ToOcamlRep");
       (Some "serde", "Serialize");
+      (Some "serde", "Deserialize");
     ]
 
 let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
@@ -291,7 +323,13 @@ let record_label_declaration ?(pub = false) ?(prefix = "") ld =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
   let ty = core_type ld.pld_type in
-  sprintf "%s%s%s: %s,\n" doc pub name (rust_type_to_string ty)
+  sprintf
+    "%s%s%s %s: %s,\n"
+    doc
+    (rust_de_field_attr [ty])
+    pub
+    name
+    (rust_type_to_string ty)
 
 let declare_record_arguments ?(pub = false) labels =
   let prefix =
@@ -310,15 +348,16 @@ let declare_record_arguments ?(pub = false) labels =
   |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
   |> sprintf "{\n%s}"
 
-let declare_constructor_arguments ?(box_fields = false) types =
+let declare_constructor_arguments ?(box_fields = false) types : Rust_type.t list
+    =
   if not box_fields then
     if List.is_empty types then
-      ""
+      []
     else
-      Rust_type.rust_type_to_string (tuple types)
+      List.map ~f:core_type types
   else
     match types with
-    | [] -> ""
+    | [] -> []
     | [ty] ->
       let ty = core_type ty in
       let ty =
@@ -329,16 +368,13 @@ let declare_constructor_arguments ?(box_fields = false) types =
           | Configuration.ByRef -> rust_ref (lifetime "a") ty
           | Configuration.ByBox -> rust_type "Box" [] [ty]
       in
-      Rust_type.rust_type_to_string ty |> sprintf "(%s)"
+      [ty]
     | _ ->
-      let ty =
-        match Configuration.mode () with
-        | Configuration.ByRef ->
-          let tys = tuple ~seen_indirection:true types in
-          rust_ref (lifetime "a") tys
-        | Configuration.ByBox -> rust_type "Box" [] [tuple types]
-      in
-      Rust_type.rust_type_to_string ty |> sprintf "(%s)"
+      (match Configuration.mode () with
+      | Configuration.ByRef ->
+        let tys = tuple ~seen_indirection:true types in
+        [rust_ref (lifetime "a") tys]
+      | Configuration.ByBox -> [rust_type "Box" [] [tuple types]])
 
 let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
@@ -368,14 +404,26 @@ let variant_constructor_declaration ?(box_fields = false) cd =
         | _ -> None)
     |> Option.value ~default:""
   in
-  sprintf
-    "%s%s%s%s,\n"
-    doc
-    name
-    (match cd.pcd_args with
-    | Pcstr_tuple types -> declare_constructor_arguments ~box_fields types
-    | Pcstr_record labels -> declare_record_arguments labels)
-    discriminant
+  match cd.pcd_args with
+  | Pcstr_tuple types ->
+    let tys = declare_constructor_arguments ~box_fields types in
+    sprintf
+      "%s%s%s%s%s,\n"
+      doc
+      (rust_de_field_attr tys)
+      name
+      ( if List.is_empty tys then
+        ""
+      else
+        map_and_concat ~sep:"," ~f:rust_type_to_string tys |> sprintf "(%s)" )
+      discriminant
+  | Pcstr_record labels ->
+    sprintf
+      "%s%s%s%s,\n"
+      doc
+      name
+      (declare_record_arguments labels)
+      discriminant
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
@@ -383,6 +431,36 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
   | Pcstr_record x -> List.length x
 
 let type_declaration name td =
+  let tparam_list =
+    match (td.ptype_params, td.ptype_name.txt) with
+    (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
+    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "ty_")
+    | ([({ ptyp_desc = Ptyp_var "phase"; _ }, _)], _)
+    | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
+      when curr_module_name () = "typing_defs_core"
+           || curr_module_name () = "typing_defs" ->
+      []
+    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "t_")
+      when curr_module_name () = "typing_reason" ->
+      []
+    | (tparams, _) -> tparams
+  in
+  let (lifetime, tparams) = type_params name tparam_list in
+  let serde_attr =
+    if List.is_empty lifetime || List.is_empty tparams then
+      ""
+    else
+      let bounds =
+        map_and_concat
+          ~sep:", "
+          ~f:(fun v ->
+            sprintf
+              "%s: 'de + arena_deserializer::DeserializeInArena<'de>"
+              (Rust_type.rust_type_to_string v))
+          tparams
+      in
+      sprintf "#[serde(bound(deserialize = \"%s\" ))]" bounds
+  in
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
   let attrs_and_vis ~all_nullary ~force_derive_copy =
     if
@@ -423,23 +501,22 @@ let type_declaration name td =
       |> String.concat ~sep:", "
       |> sprintf "#[derive(%s)]"
     in
-    doc ^ derive_attr ^ "\npub"
+    doc ^ serde_attr ^ derive_attr ^ "\npub"
   in
-  let tparam_list =
-    match (td.ptype_params, td.ptype_name.txt) with
-    (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
-    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "ty_")
-    | ([({ ptyp_desc = Ptyp_var "phase"; _ }, _)], _)
-    | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
-      when curr_module_name () = "typing_defs_core"
-           || curr_module_name () = "typing_defs" ->
-      []
-    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "t_")
-      when curr_module_name () = "typing_reason" ->
-      []
-    | (tparams, _) -> tparams
+  let deserialize_in_arena_macro ~force_derive_copy =
+    if
+      Configuration.mode () = Configuration.ByRef
+      || force_derive_copy
+      || name = "EmitId"
+    then
+      let lts = List.map lifetime ~f:(fun _ -> Rust_type.lifetime "arena") in
+      sprintf
+        "arena_deserializer::impl_deserialize_in_arena!(%s%s);\n"
+        name
+        (type_params_to_string lts tparams)
+    else
+      ""
   in
-  let (lifetime, tparams) = type_params name tparam_list in
   let implements ~force_derive_copy =
     let traits = implements_traits name in
     let traits =
@@ -543,18 +620,23 @@ let type_declaration name td =
           | Ptyp_tuple tys ->
             map_and_concat
               ~f:(fun ty ->
-                core_type ty |> rust_type_to_string |> sprintf "pub %s")
+                core_type ty |> fun t ->
+                sprintf
+                  "%s pub %s"
+                  (rust_de_field_attr [t])
+                  (rust_type_to_string t))
               ~sep:","
               tys
             |> sprintf "(%s)"
           | _ -> core_type ty |> rust_type_to_string |> sprintf "(pub %s)"
         in
         sprintf
-          "%s struct %s %s;%s"
+          "%s struct %s %s;%s\n%s"
           (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
           (rust_type name lifetime tparams |> rust_type_to_string)
           ty
-          (implements ~force_derive_copy:false))
+          (implements ~force_derive_copy:false)
+          (deserialize_in_arena_macro ~force_derive_copy:false))
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let all_nullary =
@@ -576,20 +658,22 @@ let type_declaration name td =
       map_and_concat ctors (variant_constructor_declaration ~box_fields)
     in
     sprintf
-      "%s enum %s {\n%s}%s"
+      "%s enum %s {\n%s}%s\n%s"
       (attrs_and_vis ~all_nullary ~force_derive_copy)
       (rust_type name lifetime tparams |> rust_type_to_string)
       ctors
       (implements ~force_derive_copy)
+      (deserialize_in_arena_macro ~force_derive_copy)
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = declare_record_arguments labels ~pub:true in
     sprintf
-      "%s struct %s %s%s"
+      "%s struct %s %s%s\n%s"
       (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
       (rust_type name lifetime tparams |> rust_type_to_string)
       labels
       (implements ~force_derive_copy:false)
+      (deserialize_in_arena_macro ~force_derive_copy:false)
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

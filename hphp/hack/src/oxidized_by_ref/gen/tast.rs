@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6819d14613038a6c71d7f60c010d326e>>
+// @generated SignedSource<<47b0250efee3d05f6b91a10624d0c586>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,6 +12,7 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -27,6 +28,7 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -44,10 +46,12 @@ pub struct FunTastInfo {
     pub named_body_is_unsafe: bool,
 }
 impl TrivialDrop for FunTastInfo {}
+arena_deserializer::impl_deserialize_in_arena!(FunTastInfo);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -59,14 +63,20 @@ impl TrivialDrop for FunTastInfo {}
     ToOcamlRep
 )]
 pub struct SavedEnv<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
     pub pessimize: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun_tast_info: Option<&'a FunTastInfo>,
 }
 impl<'a> TrivialDrop for SavedEnv<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(SavedEnv<'arena>);
 
 pub type Program<'a> =
     aast::Program<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;

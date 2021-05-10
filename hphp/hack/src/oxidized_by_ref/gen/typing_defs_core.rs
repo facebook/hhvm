@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<87bd3445e35cd37e0cab5437943449f3>>
+// @generated SignedSource<<a7d84149bfa03495d9b4e5118023b51f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,7 @@ use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -27,6 +28,7 @@ pub use reason::PosId;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -39,15 +41,19 @@ pub use reason::PosId;
 )]
 pub enum CeVisibility<'a> {
     Vpublic,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Vprivate(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Vprotected(&'a str),
 }
 impl<'a> TrivialDrop for CeVisibility<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -59,15 +65,18 @@ impl<'a> TrivialDrop for CeVisibility<'a> {}
     ToOcamlRep
 )]
 pub enum IfcFunDecl<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FDPolicied(Option<&'a str>),
     FDInferFlows,
 }
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -84,11 +93,13 @@ pub enum Exact {
     Nonexact,
 }
 impl TrivialDrop for Exact {}
+arena_deserializer::impl_deserialize_in_arena!(Exact);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -106,11 +117,13 @@ pub enum ValKind {
     Other,
 }
 impl TrivialDrop for ValKind {}
+arena_deserializer::impl_deserialize_in_arena!(ValKind);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -135,11 +148,13 @@ pub enum FunTparamsKind {
     FTKinstantiatedTargs,
 }
 impl TrivialDrop for FunTparamsKind {}
+arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -156,11 +171,13 @@ pub enum ShapeKind {
     OpenShape,
 }
 impl TrivialDrop for ShapeKind {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -171,8 +188,13 @@ impl TrivialDrop for ShapeKind {}
     Serialize,
     ToOcamlRep
 )]
-pub struct PosString<'a>(pub &'a pos_or_decl::PosOrDecl<'a>, pub &'a str);
+pub struct PosString<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a pos_or_decl::PosOrDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a str,
+);
 impl<'a> TrivialDrop for PosString<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(PosString<'arena>);
 
 pub type TByteString<'a> = str;
 
@@ -180,6 +202,7 @@ pub type TByteString<'a> = str;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -190,13 +213,19 @@ pub type TByteString<'a> = str;
     Serialize,
     ToOcamlRep
 )]
-pub struct PosByteString<'a>(pub &'a pos_or_decl::PosOrDecl<'a>, pub &'a bstr::BStr);
+pub struct PosByteString<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a pos_or_decl::PosOrDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a bstr::BStr,
+);
 impl<'a> TrivialDrop for PosByteString<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -208,16 +237,21 @@ impl<'a> TrivialDrop for PosByteString<'a> {}
     ToOcamlRep
 )]
 pub enum TshapeFieldName<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TSFlitInt(&'a PosString<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TSFlitStr(&'a PosByteString<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TSFclassConst(&'a (PosId<'a>, PosString<'a>)),
 }
 impl<'a> TrivialDrop for TshapeFieldName<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TshapeFieldName<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -234,11 +268,13 @@ pub enum ParamMode {
     FPinout,
 }
 impl TrivialDrop for ParamMode {}
+arena_deserializer::impl_deserialize_in_arena!(ParamMode);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -255,11 +291,13 @@ pub enum XhpAttrTag {
     Lateinit,
 }
 impl TrivialDrop for XhpAttrTag {}
+arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -275,6 +313,7 @@ pub struct XhpAttr {
     pub has_default: bool,
 }
 impl TrivialDrop for XhpAttr {}
+arena_deserializer::impl_deserialize_in_arena!(XhpAttr);
 
 /// Denotes the categories of requirements we apply to constructor overrides.
 ///
@@ -287,6 +326,7 @@ impl TrivialDrop for XhpAttr {}
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -304,11 +344,13 @@ pub enum ConsistentKind {
     FinalClass,
 }
 impl TrivialDrop for ConsistentKind {}
+arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -323,10 +365,12 @@ pub enum DependentType {
     DTexpr(ident::Ident),
 }
 impl TrivialDrop for DependentType {}
+arena_deserializer::impl_deserialize_in_arena!(DependentType);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -338,14 +382,18 @@ impl TrivialDrop for DependentType {}
     ToOcamlRep
 )]
 pub struct UserAttribute<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub classname_params: &'a [&'a str],
 }
 impl<'a> TrivialDrop for UserAttribute<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -358,17 +406,23 @@ impl<'a> TrivialDrop for UserAttribute<'a> {}
 )]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, &'a Ty<'a>)],
     pub reified: oxidized::aast::ReifyKind,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a>],
 }
 impl<'a> TrivialDrop for Tparam<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -380,16 +434,18 @@ impl<'a> TrivialDrop for Tparam<'a> {}
     ToOcamlRep
 )]
 pub struct WhereConstraint<'a>(
-    pub &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
     pub oxidized::ast_defs::ConstraintKind,
-    pub &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
 );
 impl<'a> TrivialDrop for WhereConstraint<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -407,11 +463,13 @@ pub enum CollectionStyle {
     KeysetStyle,
 }
 impl TrivialDrop for CollectionStyle {}
+arena_deserializer::impl_deserialize_in_arena!(CollectionStyle);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -425,13 +483,28 @@ impl TrivialDrop for CollectionStyle {}
 pub enum Enforcement<'a> {
     Unenforced,
     Enforced,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     PartiallyEnforced(&'a (CollectionStyle, PosId<'a>)),
 }
 impl<'a> TrivialDrop for Enforcement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Enforcement<'arena>);
 
-#[derive(Clone, Debug, FromOcamlRepIn, Hash, NoPosHash, Serialize, ToOcamlRep)]
-pub struct Ty<'a>(pub &'a reason::T_<'a>, pub Ty_<'a>);
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct Ty<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
+);
 impl<'a> TrivialDrop for Ty<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
@@ -445,6 +518,7 @@ impl<'a> TrivialDrop for Ty<'a> {}
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -457,13 +531,16 @@ impl<'a> TrivialDrop for Ty<'a> {}
 )]
 pub struct ShapeFieldType<'a> {
     pub optional: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ty: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for ShapeFieldType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeFieldType<'arena>);
 
 #[derive(
     Clone,
     Copy,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -478,6 +555,7 @@ pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tapply(&'a (PosId<'a>, &'a [&'a Ty<'a>])),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -506,6 +584,7 @@ pub enum Ty_<'a> {
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
     Tmixed,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tlike(&'a Ty<'a>),
     Tany(tany_sentinel::TanySentinel),
     Terr,
@@ -521,16 +600,21 @@ pub enum Ty_<'a> {
     /// See tests in typecheck/dynamic/ for more examples.
     Tdynamic,
     /// Nullable, called "option" in the ML parlance.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Toption(&'a Ty<'a>),
     /// All the primitive types: int, string, void, etc.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tprim(&'a aast::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tfun(&'a FunType<'a>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Ttuple(&'a [&'a Ty<'a>]),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tshape(
         &'a (
             ShapeKind,
@@ -543,6 +627,7 @@ pub enum Ty_<'a> {
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tgeneric(&'a (&'a str, &'a [&'a Ty<'a>])),
     /// Union type.
     /// The values that are members of this type are the union of the values
@@ -551,17 +636,24 @@ pub enum Ty_<'a> {
     ///   Tunion []  is the "nothing" type, with no values
     ///   Tunion [int;float] is the same as num
     ///   Tunion [null;t] is the same as Toption t
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tunion(&'a [&'a Ty<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tintersection(&'a [&'a Ty<'a>]),
     /// Tdarray (ty1, ty2) => "darray<ty1, ty2>"
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdarray(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Tvarray (ty) => "varray<ty>"
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tvarray(&'a Ty<'a>),
     /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TvarrayOrDarray(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TvecOrDict(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Name of class, name of type const, remaining names of type consts
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Taccess(&'a TaccessType<'a>),
     /// This represents a type alias that lacks necessary type arguments. Given
     /// type Foo<T1,T2> = ...
@@ -570,6 +662,7 @@ pub enum Ty_<'a> {
     /// a higher-kinded type. It is never used for an alias like
     /// type Foo2 = ...
     /// that simply doesn't require type arguments.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TunappliedAlias(&'a str),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
@@ -593,8 +686,10 @@ pub enum Ty_<'a> {
     /// When the constraint is omitted, the third parameter is set to mixed.
     ///
     /// The second parameter is the list of type arguments to the type.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
     /// see dependent_type
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdependent(&'a (DependentType, &'a Ty<'a>)),
     /// Tobject is an object type compatible with all objects. This type is also
     /// compatible with some string operations (since a class might implement
@@ -606,13 +701,16 @@ pub enum Ty_<'a> {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tclass(&'a (PosId<'a>, Exact, &'a [&'a Ty<'a>])),
 }
 impl<'a> TrivialDrop for Ty_<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Ty_<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -623,13 +721,18 @@ impl<'a> TrivialDrop for Ty_<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct TaccessType<'a>(pub &'a Ty<'a>, pub PosId<'a>);
+pub struct TaccessType<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub PosId<'a>,
+);
 impl<'a> TrivialDrop for TaccessType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TaccessType<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -641,16 +744,20 @@ impl<'a> TrivialDrop for TaccessType<'a> {}
     ToOcamlRep
 )]
 pub enum Capability<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CapTy(&'a Ty<'a>),
 }
 impl<'a> TrivialDrop for Capability<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
 
 /// Companion to fun_params type, intended to consolidate checking of
 /// implicit params for functions.
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -662,15 +769,18 @@ impl<'a> TrivialDrop for Capability<'a> {}
     ToOcamlRep
 )]
 pub struct FunImplicitParams<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub capability: Capability<'a>,
 }
 impl<'a> TrivialDrop for FunImplicitParams<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
 
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -682,17 +792,25 @@ impl<'a> TrivialDrop for FunImplicitParams<'a> {}
     ToOcamlRep
 )]
 pub struct FunType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub arity: FunArity<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub params: &'a FunParams<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub implicit_params: &'a FunImplicitParams<'a>,
     /// Carries through the sync/async information from the aast
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a PossiblyEnforcedTy<'a>,
     pub flags: typing_defs_flags::FunTypeFlags,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ifc_decl: IfcFunDecl<'a>,
 }
 impl<'a> TrivialDrop for FunType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
@@ -701,6 +819,7 @@ impl<'a> TrivialDrop for FunType<'a> {}
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -715,13 +834,16 @@ pub enum FunArity<'a> {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Fvariadic(&'a FunParam<'a>),
 }
 impl<'a> TrivialDrop for FunArity<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -734,14 +856,18 @@ impl<'a> TrivialDrop for FunArity<'a> {}
 )]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enforced: Enforcement<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -753,12 +879,16 @@ impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
     ToOcamlRep
 )]
 pub struct FunParam<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a PossiblyEnforcedTy<'a>,
     pub flags: typing_defs_flags::FunParamFlags,
 }
 impl<'a> TrivialDrop for FunParam<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 
 pub type FunParams<'a> = [&'a FunParam<'a>];
 
@@ -766,6 +896,7 @@ pub type FunParams<'a> = [&'a FunParam<'a>];
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -782,10 +913,12 @@ pub enum DestructureKind {
     SplatUnpack,
 }
 impl TrivialDrop for DestructureKind {}
+arena_deserializer::impl_deserialize_in_arena!(DestructureKind);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -808,20 +941,25 @@ pub struct Destructure<'a> {
     /// corresponds to the subtyping assertion
     ///
     /// (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub required: &'a [&'a Ty<'a>],
     /// Represents the optional parameters in a function, only used for splats
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub optional: &'a [&'a Ty<'a>],
     /// Represents a function's variadic parameter, also only used for splats
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub variadic: Option<&'a Ty<'a>>,
     /// list() destructuring allows for partial matches on lists, even when the operation
     /// might throw i.e. list($a) = vec[];
     pub kind: DestructureKind,
 }
 impl<'a> TrivialDrop for Destructure<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Destructure<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -833,20 +971,26 @@ impl<'a> TrivialDrop for Destructure<'a> {}
     ToOcamlRep
 )]
 pub struct HasMember<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: nast::Sid<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
     /// This is required to check ambiguous object access, where sometimes
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub class_id: &'a nast::ClassId_<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub explicit_targs: Option<&'a [&'a nast::Targ<'a>]>,
 }
 impl<'a> TrivialDrop for HasMember<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HasMember<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -858,31 +1002,42 @@ impl<'a> TrivialDrop for HasMember<'a> {}
     ToOcamlRep
 )]
 pub enum ConstraintType_<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ThasMember(&'a HasMember<'a>),
     /// The type of container destructuring via list() or splat `...`
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdestructure(&'a Destructure<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCunion(&'a (&'a Ty<'a>, ConstraintType<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCintersection(&'a (&'a Ty<'a>, ConstraintType<'a>)),
 }
 impl<'a> TrivialDrop for ConstraintType_<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ConstraintType_<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
     Serialize,
     ToOcamlRep
 )]
-pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
+pub struct ConstraintType<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a ConstraintType_<'a>,
+);
 impl<'a> TrivialDrop for ConstraintType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ConstraintType<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -894,7 +1049,10 @@ impl<'a> TrivialDrop for ConstraintType<'a> {}
     ToOcamlRep
 )]
 pub enum InternalType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     LoclType(&'a Ty<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ConstraintType(ConstraintType<'a>),
 }
 impl<'a> TrivialDrop for InternalType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(InternalType<'arena>);

@@ -87,3 +87,8 @@ let rec type_name_and_params (ty : t) : string * t list =
   | Var n -> (n, [])
   | Ref (_, r) -> type_name_and_params r
   | Type { name; lifetimes = _; params } -> (name, params)
+
+let is_var (ty : t) : bool =
+  match ty with
+  | Var _ -> true
+  | _ -> false

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9028fb2c752ac1caf06a5a669b1e43cb>>
+// @generated SignedSource<<972958220c17e0e0f5a707a43bde0726>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -54,6 +54,7 @@ pub enum Phase {
     Typing,
 }
 impl TrivialDrop for Phase {}
+arena_deserializer::impl_deserialize_in_arena!(Phase);
 
 #[derive(
     Clone,
@@ -76,6 +77,7 @@ pub enum Severity {
     Error,
 }
 impl TrivialDrop for Severity {}
+arena_deserializer::impl_deserialize_in_arena!(Severity);
 
 #[derive(
     Clone,
@@ -99,6 +101,7 @@ pub enum Format {
     Highlighted,
 }
 impl TrivialDrop for Format {}
+arena_deserializer::impl_deserialize_in_arena!(Format);
 
 #[derive(
     Clone,
@@ -126,6 +129,7 @@ pub enum NameContext {
     RecordContext,
 }
 impl TrivialDrop for NameContext {}
+arena_deserializer::impl_deserialize_in_arena!(NameContext);
 
 /// Results of single file analysis.
 pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;

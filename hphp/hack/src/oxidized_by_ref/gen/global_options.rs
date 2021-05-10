@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9367542e06647c481436a9d6937b2f2c>>
+// @generated SignedSource<<29d30ceabbd61b0b9f4b5c216736fa17>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,6 +11,7 @@
 use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -19,6 +20,7 @@ use crate::*;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     FromOcamlRepIn,
     PartialEq,
     PartialOrd,
@@ -26,7 +28,9 @@ use crate::*;
     ToOcamlRep
 )]
 pub struct GlobalOptions<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_experimental_features: s_set::SSet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_migration_flags: s_set::SSet<'a>,
     pub tco_dynamic_view: bool,
     pub tco_num_local_workers: Option<isize>,
@@ -38,14 +42,19 @@ pub struct GlobalOptions<'a> {
     pub tco_prefetch_deferred_files: bool,
     pub tco_remote_type_check_threshold: Option<isize>,
     pub tco_remote_type_check: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_remote_worker_key: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_remote_check_id: Option<&'a str>,
     pub tco_remote_max_batch_size: isize,
     pub tco_remote_min_batch_size: isize,
     pub tco_num_remote_workers: isize,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub so_remote_version_specifier: Option<&'a str>,
     pub so_remote_worker_vfs_checkout_threshold: isize,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub so_naming_sqlite_path: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub po_auto_namespace_map: &'a [(&'a str, &'a str)],
     pub po_codegen: bool,
     pub po_deregister_php_stdlib: bool,
@@ -61,9 +70,13 @@ pub struct GlobalOptions<'a> {
     pub tco_disallow_invalid_arraykey: bool,
     pub tco_disallow_byref_dynamic_calls: bool,
     pub tco_disallow_byref_calls: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub allowed_fixme_codes_strict: i_set::ISet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub allowed_fixme_codes_partial: i_set::ISet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub codes_not_raised_partial: i_set::ISet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub log_levels: s_map::SMap<'a, isize>,
     pub po_disable_lval_as_an_expression: bool,
     pub tco_shallow_class_decl: bool,
@@ -78,6 +91,7 @@ pub struct GlobalOptions<'a> {
     pub tco_complex_coercion: bool,
     pub tco_disable_partially_abstract_typeconsts: bool,
     pub tco_disallow_partially_abstract_typeconst_definitions: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub error_codes_treated_strictly: i_set::ISet<'a>,
     pub tco_check_xhp_attribute: bool,
     pub tco_check_redundant_generics: bool,
@@ -86,9 +100,11 @@ pub struct GlobalOptions<'a> {
     pub tco_disallow_invalid_arraykey_constraint: bool,
     pub po_enable_class_level_where_clauses: bool,
     pub po_disable_legacy_soft_typehints: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub po_allowed_decl_fixme_codes: i_set::ISet<'a>,
     pub po_allow_new_attribute_syntax: bool,
     pub tco_global_inference: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_gi_reinfer_types: &'a [&'a str],
     pub tco_ordered_solving: bool,
     pub tco_const_static_props: bool,
@@ -101,13 +117,20 @@ pub struct GlobalOptions<'a> {
     pub po_disable_unset_class_const: bool,
     pub po_parser_errors_only: bool,
     pub tco_check_attribute_locations: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub glean_service: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub glean_hostname: &'a str,
     pub glean_port: isize,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub glean_reponame: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub symbol_write_root_path: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub symbol_write_hhi_path: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub symbol_write_ignore_paths: &'a [&'a str],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub symbol_write_index_paths: &'a [&'a str],
     pub symbol_write_include_hhi: bool,
     pub po_disallow_func_ptrs_in_constants: bool,
@@ -132,6 +155,7 @@ pub struct GlobalOptions<'a> {
     pub po_disallow_inst_meth: bool,
     pub po_escape_brace: bool,
     pub tco_use_direct_decl_parser: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_ifc_enabled: &'a [&'a str],
     pub po_enable_enum_supertyping: bool,
     pub po_hack_arr_dv_arrs: bool,
@@ -140,6 +164,7 @@ pub struct GlobalOptions<'a> {
     pub tco_ignore_unsafe_cast: bool,
     pub tco_readonly: bool,
     pub tco_enable_expression_trees: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_allowed_expression_tree_visitors: &'a [&'a str],
     pub tco_math_new_code: bool,
     pub tco_typeconst_concrete_concrete_error: bool,
@@ -147,3 +172,4 @@ pub struct GlobalOptions<'a> {
     pub tco_require_extends_implements_ancestors: bool,
 }
 impl<'a> TrivialDrop for GlobalOptions<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(GlobalOptions<'arena>);

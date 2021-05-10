@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d70bc429a32d48431b2b8c0638e42804>>
+// @generated SignedSource<<bbd20c8785bfa8ea91502b534b2d5a56>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -72,6 +72,7 @@ pub enum ImportFlavor {
     RequireOnce,
 }
 impl TrivialDrop for ImportFlavor {}
+arena_deserializer::impl_deserialize_in_arena!(ImportFlavor);
 
 #[derive(
     Clone,
@@ -116,6 +117,7 @@ pub enum XhpChildOp {
     ChildQuestion,
 }
 impl TrivialDrop for XhpChildOp {}
+arena_deserializer::impl_deserialize_in_arena!(XhpChildOp);
 
 #[derive(
     Clone,
@@ -286,6 +288,7 @@ pub enum Tprim {
     Tnoreturn,
 }
 impl TrivialDrop for Tprim {}
+arena_deserializer::impl_deserialize_in_arena!(Tprim);
 
 #[derive(
     Clone,
@@ -348,6 +351,7 @@ pub enum KvcKind {
     Dict,
 }
 impl TrivialDrop for KvcKind {}
+arena_deserializer::impl_deserialize_in_arena!(KvcKind);
 
 #[derive(
     Clone,
@@ -374,6 +378,7 @@ pub enum VcKind {
     Keyset,
 }
 impl TrivialDrop for VcKind {}
+arena_deserializer::impl_deserialize_in_arena!(VcKind);
 
 #[derive(
     Clone,
@@ -398,6 +403,7 @@ pub enum UseAsVisibility {
     UseAsFinal,
 }
 impl TrivialDrop for UseAsVisibility {}
+arena_deserializer::impl_deserialize_in_arena!(UseAsVisibility);
 
 #[derive(
     Clone,
@@ -420,6 +426,7 @@ pub enum TypedefVisibility {
     Opaque,
 }
 impl TrivialDrop for TypedefVisibility {}
+arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
 
 #[derive(
     Clone,
@@ -480,3 +487,4 @@ pub enum ReifyKind {
     Reified,
 }
 impl TrivialDrop for ReifyKind {}
+arena_deserializer::impl_deserialize_in_arena!(ReifyKind);

@@ -19,7 +19,7 @@ fn round_trip<'a, X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug>(x: X, a
 }
 
 #[test]
-fn impl_deserialize_in_arena_for_deserializable() {
+fn impl_deserialize_in_arena_tests() {
     #[derive(Deserialize)]
     struct N;
     impl_deserialize_in_arena!(N);
@@ -59,6 +59,8 @@ fn example() {
         #[serde(deserialize_with = "arena_deserializer::arena")]
         Succ(&'a Num<'a, T>),
         #[serde(deserialize_with = "arena_deserializer::arena")]
+        Sum(&'a Num<'a, T>, &'a Num<'a, T>),
+        #[serde(deserialize_with = "arena_deserializer::arena")]
         List(&'a [&'a Num<'a, T>]),
         #[serde(deserialize_with = "arena_deserializer::arena")]
         ListValue(&'a [Num<'a, T>]),
@@ -77,6 +79,14 @@ fn example() {
         T(T),
         #[serde(deserialize_with = "arena_deserializer::arena")]
         BStr(&'a bstr::BStr),
+        Record {
+            #[serde(deserialize_with = "arena_deserializer::arena")]
+            left: &'a Num<'a, T>,
+            #[serde(deserialize_with = "arena_deserializer::arena")]
+            right: &'a Num<'a, T>,
+        },
+        //#[serde(deserialize_with = "arena_deserializer::arena")]
+        //Cell(std::cell::Cell<&'a Num<'a, T>>),
     }
 
     impl_deserialize_in_arena!(Num<'arena, T>);
@@ -88,6 +98,10 @@ fn example() {
 
     let i: Num<'_, ()> = Num::Str("aa");
     let x = Num::Succ(&i);
+    round_trip(x, &arena);
+
+    let i: Num<'_, ()> = Num::Str("aa");
+    let x = Num::Sum(&i, &i);
     round_trip(x, &arena);
 
     let i = I(3);
@@ -137,6 +151,7 @@ fn complex() {
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct Set<'a, V>(
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Option<&'a Node<'a, V>>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)] &'a isize, // test only
     );
 
     impl_deserialize_in_arena!(Set<'arena, V>);
@@ -144,7 +159,7 @@ fn complex() {
     #[serde(bound(deserialize = "V: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct Node<'a, V>(
-        #[serde(borrow)] Set<'a, V>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Set<'a, V>,
         #[serde(deserialize_with = "arena_deserializer::arena")] V,
         usize,
     );
@@ -152,20 +167,21 @@ fn complex() {
     impl_deserialize_in_arena!(Node<'arena, V>);
 
     let arena = bumpalo::Bump::new();
+    let dummy: &isize = &3;
 
-    let x: Set<()> = Set(None);
+    let x: Set<()> = Set(None, dummy);
     round_trip(x, &arena);
 
     let v: isize = 3;
-    let n = Node(Set(None), &v, 1);
-    let x = Set(Some(&n));
+    let n = Node(Set(None, dummy), &v, 1);
+    let x = Set(Some(&n), dummy);
     round_trip(x, &arena);
 
     let v: isize = 3;
-    let n = Node(Set(None), &v, 1);
-    let x: Set<&isize> = Set(Some(&n));
+    let n = Node(Set(None, dummy), &v, 1);
+    let x: Set<&isize> = Set(Some(&n), dummy);
 
-    let n = Node(Set(None), &x, 1);
-    let x: Set<&Set<&isize>> = Set(Some(&n));
+    let n = Node(Set(None, dummy), &x, 1);
+    let x: Set<&Set<&isize>> = Set(Some(&n), dummy);
     round_trip(x, &arena);
 }

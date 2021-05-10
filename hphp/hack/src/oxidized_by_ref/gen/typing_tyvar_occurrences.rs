@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<198cf00f050fc58c9951b9b173aedf03>>
+// @generated SignedSource<<05997ef6f6510bfb9a7e9435f574e8d0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,6 +12,7 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -20,6 +21,7 @@ use crate::*;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -48,11 +50,14 @@ pub struct TypingTyvarOccurrences<'a> {
     /// There are only entries for variables that are unsolved or contain
     /// other unsolved type variables. Variables that are solved and contain
     /// no other unsolved type variables get removed from this map.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tyvar_occurrences: i_map::IMap<'a, i_set::ISet<'a>>,
     /// Mapping of type variables to the type variables contained in their
     /// types which are either unsolved or themselves contain unsolved type
     /// variables.
     /// This is the dual of tyvar_occurrences.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tyvars_in_tyvar: i_map::IMap<'a, i_set::ISet<'a>>,
 }
 impl<'a> TrivialDrop for TypingTyvarOccurrences<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypingTyvarOccurrences<'arena>);

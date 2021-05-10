@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db0f943314ec23878bf56929f3bddcbd>>
+// @generated SignedSource<<6d071f2fc4642b425b8831aa13cfcb8c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,6 +41,7 @@ pub enum Parsing {
     XhpParsingError = 1007,
 }
 impl TrivialDrop for Parsing {}
+arena_deserializer::impl_deserialize_in_arena!(Parsing);
 
 #[derive(
     Clone,
@@ -134,6 +135,7 @@ pub enum Naming {
     InvalidWildcardContext = 2117,
 }
 impl TrivialDrop for Naming {}
+arena_deserializer::impl_deserialize_in_arena!(Naming);
 
 #[derive(
     Clone,
@@ -204,6 +206,7 @@ pub enum NastCheck {
     PartiallyAbstractTypeconstDefinition = 3093,
 }
 impl TrivialDrop for NastCheck {}
+arena_deserializer::impl_deserialize_in_arena!(NastCheck);
 
 #[derive(
     Clone,
@@ -531,6 +534,7 @@ pub enum Typing {
     BadConditionalSupportDynamic = 4433,
 }
 impl TrivialDrop for Typing {}
+arena_deserializer::impl_deserialize_in_arena!(Typing);
 
 #[derive(
     Clone,
@@ -553,3 +557,4 @@ pub enum Init {
     ForwardCompatibilityBelowMinimum = 8002,
 }
 impl TrivialDrop for Init {}
+arena_deserializer::impl_deserialize_in_arena!(Init);

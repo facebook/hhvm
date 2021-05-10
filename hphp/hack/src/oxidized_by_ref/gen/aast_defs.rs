@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c9d2d85d19aa1e8dea542f272c3e1af>>
+// @generated SignedSource<<a472ababe92c8f3fd9a525cbfca0fb78>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,7 @@ use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -32,6 +33,7 @@ pub use oxidized::aast_defs::Visibility;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -42,8 +44,12 @@ pub use oxidized::aast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
-pub struct Lid<'a>(pub &'a Pos<'a>, pub &'a LocalId<'a>);
+pub struct Lid<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a LocalId<'a>,
+);
 impl<'a> TrivialDrop for Lid<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Lid<'arena>);
 
 pub type Sid<'a> = ast_defs::Id<'a>;
 
@@ -55,6 +61,7 @@ pub use oxidized::aast_defs::ImportFlavor;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -66,18 +73,24 @@ pub use oxidized::aast_defs::ImportFlavor;
     ToOcamlRep
 )]
 pub enum XhpChild<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildName(&'a Sid<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildList(&'a [XhpChild<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildUnary(&'a (XhpChild<'a>, oxidized::aast_defs::XhpChildOp)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildBinary(&'a (XhpChild<'a>, XhpChild<'a>)),
 }
 impl<'a> TrivialDrop for XhpChild<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(XhpChild<'arena>);
 
 pub use oxidized::aast_defs::XhpChildOp;
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -88,14 +101,19 @@ pub use oxidized::aast_defs::XhpChildOp;
     Serialize,
     ToOcamlRep
 )]
-pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
+pub struct Hint<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint_<'a>,
+);
 impl<'a> TrivialDrop for Hint<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Hint<'arena>);
 
 pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -106,12 +124,17 @@ pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct Contexts<'a>(pub &'a Pos<'a>, pub &'a [&'a Hint<'a>]);
+pub struct Contexts<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [&'a Hint<'a>],
+);
 impl<'a> TrivialDrop for Contexts<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -127,10 +150,12 @@ pub struct HfParamInfo {
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
 }
 impl TrivialDrop for HfParamInfo {}
+arena_deserializer::impl_deserialize_in_arena!(HfParamInfo);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -143,19 +168,26 @@ impl TrivialDrop for HfParamInfo {}
 )]
 pub struct HintFun<'a> {
     pub is_readonly: Option<oxidized::ast_defs::ReadonlyKind>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub param_tys: &'a [&'a Hint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub param_info: &'a [Option<&'a HfParamInfo>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub variadic_ty: &'a VariadicHint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ctxs: Option<&'a Contexts<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub return_ty: &'a Hint<'a>,
     pub is_readonly_return: Option<oxidized::ast_defs::ReadonlyKind>,
 }
 impl<'a> TrivialDrop for HintFun<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
 
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -167,11 +199,17 @@ impl<'a> TrivialDrop for HintFun<'a> {}
     ToOcamlRep
 )]
 pub enum Hint_<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hoption(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hlike(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hfun(&'a HintFun<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Htuple(&'a [&'a Hint<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Happly(&'a (Sid<'a>, &'a [&'a Hint<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
     /// This represents the use of a type const. Type consts are accessed like
     /// regular consts in Hack, i.e.
@@ -193,33 +231,47 @@ pub enum Hint_<'a> {
     /// This will result in the following representation
     ///
     /// Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Haccess(&'a (&'a Hint<'a>, &'a [Sid<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hsoft(&'a Hint<'a>),
     Hany,
     Herr,
     Hmixed,
     Hnonnull,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Habstr(&'a (&'a str, &'a [&'a Hint<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hdarray(&'a (&'a Hint<'a>, &'a Hint<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hvarray(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     HvarrayOrDarray(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hprim(&'a Tprim),
     Hthis,
     Hdynamic,
     Hnothing,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hunion(&'a [&'a Hint<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hintersection(&'a [&'a Hint<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     HfunContext(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hvar(&'a str),
 }
 impl<'a> TrivialDrop for Hint_<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
 
 /// AST types such as Happly("int", []) are resolved to Hprim values
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -244,10 +296,12 @@ pub enum Tprim {
     Tnoreturn,
 }
 impl TrivialDrop for Tprim {}
+arena_deserializer::impl_deserialize_in_arena!(Tprim);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -260,14 +314,18 @@ impl TrivialDrop for Tprim {}
 )]
 pub struct ShapeFieldInfo<'a> {
     pub optional: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub hint: &'a Hint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: ast_defs::ShapeFieldName<'a>,
 }
 impl<'a> TrivialDrop for ShapeFieldInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeFieldInfo<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -280,9 +338,11 @@ impl<'a> TrivialDrop for ShapeFieldInfo<'a> {}
 )]
 pub struct NastShapeInfo<'a> {
     pub allows_unknown_fields: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub field_map: &'a [&'a ShapeFieldInfo<'a>],
 }
 impl<'a> TrivialDrop for NastShapeInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(NastShapeInfo<'arena>);
 
 pub use oxidized::aast_defs::KvcKind;
 
@@ -295,6 +355,7 @@ pub use oxidized::aast_defs::TypedefVisibility;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -306,16 +367,21 @@ pub use oxidized::aast_defs::TypedefVisibility;
     ToOcamlRep
 )]
 pub struct Enum_<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub base: &'a Hint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub constraint: Option<&'a Hint<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub includes: &'a [&'a Hint<'a>],
     pub enum_class: bool,
 }
 impl<'a> TrivialDrop for Enum_<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Enum_<'arena>);
 
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -327,10 +393,11 @@ impl<'a> TrivialDrop for Enum_<'a> {}
     ToOcamlRep
 )]
 pub struct WhereConstraintHint<'a>(
-    pub &'a Hint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint<'a>,
     pub oxidized::ast_defs::ConstraintKind,
-    pub &'a Hint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint<'a>,
 );
 impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(WhereConstraintHint<'arena>);
 
 pub use oxidized::aast_defs::ReifyKind;

@@ -5,7 +5,7 @@
 
 use std::cmp::Ordering;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
@@ -16,13 +16,17 @@ use crate::typing_defs_core::{PosByteString, PosString, TshapeFieldName};
     Copy,
     Clone,
     Debug,
+    Deserialize,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
     Serialize,
     ToOcamlRep
 )]
-pub struct TShapeField<'a>(pub TshapeFieldName<'a>);
+pub struct TShapeField<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub TshapeFieldName<'a>,
+);
+arena_deserializer::impl_deserialize_in_arena!(TShapeField<'arena>);
 
 impl arena_trait::TrivialDrop for TShapeField<'_> {}
 

@@ -38,6 +38,8 @@ use crate::file_pos::FilePos;
 #[derive(Copy, Clone, Deserialize, Hash, Eq, PartialEq, Serialize)]
 pub struct FilePosSmall(usize);
 
+arena_deserializer::impl_deserialize_in_arena!(FilePosSmall);
+
 impl arena_trait::TrivialDrop for FilePosSmall {}
 
 const COLUMN_BITS: usize = 9;

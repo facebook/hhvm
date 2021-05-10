@@ -22,6 +22,8 @@ val rust_type_var : string -> t
 
 val is_ref : t -> bool
 
+val is_var : t -> bool
+
 val deref : t -> t
 
 val contains_ref : t -> bool

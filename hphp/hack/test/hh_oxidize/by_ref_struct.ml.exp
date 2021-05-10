@@ -8,6 +8,7 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -16,6 +17,7 @@ use crate::*;
 #[derive(
     Clone,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -31,6 +33,8 @@ pub struct X<'a> {
     pub b: bool,
     pub c: f64,
     pub d: std::cell::Cell<isize>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub e: &'a str,
 }
 impl<'a> TrivialDrop for X<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(X<'arena>);

@@ -25,6 +25,8 @@ use crate::pos_span_raw::PosSpanRaw;
 #[derive(Copy, Clone, Eq, PartialEq, Deserialize, Hash, Serialize)]
 pub struct PosSpanTiny(usize);
 
+arena_deserializer::impl_deserialize_in_arena!(PosSpanTiny);
+
 /// These numbers were obtained by gathering statistics on the positions in
 /// the decl heap for a large code base run as of December 2020. They should
 /// allow us to encode about 99% of positions.

@@ -8,6 +8,7 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -17,6 +18,7 @@ use crate::*;
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -29,14 +31,18 @@ use crate::*;
 )]
 pub enum IntList<'a> {
     Nil,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Cons(&'a (isize, &'a IntList<'a>)),
 }
 impl<'a> TrivialDrop for IntList<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(IntList<'arena>);
 
+#[serde(bound(deserialize = "A: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 #[derive(
     Clone,
     Copy,
     Debug,
+    Deserialize,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -48,7 +54,10 @@ impl<'a> TrivialDrop for IntList<'a> {}
     ToOcamlRep,
 )]
 pub enum NAryTree<'a, A> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Leaf(&'a A),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Children(&'a [&'a NAryTree<'a, A>]),
 }
 impl<'a, A: TrivialDrop> TrivialDrop for NAryTree<'a, A> {}
+arena_deserializer::impl_deserialize_in_arena!(NAryTree<'arena, A>);

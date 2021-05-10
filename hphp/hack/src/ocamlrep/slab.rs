@@ -611,8 +611,9 @@ impl OwnedSlab {
     ///
     /// # Safety
     ///
-    /// The caller must only invoke this function on a vector containing bytes
-    /// which were initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
+    /// The caller must only invoke this function on a vector of usizes which
+    /// was initialized by slab APIs (e.g., one cloned from a slice returned by
+    /// `OwnedSlab::as_slice` or `SlabReader::as_slice`).
     pub unsafe fn from_vec(words: Vec<usize>) -> Result<Self, SlabIntegrityError> {
         let mut slab =
             std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words.into_boxed_slice());
@@ -626,7 +627,8 @@ impl OwnedSlab {
     /// # Safety
     ///
     /// The caller must only invoke this function on slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
+    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`,
+    /// `SlabReader::as_slice`).
     pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
         let mut slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
         slab.check_initialized()?;
@@ -697,6 +699,14 @@ impl<'a> SlabReader<'a> {
         unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
+    pub fn as_slice(&self) -> &[usize] {
+        let slab = Slab::from_bytes(self.0);
+        // SAFETY: `usize` has the same size and alignment as `OpaqueValue`. The
+        // returned slice borrows `self`, so the associated memory will not be
+        // mutated while the slice exists.
+        unsafe { std::slice::from_raw_parts(slab.as_ptr() as *const usize, slab.len()) }
+    }
+
     pub fn value(&self) -> Option<Value> {
         Slab::from_bytes(self.0).value()
     }
@@ -715,6 +725,7 @@ impl Debug for SlabReader<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::FromOcamlRep;
 
     pub const MIN_SIZE_IN_BYTES: usize = (SLAB_METADATA_WORDS + 2) * WORD_SIZE;
 
@@ -735,8 +746,12 @@ mod test {
     pub const TUPLE_42_A_SIZE_IN_WORDS: usize = SLAB_METADATA_WORDS + 5;
     pub const TUPLE_42_A_SIZE_IN_BYTES: usize = TUPLE_42_A_SIZE_IN_WORDS * WORD_SIZE;
 
+    pub fn alloc_tuple_42_a() -> OwnedSlab {
+        to_slab(&(42, "a".to_string())).unwrap()
+    }
+
     pub fn write_tuple_42_a(slab: &mut Slab) {
-        let tuple_slab = to_slab(&(42, "a".to_string())).unwrap();
+        let tuple_slab = alloc_tuple_42_a();
         // Copy everything except the last word, which is an empty padding word
         // which provides space for the slab to be realigned when embedded in a
         // byte slice.
@@ -758,11 +773,33 @@ mod test {
             let tuple_slab = SlabReader::from_words(tuple_slab.as_slice()).unwrap();
             copy_and_rebase_value(tuple_slab, tuple_val.as_mut_slice())
         };
-        use crate::FromOcamlRep;
         assert_eq!(
             <(isize, String)>::from_ocamlrep(value),
             Ok((42, "a".to_string()))
         );
+    }
+
+    #[test]
+    fn to_and_from_slice() {
+        let tuple_slab = alloc_tuple_42_a();
+        let tuple_reader = tuple_slab.as_reader();
+        let mut bytes = vec![MaybeUninit::new(0u8); tuple_reader.size_in_bytes() + WORD_SIZE];
+        // Iterate over all possible alignments for our byte slice, embed the
+        // slab in the slice (with appropriate padding), and attempt to convert
+        // it to a list of usizes and back to an OwnedSlab.
+        for offset in 0..WORD_SIZE {
+            let bytes = &mut bytes[offset..offset + tuple_reader.size_in_bytes()];
+            copy_slab(tuple_reader.as_bytes(), bytes, bytes.as_ptr() as usize).unwrap();
+            unsafe {
+                let bytes = &*(bytes as *const [MaybeUninit<u8>] as *const [u8]);
+                let reader = SlabReader::from_bytes(bytes).unwrap();
+                let owned_slab = OwnedSlab::from_slice(reader.as_slice()).unwrap();
+                assert_eq!(
+                    <(isize, String)>::from_ocamlrep(owned_slab.value()),
+                    Ok((42, "a".to_string()))
+                );
+            }
+        }
     }
 }
 

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::seed::ArenaSeed;
+use bumpalo::collections::Vec as ArenaVec;
 use bumpalo::Bump;
 use serde::de::{Deserializer, SeqAccess, Visitor};
 use serde::Deserialize;
@@ -137,11 +138,11 @@ impl<'arena> DeserializeInArena<'arena> for &'arena bstr::BStr {
             #[inline]
             fn visit_seq<V: SeqAccess<'de>>(self, mut visitor: V) -> Result<Self::Value, V::Error> {
                 let len = std::cmp::min(visitor.size_hint().unwrap_or(0), 256);
-                let mut bytes = Vec::with_capacity(len);
+                let mut bytes = ArenaVec::with_capacity_in(len, self.arena);
                 while let Some(v) = visitor.next_element()? {
                     bytes.push(v);
                 }
-                Ok((self.arena.alloc_slice_copy(bytes.as_slice()) as &[u8]).into())
+                Ok(bytes.into_bump_slice().into())
             }
 
             #[inline]

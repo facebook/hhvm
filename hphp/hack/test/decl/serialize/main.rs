@@ -51,7 +51,7 @@ fn main() -> ::anyhow::Result<()> {
 
         let decl = state.decls;
         results.push(round_trip::<Decls, Json>(&arena, path, decl));
-        //results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decl));
+        results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decl));
     }
 
     let (profiles, errs) = results

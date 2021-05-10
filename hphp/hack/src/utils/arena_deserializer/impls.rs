@@ -159,6 +159,14 @@ impl<'arena> DeserializeInArena<'arena> for &'arena bstr::BStr {
             {
                 Ok((self.arena.alloc_str(value) as &str).into())
             }
+
+            #[inline]
+            fn visit_bytes<E>(self, value: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok((self.arena.alloc_slice_copy(value) as &[u8]).into())
+            }
         }
 
         deserializer.deserialize_bytes(BStrVisitor { arena })

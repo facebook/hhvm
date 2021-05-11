@@ -32,6 +32,18 @@ namespace jit {
 namespace irgen {
 namespace {
 
+SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
+                                 const std::vector<LowStringPtr>& types) {
+  assertx(f->isMethod());
+  auto result = cls;
+  for (auto const type : types) {
+    auto const name =
+      gen(env, LdClsTypeCnsClsName, result, cns(env, type.get()));
+    result = gen(env, LdCls, name, cns(env, f->implCls()));
+  }
+  return result;
+}
+
 SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
                     uint32_t paramIdx, const StringData* name) {
   if (paramIdx >= numArgsInclUnpack) return nullptr;
@@ -65,12 +77,9 @@ SSATmp* emitCCThis(IRGS& env, const Func* f,
                    SSATmp* prologueCtx) {
   assertx(!f->isClosureBody());
   assertx(f->isMethod());
-  if (!types.empty()) {
-    // TODO: implement this
-    return nullptr;
-  }
-  auto const cls =
+  auto const ctxCls =
     f->isStatic() ? prologueCtx : gen(env, LdObjClass, prologueCtx);
+  auto const cls = resolveTypeConstantChain(env, f, ctxCls, types);
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 

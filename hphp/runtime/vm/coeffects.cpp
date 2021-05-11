@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/runtime.h"
 
+#include "hphp/runtime/vm/jit/translator-runtime.h"
+
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/util/trace.h"
@@ -125,6 +127,17 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
 
 namespace {
 
+const Class* resolveTypeConstantChain(const Class* cls,
+                                      const std::vector<LowStringPtr>& types) {
+  auto result = cls;
+  for (auto const type : types) {
+    auto const name = jit::loadClsTypeCnsClsNameHelper(result, type);
+    result = Class::load(name);
+    if (!result) raise_error(Strings::UNKNOWN_CLASS, name->data());
+  }
+  return result;
+}
+
 RuntimeCoeffects emitCCParam(const Func* f,
                              uint32_t numArgsInclUnpack,
                              uint32_t paramIdx,
@@ -149,13 +162,10 @@ RuntimeCoeffects emitCCThis(const Func* f,
                             void* prologueCtx) {
   assertx(!f->isClosureBody());
   assertx(f->isMethod());
-  if (!types.empty()) {
-    // TODO: implement this
-    return RuntimeCoeffects::full();
-  }
-  auto const cls = f->isStatic()
+  auto const ctxCls = f->isStatic()
     ? reinterpret_cast<Class*>(prologueCtx)
     : reinterpret_cast<ObjectData*>(prologueCtx)->getVMClass();
+  auto const cls = resolveTypeConstantChain(ctxCls, types);
   return *cls->clsCtxCnsGet(name, true);
 }
 

@@ -1,1 +1,1 @@
-Warning: Call to A::f() requires [rx] coeffects but main() provided [] in %s on line 10
+Warning: Call to A::f() requires [rx] coeffects but main() provided [] in %s on line 16

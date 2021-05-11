@@ -385,20 +385,6 @@ void cgLdTypeCns(IRLS& env, const IRInstruction* inst) {
   v << xorqi{0x1, cns, ret, v.makeReg()};
 }
 
-const StaticString s_classname("classname");
-
-static StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
-                                              const StringData* name) {
-  auto const ts = loadClsTypeCnsHelper(cls, name, false);
-  auto const classname_field = ts->get(s_classname.get());
-  if (classname_field.is_init()) {
-    assertx(isStringType(classname_field.type()));
-    return classname_field.val().pstr;
-  }
-  raise_error("Type constant %s::%s does not have a 'classname' field",
-              cls->name()->data(), name->data());
-}
-
 void cgLdClsTypeCns(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LdClsTypeCnsData>();
   auto const args = argGroup(env, inst).ssa(0).ssa(1).imm(extra->noThrow);

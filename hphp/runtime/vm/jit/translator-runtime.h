@@ -193,6 +193,9 @@ ArrayData* loadClsTypeCnsHelper(
   bool no_throw_on_undefined
 );
 
+StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
+                                        const StringData* name);
+
 void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
 
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);

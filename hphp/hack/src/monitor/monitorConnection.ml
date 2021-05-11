@@ -28,6 +28,17 @@ let hh_monitor_config root =
     }
 
 let wait_on_server_restart ic =
+  (* The server is out of date and is going to exit. Subsequent calls
+   * to connect on the Unix Domain Socket might succeed, connecting to
+   * the server that is about to die, and eventually we will be hung
+   * up on while trying to read from our end.
+   *
+   * To avoid that fate, when we know the server is about to exit, we
+   * wait for the connection to be closed, signaling that the server
+   * has exited and the OS has cleaned up after it, then we try again.
+   *
+   * See also: ServerMonitor.client_out_of_date
+   *)
   try
     while true do
       let _ = Timeout.input_char ic in
@@ -39,124 +50,23 @@ let wait_on_server_restart ic =
     (* Server has exited and hung up on us *)
     ()
 
-let send_version ~(tracker : Connection_tracker.t) oc =
-  let json =
-    Hh_json.JSON_Object
-      [
-        ("client_version", Hh_json.JSON_String Build_id.build_revision);
-        ("tracker_id", Hh_json.JSON_String (Connection_tracker.log_id tracker));
-      ]
-    |> Hh_json.json_to_string
-  in
-  Marshal_tools.to_fd_with_preamble (Unix.descr_of_out_channel oc) json
-  |> ignore;
+let produce_version_payload ~(tracker : Connection_tracker.t) : string =
+  Hh_json.JSON_Object
+    [
+      ("client_version", Hh_json.JSON_String Build_id.build_revision);
+      ("tracker_id", Hh_json.JSON_String (Connection_tracker.log_id tracker));
+    ]
+  |> Hh_json.json_to_string
 
-  (* For backwards-compatibility, newline has always followed the version *)
-  let (_ : int) =
-    Unix.write (Unix.descr_of_out_channel oc) (Bytes.of_string "\n") 0 1
-  in
-  ()
-
-let send_server_handoff_rpc ~tracker handoff_options oc =
-  Marshal_tools.to_fd_with_preamble
-    (Unix.descr_of_out_channel oc)
-    (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
-  |> ignore
-
-let send_shutdown_rpc ~tracker oc =
-  log "send_shutdown" ~tracker;
-  Marshal_tools.to_fd_with_preamble
-    (Unix.descr_of_out_channel oc)
-    (MonitorRpc.SHUT_DOWN tracker)
-  |> ignore
-
-let establish_connection ~timeout config =
-  let sock_name = Socket.get_path config.socket_file in
-  let sockaddr =
-    if Sys.win32 then (
-      let ic = In_channel.create ~binary:true sock_name in
-      let port = Option.value_exn (In_channel.input_binary_int ic) in
-      In_channel.close ic;
-      Unix.(ADDR_INET (inet_addr_loopback, port))
-    ) else
-      Unix.ADDR_UNIX sock_name
-  in
-  try Ok (Timeout.open_connection ~timeout sockaddr)
-  with exn when not (Timeout.is_timeout_exn timeout exn) ->
-    let e = Exception.wrap exn in
-    Error
-      (Connect_to_monitor_failure
-         {
-           server_exists = server_exists config.lock_file;
-           failure_phase = Connect_open_socket;
-           failure_reason = Connect_exception e;
-         })
-
-let get_cstate
-    ~(tracker : Connection_tracker.t)
-    ~(timeout : Timeout.t)
-    (config : ServerMonitorUtils.monitor_config)
-    ((ic, oc) : Timeout.in_channel * Out_channel.t) :
-    ( Timeout.in_channel
-      * Out_channel.t
-      * ServerMonitorUtils.connection_state
-      * Connection_tracker.t,
-      ServerMonitorUtils.connection_error )
-    result =
-  try
-    send_version ~tracker oc;
-    let tracker = Connection_tracker.(track tracker ~key:Client_sent_version) in
-    let cstate : connection_state = from_channel_without_buffering ic in
-    let tracker = Connection_tracker.(track tracker ~key:Client_got_cstate) in
-    Ok (ic, oc, cstate, tracker)
-  with exn ->
-    let e = Exception.wrap exn in
-    log
-      "error getting cstate; closing connection. %s"
-      ~tracker
-      (Exception.to_string e);
-    Timeout.shutdown_connection ic;
-    Timeout.close_in_noerr ic;
-    let failure_reason =
-      if Timeout.is_timeout_exn timeout exn then
-        Connect_timeout
-      else
-        Connect_exception e
-    in
-    Error
-      (Connect_to_monitor_failure
-         {
-           server_exists = server_exists config.lock_file;
-           failure_phase = Connect_receive_connection_ok;
-           failure_reason;
-         })
-
-let verify_cstate ~tracker ic cstate =
-  match cstate with
-  | Connection_ok
-  | Connection_ok_v2 _ ->
-    Ok ()
-  | Build_id_mismatch_ex mismatch_info
-  | Build_id_mismatch_v3 (mismatch_info, _) ->
-    (* The server is out of date and is going to exit. Subsequent calls
-     * to connect on the Unix Domain Socket might succeed, connecting to
-     * the server that is about to die, and eventually we will be hung
-     * up on while trying to read from our end.
-     *
-     * To avoid that fate, when we know the server is about to exit, we
-     * wait for the connection to be closed, signaling that the server
-     * has exited and the OS has cleaned up after it, then we try again.
-     *
-     * See also: ServerMonitor.client_out_of_date
-     *)
-    log "verify_cstate: waiting on server restart" ~tracker;
-    wait_on_server_restart ic;
-    log "verify_cstate: closing ic" ~tracker;
-    Timeout.close_in_noerr ic;
-    Error (Build_id_mismatched (Some mismatch_info))
-  | Build_id_mismatch ->
-    (* The server no longer ever sends this message, as of July 2017 *)
-    failwith "Ancient version of server sent old Build_id_mismatch"
+let get_sockaddr config =
+  let sock_name = Socket.get_path config.ServerMonitorUtils.socket_file in
+  if Sys.win32 then (
+    let ic = In_channel.create ~binary:true sock_name in
+    let port = Option.value_exn (In_channel.input_binary_int ic) in
+    In_channel.close ic;
+    Unix.(ADDR_INET (inet_addr_loopback, port))
+  ) else
+    Unix.ADDR_UNIX sock_name
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
@@ -200,19 +110,6 @@ let rec consume_prehandoff_messages
     wait_on_server_restart ic;
     Error Server_died
 
-let consume_prehandoff_messages
-    ~(timeout : int) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
-    ( Timeout.in_channel
-      * Stdlib.out_channel
-      * ServerCommandTypes.server_specific_files,
-      ServerMonitorUtils.connection_error )
-    result =
-  Timeout.with_timeout
-    ~timeout
-    ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
-    ~on_timeout:(fun _ ->
-      Error ServerMonitorUtils.Server_dormant_out_of_retries)
-
 let connect_to_monitor ~tracker ~timeout config =
   (* There are some pathological scenarios concerned with high volumes of requests.
   1. There's a finite unix pipe between monitor and server, used for handoff. When
@@ -234,6 +131,86 @@ let connect_to_monitor ~tracker ~timeout config =
   let open Result.Monad_infix in
   Timeout.with_timeout
     ~timeout
+    ~do_:
+      begin
+        fun timeout ->
+        let sockaddr = get_sockaddr config in
+        begin
+          try Ok (Timeout.open_connection ~timeout sockaddr)
+          with exn when not (Timeout.is_timeout_exn timeout exn) ->
+            let e = Exception.wrap exn in
+            Error
+              (Connect_to_monitor_failure
+                 {
+                   server_exists = server_exists config.lock_file;
+                   failure_phase = Connect_open_socket;
+                   failure_reason = Connect_exception e;
+                 })
+        end
+        >>= fun (ic, oc) ->
+        let tracker =
+          Connection_tracker.(track tracker ~key:Client_opened_socket)
+        in
+        begin
+          try
+            let version_str = produce_version_payload ~tracker in
+            let (_ : int) =
+              Marshal_tools.to_fd_with_preamble
+                (Unix.descr_of_out_channel oc)
+                version_str
+            in
+            (* For backwards-compatibility, newline has always followed the version *)
+            let (_ : int) =
+              Unix.write
+                (Unix.descr_of_out_channel oc)
+                (Bytes.of_string "\n")
+                0
+                1
+            in
+            let tracker =
+              Connection_tracker.(track tracker ~key:Client_sent_version)
+            in
+            let cstate : connection_state = from_channel_without_buffering ic in
+            let tracker =
+              Connection_tracker.(track tracker ~key:Client_got_cstate)
+            in
+            Ok (ic, oc, cstate, tracker)
+          with exn ->
+            let e = Exception.wrap exn in
+            log
+              "error getting cstate; closing connection. %s"
+              ~tracker
+              (Exception.to_string e);
+            Timeout.shutdown_connection ic;
+            Timeout.close_in_noerr ic;
+            let failure_reason =
+              if Timeout.is_timeout_exn timeout exn then
+                Connect_timeout
+              else
+                Connect_exception e
+            in
+            Error
+              (Connect_to_monitor_failure
+                 {
+                   server_exists = server_exists config.lock_file;
+                   failure_phase = Connect_receive_connection_ok;
+                   failure_reason;
+                 })
+        end
+        >>= fun (ic, oc, cstate, tracker) ->
+        match cstate with
+        | Connection_ok
+        | Connection_ok_v2 _ ->
+          Ok (ic, oc, tracker)
+        | Build_id_mismatch_ex mismatch_info
+        | Build_id_mismatch_v3 (mismatch_info, _) ->
+          wait_on_server_restart ic;
+          Timeout.close_in_noerr ic;
+          Error (Build_id_mismatched (Some mismatch_info))
+        | Build_id_mismatch ->
+          (* The server no longer ever sends this message, as of July 2017 *)
+          failwith "Ancient version of server sent old Build_id_mismatch"
+      end
     ~on_timeout:(fun timings ->
       HackEventLogger.client_connect_to_monitor_timeout ();
       let exists_lock_file = server_exists config.lock_file in
@@ -251,23 +228,17 @@ let connect_to_monitor ~tracker ~timeout config =
              i.e. failure_phase = Connect_open_socket. *)
              failure_reason = Connect_timeout;
            }))
-    ~do_:
-      begin
-        fun timeout ->
-        establish_connection ~timeout config >>= fun (ic, oc) ->
-        let tracker =
-          Connection_tracker.(track tracker ~key:Client_opened_socket)
-        in
-        get_cstate ~tracker ~timeout config (ic, oc)
-      end
 
 let connect_and_shut_down ~tracker root =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
-  connect_to_monitor ~tracker ~timeout:3 config
-  >>= fun (ic, oc, cstate, tracker) ->
-  verify_cstate ~tracker ic cstate >>= fun () ->
-  send_shutdown_rpc ~tracker oc;
+  connect_to_monitor ~tracker ~timeout:3 config >>= fun (ic, oc, tracker) ->
+  log "send_shutdown" ~tracker;
+  let (_ : int) =
+    Marshal_tools.to_fd_with_preamble
+      (Unix.descr_of_out_channel oc)
+      (MonitorRpc.SHUT_DOWN tracker)
+  in
   Timeout.with_timeout
     ~timeout:3
     ~on_timeout:(fun _timings ->
@@ -295,13 +266,19 @@ let connect_once ~tracker ~timeout root handoff_options =
   let tracker =
     Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
   in
-  connect_to_monitor ~tracker ~timeout config
-  >>= fun (ic, oc, cstate, tracker) ->
-  verify_cstate ~tracker ic cstate >>= fun () ->
+  connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
   let tracker =
     Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
   in
-  send_server_handoff_rpc ~tracker handoff_options oc;
+  let (_ : int) =
+    Marshal_tools.to_fd_with_preamble
+      (Unix.descr_of_out_channel oc)
+      (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
+  in
   let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
   let timeout = max (timeout - elapsed_t) 1 in
-  consume_prehandoff_messages ~timeout ic oc
+  Timeout.with_timeout
+    ~timeout
+    ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
+    ~on_timeout:(fun _ ->
+      Error ServerMonitorUtils.Server_dormant_out_of_retries)

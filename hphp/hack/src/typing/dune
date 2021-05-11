@@ -42,7 +42,6 @@
   (name tast)
   (wrapped false)
   (modules
-    ide_tast_cache
     tast_env
     tast_expand
     tast_utils

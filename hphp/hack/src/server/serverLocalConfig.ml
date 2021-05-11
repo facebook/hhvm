@@ -458,7 +458,6 @@ type t = {
   (* forces Hulk *)
   force_remote_type_check: bool;
   ide_parser_cache: bool;
-  ide_tast_cache: bool;
   (* When enabled, save hot class declarations (for now, specified in a special
      file in the repository) when generating a saved state. *)
   store_decls_in_saved_state: bool;
@@ -595,7 +594,6 @@ let default =
     hg_aware_redecl_restart_threshold = 0;
     hg_aware_recheck_restart_threshold = 0;
     ide_parser_cache = false;
-    ide_tast_cache = false;
     store_decls_in_saved_state = false;
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
@@ -1022,13 +1020,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let ide_tast_cache =
-    bool_if_min_version
-      "ide_tast_cache"
-      ~default:default.ide_tast_cache
-      ~current_version
-      config
-  in
   let idle_gc_slice =
     int_ "idle_gc_slice" ~default:default.idle_gc_slice config
   in
@@ -1250,7 +1241,6 @@ let load_ fn ~silent ~current_version overrides =
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;
     ide_parser_cache;
-    ide_tast_cache;
     store_decls_in_saved_state;
     load_decls_from_saved_state;
     idle_gc_slice;

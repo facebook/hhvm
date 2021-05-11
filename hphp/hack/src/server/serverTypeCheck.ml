@@ -1467,10 +1467,6 @@ functor
         Telemetry.duration telemetry ~key:"redecl2_end" ~start_time
       in
 
-      (* We have changed declarations, which means that typed ASTs could have
-       * changed too. *)
-      Ide_tast_cache.invalidate ();
-
       let (fast, to_recheck, to_recheck_deps) =
         merge_redecl_results
           ~fast

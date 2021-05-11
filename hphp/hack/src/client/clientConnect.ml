@@ -22,6 +22,7 @@ let log ?tracker ?connection_log_id s =
 type env = {
   root: Path.t;
   from: string;
+  local_config: ServerLocalConfig.t;
   autostart: bool;
   force_dormant_start: bool;
   deadline: float option;
@@ -429,6 +430,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         let {
           root;
           from;
+          local_config = _;
           autostart = _;
           force_dormant_start = _;
           deadline = _;

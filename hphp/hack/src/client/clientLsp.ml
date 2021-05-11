@@ -24,8 +24,11 @@ type env = {
   init_id: string;
 }
 
-(** This is env.from, but maybe modified in the light of the initialize request *)
+(** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
 let from = ref "[init]"
+
+(** This gets initialized in the initialize request *)
+let ref_local_config : ServerLocalConfig.t option ref = ref None
 
 (** We cache the state of the typecoverageToggle button, so that when Hack restarts,
   dynamic view stays in sync with the button in Nuclide *)
@@ -198,6 +201,7 @@ let initialize_params_exc () : Lsp.Initialize.params =
   | None -> failwith "initialize_params not yet received"
   | Some initialize_params -> initialize_params
 
+(** root only becomes available after the initialize message *)
 let get_root_opt () : Path.t option =
   match !initialize_params_ref with
   | None -> None
@@ -205,7 +209,12 @@ let get_root_opt () : Path.t option =
     let path = Some (Lsp_helpers.get_root initialize_params) in
     Some (Wwwroot.get path)
 
+(** root only becomes available after the initialize message *)
 let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
+
+(** local_config only becomes available after the initialize message *)
+let get_local_config_exn () : ServerLocalConfig.t =
+  Option.value_exn !ref_local_config
 
 (** We remember the last version of .hhconfig, and hack_rc_mode switch,
 so that if they change then we know we must terminate and be restarted. *)
@@ -1175,6 +1184,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
         ClientConnect.root;
         from = !from;
         autostart;
+        local_config = get_local_config_exn ();
         force_dormant_start = false;
         watchman_debug_logging = false;
         (* If you want this, start the server manually in terminal. *)
@@ -3406,12 +3416,7 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
 
-let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
-  let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
-  let server_args = ServerArgs.set_config server_args env.config in
-  let server_local_config =
-    snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
-  in
+let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
     {
       server_capabilities =
@@ -3450,7 +3455,7 @@ let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
           documentLinkProvider = None;
           executeCommandProvider = None;
           implementationProvider =
-            server_local_config.ServerLocalConfig.go_to_implementation;
+            local_config.ServerLocalConfig.go_to_implementation;
           typeCoverageProviderFB = true;
           rageProviderFB = true;
         };
@@ -3943,9 +3948,14 @@ let handle_client_message
     | (Pre_init, _, RequestMessage (id, InitializeRequest initialize_params)) ->
       let open Initialize in
       initialize_params_ref := Some initialize_params;
+
+      (* There's a lot of global-mutable-variable initialization we can only do after
+      we get root, here in the handler of the initialize request. The function
+      [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
       let root = get_root_exn () in
-      (* calculated from initialize_params_ref *)
+      Relative_path.set_path_prefix Relative_path.Root root;
       set_up_hh_logger_for_client_lsp root;
+
       (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
       unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
       v3.14. So by looking at the version, we can at least distinguish that it's old. *)
@@ -3959,6 +3969,16 @@ let handle_client_message
         HackEventLogger.set_from !from
       end;
 
+      (* The function [get_local_config_exn] becomes available after we've set ref_local_config. *)
+      let server_args =
+        ServerArgs.default_options ~root:(Path.to_string root)
+      in
+      let server_args = ServerArgs.set_config server_args env.config in
+      let local_config =
+        snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
+      in
+      ref_local_config := Some local_config;
+
       let%lwt version = read_hhconfig_version () in
       HackEventLogger.set_hhconfig_version
         (Some (String_utils.lstrip version "^"));
@@ -3966,7 +3986,6 @@ let handle_client_message
       hhconfig_version_and_switch := version_and_switch;
       let%lwt new_state = connect ~env !state in
       state := new_state;
-      Relative_path.set_path_prefix Relative_path.Root root;
       (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
       verbose here, since the command-line argument --verbose trumps initialization params. *)
       begin
@@ -3976,7 +3995,7 @@ let handle_client_message
         | Initialize.Verbose ->
           set_verbose_to_file ~ide_service ~env ~tracking_id true
       end;
-      let result = do_initialize ~env root in
+      let result = do_initialize local_config in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
       begin

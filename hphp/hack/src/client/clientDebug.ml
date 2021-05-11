@@ -14,12 +14,14 @@ type env = {
   from: string;
 }
 
-let main (env : env) : Exit_status.t Lwt.t =
+let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
+    =
   let%lwt { ClientConnect.channels = (ic, oc); _ } =
     ClientConnect.connect
       {
         ClientConnect.root = env.root;
         from = env.from;
+        local_config;
         autostart = true;
         force_dormant_start = false;
         ai_mode = None;

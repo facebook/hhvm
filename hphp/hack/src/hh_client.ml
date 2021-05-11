@@ -52,8 +52,11 @@ let () =
     | ClientCommand.CRage _ -> "Rage"
   in
 
-  (* We'll chose where Hh_logger.log gets sent *)
+  (* The global variable Relative_path.root must be initialized for a wide variety of things *)
   let root = ClientArgs.root command in
+  Option.iter root ~f:(Relative_path.set_path_prefix Relative_path.Root);
+
+  (* We'll chose where Hh_logger.log gets sent *)
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
@@ -77,21 +80,8 @@ let () =
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  (* To set up HackEventLogger, we need the .hhconfig version= field *)
-  Option.iter root ~f:(Relative_path.set_path_prefix Relative_path.Root);
-  let hhconfig_version =
-    match root with
-    | Some root ->
-      Path.concat root Config_file.file_path_relative_to_repo_root
-      |> Path.to_string
-      |> Config_file.parse_local_config ~silent:true
-      |> SMap.find_opt "version"
-      |> Config_file.parse_version
-      |> Config_file.version_to_string_opt
-    | None -> None
-  in
-  (* Also for HackEventLogger, we want rollout_options, which come from ServerLocalConfig *)
-  let rollout_flags =
+  (* local_config embodies what's in hh.conf, combined with the version= field from <root>/.hhconfig *)
+  let local_config =
     match root with
     | None -> None
     | Some root ->
@@ -110,12 +100,26 @@ let () =
       let (_, local_config) =
         ServerConfig.load ~silent:true ServerConfig.filename fake_server_args
       in
-      Some (ServerLocalConfig.to_rollout_flags local_config)
+      Some local_config
+  in
+
+  (* To set up HackEventLogger, we need the .hhconfig version= field *)
+  let hhconfig_version =
+    match root with
+    | Some root ->
+      Path.concat root Config_file.file_path_relative_to_repo_root
+      |> Path.to_string
+      |> Config_file.parse_local_config ~silent:true
+      |> SMap.find_opt "version"
+      |> Config_file.parse_version
+      |> Config_file.version_to_string_opt
+    | None -> None
   in
   HackEventLogger.client_init
     ~init_id
     ~hhconfig_version
-    ~rollout_flags
+    ~rollout_flags:
+      (Option.map local_config ~f:ServerLocalConfig.to_rollout_flags)
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
 
@@ -123,12 +127,14 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        Lwt_main.run (ClientCheck.main check_env)
+        Lwt_main.run
+          (ClientCheck.main check_env (Option.value_exn local_config))
       | ClientCommand.CStart env -> Lwt_main.run (ClientStart.main env)
       | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
       | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
-      | ClientCommand.CDebug env -> Lwt_main.run (ClientDebug.main env)
+      | ClientCommand.CDebug env ->
+        Lwt_main.run (ClientDebug.main env (Option.value_exn local_config))
       | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)

@@ -16,6 +16,9 @@ module Rpc = ServerCommandTypes
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
+(** This is initialized at the start of [main] *)
+let ref_local_config : ServerLocalConfig.t option ref = ref None
+
 module SaveStateResultPrinter = ClientResultPrinter.Make (struct
   type t = SaveStateServiceTypes.save_state_result
 
@@ -132,6 +135,7 @@ let connect ?(use_priority_pipe = false) args =
       {
         root;
         from;
+        local_config = Option.value_exn !ref_local_config;
         autostart;
         force_dormant_start;
         deadline;
@@ -207,7 +211,11 @@ let filter_real_paths paths =
         prerr_endlinef "Could not find file '%s'" fn;
         None)
 
-let main (args : client_check_env) : Exit_status.t Lwt.t =
+let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
+    Exit_status.t Lwt.t =
+  ref_local_config := Some local_config;
+  (* That's a hack, just to avoid having to pass local_config into loads of callsites
+  in this module. *)
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.set_from args.from;
   HackEventLogger.client_set_mode mode_s;

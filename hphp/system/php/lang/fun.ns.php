@@ -73,8 +73,8 @@ namespace __SystemLib {
                                bool $force)[] {
     if (!$force &&
         !\__SystemLib\is_dynamically_callable_inst_method($class, $method)) {
-      $level = \ini_get('hhvm.dynamic_meth_caller_level');
-      if ($level == 1) {
+      $level = (int)\ini_get('hhvm.dynamic_meth_caller_level');
+      if ($level === 1) {
         \trigger_error(
           "dynamic_meth_caller(): $class::$method is not a dynamically ".
           "callable instance method",

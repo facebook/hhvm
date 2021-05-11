@@ -46,6 +46,7 @@ struct RuntimeCoeffects {
 
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
+  static RuntimeCoeffects policied_of();
 
   // This function is a placeholder to indicate that the correct coeffect needs
   // to be indentified and passed in its place

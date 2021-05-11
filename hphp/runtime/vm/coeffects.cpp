@@ -45,6 +45,12 @@ RuntimeCoeffects RuntimeCoeffects::pure() {
   return pure;
 }
 
+RuntimeCoeffects RuntimeCoeffects::policied_of() {
+  static RuntimeCoeffects c =
+    CoeffectsConfig::fromName("policied_of").toAmbient();
+  return c;
+}
+
 const std::string RuntimeCoeffects::toString() const {
   // Pretend to be StaticCoeffects, this is safe since RuntimeCoeffects is a
   // subset of StaticCoeffects

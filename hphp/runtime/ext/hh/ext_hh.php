@@ -574,6 +574,14 @@ namespace HH\Coeffects {
   <<__Native>>
   function backdoor((function()[defaults]: Tout) $f)[]: mixed;
 
+  /**
+   * Entry point for policied_of functions
+   */
+  <<__Native>>
+  function enter_policied_of(
+    (function()[policied_of]: Tout) $f
+  )[defaults]: mixed;
+
 }
 
 namespace __SystemLib {

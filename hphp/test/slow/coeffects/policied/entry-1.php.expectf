@@ -1,0 +1,3 @@
+Warning: Call to policied_of() requires [policied_of] coeffects but main() provided [defaults] in %s on line 9
+in policied_of
+in policied_of

@@ -1133,17 +1133,33 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   return prev_index;
 }
 
-Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
+namespace {
+
+Variant coeffects_call_helper(const Variant& function, const char* name,
+                              RuntimeCoeffects coeffects) {
   CallCtx ctx;
   vm_decode_function(function, ctx);
   if (!ctx.func) {
-    raise_error("HH\\Coeffects\\backdoor expects first argument to be a "
-                "closure or a function pointer");
+    raise_error("%s expects first argument to be a closure or a "
+                "function pointer",
+                name);
   }
   return Variant::attach(
     g_context->invokeFunc(ctx.func, init_null_variant, ctx.this_, ctx.cls,
-                          RuntimeCoeffects::defaults(), ctx.dynamic)
+                          coeffects, ctx.dynamic)
   );
+}
+
+} // namespace
+
+Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
+  return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
+                               RuntimeCoeffects::defaults());
+}
+
+Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
+  return coeffects_call_helper(function, "HH\\Coeffects\\enter_policied_of",
+                               RuntimeCoeffects::policied_of());
 }
 
 bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
@@ -1321,6 +1337,7 @@ static struct HHExtension final : Extension {
 #undef X
 
     HHVM_NAMED_FE(HH\\Coeffects\\backdoor, HHVM_FN(coeffects_backdoor));
+    HHVM_NAMED_FE(HH\\Coeffects\\enter_policied_of, HHVM_FN(enter_policied_of));
 
     HHVM_NAMED_FE(__SystemLib\\is_dynamically_callable_inst_method,
                   HHVM_FN(is_dynamically_callable_inst_method));

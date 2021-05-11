@@ -451,6 +451,18 @@ let check =
         | _ -> ())
       | _ -> ()
 
+    method check_special_function env caller args =
+      match (caller, args) with
+      | ((_, Id (pos, x)), [arg])
+        when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut)
+        ->
+        let arg_ty = Tast.get_type arg in
+        if not (self#is_safe_mut_ty env arg_ty) then
+          Errors.readonly_invalid_as_mut pos
+        else
+          ()
+      | _ -> ()
+
     (* Checks related to calling a function or method
       is_readonly is true when the call is allowed to return readonly
       TODO: handle inout
@@ -524,6 +536,27 @@ let check =
       check_readonly_closure caller_ty caller_rty;
       check_readonly_return_call pos caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
+
+    (* Check if type is safe to convert from readonly to mut
+    TODO(readonly): Update to include more complex types. *)
+    method is_safe_mut_ty env ty =
+      let env = Tast_env.tast_env_as_typing_env env in
+      let primitive_types =
+        [
+          MakeType.bool Reason.none;
+          MakeType.int Reason.none;
+          MakeType.arraykey Reason.none;
+          MakeType.string Reason.none;
+          MakeType.float Reason.none;
+          MakeType.null Reason.none;
+          MakeType.num Reason.none;
+          (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
+          MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
+        ]
+      in
+      (* Make a union type to subtype with the ty *)
+      let union = MakeType.union Reason.none primitive_types in
+      Typing_utils.is_sub_type env ty union
 
     method is_value_collection_ty env ty =
       let mixed = MakeType.mixed Reason.none in
@@ -678,6 +711,7 @@ let check =
           (self#ty_expr env caller)
           args
           unpacked_arg;
+        self#check_special_function env caller args;
         self#method_call env caller;
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Call env caller targs args unpacked_arg
@@ -691,6 +725,7 @@ let check =
           (self#ty_expr env caller)
           args
           unpacked_arg;
+        self#check_special_function env caller args;
         self#method_call env caller;
         super#on_expr env e
       | (_, ReadonlyExpr (_, Obj_get (obj, get, nullable, is_prop_call))) ->

@@ -1695,3 +1695,5 @@ val bad_conditional_support_dynamic :
   string ->
   (Pos_or_decl.t * string) list ->
   unit
+
+val readonly_invalid_as_mut : Pos.t -> unit

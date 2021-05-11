@@ -5499,6 +5499,12 @@ let readonly_mismatch prefix pos ~reason_sub ~reason_super =
     (pos, prefix)
     (reason_sub @ reason_super)
 
+let readonly_invalid_as_mut pos =
+  add
+    (Typing.err_code Typing.ReadonlyInvalidAsMut)
+    pos
+    "Only primitive value types can be converted to mutable."
+
 let readonly_exception pos =
   add
     (Typing.err_code Typing.ReadonlyException)

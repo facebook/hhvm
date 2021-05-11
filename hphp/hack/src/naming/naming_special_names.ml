@@ -775,6 +775,12 @@ module Coeffects = struct
   let unsafe_contexts = contexts ^ "\\Unsafe"
 end
 
+module Readonly = struct
+  let prefix = "\\HH\\Readonly\\"
+
+  let as_mut = prefix ^ "as_mut"
+end
+
 module Capabilities = struct
   let defaults = Coeffects.contexts ^ "\\defaults"
 

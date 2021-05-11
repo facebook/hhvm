@@ -306,11 +306,10 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
                       int64_t maxlength /* = -1 */,
                       int64_t offset /* = 0 */) {
   if (maxlength == 0) return 0;
-  if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
 
   auto srcFile = cast<File>(source);
   auto destFile = cast<File>(dest);
-  if (maxlength < 0) {
+  if (maxlength < 0 && maxlength != PHP_STREAM_COPY_ALL) {
     raise_invalid_argument_warning("maxlength: %ld", maxlength);
     return false;
   }
@@ -319,17 +318,31 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
     return false;
   }
   int64_t cbytes = 0;
-  if (maxlength == 0) maxlength = INT_MAX;
-  while (cbytes < maxlength) {
-    int64_t remaining = maxlength - cbytes;
-    //srcFile->getChunkSize currently returns an int64_t
-    auto chunkSize = srcFile->getChunkSize();
-    String buf = srcFile->read(std::min(remaining, chunkSize));
-    if (buf.size() == 0) break;
-    if (destFile->write(buf) != buf.size()) {
-      return false;
+
+  if (maxlength == PHP_STREAM_COPY_ALL) {
+    while (!srcFile->eof()) {
+      // We read 0x10000 (64 KB at a time) because the size of a StringBuffer
+      // is limited.
+      String buf = srcFile->read(0x10000);
+
+      if (destFile->write(buf) != buf.size()) {
+        return false;
+      }
+
+      cbytes += buf.size();
     }
-    cbytes += buf.size();
+  } else {
+    while (cbytes < maxlength) {
+      int64_t remaining = maxlength - cbytes;
+      //srcFile->getChunkSize currently returns an int64_t
+      auto chunkSize = srcFile->getChunkSize();
+      String buf = srcFile->read(std::min(remaining, chunkSize));
+      if (buf.size() == 0) break;
+      if (destFile->write(buf) != buf.size()) {
+        return false;
+      }
+      cbytes += buf.size();
+    }
   }
 
   return cbytes;

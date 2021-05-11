@@ -202,40 +202,27 @@ let consume_prehandoff_messages
       Error ServerMonitorUtils.Server_dormant_out_of_retries)
 
 let connect_to_monitor ~tracker ~timeout config =
+  (* There are some pathological scenarios concerned with high volumes of requests.
+  1. There's a finite unix pipe between monitor and server, used for handoff. When
+  that pipe gets full (~30 requests), the monitor will freeze for 4s before closing
+  the client request.
+  2. In ClientConnect.connect we allow the monitor only 1s to respond before we
+  abandon our connection attempt and try again, repeated up to --timeout times (by
+  default infinite). If the monitor takes >1s to work through its queue, then every
+  item placed there will be expired before the monitor gets to handle it, and we'll
+  never recover.
+  3. The monitor's finite incoming queue will become full too, disallowing clients from
+  even connecting.
+  4. Aside from those concerns, just practically, the commonest mode of failure I've observed
+  is that the monitor actually just gets stuck -- sometimes stuck on a "read" call to
+  read requests parameters where it should make progress or get an EOF but just sits there
+  indefinitely, sometimes stuck on a "select" call to see if there's a request on the queue
+  where I know there are outstanding requests but again it doesn't see them. I have no
+  explanation for these phemona. *)
   let open Result.Monad_infix in
   Timeout.with_timeout
     ~timeout
     ~on_timeout:(fun timings ->
-      (*
-       * Monitor should always readily accept connections. In theory, this will
-       * only timeout if the Monitor is being very heavily DDOS'd, or the Monitor
-       * has wedged itself (a bug).
-       *
-       * The DDOS occurs when the Monitor's new connections (arriving on
-       * the socket) queue grows faster than they are being processed. This can
-       * happen in two scenarios:
-       * 1) Malicious DDOSer fills up new connection queue (incoming
-       *    connections on the socket) quicker than the queue is being
-       *    consumed.
-       * 2) New client connections to the monitor are being created by the
-       *    retry logic in hh_client faster than those cancelled connections
-       *    (cancelled due to the timeout above) are being discarded by the
-       *    monitor. This could happen from thousands of hh_clients being
-       *    used to parallelize a job. This is effectively an inadvertent DDOS.
-       *    In detail, suppose the timeout above is set to 1 ssecond and that
-       *    1000 thousand hh_client have timed out at the line above. Then these
-       *    1000 clients will cancel the connection and retry. But the Monitor's
-       *    connection queue still has these dead/canceled connections waiting
-       *    to be processed. Suppose it takes the monitor longer than 1
-       *    millisecond to handle and discard a dead connection. Then the
-       *    1000 retrying hh_clients will again add another 1000 dead
-       *    connections during retrying even tho the monitor has discarded
-       *    fewer than 1000 dead connections. Thus, no progress will be made
-       *    on clearing out dead connections and all new connection attempts
-       *    will time out.
-       *
-       *    We ameliorate this by having the timeout be quite large
-       *    (many seconds) and by not auto-retrying connections to the Monitor. *)
       HackEventLogger.client_connect_to_monitor_timeout ();
       let exists_lock_file = server_exists config.lock_file in
       log
@@ -278,102 +265,6 @@ let connect_and_shut_down ~tracker root =
         Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
       end
 
-(** connect_once.
-    1. OPEN SOCKET. After this point we have a working stdin/stdout to the
-    process. Implemented in establish_connection.
-      | catch EConnRefused/ENoEnt/Timeout 1s when lockfile present ->
-        Error Monitor_socket_not_ready.
-          This is unexpected! But can happen if you manage to catch the
-          monitor in the short timeframe after it has grabbed its lock but
-          before it has started listening in on its socket.
-          -> "hh_client check/ide" -> retry from step 1, up to 800 times.
-            The number 800 is hard-coded in 9 places through the codebase.
-          -> "hh_client start" -> print "replacing unresponsive server"
-                kill_server; start_server; exit.
-      | catch Timeout <retries>s when lockfile present ->
-        Error Monitor_establish_connection_timeout
-          This is unexpected! after all the monitor is always responsive,
-          and indeed start_server waits until responsive before returning.
-          But this can happen during a DDOS.
-          -> "hh_client check/ide" -> Its retry attempts are passed to the
-              monitor connection attempt already. So in this timeout all
-              the retries have already been consumed. Just exit.
-          -> "hh_client start" -> print "replacing unresponsive server"
-                kill_server; start_server; exit.
-      | catch EConnRefused/ENoEnt/Timeout when lockfile absent ->
-        Error Server_missing.
-          -> "hh_client ide" -> raise Exit_with IDE_no_server.
-          -> "hh_client check" -> start_server; retry step 1, up to 800x.
-          -> "hh_client start" -> start_server; exit.
-      | catch other exception -> unhandled.
-
-    2. SEND VERSION; READ VERSION; CHECK VERSIONS. After this point we can
-    safely marshal OCaml types back and forth. Implemented in get_cstate
-    and verify_cstate.
-      | catch any exception when lockfile present ->
-        close_connection; Error Monitor_connection_failure.
-          This is unexpected!
-          -> "hh_client check/ide" -> retry from step 1, up to 800 times.
-          -> "hh_client start" -> print "replacing unresponsive server"
-                kill_server; start_server; exit.
-      | catch any exception when lockfile absent ->
-        close_connection; Error Server_missing.
-          -> "hh_client ide" -> raise Exit_with IDE_no_server
-          -> "hh_client check" -> start_server; retry step 1, up to 800x.
-          -> "hh_client start" -> start_server; exit.
-      | if version numbers differ ->
-        Error Build_mismatch.
-          -> "hh_client ide" -> raise Exit_with IDE_no_server.
-          -> "hh_client check" -> close_log_tailer; retry from step 1.
-          -> "hh_client start" -> start_server; exit.
-
-    3. SEND HANDOFF; READ RESPONSE. After this point we have a working
-    connection to a server who we believe is ready to handle our messages.
-    Handoff is the stage of the protocol when we're speaking to the monitor
-    rather than directly to the server process itself. Implemented in
-    send_server_handoff_rpc and consume_prehandoff_message.
-      | response Server_name_not_found ->
-        raise Exit_with Server_name_not_found.
-      | response Server_not_alive_dormant ->
-        print "Waiting for server to start"; retry step 5, unlimited times.
-      | response Server_dormant_connections_limit_reached ->
-        Error Server_dormant.
-          -> "hh_client ide" -> raise Exit_with IDE_no_server.
-          -> "hh_client start" -> print "Server already exists but is
-            dormant"; exit.
-          -> "hh_client check" -> print "No server running, and connection
-            limit reached for waiting  on the next server to be started.
-            Please wait patiently." raise Exit_with No_server_running.
-      | response Server_died ->
-        print "Last killed by OOM / signal / stopped by signal / exited";
-        wait for server to close; Error Server_died.
-          -> "hh_client ide" -> raise Exit_with IDE_no_server.
-          -> "hh_client start" -> start_server.
-          -> "hh_client check" -> retry from step 1, up to 800 times.
-      | catch any exception -> unhandled.
-
-    The following two steps aren't implemented inside connect_once but are
-    typically done by callers after connect_once has succeeded...
-
-    4. READ "HELLO" FROM SERVER. After this point we have evidence that the
-    server is ready to handle our messages. We basically gobble whatever
-    the server sends until it finally sends a line with just "hello".
-    Implemented in wait_for_server_hello.
-      | read anything other than "hello" -> retry from step 4, up to 800x.
-      | catch Timeout 1s -> retry from step 4, up to 800 times.
-      | catch exception EndOfFile/Sys_error ->
-        raise ServerHungUp.
-          -> "hh_client ide/check" -> program exit, code=No_server_running.
-          -> clientStart never actually bothers to do step 4.
-      | catch other exception -> unhandled.
-
-    5. SEND CONNECTION TYPE; READ RESPONSE. After this point we have
-    evidence that the server is able to handle our connection. The
-    connection type indicates Persistent vs Non-persistent.
-      | response Denied_due_to_existing_persistent_connection.
-          -> "hh_client lsp" -> raise Lsp.Error_server_start.
-      | catch any exception -> unhandled.
-*)
 let connect_once ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in

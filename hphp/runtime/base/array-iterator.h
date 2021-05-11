@@ -20,10 +20,11 @@
 #include <cstdint>
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/bespoke-iter.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -262,6 +263,8 @@ void IterateV(const ArrayData* adata, ArrFn arrFn) {
     PackedArray::IterateV(adata, arrFn);
   } else if (adata->isVanillaDict()) {
     MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
+  } else if (bespoke::IsStructDict(adata)) {
+    bespoke::StructDictIterateV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {
     SetArray::Iterate(SetArray::asSet(adata), arrFn);
   } else {
@@ -340,6 +343,8 @@ void IterateKV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return;
   if (adata->isVanillaDict()) {
     MixedArray::IterateKV(MixedArray::asMixed(adata), arrFn);
+  } else if (bespoke::IsStructDict(adata)) {
+    bespoke::StructDictIterateKV(adata, arrFn);
   } else if (adata->isVanillaVec()) {
     PackedArray::IterateKV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {

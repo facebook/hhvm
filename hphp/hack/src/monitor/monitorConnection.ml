@@ -81,10 +81,9 @@ let establish_connection ~timeout config =
     ) else
       Unix.ADDR_UNIX sock_name
   in
-  try Ok (Timeout.open_connection ~timeout sockaddr) with
-  | (Unix.Unix_error (Unix.ECONNREFUSED, _, _) as e)
-  | (Unix.Unix_error (Unix.ENOENT, _, _) as e) ->
-    let e = Exception.wrap e in
+  try Ok (Timeout.open_connection ~timeout sockaddr)
+  with exn when not (Timeout.is_timeout_exn timeout exn) ->
+    let e = Exception.wrap exn in
     Error
       (Connect_to_monitor_failure
          {

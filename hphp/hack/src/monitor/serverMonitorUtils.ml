@@ -96,7 +96,6 @@ let current_build_info =
 type connect_failure_reason =
   | Connect_timeout
   | Connect_exception of Exception.t
-[@@deriving show]
 
 type connect_failure_phase =
   | Connect_open_socket
@@ -112,7 +111,6 @@ type connect_to_monitor_failure = {
   failure_phase: connect_failure_phase;
   failure_reason: connect_failure_reason;
 }
-[@@deriving show]
 
 type connection_error =
   | Connect_to_monitor_failure of connect_to_monitor_failure
@@ -134,7 +132,38 @@ type connection_error =
    *   correctly.
    *)
   | Build_id_mismatched of build_mismatch_info option
-[@@deriving show]
+
+let connection_error_to_telemetry (e : connection_error) : Telemetry.t =
+  let telemetry = Telemetry.create () in
+  match e with
+  | Server_died ->
+    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Server_died"
+  | Server_dormant ->
+    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Server_dormant"
+  | Server_dormant_out_of_retries ->
+    telemetry
+    |> Telemetry.string_ ~key:"kind" ~value:"Server_dormant_out_of_retries"
+  | Build_id_mismatched _ ->
+    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Build_id_mismatched"
+  | Connect_to_monitor_failure { server_exists; failure_phase; failure_reason }
+    ->
+    let (reason, exn, stack) =
+      match failure_reason with
+      | Connect_timeout -> ("timeout", None, None)
+      | Connect_exception e ->
+        ( "exception",
+          Some (Exception.get_ctor_string e),
+          Some (Exception.get_backtrace_string e |> Exception.clean_stack) )
+    in
+    telemetry
+    |> Telemetry.string_ ~key:"kind" ~value:"Connection_to_monitor_Failure"
+    |> Telemetry.bool_ ~key:"server_exists" ~value:server_exists
+    |> Telemetry.string_
+         ~key:"phase"
+         ~value:(show_connect_failure_phase failure_phase)
+    |> Telemetry.string_ ~key:"reason" ~value:reason
+    |> Telemetry.string_opt ~key:"exn" ~value:exn
+    |> Telemetry.string_opt ~key:"exn_stack" ~value:stack
 
 type connection_state =
   | Connection_ok

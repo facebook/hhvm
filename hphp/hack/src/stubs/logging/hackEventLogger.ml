@@ -205,15 +205,13 @@ let ranked_autocomplete_request_duration ~start_time:_ = ()
 
 let monitor_dead_but_typechecker_alive () = ()
 
-let client_connect_to_monitor_timeout () = ()
-
 let client_established_connection _ = ()
 
 let client_establish_connection_exception _ = ()
 
-let client_connect_once _ = ()
+let client_connect_once ~t_start:_ = ()
 
-let client_connect_once_busy _ = ()
+let client_connect_once_failure ~t_start:_ _ = ()
 
 let client_connect_autostart () = ()
 

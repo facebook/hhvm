@@ -307,13 +307,9 @@ let wait_for_server_hello
   in
   Lwt.return_unit
 
-let rec connect
-    ?(first_attempt = false)
-    ?(allow_macos_hack = true)
-    (env : env)
-    (start_time : float) : conn Lwt.t =
+let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
+    conn Lwt.t =
   check_for_deadline env.deadline;
-  let connect_once_start_t = Unix.time () in
   let handoff_options =
     {
       MonitorRpc.force_dormant_start = env.force_dormant_start;
@@ -336,7 +332,6 @@ let rec connect
     MonitorConnection.connect_once ~tracker ~timeout:1 env.root handoff_options
   in
   let t_connected_to_monitor = Unix.gettimeofday () in
-  HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Ok (ic, oc, server_specific_files) ->
     log
@@ -405,13 +400,6 @@ let rec connect
           from = env.from;
         }
   | Error e ->
-    log
-      ~tracker
-      "connect: error %s"
-      (ServerMonitorUtils.show_connection_error e);
-    if first_attempt then
-      Printf.eprintf
-        "For more detailed logs, try `tail -f $(hh_client --monitor-logname) $(hh_client --logname)`\n";
     (match e with
     | ServerMonitorUtils.(
         Connect_to_monitor_failure
@@ -426,7 +414,6 @@ let rec connect
       first case, but we fail with Exit_status.Server_hung_up_should_retry in
       the second case above causing find_hh.sh to reattempt after exponential
       backoff. See discussion in T85425990. *)
-      HackEventLogger.client_connect_once_busy start_time;
       Printf.eprintf
         "\nError: Hh_server is overloaded with too many concurrent requests. Giving up.\n%!";
       raise Exit_status.(Exit_with Monitor_connection_failure)
@@ -555,9 +542,7 @@ let rec connect
 let connect (env : env) : conn Lwt.t =
   let start_time = Unix.time () in
   try%lwt
-    let%lwt ({ channels = (_, oc); _ } as conn) =
-      connect ~first_attempt:true env start_time
-    in
+    let%lwt ({ channels = (_, oc); _ } as conn) = connect env start_time in
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;

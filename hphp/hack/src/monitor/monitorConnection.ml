@@ -243,22 +243,37 @@ let connect_once ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
-  let tracker =
-    Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
+  let result =
+    let tracker =
+      Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
+    in
+    connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
+    let tracker =
+      Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
+    in
+    let (_ : int) =
+      Marshal_tools.to_fd_with_preamble
+        (Unix.descr_of_out_channel oc)
+        (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
+    in
+    let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
+    let timeout = max (timeout - elapsed_t) 1 in
+    Timeout.with_timeout
+      ~timeout
+      ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
+      ~on_timeout:(fun _ ->
+        Error ServerMonitorUtils.Server_dormant_out_of_retries)
   in
-  connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
-  let tracker =
-    Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
-  in
-  let (_ : int) =
-    Marshal_tools.to_fd_with_preamble
-      (Unix.descr_of_out_channel oc)
-      (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
-  in
-  let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
-  let timeout = max (timeout - elapsed_t) 1 in
-  Timeout.with_timeout
-    ~timeout
-    ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
-    ~on_timeout:(fun _ ->
-      Error ServerMonitorUtils.Server_dormant_out_of_retries)
+  Result.iter result ~f:(fun _ ->
+      log ~tracker "CLIENT_CONNECT_ONCE";
+      HackEventLogger.client_connect_once ~t_start;
+      ());
+  Result.iter_error result ~f:(fun e ->
+      let telemetry = ServerMonitorUtils.connection_error_to_telemetry e in
+      log
+        ~tracker
+        "CLIENT_CONNECT_ONCE FAILURE %s"
+        (telemetry |> Telemetry.to_string);
+      HackEventLogger.client_connect_once_failure ~t_start telemetry;
+      ());
+  result

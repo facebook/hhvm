@@ -10,3 +10,15 @@ path = "../../typing_deps_hash.rs"
 [dependencies]
 fnv = "1.0"
 oxidized = { path = "../../../oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

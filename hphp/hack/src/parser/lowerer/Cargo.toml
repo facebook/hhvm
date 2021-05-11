@@ -24,3 +24,15 @@ parser_core_types = { path = "../cargo/core_types" }
 regex = "1.4.2"
 rescan_trivia = { path = "../api/cargo/rescan_trivia" }
 stack_limit = { path = "../../utils/stack_limit" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

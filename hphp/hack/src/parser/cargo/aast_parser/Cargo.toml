@@ -23,3 +23,15 @@ rust_aast_parser_types = { path = "../rust_aast_parser_types" }
 rust_parser_errors = { path = "../errors" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

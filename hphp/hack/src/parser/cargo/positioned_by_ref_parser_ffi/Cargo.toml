@@ -15,3 +15,15 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

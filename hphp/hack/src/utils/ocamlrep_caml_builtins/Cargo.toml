@@ -10,3 +10,15 @@ path = "lib.rs"
 [dependencies]
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_custom = { path = "../../ocamlrep_custom" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

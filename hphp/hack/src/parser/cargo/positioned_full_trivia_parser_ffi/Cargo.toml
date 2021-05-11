@@ -18,3 +18,15 @@ parser_core_types = { path = "../core_types" }
 positioned_full_trivia_parser = { path = "../../api/cargo/positioned_full_trivia_parser" }
 serde_json = { version = "1.0", features = ["float_roundtrip"] }
 stack_limit = { path = "../../../utils/stack_limit" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

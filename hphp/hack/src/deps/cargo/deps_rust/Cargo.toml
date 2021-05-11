@@ -17,3 +17,15 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 once_cell = "1.4"
 oxidized = { path = "../../../oxidized" }
 typing_deps_hash = { path = "../typing_deps_hash" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

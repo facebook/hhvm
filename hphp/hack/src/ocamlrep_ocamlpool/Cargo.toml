@@ -10,3 +10,15 @@ path = "lib.rs"
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
 ocamlrep = { path = "../ocamlrep" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

@@ -12,3 +12,15 @@ doctest = false
 [dependencies]
 ocamlrep_custom = { path = "../../../../src/ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../../src/ocamlrep_ocamlpool" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

@@ -12,3 +12,15 @@ escaper = { path = "../../../utils/escaper" }
 flatten_smart_constructors = { path = "../../../parser/cargo/flatten_smart_constructors" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 smart_constructors = { path = "../../../parser/cargo/smart_constructors" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

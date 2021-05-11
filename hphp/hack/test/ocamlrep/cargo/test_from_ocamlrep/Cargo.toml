@@ -10,3 +10,15 @@ path = "../../test_from_ocamlrep.rs"
 [dependencies]
 ocamlrep = { path = "../../../../src/ocamlrep" }
 ocamlrep_derive = { path = "../../../../src/ocamlrep_derive" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

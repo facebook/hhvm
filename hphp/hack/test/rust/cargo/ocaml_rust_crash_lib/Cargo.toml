@@ -11,3 +11,15 @@ doctest = false
 
 [dependencies]
 ocaml = "0.8"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

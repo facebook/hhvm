@@ -14,3 +14,15 @@ depgraph = { path = "../depgraph" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
 rusqlite = { version = "0.23", features = ["blob"] }
 structopt = "0.3.21"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

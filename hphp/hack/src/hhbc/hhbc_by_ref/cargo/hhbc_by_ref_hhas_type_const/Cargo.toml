@@ -9,3 +9,15 @@ path = "../../hhas_type_const.rs"
 
 [dependencies]
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

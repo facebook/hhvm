@@ -9,3 +9,15 @@ path = "../../hhas_pos.rs"
 
 [dependencies]
 oxidized = { path = "../../../../oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

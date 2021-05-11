@@ -10,3 +10,15 @@ path = "lib.rs"
 [dependencies]
 indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
 rustc-hash = "1.1.0"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

@@ -21,3 +21,15 @@ parser_core_types = { path = "../core_types" }
 positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }
 stack_limit = { path = "../../../utils/stack_limit" }
 to_ocaml_impl = { path = "../to_ocaml_impl" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

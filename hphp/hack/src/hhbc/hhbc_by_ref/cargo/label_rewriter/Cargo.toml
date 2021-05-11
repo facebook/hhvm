@@ -15,3 +15,15 @@ hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

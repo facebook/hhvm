@@ -14,3 +14,15 @@ parser_core_types = { path = "../cargo/core_types" }
 smart_constructors = { path = "../cargo/smart_constructors" }
 stack_limit = { path = "../../utils/stack_limit" }
 static_assertions = "1.1.0"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

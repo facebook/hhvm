@@ -6,3 +6,15 @@ edition = "2018"
 
 [lib]
 path = "../line_break_map.rs"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

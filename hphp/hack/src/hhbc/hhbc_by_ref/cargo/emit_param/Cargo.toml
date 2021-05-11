@@ -23,3 +23,15 @@ hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence
 hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 oxidized = { path = "../../../../oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

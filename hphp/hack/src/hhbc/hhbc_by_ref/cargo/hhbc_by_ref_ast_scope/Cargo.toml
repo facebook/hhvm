@@ -11,3 +11,15 @@ path = "../../ast_scope.rs"
 hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
 itertools = "0.8"
 oxidized = { path = "../../../../oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

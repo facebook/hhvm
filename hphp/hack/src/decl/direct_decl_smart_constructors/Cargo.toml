@@ -21,3 +21,15 @@ naming_special_names_rust = { path = "../../naming" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 smart_constructors = { path = "../../parser/cargo/smart_constructors" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

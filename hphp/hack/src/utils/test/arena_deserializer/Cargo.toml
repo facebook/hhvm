@@ -15,3 +15,15 @@ bumpalo = { version = "3.2.1", features = ["collections"] }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 serde = { version = "=1.0.118", features = ["derive", "rc"] }
 serde_json = { version = "1.0", features = ["float_roundtrip"] }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

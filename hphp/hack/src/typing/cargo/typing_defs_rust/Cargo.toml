@@ -15,3 +15,15 @@ ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 typing_collections_rust = { path = "../typing_collections_rust" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

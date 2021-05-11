@@ -9,3 +9,15 @@ path = "../../hh_autoimport.rs"
 
 [dependencies]
 lazy_static = "1.0"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

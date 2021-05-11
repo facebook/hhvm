@@ -16,3 +16,15 @@ oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 rusqlite = { version = "0.23", features = ["blob"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

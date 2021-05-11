@@ -14,3 +14,15 @@ crate-type = ["lib", "staticlib"]
 compile_ffi = { path = "../compile_ffi" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 options = { path = "../options" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

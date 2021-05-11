@@ -10,3 +10,15 @@ path = "naming_special_names.rs"
 [dependencies]
 hash = { path = "../utils/hash" }
 lazy_static = "1.0"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

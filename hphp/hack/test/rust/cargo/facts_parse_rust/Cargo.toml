@@ -13,3 +13,15 @@ test = false
 clap = "2.33"
 facts_rust = { path = "../../../../src/facts/cargo/facts_rust" }
 oxidized = { path = "../../../../src/oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

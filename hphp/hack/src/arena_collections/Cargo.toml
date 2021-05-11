@@ -18,3 +18,15 @@ serde = { version = "=1.0.118", features = ["derive", "rc"] }
 [dev-dependencies]
 quickcheck = "0.9"
 rand = { version = "0.7", features = ["small_rng"] }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

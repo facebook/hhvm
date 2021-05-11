@@ -10,3 +10,15 @@ path = "../../hhas_attribute.rs"
 [dependencies]
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 naming_special_names_rust = { path = "../../../../naming" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

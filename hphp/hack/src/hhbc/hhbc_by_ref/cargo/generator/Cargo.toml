@@ -10,3 +10,15 @@ path = "../../generator.rs"
 [dependencies]
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
 oxidized = { path = "../../../../oxidized" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

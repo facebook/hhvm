@@ -10,3 +10,15 @@ path = "../../unique_list_bench.rs"
 
 [dev-dependencies]
 hhbc_by_ref_unique_list = { path = "../unique_list" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

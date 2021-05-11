@@ -15,3 +15,15 @@ hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
 hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

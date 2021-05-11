@@ -29,3 +29,15 @@ stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.21"
 strum = "0.19"
 strum_macros = "0.19"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

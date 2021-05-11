@@ -14,3 +14,15 @@ facts_smart_constructors = { path = "../../../../facts/cargo/facts_smart_constru
 parser = { path = "../../../core" }
 parser_core_types = { path = "../../../cargo/core_types" }
 stack_limit = { path = "../../../../utils/stack_limit" }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

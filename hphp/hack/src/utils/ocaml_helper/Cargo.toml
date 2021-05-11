@@ -9,3 +9,15 @@ path = "../ocaml_helper.rs"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

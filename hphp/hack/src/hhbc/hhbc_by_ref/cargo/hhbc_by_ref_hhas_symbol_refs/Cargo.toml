@@ -6,3 +6,15 @@ edition = "2018"
 
 [lib]
 path = "../../hhas_symbol_refs.rs"
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

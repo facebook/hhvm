@@ -12,3 +12,15 @@ bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 nohash-hasher = "0.1"
 serde = { version = "=1.0.118", features = ["derive", "rc"] }
+
+[profile.release]
+incremental = false
+
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+
+[profile.bench]
+incremental = false

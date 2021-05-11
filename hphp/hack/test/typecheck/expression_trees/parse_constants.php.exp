@@ -1,2 +1,2 @@
 File "parse_constants.php", line 8, characters 17-24:
-Unsupported syntax for expression trees. (Parsing[1002])
+Unsupported expression tree syntax. (Parsing[1002])

@@ -1,7 +1,5 @@
 <?hh
 
-type ExprTreeInferredType<T> = ?(function(): T);
-
 class Code {
   const type TAst = mixed;
 
@@ -13,50 +11,74 @@ class Code {
       'static_methods' => vec<mixed>,
     ) $metadata,
     (function(TVisitor): Code::TAst) $ast,
-    ExprTreeInferredType<TInfer> $null,
+    ?(function(): TInfer) $_,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
     throw new Exception();
   }
 
-  // Lifting literals.
-  public static function liftInt(
-    int $_,
-  ): ExprTree<Code, Code::TAst, ExampleInt> {
+  // Virtual types (These do not have to be implemented)
+  public static function intType(): ExampleInt {
     throw new Exception();
   }
-  public static function liftFloat(
-    float $_,
-  ): ExprTree<Code, Code::TAst, ExampleFloat> {
+  public static function floatType(): ExampleFloat {
     throw new Exception();
   }
-  public static function liftBool(bool $_):
-    ExprTree<Code, Code::TAst, ExampleBool>
-  {
+  public static function boolType(): ExampleBool {
     throw new Exception();
   }
-  public static function liftString(string $_):
-    ExprTree<Code, Code::TAst, ExampleString>
-  {
+  public static function stringType(): ExampleString {
     throw new Exception();
   }
-  public static function liftNull(): ExprTree<Code, Code::TAst, null> {
+  public static function nullType(): null {
     throw new Exception();
   }
-  public static function liftVoid(): ExprTree<Code, Code::TAst, ExampleVoid> {
+  public static function voidType(): ExampleVoid {
     throw new Exception();
   }
-
-  // Symbols
-  public static function liftSymbol<T>(
+  public static function symbolType<T>(
     (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
-  ): ExprTree<Code, Code::TAst, T> {
+  ): T {
     throw new Exception();
   }
 
-  // Expressions
+  // Desugared nodes (These should be implemented)
+  public function visitInt(?ExprPos $_, int $_): Code::TAst {
+    throw new Exception();
+  }
+  public function visitFloat(?ExprPos $_, float $_): Code::TAst {
+    throw new Exception();
+  }
+  public function visitBool(?ExprPos $_, bool $_): Code::TAst {
+    throw new Exception();
+  }
+  public function visitString(?ExprPos $_, string $_): Code::TAst {
+    throw new Exception();
+  }
+  public function visitNull(?ExprPos $_): Code::TAst {
+    throw new Exception();
+  }
+
+  public function visitBinop(
+    ?ExprPos $_,
+    Code::TAst $lhs,
+    string $op,
+    Code::TAst $rhs,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
+  public function visitUnop(
+    ?ExprPos $_,
+    Code::TAst $operand,
+    string $operator,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
   public function visitLocal(?ExprPos $_, string $_): Code::TAst {
     throw new Exception();
   }
+
   public function visitLambda(
     ?ExprPos $_,
     vec<string> $_args,
@@ -65,18 +87,21 @@ class Code {
     throw new Exception();
   }
 
-  // Operators
-  public function visitMethCall(
+  public function visitGlobalFunction<T>(
     ?ExprPos $_,
-    Code::TAst $_,
-    string $_,
-    vec<Code::TAst> $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): Code::TAst {
     throw new Exception();
   }
 
-  // Old style operators
-  public function visitCall<T>(
+  public function visitStaticMethod<T>(
+    ?ExprPos $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
+  public function visitCall(
     ?ExprPos $_,
     Code::TAst $_callee,
     vec<Code::TAst> $_args,
@@ -119,7 +144,7 @@ class Code {
   }
   public function visitReturn(
     ?ExprPos $_,
-    Code::TAst $_,
+    ?Code::TAst $_,
   ): Code::TAst {
     throw new Exception();
   }

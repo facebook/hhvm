@@ -2012,8 +2012,8 @@ where
 
                 let hint = Self::p_hint(&c.prefix, env)?;
 
-                let desugared_expr = match desugar(&hint, src_expr, env) {
-                    Ok(desugared_expr) => desugared_expr,
+                let et = match desugar(&hint, src_expr, env) {
+                    Ok(et) => et,
                     Err((pos, msg)) => {
                         Self::raise_parsing_error_pos(&pos, env, &msg);
                         // Discard the source AST and just use a null
@@ -2022,12 +2022,7 @@ where
                     }
                 };
 
-                Ok(E_::mk_expression_tree(ast::ExpressionTree {
-                    hint,
-                    splices: vec![],
-                    virtualized_expr: ast::Expr::new(Pos::make_none(), ast::Expr_::Omitted),
-                    runtime_expr: desugared_expr,
-                }))
+                Ok(et.1)
             }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.alternative, env)?;

@@ -19,6 +19,31 @@ function concat_block(vec<string> $block): string {
 class Code {
   const type TAst = string;
 
+    // Virtual types (These do not have to be implemented)
+  public static function intType(): ExampleInt {
+    throw new Exception();
+  }
+  public static function floatType(): ExampleFloat {
+    throw new Exception();
+  }
+  public static function boolType(): ExampleBool {
+    throw new Exception();
+  }
+  public static function stringType(): ExampleString {
+    throw new Exception();
+  }
+  public static function nullType(): null {
+    throw new Exception();
+  }
+  public static function voidType(): ExampleVoid {
+    throw new Exception();
+  }
+  public static function symbolType<T>(
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+  ): T {
+    throw new Exception();
+  }
+
   public static function makeTree<TVisitor as Code, TInfer>(
     ?ExprPos $pos,
     ExprTreeInfo $metadata,
@@ -28,101 +53,35 @@ class Code {
     return new ExprTree($pos, $metadata, $ast, $null);
   }
 
-  // Lifting literals.
-  public static function liftInt(
-    int $i,
-  ): ExprTree<Code, Code::TAst, ExampleInt> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> (string)$i,
-      () ==> {
-        throw new Exception();
-      },
-    );
+  // Desugared nodes (These should be implemented)
+  public function visitInt(?ExprPos $_, int $i): string {
+    return (string)$i;
+  }
+  public function visitFloat(?ExprPos $_, float $f): string {
+    return (string)$f;
+  }
+  public function visitBool(?ExprPos $_, bool $b): string {
+    return $b ? "true" : "false";
+  }
+  public function visitString(?ExprPos $_, string $s): string {
+    return "\"$s\"";
+  }
+  public function visitNull(?ExprPos $_): string {
+    return "null";
   }
 
-  public static function liftFloat(
-    float $f,
-  ): ExprTree<Code, Code::TAst, ExampleFloat> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> (string)$f,
-      () ==> {
-        throw new Exception();
-      },
-    );
+  public function visitGlobalFunction<T>(
+    ?ExprPos $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+  ): Code::TAst {
+    return "function_ptr";
   }
 
-  public static function liftBool(
-    bool $b,
-  ): ExprTree<Code, Code::TAst, ExampleBool> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> $b ? "true" : "false",
-      () ==> {
-        throw new Exception();
-      },
-    );
-  }
-
-  public static function liftString(
-    string $s,
-  ): ExprTree<Code, Code::TAst, ExampleString> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> "\"$s\"",
-      () ==> {
-        throw new Exception();
-      },
-    );
-  }
-
-  public static function liftNull(): ExprTree<Code, Code::TAst, null> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> "null",
-      () ==> {
-        throw new Exception();
-      },
-    );
-  }
-
-  public static function liftVoid(): ExprTree<Code, Code::TAst, ExampleVoid> {
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> "void",
-      () ==> {
-        throw new Exception();
-      },
-    );
-  }
-
-  // Symbols
-  public static function liftSymbol<T>(
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $fp,
-  ): ExprTree<Code, Code::TAst, T> {
-    if (HH\is_fun($fp)) {
-      $name = HH\fun_get_function($fp);
-    } else if (HH\is_class_meth($fp)) {
-      $name = HH\class_meth_get_class($fp)."::".HH\class_meth_get_method($fp);
-    } else {
-      throw new Exception("Invalid function pointer in symbol");
-    }
-
-    return new ExprTree(
-      null,
-      shape('splices' => dict[], 'functions' => vec[], 'static_methods' => dict[]),
-      (Code $_) ==> $name."()",
-      () ==> {
-        throw new Exception();
-      },
-    );
+  public function visitStaticMethod<T>(
+    ?ExprPos $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+  ): Code::TAst {
+    return "function_ptr";
   }
 
   // Expressions
@@ -138,14 +97,22 @@ class Code {
     return "(".concat_arg_list($args).")"." ==> {\n".concat_block($body)."}";
   }
 
-  // Operators
-  public function visitMethCall(
+  // New operators
+  public function visitBinop(
     ?ExprPos $_,
-    Code::TAst $callee,
+    string $lhs,
     string $op,
-    vec<Code::TAst> $args,
-  ): Code::TAst {
-    return $callee."->".$op."(".concat_arg_list($args).")";
+    string $rhs,
+  ): string {
+    return "$lhs $op $rhs";
+  }
+
+  public function visitUnop(
+    ?ExprPos $_,
+    string $op,
+    string $operand,
+  ): string {
+    return "$op $operand";
   }
 
   public function visitCall<T>(
@@ -196,7 +163,10 @@ class Code {
     return "while (".$cond.") {\n".concat_block($body)."}";
   }
 
-  public function visitReturn(?ExprPos $_, Code::TAst $return_val): Code::TAst {
+  public function visitReturn(?ExprPos $_, ?Code::TAst $return_val): Code::TAst {
+    if ($return_val is null) {
+      return "return;";
+    }
     return "return ".$return_val.";";
   }
 

@@ -1,22 +1,22 @@
-${1}->__tripleEquals(${2})
-${1}->__notTripleEquals(${2})
-${1}->__plus(${2})
-${1}->__minus(${2})
-${1}->__star(${2})
-${1}->__slash(${2})
-${1}->__percent(${2})
-${1}->__negate()
-${1}->__lessThan(${2})
-${1}->__lessThanEqual(${2})
-${1}->__greaterThan(${2})
-${1}->__greaterThanEqual(${2})
-${1}->__amp(${2})
-${1}->__bar(${2})
-${1}->__caret(${2})
-${1}->__lessThanLessThan(${2})
-${1}->__greaterThanGreaterThan(${2})
-${1}->__tilde()
-${true}->__ampamp(${false})
-${true}->__barbar(${false})
-${true}->__exclamationMark()
-${"Hello"}->__dot(${"World"})
+1 __tripleEquals 2
+1 __notTripleEquals 2
+1 __plus 2
+1 __minus 2
+1 __star 2
+1 __slash 2
+1 __percent 2
+1 __negate
+1 __lessThan 2
+1 __lessThanEqual 2
+1 __greaterThan 2
+1 __greaterThanEqual 2
+1 __amp 2
+1 __bar 2
+1 __caret 2
+1 __lessThanLessThan 2
+1 __greaterThanGreaterThan 2
+1 __tilde
+true __ampamp false
+true __barbar false
+true __exclamationMark
+"Hello" __dot "World"

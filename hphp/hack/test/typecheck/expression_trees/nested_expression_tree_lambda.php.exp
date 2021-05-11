@@ -1,2 +1,2 @@
 File "nested_expression_tree_lambda.php", line 6, characters 22-28:
-Expression trees may not be nested. (Parsing[1002])
+Expression trees may not be nested (Parsing[1002])

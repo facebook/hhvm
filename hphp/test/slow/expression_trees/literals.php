@@ -11,5 +11,6 @@ function test(): void {
   print_et(Code`3.14`);
   print_et(Code`false`);
   print_et(Code`null`);
+  print_et(Code`() ==> {}`);
   print_et(Code`() ==> { return; }`);
 }

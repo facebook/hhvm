@@ -1,8 +1,6 @@
 File "splice_err3.php", line 13, characters 17-21:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 181, characters 35-44:
+  File "expr_tree.hhi", line 206, characters 35-44:
   Expected `ExampleInt`
-  File "expr_tree.hhi", line 38, characters 32-44:
+  File "expr_tree.hhi", line 29, characters 40-52:
   But got `ExampleString`
-  File "expr_tree.hhi", line 157, characters 44-49:
-    via this generic `TInfer`

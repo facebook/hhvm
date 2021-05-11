@@ -1,2 +1,2 @@
-File "self_static_method_call.php", line 13, characters 22-30:
+File "self_static_method_call.php", line 13, characters 22-37:
 Static method calls in expression trees require explicit class names. (Parsing[1002])

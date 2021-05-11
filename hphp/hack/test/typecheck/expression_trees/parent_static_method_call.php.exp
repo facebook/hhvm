@@ -1,2 +1,2 @@
-File "parent_static_method_call.php", line 15, characters 22-32:
+File "parent_static_method_call.php", line 15, characters 22-39:
 Static method calls in expression trees require explicit class names. (Parsing[1002])

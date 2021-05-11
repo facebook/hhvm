@@ -6,15 +6,3 @@ Typing error (Typing[4110])
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_variable4.php", line 5, characters 25-62:
   But got `dynamic` because it is an unenforceable type
-File "splice_variable4.php", line 15, characters 10-10:
-Typing error (Typing[4110])
-  File "splice_variable4.php", line 15, characters 10-10:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 24, characters 6-43:
-  But got `dynamic` because it is an unenforceable type
-File "splice_variable4.php", line 16, characters 5-11:
-Typing error (Typing[4110])
-  File "splice_variable4.php", line 16, characters 5-11:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 45, characters 38-76:
-  But got `dynamic` because it is an unenforceable type

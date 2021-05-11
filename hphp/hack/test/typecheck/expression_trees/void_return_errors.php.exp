@@ -2,10 +2,8 @@ File "void_return_errors.php", line 7, characters 8-22:
 Invalid return type (Typing[4110])
   File "void_return_errors.php", line 7, characters 12-15:
   Expected `void`
-  File "expr_tree.hhi", line 45, characters 65-75:
+  File "expr_tree.hhi", line 35, characters 38-48:
   But got `ExampleVoid`
-  File "expr_tree.hhi", line 157, characters 44-49:
-    via this generic `TInfer`
 File "void_return_errors.php", line 7, characters 8-22:
 You cannot return a value (Typing[4084])
   File "void_return_errors.php", line 7, characters 12-15:

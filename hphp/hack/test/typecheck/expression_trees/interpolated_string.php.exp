@@ -1,2 +1,2 @@
 File "interpolated_string.php", line 10, characters 7-19:
-Unsupported syntax for expression trees. (Parsing[1002])
+Unsupported expression tree syntax. (Parsing[1002])

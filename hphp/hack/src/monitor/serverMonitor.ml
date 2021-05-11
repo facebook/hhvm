@@ -162,6 +162,9 @@ struct
      * 0 means "close immediately"
      * -1 means "wait for server receipt" *)
     monitor_fd_close_delay: int;
+    (* This flag controls whether ClientConnect responds to monitor backpressure,
+    and ServerMonitor responds to server backpressure *)
+    monitor_backpressure: bool;
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
@@ -861,6 +864,7 @@ struct
       ~waiting_client
       ~max_purgatory_clients
       ~monitor_fd_close_delay
+      ~monitor_backpressure
       server_start_options
       informant_init_env
       monitor_config =
@@ -907,6 +911,7 @@ struct
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
         monitor_fd_close_delay;
+        monitor_backpressure;
       }
     in
     (env, monitor_config, socket)
@@ -916,6 +921,7 @@ struct
       ~waiting_client
       ~max_purgatory_clients
       ~monitor_fd_close_delay
+      ~monitor_backpressure
       server_start_options
       informant_init_env
       monitor_config =
@@ -925,6 +931,7 @@ struct
         ~waiting_client
         ~max_purgatory_clients
         ~monitor_fd_close_delay
+        ~monitor_backpressure
         server_start_options
         informant_init_env
         monitor_config

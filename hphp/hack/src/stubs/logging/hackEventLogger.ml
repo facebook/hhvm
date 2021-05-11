@@ -16,6 +16,7 @@ type rollout_flags = {
   longlived_workers: bool;
   max_times_to_defer_type_checking: int option;
   monitor_fd_close_delay: int;
+  monitor_backpressure: bool;
   enable_devx_dependency_graph: bool;
 }
 

@@ -162,7 +162,8 @@ let test_no_event mock_server_config temp_dir =
       ~current_version:(Config_file.Opaque_version None)
       ~waiting_client:None
       ~max_purgatory_clients:10
-      ~monitor_fd_close_delay:0
+      ~monitor_fd_close_delay:(-1)
+      ~monitor_backpressure:true
       ()
       (Tools.simple_informant_options temp_dir)
       (Tools.monitor_config temp_dir)
@@ -197,7 +198,8 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
       ~current_version:(Config_file.Opaque_version None)
       ~waiting_client:None
       ~max_purgatory_clients:10
-      ~monitor_fd_close_delay:0
+      ~monitor_fd_close_delay:(-1)
+      ~monitor_backpressure:true
       ()
       (Tools.simple_informant_options temp_dir)
       (Tools.monitor_config temp_dir)
@@ -268,7 +270,8 @@ let test_server_restart_suppressed_on_hhconfig_version_change
       ~current_version:(Config_file.Opaque_version (Some "aaa"))
       ~waiting_client:None
       ~max_purgatory_clients:10
-      ~monitor_fd_close_delay:0
+      ~monitor_fd_close_delay:(-1)
+      ~monitor_backpressure:true
       ()
       (Tools.simple_informant_options temp_dir)
       (Tools.monitor_config temp_dir)

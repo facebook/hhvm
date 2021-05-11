@@ -423,6 +423,8 @@ type t = {
   max_purgatory_clients: int;
   (* Monitor: how many seconds the monitor waits after handoff before closing the FD, or -1 to wait for server receipt *)
   monitor_fd_close_delay: int;
+  (* Monitor: should ClientConnect respect backpressure from server/monitor? *)
+  monitor_backpressure: bool;
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
@@ -566,6 +568,7 @@ let default =
         2
       else
         0 );
+    monitor_backpressure = false;
     search_chunk_size = 0;
     io_priority = 7;
     cpu_priority = 10;
@@ -824,6 +827,13 @@ let load_ fn ~silent ~current_version overrides =
   in
   let monitor_fd_close_delay =
     int_ "monitor_fd_close_delay" ~default:default.monitor_fd_close_delay config
+  in
+  let monitor_backpressure =
+    bool_if_min_version
+      "monitor_backpressure"
+      ~default:default.monitor_backpressure
+      ~current_version
+      config
   in
   let search_chunk_size =
     int_ "search_chunk_size" ~default:default.search_chunk_size config
@@ -1207,6 +1217,7 @@ let load_ fn ~silent ~current_version overrides =
     load_state_natively_64bit;
     max_purgatory_clients;
     monitor_fd_close_delay;
+    monitor_backpressure;
     type_decl_bucket_size;
     extend_fast_bucket_size;
     enable_on_nfs;
@@ -1292,5 +1303,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       max_times_to_defer_type_checking =
         options.max_times_to_defer_type_checking;
       monitor_fd_close_delay = options.monitor_fd_close_delay;
+      monitor_backpressure = options.monitor_backpressure;
       enable_devx_dependency_graph = options.enable_devx_dependency_graph;
     }

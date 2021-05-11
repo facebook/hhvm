@@ -368,6 +368,10 @@ struct
       try hand_off_client_connection ~tracker env server_fd client_fd
       with exn ->
         let e = Exception.wrap exn in
+        (* The only failure we've ever observed is EPIPE, meaning that the server
+        has closed its end of the pipe. It's typically because the server detected
+        a large rebase, or an incompatible .hhconfig change. This is not a high-volume
+        scenario and it's fine to be slow. *)
         if retries > 0 then (
           log
             "Handoff FD failed [%s]. Retrying."
@@ -384,7 +388,7 @@ struct
             "Handoff FD failed [%s]. Giving up and closing client FD"
             ~tracker
             (Exception.get_ctor_string e);
-          HackEventLogger.send_fd_failure exn;
+          HackEventLogger.send_fd_failure e;
           Unix.close client_fd
         )
     else if retries > 0 then (
@@ -396,6 +400,9 @@ struct
         (retries - 1)
         client_fd
     ) else (
+      (* Note that "timed out because server too busy or backed up to accept handoff" is a typical scenario
+      if the server's queue is full and it's currently engaged in a length operation.
+      We specifically don't want to be slow in that scenario, hence no HackEventLogger here. *)
       log
         "Handoff FD timed out [0.5s]. Sending Monitor_failed_to_handoff to client and closing client FD"
         ~tracker;
@@ -844,7 +851,6 @@ struct
         | Exit_status.Exit_with _ as e -> raise e
         | e ->
           let e = Exception.wrap e in
-          HackEventLogger.ack_and_handoff_exception e;
           Hh_logger.log
             "Ack_and_handoff failure; closing client FD: %s"
             (Exception.get_ctor_string e);

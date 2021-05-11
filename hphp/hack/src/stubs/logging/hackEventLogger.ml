@@ -381,8 +381,6 @@ let informant_watcher_starting_server_from_settling _ = ()
 (** Server Monitor events *)
 let accepting_on_socket_exception _ = ()
 
-let ack_and_handoff_exception _ = ()
-
 let malformed_build_id _ = ()
 
 let send_fd_failure _ = ()

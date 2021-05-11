@@ -77,12 +77,7 @@ let monitor_daemon_main
       (Unix.gettimeofday ());
   Sys_utils.set_signal
     Sys.sigpipe
-    (Sys.Signal_handle
-       (fun i ->
-         let stack =
-           Exception.get_current_callstack_string 99 |> Exception.clean_stack
-         in
-         Hh_logger.log "SIGPIPE(%d) - ignoring.\n%s\n" i stack));
+    (Sys.Signal_handle (fun i -> Hh_logger.log "SIGPIPE(%d)" i));
 
   ignore @@ Sys_utils.setsid ();
   ignore (make_tmp_dir ());

@@ -366,9 +366,13 @@ struct
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
     if not (List.is_empty ready_l) then
       try hand_off_client_connection ~tracker env server_fd client_fd
-      with e ->
+      with exn ->
+        let e = Exception.wrap exn in
         if retries > 0 then (
-          log "Retrying FD handoff" ~tracker;
+          log
+            "Handoff FD failed [%s]. Retrying."
+            ~tracker
+            (Exception.get_ctor_string e);
           hand_off_client_connection_with_retries
             ~tracker
             env
@@ -376,12 +380,15 @@ struct
             (retries - 1)
             client_fd
         ) else (
-          log "No more retries. Ignoring request." ~tracker;
-          HackEventLogger.send_fd_failure e;
+          log
+            "Handoff FD failed [%s]. Giving up and closing client FD"
+            ~tracker
+            (Exception.get_ctor_string e);
+          HackEventLogger.send_fd_failure exn;
           Unix.close client_fd
         )
     else if retries > 0 then (
-      log "server socket not yet ready. Retrying." ~tracker;
+      log "Handoff FD timed out [0.5s]. Retrying." ~tracker;
       hand_off_client_connection_with_retries
         ~tracker
         env
@@ -390,7 +397,7 @@ struct
         client_fd
     ) else (
       log
-        "server socket not yet ready. No more retries. Sending Monitor_failed_to_handoff to client and closing client FD"
+        "Handoff FD timed out [0.5s]. Sending Monitor_failed_to_handoff to client and closing client FD"
         ~tracker;
       msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
       Unix.close client_fd
@@ -839,8 +846,8 @@ struct
           let e = Exception.wrap e in
           HackEventLogger.ack_and_handoff_exception e;
           Hh_logger.log
-            "Handling client connection failed. Ignoring connection attempt.\n%s\n"
-            (Exception.to_string e |> Exception.clean_stack);
+            "Ack_and_handoff failure; closing client FD: %s"
+            (Exception.get_ctor_string e);
           Unix.close fd;
           env
       with

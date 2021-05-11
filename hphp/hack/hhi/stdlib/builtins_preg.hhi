@@ -129,13 +129,6 @@ function preg_split_with_error(
 )[];
 <<__PHPStdLib>>
 function preg_quote(string $str, $delimiter = null)[];
-<<__PHPStdLib,
-  __Deprecated(
-    'Use `_with_error`-suffixed versions of preg functions to get the error '.
-    'code. e.g. `preg_match_with_error` instead of `preg_match`.',
-    0
-  )>>
-function preg_last_error();
 <<__PHPStdLib>>
 function ereg_replace(string $pattern, string $replacement, string $str);
 <<__PHPStdLib>>

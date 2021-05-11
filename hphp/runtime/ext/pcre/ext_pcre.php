@@ -45,18 +45,6 @@ function preg_grep_with_error(
 )[]: mixed;
 
 /**
- * Returns the error code of the last PCRE regex execution
- *
- * @return int - Returns one of the following constants (explained on
- *   their own page):  PREG_NO_ERROR PREG_INTERNAL_ERROR
- *   PREG_BACKTRACK_LIMIT_ERROR (see also pcre.backtrack_limit)
- *   PREG_RECURSION_LIMIT_ERROR (see also pcre.recursion_limit)
- *   PREG_BAD_UTF8_ERROR PREG_BAD_UTF8_OFFSET_ERROR (since PHP 5.3.0)
- */
-<<__Native>>
-function preg_last_error(): int;
-
-/**
  * Perform a global regular expression match
  *
  * @param string $pattern - The pattern to search for, as a string.

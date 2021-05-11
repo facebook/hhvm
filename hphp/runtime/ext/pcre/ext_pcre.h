@@ -45,7 +45,6 @@ Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
                                   const Variant& limit, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
                                  const Variant& = null_string);
-int64_t HHVM_FUNCTION(preg_last_error);
 
 ///////////////////////////////////////////////////////////////////////////////
 // deprecating these
@@ -62,4 +61,3 @@ String HHVM_FUNCTION(sql_regcase, const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

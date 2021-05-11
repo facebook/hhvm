@@ -318,10 +318,6 @@ String HHVM_FUNCTION(preg_quote, const String& str,
   }
 }
 
-int64_t HHVM_FUNCTION(preg_last_error) {
-  return preg_last_error();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // ereg
 
@@ -438,7 +434,6 @@ struct PcreExtension final : Extension {
     HHVM_FE(preg_split);
     HHVM_FE(preg_split_with_error);
     HHVM_FE(preg_quote);
-    HHVM_FE(preg_last_error);
     HHVM_FE(ereg_replace);
     HHVM_FE(eregi_replace);
     HHVM_FE(split);

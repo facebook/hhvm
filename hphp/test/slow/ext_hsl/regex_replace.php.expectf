@@ -1,160 +1,52 @@
-== using preg_match to make preg_last_error zero ==
 -- invalid pattern 1 --
 args: lol, whut, the
-p_l_e before: 0
-p_l_e after: 0
 error: int(6)
 NULL
 -- invalid pattern 2 --
 args: lol, /whut, the
-p_l_e before: 0
-p_l_e after: 0
 error: int(6)
 NULL
 -- backtracking limit error --
 args: 0123456789, /(..?)*\p{N}/, sup
-p_l_e before: 0
-p_l_e after: 0
 error: int(2)
 NULL
 -- no match --
 args: abcd, /de/, f
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(4) "abcd"
 -- match at start --
 args: abcd, /ab/, f
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(3) "fcd"
 -- match in middle --
 args: abcd, /bc/, f
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(3) "afd"
 -- match at end --
 args: abcd, /cd/, f
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(3) "abf"
 -- match more than once --
 args: abcdefghi, /[bdfh]/, x
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(9) "axcxexgxi"
 -- backreference style 1 --
 args: foobar foobaz, /foo(bar|baz)/, bar\1
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(13) "barbar barbaz"
 -- backreference style 2 --
 args: foobar foobaz, /foo(bar|baz)/, bar$1
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(13) "barbar barbaz"
 -- backreference style 3 --
 args: foobar foobaz, /foo(bar|baz)/, bar${1}
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(13) "barbar barbaz"
 -- multiple backreferences --
 args: longcat, bigbird, /(long|big)(cat|bird)/, \2 \1
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 string(18) "cat long, bird big"
 -- bad backreference numbers (currently) become empty strings --
 args: 12, /(1)(2)/, "$0" "$1" "$2" "$3" "$4" "${99}"
-p_l_e before: 0
-p_l_e after: 0
-error: NULL
-string(21) ""12" "1" "2" "" "" """
-== using preg_match to make preg_last_error non-zero ==
-
-Warning: REGEXERR: preg_match_impl/%d: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/(..?)*\\p{N}/', subject='0123456789', repl='', limits=(2, 100000), extra=(0, 0, 0, 0) in %s/ext_hsl/regex_replace.php on line %d
--- invalid pattern 1 --
-args: lol, whut, the
-p_l_e before: 2
-p_l_e after: 2
-error: int(6)
-NULL
--- invalid pattern 2 --
-args: lol, /whut, the
-p_l_e before: 2
-p_l_e after: 2
-error: int(6)
-NULL
--- backtracking limit error --
-args: 0123456789, /(..?)*\p{N}/, sup
-p_l_e before: 2
-p_l_e after: 2
-error: int(2)
-NULL
--- no match --
-args: abcd, /de/, f
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(4) "abcd"
--- match at start --
-args: abcd, /ab/, f
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(3) "fcd"
--- match in middle --
-args: abcd, /bc/, f
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(3) "afd"
--- match at end --
-args: abcd, /cd/, f
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(3) "abf"
--- match more than once --
-args: abcdefghi, /[bdfh]/, x
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(9) "axcxexgxi"
--- backreference style 1 --
-args: foobar foobaz, /foo(bar|baz)/, bar\1
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(13) "barbar barbaz"
--- backreference style 2 --
-args: foobar foobaz, /foo(bar|baz)/, bar$1
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(13) "barbar barbaz"
--- backreference style 3 --
-args: foobar foobaz, /foo(bar|baz)/, bar${1}
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(13) "barbar barbaz"
--- multiple backreferences --
-args: longcat, bigbird, /(long|big)(cat|bird)/, \2 \1
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-string(18) "cat long, bird big"
--- bad backreference numbers (currently) become empty strings --
-args: 12, /(1)(2)/, "$0" "$1" "$2" "$3" "$4" "${99}"
-p_l_e before: 2
-p_l_e after: 2
 error: NULL
 string(21) ""12" "1" "2" "" "" """

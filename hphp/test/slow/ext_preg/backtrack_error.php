@@ -21,21 +21,27 @@ $fail = '{
 }';
 
   $match = null;
-  $count = preg_match_with_matches($re, $pass, inout $match);
-  var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_match_with_matches_and_error($re, $pass, inout $match, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 
-  $count = preg_match_with_matches($re, $fail, inout $match);
-  var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_match_with_matches_and_error($re, $fail, inout $match, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 
-$count = preg_replace($re, '', $fail);
-var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_replace_with_error($re, '', $fail, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 
-$count = preg_replace($re, '', $pass);
-var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_replace_with_error($re, '', $pass, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 
-$count = preg_split($re, $fail);
-var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_split_with_error($re, $fail, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 
-$count = preg_split($re, $pass);
-var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+  $error = null;
+  $count = preg_split_with_error($re, $pass, inout $error);
+  var_dump($count, $error === PREG_BACKTRACK_LIMIT_ERROR);
 }

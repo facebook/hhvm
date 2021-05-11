@@ -16,7 +16,6 @@ dict(1) {
   ["x"]=>
   string(1) "1"
 }
-bool(true)
 dict(3) {
   [5]=>
   string(1) "a"

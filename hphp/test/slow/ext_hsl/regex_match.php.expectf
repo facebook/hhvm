@@ -1,64 +1,45 @@
-== using preg_match to make preg_last_error zero ==
 -- invalid pattern 1 --
 args: lol, whut, 0
-p_l_e before: 0
-p_l_e after: 0
 error: int(6)
 offset: 0
 NULL
 -- invalid pattern 2 --
 args: lol, /whut, 0
-p_l_e before: 0
-p_l_e after: 0
 error: int(6)
 offset: 0
 NULL
 -- backtracking limit error --
 args: 0123456789, /.*\p{N}/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: int(2)
 offset: 0
 NULL
 -- offset does not change on error --
 args: lol, whut, 2
-p_l_e before: 0
-p_l_e after: 0
 error: int(6)
 offset: 2
 NULL
 -- no match (pattern) --
 args: lol, /whut/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 0
 NULL
 -- no match (offset) --
 args: lol, /lol/, 1
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 1
 NULL
 -- no match (offset from end) --
 args: lol, /lol/, -1
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: -1
 NULL
 -- no match (offset past the end) --
 args: lol, /o/, 5
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 5
 NULL
 -- match part at start --
 args: lol, /lo/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 0
 dict(1) {
@@ -67,8 +48,6 @@ dict(1) {
 }
 -- match whole --
 args: lol, /lol/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 0
 dict(1) {
@@ -77,8 +56,6 @@ dict(1) {
 }
 -- match after start moves offset --
 args: lol, /ol/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 1
 dict(1) {
@@ -87,8 +64,6 @@ dict(1) {
 }
 -- offset before beginning still matches --
 args: lol, /o/, -5
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 1
 dict(1) {
@@ -97,8 +72,6 @@ dict(1) {
 }
 -- multi-step 1 --
 args: abbaabbbbaaaba, /ab/, 0
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 0
 dict(1) {
@@ -107,8 +80,6 @@ dict(1) {
 }
 -- multi-step 2 --
 args: abbaabbbbaaaba, /ab/, 2
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 4
 dict(1) {
@@ -117,8 +88,6 @@ dict(1) {
 }
 -- multi-step 3 --
 args: abbaabbbbaaaba, /ab/, 6
-p_l_e before: 0
-p_l_e after: 0
 error: NULL
 offset: 11
 dict(1) {
@@ -127,144 +96,6 @@ dict(1) {
 }
 -- multi-step 4 --
 args: abbaabbbbaaaba, /ab/, 13
-p_l_e before: 0
-p_l_e after: 0
-error: NULL
-offset: 13
-NULL
-== using preg_match to make preg_last_error non-zero ==
-
-Warning: REGEXERR: preg_match_impl/%d: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/.*\\p{N}/', subject='0123456789', repl='', limits=(1, 100000), extra=(0, 0, 0, 0) in %s/test/slow/ext_hsl/regex_match.php on line 59
--- invalid pattern 1 --
-args: lol, whut, 0
-p_l_e before: 2
-p_l_e after: 2
-error: int(6)
-offset: 0
-NULL
--- invalid pattern 2 --
-args: lol, /whut, 0
-p_l_e before: 2
-p_l_e after: 2
-error: int(6)
-offset: 0
-NULL
--- backtracking limit error --
-args: 0123456789, /.*\p{N}/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: int(2)
-offset: 0
-NULL
--- offset does not change on error --
-args: lol, whut, 2
-p_l_e before: 2
-p_l_e after: 2
-error: int(6)
-offset: 2
-NULL
--- no match (pattern) --
-args: lol, /whut/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 0
-NULL
--- no match (offset) --
-args: lol, /lol/, 1
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 1
-NULL
--- no match (offset from end) --
-args: lol, /lol/, -1
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: -1
-NULL
--- no match (offset past the end) --
-args: lol, /o/, 5
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 5
-NULL
--- match part at start --
-args: lol, /lo/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 0
-dict(1) {
-  [0]=>
-  string(2) "lo"
-}
--- match whole --
-args: lol, /lol/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 0
-dict(1) {
-  [0]=>
-  string(3) "lol"
-}
--- match after start moves offset --
-args: lol, /ol/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 1
-dict(1) {
-  [0]=>
-  string(2) "ol"
-}
--- offset before beginning still matches --
-args: lol, /o/, -5
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 1
-dict(1) {
-  [0]=>
-  string(1) "o"
-}
--- multi-step 1 --
-args: abbaabbbbaaaba, /ab/, 0
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 0
-dict(1) {
-  [0]=>
-  string(2) "ab"
-}
--- multi-step 2 --
-args: abbaabbbbaaaba, /ab/, 2
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 4
-dict(1) {
-  [0]=>
-  string(2) "ab"
-}
--- multi-step 3 --
-args: abbaabbbbaaaba, /ab/, 6
-p_l_e before: 2
-p_l_e after: 2
-error: NULL
-offset: 11
-dict(1) {
-  [0]=>
-  string(2) "ab"
-}
--- multi-step 4 --
-args: abbaabbbbaaaba, /ab/, 13
-p_l_e before: 2
-p_l_e after: 2
 error: NULL
 offset: 13
 NULL

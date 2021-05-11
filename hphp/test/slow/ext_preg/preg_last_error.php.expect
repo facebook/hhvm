@@ -1,110 +1,50 @@
 === preg_grep ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_match ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_match_with_matches ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_match_all ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_match_all_with_matches ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_replace ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_replace_with_count ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_split ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_replace_callback ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)
 === preg_replace_callback_array ===
 - no error -
 bool(true)
-bool(true)
 - error induced -
-bool(true)
-bool(true)
-- error state preserved -
-bool(true)
-bool(true)
 bool(true)

@@ -1,6 +1,0 @@
-*** Testing preg_last_error() : error conditions ***
-
--- Testing preg_last_error() function with more than expected no. of arguments --
-
-Warning: preg_last_error() expects exactly 0 parameters, 1 given in %s/preg_last_error_error.php on line 17
-===Done===

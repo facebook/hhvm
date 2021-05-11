@@ -9,25 +9,15 @@ function test_fn($name, $base, $with_error) {
 
   echo "- no error -\n";
   $base(TPATTERN);
-  var_dump(preg_last_error() === PREG_NO_ERROR);
   $error = null;
   $with_error(TPATTERN, inout $error);
   var_dump($error === null);
 
   echo "- error induced -\n";
   $base(TBACKTRACK_PATTERN);
-  var_dump(preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
   $error = null;
   $with_error(TBACKTRACK_PATTERN, inout $error);
   var_dump($error === PREG_BACKTRACK_LIMIT_ERROR);
-
-  echo "- error state preserved -\n";
-  $base(TPATTERN);
-  var_dump(preg_last_error() === PREG_NO_ERROR);
-  $error = null;
-  $with_error(TBACKTRACK_PATTERN, inout $error);
-  var_dump($error === PREG_BACKTRACK_LIMIT_ERROR);
-  var_dump(preg_last_error() === PREG_NO_ERROR);
 }
 
 function test_preg_grep() {

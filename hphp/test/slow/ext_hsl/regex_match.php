@@ -3,10 +3,8 @@
 function test_one($name, $haystack, $pattern, $offset) {
   echo "-- $name --\n";
   echo "args: $haystack, $pattern, $offset\n";
-  echo "p_l_e before: " . preg_last_error() . "\n";
   list ($matches, $error) =
     HH\Lib\_Private\_Regex\match($haystack, $pattern, inout $offset);
-  echo "p_l_e after: " . preg_last_error() . "\n";
   echo "error: "; var_dump($error);
   echo "offset: $offset\n";
   var_dump($matches);
@@ -45,21 +43,7 @@ function test_one($name, $haystack, $pattern, $offset) {
   $cases[] = vec['multi-step 3', $haystack, $pattern, 6];
   $cases[] = vec['multi-step 4', $haystack, $pattern, 13];
 
-  // cause preg_last_error() to be zero
-  echo "== using preg_match to make preg_last_error zero ==\n";
-  preg_match('/./', '0');
-
   // run all the cases
-  foreach ($cases as $case) {
-    test_one(...$case);
-  }
-
-  // cause preg_last_error() to be non-zero
-  echo "== using preg_match to make preg_last_error non-zero ==\n";
-  preg_match('/.*\p{N}/', '0123456789');
-
-  // run all the cases again to show we still don't mutate preg_last_error
-  // and that preg_last_error doesn't affect the error we produce
   foreach ($cases as $case) {
     test_one(...$case);
   }

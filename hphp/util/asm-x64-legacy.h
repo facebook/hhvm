@@ -309,8 +309,7 @@ public:
   // exactly the same as movzbl but takes an extra byte.
   void loadzbl(MemoryRef m, Reg32 r)        { instrMR(instr_movzbx,
                                                       m, rbyte(r)); }
-  void loadzwl(MemoryRef m, Reg32 r)        { instrMR(instr_movzwx,
-                                                      m, r16(r)); }
+  void loadzwl(MemoryRef m, Reg32 r)        { instrMR(instr_movzwx, m, r); }
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
                                                        rn(src), rn(dest)); }
   void movsbl(Reg8 src, Reg32 dest)         { emitRR(instr_movsbx,

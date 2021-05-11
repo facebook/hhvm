@@ -717,6 +717,11 @@ pub mod hh {
 pub mod rx {
     pub const IS_ENABLED: &str = "\\HH\\Rx\\IS_ENABLED";
 }
+
+pub mod readonly {
+    pub const AS_MUT: &str = "\\HH\\Readonly\\as_mut";
+}
+
 pub mod coeffects {
     pub const DEFAULTS: &str = "defaults";
 

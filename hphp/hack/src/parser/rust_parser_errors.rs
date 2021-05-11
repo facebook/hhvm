@@ -3033,6 +3033,10 @@ where
                     .parser_options
                     .po_disallow_fun_and_cls_meth_pseudo_funcs;
 
+                if Self::strip_ns(self.text(recv)) == Self::strip_ns(sn::readonly::AS_MUT) {
+                    self.check_can_use_feature(recv, &UnstableFeatures::Readonly);
+                }
+
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
                     && fun_and_clsmeth_disabled
                 {

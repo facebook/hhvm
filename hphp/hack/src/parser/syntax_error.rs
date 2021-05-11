@@ -997,3 +997,6 @@ pub const inst_meth_disabled: Error =
 
 pub const invalid_atom_location: Error =
     Cow::Borrowed("`__Atom` attribute can only appear on the first parameter of a function");
+
+pub const as_mut_single_argument: Error =
+    Cow::Borrowed("HH\\Readonly\\as_mut takes a single value-typed expression as an argument.");

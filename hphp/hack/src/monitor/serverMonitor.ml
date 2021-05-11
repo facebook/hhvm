@@ -361,11 +361,31 @@ struct
       raise (Send_fd_failure status)
     end
 
-  (* Sends the client connection FD to the server process then closes the
-   * FD. *)
+  (** Sends the client connection FD to the server process then closes the FD.
+  Backpressure: We have a timeout of 30s here to wait for the server to accept
+  the handoff. That timeout will be exceeded if monitor->server pipe has filled
+  up from previous requests and the server's current work item is costly. In this
+  case we'll give up on the handoff, and hh_client will fail with Server_hung_up_should_retry,
+  and find_hh.sh will retry with exponential backoff.
+  During the 30s while we're blocked here, if there are lots of other clients trying
+  to connect to the monitor and the monitor's incoming queue is full, they'll time
+  out trying to open a connection to the monitor. Their response is to back off,
+  with exponentially longer timeouts they're willing to wait for the monitor to become
+  available. In this way the queue of clients is stored in the unix process list.
+  Why did we pick 30s? It's arbitrary. If we decreased then, if there are lots of clients,
+  they'll do more work while they needlessly cycle. If we increased up to infinite
+  then I worry that a failure for other reasons might look like a hang.
+  This 30s must be comfortably shorter than the 60s delay in ClientConnect.connect, since
+  if not then by the time we in the monitor timeout we'll find that every single item
+  in our incoming queue is already stale! *)
   let hand_off_client_connection_wrapper ~tracker env server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let timeout = 4.0 in
+    let timeout =
+      if env.monitor_backpressure then
+        30.0
+      else
+        4.0
+    in
     let to_finally_close = ref (Some client_fd) in
     Utils.try_finally
       ~f:(fun () ->

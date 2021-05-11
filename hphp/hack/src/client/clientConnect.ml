@@ -326,11 +326,34 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
   in
   let tracker = Connection_tracker.create () in
   let connection_log_id = Connection_tracker.log_id tracker in
+  (* We'll attempt to connect, with timeout up to [env.deadline]. Effectively, the
+  unix process list will be where we store our (unbounded) queue of incoming client requests,
+  each of them waiting for the monitor's incoming socket to become available; if there's a backlog
+  in the monitor->server pipe and the monitor's incoming queue is full, then the monitor's incoming
+  socket will become only available after the server has finished a request, and the monitor gets to
+  send its next handoff, and take the next item off its incoming queue.
+  If the deadline is infinite, I arbitrarily picked 60s as the timeout coupled with "will retry..."
+  if it timed out. That's because I distrust infinite timeouts, just in case something got stuck for
+  unknown causes, and maybe retrying the connection attempt will get it unstuck? -- a sort of
+  "try turning it off then on again". This timeout must be comfortably longer than the monitor's
+  own 30s timeout in serverMonitor.hand_off_client_connection_wrapper to handoff to the server;
+  if it were shorter, then the monitor's incoming queue would be entirely full of requests that
+  were all stale by the time it got to handle them. *)
+  let timeout =
+    match
+      (env.local_config.ServerLocalConfig.monitor_backpressure, env.deadline)
+    with
+    | (false, _) -> 1
+    | (true, None) -> 60
+    | (true, Some deadline) ->
+      Int.max 1 (int_of_float (deadline -. Unix.gettimeofday ()))
+  in
   log
     ~connection_log_id
-    "ClientConnect.connect: attempting MonitorConnection.connect_once";
+    "ClientConnect.connect: attempting MonitorConnection.connect_once (%ds)"
+    timeout;
   let conn =
-    MonitorConnection.connect_once ~tracker ~timeout:1 env.root handoff_options
+    MonitorConnection.connect_once ~tracker ~timeout env.root handoff_options
   in
   let t_connected_to_monitor = Unix.gettimeofday () in
   match conn with
@@ -408,7 +431,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
             server_exists = true;
             failure_phase = Connect_open_socket;
             failure_reason = Connect_timeout;
-          }) ->
+          })
+      when not env.local_config.ServerLocalConfig.monitor_backpressure ->
       (* If server+monitor are too busy, this is manifest either as timeouts
       during Connect_open_socket (this case) or receiving SERVER_HUNG_UP in
       [wait_for_server_message] above. Arbitrarily, we fail fatally in this
@@ -421,6 +445,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     | ServerMonitorUtils.Server_died
     | ServerMonitorUtils.(
         Connect_to_monitor_failure { server_exists = true; _ }) ->
+      log ~tracker "connect: no response yet from server; will retry...";
       Unix.sleepf 0.1;
       connect env start_time
     | ServerMonitorUtils.(

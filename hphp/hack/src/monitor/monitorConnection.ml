@@ -128,38 +128,35 @@ let connect_to_monitor ~tracker ~timeout config =
   indefinitely, sometimes stuck on a "select" call to see if there's a request on the queue
   where I know there are outstanding requests but again it doesn't see them. I have no
   explanation for these phemona. *)
-  let open Result.Monad_infix in
-  Timeout.with_timeout
-    ~timeout
-    ~do_:
-      begin
-        fun timeout ->
-        let sockaddr = get_sockaddr config in
-        begin
-          try Ok (Timeout.open_connection ~timeout sockaddr)
-          with exn when not (Timeout.is_timeout_exn timeout exn) ->
-            let e = Exception.wrap exn in
-            Error
-              (Connect_to_monitor_failure
-                 {
-                   server_exists = server_exists config.lock_file;
-                   failure_phase = Connect_open_socket;
-                   failure_reason = Connect_exception e;
-                 })
-        end
-        >>= fun (ic, oc) ->
-        let tracker =
-          Connection_tracker.(track tracker ~key:Client_opened_socket)
-        in
-        begin
-          try
+  let open Connection_tracker in
+  let phase = ref ServerMonitorUtils.Connect_open_socket in
+  let finally_close : Timeout.in_channel option ref = ref None in
+  Utils.try_finally
+    ~f:(fun () ->
+      try
+        (* Note: Timeout.with_timeout is accomplished internally by an exception;
+        hence, our "try/with exn ->" catch-all must be outside with_timeout. *)
+        Timeout.with_timeout
+          ~timeout
+          ~do_:(fun timeout ->
+            (* 1. open the socket *)
+            phase := ServerMonitorUtils.Connect_open_socket;
+            let sockaddr = get_sockaddr config in
+            let (ic, oc) = Timeout.open_connection ~timeout sockaddr in
+            finally_close := Some ic;
+            let tracker =
+              Connection_tracker.track tracker ~key:Client_opened_socket
+            in
+
+            (* 2. send version, followed by newline *)
+            phase := ServerMonitorUtils.Connect_send_version;
             let version_str = produce_version_payload ~tracker in
             let (_ : int) =
               Marshal_tools.to_fd_with_preamble
                 (Unix.descr_of_out_channel oc)
                 version_str
             in
-            (* For backwards-compatibility, newline has always followed the version *)
+            phase := ServerMonitorUtils.Connect_send_newline;
             let (_ : int) =
               Unix.write
                 (Unix.descr_of_out_channel oc)
@@ -168,66 +165,49 @@ let connect_to_monitor ~tracker ~timeout config =
                 1
             in
             let tracker =
-              Connection_tracker.(track tracker ~key:Client_sent_version)
+              Connection_tracker.track tracker ~key:Client_sent_version
             in
+
+            (* 3. wait for Connection_ok *)
+            (* timeout/exn -> Server_missing_exn/Monitor_connection_misc_exception *)
+            phase := ServerMonitorUtils.Connect_receive_connection_ok;
             let cstate : connection_state = from_channel_without_buffering ic in
             let tracker =
-              Connection_tracker.(track tracker ~key:Client_got_cstate)
+              Connection_tracker.track tracker ~key:Client_got_cstate
             in
-            Ok (ic, oc, cstate, tracker)
-          with exn ->
-            let e = Exception.wrap exn in
-            log
-              "error getting cstate; closing connection. %s"
-              ~tracker
-              (Exception.to_string e);
-            Timeout.shutdown_connection ic;
-            Timeout.close_in_noerr ic;
-            let failure_reason =
-              if Timeout.is_timeout_exn timeout exn then
-                Connect_timeout
-              else
-                Connect_exception e
-            in
+
+            (* 4. return Ok *)
+            match cstate with
+            | Build_id_mismatch_ex mismatch_info
+            | Build_id_mismatch_v3 (mismatch_info, _) ->
+              wait_on_server_restart ic;
+              Error (Build_id_mismatched (Some mismatch_info))
+            | _ ->
+              finally_close := None;
+              Ok (ic, oc, tracker))
+          ~on_timeout:(fun _timings ->
             Error
               (Connect_to_monitor_failure
                  {
                    server_exists = server_exists config.lock_file;
-                   failure_phase = Connect_receive_connection_ok;
-                   failure_reason;
-                 })
-        end
-        >>= fun (ic, oc, cstate, tracker) ->
-        match cstate with
-        | Connection_ok
-        | Connection_ok_v2 _ ->
-          Ok (ic, oc, tracker)
-        | Build_id_mismatch_ex mismatch_info
-        | Build_id_mismatch_v3 (mismatch_info, _) ->
-          wait_on_server_restart ic;
-          Timeout.close_in_noerr ic;
-          Error (Build_id_mismatched (Some mismatch_info))
-        | Build_id_mismatch ->
-          (* The server no longer ever sends this message, as of July 2017 *)
-          failwith "Ancient version of server sent old Build_id_mismatch"
-      end
-    ~on_timeout:(fun timings ->
-      HackEventLogger.client_connect_to_monitor_timeout ();
-      let exists_lock_file = server_exists config.lock_file in
-      log
-        "connect_to_monitor: lockfile=%b timeout=%s"
-        ~tracker
-        exists_lock_file
-        (Timeout.show_timings timings);
-      Error
-        (Connect_to_monitor_failure
-           {
-             server_exists = exists_lock_file;
-             failure_phase = Connect_open_socket;
-             (* get_cstate swallows timeouts; hence, any timeout we get here must have come from establish_connection,
-             i.e. failure_phase = Connect_open_socket. *)
-             failure_reason = Connect_timeout;
-           }))
+                   failure_phase = !phase;
+                   failure_reason = Connect_timeout;
+                 }))
+      with exn ->
+        let e = Exception.wrap exn in
+        Error
+          (Connect_to_monitor_failure
+             {
+               server_exists = server_exists config.lock_file;
+               failure_phase = !phase;
+               failure_reason = Connect_exception e;
+             }))
+    ~finally:(fun () ->
+      match !finally_close with
+      | None -> ()
+      | Some ic ->
+        Timeout.shutdown_connection ic;
+        Timeout.close_in_noerr ic)
 
 let connect_and_shut_down ~tracker root =
   let open Result.Monad_infix in

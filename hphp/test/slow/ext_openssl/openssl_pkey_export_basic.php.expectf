@@ -1,6 +1,7 @@
 resource(%d) of type (OpenSSL key)
 bool(true)
------BEGIN EC PRIVATE KEY-----%a-----END EC PRIVATE KEY-----
+// @lint-ignore-every PRIVATEKEY unit test
+-----BEGIN PRIVATE KEY-----%a-----END PRIVATE KEY-----
 bool(true)
 bool(true)
 resource(%d) of type (OpenSSL key)

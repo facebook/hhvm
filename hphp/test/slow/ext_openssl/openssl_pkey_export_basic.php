@@ -6,6 +6,8 @@ $config_arg = darray["config" => __DIR__ . DIRECTORY_SEPARATOR . "openssl.cnf"];
 
 $output = null;
 var_dump(openssl_pkey_export($key, inout $output, '', $config_arg));
+// lintception
+echo "// @lint-ignore-every PRIVATEKEY unit test\n";
 echo $output;
 
 // Load the private key from the exported pem string

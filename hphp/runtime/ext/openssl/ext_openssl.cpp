@@ -1804,23 +1804,9 @@ openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
     }
     assertx(bio_out);
 
-    switch (EVP_PKEY_id(pkey)) {
-#ifdef HAVE_EVP_PKEY_EC
-      case EVP_PKEY_EC:
-        ret = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get0_EC_KEY(pkey),
-                                         cipher,
-                                         (unsigned char *)passphrase.data(),
-                                         passphrase.size(),
-                                         nullptr,
-                                         nullptr);
-        break;
-#endif
-      default:
-        ret = PEM_write_bio_PrivateKey(bio_out, pkey, cipher,
-                                       (unsigned char *)passphrase.data(),
-                                       passphrase.size(), nullptr, nullptr);
-        break;
-    }
+    ret = PEM_write_bio_PrivateKey(bio_out, pkey, cipher,
+                                   (unsigned char *)passphrase.data(),
+                                   passphrase.size(), nullptr, nullptr);
   }
   php_openssl_dispose_config(&req);
   return ret;

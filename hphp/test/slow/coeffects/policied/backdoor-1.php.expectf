@@ -1,0 +1,10 @@
+Warning: Call to defaults() requires [defaults] coeffects but main() provided [] in %s on line 13
+in defaults
+in defaults
+
+Warning: Call to defaults_async() requires [defaults] coeffects but main() provided [] in %s on line 15
+in defaults_async
+in defaults_async
+
+Warning: Call to Closure$main() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 18
+in policied_of

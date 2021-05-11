@@ -1,0 +1,3 @@
+Warning: Invalid argument: function: not string, closure, or array in %s on line 5
+
+Fatal error: HH\Coeffects\backdoor expects first argument to be a closure or a function pointer in %s on line 5

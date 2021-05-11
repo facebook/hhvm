@@ -1133,6 +1133,19 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   return prev_index;
 }
 
+Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
+  CallCtx ctx;
+  vm_decode_function(function, ctx);
+  if (!ctx.func) {
+    raise_error("HH\\Coeffects\\backdoor expects first argument to be a "
+                "closure or a function pointer");
+  }
+  return Variant::attach(
+    g_context->invokeFunc(ctx.func, init_null_variant, ctx.this_, ctx.cls,
+                          RuntimeCoeffects::defaults(), ctx.dynamic)
+  );
+}
+
 bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
                                                         StringArg meth) {
   if (auto const c = Class::load(cls.get())) {
@@ -1306,6 +1319,8 @@ static struct HHExtension final : Extension {
     X(AUTOLOAD_MAP_KIND_OF_CONSTANT, Constant);
     X(AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS, TypeAlias);
 #undef X
+
+    HHVM_NAMED_FE(HH\\Coeffects\\backdoor, HHVM_FN(coeffects_backdoor));
 
     HHVM_NAMED_FE(__SystemLib\\is_dynamically_callable_inst_method,
                   HHVM_FN(is_dynamically_callable_inst_method));

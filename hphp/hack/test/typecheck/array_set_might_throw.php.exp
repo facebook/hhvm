@@ -1,0 +1,6 @@
+File "array_set_might_throw.php", line 16, characters 3-4:
+Typing error (Typing[4110])
+  File "array_set_might_throw.php", line 16, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "array_set_might_throw.php", line 8, characters 12-14:
+  But got `Foo`

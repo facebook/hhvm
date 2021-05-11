@@ -5184,6 +5184,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
     | (pos, Array_get (e1, Some e)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (env, te, ty) = expr env e ~allow_awaitable in
+      let env = might_throw env in
       let (env, ty1', err_opt) =
         Typing_array_access.assign_array_get_with_err
           ~array_pos:(fst e1)

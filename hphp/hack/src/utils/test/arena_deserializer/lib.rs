@@ -16,6 +16,14 @@ fn round_trip<'a, X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug>(x: X, a
     let de = ArenaDeserializer::new(arena, &mut de);
     let x2 = X::deserialize(de).unwrap();
     assert_eq!(x, x2);
+
+    use bincode::Options;
+    let op = bincode::config::Options::with_native_endian(bincode::options());
+    let se = op.serialize(&x).unwrap();
+    let mut de = bincode::de::Deserializer::from_slice(se.as_slice(), op);
+    let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+    let x2 = X::deserialize(de).unwrap();
+    assert_eq!(x, x2, "Bytes: {:?}", se);
 }
 
 #[test]
@@ -85,6 +93,8 @@ fn example() {
             #[serde(deserialize_with = "arena_deserializer::arena")]
             right: &'a Num<'a, T>,
         },
+        #[serde(deserialize_with = "arena_deserializer::arena")]
+        RP(&'a oxidized_by_ref::relative_path::RelativePath<'a>),
         //#[serde(deserialize_with = "arena_deserializer::arena")]
         //Cell(std::cell::Cell<&'a Num<'a, T>>),
     }
@@ -142,6 +152,13 @@ fn example() {
 
     let s: &bstr::BStr = "abc".into();
     let x: Num<'_, ()> = Num::BStr(s);
+    round_trip(x, &arena);
+
+    let s = oxidized_by_ref::relative_path::RelativePath::new(
+        oxidized_by_ref::relative_path::Prefix::Dummy,
+        std::path::Path::new("/tmp/foo.php"),
+    );
+    let x: Num<'_, ()> = Num::RP(&s);
     round_trip(x, &arena);
 }
 

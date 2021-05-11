@@ -52,6 +52,7 @@ fn main() -> ::anyhow::Result<()> {
         let decl = state.decls;
         results.push(round_trip::<Decls, Json>(&arena, path, decl));
         results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decl));
+        results.push(round_trip::<Decls, Bincode>(&arena, path, decl));
     }
 
     let (profiles, errs) = results
@@ -65,7 +66,7 @@ fn main() -> ::anyhow::Result<()> {
         });
 
     if !errs.is_empty() {
-        errs.iter().for_each(|e| println!("Faild: {:?}", e));
+        errs.iter().for_each(|e| println!("Faild: {:#?}", e));
         panic!("mismatch")
     }
 
@@ -183,7 +184,7 @@ impl Provider for Json {
 
     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
         serde_json::to_string(x)
-            .map_err(|e| format!("{} failed to serialize to json, error: {}", Self::name(), e))
+            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))
     }
 
     fn de<'a, X: serde::Deserialize<'a>>(
@@ -193,7 +194,7 @@ impl Provider for Json {
         let mut de = serde_json::Deserializer::from_str(&data);
         let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
         X::deserialize(de)
-            .map_err(|e| format!("{} failed to serialize to json, error: {}", Self::name(), e))
+            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
     }
 
     fn get_bytes(data: &Self::Data) -> &[u8] {
@@ -212,13 +213,8 @@ impl Provider for FlexBuffer {
 
     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
         let mut s = flexbuffers::FlexbufferSerializer::new();
-        x.serialize(&mut s).map_err(|e| {
-            format!(
-                "{} failed to serialize to flexbuffers, error: {}",
-                Self::name(),
-                e
-            )
-        })?;
+        x.serialize(&mut s)
+            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))?;
         Ok(s)
     }
 
@@ -235,16 +231,44 @@ impl Provider for FlexBuffer {
         })?;
 
         let de = arena_deserializer::ArenaDeserializer::new(arena, de);
-        X::deserialize(de).map_err(|e| {
-            format!(
-                "{} failed to serialize to flexbuffers, error: {}",
-                Self::name(),
-                e
-            )
-        })
+        X::deserialize(de)
+            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
     }
 
     fn get_bytes(data: &Self::Data) -> &[u8] {
         data.view()
+    }
+}
+
+struct Bincode;
+
+impl Provider for Bincode {
+    type Data = Vec<u8>;
+
+    fn name() -> &'static str {
+        "bincode"
+    }
+
+    fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
+        use bincode::Options;
+        let op = bincode::config::Options::with_native_endian(bincode::options());
+        op.serialize(x)
+            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))
+    }
+
+    fn de<'a, X: serde::Deserialize<'a>>(
+        arena: &'a bumpalo::Bump,
+        data: Self::Data,
+    ) -> Result<X, String> {
+        let op = bincode::config::Options::with_native_endian(bincode::options());
+        let mut de = bincode::de::Deserializer::from_slice(&data, op);
+
+        let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+        X::deserialize(de)
+            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
+    }
+
+    fn get_bytes(data: &Self::Data) -> &[u8] {
+        data.as_slice()
     }
 }

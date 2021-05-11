@@ -153,8 +153,9 @@ fn parse(value: &str) -> Result<RelativePath, String> {
     let path = match path_str {
         Some(path_str) => path_str,
         None => {
-            return Err(String::from(
-                "missing pipe or got empty string when deserializing RelativePath",
+            return Err(format!(
+                "missing pipe or got empty string when deserializing RelativePath, raw string \"{}\"",
+                value
             ));
         }
     };
@@ -204,7 +205,7 @@ impl<'arena> arena_deserializer::DeserializeInArena<'arena> for RelativePath<'ar
             type Value = RelativePath<'arena>;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("[DeserializeInArena]a string for RelativePath")
+                formatter.write_str("[DeserializeInArena] string for RelativePath")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<RelativePath<'arena>, E>

@@ -162,6 +162,6 @@ impl<'de> serde::Deserialize<'de> for FunParamFlags {
                 ))
             }
         }
-        deserializer.deserialize_u8(Visitor)
+        deserializer.deserialize_u16(Visitor)
     }
 }

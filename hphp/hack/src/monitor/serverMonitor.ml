@@ -360,55 +360,43 @@ struct
 
   (* Sends the client connection FD to the server process then closes the
    * FD. *)
-  let rec hand_off_client_connection_with_retries
-      ~tracker env server_fd retries client_fd =
+  let hand_off_client_connection_wrapper ~tracker env server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
-    if not (List.is_empty ready_l) then
-      try hand_off_client_connection ~tracker env server_fd client_fd
-      with exn ->
-        let e = Exception.wrap exn in
-        (* The only failure we've ever observed is EPIPE, meaning that the server
-        has closed its end of the pipe. It's typically because the server detected
-        a large rebase, or an incompatible .hhconfig change. This is not a high-volume
-        scenario and it's fine to be slow. *)
-        if retries > 0 then (
+    let timeout = 4.0 in
+    let to_finally_close = ref (Some client_fd) in
+    Utils.try_finally
+      ~f:(fun () ->
+        let (_, ready_l, _) = Unix.select [] [server_fd] [] timeout in
+        if List.is_empty ready_l then
           log
-            "Handoff FD failed [%s]. Retrying."
             ~tracker
-            (Exception.get_ctor_string e);
-          hand_off_client_connection_with_retries
-            ~tracker
-            env
-            server_fd
-            (retries - 1)
-            client_fd
-        ) else (
+            "Handoff FD timed out (%.1fs): server's current iteration is taking longer than that, and its incoming pipe is full"
+            timeout
+        else
+          try
+            hand_off_client_connection ~tracker env server_fd client_fd;
+            to_finally_close := None
+          with
+          | Unix.Unix_error (Unix.EPIPE, _, _) ->
+            log
+              ~tracker
+              "Handoff FD failed: server has closed its end of pipe (EPIPE), maybe due to large rebase or incompatible .hhconfig change or crash"
+          | exn ->
+            let e = Exception.wrap exn in
+            log
+              ~tracker
+              "Handoff FD failed unexpectedly - %s"
+              (Exception.to_string e);
+            HackEventLogger.send_fd_failure e)
+      ~finally:(fun () ->
+        match !to_finally_close with
+        | None -> ()
+        | Some client_fd ->
           log
-            "Handoff FD failed [%s]. Giving up and closing client FD"
             ~tracker
-            (Exception.get_ctor_string e);
-          HackEventLogger.send_fd_failure e;
-          Unix.close client_fd
-        )
-    else if retries > 0 then (
-      log "Handoff FD timed out [0.5s]. Retrying." ~tracker;
-      hand_off_client_connection_with_retries
-        ~tracker
-        env
-        server_fd
-        (retries - 1)
-        client_fd
-    ) else (
-      (* Note that "timed out because server too busy or backed up to accept handoff" is a typical scenario
-      if the server's queue is full and it's currently engaged in a length operation.
-      We specifically don't want to be slow in that scenario, hence no HackEventLogger here. *)
-      log
-        "Handoff FD timed out [0.5s]. Sending Monitor_failed_to_handoff to client and closing client FD"
-        ~tracker;
-      msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
-      Unix.close client_fd
-    )
+            "Sending Monitor_failed_to_handoff to client, and closing FD";
+          msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
+          Unix.close client_fd)
 
   (* Does not return. *)
   let client_out_of_date_ client_fd mismatch_info =
@@ -462,7 +450,7 @@ struct
       let tracker =
         Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
       in
-      hand_off_client_connection_with_retries ~tracker env server_fd 8 client_fd;
+      hand_off_client_connection_wrapper ~tracker env server_fd client_fd;
       server.last_request_handoff := Unix.time ();
       { env with server = Alive server }
     | Died_unexpectedly (status, was_oom) ->

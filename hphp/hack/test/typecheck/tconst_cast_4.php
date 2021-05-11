@@ -41,7 +41,7 @@ function top(I1 $x): void {
   // I2->getID() with this=(I1 & I2) produces IT2<(I1 & I2)>
   // So result should be IT1<(I1 & I2)> & IT2<(I1 & I2)>
   $y = $x->getID();
-  hh_show_env();
-  hh_show($y);
+  // hh_show_env();
+  // hh_show($y);
   foo($y, $y);
 }

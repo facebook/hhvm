@@ -1,0 +1,2 @@
+File "switch_default.php", line 13, characters 10-22:
+Default case in `switch` must be terminal (NastCheck[3081])

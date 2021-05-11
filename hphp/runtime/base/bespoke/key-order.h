@@ -108,7 +108,6 @@ using KeyOrderMap =
 // keys in the given map. If the map has too many keys, or keys of the wrong
 // type, this function will return an invalid KeyOrder.
 KeyOrder collectKeyOrder(const KeyOrderMap& map);
-KeyOrder pruneKeyOrder(const KeyOrderMap& keyOrderMap, double cutoff);
 
 void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src);
 

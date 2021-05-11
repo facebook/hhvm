@@ -162,6 +162,196 @@ KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
   return KeyOrder::Make(sorted);
 }
 
+using KeyCountMap = folly::F14FastMap<const StringData*, size_t>;
+using KeyOrderFrequencyList = std::vector<std::pair<KeyOrder, size_t>>;
+
+// Returns a map from keys to counts, indicating a conservative approximation
+// of the number of logged arrays containing (the static version of) each key.
+// We miss keys that are in uncounted arrays or set via a non-static value
+KeyCountMap arraysContainingKeys(
+    const std::vector<const LoggingProfile*>& profiles, size_t bound) {
+  auto arrayCounts = KeyCountMap();
+  for (auto const& profile : profiles) {
+    // Count ConstructStr/SetStr keys
+    for (auto const& it : profile->data->events) {
+      auto const op = getEventArrayOp(it.first);
+      if (op == ArrayOp::ConstructStr || op == ArrayOp::SetStr) {
+        auto const key = getEventStrKey(it.first);
+        if (key != nullptr) {
+          auto& count = arrayCounts[key.get()];
+          count = std::min(count + it.second, bound);
+        }
+      }
+    }
+
+    // Count static keys
+    auto const ad = profile->data->staticSampledArray;
+    if (!ad) continue;
+    assertx(ad->isVanillaDict());
+    MixedArray::IterateKV(
+      MixedArray::asMixed(ad),
+      [&](auto k, auto) {
+        if (!tvIsString(k)) return;
+        auto& count = arrayCounts[val(k).pstr];
+        count = std::min(
+          size_t{count + load(profile->data->loggingArraysEmitted)}, bound);
+      }
+    );
+  }
+  return arrayCounts;
+}
+
+size_t countArrays(const std::vector<const LoggingProfile*>& profiles) {
+  return std::accumulate(
+    profiles.begin(),
+    profiles.end(),
+    size_t{0},
+    [](auto const& a, auto const& b) {
+      return a + load(b->data->loggingArraysEmitted);
+    }
+  );
+}
+
+/*
+ * Returns a map indicating, for each key in the KeyOrderMap, how many key
+ * order instances would be invalidated by removing it.
+ */
+KeyCountMap countKeyInstances(const KeyOrderFrequencyList& frequencyList) {
+  auto keyInstances = KeyCountMap{};
+  for (auto const& [keyOrder, count] : frequencyList) {
+    for (auto const& key : keyOrder) {
+      keyInstances[key] += count;
+    }
+  }
+
+  return keyInstances;
+}
+
+KeyOrder pruneKeyOrder(
+    const std::vector<const LoggingProfile*>& profiles, double cutoff) {
+  auto const keyOrderMap = [&] {
+    auto kom = KeyOrderMap();
+    for (auto const profile : profiles) {
+      mergeKeyOrderMap(kom, profile->data->keyOrders);
+    }
+    return kom;
+  }();
+
+  auto workingSet = KeyOrderFrequencyList();
+  workingSet.reserve(keyOrderMap.size());
+  for (auto const& [keyOrder, count] : keyOrderMap) {
+    workingSet.emplace_back(keyOrder, count);
+  }
+
+  auto const sumCounts = [](auto begin, auto end) {
+    return std::accumulate(
+      begin, end,
+      size_t{0},
+      [](auto const& a, auto const& b) { return a + b.second; }
+    );
+  };
+
+  // Compute the total number of key order instances we begin with.
+  auto const totalOrders = sumCounts(workingSet.begin(), workingSet.end());
+  auto const totalArrays = countArrays(profiles);
+  auto const arraysContainingKey = arraysContainingKeys(profiles, totalArrays);
+
+  // Immediately prune invalid key orders.
+  auto acceptedOrders = totalOrders;
+  auto acceptedArrays = totalArrays;
+
+  {
+    auto const removeAt = std::partition(
+      workingSet.begin(), workingSet.end(),
+      [&](auto const& a) { return a.first.valid(); }
+    );
+    auto const discardedOrders = sumCounts(removeAt, workingSet.end());
+    acceptedOrders -= discardedOrders;
+    workingSet.erase(removeAt, workingSet.end());
+    assertx(acceptedOrders == sumCounts(workingSet.begin(), workingSet.end()));
+
+    // Conservatively invalidate the same number of arrays.
+    if (discardedOrders > acceptedArrays) return KeyOrder::MakeInvalid();
+    acceptedArrays -= discardedOrders;
+
+    FTRACE(2, "Prune invalid. Remain: ({} / {} ko), ({} / {} arrays)\n",
+           acceptedOrders, totalOrders, acceptedArrays, totalArrays);
+  }
+
+  // If we're already below our cutoff, abort.
+  if (acceptedOrders < totalOrders * cutoff ||
+      acceptedArrays < totalArrays * cutoff) {
+    return KeyOrder::MakeInvalid();
+  }
+
+  // Greedily remove the key which invalidates the least number of key order
+  // instances. Stop when doing so again would cross the cutoff.
+  auto keyInstances = countKeyInstances(workingSet);
+  while (!keyInstances.empty()) {
+    auto const keyAndCount = std::min_element(
+      keyInstances.cbegin(), keyInstances.cend(),
+      [](auto const& a, auto const& b) { return a.second < b.second; }
+    );
+
+    FTRACE(2, "Suggest prune key \"{}\".\n", keyAndCount->first);
+
+    {
+      acceptedOrders -= keyAndCount->second;
+      auto const iter = arraysContainingKey.find(keyAndCount->first);
+      // If we do not have any arrays registered as containing the key, then it
+      // must be a key added during an uncounted APC logging array
+      // construction. It should therefore be in all operation key orders, so
+      // there's no need to pessimize here.
+      auto const attributed =
+        iter == arraysContainingKey.end() ? 0 : iter->second;
+      if (attributed > acceptedArrays) break;
+      acceptedArrays -= attributed;
+      if (acceptedOrders < totalOrders * cutoff ||
+          acceptedArrays < totalArrays * cutoff) {
+        break;
+      }
+    }
+
+    FTRACE(2, "Prune key \"{}\". Remain: ({} / {} ko), ({} / {} arrays)\n",
+           keyAndCount->first, acceptedOrders, totalOrders,
+           acceptedArrays, totalArrays);
+
+    // Remove all key orders invalidated by this removal, and update the
+    // instance counts.
+    auto removeAt = std::partition(
+      workingSet.begin(), workingSet.end(),
+      [&](auto const& a) { return !a.first.contains(keyAndCount->first); }
+    );
+    std::for_each(
+      removeAt, workingSet.end(),
+      [&](auto const& pair) {
+        for (auto const& key : pair.first) {
+          auto const iter = keyInstances.find(key);
+          assertx(iter != keyInstances.end());
+          iter->second -= pair.second;
+          if (iter->second == 0) {
+            keyInstances.erase(iter);
+          }
+        }
+      }
+    );
+
+    workingSet.erase(removeAt, workingSet.end());
+
+    assertx(acceptedOrders == sumCounts(workingSet.begin(), workingSet.end()));
+    assertx(keyInstances == countKeyInstances(workingSet));
+  }
+
+  // Assemble the final pruned key order.
+  auto prunedResult = KeyOrderMap();
+  for (auto const& [keyOrder, count] : workingSet) {
+    prunedResult.emplace(keyOrder, count);
+  }
+
+  auto const result = collectKeyOrder(prunedResult);
+  return result;
+}
+
 // Returns true if we treat the given sink as a "merge point" and union the
 // sets of sinks that are incident to that merge. These points are also the
 // only ones at which we'll JIT struct access code.
@@ -225,7 +415,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
   // and there's a struct layout that's a good match for this source alone.
   if (!type_okay || profile.data->keyOrders.empty()) return;
   auto const threshold = keyCoverageThreshold();
-  auto const ko = pruneKeyOrder(profile.data->keyOrders, threshold);
+  auto const ko = pruneKeyOrder({&profile}, threshold);
   if (!ko.valid()) return;
   DEBUG_ONLY auto const index = sa.union_find.insert(&profile);
   assertx(index == sa.key_orders.size());
@@ -264,10 +454,8 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   // Assign sources to layouts.
   StructAnalysisResult result;
   for (auto const& group : groups) {
-    KeyOrderMap kom;
     KeyFrequencies keys;
     for (auto const source : group.first) {
-      mergeKeyOrderMap(kom, source->data->keyOrders);
       auto const multiplier = source->getSampleCountMultiplier();
       for (auto const& it : source->data->events) {
         auto const key = getEventStrKey(it.first);
@@ -275,7 +463,8 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
       }
     }
     auto const threshold = keyCoverageThreshold();
-    auto const groupKO = sortKeyOrder(pruneKeyOrder(kom, threshold), keys);
+    auto const groupKO =
+      sortKeyOrder(pruneKeyOrder(group.first, threshold), keys);
     auto const groupLayout = StructLayout::GetLayout(groupKO, true);
     if (groupLayout != nullptr) {
       for (auto const source : group.first) {

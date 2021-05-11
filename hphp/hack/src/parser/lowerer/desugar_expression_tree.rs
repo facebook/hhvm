@@ -27,7 +27,7 @@ use oxidized::{
 ///
 /// Then the expression is virtualized as virtualized_expr
 /// ```
-/// MyDsl::symbolType(foo<>)(MyDsl::intType()) + ${ $0splice0 }
+/// MyDsl::symbolType(foo<>)(MyDsl::intType())->__plus( ${ $0splice0 } )
 /// ```
 /// Where virtualized_expr is used in helping type Expression Trees
 ///

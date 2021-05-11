@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 
+#include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
@@ -31,6 +32,19 @@ TRACE_SET_MOD(bespoke);
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////////////
+
+struct StructGroup {
+  StructGroup(std::vector<const LoggingProfile*>&& profiles, double weight)
+    : profiles(std::move(profiles))
+    , weight(weight)
+  {}
+
+  std::vector<const LoggingProfile*> profiles;
+  double weight;
+  const StructLayout* layout;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -445,7 +459,7 @@ void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
 
 StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
-  std::vector<std::pair<std::vector<const LoggingProfile*>, double>> groups;
+  auto groups = std::vector<StructGroup>{};
 
   // Sort groups by weight to preferentially create hot struct layouts.
   // We also filter out groups that are likely to need escalation here.
@@ -458,17 +472,19 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
       p_escalated += source_weight * probabilityOfEscalation(*source);
     }
     if (weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
-      groups.push_back({std::move(group), weight});
+      groups.emplace_back(std::move(group), weight);
     }
   });
   std::sort(groups.begin(), groups.end(),
-            [](auto const& a, auto const& b) { return a.second > b.second; });
+            [](auto const& a, auto const& b) { return a.weight > b.weight; });
 
-  // Assign sources to layouts.
-  StructAnalysisResult result;
-  for (auto const& group : groups) {
+  using LayoutWeightMap = folly::F14FastMap<const StructLayout*, double>;
+  auto layoutWeights = LayoutWeightMap{};
+
+  // Create potential layout set.
+  for (auto& group : groups) {
     KeyFrequencies keys;
-    for (auto const source : group.first) {
+    for (auto const source : group.profiles) {
       auto const multiplier = source->getSampleCountMultiplier();
       for (auto const& it : source->data->events) {
         auto const key = getEventStrKey(it.first);
@@ -477,13 +493,59 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     }
     auto const threshold = keyCoverageThreshold();
     auto const groupKO =
-      sortKeyOrder(pruneKeyOrder(group.first, threshold), keys);
-    auto const groupLayout = StructLayout::GetLayout(groupKO, true);
-    if (groupLayout != nullptr) {
-      for (auto const source : group.first) {
-        // TODO(mcolavita): exclude sources likely to escalate with final layout
-        result.sources.insert({source, groupLayout});
-      }
+      sortKeyOrder(pruneKeyOrder(group.profiles, threshold), keys);
+    auto const layout = StructLayout::GetLayout(groupKO, true);
+    group.layout = layout;
+    if (layout) layoutWeights[layout] += group.weight;
+  }
+
+  // Sort layouts in order of descending weight.
+  auto orderedLayouts = [&] {
+    using LayoutWeightVector =
+      std::vector<std::pair<const StructLayout*, double>>;
+    auto layoutVector =
+      LayoutWeightVector(layoutWeights.begin(), layoutWeights.end());
+    std::sort(
+      layoutVector.begin(), layoutVector.end(),
+      [](auto const& a, auto const& b) { return a.second > b.second; }
+    );
+
+    auto result = std::vector<const StructLayout*>{};
+    std::transform(
+      layoutVector.begin(), layoutVector.end(), std::back_inserter(result),
+      [&](auto const& a) { return a.first; }
+    );
+
+    return result;
+  }();
+
+  // Find a colorable subset of the selected layouts.
+  auto const [coloringEnd, coloring] = findKeyColoring(orderedLayouts);
+  if (!coloring) return {};
+
+  // Remove groups with missing or discarded StructLayouts.
+  {
+    auto const discarded = folly::F14FastSet<const StructLayout*>(
+        coloringEnd, orderedLayouts.cend());
+    groups.erase(
+      std::remove_if(
+        groups.begin(),
+        groups.end(),
+        [&](auto const& a) {
+          return a.layout == nullptr ||
+                 discarded.find(a.layout) != discarded.end();
+        }
+      ), groups.end()
+    );
+  }
+
+  // Assign sources to layouts.
+  StructAnalysisResult result;
+  for (auto const& group : groups) {
+    assertx(group.layout);
+    for (auto const source : group.profiles) {
+      // TODO(mcolavita): exclude sources likely to escalate with final layout
+      result.sources.insert({source, group.layout});
     }
   }
 

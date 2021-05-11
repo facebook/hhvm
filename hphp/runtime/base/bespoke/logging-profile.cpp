@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
+#include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
@@ -894,6 +895,10 @@ bool exportLayouts(FILE* file) {
   LOG_OR_RETURN(file, "========================================================================\n");
   LOG_OR_RETURN(file, "Layouts:\n\n");
   LOG_OR_RETURN(file, "{}", Layout::dumpAllLayouts());
+
+  LOG_OR_RETURN(file, "========================================================================\n");
+  LOG_OR_RETURN(file, "Coloring info:\n\n");
+  LOG_OR_RETURN(file, "{}", dumpColoringInfo());
 
   return true;
 }

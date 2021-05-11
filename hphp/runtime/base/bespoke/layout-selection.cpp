@@ -36,6 +36,14 @@ namespace {
 
 using jit::ArrayLayout;
 
+// This type represents a decision of type T that we make based on profiling.
+// It covers a fraction `coverage` of the profiled distribution.
+template <typename T>
+struct Decision {
+  T value;
+  double coverage;
+};
+
 uint64_t load(const std::atomic<uint64_t>& x) {
   return x.load(std::memory_order_relaxed);
 }
@@ -52,11 +60,18 @@ double probabilityOfEscalation(const LoggingProfile& profile) {
   return 1.0 * std::min(escalated, logging) / logging;
 }
 
+double probabilityOfSampled(const SinkProfile& profile) {
+  if (profile.data->sources.empty()) return 0.0;
+  auto const sampled = load(profile.data->sampledCount);
+  auto const unsampled = load(profile.data->unsampledCount);
+  return 1.0 * sampled / (sampled + unsampled);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Monotype helpers
 
 // Returns KeyTypes::Any if there's no good key type to specialize on.
-KeyTypes selectKeyType(const SinkProfile& profile, double p_cutoff) {
+Decision<KeyTypes> selectKeyType(const SinkProfile& profile, double p_cutoff) {
   assertx(profile.data);
 
   auto const empty = load(profile.data->keyCounts[int(KeyTypes::Empty)]);
@@ -66,21 +81,21 @@ KeyTypes selectKeyType(const SinkProfile& profile, double p_cutoff) {
   auto const any   = load(profile.data->keyCounts[int(KeyTypes::Any)]);
 
   auto const total = empty + ints + strs + sstrs + any;
-  if (!total) return KeyTypes::Any;
+  if (!total) return {KeyTypes::Any, 1.0};
 
   auto const p_ints  = 1.0 * (empty + ints) / total;
   auto const p_strs  = 1.0 * (empty + strs + sstrs) / total;
   auto const p_sstrs = 1.0 * (empty + sstrs) / total;
 
-  if (p_sstrs >= p_cutoff) return KeyTypes::StaticStrings;
-  if (p_strs >= p_cutoff)  return KeyTypes::Strings;
-  if (p_ints >= p_cutoff)  return KeyTypes::Ints;
-  return KeyTypes::Any;
+  if (p_sstrs >= p_cutoff) return {KeyTypes::StaticStrings, p_sstrs};
+  if (p_strs >= p_cutoff)  return {KeyTypes::Strings, p_strs};
+  if (p_ints >= p_cutoff)  return {KeyTypes::Ints, p_ints};
+  return {KeyTypes::Any, 1.0};
 }
 
 // Returns kKindOfUninit if we should specialize on "monotype of unknown type".
 // Returns kInvalidDataType if we should not specialize this sink on a monotype.
-DataType selectValType(const SinkProfile& profile, double p_cutoff) {
+Decision<DataType> selectValType(const SinkProfile& profile, double p_cutoff) {
   assertx(profile.data);
 
   auto const empty = load(profile.data->valCounts[SinkProfile::kNoValTypes]);
@@ -101,17 +116,18 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
     }
   }
 
-  if (!total) return kInvalidDataType;
+  if (!total) return {kInvalidDataType, 1.0};
 
   auto const p_empty = 1.0 * empty / total;
   auto const p_max   = 1.0 * (empty + max_count) / total;
   auto const p_mono  = 1.0 * (total - any) / total;
+  auto const max = safe_cast<DataType>(max_index + kMinDataType);
 
   // TODO(kshaunak): We may want to specialize on empty in the future.
-  if (p_empty >= p_cutoff) return KindOfUninit;
-  if (p_max >= p_cutoff)   return safe_cast<DataType>(max_index + kMinDataType);
-  if (p_mono >= p_cutoff)  return KindOfUninit;
-  return kInvalidDataType;
+  if (p_empty >= p_cutoff) return {KindOfUninit, p_mono};
+  if (p_max >= p_cutoff)   return {max, p_max};
+  if (p_mono >= p_cutoff)  return {KindOfUninit, p_mono};
+  return {kInvalidDataType, 1.0};
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -127,7 +143,7 @@ struct StructAnalysis {
 
 struct StructAnalysisResult {
   folly::F14FastMap<const LoggingProfile*, const StructLayout*> sources;
-  folly::F14FastMap<const SinkProfile*, const StructLayout*> sinks;
+  folly::F14FastMap<const SinkProfile*, Decision<ArrayLayout>> sinks;
 };
 
 double keyCoverageThreshold() {
@@ -357,11 +373,8 @@ KeyOrder pruneKeyOrder(
 // only ones at which we'll JIT struct access code.
 bool mergeStructsAtSink(const SinkProfile& profile, const StructAnalysis& sa) {
   // 1. We must have sufficient LoggingArray coverage for the given sink.
-  if (profile.data->sources.empty()) return false;
-  auto const sampled = load(profile.data->sampledCount);
-  auto const unsampled = load(profile.data->unsampledCount);
   auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
-  auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
+  auto const p_sampled = probabilityOfSampled(profile);
   if (p_sampled < p_cutoff) return false;
 
   // 2. All sources must be struct-like sources.
@@ -479,7 +492,9 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     // TODO(mcolavita): exclude sinks likely to escalate with final layout
     assertx(!sink->data->sources.empty());
     auto const it = result.sources.find(sink->data->sources.begin()->first);
-    if (it != result.sources.end()) result.sinks.insert({sink, it->second});
+    if (it == result.sources.end()) continue;
+    auto const p_sampled = probabilityOfSampled(*sink);
+    result.sinks.insert({sink, {ArrayLayout(it->second), p_sampled}});
   }
   return result;
 }
@@ -547,19 +562,23 @@ ArrayLayout selectSourceLayout(
   return ArrayLayout::Vanilla();
 }
 
-ArrayLayout makeSinkDecision(
+Decision<ArrayLayout> makeSinkDecision(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
+  using DAL = Decision<ArrayLayout>;
   auto const mode = RO::EvalBespokeArraySpecializationMode;
-  if (mode == 1) return ArrayLayout::Vanilla();
-  if (mode == 2) return ArrayLayout::Top();
+  if (mode == 1) return {ArrayLayout::Vanilla(), 1.0};
+  if (mode == 2) return {ArrayLayout::Top(), 1.0};
 
   auto const it = sar.sinks.find(&profile);
-  if (it != sar.sinks.end()) return ArrayLayout(it->second);
+  if (it != sar.sinks.end()) return it->second;
 
   auto const sampled = load(profile.data->sampledCount);
   auto const unsampled = load(profile.data->unsampledCount);
-  if (!sampled) return unsampled ? ArrayLayout::Vanilla() : ArrayLayout::Top();
+  if (!sampled) {
+    return unsampled ? DAL{ArrayLayout::Vanilla(), 1.0}
+                     : DAL{ArrayLayout::Top(), 1.0};
+  }
 
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
@@ -586,15 +605,16 @@ ArrayLayout makeSinkDecision(
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 
   if (!total) {
-    if ((1 - p_sampled) >= p_cutoff) return ArrayLayout::Vanilla();
-    return ArrayLayout::Top();
+    auto const p_vanilla = 1 - p_sampled;
+    if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
+    return {ArrayLayout::Top(), 1.0};
   }
 
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
   auto const p_is_struct = p_sampled * is_struct / total;
 
-  if (p_vanilla >= p_cutoff) return ArrayLayout::Vanilla();
+  if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
 
   if (p_monotype >= p_cutoff) {
     using AK = ArrayData::ArrayKind;
@@ -603,41 +623,52 @@ ArrayLayout makeSinkDecision(
     auto const keyset = load(profile.data->arrCounts[AK::kKeysetKind / 2]);
 
     assertx(vec || dict || keyset);
-    if (bool(vec) + bool(dict) + bool(keyset) != 1) return ArrayLayout::Top();
+    if (bool(vec) + bool(dict) + bool(keyset) != 1) {
+      return {ArrayLayout::Top(), 1.0};
+    }
 
-    auto const dt = selectValType(profile, p_cutoff);
-    if (dt == kInvalidDataType) return ArrayLayout::Top();
+    auto const p_cutoff_val = 1 + p_cutoff - p_monotype;
+    auto const dt_decision = selectValType(profile, p_cutoff_val);
+    auto const dt = dt_decision.value;
+    if (dt == kInvalidDataType) return {ArrayLayout::Top(), 1.0};
+    auto const p_monotype_val = p_monotype + dt_decision.coverage - 1;
 
     if (vec) {
       return dt == KindOfUninit
-        ? ArrayLayout(TopMonotypeVecLayout::Index())
-        : ArrayLayout(MonotypeVecLayout::Index(dt));
+        ? DAL{ArrayLayout(TopMonotypeVecLayout::Index()), p_monotype_val}
+        : DAL{ArrayLayout(MonotypeVecLayout::Index(dt)), p_monotype_val};
     }
 
     if (dict) {
-      auto const kt = selectKeyType(profile, p_cutoff);
-      if (kt == KeyTypes::Any) return ArrayLayout::Bespoke();
+      auto const p_cutoff_key = 1 + p_cutoff - p_monotype_val;
+      auto const kt_decision = selectKeyType(profile, p_cutoff_key);
+      auto const kt = kt_decision.value;
+      if (kt == KeyTypes::Any) return {ArrayLayout::Bespoke(), p_monotype_val};
+      auto const p_monotype_key = p_monotype_val + kt_decision.coverage - 1;
       return dt == KindOfUninit
-        ? ArrayLayout(TopMonotypeDictLayout::Index(kt))
-        : ArrayLayout(MonotypeDictLayout::Index(kt, dt));
+        ? DAL{ArrayLayout(TopMonotypeDictLayout::Index(kt)), p_monotype_key}
+        : DAL{ArrayLayout(MonotypeDictLayout::Index(kt, dt)), p_monotype_key};
     }
   }
 
   if (p_is_struct >= p_cutoff) {
     for (auto const& pair : structs) {
-      auto const p_this_struct = p_sampled * pair.second / total;
-      if (p_this_struct >= p_cutoff) return ArrayLayout(pair.first);
+      auto const p_this = p_sampled * pair.second / total;
+      if (p_this >= p_cutoff) return {ArrayLayout(pair.first), p_this};
     }
-    return ArrayLayout(TopStructLayout::Index());
+    return {ArrayLayout(TopStructLayout::Index()), p_is_struct};
   }
 
-  return ArrayLayout::Top();
+  return {ArrayLayout::Top(), 1.0};
 }
 
 SinkLayout selectSinkLayout(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
-  auto const layout = makeSinkDecision(profile, sar);
+  auto const decision = makeSinkDecision(profile, sar);
   auto const sideExit = [&]{
+    auto const p_cutoff = RO::EvalBespokeArraySinkSideExitThreshold / 100;
+    if (decision.coverage < p_cutoff) return false;
+
     auto const count = profile.data->sources.size();
     if (count > RO::EvalBespokeArraySinkSideExitMaxSources) return false;
 
@@ -647,7 +678,7 @@ SinkLayout selectSinkLayout(
     }
     return true;
   }();
-  return {layout, sideExit};
+  return {decision.value, sideExit};
 }
 
 //////////////////////////////////////////////////////////////////////////////

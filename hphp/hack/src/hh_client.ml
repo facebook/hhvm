@@ -118,10 +118,10 @@ let () =
   HackEventLogger.client_init
     ~init_id
     ~hhconfig_version
-    ~rollout_flags:
-      (Option.map local_config ~f:ServerLocalConfig.to_rollout_flags)
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
+  HackEventLogger.set_rollout_flags
+    (Option.map local_config ~f:ServerLocalConfig.to_rollout_flags);
 
   try
     let exit_status =

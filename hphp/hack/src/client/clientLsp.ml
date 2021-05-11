@@ -3978,6 +3978,8 @@ let handle_client_message
         snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
       in
       ref_local_config := Some local_config;
+      HackEventLogger.set_rollout_flags
+        (Some (ServerLocalConfig.to_rollout_flags local_config));
 
       let%lwt version = read_hhconfig_version () in
       HackEventLogger.set_hhconfig_version

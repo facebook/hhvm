@@ -413,23 +413,30 @@ let rec connect
       Printf.eprintf
         "For more detailed logs, try `tail -f $(hh_client --monitor-logname) $(hh_client --logname)`\n";
     (match e with
-    | ServerMonitorUtils.Monitor_establish_connection_timeout ->
-      (* This should only happen if the Monitor is being DDOSed or has
-       * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,
-       * we don't auto-retry a connection when the Monitor is busy .*)
+    | ServerMonitorUtils.(
+        Connect_to_monitor_failure
+          {
+            server_exists = true;
+            failure_phase = Connect_open_socket;
+            failure_reason = Connect_timeout;
+          }) ->
+      (* If server+monitor are too busy, this is manifest either as timeouts
+      during Connect_open_socket (this case) or receiving SERVER_HUNG_UP in
+      [wait_for_server_message] above. Arbitrarily, we fail fatally in this
+      first case, but we fail with Exit_status.Server_hung_up_should_retry in
+      the second case above causing find_hh.sh to reattempt after exponential
+      backoff. See discussion in T85425990. *)
       HackEventLogger.client_connect_once_busy start_time;
-      Printf.eprintf "\nError: Monitor is busy. Giving up!\n%!";
+      Printf.eprintf
+        "\nError: Hh_server is overloaded with too many concurrent requests. Giving up.\n%!";
       raise Exit_status.(Exit_with Monitor_connection_failure)
     | ServerMonitorUtils.Server_died
-    | ServerMonitorUtils.Monitor_connection_misc_exception _ ->
+    | ServerMonitorUtils.(
+        Connect_to_monitor_failure { server_exists = true; _ }) ->
       Unix.sleepf 0.1;
       connect env start_time
-    | ServerMonitorUtils.Monitor_socket_not_ready _ ->
-      HackEventLogger.client_connect_once_busy start_time;
-      Unix.sleepf 0.1;
-      connect env start_time
-    | ServerMonitorUtils.Server_missing_exn _
-    | ServerMonitorUtils.Server_missing_timeout _ ->
+    | ServerMonitorUtils.(
+        Connect_to_monitor_failure { server_exists = false; _ }) ->
       log ~tracker "connect: autostart=%b" env.autostart;
       if env.autostart then (
         let {

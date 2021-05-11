@@ -260,18 +260,18 @@ let should_start env =
   with
   | Ok _conn -> false
   | Error
-      ( ServerMonitorUtils.Server_missing_exn _
-      | ServerMonitorUtils.Server_missing_timeout _
-      | ServerMonitorUtils.Build_id_mismatched _
-      | ServerMonitorUtils.Server_died ) ->
+      ServerMonitorUtils.(
+        Connect_to_monitor_failure { server_exists = false; _ })
+  | Error (ServerMonitorUtils.Build_id_mismatched _)
+  | Error ServerMonitorUtils.Server_died ->
     true
   | Error ServerMonitorUtils.Server_dormant
   | Error ServerMonitorUtils.Server_dormant_out_of_retries ->
     Printf.eprintf "Server already exists but is dormant";
     false
-  | Error (ServerMonitorUtils.Monitor_socket_not_ready _)
-  | Error ServerMonitorUtils.Monitor_establish_connection_timeout
-  | Error (ServerMonitorUtils.Monitor_connection_misc_exception _) ->
+  | Error
+      ServerMonitorUtils.(
+        Connect_to_monitor_failure { server_exists = true; _ }) ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root env.from;
     true

@@ -93,20 +93,29 @@ let current_build_info =
     existing_launch_time = Unix.gettimeofday ();
   }
 
+type connect_failure_reason =
+  | Connect_timeout
+  | Connect_exception of Exception.t
+[@@deriving show]
+
+type connect_failure_phase =
+  | Connect_open_socket
+  | Connect_send_version
+  | Connect_send_newline
+  | Connect_receive_connection_ok
+  | Connect_send_shutdown
+[@@deriving show]
+
+type connect_to_monitor_failure = {
+  server_exists: bool;
+      (** This reflects the state of the lock file shortly after the failure happened. *)
+  failure_phase: connect_failure_phase;
+  failure_reason: connect_failure_reason;
+}
+[@@deriving show]
+
 type connection_error =
-  (*
-   * This should be rare. The monitor rapidly accepts connections and does
-   * the version ID check very quickly. Only under very heavy load will that
-   * sequence time out. *)
-  | Monitor_establish_connection_timeout
-  | Server_missing_exn of Exception.t
-  | Server_missing_timeout of Timeout.timings
-  (* There is a brief period of time after the Monitor has grabbed its
-   * liveness lock and before it starts listening in on the socket
-   * (which can only happen after the socket file is created). During that
-   * period, either the socket file doesn't exist yet, or socket connections
-   * are refused. *)
-  | Monitor_socket_not_ready of Exception.t
+  | Connect_to_monitor_failure of connect_to_monitor_failure
   | Server_died
   (* Server dormant and can't join the (now full) queue of connections
    * waiting for the next server. *)
@@ -125,7 +134,6 @@ type connection_error =
    *   correctly.
    *)
   | Build_id_mismatched of build_mismatch_info option
-  | Monitor_connection_misc_exception of Exception.t
 [@@deriving show]
 
 type connection_state =

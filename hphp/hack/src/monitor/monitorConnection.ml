@@ -85,13 +85,17 @@ let establish_connection ~timeout config =
   | (Unix.Unix_error (Unix.ECONNREFUSED, _, _) as e)
   | (Unix.Unix_error (Unix.ENOENT, _, _) as e) ->
     let e = Exception.wrap e in
-    if not (server_exists config.lock_file) then
-      Error (Server_missing_exn e)
-    else
-      Error (Monitor_socket_not_ready e)
+    Error
+      (Connect_to_monitor_failure
+         {
+           server_exists = server_exists config.lock_file;
+           failure_phase = Connect_open_socket;
+           failure_reason = Connect_exception e;
+         })
 
 let get_cstate
     ~(tracker : Connection_tracker.t)
+    ~(timeout : Timeout.t)
     (config : ServerMonitorUtils.monitor_config)
     ((ic, oc) : Timeout.in_channel * Out_channel.t) :
     ( Timeout.in_channel
@@ -106,18 +110,27 @@ let get_cstate
     let cstate : connection_state = from_channel_without_buffering ic in
     let tracker = Connection_tracker.(track tracker ~key:Client_got_cstate) in
     Ok (ic, oc, cstate, tracker)
-  with e ->
-    let e = Exception.wrap e in
+  with exn ->
+    let e = Exception.wrap exn in
     log
       "error getting cstate; closing connection. %s"
       ~tracker
       (Exception.to_string e);
     Timeout.shutdown_connection ic;
     Timeout.close_in_noerr ic;
-    if not (server_exists config.lock_file) then
-      Error (Server_missing_exn e)
-    else
-      Error (Monitor_connection_misc_exception e)
+    let failure_reason =
+      if Timeout.is_timeout_exn timeout exn then
+        Connect_timeout
+      else
+        Connect_exception e
+    in
+    Error
+      (Connect_to_monitor_failure
+         {
+           server_exists = server_exists config.lock_file;
+           failure_phase = Connect_receive_connection_ok;
+           failure_reason;
+         })
 
 let verify_cstate ~tracker ic cstate =
   match cstate with
@@ -230,10 +243,15 @@ let connect_to_monitor ~tracker ~timeout config =
         ~tracker
         exists_lock_file
         (Timeout.show_timings timings);
-      if not exists_lock_file then
-        Error (Server_missing_timeout timings)
-      else
-        Error ServerMonitorUtils.Monitor_establish_connection_timeout)
+      Error
+        (Connect_to_monitor_failure
+           {
+             server_exists = exists_lock_file;
+             failure_phase = Connect_open_socket;
+             (* get_cstate swallows timeouts; hence, any timeout we get here must have come from establish_connection,
+             i.e. failure_phase = Connect_open_socket. *)
+             failure_reason = Connect_timeout;
+           }))
     ~do_:
       begin
         fun timeout ->
@@ -241,7 +259,7 @@ let connect_to_monitor ~tracker ~timeout config =
         let tracker =
           Connection_tracker.(track tracker ~key:Client_opened_socket)
         in
-        get_cstate ~tracker config (ic, oc)
+        get_cstate ~tracker ~timeout config (ic, oc)
       end
 
 let connect_and_shut_down ~tracker root =
@@ -253,11 +271,17 @@ let connect_and_shut_down ~tracker root =
   send_shutdown_rpc ~tracker oc;
   Timeout.with_timeout
     ~timeout:3
-    ~on_timeout:(fun timings ->
-      if not (server_exists config.lock_file) then
-        Error (Server_missing_timeout timings)
+    ~on_timeout:(fun _timings ->
+      if server_exists config.lock_file then
+        Ok ServerMonitorUtils.SHUTDOWN_UNVERIFIED
       else
-        Ok ServerMonitorUtils.SHUTDOWN_UNVERIFIED)
+        Error
+          (Connect_to_monitor_failure
+             {
+               server_exists = false;
+               failure_phase = Connect_send_shutdown;
+               failure_reason = Connect_timeout;
+             }))
     ~do_:
       begin
         fun _ ->

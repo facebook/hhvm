@@ -50,8 +50,9 @@ let nice_kill env =
       end
     | Error (ServerMonitorUtils.Build_id_mismatched _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
-    | Error (ServerMonitorUtils.Server_missing_exn _)
-    | Error (ServerMonitorUtils.Server_missing_timeout _) ->
+    | Error
+        ServerMonitorUtils.(
+          Connect_to_monitor_failure { server_exists = false; _ }) ->
       Printf.eprintf "No server to kill for %s\n%!" root_s
     | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;

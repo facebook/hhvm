@@ -472,7 +472,7 @@ void Vgen::emitVeneers(Venv& env) {
     auto cb = getBlock(env, veneer.source);
     if (!cb) {
       // If we can't find the code block, it must have been emitted by a Vunit
-      // wrapping this one (retransopt emits a Vunit within a Vunit).
+      // wrapping this one (bindjmp emits a Vunit within a Vunit).
       notEmitted.push_back(veneer);
       continue;
     }
@@ -567,7 +567,7 @@ void Vgen::handleLiterals(Venv& env) {
     auto const cb = getBlock(env, pl.patchAddress);
     if (!cb) {
       // If we can't find the code block it must have been emitted by a Vunit
-      // wrapping this one.  (retransopt emits a Vunit within a Vunit)
+      // wrapping this one.  (bindjmp emits a Vunit within a Vunit)
       notEmitted.push_back(pl);
       continue;
     }

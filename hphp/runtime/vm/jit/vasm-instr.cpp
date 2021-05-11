@@ -38,7 +38,6 @@ bool isBlockEnd(const Vinstr& inst) {
     // service request-y things
     case Vinstr::bindjmp:
     case Vinstr::fallback:
-    case Vinstr::retransopt:
     // control flow
     case Vinstr::jcc:
     case Vinstr::jcci:
@@ -98,7 +97,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::bindaddr:
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
-    case Vinstr::retransopt:
     // vasm intrinsics
     case Vinstr::conjure:
     case Vinstr::conjureuse:

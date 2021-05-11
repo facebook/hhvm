@@ -83,17 +83,7 @@ struct CGMeta;
    * The smash target(s) of a retranslate is stored in
    * SrcRec::m_tailFallbackJumps.
    */                     \
-  REQ(RETRANSLATE)        \
-                          \
-  /*
-   * retranslate_opt(SrcKey sk)
-   *
-   * A request to retranslate the function from `sk', leveraging profiling data
-   * to produce a set of larger, more optimized translations.  Only used when
-   * PGO is enabled. Execution will resume at `sk' whether or not retranslation
-   * is successful.
-   */                     \
-  REQ(RETRANSLATE_OPT)
+  REQ(RETRANSLATE)
 
 /*
  * Service request types.
@@ -213,8 +203,6 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                       SBInvOffset spOff, TCA jmp, SrcKey target);
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        SBInvOffset spOff, TCA* addr, SrcKey target);
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                              SBInvOffset spOff, SrcKey sk);
 
 /*
  * Emit a stub which syncs vmsp and vmpc and then calls

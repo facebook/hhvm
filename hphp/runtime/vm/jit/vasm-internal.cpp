@@ -228,12 +228,6 @@ bool emit(Venv& env, const fallbackcc& i) {
   return true;
 }
 
-bool emit(Venv& env, const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), env.meta,
-                                    i.spOff, i.sk);
-  return true;
-}
-
 bool emit(Venv& env, const movqs& i) {
   auto const mov = emitSmashableMovq(*env.cb, env.meta, i.s.q(), r64(i.d));
   if (i.addr.isValid()) {

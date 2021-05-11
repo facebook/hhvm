@@ -440,13 +440,12 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<ReqRetranslateOpt>();
   auto& v = vmain(env);
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
-  v << retransopt{
-    inst->marker().sk(),
-    inst->marker().bcSPOff(),
-    cross_trace_args(inst->marker())
+  v << copy{v.cns(inst->marker().sk().offset()), rarg(0)};
+  v << copy{v.cns(inst->marker().bcSPOff().offset), rarg(1)};
+  v << jmpi{
+    tc::ustubs().handleRetranslateOpt,
+    leave_trace_regs() | arg_regs(2)
   };
 }
 

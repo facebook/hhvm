@@ -696,6 +696,37 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
+  alignCacheLine(cb);
+
+  return vwrap(cb, data, [] (Vout& v) {
+    auto const bcOff = v.makeReg();
+    auto const spOff = v.makeReg();
+    v << copy{rarg(0), bcOff};
+    v << copy{rarg(1), spOff};
+
+    storeVmfp(v);
+
+    auto const ret = v.makeReg();
+    v << vcall{
+      CallSpec::direct(svcreq::handleRetranslateOpt),
+      v.makeVcallArgs({{bcOff, spOff}}),
+      v.makeTuple({ret}),
+      Fixup::none(),
+      DestType::SSA
+    };
+
+    // We did not initialize rvmsp(), but it might be needed by the next
+    // translation. Luckily, handleRetranslateOpt() synced vmsp(), so load
+    // it from there.
+    loadVmsp(v);
+
+    v << jmpr{ret, vm_regs_with_sp()};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   return vwrap(cb, data, [] (Vout& v) {
     v << stublogue{false};
@@ -1297,6 +1328,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(genRetHelper, view, emitInterpGenRet<false>(cold, data));
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
   ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
+
+  ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt(cold, data));
 
   ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));
 

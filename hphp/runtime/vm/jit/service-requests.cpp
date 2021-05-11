@@ -199,18 +199,6 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   );
 }
 
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                              SBInvOffset spOff, SrcKey sk) {
-  return emit_persistent(
-    cb,
-    data,
-    fixups,
-    spOff,
-    REQ_RETRANSLATE_OPT,
-    sk.toAtomicInt()
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

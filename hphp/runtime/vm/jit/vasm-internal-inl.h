@@ -112,7 +112,6 @@ bool emit(Venv& env, const bindjcc& i);
 bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
-bool emit(Venv& env, const retransopt& i);
 bool emit(Venv& env, const movqs& i);
 bool emit(Venv& env, const jmps& i);
 

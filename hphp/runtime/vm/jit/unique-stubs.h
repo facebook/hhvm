@@ -391,6 +391,15 @@ struct UniqueStubs {
    */
   TCA handleSRHelper;
 
+  /*
+   * Handle a request to retranslate the current function in optimized mode.
+   * See svcreq::handleRetranslateOpt() for more details.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA handleRetranslateOpt;
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*

@@ -313,22 +313,6 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       SKTRACE(2, sk, "retranslated @%p\n", transResult->addr());
       break;
     }
-
-    case REQ_RETRANSLATE_OPT: {
-      sk = SrcKey::fromAtomicInt(info.args[0].sk);
-      if (mcgen::retranslateOpt(sk.funcID())) {
-        // Retranslation was successful. Resume execution at the new Optimize
-        // translation.
-        vmpc() = sk.func()->at(sk.offset());
-        transResult = TranslationResult{tc::ustubs().resumeHelper};
-      } else {
-        // Retranslation failed, probably because we couldn't get the write
-        // lease. Interpret a BB before running more Profile translations, to
-        // avoid spinning through this path repeatedly.
-        transResult = TranslationResult::failTransiently();
-      }
-      break;
-    }
   }
 
   if (smashed && info.stub) {
@@ -339,6 +323,30 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
   assertx(transResult);
   return resume(sk, *transResult);
+}
+
+TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept {
+  assert_native_stack_aligned();
+
+  // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
+  // later if we are going to use the resume helper.
+  tl_regState = VMRegState::CLEAN;
+  vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+
+  FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
+
+  auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
+  if (mcgen::retranslateOpt(sk.funcID())) {
+    // Retranslation was successful. Resume execution at the new Optimize
+    // translation.
+    vmpc() = sk.pc();
+    return resume(sk, TranslationResult{tc::ustubs().resumeHelper});
+  } else {
+    // Retranslation failed, probably because we couldn't get the write
+    // lease. Interpret a BB before running more Profile translations, to
+    // avoid spinning through this path repeatedly.
+    return resume(sk, TranslationResult::failTransiently());
+  }
 }
 
 TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {

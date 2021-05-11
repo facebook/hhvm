@@ -461,26 +461,25 @@ void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
-void cgAllocUninitBespokeStructDict(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<AllocUninitBespokeStructDict>();
+void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<InitStructPositions>();
   auto& v = vmain(env);
 
-  auto const n = static_cast<size_t>((extra->numSlots + 7) & ~7);
-  auto const slots = reinterpret_cast<uint8_t*>(v.allocData<uint64_t>(n / 8));
-  for (auto i = 0; i < extra->numSlots; i++) {
-    slots[i] = safe_cast<uint8_t>(extra->slots[i]);
-  }
-  for (auto i = extra->numSlots; i < n; i++) {
-    slots[i] = static_cast<uint8_t>(KindOfUninit);
-  }
+  v << storel{v.cns(extra->numSlots), arr[ArrayData::offsetofSize()]};
 
-  auto const target = CallSpec::direct(StructDict::AllocUninitStructDict);
-  auto const args = argGroup(env, inst)
-    .imm(StructLayout::As(extra->layout.bespokeLayout()))
-    .imm(extra->numSlots)
-    .dataPtr(slots);
-
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  auto constexpr kSlotsPerStore = 8;
+  for (auto i = 0; i < extra->numSlots; i += kSlotsPerStore) {
+    uint64_t slots = 0;
+    for (auto j = 0; j < kSlotsPerStore; j++) {
+      auto const index = i + j;
+      auto const slot = index < extra->numSlots
+        ? safe_cast<uint8_t>(extra->slots[index])
+        : static_cast<uint8_t>(KindOfUninit);
+      slots = slots | (safe_cast<uint64_t>(slot) << (j * 8));
+    }
+    v << store{v.cns(slots), arr[sizeof(StructDict) + i]};
+  }
 }
 
 void cgInitStructElem(IRLS& env, const IRInstruction* inst) {

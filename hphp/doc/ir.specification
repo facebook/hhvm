@@ -1513,11 +1513,11 @@ To string conversions:
 
   Allocate a new, empty dict with the bespoke StructLayout `layout`.
 
-| AllocUninitBespokeStructDict<layout,slots...>,   DStructDict, NA, PRc
+| InitStructPositions<slots>, ND, SStructDict, NF
 
-  Allocate a new dict with the bespoke StructLayout `layout` and insertion order
-  specified by `slots`. This instruction does not set the elements of the dict;
-  use InitStructElem for that.
+  Initialize the size and iterator positions of the bespoke StructDict S0 for
+  the fields specified by `slots`. This instruction does not set the elements
+  of the dict; use InitStructElem for that.
 
 | InitStructElem<slot,key>, ND, SStructDict S(Cell), CRc
 

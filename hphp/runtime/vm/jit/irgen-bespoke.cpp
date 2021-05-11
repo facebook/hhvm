@@ -1178,9 +1178,11 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     return true;
   }
 
-  auto const data = AllocUninitBespokeStructData {
+  auto const data = ArrayLayoutData { layout };
+  auto const positions = InitStructPositionsData {
       layout, safe_cast<uint32_t>(size), slots };
-  auto const arr = gen(env, AllocUninitBespokeStructDict, data);
+  auto const arr = gen(env, AllocBespokeStructDict, data);
+  gen(env, InitStructPositions, positions, arr);
   for (auto i = 0; i < size; ++i) {
     auto const idx = size - i - 1;
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[idx]);

@@ -42,11 +42,6 @@ struct StructDict : public BespokeArray {
   static StructDict* AllocStructDict(
       const StructLayout* layout);
 
-  // The `slots` array must be aligned to 8 bytes, and any leftover bytes must
-  // be padded with KindOfUninit, because type bytes follow position bytes.
-  static StructDict* AllocUninitStructDict(const StructLayout* layout,
-                                           uint32_t size,
-                                           const uint8_t* slots);
   static StructDict* MakeStructDict(
       const StructLayout* layout, uint32_t size,
       const uint8_t* slots, const TypedValue* vals);

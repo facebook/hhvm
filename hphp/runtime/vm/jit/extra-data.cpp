@@ -58,7 +58,7 @@ std::string NewBespokeStructData::show() const {
   return os.str();
 }
 
-std::string AllocUninitBespokeStructData::show() const {
+std::string InitStructPositionsData::show() const {
   std::ostringstream os;
   os << layout.describe() << ",(";
   auto delimiter = "";

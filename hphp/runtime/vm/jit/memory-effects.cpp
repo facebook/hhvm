@@ -1439,9 +1439,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AllocVec:
   case AllocStructDict:
   case AllocBespokeStructDict:
-  case AllocUninitBespokeStructDict:
   case ConvDblToStr:
   case ConvIntToStr:
+  case InitStructPositions:
     return IrrelevantEffects {};
 
   case AllocObj:

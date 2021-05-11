@@ -275,7 +275,6 @@ bool canDCE(IRInstruction* inst) {
   case ConstructClosure:
   case AllocBespokeStructDict:
   case AllocStructDict:
-  case AllocUninitBespokeStructDict:
   case AllocVec:
   case GetDictPtrIter:
   case AdvanceDictPtrIter:
@@ -449,6 +448,7 @@ bool canDCE(IRInstruction* inst) {
   case ConstructInstance:
   case InitDictElem:
   case InitStructElem:
+  case InitStructPositions:
   case InitVecElem:
   case InitVecElemLoop:
   case NewKeysetArray:

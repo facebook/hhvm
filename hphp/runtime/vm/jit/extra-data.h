@@ -1592,10 +1592,8 @@ struct NewBespokeStructData : IRExtraData {
   Slot* slots;
 };
 
-struct AllocUninitBespokeStructData : IRExtraData {
-  AllocUninitBespokeStructData(ArrayLayout layout,
-                               uint32_t numSlots,
-                               Slot* slots)
+struct InitStructPositionsData : IRExtraData {
+  InitStructPositionsData(ArrayLayout layout, uint32_t numSlots, Slot* slots)
     : layout(layout), numSlots(numSlots), slots(slots) {}
 
   std::string show() const;
@@ -1611,7 +1609,7 @@ struct AllocUninitBespokeStructData : IRExtraData {
     return hash;
   }
 
-  bool equals(const AllocUninitBespokeStructData& o) const {
+  bool equals(const InitStructPositionsData& o) const {
     if (layout != o.layout) return false;
     if (numSlots != o.numSlots) return false;
     for (auto i = 0; i < numSlots; i++) {
@@ -2763,7 +2761,7 @@ X(NewStructDict,                NewStructData);
 X(NewRecord,                    NewStructData);
 X(AllocStructDict,              NewStructData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
-X(AllocUninitBespokeStructDict, AllocUninitBespokeStructData);
+X(InitStructPositions,          InitStructPositionsData);
 X(NewBespokeStructDict,         NewBespokeStructData);
 X(AllocVec,                     PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);

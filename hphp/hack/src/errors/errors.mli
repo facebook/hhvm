@@ -1598,6 +1598,14 @@ val ifc_policy_mismatch :
   error_from_reasons_callback ->
   unit
 
+val override_method_support_dynamic_type :
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  error_from_reasons_callback ->
+  unit
+
 val parent_support_dynamic_type :
   Pos.t ->
   string * Ast_defs.class_kind ->

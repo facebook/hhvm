@@ -1,0 +1,4 @@
+File "override_sound_dynamic.bad.php", line 9, characters 19-21:
+Method foo must be declared <<__SupportDynamicType>> because it overrides method in class C which does. (Typing[4402])
+  File "override_sound_dynamic.bad.php", line 6, characters 19-21:
+  Overridden method is defined here.

@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "collections/Map.hhi", line 55, characters 60-61:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1063, characters 59-60:
+  File "collections/interfaces.hhi", line 1064, characters 59-60:
     via this generic `Tk`
   File "constmap.php", line 12, characters 30-37:
   But got `arraykey`
@@ -16,7 +16,7 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "collections/Map.hhi", line 55, characters 60-61:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1063, characters 59-60:
+  File "collections/interfaces.hhi", line 1064, characters 59-60:
     via this generic `Tk`
   File "constmap.php", line 13, characters 47-54:
   But got `arraykey`
@@ -48,7 +48,7 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "collections/Map.hhi", line 55, characters 60-61:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1063, characters 59-60:
+  File "collections/interfaces.hhi", line 1064, characters 59-60:
     via this generic `Tk`
   File "constmap.php", line 23, characters 39-46:
   But got `arraykey`
@@ -60,7 +60,7 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "collections/Map.hhi", line 55, characters 60-61:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1063, characters 59-60:
+  File "collections/interfaces.hhi", line 1064, characters 59-60:
     via this generic `Tk`
   File "constmap.php", line 24, characters 65-72:
   But got `arraykey`

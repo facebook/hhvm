@@ -234,6 +234,27 @@ let check_override
     else
       on_error
   in
+  let check_compatible_sound_dynamic_attributes
+      member_name parent_class (class_ : Cls.t) parent_class_elt class_elt =
+    if
+      TypecheckerOptions.enable_sound_dynamic
+        (Provider_context.get_tcopt (Env.get_ctx env))
+      && ( Cls.get_support_dynamic_type parent_class
+         || get_ce_support_dynamic_type parent_class_elt )
+      && not
+           ( Cls.get_support_dynamic_type class_
+           || get_ce_support_dynamic_type class_elt )
+    then
+      let (lazy pos) = class_elt.ce_pos in
+      let (lazy parent_pos) = parent_class_elt.ce_pos in
+      Errors.override_method_support_dynamic_type
+        pos
+        parent_pos
+        parent_class_elt.ce_origin
+        member_name
+        on_error
+  in
+
   if is_method mem_source then begin
     (* We first verify that we aren't overriding a final method *)
     (* we only check for final overrides on methods, not properties *)
@@ -326,6 +347,12 @@ let check_override
            * which is checked elsewhere *)
           env
         | _ ->
+          check_compatible_sound_dynamic_attributes
+            member_name
+            parent_class
+            class_
+            parent_class_elt
+            class_elt;
           Typing_subtype_method.(
             (* Add deps here when we override *)
             subtype_method_decl

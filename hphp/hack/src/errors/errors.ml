@@ -5251,6 +5251,25 @@ let ifc_internal_error pos reason =
     ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
     )
 
+let override_method_support_dynamic_type
+    child_pos
+    parent_pos
+    parent_origin
+    name
+    (on_error : error_from_reasons_callback) =
+  let parent_origin = strip_ns parent_origin in
+  on_error
+    ~code:(Typing.err_code Typing.ImplementsDynamic)
+    [
+      ( child_pos,
+        "Method "
+        ^ name
+        ^ " must be declared <<__SupportDynamicType>> because it overrides method in class "
+        ^ parent_origin
+        ^ " which does." );
+      (parent_pos, "Overridden method is defined here.");
+    ]
+
 let parent_support_dynamic_type
     pos
     (child_name, child_kind)

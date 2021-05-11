@@ -1,0 +1,2 @@
+File "entry_point_no_generics.php", line 4, characters 15-15:
+`__EntryPoint` functions cannot have generic parameters. (NastCheck[3094])

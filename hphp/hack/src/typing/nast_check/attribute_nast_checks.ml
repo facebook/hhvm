@@ -75,9 +75,12 @@ let handler =
         (match f.f_params with
         | [] -> ()
         | param :: _ -> Errors.entrypoint_arguments param.param_pos);
-        match variadic_pos f.f_variadic with
+        (match variadic_pos f.f_variadic with
         | Some p -> Errors.entrypoint_arguments p
-        | None -> ()
+        | None -> ());
+        match f.f_tparams with
+        | [] -> ()
+        | tparam :: _ -> Errors.entrypoint_generics (fst tparam.tp_name)
       end;
       (* Ban variadic arguments on memoized functions. *)
       ( if has_attribute "__Memoize" f.f_user_attributes then

@@ -2082,6 +2082,12 @@ let entrypoint_arguments pos =
     pos
     "`__EntryPoint` functions cannot take arguments."
 
+let entrypoint_generics pos =
+  add
+    (NastCheck.err_code NastCheck.EntryPointGenerics)
+    pos
+    "`__EntryPoint` functions cannot have generic parameters."
+
 let variadic_memoize pos =
   add
     (NastCheck.err_code NastCheck.VariadicMemoize)

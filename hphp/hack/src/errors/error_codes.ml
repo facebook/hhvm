@@ -231,6 +231,7 @@ module NastCheck = struct
     (* | InvalidConstFunAttributeDEPRECATED [@value 3091] *)
     | ListRvalue [@value 3092]
     | PartiallyAbstractTypeconstDefinition [@value 3093]
+    | EntryPointGenerics [@value 3094]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

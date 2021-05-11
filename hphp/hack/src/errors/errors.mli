@@ -1362,6 +1362,8 @@ val invalid_arraykey_constraint : Pos.t -> string -> unit
 
 val entrypoint_arguments : Pos.t -> unit
 
+val entrypoint_generics : Pos.t -> unit
+
 val variadic_memoize : Pos.t -> unit
 
 val abstract_method_memoize : Pos.t -> unit

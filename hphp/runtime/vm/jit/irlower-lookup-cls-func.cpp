@@ -121,7 +121,8 @@ void cgLdCls(IRLS& env, const IRInstruction* inst) {
   auto const cls1 = v.makeReg();
   auto const cls2 = v.makeReg();
 
-  v << testbim{1, src[StringData::isSymbolOffset()], sf1};
+  auto const mask = static_cast<int8_t>(StringData::kIsSymbolMask);
+  v << testbim{mask, src[StringData::isSymbolOffset()], sf1};
   fwdJcc(v, env, CC_E, sf1, then);
   if (use_lowptr) {
     auto const low = v.makeReg();

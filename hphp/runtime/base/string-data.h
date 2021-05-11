@@ -428,6 +428,14 @@ struct StringData final : MaybeCountable,
   static void markSymbolsLoaded();
 
   /*
+   * A static string may be assigned a "color" which to be used as the hash key
+   * in implementations of perfect hashing for bespoke arrays. The color is
+   * present only in static arrays, and is stored in  the lower 14 bits of
+   * m_aux16.
+   */
+  uint16_t color() const;
+
+  /*
    * Get or set the cached class or named entity. Get will return nullptr
    * if the corresponding cached value hasn't been set yet.
    *
@@ -441,8 +449,16 @@ struct StringData final : MaybeCountable,
   /*
    * Helpers used to JIT access to the symbol cache.
    */
+  constexpr static uint8_t kIsSymbolMask = 0x80;
   static ptrdiff_t isSymbolOffset();
   static ptrdiff_t cachedClassOffset();
+
+  /*
+   * Helpers used to JIT access to the color field.
+   */
+  constexpr static uint16_t kColorMask = 0x3fff;
+  constexpr static uint16_t kInvalidColor = 0x0000;
+  static ptrdiff_t colorOffset();
 
   /*
    * Type conversion functions.

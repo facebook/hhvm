@@ -73,7 +73,6 @@ struct IncomingBranch {
 
   Tag type()        const { return m_ptr.tag(); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
-  void relocate(RelocationInfo& rel);
   void adjust(TCA addr) {
     m_ptr.set(m_ptr.tag(), addr);
   }
@@ -175,8 +174,7 @@ struct SrcRec final {
   }
 
   /*
-   * Get the anchor translation for this SrcRec. If another thread holds the
-   * code lock it may update this address via relocate().
+   * Get the anchor translation for this SrcRec.
    */
   TCA getFallbackTranslation() const;
 
@@ -215,11 +213,6 @@ struct SrcRec final {
     auto srLock = readlock();
     return translations().size();
   }
-
-  /*
-   * Relocate may override the anchor so the code lock must also be acquired
-   */
-  void relocate(RelocationInfo& rel);
 
   //////////////////////////////////////////////////////////////////////////////
 

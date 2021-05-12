@@ -35,24 +35,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(trans)
 
-void IncomingBranch::relocate(RelocationInfo& rel) {
-  // compute adjustedTarget before altering the smash address,
-  // because it might be a 5-byte nop
-  TCA adjustedTarget = rel.adjustedAddressAfter(target());
-
-  if (TCA adjusted = rel.adjustedAddressAfter(toSmash())) {
-    m_ptr.set(m_ptr.tag(), adjusted);
-  }
-
-  if (adjustedTarget) {
-    FTRACE_MOD(Trace::mcg, 1, "Patching: 0x{:08x} from 0x{:08x} to 0x{:08x}\n",
-               (uintptr_t)toSmash(), (uintptr_t)target(),
-               (uintptr_t)adjustedTarget);
-
-    patch(adjustedTarget);
-  }
-}
-
 void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP:
@@ -202,41 +184,6 @@ void SrcRec::smashFallbacksToStub(TCA stub) {
   TRACE(1, "SrcRec(%p)::smashFallbacksToStub @%p, ", this, stub);
   for (auto& br : m_tailFallbackJumps) br.patch(stub);
   m_tailFallbackJumps.clear();
-}
-
-void SrcRec::relocate(RelocationInfo& rel) {
-  tc::assertOwnsCodeLock();
-
-  auto srLock = writelock();
-  if (auto adjusted = rel.adjustedAddressAfter(m_anchorTranslation)) {
-    m_anchorTranslation = adjusted;
-  }
-
-  if (auto adjusted = rel.adjustedAddressAfter(m_topTranslation.get())) {
-    m_topTranslation = adjusted;
-  }
-
-  for (auto &t : m_translations) {
-    if (TCA adjusted = rel.adjustedAddressAfter(t.mainStart())) {
-      t.setMainStart(adjusted);
-    }
-
-    if (TCA adjusted = rel.adjustedAddressAfter(t.coldStart())) {
-      t.setColdStart(adjusted);
-    }
-
-    if (TCA adjusted = rel.adjustedAddressAfter(t.frozenStart())) {
-      t.setFrozenStart(adjusted);
-    }
-  }
-
-  for (auto &ib : m_tailFallbackJumps) {
-    ib.relocate(rel);
-  }
-
-  for (auto &ib : m_incomingBranches) {
-    ib.relocate(rel);
-  }
 }
 
 void SrcRec::patchIncomingBranches(TCA newStart) {

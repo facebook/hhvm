@@ -629,6 +629,7 @@ module Typing = struct
     | ProtectedMethCaller [@value 4432]
     | BadConditionalSupportDynamic [@value 4433]
     | ReadonlyInvalidAsMut [@value 4434]
+    | InvalidKeysetValue [@value 4435]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

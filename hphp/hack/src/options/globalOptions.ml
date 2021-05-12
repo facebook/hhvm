@@ -92,6 +92,7 @@ type t = {
   symbol_write_ignore_paths: string list;
   symbol_write_index_paths: string list;
   symbol_write_index_paths_file: string option;
+  symbol_write_index_paths_file_output: string option;
   symbol_write_include_hhi: bool;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
@@ -281,6 +282,7 @@ let default =
     symbol_write_ignore_paths = [];
     symbol_write_index_paths = [];
     symbol_write_index_paths_file = None;
+    symbol_write_index_paths_file_output = None;
     symbol_write_include_hhi = true;
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
@@ -416,6 +418,7 @@ let make
     ?(symbol_write_ignore_paths = default.symbol_write_ignore_paths)
     ?(symbol_write_index_paths = default.symbol_write_index_paths)
     ?symbol_write_index_paths_file
+    ?symbol_write_index_paths_file_output
     ?(symbol_write_include_hhi = default.symbol_write_include_hhi)
     ?(po_disallow_func_ptrs_in_constants =
       default.po_disallow_func_ptrs_in_constants)
@@ -550,6 +553,7 @@ let make
     symbol_write_ignore_paths;
     symbol_write_index_paths;
     symbol_write_index_paths_file;
+    symbol_write_index_paths_file_output;
     symbol_write_include_hhi;
     po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas;
@@ -772,6 +776,9 @@ let symbol_write_ignore_paths t = t.symbol_write_ignore_paths
 let symbol_write_index_paths t = t.symbol_write_index_paths
 
 let symbol_write_index_paths_file t = t.symbol_write_index_paths_file
+
+let symbol_write_index_paths_file_output t =
+  t.symbol_write_index_paths_file_output
 
 let symbol_write_include_hhi t = t.symbol_write_include_hhi
 

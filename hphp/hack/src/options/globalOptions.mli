@@ -218,6 +218,8 @@ type t = {
   symbol_write_ignore_paths: string list;
   (* When set, write indexing data for these filepaths only. Relative to repository root, eg: bar.php for root|bar.php *)
   symbol_write_index_paths: string list;
+  (* A file which contains paths (one per line) to add to symbol_write_index_paths *)
+  symbol_write_index_paths_file: string option;
   (* Write symbol indexing data for hhi files *)
   symbol_write_include_hhi: bool;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
@@ -388,6 +390,7 @@ val make :
   ?symbol_write_hhi_path:string ->
   ?symbol_write_ignore_paths:string list ->
   ?symbol_write_index_paths:string list ->
+  ?symbol_write_index_paths_file:string ->
   ?symbol_write_include_hhi:bool ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
@@ -623,6 +626,8 @@ val symbol_write_hhi_path : t -> string
 val symbol_write_ignore_paths : t -> string list
 
 val symbol_write_index_paths : t -> string list
+
+val symbol_write_index_paths_file : t -> string option
 
 val symbol_write_include_hhi : t -> bool
 

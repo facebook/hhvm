@@ -967,9 +967,17 @@ let write_symbol_info_init
   in
   let (env, t) = naming env t ~profile_label:"naming" ~profiling in
   let index_paths = env.swriteopt.symbol_write_index_paths in
+  let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
+  let paths =
+    List.concat
+      [
+        Option.value_map index_paths_file ~default:[] ~f:In_channel.read_lines;
+        index_paths;
+      ]
+  in
   let files =
-    if List.length index_paths > 0 then
-      List.fold index_paths ~init:[] ~f:(fun acc path ->
+    if List.length paths > 0 then
+      List.fold paths ~init:[] ~f:(fun acc path ->
           if Sys.file_exists path then
             Relative_path.from_root ~suffix:path :: acc
           else

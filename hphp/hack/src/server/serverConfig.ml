@@ -403,6 +403,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (string_list_opt "symbol_write_ignore_paths" config)
       ?symbol_write_index_paths:
         (string_list_opt "symbol_write_index_paths" config)
+      ?symbol_write_index_paths_file:
+        (string_opt "symbol_write_index_paths_file" config)
       ?symbol_write_include_hhi:(bool_opt "symbol_write_include_hhi" config)
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)

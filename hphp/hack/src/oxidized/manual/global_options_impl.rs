@@ -97,6 +97,7 @@ impl Default for GlobalOptions {
             symbol_write_hhi_path: String::new(),
             symbol_write_ignore_paths: vec![],
             symbol_write_index_paths: vec![],
+            symbol_write_index_paths_file: None,
             symbol_write_include_hhi: true,
             po_enable_enum_classes: true,
             po_disable_modes: false,

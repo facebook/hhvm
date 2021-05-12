@@ -95,6 +95,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     symbol_write_hhi_path: "",
     symbol_write_ignore_paths: &[],
     symbol_write_index_paths: &[],
+    symbol_write_index_paths_file: None,
     symbol_write_include_hhi: true,
     po_enable_enum_classes: true,
     po_disable_modes: false,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f05249d2ea1f169d1cf0cf80f182a368>>
+// @generated SignedSource<<7dbeb395fa73e9c9769956e11123a8aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -110,6 +110,7 @@ pub struct GlobalOptions {
     pub symbol_write_hhi_path: String,
     pub symbol_write_ignore_paths: Vec<String>,
     pub symbol_write_index_paths: Vec<String>,
+    pub symbol_write_index_paths_file: Option<String>,
     pub symbol_write_include_hhi: bool,
     pub po_disallow_func_ptrs_in_constants: bool,
     pub tco_error_php_lambdas: bool,

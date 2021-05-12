@@ -477,15 +477,6 @@ pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
 /// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
 /// pointers in `dest`.
 ///
-/// Pointers in `dest` will be rebased with respect to `dest_addr`. This is so
-/// that a process which copies a slab into shared memory may rebase the slab
-/// for reading in another process, which maps that shared memory segment at a
-/// different address. `dest_addr` should be the address of the first byte in
-/// `dest` in that reader process.
-///
-/// When copying a slab for reading within the same process, use the value
-/// `dest.as_ptr() as usize` for `dest_addr`.
-///
 /// Padding bytes in `dest` (bytes before the first or after the last aligned
 /// word) will not be modified.
 ///
@@ -494,11 +485,8 @@ pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
 /// # Panics
 ///
 /// This function will panic if `src` and `dest` have different lengths.
-pub fn copy_slab(
-    src: &[u8],
-    dest: &mut [MaybeUninit<u8>],
-    dest_addr: usize,
-) -> Result<(), SlabIntegrityError> {
+pub fn copy_slab(src: &[u8], dest: &mut [MaybeUninit<u8>]) -> Result<(), SlabIntegrityError> {
+    let dest_addr = dest.as_ptr() as usize;
     let new_base = dest_addr + leading_padding(dest);
 
     let src_slab = Slab::from_bytes(src);
@@ -789,7 +777,7 @@ mod test {
         // it to a list of usizes and back to an OwnedSlab.
         for offset in 0..WORD_SIZE {
             let bytes = &mut bytes[offset..offset + tuple_reader.size_in_bytes()];
-            copy_slab(tuple_reader.as_bytes(), bytes, bytes.as_ptr() as usize).unwrap();
+            copy_slab(tuple_reader.as_bytes(), bytes).unwrap();
             unsafe {
                 let bytes = &*(bytes as *const [MaybeUninit<u8>] as *const [u8]);
                 let reader = SlabReader::from_bytes(bytes).unwrap();

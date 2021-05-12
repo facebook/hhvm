@@ -521,12 +521,11 @@ and localize_cstr_ty ~ety_env env ty tp_name =
  * the type parameters to the provided types.
  *)
 and localize_ft
-    ?(instantiation : method_instantiation option) ~ety_env ~def_pos env ft =
-  (* If no explicit type parameters are provided, set the instantiated type parameter to
-   * initially point to unresolved, so that it can grow and eventually be a subtype of
-   * something like "mixed".
-   * If explicit type parameters are provided, just instantiate tvarl to them.
-   *)
+    ?(instantiation : method_instantiation option)
+    ~ety_env
+    ~def_pos
+    env
+    (ft : decl_ty fun_type) =
   let (env, substs) =
     match instantiation with
     | Some { explicit_targs; use_name = _; use_pos } ->
@@ -555,7 +554,9 @@ and localize_ft
   in
   let ety_env = { ety_env with substs } in
   (* Localize the constraints for a type parameter declaration *)
-  let rec localize_tparam ~nested env t =
+  let rec localize_tparam :
+      nested:bool -> env -> decl_ty tparam -> env * locl_ty tparam =
+   fun ~nested env t ->
     let (env, cstrl) =
       (* TODO(T70068435)
         For nested type parameters (i.e., type parameters of type parameters),
@@ -696,10 +697,12 @@ and localize_ft
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
   let check_tparam_constraints env t =
-    List.fold_left t.tp_constraints ~init:env ~f:(fun env (ck, ty) ->
-        let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
-        match SMap.find_opt (snd t.tp_name) ety_env.substs with
-        | Some x_ty ->
+    match SMap.find_opt (snd t.tp_name) ety_env.substs with
+    | Some ty ->
+      List.fold_left t.tp_constraints ~init:env ~f:(fun env (ck, cstr_ty) ->
+          let (env, cstr_ty) =
+            localize_cstr_ty ~ety_env env cstr_ty t.tp_name
+          in
           Typing_log.(
             log_with_level env "generics" 1 (fun () ->
                 log_types
@@ -708,32 +711,32 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
                   [
                     Log_head
                       ( "check_tparams_constraints: check_tparams_constraint",
-                        [Log_type ("ty", ty); Log_type ("x_ty", x_ty)] );
+                        [Log_type ("cstr_ty", cstr_ty); Log_type ("ty", ty)] );
                   ]));
           TGenConstraint.check_tparams_constraint
             env
             ~use_pos
             t.tp_name
             ck
-            ty
-            x_ty
-        | None -> env)
+            ~cstr_ty
+            ty)
+    | None -> env
   in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints
 
 and check_where_constraints
     ~in_class ~use_pos ~ety_env ~definition_pos env cstrl =
-  List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      let (env, ty1) = localize ~ety_env env ty1 in
-      let (env, ty2) = localize ~ety_env env ty2 in
+  List.fold_left cstrl ~init:env ~f:(fun env (ty, ck, cstr_ty) ->
+      let (env, ty) = localize ~ety_env env ty in
+      let (env, cstr_ty) = localize ~ety_env env cstr_ty in
       TGenConstraint.check_where_constraint
         ~in_class
         env
         ~use_pos
         ~definition_pos
         ck
-        ty2
-        ty1)
+        ~cstr_ty
+        ty)
 
 (**
  * If a type annotation for a class is missing type arguments, create a type variable

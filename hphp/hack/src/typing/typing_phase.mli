@@ -95,7 +95,7 @@ val localize_targs :
   Aast.hint list ->
   env * Tast.targ list
 
-(** Like localize_targs, but acts on kinds. *)
+(** Like [localize_targs], but acts on kinds. *)
 val localize_targs_with_kinds :
   check_well_kinded:bool ->
   is_method:bool ->
@@ -108,6 +108,21 @@ val localize_targs_with_kinds :
   Typing_kinding_defs.Simple.named_kind list ->
   Aast.hint list ->
   env * Tast.targ list
+
+(** Same as [localize_targs] but also check constraints on type parameters
+    (though not `where` constraints) *)
+val localize_targs_and_check_constraints :
+  exact:exact ->
+  check_well_kinded:bool ->
+  check_constraints:bool ->
+  def_pos:Pos_or_decl.t ->
+  use_pos:Pos.t ->
+  ?check_explicit_targs:bool ->
+  env ->
+  Ast_defs.id ->
+  decl_tparam list ->
+  Aast.hint list ->
+  env * locl_ty * Tast.targ list
 
 (** Declare and localize a single explicit type argument *)
 val localize_targ :
@@ -133,19 +148,6 @@ val check_where_constraints :
 val decl : decl_ty -> phase_ty
 
 val locl : locl_ty -> phase_ty
-
-val localize_targs_and_check_constraints :
-  exact:exact ->
-  check_well_kinded:bool ->
-  check_constraints:bool ->
-  def_pos:Pos_or_decl.t ->
-  use_pos:Pos.t ->
-  ?check_explicit_targs:bool ->
-  env ->
-  Ast_defs.id ->
-  decl_tparam list ->
-  Aast.hint list ->
-  env * locl_ty * Tast.targ list
 
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints *)

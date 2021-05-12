@@ -166,7 +166,7 @@ end
   type Bar<T2> = Foo<T2>;
 
   Here, T2 of Bar implicitly has the bound T2 as num. However, in the current design, we only
-  ever check that when expaning Bar, the argument in place of T2 satisfies all the
+  ever check that when expandsing Bar, the argument in place of T2 satisfies all the
   implicit bounds.
   However, this is not feasible for using aliases and newtypes as higher-kinded types, where we
   use them without expanding them.

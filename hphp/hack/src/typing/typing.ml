@@ -6632,7 +6632,7 @@ and class_id_for_new
   in
   get_info [] [cid_ty]
 
-(* When invoking a method the class_id is used to determine what class we
+(* When invoking a method, the class_id is used to determine what class we
  * lookup the method in, but the type of 'this' will be the late bound type.
  * For example:
  *
@@ -6649,7 +6649,7 @@ and class_id_for_new
  *
  *  This means when determining the type of this, CIparent and CIself should be
  *  changed to CIstatic. For the other cases of C::get() or $c::get(), we only
- *  look at the left hand side of the '::' and use the type type associated
+ *  look at the left hand side of the '::' and use the type associated
  *  with it.
  *
  *  Thus C::get() will return a type C, while $c::get() will return the same

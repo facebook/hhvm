@@ -302,7 +302,7 @@ namespace HH {
    * and code.
    */
   <<__Native>>
-  function global_key_exists(string $key): bool;
+  function global_key_exists(string $key)[read_globals]: bool;
 }
 
 namespace HH\Lib\_Private\Native {

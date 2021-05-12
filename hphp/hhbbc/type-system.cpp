@@ -4784,8 +4784,6 @@ Type widen_type(Type t) {
 }
 
 Type widening_union(const Type& a, const Type& b) {
-  if (a.subtypeOf(b)) return b;
-  if (b.subtypeOf(a)) return a;
   return widen_type(union_of(a, b));
 }
 

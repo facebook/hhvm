@@ -98,7 +98,7 @@ function jit_serialize_option(string $cmd, $test, $options, $serialize) {
   $serialized = test_repo($options, $test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
-    ' --count=' . ($serialize ? $options['jit-serialize'] + 1 : 1) .
+    ' --count=' . ($serialize ? (int)$options['jit-serialize'] + 1 : 1) .
     " -vEval.JitSerdesFile=" . $serialized .
     " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail').
     ($serialize ? " -vEval.JitSerializeOptProfRequests=1" : '');
@@ -903,7 +903,7 @@ function hhvm_cmd_impl(
     }
 
     if (isset($options['retranslate-all'])) {
-      $args[] = '--count='.($options['retranslate-all'] * 2);
+      $args[] = '--count='.((int)$options['retranslate-all'] * 2);
       $args[] = '-vEval.JitPGO=true';
       $args[] = '-vEval.JitRetranslateAllRequest='.$options['retranslate-all'];
       // Set to timeout.  We want requests to trigger retranslate all.
@@ -2761,11 +2761,11 @@ function run_config_post($outputs, $test, $options) {
   $repeats = 0;
   if (!$check_hhbbc_error) {
     if (isset($options['retranslate-all'])) {
-      $repeats = $options['retranslate-all'] * 2;
+      $repeats = (int)$options['retranslate-all'] * 2;
     }
 
     if (isset($options['recycle-tc'])) {
-      $repeats = $options['recycle-tc'];
+      $repeats = (int)$options['recycle-tc'];
     }
 
     if (isset($options['cli-server'])) {
@@ -3002,7 +3002,7 @@ function run_test($options, $test) {
       return 'skip-norepo';
     }
     if (file_exists($test.'.onlyjumpstart') &&
-       (!isset($options['jit-serialize']) || $options['jit-serialize'] < 1)) {
+       (!isset($options['jit-serialize']) || (int)$options['jit-serialize'] < 1)) {
       return 'skip-onlyjumpstart';
     }
 
@@ -3218,7 +3218,7 @@ function msg_loop($num_tests, $queue) {
 
     if ($do_progress) {
       $total_run = (Status::$skipped + Status::$failed + Status::$passed);
-      $bar_cols = ($cols - 45);
+      $bar_cols = ((int)$cols - 45);
 
       $passed_ticks  = round($bar_cols * (Status::$passed  / $num_tests));
       $skipped_ticks = round($bar_cols * (Status::$skipped / $num_tests));

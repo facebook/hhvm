@@ -80,7 +80,11 @@ let () =
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  (* local_config embodies what's in hh.conf, combined with the version= field from <root>/.hhconfig *)
+  HackEventLogger.client_init
+    ~init_id
+    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
+    (Option.value root ~default:Path.dummy_path);
+  (* we also have to patch up HackEventLogger with stuff we learn from root, if available... *)
   let local_config =
     match root with
     | None -> None
@@ -97,31 +101,15 @@ let () =
         | None -> fake_server_args
         | Some config -> ServerArgs.set_config fake_server_args config
       in
-      let (_, local_config) =
+      let (config, local_config) =
         ServerConfig.load ~silent:true ServerConfig.filename fake_server_args
       in
+      HackEventLogger.set_hhconfig_version
+        (ServerConfig.version config |> Config_file.version_to_string_opt);
+      HackEventLogger.set_rollout_flags
+        (ServerLocalConfig.to_rollout_flags local_config);
       Some local_config
   in
-
-  (* To set up HackEventLogger, we need the .hhconfig version= field *)
-  let hhconfig_version =
-    match root with
-    | Some root ->
-      Path.concat root Config_file.file_path_relative_to_repo_root
-      |> Path.to_string
-      |> Config_file.parse_local_config ~silent:true
-      |> SMap.find_opt "version"
-      |> Config_file.parse_version
-      |> Config_file.version_to_string_opt
-    | None -> None
-  in
-  HackEventLogger.client_init
-    ~init_id
-    ~hhconfig_version
-    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
-    (Option.value root ~default:Path.dummy_path);
-  HackEventLogger.set_rollout_flags
-    (Option.map local_config ~f:ServerLocalConfig.to_rollout_flags);
 
   try
     let exit_status =

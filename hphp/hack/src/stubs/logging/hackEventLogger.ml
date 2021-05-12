@@ -66,8 +66,15 @@ let init_worker
     ~profile_desc:_ =
   ()
 
-let init_monitor ~from:_ ~custom_columns:_ ~proc_stack:_ ~rollout_flags:_ _ _ _
-    =
+let init_monitor
+    ~from:_
+    ~custom_columns:_
+    ~proc_stack:_
+    ~hhconfig_version:_
+    ~rollout_flags:_
+    _
+    _
+    _ =
   ()
 
 let init_batch_tool ~init_id:_ ~root:_ ~time:_ = ()
@@ -116,7 +123,7 @@ let out_of_date _ = ()
 
 let lock_stolen _ = ()
 
-let client_init ~init_id:_ ~hhconfig_version:_ ~custom_columns:_ _ = ()
+let client_init ~init_id:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
 

@@ -386,13 +386,13 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string param.root)
   in
   let server_args = ServerArgs.set_config server_args param.config in
-  let (server_config, server_local_config) =
+  let (config, local_config) =
     ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
-  let hhconfig_version =
-    server_config |> ServerConfig.version |> Config_file.version_to_string_opt
-  in
-  HackEventLogger.set_hhconfig_version hhconfig_version;
+  HackEventLogger.set_hhconfig_version
+    (ServerConfig.version config |> Config_file.version_to_string_opt);
+  HackEventLogger.set_rollout_flags
+    (ServerLocalConfig.to_rollout_flags local_config);
 
   Provider_backend.set_local_memory_backend_with_defaults ();
   let local_memory =
@@ -401,10 +401,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     | _ -> failwith "expected local memory backend"
   in
 
-  (* Use server_config to modify server_env with the correct symbol index *)
-  let genv =
-    ServerEnvBuild.make_genv server_args server_config server_local_config []
-  in
+  (* Use config to modify server_env with the correct symbol index *)
+  let genv = ServerEnvBuild.make_genv server_args config local_config [] in
   let init_id = Random_id.short_string () in
   let { ServerEnv.tcopt; popt; gleanopt; _ } =
     (* TODO(hverr): Figure out 64-bit mode *)
@@ -424,12 +422,10 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~globalrev:None
       ~gleanopt
       ~namespace_map:(GlobalOptions.po_auto_namespace_map tcopt)
-      ~provider_name:
-        server_local_config.ServerLocalConfig.symbolindex_search_provider
-      ~quiet:server_local_config.ServerLocalConfig.symbolindex_quiet
+      ~provider_name:local_config.ServerLocalConfig.symbolindex_search_provider
+      ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
       ~ignore_hh_version:false
-      ~savedstate_file_opt:
-        server_local_config.ServerLocalConfig.symbolindex_file
+      ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
       ~workers:None
   in
   let sienv =

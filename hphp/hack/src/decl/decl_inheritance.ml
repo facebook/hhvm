@@ -10,7 +10,6 @@
 open Hh_prelude
 open Decl_defs
 open Decl_subst
-open Reordered_argument_collections
 open Shallow_decl_defs
 open Typing_defs
 module DTT = Decl_to_typing
@@ -84,18 +83,6 @@ let filter_for_const_lookup lin =
   Sequence.filter lin ~f:(fun mro ->
       not (is_set mro_xhp_attrs_only mro.mro_flags))
 
-module SPairSet = Reordered_argument_set (Caml.Set.Make (struct
-  type t = string * string
-
-  (* Equivalent to polymorphic compare; written explicitly for perf reasons *)
-  let compare (a1, a2) (b1, b2) =
-    let r = String.compare a1 b1 in
-    if Int.( <> ) r 0 then
-      r
-    else
-      String.compare a2 b2
-end))
-
 let filter_target ~target ~f list =
   match target with
   | AllMembers -> list
@@ -103,32 +90,18 @@ let filter_target ~target ~f list =
     list |> List.find ~f:(fun x -> String.equal s (f x)) |> Option.to_list
 
 (** Given a linearization filtered for method lookup, return a [Sequence.t]
-    containing each method (as an {!tagged_elt}) in linearization order, with
-    method redeclarations already handled (that is, methods arising from a
-    redeclaration appear in the sequence as regular methods, and trait methods
-    which were redeclared do not appear in the sequence). *)
+    containing each method (as an {!tagged_elt}) in linearization order. *)
 let methods ~target ~static child_class_name lin =
-  Sequence.unfold ~init:(SPairSet.empty, lin) ~f:(fun (removed, seq) ->
-      match Sequence.next seq with
-      | None -> None
-      | Some ((mro, cls, subst), rest) ->
-        let methods =
-          if static then
-            cls.sc_static_methods
-          else
-            cls.sc_methods
-        in
-        let cid = mro.mro_name in
-        let methods_seq =
-          methods
-          |> filter_target ~target ~f:(fun { sm_name = (_, n); _ } -> n)
-          |> Sequence.of_list
-          |> Sequence.filter ~f:(fun sm ->
-                 not (SPairSet.mem removed (cid, snd sm.sm_name)))
-          |> Sequence.map
-               ~f:(DTT.shallow_method_to_telt child_class_name mro subst)
-        in
-        Some (methods_seq, (removed, rest)))
+  lin
+  |> Sequence.map ~f:(fun (mro, cls, subst) ->
+         ( if static then
+           cls.sc_static_methods
+         else
+           cls.sc_methods )
+         |> filter_target ~target ~f:(fun { sm_name = (_, n); _ } -> n)
+         |> Sequence.of_list
+         |> Sequence.map
+              ~f:(DTT.shallow_method_to_telt child_class_name mro subst))
   |> Sequence.concat
 
 (** Given a linearization filtered for property lookup, return a [Sequence.t]

@@ -2571,6 +2571,30 @@ and expr_
     let env = forget_fake_members env p e in
     (env, te, ty)
   in
+  let check_collection_tparams env name tys =
+    (* varrays and darrays are not classes but they share the same
+    constraints with vec and dict respectively *)
+    let name =
+      if String.equal name SN.Typehints.varray then
+        SN.Collections.cVec
+      else if String.equal name SN.Typehints.darray then
+        SN.Collections.cDict
+      else
+        name
+    in
+    (* Class retrieval always succeeds because we're fetching a
+    collection decl from an HHI file. *)
+    let class_ = Option.value_exn (Env.get_class env name) in
+    let ety_env =
+      {
+        (empty_expand_env_with_on_error
+           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
+        with
+        substs = TUtils.make_locl_subst_for_class_tparams class_ tys;
+      }
+    in
+    Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
+  in
   match e with
   | Import _
   | Collection _ ->
@@ -2642,6 +2666,7 @@ and expr_
       match th with
       | Some (_, tv) ->
         let (env, tv, tv_expected) = localize_targ env tv in
+        let env = check_collection_tparams env name [fst tv] in
         (env, Some tv_expected, Some tv)
       | _ ->
         begin
@@ -2703,6 +2728,7 @@ and expr_
       | Some ((_, tk), (_, tv)) ->
         let (env, tk, tk_expected) = localize_targ env tk in
         let (env, tv, tv_expected) = localize_targ env tv in
+        let env = check_collection_tparams env name [fst tk; fst tv] in
         (env, Some tk_expected, Some tv_expected, Some (tk, tv))
       | _ ->
         (* no explicit typehint, fallback to supplied expect *)

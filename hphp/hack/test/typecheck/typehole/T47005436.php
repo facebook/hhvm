@@ -34,5 +34,5 @@ final class Bar extends BaseClass {
 
 <<__EntryPoint>>
 function main():void {
-  BaseClass::start();
+  Bar::start();
 }

@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_core
 open Utils
 open String_utils
 open SearchUtils
@@ -306,7 +307,8 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
              Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
     in
 
-    let enum_values = match attr_origin with
+    let enum_values =
+      match attr_origin with
       | Some cls -> Cls.xhp_enum_values cls
       | None -> SMap.empty
     in
@@ -550,6 +552,81 @@ let autocomplete_enum_atom env f pos_atomname =
     | _ -> ())
   | _ -> ()
 
+(* Zip two lists together. If the two lists have different lengths,
+   take the shortest. *)
+let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
+  match (xs, ys) with
+  | (x :: xs, y :: ys) -> (x, y) :: zip_truncate xs ys
+  | _ -> []
+
+(* Get the names of string literal keys in this shape type. *)
+let shape_string_keys (sm : 'a TShapeMap.t) : string list =
+  let fields = TShapeMap.keys sm in
+  List.filter_map fields ~f:(fun field ->
+      match field with
+      | TSFlit_str (_, s) -> Some s
+      | _ -> None)
+
+let unwrap_holes (e : Tast.expr) : Tast.expr =
+  match snd e with
+  | Aast.Hole (e, _, _, _) -> e
+  | _ -> e
+
+(* If we see a call to a function that takes a shape argument, offer
+   completions for field names in shape literals.
+
+   takes_shape(shape('x' => 123, '|'));
+
+ *)
+let autocomplete_shape_literal_in_call
+    env (ft : Typing_defs.locl_fun_type) (args : Tast.expr list) : unit =
+  let add_shape_key_result pos key =
+    ac_env := Some env;
+    autocomplete_identifier := Some (pos, key);
+    argument_global_type := Some Acshape_key;
+
+    let ty = Tprim Aast_defs.Tstring in
+    let reason = Typing_reason.Rwitness pos in
+    let ty = mk (reason, ty) in
+    add_partial_result key (Phase.locl ty) SI_Literal None
+  in
+
+  (* If this shape field name is of the form "fooAUTO332", return "foo". *)
+  let shape_field_autocomplete_prefix (sfn : Ast_defs.shape_field_name) :
+      string option =
+    match sfn with
+    | Ast_defs.SFlit_str (_, name) when is_auto_complete name ->
+      Some (strip_suffix name)
+    | _ -> None
+  in
+
+  let args = List.map args ~f:unwrap_holes in
+
+  List.iter
+    ~f:(fun (arg, expected_ty) ->
+      match arg with
+      | ((pos, _), Aast.Shape kvs) ->
+        (* We're passing a shape literal as this function argument. *)
+        List.iter kvs ~f:(fun (name, _val) ->
+            match shape_field_autocomplete_prefix name with
+            | Some prefix ->
+              (* This shape key is being autocompleted. *)
+              let (_, ty_) =
+                Typing_defs_core.deref expected_ty.fp_type.et_type
+              in
+              (match ty_ with
+              | Tshape (_, fields) ->
+                (* This parameter is known to be a concrete shape type. *)
+                let keys = shape_string_keys fields in
+                let matching_keys =
+                  List.filter keys ~f:(String.is_prefix ~prefix)
+                in
+                List.iter matching_keys ~f:(add_shape_key_result pos)
+              | _ -> ())
+            | _ -> ())
+      | _ -> ())
+    (zip_truncate args ft.ft_params)
+
 let visitor =
   object (self)
     inherit Tast_visitor.iter as super
@@ -604,8 +681,8 @@ let visitor =
         let ty = get_type arr in
         let (_, ty) = Tast_env.expand_type env ty in
         begin
-          match Typing_defs.get_node ty with
-          | Typing_defs.Tshape (_, fields) ->
+          match get_node ty with
+          | Tshape (_, fields) ->
             (match key with
             | Aast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid)
             | Aast.String mid ->
@@ -640,6 +717,10 @@ let visitor =
             | _ -> ())
           | _ -> ()
         end
+      | (_, Aast.Call (((_, recv_ty), _), _, args, _)) ->
+        (match deref recv_ty with
+        | (_r, Tfun ft) -> autocomplete_shape_literal_in_call env ft args
+        | _ -> ())
       | _ -> ());
       super#on_expr env expr
 

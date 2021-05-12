@@ -12,6 +12,13 @@ HHVM_DEFINE_EXTENSION("hsl_os"
     ext_hsl_os.php
 )
 
+HHVM_DEFINE_EXTENSION("hsl_locale"
+  SOURCES
+    ext_hsl_locale.cpp
+  SYSTEMLIB
+    ext_hsl_locale.php
+)
+
 HHVM_DEFINE_EXTENSION("hsl_random"
   SOURCES
     ext_hsl_random.cpp

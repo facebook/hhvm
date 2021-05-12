@@ -1,0 +1,42 @@
+--- C ---
+  'LC_COLLATE'	 => 'C'
+  'LC_CTYPE'	 => 'C'
+  'LC_MESSAGES'	 => 'C'
+  'LC_MONETARY'	 => 'C'
+  'LC_NUMERIC'	 => 'C'
+  'LC_TIME'	 => 'C'
+--- en_GB.UTF-8 ---
+  'LC_COLLATE'	 => 'en_GB.UTF-8'
+  'LC_CTYPE'	 => 'en_GB.UTF-8'
+  'LC_MESSAGES'	 => 'en_GB.UTF-8'
+  'LC_MONETARY'	 => 'en_GB.UTF-8'
+  'LC_NUMERIC'	 => 'en_GB.UTF-8'
+  'LC_TIME'	 => 'en_GB.UTF-8'
+--- en_GB with UTF-8 ctype ---
+  'LC_COLLATE'	 => 'en_GB.UTF-8'
+  'LC_CTYPE'	 => 'C'
+  'LC_MESSAGES'	 => 'en_GB.UTF-8'
+  'LC_MONETARY'	 => 'en_GB.UTF-8'
+  'LC_NUMERIC'	 => 'en_GB.UTF-8'
+  'LC_TIME'	 => 'en_GB.UTF-8'
+--- fr partial ---
+  'LC_COLLATE'	 => 'en_GB.UTF-8'
+  'LC_CTYPE'	 => 'en_GB.UTF-8'
+  'LC_MESSAGES'	 => 'en_GB.UTF-8'
+  'LC_MONETARY'	 => 'fr_FR.UTF-8'
+  'LC_NUMERIC'	 => 'fr_FR.UTF-8'
+  'LC_TIME'	 => 'en_GB.UTF-8'
+--- request locale ---
+  'LC_COLLATE'	 => 'en_GB.UTF-8'
+  'LC_CTYPE'	 => 'en_GB.UTF-8'
+  'LC_MESSAGES'	 => 'en_GB.UTF-8'
+  'LC_MONETARY'	 => 'fr_FR.UTF-8'
+  'LC_NUMERIC'	 => 'fr_FR.UTF-8'
+  'LC_TIME'	 => 'en_GB.UTF-8'
+--- Request locale from setlocale() ---
+   LC_COLLATE	=> en_GB.UTF-8
+   LC_CTYPE	=> en_GB.UTF-8
+   LC_MESSAGES	=> en_GB.UTF-8
+   LC_MONETARY	=> fr_FR.UTF-8
+   LC_NUMERIC	=> fr_FR.UTF-8
+   LC_TIME	=> en_GB.UTF-8

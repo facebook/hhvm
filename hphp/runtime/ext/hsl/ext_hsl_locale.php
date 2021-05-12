@@ -1,3 +1,5 @@
+<?hh // strict
+
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -12,36 +14,31 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-*/
+ */
 
-#pragma once
+namespace HH\Lib\_Private\_Locale {
 
-#include "hphp/runtime/base/locale.h"
-#include "hphp/util/locale-portability.h"
-#include "hphp/util/rds-local.h"
-#include "hphp/util/thread-local.h"
-
-namespace HPHP {
-
-struct ThreadSafeLocaleHandler {
-public:
-  ThreadSafeLocaleHandler();
-  ~ThreadSafeLocaleHandler();
-  void reset();
-  const char* actuallySetLocale(int category, const char* locale);
-  struct lconv* localeconv();
-
-  static std::shared_ptr<Locale> getRequestLocale();
-  static void setRequestLocale(std::shared_ptr<Locale>);
-
-private:
-  void generate_LC_ALL_String();
-
-  std::string m_lc_all;
-  std::shared_ptr<Locale> m_locale;  
-};
-
-extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
-
+<<__NativeData("HSLLocale")>>
+final class Locale {
+  private function __construct() {}
+  <<__Native>>
+  public function __debugInfo(): dict<string, string>;
 }
 
+<<__Native>>
+function get_c_locale()[]: Locale;
+<<__Native>>
+function get_environment_locale(): Locale;
+<<__Native>>
+function get_request_locale(): Locale;
+<<__Native>>
+function set_request_locale(Locale $loc): void;
+
+/** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
+<<__Native>>
+function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
+/** Take a single category, e.g. `LC_TYPE` */
+<<__Native>>
+function newlocale_category(int $category, string $locale, Locale $base): Locale;
+
+} // namespace _Locale

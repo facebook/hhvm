@@ -208,6 +208,17 @@ void ThreadSafeLocaleHandler::generate_LC_ALL_String() {
   m_lc_all.resize(m_lc_all.size() - 1);
 }
 
+std::shared_ptr<Locale> ThreadSafeLocaleHandler::getRequestLocale() {
+  return HPHP::g_thread_safe_locale_handler->m_locale;
+}
+
+void ThreadSafeLocaleHandler::setRequestLocale(std::shared_ptr<Locale> loc) {
+  if (!uselocale(loc->get())) {
+    return;
+  }
+  HPHP::g_thread_safe_locale_handler->m_locale = loc;
+}
+
 }
 
 #ifndef _MSC_VER

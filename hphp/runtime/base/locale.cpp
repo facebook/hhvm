@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/locale.h"
+#include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/util/assertions.h"
 
 #include <string.h>

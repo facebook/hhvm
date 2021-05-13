@@ -157,7 +157,7 @@ let read_progress_file ~(server_progress_file : string) :
   let content = ref "[not yet read content]" in
   try
     content := Sys_utils.protected_read_exn server_progress_file;
-    let json = Some (Disk.cat server_progress_file |> Hh_json.json_of_string) in
+    let json = Some (Hh_json.json_of_string !content) in
     let server_progress = Hh_json_helpers.Jget.string_exn json "progress" in
     let server_warning = Hh_json_helpers.Jget.string_opt json "warning" in
     let server_timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in

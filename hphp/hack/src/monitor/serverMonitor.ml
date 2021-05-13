@@ -664,6 +664,12 @@ struct
             | Unix.WEXITED code when code = oom_code -> true
             | _ -> Sys_utils.check_dmesg_for_oom process.pid "hh_server"
           in
+          (* Now we run some cleanup if the server died. First off, any FD we're waiting for
+          a read-receipt from the server will never be fulfilled, so let's close them.
+          The client will get an EOF and think (rightly) that the server hung up. *)
+          Sent_fds_collector.collect_garbage
+            ~sequence_receipt_high_water_mark:Int.max_value;
+          (* Plus any additional cleanup. *)
           SC.on_server_exit monitor_config;
           ServerProcessTools.check_exit_status proc_stat process monitor_config;
           { env with server = Died_unexpectedly (proc_stat, was_oom) })

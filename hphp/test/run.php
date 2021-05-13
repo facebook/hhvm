@@ -2117,7 +2117,7 @@ function runif_test_for_feature(
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $tmp, true);
   $hhvm = $hhvm[0];
   // Remove any --count <n> from the command
-  $hhvm = preg_replace('/ --count[ =]\d+\s{0,}/', ' ', $hhvm);
+  $hhvm = preg_replace('/ --count[ =]\d+/', '', $hhvm);
   // some tests set open_basedir to a restrictive value, override to permissive
   $hhvm .= ' -dopen_basedir= ';
 
@@ -2416,7 +2416,7 @@ function skipif_should_skip_test(
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
   $hhvm = $hhvm[0];
   // Remove any --count <n> from the command
-  $hhvm = preg_replace('/ --count[ =][\d+][\s]{0,}/', ' ', $hhvm);
+  $hhvm = preg_replace('/ --count[ =]\d+/', '', $hhvm);
 
   $descriptorspec = darray[
     0 => varray["pipe", "r"],

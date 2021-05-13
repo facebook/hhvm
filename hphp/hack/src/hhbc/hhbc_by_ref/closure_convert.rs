@@ -154,7 +154,7 @@ impl<'a> Env<'a> {
 
     fn with_lambda(&mut self, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params);
+        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params, vec![], vec![]);
 
         let lambda = Lambda {
             is_async,
@@ -165,7 +165,7 @@ impl<'a> Env<'a> {
 
     fn with_longlambda(&mut self, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params);
+        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params, vec![], vec![]);
 
         let long_lambda = LongLambda {
             is_async,

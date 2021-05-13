@@ -148,7 +148,12 @@ pub fn from_ast<'a, 'arena>(
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
-    let mut coeffects = HhasCoeffects::from_ast(&method.ctxs, &method.params);
+    let mut coeffects = HhasCoeffects::from_ast(
+        &method.ctxs,
+        &method.params,
+        &method.tparams,
+        &class.tparams,
+    );
     if method.ctxs == None && is_closure_body {
         let parent_coeffects = emitter
             .emit_global_state()

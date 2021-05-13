@@ -187,6 +187,8 @@ impl HhasCoeffects {
     pub fn from_ast<Ex, Fb, En, Hi>(
         ctxs_opt: &Option<a::Contexts>,
         params: impl AsRef<[a::FunParam<Ex, Fb, En, Hi>]>,
+        _fun_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
+        _cls_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut unenforced_static_coeffects = vec![];

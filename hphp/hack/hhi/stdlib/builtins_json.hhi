@@ -78,17 +78,3 @@ function json_decode_with_error(
   int $depth = 512,
   int $options = 0,
 )[];
-<<__PHPStdLib,
-  __Deprecated(
-    'Use `_with_error`-suffixed versions of json functions to get the error '.
-    'code/message. e.g. `json_encode_with_error` instead of `json_encode`.',
-    0
-  )>>
-function json_last_error();
-<<__PHPStdLib,
-  __Deprecated(
-    'Use `_with_error`-suffixed versions of json functions to get the error '.
-    'code/message. e.g. `json_encode_with_error` instead of `json_encode`.',
-    0
-  )>>
-function json_last_error_msg();

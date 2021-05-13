@@ -89,13 +89,6 @@ const int64_t k_JSON_ERROR_UNSUPPORTED_TYPE
   = json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE;
 
 ///////////////////////////////////////////////////////////////////////////////
-int64_t HHVM_FUNCTION(json_last_error) {
-  return (int) json_get_last_error_code();
-}
-
-String HHVM_FUNCTION(json_last_error_msg) {
-  return json_get_last_error_msg();
-}
 
 // Handles output of `json_encode` with fallback value for
 // partial output on errors, and `false` otherwise.
@@ -362,8 +355,6 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_ERROR_INF_OR_NAN, k_JSON_ERROR_INF_OR_NAN);
     HHVM_RC_INT(JSON_ERROR_UNSUPPORTED_TYPE, k_JSON_ERROR_UNSUPPORTED_TYPE);
 
-    HHVM_FE(json_last_error);
-    HHVM_FE(json_last_error_msg);
     HHVM_FE(json_encode);
     HHVM_FE(json_encode_with_error);
     HHVM_FE(json_encode_pure);

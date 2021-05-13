@@ -29,8 +29,8 @@ namespace {
 
 struct ColoringMetadata {
   folly::Optional<ColorMap> coloring;
-  std::vector<const StructLayout*> coloringAcceptedLayouts;
-  std::vector<const StructLayout*> coloringDiscardedLayouts;
+  LayoutWeightVector coloringAcceptedLayouts;
+  LayoutWeightVector coloringDiscardedLayouts;
 };
 
 ColoringMetadata s_metadata;
@@ -38,8 +38,8 @@ ColoringMetadata s_metadata;
 //////////////////////////////////////////////////////////////////////////////
 
 folly::Optional<ColorMap> performColoring(
-    const StructLayoutVector::const_iterator& begin,
-    const StructLayoutVector::const_iterator& end) {
+    const LayoutWeightVector::const_iterator& begin,
+    const LayoutWeightVector::const_iterator& end) {
   FTRACE(3, "Attempting to color {} layouts.\n", std::distance(begin, end));
 
   if (begin == end) return {ColorMap()};
@@ -47,9 +47,10 @@ folly::Optional<ColorMap> performColoring(
   // 1. Construct the interference graph from the layout set.
   using VertexSet = folly::F14FastSet<const StringData*>;
   using EdgeSet = folly::F14FastMap<const StringData*, VertexSet>;
-  auto const allEdges = [&] {
+  auto allEdges = [&] {
     auto result = EdgeSet();
-    std::for_each(begin, end, [&](auto const& layout) {
+    std::for_each(begin, end, [&](auto const& pair) {
+      auto const& layout = pair.first;
       auto const& keyOrder = layout->keyOrder();
       for (auto const& first : keyOrder) {
         result.try_emplace(first);
@@ -67,7 +68,14 @@ folly::Optional<ColorMap> performColoring(
   using VertexData = std::pair<const StringData*, VertexSet>;
   using OrderedVertices = std::vector<VertexData>;
   auto const orderedVertices = [&] {
-    auto result = OrderedVertices(allEdges.cbegin(), allEdges.cend());
+    auto result = OrderedVertices();
+    result.reserve(allEdges.size());
+    allEdges.eraseInto(
+      allEdges.begin(), allEdges.end(),
+      [&](auto&& key, auto&& val) {
+        result.emplace_back(std::move(key), std::move(val));
+      }
+    );
     std::sort(
       result.begin(),
       result.end(),
@@ -110,7 +118,8 @@ folly::Optional<ColorMap> performColoring(
 
   // 4. Validate the coloring.
   if constexpr (debug) {
-    std::for_each(begin, end, [&](auto const& layout) {
+    std::for_each(begin, end, [&](auto const& pair) {
+      auto const& layout = pair.first;
       auto const& keyOrder = layout->keyOrder();
       for (auto const& first : keyOrder) {
         assertx(colors[first] > 0 && colors[first] <= kMaxColors);
@@ -141,11 +150,18 @@ folly::Optional<ColorMap> performColoring(
 
 //////////////////////////////////////////////////////////////////////////////
 
-std::pair<StructLayoutVector::const_iterator, folly::Optional<ColorMap>>
- findKeyColoring(StructLayoutVector& layouts) {
+std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
+ findKeyColoring(LayoutWeightVector& layouts) {
   FTRACE(3, "Attempting to color a prefix of {} layouts.\n", layouts.size());
   if (layouts.empty()) return {layouts.begin(), {}};
 
+  // Sort the layouts in descending order by weight.
+  std::sort(
+    layouts.begin(), layouts.end(),
+    [](auto const& a, auto const& b) { return a.second > b.second; }
+  );
+
+  // Binary search for a colorable prefix.
   auto lo_idx = 0;
   auto hi_idx = layouts.size();
   while (lo_idx + 1 != hi_idx) {
@@ -199,7 +215,7 @@ std::string dumpColoringInfo() {
   {
     auto const& discarded = s_metadata.coloringDiscardedLayouts;
     ss << "Discarded layouts (" << discarded.size() << "):\n";
-    for (auto const& layout : discarded) {
+    for (auto const& [layout, _] : discarded) {
       ss << "  " << layout->describe() << "\n";
     }
     ss << "\n";
@@ -231,7 +247,7 @@ std::string dumpColoringInfo() {
 
   {
     ss << "Max color indices:\n";
-    for (auto const& layout : s_metadata.coloringAcceptedLayouts) {
+    for (auto const& [layout, _] : s_metadata.coloringAcceptedLayouts) {
       auto const& coloring = *s_metadata.coloring;
       auto maxColor = Color{0};
       for (auto const& key : layout->keyOrder()) {

@@ -23,10 +23,9 @@ namespace HPHP { namespace bespoke {
 
 using Color = uint16_t;
 using ColorMap = folly::F14FastMap<const StringData*, Color>;
-using StructLayoutVector = std::vector<const StructLayout*>;
 
-// Finds a colorable subset of the supplied layouts. The return value is a
-// a pair of:
+// Finds a colorable subset of the supplied layout/weight pairs. The return
+// value is a a pair of:
 //
 //   1) an iterator `ret` such that the range [begin, ret) is colorable
 //   2) the coloring produced (if any)
@@ -35,10 +34,10 @@ using StructLayoutVector = std::vector<const StructLayout*>;
 // prefix, and a set of layouts that could not be colored. The return value is
 // an iterator pointing to the first element of the uncolorable suffix.
 //
-// The current implementation does not modify the vector and only searches for
-// a colorable prefix of the current order.
-std::pair<StructLayoutVector::const_iterator, folly::Optional<ColorMap>>
-  findKeyColoring(StructLayoutVector& layouts);
+// The current implementation sorts the layouts by weight and finds a colorable
+// prefix of the resulting order.
+std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
+  findKeyColoring(LayoutWeightVector& layouts);
 
 std::string dumpColoringInfo();
 

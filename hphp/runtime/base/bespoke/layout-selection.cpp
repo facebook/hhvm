@@ -499,34 +499,22 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     if (layout) layoutWeights[layout] += group.weight;
   }
 
-  // Sort layouts in order of descending weight.
-  auto orderedLayouts = [&] {
-    using LayoutWeightVector =
-      std::vector<std::pair<const StructLayout*, double>>;
-    auto layoutVector =
-      LayoutWeightVector(layoutWeights.begin(), layoutWeights.end());
-    std::sort(
-      layoutVector.begin(), layoutVector.end(),
-      [](auto const& a, auto const& b) { return a.second > b.second; }
-    );
-
-    auto result = std::vector<const StructLayout*>{};
-    std::transform(
-      layoutVector.begin(), layoutVector.end(), std::back_inserter(result),
-      [&](auto const& a) { return a.first; }
-    );
-
-    return result;
-  }();
+  auto layoutVector =
+    LayoutWeightVector(layoutWeights.begin(), layoutWeights.end());
 
   // Find a colorable subset of the selected layouts.
-  auto const [coloringEnd, coloring] = findKeyColoring(orderedLayouts);
+  auto const [coloringEnd, coloring] = findKeyColoring(layoutVector);
   if (!coloring) return {};
 
   // Remove groups with missing or discarded StructLayouts.
   {
-    auto const discarded = folly::F14FastSet<const StructLayout*>(
-        coloringEnd, orderedLayouts.cend());
+    auto discarded = folly::F14FastSet<const StructLayout*>();
+    std::transform(
+      coloringEnd,
+      layoutVector.cend(),
+      std::inserter(discarded, discarded.end()),
+      [&](auto const& a) { return a.first; }
+    );
     groups.erase(
       std::remove_if(
         groups.begin(),

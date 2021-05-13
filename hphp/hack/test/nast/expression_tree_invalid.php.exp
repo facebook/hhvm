@@ -1,3 +1,7 @@
+
+
+(Relative_path.Dummy, "expression_tree_invalid.php"):
+
 [(Fun
     { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
@@ -11,3 +15,4 @@
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None })
+  ]

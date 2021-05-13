@@ -1,3 +1,7 @@
+
+
+(Relative_path.Dummy, "function_pointer.php"):
+
 [(Fun
     { f_span = [5:1-24]; f_readonly_this = None; f_annotation = (); f_mode = Mstrict; 
       f_readonly_ret = None; f_ret = ((), (Some ([5:17-21], (Hprim Tvoid)))); 
@@ -31,3 +35,4 @@
          ns_name = (Some "Foo\\Bar"); ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
        f_doc_comment = None })
+  ]

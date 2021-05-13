@@ -1340,11 +1340,20 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
 
 let print_nasts ~should_print_position nasts filenames =
   List.iter filenames (fun filename ->
-      let nast = Relative_path.Map.find nasts filename in
-      if should_print_position then
-        Naming_ast_print.print_nast nast
-      else
-        Naming_ast_print.print_nast_without_position nast)
+      match Relative_path.Map.find_opt nasts filename with
+      | None ->
+        Printf.eprintf
+          "Could not find nast for file %s\n"
+          (Relative_path.show filename);
+        Printf.eprintf "Available nasts:\n";
+        Relative_path.Map.iter nasts ~f:(fun path _ ->
+            Printf.eprintf "  %s\n" (Relative_path.show path))
+      | Some nast ->
+        Printf.printf "\n\n%s:\n\n" (Relative_path.show filename);
+        if should_print_position then
+          Naming_ast_print.print_nast nast
+        else
+          Naming_ast_print.print_nast_without_position nast)
 
 let print_tasts ~should_print_position tasts ctx =
   Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
@@ -1718,7 +1727,10 @@ let handle_mode
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
     let nasts = create_nasts ctx files_info in
-    print_nasts ~should_print_position nasts filenames
+    print_nasts
+      ~should_print_position
+      nasts
+      (Relative_path.Map.keys files_contents)
   | Dump_tast ->
     let (errors, tasts, _gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents

@@ -1,9 +1,13 @@
+
+
+(Relative_path.Dummy, "ctx_const2.php"):
+
 [(Class
-    { c_span = [5:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
-      c_name = ([5:7-17], "\\CWithConst"); c_tparams = []; c_extends = [];
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false;
+    { c_span = [5:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([5:7-17], "\\CWithConst"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_user_attributes = []; c_tconst_name = ([6:13-14], "C");
@@ -16,20 +20,21 @@
              { c_tc_type = ([7:19-64], (Hintersection [([7:20-39], (Happly (([7:20-39], "\\HH\\Capabilities\\IO"), []))); ([7:42-63], (Happly (([7:42-63], "\\HH\\Capabilities\\Rand"), [])))])) });
           c_tconst_span = [7:3-65]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
       c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [];
       c_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [([3:34-60], (String "union_intersection_types"))] }];
          fa_namespace =
-         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-           ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+           ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
            ns_disable_xhp_element_mangling = false }
          }
         ];
       c_enum = None; c_doc_comment = None; c_emit_id = None })
+  ]

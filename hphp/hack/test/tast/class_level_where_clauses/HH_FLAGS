@@ -1,1 +1,1 @@
---nast --enable-class-level-where-clauses
+--tast --enable-class-level-where-clauses

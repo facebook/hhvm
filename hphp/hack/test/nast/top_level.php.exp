@@ -1,3 +1,7 @@
+
+
+(Relative_path.Dummy, "top_level.php"):
+
 [(Stmt ([5:1-12], (Expr ([5:1-11], (Call (([5:1-9], (Id ([5:1-9], "\\func_foo"))), [], [], None)))))); (
   Stmt ([9:1-7], (Expr ([9:1-6], (Call (([9:1-4], (Id ([9:1-4], "\\foo"))), [], [], None))))));
   (Stmt ([11:1-9], (Expr ([11:1-8], (Binop (Plus, ([11:1-2], (Int "1")), ([11:3-8], (Call (([11:3-6], (Id ([11:3-6], "\\foo"))), [], [], None)))))))));
@@ -70,3 +74,4 @@
          ns_name = (Some "HH\\Lib\\Vec"); ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
        f_doc_comment = None })
+  ]

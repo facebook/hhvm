@@ -1,3 +1,7 @@
+
+
+(Relative_path.Dummy, "fun_empty.php"):
+
 [(Fun
     { f_span = [12:1-30]; f_readonly_this = None; f_annotation = (); 
       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid)))); 
@@ -20,3 +24,4 @@
       (Some ([2:1-10:4],
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
       })
+  ]

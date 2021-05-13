@@ -1160,11 +1160,7 @@ SrcKey getSrcKey() {
   if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
     return SrcKey();
   }
-  auto const fp = vmfp();
-  auto const func = fp->func();
-  if (!func->contains(vmpc())) return SrcKey();
-
-  auto const result = SrcKey(func, vmpc(), ResumeMode::None);
+  auto const result = SrcKey(vmfp()->func(), vmpc(), ResumeMode::None);
   assertx(canonicalize(result) == result);
   return result;
 }

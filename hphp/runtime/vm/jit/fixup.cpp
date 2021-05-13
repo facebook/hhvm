@@ -116,6 +116,7 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
 
   auto extraSpOffset = SBInvOffset{0};
   if (fixup->isIndirect()) {
+    TRACE(3, "getFrameRegs: fp %p -> %s\n", ar, fixup->show().c_str());
     auto const ripAddr = reinterpret_cast<uintptr_t>(ar) + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);
     extraSpOffset = fixup->spOffset();

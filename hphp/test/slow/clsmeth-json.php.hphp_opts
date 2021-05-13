@@ -1,0 +1,2 @@
+-vRuntime.Eval.EmitClsMethPointers=1 -vRuntime.Eval.RaiseClsMethConversionWarning=1
+

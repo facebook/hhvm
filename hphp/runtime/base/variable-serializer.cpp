@@ -1682,11 +1682,21 @@ void VariableSerializer::serializeClsMeth(
       m_buf->append("}\n");
       break;
 
+    case Type::JSON: {
+      auto const kind = getKind(empty_vec_array().get());
+      writeArrayHeader(2 /* size */, true /* isVectorData */, kind);
+      writeArrayKey(VarNR(0), kind);
+      writeArrayValue(VarNR(clsName), kind);
+      writeArrayKey(VarNR(1), kind);
+      writeArrayValue(VarNR(funcName), kind);
+      writeArrayFooter(kind);
+      break;
+    }
+
     case Type::Serialize:
     case Type::Internal:
     case Type::APCSerialize:
-    case Type::DebuggerSerialize:
-    case Type::JSON: {
+    case Type::DebuggerSerialize: {
       if (!RO::EvalIsCompatibleClsMethType) {
         SystemLib::throwInvalidOperationExceptionObject(
           "Unable to serialize class meth pointer"

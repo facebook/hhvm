@@ -293,6 +293,8 @@ public:
   static arr_lval LvalStr(ArrayData* ad, StringData* k);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v);
+  static ArrayData* SetStrMoveSkipConflict(ArrayData* ad, StringData* k, TypedValue v);
   static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
@@ -483,6 +485,7 @@ private:
 
   template <class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, TypedValue data);
+  template <class K> ArrayData* updateSkipConflict(K k, TypedValue data);
 
   void updateNextKI(int64_t removedKey, bool updateNext);
   void eraseNoCompact(RemovePos pos);
@@ -544,4 +547,3 @@ HASH_TABLE_CHECK_OFFSETS(MixedArray, MixedArrayElm)
 //////////////////////////////////////////////////////////////////////
 
 }
-

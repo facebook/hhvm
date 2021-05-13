@@ -103,27 +103,7 @@ void BaseSet::addImpl(int64_t k) {
   if (!raw) {
     mutate();
   }
-  auto h = hash_int64(k);
-  auto p = findForInsert(k, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
-    // When there is a conflict, the add() API is supposed to replace the
-    // existing element with the new element in place. However since Sets
-    // currently only support integer and string elements, there is no way
-    // user code can really tell whether the existing element was replaced
-    // so for efficiency we do nothing.
-    return;
-  }
-  if (UNLIKELY(isFull())) {
-    makeRoom();
-    p = findForInsert(k, h);
-  }
-  auto& e = allocElm(p);
-  e.setIntKey(k, h);
-  arrayData()->mutableKeyTypes()->recordInt();
-  e.data.m_type = KindOfInt64;
-  e.data.m_data.num = k;
-  updateNextKI(k);
+  SetIntMoveSkipConflict(k, make_tv<KindOfInt64>(k));
 }
 
 template<bool raw>
@@ -132,22 +112,7 @@ void BaseSet::addImpl(StringData *key) {
   if (!raw) {
     mutate();
   }
-  strhash_t h = key->hash();
-  auto p = findForInsert(key, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
-    return;
-  }
-  if (UNLIKELY(isFull())) {
-    makeRoom();
-    p = findForInsert(key, h);
-  }
-  auto& e = allocElm(p);
-  // This increments the string's refcount twice, once for
-  // the key and once for the value
-  e.setStrKey(key, h);
-  arrayData()->mutableKeyTypes()->recordStr(key);
-  tvDup(make_tv<KindOfString>(key), e.data);
+  SetStrMoveSkipConflict(key, make_tv<KindOfString>(key));
 }
 
 void BaseSet::addRaw(int64_t k) {
@@ -189,6 +154,23 @@ void BaseSet::addFront(int64_t k) {
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
+}
+
+void BaseSet::SetIntMoveSkipConflict(int64_t k, TypedValue v) {
+  auto ad = MixedArray::SetIntMoveSkipConflict(arrayData(), k, v);
+  setArrayData(MixedArray::asMixed(ad));
+  m_size = arrayData()->m_size;
+}
+
+void BaseSet::SetStrMoveSkipConflict(StringData* k, TypedValue v) {
+  // This increments the string's refcount twice, once for
+  // the key and once for the value
+  auto ad = MixedArray::SetStrMoveSkipConflict(arrayData(), k, v);
+  setArrayData(MixedArray::asMixed(ad));
+  if (m_size != arrayData()->m_size) {
+    k->incRefCount();
+    m_size = arrayData()->m_size;
+  }
 }
 
 void BaseSet::addFront(StringData *key) {

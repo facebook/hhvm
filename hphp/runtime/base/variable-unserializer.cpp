@@ -1697,19 +1697,9 @@ void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
     Variant k;
     unserializeVariant(k.asTypedValue(), UnserializeMode::ColKey);
     if (k.isInteger()) {
-      auto h = k.toInt64();
-      auto tv = set->findForUnserialize(h);
-      // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) continue;
-      tv->m_type = KindOfInt64;
-      tv->m_data.num = h;
+      set->add(k.toInt64());
     } else if (k.isString()) {
-      auto key = k.getStringData();
-      auto tv = set->findForUnserialize(key);
-      if (UNLIKELY(!tv)) continue;
-      // This increments the string's refcount twice, once for
-      // the key and once for the value
-      tvDup(make_tv<KindOfString>(key), *tv);
+      set->add(k.getStringData());
     } else {
       throwInvalidHashKey(obj);
     }

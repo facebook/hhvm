@@ -858,6 +858,18 @@ ArrayData* MixedArray::update(K k, TypedValue data) {
   return this;
 }
 
+template <class K> ALWAYS_INLINE
+ArrayData* MixedArray::updateSkipConflict(K k, TypedValue data) {
+  assertx(!isFull());
+  assertx(data.m_type != KindOfUninit);
+  auto p = insert(k);
+  if (p.found) {
+    return this;
+  }
+  tvCopy(data, p.tv);
+  return this;
+}
+
 arr_lval MixedArray::LvalInt(ArrayData* adIn, int64_t key) {
   auto const pos = asMixed(adIn)->find(key, hash_int64(key));
   if (!validPos(pos)) {
@@ -928,6 +940,24 @@ ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   tvIncRefGen(v);
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
+}
+
+ArrayData* MixedArray::SetStrMoveSkipConflict(ArrayData* ad, StringData* k, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = preped->updateSkipConflict(k, v);
+  if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
+  return result;
+}
+
+ArrayData* MixedArray::SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = preped->updateSkipConflict(k, v);
+  if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
+  return result;
 }
 
 ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {

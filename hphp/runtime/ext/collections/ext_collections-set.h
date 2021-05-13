@@ -67,6 +67,18 @@ public:
   void add(const Variant& v) { add(*v.asTypedValue()); }
 
   /*
+   * Append an element to the Set, increffing it if it's refcounted.
+   *
+   * When there is a conflict, the add() API is supposed to replace the
+   * existing element with the new element in place. However since Sets
+   * currently only support integer and string elements, there is no way
+   * user code can really tell whether the existing element was replaced
+   * so for efficiency we do nothing.
+   */
+  void SetIntMoveSkipConflict(int64_t k, TypedValue v);
+  void SetStrMoveSkipConflict(StringData* k, TypedValue v);
+
+  /*
    * Prepend an element to the Set, increffing it if it's refcounted.
    */
   void addFront(int64_t k);

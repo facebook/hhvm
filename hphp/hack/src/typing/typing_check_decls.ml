@@ -349,7 +349,7 @@ let typedef tenv t =
     t_constraint;
     t_kind;
     t_mode = _;
-    t_vis = _;
+    t_vis;
     t_namespace = _;
     t_user_attributes = _;
     t_span = _;
@@ -375,11 +375,15 @@ let typedef tenv t =
   check_hint_wellkindedness tenv_with_typedef_tparams t_kind;
   let env =
     {
-      (* Since typedefs cannot have constraints we shouldn't check
-       * if its type params satisfy the constraints of any tapply it
-       * references.
-       *)
-      typedef_tparams = t.t_tparams;
+      typedef_tparams =
+        ( if equal_typedef_visibility t_vis Transparent then
+          (* Since type aliases cannot have constraints we shouldn't check
+           * if its type params satisfy the constraints of any tapply it
+           * references.
+           *)
+          t.t_tparams
+        else
+          [] );
       tenv;
     }
   in

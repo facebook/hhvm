@@ -6,4 +6,4 @@ interface Constraint<T as num> {}
 // definitions since they cannot put constraints on their type parameters
 type AliasConstraint<T> = Constraint<T>;
 
-newtype NewConstraint<T> as Constraint<T> = AliasConstraint<T>;
+newtype NewConstraint<T as num> as Constraint<T> = AliasConstraint<T>;

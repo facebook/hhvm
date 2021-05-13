@@ -1,10 +1,10 @@
 File "tapply_is_newtype.php--file2.php", line 4, characters 18-37:
 Some type constraint(s) here are violated (Typing[4323])
-File "tapply_is_newtype.php--file1.php", line 3, characters 22-22:
-`T` is a constrained type parameter
-File "tapply_is_newtype.php--file1.php", line 3, characters 27-29:
-Expected `num`
-File "tapply_is_newtype.php--file2.php", line 4, characters 32-36:
-But got `mixed`
-File "tapply_is_newtype.php--file1.php", line 5, characters 40-40:
-  via this generic `T`
+  File "tapply_is_newtype.php--file1.php", line 3, characters 22-22:
+  `T` is a constrained type parameter
+  File "tapply_is_newtype.php--file1.php", line 3, characters 27-29:
+  Expected `num`
+  File "tapply_is_newtype.php--file2.php", line 4, characters 32-36:
+  But got `mixed`
+  File "tapply_is_newtype.php--file1.php", line 5, characters 47-47:
+    via this generic `T`

@@ -3,7 +3,7 @@
 
 interface Constraint<T as num> {}
 
-newtype NewConstraint<T> as Constraint<T> = Constraint<T>;
+newtype NewConstraint<T as num> as Constraint<T> = Constraint<T>;
 
 //// file2.php
 <?hh // strict

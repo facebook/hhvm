@@ -289,14 +289,12 @@ let rec array_get
            * dict<string,int> <: dict<arraykey,int>
            *)
           let (env, k) = Env.expand_type env k in
+          let env = check_arraykey_index_read env expr_pos ty1 ty2 in
           let env =
-            if
-              String.equal cn SN.Collections.cDict
-              || String.equal cn SN.Collections.cKeyset
-            then
-              check_arraykey_index_read env expr_pos ty1 ty2
-            else
+            if String.equal cn SN.Collections.cMap then
               type_index env expr_pos ty2 k (Reason.index_class cn)
+            else
+              env
           in
           (env, v)
       (* Certain container/collection types are intended to be immutable/const,

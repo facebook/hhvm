@@ -8,14 +8,24 @@
  *
  */
 
+// Error code constants
+// No error has occurred
 const int JSON_ERROR_NONE = 0;
+// The maximum stack depth has been exceeded
 const int JSON_ERROR_DEPTH = 1;
+// Invalid or malformed JSON
 const int JSON_ERROR_STATE_MISMATCH = 2;
+// Control character error, possibly incorrectly encoded
 const int JSON_ERROR_CTRL_CHAR = 3;
+// Syntax error
 const int JSON_ERROR_SYNTAX = 4;
+// Malformed UTF-8 characters, possibly incorrectly encoded
 const int JSON_ERROR_UTF8 = 5;
+// One or more recursive references in the value to be encoded
 const int JSON_ERROR_RECURSION = 6;
+// One or more NAN or INF values in the value to be encoded
 const int JSON_ERROR_INF_OR_NAN = 7;
+// A value of a type that cannot be encoded was given
 const int JSON_ERROR_UNSUPPORTED_TYPE = 8;
 
 // json_encode

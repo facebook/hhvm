@@ -39,8 +39,12 @@ function json_decode(string $json,
                      int $options = 0)[]: mixed;
 
 /**
- * Like json_decode, but includes json_last_error(_msg) results.
- */
+ * json_decode, but populates $error in case of error.
+ *
+ * If the function runs normally with no errors, then $error is set to null.
+ * Otherwise, if an error occurs, $error is set to a tuple of (error code
+ * constant, description) from the list defined in builtins_json.hhi.
+ * */
 <<__Native>>
 function json_decode_with_error(
   string $json,
@@ -71,8 +75,12 @@ function json_encode(mixed $value,
 
 
 /**
- * Like json_encode, but includes json_last_error(_msg) results.
- */
+ * json_encode, but populates $error in case of error.
+ *
+ * If the function runs normally with no errors, then $error is set to null.
+ * Otherwise, if an error occurs, $error is set to a tuple of (error code
+ * constant, description) from the list defined in builtins_json.hhi.
+ * */
 <<__Native>>
 function json_encode_with_error(
   mixed $value,

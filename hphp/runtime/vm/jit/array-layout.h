@@ -81,10 +81,10 @@ struct ArrayLayout {
    * Static helpers to get basic layouts
    **************************************************************************/
 
-  static constexpr ArrayLayout Top()     { return ArrayLayout(Sort::Top); }
-  static constexpr ArrayLayout Vanilla() { return ArrayLayout(Sort::Vanilla); }
-  static constexpr ArrayLayout Bespoke() { return ArrayLayout(Sort::Bespoke); }
-  static constexpr ArrayLayout Bottom()  { return ArrayLayout(Sort::Bottom); }
+  static constexpr ArrayLayout Top()     noexcept { return ArrayLayout(Sort::Top); }
+  static constexpr ArrayLayout Vanilla() noexcept { return ArrayLayout(Sort::Vanilla); }
+  static constexpr ArrayLayout Bespoke() noexcept { return ArrayLayout(Sort::Bespoke); }
+  static constexpr ArrayLayout Bottom()  noexcept { return ArrayLayout(Sort::Bottom); }
 
   static constexpr ArrayLayout FromUint16(uint16_t x) {
     return ArrayLayout(Sort(x));
@@ -124,7 +124,7 @@ struct ArrayLayout {
   enum class Sort : uint16_t { Top, Bottom, Vanilla, Bespoke };
 
 private:
-  constexpr explicit ArrayLayout(Sort sort) : sort(sort) {}
+  constexpr explicit ArrayLayout(Sort sort) noexcept : sort(sort) {}
 
   // Returns a bespoke::Layout that can be used to JIT code for this layout.
   // We use the fact that BespokeTop codegen can also handle vanilla arrays.

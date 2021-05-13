@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -75,6 +76,29 @@ std::optional<folly::fs::path> resolvePathRelativeToRoot(
 
 namespace HPHP {
 namespace Facts {
+
+namespace {
+
+/**
+ * Cancel the request timeout when created, restart the request timeout when
+ * destroyed.
+ */
+struct TimeoutSuspender {
+  TimeoutSuspender() : m_timeoutSeconds{RID().getTimeout()} {
+    RID().setTimeout(0);
+  }
+  ~TimeoutSuspender() {
+    RID().setTimeout(m_timeoutSeconds);
+  }
+  int m_timeoutSeconds{0};
+
+  TimeoutSuspender(const TimeoutSuspender&) = delete;
+  TimeoutSuspender& operator=(const TimeoutSuspender&) = delete;
+  TimeoutSuspender(TimeoutSuspender&&) = delete;
+  TimeoutSuspender& operator=(TimeoutSuspender&&) = delete;
+};
+
+} // namespace
 
 constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
@@ -506,6 +530,8 @@ WatchmanAutoloadMap::~WatchmanAutoloadMap() {
 }
 
 void WatchmanAutoloadMap::ensureUpdated() {
+  TimeoutSuspender suspendTimeoutsDuringUpdate;
+
   folly::Future<folly::Unit> updateFuture = update();
   updateFuture.wait();
   auto const& res = std::move(updateFuture).result();

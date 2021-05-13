@@ -1,0 +1,2 @@
+# This file enables testing by Hack Native ("hphp/test/run.php --hn").
+--sl=nodyn

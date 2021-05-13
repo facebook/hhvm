@@ -1,11 +1,11 @@
-resource(%d) of type (stream)
+resource(4) of type (stream)
 
-Warning: json_encode(): type is unsupported, encoded as false in %s/unsupported_type_error.php on line 7
+Warning: json_encode(): type is unsupported, encoded as false in %s/test/zend/good/ext/json/tests/unsupported_type_error.php on line 10
 bool(false)
 int(8)
 string(21) "Type is not supported"
 
-Warning: json_encode(): type is unsupported, encoded as null in %s/unsupported_type_error.php on line 10
+Warning: json_encode(): type is unsupported, encoded as null in %s/test/zend/good/ext/json/tests/unsupported_type_error.php on line 19
 string(4) "null"
 int(8)
 string(21) "Type is not supported"

@@ -1,24 +1,42 @@
 <?hh
-<<__EntryPoint>> function main(): void {
-$inf = INF;
 
-var_dump($inf);
+<<__EntryPoint>>
+function main(): void {
+  $inf = INF;
 
-var_dump(json_encode($inf));
-var_dump(json_last_error(), json_last_error_msg());
+  var_dump($inf);
 
-var_dump(json_encode($inf, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+  $error = null;
+  $result = json_encode_with_error($inf, inout $error);
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 
-echo "\n";
+  $error = null;
+  $result = json_encode_with_error(
+    $inf,
+    inout $error,
+    JSON_PARTIAL_OUTPUT_ON_ERROR,
+  );
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 
-$nan = NAN;
+  echo "\n";
 
-var_dump($nan);
+  $nan = NAN;
 
-var_dump(json_encode($nan));
-var_dump(json_last_error(), json_last_error_msg());
+  var_dump($nan);
 
-var_dump(json_encode($nan, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+  $error = null;
+  $result = json_encode_with_error($nan, inout $error);
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
+
+  $error = null;
+  $result = json_encode_with_error(
+    $nan,
+    inout $error,
+    JSON_PARTIAL_OUTPUT_ON_ERROR,
+  );
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 }

@@ -1,1 +1,5 @@
-string(8) "No error"
+vec(2) {
+  int(4)
+  string(12) "Syntax error"
+}
+NULL

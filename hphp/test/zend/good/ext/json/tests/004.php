@@ -1,19 +1,23 @@
 <?hh
-<<__EntryPoint>> function main(): void {
-$a = new stdclass;
-$a->prop = $a;
 
-var_dump($a);
+<<__EntryPoint>>
+function main(): void {
+  $a = new stdclass;
+  $a->prop = $a;
 
-echo "\n";
+  var_dump($a);
 
-var_dump(json_encode($a));
-var_dump(json_last_error(), json_last_error_msg());
+  echo "\n";
 
-echo "\n";
+  $error = null;
+  $result = json_encode_with_error($a, inout $error);
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 
-var_dump(json_encode($a, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+  echo "\n";
 
-echo "Done\n";
+  var_dump(json_encode($a, JSON_PARTIAL_OUTPUT_ON_ERROR));
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
+
+  echo "Done\n";
 }

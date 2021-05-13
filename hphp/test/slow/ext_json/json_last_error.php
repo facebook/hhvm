@@ -13,13 +13,10 @@ function test_decode() {
     "{}",
   ];
 
-  $error = null;
   foreach ($json as $string) {
     echo 'Decoding: '.$string."\n";
 
-    json_decode($string);
-    echo json_last_error().": ".json_last_error_msg()."\n";
-
+    $error = null;
     json_decode_with_error($string, inout $error);
     var_dump($error);
 
@@ -35,13 +32,10 @@ function test_encode() {
      "\x9f",
   ];
 
-  $error = null;
   foreach ($json as $string) {
     echo 'Encoding: '.$string."\n";
 
-    json_encode($string);
-    echo json_last_error().": ".json_last_error_msg()."\n";
-
+    $error = null;
     json_encode_with_error($string, inout $error);
     var_dump($error);
 

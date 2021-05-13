@@ -1,19 +1,38 @@
-<?hh <<__EntryPoint>> function main(): void {
-$invalid_utf8 = "\x9f";
+<?hh
 
-var_dump(json_encode($invalid_utf8));
-var_dump(json_last_error(), json_last_error_msg());
+<<__EntryPoint>>
+function main(): void {
+  $invalid_utf8 = "\x9f";
 
-var_dump(json_encode($invalid_utf8, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+  $error = null;
+  $result = json_encode_with_error($invalid_utf8, inout $error);
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 
-echo "\n";
+  $error = null;
+  $result = json_encode_with_error(
+    $invalid_utf8,
+    inout $error,
+    JSON_PARTIAL_OUTPUT_ON_ERROR,
+  );
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 
-$invalid_utf8 = "an invalid sequen\xce in the middle of a string";
+  echo "\n";
 
-var_dump(json_encode($invalid_utf8));
-var_dump(json_last_error(), json_last_error_msg());
+  $invalid_utf8 = "an invalid sequen\xce in the middle of a string";
 
-var_dump(json_encode($invalid_utf8, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+  $error = null;
+  $result = json_encode_with_error($invalid_utf8, inout $error);
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
+
+  $error = null;
+  $result = json_encode_with_error(
+    $invalid_utf8,
+    inout $error,
+    JSON_PARTIAL_OUTPUT_ON_ERROR,
+  );
+  var_dump($result);
+  var_dump($error[0] ?? 0, $error[1] ?? 'No error');
 }

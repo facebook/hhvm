@@ -1,30 +1,33 @@
 <?hh
 
-
 <<__EntryPoint>>
 function main_error_depth() {
-$array = varray[];
-for ($i=0; $i<550; $i++) {
+  $array = varray[];
+  for ($i=0; $i<550; $i++) {
     $array = varray[$array];
-}
+  }
 
-var_dump(json_encode($array, 0, 551));
-switch (json_last_error()) {
-    case JSON_ERROR_NONE:
-        echo 'OK'.PHP_EOL;
+  $error = null;
+  $result = json_encode_with_error($array, inout $error, 0, 551);
+  var_dump($result);
+  switch ($error[0] ?? 0) {
+    case 0:
+      echo 'OK'.PHP_EOL;
     break;
     case JSON_ERROR_DEPTH:
-        echo 'ERROR'.PHP_EOL;
+      echo 'ERROR'.PHP_EOL;
     break;
-}
+  }
 
-var_dump(json_encode($array, 0, 540));
-switch (json_last_error()) {
-    case JSON_ERROR_NONE:
-        echo 'OK'.PHP_EOL;
+  $error = null;
+  $result = json_encode_with_error($array, inout $error, 0, 540);
+  var_dump($result);
+  switch ($error[0] ?? 0) {
+    case 0:
+      echo 'OK'.PHP_EOL;
     break;
     case JSON_ERROR_DEPTH:
-        echo 'ERROR'.PHP_EOL;
+      echo 'ERROR'.PHP_EOL;
     break;
-}
+  }
 }

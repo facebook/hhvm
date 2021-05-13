@@ -1,5 +1,9 @@
-<?hh <<__EntryPoint>> function main(): void {
-$data = "\xB1\x31";
-$data = json_encode($data);
-var_dump(json_last_error());
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  $data = "\xB1\x31";
+  $error = null;
+  $data = json_encode_with_error($data, inout $error);
+  var_dump($error[0]);
 }

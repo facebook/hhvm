@@ -1,15 +1,20 @@
-<?hh <<__EntryPoint>> function main(): void {
-json_decode('{"test":"test"}');
-var_dump(json_last_error());
+<?hh
 
-json_decode("");
-var_dump(json_last_error());
+<<__EntryPoint>>
+function main(): void {
+  $error = null;
+  json_decode_with_error('{"test":"test"}', inout $error);
+  var_dump($error[0] ?? 0);
 
+  $error = null;
+  json_decode_with_error("", inout $error);
+  var_dump($error[0] ?? 0);
 
-json_decode("invalid json");
-var_dump(json_last_error());
+  $error = null;
+  json_decode_with_error("invalid json", inout $error);
+  var_dump($error[0] ?? 0);
 
-
-json_decode("");
-var_dump(json_last_error());
+  $error = null;
+  json_decode_with_error("", inout $error);
+  var_dump($error[0] ?? 0);
 }

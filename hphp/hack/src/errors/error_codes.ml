@@ -630,6 +630,7 @@ module Typing = struct
     | BadConditionalSupportDynamic [@value 4433]
     | ReadonlyInvalidAsMut [@value 4434]
     | InvalidKeysetValue [@value 4435]
+    | UnresolvedTypeVariableProjection [@value 4436]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

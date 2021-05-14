@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 use arena_trait::{Arena, TrivialDrop};
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
-#[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 #[derive(
     Deserialize,
     Eq,
@@ -22,6 +21,7 @@ use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
     Serialize,
     ToOcamlRep
 )]
+#[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 pub enum List<'a, T> {
     Nil,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

@@ -501,7 +501,7 @@ let type_declaration name td =
       |> String.concat ~sep:", "
       |> sprintf "#[derive(%s)]"
     in
-    doc ^ serde_attr ^ derive_attr ^ "\npub"
+    doc ^ derive_attr ^ serde_attr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
     if

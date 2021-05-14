@@ -12,8 +12,8 @@ use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 /// An arena-allocated map.
 ///
 /// See `Map` for more info.
-#[serde(bound(deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 #[derive(Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(bound(deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 #[must_use]
 pub struct Set<'a, K>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Map<'a, K, ()>,

@@ -683,10 +683,10 @@ where
 ///   `SortedAssocList` from an `AssocListMut`, entries will be deduplicated by
 ///   key, and only the most recently inserted entry for each key will be
 ///   retained.
+#[derive(Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[derive(Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SortedAssocList<'a, K: 'a, V: 'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     entries: &'a [(K, V)],

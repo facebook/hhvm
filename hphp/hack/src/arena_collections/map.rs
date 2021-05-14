@@ -30,10 +30,10 @@ const MAX_DELTA: usize = 2;
 /// Since the whole Map is just a 1 word pointer, it implements the
 /// `Copy` trait.
 
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[derive(Debug, Deserialize, Serialize)]
 #[must_use]
 pub struct Map<'a, K, V>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Option<&'a Node<'a, K, V>>,
@@ -120,10 +120,10 @@ where
     }
 }
 
+#[derive(Debug, Deserialize, Serialize, ToOcamlRep)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[derive(Debug, Deserialize, Serialize, ToOcamlRep)]
 struct Node<'a, K, V>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Map<'a, K, V>,
     #[serde(deserialize_with = "arena_deserializer::arena")] K,

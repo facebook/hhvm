@@ -59,8 +59,8 @@ fn example() {
     struct I(isize);
     impl_deserialize_in_arena!(I);
 
-    #[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+    #[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     enum Num<'a, T> {
         #[serde(deserialize_with = "arena_deserializer::arena")]
         Base(&'a I),
@@ -164,8 +164,8 @@ fn example() {
 
 #[test]
 fn complex() {
-    #[serde(bound(deserialize = "V: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    #[serde(bound(deserialize = "V: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     struct Set<'a, V>(
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Option<&'a Node<'a, V>>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)] &'a isize, // test only
@@ -173,8 +173,8 @@ fn complex() {
 
     impl_deserialize_in_arena!(Set<'arena, V>);
 
-    #[serde(bound(deserialize = "V: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    #[serde(bound(deserialize = "V: 'de + arena_deserializer::DeserializeInArena<'de>"))]
     struct Node<'a, V>(
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)] Set<'a, V>,
         #[serde(deserialize_with = "arena_deserializer::arena")] V,

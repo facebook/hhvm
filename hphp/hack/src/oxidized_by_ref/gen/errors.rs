@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<33f9b3159149f90afe111397e6d2318d>>
+// @generated SignedSource<<ceba4692e7d0f97dcdcda6d10b05a4f6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,9 +43,6 @@ pub type FileT<'a, A> = phase_map::PhaseMap<'a, &'a [A]>;
 /// Results of multi-file analysis.
 pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
 
-#[serde(bound(
-    deserialize = "PrimPos: 'de + arena_deserializer::DeserializeInArena<'de>, Pos: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
 #[derive(
     Clone,
     Debug,
@@ -58,6 +55,9 @@ pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
     Serialize,
     ToOcamlRep
 )]
+#[serde(bound(
+    deserialize = "PrimPos: 'de + arena_deserializer::DeserializeInArena<'de>, Pos: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
 pub struct Error_<'a, PrimPos, Pos> {
     pub code: oxidized::errors::ErrorCode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

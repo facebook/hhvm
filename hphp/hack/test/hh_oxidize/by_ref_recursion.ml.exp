@@ -37,7 +37,6 @@ pub enum IntList<'a> {
 impl<'a> TrivialDrop for IntList<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IntList<'arena>);
 
-#[serde(bound(deserialize = "A: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 #[derive(
     Clone,
     Copy,
@@ -53,6 +52,7 @@ arena_deserializer::impl_deserialize_in_arena!(IntList<'arena>);
     Serialize,
     ToOcamlRep,
 )]
+#[serde(bound(deserialize = "A: 'de + arena_deserializer::DeserializeInArena<'de>"))]
 pub enum NAryTree<'a, A> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Leaf(&'a A),

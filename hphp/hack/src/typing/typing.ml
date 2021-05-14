@@ -2242,9 +2242,7 @@ and catch catchctx env (sid, exn_lvar, b) =
   let cid = CI sid in
   let ety_p = fst sid in
   let (env, _, _, _) = instantiable_cid ety_p env cid [] in
-  let (env, _tal, _te, ety) =
-    static_class_id ~check_constraints:false ety_p env [] cid
-  in
+  let (env, _tal, _te, ety) = class_expr env [] (ety_p, cid) in
   let env = coerce_to_throwable ety_p env ety in
   let (p, x) = exn_lvar in
   let env = set_valid_rvalue p env x ety in
@@ -2997,10 +2995,8 @@ and expr_
           p
           (Aast.Method_caller (pos_cname, meth_name))
           (Typing_utils.mk_tany env pos)))
-  | FunctionPointer (FP_class_const (((cpos, cid_) as cid), meth), targs) ->
-    let (env, _, ce, cty) =
-      static_class_id ~check_constraints:true cpos env [] cid_
-    in
+  | FunctionPointer (FP_class_const (cid, meth), targs) ->
+    let (env, _, ce, cty) = class_expr env [] cid in
     let (env, (fpty, tal)) =
       class_get
         ~is_method:true
@@ -3021,7 +3017,7 @@ and expr_
       p
       (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
       fpty
-  | Smethod_id ((pc, cid), meth) ->
+  | Smethod_id (((pc, cid_) as cid), meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
      *
@@ -3029,7 +3025,7 @@ and expr_
      * public+static and then return its type.
      *)
     let (class_, classname) =
-      match cid with
+      match cid_ with
       | CIself
       | CIstatic ->
         (Env.get_self_class env, Env.get_self_id env)
@@ -3060,15 +3056,13 @@ and expr_
       | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
         let () =
           if get_ce_abstract ce then
-            match cid with
+            match cid_ with
             | CIstatic -> ()
             | _ -> Errors.class_meth_abstract_call classname (snd meth) p ce_pos
         in
         let ce_visibility = ce.ce_visibility in
         let ce_deprecated = ce.ce_deprecated in
-        let (env, _tal, te, cid_ty) =
-          static_class_id ~exact:Exact ~check_constraints:true pc env [] cid
-        in
+        let (env, _tal, te, cid_ty) = class_expr ~exact:Exact env [] cid in
         let (env, cid_ty) = Env.expand_type env cid_ty in
         let tyargs =
           match get_node cid_ty with
@@ -3482,19 +3476,15 @@ and expr_
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get ((cpos, cid), CGstring mid, in_parens)
-    when Env.FakeMembers.is_valid_static env cid (snd mid) ->
-    let (env, local) = Env.FakeMembers.make_static env cid (snd mid) p in
+  | Class_get (cid, CGstring mid, in_parens)
+    when Env.FakeMembers.is_valid_static env (snd cid) (snd mid) ->
+    let (env, local) = Env.FakeMembers.make_static env (snd cid) (snd mid) p in
     let local = (p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
-    let (env, _tal, te, _) =
-      static_class_id ~check_constraints:false cpos env [] cid
-    in
+    let (env, _tal, te, _) = class_expr env [] cid in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
-  | Class_get (((cpos, cid_) as cid), CGstring ((ppos, _) as mid), in_parens) ->
-    let (env, _tal, te, cty) =
-      static_class_id ~check_constraints:false cpos env [] cid_
-    in
+  | Class_get (cid, CGstring ((ppos, _) as mid), in_parens) ->
+    let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
       class_get
@@ -3507,7 +3497,7 @@ and expr_
         cid
     in
     let (env, ty) =
-      Env.FakeMembers.check_static_invalid env cid_ (snd mid) ty
+      Env.FakeMembers.check_static_invalid env (snd cid) (snd mid) ty
     in
     let env =
       Errors.try_if_no_errors
@@ -4231,10 +4221,8 @@ and expr_
     make_result env p (Aast.EnumAtom s) (mk (Reason.Rwitness p, Terr))
 
 (* let ty = err_witness env cst_pos in *)
-and class_const ?(incl_tc = false) env p (((cpos, cid_) as cid), mid) =
-  let (env, _tal, ce, cty) =
-    static_class_id ~check_constraints:true cpos env [] cid_
-  in
+and class_const ?(incl_tc = false) env p (cid, mid) =
+  let (env, _tal, ce, cty) = class_expr env [] cid in
   let env =
     match get_node cty with
     | Tclass ((_, n), _, _) when Env.is_enum_class env n ->
@@ -5159,16 +5147,14 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
       (env, te1, ty2, err_opt)
     | (_, Class_get (_, CGexpr _, _)) ->
       failwith "AST should not have any CGexprs after naming"
-    | (_, Class_get ((pos_classid, x), CGstring (pos_member, y), _)) ->
+    | (_, Class_get (((_, x) as cid), CGstring (pos_member, y), _)) ->
       let lenv = env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       let (env, te1, _) = lvalue no_fakes e1 in
       let env = { env with lenv } in
       let (env, ety2) = Env.expand_type env ty2 in
       (* This defers the coercion check to class_get, which looks up the appropriate target type *)
-      let (env, _tal, _, cty) =
-        static_class_id ~check_constraints:false pos_classid env [] x
-      in
+      let (env, _tal, _, cty) = class_expr env [] cid in
       let env = might_throw env in
       let (env, _, err_opt) =
         class_get_err
@@ -5178,7 +5164,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
           env
           cty
           (pos_member, y)
-          (pos_classid, x)
+          cid
       in
       let (env, local) = Env.FakeMembers.make_static env x y p in
       let env = set_valid_rvalue p env local ty2 in
@@ -5405,14 +5391,7 @@ and dispatch_call
       ty
   in
   let dispatch_class_const env ((pos, e1_) as e1) m =
-    let (env, _tal, tcid, ty1) =
-      static_class_id
-        ~check_constraints:(not (Nast.equal_class_id_ e1_ CIparent))
-        pos
-        env
-        []
-        e1_
-    in
+    let (env, _tal, tcid, ty1) = class_expr env [] e1 in
     let this_ty = MakeType.this (Reason.Rwitness fpos) in
     (* In static context, you can only call parent::foo() on static methods.
      * In instance context, you can call parent:foo() on static
@@ -6586,15 +6565,13 @@ and class_id_for_new
     ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :
     newable_class_info =
   let (env, tal, te, cid_ty) =
-    static_class_id
+    class_expr
       ~check_targs_well_kinded:true
       ~check_explicit_targs:true
       ~exact
-      ~check_constraints:false
-      p
       env
       explicit_targs
-      cid
+      (p, cid)
   in
   (* Need to deal with union case *)
   let rec get_info res tyl =
@@ -6660,25 +6637,26 @@ and this_for_method env (p, cid) default_ty =
   | CIparent
   | CIself
   | CIstatic ->
-    let (env, _tal, _te, ty) =
-      static_class_id ~check_constraints:false p env [] CIstatic
-    in
+    let (env, _tal, _te, ty) = class_expr env [] (p, CIstatic) in
     ExprDepTy.make env CIstatic ty
   | _ -> (env, default_ty)
 
-(** Resolve class expressions like `parent`, `self`, `static`, classnames
-    and others. *)
-and static_class_id
+(** Resolve class expressions:
+ *     self    CIself       lexically enclosing class
+ *     parent  CIparent     lexically enclosing `extends` class
+ *     static  CIstatic     late-static-bound class (i.e. runtime receiver)
+ *     <id>    CI id        literal class name
+ *     <expr>  CIexpr expr  expression that evaluates to an object or classname
+ *)
+and class_expr
     ?(check_targs_well_kinded = false)
     ?(exact = Nonexact)
     ?(check_explicit_targs = false)
-    ~(check_constraints : bool)
-    (p : pos)
     (env : env)
-    (tal : Nast.targ list) :
-    Nast.class_id_ -> env * Tast.targ list * Tast.class_id * locl_ty =
+    (tal : Nast.targ list)
+    (p, cid_) : env * Tast.targ list * Tast.class_id * locl_ty =
   let make_result env tal te ty = (env, tal, ((p, ty), te), ty) in
-  function
+  match cid_ with
   | CIparent ->
     (match Env.get_self_id env with
     | Some self ->
@@ -6775,7 +6753,6 @@ and static_class_id
             |> Phase.localize_targs_and_check_constraints
                  ~exact
                  ~check_well_kinded:check_targs_well_kinded
-                 ~check_constraints
                  ~def_pos:(Cls.pos class_)
                  ~use_pos:p
                  ~check_explicit_targs
@@ -6844,9 +6821,6 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
       on_error = Errors.unify_error_at p;
     }
-  in
-  let env =
-    Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
   in
   let env =
     Phase.check_where_constraints
@@ -7816,18 +7790,8 @@ and type_param env t =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function
-    make_call
-    fpos
-    p
-    env
-    ((cpos, class_id_) as class_id)
-    method_id
-    el
-    unpacked_element
-    f =
-  let (env, _tal, tcid, ty) =
-    static_class_id ~check_constraints:false cpos env [] class_id_
-  in
+    make_call fpos p env class_id method_id el unpacked_element f =
+  let (env, _tal, tcid, ty) = class_expr env [] class_id in
   let (env, _tel, _) = exprs env el ~allow_awaitable:(*?*) false in
   let (env, (fty, tal)) =
     class_get

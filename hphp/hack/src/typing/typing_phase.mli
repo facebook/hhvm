@@ -114,7 +114,6 @@ val localize_targs_with_kinds :
 val localize_targs_and_check_constraints :
   exact:exact ->
   check_well_kinded:bool ->
-  check_constraints:bool ->
   def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
   ?check_explicit_targs:bool ->

@@ -994,7 +994,6 @@ let localize_possibly_enforced_with_self env ~ignore_errors ety =
 let localize_targs_and_check_constraints
     ~exact
     ~check_well_kinded
-    ~check_constraints
     ~def_pos
     ~use_pos
     ?(check_explicit_targs = true)
@@ -1020,20 +1019,15 @@ let localize_targs_and_check_constraints
       ( Reason.Rwitness (fst class_id),
         Tclass (Positioned.of_raw_positioned class_id, exact, targs_tys) )
   in
-  let env =
-    if check_constraints then
-      let ety_env =
-        {
-          type_expansions = Typing_defs.Type_expansions.empty;
-          this_ty;
-          substs = Subst.make_locl tparaml targs_tys;
-          on_error = Errors.unify_error_at use_pos;
-        }
-      in
-      check_tparams_constraints ~use_pos ~ety_env env tparaml
-    else
-      env
+  let ety_env =
+    {
+      type_expansions = Typing_defs.Type_expansions.empty;
+      this_ty;
+      substs = Subst.make_locl tparaml targs_tys;
+      on_error = Errors.unify_error_at use_pos;
+    }
   in
+  let env = check_tparams_constraints ~use_pos ~ety_env env tparaml in
   (env, this_ty, type_argl)
 
 (* Add generic parameters to the environment, localize their bounds, and

@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
@@ -1136,13 +1137,22 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
 namespace {
 
 Variant coeffects_call_helper(const Variant& function, const char* name,
-                              RuntimeCoeffects coeffects) {
+                              RuntimeCoeffects coeffects,
+                              bool getCoeffectsFromClosure) {
   CallCtx ctx;
   vm_decode_function(function, ctx);
   if (!ctx.func) {
     raise_error("%s expects first argument to be a closure or a "
                 "function pointer",
                 name);
+  }
+  if (getCoeffectsFromClosure &&
+      ctx.func->hasCoeffectRules() &&
+      ctx.func->getCoeffectRules().size() == 1 &&
+      ctx.func->getCoeffectRules()[0].isClosureParentScope()) {
+    assertx(ctx.func->isClosureBody());
+    auto const closure = reinterpret_cast<c_Closure*>(ctx.this_);
+    coeffects = closure->getCoeffects();
   }
   return Variant::attach(
     g_context->invokeFunc(ctx.func, init_null_variant, ctx.this_, ctx.cls,
@@ -1154,12 +1164,12 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 
 Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
   return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
-                               RuntimeCoeffects::defaults());
+                               RuntimeCoeffects::defaults(), true);
 }
 
 Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
   return coeffects_call_helper(function, "HH\\Coeffects\\enter_policied_of",
-                               RuntimeCoeffects::policied_of());
+                               RuntimeCoeffects::policied_of(), false);
 }
 
 bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,

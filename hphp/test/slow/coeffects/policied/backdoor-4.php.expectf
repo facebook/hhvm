@@ -1,0 +1,9 @@
+Warning: Call to Closure$defaults_f() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 8
+
+Warning: Call to Closure$policied_of_f() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 15
+
+Warning: Call to Closure$policied_of_f#2() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 19
+
+Warning: Call to policied_of() requires [policied_of] coeffects but Closure$unknown() provided [defaults] in %s on line 24
+
+Warning: Call to unknown() requires [policied_of] coeffects but main() provided [defaults] in %s on line 32

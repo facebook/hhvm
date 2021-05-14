@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
@@ -1160,9 +1161,11 @@ SrcKey getSrcKey() {
   if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
     return SrcKey();
   }
-  auto const result = SrcKey(vmfp()->func(), vmpc(), ResumeMode::None);
-  assertx(canonicalize(result) == result);
-  return result;
+  return fromLeaf([&](const ActRec* ar, Offset offset) {
+    auto const result = SrcKey(ar->func(), offset, ResumeMode::None);
+    assertx(canonicalize(result) == result);
+    return result;
+  });
 }
 
 void eachSource(std::function<void(LoggingProfile& profile)> fn) {

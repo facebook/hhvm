@@ -1,8 +1,6 @@
 File "typing_fail_visibility.php", line 13, characters 29-29:
-Non-abstract method `A::f` must contain body (Parsing[1002])
-File "typing_fail_visibility.php", line 13, characters 20-20:
-This method is not declared as abstract, it must have a body (NastCheck[3014])
+A method must have a body or be marked `abstract`. (Parsing[1002])
 File "typing_fail_visibility.php", line 19, characters 9-9:
 You cannot access this member (Typing[4112])
-File "typing_fail_visibility.php", line 13, characters 20-20:
-This member is private
+  File "typing_fail_visibility.php", line 13, characters 20-20:
+  This member is private

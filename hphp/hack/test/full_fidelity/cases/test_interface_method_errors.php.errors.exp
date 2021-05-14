@@ -1,2 +1,2 @@
-(9,22)-(9,23) Non-abstract method `C::c1` must contain body
-(14,23)-(14,24) Non-abstract method `T::t1` must contain body
+(9,22)-(9,23) A method must have a body or be marked `abstract`.
+(14,23)-(14,24) A method must have a body or be marked `abstract`.

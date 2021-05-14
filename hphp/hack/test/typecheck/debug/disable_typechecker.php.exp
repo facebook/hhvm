@@ -2,5 +2,3 @@ File "disable_typechecker.php", line 4, characters 10-10:
 Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute (Other[0000])
 File "disable_typechecker.php", line 10, characters 19-19:
 Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute (Other[0000])
-File "disable_typechecker.php", line 10, characters 19-19:
-This method is not declared as abstract, it must have a body (NastCheck[3014])

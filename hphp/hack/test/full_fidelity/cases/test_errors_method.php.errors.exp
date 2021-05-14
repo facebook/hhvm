@@ -9,7 +9,7 @@
 (8,3)-(8,46) Redeclared method `E::f`
 (9,3)-(9,46) Redeclared method `E::f`
 (10,3)-(10,30) Redeclared method `E::f`
-(10,31)-(10,32) Non-abstract method `E::f` must contain body
+(10,31)-(10,32) A method must have a body or be marked `abstract`.
 (11,3)-(11,16) Constructor `E::__construct()` cannot be static
 (12,3)-(12,46) Redeclared method `E::__construct`
 (13,3)-(13,42) Redeclared method `E::__construct`

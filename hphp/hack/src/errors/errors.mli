@@ -981,8 +981,6 @@ val invalid_req_extends : Pos.t -> unit
 
 val abstract_with_body : Pos.t * 'a -> unit
 
-val not_abstract_without_body : Pos.t * 'a -> unit
-
 val return_in_gen : Pos.t -> unit
 
 val return_in_finally : Pos.t -> unit

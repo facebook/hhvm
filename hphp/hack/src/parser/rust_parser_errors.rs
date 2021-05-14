@@ -1710,7 +1710,7 @@ where
                 self.produce_error(
                     |self_, x| self_.methodish_non_abstract_without_body_not_native(x),
                     node,
-                    || errors::error2015(class_name, method_name),
+                    || errors::error2015,
                     fun_semicolon,
                 );
                 self.produce_error(

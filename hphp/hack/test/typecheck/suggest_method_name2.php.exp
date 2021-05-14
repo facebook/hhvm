@@ -1,12 +1,10 @@
 File "suggest_method_name2.php", line 13, characters 36-36:
-Non-abstract method `X::myMethod` must contain body (Parsing[1002])
+A method must have a body or be marked `abstract`. (Parsing[1002])
 File "suggest_method_name2.php", line 12, characters 17-17:
 Unbound name: `Y` (an object type) (Naming[2049])
-File "suggest_method_name2.php", line 13, characters 26-33:
-This method is not declared as abstract, it must have a body (NastCheck[3014])
 File "suggest_method_name2.php", line 17, characters 6-13:
 No static method `mymethod` in `X` (Typing[4090])
-File "suggest_method_name2.php", line 13, characters 26-33:
-Did you mean `my~~M~~ethod` instead (which only differs by case)?
-File "suggest_method_name2.php", line 12, characters 7-7:
-Declaration of `X` is here
+  File "suggest_method_name2.php", line 13, characters 26-33:
+  Did you mean `my~~M~~ethod` instead (which only differs by case)?
+  File "suggest_method_name2.php", line 12, characters 7-7:
+  Declaration of `X` is here

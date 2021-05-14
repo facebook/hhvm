@@ -1896,12 +1896,6 @@ let abstract_with_body (p, _) =
     p
     "This method is declared as abstract, but has a body"
 
-let not_abstract_without_body (p, _) =
-  add
-    (NastCheck.err_code NastCheck.NotAbstractWithoutBody)
-    p
-    "This method is not declared as abstract, it must have a body"
-
 let mk_not_abstract_without_typeconst (p, _) =
   {
     code = NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst;

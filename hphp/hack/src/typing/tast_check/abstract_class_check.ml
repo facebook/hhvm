@@ -26,17 +26,10 @@ let check_expr env (pos, e) =
     | _ -> ())
   | _ -> ()
 
-let check_method_body env m =
+let check_method_body m =
   let named_body = m.m_body in
   if m.m_abstract && not (List.is_empty named_body.fb_ast) then
-    Errors.abstract_with_body m.m_name;
-  let tenv = Env.tast_env_as_typing_env env in
-  if
-    (not (Typing_env.is_hhi tenv))
-    && (not m.m_abstract)
-    && List.is_empty named_body.fb_ast
-  then
-    Errors.not_abstract_without_body m.m_name
+    Errors.abstract_with_body m.m_name
 
 let check_class _ c =
   if Ast_defs.(equal_class_kind c.c_kind Cabstract) && c.c_final then (
@@ -60,7 +53,7 @@ let handler =
 
     method! at_expr env e = check_expr env e
 
-    method! at_method_ env m = check_method_body env m
+    method! at_method_ _ m = check_method_body m
 
     method! at_class_ env c = check_class env c
   end

@@ -1,9 +1,7 @@
 File "suggest_method_name3.php", line 13, characters 36-36:
-Non-abstract method `X::myMethod` must contain body (Parsing[1002])
+A method must have a body or be marked `abstract`. (Parsing[1002])
 File "suggest_method_name3.php", line 12, characters 17-17:
 Unbound name: `Y` (an object type) (Naming[2049])
-File "suggest_method_name3.php", line 13, characters 26-33:
-This method is not declared as abstract, it must have a body (NastCheck[3014])
 File "suggest_method_name3.php", line 18, characters 7-14:
 No instance method `mymethod` in `X` (Typing[4053])
   File "suggest_method_name3.php", line 13, characters 26-33:

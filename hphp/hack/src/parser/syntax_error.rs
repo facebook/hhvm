@@ -215,13 +215,8 @@ pub const error2010: Error = Cow::Borrowed(concat!(
     "parameter lists of constructors)."
 ));
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
-pub fn error2015(class_name: &str, method_name: &str) -> Error {
-    Cow::Owned(format!(
-        "Non-abstract method `{}::{}` must contain body",
-        class_name.to_string(),
-        method_name.to_string(),
-    ))
-}
+pub const error2015: Error = Cow::Borrowed("A method must have a body or be marked `abstract`.");
+
 pub fn error2016(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot declare abstract method `{}::{}` `private`",

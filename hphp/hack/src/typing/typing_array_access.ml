@@ -152,6 +152,8 @@ let check_arraykey_index_read =
 let check_arraykey_index_write =
   check_arraykey_index Errors.invalid_arraykey_write
 
+let check_keyset_value = check_arraykey_index Errors.invalid_keyset_value
+
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -553,8 +555,12 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
              || String.equal n SN.Collections.cSet ->
         (env, ty1, Ok ty2)
       | (r, Tclass (((_, n) as id), e, [tv]))
-        when String.equal n SN.Collections.cVec
-             || String.equal n SN.Collections.cKeyset ->
+        when String.equal n SN.Collections.cVec ->
+        let (env, tv') = Typing_union.union env tv ty2 in
+        (env, mk (r, Tclass (id, e, [tv'])), Ok ty2)
+      | (r, Tclass (((_, n) as id), e, [tv]))
+        when String.equal n SN.Collections.cKeyset ->
+        let env = check_keyset_value env expr_pos ty1 ty2 in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tclass (id, e, [tv'])), Ok ty2)
       | (r, Tvarray tv) ->

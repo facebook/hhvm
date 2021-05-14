@@ -57,22 +57,6 @@ function apc_store(mixed $key_or_array,
                    int $bump_ttl = 0): mixed;
 
 /**
- * Simlar to apc_store() but TTL is always 0 and there is no TTL cap applied.
- * Do not use in prod, use cachearchiver instead.
- *
- * @param string $key - Store the variable using this name. keys are
- *   cache-unique, so storing a second value with the same key will overwrite
- *   the original value.
- * @param mixed $var - The variable to store
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Native, __NonRx('APC')>>
-function apc_store_as_primed_do_not_use(string $key,
-                                        mixed $var): bool;
-
-/**
  * Fetches a stored variable from the cache.
  *
  * @param mixed $key - The key used to store the value (with apc_store()). If

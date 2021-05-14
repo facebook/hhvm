@@ -835,27 +835,21 @@ bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl) {
-  return storeImpl(key, val, max_ttl, bump_ttl, false, true);
+  return storeImpl(key, val, max_ttl, bump_ttl, false);
 }
 
 void ConcurrentTableSharedStore::set(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl) {
-  storeImpl(key, val, max_ttl, bump_ttl, true, true);
-}
-
-void ConcurrentTableSharedStore::setWithoutTTL(const String& key,
-                                               const Variant& val) {
-  storeImpl(key, val, 0, 0, true, false);
+  storeImpl(key, val, max_ttl, bump_ttl, true);
 }
 
 bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            const Variant& value,
                                            int64_t max_ttl,
                                            int64_t bump_ttl,
-                                           bool overwrite,
-                                           bool limit_ttl) {
+                                           bool overwrite) {
   StoreValue *sval;
   auto keyLen = key.size();
 
@@ -893,7 +887,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       APCStats::getAPCStats().addKey(keyLen);
     }
 
-    int64_t adjustedMaxTTL = limit_ttl ? apply_ttl_limit(max_ttl) : max_ttl;
+    int64_t adjustedMaxTTL = apply_ttl_limit(max_ttl);
     if (adjustedMaxTTL > apcExtension::TTLMaxFinite) {
       adjustedMaxTTL = 0;
     }

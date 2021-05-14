@@ -37,7 +37,7 @@ function main_apc_extend_ttl() {
   if (apc_extend_ttl('key_to_not-extend', 10)) {
     echo "Cannot extend expired key\n";
   }
-  apc_store_as_primed_do_not_use('infinite_ttl_key', 111);
+  apc_store('infinite_ttl_key', 111);
   if (apc_extend_ttl('infinite_ttl_key', 1000)) {
     echo "Cannot extend infinite ttl key\n";
   }

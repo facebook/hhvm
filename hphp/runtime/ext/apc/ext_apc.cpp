@@ -194,7 +194,6 @@ void apcExtension::moduleInit() {
 
   HHVM_FE(apc_add);
   HHVM_FE(apc_store);
-  HHVM_FE(apc_store_as_primed_do_not_use);
   HHVM_FE(apc_fetch);
   HHVM_FE(apc_delete);
   HHVM_FE(apc_clear_cache);
@@ -313,29 +312,6 @@ Variant HHVM_FUNCTION(apc_store,
     ServerStats::Log("apc.write", 1);
   }
   return Variant(true);
-}
-
-/**
- * Stores the key in a similar fashion as "priming" would do (no TTL limit).
- * Using this function is equivalent to adding your key to apc_prime.so.
- */
-bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
-                   const String& key,
-                   const Variant& var) {
-  if (!apcExtension::Enable) return false;
-  if (key.empty()) {
-    raise_invalid_argument_warning("apc key: (empty string)");
-    return false;
-  }
-  if (isKeyInvalid(key)) {
-    raise_invalid_argument_warning("apc key: (contains invalid characters)");
-    return false;
-  }
-  apc_store().setWithoutTTL(key, var);
-  if (RuntimeOption::EnableAPCStats) {
-    ServerStats::Log("apc.write", 1);
-  }
-  return true;
 }
 
 Variant HHVM_FUNCTION(apc_add,

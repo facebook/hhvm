@@ -216,11 +216,6 @@ struct ConcurrentTableSharedStore {
   void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
 
   /*
-   * Set the value for `key' to `val', without any TTL.
-   */
-  void setWithoutTTL(const String& key, const Variant& val);
-
-  /*
    * Increment the value for the key `key' by step, iff it is present,
    * non-expired, and a numeric (KindOfInt64 or KindOfDouble) value.  Sets
    * `found' to true if the increment is performed, false otherwise.
@@ -392,7 +387,7 @@ private:
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, int64_t, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
+  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);

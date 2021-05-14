@@ -73,9 +73,6 @@ Variant HHVM_FUNCTION(apc_store,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
                       int64_t bump_ttl = 0);
-bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
-                   const String& key,
-                   const Variant& var);
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);

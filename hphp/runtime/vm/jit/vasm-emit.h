@@ -37,7 +37,7 @@ struct Vcost {
   // The "cost" of inlining the callee is based on an estimate of the resulting
   // increase in code size
   int cost;
-  // If the callee region contains any bind* or fallback instructions track that
+  // If the callee region contains bindjmp or fallback instructions track that
   // separately as executing them will be disproportionately expensive
   bool incomplete;
 };
@@ -71,4 +71,3 @@ Vcost computeVunitCost(const Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

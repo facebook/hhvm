@@ -68,6 +68,7 @@ bitflags! {
     }
 
 }
+
 bitflags! {
       pub struct HHBCFlags: u32 {
         const LTR_ASSIGN=1 << 0;
@@ -89,6 +90,7 @@ bitflags! {
         const EMIT_INST_METH_POINTERS=1 << 16;
     }
 }
+
 bitflags! {
     pub struct ParserFlags: u32 {
         const ABSTRACT_STATIC_PROPS=1 << 0;
@@ -111,6 +113,8 @@ bitflags! {
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19;
+        const ENABLE_READONLY_ENFORCEMENT=1 << 20;
+        const ESCAPE_BRACE=1 << 21;
   }
 }
 
@@ -246,6 +250,12 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS) {
             f |= LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS;
+        }
+        if self.contains(ParserFlags::ENABLE_READONLY_ENFORCEMENT) {
+            f |= LangFlags::ENABLE_READONLY_ENFORCEMENT;
+        }
+        if self.contains(ParserFlags::ESCAPE_BRACE) {
+            f |= LangFlags::ESCAPE_BRACE;
         }
         f
     }

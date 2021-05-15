@@ -102,4 +102,3 @@ struct TransCFG {
 TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData);
 
 } }
-

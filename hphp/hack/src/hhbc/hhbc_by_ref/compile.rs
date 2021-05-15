@@ -79,6 +79,7 @@ bitflags! {
         const LOG_EXTERN_COMPILER_PERF=1 << 6;
         const ENABLE_INTRINSICS_EXTENSION=1 << 7;
         const DISABLE_NONTOPLEVEL_DECLARATIONS=1 << 8;
+        // No longer using bit 9.
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
         const RX_IS_ENABLED=1 << 12;

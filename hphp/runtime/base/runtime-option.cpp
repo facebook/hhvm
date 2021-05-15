@@ -312,9 +312,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
   if (RuntimeOption::DisableNontoplevelDeclarations) {
     hhbc_flags |= DISABLE_NONTOPLEVEL_DECLARATIONS;
   }
-  if (RuntimeOption::DisableStaticClosures) {
-    hhbc_flags |= DISABLE_STATIC_CLOSURES;
-  }
   if (RuntimeOption::EvalEmitClsMethPointers) {
     hhbc_flags |= EMIT_CLS_METH_POINTERS;
   }
@@ -1016,7 +1013,6 @@ uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
-bool RuntimeOption::DisableStaticClosures = false;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -1903,9 +1899,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableNontoplevelDeclarations, ini, config,
                  "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
                  DisableNontoplevelDeclarations);
-    Config::Bind(DisableStaticClosures, ini, config,
-                 "Hack.Lang.Phpism.DisableStaticClosures",
-                 DisableStaticClosures);
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);

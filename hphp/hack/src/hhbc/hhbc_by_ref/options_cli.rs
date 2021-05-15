@@ -40,7 +40,6 @@ lazy_static! {
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
             // group 4: combination of group 3 & 1
             "hack.lang.phpism.disablenontopleveldeclarations" => "hhvm.hack.lang.phpism.disable_nontoplevel_declarations",
-            "hack.lang.phpism.disablestaticclosures" => "hhvm.hack.lang.phpism.disable_static_closures",
             // group 5: we could assume "hack." between "hhvm." and "lang."
             "hhvm.lang.enable_class_level_where_clauses" => "hhvm.hack.lang.enable_class_level_where_clauses",
             "hhvm.lang.disable_legacy_soft_typehints" => "hhvm.hack.lang.disable_legacy_soft_typehints",

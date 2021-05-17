@@ -1114,18 +1114,34 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   // Copy the elements
   auto mask = MixedArray::Mask(scale);
-  for (; srcElm != srcStop; ++srcElm) {
-    if (srcElm->isTombstone()) continue;
-    tvDup(srcElm->data, dstElm->data);
-    auto const hash = static_cast<int32_t>(srcElm->probe());
-    if (hash < 0) {
-      dstElm->setIntKey(srcElm->ikey, hash);
-    } else {
-      dstElm->setStrKey(srcElm->skey, hash);
+  if (src->keyTypes().mayIncludeCounted()) {
+    for (; srcElm != srcStop; ++srcElm) {
+      if (srcElm->isTombstone()) continue;
+      tvDup(srcElm->data, dstElm->data);
+      auto const hash = static_cast<int32_t>(srcElm->probe());
+      if (hash < 0) {
+        dstElm->setIntKey(srcElm->ikey, hash);
+      } else {
+        dstElm->setStrKey(srcElm->skey, hash);
+      }
+      *ad->findForNewInsert(table, mask, hash) = i;
+      ++dstElm;
+      ++i;
     }
-    *ad->findForNewInsert(table, mask, hash) = i;
-    ++dstElm;
-    ++i;
+  } else {
+    for (; srcElm != srcStop; ++srcElm) {
+      if (srcElm->isTombstone()) continue;
+      tvDup(srcElm->data, dstElm->data);
+      auto const hash = static_cast<int32_t>(srcElm->probe());
+      if (hash < 0) {
+        dstElm->setIntKey(srcElm->ikey, hash);
+      } else {
+        dstElm->setStrKeyNoIncRef(srcElm->skey, hash);
+      }
+      *ad->findForNewInsert(table, mask, hash) = i;
+      ++dstElm;
+      ++i;
+    }
   }
 
   // Set new used value (we've removed any tombstones).

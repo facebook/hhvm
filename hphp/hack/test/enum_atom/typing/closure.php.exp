@@ -1,16 +1,14 @@
-File "closure.php", line 38, characters 17-23:
+File "closure.php", line 29, characters 17-23:
 Invalid argument (Typing[4110])
   File "closure.php", line 16, characters 21-23:
   Expected `int`
   File "closure.php", line 6, characters 3-8:
   But got `string`
-File "closure.php", line 43, characters 10-14:
+File "closure.php", line 34, characters 10-14:
 Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
-File "closure.php", line 54, characters 14-22:
-Invalid argument (Typing[4110])
-  File "closure.php", line 16, characters 21-23:
-  Expected `int`
-  File "closure.php", line 52, characters 35-40:
-  But got `string`
-File "closure.php", line 58, characters 11-17:
-An atom is required here, not a class constant projection (Typing[4397])
+File "closure.php", line 38, characters 26-27:
+An atom is required here. (Typing[4397])
+File "closure.php", line 40, characters 51-52:
+An atom is required here. (Typing[4397])
+File "closure.php", line 43, characters 61-62:
+An atom is required here. (Typing[4397])

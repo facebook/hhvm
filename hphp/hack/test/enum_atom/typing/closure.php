@@ -22,15 +22,6 @@ function good(): void {
 
   echo $f(E::Name);
   echo "\n";
-
-
-  // Lambda can't have generics
-  // This should be a type error
-  $f = ((<<__Atom>>HH\MemberOf<E, string> $x) ==> with_atom($x));
-  expect_string($f#Name());
-
-  echo $f#Name();
-  echo "\n";
 }
 
 function bad(): void {
@@ -43,18 +34,12 @@ function bad(): void {
   echo $f#Name();
   echo "\n";
 
-  // TODO[T89937098]
+  // wrong, we must pass an atom to `with_atom`
   $f = ($x ==> with_atom($x));
-  // TODO[T89937098]
+  // same
   $f = ((HH\MemberOf<E, string> $x) ==> with_atom($x));
-
-  // Correct syntax for hack but missing runtime support
+  // more stuble, but wrong. The `__Atom` automatically transform the input
+  // atom into a constant, so the $x with pass to with_atom is wrong too
   $f = ((<<__Atom>>HH\MemberOf<E, string> $x) ==> with_atom($x));
-  // Will crash
-  expect_int($f#Name()); // int vs string
-
-
-  // Typing[4397] An atom is required here, not a class constant projection
-  echo $f(E::Name);
-  echo "\n";
+  // bottom line, lambdas should use `HH\Label`, not __Atom
 }

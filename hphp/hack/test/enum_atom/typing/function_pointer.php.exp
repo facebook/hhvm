@@ -13,7 +13,7 @@ Invalid argument (Typing[4110])
   File "function_pointer.php", line 6, characters 3-8:
   But got `string`
 File "function_pointer.php", line 50, characters 11-17:
-An atom is required here, not a class constant projection (Typing[4397])
+An atom is required here, not a class constant projection. (Typing[4397])
 File "function_pointer.php", line 50, characters 11-17:
 Invalid argument (Typing[4110])
   File "function_pointer.php", line 16, characters 21-23:

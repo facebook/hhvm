@@ -7209,7 +7209,10 @@ and call
                 (* Already reported, see Typing_check_decls *)
                 (env, None))
             | Class_const _ when is_atom ->
-              Errors.atom_invalid_argument pos;
+              Errors.atom_invalid_argument pos ~is_proj:true;
+              (env, None)
+            | _ when is_atom ->
+              Errors.atom_invalid_argument pos ~is_proj:false;
               (env, None)
             | _ -> (env, None)
           in

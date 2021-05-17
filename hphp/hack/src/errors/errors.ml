@@ -5239,10 +5239,16 @@ let atom_as_expr pos =
       ^ Naming_special_names.UserAttributes.uaAtom )
     []
 
-let atom_invalid_argument pos =
+let atom_invalid_argument pos ~is_proj =
+  let msg =
+    if is_proj then
+      ", not a class constant projection."
+    else
+      "."
+  in
   add_list
     (Typing.err_code Typing.AtomInvalidArgument)
-    (pos, "An atom is required here, not a class constant projection")
+    (pos, "An atom is required here" ^ msg)
     []
 
 let ifc_internal_error pos reason =

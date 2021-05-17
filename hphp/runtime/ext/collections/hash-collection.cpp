@@ -153,18 +153,11 @@ void HashCollection::eraseNoCompact(MixedArray::RemovePos pos) {
 NEVER_INLINE
 void HashCollection::makeRoom() {
   assertx(isFull());
-  assertx(posLimit() == cap());
-  if (LIKELY(!isDensityTooLow())) {
-    if (UNLIKELY(cap() == MaxSize)) {
-      throwTooLarge();
-    }
-    assertx(scale() > 0);
-    grow(scale() * 2);
-  } else {
-    compact();
-  }
+  assertx(!isDensityTooLow());
+  if (UNLIKELY(cap() == MaxSize)) throwTooLarge();
+  assertx(scale() > 0);
+  grow(scale() * 2);
   assertx(canMutateBuffer());
-  assertx(m_immCopy.isNull());
   assertx(!isFull());
 }
 
@@ -242,7 +235,6 @@ void HashCollection::grow(uint32_t newScale) {
     resizeHelper(newCap);
   }
   assertx(canMutateBuffer());
-  assertx(m_immCopy.isNull());
 }
 
 void HashCollection::compact() {
@@ -258,7 +250,6 @@ void HashCollection::compact() {
     resizeHelper(cap());
   }
   assertx(canMutateBuffer());
-  assertx(m_immCopy.isNull());
   assertx(!isDensityTooLow());
 }
 
@@ -318,7 +309,6 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     resizeHelper(newCap);
   }
   assertx(canMutateBuffer());
-  assertx(m_immCopy.isNull());
   assertx(!isCapacityTooHigh() || newCap == oldCap);
 }
 

@@ -284,3 +284,17 @@ namespace HH {
   <<__Native>>
   function deferred_errors(): vec;
 }
+
+namespace __SystemLib {
+
+  /*
+   * Systemlib internal function to extract a trace from a compact trace
+   * resource. Exceptions encoded traces using a compact resource format and
+   * lazily construct them on first use.
+   *
+   * @param resource $trace - the compact backtrace to extract
+   * @return array - the backtrace extracted from $trace
+   */
+  <<__Native>>
+  function extract_trace(resource $trace): \HH\varray;
+}

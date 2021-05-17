@@ -82,6 +82,34 @@ struct CompactTraceData {
   folly::small_vector<CompactFrame, 16> m_frames;
 };
 
+struct CompactTrace : SweepableResourceData {
+  Array extract() const;
+
+  CompactTraceData* get() const {
+    if (!m_backtrace) m_backtrace = CompactTraceData::Create();
+    return m_backtrace.get();
+  }
+
+  void insert(const ActRec* fp, int32_t prevPc) {
+    get()->insert(fp, prevPc);
+  }
+
+  DECLARE_RESOURCE_ALLOCATION(CompactTrace)
+  TYPE_SCAN_IGNORE_ALL;
+
+  uint32_t size() const {
+    if (!m_backtrace) return 0;
+    return m_backtrace->size();
+  }
+
+  const auto& frames() const {
+    return get()->frames();
+  }
+
+ private:
+  mutable CompactTraceData::Ptr m_backtrace;
+};
+
 struct BacktraceArgs {
 
   /**
@@ -311,6 +339,7 @@ Array createCrashBacktrace(BTFrame frame, jit::CTCA addr);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop);
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop = false);
 std::pair<const Func*, Offset> getCurrentFuncAndOffset();
 
 /*

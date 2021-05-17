@@ -345,6 +345,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   static auto const s_runtimeStruct =
     RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
 
+  if (btArgs.isCompact()) {
+    return createCompactBacktrace(btArgs.m_skipTop)->extract();
+  }
+
   auto bt = Array::CreateVec();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
@@ -645,6 +649,12 @@ void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
   }, skipTop);
 }
 
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
+  auto ret = req::make<CompactTrace>();
+  fillCompactBacktrace(ret->get(), skipTop);
+  return ret;
+}
+
 std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   VMRegAnchor _;
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
@@ -659,6 +669,8 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   }
   return std::make_pair(frm.fp ? frm.fp->func() : nullptr, frm.pc);
 }
+
+IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 
 void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
   m_frames.emplace_back(
@@ -718,6 +730,11 @@ Array CompactTraceData::extract() const {
   }
 
   return aInit.toArray();
+}
+
+Array CompactTrace::extract() const {
+  if (size() <= 1) return Array::CreateVec();
+  return m_backtrace->extract();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

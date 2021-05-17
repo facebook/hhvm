@@ -5629,6 +5629,12 @@ let unresolved_type_variable_projection pos ~proj_pos =
         ^ "annotations here." );
     ]
 
+let function_pointer_with_atom pos fpos =
+  add_list
+    (Typing.err_code Typing.FunctionPointerWithAtom)
+    (pos, "Function pointer on functions/methods using __Atom is not supported.")
+    [(fpos, "__Atom is used here.")]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

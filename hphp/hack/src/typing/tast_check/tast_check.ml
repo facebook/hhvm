@@ -59,6 +59,7 @@ let visitor ctx =
         Meth_caller_check.handler;
         Expression_tree_check.handler;
         Class_const_origin_check.handler;
+        Enum_classes_check.handler;
       ] )
 
 let program ctx = (visitor ctx)#go ctx

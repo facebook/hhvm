@@ -1,52 +1,33 @@
 <?hh
 <<file:__EnableUnstableFeatures('enum_atom')>>
 
-enum class E : mixed {
-  int Age = 42;
-  string Name = "zuck";
+enum class E : int {
+  int A = 42;
 }
 
-function with_atom<T>(<<__Atom>>HH\MemberOf<E, T> $e) : T {
-  return $e;
+class C {
+  public static function f(HH\MemberOf<E, int> $_): void {
+    echo "YOLO\n";
+  }
+
+  public static function g(<<__Atom>>HH\MemberOf<E, int> $_): void {
+    echo "YOLO\n";
+  }
 }
 
-function without_atom<T>(HH\MemberOf<E, T> $e): T { return $e; }
+class D extends C {
+  public function testit(): void {
+    $fp = static::f<>;
+    $fp(E::A);
 
-function expect_string(string $_): void {}
-function expect_int(int $_): void {}
-
-<<__EntryPoint>>
-function good(): void {
-  $f = without_atom<>;
-  expect_string($f(E::Name));
-
-  echo $f(E::Name);
-  echo "\n";
-
-
-  $f = with_atom<>;
-  expect_string($f#Name());
-
-  echo $f#Name();
-  echo "\n";
+    $fp2 = static::g<>;
+  }
 }
+
+function h(<<__Atom>>HH\MemberOf<E, int> $_): void {}
 
 function bad(): void {
-  $f = without_atom<>;
-  expect_int($f(E::Name)); // int vs string
-
-  // Typing[4396] Atoms are not allowed in this position. They are only
-  // allowed in function call, if the function parameter is annotated with
-  // __Atom
-  echo $f#Name();
-  echo "\n";
-
-
-  $f = with_atom<>;
-  expect_int($f#Name()); // int vs string
-
-
-  // Typing[4397] An atom is required here, not a class constant projection
-  echo $f(E::Name);
-  echo "\n";
+  $d = new D();
+  $d->testit();
+  $h = h<>;
 }

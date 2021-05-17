@@ -1,22 +1,8 @@
-File "function_pointer.php", line 36, characters 17-23:
-Invalid argument (Typing[4110])
-  File "function_pointer.php", line 16, characters 21-23:
-  Expected `int`
-  File "function_pointer.php", line 6, characters 3-8:
-  But got `string`
-File "function_pointer.php", line 41, characters 10-14:
-Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
-File "function_pointer.php", line 46, characters 16-20:
-Invalid argument (Typing[4110])
-  File "function_pointer.php", line 16, characters 21-23:
-  Expected `int`
-  File "function_pointer.php", line 6, characters 3-8:
-  But got `string`
-File "function_pointer.php", line 50, characters 11-17:
-An atom is required here, not a class constant projection. (Typing[4397])
-File "function_pointer.php", line 50, characters 11-17:
-Invalid argument (Typing[4110])
-  File "function_pointer.php", line 16, characters 21-23:
-  Expected `int`
-  File "function_pointer.php", line 6, characters 3-8:
-  But got `string`
+File "function_pointer.php", line 23, characters 12-22:
+Function pointer on functions/methods using __Atom is not supported. (Typing[4437])
+  File "function_pointer.php", line 13, characters 58-59:
+  __Atom is used here.
+File "function_pointer.php", line 32, characters 8-10:
+Function pointer on functions/methods using __Atom is not supported. (Typing[4437])
+  File "function_pointer.php", line 27, characters 42-43:
+  __Atom is used here.

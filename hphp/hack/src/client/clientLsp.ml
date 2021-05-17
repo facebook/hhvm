@@ -4290,7 +4290,7 @@ let handle_client_message
     | (_, _, RequestMessage (id, WillSaveWaitUntilRequest params)) ->
       let result = do_willSaveWaitUntil editor_open_files params in
       respond_jsonrpc
-        ~powered_by:Serverless_ide
+        ~powered_by:Language_server
         id
         (WillSaveWaitUntilResult result);
       Lwt.return_some

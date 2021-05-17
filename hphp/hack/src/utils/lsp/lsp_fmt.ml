@@ -177,7 +177,7 @@ let print_textEdits (r : TextEdit.t list) : json =
 let print_workspaceEdit (r : WorkspaceEdit.t) : json =
   WorkspaceEdit.(
     let print_workspace_edit_changes (uri, text_edits) =
-      (uri, JSON_Array (List.map ~f:print_textEdit text_edits))
+      (uri, print_textEdits text_edits)
     in
     JSON_Object
       [
@@ -729,7 +729,7 @@ let print_completionItem (item : Completion.completionItem) : json =
           | None
           | Some [] ->
             None
-          | Some l -> Some (JSON_Array (List.map l ~f:print_textEdit)) );
+          | Some l -> Some (print_textEdits l) );
         ("command", Option.map item.command print_command);
         ("data", item.data);
       ])
@@ -854,7 +854,7 @@ let parse_documentFormatting (params : json option) : DocumentFormatting.params
   }
 
 let print_documentFormatting (r : DocumentFormatting.result) : json =
-  JSON_Array (List.map r ~f:print_textEdit)
+  print_textEdits r
 
 let parse_documentRangeFormatting (params : json option) :
     DocumentRangeFormatting.params =
@@ -866,7 +866,7 @@ let parse_documentRangeFormatting (params : json option) :
   }
 
 let print_documentRangeFormatting (r : DocumentRangeFormatting.result) : json =
-  JSON_Array (List.map r ~f:print_textEdit)
+  print_textEdits r
 
 let parse_documentOnTypeFormatting (params : json option) :
     DocumentOnTypeFormatting.params =
@@ -880,7 +880,7 @@ let parse_documentOnTypeFormatting (params : json option) :
 
 let print_documentOnTypeFormatting (r : DocumentOnTypeFormatting.result) : json
     =
-  JSON_Array (List.map r ~f:print_textEdit)
+  print_textEdits r
 
 let parse_willSaveWaitUntil (params : json option) : WillSaveWaitUntil.params =
   let open WillSaveWaitUntil in

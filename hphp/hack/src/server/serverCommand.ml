@@ -55,6 +55,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS_SINGLE _ -> false
   | STATUS_SINGLE_REMOTE_EXECUTION _ -> true
   | STATUS_REMOTE_EXECUTION _ -> true
+  | STATUS_MULTI_REMOTE_EXECUTION _ -> true
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
@@ -145,6 +146,9 @@ let force_remote = function
 let rpc_files : type a. a t -> Relative_path.Set.t = function
   | STATUS_SINGLE_REMOTE_EXECUTION fn ->
     Relative_path.Set.singleton (Relative_path.create_detect_prefix fn)
+  | STATUS_MULTI_REMOTE_EXECUTION fns ->
+    List.fold fns ~init:Relative_path.Set.empty ~f:(fun acc fn ->
+        Relative_path.Set.add acc (Relative_path.create_detect_prefix fn))
   | _ -> Relative_path.Set.empty
 
 let force_remote_execution_files = function

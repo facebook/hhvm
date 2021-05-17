@@ -489,6 +489,7 @@
     serverStatusSingle
     serverStatusSingleRemoteExecution
     serverStatusRemoteExecution
+    serverStatusMultiRemoteExecution
     serverTypeCheck
     serverTypeDefinition
     serverWorker

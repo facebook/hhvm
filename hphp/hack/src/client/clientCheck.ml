@@ -688,6 +688,16 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       print_endline "ERRORS:";
       print_endline error_list;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_STATUS_MULTI_REMOTE_EXECUTION ->
+      let paths = filter_real_paths args.paths in
+      let%lwt ((error_list, deps), telemetry) =
+        rpc args (Rpc.STATUS_MULTI_REMOTE_EXECUTION paths)
+      in
+      print_endline "DISCOVERED DEP EDGES:";
+      print_endline deps;
+      print_endline "ERRORS:";
+      print_endline error_list;
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_SEARCH (query, type_) ->
       let%lwt (results, telemetry) = rpc args @@ Rpc.SEARCH (query, type_) in
       ClientSearch.go results args.output_json;

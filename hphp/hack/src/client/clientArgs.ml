@@ -650,6 +650,9 @@ let parse_check_args cmd =
       ( "--single-remote-execution",
         Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE_REMOTE_EXECUTION x)),
         "<path> Return (errors, dep_edges) in file with provided name" );
+      ( "--multi-remote-execution",
+        Arg.Unit (fun () -> set_mode MODE_STATUS_MULTI_REMOTE_EXECUTION),
+        "<paths> Return (errors, dep_edges) in files with provided names" );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),
@@ -740,6 +743,7 @@ let parse_check_args cmd =
     match (mode, args) with
     | (MODE_LINT, _)
     | (MODE_CONCATENATE_ALL, _)
+    | (MODE_STATUS_MULTI_REMOTE_EXECUTION, _)
     | (MODE_FILE_DEPENDENTS, _) ->
       (Wwwroot.get None, args)
     | (_, []) -> (Wwwroot.get None, [])

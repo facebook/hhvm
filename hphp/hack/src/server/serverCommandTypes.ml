@@ -324,6 +324,7 @@ type _ t =
   | STATUS_REMOTE_EXECUTION :
       int option
       -> (Errors.finalized_error list * int) t
+  | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool

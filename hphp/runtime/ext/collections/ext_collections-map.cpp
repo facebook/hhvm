@@ -243,45 +243,16 @@ Variant BaseMap::popFront() {
 
 void BaseMap::setImpl(int64_t k, TypedValue tv) {
   assertx(canMutateBuffer());
-  auto h = hash_int64(k);
-retry:
-  auto p = findForInsert(k, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
-    auto& e = data()[(int32_t)*p];
-    tvMove(tv, e.data);
-    return;
-  }
-  if (UNLIKELY(isFull())) {
-    makeRoom();
-    goto retry;
-  }
-  auto& e = allocElm(p);
-  tvCopy(tv, e.data);
-  e.setIntKey(k, h);
-  arrayData()->mutableKeyTypes()->recordInt();
-  updateNextKI(k);
+  auto ad = MixedArray::SetIntMove(arrayData(), k, tv);
+  setArrayData(MixedArray::asMixed(ad));
+  m_size = arrayData()->m_size;
 }
 
 void BaseMap::setImpl(StringData* key, TypedValue tv) {
   assertx(canMutateBuffer());
-retry:
-  strhash_t h = key->hash();
-  auto p = findForInsert(key, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
-    auto& e = data()[(int32_t)*p];
-    tvMove(tv, e.data);
-    return;
-  }
-  if (UNLIKELY(isFull())) {
-    makeRoom();
-    goto retry;
-  }
-  auto& e = allocElm(p);
-  tvCopy(tv, e.data);
-  e.setStrKey(key, h);
-  arrayData()->mutableKeyTypes()->recordStr(key);
+  auto ad = MixedArray::SetStrMove(arrayData(), key, tv);
+  setArrayData(MixedArray::asMixed(ad));
+  m_size = arrayData()->m_size;
 }
 
 void BaseMap::set(int64_t k, TypedValue val) {

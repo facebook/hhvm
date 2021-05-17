@@ -6,4 +6,6 @@
  *
  *)
 
+let initialize_lease () = failwith "not implemented"
+
 let process_file _path = failwith "not implemented"

@@ -143,11 +143,12 @@ type process_file_results = {
 
 let process_file_remote_execution
     (_dynamic_view_files : Relative_path.Set.t)
-    (_ctx : Provider_context.t)
+    (ctx : Provider_context.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
-  let errors' = Re.process_file fn in
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  let errors' = Re.process_file fn deps_mode in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
 let process_file

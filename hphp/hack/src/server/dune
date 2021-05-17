@@ -494,6 +494,7 @@
     serverWorker
     symbolInfoService)
   (libraries
+    base64
     buffered_line_reader
     cgroup
     coverage_level

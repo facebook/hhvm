@@ -315,6 +315,7 @@ let handle
       ServerEnv.remote_execution = force_remote_execution msg;
     }
   in
+  if env.ServerEnv.remote_execution then Re.initialize_lease ();
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in

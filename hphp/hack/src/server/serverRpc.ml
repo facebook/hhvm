@@ -73,6 +73,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, dep_edges) = ServerStatusSingleRemoteExecution.go fn ctx in
     (env, (errors, dep_edges))
+  | STATUS_REMOTE_EXECUTION max_errors ->
+    (* let ctx = Provider_utils.ctx_from_server_env env in *)
+    let errors = ServerStatusRemoteExecution.go env in
+    let (error_list, dropped_count) = take_max_errors errors max_errors in
+    (env, (error_list, dropped_count))
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) = single_ctx env path file_input in

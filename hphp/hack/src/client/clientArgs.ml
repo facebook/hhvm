@@ -540,6 +540,9 @@ let parse_check_args cmd =
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
       ("--remote", Arg.Set remote, " force remote type checking");
+      ( "--remote-execution",
+        Arg.Unit (fun () -> set_mode MODE_STATUS_REMOTE_EXECUTION),
+        "force type checking with remote execution" );
       ( "--remove-dead-fixme",
         Arg.Int
           begin

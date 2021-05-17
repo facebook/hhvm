@@ -488,6 +488,7 @@
     serverStamp
     serverStatusSingle
     serverStatusSingleRemoteExecution
+    serverStatusRemoteExecution
     serverTypeCheck
     serverTypeDefinition
     serverWorker

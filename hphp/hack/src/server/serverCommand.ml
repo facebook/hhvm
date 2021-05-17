@@ -54,6 +54,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
   | STATUS_SINGLE_REMOTE_EXECUTION _ -> true
+  | STATUS_REMOTE_EXECUTION _ -> true
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
@@ -149,6 +150,14 @@ let rpc_files : type a. a t -> Relative_path.Set.t = function
 let force_remote_execution_files = function
   | Rpc (_metadata, x) -> rpc_files x
   | _ -> Relative_path.Set.empty
+
+let rpc_remote_execution : type a. a t -> bool = function
+  | STATUS_REMOTE_EXECUTION _ -> true
+  | _ -> false
+
+let force_remote_execution = function
+  | Rpc (_metadata, x) -> rpc_remote_execution x
+  | _ -> false
 
 let ignore_ide = function
   | Rpc (_metadata, STATUS status) -> status.ignore_ide
@@ -303,6 +312,7 @@ let handle
     {
       env with
       ServerEnv.remote_execution_files = force_remote_execution_files msg;
+      ServerEnv.remote_execution = force_remote_execution msg;
     }
   in
   let env = { env with ServerEnv.remote = force_remote msg } in

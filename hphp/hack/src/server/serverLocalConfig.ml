@@ -451,6 +451,7 @@ type t = {
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
   longlived_workers: bool;
+  remote_execution: bool;
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
@@ -589,6 +590,7 @@ let default =
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     longlived_workers = false;
+    remote_execution = false;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
@@ -974,6 +976,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let remote_execution =
+    bool_if_min_version
+      "remote_execution"
+      ~default:default.remote_execution
+      ~current_version
+      config
+  in
   let hg_aware =
     bool_if_min_version
       "hg_aware"
@@ -1236,6 +1245,7 @@ let load_ fn ~silent ~current_version overrides =
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     longlived_workers;
+    remote_execution;
     hg_aware;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;

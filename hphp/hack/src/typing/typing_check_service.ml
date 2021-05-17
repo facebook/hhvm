@@ -141,6 +141,15 @@ type process_file_results = {
   deferred_decls: Deferred_decl.deferment list;
 }
 
+let process_file_remote_execution
+    (_dynamic_view_files : Relative_path.Set.t)
+    (_ctx : Provider_context.t)
+    (errors : Errors.t)
+    (file : check_file_computation) : process_file_results =
+  let fn = file.path in
+  let errors' = Re.process_file fn in
+  { errors = Errors.merge errors' errors; deferred_decls = [] }
+
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -371,6 +380,7 @@ let process_files
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(remote_execution : bool)
     ~(check_info : check_info) : typing_result * computation_progress =
   if not longlived_workers then SharedMem.invalidate_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
@@ -424,7 +434,10 @@ let process_files
         match fn with
         | Check file ->
           let process_file () =
-            process_file dynamic_view_files ctx errors file
+            if remote_execution then
+              process_file_remote_execution dynamic_view_files ctx errors file
+            else
+              process_file dynamic_view_files ctx errors file
           in
           let result =
             if check_info.profile_log then (
@@ -550,6 +563,7 @@ let load_and_process_files
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(remote_execution : bool)
     ~(check_info : check_info) : typing_result * computation_progress =
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
@@ -563,6 +577,7 @@ let load_and_process_files
     progress
     ~memory_cap
     ~longlived_workers
+    ~remote_execution
     ~check_info
 
 (*****************************************************************************)
@@ -774,6 +789,7 @@ let process_in_parallel
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(remote_execution : bool)
     ~(check_info : check_info) :
     typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
   let record = Measure.create () in
@@ -807,6 +823,7 @@ let process_in_parallel
       dynamic_view_files
       ~memory_cap
       ~longlived_workers
+      ~remote_execution
       ~check_info
   in
   let job (typing_result : typing_result) (progress : progress) =
@@ -927,6 +944,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(remote_execution : bool)
     ~(check_info : check_info)
     ~(profiling : CgroupProfiler.Profiling.t) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
@@ -969,6 +987,7 @@ let go_with_interrupt
           progress
           ~memory_cap:None
           ~longlived_workers
+          ~remote_execution
           ~check_info
       in
       ( typing_result,
@@ -997,6 +1016,7 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~longlived_workers
+        ~remote_execution
         ~check_info
     end
   in
@@ -1048,6 +1068,7 @@ let go
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(remote_execution : bool)
     ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (res, delegate_state, telemetry, (), cancelled) =
@@ -1061,6 +1082,7 @@ let go
       ~interrupt
       ~memory_cap
       ~longlived_workers
+      ~remote_execution
       ~check_info
       ~profiling
   in

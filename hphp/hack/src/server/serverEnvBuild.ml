@@ -313,6 +313,7 @@ let make_env ~init_id ~deps_mode config =
     last_notifier_check_time = 0.0;
     last_idle_job_time = 0.0;
     remote_execution_files = Relative_path.Set.empty;
+    remote_execution = false;
     editor_open_files = Relative_path.Set.empty;
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;

@@ -95,6 +95,7 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false
+      ~remote_execution:false
       ~check_info
       ~profiling:CgroupProfiler.Profiling.empty
   in

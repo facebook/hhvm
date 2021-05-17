@@ -89,6 +89,7 @@
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 
+
 (library
   (name typing_service_api_stubs)
   (wrapped false)
@@ -152,6 +153,13 @@
   (wrapped false)
   (modules
     decl_ipc_ffi_externs)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name re_stubs)
+  (wrapped false)
+  (modules re)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 

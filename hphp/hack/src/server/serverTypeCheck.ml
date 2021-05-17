@@ -1068,6 +1068,7 @@ functor
           ~interrupt
           ~memory_cap
           ~longlived_workers
+          ~remote_execution:env.ServerEnv.remote_execution
           ~check_info:(get_check_info genv env)
           ~profiling
       in

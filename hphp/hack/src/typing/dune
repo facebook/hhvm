@@ -250,6 +250,7 @@
     file_info
     nast
     heap_global_storage
+    re_stubs
     typing
     typing_deps)
   (preprocess (pps ppx_deriving.std)))
@@ -273,6 +274,7 @@
     procs_bucket
     server_monitor
     counters
+    re_stubs
     typing
     typing_defs
     typing_deps

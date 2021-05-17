@@ -165,6 +165,7 @@ let test_dep_graph_blob () =
             [Relative_path.from_root ~suffix:"baz.php"]
             ~memory_cap
             ~longlived_workers:false
+            ~remote_execution:false
             ~check_info
         in
 

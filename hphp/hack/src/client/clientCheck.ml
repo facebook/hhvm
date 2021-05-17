@@ -656,6 +656,28 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           args.max_errors
       in
       Lwt.return (exit_status, telemetry)
+    | MODE_STATUS_REMOTE_EXECUTION ->
+      let%lwt ((error_list, dropped_count), telemetry) =
+        rpc args (Rpc.STATUS_REMOTE_EXECUTION args.max_errors)
+      in
+      let status =
+        {
+          error_list;
+          dropped_count;
+          Rpc.Server_status.liveness = Rpc.Live_status;
+          has_unsaved_changes = false;
+          last_recheck_stats = None;
+        }
+      in
+      let exit_status =
+        ClientCheckStatus.go
+          status
+          args.output_json
+          args.from
+          args.error_format
+          args.max_errors
+      in
+      Lwt.return (exit_status, telemetry)
     | MODE_STATUS_SINGLE_REMOTE_EXECUTION filename ->
       let file_input = expand_path filename in
       let%lwt ((error_list, deps), telemetry) =

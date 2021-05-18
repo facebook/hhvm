@@ -15,6 +15,6 @@ function test(): void {
   }
 
   if ($x !== null) {
-    $x?->f(); // error, $x cannot be null. This error used to be omitted.
+    $x?->f();
   }
 }

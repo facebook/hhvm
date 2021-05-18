@@ -1097,8 +1097,6 @@ val invalid_shape_remove_key : Pos.t -> unit
 
 val using_internal_class : Pos.t -> string -> unit
 
-val nullsafe_not_needed : Pos.t -> (Pos_or_decl.t * string) list -> unit
-
 val trivial_strict_eq :
   Pos.t ->
   string ->

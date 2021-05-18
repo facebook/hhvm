@@ -1,4 +1,1 @@
-File "null.php", line 18, characters 5-10:
-You are using the `?->` operator but this object cannot be null.  (Typing[4117])
-File "null.php", line 14, characters 14-14:
-This is what makes me believe it cannot be null
+No errors

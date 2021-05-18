@@ -1,4 +1,1 @@
-File "nullsafe-unresolved-2.php", line 18, characters 10-16:
-You are using the `?->` operator but this object cannot be null.  (Typing[4117])
-File "nullsafe-unresolved-2.php", line 12, characters 24-24:
-This is what makes me believe it cannot be null
+No errors

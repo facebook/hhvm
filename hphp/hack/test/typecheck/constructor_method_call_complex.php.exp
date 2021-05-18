@@ -1,10 +1,6 @@
 File "constructor_method_call_complex.php", line 9, characters 9-15:
 Method call following immediate constructor call requires parentheses around constructor call. (Parsing[1002])
-File "constructor_method_call_complex.php", line 9, characters 9-22:
-You are using the `?->` operator but this object cannot be null.  (Typing[4117])
-File "constructor_method_call_complex.php", line 9, characters 13-13:
-This is what makes me believe it cannot be null
 File "constructor_method_call_complex.php", line 9, characters 9-24:
 You are using the return value of a `void` function (Typing[4119])
-File "constructor_method_call_complex.php", line 4, characters 26-29:
-A `void` function doesn't return a value.
+  File "constructor_method_call_complex.php", line 4, characters 26-29:
+  A `void` function doesn't return a value.

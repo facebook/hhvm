@@ -4248,12 +4248,6 @@ let missing_xhp_required_attr pos attr ty_reason_msg =
     (pos, msg)
     ty_reason_msg
 
-let nullsafe_not_needed p nonnull_witness =
-  add_list
-    (Typing.err_code Typing.NullsafeNotNeeded)
-    (p, "You are using the `?->` operator but this object cannot be null. ")
-    nonnull_witness
-
 let generic_at_runtime p prefix =
   add
     (Typing.err_code Typing.ErasedGenericAtRuntime)

@@ -355,7 +355,7 @@ module Typing = struct
     (* | VoidParameterDEPRECATED [@value 4114] *)
     | WrongExtendKind [@value 4115]
     | GenericUnify [@value 4116]
-    | NullsafeNotNeeded [@value 4117]
+    (* | NullsafeNotNeeded [@value 4117] *)
     | TrivialStrictEq [@value 4118]
     | VoidUsage [@value 4119]
     | DeclaredCovariant [@value 4120]

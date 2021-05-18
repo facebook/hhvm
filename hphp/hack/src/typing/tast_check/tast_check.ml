@@ -25,7 +25,6 @@ let visitor ctx =
         String_cast_check.handler;
         Tautology_check.handler;
         Enforceable_hint_check.handler;
-        Redundant_nullsafe_check.handler;
         Const_write_check.handler;
         Switch_check.handler (fun t ->
             if TypecheckerOptions.disallow_scrutinee_case_value_type_mismatch t

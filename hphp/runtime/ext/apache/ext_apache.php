@@ -92,6 +92,6 @@ function get_headers_secure(): darray<string, varray<string>>;
  * sent by client, it will appear more than once in this array.
  */
 <<__Native>>
-function get_proxygen_headers(): varray<(string, string)>;
+function get_proxygen_headers(): vec<(string, string)>;
 
 }

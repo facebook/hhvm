@@ -1,12 +1,12 @@
 File "explicit_type_collection_mismatch6.php", line 4, characters 8-39:
-The keys of this `Map` are incompatible (Typing[4110])
-File "explicit_type_collection_mismatch6.php", line 4, characters 15-20:
-Expected `string`
-File "explicit_type_collection_mismatch6.php", line 4, characters 28-28:
-But got `int`
+The keys of this darray are incompatible (Typing[4110])
+  File "explicit_type_collection_mismatch6.php", line 4, characters 15-20:
+  Expected `string`
+  File "explicit_type_collection_mismatch6.php", line 4, characters 28-28:
+  But got `int`
 File "explicit_type_collection_mismatch6.php", line 4, characters 8-39:
 The values of this `Map` are incompatible (Typing[4110])
-File "explicit_type_collection_mismatch6.php", line 4, characters 23-25:
-Expected `int`
-File "explicit_type_collection_mismatch6.php", line 4, characters 33-38:
-But got `string`
+  File "explicit_type_collection_mismatch6.php", line 4, characters 23-25:
+  Expected `int`
+  File "explicit_type_collection_mismatch6.php", line 4, characters 33-38:
+  But got `string`

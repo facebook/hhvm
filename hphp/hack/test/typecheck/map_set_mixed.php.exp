@@ -1,0 +1,6 @@
+File "map_set_mixed.php", line 5, characters 11-12:
+Invalid argument (Typing[4110])
+  File "map_set_mixed.php", line 4, characters 8-13:
+  Expected `arraykey` because type parameter `Tk` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+  File "map_set_mixed.php", line 3, characters 12-16:
+  But got `mixed`

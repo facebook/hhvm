@@ -844,7 +844,7 @@ type ureason =
   | URforeach
   | URthrow
   | URvector
-  | URkey
+  | URkey of string
   | URvalue
   | URawait
   | URyield
@@ -891,7 +891,7 @@ let string_of_ureason = function
   | URforeach -> "Invalid `foreach`"
   | URthrow -> "Invalid exception"
   | URvector -> "Some elements in this collection are incompatible"
-  | URkey -> "The keys of this `Map` are incompatible"
+  | URkey s -> "The keys of this " ^ strip_ns s ^ " are incompatible"
   | URvalue -> "The values of this `Map` are incompatible"
   | URawait -> "`await` can only operate on an `Awaitable`"
   | URyield -> "Invalid `yield`"

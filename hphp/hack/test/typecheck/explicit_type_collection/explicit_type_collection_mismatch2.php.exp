@@ -1,6 +1,6 @@
 File "explicit_type_collection_mismatch2.php", line 4, characters 8-54:
-The keys of this `Map` are incompatible (Typing[4110])
-File "explicit_type_collection_mismatch2.php", line 4, characters 13-18:
-Expected `string`
-File "explicit_type_collection_mismatch2.php", line 4, characters 26-26:
-But got `int`
+The keys of this dict are incompatible (Typing[4110])
+  File "explicit_type_collection_mismatch2.php", line 4, characters 13-18:
+  Expected `string`
+  File "explicit_type_collection_mismatch2.php", line 4, characters 26-26:
+  But got `int`

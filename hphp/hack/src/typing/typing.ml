@@ -2467,10 +2467,18 @@ and expr_
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
   let compute_supertype
-      ~(expected : ExpectedTy.t option) ~reason ~use_pos r env tys =
+      ~(expected : ExpectedTy.t option) ~reason ~use_pos ?bound r env tys =
     let (env, supertype) =
       match expected with
-      | None -> Env.fresh_type_reason env use_pos r
+      | None ->
+        let (env, supertype) = Env.fresh_type_reason env use_pos r in
+        let env =
+          match bound with
+          | None -> env
+          | Some ty ->
+            SubType.sub_type env supertype ty (fun ?code _ -> ignore code)
+        in
+        (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
     in
     match get_node supertype with
@@ -2510,6 +2518,7 @@ and expr_
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
       ?(reason = Reason.URarray_value)
+      ?bound
       ~use_pos
       r
       env
@@ -2520,7 +2529,7 @@ and expr_
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let (env, supertype, err_opts) =
-      compute_supertype ~expected ~reason ~use_pos r env tys
+      compute_supertype ~expected ~reason ~use_pos ?bound r env tys
     in
     ( env,
       List.map2_exn
@@ -2745,12 +2754,14 @@ and expr_
         end
     in
     let (kl, vl) = List.unzip l in
+    let r = Reason.Rtype_variable_generics (p, "Tk", strip_ns name) in
     let (env, tkl, k) =
       compute_exprs_and_supertype
         ~expected:kexpected
         ~use_pos:p
-        ~reason:Reason.URkey
-        (Reason.Rtype_variable_generics (p, "Tk", strip_ns name))
+        ~reason:(Reason.URkey name)
+        ~bound:(MakeType.arraykey r)
+        r
         env
         kl
         (arraykey_value p name false)

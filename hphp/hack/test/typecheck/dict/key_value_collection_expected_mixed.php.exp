@@ -17,19 +17,19 @@ Invalid index type for this dict (Typing[4110])
   File "key_value_collection_expected_mixed.php", line 8, characters 34-34:
   But got `C`
 File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `Map` are incompatible (Typing[4110])
+The keys of this dict are incompatible (Typing[4110])
   File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
   This is a key-value collection, which requires `arraykey`-typed keys
   File "key_value_collection_expected_mixed.php", line 8, characters 15-19:
   But got `float`
 File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `Map` are incompatible (Typing[4110])
+The keys of this dict are incompatible (Typing[4110])
   File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
   This is a key-value collection, which requires `arraykey`-typed keys
   File "key_value_collection_expected_mixed.php", line 8, characters 25-28:
   But got `?int`
 File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `Map` are incompatible (Typing[4110])
+The keys of this dict are incompatible (Typing[4110])
   File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
   This is a key-value collection, which requires `arraykey`-typed keys
   File "key_value_collection_expected_mixed.php", line 8, characters 34-34:

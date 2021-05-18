@@ -1,1 +1,6 @@
-No errors
+File "dictionary_key.php", line 4, characters 3-31:
+The keys of this dict are incompatible (Typing[4110])
+  File "dictionary_key.php", line 4, characters 3-31:
+  Expected `arraykey` because type parameter `Tk` of `HH\dict` could not be determined. Please add explicit type parameters to the invocation of `HH\dict`
+  File "dictionary_key.php", line 4, characters 14-22:
+  But got `dynamic`

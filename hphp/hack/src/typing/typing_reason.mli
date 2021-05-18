@@ -191,7 +191,7 @@ type ureason =
   | URforeach
   | URthrow
   | URvector
-  | URkey
+  | URkey of string
   | URvalue
   | URawait
   | URyield

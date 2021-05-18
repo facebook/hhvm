@@ -5,7 +5,7 @@ Invalid index type for this darray (Typing[4110])
   File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:
   But got `bool`
 File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-30:
-The keys of this `Map` are incompatible (Typing[4110])
+The keys of this darray are incompatible (Typing[4110])
   File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 25-30:
   Expected `string`
   File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:

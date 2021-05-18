@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<18789b3c2c1a34e63b3dd58ad0b7d1c1>>
+// @generated SignedSource<<f462f02f43d169cf9cc32c12f2ce366b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -367,7 +367,8 @@ pub enum Ureason<'a> {
     URforeach,
     URthrow,
     URvector,
-    URkey,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    URkey(&'a str),
     URvalue,
     URawait,
     URyield,

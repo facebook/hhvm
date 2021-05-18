@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
 
 #include "hphp/util/exception.h"
 
@@ -235,6 +236,9 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::register_start(ad);
+  }
 
   s_cachedHash.first = ad;
   assertx(hashArrayPortion(ad) == s_cachedHash.second);

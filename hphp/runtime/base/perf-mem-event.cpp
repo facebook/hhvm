@@ -227,6 +227,10 @@ bool record_vm_metadata_mem_event(data_map::result res, const void* addr,
   assertx(!res.empty());
   match<void>(
     res,
+    [&](const ArrayData* arr) {
+      record.setInt("offset", pos - reinterpret_cast<const char*>(arr));
+      record.setStr("kind", "Array");
+    },
     [&](const Class* cls) {
       record.setInt("offset", pos - reinterpret_cast<const char*>(cls));
       record.setStr("kind", "Class");

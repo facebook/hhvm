@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/vm/reverse-data-map.h"
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -37,6 +40,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define META_TYPES \
+  X(ArrayData)\
   X(Class)\
   X(Func)\
   X(NamedEntity)\
@@ -50,6 +54,7 @@ enum class Kind : uint8_t {
   NamedEntity = 3,
   StringData = 4,
   Unit = 5,
+  ArrayData = 6,
 };
 
 constexpr size_t kChunkSize = 1 << 21;
@@ -111,6 +116,13 @@ void deregister(Kind /*kind*/, const void* meta) {
  * These routines account for variable-length prefix or suffix allocations,
  * such as Class's funcVec and classVec, or StringData's data().
  */
+bool contains(const ArrayData* arr, const void* addr) {
+  auto const start = reinterpret_cast<const char*>(arr);
+  if (addr < start) return false;
+  size_t heapSize = allocSize(arr);
+  return addr < start + heapSize;
+}
+
 bool contains(const Class* cls, const void* addr) {
   return cls->funcVec() <= addr && addr < cls->mallocEnd();
 }

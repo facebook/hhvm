@@ -295,7 +295,8 @@ let add_func_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact FunctionDeclaration json_fact progress
 
-let add_func_defn_fact ctx source_map elem decl_id progress =
+let add_func_defn_fact ctx source_map fd decl_id progress =
+  let elem = fd.fd_fun in
   let tparams =
     List.map elem.f_tparams (build_type_param_json ctx source_map)
   in
@@ -314,7 +315,7 @@ let add_func_defn_fact ctx source_map elem decl_id progress =
         build_attributes_json_nested source_map elem.f_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_namespace_decl_json_nested elem.f_namespace
+    @ build_namespace_decl_json_nested fd.fd_namespace
   in
   add_fact FunctionDefinition (JSON_Object json_fields) progress
 

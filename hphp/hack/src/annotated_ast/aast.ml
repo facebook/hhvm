@@ -726,7 +726,6 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;
   f_readonly_this: Ast_defs.readonly_kind option;
   f_annotation: 'en;
-  f_mode: FileInfo.mode; [@visitors.opaque]
   f_readonly_ret: Ast_defs.readonly_kind option;
   (* Whether the return value is readonly *)
   f_ret: 'hi type_hint;
@@ -740,11 +739,9 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_body: ('ex, 'fb, 'en, 'hi) func_body;
   f_fun_kind: Ast_defs.fun_kind;
   f_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
-  f_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
   f_external: bool;
       (** true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
-  f_namespace: nsenv;
   f_doc_comment: doc_comment option;
 }
 
@@ -1011,7 +1008,12 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
 
 and record_hint = hint
 
-and ('ex, 'fb, 'en, 'hi) fun_def = ('ex, 'fb, 'en, 'hi) fun_
+and ('ex, 'fb, 'en, 'hi) fun_def = {
+  fd_namespace: nsenv;
+  fd_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
+  fd_mode: FileInfo.mode; [@visitors.opaque]
+  fd_fun: ('ex, 'fb, 'en, 'hi) fun_;
+}
 
 and ('ex, 'fb, 'en, 'hi) def =
   | Fun of ('ex, 'fb, 'en, 'hi) fun_def

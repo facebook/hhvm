@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8458e355b2b4d26f5d24a74d551374a5>>
+// @generated SignedSource<<6c39405435ddee902c9917adc211c726>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1054,7 +1054,6 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub readonly_this: Option<ast_defs::ReadonlyKind>,
     pub annotation: En,
-    pub mode: file_info::Mode,
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Hi>,
     pub name: Sid,
@@ -1067,11 +1066,9 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
-    pub namespace: Nsenv,
     pub doc_comment: Option<DocComment>,
 }
 
@@ -1722,7 +1719,26 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
 
 pub type RecordHint = Hint;
 
-pub type FunDef<Ex, Fb, En, Hi> = Fun_<Ex, Fb, En, Hi>;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct FunDef<Ex, Fb, En, Hi> {
+    pub namespace: Nsenv,
+    pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
+    pub mode: file_info::Mode,
+    pub fun: Fun_<Ex, Fb, En, Hi>,
+}
 
 #[derive(
     Clone,

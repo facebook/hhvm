@@ -35,9 +35,10 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true ctx fn x with
-  | Some f ->
+  | Some fd ->
+    let f = fd.Aast.fd_fun in
     handle_exn_as_error f.Aast.f_span (fun () ->
-        let fun_ = Naming.fun_ ctx f in
+        let fun_ = Naming.fun_def ctx fd in
         Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
           Typing_toplevel.fun_def ctx fun_

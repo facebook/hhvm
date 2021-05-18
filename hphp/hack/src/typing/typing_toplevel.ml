@@ -343,11 +343,12 @@ let function_dynamically_callable
   in
   if not interface_check then function_body_check ()
 
-let fun_def ctx f :
+let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
+  let f = fd.fd_fun in
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
-  let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx f in
+  let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
       Reason.expr_display_id_map := IMap.empty;
@@ -359,7 +360,9 @@ let fun_def ctx f :
       let env =
         Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
       in
-      let (env, file_attrs) = Typing.file_attributes env f.f_file_attributes in
+      let (env, file_attrs) =
+        Typing.file_attributes env fd.fd_file_attributes
+      in
       let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
@@ -483,12 +486,11 @@ let fun_def ctx f :
           variadicity_decl_ty
           return_ty;
 
-      let fundef =
+      let fun_ =
         {
           Aast.f_annotation = Env.save local_tpenv env;
           Aast.f_readonly_this = f.f_readonly_this;
           Aast.f_span = f.f_span;
-          Aast.f_mode = f.f_mode;
           Aast.f_readonly_ret = f.f_readonly_ret;
           Aast.f_ret = (return_ty, hint_of_type_hint f.f_ret);
           Aast.f_name = f.f_name;
@@ -499,12 +501,18 @@ let fun_def ctx f :
           Aast.f_ctxs = f.f_ctxs;
           Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
           Aast.f_fun_kind = f.f_fun_kind;
-          Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
           Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
           Aast.f_external = f.f_external;
-          Aast.f_namespace = f.f_namespace;
           Aast.f_doc_comment = f.f_doc_comment;
+        }
+      in
+      let fundef =
+        {
+          Aast.fd_mode = fd.fd_mode;
+          Aast.fd_fun = fun_;
+          Aast.fd_file_attributes = file_attrs;
+          Aast.fd_namespace = fd.fd_namespace;
         }
       in
       let (_env, global_inference_env) = Env.extract_global_inference_env env in

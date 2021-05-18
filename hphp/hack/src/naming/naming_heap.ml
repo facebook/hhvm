@@ -314,7 +314,7 @@ module Funs = struct
   let get_canon_name ctx name =
     let map_result path =
       match Ast_provider.find_ifun_in_file ctx path name with
-      | Some f -> Some (snd f.Aast.f_name)
+      | Some f -> Some (snd f.Aast.fd_fun.Aast.f_name)
       | None ->
         let path_str = Relative_path.S.to_string path in
         Hh_logger.log

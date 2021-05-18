@@ -153,7 +153,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Def::Fun(f) => {
                 let mut env = env.clone();
                 env.namespace = f.namespace.clone();
-                env.extend_tparams(&f.tparams);
+                env.extend_tparams(&f.fun.tparams);
                 def.recurse(&mut env, self.object())
             }
             Def::SetNamespaceEnv(nsenv) => Ok(env.namespace = (**nsenv).clone()),

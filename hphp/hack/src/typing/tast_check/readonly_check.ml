@@ -592,14 +592,15 @@ let check =
       ctx <- new_ctx;
       super#on_method_ env m
 
-    method! on_fun_def env f =
+    method! on_fun_def env fd =
+      let f = fd.fd_fun in
       let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
       let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos) in
       let new_ctx =
         { this_ty = None; ret_ty; lenv = lenv_from_params f.f_params }
       in
       ctx <- new_ctx;
-      super#on_fun_def env f
+      super#on_fun_def env fd
 
     (* Normal functions go through on_fun_def, but all functions including closures go through on_fun_*)
     method! on_fun_ env f =

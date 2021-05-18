@@ -188,7 +188,8 @@ let process_enum_xref symbol_def pos (xrefs, progress) =
     pos
     (xrefs, progress)
 
-let process_func_decl ctx source_map elem (all_decls, progress) =
+let process_func_decl ctx source_map fd (all_decls, progress) =
+  let elem = fd.fd_fun in
   let (pos, id) = elem.f_name in
   let (decl_id, prog) =
     process_decl_loc
@@ -198,7 +199,7 @@ let process_func_decl ctx source_map elem (all_decls, progress) =
       pos
       (Some elem.f_span)
       id
-      elem
+      fd
       elem.f_doc_comment
       progress
   in

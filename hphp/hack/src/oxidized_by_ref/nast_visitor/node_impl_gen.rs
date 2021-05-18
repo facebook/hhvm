@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a564a54b8068998e44e982907d496a83>>
+// @generated SignedSource<<5a2a019fad7088db60ad0a9f65887853>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -836,6 +836,32 @@ impl<'a> Node<'a>
         }
     }
 }
+impl<'a> Node<'a> for FunDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_def(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunDef {
+                namespace: ref __binding_0,
+                file_attributes: ref __binding_1,
+                mode: ref __binding_2,
+                fun: ref __binding_3,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
+            }
+        }
+    }
+}
 impl<'a> Node<'a> for FunKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_kind(self)
@@ -923,23 +949,20 @@ impl<'a> Node<'a> for Fun_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
                 span: ref __binding_0,
                 readonly_this: ref __binding_1,
                 annotation: ref __binding_2,
-                mode: ref __binding_3,
-                readonly_ret: ref __binding_4,
-                ret: ref __binding_5,
-                name: ref __binding_6,
-                tparams: ref __binding_7,
-                where_constraints: ref __binding_8,
-                variadic: ref __binding_9,
-                params: ref __binding_10,
-                ctxs: ref __binding_11,
-                unsafe_ctxs: ref __binding_12,
-                body: ref __binding_13,
-                fun_kind: ref __binding_14,
-                user_attributes: ref __binding_15,
-                file_attributes: ref __binding_16,
-                external: ref __binding_17,
-                namespace: ref __binding_18,
-                doc_comment: ref __binding_19,
+                readonly_ret: ref __binding_3,
+                ret: ref __binding_4,
+                name: ref __binding_5,
+                tparams: ref __binding_6,
+                where_constraints: ref __binding_7,
+                variadic: ref __binding_8,
+                params: ref __binding_9,
+                ctxs: ref __binding_10,
+                unsafe_ctxs: ref __binding_11,
+                body: ref __binding_12,
+                fun_kind: ref __binding_13,
+                user_attributes: ref __binding_14,
+                external: ref __binding_15,
+                doc_comment: ref __binding_16,
             } => {
                 {
                     __binding_0.accept(v)
@@ -989,16 +1012,7 @@ impl<'a> Node<'a> for Fun_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
                 {
                     __binding_15.accept(v)
                 }
-                {
-                    __binding_16.accept(v)
-                }
-                {
-                    __binding_17.accept(v)
-                }
-                {
-                    __binding_18.accept(v)
-                }
-                { __binding_19.accept(v) }
+                { __binding_16.accept(v) }
             }
         }
     }

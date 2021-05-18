@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce992b48cb2e176349624fffcfa0f491>>
+// @generated SignedSource<<81ac03c31c1d5d874433a4f4ee9fc2a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -172,6 +172,12 @@ pub trait Visitor<'a> {
     fn visit_file_attribute(
         &mut self,
         p: &'a FileAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>,
+    ) {
+        p.recurse(self.object())
+    }
+    fn visit_fun_def(
+        &mut self,
+        p: &'a FunDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>,
     ) {
         p.recurse(self.object())
     }

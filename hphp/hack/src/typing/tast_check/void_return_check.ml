@@ -236,11 +236,6 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_def env x =
-      let env = Tast_env.restore_fun_env env x in
-      visitor#reset;
-      visitor#on_fun_ env x
-
     method! at_method_ env x =
       let env = Tast_env.restore_method_env env x in
       visitor#reset;

@@ -1,49 +1,51 @@
 [(Fun
-    { f_span = [5:1-26:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
-      f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([5:17-19], bool); param_type_hint = ((bool), (Some ([5:12-16], (Hprim Tbool)))); 
-         param_is_variadic = false; param_pos = [5:17-19]; param_name = "$b"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([5:25-27], int); param_type_hint = ((int), (Some ([5:21-24], (Hprim Tint)))); 
-          param_is_variadic = false; param_pos = [5:25-27]; param_name = "$a"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([6:3-9:16],
-          (Do (
-             [([7:5-8], (Expr (([7:5-7], (int | string)), (Lvar ([7:5-7], $a)))));
-               ([8:5-13], (Expr (([8:5-12], string), (Binop ((Eq None), (([8:5-7], string), (Lvar ([8:5-7], $a))), (([8:10-12], string), (String "")))))))],
-             (([9:12-14], bool), (Lvar ([9:12-14], $b))))));
-          ([10:3-6], (Expr (([10:3-5], string), (Lvar ([10:3-5], $a)))));
-          ([12:3-15:16],
-           (Do (
-              [([13:5-8], (Expr (([13:5-7], string), (Lvar ([13:5-7], $a)))));
-                ([14:5-13], (Expr (([14:5-12], string), (Binop ((Eq None), (([14:5-7], string), (Lvar ([14:5-7], $a))), (([14:10-12], string), (String "")))))))],
-              (([15:12-14], bool), (Lvar ([15:12-14], $b))))));
-          ([17:3-25:16],
-           (Do (
-              [([18:5-8], (Expr (([18:5-7], string), (Lvar ([18:5-7], $a)))));
-                ([19:5-12], (Expr (([19:5-11], int), (Binop ((Eq None), (([19:5-7], int), (Lvar ([19:5-7], $a))), (([19:10-11], int), (Int "0")))))));
-                ([20:5-23:18],
-                 (Do (
-                    [([21:7-10], (Expr (([21:7-9], int), (Lvar ([21:7-9], $a)))));
-                      ([22:7-14], (Expr (([22:7-13], int), (Binop ((Eq None), (([22:7-9], int), (Lvar ([22:7-9], $a))), (([22:12-13], int), (Int "1")))))))],
-                    (([23:14-16], bool), (Lvar ([23:14-16], $b))))));
-                ([24:5-13], (Expr (([24:5-12], string), (Binop ((Eq None), (([24:5-7], string), (Lvar ([24:5-7], $a))), (([24:10-12], string), (String "")))))))],
-              (([25:12-14], bool), (Lvar ([25:12-14], $b))))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [5:1-26:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
+        f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([5:17-19], bool); param_type_hint = ((bool), (Some ([5:12-16], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [5:17-19]; param_name = "$b"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([5:25-27], int); param_type_hint = ((int), (Some ([5:21-24], (Hprim Tint)))); 
+            param_is_variadic = false; param_pos = [5:25-27]; param_name = "$a"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([6:3-9:16],
+            (Do (
+               [([7:5-8], (Expr (([7:5-7], (int | string)), (Lvar ([7:5-7], $a)))));
+                 ([8:5-13], (Expr (([8:5-12], string), (Binop ((Eq None), (([8:5-7], string), (Lvar ([8:5-7], $a))), (([8:10-12], string), (String "")))))))],
+               (([9:12-14], bool), (Lvar ([9:12-14], $b))))));
+            ([10:3-6], (Expr (([10:3-5], string), (Lvar ([10:3-5], $a)))));
+            ([12:3-15:16],
+             (Do (
+                [([13:5-8], (Expr (([13:5-7], string), (Lvar ([13:5-7], $a)))));
+                  ([14:5-13], (Expr (([14:5-12], string), (Binop ((Eq None), (([14:5-7], string), (Lvar ([14:5-7], $a))), (([14:10-12], string), (String "")))))))],
+                (([15:12-14], bool), (Lvar ([15:12-14], $b))))));
+            ([17:3-25:16],
+             (Do (
+                [([18:5-8], (Expr (([18:5-7], string), (Lvar ([18:5-7], $a)))));
+                  ([19:5-12], (Expr (([19:5-11], int), (Binop ((Eq None), (([19:5-7], int), (Lvar ([19:5-7], $a))), (([19:10-11], int), (Int "0")))))));
+                  ([20:5-23:18],
+                   (Do (
+                      [([21:7-10], (Expr (([21:7-9], int), (Lvar ([21:7-9], $a)))));
+                        ([22:7-14], (Expr (([22:7-13], int), (Binop ((Eq None), (([22:7-9], int), (Lvar ([22:7-9], $a))), (([22:12-13], int), (Int "1")))))))],
+                      (([23:14-16], bool), (Lvar ([23:14-16], $b))))));
+                  ([24:5-13], (Expr (([24:5-12], string), (Binop ((Eq None), (([24:5-7], string), (Lvar ([24:5-7], $a))), (([24:10-12], string), (String "")))))))],
+                (([25:12-14], bool), (Lvar ([25:12-14], $b))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

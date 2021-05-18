@@ -28,29 +28,32 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [9:1-15:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
-       f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([11:3-21],
-           (Expr
-              ([11:3-20],
-               (Binop ((Eq None), ([11:3-5], (Lvar ([11:3-5], $x))), ([11:8-20], (FunctionPointer ((FP_class_const (([11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))))))));
-           ([14:3-28],
-            (Expr
-               ([14:3-27],
-                (Binop ((Eq None), ([14:3-5], (Lvar ([14:3-5], $x))), (
-                   [14:8-27], (FunctionPointer ((FP_class_const (([14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
-           ];
-         fb_annotation = Named };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = (Some "Foo\\Bar"); ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [9:1-15:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
+         f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([11:3-21],
+             (Expr
+                ([11:3-20],
+                 (Binop ((Eq None), ([11:3-5], (Lvar ([11:3-5], $x))), (
+                    [11:8-20], (FunctionPointer ((FP_class_const (([11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))))))));
+             ([14:3-28],
+              (Expr
+                 ([14:3-27],
+                  (Binop ((Eq None), ([14:3-5], (Lvar ([14:3-5], $x))),
+                     ([14:8-27], (FunctionPointer ((FP_class_const (([14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
+             ];
+           fb_annotation = Named };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })
   ]

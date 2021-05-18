@@ -4,47 +4,51 @@ Errors:
   [3:25-27]   via this generic `Tu`
   [8:18-20] But got `int`
 [(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Tu), (Some ([3:33-35], (Habstr ("Tu", []))))); 
-      f_name = ([3:10-11], "\\f");
-      f_tparams =
-      [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Reified; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-      f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:28-30], Tu); param_type_hint = ((Tu), (Some ([3:25-27], (Habstr ("Tu", []))))); 
-         param_is_variadic = false; param_pos = [3:28-30]; param_name = "$f"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))]; fb_annotation = () }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((Tu), (Some ([3:33-35], (Habstr ("Tu", []))))); 
+        f_name = ([3:10-11], "\\f");
+        f_tparams =
+        [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Reified; tp_user_attributes = [] };
+          { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:28-30], Tu); param_type_hint = ((Tu), (Some ([3:25-27], (Habstr ("Tu", []))))); 
+           param_is_variadic = false; param_pos = [3:28-30]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))]; fb_annotation = () }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([7:15-19], (Hprim Tvoid)))); 
-       f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([8:3-22],
-           (Expr
-              (([8:3-21], string),
-               (Call ((([8:3-4], (function<reify T, Tu>(string $f): string)), (Id ([8:3-4], "\\f"))), 
-                  [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                  [(([8:18-20], int), (Hole ((([8:18-20], int), (Int "42")), (int), (string), Typing)))], None)))))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:15-19], (Hprim Tvoid)))); 
+         f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([8:3-22],
+             (Expr
+                (([8:3-21], string),
+                 (Call ((([8:3-4], (function<reify T, Tu>(string $f): string)), (Id ([8:3-4], "\\f"))), 
+                    [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
+                    [(([8:18-20], int), (Hole ((([8:18-20], int), (Int "42")), (int), (string), Typing)))], None)))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

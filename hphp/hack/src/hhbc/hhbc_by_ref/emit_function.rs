@@ -26,10 +26,12 @@ use itertools::Either;
 pub fn emit_function<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
-    f: &'a tast::Fun_,
+    fd: &'a tast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
+
+    let f = &fd.fun;
     let original_id = hhbc_id::function::Type::from_ast_name(alloc, &f.name.1);
     let mut flags = Flags::empty();
     flags.set(
@@ -93,7 +95,7 @@ pub fn emit_function<'a, 'arena>(
     };
     let mut scope = Scope::toplevel();
     if !is_debug_main {
-        scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
+        scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&fd)));
     }
 
     let mut coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
@@ -143,7 +145,7 @@ pub fn emit_function<'a, 'arena>(
         emit_body::emit_body(
             alloc,
             e,
-            RcOc::clone(&f.namespace),
+            RcOc::clone(&fd.namespace),
             Either::Right(ast_body),
             instr::null(alloc),
             scope,
@@ -170,7 +172,7 @@ pub fn emit_function<'a, 'arena>(
             original_id,
             &renamed_id,
             &deprecation_info,
-            &f,
+            &fd,
         )?)
     } else {
         None

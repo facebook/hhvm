@@ -226,11 +226,12 @@ let restore_fun_env env f =
   let se = f.f_annotation in
   restore_saved_env env se
 
-let fun_env ctx f =
+let fun_env ctx fd =
+  let f = fd.fd_fun in
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> f.f_annotation.tcopt)
   in
-  let env = EnvFromDef.fun_env ~origin:Decl_counters.Tast ctx f in
+  let env = EnvFromDef.fun_env ~origin:Decl_counters.Tast ctx fd in
   restore_fun_env env f
 
 let class_env ctx c =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b480eb16120617bc556614fefcce473c>>
+// @generated SignedSource<<50483e90ef08888b6bb51135abdf8a72>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1079,6 +1079,26 @@ impl<P: Params> Node<P> for FileAttribute<P::Ex, P::Fb, P::En, P::Hi> {
         Ok(())
     }
 }
+impl<P: Params> Node<P> for FunDef<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_fun_def(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.namespace.accept(c, v)?;
+        self.file_attributes.accept(c, v)?;
+        self.mode.accept(c, v)?;
+        self.fun.accept(c, v)?;
+        Ok(())
+    }
+}
 impl<P: Params> Node<P> for FunKind {
     fn accept<'node>(
         &'node self,
@@ -1168,7 +1188,6 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.span.accept(c, v)?;
         self.readonly_this.accept(c, v)?;
         v.visit_en(c, &self.annotation)?;
-        self.mode.accept(c, v)?;
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.name.accept(c, v)?;
@@ -1181,9 +1200,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
-        self.file_attributes.accept(c, v)?;
         self.external.accept(c, v)?;
-        self.namespace.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         Ok(())
     }

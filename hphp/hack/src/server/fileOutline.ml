@@ -344,7 +344,8 @@ let summarize_typedef tdef =
     docblock = None;
   }
 
-let summarize_fun f =
+let summarize_fun fd =
+  let f = fd.fd_fun in
   let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
   let params = Some (List.map f.f_params summarize_param) in
   let kind = SymbolDefinition.Function in

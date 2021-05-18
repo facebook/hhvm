@@ -16,56 +16,58 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       t_span = [3:1-45]; t_emit_id = None });
   (Fun
-     { f_span = [5:1-11:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid)))); 
-       f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic;
-       f_params =
-       [{ param_annotation = ([5:21-23], shape('x' => int, ?'y' => int)); 
-          param_type_hint = ((shape('x' => int, ?'y' => int)), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), []))))); 
-          param_is_variadic = false; param_pos = [5:21-23]; param_name = "$p"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-         ];
-       f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([6:3-24],
-           (Expr
-              (([6:3-23], ?int),
-               (Call ((([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)), (Class_const ((([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))), 
-                  [], [(([6:15-17], shape('x' => int, ?'y' => int)), (Lvar ([6:15-17], $p))); (([6:19-22], string), (String "x"))], None)))));
-           ([7:3-27],
-            (Expr
-               (([7:3-26], int),
-                (Call ((([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)), (Class_const ((([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))), 
-                   [], [(([7:15-17], shape('x' => int, ?'y' => int)), (Lvar ([7:15-17], $p))); (([7:19-22], string), (String "x")); (([7:24-25], int), (Int "3"))], None)))));
-           ([8:3-30],
-            (Expr
-               (([8:3-29], bool),
-                (Call ((([8:3-20], (function(shape(...) $shape, arraykey $index): bool)), (Class_const ((([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))), 
-                   [], [(([8:21-23], shape('x' => int, ?'y' => int)), (Lvar ([8:21-23], $p))); (([8:25-28], string), (String "y"))], None)))));
-           ([9:3-36],
-            (Expr
-               (([9:3-35], void),
-                (Call (
-                   (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
-                    (Class_const ((([9:3-9], Shapes), (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey")))),
-                   [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))],
-                   [(([9:21-29], shape('x' => int, ?'y' => int)), (Callconv (Pinout, (([9:27-29], shape('x' => int, ?'y' => int)), (Lvar ([9:27-29], $p)))))); (([9:31-34], string), (String "y"))],
-                   None)))));
-           ([10:3-23],
-            (Expr
-               (([10:3-22], dict<string, int>),
-                (Call ((([10:3-18], (function(shape(...) $shape): dict<string, int>)), (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
-                   [], [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))], None)))))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [5:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid)))); 
+         f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ([5:21-23], shape('x' => int, ?'y' => int)); 
+            param_type_hint = ((shape('x' => int, ?'y' => int)), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), []))))); 
+            param_is_variadic = false; param_pos = [5:21-23]; param_name = "$p"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:3-24],
+             (Expr
+                (([6:3-23], ?int),
+                 (Call ((([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)), (Class_const ((([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))), 
+                    [], [(([6:15-17], shape('x' => int, ?'y' => int)), (Lvar ([6:15-17], $p))); (([6:19-22], string), (String "x"))], None)))));
+             ([7:3-27],
+              (Expr
+                 (([7:3-26], int),
+                  (Call ((([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)), (Class_const ((([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))), 
+                     [], [(([7:15-17], shape('x' => int, ?'y' => int)), (Lvar ([7:15-17], $p))); (([7:19-22], string), (String "x")); (([7:24-25], int), (Int "3"))], None)))));
+             ([8:3-30],
+              (Expr
+                 (([8:3-29], bool),
+                  (Call ((([8:3-20], (function(shape(...) $shape, arraykey $index): bool)), (Class_const ((([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))), 
+                     [], [(([8:21-23], shape('x' => int, ?'y' => int)), (Lvar ([8:21-23], $p))); (([8:25-28], string), (String "y"))], None)))));
+             ([9:3-36],
+              (Expr
+                 (([9:3-35], void),
+                  (Call (
+                     (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
+                      (Class_const ((([9:3-9], Shapes), (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey")))),
+                     [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))],
+                     [(([9:21-29], shape('x' => int, ?'y' => int)), (Callconv (Pinout, (([9:27-29], shape('x' => int, ?'y' => int)), (Lvar ([9:27-29], $p)))))); (([9:31-34], string), (String "y"))],
+                     None)))));
+             ([10:3-23],
+              (Expr
+                 (([10:3-22], dict<string, int>),
+                  (Call ((([10:3-18], (function(shape(...) $shape): dict<string, int>)), (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
+                     [], [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))], None)))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

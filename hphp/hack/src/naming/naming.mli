@@ -14,7 +14,7 @@
 val program : Provider_context.t -> Nast.program -> Nast.program
 
 (* Solves the local names within a function *)
-val fun_ : Provider_context.t -> Nast.fun_ -> Nast.fun_
+val fun_def : Provider_context.t -> Nast.fun_def -> Nast.fun_def
 
 (* Solves the local names of a class *)
 val class_ : Provider_context.t -> Nast.class_ -> Nast.class_

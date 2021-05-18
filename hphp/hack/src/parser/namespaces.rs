@@ -352,7 +352,7 @@ pub mod toplevel_elaborator {
             }
             D::<A>::Fun(mut x) => {
                 let f = x.as_mut();
-                elaborate_defined_id(nsenv, &mut f.name);
+                elaborate_defined_id(nsenv, &mut f.fun.name);
                 f.namespace = RcOc::clone(nsenv);
                 acc.push(Def::<A>::Fun(x));
             }

@@ -5,46 +5,50 @@ Errors:
   [12:10-19] Expected `num` because this is used in an arithmetic operation
   [3:27-41] But got `Awaitable<int>`
 [(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:27-41], (Happly (([3:27-36], "\\HH\\Awaitable"), [([3:37-40], (Hprim Tint))])))));
-      f_name = ([3:16-23], "\\gen_int"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-      f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))]; fb_annotation = () }; 
-      f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:27-41], (Happly (([3:27-36], "\\HH\\Awaitable"), [([3:37-40], (Hprim Tint))]))))); 
+        f_name = ([3:16-23], "\\gen_int"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+        f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))]; fb_annotation = () }; 
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [7:1-13:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([7:24-38], (Happly (([7:24-33], "\\HH\\Awaitable"), [([7:34-37], (Hprim Tint))]))))); 
-       f_name = ([7:16-20], "\\test"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([8:3-13],
-           (Awaitall ([((Some ([9:17-26], __tmp$1)), (([9:17-26], Awaitable<int>), (Call ((([9:17-24], (function(): Awaitable<int>)), (Id ([9:17-24], "\\gen_int"))), [], [], None))))],
-              [([10:5-21],
-                (Expr
-                   (([10:5-20], Awaitable<int>),
-                    (Binop ((Eq None), (([10:5-8], Awaitable<int>), (Lvar ([10:5-8], $v2))),
-                       (([10:11-20], Awaitable<int>), (Call ((([10:11-18], (function(): Awaitable<int>)), (Id ([10:11-18], "\\gen_int"))), [], [], None))))))));
-                ([9:5-27], (Expr (([9:5-26], int), (Binop ((Eq None), (([9:5-8], int), (Lvar ([9:5-8], $v1))), (([9:11-26], int), (Lvar ([9:11-26], __tmp$1))))))))]
-              )));
-           ([12:3-20],
-            (Return
-               (Some (([12:10-19], int),
-                      (Binop (Plus, (([12:10-13], int), (Lvar ([12:10-13], $v1))),
-                         (([12:16-19], Awaitable<int>), (Hole ((([12:16-19], Awaitable<int>), (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))))))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([7:24-38], (Happly (([7:24-33], "\\HH\\Awaitable"), [([7:34-37], (Hprim Tint))]))))); 
+         f_name = ([7:16-20], "\\test"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([8:3-13],
+             (Awaitall ([((Some ([9:17-26], __tmp$1)), (([9:17-26], Awaitable<int>), (Call ((([9:17-24], (function(): Awaitable<int>)), (Id ([9:17-24], "\\gen_int"))), [], [], None))))],
+                [([10:5-21],
+                  (Expr
+                     (([10:5-20], Awaitable<int>),
+                      (Binop ((Eq None), (([10:5-8], Awaitable<int>), (Lvar ([10:5-8], $v2))),
+                         (([10:11-20], Awaitable<int>), (Call ((([10:11-18], (function(): Awaitable<int>)), (Id ([10:11-18], "\\gen_int"))), [], [], None))))))));
+                  ([9:5-27], (Expr (([9:5-26], int), (Binop ((Eq None), (([9:5-8], int), (Lvar ([9:5-8], $v1))), (([9:11-26], int), (Lvar ([9:11-26], __tmp$1))))))))]
+                )));
+             ([12:3-20],
+              (Return
+                 (Some (([12:10-19], int),
+                        (Binop (Plus, (([12:10-13], int), (Lvar ([12:10-13], $v1))),
+                           (([12:16-19], Awaitable<int>), (Hole ((([12:16-19], Awaitable<int>), (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

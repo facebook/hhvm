@@ -3,30 +3,32 @@
 (Relative_path.Dummy, "poly_var.php"):
 
 [(Fun
-    { f_span = [3:1-5:18]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([5:11-15], (Hprim Tvoid)))); 
-      f_name = ([3:10-14], "\\poly");
-      f_tparams =
-      [{ tp_variance = Invariant; tp_name = ([4:5-7], "T$f"); tp_parameters = []; 
-         tp_constraints = [(Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))]; 
-         tp_reified = Erased; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([5:3-8], "T$f@C"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-      f_where_constraints = [(([5:3-8], (Habstr ("T$f@C", []))), Constraint_eq, ([5:3-8], (Haccess (([4:5-7], (Habstr ("T$f", []))), [([5:7-8], "C")]))))]; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = [4:5-7]; param_type_hint = ((), (Some ([4:5-7], (Habstr ("T$f", []))))); 
-         param_is_variadic = false; param_pos = [4:5-7]; param_name = "$f"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))]));
-      f_unsafe_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))])); 
-      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:18]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([5:11-15], (Hprim Tvoid)))); 
+        f_name = ([3:10-14], "\\poly");
+        f_tparams =
+        [{ tp_variance = Invariant; tp_name = ([4:5-7], "T$f"); tp_parameters = []; 
+           tp_constraints = [(Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))]; 
+           tp_reified = Erased; tp_user_attributes = [] };
+          { tp_variance = Invariant; tp_name = ([5:3-8], "T$f@C"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        f_where_constraints = [(([5:3-8], (Habstr ("T$f@C", []))), Constraint_eq, ([5:3-8], (Haccess (([4:5-7], (Habstr ("T$f", []))), [([5:7-8], "C")]))))]; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = [4:5-7]; param_type_hint = ((), (Some ([4:5-7], (Habstr ("T$f", []))))); 
+           param_is_variadic = false; param_pos = [4:5-7]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))]));
+        f_unsafe_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))])); 
+        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })
   ]

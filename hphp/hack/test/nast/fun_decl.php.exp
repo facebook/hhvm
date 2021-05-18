@@ -3,25 +3,27 @@
 (Relative_path.Dummy, "fun_decl.php"):
 
 [(Fun
-    { f_span = [12:1-28]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid)))); 
-      f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = [12:18-20]; param_type_hint = ((), (Some ([12:14-17], (Hprim Tint)))); 
-         param_is_variadic = false; param_pos = [12:18-20]; param_name = "$v"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = []; fb_annotation = Named }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = true;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment =
-      (Some ([2:1-10:4],
-             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [12:1-28]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid)))); 
+        f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = [12:18-20]; param_type_hint = ((), (Some ([12:14-17], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [12:18-20]; param_name = "$v"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = []; fb_annotation = Named }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = true;
+        f_doc_comment =
+        (Some ([2:1-10:4],
+               "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+        }
       })
   ]

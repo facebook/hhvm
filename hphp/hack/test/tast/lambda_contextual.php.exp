@@ -1,75 +1,73 @@
 [(Fun
-    { f_span = [3:1-54]; f_readonly_this = None; f_annotation = (); f_mode = Mstrict; 
-      f_readonly_ret = None; f_ret = ((void), (Some ([3:47-51], (Hprim Tvoid)))); 
-      f_name = ([3:10-19], "\\takes_fun"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:42-44], (function(int): num));
-         param_type_hint =
-         (((function(int): num)),
-          (Some ([3:20-41],
-                 (Hfun
-                    { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
-                      hf_param_info = [None]; hf_variadic_ty = None; 
-                      hf_ctxs = None; hf_return_ty = ([3:37-40], (Hprim Tnum)); 
-                      hf_is_readonly_return = None }))));
-         param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-54]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:47-51], (Hprim Tvoid)))); 
+        f_name = ([3:10-19], "\\takes_fun"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:42-44], (function(int): num));
+           param_type_hint =
+           (((function(int): num)),
+            (Some ([3:20-41],
+                   (Hfun
+                      { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
+                        hf_param_info = [None]; hf_variadic_ty = None; 
+                        hf_ctxs = None; hf_return_ty = ([3:37-40], (Hprim Tnum)); 
+                        hf_is_readonly_return = None }))));
+           param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid)))); 
-       f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([6:3-24],
-           (Expr
-              (([6:3-23], void),
-               (Call ((([6:3-12], (function((function(int): num) $f): void)), (Id ([6:3-12], "\\takes_fun"))), 
-                  [],
-                  [(([6:13-22], (function(int $x): num)),
-                    (Lfun (
-                       { f_span = [6:13-22]; f_readonly_this = None; 
-                         f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-                         f_ret = ((num), None); f_name = ([6:13-22], ";anonymous"); 
-                         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-                         f_params =
-                         [{ param_annotation = ([6:13-15], int); param_type_hint = ((int), None); 
-                            param_is_variadic = false; param_pos = [6:13-15]; 
-                            param_name = "$x"; param_expr = None; param_readonly = None; 
-                            param_callconv = None; param_user_attributes = []; 
-                            param_visibility = None }
-                           ];
-                         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some (([6:20-22], int), (Lvar ([6:20-22], $x))))))]; fb_annotation = () }; 
-                         f_fun_kind = FSync; f_user_attributes = []; 
-                         f_file_attributes = []; f_external = false;
-                         f_namespace =
-                         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                           ns_const_uses = <opaque>; ns_name = None; 
-                           ns_auto_ns_map = []; ns_is_codegen = false; 
-                           ns_disable_xhp_element_mangling = false };
-                         f_doc_comment = None },
-                       [])))
-                    ],
-                  None)))))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid)))); 
+         f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:3-24],
+             (Expr
+                (([6:3-23], void),
+                 (Call ((([6:3-12], (function((function(int): num) $f): void)), (Id ([6:3-12], "\\takes_fun"))), 
+                    [],
+                    [(([6:13-22], (function(int $x): num)),
+                      (Lfun (
+                         { f_span = [6:13-22]; f_readonly_this = None; 
+                           f_annotation = (); f_readonly_ret = None; 
+                           f_ret = ((num), None); f_name = ([6:13-22], ";anonymous"); 
+                           f_tparams = []; f_where_constraints = []; 
+                           f_variadic = FVnonVariadic;
+                           f_params =
+                           [{ param_annotation = ([6:13-15], int); param_type_hint = ((int), None); 
+                              param_is_variadic = false; param_pos = [6:13-15]; 
+                              param_name = "$x"; param_expr = None; param_readonly = None; 
+                              param_callconv = None; param_user_attributes = []; 
+                              param_visibility = None }
+                             ];
+                           f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some (([6:20-22], int), (Lvar ([6:20-22], $x))))))]; fb_annotation = () };
+                           f_fun_kind = FSync; f_user_attributes = []; 
+                           f_external = false; f_doc_comment = None },
+                         [])))
+                      ],
+                    None)))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

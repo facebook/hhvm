@@ -16,7 +16,7 @@ let recheck_naming ctx filename_l =
           (* We only need to name to find references to locals *)
           List.iter (Ast_provider.get_ast ctx file) (function
               | Aast.Fun f ->
-                let _ = Naming.fun_ ctx f in
+                let _ = Naming.fun_def ctx f in
                 ()
               | Aast.Class c ->
                 let _ = Naming.class_ ctx c in

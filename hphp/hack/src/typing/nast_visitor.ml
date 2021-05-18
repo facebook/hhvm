@@ -21,6 +21,8 @@ class virtual iter =
 
     method go_def ctx x = self#on_def (def_env ctx x) x
 
+    method! on_fun_def env x = super#on_fun_def (fun_def_env env x) x
+
     method! on_fun_ env x = super#on_fun_ (fun_env env x) x
 
     method! on_method_ env x = super#on_method_ (method_env env x) x
@@ -91,11 +93,14 @@ class virtual ['state] iter_with_state =
 
     method go_def state ctx x = self#on_def (def_env ctx x, state) x
 
-    method! on_fun_ (env, state) x = super#on_fun_ (fun_env env x, state) x
+    method! on_fun_def (env, state) x =
+      super#on_fun_def (fun_def_env env x, state) x
   end
 
 class type handler =
   object
+    method at_fun_def : env -> Nast.fun_def -> unit
+
     method at_fun_ : env -> Nast.fun_ -> unit
 
     method at_class_ : env -> Nast.class_ -> unit
@@ -119,6 +124,8 @@ class type handler =
 
 class virtual handler_base : handler =
   object
+    method at_fun_def _ _ = ()
+
     method at_fun_ _ _ = ()
 
     method at_class_ _ _ = ()
@@ -143,6 +150,10 @@ class virtual handler_base : handler =
 let iter_with (handlers : handler list) : iter =
   object
     inherit iter as super
+
+    method! on_fun_def env x =
+      List.iter handlers (fun v -> v#at_fun_def env x);
+      super#on_fun_def env x
 
     method! on_fun_ env x =
       List.iter handlers (fun v -> v#at_fun_ env x);

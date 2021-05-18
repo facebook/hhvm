@@ -1575,7 +1575,6 @@ where
                     span: pos.clone(),
                     readonly_this: None, // filled in by mk_unop
                     annotation: (),
-                    mode: env.file_mode(),
                     readonly_ret,
                     ret: ast::TypeHint((), ret),
                     name: ast::Id(pos, String::from(";anonymous")),
@@ -1591,9 +1590,7 @@ where
                     ctxs,
                     unsafe_ctxs,
                     user_attributes: Self::p_user_attributes(&c.attribute_spec, env)?,
-                    file_attributes: vec![],
                     external,
-                    namespace: Self::mk_empty_ns_env(env),
                     doc_comment: None,
                 };
                 Ok(E_::mk_lfun(fun, vec![]))
@@ -2147,7 +2144,6 @@ where
                     span: Self::p_pos(node, env),
                     readonly_this: None, // set in process_readonly_expr
                     annotation: (),
-                    mode: env.file_mode(),
                     readonly_ret: Self::mp_optional(Self::p_readonly, &c.readonly_return, env)?,
                     ret: ast::TypeHint((), Self::mp_optional(Self::p_hint, &c.type_, env)?),
                     name: ast::Id(name_pos, String::from(";anonymous")),
@@ -2163,9 +2159,7 @@ where
                     ctxs,
                     unsafe_ctxs,
                     user_attributes,
-                    file_attributes: vec![],
                     external,
-                    namespace: Self::mk_empty_ns_env(env),
                     doc_comment,
                 };
                 let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
@@ -2181,7 +2175,6 @@ where
                 let body = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
-                    mode: env.file_mode(),
                     readonly_this: None, // set in process_readonly_expr
                     readonly_ret: None,  // TODO: awaitable creation expression
                     ret: ast::TypeHint((), None),
@@ -2203,9 +2196,7 @@ where
                     ctxs: None,        // TODO(T70095684)
                     unsafe_ctxs: None, // TODO(T70095684)
                     user_attributes,
-                    file_attributes: vec![],
                     external,
-                    namespace: Self::mk_empty_ns_env(env),
                     doc_comment: None,
                 };
                 Ok(E_::mk_call(
@@ -4916,11 +4907,11 @@ where
                 Self::check_context_has_this(&hdr.contexts, env);
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = ast::TypeHint((), hdr.return_type);
-                Ok(vec![ast::Def::mk_fun(ast::Fun_ {
+
+                let fun = ast::Fun_ {
                     span: Self::p_fun_pos(node, env),
                     readonly_this: hdr.readonly_this,
                     annotation: (),
-                    mode: env.file_mode(),
                     ret,
                     readonly_ret: hdr.readonly_return,
                     name: hdr.name,
@@ -4936,10 +4927,15 @@ where
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, yield_),
                     variadic,
                     user_attributes,
-                    file_attributes: vec![],
                     external: is_external,
-                    namespace: Self::mk_empty_ns_env(env),
                     doc_comment: doc_comment_opt,
+                };
+
+                Ok(vec![ast::Def::mk_fun(ast::FunDef {
+                    namespace: Self::mk_empty_ns_env(env),
+                    file_attributes: vec![],
+                    mode: env.file_mode(),
+                    fun,
                 })])
             }
             ClassishDeclaration(c) if Self::contains_class_body(c) => {

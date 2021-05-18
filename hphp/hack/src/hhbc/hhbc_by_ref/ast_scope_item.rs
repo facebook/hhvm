@@ -67,7 +67,7 @@ impl<'a, AST, BRIEF> Clone for E<'a, AST, BRIEF> {
 }
 
 pub type Class<'a> = E<'a, ast::Class_, Class_>;
-pub type Fun<'a> = E<'a, ast::Fun_, Fun_>;
+pub type Fun<'a> = E<'a, ast::FunDef, Fun_>;
 pub type Method<'a> = E<'a, ast::Method_, Method_>;
 
 impl<'a> Class<'a> {
@@ -109,32 +109,35 @@ impl<'a> Class<'a> {
 }
 
 impl<'a> Fun<'a> {
-    pub fn new_rc(x: &ast::Fun_) -> Self {
+    pub fn new_rc(x: &ast::FunDef) -> Self {
         Self::new_rc_(x, Fun_::new)
     }
 
     pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
-        self.either(|x: &'a ast::Fun_| &x.tparams[..], |x: &Fun_| &x.tparams[..])
+        self.either(
+            |x: &'a ast::FunDef| &x.fun.tparams[..],
+            |x: &Fun_| &x.tparams[..],
+        )
     }
 
     pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
-        self.either(|x| &x.user_attributes[..], |x| &x.user_attributes[..])
+        self.either(|x| &x.fun.user_attributes[..], |x| &x.user_attributes[..])
     }
 
     pub fn get_ctxs(&self) -> &Option<ast::Contexts> {
-        self.either(|x| &x.ctxs, |x| &x.ctxs)
+        self.either(|x| &x.fun.ctxs, |x| &x.ctxs)
     }
 
     pub fn get_params(&self) -> &[ast::FunParam] {
-        self.either(|x| &x.params[..], |x| &x.params[..])
+        self.either(|x| &x.fun.params[..], |x| &x.params[..])
     }
 
     pub fn get_span(&self) -> &Pos {
-        self.either(|x| &x.span, |x| &x.span)
+        self.either(|x| &x.fun.span, |x| &x.span)
     }
 
     pub fn get_name(&self) -> &ast::Id {
-        self.either(|x| &x.name, |x| &x.name)
+        self.either(|x| &x.fun.name, |x| &x.name)
     }
 
     pub fn get_name_str(&self) -> &str {
@@ -146,7 +149,7 @@ impl<'a> Fun<'a> {
     }
 
     pub fn get_fun_kind(&self) -> ast::FunKind {
-        self.either(|x| x.fun_kind, |x| x.fun_kind)
+        self.either(|x| x.fun.fun_kind, |x| x.fun_kind)
     }
 }
 
@@ -230,13 +233,14 @@ pub struct Fun_ {
 }
 
 impl Fun_ {
-    fn new(f: &ast::Fun_) -> Self {
+    fn new(fd: &ast::FunDef) -> Self {
+        let f = &fd.fun;
         Self {
             name: f.name.clone(),
             span: f.span.clone(),
             tparams: f.tparams.clone(),
             user_attributes: f.user_attributes.clone(),
-            mode: f.mode,
+            mode: fd.mode,
             fun_kind: f.fun_kind,
             ctxs: f.ctxs.clone(),
             params: f.params.clone(),

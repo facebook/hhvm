@@ -1,36 +1,38 @@
 [(Fun
-    { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), (Some ([3:51-54], (Hprim Tint)))); 
-      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:20-22], bool); param_type_hint = ((bool), (Some ([3:15-19], (Hprim Tbool)))); 
-         param_is_variadic = false; param_pos = [3:20-22]; param_name = "$b"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([3:46-48], (function(int): int));
-          param_type_hint =
-          (((function(int): int)),
-           (Some ([3:24-45],
-                  (Hfun
-                     { hf_is_readonly = None; hf_param_tys = [([3:35-38], (Hprim Tint))]; 
-                       hf_param_info = [None]; hf_variadic_ty = None; 
-                       hf_ctxs = None; hf_return_ty = ([3:41-44], (Hprim Tint)); 
-                       hf_is_readonly_return = None }))));
-          param_is_variadic = false; param_pos = [3:46-48]; param_name = "$f"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-13], (If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [], [([Pos.none], Noop)])));
-          ([5:3-16], (Return (Some (([5:10-15], int), (Call ((([5:10-12], (function(int): int)), (Lvar ([5:10-12], $f))), [], [(([5:13-14], int), (Int "1"))], None))))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:51-54], (Hprim Tint)))); 
+        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:20-22], bool); param_type_hint = ((bool), (Some ([3:15-19], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [3:20-22]; param_name = "$b"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([3:46-48], (function(int): int));
+            param_type_hint =
+            (((function(int): int)),
+             (Some ([3:24-45],
+                    (Hfun
+                       { hf_is_readonly = None; hf_param_tys = [([3:35-38], (Hprim Tint))]; 
+                         hf_param_info = [None]; hf_variadic_ty = None; 
+                         hf_ctxs = None; hf_return_ty = ([3:41-44], (Hprim Tint)); 
+                         hf_is_readonly_return = None }))));
+            param_is_variadic = false; param_pos = [3:46-48]; param_name = "$f"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-13], (If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [], [([Pos.none], Noop)])));
+            ([5:3-16], (Return (Some (([5:10-15], int), (Call ((([5:10-12], (function(int): int)), (Lvar ([5:10-12], $f))), [], [(([5:13-14], int), (Int "1"))], None))))))];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

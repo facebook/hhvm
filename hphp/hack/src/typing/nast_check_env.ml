@@ -33,9 +33,10 @@ let fun_env env f =
   {
     env with
     function_name = Some (snd f.f_name);
-    file_mode = f.f_mode;
     function_kind = Some f.f_fun_kind;
   }
+
+let fun_def_env env fd = { (fun_env env fd.fd_fun) with file_mode = fd.fd_mode }
 
 let method_env env m =
   {
@@ -70,7 +71,7 @@ let get_empty_env ctx =
 let def_env ctx x =
   let empty_env = get_empty_env ctx in
   match x with
-  | Fun f -> fun_env empty_env f
+  | Fun f -> fun_def_env empty_env f
   | Class c -> class_env empty_env c
   | Typedef t -> typedef_env empty_env t
   | RecordDef _

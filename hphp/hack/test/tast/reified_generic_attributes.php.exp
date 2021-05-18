@@ -5,123 +5,131 @@ Errors:
   [7:47-49] The type parameter `Tu` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
   [11:15-16] This constructor expects no argument
 [(Class
-    { c_span = [3:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false;
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
-      c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = [];
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = [([3:20-45], (Happly (([3:20-45], "\\HH\\TypeParameterAttribute"), [])))];
-      c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
-      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+    { c_span = [3:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = [([3:20-45], (Happly (([3:20-45], "\\HH\\TypeParameterAttribute"), [])))]; 
+      c_support_dynamic_type = false; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [4:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false;
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal;
-       c_name = ([4:7-8], "\\B"); c_tparams = []; c_extends = []; c_uses = [];
-       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
-       c_xhp_category = None; c_reqs = []; c_implements = [([4:20-45], (Happly (([4:20-45], "\\HH\\TypeParameterAttribute"), [])))];
-       c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
-       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+     { c_span = [4:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_name = ([4:7-8], "\\B"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+       c_xhp_category = None; c_reqs = []; c_implements = [([4:20-45], (Happly (([4:20-45], "\\HH\\TypeParameterAttribute"), [])))]; 
+       c_support_dynamic_type = false; c_where_constraints = []; c_consts = []; 
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
        c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [6:1-57]; f_readonly_this = None; f_annotation = ();
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((_), None);
-       f_name = ([6:10-11], "\\f");
-       f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([6:48-49], "T"); tp_parameters = [];
-          tp_constraints = []; tp_reified = Reified;
-          tp_user_attributes = [{ ua_name = ([6:38-39], "\\A"); ua_params = [] }; { ua_name = ([6:24-37], "__Enforceable"); ua_params = [] }; { ua_name = ([6:14-23], "__Newable"); ua_params = [] }] }
-         ];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [6:1-57]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((_), None); f_name = ([6:10-11], "\\f");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([6:48-49], "T"); tp_parameters = []; 
+            tp_constraints = []; tp_reified = Reified;
+            tp_user_attributes = [{ ua_name = ([6:38-39], "\\A"); ua_params = [] }; { ua_name = ([6:24-37], "__Enforceable"); ua_params = [] }; { ua_name = ([6:14-23], "__Newable"); ua_params = [] }]
+            }
+           ];
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [7:1-55]; f_readonly_this = None; f_annotation = ();
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((_), None);
-       f_name = ([7:10-11], "\\g");
-       f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([7:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([7:47-49], "Tu"); tp_parameters = [];
-           tp_constraints = []; tp_reified = Reified; tp_user_attributes = [{ ua_name = ([7:29-38], "__Newable"); ua_params = [] }; { ua_name = ([7:17-28], "\\Enforceable"); ua_params = [] }] }
-         ];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [7:1-55]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((_), None); f_name = ([7:10-11], "\\g");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([7:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
+           { tp_variance = Invariant; tp_name = ([7:47-49], "Tu"); tp_parameters = []; 
+             tp_constraints = []; tp_reified = Reified; tp_user_attributes = [{ ua_name = ([7:29-38], "__Newable"); ua_params = [] }; { ua_name = ([7:17-28], "\\Enforceable"); ua_params = [] }] }
+           ];
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [8:1-24]; f_readonly_this = None; f_annotation = ();
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((_), None);
-       f_name = ([8:10-11], "\\h");
-       f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([8:17-18], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [8:1-24]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((_), None); f_name = ([8:10-11], "\\h");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([8:17-18], "T"); tp_parameters = []; 
+            tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }
+           ];
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [9:1-37]; f_readonly_this = None; f_annotation = ();
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((_), None);
-       f_name = ([9:10-11], "\\j");
-       f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([9:29-31], "Tv"); tp_parameters = [];
-          tp_constraints = []; tp_reified = SoftReified; tp_user_attributes = [{ ua_name = ([9:14-20], "__Soft"); ua_params = [] }] }
-         ];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [9:1-37]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((_), None); f_name = ([9:10-11], "\\j");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([9:29-31], "Tv"); tp_parameters = []; 
+            tp_constraints = []; tp_reified = SoftReified; tp_user_attributes = [{ ua_name = ([9:14-20], "__Soft"); ua_params = [] }] }
+           ];
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [11:1-29]; f_readonly_this = None; f_annotation = ();
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((_), None);
-       f_name = ([11:10-12], "\\ff");
-       f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([11:22-23], "T"); tp_parameters = [];
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([11:15-16], "\\A"); ua_params = [(([11:17-18], int), (Int "1"))] }] }
-         ];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [11:1-29]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((_), None); f_name = ([11:10-12], "\\ff");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([11:22-23], "T"); tp_parameters = []; 
+            tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([11:15-16], "\\A"); ua_params = [(([11:17-18], int), (Int "1"))] }] }
+           ];
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

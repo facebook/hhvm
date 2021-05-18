@@ -1,28 +1,30 @@
 [(Fun
-    { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([3:57-61], (Hprim Tvoid)))); 
-      f_name = ([3:10-37], "\\compound_assign_bitwise_and"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:50-53], Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:38-49], (Happly (([3:38-44], "\\HH\\Vector"), [([3:45-48], (Hprim Tint))])))));
-         param_is_variadic = false; param_pos = [3:50-53]; param_name = "$xs"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([5:3-17],
-          (Expr
-             (([5:3-16], int),
-              (Binop ((Eq (Some Amp)), (([5:3-9], int), (Array_get ((([5:3-6], Vector<int>), (Lvar ([5:3-6], $xs))), (Some (([5:7-8], int), (Int "0")))))),
-                 (([5:13-16], float), (Hole ((([5:13-16], float), (Float "1.0")), (float), (int), Typing))))))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:57-61], (Hprim Tvoid)))); 
+        f_name = ([3:10-37], "\\compound_assign_bitwise_and"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:50-53], Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:38-49], (Happly (([3:38-44], "\\HH\\Vector"), [([3:45-48], (Hprim Tint))])))));
+           param_is_variadic = false; param_pos = [3:50-53]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-17],
+            (Expr
+               (([5:3-16], int),
+                (Binop ((Eq (Some Amp)), (([5:3-9], int), (Array_get ((([5:3-6], Vector<int>), (Lvar ([5:3-6], $xs))), (Some (([5:7-8], int), (Int "0")))))),
+                   (([5:13-16], float), (Hole ((([5:13-16], float), (Float "1.0")), (float), (int), Typing))))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

@@ -11,7 +11,7 @@
 val fun_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c, 'd) Aast.fun_ ->
+  ('a, 'b, 'c, 'd) Aast.fun_def ->
   Typing_env_types.env
 
 val class_env :

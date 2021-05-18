@@ -1,53 +1,59 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:26-40], (Happly (([3:26-35], "\\HH\\Awaitable"), [([3:36-39], (Hprim Tint))])))));
-      f_name = ([3:16-22], "\\genInt"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-      f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))]; fb_annotation = () }; 
-      f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:26-40], (Happly (([3:26-35], "\\HH\\Awaitable"), [([3:36-39], (Hprim Tint))]))))); 
+        f_name = ([3:16-22], "\\genInt"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+        f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))]; fb_annotation = () }; 
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))])))));
-       f_name = ([7:16-25], "\\genString"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-       f_body = { fb_ast = [([8:3-16], (Return (Some (([8:10-15], string), (String "foo")))))]; fb_annotation = () }; 
-       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((Awaitable<string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))]))))); 
+         f_name = ([7:16-25], "\\genString"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+         f_body = { fb_ast = [([8:3-16], (Return (Some (([8:10-15], string), (String "foo")))))]; fb_annotation = () }; 
+         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [11:1-17:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([11:21-36], (Happly (([11:21-30], "\\HH\\Awaitable"), [([11:31-35], (Hprim Tvoid))])))));
-       f_name = ([11:16-17], "\\f"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([12:3-13],
-           (Awaitall (
-              [((Some ([15:16-27], __tmp$2)), (([15:16-27], Awaitable<string>), (Call ((([15:16-25], (function(): Awaitable<string>)), (Id ([15:16-25], "\\genString"))), [], [], None))));
-                (None, (([14:11-22], Awaitable<string>), (Call ((([14:11-20], (function(): Awaitable<string>)), (Id ([14:11-20], "\\genString"))), [], [], None))));
-                ((Some ([13:16-24], __tmp$1)), (([13:16-24], Awaitable<int>), (Call ((([13:16-22], (function(): Awaitable<int>)), (Id ([13:16-22], "\\genInt"))), [], [], None))))],
-              [([14:5-23], (Expr (([14:5-22], null), Null)));
-                ([13:5-25], (Expr (([13:5-24], int), (Binop ((Eq None), (([13:5-7], int), (Lvar ([13:5-7], $a))), (([13:10-24], int), (Lvar ([13:10-24], __tmp$1))))))));
-                ([15:5-28], (Expr (([15:5-27], string), (Binop ((Eq None), (([15:5-7], string), (Lvar ([15:5-7], $c))), (([15:10-27], string), (Lvar ([15:10-27], __tmp$2))))))))]
-              )))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [11:1-17:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([11:21-36], (Happly (([11:21-30], "\\HH\\Awaitable"), [([11:31-35], (Hprim Tvoid))]))))); 
+         f_name = ([11:16-17], "\\f"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([12:3-13],
+             (Awaitall (
+                [((Some ([15:16-27], __tmp$2)), (([15:16-27], Awaitable<string>), (Call ((([15:16-25], (function(): Awaitable<string>)), (Id ([15:16-25], "\\genString"))), [], [], None))));
+                  (None, (([14:11-22], Awaitable<string>), (Call ((([14:11-20], (function(): Awaitable<string>)), (Id ([14:11-20], "\\genString"))), [], [], None))));
+                  ((Some ([13:16-24], __tmp$1)), (([13:16-24], Awaitable<int>), (Call ((([13:16-22], (function(): Awaitable<int>)), (Id ([13:16-22], "\\genInt"))), [], [], None))))],
+                [([14:5-23], (Expr (([14:5-22], null), Null)));
+                  ([13:5-25], (Expr (([13:5-24], int), (Binop ((Eq None), (([13:5-7], int), (Lvar ([13:5-7], $a))), (([13:10-24], int), (Lvar ([13:10-24], __tmp$1))))))));
+                  ([15:5-28], (Expr (([15:5-27], string), (Binop ((Eq None), (([15:5-7], string), (Lvar ([15:5-7], $c))), (([15:10-27], string), (Lvar ([15:10-27], __tmp$2))))))))]
+                )))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

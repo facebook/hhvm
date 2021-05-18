@@ -1,93 +1,100 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((string), None); 
-      f_name = ([3:10-12], "\\f1"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
-         param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], string), (Lvar ([4:10-12], $x))))))]; fb_annotation = () }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })[(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((string), None); 
-      f_name = ([3:10-12], "\\f2"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
-         param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-17], (Return (Some (([4:10-16], string), (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f1"))), [], [(([4:13-15], string), (Lvar ([4:13-15], $x)))], None))))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })[(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((string), None); 
-      f_name = ([3:10-12], "\\f3"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
-         param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-21],
-          (Return
-             (Some (([4:10-20], string),
-                    (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f2"))), 
-                       [], [(([4:13-19], string), (Call ((([4:13-15], (function(string $x): string)), (Id ([4:13-15], "\\f1"))), [], [(([4:16-18], string), (Lvar ([4:16-18], $x)))], None)))], None))))))
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f1"); 
+        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
+           param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
           ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], string), (Lvar ([4:10-12], $x))))))]; fb_annotation = () }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })[(Fun
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })[(Fun
-    { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((string), None); 
-      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-25],
-          (Return
-             (Some (([4:10-24], string),
-                    (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f3"))), 
-                       [],
-                       [(([4:13-23], string),
-                         (Call ((([4:13-15], (function(string $x): string)), (Id ([4:13-15], "\\f2"))), 
-                            [], [(([4:16-22], string), (Call ((([4:16-18], (function(string $x): string)), (Id ([4:16-18], "\\f1"))), [], [(([4:19-21], string), (String ""))], None)))], None)))
-                         ],
-                       None))))))
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f2"); 
+        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
+           param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
           ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-17], (Return (Some (([4:10-16], string), (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f1"))), [], [(([4:13-15], string), (Lvar ([4:13-15], $x)))], None))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })[(Fun
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f3"); 
+        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:13-15], string); param_type_hint = ((string), None); 
+           param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-21],
+            (Return
+               (Some (([4:10-20], string),
+                      (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f2"))), 
+                         [], [(([4:13-19], string), (Call ((([4:13-15], (function(string $x): string)), (Id ([4:13-15], "\\f1"))), [], [(([4:16-18], string), (Lvar ([4:16-18], $x)))], None)))], None
+                         ))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-11], "\\f"); 
+        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-25],
+            (Return
+               (Some (([4:10-24], string),
+                      (Call ((([4:10-12], (function(string $x): string)), (Id ([4:10-12], "\\f3"))), 
+                         [],
+                         [(([4:13-23], string),
+                           (Call ((([4:13-15], (function(string $x): string)), (Id ([4:13-15], "\\f2"))), 
+                              [], [(([4:16-22], string), (Call ((([4:16-18], (function(string $x): string)), (Id ([4:16-18], "\\f1"))), [], [(([4:19-21], string), (String ""))], None)))], None)))
+                           ],
+                         None))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

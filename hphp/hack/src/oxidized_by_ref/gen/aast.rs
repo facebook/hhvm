@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4534e4b9ec0e092c26c587cd94c5cec>>
+// @generated SignedSource<<6107d67b7abc9ea4efab322a094cc5d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1377,7 +1377,6 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub readonly_this: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena")]
     pub annotation: En,
-    pub mode: oxidized::file_info::Mode,
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a TypeHint<'a, Hi>,
@@ -1400,13 +1399,9 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub fun_kind: oxidized::ast_defs::FunKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub file_attributes: &'a [&'a FileAttribute<'a, Ex, Fb, En, Hi>],
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub namespace: &'a Nsenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
 }
@@ -2287,7 +2282,37 @@ arena_deserializer::impl_deserialize_in_arena!(RecordDef<'arena, Ex, Fb, En, Hi>
 
 pub type RecordHint<'a> = Hint<'a>;
 
-pub type FunDef<'a, Ex, Fb, En, Hi> = Fun_<'a, Ex, Fb, En, Hi>;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, Fb: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>, Hi: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+pub struct FunDef<'a, Ex, Fb, En, Hi> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub namespace: &'a Nsenv<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub file_attributes: &'a [&'a FileAttribute<'a, Ex, Fb, En, Hi>],
+    pub mode: oxidized::file_info::Mode,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub fun: &'a Fun_<'a, Ex, Fb, En, Hi>,
+}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for FunDef<'a, Ex, Fb, En, Hi>
+{
+}
+arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, Fb, En, Hi>);
 
 #[derive(
     Clone,

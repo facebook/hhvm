@@ -233,8 +233,9 @@ let gamma_from_params env (params : ETast.fun_param list) =
   in
   List.fold ~init:empty_gamma ~f:add_param_to_gamma params
 
-let check_fun env (f : ETast.fun_def) =
-  if not (Partial.should_check_error f.f_mode 4291) then
+let check_fun env (fd : ETast.fun_def) =
+  let f = fd.fd_fun in
+  if not (Partial.should_check_error fd.fd_mode 4291) then
     ()
   else
     let gamma = gamma_from_params env f.f_params in

@@ -25,16 +25,17 @@ module SN = Naming_special_names
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec fun_naming_and_decl (ctx : Provider_context.t) (f : Nast.fun_) :
+let rec fun_naming_and_decl (ctx : Provider_context.t) (f : Nast.fun_def) :
     string * Typing_defs.fun_elt =
-  let f = Errors.ignore_ (fun () -> Naming.fun_ ctx f) in
+  let f = Errors.ignore_ (fun () -> Naming.fun_def ctx f) in
   let fe = fun_decl ctx f in
-  (snd f.f_name, fe)
+  (snd f.fd_fun.f_name, fe)
 
-and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
-  let dep = Dep.Fun (snd f.f_name) in
-  let env = { Decl_env.mode = f.f_mode; droot = Some dep; ctx } in
-  fun_decl_in_env env ~is_lambda:false f
+and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
+    =
+  let dep = Dep.Fun (snd f.fd_fun.f_name) in
+  let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
+  fun_decl_in_env env ~is_lambda:false f.fd_fun
 
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =

@@ -32,10 +32,10 @@ val find_fun_in_file :
   Provider_context.t ->
   Relative_path.t ->
   string ->
-  Nast.fun_ option
+  Nast.fun_def option
 
 val find_ifun_in_file :
-  Provider_context.t -> Relative_path.t -> string -> Nast.fun_ option
+  Provider_context.t -> Relative_path.t -> string -> Nast.fun_def option
 
 val find_typedef_in_file :
   ?full:bool ->

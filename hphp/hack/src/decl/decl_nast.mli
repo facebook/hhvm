@@ -11,7 +11,7 @@ val fun_decl_in_env :
   Decl_env.env -> is_lambda:bool -> Nast.fun_ -> Typing_defs.fun_elt
 
 val fun_naming_and_decl :
-  Provider_context.t -> Nast.fun_ -> string * Typing_defs.fun_elt
+  Provider_context.t -> Nast.fun_def -> string * Typing_defs.fun_elt
 
 val record_def_naming_and_decl :
   Provider_context.t -> Nast.record_def -> string * Typing_defs.record_def_type

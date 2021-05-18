@@ -66,7 +66,7 @@ module Env : sig
 
   val make_top_level_env : Provider_context.t -> genv * lenv
 
-  val make_fun_decl_genv : Provider_context.t -> Nast.fun_ -> genv
+  val make_fun_decl_genv : Provider_context.t -> Nast.fun_def -> genv
 
   val make_file_attributes_env :
     Provider_context.t -> FileInfo.mode -> Aast.nsenv -> genv * lenv
@@ -157,7 +157,11 @@ end = struct
     }
 
   let make_fun_decl_genv ctx f =
-    make_fun_genv ctx f.Aast.f_tparams f.Aast.f_mode f.Aast.f_namespace
+    make_fun_genv
+      ctx
+      f.Aast.fd_fun.Aast.f_tparams
+      f.Aast.fd_mode
+      f.Aast.fd_namespace
 
   let make_const_genv ctx cst =
     {
@@ -1484,15 +1488,30 @@ and extend_tparams genv paraml =
   in
   { genv with type_params = params }
 
-and fun_ ctx f =
-  let genv = Env.make_fun_decl_genv ctx f in
+and fun_def ctx fd =
+  let genv = Env.make_fun_decl_genv ctx fd in
+  let fd =
+    elaborate_namespaces#on_fun_def
+      (Naming_elaborate_namespaces_endo.make_env genv.namespace)
+      fd
+  in
+  let file_attributes =
+    file_attributes ctx fd.Aast.fd_mode fd.Aast.fd_file_attributes
+  in
+  let f = fun_ genv fd.Aast.fd_fun in
+  let named_fun_def =
+    {
+      N.fd_fun = f;
+      fd_mode = fd.Aast.fd_mode;
+      fd_namespace = fd.Aast.fd_namespace;
+      fd_file_attributes = file_attributes;
+    }
+  in
+  named_fun_def
+
+and fun_ genv f =
   let lenv = Env.empty_local None in
   let env = (genv, lenv) in
-  let f =
-    elaborate_namespaces#on_fun_def
-      (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
-      f
-  in
   let where_constraints =
     type_where_constraints env f.Aast.f_where_constraints
   in
@@ -1525,15 +1544,11 @@ and fun_ ctx f =
   in
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
-  let file_attributes =
-    file_attributes ctx f.Aast.f_mode f.Aast.f_file_attributes
-  in
   let named_fun =
     {
       N.f_annotation = ();
       f_readonly_this = f.Aast.f_readonly_this;
       f_span = f.Aast.f_span;
-      f_mode = f.Aast.f_mode;
       f_readonly_ret = f.Aast.f_readonly_ret;
       f_ret = h;
       f_name = f.Aast.f_name;
@@ -1547,9 +1562,7 @@ and fun_ ctx f =
       f_fun_kind = f_kind;
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.Aast.f_user_attributes;
-      f_file_attributes = file_attributes;
       f_external = f.Aast.f_external;
-      f_namespace = f.Aast.f_namespace;
       f_doc_comment = f.Aast.f_doc_comment;
     }
   in
@@ -2259,7 +2272,6 @@ and expr_lambda env f =
     N.f_annotation = ();
     f_readonly_this = f.Aast.f_readonly_this;
     f_span = f.Aast.f_span;
-    f_mode = (fst env).in_mode;
     f_readonly_ret = f.Aast.f_readonly_ret;
     f_ret = h;
     f_name = f.Aast.f_name;
@@ -2271,10 +2283,8 @@ and expr_lambda env f =
     f_body = body;
     f_fun_kind = f.Aast.f_fun_kind;
     f_variadic = variadicity;
-    f_file_attributes = [];
     f_user_attributes = user_attributes env f.Aast.f_user_attributes;
     f_external = f.Aast.f_external;
-    f_namespace = f.Aast.f_namespace;
     f_doc_comment = f.Aast.f_doc_comment;
   }
 
@@ -2475,7 +2485,7 @@ let program ctx ast =
   let top_level_env = ref (Env.make_top_level_env ctx) in
   let rec aux acc def =
     match def with
-    | Aast.Fun f -> N.Fun (fun_ ctx f) :: acc
+    | Aast.Fun f -> N.Fun (fun_def ctx f) :: acc
     | Aast.Class c -> N.Class (class_ ctx c) :: acc
     | Aast.Stmt (_, Aast.Noop)
     | Aast.Stmt (_, Aast.Markup _) ->

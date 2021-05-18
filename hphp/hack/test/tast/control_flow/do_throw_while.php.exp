@@ -1,32 +1,34 @@
 [(Fun
-    { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid)))); 
-      f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:36-41], bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool)))); 
-         param_is_variadic = false; param_pos = [3:36-41]; param_name = "$cond"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-6:19],
-          (Do (
-             [([5:5-40],
-               (Throw
-                  (([5:11-39], Exception),
-                   (New ((([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))), 
-                      [], [(([5:25-38], string), (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-               ],
-             (([6:12-17], nothing), (Lvar ([6:12-17], $cond))))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid)))); 
+        f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:36-41], bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [3:36-41]; param_name = "$cond"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-6:19],
+            (Do (
+               [([5:5-40],
+                 (Throw
+                    (([5:11-39], Exception),
+                     (New ((([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))), 
+                        [], [(([5:25-38], string), (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                 ],
+               (([6:12-17], nothing), (Lvar ([6:12-17], $cond))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

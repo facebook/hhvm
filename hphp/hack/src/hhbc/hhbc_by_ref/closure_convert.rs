@@ -138,8 +138,12 @@ impl<'a> Env<'a> {
         )
     }
 
-    fn with_function(&mut self, fd: &Fun_) -> Result<()> {
-        self.with_function_like(ScopeItem::Function(ast_scope::Fun::new_rc(fd)), false, fd)
+    fn with_function(&mut self, fd: &FunDef) -> Result<()> {
+        self.with_function_like(
+            ScopeItem::Function(ast_scope::Fun::new_rc(fd)),
+            false,
+            &fd.fun,
+        )
     }
 
     fn with_method(&mut self, md: &Method_) -> Result<()> {
@@ -241,7 +245,7 @@ struct State {
     // Closure classes and hoisted inline classes
     hoisted_classes: Vec<Class_>,
     /// Hoisted meth_caller functions
-    named_hoisted_functions: SMap<Fun_>,
+    named_hoisted_functions: SMap<FunDef>,
     // The current namespace environment
     namespace: RcOc<namespace_env::Env>,
     // Empty namespace as constructed by parser
@@ -444,6 +448,7 @@ fn make_closure(
     fun_tparams: Vec<Tparam>,
     class_tparams: Vec<Tparam>,
     is_static: bool,
+    mode: Mode,
     mut fd: Fun_,
 ) -> (Fun_, Class_) {
     let md = Method_ {
@@ -493,7 +498,7 @@ fn make_closure(
     let cd = Class_ {
         span: p.clone(),
         annotation: fd.annotation,
-        mode: fd.mode,
+        mode,
         user_attributes: vec![],
         file_attributes: vec![],
         final_: false,
@@ -737,6 +742,7 @@ fn convert_lambda<'a>(
         fun_tparams,
         class_tparams,
         is_static,
+        get_scope_fmode(&env.scope),
         fd,
     );
 
@@ -800,6 +806,17 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
         user_attributes: vec![],
         visibility: None,
     }
+}
+
+fn get_scope_fmode(scope: &Scope) -> Mode {
+    scope
+        .iter()
+        .find_map(|item| match item {
+            ScopeItem::Class(cd) => Some(cd.get_mode()),
+            ScopeItem::Function(fd) => Some(fd.get_mode()),
+            _ => None,
+        })
+        .unwrap_or(Mode::Mstrict)
 }
 
 fn convert_meth_caller_to_func_ptr(
@@ -889,11 +906,10 @@ fn convert_meth_caller_to_func_ptr(
         ),
     );
 
-    let fd = Fun_ {
+    let f = Fun_ {
         span: pos(),
         annotation: dummy_saved_env,
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
-        mode: get_scope_fmode(&env.scope),
         readonly_ret: None,
         ret: TypeHint((), None),
         name: Id(pos(), mangle_name.clone()),
@@ -918,33 +934,20 @@ fn convert_meth_caller_to_func_ptr(
             name: Id(pos(), "__MethCaller".into()),
             params: vec![Expr(pos(), Expr_::String(cname.into()))],
         }],
-        file_attributes: vec![],
         external: false,
-        namespace: RcOc::clone(&st.state.empty_namespace),
         doc_comment: None,
+    };
+    let fd = FunDef {
+        file_attributes: vec![],
+        namespace: RcOc::clone(&st.state.empty_namespace),
+        mode: get_scope_fmode(&env.scope),
+        fun: f,
     };
     st.state.named_hoisted_functions.insert(mangle_name, fd);
     fun_handle
 }
 
-fn make_dyn_meth_caller_lambda(
-    env: &Env,
-    st: &mut ClosureConvertVisitor,
-    pos: &Pos,
-    cexpr: &Expr,
-    fexpr: &Expr,
-    force: bool,
-) -> Expr_ {
-    fn get_scope_fmode(scope: &Scope) -> Mode {
-        scope
-            .iter()
-            .find_map(|item| match item {
-                ScopeItem::Class(cd) => Some(cd.get_mode()),
-                ScopeItem::Function(fd) => Some(fd.get_mode()),
-                _ => None,
-            })
-            .unwrap_or(Mode::Mstrict)
-    }
+fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: bool) -> Expr_ {
     // TODO: Move dummy variable to tasl.rs once it exists.
     let dummy_saved_env = ();
     let pos = || pos.clone();
@@ -985,8 +988,7 @@ fn make_dyn_meth_caller_lambda(
         span: pos(),
         annotation: dummy_saved_env,
         readonly_this: None, // TODO: readonly_this in closure_convert
-        mode: get_scope_fmode(&env.scope),
-        readonly_ret: None, // TODO: readonly_ret in closure convert
+        readonly_ret: None,  // TODO: readonly_ret in closure convert
         ret: TypeHint((), None),
         name: Id(pos(), ";anonymous".to_string()),
         tparams: vec![],
@@ -1005,9 +1007,7 @@ fn make_dyn_meth_caller_lambda(
         },
         fun_kind: FunKind::FSync,
         user_attributes: attrs,
-        file_attributes: vec![],
         external: false,
-        namespace: RcOc::clone(&st.state.empty_namespace),
         doc_comment: None,
     };
     let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
@@ -1126,14 +1126,14 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 let mut env = env.clone();
                 env.with_function(&x)?;
                 self.state.reset_function_counts();
-                let function_state = convert_function_like_body(self, &mut env, &mut x.body)?;
+                let function_state = convert_function_like_body(self, &mut env, &mut x.fun.body)?;
                 self.state.record_function_state(
-                    get_unique_id_for_function(&x.name.1),
+                    get_unique_id_for_function(&x.fun.name.1),
                     function_state,
                     HhasCoeffects::default(),
                 );
-                visit_mut(self, &mut env, &mut x.params)?;
-                visit_mut(self, &mut env, &mut x.user_attributes)
+                visit_mut(self, &mut env, &mut x.fun.params)?;
+                visit_mut(self, &mut env, &mut x.fun.user_attributes)
             }
             _ => def.recurse(env, self.object()),
         }
@@ -1253,8 +1253,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     false
                 };
                 if let [cexpr, fexpr] = &mut *x.2 {
-                    let mut res =
-                        make_dyn_meth_caller_lambda(env, self, &*pos, &cexpr, &fexpr, force);
+                    let mut res = make_dyn_meth_caller_lambda(&*pos, &cexpr, &fexpr, force);
                     res.recurse(env, self.object())?;
                     res
                 } else {
@@ -1651,12 +1650,11 @@ fn extract_debugger_main(
         0..0,
         0,
     );
-    let fd = Fun_ {
+    let f = Fun_ {
         span: pos,
         annotation: (),
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
-        mode: Mode::Mstrict,
-        readonly_ret: None, // TODO(readonly): readonly_ret in closure_convert
+        readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
         ret: TypeHint((), None),
         name: Id(Pos::make_none(), "include".into()),
         tparams: vec![],
@@ -1674,10 +1672,14 @@ fn extract_debugger_main(
             name: Id(Pos::make_none(), "__DebuggerMain".into()),
             params: vec![],
         }],
-        file_attributes: vec![],
         external: false,
-        namespace: RcOc::clone(empty_namespace),
         doc_comment: None,
+    };
+    let fd = FunDef {
+        namespace: RcOc::clone(empty_namespace),
+        file_attributes: vec![],
+        mode: Mode::Mstrict,
+        fun: f,
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

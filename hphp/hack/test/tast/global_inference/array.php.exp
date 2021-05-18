@@ -1,32 +1,34 @@
 [(Fun
-    { f_span = [3:1-11:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid)))); 
-      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([4:3-5], nothing); param_type_hint = ((nothing), None); 
-         param_is_variadic = false; param_pos = [4:3-5]; param_name = "$a"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([5:3-5], nothing); param_type_hint = ((nothing), None); 
-          param_is_variadic = false; param_pos = [5:3-5]; param_name = "$b"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([7:3-10:5],
-          (Expr
-             (([7:3-10:4], dict<string, nothing>),
-              (KeyValCollection (Dict, None,
-                 [((([8:5-8], string), (String "a")), (([8:12-14], nothing), (Lvar ([8:12-14], $a)))); ((([9:5-8], string), (String "b")), (([9:12-14], nothing), (Lvar ([9:12-14], $b))))])))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-11:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid)))); 
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([4:3-5], nothing); param_type_hint = ((nothing), None); 
+           param_is_variadic = false; param_pos = [4:3-5]; param_name = "$a"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([5:3-5], nothing); param_type_hint = ((nothing), None); 
+            param_is_variadic = false; param_pos = [5:3-5]; param_name = "$b"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([7:3-10:5],
+            (Expr
+               (([7:3-10:4], dict<string, nothing>),
+                (KeyValCollection (Dict, None,
+                   [((([8:5-8], string), (String "a")), (([8:12-14], nothing), (Lvar ([8:12-14], $a)))); ((([9:5-8], string), (String "b")), (([9:12-14], nothing), (Lvar ([9:12-14], $b))))])))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

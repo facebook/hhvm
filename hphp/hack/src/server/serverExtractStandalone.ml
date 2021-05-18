@@ -226,9 +226,9 @@ end
 
 (* -- Nast helpers ---------------------------------------------------------- *)
 module Nast_helper : sig
-  val get_fun : Provider_context.t -> string -> Nast.fun_ option
+  val get_fun : Provider_context.t -> string -> Nast.fun_def option
 
-  val get_fun_exn : Provider_context.t -> string -> Nast.fun_
+  val get_fun_exn : Provider_context.t -> string -> Nast.fun_def
 
   val get_class : Provider_context.t -> string -> Nast.class_ option
 
@@ -278,7 +278,7 @@ end = struct
     make_nast_getter
       ~get_pos:Decl.get_fun_pos
       ~find_in_file:Ast_provider.find_fun_in_file
-      ~naming:Naming.fun_
+      ~naming:Naming.fun_def
 
   let get_fun_exn ctx name = value_or_not_found name (get_fun ctx name)
 
@@ -445,7 +445,8 @@ end = struct
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
 
   let get_fun_mode ctx name =
-    Nast_helper.get_fun ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
+    Nast_helper.get_fun ctx name
+    |> Option.map ~f:(fun fun_ -> fun_.Aast.fd_mode)
 
   let get_class_mode ctx name =
     Nast_helper.get_class ctx name
@@ -561,7 +562,7 @@ end = struct
         match target with
         | Function name ->
           let fun_ = Nast_helper.get_fun_exn ctx name in
-          fun_.Aast.f_span
+          fun_.Aast.fd_fun.Aast.f_span
         | Method (class_name, method_name) ->
           let method_ = Nast_helper.get_method_exn ctx class_name method_name in
           method_.Aast.m_span)
@@ -874,12 +875,16 @@ end = struct
     List.iter params ~f:(add_fun_param_attr_deps ctx env);
     List.iter tparams ~f:(add_tparam_attr_deps ctx env)
 
-  and add_fun_attr_deps
-      ctx
-      env
-      Aast.
-        { f_user_attributes = attrs; f_params = params; f_tparams = tparams; _ }
-      =
+  and add_fun_attr_deps ctx env fd =
+    let Aast.
+          {
+            f_user_attributes = attrs;
+            f_params = params;
+            f_tparams = tparams;
+            _;
+          } =
+      fd.Aast.fd_fun
+    in
     add_arg_attr_deps ctx env (attrs, params, tparams)
 
   and add_method_attr_deps
@@ -1900,7 +1905,7 @@ end = struct
 
     val mk_gconst : Provider_context.t -> Nast.gconst -> t
 
-    val mk_gfun : Nast.fun_ -> t
+    val mk_gfun : Nast.fun_def -> t
 
     val mk_tydef : Nast.typedef -> t
 
@@ -1924,7 +1929,7 @@ end = struct
           init_val: string;
         }
       | STydef of string * int * int list * Nast.typedef
-      | SGFun of string * int * Nast.fun_
+      | SGFun of string * int * Nast.fun_def
       | SGTargetFun of string * int * SourceText.t
 
     let mk_target_fun ctx (fun_name, target) =
@@ -1960,7 +1965,8 @@ end = struct
       let init_val = init_value ctx type_ in
       SGConst { name; line = Pos.line pos; type_; init_val }
 
-    let mk_gfun (Aast.{ f_name = (pos, name); _ } as ast) =
+    let mk_gfun ast =
+      let Aast.{ f_name = (pos, name); _ } = ast.Aast.fd_fun in
       SGFun (name, Pos.line pos, ast)
 
     let mk_tydef (Aast.{ t_name = (pos, name); _ } as ast) =
@@ -1989,10 +1995,8 @@ end = struct
 
     (* -- Global functions -------------------------------------------------- *)
 
-    let pp_fun
-        ppf
-        ( name,
-          Aast.
+    let pp_fun ppf (name, fd) =
+      let Aast.
             {
               f_user_attributes;
               f_tparams;
@@ -2001,7 +2005,9 @@ end = struct
               f_ret;
               f_ctxs;
               _;
-            } ) =
+            } =
+        fd.Aast.fd_fun
+      in
       Fmt.(
         pf
           ppf

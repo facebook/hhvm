@@ -17,47 +17,49 @@ File "switch_fallthrough.php", line 33, characters 7-17:
 File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
 [(Fun
-    { f_span = [3:1-38:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid)))); 
-      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([5:3-10], (Expr (([5:3-9], int), (Binop ((Eq None), (([5:3-5], int), (Lvar ([5:3-5], $x))), (([5:8-9], int), (Int "0")))))));
-          ([6:3-15], (Expr (([6:3-14], void), (Call ((([6:3-10], _), (Id ([6:3-10], "\\hh_show"))), [], [(([6:11-13], int), (Lvar ([6:11-13], $x)))], None)))));
-          ([7:3-35:4],
-           (Switch ((([7:11-13], int), (Lvar ([7:11-13], $x))),
-              [(Case ((([8:10-11], int), (Int "0")), []));
-                (Case ((([10:10-11], int), (Int "1")),
-                   [([12:7-19], (Expr (([12:7-18], void), (Call ((([12:7-14], _), (Id ([12:7-14], "\\hh_show"))), [], [(([12:15-17], int), (Lvar ([12:15-17], $x)))], None)))));
-                     ([14:7-15], (Expr (([14:7-14], string), (Binop ((Eq None), (([14:7-9], string), (Lvar ([14:7-9], $x))), (([14:12-14], string), (String "")))))));
-                     ([15:7-19], (Expr (([15:7-18], void), (Call ((([15:7-14], _), (Id ([15:7-14], "\\hh_show"))), [], [(([15:15-17], string), (Lvar ([15:15-17], $x)))], None)))));
-                     ([Pos.none], Fallthrough)]
-                   ));
-                (Case ((([17:10-11], int), (Int "3")),
-                   [([19:7-19], (Expr (([19:7-18], void), (Call ((([19:7-14], _), (Id ([19:7-14], "\\hh_show"))), [], [(([19:15-17], (int | string)), (Lvar ([19:15-17], $x)))], None)))));
-                     ([20:7-17], (Expr (([20:7-16], bool), (Binop ((Eq None), (([20:7-9], bool), (Lvar ([20:7-9], $x))), (([20:12-16], bool), True))))));
-                     ([22:7-19], (Expr (([22:7-18], void), (Call ((([22:7-14], _), (Id ([22:7-14], "\\hh_show"))), [], [(([22:15-17], bool), (Lvar ([22:15-17], $x)))], None)))));
-                     ([Pos.none], Fallthrough)]
-                   ));
-                (Case ((([24:10-11], int), (Int "4")),
-                   [([26:7-19], (Expr (([26:7-18], void), (Call ((([26:7-14], _), (Id ([26:7-14], "\\hh_show"))), [], [(([26:15-17], (int | bool)), (Lvar ([26:15-17], $x)))], None)))));
-                     ([27:7-13], Break)]
-                   ));
-                (Case ((([28:10-11], int), (Int "4")),
-                   [([30:7-19], (Expr (([30:7-18], void), (Call ((([30:7-14], _), (Id ([30:7-14], "\\hh_show"))), [], [(([30:15-17], int), (Lvar ([30:15-17], $x)))], None)))));
-                     ([32:7-16], (Expr (([32:7-15], float), (Binop ((Eq None), (([32:7-9], float), (Lvar ([32:7-9], $x))), (([32:12-15], float), (Float "1.0")))))));
-                     ([33:7-19], (Expr (([33:7-18], void), (Call ((([33:7-14], _), (Id ([33:7-14], "\\hh_show"))), [], [(([33:15-17], float), (Lvar ([33:15-17], $x)))], None))))); (
-                     [34:7-13], Break)]
-                   ))
-                ]
-              )));
-          ([37:3-15], (Expr (([37:3-14], void), (Call ((([37:3-10], _), (Id ([37:3-10], "\\hh_show"))), [], [(([37:11-13], (bool | num)), (Lvar ([37:11-13], $x)))], None)))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-38:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid)))); 
+        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-10], (Expr (([5:3-9], int), (Binop ((Eq None), (([5:3-5], int), (Lvar ([5:3-5], $x))), (([5:8-9], int), (Int "0")))))));
+            ([6:3-15], (Expr (([6:3-14], void), (Call ((([6:3-10], _), (Id ([6:3-10], "\\hh_show"))), [], [(([6:11-13], int), (Lvar ([6:11-13], $x)))], None)))));
+            ([7:3-35:4],
+             (Switch ((([7:11-13], int), (Lvar ([7:11-13], $x))),
+                [(Case ((([8:10-11], int), (Int "0")), []));
+                  (Case ((([10:10-11], int), (Int "1")),
+                     [([12:7-19], (Expr (([12:7-18], void), (Call ((([12:7-14], _), (Id ([12:7-14], "\\hh_show"))), [], [(([12:15-17], int), (Lvar ([12:15-17], $x)))], None)))));
+                       ([14:7-15], (Expr (([14:7-14], string), (Binop ((Eq None), (([14:7-9], string), (Lvar ([14:7-9], $x))), (([14:12-14], string), (String "")))))));
+                       ([15:7-19], (Expr (([15:7-18], void), (Call ((([15:7-14], _), (Id ([15:7-14], "\\hh_show"))), [], [(([15:15-17], string), (Lvar ([15:15-17], $x)))], None)))));
+                       ([Pos.none], Fallthrough)]
+                     ));
+                  (Case ((([17:10-11], int), (Int "3")),
+                     [([19:7-19], (Expr (([19:7-18], void), (Call ((([19:7-14], _), (Id ([19:7-14], "\\hh_show"))), [], [(([19:15-17], (int | string)), (Lvar ([19:15-17], $x)))], None)))));
+                       ([20:7-17], (Expr (([20:7-16], bool), (Binop ((Eq None), (([20:7-9], bool), (Lvar ([20:7-9], $x))), (([20:12-16], bool), True))))));
+                       ([22:7-19], (Expr (([22:7-18], void), (Call ((([22:7-14], _), (Id ([22:7-14], "\\hh_show"))), [], [(([22:15-17], bool), (Lvar ([22:15-17], $x)))], None)))));
+                       ([Pos.none], Fallthrough)]
+                     ));
+                  (Case ((([24:10-11], int), (Int "4")),
+                     [([26:7-19], (Expr (([26:7-18], void), (Call ((([26:7-14], _), (Id ([26:7-14], "\\hh_show"))), [], [(([26:15-17], (int | bool)), (Lvar ([26:15-17], $x)))], None)))));
+                       ([27:7-13], Break)]
+                     ));
+                  (Case ((([28:10-11], int), (Int "4")),
+                     [([30:7-19], (Expr (([30:7-18], void), (Call ((([30:7-14], _), (Id ([30:7-14], "\\hh_show"))), [], [(([30:15-17], int), (Lvar ([30:15-17], $x)))], None)))));
+                       ([32:7-16], (Expr (([32:7-15], float), (Binop ((Eq None), (([32:7-9], float), (Lvar ([32:7-9], $x))), (([32:12-15], float), (Float "1.0")))))));
+                       ([33:7-19], (Expr (([33:7-18], void), (Call ((([33:7-14], _), (Id ([33:7-14], "\\hh_show"))), [], [(([33:15-17], float), (Lvar ([33:15-17], $x)))], None)))));
+                       ([34:7-13], Break)]
+                     ))
+                  ]
+                )));
+            ([37:3-15], (Expr (([37:3-14], void), (Call ((([37:3-10], _), (Id ([37:3-10], "\\hh_show"))), [], [(([37:11-13], (bool | num)), (Lvar ([37:11-13], $x)))], None)))))];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

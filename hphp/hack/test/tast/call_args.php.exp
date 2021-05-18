@@ -1,35 +1,39 @@
 [(Fun
-    { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); f_mode = Mpartial; 
-      f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
-      f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:30-32], string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
-         param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
+        f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:30-32], string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
+           param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([5:15-19], (Hprim Tvoid)))); 
-       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast = [([6:3-25], (Expr (([6:3-24], void), (Call ((([6:3-15], (function(string $s): void)), (Id ([6:3-15], "\\takes_string"))), [], [(([6:16-23], string), (String "hello"))], None)))))];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:15-19], (Hprim Tvoid)))); 
+         f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast = [([6:3-25], (Expr (([6:3-24], void), (Call ((([6:3-15], (function(string $s): void)), (Id ([6:3-15], "\\takes_string"))), [], [(([6:16-23], string), (String "hello"))], None)))))];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

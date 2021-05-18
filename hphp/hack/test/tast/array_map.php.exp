@@ -1,122 +1,124 @@
 [(Fun
-    { f_span = [3:1-19:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
-      f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([4:25-27], (function(int): bool));
-         param_type_hint =
-         (((function(int): bool)),
-          (Some ([4:3-24],
-                 (Hfun
-                    { hf_is_readonly = None; hf_param_tys = [([4:13-16], (Hprim Tint))]; 
-                      hf_param_info = [None]; hf_variadic_ty = None; 
-                      hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
-                      hf_is_readonly_return = None }))));
-         param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([5:33-35], (function(int, string): bool));
-          param_type_hint =
-          (((function(int, string): bool)),
-           (Some ([5:3-32],
-                  (Hfun
-                     { hf_is_readonly = None; hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))]; 
-                       hf_param_info = [None; None]; hf_variadic_ty = None; 
-                       hf_ctxs = None; hf_return_ty = ([5:27-31], (Hprim Tbool)); 
-                       hf_is_readonly_return = None }))));
-          param_is_variadic = false; param_pos = [5:33-35]; param_name = "$g"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([6:48-50], (function(int, string, num): Container<int>));
-          param_type_hint =
-          (((function(int, string, num): Container<int>)),
-           (Some ([6:3-47],
-                  (Hfun
-                     { hf_is_readonly = None; hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))]; 
-                       hf_param_info = [None; None; None]; hf_variadic_ty = None; 
-                       hf_ctxs = None; hf_return_ty = ([6:32-46], (Happly (([6:32-41], "\\HH\\Container"), [([6:42-45], (Hprim Tint))]))); 
-                       hf_is_readonly_return = None }))));
-          param_is_variadic = false; param_pos = [6:48-50]; param_name = "$h"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([7:25-27], (function(num): bool));
-          param_type_hint =
-          (((function(num): bool)),
-           (Some ([7:3-24],
-                  (Hfun
-                     { hf_is_readonly = None; hf_param_tys = [([7:13-16], (Hprim Tnum))]; 
-                       hf_param_info = [None]; hf_variadic_ty = None; 
-                       hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
-                       hf_is_readonly_return = None }))));
-          param_is_variadic = false; param_pos = [7:25-27]; param_name = "$i"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([8:18-21], Container<int>); param_type_hint = ((Container<int>), (Some ([8:3-17], (Happly (([8:3-12], "\\HH\\Container"), [([8:13-16], (Hprim Tint))])))));
-          param_is_variadic = false; param_pos = [8:18-21]; param_name = "$ci"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([9:21-24], Container<string>); param_type_hint = ((Container<string>), (Some ([9:3-20], (Happly (([9:3-12], "\\HH\\Container"), [([9:13-19], (Hprim Tstring))])))));
-          param_is_variadic = false; param_pos = [9:21-24]; param_name = "$cs"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([10:28-31], KeyedContainer<int, num>);
-          param_type_hint = ((KeyedContainer<int, num>), (Some ([10:3-27], (Happly (([10:3-17], "\\HH\\KeyedContainer"), [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))])))));
-          param_is_variadic = false; param_pos = [10:28-31]; param_name = "$cn"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([11:8-10], bool); param_type_hint = ((bool), (Some ([11:3-7], (Hprim Tbool)))); 
-          param_is_variadic = false; param_pos = [11:8-10]; param_name = "$b"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([13:3-32],
-          (Expr
-             (([13:3-31], (Container<int> | KeyedContainer<int, num>)),
-              (Binop ((Eq None), (([13:3-14], (Container<int> | KeyedContainer<int, num>)), (Lvar ([13:3-14], $unresolved))),
-                 (([13:17-31], (Container<int> | KeyedContainer<int, num>)),
-                  (Eif ((([13:17-19], bool), (Lvar ([13:17-19], $b))), (Some (
-                     ([13:22-25], Container<int>), (Lvar ([13:22-25], $ci)))), (
-                     ([13:28-31], KeyedContainer<int, num>), (Lvar ([13:28-31], $cn))))))
-                 )))));
-          ([15:3-22],
-           (Expr
-              (([15:3-21], dict<arraykey, _>),
-               (Call ((([15:3-12], (function($callback, $arr1, ...): dict<arraykey, _>)), (Id ([15:3-12], "\\array_map"))), 
-                  [], [(([15:13-15], (function(int): bool)), (Lvar ([15:13-15], $f))); (([15:17-20], Container<int>), (Lvar ([15:17-20], $ci)))], None)))));
-          ([16:3-27],
-           (Expr
-              (([16:3-26], _),
-               (Call ((([16:3-12], (function($callback, $arr1, ...): _)), (Id ([16:3-12], "\\array_map"))), 
-                  [],
-                  [(([16:13-15], (function(int, string): bool)), (Lvar ([16:13-15], $g))); (
-                    ([16:17-20], Container<int>), (Lvar ([16:17-20], $ci))); (
-                    ([16:22-25], Container<string>), (Lvar ([16:22-25], $cs)))],
-                  None)))));
-          ([17:3-32],
-           (Expr
-              (([17:3-31], _),
-               (Call ((([17:3-12], (function($callback, $arr1, ...): _)), (Id ([17:3-12], "\\array_map"))), 
-                  [],
-                  [(([17:13-15], (function(int, string, num): Container<int>)), (Lvar ([17:13-15], $h))); (
-                    ([17:17-20], Container<int>), (Lvar ([17:17-20], $ci))); (
-                    ([17:22-25], Container<string>), (Lvar ([17:22-25], $cs))); (
-                    ([17:27-30], KeyedContainer<int, num>), (Lvar ([17:27-30], $cn)))],
-                  None)))));
-          ([18:3-30],
-           (Expr
-              (([18:3-29], dict<arraykey, _>),
-               (Call ((([18:3-12], (function($callback, $arr1, ...): dict<arraykey, _>)), (Id ([18:3-12], "\\array_map"))), 
-                  [], [(([18:13-15], (function(num): bool)), (Lvar ([18:13-15], $i))); (([18:17-28], (Container<int> | KeyedContainer<int, num>)), (Lvar ([18:17-28], $unresolved)))], None)))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-19:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
+        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([4:25-27], (function(int): bool));
+           param_type_hint =
+           (((function(int): bool)),
+            (Some ([4:3-24],
+                   (Hfun
+                      { hf_is_readonly = None; hf_param_tys = [([4:13-16], (Hprim Tint))]; 
+                        hf_param_info = [None]; hf_variadic_ty = None; 
+                        hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
+                        hf_is_readonly_return = None }))));
+           param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([5:33-35], (function(int, string): bool));
+            param_type_hint =
+            (((function(int, string): bool)),
+             (Some ([5:3-32],
+                    (Hfun
+                       { hf_is_readonly = None; hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))]; 
+                         hf_param_info = [None; None]; hf_variadic_ty = None; 
+                         hf_ctxs = None; hf_return_ty = ([5:27-31], (Hprim Tbool)); 
+                         hf_is_readonly_return = None }))));
+            param_is_variadic = false; param_pos = [5:33-35]; param_name = "$g"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([6:48-50], (function(int, string, num): Container<int>));
+            param_type_hint =
+            (((function(int, string, num): Container<int>)),
+             (Some ([6:3-47],
+                    (Hfun
+                       { hf_is_readonly = None; hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))]; 
+                         hf_param_info = [None; None; None]; hf_variadic_ty = None; 
+                         hf_ctxs = None; hf_return_ty = ([6:32-46], (Happly (([6:32-41], "\\HH\\Container"), [([6:42-45], (Hprim Tint))]))); 
+                         hf_is_readonly_return = None }))));
+            param_is_variadic = false; param_pos = [6:48-50]; param_name = "$h"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([7:25-27], (function(num): bool));
+            param_type_hint =
+            (((function(num): bool)),
+             (Some ([7:3-24],
+                    (Hfun
+                       { hf_is_readonly = None; hf_param_tys = [([7:13-16], (Hprim Tnum))]; 
+                         hf_param_info = [None]; hf_variadic_ty = None; 
+                         hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
+                         hf_is_readonly_return = None }))));
+            param_is_variadic = false; param_pos = [7:25-27]; param_name = "$i"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([8:18-21], Container<int>); param_type_hint = ((Container<int>), (Some ([8:3-17], (Happly (([8:3-12], "\\HH\\Container"), [([8:13-16], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [8:18-21]; param_name = "$ci"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([9:21-24], Container<string>); param_type_hint = ((Container<string>), (Some ([9:3-20], (Happly (([9:3-12], "\\HH\\Container"), [([9:13-19], (Hprim Tstring))])))));
+            param_is_variadic = false; param_pos = [9:21-24]; param_name = "$cs"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([10:28-31], KeyedContainer<int, num>);
+            param_type_hint = ((KeyedContainer<int, num>), (Some ([10:3-27], (Happly (([10:3-17], "\\HH\\KeyedContainer"), [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))])))));
+            param_is_variadic = false; param_pos = [10:28-31]; param_name = "$cn"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([11:8-10], bool); param_type_hint = ((bool), (Some ([11:3-7], (Hprim Tbool)))); 
+            param_is_variadic = false; param_pos = [11:8-10]; param_name = "$b"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([13:3-32],
+            (Expr
+               (([13:3-31], (Container<int> | KeyedContainer<int, num>)),
+                (Binop ((Eq None), (([13:3-14], (Container<int> | KeyedContainer<int, num>)), (Lvar ([13:3-14], $unresolved))),
+                   (([13:17-31], (Container<int> | KeyedContainer<int, num>)),
+                    (Eif ((([13:17-19], bool), (Lvar ([13:17-19], $b))), (Some (
+                       ([13:22-25], Container<int>), (Lvar ([13:22-25], $ci)))), (
+                       ([13:28-31], KeyedContainer<int, num>), (Lvar ([13:28-31], $cn))))))
+                   )))));
+            ([15:3-22],
+             (Expr
+                (([15:3-21], dict<arraykey, _>),
+                 (Call ((([15:3-12], (function($callback, $arr1, ...): dict<arraykey, _>)), (Id ([15:3-12], "\\array_map"))), 
+                    [], [(([15:13-15], (function(int): bool)), (Lvar ([15:13-15], $f))); (([15:17-20], Container<int>), (Lvar ([15:17-20], $ci)))], None)))));
+            ([16:3-27],
+             (Expr
+                (([16:3-26], _),
+                 (Call ((([16:3-12], (function($callback, $arr1, ...): _)), (Id ([16:3-12], "\\array_map"))), 
+                    [],
+                    [(([16:13-15], (function(int, string): bool)), (Lvar ([16:13-15], $g))); (
+                      ([16:17-20], Container<int>), (Lvar ([16:17-20], $ci))); (
+                      ([16:22-25], Container<string>), (Lvar ([16:22-25], $cs)))],
+                    None)))));
+            ([17:3-32],
+             (Expr
+                (([17:3-31], _),
+                 (Call ((([17:3-12], (function($callback, $arr1, ...): _)), (Id ([17:3-12], "\\array_map"))), 
+                    [],
+                    [(([17:13-15], (function(int, string, num): Container<int>)), (Lvar ([17:13-15], $h))); (
+                      ([17:17-20], Container<int>), (Lvar ([17:17-20], $ci))); (
+                      ([17:22-25], Container<string>), (Lvar ([17:22-25], $cs))); (
+                      ([17:27-30], KeyedContainer<int, num>), (Lvar ([17:27-30], $cn)))],
+                    None)))));
+            ([18:3-30],
+             (Expr
+                (([18:3-29], dict<arraykey, _>),
+                 (Call ((([18:3-12], (function($callback, $arr1, ...): dict<arraykey, _>)), (Id ([18:3-12], "\\array_map"))), 
+                    [], [(([18:13-15], (function(num): bool)), (Lvar ([18:13-15], $i))); (([18:17-28], (Container<int> | KeyedContainer<int, num>)), (Lvar ([18:17-28], $unresolved)))], None)))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

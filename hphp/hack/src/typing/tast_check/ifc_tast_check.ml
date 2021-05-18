@@ -89,18 +89,18 @@ let handle_method
       |> check_errors_from_callable_result)
 
 (* Run IFC on a single toplevel function, catching exceptions *)
-let handle_fun
-    (ctx : Provider_context.t)
-    ({
-       f_name = (_, name);
-       f_annotation = saved_env;
-       f_params = params;
-       f_body = body;
-       f_ret = (return, _);
-       f_span = pos;
-       _;
-     } :
-      Tast.fun_) =
+let handle_fun (ctx : Provider_context.t) (fd : Tast.fun_def) =
+  let {
+    f_name = (_, name);
+    f_annotation = saved_env;
+    f_params = params;
+    f_body = body;
+    f_ret = (return, _);
+    f_span = pos;
+    _;
+  } =
+    fd.fd_fun
+  in
   catch_ifc_internal_errors pos (fun () ->
       Ifc.analyse_callable
         ~opts:options

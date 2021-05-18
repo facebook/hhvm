@@ -3,20 +3,22 @@ Errors:
   [5:3-10] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
   [5:7-8] Erased generics can only be used in type hints because they do not exist at runtime.
 [(Fun
-    { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
-      f_name = ([4:10-11], "\\f"); f_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([5:3-11], (Expr (([5:3-10], T), (New ((([5:7-8], T), (CI ([5:7-8], "T"))), [], [], None, ([5:7-8], _))))));
-          ([6:3-11], (Expr (([6:3-10], object), (New ((([6:7-8], _), (CI ([6:7-8], "\\U"))), [], [], None, ([6:7-8], _))))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
+        f_name = ([4:10-11], "\\f"); f_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-11], (Expr (([5:3-10], T), (New ((([5:7-8], T), (CI ([5:7-8], "T"))), [], [], None, ([5:7-8], _))))));
+            ([6:3-11], (Expr (([6:3-10], object), (New ((([6:7-8], _), (CI ([6:7-8], "\\U"))), [], [], None, ([6:7-8], _))))))];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

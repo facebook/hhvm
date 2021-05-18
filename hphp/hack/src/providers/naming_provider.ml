@@ -228,9 +228,9 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
       ~is_symbol:(fun symbol_name ->
         String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
+  let canon_name fd = snd fd.Aast.fd_fun.Aast.f_name in
   let compute_symbol_canon_name path =
-    Ast_provider.find_ifun_in_file ctx path name
-    >>| fun { Aast.f_name = (_, canon_name); _ } -> canon_name
+    Ast_provider.find_ifun_in_file ctx path name >>| canon_name
   in
 
   match symbol_opt with
@@ -575,7 +575,7 @@ let get_fun_full_pos ctx (pos, name) =
                decl.Typing_defs.fe_pos |> resolve_position ctx)
       | _ ->
         Ast_provider.find_fun_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.f_name)
+        |> Option.map ~f:(fun fd -> fst fd.Aast.fd_fun.Aast.f_name)
     end
   | _ -> None
 

@@ -1,20 +1,23 @@
 [(Fun
-    { f_span = [3:1-11:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((bool), (Some ([3:30-34], (Hprim Tbool)))); 
-      f_name = ([3:10-27], "\\return_refinement"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-10], (Expr (([4:3-9], int), (Binop ((Eq None), (([4:3-5], int), (Lvar ([4:3-5], $x))), (([4:8-9], int), (Int "3")))))));
-          ([5:3-10:4],
-           (If ((([5:6-10], bool), True), [([7:5-15], (Return (Some (([7:12-14], int), (Hole ((([7:12-14], int), (Lvar ([7:12-14], $x))), (int), (bool), Typing))))))],
-              [([9:5-15], (Return (Some (([9:12-14], nothing), (Lvar ([9:12-14], $x))))))])))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-11:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((bool), (Some ([3:30-34], (Hprim Tbool)))); 
+        f_name = ([3:10-27], "\\return_refinement"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-10], (Expr (([4:3-9], int), (Binop ((Eq None), (([4:3-5], int), (Lvar ([4:3-5], $x))), (([4:8-9], int), (Int "3")))))));
+            ([5:3-10:4],
+             (If ((([5:6-10], bool), True), [([7:5-15], (Return (Some (([7:12-14], int), (Hole ((([7:12-14], int), (Lvar ([7:12-14], $x))), (int), (bool), Typing))))))],
+                [([9:5-15], (Return (Some (([9:12-14], nothing), (Lvar ([9:12-14], $x))))))])))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

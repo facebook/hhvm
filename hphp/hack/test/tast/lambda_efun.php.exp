@@ -1,137 +1,121 @@
 Errors:
   [20:4-21:1] A semicolon `;` is expected here.
 [(Fun
-    { f_span = [12:1-25:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
-      f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([13:3-10], (Expr (([13:3-9], int), (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $y))), (([13:8-9], int), (Int "2")))))));
-          ([15:3-23],
-           (Expr
-              (([15:3-22], (function(num $z): int)),
-               (Binop ((Eq None), (([15:3-5], (function(num $z): int)), (Lvar ([15:3-5], $x))),
-                  (([15:8-22], (function(num $z): int)),
-                   (Lfun (
-                      { f_span = [15:8-22]; f_readonly_this = None; f_annotation = (); 
-                        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), None); 
-                        f_name = ([15:8-22], ";anonymous"); f_tparams = []; 
-                        f_where_constraints = []; f_variadic = FVnonVariadic;
-                        f_params =
-                        [{ param_annotation = ([15:8-10], num); param_type_hint = ((num), None); 
-                           param_is_variadic = false; param_pos = [15:8-10]; 
-                           param_name = "$z"; param_expr = None; param_readonly = None; 
-                           param_callconv = None; param_user_attributes = []; 
-                           param_visibility = None }
-                          ];
-                        f_ctxs = None; f_unsafe_ctxs = None;
-                        f_body =
-                        { fb_ast = [([15:15-22], (Return (Some (([15:15-22], int), (Binop (Plus, (([15:15-17], int), (Lvar ([15:15-17], $y))), (([15:20-22], num), (Lvar ([15:20-22], $z)))))))))];
-                          fb_annotation = () };
-                        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-                        f_external = false;
-                        f_namespace =
-                        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
-                          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None },
-                      [([15:15-17], $y)])))
-                  )))));
-          ([16:3-14],
-           (Expr
-              (([16:3-13], int),
-               (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
-                  (([16:8-13], int), (Call ((([16:8-10], (function(num $z): int)), (Lvar ([16:8-10], $x))), [], [(([16:11-12], int), (Int "2"))], None))))))));
-          ([18:3-20:4],
-           (Expr
-              (([18:3-20:4], (function(num $z): int)),
-               (Binop ((Eq None), (([18:3-5], (function(num $z): int)), (Lvar ([18:3-5], $x))),
-                  (([18:8-20:4], (function(num $z): int)),
-                   (Efun (
-                      { f_span = [18:8-20:4]; f_readonly_this = None; 
-                        f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
-                        f_ret = ((int), None); f_name = ([18:8-20:4], ";anonymous"); 
-                        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-                        f_params =
-                        [{ param_annotation = ([18:17-19], num); param_type_hint = ((num), None); 
-                           param_is_variadic = false; param_pos = [18:17-19]; 
-                           param_name = "$z"; param_expr = None; param_readonly = None; 
-                           param_callconv = None; param_user_attributes = []; 
-                           param_visibility = None }
-                          ];
-                        f_ctxs = None; f_unsafe_ctxs = None;
-                        f_body =
-                        { fb_ast = [([19:5-20], (Return (Some (([19:12-19], int), (Binop (Plus, (([19:12-14], int), (Lvar ([19:12-14], $y))), (([19:17-19], num), (Lvar ([19:17-19], $z)))))))))];
-                          fb_annotation = () };
-                        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-                        f_external = false;
-                        f_namespace =
-                        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
-                          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None },
-                      [([18:26-28], $y)])))
-                  )))));
-          ([21:3-14],
-           (Expr
-              (([21:3-13], int),
-               (Binop ((Eq None), (([21:3-5], int), (Lvar ([21:3-5], $l))),
-                  (([21:8-13], int), (Call ((([21:8-10], (function(num $z): int)), (Lvar ([21:8-10], $x))), [], [(([21:11-12], int), (Int "2"))], None))))))));
-          ([23:3-29],
-           (Expr
-              (([23:3-28], (function(int $a, int $b): int)),
-               (Binop ((Eq None), (([23:3-5], (function(int $a, int $b): int)), (Lvar ([23:3-5], $x))),
-                  (([23:8-28], (function(int $a, int $b): int)),
-                   (Lfun (
-                      { f_span = [23:8-28]; f_readonly_this = None; f_annotation = (); 
-                        f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), None); 
-                        f_name = ([23:8-28], ";anonymous"); f_tparams = []; 
-                        f_where_constraints = []; f_variadic = FVnonVariadic;
-                        f_params =
-                        [{ param_annotation = ([23:9-11], int); param_type_hint = ((int), None); 
-                           param_is_variadic = false; param_pos = [23:9-11]; 
-                           param_name = "$a"; param_expr = None; param_readonly = None; 
-                           param_callconv = None; param_user_attributes = []; 
-                           param_visibility = None };
-                          { param_annotation = ([23:13-15], int); param_type_hint = ((int), None); 
-                            param_is_variadic = false; param_pos = [23:13-15]; 
-                            param_name = "$b"; param_expr = None; param_readonly = None; 
-                            param_callconv = None; param_user_attributes = []; 
-                            param_visibility = None }
-                          ];
-                        f_ctxs = None; f_unsafe_ctxs = None;
-                        f_body =
-                        { fb_ast = [([23:21-28], (Return (Some (([23:21-28], int), (Binop (Plus, (([23:21-23], int), (Lvar ([23:21-23], $a))), (([23:26-28], int), (Lvar ([23:26-28], $b)))))))))];
-                          fb_annotation = () };
-                        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-                        f_external = false;
-                        f_namespace =
-                        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
-                          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None },
-                      [])))
-                  )))));
-          ([24:3-17],
-           (Expr
-              (([24:3-17], int),
-               (Binop ((Eq None), (([24:3-5], int), (Lvar ([24:3-5], $l))),
-                  (([24:8-17], int),
-                   (Call ((([24:8-10], (function(int $a, int $b): int)), (Lvar ([24:8-10], $x))), [], [(([24:11-12], int), (Int "2")); (([24:14-16], int), (Lvar ([24:14-16], $y)))], None)))
-                  )))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment =
-      (Some ([2:1-10:4],
-             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [12:1-25:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
+        f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([13:3-10], (Expr (([13:3-9], int), (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $y))), (([13:8-9], int), (Int "2")))))));
+            ([15:3-23],
+             (Expr
+                (([15:3-22], (function(num $z): int)),
+                 (Binop ((Eq None), (([15:3-5], (function(num $z): int)), (Lvar ([15:3-5], $x))),
+                    (([15:8-22], (function(num $z): int)),
+                     (Lfun (
+                        { f_span = [15:8-22]; f_readonly_this = None; 
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None); 
+                          f_name = ([15:8-22], ";anonymous"); f_tparams = []; 
+                          f_where_constraints = []; f_variadic = FVnonVariadic;
+                          f_params =
+                          [{ param_annotation = ([15:8-10], num); param_type_hint = ((num), None); 
+                             param_is_variadic = false; param_pos = [15:8-10]; 
+                             param_name = "$z"; param_expr = None; param_readonly = None; 
+                             param_callconv = None; param_user_attributes = []; 
+                             param_visibility = None }
+                            ];
+                          f_ctxs = None; f_unsafe_ctxs = None;
+                          f_body =
+                          { fb_ast = [([15:15-22], (Return (Some (([15:15-22], int), (Binop (Plus, (([15:15-17], int), (Lvar ([15:15-17], $y))), (([15:20-22], num), (Lvar ([15:20-22], $z)))))))))];
+                            fb_annotation = () };
+                          f_fun_kind = FSync; f_user_attributes = []; 
+                          f_external = false; f_doc_comment = None },
+                        [([15:15-17], $y)])))
+                    )))));
+            ([16:3-14],
+             (Expr
+                (([16:3-13], int),
+                 (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
+                    (([16:8-13], int), (Call ((([16:8-10], (function(num $z): int)), (Lvar ([16:8-10], $x))), [], [(([16:11-12], int), (Int "2"))], None))))))));
+            ([18:3-20:4],
+             (Expr
+                (([18:3-20:4], (function(num $z): int)),
+                 (Binop ((Eq None), (([18:3-5], (function(num $z): int)), (Lvar ([18:3-5], $x))),
+                    (([18:8-20:4], (function(num $z): int)),
+                     (Efun (
+                        { f_span = [18:8-20:4]; f_readonly_this = None; 
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None); 
+                          f_name = ([18:8-20:4], ";anonymous"); f_tparams = []; 
+                          f_where_constraints = []; f_variadic = FVnonVariadic;
+                          f_params =
+                          [{ param_annotation = ([18:17-19], num); param_type_hint = ((num), None); 
+                             param_is_variadic = false; param_pos = [18:17-19]; 
+                             param_name = "$z"; param_expr = None; param_readonly = None; 
+                             param_callconv = None; param_user_attributes = []; 
+                             param_visibility = None }
+                            ];
+                          f_ctxs = None; f_unsafe_ctxs = None;
+                          f_body =
+                          { fb_ast = [([19:5-20], (Return (Some (([19:12-19], int), (Binop (Plus, (([19:12-14], int), (Lvar ([19:12-14], $y))), (([19:17-19], num), (Lvar ([19:17-19], $z)))))))))];
+                            fb_annotation = () };
+                          f_fun_kind = FSync; f_user_attributes = []; 
+                          f_external = false; f_doc_comment = None },
+                        [([18:26-28], $y)])))
+                    )))));
+            ([21:3-14],
+             (Expr
+                (([21:3-13], int),
+                 (Binop ((Eq None), (([21:3-5], int), (Lvar ([21:3-5], $l))),
+                    (([21:8-13], int), (Call ((([21:8-10], (function(num $z): int)), (Lvar ([21:8-10], $x))), [], [(([21:11-12], int), (Int "2"))], None))))))));
+            ([23:3-29],
+             (Expr
+                (([23:3-28], (function(int $a, int $b): int)),
+                 (Binop ((Eq None), (([23:3-5], (function(int $a, int $b): int)), (Lvar ([23:3-5], $x))),
+                    (([23:8-28], (function(int $a, int $b): int)),
+                     (Lfun (
+                        { f_span = [23:8-28]; f_readonly_this = None; 
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None); 
+                          f_name = ([23:8-28], ";anonymous"); f_tparams = []; 
+                          f_where_constraints = []; f_variadic = FVnonVariadic;
+                          f_params =
+                          [{ param_annotation = ([23:9-11], int); param_type_hint = ((int), None); 
+                             param_is_variadic = false; param_pos = [23:9-11]; 
+                             param_name = "$a"; param_expr = None; param_readonly = None; 
+                             param_callconv = None; param_user_attributes = []; 
+                             param_visibility = None };
+                            { param_annotation = ([23:13-15], int); param_type_hint = ((int), None); 
+                              param_is_variadic = false; param_pos = [23:13-15]; 
+                              param_name = "$b"; param_expr = None; param_readonly = None; 
+                              param_callconv = None; param_user_attributes = []; 
+                              param_visibility = None }
+                            ];
+                          f_ctxs = None; f_unsafe_ctxs = None;
+                          f_body =
+                          { fb_ast = [([23:21-28], (Return (Some (([23:21-28], int), (Binop (Plus, (([23:21-23], int), (Lvar ([23:21-23], $a))), (([23:26-28], int), (Lvar ([23:26-28], $b)))))))))];
+                            fb_annotation = () };
+                          f_fun_kind = FSync; f_user_attributes = []; 
+                          f_external = false; f_doc_comment = None },
+                        [])))
+                    )))));
+            ([24:3-17],
+             (Expr
+                (([24:3-17], int),
+                 (Binop ((Eq None), (([24:3-5], int), (Lvar ([24:3-5], $l))),
+                    (([24:8-17], int),
+                     (Call ((([24:8-10], (function(int $a, int $b): int)), (Lvar ([24:8-10], $x))), [], [(([24:11-12], int), (Int "2")); (([24:14-16], int), (Lvar ([24:14-16], $y)))], None)))
+                    )))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_doc_comment =
+        (Some ([2:1-10:4],
+               "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+        }
       })

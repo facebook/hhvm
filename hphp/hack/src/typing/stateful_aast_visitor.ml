@@ -18,7 +18,7 @@ class type virtual ['env] nast_visitor_with_state =
   object
     method virtual initial_state : 'env
 
-    method at_fun_ : 'env -> Nast.fun_ -> 'env
+    method at_fun_def : 'env -> Nast.fun_def -> 'env
 
     method at_class_ : 'env -> Nast.class_ -> 'env
 
@@ -62,7 +62,7 @@ class virtual ['env] default_nast_visitor_with_state :
   object
     method virtual initial_state : 'env
 
-    method at_fun_ env _ = env
+    method at_fun_def env _ = env
 
     method at_class_ env _ = env
 
@@ -110,7 +110,7 @@ let combine_visitors =
     object
       method initial_state = (visitor1#initial_state, visitor2#initial_state)
 
-      method at_fun_ = visit visitor1#at_fun_ visitor2#at_fun_
+      method at_fun_def = visit visitor1#at_fun_def visitor2#at_fun_def
 
       method at_class_ = visit visitor1#at_class_ visitor2#at_class_
 
@@ -162,9 +162,9 @@ let checker (visitor : 'env nast_visitor_with_state) =
 
     method initial_state = visitor#initial_state
 
-    method! on_fun_ env f =
-      let env = visitor#at_fun_ env f in
-      super#on_fun_ env f
+    method! on_fun_def env f =
+      let env = visitor#at_fun_def env f in
+      super#on_fun_def env f
 
     method! on_class_ env c =
       let env = visitor#at_class_ env c in

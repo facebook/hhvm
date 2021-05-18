@@ -188,12 +188,13 @@ let handler ctx =
       in
       new_env
 
-    method! at_fun_ env f =
+    method! at_fun_def env fd =
+      let f = fd.Aast.fd_fun in
       let new_env =
         {
           env with
           droot = Typing_deps.Dep.Fun (snd f.Aast.f_name);
-          mode = f.Aast.f_mode;
+          mode = fd.Aast.fd_mode;
           type_params = extend_type_params env.type_params f.Aast.f_tparams;
         }
       in

@@ -19,10 +19,11 @@ module MakeType = Typing_make_type
 
 open Aast
 
-let fun_env ?origin ctx f =
+let fun_env ?origin ctx fd =
+  let f = fd.fd_fun in
   let file = Pos.filename (fst f.f_name) in
   let droot = Some (Typing_deps.Dep.Fun (snd f.f_name)) in
-  let env = Env.empty ?origin ctx file ~mode:f.f_mode ~droot in
+  let env = Env.empty ?origin ctx file ~mode:fd.fd_mode ~droot in
   env
 
 (* Given a class definition construct a type consisting of the

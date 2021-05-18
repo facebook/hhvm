@@ -1,80 +1,86 @@
 [(Fun
-    { f_span = [3:1-30]; f_readonly_this = None; f_annotation = (); f_mode = Mstrict; 
-      f_readonly_ret = None; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid)))); 
-      f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:18-20], int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
-         param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-30]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid)))); 
+        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:18-20], int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [5:1-15:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid)))); 
-       f_name = ([5:10-24], "\\call_dead_code"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([6:3-10], (Expr (([6:3-9], int), (Binop ((Eq None), (([6:3-5], int), (Lvar ([6:3-5], $x))), (([6:8-9], int), (Int "1")))))));
-           ([7:3-14:4],
-            (If ((([7:7-11], bool), True),
-               [([8:5-19], (Expr (([8:5-18], string), (Binop ((Eq None), (([8:5-7], string), (Lvar ([8:5-7], $x))), (([8:10-18], string), (String "string")))))));
-                 ([10:5-13],
-                  (Expr
-                     (([10:5-12], void),
-                      (Call ((([10:5-8], (function(int $x): void)), (Id ([10:5-8], "\\foo"))), 
-                         [], [(([10:9-11], string), (Hole ((([10:9-11], string), (Lvar ([10:9-11], $x))), (string), (int), Typing)))], None)))))
-                 ],
-               [([12:5-19], (Expr (([12:5-18], string), (Binop ((Eq None), (([12:5-7], string), (Lvar ([12:5-7], $x))), (([12:10-18], string), (String "string")))))));
-                 ([13:5-13], (Expr (([13:5-12], void), (Call ((([13:5-8], (function(int $x): void)), (Id ([13:5-8], "\\foo"))), [], [(([13:9-11], nothing), (Lvar ([13:9-11], $x)))], None)))))]
-               )))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None });
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [5:1-15:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid)))); 
+         f_name = ([5:10-24], "\\call_dead_code"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:3-10], (Expr (([6:3-9], int), (Binop ((Eq None), (([6:3-5], int), (Lvar ([6:3-5], $x))), (([6:8-9], int), (Int "1")))))));
+             ([7:3-14:4],
+              (If ((([7:7-11], bool), True),
+                 [([8:5-19], (Expr (([8:5-18], string), (Binop ((Eq None), (([8:5-7], string), (Lvar ([8:5-7], $x))), (([8:10-18], string), (String "string")))))));
+                   ([10:5-13],
+                    (Expr
+                       (([10:5-12], void),
+                        (Call ((([10:5-8], (function(int $x): void)), (Id ([10:5-8], "\\foo"))), 
+                           [], [(([10:9-11], string), (Hole ((([10:9-11], string), (Lvar ([10:9-11], $x))), (string), (int), Typing)))], None)))))
+                   ],
+                 [([12:5-19], (Expr (([12:5-18], string), (Binop ((Eq None), (([12:5-7], string), (Lvar ([12:5-7], $x))), (([12:10-18], string), (String "string")))))));
+                   ([13:5-13], (Expr (([13:5-12], void), (Call ((([13:5-8], (function(int $x): void)), (Id ([13:5-8], "\\foo"))), [], [(([13:9-11], nothing), (Lvar ([13:9-11], $x)))], None)))))]
+                 )))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
   (Fun
-     { f_span = [17:1-27:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mstrict; f_readonly_ret = None; f_ret = ((void), (Some ([17:33-37], (Hprim Tvoid)))); 
-       f_name = ([17:10-29], "\\call_dead_code_cast"); f_tparams = []; 
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-       f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([18:3-10], (Expr (([18:3-9], int), (Binop ((Eq None), (([18:3-5], int), (Lvar ([18:3-5], $x))), (([18:8-9], int), (Int "1")))))));
-           ([19:3-26:4],
-            (If ((([19:7-11], bool), True),
-               [([20:5-19], (Expr (([20:5-18], string), (Binop ((Eq None), (([20:5-7], string), (Lvar ([20:5-7], $x))), (([20:10-18], string), (String "string")))))));
-                 ([22:5-38],
-                  (Expr
-                     (([22:5-37], void),
-                      (Call ((([22:5-8], (function(int $x): void)), (Id ([22:5-8], "\\foo"))), 
-                         [], [(([22:9-36], int), (Hole ((([22:33-35], string), (Lvar ([22:33-35], $x))), (string), (int), UnsafeCast)))], None)))))
-                 ],
-               [([24:5-19], (Expr (([24:5-18], string), (Binop ((Eq None), (([24:5-7], string), (Lvar ([24:5-7], $x))), (([24:10-18], string), (String "string")))))));
-                 ([25:5-13], (Expr (([25:5-12], void), (Call ((([25:5-8], (function(int $x): void)), (Id ([25:5-8], "\\foo"))), [], [(([25:9-11], nothing), (Lvar ([25:9-11], $x)))], None)))))]
-               )))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [17:1-27:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([17:33-37], (Hprim Tvoid)))); 
+         f_name = ([17:10-29], "\\call_dead_code_cast"); f_tparams = []; 
+         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([18:3-10], (Expr (([18:3-9], int), (Binop ((Eq None), (([18:3-5], int), (Lvar ([18:3-5], $x))), (([18:8-9], int), (Int "1")))))));
+             ([19:3-26:4],
+              (If ((([19:7-11], bool), True),
+                 [([20:5-19], (Expr (([20:5-18], string), (Binop ((Eq None), (([20:5-7], string), (Lvar ([20:5-7], $x))), (([20:10-18], string), (String "string")))))));
+                   ([22:5-38],
+                    (Expr
+                       (([22:5-37], void),
+                        (Call ((([22:5-8], (function(int $x): void)), (Id ([22:5-8], "\\foo"))), 
+                           [], [(([22:9-36], int), (Hole ((([22:33-35], string), (Lvar ([22:33-35], $x))), (string), (int), UnsafeCast)))], None)))))
+                   ],
+                 [([24:5-19], (Expr (([24:5-18], string), (Binop ((Eq None), (([24:5-7], string), (Lvar ([24:5-7], $x))), (([24:10-18], string), (String "string")))))));
+                   ([25:5-13], (Expr (([25:5-12], void), (Call ((([25:5-8], (function(int $x): void)), (Id ([25:5-8], "\\foo"))), [], [(([25:9-11], nothing), (Lvar ([25:9-11], $x)))], None)))))]
+                 )))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

@@ -2,34 +2,36 @@ Errors:
   [2:3-7] Unrecognized user attribute: `__Rx` starts with __ but is not a standard attribute
   [4:18-22] Unbound name: `Pure`
 [(Fun
-    { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None;
-      f_ret =
-      ((Pure<(function(int): void)>),
-       (Some ([4:18-47],
-              (Happly (([4:18-22], "\\Pure"),
-                 [([4:23-46],
-                   (Hfun
-                      { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
-                        hf_param_info = [None]; hf_variadic_ty = None; 
-                        hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
-                        hf_is_readonly_return = None }))
-                   ]
-                 )))));
-      f_name = ([4:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([5:3-25],
-          (Throw
-             (([5:9-24], Exception),
-              (New ((([5:13-22], Exception), (CI ([5:13-22], "\\Exception"))), [], [], None, ([5:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
-      f_file_attributes = []; f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None;
+        f_ret =
+        ((Pure<(function(int): void)>),
+         (Some ([4:18-47],
+                (Happly (([4:18-22], "\\Pure"),
+                   [([4:23-46],
+                     (Hfun
+                        { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
+                          hf_param_info = [None]; hf_variadic_ty = None; 
+                          hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
+                          hf_is_readonly_return = None }))
+                     ]
+                   )))));
+        f_name = ([4:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-25],
+            (Throw
+               (([5:9-24], Exception),
+                (New ((([5:13-22], Exception), (CI ([5:13-22], "\\Exception"))), [], [], None, ([5:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None }
+      })

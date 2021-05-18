@@ -16,7 +16,7 @@
     - check hint well-kinded-ness
     - check correct usage of __Atom attribute *)
 
-val fun_ : Typing_env_types.env -> Nast.fun_def -> unit
+val fun_ : Typing_env_types.env -> Nast.fun_ -> unit
 
 val class_ : Typing_env_types.env -> Nast.class_ -> unit
 

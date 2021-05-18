@@ -37,11 +37,12 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
     original_id: function::Type<'arena>,
     renamed_id: &function::Type<'arena>,
     deprecation_info: &Option<&[TypedValue<'arena>]>,
-    f: &'a T::Fun_,
+    fd: &'a T::FunDef,
 ) -> Result<HhasFunction<'arena>> {
+    let f = &fd.fun;
     emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
     let scope = Scope {
-        items: vec![ScopeItem::Function(ast_scope::Fun::new_ref(f))],
+        items: vec![ScopeItem::Function(ast_scope::Fun::new_ref(fd))],
     };
     let mut tparams = scope
         .get_tparams()
@@ -61,7 +62,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let mut env = Env::default(alloc, RcOc::clone(&f.namespace)).with_scope(scope);
+    let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let body_instrs = make_memoize_function_code(
         alloc,
         emitter,

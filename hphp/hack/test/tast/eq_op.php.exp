@@ -1,39 +1,42 @@
 [(Fun
-    { f_span = [3:1-12:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((int), (Some ([3:21-24], (Hprim Tint)))); 
-      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:16-18], int); param_type_hint = ((int), (Some ([3:12-15], (Hprim Tint)))); 
-         param_is_variadic = false; param_pos = [3:16-18]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-11], (Expr (([4:3-10], int), (Binop ((Eq (Some Minus)), (([4:3-5], int), (Lvar ([4:3-5], $x))), (([4:9-10], int), (Int "4")))))));
-          ([5:3-11], (Expr (([5:3-10], int), (Binop ((Eq (Some Plus)), (([5:3-5], int), (Lvar ([5:3-5], $x))), (([5:9-10], int), (Int "4")))))));
-          ([6:3-11], (Expr (([6:3-10], int), (Binop ((Eq (Some Star)), (([6:3-5], int), (Lvar ([6:3-5], $x))), (([6:9-10], int), (Int "4")))))));
-          ([8:3-29],
-           (Expr
-              (([8:3-28], vec<int>),
-               (Binop ((Eq None), (([8:3-7], vec<int>), (Lvar ([8:3-7], $arr))),
-                  (([8:10-28], vec<int>), (ValCollection (Vec, None, [(([8:17-18], int), (Int "1")); (([8:20-21], int), (Int "2")); (([8:23-24], int), (Int "3")); (([8:26-27], int), (Int "4"))]))))))));
-          ([8:30-37], (Expr (([8:30-36], int), (Binop ((Eq None), (([8:30-32], int), (Lvar ([8:30-32], $i))), (([8:35-36], int), (Int "2")))))));
-          ([9:3-21],
-           (Expr
-              (([9:3-20], int),
-               (Binop ((Eq (Some Plus)),
-                  (([9:3-15], int),
-                   (Array_get ((([9:3-7], vec<int>), (Lvar ([9:3-7], $arr))), (Some (([9:8-14], int), (Binop (Minus, (([9:8-10], int), (Lvar ([9:8-10], $i))), (([9:13-14], int), (Int "1"))))))))),
-                  (([9:19-20], int), (Int "4")))))));
-          ([11:3-13], (Return (Some (([11:10-12], int), (Lvar ([11:10-12], $x))))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-12:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:21-24], (Hprim Tint)))); 
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:16-18], int); param_type_hint = ((int), (Some ([3:12-15], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:16-18]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-11], (Expr (([4:3-10], int), (Binop ((Eq (Some Minus)), (([4:3-5], int), (Lvar ([4:3-5], $x))), (([4:9-10], int), (Int "4")))))));
+            ([5:3-11], (Expr (([5:3-10], int), (Binop ((Eq (Some Plus)), (([5:3-5], int), (Lvar ([5:3-5], $x))), (([5:9-10], int), (Int "4")))))));
+            ([6:3-11], (Expr (([6:3-10], int), (Binop ((Eq (Some Star)), (([6:3-5], int), (Lvar ([6:3-5], $x))), (([6:9-10], int), (Int "4")))))));
+            ([8:3-29],
+             (Expr
+                (([8:3-28], vec<int>),
+                 (Binop ((Eq None), (([8:3-7], vec<int>), (Lvar ([8:3-7], $arr))),
+                    (([8:10-28], vec<int>), (ValCollection (Vec, None, [(([8:17-18], int), (Int "1")); (([8:20-21], int), (Int "2")); (([8:23-24], int), (Int "3")); (([8:26-27], int), (Int "4"))])))
+                    )))));
+            ([8:30-37], (Expr (([8:30-36], int), (Binop ((Eq None), (([8:30-32], int), (Lvar ([8:30-32], $i))), (([8:35-36], int), (Int "2")))))));
+            ([9:3-21],
+             (Expr
+                (([9:3-20], int),
+                 (Binop ((Eq (Some Plus)),
+                    (([9:3-15], int),
+                     (Array_get ((([9:3-7], vec<int>), (Lvar ([9:3-7], $arr))), (Some (([9:8-14], int), (Binop (Minus, (([9:8-10], int), (Lvar ([9:8-10], $i))), (([9:13-14], int), (Int "1"))))))))),
+                    (([9:19-20], int), (Int "4")))))));
+            ([11:3-13], (Return (Some (([11:10-12], int), (Lvar ([11:10-12], $x))))))];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

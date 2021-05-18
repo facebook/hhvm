@@ -1,27 +1,29 @@
 [(Fun
-    { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mstrict; f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([3:68-83], (Happly (([3:68-77], "\\HH\\Awaitable"), [([3:78-82], (Hprim Tvoid))])))));
-      f_name = ([3:16-47], "\\foreach_async_union_int_dynamic"); f_tparams = []; 
-      f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:62-65], (dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)]))));
-         param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([5:3-6:4],
-          (Foreach ((([5:12-15], (dynamic | int)), (Hole ((([5:12-15], (dynamic | int)), (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | AsyncIterator<dynamic>)), Typing))),
-             (Await_as_v ([5:16-21], (([5:25-27], dynamic), (Lvar ([5:25-27], $x))))), 
-             [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
-          ];
-        fb_annotation = () };
-      f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None })
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([3:68-83], (Happly (([3:68-77], "\\HH\\Awaitable"), [([3:78-82], (Hprim Tvoid))])))));
+        f_name = ([3:16-47], "\\foreach_async_union_int_dynamic"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:62-65], (dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)]))));
+           param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-6:4],
+            (Foreach ((([5:12-15], (dynamic | int)), (Hole ((([5:12-15], (dynamic | int)), (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | AsyncIterator<dynamic>)), Typing))),
+               (Await_as_v ([5:16-21], (([5:25-27], dynamic), (Lvar ([5:25-27], $x))))), 
+               [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

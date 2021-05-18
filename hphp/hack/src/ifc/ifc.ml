@@ -2104,16 +2104,18 @@ let analyse_callable
 
 let walk_tast opts decl_env ctx =
   let def = function
-    | A.Fun
-        {
-          A.f_name = (_, name);
-          f_annotation = saved_env;
-          f_params = params;
-          f_body = body;
-          f_ret = (return, _);
-          f_span = pos;
-          _;
-        } ->
+    | A.Fun fd ->
+      let {
+        A.f_name = (_, name);
+        f_annotation = saved_env;
+        f_params = params;
+        f_body = body;
+        f_ret = (return, _);
+        f_span = pos;
+        _;
+      } =
+        fd.A.fd_fun
+      in
       let is_static = false in
       let callable_res =
         analyse_callable

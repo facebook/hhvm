@@ -1,48 +1,52 @@
 [(Fun
-    { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
-      f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), (Some ([3:20-23], (Hprim Tint)))); 
-      f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-      f_variadic = FVnonVariadic;
-      f_params =
-      [{ param_annotation = ([3:14-16], mixed); param_type_hint = ((mixed), None); 
-         param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
-         param_expr = None; param_readonly = None; param_callconv = None; 
-         param_user_attributes = []; param_visibility = None }
-        ];
-      f_ctxs = None; f_unsafe_ctxs = None;
-      f_body =
-      { fb_ast =
-        [([4:3-6:4],
-          (If ((([4:7-16], bool), (Is ((([4:7-9], mixed), (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
-             [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (([5:12-14], (mixed & int)), (Lvar ([5:12-14], $x))))))],
-             [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
-          ([7:3-19], (Return (Some (([7:10-18], int), (Cast (([7:11-14], (Hprim Tint)), (([7:16-18], mixed), (Lvar ([7:16-18], $x)))))))))];
-        fb_annotation = () };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-      f_external = false;
-      f_namespace =
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None });
+      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_fun =
+      { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:20-23], (Hprim Tint)))); 
+        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:14-16], mixed); param_type_hint = ((mixed), None); 
+           param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-6:4],
+            (If ((([4:7-16], bool), (Is ((([4:7-9], mixed), (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
+               [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (([5:12-14], (mixed & int)), (Lvar ([5:12-14], $x))))))],
+               [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
+            ([7:3-19], (Return (Some (([7:10-18], int), (Cast (([7:11-14], (Hprim Tint)), (([7:16-18], mixed), (Lvar ([7:16-18], $x)))))))))];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
   (Fun
-     { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
-       f_mode = Mpartial; f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint)))); 
-       f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-       f_variadic = FVnonVariadic;
-       f_params =
-       [{ param_annotation = ([10:14-16], num); param_type_hint = ((num), None); 
-          param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
-          param_expr = None; param_readonly = None; param_callconv = None; 
-          param_user_attributes = []; param_visibility = None }
-         ];
-       f_ctxs = None; f_unsafe_ctxs = None;
-       f_body = { fb_ast = [([11:3-17], (Return (Some (([11:10-16], int), (Binop (Plus, (([11:10-12], num), (Lvar ([11:10-12], $x))), (([11:15-16], int), (Int "4"))))))))]; fb_annotation = () };
-       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
-       f_external = false;
-       f_namespace =
+     { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None })
+       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_fun =
+       { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint)))); 
+         f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ([10:14-16], num); param_type_hint = ((num), None); 
+            param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body = { fb_ast = [([11:3-17], (Return (Some (([11:10-16], int), (Binop (Plus, (([11:10-12], num), (Lvar ([11:10-12], $x))), (([11:15-16], int), (Int "4"))))))))]; fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

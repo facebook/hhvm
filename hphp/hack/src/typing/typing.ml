@@ -4598,14 +4598,12 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_annotation = Env.save local_tpenv env;
               Aast.f_readonly_this = f.f_readonly_this;
               Aast.f_span = f.f_span;
-              Aast.f_mode = f.f_mode;
               Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
               Aast.f_readonly_ret = f.f_readonly_ret;
               Aast.f_name = f.f_name;
               Aast.f_tparams = tparams;
               Aast.f_where_constraints = f.f_where_constraints;
               Aast.f_fun_kind = f.f_fun_kind;
-              Aast.f_file_attributes = [];
               Aast.f_user_attributes = user_attributes;
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
               Aast.f_ctxs = f.f_ctxs;
@@ -4614,7 +4612,6 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_variadic = t_variadic;
               (* TODO TAST: Variadic efuns *)
               Aast.f_external = f.f_external;
-              Aast.f_namespace = f.f_namespace;
               Aast.f_doc_comment = f.f_doc_comment;
             }
           in

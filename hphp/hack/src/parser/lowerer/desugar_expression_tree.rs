@@ -1,14 +1,12 @@
 use crate::lowerer::Env;
 use bstr::BString;
 use naming_special_names_rust::{classes, pseudo_functions};
-use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, NodeMut, Visitor, VisitorMut},
     ast,
     ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
     ast_defs::*,
-    file_info,
     pos::Pos,
 };
 
@@ -113,7 +111,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         user_attributes: vec![],
         visibility: None,
     };
-    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone(), env);
+    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
     let visitor_lambda = Expr::new(et_literal_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
 
     // Wrap this in an Efun with appropriate variables for typing.
@@ -123,7 +121,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             ast: vec![wrap_return(virtual_expr, &et_literal_pos)],
             annotation: (),
         };
-        let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone(), env);
+        let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
         let spliced_vars = (0..splice_count)
             .into_iter()
             .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_lvar_string(i))))
@@ -165,7 +163,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
     } else {
         let mut body = splice_assignments.clone();
         body.push(wrap_return(make_tree, &et_literal_pos));
-        immediately_invoked_lambda(env, &et_literal_pos, body)
+        immediately_invoked_lambda(&et_literal_pos, body)
     };
 
     Ok(Expr::new(
@@ -185,17 +183,11 @@ fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
 }
 
 /// Wrap a FuncBody into an anonymous Fun_
-fn wrap_fun_<TF>(
-    body: ast::FuncBody,
-    params: Vec<ast::FunParam>,
-    pos: Pos,
-    env: &Env<TF>,
-) -> ast::Fun_ {
+fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos) -> ast::Fun_ {
     ast::Fun_ {
         span: pos.clone(),
         readonly_this: None,
         annotation: (),
-        mode: file_info::Mode::Mstrict,
         readonly_ret: None,
         ret: ast::TypeHint((), None),
         name: make_id(pos, ";anonymous"),
@@ -208,10 +200,8 @@ fn wrap_fun_<TF>(
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
         user_attributes: vec![],
-        file_attributes: vec![],
         external: false,
         doc_comment: None,
-        namespace: RcOc::clone(&env.empty_ns_env),
     }
 }
 
@@ -1186,12 +1176,12 @@ fn hint_name(hint: &aast::Hint) -> Result<String, (Pos, String)> {
     }
 }
 
-fn immediately_invoked_lambda<TF>(env: &Env<TF>, pos: &Pos, stmts: Vec<Stmt>) -> Expr {
+fn immediately_invoked_lambda(pos: &Pos, stmts: Vec<Stmt>) -> Expr {
     let func_body = ast::FuncBody {
         ast: stmts,
         annotation: (),
     };
-    let fun_ = wrap_fun_(func_body, vec![], pos.clone(), env);
+    let fun_ = wrap_fun_(func_body, vec![], pos.clone());
     let lambda_expr = Expr::new(pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 
     Expr::new(

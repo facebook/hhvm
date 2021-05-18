@@ -107,9 +107,40 @@ impl Names {
         }
     }
 
-    pub fn save_fileinfo(conn: &Connection, path_rel: &RelativePath, fileinfo: &FileInfo) {
+    pub fn save_fileinfo(
+        conn: &Connection,
+        path_rel: &RelativePath,
+        fileinfo: &FileInfo,
+    ) -> Result<()> {
         let _ = file_infos::insert(conn, path_rel, fileinfo);
-        // todo reset of tables
+        let file_info_id = conn.last_insert_rowid();
+        funs::insert(
+            conn,
+            file_info_id,
+            fileinfo.funs.into_iter().map(|x| x.1.to_string()),
+        )?;
+        types::insert(
+            conn,
+            file_info_id,
+            fileinfo.classes.into_iter().map(|x| types::TypeItem {
+                name: x.1.to_string(),
+                kind: KindOfType::TClass,
+            }),
+        )?;
+        types::insert(
+            conn,
+            file_info_id,
+            fileinfo.typedefs.into_iter().map(|x| types::TypeItem {
+                name: x.1.to_string(),
+                kind: KindOfType::TTypedef,
+            }),
+        )?;
+        consts::insert(
+            conn,
+            file_info_id,
+            fileinfo.consts.into_iter().map(|x| x.1.to_string()),
+        )?;
+        Ok(())
     }
 
     pub fn get_path(&self, kind: NameType, name: &str) -> Result<Option<RelativePath>> {

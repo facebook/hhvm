@@ -9,12 +9,6 @@ use crate::Result;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection, OptionalExtension};
 
-#[derive(Clone, Debug)]
-pub(crate) struct ConstItem {
-    name: String,
-    file_info_id: i64,
-}
-
 pub fn create_table(connection: &Connection) -> Result<()> {
     let statement = "
         CREATE TABLE IF NOT EXISTS NAMING_CONSTS (
@@ -26,9 +20,11 @@ pub fn create_table(connection: &Connection) -> Result<()> {
     Ok(())
 }
 
-// Used only in tests for now.
-#[cfg(test)]
-fn insert(connection: &Connection, items: &[ConstItem]) -> Result<()> {
+pub fn insert(
+    connection: &Connection,
+    file_info_id: i64,
+    names: impl Iterator<Item = String>,
+) -> Result<()> {
     let insert_statement = "
         INSERT INTO NAMING_CONSTS (
             HASH,
@@ -39,10 +35,10 @@ fn insert(connection: &Connection, items: &[ConstItem]) -> Result<()> {
 
     let mut insert_statement = connection.prepare(&insert_statement)?;
 
-    for item in items {
-        let hash = convert::name_to_hash(typing_deps_hash::DepType::GConst, &item.name);
+    for name in names {
+        let hash = convert::name_to_hash(typing_deps_hash::DepType::GConst, &name);
 
-        insert_statement.execute(params![hash, item.file_info_id])?;
+        insert_statement.execute(params![hash, file_info_id])?;
     }
     Ok(())
 }
@@ -81,10 +77,6 @@ mod tests {
     fn test_add_const() {
         let conn = Connection::open_in_memory().unwrap();
         create_table(&conn).unwrap();
-        let consts = [ConstItem {
-            name: "Foo".to_string(),
-            file_info_id: 123,
-        }];
-        insert(&conn, &consts).unwrap();
+        insert(&conn, 123, ["Foo".to_string()].iter().cloned()).unwrap();
     }
 }

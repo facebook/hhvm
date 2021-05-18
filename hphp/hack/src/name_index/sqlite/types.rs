@@ -11,10 +11,9 @@ use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection, OptionalExtension};
 
 #[derive(Clone, Debug)]
-pub(crate) struct TypeItem {
-    name: String,
-    kind: KindOfType,
-    file_info_id: i64,
+pub struct TypeItem {
+    pub name: String,
+    pub kind: KindOfType,
 }
 
 pub fn create_table(connection: &Connection) -> Result<()> {
@@ -30,9 +29,11 @@ pub fn create_table(connection: &Connection) -> Result<()> {
     Ok(())
 }
 
-// Used only in tests for now.
-#[cfg(test)]
-fn insert(connection: &Connection, items: Vec<TypeItem>) -> Result<()> {
+pub fn insert(
+    connection: &Connection,
+    file_info_id: i64,
+    items: impl Iterator<Item = TypeItem>,
+) -> Result<()> {
     let insert_statement = "
         INSERT INTO NAMING_TYPES (
             HASH,
@@ -50,12 +51,7 @@ fn insert(connection: &Connection, items: Vec<TypeItem>) -> Result<()> {
         item.name.make_ascii_lowercase();
         let canon_hash = convert::name_to_hash(typing_deps_hash::DepType::Class, &item.name);
 
-        insert_statement.execute(params![
-            hash,
-            canon_hash,
-            item.kind as isize,
-            item.file_info_id
-        ])?;
+        insert_statement.execute(params![hash, canon_hash, item.kind as isize, file_info_id])?;
     }
     Ok(())
 }
@@ -126,11 +122,10 @@ mod tests {
     fn test_add_type() {
         let conn = Connection::open_in_memory().unwrap();
         create_table(&conn).unwrap();
-        let types = vec![TypeItem {
+        let types = [TypeItem {
             name: "Foo".to_string(),
             kind: KindOfType::TClass,
-            file_info_id: 123,
         }];
-        insert(&conn, types).unwrap();
+        insert(&conn, 123, types.iter().cloned()).unwrap();
     }
 }

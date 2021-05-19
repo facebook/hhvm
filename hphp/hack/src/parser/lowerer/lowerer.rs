@@ -4444,6 +4444,7 @@ where
                 let is_static = kinds.has(modifier::STATIC);
                 let readonly_this = kinds.has(modifier::READONLY);
                 *env.in_static_method() = is_static;
+                Self::check_effect_polymorphic_reification(&hdr.contexts, env, node);
                 let (mut body, body_has_yield) =
                     Self::mp_yielding(Self::p_function_body, &c.function_body, env)?;
                 if env.codegen() {
@@ -4873,6 +4874,27 @@ where
                             "this:: context is not allowed on top level functions",
                         )
                     }
+                    _ => {}
+                },
+                _ => {}
+            });
+        }
+    }
+
+    fn check_effect_polymorphic_reification(
+        contexts: &Option<ast::Contexts>,
+        env: &mut Env<'a, TF>,
+        node: S<'a, T, V>,
+    ) {
+        use ast::Hint_::{Haccess, Happly};
+        if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+            context_hints.iter().for_each(|c| match *c.1 {
+                Haccess(ref root, _) => match &*root.1 {
+                    Happly(oxidized::ast::Id(_, id), _) => Self::fail_if_invalid_reified_generic(
+                        node,
+                        env,
+                        Self::strip_ns(id.as_str()),
+                    ),
                     _ => {}
                 },
                 _ => {}

@@ -12,7 +12,6 @@ hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
 hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
 lazy_static = "1.0"
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }
 
 [profile.release]

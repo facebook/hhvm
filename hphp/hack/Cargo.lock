@@ -1515,7 +1515,6 @@ dependencies = [
  "hhbc_by_ref_unique_id_builder",
  "lazy_static",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
 ]
 
@@ -1567,8 +1566,6 @@ version = "0.0.0"
 dependencies = [
  "hhbc_by_ref_hhbc_string_utils",
  "naming_special_names_rust",
- "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
 ]
 

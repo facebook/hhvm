@@ -5,7 +5,6 @@
 
 use hhbc_by_ref_hhbc_string_utils::strip_ns;
 use naming_special_names_rust::{self as sn, coeffects as c};
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
     aast as a,
     aast_defs::{Hint, Hint_},
@@ -13,7 +12,7 @@ use oxidized::{
 };
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq, ToOcamlRep, FromOcamlRep)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Ctx {
     Defaults,
 
@@ -69,7 +68,7 @@ pub struct HhasCtxConstant {
     pub is_abstract: bool,
 }
 
-#[derive(Clone, Debug, Default, ToOcamlRep, FromOcamlRep)]
+#[derive(Clone, Debug, Default)]
 pub struct HhasCoeffects {
     static_coeffects: Vec<Ctx>,
     unenforced_static_coeffects: Vec<String>,

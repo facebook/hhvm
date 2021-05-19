@@ -7,10 +7,9 @@ use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_unique_id_builder::{SMap, SSet, UniqueIdBuilder};
 use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
 
-#[derive(Debug, FromOcamlRep, ToOcamlRep, Clone)]
+#[derive(Debug, Clone)]
 pub struct ClosureEnclosingClassInfo {
     pub kind: ClassKind,
     pub name: String,
@@ -27,7 +26,7 @@ impl Default for ClosureEnclosingClassInfo {
     }
 }
 
-#[derive(Default, FromOcamlRep, ToOcamlRep, Debug)]
+#[derive(Default, Debug)]
 pub struct GlobalState {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,

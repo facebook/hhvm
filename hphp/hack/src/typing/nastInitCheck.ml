@@ -534,7 +534,11 @@ and expr_ env acc p e =
   | Class_const _
   | Class_get _ ->
     acc
-  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _, false)), _, _, _) ->
+  | Call
+      ( (p, Obj_get ((_, This), (_, Id (_, f)), _, false)),
+        _,
+        el,
+        unpacked_element ) ->
     let method_ = Env.get_method env f in
     (match method_ with
     | None ->
@@ -544,6 +548,13 @@ and expr_ env acc p e =
       (match !method_ with
       | Done -> acc
       | Todo b ->
+        (* First time we encounter this private method. Let's check its
+         * arguments first, and then recurse into the method body.
+         *)
+        let acc = List.fold_left ~f:expr ~init:acc el in
+        let acc =
+          Option.value_map ~f:(expr acc) ~default:acc unpacked_element
+        in
         method_ := Done;
         let fb = Nast.assert_named_body b in
         toplevel env acc fb.fb_ast))

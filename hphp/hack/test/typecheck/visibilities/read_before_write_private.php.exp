@@ -1,0 +1,2 @@
+File "read_before_write_private.php", line 7, characters 32-32:
+Read access to `$this->a` before initialization (Typing[4083])

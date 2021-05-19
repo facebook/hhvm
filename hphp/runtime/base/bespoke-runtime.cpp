@@ -37,46 +37,34 @@ folly::SharedMutex s_mapLock;
 }
 
 RuntimeStruct::RuntimeStruct(
-    const StringData* stableIdentifier, const FieldIndexVector& fields)
+    const StringData* stableIdentifier,
+    const FieldIndexVector& fields,
+    size_t fieldsLength)
   : m_profile(nullptr)
   , m_stableIdentifier(stableIdentifier)
+  , m_fields(fieldsLength, nullptr)
   , m_assignedLayout(nullptr)
-  , m_fields()
-  , m_fieldSlots()
-  , m_fieldCount(0)
 {
   assertx(stableIdentifier->isStatic());
 
-  auto maxId = 0;
-  for (auto const [idx, _] : fields) {
-    if (idx > maxId) maxId = idx;
-  }
-
-  auto fieldKeys = FieldKeys(maxId + 1, nullptr);
   for (auto const [idx, key] : fields) {
-    auto const str = key.get();
-    always_assert(str->isStatic());
-    assertx(fieldKeys[idx] == nullptr);
-    fieldKeys[idx] = str;
+    setKey(idx, key.get());
   }
-
-  m_fieldCount = fields.size();
-  m_fields = std::move(fieldKeys);
 }
 
 RuntimeStruct::RuntimeStruct(
     const StringData* stableIdentifier, FieldKeys&& fields)
   : m_profile(nullptr)
   , m_stableIdentifier(stableIdentifier)
+  , m_fields(fields.size(), nullptr)
   , m_assignedLayout(nullptr)
-  , m_fields(std::move(fields))
-  , m_fieldSlots()
-  , m_fieldCount(0)
 {
-  for (auto const key : m_fields) {
-    if (key != nullptr) m_fieldCount++;
-  }
   assertx(stableIdentifier->isStatic());
+
+  for (auto idx = 0; idx < fields.size(); idx++) {
+    auto const key = fields[idx];
+    if (key) setKey(idx, key);
+  }
 }
 
 RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
@@ -118,12 +106,21 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     if (str.get()->isStrictlyInteger(i)) return nullptr;
   }
 
-  folly::SharedMutex::WriteHolder lock{s_mapLock};
-  auto const rs = new RuntimeStruct(stableIdentifier.get(), fields);
-  auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), rs);
-  if (!pair.second) delete rs;
+  // The fields are not contiguous, so find out how many we need to allocate.
+  auto fieldsLength = 0;
+  for (auto const [idx, _] : fields) {
+    if (idx >= fieldsLength) fieldsLength = idx + 1;
+  }
 
-  return pair.first->second;
+  folly::SharedMutex::WriteHolder lock{s_mapLock};
+  auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), nullptr);
+  if (!pair.second) return pair.first->second;
+
+  auto const mem = allocate(fieldsLength);
+  auto const rs = new (mem) RuntimeStruct(
+      stableIdentifier.get(), fields, fieldsLength);
+  pair.first->second = rs;
+  return rs;
 }
 
 void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
@@ -132,8 +129,8 @@ void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
       folly::sformat("Field mismatch for struct {}\n", m_stableIdentifier);
     ret += "Existing schema:\n";
     for (size_t i = 0; i < m_fields.size(); i++) {
-      if (m_fields[i] == nullptr) continue;
-      ret += folly::sformat("  {}: {}\n", i, m_fields[i]);
+      auto const key = getKey(i);
+      if (key) ret += folly::sformat("  {}: {}\n", i, key);
     }
     ret += "New schema:\n";
     auto newSchema = FieldIndexVector(fields);
@@ -144,18 +141,59 @@ void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
     return ret;
   };
 
-  always_assert(m_fieldCount == fields.size());
-  for (auto const [idx, str] : fields) {
-    always_assert(m_fields[idx]->same(str.get()));
+  auto numFields = 0;
+  for (auto const key : m_fields) {
+    if (key) numFields++;
   }
+  always_assert(numFields == fields.size());
+  for (auto const [idx, str] : fields) {
+    always_assert(getKey(idx)->same(str.get()));
+  }
+}
+
+RuntimeStruct* RuntimeStruct::allocate(size_t fieldsLength) {
+  static_assert(alignof(RuntimeStruct) % alignof(Slot) == 0);
+
+  // TODO(kshaunak): We should use vm_malloc here, but it looks bad on perf.
+  auto const bytes = sizeof(RuntimeStruct) + fieldsLength * sizeof(Slot);
+  auto const rs = reinterpret_cast<RuntimeStruct*>(malloc(bytes));
+
+  for (auto i = 0; i < fieldsLength; i++) {
+    reinterpret_cast<Slot*>(rs + 1)[i] = kInvalidSlot;
+  }
+  return rs;
+}
+
+LowStringPtr RuntimeStruct::getKey(size_t idx) const {
+  assertx(idx < m_fields.size());
+  return m_fields[idx];
+}
+
+Slot RuntimeStruct::getSlot(size_t idx) const {
+  assertx(idx < m_fields.size());
+  return reinterpret_cast<const Slot*>(this + 1)[idx];
+}
+
+void RuntimeStruct::setKey(size_t idx, StringData* key) {
+  always_assert(key->isStatic());
+  assertx(getKey(idx) == nullptr);
+  assertx(getSlot(idx) == kInvalidSlot);
+  m_fields[idx] = key;
+}
+
+void RuntimeStruct::setSlot(size_t idx, Slot slot) {
+  assertx(getKey(idx) != nullptr);
+  assertx(getSlot(idx) == kInvalidSlot);
+  reinterpret_cast<Slot*>(this + 1)[idx] = slot;
 }
 
 RuntimeStruct* RuntimeStruct::deserialize(
     const StringData* stableIdentifier, FieldKeys&& fields) {
   assertx(allowBespokeArrayLikes());
-  auto const runtimeStruct = new RuntimeStruct(stableIdentifier, std::move(fields));
-  s_runtimeStrMap.emplace(stableIdentifier, runtimeStruct);
-  return runtimeStruct;
+  auto const mem = allocate(fields.size());
+  auto const rs = new (mem) RuntimeStruct(stableIdentifier, std::move(fields));
+  s_runtimeStrMap.emplace(stableIdentifier, rs);
+  return rs;
 }
 
 RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
@@ -176,13 +214,10 @@ void RuntimeStruct::eachRuntimeStruct(std::function<void(RuntimeStruct*)> fn) {
 }
 
 void RuntimeStruct::applyLayout(const bespoke::StructLayout* layout) {
-  auto slots = std::vector<Slot>(m_fields.size(), kInvalidSlot);
   for (size_t i = 0; i < m_fields.size(); i++) {
-    if (m_fields[i] == nullptr) continue;
-    slots[i] = layout->keySlot(m_fields[i]);
+    auto const key = getKey(i);
+    if (key) setSlot(i, layout->keySlot(key));
   }
-
-  m_fieldSlots = std::move(slots);
   m_assignedLayout.store(layout, std::memory_order_release);
 }
 
@@ -241,9 +276,9 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
   }
 
   // We are currently wrapping a StructDict.
-  assertx(m_struct->m_fields[idx]->same(key));
+  assertx(m_struct->getKey(idx)->same(key));
   auto const sad = StructDict::As(m_arr);
-  auto const slot = m_struct->m_fieldSlots[idx];
+  auto const slot = m_struct->getSlot(idx);
   if (slot == kInvalidSlot) {
     // We are adding a key with no corresponding slot. This must escalate to
     // vanilla, so escalate with the requested capacity and clear the m_struct

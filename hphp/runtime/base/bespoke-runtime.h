@@ -94,11 +94,12 @@ struct RuntimeStruct {
   std::atomic<bespoke::LoggingProfile*> m_profile;
 
 private:
-  using FieldSlots = std::vector<Slot>;
-  using FieldKeys = std::vector<const StringData*>;
+  using FieldKeys = std::vector<StringData*>;
 
   RuntimeStruct(
-      const StringData* stableIdentifier, const FieldIndexVector& fields);
+      const StringData* stableIdentifier,
+      const FieldIndexVector& fields,
+      size_t fieldsLength);
   RuntimeStruct(
       const StringData* stableIdentifier, FieldKeys&& fields);
   static RuntimeStruct* deserialize(
@@ -106,11 +107,25 @@ private:
 
   void validateFieldsMatch(const FieldIndexVector& fields) const;
 
+  // NOTE: RuntimeStruct is followed in memory by an array of m_fields.size()
+  // Slot values, because we read the slots in hot code if we select a struct
+  // layout for this array source.
+  //
+  // These five methods are the only ones that deal with the layout logic.
+
+  static RuntimeStruct* allocate(size_t fieldsLength);
+
+  LowStringPtr getKey(size_t index) const;
+  Slot getSlot(size_t index) const;
+
+  void setKey(size_t index, StringData* key);
+  void setSlot(size_t index, Slot slot);
+
+  // Private fields, along with extra array.
+
   const StringData* m_stableIdentifier;
+  CompactVector<LowStringPtr> m_fields;
   std::atomic<const bespoke::StructLayout*> m_assignedLayout;
-  FieldKeys m_fields;
-  FieldSlots m_fieldSlots;
-  size_t m_fieldCount;
 
   friend struct StructDictInit;
   friend struct jit::RuntimeStructSerde;

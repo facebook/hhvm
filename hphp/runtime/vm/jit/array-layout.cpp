@@ -361,10 +361,10 @@ struct RuntimeStructSerde {
     write_string(ser, runtimeStruct->m_stableIdentifier);
 
     write_raw(ser, runtimeStruct->m_fields.size());
-    for (size_t i = 0; i < runtimeStruct->m_fields.size(); i++) {
-      if (runtimeStruct->m_fields[i]) {
+    for (auto const key : runtimeStruct->m_fields) {
+      if (key) {
         write_raw(ser, true);
-        write_string(ser, runtimeStruct->m_fields[i]);
+        write_string(ser, key);
       } else {
         write_raw(ser, false);
       }

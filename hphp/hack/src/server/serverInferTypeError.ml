@@ -8,23 +8,42 @@
 
 open Hh_prelude
 
+let starts_at pos line char_start =
+  let (l, c, _) = Pos.info_pos pos in
+  line = l && char_start = c
+
 let visitor line char =
   object
-    inherit [_] Tast_visitor.reduce
+    inherit [_] Tast_visitor.reduce as super
 
-    inherit [Pos.t * _ * _ * _] Ast_defs.option_monoid
+    method private zero = None
 
-    method private merge ((lpos, _, _, _) as lhs) ((rpos, _m, _, _) as rhs) =
-      if Pos.length lpos <= Pos.length rpos then
+    (* A node with position P is not always a parent of every other node with
+    * a position contained by P. Some desugaring can cause nodes to be
+    * rearranged so that this is no longer the case (e.g., `invariant`).
+    *
+    * Since we are finding `Hole`s based on their exact starting position,
+    * we _shouldn't_ encounter the case of two simultaneous `Hole`s with
+    * different parents but the logic to handle this is retained - we simply
+    * take the smaller node. *)
+    method private plus lhs rhs =
+      Option.merge
         lhs
-      else
         rhs
+        ~f:(fun ((lpos, _, _, _) as lhs) ((rpos, _, _, _) as rhs) ->
+          if Pos.length lpos <= Pos.length rpos then
+            lhs
+          else
+            rhs)
 
+    (* Find the the `Hole` which exactly starts at the provided position;
+       if the current hole does not, call method on supertype to continue
+       recursion *)
     method! on_Hole env expr from_ty to_ty hole_source =
       match (expr, hole_source) with
-      | (((pos, _), _), Aast.Typing) when Pos.inside pos line char ->
+      | (((pos, _), _), Aast.Typing) when starts_at pos line char ->
         Some (pos, env, from_ty, to_ty)
-      | _ -> None
+      | _ -> super#on_Hole env expr from_ty to_ty hole_source
   end
 
 let type_error_at_pos

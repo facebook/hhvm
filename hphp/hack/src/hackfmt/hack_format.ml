@@ -535,13 +535,24 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       ->
       Concat
         [
-          t env where;
-          Space;
-          handle_possible_list env constraints ~after_each:(fun is_last ->
-              if is_last then
-                Nothing
-              else
-                Space);
+          WithRule
+            ( Rule.Parental,
+              Concat
+                [
+                  Space;
+                  Split;
+                  t env where;
+                  Nest
+                    [
+                      handle_possible_list
+                        env
+                        constraints
+                        ~before_each:space_split
+                        ~handle_last:
+                          (transform_last_arg env ~allow_trailing:false)
+                        ~handle_element:(transform_argish_item env);
+                    ];
+                ] );
         ]
     | Syntax.WhereConstraint
         {

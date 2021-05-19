@@ -1,0 +1,32 @@
+[
+  {
+    "actual_type": "int",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/return_expr_only.php",
+        "line": 8,
+        "char_start": 31,
+        "char_end": 33
+      },
+      "kind": "primitive",
+      "name": "int"
+    },
+    "expected_type": "float",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/return_expr_only.php",
+        "line": 3,
+        "char_start": 33,
+        "char_end": 37
+      },
+      "kind": "primitive",
+      "name": "float"
+    },
+    "pos": {
+      "line_start": 5,
+      "char_start": 10,
+      "line_end": 5,
+      "char_end": 23
+    }
+  }
+]

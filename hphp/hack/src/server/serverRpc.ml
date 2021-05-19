@@ -107,6 +107,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
     let env = { env with tcopt } in
     (env, ServerInferTypeBatch.go genv.workers positions env)
+  | TAST_HOLES (file_input, hole_filter) ->
+    let path =
+      match file_input with
+      | FileName fn -> Relative_path.create_detect_prefix fn
+      | FileContent _ -> Relative_path.create_detect_prefix ""
+    in
+    let (ctx, entry) = single_ctx env path file_input in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerCollectTastHoles.go_ctx ~ctx ~entry ~hole_filter)
+    in
+    (env, result)
   | INFER_TYPE_ERROR (file_input, line, column) ->
     let path =
       match file_input with

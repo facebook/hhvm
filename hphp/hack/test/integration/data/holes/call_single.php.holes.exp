@@ -1,0 +1,73 @@
+[
+  {
+    "actual_type": "?int",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/call_single.php",
+        "line": 5,
+        "char_start": 30,
+        "char_end": 33
+      },
+      "kind": "nullable",
+      "args": [
+        {
+          "src_pos": {
+            "filename": "/call_single.php",
+            "line": 5,
+            "char_start": 31,
+            "char_end": 33
+          },
+          "kind": "primitive",
+          "name": "int"
+        }
+      ]
+    },
+    "expected_type": "int",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/call_single.php",
+        "line": 3,
+        "char_start": 15,
+        "char_end": 17
+      },
+      "kind": "primitive",
+      "name": "int"
+    },
+    "pos": {
+      "line_start": 10,
+      "char_start": 10,
+      "line_end": 10,
+      "char_end": 11
+    }
+  },
+  {
+    "actual_type": "float",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/call_single.php",
+        "line": 5,
+        "char_start": 20,
+        "char_end": 24
+      },
+      "kind": "primitive",
+      "name": "float"
+    },
+    "expected_type": "int",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/call_single.php",
+        "line": 3,
+        "char_start": 15,
+        "char_end": 17
+      },
+      "kind": "primitive",
+      "name": "int"
+    },
+    "pos": {
+      "line_start": 7,
+      "char_start": 10,
+      "line_end": 7,
+      "char_end": 11
+    }
+  }
+]

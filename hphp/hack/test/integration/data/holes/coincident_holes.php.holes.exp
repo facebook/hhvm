@@ -1,0 +1,83 @@
+[
+  {
+    "actual_type": "(int | string)",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/coincident_holes.php",
+        "line": 5,
+        "char_start": 19,
+        "char_end": 21
+      },
+      "kind": "union",
+      "args": [
+        {
+          "src_pos": {
+            "filename": "/coincident_holes.php",
+            "line": 5,
+            "char_start": 19,
+            "char_end": 21
+          },
+          "kind": "primitive",
+          "name": "string"
+        },
+        {
+          "src_pos": {
+            "filename": "/coincident_holes.php",
+            "line": 5,
+            "char_start": 25,
+            "char_end": 25
+          },
+          "kind": "primitive",
+          "name": "int"
+        }
+      ]
+    },
+    "expected_type": "string",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/coincident_holes.php",
+        "line": 3,
+        "char_start": 24,
+        "char_end": 29
+      },
+      "kind": "primitive",
+      "name": "string"
+    },
+    "pos": {
+      "line_start": 5,
+      "char_start": 10,
+      "line_end": 5,
+      "char_end": 25
+    }
+  },
+  {
+    "actual_type": "bool",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/coincident_holes.php",
+        "line": 3,
+        "char_start": 14,
+        "char_end": 17
+      },
+      "kind": "primitive",
+      "name": "bool"
+    },
+    "expected_type": "num",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/coincident_holes.php",
+        "line": 5,
+        "char_start": 10,
+        "char_end": 15
+      },
+      "kind": "primitive",
+      "name": "num"
+    },
+    "pos": {
+      "line_start": 5,
+      "char_start": 10,
+      "line_end": 5,
+      "char_end": 11
+    }
+  }
+]

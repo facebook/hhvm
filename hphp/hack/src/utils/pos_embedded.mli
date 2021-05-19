@@ -75,8 +75,12 @@ val multiline_string_no_file : 'a pos -> string
 (* This returns a closed interval. *)
 val json : absolute -> Hh_json.json
 
+val json_no_filename : absolute -> Hh_json.json
+
 (* This returns a half-open interval. *)
 val multiline_json : absolute -> Hh_json.json
+
+val multiline_json_no_filename : 'a pos -> Hh_json.json
 
 val inside : 'a pos -> int -> int -> bool
 

@@ -284,6 +284,13 @@ module Extract_standalone = struct
     | Method of string * string
 end
 
+module Tast_hole = struct
+  type filter =
+    | Typing
+    | Cast
+    | Any
+end
+
 type file_input =
   | FileName of string
   | FileContent of string
@@ -330,6 +337,7 @@ type _ t =
       (string * int * int * (int * int) option) list * bool
       -> string list t
   | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
+  | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :
       (string * int * int * string option * SearchUtils.si_kind)

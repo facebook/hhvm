@@ -231,6 +231,15 @@ let json pos =
       ("char_end", Hh_json.int_ end_);
     ]
 
+let json_no_filename pos =
+  let (line, start, end_) = info_pos pos in
+  Hh_json.JSON_Object
+    [
+      ("line", Hh_json.int_ line);
+      ("char_start", Hh_json.int_ start);
+      ("char_end", Hh_json.int_ end_);
+    ]
+
 (*
  * !!! Be careful !!!
  * This method returns zero-based column numbers, but one-based line numbers.
@@ -600,6 +609,16 @@ let multiline_json t =
   Hh_json.JSON_Object
     [
       ("filename", Hh_json.JSON_String fn);
+      ("line_start", Hh_json.int_ line_start);
+      ("char_start", Hh_json.int_ char_start);
+      ("line_end", Hh_json.int_ line_end);
+      ("char_end", Hh_json.int_ (char_end - 1));
+    ]
+
+let multiline_json_no_filename t =
+  let (line_start, char_start, line_end, char_end) = destruct_range t in
+  Hh_json.JSON_Object
+    [
       ("line_start", Hh_json.int_ line_start);
       ("char_start", Hh_json.int_ char_start);
       ("line_end", Hh_json.int_ line_end);

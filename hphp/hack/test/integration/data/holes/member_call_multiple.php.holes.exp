@@ -1,0 +1,86 @@
+[
+  {
+    "actual_type": "bool",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/member_call_multiple.php",
+        "line": 6,
+        "char_start": 42,
+        "char_end": 45
+      },
+      "kind": "primitive",
+      "name": "bool"
+    },
+    "expected_type": "int",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/member_call_multiple.php",
+        "line": 4,
+        "char_start": 31,
+        "char_end": 33
+      },
+      "kind": "primitive",
+      "name": "int"
+    },
+    "pos": {
+      "line_start": 8,
+      "char_start": 17,
+      "line_end": 8,
+      "char_end": 18
+    }
+  },
+  {
+    "actual_type": "vec<bool>",
+    "full_actual_type": {
+      "src_pos": {
+        "filename": "/member_call_multiple.php",
+        "line": 6,
+        "char_start": 51,
+        "char_end": 59
+      },
+      "kind": "class",
+      "name": "\\HH\\vec",
+      "args": [
+        {
+          "src_pos": {
+            "filename": "/member_call_multiple.php",
+            "line": 6,
+            "char_start": 55,
+            "char_end": 58
+          },
+          "kind": "primitive",
+          "name": "bool"
+        }
+      ]
+    },
+    "expected_type": "vec<int>",
+    "full_expected_type": {
+      "src_pos": {
+        "filename": "/member_call_multiple.php",
+        "line": 4,
+        "char_start": 39,
+        "char_end": 46
+      },
+      "kind": "class",
+      "name": "\\HH\\vec",
+      "args": [
+        {
+          "src_pos": {
+            "filename": "/member_call_multiple.php",
+            "line": 4,
+            "char_start": 43,
+            "char_end": 45
+          },
+          "kind": "primitive",
+          "name": "int"
+        }
+      ]
+    },
+    "pos": {
+      "line_start": 8,
+      "char_start": 20,
+      "line_end": 8,
+      "char_end": 21
+    }
+  }
+]

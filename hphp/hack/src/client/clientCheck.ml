@@ -502,6 +502,46 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       in
       ClientTypeErrorAtPos.go ty args.output_json;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_TAST_HOLES arg ->
+      let parse_hole_filter = function
+        | "any" -> Some Rpc.Tast_hole.Any
+        | "typing" -> Some Rpc.Tast_hole.Typing
+        | "cast" -> Some Rpc.Tast_hole.Cast
+        | _ -> None
+      in
+
+      let (filename, hole_src_opt) =
+        try
+          match Str.(split (regexp ":") arg) with
+          | [filename; filter_str] ->
+            let fn = expand_path filename in
+            (match parse_hole_filter filter_str with
+            | Some filter -> (ServerCommandTypes.FileName fn, filter)
+            | _ -> raise Exit)
+          | [part] ->
+            (match parse_hole_filter part with
+            | Some src_opt ->
+              let content = Sys_utils.read_stdin_to_string () in
+              (ServerCommandTypes.FileContent content, src_opt)
+            | _ ->
+              let fn = expand_path part in
+              (* No hole source specified; default to `Typing` *)
+              (ServerCommandTypes.FileName fn, Rpc.Tast_hole.Typing))
+          | _ -> raise Exit
+        with
+        | Exit ->
+          Printf.eprintf
+            "Invalid argument; expected an argument of the form [filename](:[any|typing|cast])? or [any|typing|cast]\n";
+          raise Exit_status.(Exit_with Input_error)
+        | exn ->
+          Printf.eprintf "An unexpected error occured: %s" (Exn.to_string exn);
+          raise exn
+      in
+      let%lwt (ty, telemetry) =
+        rpc args @@ Rpc.TAST_HOLES (filename, hole_src_opt)
+      in
+      ClientTastHoles.go ty args.output_json;
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_FUN_DEPS_AT_POS_BATCH positions ->
       let positions = parse_positions positions in
       let%lwt (responses, telemetry) =

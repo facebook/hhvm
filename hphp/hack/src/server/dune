@@ -245,7 +245,8 @@
     serverLintTypes
     serverNotifierTypes
     serverRageTypes
-    serverRefactorTypes)
+    serverRefactorTypes
+    tastHolesService)
   (libraries
     connection_tracker
     full_fidelity
@@ -391,7 +392,8 @@
   (name server_infer_type)
   (wrapped false)
   (modules serverInferType
-    serverInferTypeError)
+    serverInferTypeError
+    serverCollectTastHoles)
   (libraries
     annotated_ast
     ast

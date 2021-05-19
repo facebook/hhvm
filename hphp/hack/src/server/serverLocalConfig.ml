@@ -377,9 +377,9 @@ module RecheckCapture = struct
           ~default:default.sample_threshold
           config
       in
-      if sample_threshold > 1.0 then
+      if Float.(sample_threshold > 1.0) then
         1.0
-      else if sample_threshold < 0.0 then
+      else if Float.(sample_threshold < 0.0) then
         0.0
       else
         sample_threshold

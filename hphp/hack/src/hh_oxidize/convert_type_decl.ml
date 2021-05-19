@@ -18,6 +18,11 @@ open Convert_longident
 open Convert_type
 open Rust_type
 
+let is_by_ref () =
+  match Configuration.mode () with
+  | Configuration.ByRef -> true
+  | Configuration.ByBox -> false
+
 let rust_de_field_attr (tys : Rust_type.t list) : string =
   let contains_ref = List.exists ~f:Rust_type.contains_ref tys in
   (* deserialize a type contains any Cell causes a compilation error, see T90211775 *)
@@ -29,11 +34,7 @@ let rust_de_field_attr (tys : Rust_type.t list) : string =
         |> String.is_suffix ~suffix:"::Cell")
       tys
   in
-  if
-    contains_ref
-    || Configuration.mode () = Configuration.ByRef
-       && List.exists ~f:Rust_type.is_var tys
-  then
+  if contains_ref || (is_by_ref () && List.exists ~f:Rust_type.is_var tys) then
     if contains_cell then
       "#[serde(skip)]"
     else
@@ -76,11 +77,6 @@ let default_derives () =
     ]
 
 let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
-
-let is_by_ref () =
-  match Configuration.mode () with
-  | Configuration.ByRef -> true
-  | Configuration.ByBox -> false
 
 let is_by_box () = not (is_by_ref ())
 
@@ -238,7 +234,8 @@ let rename ty_name =
   |> Option.value_map ~f:snd ~default:ty_name
 
 let should_use_alias_instead_of_tuple_struct ty_name =
-  List.mem tuple_aliases (curr_module_name (), ty_name) ~equal:( = )
+  let equal = [%derive.eq: string * string] in
+  List.mem tuple_aliases (curr_module_name (), ty_name) ~equal
 
 let doc_comment_of_attribute { attr_name; attr_payload; _ } =
   match (attr_name, attr_payload) with
@@ -280,7 +277,10 @@ let convert_doc_comment doc =
              was_in_code_block
          in
          let line =
-           if now_in_code_block && was_in_code_block && lstripped = no_asterisk
+           if
+             now_in_code_block
+             && was_in_code_block
+             && String.equal lstripped no_asterisk
            then
              sprintf "///%s\n" original_line
            else
@@ -339,7 +339,7 @@ let declare_record_arguments ?(pub = false) labels =
      fields x_bar and x_baz, we want to remove x_, not x_ba). *)
   let prefix =
     let idx = ref (String.length prefix) in
-    while !idx > 0 && prefix.[!idx - 1] <> '_' do
+    while !idx > 0 && Char.(prefix.[!idx - 1] <> '_') do
       idx := !idx - 1
     done;
     String.sub prefix 0 !idx
@@ -437,11 +437,12 @@ let type_declaration name td =
     | ([({ ptyp_desc = Ptyp_any; _ }, _)], "ty_")
     | ([({ ptyp_desc = Ptyp_var "phase"; _ }, _)], _)
     | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
-      when curr_module_name () = "typing_defs_core"
-           || curr_module_name () = "typing_defs" ->
+      when String.(
+             curr_module_name () = "typing_defs_core"
+             || curr_module_name () = "typing_defs") ->
       []
     | ([({ ptyp_desc = Ptyp_any; _ }, _)], "t_")
-      when curr_module_name () = "typing_reason" ->
+      when String.(curr_module_name () = "typing_reason") ->
       []
     | (tparams, _) -> tparams
   in
@@ -504,11 +505,7 @@ let type_declaration name td =
     doc ^ derive_attr ^ serde_attr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
-    if
-      Configuration.mode () = Configuration.ByRef
-      || force_derive_copy
-      || name = "EmitId"
-    then
+    if is_by_ref () || force_derive_copy || String.equal name "EmitId" then
       let lts = List.map lifetime ~f:(fun _ -> Rust_type.lifetime "arena") in
       sprintf
         "arena_deserializer::impl_deserialize_in_arena!(%s%s);\n"
@@ -574,7 +571,7 @@ let type_declaration name td =
        first declaration to the name of the module. We can just skip the second
        declaration introducing the alias. *)
       let mod_name_as_type = convert_type_name (curr_module_name ()) in
-      if name = mod_name_as_type then
+      if String.equal name mod_name_as_type then
         raise
           (Skip_type_decl
              ( "it is an alias to type t, which was already renamed to "
@@ -588,7 +585,9 @@ let type_declaration name td =
     | Ptyp_constr ({ txt = id; _ }, targs) ->
       let id = longident_to_string id in
       let ty_name = id |> String.split ~on:':' |> List.last_exn in
-      if List.length td.ptype_params = List.length targs && self () = ty_name
+      if
+        List.length td.ptype_params = List.length targs
+        && String.(self () = ty_name)
       then (
         add_ty_reexport id;
         raise (Skip_type_decl ("it is a re-export of " ^ id))
@@ -643,13 +642,13 @@ let type_declaration name td =
       List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
     in
     let force_derive_copy =
-      if Configuration.(mode () = ByRef) then
+      if is_by_ref () then
         true
       else
         all_nullary
     in
     let box_fields =
-      if Configuration.(mode () = ByRef) then
+      if is_by_ref () then
         true
       else
         should_box_variant name
@@ -684,7 +683,7 @@ let type_declaration name td =
 let type_declaration td =
   let name = td.ptype_name.txt in
   let name =
-    if name = "t" then
+    if String.equal name "t" then
       curr_module_name ()
     else
       name

@@ -110,7 +110,7 @@ module Sent_fds_collector = struct
               ~tracker
               m2s_sequence_number;
             true
-          | Fd_close_after_time t when t <= t_now ->
+          | Fd_close_after_time t when Float.(t <= t_now) ->
             log "closing client FD#%d, after delay" ~tracker m2s_sequence_number;
             true
           | Fd_close_upon_receipt

@@ -953,14 +953,15 @@ let go_with_interrupt
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
   let fnl =
-    if sample_rate >= 1.0 then
+    if Float.(sample_rate >= 1.0) then
       fnl
     else
       let result =
         BigList.filter
           ~f:(fun x ->
-            float (Base.String.hash (Relative_path.suffix x) mod 1000000)
-            <= sample_rate *. 1000000.0)
+            Float.(
+              float (Base.String.hash (Relative_path.suffix x) mod 1000000)
+              <= sample_rate *. 1000000.0))
           fnl
       in
       Hh_logger.log

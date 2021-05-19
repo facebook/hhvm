@@ -69,10 +69,10 @@ end = struct
           | Periodic (seconds_left, _, job)
           | Once (seconds_left, job) ->
             seconds_left := !seconds_left -. delta;
-            if !seconds_left < 0.0 then env := job !env);
+            if Float.(!seconds_left < 0.0) then env := job !env);
           match callback with
           | Periodic (seconds_left, period, _) ->
-            if !seconds_left < 0.0 then seconds_left := period;
+            if Float.(!seconds_left < 0.0) then seconds_left := period;
             true
           | Once _ -> false);
     !env
@@ -105,7 +105,7 @@ let stamp_connection () =
 
 let exit_if_unused () =
   let delta : float = Unix.time () -. !last_client_connect in
-  if delta > Periodical.one_week then (
+  if Float.(delta > Periodical.one_week) then (
     Printf.eprintf "Exiting server. Last used >7 days ago\n";
     Exit.exit Exit_status.Unused_server
   )

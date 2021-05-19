@@ -259,7 +259,7 @@ let test_abcdefgh_string () =
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
-  abs_diff < 0.0001
+  Float.(abs_diff < 0.0001)
 
 let test_zero_float () =
   let f = get_zero_float () in
@@ -443,7 +443,7 @@ let test_convert_abcdefgh_string () =
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
-  abs_diff < 0.0001
+  Float.(abs_diff < 0.0001)
 
 let test_convert_zero_float () =
   let f = convert_to_ocamlrep 0. in
@@ -629,7 +629,7 @@ let test_realloc_abcdefgh_string () =
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
-  abs_diff < 0.0001
+  Float.(abs_diff < 0.0001)
 
 let test_realloc_zero_float () =
   let f = realloc_in_ocaml_heap 0. in

@@ -434,7 +434,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     match select_outcome with
     | ClientProvider.Select_new _ -> `Sync
     | ClientProvider.Select_nothing ->
-      if start_time -. env.last_notifier_check_time > 0.5 then
+      if Float.(start_time - env.last_notifier_check_time > 0.5) then
         `Async
       else
         `Skip
@@ -458,7 +458,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     | _ -> true)
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
-    start_time -. env.last_command_time > 0.3
+    Float.(start_time - env.last_command_time > 0.3)
   in
   (* saving any file is our trigger to start full recheck *)
   let env =
@@ -486,7 +486,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
             * rechecks and us restarting them. We're going to heavily favor edits and
             * restart only after a longer period since last edit. Note that we'll still
             * start full recheck immediately after any file save. *)
-           && start_time -. env.last_command_time > 5.0 ->
+           && Float.(start_time - env.last_command_time > 5.0) ->
       let still_there =
         try
           ClientProvider.ping client;

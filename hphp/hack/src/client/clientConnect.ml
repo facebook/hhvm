@@ -142,7 +142,7 @@ let show_progress
 let check_for_deadline deadline_opt =
   let now = Unix.time () in
   match deadline_opt with
-  | Some deadline when now >. deadline ->
+  | Some deadline when Float.(now > deadline) ->
     log
       "check_for_deadline expired: %s > %s"
       (Utils.timestring now)

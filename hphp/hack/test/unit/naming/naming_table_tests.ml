@@ -582,7 +582,9 @@ let test_naming_table_hash () =
     "Expected foo lower bound to be correct (this test must be updated if the hashing logic changes)";
   Asserter.Bool_asserter.assert_equals
     true
-    (foo_lower_bound <= foo_naming_hash)
+    Int64.(
+      Typing_deps.NamingHash.to_int64 foo_lower_bound
+      <= Typing_deps.NamingHash.to_int64 foo_naming_hash)
     (Printf.sprintf
        "sanity check: foo_lower_bound (%d) <= foo_naming_hash (%d)"
        (hash_to_int foo_lower_bound)
@@ -598,7 +600,9 @@ let test_naming_table_hash () =
     "Expected foo upper bound to be correct";
   Asserter.Bool_asserter.assert_equals
     true
-    (foo_naming_hash <= foo_upper_bound)
+    Int64.(
+      Typing_deps.NamingHash.to_int64 foo_naming_hash
+      <= Typing_deps.NamingHash.to_int64 foo_upper_bound)
     (Printf.sprintf
        "sanity check: foo_naming_hash (%d) <= foo_upper_bound (%d)"
        (hash_to_int foo_naming_hash)

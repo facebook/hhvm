@@ -366,11 +366,8 @@ public:
    *
    * This is ArrayData::lval, with COW and escalation handled internally.
    *
-   * lvalForce() has the legacy lval() behavior---if the key is not present,
-   * it writes null, then returns the lval.
    */
   FOR_EACH_KEY_TYPE(lval, tv_lval, )
-  FOR_EACH_KEY_TYPE(lvalForce, tv_lval, )
 
 #undef D
 #undef I
@@ -461,7 +458,6 @@ private:
 
   template<typename T> TypedValue lookupImpl(const T& key, Flags) const;
   template<typename T> tv_lval lvalImpl(const T& key, Flags);
-  template<typename T> tv_lval lvalForceImpl(const T& key, Flags);
 
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);

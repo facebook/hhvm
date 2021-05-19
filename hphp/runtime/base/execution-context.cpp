@@ -1895,9 +1895,8 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
     g_context->invokeFuncFew(func, nullptr, 0, nullptr,
                              RuntimeCoeffects::fixme(), true, true)
   );
-  auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
-  tvSet(*v.asTypedValue(), lv);
-  return Variant::wrap(lv.tv());
+  m_evaledArgs.set(key, *v.asTypedValue());
+  return Variant::wrap(m_evaledArgs.lookup(key));
 }
 
 void ExecutionContext::recordLastError(const Exception& e, int errnum) {

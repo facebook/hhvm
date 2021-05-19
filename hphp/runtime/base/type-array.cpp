@@ -311,19 +311,6 @@ tv_lval Array::lvalImpl(const T& key, AccessFlags) {
 }
 
 template<typename T> ALWAYS_INLINE
-tv_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::CreateDict());
-  if (!m_arr->exists(key)) {
-    m_arr.mutateInPlace([&](ArrayData* ad) {
-      return ad->setMove(key, make_tv<KindOfNull>());
-    });
-  }
-  auto const lval = m_arr->lval(key);
-  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
-  return lval;
-}
-
-template<typename T> ALWAYS_INLINE
 bool Array::existsImpl(const T& key) const {
   if (m_arr) return m_arr->exists(key);
   return false;
@@ -445,7 +432,6 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
 FOR_EACH_KEY_TYPE(lookup, TypedValue, const)
 FOR_EACH_KEY_TYPE(lval, tv_lval, )
-FOR_EACH_KEY_TYPE(lvalForce, tv_lval, )
 
 #undef I
 #undef V

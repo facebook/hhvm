@@ -379,7 +379,10 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
-  return reserveProperties().lvalForce(StrNR(key), AccessFlags::Key);
+  if (!reserveProperties().exists(StrNR(key))) {
+    reserveProperties().set(StrNR(key), make_tv<KindOfNull>());
+  }
+  return reserveProperties().lval(StrNR(key), AccessFlags::Key);
 }
 
 void ObjectData::setDynProp(const StringData* key, TypedValue val) {

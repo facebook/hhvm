@@ -198,6 +198,7 @@ type collection_style =
   | VecStyle
   | DictStyle
   | KeysetStyle
+  | ArraykeyStyle
 [@@deriving eq, show, ord]
 
 type enforcement =

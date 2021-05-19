@@ -275,7 +275,13 @@ let subst_for_dynamic partial_enf_kind (pos, class_name) (ty : internal_type) =
               Typing_reason.Rdynamic_partial_enforcement
                 (pos, class_name ^ "<arraykey>", get_reason ty)
             in
-            class_type r class_name [arraykey r])
+            class_type r class_name [arraykey r]
+          | ArraykeyStyle ->
+            let r =
+              Typing_reason.Rdynamic_partial_enforcement
+                (pos, "arraykey", get_reason ty)
+            in
+            arraykey r)
     | Toption ty ->
       (match subst_for_dynamic_locl ty with
       | None -> None
@@ -2937,6 +2943,8 @@ and sub_type_inner
         " (treat dynamic as " ^ cn ^ "<arraykey, dynamic>)"
       | Some (TL.PartialCoerceFromDynamic (KeysetStyle, (_, cn))) ->
         " (treat dynamic as " ^ cn ^ ")"
+      | Some (TL.PartialCoerceFromDynamic (ArraykeyStyle, _)) ->
+        " (treat dynamic as arraykey)"
       | None -> "" )
     env
     ty_sub

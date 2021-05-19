@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<023036b041e5e797105ccd84fb4850af>>
+// @generated SignedSource<<54d9e654120fa7b37d39bc76df8c5d12>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -133,6 +133,7 @@ impl<'a> Node<'a> for CollectionStyle {
             CollectionStyle::VecStyle => {}
             CollectionStyle::DictStyle => {}
             CollectionStyle::KeysetStyle => {}
+            CollectionStyle::ArraykeyStyle => {}
         }
     }
 }

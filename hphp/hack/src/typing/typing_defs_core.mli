@@ -170,6 +170,8 @@ type collection_style =
   | DictStyle
   (* A collection with a single generic with arraykey upper bound *)
   | KeysetStyle
+  (* an arraykey *)
+  | ArraykeyStyle
 [@@deriving eq, show, ord]
 
 type enforcement =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a7d84149bfa03495d9b4e5118023b51f>>
+// @generated SignedSource<<92a655e3196f7f7687528cf7d2e20606>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -461,6 +461,7 @@ pub enum CollectionStyle {
     VecStyle,
     DictStyle,
     KeysetStyle,
+    ArraykeyStyle,
 }
 impl TrivialDrop for CollectionStyle {}
 arena_deserializer::impl_deserialize_in_arena!(CollectionStyle);

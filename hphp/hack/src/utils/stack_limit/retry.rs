@@ -53,7 +53,7 @@ impl Job {
     ///     let _: A_n = ...;
     /// }
     /// ```
-    pub fn with_elastic_stack<'a, F, T>(
+    pub fn with_elastic_stack<F, T>(
         &self,
         make_retryable: impl Fn() -> F,
         on_retry: &mut impl FnMut(usize),

@@ -5476,23 +5476,23 @@ and dispatch_call
           (* first type the `unsafe_cast` as a call, handling arity errors *)
           let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
           check_disposable_in_return env fty;
-          let (env, (tel, typed_unpack_element, ty)) =
+          let (env, (tel, _, ty)) =
             call ~expected p env fty el unpacked_element
           in
-          (* then, on the happy path, represent internally as a `Hole`;
-             if we have arity mismatches etc, and therefore errors,
-             represent as a call *)
-          match (tel, typed_unpack_element, tal) with
-          | ([el], None, [(ty_from, _); (ty_to, _)]) ->
-            make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
-          | _ ->
-            make_call
-              env
-              (Tast.make_typed_expr fpos fty (Aast.Id id))
-              tal
-              tel
-              typed_unpack_element
-              ty
+          (* construct the `Hole` using default value and type arguments
+             if necessary *)
+          let dflt_ty = MakeType.err Reason.none in
+          let el =
+            Option.value
+              (List.hd tel)
+              ~default:(Tast.make_typed_expr fpos dflt_ty Aast.Null)
+          and (ty_from, ty_to) =
+            match tal with
+            | (ty_from, _) :: (ty_to, _) :: _ -> (ty_from, ty_to)
+            | (ty, _) :: _ -> (ty, ty)
+            | _ -> (dflt_ty, dflt_ty)
+          in
+          make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
         )
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->

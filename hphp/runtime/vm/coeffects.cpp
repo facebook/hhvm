@@ -105,6 +105,13 @@ StaticCoeffects::storage_t StaticCoeffects::locals() const {
 }
 
 folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
+  auto const typesToString = [&] {
+    std::vector<std::string> types;
+    for (auto type : m_types) {
+      types.push_back(folly::to<std::string>("::", type->toCppString()));
+    }
+    return folly::join("", types);
+  };
   switch (m_type) {
     case Type::FunParam:
       return folly::to<std::string>("ctx $",
@@ -114,12 +121,12 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
                                     f->localVarName(m_index)->toCppString(),
                                     "::",
                                     m_name->toCppString());
-    case Type::CCThis: {
-      std::vector<std::string> types;
-      for (auto type : m_types) {
-        types.push_back(folly::to<std::string>("::", type->toCppString()));
-      }
-      return folly::sformat("this{}::{}", folly::join("", types), m_name);
+    case Type::CCThis:
+      return folly::sformat("this{}::{}", typesToString(), m_name);
+    case Type::CCReified: {
+      // TODO: type parameter names are not currently available in HHVM
+      auto const reified_name = "<unknown>";
+      return folly::sformat("{}{}::{}", reified_name, typesToString(), m_name);
     }
     case Type::ClosureParentScope:
     case Type::GeneratorThis:
@@ -173,6 +180,11 @@ RuntimeCoeffects emitCCThis(const Func* f,
     : reinterpret_cast<ObjectData*>(prologueCtx)->getVMClass();
   auto const cls = resolveTypeConstantChain(ctxCls, types);
   return *cls->clsCtxCnsGet(name, true);
+}
+
+RuntimeCoeffects emitCCReified() {
+  // TODO: implement me
+  return RuntimeCoeffects::full();
 }
 
 RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
@@ -249,6 +261,8 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
       return emitCCParam(f, numArgsInclUnpack, m_index, m_name);
     case Type::CCThis:
       return emitCCThis(f, m_types, m_name, prologueCtx);
+    case Type::CCReified:
+      return emitCCReified();
     case Type::FunParam:
       return emitFunParam(f, numArgsInclUnpack, m_index);
     case Type::ClosureParentScope:
@@ -272,6 +286,14 @@ bool CoeffectRule::isGeneratorThis() const {
 }
 
 std::string CoeffectRule::getDirectiveString() const {
+  auto const typesToString = [&] {
+    std::vector<std::string> names;
+    for (auto type : m_types) {
+      names.push_back(folly::cEscape<std::string>(type->toCppString()));
+    }
+    names.push_back(folly::cEscape<std::string>(m_name->toCppString()));
+    return folly::join(" ", names);
+  };
   switch (m_type) {
     case Type::FunParam:
       return folly::sformat(".coeffects_fun_param {};", m_index);
@@ -279,15 +301,13 @@ std::string CoeffectRule::getDirectiveString() const {
       return folly::sformat(".coeffects_cc_param {} {};", m_index,
                             folly::cEscape<std::string>(
                               m_name->toCppString()));
-    case Type::CCThis: {
-      std::vector<std::string> names;
-      for (auto type : m_types) {
-        names.push_back(folly::cEscape<std::string>(type->toCppString()));
-      }
-      names.push_back(folly::cEscape<std::string>(m_name->toCppString()));
-      return folly::sformat(".coeffects_cc_this {};",
-                            folly::join(" ", names));
-    }
+    case Type::CCThis:
+      return folly::sformat(".coeffects_cc_this {};", typesToString());
+    case Type::CCReified:
+      return folly::sformat(".coeffects_cc_reified {}{} {};",
+                            (m_isClass ? "isClass " : ""),
+                            m_index,
+                            typesToString());
     case Type::ClosureParentScope:
       return ".coeffects_closure_parent_scope;";
     case Type::GeneratorThis:
@@ -303,6 +323,7 @@ std::string CoeffectRule::getDirectiveString() const {
 template<class SerDe>
 void CoeffectRule::serde(SerDe& sd) {
   sd(m_type)
+    (m_isClass)
     (m_index)
     (m_types)
     (m_name)

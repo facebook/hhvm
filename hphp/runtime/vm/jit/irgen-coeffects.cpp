@@ -83,6 +83,11 @@ SSATmp* emitCCThis(IRGS& env, const Func* f,
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
+SSATmp* emitCCReified() {
+  // TODO: implement me
+  return nullptr;
+}
+
 SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
                      uint32_t paramIdx) {
   if (paramIdx >= numArgsInclUnpack) return nullptr;
@@ -260,6 +265,8 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
       return emitCCParam(env, f, numArgsInclUnpack, m_index, m_name);
     case Type::CCThis:
       return emitCCThis(env, f, m_types, m_name, prologueCtx);
+    case Type::CCReified:
+      return emitCCReified();
     case Type::FunParam:
       return emitFunParam(env, f, numArgsInclUnpack, m_index);
     case Type::ClosureParentScope:

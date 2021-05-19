@@ -125,6 +125,7 @@ struct CoeffectRule final {
   struct FunParam {};
   struct CCParam {};
   struct CCThis {};
+  struct CCReified {};
   struct ClosureParentScope {};
   struct GeneratorThis {};
   struct Caller {};
@@ -149,6 +150,18 @@ struct CoeffectRule final {
                std::vector<LowStringPtr> types,
                const StringData* ctx_name)
     : m_type(Type::CCThis)
+    , m_types(types)
+    , m_name(ctx_name)
+  { assertx(ctx_name); }
+
+  CoeffectRule(CCReified,
+               bool is_class,
+               uint32_t index,
+               std::vector<LowStringPtr> types,
+               const StringData* ctx_name)
+    : m_type(Type::CCReified)
+    , m_isClass(is_class)
+    , m_index(index)
     , m_types(types)
     , m_name(ctx_name)
   { assertx(ctx_name); }
@@ -185,12 +198,14 @@ private:
     FunParam,
     CCParam,
     CCThis,
+    CCReified,
     ClosureParentScope,
     GeneratorThis,
     Caller,
   };
 
   Type m_type{Type::Invalid};
+  bool m_isClass{false};
   uint32_t m_index{0};
   std::vector<LowStringPtr> m_types{};
   LowStringPtr m_name{nullptr};

@@ -75,6 +75,7 @@ pub struct HhasCoeffects {
     fun_param: Vec<usize>,
     cc_param: Vec<(usize, String)>,
     cc_this: Vec<Vec<String>>,
+    cc_reified: Vec<(bool, usize, Vec<String>)>,
     is_any_rx: bool,
     is_pure: bool,
     closure_parent_scope: bool,
@@ -116,6 +117,17 @@ impl HhasCoeffects {
         for v in coeffects.get_cc_this() {
             match HhasCoeffects::vec_to_string(v.as_slice(), |c| c.to_string()) {
                 Some(str) => results.push(format!(".coeffects_cc_this {};", str)),
+                None => panic!("Not possible"),
+            }
+        }
+        for v in coeffects.get_cc_reified() {
+            match HhasCoeffects::vec_to_string(v.2.as_slice(), |c| c.to_string()) {
+                Some(str) => results.push(format!(
+                    ".coeffects_cc_reified {}{} {};",
+                    if v.0 { "isClass " } else { "" },
+                    v.1,
+                    str
+                )),
                 None => panic!("Not possible"),
             }
         }
@@ -186,14 +198,15 @@ impl HhasCoeffects {
     pub fn from_ast<Ex, Fb, En, Hi>(
         ctxs_opt: &Option<a::Contexts>,
         params: impl AsRef<[a::FunParam<Ex, Fb, En, Hi>]>,
-        _fun_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
-        _cls_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
+        fun_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
+        cls_tparams: impl AsRef<[a::Tparam<Ex, Fb, En, Hi>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut unenforced_static_coeffects = vec![];
         let mut fun_param = vec![];
         let mut cc_param = vec![];
         let mut cc_this = vec![];
+        let mut cc_reified = vec![];
         let mut is_any_rx = false;
         let mut is_pure = false;
 
@@ -203,6 +216,17 @@ impl HhasCoeffects {
             } else {
                 panic!("Invalid context");
             }
+        };
+
+        let is_reified_tparam = |name: &str, is_class: bool| -> Option<usize> {
+            let tparam = if is_class {
+                cls_tparams.as_ref()
+            } else {
+                fun_tparams.as_ref()
+            };
+            tparam
+                .iter()
+                .position(|tp| tp.reified == a::ReifyKind::Reified && tp.name.1 == name)
         };
 
         // From coeffect syntax
@@ -226,10 +250,23 @@ impl HhasCoeffects {
                     }
                     Hint_::HfunContext(name) => fun_param.push(get_arg_pos(name)),
                     Hint_::Haccess(Hint(_, hint), sids) => match &**hint {
-                        Hint_::Happly(Id(_, id), _)
-                            if strip_ns(id.as_str()) == sn::typehints::THIS && !sids.is_empty() =>
-                        {
-                            cc_this.push(sids.into_iter().map(|Id(_, id)| id.clone()).collect());
+                        Hint_::Happly(Id(_, id), _) if !sids.is_empty() => {
+                            if strip_ns(id.as_str()) == sn::typehints::THIS {
+                                cc_this
+                                    .push(sids.into_iter().map(|Id(_, id)| id.clone()).collect());
+                            } else if let Some(idx) = is_reified_tparam(id.as_str(), false) {
+                                cc_reified.push((
+                                    false,
+                                    idx,
+                                    sids.into_iter().map(|Id(_, id)| id.clone()).collect(),
+                                ));
+                            } else if let Some(idx) = is_reified_tparam(id.as_str(), true) {
+                                cc_reified.push((
+                                    true,
+                                    idx,
+                                    sids.into_iter().map(|Id(_, id)| id.clone()).collect(),
+                                ));
+                            }
                         }
                         Hint_::Hvar(name) if sids.len() == 1 => {
                             let pos = get_arg_pos(name);
@@ -246,7 +283,10 @@ impl HhasCoeffects {
         // If there are no static coeffects but there are coeffect rules, then
         // the static coeffects are pure
         if static_coeffects.is_empty()
-            && (!fun_param.is_empty() || !cc_param.is_empty() || !cc_this.is_empty())
+            && (!fun_param.is_empty()
+                || !cc_param.is_empty()
+                || !cc_this.is_empty()
+                || !cc_reified.is_empty())
         {
             static_coeffects.push(Ctx::Pure);
         }
@@ -257,6 +297,7 @@ impl HhasCoeffects {
             fun_param,
             cc_param,
             cc_this,
+            cc_reified,
             is_any_rx,
             is_pure,
             ..HhasCoeffects::default()
@@ -313,6 +354,10 @@ impl HhasCoeffects {
         self.cc_this.as_slice()
     }
 
+    pub fn get_cc_reified(&self) -> &[(bool, usize, Vec<String>)] {
+        self.cc_reified.as_slice()
+    }
+
     pub fn is_any_rx(&self) -> bool {
         self.is_any_rx
     }
@@ -333,6 +378,7 @@ impl HhasCoeffects {
         !self.fun_param.is_empty()
             || !self.cc_param.is_empty()
             || !self.cc_this.is_empty()
+            || !self.cc_reified.is_empty()
             || self.closure_parent_scope
             || self.generator_this
             || self.caller

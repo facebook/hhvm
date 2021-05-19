@@ -1912,6 +1912,30 @@ void parse_coeffects_cc_this(AsmState& as) {
 }
 
 /*
+ * directive-coeffects_cc_reified : [isClass] index type-name* ctx-name ';'
+ *                                ;
+ */
+void parse_coeffects_cc_reified(AsmState& as) {
+  std::vector<LowStringPtr> names;
+  std::string name;
+
+  as.in.skipWhitespace();
+  auto const is_class = as.in.tryConsume("isClass");
+  as.in.skipWhitespace();
+  auto const pos = read_opcode_arg<uint32_t>(as);
+  while (as.in.readword(name)) {
+    auto sstr = makeStaticString(name);
+    if (as.in.peek() == ';') {
+      as.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCReified{}, is_class, pos, names, sstr));
+      break;
+    }
+    names.push_back(sstr);
+  }
+  as.in.expectWs(';');
+}
+
+/*
  * directive-coeffects_closure_parent_scope ';'
  */
 void parse_coeffects_closure_parent_scope(AsmState& as) {
@@ -2222,6 +2246,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
       if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
+      if (word == ".coeffects_cc_reified") { parse_coeffects_cc_reified(as); continue; }
       if (word == ".coeffects_closure_parent_scope") {
         parse_coeffects_closure_parent_scope(as);
         continue;

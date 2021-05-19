@@ -5,11 +5,11 @@ function g()[rx, write_props, lol, read_globals, globals] {}
 function h() {}
 
 class Something {}
-class C {
-  public function f(
+class C<reify Tc1> {
+  public function f<Tf1, reify Tf2>(
     Something $x1,
     (function()[_]: void) $x2,
-  )[$x1::C, ctx $x2, this::C, IO, this::T1::T2::C2] {}
+  )[$x1::C, ctx $x2, this::C, IO, this::T1::T2::C2, Tc1::T1::T2::C, Tf2::C] {}
 }
 
 <<__EntryPoint>>

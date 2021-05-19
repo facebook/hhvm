@@ -168,12 +168,26 @@ KeyOrder::const_iterator KeyOrder::end() const {
 
 KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
   std::unordered_set<const StringData*> keys;
+  uint64_t weightedSizeSum = 0;
+  uint64_t weight = 0;
   for (auto const& pair : keyOrderMap) {
     if (!pair.first.valid()) return pair.first;
+    weightedSizeSum += pair.first.size() * pair.second;
+    weight += pair.second;
     keys.insert(pair.first.begin(), pair.first.end());
   }
 
-  if (keys.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+  if (weight == 0 || keys.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+    return KeyOrder::MakeInvalid();
+  }
+
+  auto const weightedAvg = (double)weightedSizeSum / weight;
+  auto const scale =
+    (keys.size() + RO::EvalBespokeStructDictMinKeys) /
+    (weightedAvg + RO::EvalBespokeStructDictMinKeys);
+  // If the final merged key size is significantly larger than the average
+  // key order size, creating a StructDict will waste memory.
+  if (scale > RO::EvalBespokeStructDictMaxSizeRatio) {
     return KeyOrder::MakeInvalid();
   }
 

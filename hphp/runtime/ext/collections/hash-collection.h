@@ -243,25 +243,38 @@ struct HashCollection : ObjectData {
       return n;
     }
     // Slow path: AssoCollection has at least one tombstone,
-    // so we need to count forward
-    // TODO Task# 4281431: If n > m_size/2 we could get better
-    // performance by starting at the end of the buffer and
-    // walking backward.
+    // so we need to linear scan.
     if (n >= m_size) {
       return posLimit();
     }
-    uint32_t pos = 0;
-    for (;;) {
-      while (isTombstone(pos)) {
+
+    if (n > m_size/2) {
+      uint32_t pos = posLimit() - 1;
+      for (;;) {
+        while (isTombstone(pos)) {
+          assertx(pos > 0);
+          --pos;
+        }
+        if (n == m_size - 1) break;
+        n++;
+        assertx(pos > 0);
+        --pos;
+      }
+      return pos;
+    } else {
+      uint32_t pos = 0;
+      for (;;) {
+        while (isTombstone(pos)) {
+          assertx(pos + 1 < posLimit());
+          ++pos;
+        }
+        if (n == 0) break;
+        --n;
         assertx(pos + 1 < posLimit());
         ++pos;
       }
-      if (n <= 0) break;
-      --n;
-      assertx(pos + 1 < posLimit());
-      ++pos;
+      return pos;
     }
-    return pos;
   }
 
   /**

@@ -1,0 +1,206 @@
+[(Class
+    { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cabstract; 
+      c_name = ([3:16-32], "\\WithTypeConstant"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
+      c_where_constraints = []; c_consts = [];
+      c_typeconsts =
+      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:23-25], "TX"); 
+         c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None }); 
+         c_tconst_span = [4:3-26]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
+        ];
+      c_vars = [];
+      c_methods =
+      [{ m_span = [6:3-44]; m_annotation = (); m_final = false; m_abstract = true; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([6:28-31], "gen"); m_tparams = []; m_where_constraints = []; 
+         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
+         m_body = { fb_ast = []; fb_annotation = () }; m_fun_kind = FSync; 
+         m_user_attributes = []; m_readonly_ret = None; m_ret = ((this::TX), (Some ([6:35-43], (Haccess (([6:35-39], Hthis), [([6:41-43], "TX")]))))); 
+         m_external = false; m_doc_comment = None };
+        { m_span = [7:3-51]; m_annotation = (); m_final = false; m_abstract = true; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([7:28-31], "log"); m_tparams = []; m_where_constraints = []; 
+          m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([7:41-43], this::TX); param_type_hint = ((this::TX), (Some ([7:32-40], (Haccess (([7:32-36], Hthis), [([7:38-40], "TX")]))))); 
+             param_is_variadic = false; param_pos = [7:41-43]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = []; fb_annotation = () }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([7:46-50], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((TR), (Some ([10:54-56], (Habstr ("TR", []))))); 
+         f_name = ([10:10-16], "\\my_gen");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = []; 
+            tp_constraints = [(Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))]; 
+            tp_reified = Erased; tp_user_attributes = [] };
+           { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+         f_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
+         f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ([10:46-51], T); param_type_hint = ((T), (Some ([10:44-45], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [10:46-51]; param_name = "$left"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([11:3-23],
+             (Return
+                (Some (([11:10-22], T::TX),
+                       (Call (
+                          (([11:10-20], (function(): T::TX)),
+                           (Obj_get ((([11:10-15], T), (Lvar ([11:10-15], $left))), (([11:17-20], (function(): T::TX)), (Id ([11:17-20], "gen"))), OG_nullthrows, false))),
+                          [], [], None))))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [14:1-18:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None;
+         f_ret =
+         (((function(TR): void)),
+          (Some ([14:54-16:9],
+                 (Hfun
+                    { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))]; 
+                      hf_param_info = [None]; hf_variadic_ty = None; 
+                      hf_ctxs = None; hf_return_ty = ([16:4-8], (Hprim Tvoid)); 
+                      hf_is_readonly_return = None }))));
+         f_name = ([14:10-16], "\\my_log");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = []; 
+            tp_constraints = [(Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))]; 
+            tp_reified = Erased; tp_user_attributes = [] };
+           { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+         f_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
+         f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ([14:46-51], T); param_type_hint = ((T), (Some ([14:44-45], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [14:46-51]; param_name = "$left"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([17:3-39],
+             (Return
+                (Some (([17:10-38], (function(TR $x): void)),
+                       (Lfun (
+                          { f_span = [17:10-38]; f_readonly_this = None; 
+                            f_annotation = (); f_readonly_ret = None; 
+                            f_ret = ((void), None); f_name = ([17:10-38], ";anonymous"); 
+                            f_tparams = []; f_where_constraints = []; 
+                            f_variadic = FVnonVariadic;
+                            f_params =
+                            [{ param_annotation = ([17:14-16], TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
+                               param_is_variadic = false; param_pos = [17:14-16]; 
+                               param_name = "$x"; param_expr = None; 
+                               param_readonly = None; param_callconv = None; 
+                               param_user_attributes = []; param_visibility = None }
+                              ];
+                            f_ctxs = None; f_unsafe_ctxs = None;
+                            f_body =
+                            { fb_ast =
+                              [([17:23-37],
+                                (Return
+                                   (Some (([17:23-37], void),
+                                          (Call (
+                                             (([17:23-33], (function(T::TX $x): void)),
+                                              (Obj_get ((([17:23-28], T), (Lvar ([17:23-28], $left))), (([17:30-33], (function(T::TX $x): void)), (Id ([17:30-33], "log"))), OG_nullthrows, false))),
+                                             [], [(([17:34-36], TR), (Lvar ([17:34-36], $x)))], None))))))
+                                ];
+                              fb_annotation = () };
+                            f_fun_kind = FSync; f_user_attributes = []; 
+                            f_external = false; f_doc_comment = None },
+                          [([17:23-28], $left)]))))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [20:1-27:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([20:62-66], (Hprim Tvoid)))); 
+         f_name = ([20:10-18], "\\my_error"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ([20:36-38], WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:19-35], (Happly (([20:19-35], "\\WithTypeConstant"), [])))));
+            param_is_variadic = false; param_pos = [20:36-38]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = ([20:57-59], WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:40-56], (Happly (([20:40-56], "\\WithTypeConstant"), [])))));
+             param_is_variadic = false; param_pos = [20:57-59]; param_name = "$y"; 
+             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([21:3-21],
+             (Expr
+                (([21:3-20], <expr#1>::TX),
+                 (Binop ((Eq None), (([21:3-7], <expr#1>::TX), (Lvar ([21:3-7], $gen))),
+                    (([21:10-20], <expr#1>::TX),
+                     (Call ((([21:10-16], (function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), (Id ([21:10-16], "\\my_gen"))),
+                        [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
+                        [(([21:17-19], WithTypeConstant), (Lvar ([21:17-19], $x)))], None)))
+                    )))));
+             ([22:3-21],
+              (Expr
+                 (([22:3-20], (function(<expr#2>::TX): void)),
+                  (Binop ((Eq None), (([22:3-7], (function(<expr#2>::TX): void)), (Lvar ([22:3-7], $log))),
+                     (([22:10-20], (function(<expr#2>::TX): void)),
+                      (Call ((([22:10-16], (function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), (Id ([22:10-16], "\\my_log"))),
+                         [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
+                         [(([22:17-19], WithTypeConstant), (Lvar ([22:17-19], $y)))], None)))
+                     )))));
+             ([26:3-14],
+              (Expr
+                 (([26:3-13], void),
+                  (Call ((([26:3-7], (function(<expr#2>::TX): void)), (Lvar ([26:3-7], $log))), 
+                     [], [(([26:8-12], <expr#1>::TX), (Hole ((([26:8-12], <expr#1>::TX), (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

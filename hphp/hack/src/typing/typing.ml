@@ -5070,9 +5070,10 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
         ~ok:(fun env ->
           let (env, te, ty, subty_errs) = type_list_elem env in
           let err_opt =
-            match subty_errs with
-            | [] -> None
-            | _ -> Some (ty2, pack_errs pos2 ty2 (subty_errs, None))
+            if List.for_all subty_errs ~f:Option.is_none then
+              None
+            else
+              Some (ty2, pack_errs pos2 ty2 (subty_errs, None))
           in
           (env, te, ty, err_opt))
         ~error:(fun env ->

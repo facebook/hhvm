@@ -307,6 +307,8 @@ type t = {
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
   tco_require_extends_implements_ancestors: bool;
+  (* Emit an error when "==" or "!=" is used to compare values that are incompatible types *)
+  tco_strict_value_equality: bool;
 }
 [@@deriving eq, show]
 
@@ -431,6 +433,7 @@ val make :
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
+  ?tco_strict_value_equality:bool ->
   unit ->
   t
 
@@ -707,3 +710,5 @@ val tco_typeconst_concrete_concrete_error : t -> bool
 val tco_meth_caller_only_public_visibility : t -> bool
 
 val tco_require_extends_implements_ancestors : t -> bool
+
+val tco_strict_value_equality : t -> bool

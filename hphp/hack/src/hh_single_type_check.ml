@@ -273,6 +273,7 @@ let parse_options () =
   let typeconst_concrete_concrete_error = ref false in
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
+  let strict_value_equality = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -679,6 +680,10 @@ let parse_options () =
         Arg.Set require_extends_implements_ancestors,
         "Consider `require extends` and `require implements` as ancestors when checking a class"
       );
+      ( "--strict-value-equality",
+        Arg.Set strict_value_equality,
+        "Emit an error when \"==\" or \"!=\" is used to compare values that are incompatible types."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -826,6 +831,7 @@ let parse_options () =
         !meth_caller_only_public_visibility
       ~tco_require_extends_implements_ancestors:
         !require_extends_implements_ancestors
+      ~tco_strict_value_equality:!strict_value_equality
       ()
   in
   Errors.allowed_fixme_codes_strict :=

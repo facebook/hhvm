@@ -129,6 +129,7 @@ impl Default for GlobalOptions {
             tco_typeconst_concrete_concrete_error: false,
             tco_meth_caller_only_public_visibility: true,
             tco_require_extends_implements_ancestors: false,
+            tco_strict_value_equality: false,
         }
     }
 }

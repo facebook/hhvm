@@ -451,6 +451,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "meth_caller_only_public_visibility" config)
       ?tco_require_extends_implements_ancestors:
         (bool_opt "require_extends_implements_ancestors" config)
+      ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

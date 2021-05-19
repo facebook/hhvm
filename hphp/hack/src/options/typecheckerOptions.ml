@@ -202,3 +202,5 @@ let meth_caller_only_public_visibility =
 
 let require_extends_implements_ancestors =
   GlobalOptions.tco_require_extends_implements_ancestors
+
+let strict_value_equality = GlobalOptions.tco_strict_value_equality

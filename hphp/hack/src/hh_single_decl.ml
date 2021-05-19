@@ -249,6 +249,7 @@ let () =
       ignored_flag "--typeconst-concrete-concrete-error";
       ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
+      ignored_flag "--strict-value-equality";
     ]
     set_file
     usage;

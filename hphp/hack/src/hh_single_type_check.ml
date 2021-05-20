@@ -282,13 +282,13 @@ let parse_options () =
     [
       ( "--no-print-position",
         Arg.Unit (fun _ -> print_position := false),
-        "Don't print positions while printing tasts and nasts" );
+        " Don't print positions while printing TASTs and NASTs" );
       ( "--naming-table",
         Arg.String (fun s -> naming_table := Some s),
-        "Naming table, to look up undefined symbols; needs --root" );
+        " Naming table, to look up undefined symbols; needs --root" );
       ( "--root",
         Arg.String (fun s -> root := Some s),
-        "Root for where to look up undefined symbols; needs --naming-table" );
+        " Root for where to look up undefined symbols; needs --naming-table" );
       ( "--extra-builtin",
         Arg.String (fun f -> extra_builtins := f :: !extra_builtins),
         " HHI file to parse and declare" );
@@ -306,13 +306,13 @@ let parse_options () =
         " Alias namespaces" );
       ( "--no-call-coeffects",
         Arg.Unit (fun () -> call_coeffects := false),
-        "Turns off call coeffects" );
+        " Turns off call coeffects" );
       ( "--no-local-coeffects",
         Arg.Unit (fun () -> local_coeffects := false),
-        "Turns off local coeffects" );
+        " Turns off local coeffects" );
       ( "--no-strict-contexts",
         Arg.Unit (fun () -> strict_contexts := false),
-        "Do not enforce contexts to be defined within Contexts namespace" );
+        " Do not enforce contexts to be defined within Contexts namespace" );
       ("--colour", Arg.Unit (set_mode Color), " Produce colour output");
       ("--color", Arg.Unit (set_mode Color), " Produce color output");
       ("--coverage", Arg.Unit (set_mode Coverage), " Produce coverage output");
@@ -339,7 +339,7 @@ let parse_options () =
         " Don't use builtins (e.g. ConstSet); implied by --root" );
       ( "--out-extension",
         Arg.String (fun s -> out_extension := s),
-        "output file extension (default .out)" );
+        " output file extension (default .out)" );
       ("--dump-deps", Arg.Unit (set_mode Dump_deps), " Print dependencies");
       ( "--dump-dep-hashes",
         Arg.Unit (set_mode Dump_dep_hashes),
@@ -382,13 +382,13 @@ let parse_options () =
         ^ " (requires --global-inference)." );
       ( "--global-inference",
         Arg.Set global_inference,
-        "Global type inference to infer missing type annotations." );
+        " Global type inference to infer missing type annotations." );
       ( "--ordered-solving",
         Arg.Set ordered_solving,
-        "Optimized solver for type variables. Experimental." );
+        " Optimized solver for type variables. Experimental." );
       ( "--reinfer-types",
         Arg.String (fun s -> reinfer_types := Str.split (Str.regexp ", *") s),
-        "List of type hint to be ignored and infered again using global inference."
+        " List of type hint to be ignored and infered again using global inference."
       );
       ( "--find-refs",
         Arg.Tuple
@@ -513,7 +513,7 @@ let parse_options () =
         " Load the symbol index from this file" );
       ( "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
-        "Enables support for class-level where clauses" );
+        " Enables support for class-level where clauses" );
       ( "--disallow-trait-reuse",
         Arg.Unit (set_bool disallow_trait_reuse),
         " Forbid a class from using a trait already used in a parent class" );
@@ -560,58 +560,58 @@ let parse_options () =
       ("--glean-port", Arg.Int (fun x -> glean_port := x), " glean port number");
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
-        "glean repo name" );
+        " glean repo name" );
       ( "--disallow-func-ptrs-in-constants",
         Arg.Set disallow_func_ptrs_in_constants,
         " Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
       );
       ( "--disallow-php-lambdas",
         Arg.Set error_php_lambdas,
-        "Disallow php style anonymous functions." );
+        " Disallow php style anonymous functions." );
       ( "--disallow-discarded-nullable-awaitables",
         Arg.Set disallow_discarded_nullable_awaitables,
-        "Error on using discarded nullable awaitables" );
+        " Error on using discarded nullable awaitables" );
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
-        "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
+        " Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
       );
       ( "--disable-xhp-children-declarations",
         Arg.Set disable_xhp_children_declarations,
-        "Disable XHP children declarations, e.g. children (foo, bar+)" );
+        " Disable XHP children declarations, e.g. children (foo, bar+)" );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,
-        "Enable the XHP class modifier, xhp class name {} will define an xhp class."
+        " Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
       ( "--verbose",
         Arg.Int (fun v -> verbosity := v),
-        "Verbosity as an integer." );
-      ("--disable-modes", Arg.Set disable_modes, "Treat partial as strict");
+        " Verbosity as an integer." );
+      ("--disable-modes", Arg.Set disable_modes, " Treat partial as strict");
       ( "--disable-hh-ignore-error",
         Arg.Set disable_hh_ignore_error,
-        "Treat HH_IGNORE_ERROR comments as normal comments" );
+        " Treat HH_IGNORE_ERROR comments as normal comments" );
       ( "--enable-systemlib-annotations",
         Arg.Set enable_systemlib_annotations,
-        "Enable systemlib annotations" );
+        " Enable systemlib annotations" );
       ( "--enable-higher-kinded-types",
         Arg.Set enable_higher_kinded_types,
-        "Enable support for higher-kinded types" );
+        " Enable support for higher-kinded types" );
       ( "--allowed-fixme-codes-strict",
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
-        "List of fixmes that are allowed in strict mode." );
+        " List of fixmes that are allowed in strict mode." );
       ( "--allowed-fixme-codes-partial",
         Arg.String
           (fun s ->
             allowed_fixme_codes_partial := Some (comma_string_to_iset s)),
-        "List of fixmes that are allowed in partial mode." );
+        " List of fixmes that are allowed in partial mode." );
       ( "--codes-not-raised-partial",
         Arg.String
           (fun s -> codes_not_raised_partial := Some (comma_string_to_iset s)),
-        "List of error codes that are not raised in partial mode." );
+        " List of error codes that are not raised in partial mode." );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
-        "List of fixmes that are allowed in declarations." );
+        " List of fixmes that are allowed in declarations." );
       ( "--method-call-inference",
         Arg.Set method_call_inference,
         " Infer constraints for method calls. NB: incompatible with like types."
@@ -622,53 +622,50 @@ let parse_options () =
       );
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
-        "Enforce sound dynamic types.  Experimental." );
+        " Enforce sound dynamic types.  Experimental." );
       ( "--disallow-hash-comments",
         Arg.Set disallow_hash_comments,
-        "Disallow #-style comments (besides hashbangs)." );
+        " Disallow #-style comments (besides hashbangs)." );
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        "Disable parsing of fun() and class_meth()." );
+        " Disable parsing of fun() and class_meth()." );
       ( "--disallow-inst-meth",
         Arg.Set disallow_inst_meth,
-        "Disable parsing of inst_meth()." );
+        " Disable parsing of inst_meth()." );
       ( "--use-direct-decl-parser",
         Arg.Set use_direct_decl_parser,
-        "Use direct decl parser" );
+        " Use direct decl parser" );
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
-        "Disable the enum classes extension." );
+        " Disable the enum classes extension." );
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
-        "Enable the enum supertyping extension." );
+        " Enable the enum supertyping extension." );
       ( "--hack-arr-dv-arrs",
         Arg.Set hack_arr_dv_arrs,
-        "Varray and darray become vec and dict." );
+        " Varray and darray become vec and dict." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
-        "Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
+        " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
       );
       ( "--enable-strict-string-concat-interp",
         Arg.Set enable_strict_string_concat_interp,
-        "Require arguments are arraykey types in string concatenation and
-        interpolation."
+        " Require arguments are arraykey types in string concatenation and interpolation."
       );
       ( "--ignore-unsafe-cast",
         Arg.Set ignore_unsafe_cast,
-        "Ignore unsafe_cast and retain the original type of the expression" );
+        " Ignore unsafe_cast and retain the original type of the expression" );
       ( "--math-new-code",
         Arg.Set math_new_code,
-        "Use a new error code for math operations: addition, subtraction,
-        division, multiplication, exponentiation"
+        " Use a new error code for math operations: addition, subtraction, division, multiplication, exponentiation"
       );
       ( "--typeconst-concrete-concrete-error",
         Arg.Set typeconst_concrete_concrete_error,
-        "Raise an error when a concrete type constant is overridden by a concrete type constant
-        in a child class."
+        " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
       );
       ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
-        "Controls whether meth_caller can be used on non-public methods" );
+        " Controls whether meth_caller can be used on non-public methods" );
       ( "--hover",
         Arg.Tuple
           [
@@ -678,14 +675,28 @@ let parse_options () =
         "<pos> Display hover tooltip" );
       ( "--require-extends-implements-ancestors",
         Arg.Set require_extends_implements_ancestors,
-        "Consider `require extends` and `require implements` as ancestors when checking a class"
+        " Consider `require extends` and `require implements` as ancestors when checking a class"
       );
       ( "--strict-value-equality",
         Arg.Set strict_value_equality,
-        "Emit an error when \"==\" or \"!=\" is used to compare values that are incompatible types."
+        " Emit an error when \"==\" or \"!=\" is used to compare values that are incompatible types."
       );
     ]
   in
+
+  (* Sanity check that all option descriptions are well-formed. *)
+  List.iter options ~f:(fun (_, _, description) ->
+      if
+        String.is_prefix description ~prefix:" "
+        || String.is_prefix description ~prefix:"<"
+      then
+        ()
+      else
+        failwith
+          (Printf.sprintf
+             "Descriptions should start with <foo> or a leading space, got: %S"
+             description));
+
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
   let fns =

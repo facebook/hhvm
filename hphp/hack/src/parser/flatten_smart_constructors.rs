@@ -867,14 +867,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_define_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::DefineExpression)
-        } else {
-          self.flatten(SyntaxKind::DefineExpression, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
     fn make_isset_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero(SyntaxKind::IssetExpression)

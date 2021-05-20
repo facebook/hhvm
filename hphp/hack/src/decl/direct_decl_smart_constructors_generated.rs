@@ -474,10 +474,6 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_eval_expression(self, keyword, left_paren, argument, right_paren)
     }
 
-    fn make_define_expression(&mut self, keyword: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_define_expression(self, keyword, left_paren, argument_list, right_paren)
-    }
-
     fn make_isset_expression(&mut self, keyword: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_isset_expression(self, keyword, left_paren, argument_list, right_paren)
     }

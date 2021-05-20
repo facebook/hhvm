@@ -308,8 +308,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ ->
       tag validate_eval_expression (fun x -> ExprEval x) x
-    | Syntax.DefineExpression _ ->
-      tag validate_define_expression (fun x -> ExprDefine x) x
     | Syntax.IssetExpression _ ->
       tag validate_isset_expression (fun x -> ExprIsset x) x
     | Syntax.FunctionCallExpression _ ->
@@ -424,7 +422,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | ExprNullableAs thing -> invalidate_nullable_as_expression (value, thing)
     | ExprConditional thing -> invalidate_conditional_expression (value, thing)
     | ExprEval thing -> invalidate_eval_expression (value, thing)
-    | ExprDefine thing -> invalidate_define_expression (value, thing)
     | ExprIsset thing -> invalidate_isset_expression (value, thing)
     | ExprFunctionCall thing ->
       invalidate_function_call_expression (value, thing)
@@ -789,8 +786,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ ->
       tag validate_eval_expression (fun x -> LambdaEval x) x
-    | Syntax.DefineExpression _ ->
-      tag validate_define_expression (fun x -> LambdaDefine x) x
     | Syntax.IssetExpression _ ->
       tag validate_isset_expression (fun x -> LambdaIsset x) x
     | Syntax.FunctionCallExpression _ ->
@@ -916,7 +911,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | LambdaNullableAs thing -> invalidate_nullable_as_expression (value, thing)
     | LambdaConditional thing -> invalidate_conditional_expression (value, thing)
     | LambdaEval thing -> invalidate_eval_expression (value, thing)
-    | LambdaDefine thing -> invalidate_define_expression (value, thing)
     | LambdaIsset thing -> invalidate_isset_expression (value, thing)
     | LambdaFunctionCall thing ->
       invalidate_function_call_expression (value, thing)
@@ -1015,8 +1009,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ ->
       tag validate_eval_expression (fun x -> CExprEval x) x
-    | Syntax.DefineExpression _ ->
-      tag validate_define_expression (fun x -> CExprDefine x) x
     | Syntax.IssetExpression _ ->
       tag validate_isset_expression (fun x -> CExprIsset x) x
     | Syntax.FunctionCallExpression _ ->
@@ -1132,7 +1124,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | CExprNullableAs thing -> invalidate_nullable_as_expression (value, thing)
     | CExprConditional thing -> invalidate_conditional_expression (value, thing)
     | CExprEval thing -> invalidate_eval_expression (value, thing)
-    | CExprDefine thing -> invalidate_define_expression (value, thing)
     | CExprIsset thing -> invalidate_isset_expression (value, thing)
     | CExprFunctionCall thing ->
       invalidate_function_call_expression (value, thing)
@@ -4494,33 +4485,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             eval_left_paren = invalidate_token x.eval_left_paren;
             eval_argument = invalidate_expression x.eval_argument;
             eval_right_paren = invalidate_token x.eval_right_paren;
-          };
-      Syntax.value = v;
-    }
-
-  and validate_define_expression : define_expression validator = function
-    | { Syntax.syntax = Syntax.DefineExpression x; value = v } ->
-      ( v,
-        {
-          define_right_paren = validate_token x.define_right_paren;
-          define_argument_list =
-            validate_list_with validate_expression x.define_argument_list;
-          define_left_paren = validate_token x.define_left_paren;
-          define_keyword = validate_token x.define_keyword;
-        } )
-    | s -> validation_fail (Some SyntaxKind.DefineExpression) s
-
-  and invalidate_define_expression : define_expression invalidator =
-   fun (v, x) ->
-    {
-      Syntax.syntax =
-        Syntax.DefineExpression
-          {
-            define_keyword = invalidate_token x.define_keyword;
-            define_left_paren = invalidate_token x.define_left_paren;
-            define_argument_list =
-              invalidate_list_with invalidate_expression x.define_argument_list;
-            define_right_paren = invalidate_token x.define_right_paren;
           };
       Syntax.value = v;
     }

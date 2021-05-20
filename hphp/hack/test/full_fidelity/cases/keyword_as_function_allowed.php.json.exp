@@ -4704,11 +4704,11 @@
       {
         "kind":"expression_statement",
         "expression_statement_expression":{
-          "kind":"define_expression",
-          "define_keyword":{
+          "kind":"function_call_expression",
+          "function_call_receiver":{
             "kind":"token",
             "token":{
-              "kind":"define",
+              "kind":"name",
               "text":"define",
               "offset":1010,
               "leading_width":0,
@@ -4719,7 +4719,7 @@
               "line_number":57
             }
           },
-          "define_left_paren":{
+          "function_call_left_paren":{
             "kind":"token",
             "token":{
               "kind":"(",
@@ -4733,7 +4733,7 @@
               "line_number":57
             }
           },
-          "define_right_paren":{
+          "function_call_right_paren":{
             "kind":"token",
             "token":{
               "kind":")",

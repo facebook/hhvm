@@ -1159,17 +1159,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_define_expression(ctx: &C, keyword: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
-        let syntax = SyntaxVariant::DefineExpression(ctx.get_arena().alloc(DefineExpressionChildren {
-            keyword,
-            left_paren,
-            argument_list,
-            right_paren,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_isset_expression(ctx: &C, keyword: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::IssetExpression(ctx.get_arena().alloc(IssetExpressionChildren {
             keyword,

@@ -768,12 +768,6 @@ struct
         eval_argument: t;
         eval_right_paren: t;
       }
-    | DefineExpression of {
-        define_keyword: t;
-        define_left_paren: t;
-        define_argument_list: t;
-        define_right_paren: t;
-      }
     | IssetExpression of {
         isset_keyword: t;
         isset_left_paren: t;
@@ -1221,7 +1215,6 @@ struct
     | ExprNullableAs of nullable_as_expression
     | ExprConditional of conditional_expression
     | ExprEval of eval_expression
-    | ExprDefine of define_expression
     | ExprIsset of isset_expression
     | ExprFunctionCall of function_call_expression
     | ExprFunctionPointer of function_pointer_expression
@@ -1344,7 +1337,6 @@ struct
     | LambdaNullableAs of nullable_as_expression
     | LambdaConditional of conditional_expression
     | LambdaEval of eval_expression
-    | LambdaDefine of define_expression
     | LambdaIsset of isset_expression
     | LambdaFunctionCall of function_call_expression
     | LambdaFunctionPointer of function_pointer_expression
@@ -1393,7 +1385,6 @@ struct
     | CExprNullableAs of nullable_as_expression
     | CExprConditional of conditional_expression
     | CExprEval of eval_expression
-    | CExprDefine of define_expression
     | CExprIsset of isset_expression
     | CExprFunctionCall of function_call_expression
     | CExprFunctionPointer of function_pointer_expression
@@ -2137,13 +2128,6 @@ struct
     eval_left_paren: Token.t value;
     eval_argument: expression value;
     eval_right_paren: Token.t value;
-  }
-
-  and define_expression = {
-    define_keyword: Token.t value;
-    define_left_paren: Token.t value;
-    define_argument_list: expression listesque value;
-    define_right_paren: Token.t value;
   }
 
   and isset_expression = {

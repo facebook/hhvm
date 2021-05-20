@@ -162,7 +162,6 @@ module WithToken (Token : TokenType) = struct
       | NullableAsExpression _ -> SyntaxKind.NullableAsExpression
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | EvalExpression _ -> SyntaxKind.EvalExpression
-      | DefineExpression _ -> SyntaxKind.DefineExpression
       | IssetExpression _ -> SyntaxKind.IssetExpression
       | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
       | FunctionPointerExpression _ -> SyntaxKind.FunctionPointerExpression
@@ -471,8 +470,6 @@ module WithToken (Token : TokenType) = struct
     let is_conditional_expression = has_kind SyntaxKind.ConditionalExpression
 
     let is_eval_expression = has_kind SyntaxKind.EvalExpression
-
-    let is_define_expression = has_kind SyntaxKind.DefineExpression
 
     let is_isset_expression = has_kind SyntaxKind.IssetExpression
 
@@ -1763,18 +1760,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc eval_left_paren in
         let acc = f acc eval_argument in
         let acc = f acc eval_right_paren in
-        acc
-      | DefineExpression
-          {
-            define_keyword;
-            define_left_paren;
-            define_argument_list;
-            define_right_paren;
-          } ->
-        let acc = f acc define_keyword in
-        let acc = f acc define_left_paren in
-        let acc = f acc define_argument_list in
-        let acc = f acc define_right_paren in
         acc
       | IssetExpression
           {
@@ -3407,19 +3392,6 @@ module WithToken (Token : TokenType) = struct
       | EvalExpression
           { eval_keyword; eval_left_paren; eval_argument; eval_right_paren } ->
         [eval_keyword; eval_left_paren; eval_argument; eval_right_paren]
-      | DefineExpression
-          {
-            define_keyword;
-            define_left_paren;
-            define_argument_list;
-            define_right_paren;
-          } ->
-        [
-          define_keyword;
-          define_left_paren;
-          define_argument_list;
-          define_right_paren;
-        ]
       | IssetExpression
           {
             isset_keyword;
@@ -5032,19 +5004,6 @@ module WithToken (Token : TokenType) = struct
       | EvalExpression
           { eval_keyword; eval_left_paren; eval_argument; eval_right_paren } ->
         ["eval_keyword"; "eval_left_paren"; "eval_argument"; "eval_right_paren"]
-      | DefineExpression
-          {
-            define_keyword;
-            define_left_paren;
-            define_argument_list;
-            define_right_paren;
-          } ->
-        [
-          "define_keyword";
-          "define_left_paren";
-          "define_argument_list";
-          "define_right_paren";
-        ]
       | IssetExpression
           {
             isset_keyword;
@@ -6842,20 +6801,6 @@ module WithToken (Token : TokenType) = struct
           [eval_keyword; eval_left_paren; eval_argument; eval_right_paren] ) ->
         EvalExpression
           { eval_keyword; eval_left_paren; eval_argument; eval_right_paren }
-      | ( SyntaxKind.DefineExpression,
-          [
-            define_keyword;
-            define_left_paren;
-            define_argument_list;
-            define_right_paren;
-          ] ) ->
-        DefineExpression
-          {
-            define_keyword;
-            define_left_paren;
-            define_argument_list;
-            define_right_paren;
-          }
       | ( SyntaxKind.IssetExpression,
           [
             isset_keyword;
@@ -9020,23 +8965,6 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           EvalExpression
             { eval_keyword; eval_left_paren; eval_argument; eval_right_paren }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_define_expression
-          define_keyword
-          define_left_paren
-          define_argument_list
-          define_right_paren =
-        let syntax =
-          DefineExpression
-            {
-              define_keyword;
-              define_left_paren;
-              define_argument_list;
-              define_right_paren;
-            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

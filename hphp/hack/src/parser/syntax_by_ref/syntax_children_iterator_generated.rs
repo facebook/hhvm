@@ -1068,16 +1068,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            DefineExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.left_paren),
-                    2 => Some(&x.argument_list),
-                    3 => Some(&x.right_paren),
-                        _ => None,
-                    }
-                })
-            },
             IssetExpression(x) => {
                 get_index(4).and_then(|index| { match index {
                         0 => Some(&x.keyword),

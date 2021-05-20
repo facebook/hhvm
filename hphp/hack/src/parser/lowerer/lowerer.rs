@@ -1939,18 +1939,6 @@ where
                     Ok(E_::mk_yield(Self::p_afield(&c.operand, env)?))
                 }
             }
-            DefineExpression(c) => {
-                let name = Self::pos_name(&c.keyword, env)?;
-                Ok(E_::mk_call(
-                    mk_id_expr(name),
-                    vec![],
-                    c.argument_list
-                        .syntax_node_to_list_skip_separator()
-                        .map(|x| Self::p_expr(x, env))
-                        .collect::<Result<Vec<_>, _>>()?,
-                    None,
-                ))
-            }
             ScopeResolutionExpression(c) => {
                 let qual = Self::p_expr(&c.qualifier, env)?;
                 if let E_::Id(id) = &qual.1 {

@@ -460,7 +460,6 @@ where
             | TokenKind::Require
             | TokenKind::Require_once => self.parse_inclusion_expression(),
             TokenKind::Isset => self.parse_isset_expression(),
-            TokenKind::Define => self.parse_define_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
             TokenKind::Hash => self.parse_atom(),
             TokenKind::Empty => {
@@ -521,31 +520,6 @@ where
             self.continue_from(parser1);
             let (left, args, right) = self.parse_expression_list_opt();
             S!(make_isset_expression, self, keyword, left, args, right)
-        } else {
-            self.parse_as_name_or_error()
-        }
-    }
-
-    fn parse_define_expression(&mut self) -> S::R {
-        // TODO: This is a PHP-ism. Open questions:
-        // * Should we allow a trailing comma? See D4273242 for discussion.
-        // * Is there any restriction on the kind of expression the arguments can be?
-        //   They must be string, value, bool, but do they have to be compile-time
-        //   constants, for instance?
-        // * Should this be an error in strict mode? You should use const instead.
-        // * Should this be in the specification?
-        // * PHP requires that there be at least two arguments; should we require
-        //   that? if so, should we give the error in the parser or a later pass?
-        //   is define case-insensitive?
-        //
-        // TODO: The original Hack and HHVM parsers accept "define" as an
-        // identifier, so we do too; consider whether it should be reserved.
-        let mut parser1 = self.clone();
-        let keyword = parser1.assert_token(TokenKind::Define);
-        if parser1.peek_token_kind() == TokenKind::LeftParen {
-            self.continue_from(parser1);
-            let (left, args, right) = self.parse_expression_list_opt();
-            S!(make_define_expression, self, keyword, left, args, right)
         } else {
             self.parse_as_name_or_error()
         }

@@ -1600,14 +1600,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env kw;
           transform_argish env ~allow_trailing:false left_p args right_p;
         ]
-    | Syntax.DefineExpression
-        {
-          define_keyword = kw;
-          define_left_paren = left_p;
-          define_argument_list = args;
-          define_right_paren = right_p;
-        } ->
-      Concat [t env kw; transform_argish env left_p args right_p]
     | Syntax.ParenthesizedExpression
         {
           parenthesized_expression_left_paren = left_p;

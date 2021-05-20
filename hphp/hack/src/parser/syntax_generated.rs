@@ -1153,17 +1153,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_define_expression(_: &C, define_keyword: Self, define_left_paren: Self, define_argument_list: Self, define_right_paren: Self) -> Self {
-        let syntax = SyntaxVariant::DefineExpression(Box::new(DefineExpressionChildren {
-            define_keyword,
-            define_left_paren,
-            define_argument_list,
-            define_right_paren,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_isset_expression(_: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
             isset_keyword,
@@ -2723,14 +2712,6 @@ where
                 let acc = f(eval_right_paren, acc);
                 acc
             },
-            SyntaxVariant::DefineExpression(x) => {
-                let DefineExpressionChildren { define_keyword, define_left_paren, define_argument_list, define_right_paren } = *x;
-                let acc = f(define_keyword, acc);
-                let acc = f(define_left_paren, acc);
-                let acc = f(define_argument_list, acc);
-                let acc = f(define_right_paren, acc);
-                acc
-            },
             SyntaxVariant::IssetExpression(x) => {
                 let IssetExpressionChildren { isset_keyword, isset_left_paren, isset_argument_list, isset_right_paren } = *x;
                 let acc = f(isset_keyword, acc);
@@ -3354,7 +3335,6 @@ where
             SyntaxVariant::NullableAsExpression {..} => SyntaxKind::NullableAsExpression,
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
-            SyntaxVariant::DefineExpression {..} => SyntaxKind::DefineExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
             SyntaxVariant::FunctionCallExpression {..} => SyntaxKind::FunctionCallExpression,
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
@@ -4148,13 +4128,6 @@ where
                  eval_argument: ts.pop().unwrap(),
                  eval_left_paren: ts.pop().unwrap(),
                  eval_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::DefineExpression, 4) => SyntaxVariant::DefineExpression(Box::new(DefineExpressionChildren {
-                 define_right_paren: ts.pop().unwrap(),
-                 define_argument_list: ts.pop().unwrap(),
-                 define_left_paren: ts.pop().unwrap(),
-                 define_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::IssetExpression, 4) => SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
@@ -5429,14 +5402,6 @@ pub struct EvalExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct DefineExpressionChildren<T, V> {
-    pub define_keyword: Syntax<T, V>,
-    pub define_left_paren: Syntax<T, V>,
-    pub define_argument_list: Syntax<T, V>,
-    pub define_right_paren: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct IssetExpressionChildren<T, V> {
     pub isset_keyword: Syntax<T, V>,
     pub isset_left_paren: Syntax<T, V>,
@@ -6056,7 +6021,6 @@ pub enum SyntaxVariant<T, V> {
     NullableAsExpression(Box<NullableAsExpressionChildren<T, V>>),
     ConditionalExpression(Box<ConditionalExpressionChildren<T, V>>),
     EvalExpression(Box<EvalExpressionChildren<T, V>>),
-    DefineExpression(Box<DefineExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),
     FunctionCallExpression(Box<FunctionCallExpressionChildren<T, V>>),
     FunctionPointerExpression(Box<FunctionPointerExpressionChildren<T, V>>),
@@ -7169,16 +7133,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.eval_left_paren),
                     2 => Some(&x.eval_argument),
                     3 => Some(&x.eval_right_paren),
-                        _ => None,
-                    }
-                })
-            },
-            DefineExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.define_keyword),
-                    1 => Some(&x.define_left_paren),
-                    2 => Some(&x.define_argument_list),
-                    3 => Some(&x.define_right_paren),
                         _ => None,
                     }
                 })

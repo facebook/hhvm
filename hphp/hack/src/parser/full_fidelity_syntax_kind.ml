@@ -123,7 +123,6 @@ type t =
   | NullableAsExpression
   | ConditionalExpression
   | EvalExpression
-  | DefineExpression
   | IssetExpression
   | FunctionCallExpression
   | FunctionPointerExpression
@@ -301,7 +300,6 @@ let to_string kind =
   | NullableAsExpression -> "nullable_as_expression"
   | ConditionalExpression -> "conditional_expression"
   | EvalExpression -> "eval_expression"
-  | DefineExpression -> "define_expression"
   | IssetExpression -> "isset_expression"
   | FunctionCallExpression -> "function_call_expression"
   | FunctionPointerExpression -> "function_pointer_expression"

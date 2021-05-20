@@ -891,14 +891,6 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
-    fn make_define_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_define_expression(self, arg0, arg1, arg2, arg3);
-        self.state_mut().verify(&args);
-        self.state_mut().push(r.kind());
-        r
-    }
-
     fn make_isset_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2, arg3);
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_isset_expression(self, arg0, arg1, arg2, arg3);

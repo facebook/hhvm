@@ -361,28 +361,6 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         }
     }
 
-    fn make_define_expression(
-        &mut self,
-        _keyword: Self::R,
-        _left_paren: Self::R,
-        args: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
-        match args {
-            Node::List(mut nodes) => {
-                if let Some(_snd) = nodes.pop() {
-                    if let Some(fst @ Node::String(_)) = nodes.pop() {
-                        if nodes.is_empty() {
-                            return Node::Define(Box::new(fst));
-                        }
-                    }
-                }
-            }
-            _ => {}
-        };
-        Node::Ignored
-    }
-
     fn make_function_declaration(
         &mut self,
         _attributes: Self::R,

@@ -638,12 +638,6 @@ module type Syntax_S = sig
         eval_argument: t;
         eval_right_paren: t;
       }
-    | DefineExpression of {
-        define_keyword: t;
-        define_left_paren: t;
-        define_argument_list: t;
-        define_right_paren: t;
-      }
     | IssetExpression of {
         isset_keyword: t;
         isset_left_paren: t;
@@ -1288,8 +1282,6 @@ module type Syntax_S = sig
 
   val make_eval_expression : t -> t -> t -> t -> t
 
-  val make_define_expression : t -> t -> t -> t -> t
-
   val make_isset_expression : t -> t -> t -> t -> t
 
   val make_function_call_expression : t -> t -> t -> t -> t -> t -> t
@@ -1638,8 +1630,6 @@ module type Syntax_S = sig
   val is_conditional_expression : t -> bool
 
   val is_eval_expression : t -> bool
-
-  val is_define_expression : t -> bool
 
   val is_isset_expression : t -> bool
 

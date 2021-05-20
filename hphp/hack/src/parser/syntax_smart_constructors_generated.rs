@@ -560,11 +560,6 @@ where
         Self::R::make_eval_expression(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
-    fn make_define_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
-        Self::R::make_define_expression(self.state_mut(), arg0, arg1, arg2, arg3)
-    }
-
     fn make_isset_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
         Self::R::make_isset_expression(self.state_mut(), arg0, arg1, arg2, arg3)

@@ -380,9 +380,6 @@ where S: SmartConstructors<State = State>,
     fn make_eval_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         compose(SyntaxKind::EvalExpression, self.s.make_eval_expression(arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_define_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::DefineExpression, self.s.make_define_expression(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
     fn make_isset_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         compose(SyntaxKind::IssetExpression, self.s.make_isset_expression(arg0.1, arg1.1, arg2.1, arg3.1))
     }

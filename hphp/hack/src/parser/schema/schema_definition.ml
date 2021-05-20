@@ -1459,21 +1459,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "DefineExpression";
-      type_name = "define_expression";
-      func_name = "define_expression";
-      description = "define_expression";
-      prefix = "define";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_paren", Token);
-          ("argument_list", ZeroOrMore (Aggregate Expression));
-          ("right_paren", Token);
-        ];
-    };
-    {
       kind_name = "IssetExpression";
       type_name = "isset_expression";
       func_name = "isset_expression";

@@ -967,15 +967,6 @@ ss.serialize_field("eval_argument", &self.with(argument))?;
 ss.serialize_field("eval_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
-SyntaxVariant::DefineExpression (DefineExpressionChildren{keyword,left_paren,argument_list,right_paren} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "define_expression")?;
-      ss.serialize_field("define_keyword", &self.with(keyword))?;
-ss.serialize_field("define_left_paren", &self.with(left_paren))?;
-ss.serialize_field("define_argument_list", &self.with(argument_list))?;
-ss.serialize_field("define_right_paren", &self.with(right_paren))?;
-      ss.end()
-} 
 SyntaxVariant::IssetExpression (IssetExpressionChildren{keyword,left_paren,argument_list,right_paren} ) => {
       let mut ss = s.serialize_struct("", 5)?;
       ss.serialize_field("kind", "isset_expression")?;

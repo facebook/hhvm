@@ -105,6 +105,12 @@ struct IRGS {
   int32_t budgetBCInstrs{0};
 
   /*
+   * A surprise check has already been emitted and does not need to be generated
+   * again for the current instruction.
+   */
+  bool skipSurpriseCheck{false};
+
+  /*
    * Context for translation retries.
    */
   TranslateRetryContext* retryContext;

@@ -356,8 +356,7 @@ static bool needsSurpriseCheck(Op op) {
   return op == Op::JmpZ || op == Op::JmpNZ || op == Op::Jmp;
 }
 
-// Unlike isCompare, this also allows Not, Same, NSame and Cmp.
-static bool isCmp(Op op) {
+static bool isSimpleOp(Op op) {
   return op == Op::Not ||
       op == Op::Same ||
       op == Op::NSame ||
@@ -367,7 +366,43 @@ static bool isCmp(Op op) {
       op == Op::Lte ||
       op == Op::Gt ||
       op == Op::Gte ||
-      op == Op::Cmp;
+      op == Op::Cmp ||
+      op == Op::IsTypeL ||
+      op == Op::IsTypeC ||
+      op == Op::Add ||
+      op == Op::Sub ||
+      op == Op::Mul || 
+      op == Op::Div ||
+      op == Op::Mod ||
+      op == Op::Pow ||
+      op == Op::BitAnd ||
+      op == Op::BitOr ||
+      op == Op::BitXor ||
+      op == Op::BitNot ||
+      op == Op::CastBool ||
+      op == Op::CastInt;
+}
+
+folly::Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
+  folly::Optional<unsigned> checkIdx;
+  auto sk = block.start();
+  for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
+    auto const backwards = [&]{
+      auto const offsets = instrJumpOffsets(sk.pc());
+      return std::any_of(
+        offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+      );
+    };
+    if (i == block.length() - 1 && needsSurpriseCheck(sk.op()) && backwards()) {
+      return checkIdx;
+    }
+    if (isSimpleOp(sk.op())) {
+      if (!checkIdx) checkIdx = i;
+      continue;
+    }
+    checkIdx.reset();
+  }
+  return {};
 }
 
 TransID canonTransID(const TransIDSet& tids) {
@@ -442,6 +477,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
     bool emitedSurpriseCheck = false;
+    auto const surprise = scheduleSurprise(block);
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
@@ -491,7 +527,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
       ProfSrcKey psk { canonTransID(irgs.profTransIDs), sk };
       auto const lastInstr = i == block.length() - 1;
-      auto const penultimateInst = i == block.length() - 2;
 
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
@@ -501,35 +536,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       NormalizedInstruction inst(sk, block.unit());
       inst.interp = irgs.retryContext->toInterp.count(psk);
 
-      if (penultimateInst && isCmp(inst.op())) {
-          SrcKey nextSk = inst.nextSk();
-          Op nextOp = nextSk.op();
-          auto const backwards = [&]{
-            auto const offsets = instrJumpOffsets(nextSk.pc());
-            return std::any_of(
-              offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
-            );
-          };
-          if (needsSurpriseCheck(nextOp) && backwards()) {
-            emitedSurpriseCheck = true;
-            inst.forceSurpriseCheck = true;
-          }
+      if (surprise && *surprise == i) {
+        emitedSurpriseCheck = true;
+        inst.forceSurpriseCheck = true;
       }
 
       // Emit IR for the body of the instruction.
       try {
-        auto const backwards = [&]{
-          auto const offsets = instrJumpOffsets(inst.pc());
-          return std::any_of(
-            offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
-          );
-        };
-        if (lastInstr && !emitedSurpriseCheck &&
-            needsSurpriseCheck(inst.op()) &&
-            backwards()) {
-          emitedSurpriseCheck = true;
-          inst.forceSurpriseCheck = true;
-        }
+        irgs.skipSurpriseCheck = emitedSurpriseCheck;
         translateInstr(irgs, inst);
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;

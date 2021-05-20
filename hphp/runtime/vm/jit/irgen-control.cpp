@@ -35,7 +35,7 @@ void surpriseCheck(IRGS& env) {
 }
 
 void surpriseCheck(IRGS& env, Offset relOffset) {
-  if (relOffset <= 0) {
+  if (relOffset <= 0 && !env.skipSurpriseCheck) {
     surpriseCheck(env);
   }
 }

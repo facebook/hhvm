@@ -2,5 +2,5 @@ File "splice_err3.php", line 13, characters 17-21:
 Typing error (Typing[4110])
   File "splice_err3.php", line 13, characters 17-21:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 15, characters 6-43:
+  File "expr_tree.hhi", line 14, characters 6-39:
   But got `dynamic` because it is an unenforceable type

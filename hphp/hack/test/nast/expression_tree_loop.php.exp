@@ -23,61 +23,70 @@
                      et_splices = [];
                      et_virtualized_expr =
                      ([4:8-41],
-                      (Efun (
-                         { f_span = [4:8-41]; f_readonly_this = None; 
-                           f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([4:8-41], ";anonymous"); 
-                           f_tparams = []; f_where_constraints = []; 
-                           f_variadic = FVnonVariadic; f_params = []; 
-                           f_ctxs = None; f_unsafe_ctxs = None;
-                           f_body =
-                           { fb_ast =
-                             [([4:8-41],
-                               (Return
-                                  (Some ([4:8-41],
-                                         (Lfun (
-                                            { f_span = [4:8-41]; f_readonly_this = None; 
-                                              f_annotation = (); f_readonly_ret = None; 
-                                              f_ret = ((), None); f_name = ([4:8-41], ";anonymous"); 
-                                              f_tparams = []; f_where_constraints = []; 
-                                              f_variadic = FVnonVariadic; 
-                                              f_params = []; f_ctxs = None; 
-                                              f_unsafe_ctxs = None;
-                                              f_body =
-                                              { fb_ast =
-                                                [([4:17-39],
-                                                  (While (
-                                                     ([4:23-27],
-                                                      (Call (
+                      (Call (
+                         ([4:8-41],
+                          (Efun (
+                             { f_span = [4:8-41]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_ret = ((), None); f_name = ([4:8-41], ";anonymous"); 
+                               f_tparams = []; f_where_constraints = []; 
+                               f_variadic = FVnonVariadic; f_params = []; 
+                               f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast =
+                                 [([4:8-41],
+                                   (Return
+                                      (Some ([4:8-41],
+                                             (Lfun (
+                                                { f_span = [4:8-41]; 
+                                                  f_readonly_this = None; 
+                                                  f_annotation = (); 
+                                                  f_readonly_ret = None; 
+                                                  f_ret = ((), None); 
+                                                  f_name = ([4:8-41], ";anonymous"); 
+                                                  f_tparams = []; f_where_constraints = []; 
+                                                  f_variadic = FVnonVariadic; 
+                                                  f_params = []; f_ctxs = None; 
+                                                  f_unsafe_ctxs = None;
+                                                  f_body =
+                                                  { fb_ast =
+                                                    [([4:17-39],
+                                                      (While (
                                                          ([4:23-27],
-                                                          (Obj_get ((
-                                                             [4:23-27], (Call (([4:23-27], (Class_const (([4:23-27], (CI ([4:23-27], "\\Code"))), ([4:23-27], "boolType")))), [], [], None))),
-                                                             ([4:23-27], (Id ([4:23-27], "__bool"))), OG_nullthrows, false))),
-                                                         [], [], None))),
-                                                     [([4:31-37],
-                                                       (Expr
-                                                          ([4:31-36],
-                                                           (Call (
+                                                          (Call (
+                                                             ([4:23-27],
+                                                              (Obj_get (
+                                                                 ([4:23-27], (Call (([4:23-27], (Class_const (([4:23-27], (CI ([4:23-27], "\\Code"))), ([4:23-27], "boolType")))), [], [], None))),
+                                                                 ([4:23-27], (Id ([4:23-27], "__bool"))), OG_nullthrows, false))),
+                                                             [], [], None))),
+                                                         [([4:31-37],
+                                                           (Expr
                                                               ([4:31-36],
-                                                               (Call ((
-                                                                  [4:31-36], (Class_const (([4:31-36], (CI ([4:31-36], "\\Code"))), ([4:31-36], "symbolType")))), 
+                                                               (Call (
+                                                                  ([4:31-36],
+                                                                   (Call ((
+                                                                    [4:31-36], (Class_const (([4:31-36], (CI ([4:31-36], "\\Code"))), ([4:31-36], "symbolType")))), 
+                                                                    [], 
+                                                                    [([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))),
                                                                   [], 
-                                                                  [([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))),
-                                                              [], [], None)))))
-                                                       ]
-                                                     )));
-                                                  ([4:8-41],
-                                                   (Return (Some ([4:8-41], (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
-                                                  ];
-                                                fb_annotation = Named };
-                                              f_fun_kind = FSync; f_user_attributes = []; 
-                                              f_external = false; f_doc_comment = None },
-                                            []))))))
-                               ];
-                             fb_annotation = Named };
-                           f_fun_kind = FSync; f_user_attributes = []; 
-                           f_external = false; f_doc_comment = None },
-                         [])));
+                                                                  [], None)))))
+                                                           ]
+                                                         )));
+                                                      ([4:8-41],
+                                                       (Return (Some ([4:8-41], (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
+                                                      ];
+                                                    fb_annotation = Named };
+                                                  f_fun_kind = FSync; 
+                                                  f_user_attributes = []; 
+                                                  f_external = false; 
+                                                  f_doc_comment = None },
+                                                []))))))
+                                   ];
+                                 fb_annotation = Named };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_doc_comment = None },
+                             []))),
+                         [], [], None)));
                      et_runtime_expr =
                      ([4:8-41],
                       (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "makeTree")))), 
@@ -184,70 +193,6 @@
                                                         )))
                                                     ],
                                                   None))))))
-                                     ];
-                                   fb_annotation = Named };
-                                 f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None },
-                               [])));
-                           ([4:8-41],
-                            (Efun (
-                               { f_span = [4:8-41]; f_readonly_this = None; 
-                                 f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_name = ([4:8-41], ";anonymous"); 
-                                 f_tparams = []; f_where_constraints = []; 
-                                 f_variadic = FVnonVariadic; f_params = []; 
-                                 f_ctxs = None; f_unsafe_ctxs = None;
-                                 f_body =
-                                 { fb_ast =
-                                   [([4:8-41],
-                                     (Return
-                                        (Some ([4:8-41],
-                                               (Lfun (
-                                                  { f_span = [4:8-41]; 
-                                                    f_readonly_this = None; 
-                                                    f_annotation = (); 
-                                                    f_readonly_ret = None; 
-                                                    f_ret = ((), None); 
-                                                    f_name = ([4:8-41], ";anonymous"); 
-                                                    f_tparams = []; f_where_constraints = []; 
-                                                    f_variadic = FVnonVariadic; 
-                                                    f_params = []; f_ctxs = None; 
-                                                    f_unsafe_ctxs = None;
-                                                    f_body =
-                                                    { fb_ast =
-                                                      [([4:17-39],
-                                                        (While (
-                                                           ([4:23-27],
-                                                            (Call (
-                                                               ([4:23-27],
-                                                                (Obj_get (
-                                                                   ([4:23-27], (Call (([4:23-27], (Class_const (([4:23-27], (CI ([4:23-27], "\\Code"))), ([4:23-27], "boolType")))), [], [], None))),
-                                                                   ([4:23-27], (Id ([4:23-27], "__bool"))), OG_nullthrows, false))),
-                                                               [], [], None))),
-                                                           [([4:31-37],
-                                                             (Expr
-                                                                ([4:31-36],
-                                                                 (Call (
-                                                                    (
-                                                                    [4:31-36],
-                                                                    (
-                                                                    Call ((
-                                                                    [4:31-36], (Class_const (([4:31-36], (CI ([4:31-36], "\\Code"))), ([4:31-36], "symbolType")))), 
-                                                                    [], 
-                                                                    [([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))), 
-                                                                    [], 
-                                                                    [], None)))))
-                                                             ]
-                                                           )));
-                                                        ([4:8-41],
-                                                         (Return (Some ([4:8-41], (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
-                                                        ];
-                                                      fb_annotation = Named };
-                                                    f_fun_kind = FSync; 
-                                                    f_user_attributes = []; 
-                                                    f_external = false; 
-                                                    f_doc_comment = None },
-                                                  []))))))
                                      ];
                                    fb_annotation = Named };
                                  f_fun_kind = FSync; f_user_attributes = []; 

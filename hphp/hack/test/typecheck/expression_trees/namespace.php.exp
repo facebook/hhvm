@@ -1,1 +1,6 @@
-No errors
+File "namespace.php", line 12, characters 19-19:
+Invalid argument (Typing[4110])
+  File "namespace.php", line 12, characters 5-17:
+  Expected `Bar\CodeChild`
+  File "expr_tree.hhi", line 13, characters 15-18:
+  But got `Code`

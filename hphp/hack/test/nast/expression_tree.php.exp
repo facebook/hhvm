@@ -23,41 +23,45 @@
                      et_splices = [];
                      et_virtualized_expr =
                      ([4:8-20],
-                      (Efun (
-                         { f_span = [4:8-20]; f_readonly_this = None; 
-                           f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([4:8-20], ";anonymous"); 
-                           f_tparams = []; f_where_constraints = []; 
-                           f_variadic = FVnonVariadic; f_params = []; 
-                           f_ctxs = None; f_unsafe_ctxs = None;
-                           f_body =
-                           { fb_ast =
-                             [([4:8-20],
-                               (Return
-                                  (Some ([4:8-20],
-                                         (Call (
-                                            ([4:8-20],
-                                             (Obj_get (
-                                                ([4:8-15],
-                                                 (Call (
+                      (Call (
+                         ([4:8-20],
+                          (Efun (
+                             { f_span = [4:8-20]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_ret = ((), None); f_name = ([4:8-20], ";anonymous"); 
+                               f_tparams = []; f_where_constraints = []; 
+                               f_variadic = FVnonVariadic; f_params = []; 
+                               f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast =
+                                 [([4:8-20],
+                                   (Return
+                                      (Some ([4:8-20],
+                                             (Call (
+                                                ([4:8-20],
+                                                 (Obj_get (
                                                     ([4:8-15],
-                                                     (Obj_get (
-                                                        ([4:8-10],
-                                                         (Call (
+                                                     (Call (
+                                                        ([4:8-15],
+                                                         (Obj_get (
                                                             ([4:8-10],
-                                                             (Obj_get ((
-                                                                [4:9-10], (Call (([4:9-10], (Class_const (([4:9-10], (CI ([4:9-10], "\\Code"))), ([4:9-10], "intType")))), [], [], None))),
-                                                                ([4:8-10], (Id ([4:8-10], "__negate"))), OG_nullthrows, false))),
-                                                            [], [], None))),
-                                                        ([4:8-15], (Id ([4:8-15], "__plus"))), OG_nullthrows, false))),
-                                                    [], [([4:13-15], (Call (([4:13-15], (Class_const (([4:13-15], (CI ([4:13-15], "\\Code"))), ([4:13-15], "intType")))), [], [], None)))], None))),
-                                                ([4:8-20], (Id ([4:8-20], "__plus"))), OG_nullthrows, false))),
-                                            [], [([4:18-20], (Lvar ([4:18-20], $x)))], None))))))
-                               ];
-                             fb_annotation = Named };
-                           f_fun_kind = FSync; f_user_attributes = []; 
-                           f_external = false; f_doc_comment = None },
-                         [])));
+                                                             (Call (
+                                                                ([4:8-10],
+                                                                 (Obj_get ((
+                                                                    [4:9-10], (Call (([4:9-10], (Class_const (([4:9-10], (CI ([4:9-10], "\\Code"))), ([4:9-10], "intType")))), [], [], None))),
+                                                                    (
+                                                                    [4:8-10], (Id ([4:8-10], "__negate"))), OG_nullthrows, false))),
+                                                                [], [], None))),
+                                                            ([4:8-15], (Id ([4:8-15], "__plus"))), OG_nullthrows, false))),
+                                                        [], [([4:13-15], (Call (([4:13-15], (Class_const (([4:13-15], (CI ([4:13-15], "\\Code"))), ([4:13-15], "intType")))), [], [], None)))], None))),
+                                                    ([4:8-20], (Id ([4:8-20], "__plus"))), OG_nullthrows, false))),
+                                                [], [([4:18-20], (Lvar ([4:18-20], $x)))], None))))))
+                                   ];
+                                 fb_annotation = Named };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_doc_comment = None },
+                             []))),
+                         [], [], None)));
                      et_runtime_expr =
                      ([4:8-20],
                       (Call (([4:8-20], (Class_const (([4:8-20], (CI ([4:8-20], "\\Code"))), ([4:8-20], "makeTree")))), 
@@ -167,44 +171,6 @@
                                                         None)))
                                                     ],
                                                   None))))))
-                                     ];
-                                   fb_annotation = Named };
-                                 f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None },
-                               [])));
-                           ([4:8-20],
-                            (Efun (
-                               { f_span = [4:8-20]; f_readonly_this = None; 
-                                 f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_name = ([4:8-20], ";anonymous"); 
-                                 f_tparams = []; f_where_constraints = []; 
-                                 f_variadic = FVnonVariadic; f_params = []; 
-                                 f_ctxs = None; f_unsafe_ctxs = None;
-                                 f_body =
-                                 { fb_ast =
-                                   [([4:8-20],
-                                     (Return
-                                        (Some ([4:8-20],
-                                               (Call (
-                                                  ([4:8-20],
-                                                   (Obj_get (
-                                                      ([4:8-15],
-                                                       (Call (
-                                                          ([4:8-15],
-                                                           (Obj_get (
-                                                              ([4:8-10],
-                                                               (Call (
-                                                                  ([4:8-10],
-                                                                   (Obj_get (
-                                                                    ([4:9-10], (Call (([4:9-10], (Class_const (([4:9-10], (CI ([4:9-10], "\\Code"))), ([4:9-10], "intType")))), [], [], None))),
-                                                                    ([4:8-10], (Id ([4:8-10], "__negate"))), OG_nullthrows, false))),
-                                                                  [], 
-                                                                  [], None))),
-                                                              ([4:8-15], (Id ([4:8-15], "__plus"))), OG_nullthrows, false))),
-                                                          [], [([4:13-15], (Call (([4:13-15], (Class_const (([4:13-15], (CI ([4:13-15], "\\Code"))), ([4:13-15], "intType")))), [], [], None)))], None
-                                                          ))),
-                                                      ([4:8-20], (Id ([4:8-20], "__plus"))), OG_nullthrows, false))),
-                                                  [], [([4:18-20], (Lvar ([4:18-20], $x)))], None))))))
                                      ];
                                    fb_annotation = Named };
                                  f_fun_kind = FSync; f_user_attributes = []; 

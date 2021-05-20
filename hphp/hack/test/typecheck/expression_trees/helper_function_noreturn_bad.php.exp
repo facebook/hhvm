@@ -1,0 +1,20 @@
+File "helper_function_noreturn_bad.php", line 20, characters 16-25:
+Invalid argument (Typing[4110])
+  File "helper_function_noreturn_bad.php", line 19, characters 57-57:
+  Expected `T`
+  File "helper_function_noreturn_bad.php", line 7, characters 55-62:
+  But got `noreturn`
+File "helper_function_noreturn_bad.php", line 20, characters 16-25:
+You are using the return value of a `noreturn` function (Typing[4133])
+  File "helper_function_noreturn_bad.php", line 7, characters 55-62:
+  A `noreturn` function always throws or exits.
+File "helper_function_noreturn_bad.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "helper_function_noreturn_bad.php", line 19, characters 57-57:
+  Expected `T`
+  File "helper_function_noreturn_bad.php", line 14, characters 53-60:
+  But got `noreturn`
+File "helper_function_noreturn_bad.php", line 21, characters 16-20:
+You are using the return value of a `noreturn` function (Typing[4133])
+  File "helper_function_noreturn_bad.php", line 14, characters 53-60:
+  A `noreturn` function always throws or exits.

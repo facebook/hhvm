@@ -2,7 +2,7 @@ File "void_return_errors.php", line 7, characters 8-22:
 Invalid return type (Typing[4110])
   File "void_return_errors.php", line 7, characters 12-15:
   Expected `void`
-  File "expr_tree.hhi", line 35, characters 38-48:
+  File "expr_tree.hhi", line 34, characters 38-48:
   But got `ExampleVoid`
 File "void_return_errors.php", line 7, characters 8-22:
 You cannot return a value (Typing[4084])

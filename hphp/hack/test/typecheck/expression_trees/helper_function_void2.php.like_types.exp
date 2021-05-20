@@ -1,0 +1,20 @@
+File "helper_function_void2.php", line 20, characters 8-14:
+Typing error (Typing[4110])
+  File "helper_function_void2.php", line 20, characters 8-14:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  File "helper_function_void2.php", line 19, characters 18-63:
+  But got `dynamic` because it is an unenforceable type
+File "helper_function_void2.php", line 20, characters 16-25:
+You are using the return value of a `void` function (Typing[4119])
+  File "helper_function_void2.php", line 7, characters 55-58:
+  A `void` function doesn't return a value.
+File "helper_function_void2.php", line 21, characters 8-14:
+Typing error (Typing[4110])
+  File "helper_function_void2.php", line 21, characters 8-14:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  File "helper_function_void2.php", line 19, characters 18-63:
+  But got `dynamic` because it is an unenforceable type
+File "helper_function_void2.php", line 21, characters 16-20:
+You are using the return value of a `void` function (Typing[4119])
+  File "helper_function_void2.php", line 14, characters 53-56:
+  A `void` function doesn't return a value.

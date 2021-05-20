@@ -128,35 +128,24 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             .collect();
         Expr::new(
             et_literal_pos.clone(),
-            Expr_::mk_efun(typing_fun_, spliced_vars),
+            Expr_::Call(Box::new((
+                Expr::new(
+                    et_literal_pos.clone(),
+                    Expr_::mk_efun(typing_fun_, spliced_vars),
+                ),
+                vec![],
+                vec![],
+                None,
+            ))),
         )
     };
 
-    let make_tree = if env.codegen {
-        static_meth_call(
-            &visitor_name,
-            "makeTree",
-            vec![
-                exprpos(&et_literal_pos),
-                metadata,
-                visitor_lambda,
-                null_literal(et_literal_pos.clone()),
-            ],
-            &et_literal_pos.clone(),
-        )
-    } else {
-        static_meth_call(
-            &visitor_name,
-            "makeTree",
-            vec![
-                exprpos(&et_literal_pos),
-                metadata,
-                visitor_lambda,
-                virtualized_expr.clone(),
-            ],
-            &et_literal_pos.clone(),
-        )
-    };
+    let make_tree = static_meth_call(
+        &visitor_name,
+        "makeTree",
+        vec![exprpos(&et_literal_pos), metadata, visitor_lambda],
+        &et_literal_pos.clone(),
+    );
 
     let runtime_expr = if splice_assignments.is_empty() {
         make_tree

@@ -1,7 +1,5 @@
 <?hh
 
-type ExprTreeInferredType<T> = ?(function(): T);
-
 type ExprTreeInfo = shape(
   'splices' => dict<string, mixed>,
   'functions' => vec<mixed>,
@@ -48,9 +46,8 @@ class Code {
     ?ExprPos $pos,
     ExprTreeInfo $metadata,
     (function(TVisitor): Code::TAst) $ast,
-    ExprTreeInferredType<TInfer> $null,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
-    return new ExprTree($pos, $metadata, $ast, $null);
+    return new ExprTree($pos, $metadata, $ast);
   }
 
   // Desugared nodes (These should be implemented)
@@ -216,7 +213,6 @@ final class ExprTree<TVisitor, TResult, +TInfer>
     private ?ExprPos $pos,
     private ExprTreeInfo $metadata,
     private (function(TVisitor): TResult) $ast,
-    private ExprTreeInferredType<TInfer> $err,
   ) {}
 
   public function visit(TVisitor $v): TResult {

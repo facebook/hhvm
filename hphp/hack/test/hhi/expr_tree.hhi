@@ -3,16 +3,15 @@
 class Code {
   const type TAst = mixed;
 
-  public static function makeTree<TVisitor as Code, TInfer>(
+  public static function makeTree<<<__Explicit>> TInfer>(
     ?ExprPos $pos,
     shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
     ) $metadata,
-    (function(TVisitor): Code::TAst) $ast,
-    ?(function(): TInfer) $_,
-  ): ExprTree<TVisitor, Code::TAst, TInfer> {
+    (function(Code): Code::TAst) $ast,
+  ): ExprTree<Code, Code::TAst, TInfer> {
     throw new Exception();
   }
 

@@ -419,6 +419,8 @@ val copy_tyvar_from_genv_to_env :
 
 val get_all_tyvars : env -> Ident.t list
 
+val fresh_param_name : env -> string -> env * string
+
 val add_fresh_generic_parameter_by_kind :
   env -> string -> Typing_kinding_defs.kind -> env * string
 

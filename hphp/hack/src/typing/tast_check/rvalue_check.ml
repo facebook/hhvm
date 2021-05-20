@@ -66,6 +66,21 @@ let visitor =
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
       | List el -> List.iter el (this#on_expr env)
+      | ExpressionTree
+          { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } ->
+        this#on_hint env et_hint;
+        this#on_block env et_splices;
+        (* Allow calls to void functions at the top level:
+
+             Code`void_func()`
+
+           but not in subexpressions:
+
+             Code`() ==> { $x = void_func(); }`
+         *)
+        super#on_expr env et_virtualized_expr;
+
+        this#on_expr env et_runtime_expr
       | _ ->
         if not !non_returning_allowed then check_valid_rvalue p env ty;
         this#disallow_non_returning (fun () -> super#on_expr env te)

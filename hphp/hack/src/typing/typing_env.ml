@@ -494,9 +494,7 @@ let is_consistent env = TPEnv.is_consistent (get_tpenv env)
 let mark_inconsistent env =
   env_with_tpenv env (TPEnv.mark_inconsistent (get_tpenv env))
 
-(* Generate a fresh generic parameter with a specified prefix but distinct
- * from all generic parameters in the environment *)
-let add_fresh_generic_parameter_by_kind env prefix kind =
+let fresh_param_name env prefix : env * string =
   let rec iterate i =
     let name = Printf.sprintf "%s#%d" prefix i in
     if is_generic_parameter env name then
@@ -506,6 +504,12 @@ let add_fresh_generic_parameter_by_kind env prefix kind =
   in
   let name = iterate 1 in
   let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
+  (env, name)
+
+(* Generate a fresh generic parameter with a specified prefix but distinct
+ * from all generic parameters in the environment *)
+let add_fresh_generic_parameter_by_kind env prefix (kind : TPEnv.tparam_info) =
+  let (env, name) = fresh_param_name env prefix in
   let env =
     env_with_tpenv
       env

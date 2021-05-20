@@ -420,6 +420,11 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
         return coeffects;
       }();
       tvaux.constModifiers().setCoeffects(coeffects);
+      if (!const_.coeffects().empty()) {
+        tvCopy(make_tv<KindOfInt64>(0), tvaux); // dummy value for m_data
+      } else {
+        tvWriteUninit(tvaux);
+      }
     } else {
       if (const_.valOption()) {
         tvCopy(const_.val(), tvaux);

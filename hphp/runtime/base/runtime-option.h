@@ -1419,6 +1419,7 @@ struct RuntimeOption {
   F(bool, EnableAbstractContextConstants, false)                        \
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, TypeconstInterfaceInheritanceDefaults, false)                 \
+  F(bool, AbstractContextConstantUninitAccess, false)                   \
   /* */
 
 private:

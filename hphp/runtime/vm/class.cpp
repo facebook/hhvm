@@ -1482,7 +1482,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   }
   if (cns.isAbstractAndUninit()) {
     if (!failIsFatal) return folly::none;
-    if (coinflip()) {
+    if (RO::EvalAbstractContextConstantUninitAccess || coinflip()) {
       // TODO: Once coeffect migration is done, convert this back to raise_error
       raise_warning("Context constant %s is abstract", name->data());
     }

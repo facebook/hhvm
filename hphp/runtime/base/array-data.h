@@ -517,6 +517,8 @@ public:
    */
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
+  static constexpr size_t offsetofExtra() { return offsetof(ArrayData, m_extra); }
+  static constexpr size_t sizeofExtra() { return sizeof(m_extra); }
 
   static constexpr size_t offsetOfBespokeIndex() {
     return offsetof(ArrayData, m_layout_index);
@@ -618,31 +620,28 @@ protected:
   uint32_t m_size;
 
   /*
-   * m_extra is used to store extra data for BespokeArray. For now, we require
-   * that for vanilla arrays, m_extra always equals kDefaultVanillaArrayExtra.
+   * m_layout_index identifies the array's layout. For vanilla arrays, it's
+   * always kVanillaLayoutIndex. For bespoke arrays, it's the index of some
+   * concrete bespoke::Layout hidden class.
    *
-   * We may modify this field to include "array-provenance-like" info that
-   * could help us removing legacy marks.
+   * m_extra_lo8, m_extra_hi8, and m_extra_lo16 are for use by each concrete
+   * array class. We don't constrain the values in these fields in any way.
    *
-   * When the array is bespoke:
-   *
-   *   m_extra_lo16,
-   *   m_extra_lo8/m_extra_hi8: For use by each concrete array class. We don't
-   *                            constrain the values in these fields - different
-   *                            layouts can use it differently.
-   *
-   *   m_layout_index: The bespoke LayoutIndex.
+   * m_extra is provided for fast initialization of all of these fields.
    */
-  struct {
-    /* NB the names are definitely little-endian centric but whatever */
-    union {
-      struct {
-        uint8_t m_extra_lo8;
-        uint8_t m_extra_hi8;
+  union {
+    struct {
+      /* NB the names are definitely little-endian centric but whatever */
+      union {
+        struct {
+          uint8_t m_extra_lo8;
+          uint8_t m_extra_hi8;
+        };
+        uint16_t m_extra_lo16;
       };
-      uint16_t m_extra_lo16;
+      bespoke::LayoutIndex m_layout_index;
     };
-    bespoke::LayoutIndex m_layout_index;
+    uint32_t m_extra;
   };
 };
 

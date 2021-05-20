@@ -33,20 +33,20 @@ struct StructLayout;
  * to physical slots. Each array has space for all of its layout's slots.
  */
 struct StructDict : public BespokeArray {
-  static StructDict* MakeFromVanilla(ArrayData* ad,
-                                     const StructLayout* layout);
-  template<bool Static>
-  static StructDict* MakeReserve(
-      HeaderKind kind, bool legacy, const StructLayout* layout);
+  static StructDict* MakeFromVanilla(ArrayData* ad, const StructLayout* layout);
 
-  static StructDict* AllocStructDict(
-      const StructLayout* layout);
+  template<bool Static>
+  static StructDict* MakeReserve(const StructLayout* layout, bool legacy);
+
+  static StructDict* MakeEmpty(const StructLayout* layout);
+  static StructDict* AllocStructDict(uint8_t sizeIndex, uint32_t extra);
 
   static StructDict* MakeStructDict(
-      const StructLayout* layout, uint32_t size,
+      uint8_t sizeIndex, uint32_t extra, uint32_t size,
       const uint8_t* slots, const TypedValue* vals);
 
   uint8_t sizeIndex() const;
+  static size_t positionOffset();
   static size_t sizeFromLayout(const StructLayout*);
 
   static const StructDict* As(const ArrayData* ad);
@@ -62,8 +62,9 @@ struct StructDict : public BespokeArray {
   const StructLayout* layout() const;
 
   size_t numFields() const;
-  size_t typeOffset() const { return numFields(); }
-  size_t valueOffsetInValueSize() const;
+  size_t typeOffset() const;
+  size_t valueOffset() const;
+
   const DataType* rawTypes() const;
   DataType* rawTypes();
   const Value* rawValues() const;
@@ -111,13 +112,15 @@ struct StructLayout : public ConcreteLayout {
 
   size_t numFields() const;
   size_t sizeIndex() const;
+  uint32_t extraInitializer() const;
+
   Slot keySlot(const StringData* key) const;
   Slot keySlotNonStatic(const StringData* key) const;
   const Field& field(Slot slot) const;
 
   KeyOrder keyOrder() const { return m_key_order; }
-  size_t typeOffset() const { return m_type_offset; }
-  size_t valueOffset() const { return m_value_offset; }
+  size_t typeOffset() const { return typeOffsetForSlot(0); }
+  size_t valueOffset() const { return valueOffsetForSlot(0); }
 
   // Offset of DataType and Value for 'slot' from beginning of a StructDict.
   size_t typeOffsetForSlot(Slot slot) const;
@@ -155,12 +158,21 @@ private:
   StructLayout(LayoutIndex index, const KeyOrder&);
 
   KeyOrder m_key_order;
-  size_t m_size_index;
 
-  // Offsets of datatypes and values in a StructDict
-  // from the end of the array header.
-  size_t m_type_offset;
-  size_t m_value_offset;
+  // Fields used to initialize a new StructDict. The "m_extra_initializer" is
+  // computed when we create the layout and used to initialize three fields in
+  // the array header in one go in the JIT.
+  //
+  // The field's layout should pun our usage of ArrayData's m_extra field.
+  union {
+    struct {
+      uint8_t m_num_fields;
+      uint8_t m_value_offset_in_values;
+      bespoke::LayoutIndex m_layout_index;
+    };
+    uint32_t m_extra_initializer;
+  };
+  uint8_t m_size_index;
 
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
 

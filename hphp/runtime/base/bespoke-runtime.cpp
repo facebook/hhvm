@@ -243,7 +243,7 @@ StructDictInit::StructDictInit(RuntimeStruct* structHandle, size_t n) {
 
     if (layout) {
       // We have been assigned a layout; use it for the initializer.
-      m_arr = StructDict::AllocStructDict(layout);
+      m_arr = StructDict::MakeEmpty(layout);
       assertx(n <= std::numeric_limits<uint32_t>::max());
       m_escalateCapacity = static_cast<uint32_t>(n);
       m_vanilla = false;

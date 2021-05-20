@@ -71,17 +71,19 @@ bool StructDict::checkInvariants() const {
   assertx(layout()->sizeIndex() == sizeIndex());
   assertx(layout()->numFields() == numFields());
   assertx(layout()->typeOffset() == typeOffset());
-  assertx(layout()->valueOffset() == valueOffsetInValueSize() * sizeof(Value));
+  assertx(layout()->valueOffset() == valueOffset());
   assertx(StructLayout::IsStructLayout(layoutIndex()));
   return true;
 }
 
 size_t StructLayout::typeOffsetForSlot(Slot slot) const {
-  return sizeof(StructDict) + typeOffset() + slot;
+  assertx(slot < numFields());
+  return sizeof(StructDict) + numFields() + slot * sizeof(DataType);
 }
 
 size_t StructLayout::valueOffsetForSlot(Slot slot) const {
-  return sizeof(StructDict) + valueOffset() + slot * sizeof(Value);
+  assertx(slot < numFields());
+  return (m_value_offset_in_values + slot) * sizeof(Value);
 }
 
 // As documented in bespoke/layout.h, bespoke layout bytes are constrained to
@@ -151,25 +153,32 @@ StructLayout::StructLayout(LayoutIndex index, const KeyOrder& ko)
     m_fields[i].key = key;
     i++;
   }
-  assertx(numFields() == ko.size());
-  m_type_offset = numFields();
-  m_value_offset = (m_type_offset + numFields() + 7) & ~7;
-  auto const bytes = sizeof(StructDict) +
-                     m_value_offset +
-                     numFields() * sizeof(Value);
-  m_size_index = MemoryManager::size2Index(bytes);
-}
 
-uint8_t StructDict::sizeIndex() const {
-  return m_aux16 >> 8;
+  m_layout_index = index;
+  m_num_fields = ko.size();
+  assertx(numFields() == m_key_to_slot.size());
+
+  static_assert(sizeof(Value) == 8);
+  m_value_offset_in_values = (sizeof(StructDict) + 2 * numFields() + 7) / 8;
+
+  auto const bytes = valueOffset() + numFields() * sizeof(Value);
+  m_size_index = MemoryManager::size2Index(bytes);
+
+  auto constexpr extra_offset = offsetof(StructLayout, m_extra_initializer);
+  static_assert(offsetof(StructLayout, m_layout_index) - extra_offset ==
+                ArrayData::offsetOfBespokeIndex() - ArrayData::offsetofExtra());
 }
 
 size_t StructLayout::numFields() const {
-  return m_key_to_slot.size();
+  return m_num_fields;
 }
 
 size_t StructLayout::sizeIndex() const {
   return m_size_index;
+}
+
+uint32_t StructLayout::extraInitializer() const {
+  return m_extra_initializer;
 }
 
 Slot StructLayout::keySlot(const StringData* key) const {
@@ -190,9 +199,7 @@ const StructLayout::Field& StructLayout::field(Slot slot) const {
 }
 
 template <bool Static>
-StructDict* StructDict::MakeReserve(HeaderKind kind,
-                                    bool legacy,
-                                    const StructLayout* layout) {
+StructDict* StructDict::MakeReserve(const StructLayout* layout, bool legacy) {
   assertx(layout);
   auto const sizeIdx = layout->sizeIndex();
   auto const alloc = [&] {
@@ -204,29 +211,33 @@ StructDict* StructDict::MakeReserve(HeaderKind kind,
   auto const sad = static_cast<StructDict*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
       sizeIdx, legacy ? ArrayData::kLegacyArray : 0);
-  sad->initHeader_16(kind, OneReference, aux);
-  sad->setLayoutIndex(layout->index());
+  sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
+  sad->m_extra = layout->extraInitializer();
   sad->m_size = 0;
-
-  auto const numFields = layout->numFields();
-  assertx(numFields <= std::numeric_limits<uint8_t>::max());
-  auto const valueOffset = layout->valueOffset();
-  assertx(valueOffset % 8 == 0);
-  assertx((valueOffset / 8) <= std::numeric_limits<uint8_t>::max());
-  sad->m_extra_hi8 = numFields;
-  sad->m_extra_lo8 = (valueOffset / 8);
 
   memset(sad->rawTypes(), static_cast<int>(KindOfUninit), sad->numFields());
   assertx(sad->checkInvariants());
   return sad;
 }
 
-size_t StructDict::numFields() const {
-  return m_extra_hi8;
+uint8_t StructDict::sizeIndex() const {
+  return m_aux16 >> 8;
 }
 
-size_t StructDict::valueOffsetInValueSize() const {
+size_t StructDict::numFields() const {
   return m_extra_lo8;
+}
+
+size_t StructDict::positionOffset() {
+  return sizeof(StructDict);
+}
+
+size_t StructDict::typeOffset() const {
+  return sizeof(StructDict) + numFields();
+}
+
+size_t StructDict::valueOffset() const {
+  return m_extra_hi8 * sizeof(Value);
 }
 
 const StructLayout* StructLayout::As(const Layout* l) {
@@ -239,10 +250,9 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   if (!ad->isVanillaDict()) return nullptr;;
 
   assertx(layout);
-  auto const kind = HeaderKind::BespokeDict;
   auto const result = ad->isStatic()
-    ? MakeReserve<true>(kind, ad->isLegacyArray(), layout)
-    : MakeReserve<false>(kind, ad->isLegacyArray(), layout);
+    ? MakeReserve<true>(layout, ad->isLegacyArray())
+    : MakeReserve<false>(layout, ad->isLegacyArray());
 
   auto fail = false;
   auto const types = result->rawTypes();
@@ -270,23 +280,37 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   }
 
   if (ad->isStatic()) {
-    auto const aux = packSizeIndexAndAuxBits(result->sizeIndex(),
-                                             result->auxBits());
-    result->initHeader_16(kind, StaticValue, aux);
+    auto const aux = packSizeIndexAndAuxBits(
+        result->sizeIndex(), result->auxBits());
+    result->initHeader_16(HeaderKind::BespokeDict, StaticValue, aux);
   }
 
   assertx(result->checkInvariants());
   return result;
 }
 
-StructDict* StructDict::AllocStructDict(const StructLayout* layout) {
-  return MakeReserve<false>(HeaderKind::BespokeDict, false, layout);
+StructDict* StructDict::MakeEmpty(const StructLayout* layout) {
+  auto const sizeIndex = safe_cast<uint8_t>(layout->sizeIndex());
+  return AllocStructDict(sizeIndex, layout->extraInitializer());
+}
+
+StructDict* StructDict::AllocStructDict(uint8_t sizeIndex, uint32_t extra) {
+  auto const mem = tl_heap->objMallocIndex(sizeIndex);
+  auto const sad = static_cast<StructDict*>(mem);
+  auto const aux = packSizeIndexAndAuxBits(sizeIndex, 0);
+  sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
+  sad->m_extra = extra;
+  sad->m_size = 0;
+
+  memset(sad->rawTypes(), static_cast<int>(KindOfUninit), sad->numFields());
+  assertx(sad->checkInvariants());
+  return sad;
 }
 
 StructDict* StructDict::MakeStructDict(
-    const StructLayout* layout, uint32_t size,
+    uint8_t sizeIndex, uint32_t extra, uint32_t size,
     const uint8_t* slots, const TypedValue* tvs) {
-  auto const result = AllocStructDict(layout);
+  auto const result = AllocStructDict(sizeIndex, extra);
 
   result->m_size = size;
   auto const positions = result->rawPositions();
@@ -298,14 +322,13 @@ StructDict* StructDict::MakeStructDict(
   auto const vals = result->rawValues();
 
   for (auto i = 0; i < size; i++) {
-    assertx(slots[i] <= layout->numFields());
+    assertx(slots[i] < result->numFields());
     auto const& tv = tvs[size - i - 1];
     types[slots[i]] = type(tv);
     vals[slots[i]] = val(tv);
   }
 
   assertx(result->checkInvariants());
-  assertx(result->layout() == layout);
   assertx(result->size() == size);
   return result;
 }
@@ -317,7 +340,7 @@ const StructLayout* StructDict::layout() const {
 DataType* StructDict::rawTypes() {
   assertx(typeOffset() == layout()->typeOffset());
   return reinterpret_cast<DataType*>(
-      reinterpret_cast<char*>(this + 1) + typeOffset());
+      reinterpret_cast<char*>(this) + typeOffset());
 }
 
 const DataType* StructDict::rawTypes() const {
@@ -326,7 +349,7 @@ const DataType* StructDict::rawTypes() const {
 
 Value* StructDict::rawValues() {
   return reinterpret_cast<Value*>(
-      reinterpret_cast<Value*>(this + 1) + valueOffsetInValueSize());
+      reinterpret_cast<char*>(this) + valueOffset());
 }
 
 const Value* StructDict::rawValues() const {
@@ -334,7 +357,8 @@ const Value* StructDict::rawValues() const {
 }
 
 uint8_t* StructDict::rawPositions() {
-  return reinterpret_cast<uint8_t*>(this + 1);
+  return reinterpret_cast<uint8_t*>(
+      reinterpret_cast<char*>(this) + positionOffset());
 }
 
 const uint8_t* StructDict::rawPositions() const {
@@ -548,7 +572,7 @@ StructDict* StructDict::copy() const {
   assertx(heapSize % 16 == 0);
   memcpy16_inline(sad, this, heapSize);
   auto const aux = packSizeIndexAndAuxBits(sizeIdx, auxBits());
-  sad->initHeader_16(m_kind, OneReference, aux);
+  sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   sad->incRefValues();
   return sad;
 }

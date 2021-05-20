@@ -884,7 +884,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::copy() {
   bcopy32_inline(ad, this, bytes);
 
   auto const aux = packSizeIndexAndAuxBits(sizeIndex(), auxBits());
-  ad->initHeader_16(m_kind, OneReference, aux);
+  ad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   ad->copyHash(this);
   ad->incRefElms();
 
@@ -954,7 +954,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
   bcopy32_inline(ad, this, bytes);
 
   auto const aux = packSizeIndexAndAuxBits(index, auxBits());
-  ad->initHeader_16(m_kind, OneReference, aux);
+  ad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   ad->initHash();
 
   // We don't want to check the chain condition on each insert, so we use a

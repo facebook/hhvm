@@ -454,9 +454,11 @@ void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<AllocBespokeStructDict>();
   auto& v = vmain(env);
 
+  auto const layout = StructLayout::As(extra->layout.bespokeLayout());
   auto const target = CallSpec::direct(StructDict::AllocStructDict);
   auto const args = argGroup(env, inst)
-    .imm(StructLayout::As(extra->layout.bespokeLayout()));
+    .imm(layout->sizeIndex())
+    .imm(layout->extraInitializer());
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
@@ -478,7 +480,7 @@ void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
         : static_cast<uint8_t>(KindOfUninit);
       slots = slots | (safe_cast<uint64_t>(slot) << (j * 8));
     }
-    v << store{v.cns(slots), arr[sizeof(StructDict) + i]};
+    v << store{v.cns(slots), arr[StructDict::positionOffset() + i]};
   }
 }
 
@@ -507,9 +509,11 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
     slots[i] = static_cast<uint8_t>(KindOfUninit);
   }
 
+  auto const layout = StructLayout::As(extra->layout.bespokeLayout());
   auto const target = CallSpec::direct(StructDict::MakeStructDict);
   auto const args = argGroup(env, inst)
-    .imm(StructLayout::As(extra->layout.bespokeLayout()))
+    .imm(layout->sizeIndex())
+    .imm(layout->extraInitializer())
     .imm(extra->numSlots)
     .dataPtr(slots)
     .addr(sp, cellsToBytes(extra->offset.offset));

@@ -409,8 +409,8 @@ MonotypeVec* MonotypeVec::copyHelper(uint8_t newSizeIndex, bool incRef) const {
   auto const bytes = sizeof(MonotypeVec) + m_size * sizeof(Value);
   memcpy16_inline(mad, this, size_t(bytes + 15) & ~size_t(15));
 
-  mad->initHeader_16(m_kind, OneReference,
-                     packSizeIndexAndAuxBits(newSizeIndex, auxBits()));
+  auto const aux = packSizeIndexAndAuxBits(newSizeIndex, auxBits());
+  mad->initHeader_16(HeaderKind::BespokeVec, OneReference, aux);
 
   if (incRef) mad->incRefValues();
 

@@ -147,13 +147,17 @@ CodeCache::CodeCache()
   if (use_lowptr) {
     // in LOWPTR builds, TC must fit below lowArenaMinAddr().  If it doesn't, we
     // shrink things to make it so.
-    if (currBase + (32u << 20) > lowArenaMinAddr()) {
+    auto const lowArenaStart = lowArenaMinAddr();
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
+    }
+    if (currBase + (32u << 20) > lowArenaStart) {
       fprintf(stderr, "brk is too big for LOWPTR build\n");
       exit(1);
     }
     auto const endAddr = currBase + m_totalSize;
-    if (endAddr > lowArenaMinAddr()) {
-      cutTCSizeTo(lowArenaMinAddr() - kRoundUp - currBase - thread_local_size);
+    if (endAddr > lowArenaStart) {
+      cutTCSizeTo(lowArenaStart - kRoundUp - currBase - thread_local_size);
       new (this) CodeCache;
       return;
     }

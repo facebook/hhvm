@@ -275,9 +275,11 @@ unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
 }
 
 void setup_low_arena(PageSpec s) {
-  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= lowArenaMinAddr());
-  always_assert_flog(lowArenaMinAddr() < (2ull << 30),
-                     "low arena min addr must be below 2GB");
+  auto const lowArenaStart = lowArenaMinAddr();
+  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= lowArenaStart);
+  always_assert_flog(lowArenaStart <= (2ull << 30),
+                     "low arena min addr ({}) must be <= 2GB",
+                     lowArenaStart);
   // Initialize mappers for the VeryLow and Low address ranges.
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);

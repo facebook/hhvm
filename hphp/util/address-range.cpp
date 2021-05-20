@@ -34,6 +34,7 @@ namespace alloc {
 void RangeState::reserve() {
   auto const base = reinterpret_cast<void*>(low());
   auto const size = capacity();
+  if (size == 0) return;
   auto ret = mmap(base, size, PROT_NONE,
                   MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
   if (ret != base) {

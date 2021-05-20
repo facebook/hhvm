@@ -67,7 +67,6 @@ class Exception implements Throwable {
   protected string $file;
   protected int $line;
   private varray<mixed> $trace;
-  protected mixed $userMetadata;
 
   public function __construct (
     protected string $message = '',

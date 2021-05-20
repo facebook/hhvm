@@ -1,4 +1,4 @@
-object(MyRangeException) (11) {
+object(MyRangeException) (10) {
   ["badValue":"MyRangeException":private]=>
   int(5)
   ["lowerValue":"MyRangeException":private]=>
@@ -19,8 +19,6 @@ object(MyRangeException) (11) {
   varray(0) {
   }
   ["previous":"Exception":private]=>
-  NULL
-  ["userMetadata":protected]=>
   NULL
 }
 ======

@@ -1,7 +1,7 @@
 Calling thrower
 Constructing
 In catch
-object(Exception) (8) {
+object(Exception) (7) {
   ["message":protected]=>
   string(7) "finally"
   ["string":"Exception":private]=>
@@ -34,7 +34,7 @@ object(Exception) (8) {
     }
   }
   ["previous":"Exception":private]=>
-  object(LogExn) (8) {
+  object(LogExn) (7) {
     ["message":protected]=>
     string(5) "inner"
     ["string":"Exception":private]=>
@@ -68,10 +68,6 @@ object(Exception) (8) {
     }
     ["previous":"Exception":private]=>
     NULL
-    ["userMetadata":protected]=>
-    NULL
   }
-  ["userMetadata":protected]=>
-  NULL
 }
 Leaving main

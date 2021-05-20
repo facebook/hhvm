@@ -111,7 +111,7 @@ vec(3) {
   string(14) "test_exception"
   dict(1) {
     ["exception"]=>
-    object(Exception) (8) {
+    object(Exception) (7) {
       ["message":protected]=>
       string(4) "test"
       ["string":"Exception":private]=>
@@ -155,8 +155,6 @@ vec(3) {
         }
       }
       ["previous":"Exception":private]=>
-      NULL
-      ["userMetadata":protected]=>
       NULL
     }
   }

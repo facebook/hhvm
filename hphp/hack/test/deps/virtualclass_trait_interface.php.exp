@@ -1,0 +1,8 @@
+Cstr A -> Type B
+Cstr T -> Type A
+Extends A -> Type B
+Extends I -> Type B
+Extends T -> Type A
+Type A -> Type B
+Type I -> Type B
+Type T -> Type A, Type B

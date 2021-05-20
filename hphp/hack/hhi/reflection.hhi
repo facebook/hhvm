@@ -102,6 +102,11 @@ class ReflectionClass implements Reflector {
   public function newInstanceWithoutConstructor()[];
   public function setStaticPropertyValue(string $name, mixed $value): void;
   public function __toString()[]: string;
+  public function getReifiedTypeParamInfo()[]: varray<shape(
+    'is_reified' => bool,
+    'is_soft' => bool,
+    'is_warn' => bool,
+  )>;
 }
 
 class ReflectionObject extends ReflectionClass {}

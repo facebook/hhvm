@@ -834,8 +834,22 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
 
 //////////////////////////////////////////////////////////////////////
 
+struct TrackedInstr {
+  // DecRefs which refer to the tracked instruction.
+  jit::vector<IRInstruction*> decs;
+
+  // Auxiliary instructions which must be killed if the tracked instruction is
+  // killed.
+  jit::vector<IRInstruction*> aux;
+
+  // Stores to the stack in catch traces that can be killed to kill the
+  // tracked instruction.
+  jit::vector<IRInstruction*> stores;
+};
+
 void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
-                       const UseCounts& uses) {
+                       const UseCounts& uses,
+                       jit::fast_map<IRInstruction*, TrackedInstr>& rcInsts) {
   assertx(block->front().is(BeginCatch));
   assertx(block->back().is(EndCatch));
 
@@ -942,16 +956,20 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       } else {
         candidateIncRefs.erase(it);
       }
-    } else {
+    } else if (src->type().maybe(TCounted)) {
       auto const srcInst = src->inst();
       if (!srcInst->producesReference() ||
           !canDCE(srcInst) ||
           uses[src] != 1) {
+        if (srcInst->producesReference() && canDCE(srcInst)) {
+          rcInsts[srcInst].stores.emplace_back(store);
+        }
         continue;
+      } else {
+        FTRACE(3, "Erasing {} for {}\n",
+               srcInst->toString(), store->toString());
+        state[srcInst].setDead();
       }
-      FTRACE(3, "Erasing {} for {}\n",
-             srcInst->toString(), store->toString());
-      state[srcInst].setDead();
     }
     store->setSrc(1, unit.cns(TInitNull));
   }
@@ -968,14 +986,15 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
 void optimizeCatchBlocks(const BlockList& blocks,
                          DceState& state,
                          IRUnit& unit,
-                         const UseCounts& uses) {
+                         const UseCounts& uses,
+                         jit::fast_map<IRInstruction*, TrackedInstr>& rcInsts) {
 
   for (auto block : blocks) {
     if (block->back().is(EndCatch) &&
         block->back().extra<EndCatch>()->mode !=
           EndCatchData::CatchMode::SideExit &&
         block->front().is(BeginCatch)) {
-      processCatchBlock(unit, state, block, uses);
+      processCatchBlock(unit, state, block, uses, rcInsts);
     }
   }
 }
@@ -1043,15 +1062,6 @@ void killInstrAdjustRC(
   state[inst].setDead();
 }
 
-struct TrackedInstr {
-  // DecRefs which refer to the tracked instruction.
-  jit::vector<IRInstruction*> decs;
-
-  // Auxiliary instructions which must be killed if the tracked instruction is
-  // killed.
-  jit::vector<IRInstruction*> aux;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
@@ -1116,17 +1126,20 @@ void fullDCE(IRUnit& unit) {
     }
   }
 
+  optimizeCatchBlocks(blocks, state, unit, uses, rcInsts);
+
   // If every use of a dce-able PRc instruction is a DecRef or PureStore based
   // on its dst, then we can kill it, and DecRef any of its consumesReference
   // inputs.
   for (auto& pair : rcInsts) {
     auto& info = pair.second;
-    if (uses[pair.first->dst()] != info.decs.size() + info.aux.size()) continue;
+    auto const trackedUses =
+      info.decs.size() + info.aux.size() + info.stores.size();
+    if (uses[pair.first->dst()] != trackedUses) continue;
     killInstrAdjustRC(state, unit, pair.first, info.decs);
     for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);
+    for (auto store : info.stores) store->setSrc(1, unit.cns(TInitNull));
   }
-
-  optimizeCatchBlocks(blocks, state, unit, uses);
 
   // Now remove instructions whose state is DEAD.
   removeDeadInstructions(unit, state);

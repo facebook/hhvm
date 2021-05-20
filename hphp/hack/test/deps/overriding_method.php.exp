@@ -1,0 +1,5 @@
+Cstr B -> Type C
+Extends B -> Type C
+Fun f1 -> Fun f2
+Method B::foo -> Type C
+Type B -> Type C

@@ -2823,18 +2823,26 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     auto state = states[label];
     auto& block = unit.blocks[label];
 
-    // Any block with a non NeedSpill in-state might have an instruction in it
-    // that needs spill space, which we allocate right before the instruction
-    // in question.
-    if (state.in != NeedSpill && (state.out == NeedSpill || state.changes)) {
-      auto blockState = state.in;
+    // Any block with a state change should be walked to check for allocation
+    // or free of spill space.
+    if (state.changes) {
+      auto curState = state.in;
       for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-        blockState = instrInState(unit, *it, blockState, ctx.sp);
-        if (blockState == NeedSpill) {
+        auto const prevState = curState;
+        curState = instrInState(unit, *it, curState, ctx.sp);
+        if (curState == prevState) continue;
+        if (prevState != NeedSpill && curState == NeedSpill) {
+          assertx(prevState != NoSpillPossible);
           FTRACE(3, "alloc spill before {}: {}\n", label, show(unit, *it));
           alloc.set_irctx(it->irctx());
-          block.code.insert(it, alloc);
-          break;
+          it = block.code.insert(it, alloc);
+          ++it;
+        } else if (prevState == NeedSpill &&
+                   curState == NoSpillPossible) {
+          FTRACE(3, "free spill before {}: {}\n", label, show(unit, *it));
+          free.set_irctx(it->irctx());
+          it = block.code.insert(it, free);
+          ++it;
         }
       }
     }
@@ -2842,30 +2850,16 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     // Allocate spill space on edges from a NoSpill out-state to a NeedSpill
     // in-state.
     auto const successors = succs(block);
-    if (state.out == NoSpill || state.out == NoSpillPossible) {
-      for (auto s : successors) {
-        if (states[s].in == NeedSpill) {
-          assertx(state.out != NoSpillPossible);
-          FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
-          auto it = std::prev(block.code.end());
-          alloc.set_irctx(it->irctx());
-          block.code.insert(it, alloc);
-        }
-      }
-    }
-
-    // Any block that unrecords the base native sp must have the spill space
-    // removed at the appropriate point.
-    if ((state.in == NeedSpill || state.changes) && state.out != NeedSpill) {
-      auto blockState = state.in;
-      for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-        blockState = instrInState(unit, *it, blockState, ctx.sp);
-        if (blockState == NoSpillPossible) {
-          FTRACE(3, "free spill before {}: {}\n", label, show(unit, *it));
-          free.set_irctx(it->irctx());
-          block.code.insert(it, free);
-          break;
-        }
+    for (auto s : successors) {
+      if (state.out != states[s].in) {
+        assertx(state.out != NoSpillPossible && states[s].in != NoSpillPossible);
+        auto const shouldAlloc = state.out == NoSpill;
+        auto& op =  shouldAlloc ? alloc : free;
+        FTRACE(3, "{} spill on edge from {} -> {}\n",
+               shouldAlloc ? "alloc" : "free", label, s);
+        auto it = std::prev(block.code.end());
+        op.set_irctx(it->irctx());
+        block.code.insert(it, op);
       }
     }
 
@@ -2880,9 +2874,9 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
       block.code.insert(it, free);
     }
 
-    // Any block that ends with NeedSpill needs to be walked to look for places
-    // to free spill space.
-    if (state.out == NeedSpill) {
+    // Any block that ends with NeedSpill or contains spill state changeds
+    // needs to be walked to look for places to free spill space.
+    if (state.out == NeedSpill || state.changes) {
       processSpillExits(unit, label, state.in, free, ctx.sp);
     }
 

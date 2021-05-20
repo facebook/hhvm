@@ -57,12 +57,12 @@ module Watchman_process_helpers = struct
        let warning = J.get_string_val "warning" obj in
        EventLogger.watchman_warning warning;
        Hh_logger.log "Watchman warning: %s\n" warning
-     with Caml.Not_found -> ());
+     with J.Not_found -> ());
     (try
        let error = J.get_string_val "error" obj in
        EventLogger.watchman_error error;
        raise @@ Watchman_error error
-     with Caml.Not_found -> ());
+     with J.Not_found -> ());
     try
       let canceled = J.get_bool_val "canceled" obj in
       if canceled then (
@@ -70,7 +70,7 @@ module Watchman_process_helpers = struct
         raise @@ Subscription_canceled_by_watchman
       ) else
         ()
-    with Caml.Not_found -> ()
+    with J.Not_found -> ()
 
   let max_array_elt_in_json_logging = 5
 
@@ -752,7 +752,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       with
       (* When an hg.update happens, it shows up in the watchman subscription
        * as a notification with no files key present. *)
-      | Caml.Not_found ->
+      | J.Not_found ->
         []
     in
     let files =
@@ -944,14 +944,14 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
                  `Enter
                  (J.get_string_val "state-enter" data)
                  data )
-           with Caml.Not_found ->
+           with J.Not_found ->
              (try
                 ( env,
                   make_state_change_response
                     `Leave
                     (J.get_string_val "state-leave" data)
                     data )
-              with Caml.Not_found ->
+              with J.Not_found ->
                 (env, Files_changed (set_of_list @@ extract_file_names env data))))
       end
 

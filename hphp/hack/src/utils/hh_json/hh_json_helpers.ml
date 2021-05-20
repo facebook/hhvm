@@ -144,6 +144,8 @@ end
 (* Some ad-hoc JSON processing helpers. *)
 
 module AdhocJsonHelpers = struct
+  exception Not_found
+
   let try_get_val key json =
     let obj = Hh_json.get_object_exn json in
     Base.List.Assoc.find ~equal:String.equal obj key

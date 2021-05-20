@@ -4,8 +4,6 @@ module Hashtbl_base = Hashtbl
 module Hashtbl = struct
   include Hashtbl_base
 
-  let find_opt t x = (try Some (find t x) with Not_found -> None)
-
   let empty t = length t = 0
 end
 
@@ -85,8 +83,9 @@ and get_file path root =
   if basename = "." then
     Directory parent
   else
-    try Hashtbl.find parent basename
-    with Not_found -> raise (No_such_file_or_directory path)
+    match Hashtbl.find_opt parent basename with
+    | Some path -> path
+    | None -> raise (No_such_file_or_directory path)
 
 (** Initialize creation of CWD. *)
 let () = ignore (mkdir_p "." root)

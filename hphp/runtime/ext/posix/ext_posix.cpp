@@ -34,6 +34,7 @@
 #include <pwd.h>
 
 #include <folly/container/Array.h>
+#include <folly/system/Pid.h>
 #include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -271,7 +272,7 @@ int64_t HHVM_FUNCTION(posix_getpgrp) {
 }
 
 int64_t HHVM_FUNCTION(posix_getpid) {
-  return getpid();
+  return folly::get_cached_pid();
 }
 
 int64_t HHVM_FUNCTION(posix_getppid) {

@@ -1791,7 +1791,7 @@ void run_command_on_cli_server(const char* sock_path,
                                const std::vector<std::string>& args,
                                int& count) {
   int ret = 0;
-  while (count) {
+  while (count > 0) {
     auto r = run_client(sock_path, args);
     if (!r) return;
     ret = *r;

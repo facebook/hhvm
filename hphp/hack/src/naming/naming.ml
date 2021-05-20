@@ -957,9 +957,7 @@ and user_attributes env attrl =
   let seen = Caml.Hashtbl.create 0 in
   let validate_seen ua_name =
     let (pos, name) = ua_name in
-    let existing_attr_pos =
-      (try Some (Caml.Hashtbl.find seen name) with Caml.Not_found -> None)
-    in
+    let existing_attr_pos = Caml.Hashtbl.find_opt seen name in
     match existing_attr_pos with
     | Some p ->
       Errors.duplicate_user_attribute ua_name p;

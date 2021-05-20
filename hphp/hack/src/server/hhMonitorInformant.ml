@@ -98,8 +98,7 @@ module Revision_map = struct
 
   let add_query ~hg_rev root t =
     (* Don't add if we already have an entry for this. *)
-    try ignore @@ Caml.Hashtbl.find t.global_rev_queries hg_rev
-    with Caml.Not_found ->
+    if not (Caml.Hashtbl.mem t.global_rev_queries hg_rev) then
       let future =
         Hg.get_closest_global_ancestor hg_rev (Path.to_string root)
       in
@@ -139,8 +138,10 @@ module Revision_map = struct
      *)
   let find_xdb_match global_rev t =
     let query =
-      try Some (Caml.Hashtbl.find t.xdb_queries global_rev)
-      with Caml.Not_found ->
+      let query = Caml.Hashtbl.find_opt t.xdb_queries global_rev in
+      if Option.is_some query then
+        query
+      else
         let (hhconfig_hash, _config) =
           Config_file.parse_hhconfig
             ~silent:false

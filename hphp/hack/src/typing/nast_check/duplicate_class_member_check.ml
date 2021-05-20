@@ -15,10 +15,9 @@ open Aast
 let error_if_repeated_name member_or_const =
   let seen = Caml.Hashtbl.create 0 in
   List.iter member_or_const ~f:(fun (pos, name) ->
-      try
-        let p' = Caml.Hashtbl.find seen name in
-        Errors.error_name_already_bound name name pos p'
-      with Caml.Not_found -> Caml.Hashtbl.replace seen name pos)
+      match Caml.Hashtbl.find_opt seen name with
+      | Some p' -> Errors.error_name_already_bound name name pos p'
+      | None -> Caml.Hashtbl.replace seen name pos)
 
 let handler =
   object

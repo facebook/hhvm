@@ -123,10 +123,8 @@ let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
   let candidate_rules =
     ISet.fold
       (fun id acc ->
-        ISet.union acc
-        @@
-        try ISet.of_list @@ IMap.find id deps
-        with Caml.Not_found -> ISet.empty)
+        let rules = Option.value ~default:[] (IMap.find_opt id deps) in
+        ISet.union acc @@ ISet.of_list rules)
       base_candidate_rules
       base_candidate_rules
   in

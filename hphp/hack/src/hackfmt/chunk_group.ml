@@ -38,8 +38,9 @@ let propagate_breakage t initial_bindings =
   |> IMap.keys
   |> List.fold ~init:initial_bindings ~f:(fun acc rule_id ->
          let dependencies =
-           try IMap.find rule_id t.rule_dependency_map
-           with Caml.Not_found -> []
+           Option.value
+             ~default:[]
+             (IMap.find_opt rule_id t.rule_dependency_map)
          in
          dependencies
          |> List.filter ~f:(fun id ->
@@ -74,8 +75,7 @@ let are_rule_bindings_valid t rbm =
     IMap.mapi
       (fun rule_id v ->
         let parent_list =
-          try IMap.find rule_id t.rule_dependency_map
-          with Caml.Not_found -> []
+          Option.value ~default:[] (IMap.find_opt rule_id t.rule_dependency_map)
         in
         List.for_all parent_list ~f:(fun parent_id ->
             let parent_rule = IMap.find parent_id t.rule_map in

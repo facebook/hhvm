@@ -49,7 +49,7 @@ module Fake = Typing_fake_members
 module Dep = struct
   let add x1 x2 acc =
     let x2 = Local_id.to_string x2 in
-    let prev = (try SMap.find x1 acc with Caml.Not_found -> []) in
+    let prev = Option.value ~default:[] (SMap.find_opt x1 acc) in
     SMap.add x1 (x2 :: prev) acc
 
   let get key acc =

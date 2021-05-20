@@ -2418,20 +2418,45 @@ void Class::setConstants() {
         continue;
       }
 
-      if (existingConst.isAbstractAndUninit()) {
-        existingConst.cls = iConst.cls;
-        existingConst.val = iConst.val;
-        continue;
-      }
+      if (RO::EvalTypeconstInterfaceInheritanceDefaults) {
+        if (existingConst.isAbstract()) {
+          // the case where the incoming constant is abstract without a default is covered above
+          // there are two remaining cases:
+          //   - the incoming constant is abstract with a default
+          //   - the incoming constant is concrete
+          // In both situations, the incoming constant should win, and separate bookkeeping will
+          // cover situations where there are multiple competing defaults.
+          existingConst.cls = iConst.cls;
+          existingConst.val = iConst.val;
+        } else { // existing is concrete
+          // the existing constant will win over any incoming abstracts and retain a fatal when two
+          // concrete constants collide
+          if (!iConst.isAbstract() && existingConst.cls != iConst.cls) {
+            raise_error("%s cannot inherit the %s %s from %s, because "
+                      "it was previously inherited from %s",
+                      m_preClass->name()->data(),
+                      ConstModifiers::show(iConst.kind()),
+                      iConst.name->data(),
+                      iConst.cls->name()->data(),
+                      existingConst.cls->name()->data());
+          }
+        }
+      } else {
+        if (existingConst.isAbstractAndUninit()) {
+          existingConst.cls = iConst.cls;
+          existingConst.val = iConst.val;
+          continue;
+        }
 
-      if (existingConst.cls != iConst.cls) {
-        raise_error("%s cannot inherit the %s %s from %s, because "
-                    "it was previously inherited from %s",
-                    m_preClass->name()->data(),
-                    ConstModifiers::show(iConst.kind()),
-                    iConst.name->data(),
-                    iConst.cls->name()->data(),
-                    existingConst.cls->name()->data());
+        if (existingConst.cls != iConst.cls) {
+          raise_error("%s cannot inherit the %s %s from %s, because "
+                      "it was previously inherited from %s",
+                      m_preClass->name()->data(),
+                      ConstModifiers::show(iConst.kind()),
+                      iConst.name->data(),
+                      iConst.cls->name()->data(),
+                      existingConst.cls->name()->data());
+        }
       }
     }
   }

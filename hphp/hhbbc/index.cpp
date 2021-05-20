@@ -1676,6 +1676,15 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
     // Ignore abstract constants
     if (cns->isAbstract && !cns->val) return true;
 
+    // if the existing constant in the map is concrete, then don't overwrite it with an incoming
+    // abstract constant's default
+    if (RO::EvalTypeconstInterfaceInheritanceDefaults &&
+        !existing->isAbstract &&
+        cns->isAbstract
+    ) {
+      return true;
+    }
+
     if (existing->val) {
       // A constant from a declared interface collides with a constant
       // (Excluding constants from interfaces a trait implements)
@@ -1708,19 +1717,27 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
         return true;
       }
 
-      // A constant from an interface or from an included enum collides
-      // with an existing constant.
-      if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
-        ITRACE(
-          2,
-          "build_class_constants failed for `{}' because "
-          "`{}' was defined by both `{}' and `{}'\n",
-          cinfo->cls->name,
-          cns->name,
-          cns->cls->name,
-          existing->cls->name
-        );
-        return false;
+      if (RO::EvalTypeconstInterfaceInheritanceDefaults &&
+          (cns->cls->attrs & (AttrInterface)) &&
+          existing->isAbstract
+      ) {
+        // because existing has val, this covers the case where it is abstract with default
+        // allow incoming to win
+      } else {
+        // A constant from an interface or from an included enum collides
+        // with an existing constant.
+        if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
+          ITRACE(
+            2,
+            "build_class_constants failed for `{}' because "
+            "`{}' was defined by both `{}' and `{}'\n",
+            cinfo->cls->name,
+            cns->name,
+            cns->cls->name,
+            existing->cls->name
+          );
+          return false;
+        }
       }
     }
 

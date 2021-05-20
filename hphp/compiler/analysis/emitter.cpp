@@ -183,6 +183,8 @@ RepoGlobalData getGlobalData() {
     RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
+  gd.TypeconstInterfaceInheritanceDefaults =
+    RuntimeOption::EvalTypeconstInterfaceInheritanceDefaults;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

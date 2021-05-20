@@ -26,27 +26,28 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 void RepoGlobalData::load(bool loadConstantFuncs) const {
-  RO::EnableIntrinsicsExtension         = EnableIntrinsicsExtension;
-  RO::PHP7_Builtins                     = PHP7_Builtins;
-  RO::PHP7_NoHexNumerics                = PHP7_NoHexNumerics;
-  RO::PHP7_Substr                       = PHP7_Substr;
-  RO::EvalCheckPropTypeHints            = CheckPropTypeHints;
-  RO::EnableArgsInBacktraces            = EnableArgsInBacktraces;
-  RO::EvalAbortBuildOnVerifyError       = AbortBuildOnVerifyError;
-  RO::StrictArrayFillKeys               = StrictArrayFillKeys;
-  RO::EvalIsCompatibleClsMethType       = IsCompatibleClsMethType;
-  RO::EvalEmitClassPointers             = EmitClassPointers;
-  RO::EvalEmitClsMethPointers           = EmitClsMethPointers;
-  RO::EvalForbidDynamicCallsWithAttr    = ForbidDynamicCallsWithAttr;
-  RO::EvalHackArrCompatIsVecDictNotices = HackArrCompatIsVecDictNotices;
-  RO::EvalRaiseClassConversionWarning   = RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname          = ClassPassesClassname;
-  RO::EvalClassnameNotices              = ClassnameNotices;
-  RO::EvalClassIsStringNotices          = ClassIsStringNotices;
-  RO::EvalRaiseClsMethConversionWarning = RaiseClsMethConversionWarning;
-  RO::EvalNoticeOnCoerceForStrConcat    = NoticeOnCoerceForStrConcat;
-  RO::EvalNoticeOnCoerceForBitOp        = NoticeOnCoerceForBitOp;
-  RO::EvalHackArrDVArrs                 = true; // TODO(kshaunak): Clean up.
+  RO::EnableIntrinsicsExtension                 = EnableIntrinsicsExtension;
+  RO::PHP7_Builtins                             = PHP7_Builtins;
+  RO::PHP7_NoHexNumerics                        = PHP7_NoHexNumerics;
+  RO::PHP7_Substr                               = PHP7_Substr;
+  RO::EvalCheckPropTypeHints                    = CheckPropTypeHints;
+  RO::EnableArgsInBacktraces                    = EnableArgsInBacktraces;
+  RO::EvalAbortBuildOnVerifyError               = AbortBuildOnVerifyError;
+  RO::StrictArrayFillKeys                       = StrictArrayFillKeys;
+  RO::EvalIsCompatibleClsMethType               = IsCompatibleClsMethType;
+  RO::EvalEmitClassPointers                     = EmitClassPointers;
+  RO::EvalEmitClsMethPointers                   = EmitClsMethPointers;
+  RO::EvalForbidDynamicCallsWithAttr            = ForbidDynamicCallsWithAttr;
+  RO::EvalHackArrCompatIsVecDictNotices         = HackArrCompatIsVecDictNotices;
+  RO::EvalRaiseClassConversionWarning           = RaiseClassConversionWarning;
+  RO::EvalClassPassesClassname                  = ClassPassesClassname;
+  RO::EvalClassnameNotices                      = ClassnameNotices;
+  RO::EvalClassIsStringNotices                  = ClassIsStringNotices;
+  RO::EvalRaiseClsMethConversionWarning         = RaiseClsMethConversionWarning;
+  RO::EvalNoticeOnCoerceForStrConcat            = NoticeOnCoerceForStrConcat;
+  RO::EvalNoticeOnCoerceForBitOp                = NoticeOnCoerceForBitOp;
+  RO::EvalTypeconstInterfaceInheritanceDefaults = TypeconstInterfaceInheritanceDefaults;
+  RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean up.
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -105,6 +106,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(StrictArrayFillKeys);
   SHOW(NoticeOnCoerceForStrConcat);
   SHOW(NoticeOnCoerceForBitOp);
+  SHOW(TypeconstInterfaceInheritanceDefaults);
 #undef SHOW
   return out;
 }

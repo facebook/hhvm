@@ -1419,6 +1419,7 @@ struct RuntimeOption {
   F(int32_t, SampleRequestTearing, 0)                                   \
   F(bool, EnableAbstractContextConstants, false)                        \
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
+  F(bool, TypeconstInterfaceInheritanceDefaults, false)                 \
   /* */
 
 private:

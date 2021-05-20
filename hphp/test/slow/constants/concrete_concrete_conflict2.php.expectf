@@ -1,0 +1,1 @@
+Fatal error: C cannot inherit the type constant T from I2, because it was previously inherited from I1 in %s/constants/concrete_concrete_conflict2.php on line 11

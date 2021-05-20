@@ -339,6 +339,8 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
+  gd.TypeconstInterfaceInheritanceDefaults =
+    RuntimeOption::EvalTypeconstInterfaceInheritanceDefaults;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -496,33 +498,34 @@ int main(int argc, char** argv) try {
 
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
-  RO::EvalHackArrCompatNotices          = gd.HackArrCompatNotices;
-  RO::EvalHackArrCompatCheckCompare     = gd.HackArrCompatNotices;
-  RO::EvalForbidDynamicCallsToFunc      = gd.ForbidDynamicCallsToFunc;
-  RO::EvalForbidDynamicCallsToClsMeth   = gd.ForbidDynamicCallsToClsMeth;
-  RO::EvalForbidDynamicCallsToInstMeth  = gd.ForbidDynamicCallsToInstMeth;
-  RO::EvalForbidDynamicConstructs       = gd.ForbidDynamicConstructs;
-  RO::EvalForbidDynamicCallsWithAttr    = gd.ForbidDynamicCallsWithAttr;
-  RO::EvalLogKnownMethodsAsDynamicCalls = gd.LogKnownMethodsAsDynamicCalls;
-  RO::EvalNoticeOnBuiltinDynamicCalls   = gd.NoticeOnBuiltinDynamicCalls;
-  RO::EvalHackArrCompatIsVecDictNotices = gd.HackArrCompatIsVecDictNotices;
-  RO::EvalHackArrCompatSerializeNotices = gd.HackArrCompatSerializeNotices;
-  RO::EvalAbortBuildOnVerifyError       = gd.AbortBuildOnVerifyError;
-  RO::EnableArgsInBacktraces            = gd.EnableArgsInBacktraces;
-  RO::EvalEmitClassPointers             = gd.EmitClassPointers;
-  RO::EvalEmitClsMethPointers           = gd.EmitClsMethPointers;
-  RO::EvalIsVecNotices                  = gd.IsVecNotices;
-  RO::EvalIsCompatibleClsMethType       = gd.IsCompatibleClsMethType;
-  RO::EvalRaiseClassConversionWarning   = gd.RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname          = gd.ClassPassesClassname;
-  RO::EvalClassnameNotices              = gd.ClassnameNotices;
-  RO::EvalRaiseClsMethConversionWarning = gd.RaiseClsMethConversionWarning;
-  RO::EvalNoticeOnCoerceForStrConcat    = gd.NoticeOnCoerceForStrConcat;
-  RO::EvalNoticeOnCoerceForBitOp        = gd.NoticeOnCoerceForBitOp;
-  RO::StrictArrayFillKeys               = gd.StrictArrayFillKeys;
-  RO::EvalHackArrDVArrs                 = true; // TODO(kshaunak): Clean it up.
-  RO::EvalArrayProvenance               = false; // TODO(kshaunak): Clean it up.
-  RO::EvalEnforceGenericsUB             = gd.HardGenericsUB ? 2 : 1;
+  RO::EvalHackArrCompatNotices                  = gd.HackArrCompatNotices;
+  RO::EvalHackArrCompatCheckCompare             = gd.HackArrCompatNotices;
+  RO::EvalForbidDynamicCallsToFunc              = gd.ForbidDynamicCallsToFunc;
+  RO::EvalForbidDynamicCallsToClsMeth           = gd.ForbidDynamicCallsToClsMeth;
+  RO::EvalForbidDynamicCallsToInstMeth          = gd.ForbidDynamicCallsToInstMeth;
+  RO::EvalForbidDynamicConstructs               = gd.ForbidDynamicConstructs;
+  RO::EvalForbidDynamicCallsWithAttr            = gd.ForbidDynamicCallsWithAttr;
+  RO::EvalLogKnownMethodsAsDynamicCalls         = gd.LogKnownMethodsAsDynamicCalls;
+  RO::EvalNoticeOnBuiltinDynamicCalls           = gd.NoticeOnBuiltinDynamicCalls;
+  RO::EvalHackArrCompatIsVecDictNotices         = gd.HackArrCompatIsVecDictNotices;
+  RO::EvalHackArrCompatSerializeNotices         = gd.HackArrCompatSerializeNotices;
+  RO::EvalAbortBuildOnVerifyError               = gd.AbortBuildOnVerifyError;
+  RO::EnableArgsInBacktraces                    = gd.EnableArgsInBacktraces;
+  RO::EvalEmitClassPointers                     = gd.EmitClassPointers;
+  RO::EvalEmitClsMethPointers                   = gd.EmitClsMethPointers;
+  RO::EvalIsVecNotices                          = gd.IsVecNotices;
+  RO::EvalIsCompatibleClsMethType               = gd.IsCompatibleClsMethType;
+  RO::EvalRaiseClassConversionWarning           = gd.RaiseClassConversionWarning;
+  RO::EvalClassPassesClassname                  = gd.ClassPassesClassname;
+  RO::EvalClassnameNotices                      = gd.ClassnameNotices;
+  RO::EvalRaiseClsMethConversionWarning         = gd.RaiseClsMethConversionWarning;
+  RO::EvalNoticeOnCoerceForStrConcat            = gd.NoticeOnCoerceForStrConcat;
+  RO::EvalNoticeOnCoerceForBitOp                = gd.NoticeOnCoerceForBitOp;
+  RO::EvalTypeconstInterfaceInheritanceDefaults = gd.TypeconstInterfaceInheritanceDefaults;
+  RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
+  RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean it up.
+  RO::EvalArrayProvenance                       = false; // TODO(kshaunak): Clean it up.
+  RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();

@@ -132,6 +132,8 @@ constexpr char NONEXHAUSTIVE_SWITCH[] =
   "The switch statement failed to match any of the cases";
 constexpr char INVALID_ARGUMENT_FOREACH[] =
   "Invalid argument supplied for foreach()";
+constexpr char INVALID_REIFIED_COEFFECT_CLASSNAME[] =
+  "Reified generic used for coeffect rule does not refer to a class";
 
 } // namespace Strings
 } // namespace HPHP

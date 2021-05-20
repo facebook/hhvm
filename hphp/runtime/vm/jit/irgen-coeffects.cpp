@@ -34,12 +34,12 @@ namespace {
 
 SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
                                  const std::vector<LowStringPtr>& types) {
-  assertx(f->isMethod());
   auto result = cls;
+  auto const ctx = f->isMethod() ? cns(env, f->implCls()) : cns(env, nullptr);
   for (auto const type : types) {
     auto const name =
       gen(env, LdClsTypeCnsClsName, result, cns(env, type.get()));
-    result = gen(env, LdCls, name, cns(env, f->implCls()));
+    result = gen(env, LdCls, name, ctx);
   }
   return result;
 }
@@ -83,9 +83,64 @@ SSATmp* emitCCThis(IRGS& env, const Func* f,
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
-SSATmp* emitCCReified() {
-  // TODO: implement me
-  return nullptr;
+const StaticString s_classname("classname");
+
+SSATmp* emitCCReified(IRGS& env, const Func* f,
+                      const std::vector<LowStringPtr>& types,
+                      const StringData* name,
+                      uint32_t idx,
+                      SSATmp* prologueCtx,
+                      bool isClass) {
+  assertx(!f->isClosureBody());
+  auto const generics = [&] {
+    if (isClass) {
+      assertx(f->isMethod() &&
+              !f->isStatic() &&
+              prologueCtx &&
+              f->cls()->hasReifiedGenerics());
+      auto const slot = f->cls()->lookupReifiedInitProp();
+      assertx(slot != kInvalidSlot);
+      auto const addr = gen(
+        env,
+        LdPropAddr,
+        IndexData { f->cls()->propSlotToIndex(slot) },
+        TLvalToPropVec,
+        prologueCtx
+      );
+      return gen(env, LdMem, TVec, addr);
+    }
+    assertx(f->hasReifiedGenerics());
+    // The existence of the generic is checked by emitCalleeGenericsChecks
+    return topC(env);
+  }();
+  auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+  auto const generic = gen(env, BespokeGet, data, generics, cns(env, idx));
+  auto const classname_maybe = gen(
+    env,
+    BespokeGet,
+    BespokeGetData { BespokeGetData::KeyState::Unknown },
+    gen(env, AssertType, TDict, generic),
+    cns(env, s_classname.get())
+  );
+  auto const classname = cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, CheckType, TStr, taken, classname_maybe);
+    },
+    [&] (SSATmp* s) {
+      return s;
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const msg = Strings::INVALID_REIFIED_COEFFECT_CLASSNAME;
+      gen(env, RaiseError, cns(env, makeStaticString(msg)));
+      return cns(env, staticEmptyString());
+    }
+  );
+  auto const ctx = isClass ? cns(env, f->cls()) : cns(env, nullptr);
+  auto const ctxCls = gen(env, LdCls, classname, ctx);
+  auto const cls = resolveTypeConstantChain(env, f, ctxCls, types);
+  return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
 SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
@@ -266,7 +321,8 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
     case Type::CCThis:
       return emitCCThis(env, f, m_types, m_name, prologueCtx);
     case Type::CCReified:
-      return emitCCReified();
+      return emitCCReified(env, f, m_types, m_name, m_index, prologueCtx,
+                           m_isClass);
     case Type::FunParam:
       return emitFunParam(env, f, numArgsInclUnpack, m_index);
     case Type::ClosureParentScope:

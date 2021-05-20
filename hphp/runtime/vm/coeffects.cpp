@@ -182,9 +182,45 @@ RuntimeCoeffects emitCCThis(const Func* f,
   return *cls->clsCtxCnsGet(name, true);
 }
 
-RuntimeCoeffects emitCCReified() {
-  // TODO: implement me
-  return RuntimeCoeffects::full();
+const StaticString s_classname("classname");
+
+RuntimeCoeffects emitCCReified(const Func* f,
+                               const std::vector<LowStringPtr>& types,
+                               const StringData* name,
+                               uint32_t idx,
+                               void* prologueCtx,
+                               bool isClass) {
+  assertx(!f->isClosureBody());
+  auto const generics = [&] {
+    if (isClass) {
+      assertx(f->isMethod() &&
+              !f->isStatic() &&
+              prologueCtx &&
+              f->cls()->hasReifiedGenerics());
+      return getClsReifiedGenericsProp(
+        f->cls(),
+        reinterpret_cast<ObjectData*>(prologueCtx));
+    }
+    assertx(f->hasReifiedGenerics());
+    // The existence of the generic is checked by calleeGenericsChecks
+    auto const tv = vmStack().topC();
+    assertx(tvIsVec(tv));
+    return tv->m_data.parr;
+  }();
+  assertx(generics->size() > idx);
+  auto const genericTV = generics->at(idx);
+  assertx(tvIsDict(genericTV));
+  auto const generic = genericTV.m_data.parr;
+  auto const classname_field = generic->get(s_classname.get());
+  if (!classname_field.is_init()) {
+    raise_error(Strings::INVALID_REIFIED_COEFFECT_CLASSNAME);
+  }
+  assertx(isStringType(classname_field.type()));
+  auto const ctxCls = Class::load(classname_field.val().pstr);
+  // Reified generic resolution should make sure this is always valid
+  assertx(ctxCls);
+  auto const cls = resolveTypeConstantChain(ctxCls, types);
+  return *cls->clsCtxCnsGet(name, true);
 }
 
 RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
@@ -262,7 +298,7 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
     case Type::CCThis:
       return emitCCThis(f, m_types, m_name, prologueCtx);
     case Type::CCReified:
-      return emitCCReified();
+      return emitCCReified(f, m_types, m_name, m_index, prologueCtx, m_isClass);
     case Type::FunParam:
       return emitFunParam(f, numArgsInclUnpack, m_index);
     case Type::ClosureParentScope:

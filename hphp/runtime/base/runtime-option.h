@@ -1156,10 +1156,10 @@ struct RuntimeOption {
    * will specialize and fall back to top codegen. Otherwise, we'll do  \
    * top codegen. */                                                    \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
-  F(double, BespokeArraySinkSpecializationThreshold,   90.0)            \
+  F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
-  F(uint64_t, BespokeArraySinkSideExitMaxSources, 16)                   \
-  F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 16)               \
+  F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
+  F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

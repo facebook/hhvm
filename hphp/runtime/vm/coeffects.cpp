@@ -67,9 +67,9 @@ bool RuntimeCoeffects::canCallWithWarning(const RuntimeCoeffects o) const {
   return canCall(promoted);
 }
 
-const folly::Optional<std::string> StaticCoeffects::toString() const {
+const std::string StaticCoeffects::toString() const {
   auto const list = CoeffectsConfig::toStringList(*this);
-  if (list.empty()) return folly::none;
+  if (list.empty()) return "defaults";
   return folly::join(" ", list);
 }
 

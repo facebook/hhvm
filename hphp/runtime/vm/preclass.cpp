@@ -260,11 +260,9 @@ void PreClass::Const::prettyPrint(std::ostream& out,
     return;
   }
   if (kind() == ConstModifiers::Kind::Context) {
-    auto const coeffect_str_opt = coeffects().toString();
-    auto const coeffect_str = coeffect_str_opt ? *coeffect_str_opt : "defaults";
     out << "Constant "
         << preClass->name()->data() << "::" << m_name->data()
-        << " " << coeffect_str
+        << " " << coeffects().toString()
         << std::endl;
     return;
   }

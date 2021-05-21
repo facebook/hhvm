@@ -80,7 +80,7 @@ private:
 struct StaticCoeffects {
   using storage_t = RuntimeCoeffects::storage_t;
 
-  const folly::Optional<std::string> toString() const;
+  const std::string toString() const;
 
   RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;

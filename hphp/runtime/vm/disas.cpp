@@ -655,20 +655,18 @@ std::string member_tv_initializer(TypedValue cell) {
 
 void print_class_constant(Output& out, const PreClass::Const* cns) {
   switch (cns->kind()) {
-    case ConstModifiers::Kind::Context: {
-      auto const coeffect_str = cns->coeffects().toString();
+    case ConstModifiers::Kind::Context:
       out.indent();
       out.fmt(".ctx {}", cns->name());
       if (cns->isAbstract()) {
         out.fmt(" isAbstract");
       }
-      if (coeffect_str) {
-        out.fmt(" {}", *coeffect_str);
+      if (!cns->isAbstractAndUninit()) {
+        out.fmt(" {}", cns->coeffects().toString());
       }
       out.fmt(";");
       out.nl();
       break;
-    }
     case ConstModifiers::Kind::Value:
       if (cns->isAbstract()) {
         out.fmtln(".const {} isAbstract;", cns->name());
@@ -688,6 +686,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
       }
       out.fmt(";");
       out.nl();
+      break;
   }
 }
 

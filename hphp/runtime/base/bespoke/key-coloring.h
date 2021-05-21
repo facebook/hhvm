@@ -39,6 +39,8 @@ using ColorMap = folly::F14FastMap<const StringData*, Color>;
 std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
   findKeyColoring(LayoutWeightVector& layouts);
 
+void applyColoring(const ColorMap& coloring);
+
 std::string dumpColoringInfo();
 
 }}

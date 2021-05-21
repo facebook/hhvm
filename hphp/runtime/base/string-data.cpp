@@ -125,8 +125,12 @@ ptrdiff_t StringData::colorOffset() {
 }
 
 uint16_t StringData::color() const {
-  assertx(isStatic());
   return m_aux16 & kColorMask;
+}
+
+void StringData::setColor(uint16_t color) {
+  assertx((color & ~kColorMask) == 0);
+  m_aux16 |= color;
 }
 
 //////////////////////////////////////////////////////////////////////

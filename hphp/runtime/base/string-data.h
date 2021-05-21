@@ -434,6 +434,7 @@ struct StringData final : MaybeCountable,
    * m_aux16.
    */
   uint16_t color() const;
+  void setColor(uint16_t color);
 
   /*
    * Get or set the cached class or named entity. Get will return nullptr

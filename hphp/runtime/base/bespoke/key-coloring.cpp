@@ -89,7 +89,6 @@ folly::Optional<ColorMap> performColoring(
   // 3. Greedily color each vertex, assigning the lowest color available to not
   // interfere with adjacent vertices.
   using ColorSet = folly::F14FastSet<Color>;
-  auto const kMaxColors = 2047;
   auto colors = ColorMap();
   for (auto const& pair : orderedVertices) {
     auto const& vertex = pair.first;
@@ -101,7 +100,7 @@ folly::Optional<ColorMap> performColoring(
       colorsUsed.insert(it->second);
     }
     auto const colorAssigned = [&] {
-      for (Color i = 1; i <= kMaxColors; i++) {
+      for (Color i = 1; i <= StructLayout::kMaxColor; i++) {
         if (colorsUsed.find(i) == colorsUsed.end()) {
           colors[vertex] = i;
           return true;
@@ -122,7 +121,7 @@ folly::Optional<ColorMap> performColoring(
       auto const& layout = pair.first;
       auto const& keyOrder = layout->keyOrder();
       for (auto const& first : keyOrder) {
-        assertx(colors[first] > 0 && colors[first] <= kMaxColors);
+        assertx(colors[first] > 0 && colors[first] <= StructLayout::kMaxColor);
         for (auto const& second : keyOrder) {
           if (first == second) continue;
           assertx(colors[first] != colors[second]);
@@ -196,6 +195,12 @@ std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
   FTRACE(3, "Final coloring: {} layouts.\n", hi_idx);
 
   return {layouts.begin() + hi_idx, coloring};
+}
+
+void applyColoring(const ColorMap& coloring) {
+  for (auto const& [key, color] : coloring) {
+    const_cast<StringData*>(key)->setColor(color);
+  }
 }
 
 std::string dumpColoringInfo() {

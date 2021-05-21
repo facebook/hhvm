@@ -296,7 +296,7 @@ void Layout::FinalizeHierarchy() {
 }
 
 bool Layout::HierarchyFinalized() {
-  return s_hierarchyFinal.load(std::memory_order_acquire);;
+  return s_hierarchyFinal.load(std::memory_order_acquire);
 }
 
 bool Layout::operator<=(const Layout& other) const {

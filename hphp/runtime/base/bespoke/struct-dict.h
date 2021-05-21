@@ -133,6 +133,19 @@ struct StructLayout : public ConcreteLayout {
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
 
+  void createColoringHashMap() const;
+
+  // Perfect hashing implementation.
+  struct PerfectHashEntry {
+    LowStringPtr str;
+    uint16_t typeOffset;
+    uint16_t valueOffset;
+  };
+
+  static constexpr size_t kMaxColor = 255;
+  static_assert(folly::isPowTwo(kMaxColor + 1));
+  using PerfectHashTable = PerfectHashEntry[kMaxColor + 1];
+
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.

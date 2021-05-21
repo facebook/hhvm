@@ -31,11 +31,10 @@ namespace HPHP { namespace bespoke {
 
 namespace {
 
+static constexpr size_t kMaxNumStructLayouts = 1 << 14;
 size_t s_numStructLayouts = 0;
 folly::SharedMutex s_keySetLock;
 std::unordered_map<KeyOrder, LayoutIndex, KeyOrderHash> s_keySetToIdx;
-
-constexpr size_t kMaxNumStructLayouts = 1 << 14;
 
 const LayoutFunctions* structDictVtable() {
   static auto const result = fromArray<StructDict>();
@@ -50,6 +49,16 @@ std::string describeStructLayout(const KeyOrder& ko) {
   auto const base = ko.toString();
   return folly::sformat("StructDict<{}>", base.substr(1, base.size() - 2));
 }
+
+constexpr uint16_t indexRaw(uint16_t idx) {
+  auto const hi_byte = idx >> 8;
+  auto const lo_byte = idx & 0xff;
+  auto const res = (hi_byte << 9) + lo_byte + 0x100;
+  return static_cast<uint16_t>(res);
+}
+
+constexpr size_t colorTableLen = indexRaw(kMaxNumStructLayouts);
+StructLayout::PerfectHashTable* s_hashTableSet = nullptr;
 
 }
 
@@ -89,11 +98,8 @@ size_t StructLayout::valueOffsetForSlot(Slot slot) const {
 // As documented in bespoke/layout.h, bespoke layout bytes are constrained to
 // have bit 0 (the low bit) set and bit 7 (the high bit) unset. Index() turns
 // a serialize index into this form; IsStructLayout checks it.
-
 LayoutIndex StructLayout::Index(uint16_t idx) {
-  auto const hi_byte = idx >> 8;
-  auto const lo_byte = idx & 0xff;
-  auto const result = safe_cast<uint16_t>((hi_byte << 9) + lo_byte + 0x100);
+  auto const result = indexRaw(idx);
   always_assert(IsStructLayout({result}));
   return {result};
 }
@@ -238,6 +244,23 @@ size_t StructDict::typeOffset() const {
 
 size_t StructDict::valueOffset() const {
   return m_extra_hi8 * sizeof(Value);
+}
+
+void StructLayout::createColoringHashMap() const {
+  auto& table = s_hashTableSet[index().raw];
+  for (auto i = 0; i < kMaxColor; i++) {
+    table[i] = { nullptr, 0, 0 };
+  }
+  for (auto const key : keyOrder()) {
+    auto const color = key->color();
+    assertx(color != StringData::kInvalidColor);
+    assertx(table[color].str == nullptr);
+    auto const slot = keySlot(key);
+    auto const typeOffset = safe_cast<uint16_t>(typeOffsetForSlot(slot));
+    auto const valueOffset = safe_cast<uint16_t>(valueOffsetForSlot(slot));
+    assertx(slot != kInvalidSlot);
+    table[color] = { key, typeOffset, valueOffset };
+  }
 }
 
 const StructLayout* StructLayout::As(const Layout* l) {
@@ -699,7 +722,11 @@ Slot StructDict::getSlotInPos(size_t pos) const {
 TopStructLayout::TopStructLayout()
   : AbstractLayout(Index(), "StructDict<Top>",
                    {AbstractLayout::GetBespokeTopIndex()}, structDictVtable())
-{}
+{
+  assertx(!s_hashTableSet);
+  s_hashTableSet = (StructLayout::PerfectHashTable*) vm_malloc(
+      sizeof(StructLayout::PerfectHashTable) * colorTableLen);
+}
 
 LayoutIndex TopStructLayout::Index() {
   return StructLayout::Index(0);

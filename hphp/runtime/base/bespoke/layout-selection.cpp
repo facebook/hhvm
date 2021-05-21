@@ -527,6 +527,15 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     );
   }
 
+  // Apply coloring to strings, and then have each layout create its hash map.
+  applyColoring(*coloring);
+  std::for_each(
+    layoutVector.cbegin(), coloringEnd,
+    [&](auto const& layout) {
+      layout.first->createColoringHashMap();
+    }
+  );
+
   // Assign sources to layouts.
   StructAnalysisResult result;
   for (auto const& group : groups) {

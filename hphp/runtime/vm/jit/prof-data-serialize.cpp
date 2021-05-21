@@ -1173,6 +1173,9 @@ void write_raw_string(ProfDataSerializer& ser, const StringData* str) {
   uint32_t sz = str->size();
   write_raw(ser, sz);
   write_raw(ser, str->data(), sz);
+  if (allowBespokeArrayLikes()) {
+    write_raw(ser, str->color());
+  }
 }
 
 StringData* read_raw_string(ProfDataDeserializer& ser,
@@ -1188,7 +1191,15 @@ StringData* read_raw_string(ProfDataDeserializer& ser,
   if (sz > kBufLen) ptr = (char*)malloc(sz);
   SCOPE_EXIT { if (ptr != buffer) free(ptr); };
   read_raw(ser, ptr, sz);
-  if (!skip) return makeStaticString(ptr, sz);
+  auto const color = [&] {
+    if (allowBespokeArrayLikes()) return read_raw<uint16_t>(ser);
+    return uint16_t{0};
+  }();
+  if (!skip) {
+    auto const str = makeStaticString(ptr, sz);
+    str->setColor(color);
+    return str;
+  }
   return nullptr;
 }
 

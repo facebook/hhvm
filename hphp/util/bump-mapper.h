@@ -24,7 +24,11 @@
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP { namespace alloc {
+namespace HPHP {
+
+extern bool g_useTHPUponHugeTLBFailure;
+
+namespace alloc {
 
 // Interface for all mappers. It also includes data about page limit (for huge
 // page mappers) and NUMA support.

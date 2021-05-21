@@ -37,7 +37,11 @@
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP { namespace alloc {
+namespace HPHP {
+
+bool g_useTHPUponHugeTLBFailure = false;
+
+namespace alloc {
 
 bool Bump1GMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
@@ -86,7 +90,9 @@ constexpr size_t kChunkSize = 4 * size2m;
 
 bool Bump2MMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
-  auto const freePages = get_huge2m_info().free_hugepages;
+  const uint32_t freePages =
+    g_useTHPUponHugeTLBFailure ? (kChunkSize / size2m)
+                               : get_huge2m_info().free_hugepages;
   if (freePages <= 0) return false;
 
   std::lock_guard<RangeState> _(m_state);
@@ -104,7 +110,17 @@ bool Bump2MMapper::addMappingImpl() {
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED | MAP_HUGETLB,
                         -1, 0);
-  if (newPages == MAP_FAILED) return false;
+  if (newPages == MAP_FAILED) {
+    if (!g_useTHPUponHugeTLBFailure) return false;
+    // Use transparent hugepages instead.
+    newPages = mmap((void*)currFrontier, hugeSize,
+                    PROT_READ | PROT_WRITE,
+                    MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
+                    -1, 0);
+    if (newPages == MAP_FAILED) return false;
+    assertx(newPages == (void*)currFrontier);
+    madvise(newPages, hugeSize, MADV_HUGEPAGE);
+  }
   assertx(newPages == (void*)currFrontier);    // MAP_FIXED should work
 #ifdef HAVE_NUMA
   if (numa_num_nodes > 1 && m_interleaveMask) {

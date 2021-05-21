@@ -51,6 +51,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/bump-mapper.h"
 #include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/file-cache.h"
@@ -2011,6 +2012,11 @@ void RuntimeOption::Load(
       low_2m_pages(EvalMaxLowMemHugePages);
       high_2m_pages(EvalMaxHighArenaHugePages);
     }
+#if USE_JEMALLOC_EXTENT_HOOKS
+    g_useTHPUponHugeTLBFailure =
+      Config::GetBool(ini, config, "Eval.UseTHPUponHugeTLBFailure",
+                      g_useTHPUponHugeTLBFailure);
+#endif
     s_enable_static_arena =
       Config::GetBool(ini, config, "Eval.UseTLStaticArena", true);
 

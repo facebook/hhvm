@@ -53,6 +53,7 @@ fn main() -> ::anyhow::Result<()> {
         results.push(round_trip::<Decls, Json>(&arena, path, decl));
         results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decl));
         results.push(round_trip::<Decls, Bincode>(&arena, path, decl));
+        results.push(round_trip::<Decls, Cbor>(&arena, path, decl));
     }
 
     let (profiles, errs) = results
@@ -262,6 +263,38 @@ impl Provider for Bincode {
     ) -> Result<X, String> {
         let op = bincode::config::Options::with_native_endian(bincode::options());
         let mut de = bincode::de::Deserializer::from_slice(&data, op);
+
+        let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+        X::deserialize(de)
+            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
+    }
+
+    fn get_bytes(data: &Self::Data) -> &[u8] {
+        data.as_slice()
+    }
+}
+
+struct Cbor;
+
+impl Provider for Cbor {
+    type Data = Vec<u8>;
+
+    fn name() -> &'static str {
+        "cbor"
+    }
+
+    fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
+        let mut data = vec![];
+        serde_cbor::to_writer(&mut data, x)
+            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))?;
+        Ok(data)
+    }
+
+    fn de<'a, X: serde::Deserialize<'a>>(
+        arena: &'a bumpalo::Bump,
+        data: Self::Data,
+    ) -> Result<X, String> {
+        let mut de = serde_cbor::de::Deserializer::from_reader(data.as_slice());
 
         let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
         X::deserialize(de)

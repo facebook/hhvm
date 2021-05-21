@@ -3696,8 +3696,12 @@ void Class::setInterfaceVtables() {
     cursor += nMethods * sizeof(LowPtr<Func>);
     if (vtableVec[slot].vtable != nullptr) {
       raise_error("Static analysis failure: "
-                  "%s was expected to fatal at runtime, but didn't",
-                  m_preClass->name()->data());
+                  "%s was expected to fatal at runtime, but didn't "
+                  "(interfaces %s and %s share slot %d)",
+                  m_preClass->name()->data(),
+                  iface->preClass()->name()->data(),
+                  vtableVec[slot].iface->preClass()->name()->data(),
+                  slot);
     }
     vtableVec[slot].vtable = vtable;
     vtableVec[slot].iface = iface;

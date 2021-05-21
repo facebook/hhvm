@@ -174,6 +174,11 @@ bool ArrayLayout::is_struct() const {
   return index && bespoke::StructLayout::IsStructLayout(*index);
 }
 
+bool ArrayLayout::is_concrete() const {
+  auto const layout = bespokeLayout();
+  return layout && layout->isConcrete();
+}
+
 const bespoke::Layout* ArrayLayout::bespokeLayout() const {
   auto const index = layoutIndex();
   if (!index) return nullptr;
@@ -450,7 +455,8 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   auto const layouts = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
-    StructLayout::Deserialize(index, read_key_order(des));
+    auto const layout = StructLayout::Deserialize(index, read_key_order(des));
+    layout->createColoringHashMap();
   }
   auto const runtimeStructs = read_raw<size_t>(des);
   for (auto i = 0; i < runtimeStructs; i++) {

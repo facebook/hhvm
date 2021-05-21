@@ -648,12 +648,6 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
       [](auto ad, auto /*profile*/) { return maybeMonoify(ad); }
     );
   }
-  if (mod == 3) {
-    return bespoke::maybeBespokifyForTesting(
-      ad, profile, profile->data->staticStructDict,
-      [](auto ad, auto profile) { return maybeStructify(ad, profile); }
-    );
-  }
   return ad;
 }
 

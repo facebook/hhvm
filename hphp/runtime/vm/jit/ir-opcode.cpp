@@ -915,6 +915,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:
+  case StructDictGetWithColor:
   case StructDictSet:
   case StStk:
   case StStkRange:

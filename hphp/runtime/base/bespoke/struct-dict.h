@@ -83,6 +83,9 @@ struct StructDict : public BespokeArray {
   void removeSlot(Slot slot);
   Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
+
+  static TypedValue NvGetStrNonStatic(
+      const StructDict* sad, const StringData* k);
 };
 
 /*
@@ -143,8 +146,10 @@ struct StructLayout : public ConcreteLayout {
   };
 
   static constexpr size_t kMaxColor = 255;
-  static_assert(folly::isPowTwo(kMaxColor + 1));
   using PerfectHashTable = PerfectHashEntry[kMaxColor + 1];
+
+  static PerfectHashTable* hashTableForLayout(const Layout* layout);
+  static PerfectHashTable* hashTableSet();
 
 private:
   // Callers must check whether the key is static before using one of these

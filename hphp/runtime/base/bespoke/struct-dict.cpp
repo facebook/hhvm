@@ -263,6 +263,17 @@ void StructLayout::createColoringHashMap() const {
   }
 }
 
+StructLayout::PerfectHashTable* StructLayout::hashTableSet() {
+  assertx(Layout::HierarchyFinalized());
+  return s_hashTableSet;
+}
+
+StructLayout::PerfectHashTable* StructLayout::hashTableForLayout(
+    const Layout* layout) {
+  assertx(Layout::HierarchyFinalized());
+  return &s_hashTableSet[layout->index().raw];
+}
+
 const StructLayout* StructLayout::As(const Layout* l) {
   assertx(dynamic_cast<const StructLayout*>(l));
   return reinterpret_cast<const StructLayout*>(l);
@@ -451,11 +462,37 @@ TypedValue StructDict::NvGetInt(const StructDict*, int64_t) {
   return make_tv<KindOfUninit>();
 }
 
-TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
-  auto const layout = sad->layout();
-  auto const slot = layout->keySlot(k);
+NEVER_INLINE
+TypedValue StructDict::NvGetStrNonStatic(
+    const StructDict* sad, const StringData* k) {
+  auto const structLayout = sad->layout();
+  auto const slot = structLayout->keySlot(k);
   if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
   return sad->typedValueUnchecked(slot);
+}
+
+TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
+  static_assert(folly::isPowTwo(StructLayout::kMaxColor + 1));
+  auto const color = k->color() & StructLayout::kMaxColor;
+  auto const& entry = s_hashTableSet[sad->layoutIndex().raw][color];
+  if (entry.str == k) {
+    auto const type = *reinterpret_cast<const DataType*>(
+        reinterpret_cast<uintptr_t>(sad) + entry.typeOffset);
+    auto const value = *reinterpret_cast<const Value*>(
+        reinterpret_cast<uintptr_t>(sad) + entry.valueOffset);
+    if constexpr (debug) {
+      auto const DEBUG_ONLY res = NvGetStrNonStatic(sad, k);
+      assertx(res.m_type == type);
+      assertx(res.m_data.pcnt == value.pcnt);
+    }
+    return make_tv_of_type(value, type);
+  } else {
+    if (k->isStatic()) {
+      assertx(NvGetStrNonStatic(sad, k).m_type == KindOfUninit);
+      return make_tv<KindOfUninit>();
+    }
+    return NvGetStrNonStatic(sad, k);
+  }
 }
 
 TypedValue StructDict::GetPosKey(const StructDict* sad, ssize_t pos) {

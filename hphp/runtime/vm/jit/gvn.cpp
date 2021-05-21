@@ -330,6 +330,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdFuncRequiredCoeffects:
   case FuncHasAttr:
   case ClassHasAttr:
+  case StructDictGetWithColor:
     return true;
 
   case EqArrLike:

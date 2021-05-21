@@ -92,6 +92,7 @@ struct ArraySpec {
   bool logging() const  { return layout().logging(); }
   bool monotype() const { return layout().monotype(); }
   bool is_struct() const { return layout().is_struct(); }
+  bool is_concrete() const { return layout().is_concrete(); }
 
   /*
    * Casts.

@@ -87,6 +87,29 @@ Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
   return dst;
 }
 
+template <class Then, class Else>
+Vtuple cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
+          Vtuple dst, Then thenBlock, Else elseBlock, StringTag tag) {
+  auto elze = vmain.makeBlock();
+  auto then = vcold.makeBlock();
+  auto done = vmain.makeBlock();
+
+  vmain << jcc{cc, sf, {elze, then}, tag};
+
+  vmain = elze;
+  auto r1 = elseBlock(vmain);
+  vmain << phijmp{done, r1};
+
+  vcold = then;
+  auto r2 = thenBlock(vcold);
+  vcold << phijmp{done, r2};
+
+  vmain = done;
+  vmain << phidef{dst};
+  return dst;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -166,6 +189,38 @@ void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
                 StringTag tag = StringTag{}) {
   code_gen_detail::ifThenElse(vmain, unlikely ? vcold : vmain,
                               cc, sf, thenBlock, elseBlock, tag);
+}
+
+/*
+ * Generate an if-then-else block construct with a tuple dst.
+ *
+ * Like ifThenElse(), except that the blocks are expected to return a dst Vtuple.
+ * The dsts are phi'd into `dst'.
+ *
+ * Returns `dst' unaltered, for convenience.
+ */
+template <class Then, class Else>
+Vtuple cond(Vout& vmain, ConditionCode cc, Vreg sf,
+          Vtuple dst, Then thenBlock, Else elseBlock,
+          StringTag tag = StringTag{}) {
+  return code_gen_detail::cond(vmain, vmain, cc, sf, dst,
+                               thenBlock, elseBlock, tag);
+}
+
+template <class Then, class Else>
+Vtuple unlikelyCond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
+                  Vtuple dst, Then thenBlock, Else elseBlock,
+                  StringTag tag = StringTag{}) {
+  return code_gen_detail::cond(vmain, vcold, cc, sf, dst,
+                               thenBlock, elseBlock, tag);
+}
+
+template <class Then, class Else>
+Vtuple cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
+          Vtuple dst, Then thenBlock, Else elseBlock, bool unlikely,
+          StringTag tag = StringTag{}) {
+  return code_gen_detail::cond(vmain, unlikely ? vcold : vmain,
+                               cc, sf, dst, thenBlock, elseBlock, tag);
 }
 
 /*

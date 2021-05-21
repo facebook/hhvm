@@ -153,7 +153,7 @@ DEBUG_ONLY bool validate(const State& env,
   // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
-    if (src->inst()->is(LdStructDictElem)) return true;
+    if (src->inst()->is(LdStructDictElem, StructDictGetWithColor)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
 
@@ -3129,6 +3129,8 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
       return cns(env, TUninit);
     } else if (key->hasConstVal(TStr)) {
       return gen(env, LdStructDictElem, arr, key);
+    } else {
+      return gen(env, StructDictGetWithColor, arr, key);
     }
   }
 
@@ -3158,7 +3160,8 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
     }
   }
 
-  if (arr->type().arrSpec().is_struct()) {
+  auto const arrSpec = arr->type().arrSpec();
+  if (arrSpec.is_struct()) {
     // 'taken' block for BespokeGetThrow is a special catch block that catches
     // a C++ exception from native helpers and then throws ThrowOutOfBounds.
     // When we simplify this instruction as follows, we do not need the
@@ -3173,9 +3176,13 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
       taken->erase(taken->begin());
       gen(env, Jmp, taken);
       return cns(env, TBottom);
-    } else if (key->hasConstVal(TStr)) {
+    } else if (arrSpec.is_concrete() && key->hasConstVal(TStr)) {
       taken->erase(taken->begin());
       auto const elem = gen(env, LdStructDictElem, arr, key);
+      return gen(env, CheckType, TInitCell, taken, elem);
+    } else {
+      taken->erase(taken->begin());
+      auto const elem = gen(env, StructDictGetWithColor, arr, key);
       return gen(env, CheckType, TInitCell, taken, elem);
     }
   }
@@ -3335,6 +3342,18 @@ SSATmp* simplifyLdMonotypeDictVal(State& env, const IRInstruction* inst) {
   }
   return nullptr;
 }
+
+SSATmp* simplifyStructDictGetWithColor(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+
+  if (arr->type().arrSpec().is_concrete() && key->hasConstVal()) {
+    return gen(env, LdStructDictElem, arr, key);
+  }
+
+  return nullptr;
+}
+
 
 SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
@@ -3890,6 +3909,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(RaiseErrorOnInvalidIsAsExpressionType)
       X(LdFrameCls)
       X(CheckClsMethFunc)
+      X(StructDictGetWithColor)
 #undef X
       default: break;
     }

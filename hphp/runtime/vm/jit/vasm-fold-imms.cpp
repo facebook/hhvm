@@ -364,8 +364,12 @@ struct ImmFolder {
   void fold(loadw& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadl& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadups& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadsbl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadsbq& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadsd& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadzbl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzbq& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzwq& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadzlq& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadtqb& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadtql& in, Vinstr& /*out*/) { foldVptr(in.s); }

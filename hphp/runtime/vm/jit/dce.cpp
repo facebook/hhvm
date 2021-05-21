@@ -289,6 +289,7 @@ bool canDCE(IRInstruction* inst) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case StructDictGetWithColor:
     assertx(!inst->isControlFlow());
     return true;
 

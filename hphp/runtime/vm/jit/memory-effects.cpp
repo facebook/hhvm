@@ -1098,6 +1098,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const key = inst.src(1);
     return PureLoad { AElemS { base, key->strVal() } };
   }
+  case StructDictGetWithColor:
+    return PureLoad { AElemSAny };
 
   case DictGetK:
   case KeysetGetK:

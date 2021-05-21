@@ -3126,6 +3126,13 @@ fields of that struct for holding intermediate values.
   This op has SetMove semantics; it consumes a refcount on the input array
   and produces one on the output, and does no refcounting to the value S2.
 
+| StructDictGetWithColor, DBespokeElemUninit, SStructDict S(Str), NF
+
+  Loads the element of the StructDict in S0 at the string key S1. If S1 is
+  static at runtime, the StructDict perfect hash table will be used. Otherwise,
+  we use the standard accessor method. This is only valid to use after the
+  bespoke hierarcy is finalized.
+
 | MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 
   Set element with key S1 in S0 to S2.

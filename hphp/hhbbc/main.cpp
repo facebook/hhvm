@@ -339,8 +339,6 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
-  gd.TypeconstInterfaceInheritanceDefaults =
-    RuntimeOption::EvalTypeconstInterfaceInheritanceDefaults;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -521,7 +519,6 @@ int main(int argc, char** argv) try {
   RO::EvalRaiseClsMethConversionWarning         = gd.RaiseClsMethConversionWarning;
   RO::EvalNoticeOnCoerceForStrConcat            = gd.NoticeOnCoerceForStrConcat;
   RO::EvalNoticeOnCoerceForBitOp                = gd.NoticeOnCoerceForBitOp;
-  RO::EvalTypeconstInterfaceInheritanceDefaults = gd.TypeconstInterfaceInheritanceDefaults;
   RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
   RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean it up.
   RO::EvalArrayProvenance                       = false; // TODO(kshaunak): Clean it up.

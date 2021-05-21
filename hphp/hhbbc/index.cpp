@@ -1678,10 +1678,7 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
 
     // if the existing constant in the map is concrete, then don't overwrite it with an incoming
     // abstract constant's default
-    if (RO::EvalTypeconstInterfaceInheritanceDefaults &&
-        !existing->isAbstract &&
-        cns->isAbstract
-    ) {
+    if (!existing->isAbstract && cns->isAbstract) {
       return true;
     }
 
@@ -1717,10 +1714,7 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
         return true;
       }
 
-      if (RO::EvalTypeconstInterfaceInheritanceDefaults &&
-          (cns->cls->attrs & (AttrInterface)) &&
-          existing->isAbstract
-      ) {
+      if ((cns->cls->attrs & (AttrInterface)) && existing->isAbstract) {
         // because existing has val, this covers the case where it is abstract with default
         // allow incoming to win
       } else {

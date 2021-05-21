@@ -632,6 +632,7 @@ module Typing = struct
     | InvalidKeysetValue [@value 4435]
     | UnresolvedTypeVariableProjection [@value 4436]
     | FunctionPointerWithAtom [@value 4437]
+    | InvalidEchoArgument [@value 4438]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

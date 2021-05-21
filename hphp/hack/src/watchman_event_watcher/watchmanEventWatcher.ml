@@ -361,7 +361,10 @@ let daemon_main_ root oc =
 
 let daemon_main root (_ic, oc) =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  (try daemon_main_ root oc with e -> HackEventLogger.uncaught_exception e)
+  try daemon_main_ root oc
+  with exn ->
+    let e = Exception.wrap exn in
+    HackEventLogger.watchman_uncaught_exception e
 
 (** Typechecker canont infer this type since the input channel
  * is never used so its phantom type is never ineferred. We annotate

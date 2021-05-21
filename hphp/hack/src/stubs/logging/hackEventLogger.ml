@@ -402,7 +402,9 @@ let init_watchman_failed _ = ()
 
 let restarting_watchman_subscription _ = ()
 
-let uncaught_exception _ = ()
+let watchman_uncaught_exception _ = ()
+
+let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
 

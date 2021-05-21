@@ -812,19 +812,20 @@ struct
       | Watchman.Watchman_restarted ->
         Exit.exit Exit_status.Watchman_fresh_instance
       | Exit_status.Exit_with _ as e -> raise e
-      | e ->
+      | exn ->
+        let e = Exception.wrap exn in
         let stack = Printexc.get_backtrace () in
         if consecutive_throws > 500 then (
           Hh_logger.log "Too many consecutive exceptions.";
           Hh_logger.log
             "Probably an uncaught exception rethrown each retry. Exiting. %s"
             stack;
-          HackEventLogger.uncaught_exception e;
+          HackEventLogger.monitor_giving_up_exception e;
           Exit.exit Exit_status.Uncaught_exception
         );
         Hh_logger.log
           "check_and_run_loop_ threw with exception: %s - %s"
-          (Exn.to_string e)
+          (Exception.to_string e)
           stack;
         (env, consecutive_throws + 1)
     in

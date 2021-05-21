@@ -16,7 +16,6 @@ use hhbc_by_ref_hhas_function::{self as hhas_function, HhasFunction};
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Result};
-use hhbc_by_ref_options::HhvmFlags;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as tast, ast_defs};
@@ -102,24 +101,7 @@ pub fn emit_function<'a, 'arena>(
     if is_meth_caller {
         coeffects = coeffects.with_caller()
     }
-    let (ast_body, rx_body) = {
-        if !coeffects.is_any_rx() {
-            (&f.body.ast, false)
-        } else {
-            match hhbc_by_ref_hhas_coeffects::halves_of_is_enabled_body(&f.body) {
-                Some((enabled_body, disabled_body)) => {
-                    if e.options().hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED) {
-                        (enabled_body, true)
-                    } else {
-                        flags.insert(hhas_function::Flags::RX_DISABLED);
-                        (disabled_body, false)
-                    }
-                }
-                None => (&f.body.ast, true),
-            }
-        }
-    };
-
+    let ast_body = &f.body.ast;
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
@@ -130,7 +112,6 @@ pub fn emit_function<'a, 'arena>(
             EmitBodyFlags::ASYNC,
             flags.contains(hhas_function::Flags::ASYNC),
         );
-        body_flags.set(EmitBodyFlags::RX_BODY, rx_body);
         body_flags.set(EmitBodyFlags::NATIVE, native);
         body_flags.set(EmitBodyFlags::MEMOIZE, memoized);
         body_flags.set(

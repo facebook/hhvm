@@ -698,7 +698,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
-  ret->isRxDisabled        = fe.isRxDisabled;
   ret->noContextSensitiveAnalysis = fe.userAttributes.find(
     s___NoContextSensitiveAnalysis.get()) != fe.userAttributes.end();
   ret->hasInOutArgs        = [&] {

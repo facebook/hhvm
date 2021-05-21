@@ -158,7 +158,6 @@ fn make_memoize_wrapper_method<'a, 'arena>(
         method_id: &name,
         flags: arg_flags,
     };
-    env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = emit_memoize_wrapper_body(emitter, env, &mut args)?;
     let mut flags = HhasMethodFlags::empty();
     flags.set(HhasMethodFlags::IS_STATIC, method.static_);

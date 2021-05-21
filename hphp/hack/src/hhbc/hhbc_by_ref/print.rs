@@ -422,9 +422,6 @@ fn print_fun_def<W: Write>(
     if fun_def.is_pair_generator() {
         w.write(" isPairGenerator")?;
     }
-    if fun_def.rx_disabled() {
-        w.write(" isRxDisabled")?;
-    }
     w.write(" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body, &fun_def.coeffects))?;
@@ -842,9 +839,6 @@ fn print_method_def<W: Write>(
     }
     if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
         w.write(" isClosureBody")?;
-    }
-    if method_def.flags.contains(HhasMethodFlags::RX_DISABLED) {
-        w.write(" isRxDisabled")?;
     }
     w.write(" ")?;
     braces(w, |w| {

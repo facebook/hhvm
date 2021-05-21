@@ -281,8 +281,7 @@ FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
   m_verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
                 isRxBody &&
                 // defer this to next check
-                !isPureBody &&
-                !m_func->isRxDisabled;
+                !isPureBody;
   m_verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
                   isPureBody;
 }
@@ -656,7 +655,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
       break;
     case Op::QueryM:
       if (rop != ReadOnlyOp::Mutable && rop != ReadOnlyOp::Any) {
-        return readOnlyImmNotSupported(rop, op); 
+        return readOnlyImmNotSupported(rop, op);
       }
       break;
     case Op::SetM:
@@ -1450,7 +1449,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-      
+
     default:
       break;
   }

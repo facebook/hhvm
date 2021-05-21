@@ -73,7 +73,6 @@ bitflags! {
         const MEMOIZE = 1 << 2;
         const CLOSURE_BODY = 1 << 3;
         const NATIVE = 1 << 4;
-        const RX_BODY = 1 << 5;
         const ASYNC = 1 << 6;
         const DEBUGGER_MODIFY_PROGRAM = 1 << 7;
     }
@@ -162,13 +161,7 @@ pub fn emit_body<'b, 'arena>(
         &body,
         args.flags,
     )?;
-    let mut env = make_env(
-        alloc,
-        namespace,
-        scope,
-        args.call_context,
-        args.flags.contains(Flags::RX_BODY),
-    );
+    let mut env = make_env(alloc, namespace, scope, args.call_context);
 
     set_emit_statement_state(
         alloc,
@@ -393,12 +386,10 @@ pub fn make_env<'a, 'arena>(
     namespace: RcOc<namespace_env::Env>,
     scope: Scope<'a>,
     call_context: Option<String>,
-    is_rx_body: bool,
 ) -> Env<'a, 'arena> {
     let mut env = Env::default(alloc, namespace);
     env.call_context = call_context;
     env.scope = scope;
-    env.with_rx_body(is_rx_body);
     env
 }
 

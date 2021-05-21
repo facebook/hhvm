@@ -394,7 +394,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
-  f->shared()->m_allFlags.m_isRxDisabled = isRxDisabled;
 
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);

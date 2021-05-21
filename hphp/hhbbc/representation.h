@@ -372,8 +372,6 @@ struct Func : FuncBase {
    */
   bool isReified : 1;
 
-  bool isRxDisabled: 1;
-
   bool noContextSensitiveAnalysis: 1;
 
   bool hasInOutArgs : 1;

@@ -20,7 +20,6 @@ bitflags! {
         const NEEDS_LOCAL_THIS =    0b0000_0001;
         const IN_TRY =              0b0000_0010;
         const ALLOWS_ARRAY_APPEND = 0b0000_0100;
-        const IN_RX_BODY =          0b0000_1000;
     }
 }
 
@@ -64,12 +63,6 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn with_need_local_this(&mut self, need_local_this: bool) {
         if need_local_this {
             self.flags |= Flags::NEEDS_LOCAL_THIS;
-        }
-    }
-
-    pub fn with_rx_body(&mut self, in_rx_body: bool) {
-        if in_rx_body {
-            self.flags |= Flags::IN_RX_BODY;
         }
     }
 

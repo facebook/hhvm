@@ -76,8 +76,6 @@ pub struct HhasCoeffects {
     cc_param: Vec<(usize, String)>,
     cc_this: Vec<Vec<String>>,
     cc_reified: Vec<(bool, usize, Vec<String>)>,
-    is_any_rx: bool,
-    is_pure: bool,
     closure_parent_scope: bool,
     generator_this: bool,
     caller: bool,
@@ -207,8 +205,6 @@ impl HhasCoeffects {
         let mut cc_param = vec![];
         let mut cc_this = vec![];
         let mut cc_reified = vec![];
-        let mut is_any_rx = false;
-        let mut is_pure = false;
 
         let get_arg_pos = |name: &String| -> usize {
             if let Some(pos) = params.as_ref().iter().position(|x| x.name == *name) {
@@ -232,7 +228,6 @@ impl HhasCoeffects {
         // From coeffect syntax
         if let Some(ctxs) = ctxs_opt {
             if ctxs.1.is_empty() {
-                is_pure = true;
                 static_coeffects.push(Ctx::Pure);
             }
             for ctx in &ctxs.1 {
@@ -243,9 +238,6 @@ impl HhasCoeffects {
                             static_coeffects.push(c)
                         } else {
                             unenforced_static_coeffects.push(strip_ns(id.as_str()).to_string());
-                        }
-                        if let c::RX_LOCAL | c::RX_SHALLOW | c::RX = strip_ns(id.as_str()) {
-                            is_any_rx = true;
                         }
                     }
                     Hint_::HfunContext(name) => fun_param.push(get_arg_pos(name)),
@@ -298,8 +290,6 @@ impl HhasCoeffects {
             cc_param,
             cc_this,
             cc_reified,
-            is_any_rx,
-            is_pure,
             ..HhasCoeffects::default()
         }
     }
@@ -356,14 +346,6 @@ impl HhasCoeffects {
 
     pub fn get_cc_reified(&self) -> &[(bool, usize, Vec<String>)] {
         self.cc_reified.as_slice()
-    }
-
-    pub fn is_any_rx(&self) -> bool {
-        self.is_any_rx
-    }
-
-    pub fn is_any_rx_or_pure(&self) -> bool {
-        self.is_any_rx() || self.is_pure
     }
 
     pub fn generator_this(&self) -> bool {

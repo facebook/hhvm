@@ -829,12 +829,6 @@ struct Func final {
   StaticCoeffectNamesMap staticCoeffectNames() const;
 
   /*
-   * Is this the version of the function body with reactivity disabled via
-   * if (Rx\IS_ENABLED) ?
-   */
-  bool isRxDisabled() const;
-
-  /*
    * Does this function use coeffects local to store its ambient coeffects?
    */
   bool hasCoeffectsLocal() const;
@@ -1319,7 +1313,6 @@ private:
         bool m_isMemoizeWrapperLSB : true;
         bool m_isPhpLeafFn : true;
         bool m_hasReifiedGenerics : true;
-        bool m_isRxDisabled : true;
         bool m_hasParamsWithMultiUBs : true;
         bool m_hasReturnWithMultiUBs : true;
       };

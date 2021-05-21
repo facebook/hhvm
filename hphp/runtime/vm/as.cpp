@@ -681,15 +681,6 @@ struct AsmState {
   }
 
   void finishFunction() {
-    if (fe->isRxDisabled) {
-      auto& coeffects = fe->staticCoeffects;
-      bool isPureBody =
-        std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isPure);
-      bool isRxBody =
-        std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isAnyRx);
-      if (!isRxBody || isPureBody) error("isRxDisabled on non-rx func");
-    }
-
     finishSection();
 
     // Stack depth should be 0 at the end of a function body
@@ -2638,8 +2629,6 @@ void parse_function_flags(AsmState& as) {
       as.fe->isClosureBody = true;
     } else if (flag == "isPairGenerator") {
       as.fe->isPairGenerator = true;
-    } else if (flag == "isRxDisabled") {
-      as.fe->isRxDisabled = true;
     } else {
       as.error("Unexpected function flag \"" + flag + "\"");
     }

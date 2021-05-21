@@ -77,7 +77,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
     )?;
     let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
     let has_coeffects_local = coeffects.has_coeffects_local();
-    env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = make_wrapper_body(
         alloc,
         emitter,

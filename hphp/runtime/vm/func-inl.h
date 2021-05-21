@@ -611,10 +611,6 @@ inline StaticCoeffectNamesMap Func::staticCoeffectNames() const {
   return shared()->m_staticCoeffectNames;
 }
 
-inline bool Func::isRxDisabled() const {
-  return shared()->m_allFlags.m_isRxDisabled;
-}
-
 inline bool Func::hasCoeffectsLocal() const {
   return hasCoeffectRules() &&
          !(getCoeffectRules().size() == 1 &&

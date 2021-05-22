@@ -239,7 +239,7 @@ let handle_connection_exception _ _ = ()
 
 let handled_persistent_connection _ = ()
 
-let handle_persistent_connection_exception _ _ = ()
+let handle_persistent_connection_exception _ _ ~is_fatal:_ = ()
 
 let handled_command
     _ ~start_t:_ ~major_gc_time:_ ~minor_gc_time:_ ~parsed_files:_ =

@@ -186,11 +186,9 @@ let shutdown_persistent_client client env =
 (* we have no alternative but to depend on Sys_error strings *)
 
 let handle_connection_exception
-    ~(env : ServerEnv.env)
-    ~(client : ClientProvider.client)
-    ~(exn : exn)
-    ~(stack : string) : ServerEnv.env =
-  match exn with
+    ~(env : ServerEnv.env) ~(client : ClientProvider.client) (e : Exception.t) :
+    ServerEnv.env =
+  match Exception.to_exn e with
   | ClientProvider.Client_went_away
   | ServerCommandTypes.Read_command_timeout ->
     ClientProvider.shutdown_client client;
@@ -208,9 +206,11 @@ let handle_connection_exception
     ClientProvider.shutdown_client client;
     env
   | exn ->
-    HackEventLogger.handle_connection_exception exn (Utils.Callstack stack);
-    EventLogger.master_exception exn stack;
-    Printf.fprintf stderr "Error: %s\n%s\n%!" (Exn.to_string exn) stack;
+    let e = Exception.wrap exn in
+    HackEventLogger.handle_connection_exception "inner" e;
+    Hh_logger.log
+      "HANDLE_CONNECTION_EXCEPTION(inner) %s"
+      (Exception.to_string e);
     ClientProvider.shutdown_client client;
     env
 
@@ -224,16 +224,11 @@ let handle_connection_exception
  * wrapping the return value to make it match return type of f *)
 let handle_connection_try return client env f =
   try f () with
-  | ServerCommand.Nonfatal_rpc_exception (exn, original_stack, env) ->
-    let stack = Printexc.get_backtrace () in
-    let stack =
-      Printf.sprintf "STACK=%s\nRAISED AT=%s\n" original_stack stack
-    in
-    return (handle_connection_exception ~env ~client ~exn ~stack)
+  | ServerCommand.Nonfatal_rpc_exception (e, env) ->
+    return (handle_connection_exception ~env ~client e)
   | exn ->
-    let stack = Printexc.get_backtrace () in
-    let stack = Printf.sprintf "RAISED AT=%s\n" stack in
-    return (handle_connection_exception ~env ~client ~exn ~stack)
+    let e = Exception.wrap exn in
+    return (handle_connection_exception ~env ~client e)
 
 let handle_connection_ genv env client =
   ClientProvider.track
@@ -279,24 +274,30 @@ let handle_connection_ genv env client =
       ServerUtils.Done (f env)
   | ServerCommandTypes.Non_persistent -> ServerCommand.handle genv env client
 
-let report_persistent_exception
-    ~(e : exn)
-    ~(stack : string)
-    ~(client : ClientProvider.client)
-    ~(is_fatal : bool) : unit =
+let handle_persistent_connection_exception
+    ~(client : ClientProvider.client) ~(is_fatal : bool) (e : Exception.t) :
+    unit =
   let open Marshal_tools in
-  let message = Exn.to_string e in
+  let remote_e =
+    {
+      message = Exception.get_ctor_string e;
+      stack = Exception.get_backtrace_string e |> Exception.clean_stack;
+    }
+  in
   let push =
     if is_fatal then
-      ServerCommandTypes.FATAL_EXCEPTION { message; stack }
+      ServerCommandTypes.FATAL_EXCEPTION remote_e
     else
-      ServerCommandTypes.NONFATAL_EXCEPTION { message; stack }
+      ServerCommandTypes.NONFATAL_EXCEPTION remote_e
   in
   begin
     try ClientProvider.send_push_message_to_client client push with _ -> ()
   end;
-  EventLogger.master_exception e stack;
-  Hh_logger.error "Error: %s\n%s" message stack
+  HackEventLogger.handle_persistent_connection_exception "inner" ~is_fatal e;
+  Hh_logger.error
+    "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(inner) %s"
+    (Exception.to_string e);
+  ()
 
 (* Same as handle_connection_try, but for persistent clients *)
 [@@@warning "-52"]
@@ -315,13 +316,13 @@ let handle_persistent_connection_try return client env f =
       env
       (shutdown_persistent_client client)
       ~needs_writes:(Some "Client_went_away")
-  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
-    report_persistent_exception ~e ~stack ~client ~is_fatal:false;
+  | ServerCommand.Nonfatal_rpc_exception (e, env) ->
+    handle_persistent_connection_exception ~client ~is_fatal:false e;
     return env (fun env -> env) ~needs_writes:None
-  | e ->
-    let stack = Printexc.get_backtrace () in
-    report_persistent_exception ~e ~stack ~client ~is_fatal:true;
-    let needs_writes = Some (Caml.Printexc.to_string e ^ "\n" ^ stack) in
+  | exn ->
+    let e = Exception.wrap exn in
+    handle_persistent_connection_exception ~client ~is_fatal:true e;
+    let needs_writes = Some (Exception.to_string e) in
     return env (shutdown_persistent_client client) ~needs_writes
 
 [@@@warning "+52"]
@@ -851,10 +852,12 @@ let serve_one_iteration genv env client_provider =
           in
           HackEventLogger.handled_connection t_start_recheck;
           env
-        with e ->
-          let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-          HackEventLogger.handle_connection_exception e stack;
-          Hh_logger.log "Handling client failed. Ignoring.";
+        with exn ->
+          let e = Exception.wrap exn in
+          HackEventLogger.handle_connection_exception "outer" e;
+          Hh_logger.log
+            "HANDLE_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
+            (Exception.to_string e);
           env
       end
   in
@@ -885,10 +888,15 @@ let serve_one_iteration genv env client_provider =
         in
         HackEventLogger.handled_persistent_connection t_start_recheck;
         env
-      with e ->
-        let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-        HackEventLogger.handle_persistent_connection_exception e stack;
-        Hh_logger.log "Handling persistent client failed. Ignoring.";
+      with exn ->
+        let e = Exception.wrap exn in
+        HackEventLogger.handle_persistent_connection_exception
+          "outer"
+          e
+          ~is_fatal:true;
+        Hh_logger.log
+          "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
+          (Exception.to_string e);
         env
     ) else
       env

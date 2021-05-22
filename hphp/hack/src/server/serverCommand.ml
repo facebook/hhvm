@@ -11,7 +11,7 @@ open Hh_prelude
 open Utils
 open ServerCommandTypes
 
-exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
+exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 
 (* Some client commands require full check to be run in order to update global
  * state that they depend on *)
@@ -253,14 +253,12 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     Full_fidelity_parser_profiling.start_profiling ();
     let (new_env, response) =
       try ServerRpc.handle ~is_stale genv env cmd
-      with e ->
-        let stack = Caml.Printexc.get_raw_backtrace () in
+      with exn ->
+        let e = Exception.wrap exn in
         if ServerCommandTypes.is_critical_rpc cmd then
-          Caml.Printexc.raise_with_backtrace e stack
+          Exception.reraise e
         else
-          raise
-            (Nonfatal_rpc_exception
-               (e, Caml.Printexc.raw_backtrace_to_string stack, env))
+          raise (Nonfatal_rpc_exception (e, env))
     in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     ClientProvider.track client ~key:Connection_tracker.Server_end_handle;

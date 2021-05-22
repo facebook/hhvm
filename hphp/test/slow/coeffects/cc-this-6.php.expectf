@@ -1,11 +1,11 @@
-Warning: Context constant C1 does not exist in %s on line 25
+Warning: Context constant C1 is abstract in %s on line 25
 
-Warning: Context constant C2 does not exist in %s on line 25
+Warning: Context constant C2 is abstract in %s on line 25
 
 Warning: Call to TestCls1::f() requires [rx] coeffects but main() provided [] in %s on line 25
 
-Warning: Context constant C1 does not exist in %s on line 26
+Warning: Context constant C1 is abstract in %s on line 26
 
-Warning: Context constant C2 does not exist in %s on line 26
+Warning: Context constant C2 is abstract in %s on line 26
 
 Warning: Call to TestCls1::g() requires [rx] coeffects but main() provided [] in %s on line 26

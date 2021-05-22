@@ -3172,6 +3172,19 @@ where
         }
     }
 
+    fn has_any_policied_context(contexts: &Option<ast::Contexts>) -> bool {
+        if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+            return context_hints.iter().any(|hint| match &*hint.1 {
+                ast::Hint_::Happly(ast::Id(_, id), _) => {
+                    naming_special_names_rust::coeffects::is_any_policied(&id)
+                }
+                _ => false,
+            });
+        } else {
+            false
+        }
+    }
+
     fn rewrite_effect_polymorphism(
         env: &mut Env<'a, TF>,
         params: &mut Vec<ast::FunParam>,
@@ -4444,12 +4457,7 @@ where
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.attribute, env)?;
-                Self::check_effect_polymorphic_memoized(
-                    &hdr.contexts,
-                    &user_attributes,
-                    "method",
-                    env,
-                );
+                Self::check_effect_memoized(&hdr.contexts, &user_attributes, "method", env);
                 let method = ast::Method_ {
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
@@ -4827,7 +4835,7 @@ where
         }
     }
 
-    fn check_effect_polymorphic_memoized(
+    fn check_effect_memoized(
         contexts: &Option<ast::Contexts>,
         user_attributes: &[aast::UserAttribute<Pos, (), (), ()>],
         kind: &str,
@@ -4836,12 +4844,24 @@ where
         if Self::has_polymorphic_context(contexts) {
             if let Some(u) = user_attributes
                 .iter()
-                .find(|u| u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE)
+                .find(|u| naming_special_names_rust::user_attributes::is_memoized(&u.name.1))
             {
                 Self::raise_parsing_error_pos(
                     &u.name.0,
                     env,
                     &syntax_error::effect_polymorphic_memoized(kind),
+                )
+            }
+        }
+        if Self::has_any_policied_context(contexts) {
+            if let Some(u) = user_attributes.iter().find(|u| {
+                u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE
+                    || u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE_LSB
+            }) {
+                Self::raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::effect_policied_memoized(kind),
                 )
             }
         }
@@ -4908,12 +4928,7 @@ where
                     Self::mp_yielding(&Self::p_function_body, body, env)?
                 };
                 let user_attributes = Self::p_user_attributes(attribute_spec, env)?;
-                Self::check_effect_polymorphic_memoized(
-                    &hdr.contexts,
-                    &user_attributes,
-                    "function",
-                    env,
-                );
+                Self::check_effect_memoized(&hdr.contexts, &user_attributes, "function", env);
                 Self::check_context_has_this(&hdr.contexts, env);
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = ast::TypeHint((), hdr.return_type);

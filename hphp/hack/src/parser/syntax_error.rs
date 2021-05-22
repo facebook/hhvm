@@ -984,6 +984,13 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
     ))
 }
 
+pub fn effect_policied_memoized(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "This {} can only be memoized using __PolicyShardedMemoize because it has policied context",
+        kind
+    ))
+}
+
 pub const lambda_effect_polymorphic: Error =
     Cow::Borrowed("A lambda cannot have polymorphic context");
 

@@ -220,6 +220,8 @@ pub mod user_attributes {
 
     pub const MEMOIZE_LSB: &str = "__MemoizeLSB";
 
+    pub const POLICY_SHARDED_MEMOIZE: &str = "__PolicyShardedMemoize";
+
     pub const PHP_STD_LIB: &str = "__PHPStdLib";
 
     pub const ACCEPT_DISPOSABLE: &str = "__AcceptDisposable";
@@ -307,7 +309,7 @@ pub mod user_attributes {
     }
 
     pub fn is_memoized(name: &str) -> bool {
-        name == MEMOIZE || name == MEMOIZE_LSB
+        name == MEMOIZE || name == MEMOIZE_LSB || name == POLICY_SHARDED_MEMOIZE
     }
 
     // TODO(hrust) these should probably be added to the above map/fields, too
@@ -723,6 +725,9 @@ pub mod readonly {
 }
 
 pub mod coeffects {
+    use lazy_static::lazy_static;
+    use std::collections::HashSet;
+
     pub const DEFAULTS: &str = "defaults";
 
     pub const RX_LOCAL: &str = "rx_local";
@@ -750,6 +755,14 @@ pub mod coeffects {
     pub const READ_GLOBALS: &str = "read_globals";
 
     pub const GLOBALS: &str = "globals";
+
+    pub fn is_any_policied(x: &str) -> bool {
+        lazy_static! {
+            static ref POLICIED_SET: HashSet<&'static str> =
+                vec![POLICIED, POLICIED_OF,].into_iter().collect();
+        }
+        POLICIED_SET.contains(x)
+    }
 }
 
 pub mod shapes {

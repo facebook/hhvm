@@ -92,25 +92,24 @@ void cgStLocRange(IRLS& env, const IRInstruction* inst) {
 
   auto const typePtr = v.makeReg();
   auto const dataPtr = v.makeReg();
-  auto const endPtr = v.makeReg();
   v << lea{ptrToLocalType(fp, range->start), typePtr};
   v << lea{ptrToLocalData(fp, range->start), dataPtr};
-  v << lea{ptrToLocalType(fp, range->end), endPtr};
 
-  doWhile(v, CC_NE, {typePtr, dataPtr},
-    [&] (const VregList& in, const VregList& out) {
+  forLoopUnroll(v, range->end - range->start, {typePtr, dataPtr},
+    [&] (Vout& vo, const VregList& in, int iter) {
+      auto const offset = -safe_cast<int32_t>(iter * sizeof(TypedValue));
+      auto const typeIn = in[0];
+      auto const dataIn = in[1];
+      storeTV(vo, val->type(), loc, typeIn[offset], dataIn[offset]);
+    },
+    [&] (Vout& vo, const VregList& in, const VregList& out,
+         unsigned iterations) {
       auto const typeIn = in[0];
       auto const dataIn = in[1];
       auto const typeOut = out[0];
       auto const dataOut = out[1];
-      auto const sf = v.makeReg();
-
-      storeTV(v, val->type(), loc, *typeIn, *dataIn);
-      nextLocal(v, typeIn, dataIn, typeOut, dataOut);
-      v << cmpq{typeOut, endPtr, sf};
-      return sf;
-    },
-    range->end - range->start
+      nextLocal(vo, typeIn, dataIn, typeOut, dataOut, iterations);
+    }
   );
 }
 
@@ -161,28 +160,28 @@ void cgStStkRange(IRLS& env, const IRInstruction* inst) {
 
   auto const typePtr = v.makeReg();
   auto const dataPtr = v.makeReg();
-  auto const endPtr = v.makeReg();
   v << lea{sp[cellsToBytes(startOff) + TVOFF(m_type)], typePtr};
-  v << lea{sp[cellsToBytes(startOff + count) + TVOFF(m_type)], endPtr};
   v << lea{sp[cellsToBytes(startOff) + TVOFF(m_data)], dataPtr};
 
-  auto const tvSize = (int32_t)sizeof(TypedValue);
+  auto const tvSize = safe_cast<int32_t>(sizeof(TypedValue));
 
-  doWhile(v, CC_NE, {typePtr, dataPtr},
-    [&] (const VregList& in, const VregList& out) {
+  forLoopUnroll(v, count, {typePtr, dataPtr},
+    [&] (Vout& vo, const VregList& in, int iter) {
+      auto const offset = safe_cast<int32_t>(iter * tvSize);
+      auto const typeIn = in[0];
+      auto const dataIn = in[1];
+      storeTV(vo, valType, valSrcLoc, typeIn[offset], dataIn[offset]);
+    },
+    [&] (Vout& vo, const VregList& in, const VregList& out,
+         unsigned iterations) {
       auto const typeIn = in[0];
       auto const dataIn = in[1];
       auto const typeOut = out[0];
       auto const dataOut = out[1];
-      auto const sf = v.makeReg();
-
-      storeTV(v, valType, valSrcLoc, *typeIn, *dataIn);
-      v << addqi{tvSize, typeIn, typeOut, v.makeReg()};
-      v << addqi{tvSize, dataIn, dataOut, v.makeReg()};
-      v << cmpq{typeOut, endPtr, sf};
-      return sf;
-    },
-    count
+      auto const increment = safe_cast<int32_t>(tvSize * iterations);
+      vo << addqi{increment, typeIn, typeOut, vo.makeReg()};
+      vo << addqi{increment, dataIn, dataOut, vo.makeReg()};
+    }
   );
 }
 

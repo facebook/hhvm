@@ -623,9 +623,12 @@ void nextLocal(Vout& v,
                Vreg typeIn,
                Vreg dataIn,
                Vreg typeOut,
-               Vreg dataOut) {
-  v << subqi{(int32_t)sizeof(TypedValue), typeIn, typeOut, v.makeReg()};
-  v << subqi{(int32_t)sizeof(TypedValue), dataIn, dataOut, v.makeReg()};
+               Vreg dataOut,
+               unsigned distance) {
+  v << subqi{(int32_t)(sizeof(TypedValue) * distance), typeIn, typeOut,
+      v.makeReg()};
+  v << subqi{(int32_t)(sizeof(TypedValue) * distance), dataIn, dataOut,
+      v.makeReg()};
 }
 
 void prevLocal(Vout& v,

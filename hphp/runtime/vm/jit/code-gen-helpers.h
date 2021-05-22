@@ -320,7 +320,8 @@ void nextLocal(Vout& v,
                Vreg typeIn,
                Vreg dataIn,
                Vreg typeOut,
-               Vreg dataOut);
+               Vreg dataOut,
+               unsigned distance = 1);
 
 /*
  * Given (valid) pointers to a local's type and value `typeIn' and
@@ -346,4 +347,3 @@ uint64_t auxToMask(AuxUnion);
 }}
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-inl.h"
-

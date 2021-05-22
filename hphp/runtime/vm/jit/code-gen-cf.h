@@ -430,5 +430,89 @@ VregList doWhile(Vout& v, ConditionCode cc,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+/*
+ * Generate a counted "for loop", which may be fully or partially unrolled
+ * depending on the number of iterations.
+ *
+ * - `iterations' is the number of iterations that the loop conceptually
+ *   executes.
+ *
+ * - `regs' is the set of input registers that are live into the loop body and
+ *   that will be advanced at each iteration and phi-ed at the top of the loop.
+ *
+ * - `workBlock' is lambda to emit the body of the loop containing the actual
+ *   computation for each iteration.  It takes the set of `regs' for the current
+ *   iteration as the second argument, and the relative iteration distance to
+ *   the current values of the `regs' registers as the third argument
+ *   (necessary for unrolling).
+ *
+ * - `loopAdv' is the lambda to emit the code to advance the loop variables in
+ *   `regs'.  Its second argument is the set of input registers, the third
+ *   argument is the set of output registers, and the fourth argument is the
+ *   number of iterations to advance the registers by.
+ *
+ */
+template <class Work, class Advance>
+void forLoopUnroll(Vout& v, unsigned iterations, const VregList& regs,
+                   Work workBlock, Advance loopAdv) {
+  auto const freshRegs = [&] {
+    auto copy = regs;
+    for (auto& reg : copy) reg = v.makeReg();
+    return copy;
+  };
 
+  const unsigned kMaxIterationsFullUnroll = 12;
+  const unsigned kUnrollFactor = 4;
+  static_assert(kUnrollFactor <= kMaxIterationsFullUnroll);
+
+  if (iterations <= kMaxIterationsFullUnroll) {
+    auto in = regs;
+    for (int i = 0; i < iterations; i++) {
+      workBlock(v, in, i);
+    }
+    return;
+  }
+
+  auto const loop = v.makeBlock();
+  auto const cont = v.makeBlock();
+  auto const done = v.makeBlock();
+
+  auto rCount = v.makeReg();
+
+  v << movzlq{v.cns(iterations - kUnrollFactor), rCount};
+  VregList args = regs;
+  args.push_back(rCount);
+  v << phijmp{loop, v.makeTuple(args)};
+
+  v = loop;
+  auto in = freshRegs();
+  auto rCountOld = v.makeReg();
+  args = in;
+  args.push_back(rCountOld);
+  v << phidef{v.makeTuple(args)};
+
+  for (int i = 0; i < kUnrollFactor; i++) {
+    workBlock(v, in, i);
+  }
+
+  auto out = freshRegs();
+  loopAdv(v, in, out, kUnrollFactor);
+  auto sf = v.makeReg();
+  auto rCountNew = v.makeReg();
+  v << subqi{(int32_t)kUnrollFactor, rCountOld, rCountNew, sf};
+  v << jcc{CC_GE, sf, {done, cont}};
+
+  v = cont;
+  args = out;
+  args.push_back(rCountNew);
+  v << phijmp{loop, v.makeTuple(args)};
+
+  v = done;
+  for (int i = 0; i < iterations % kUnrollFactor; i++) {
+    workBlock(v, in, kUnrollFactor + i);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}

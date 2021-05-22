@@ -133,7 +133,7 @@ void relocateOptFunc(FuncMetaInfo& info,
                      SrcKeyTransMap& srcKeyTrans,
                      size_t* failedBytes = nullptr) {
   auto const func = info.func;
-
+  unsigned nRegions = 0;
   // Relocate/emit all prologues and translations for func in order.
   for (auto& translator : info.translators) {
     assertx(func == translator->sk.func());
@@ -157,7 +157,11 @@ void relocateOptFunc(FuncMetaInfo& info,
     auto const& range = translator->range();
     auto const bytes = range.main.size() + range.cold.size() +
                        range.frozen.size();
-    translator->relocate();
+    if (regionTranslator) nRegions++;
+    // We don't want to align the first region, to enable fall-through from the
+    // last emitted prologue.
+    const bool alignMain = !regionTranslator || nRegions != 1;
+    translator->relocate(alignMain);
 
     if (translator->entry()) {
       always_assert(code().inHotOrMain(translator->entry()));

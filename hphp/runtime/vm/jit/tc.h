@@ -133,7 +133,7 @@ struct Translator {
 
   // Relocate the generated machine code to its final location.  This may be a
   // no-op if it was initially emitted into the correct location.
-  void relocate();
+  void relocate(bool alignMain);
   // Publish the translation starts, ends etc. into the required metadata
   // structures.  This includes publishing them as debug info, but also caching
   // the translation start in a manner that would be detected in

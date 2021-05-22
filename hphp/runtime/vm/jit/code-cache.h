@@ -212,7 +212,7 @@ struct CodeCache::View {
   /*
    * Align all blocks to the right alignment for a translation start.
    */
-  void alignForTranslation();
+  void alignForTranslation(bool alignMain);
 
   CodeBlock& main()   { return *m_main; }
   CodeBlock& cold()   { return *m_cold; }
@@ -234,4 +234,3 @@ private:
 };
 
 }}
-

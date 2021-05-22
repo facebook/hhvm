@@ -634,7 +634,7 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
     CGMeta fixups;
     TransLocMaker maker{*view};
     try {
-      view->alignForTranslation();
+      view->alignForTranslation(true);
       maker.markStart();
       emitVunit(*vunit, unit.get(), *view, fixups,
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
@@ -691,7 +691,7 @@ bool Translator::translateSuccess() const {
   return transMeta.has_value();
 }
 
-void Translator::relocate() {
+void Translator::relocate(bool alignMain) {
   assertx(transMeta.hasValue());
   // Code emitted directly is relocated during emission (or emitted
   // directly in place).
@@ -717,7 +717,7 @@ void Translator::relocate() {
       TransLocMaker maker{dstView};
 
       try {
-        dstView.alignForTranslation();
+        dstView.alignForTranslation(alignMain);
         maker.markStart();
         auto origin = range.data;
         if (!origin.empty()) {

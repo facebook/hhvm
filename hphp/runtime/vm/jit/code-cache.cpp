@@ -387,8 +387,8 @@ CodeCache::View CodeCache::view(TransKind kind) {
   return view;
 }
 
-void CodeCache::View::alignForTranslation() {
-  main().alignFrontier(tc::Translator::kTranslationAlign);
+void CodeCache::View::alignForTranslation(bool alignMain) {
+  if (alignMain) main().alignFrontier(tc::Translator::kTranslationAlign);
   cold().alignFrontier(tc::Translator::kTranslationAlign);
   data().alignFrontier(tc::Translator::kTranslationAlign);
   frozen().alignFrontier(tc::Translator::kTranslationAlign);

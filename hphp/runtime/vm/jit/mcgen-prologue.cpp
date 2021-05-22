@@ -111,7 +111,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       }
       translator.translate();
       if (translator.translateSuccess()) {
-        translator.relocate();
+        translator.relocate(true);
         translator.publish();
       }
     }
@@ -235,7 +235,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
     return TranslationResult::failTransiently();
   }
 
-  translator.relocate();
+  translator.relocate(true);
   return TranslationResult{translator.publish()};
 }
 

@@ -18,6 +18,86 @@ use no_pos_hash::position_insensitive_hash;
 use crate::{consts, file_infos, funs, types, Result};
 use oxidized_by_ref::file_info::FileInfo;
 
+pub struct NamingTable {
+    readonly_names: Names,
+    in_memory_names: Names,
+}
+
+impl NamingTable {
+    pub fn new(path: impl AsRef<Path>) -> Self {
+        NamingTable {
+            readonly_names: Names::readonly_from_file(path).unwrap(),
+            in_memory_names: Names::new_in_memory().unwrap(),
+        }
+    }
+
+    pub fn get_path(&self, kind: NameType, name: &str) -> Result<Option<RelativePath>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self.in_memory_names.get_path(kind, name) {
+            if let Some(path) = result {
+                return Ok(Some(path));
+            }
+        }
+        self.readonly_names.get_path(kind, name)
+    }
+
+    pub fn get_const_path(&self, name: &str) -> Result<Option<RelativePath>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self.in_memory_names.get_const_path(name) {
+            if let Some(path) = result {
+                return Ok(Some(path));
+            }
+        }
+        self.readonly_names.get_const_path(name)
+    }
+
+    pub fn get_fun_path(&self, name: &str) -> Result<Option<RelativePath>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self.in_memory_names.get_fun_path(name) {
+            if let Some(path) = result {
+                return Ok(Some(path));
+            }
+        }
+        self.readonly_names.get_fun_path(name)
+    }
+
+    pub fn get_type_path(&self, name: &str) -> Result<Option<(RelativePath, KindOfType)>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self.in_memory_names.get_type_path(name) {
+            if let Some(path_kind_tuple) = result {
+                return Ok(Some(path_kind_tuple));
+            }
+        }
+        self.readonly_names.get_type_path(name)
+    }
+
+    pub fn get_fun_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self
+            .in_memory_names
+            .get_fun_path_case_insensitive(name.clone())
+        {
+            if let Some(path) = result {
+                return Ok(Some(path));
+            }
+        }
+        self.readonly_names.get_fun_path_case_insensitive(name)
+    }
+
+    pub fn get_type_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+        // TODO: Handle deletion tombstones
+        if let Ok(result) = self
+            .in_memory_names
+            .get_type_path_case_insensitive(name.clone())
+        {
+            if let Some(path) = result {
+                return Ok(Some(path));
+            }
+        }
+        self.readonly_names.get_type_path_case_insensitive(name)
+    }
+}
+
 #[derive(Debug)]
 pub struct Names {
     connection: Connection,

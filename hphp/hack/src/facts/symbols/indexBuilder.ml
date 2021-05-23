@@ -113,6 +113,7 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
       ~disable_legacy_attribute_syntax:false
       ~enable_xhp_class_modifier:false
       ~disable_xhp_element_mangling:false
+      ~disallow_hash_comments:true
       ~filename:path
       ~text
   in

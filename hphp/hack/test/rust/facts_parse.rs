@@ -42,6 +42,7 @@ fn parse(file_path: String, parse_only: bool) {
         allow_new_attribute_syntax: false,
         enable_xhp_class_modifier: false,
         disable_xhp_element_mangling: false,
+        disallow_hash_comments: true,
         filename: path,
     };
 

@@ -21,6 +21,7 @@ pub struct ExtractAsJsonOpts {
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub filename: RelativePath,
+    pub disallow_hash_comments: bool,
 }
 
 pub fn extract_as_json(text: &[u8], opts: ExtractAsJsonOpts) -> Option<String> {
@@ -35,6 +36,7 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
         filename,
+        disallow_hash_comments,
     } = opts;
     let text = SourceText::make(RcOc::new(filename), text);
     let env = ParserEnv {
@@ -43,6 +45,7 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         allow_new_attribute_syntax,
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
+        disallow_hash_comments,
         ..ParserEnv::default()
     };
     let (root, errors, has_script_content) = facts_parser::parse_script(&text, env, None);

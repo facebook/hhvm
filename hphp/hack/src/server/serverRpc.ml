@@ -192,6 +192,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~disable_legacy_attribute_syntax:false
         ~enable_xhp_class_modifier:false
         ~disable_xhp_element_mangling:false
+        ~disallow_hash_comments:true
         ~filename:Relative_path.default
         ~text:contents
     in

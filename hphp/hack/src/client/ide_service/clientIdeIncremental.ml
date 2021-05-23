@@ -70,6 +70,7 @@ let compute_fileinfo_for_path
           (ParserOptions.enable_xhp_class_modifier popt)
         ~disable_xhp_element_mangling:
           (ParserOptions.disable_xhp_element_mangling popt)
+        ~disallow_hash_comments:(ParserOptions.disallow_hash_comments popt)
         ~filename:path
         ~text:contents
     in

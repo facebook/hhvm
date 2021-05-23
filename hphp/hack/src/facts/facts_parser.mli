@@ -21,6 +21,7 @@ val extract_as_json_string :
   disable_legacy_attribute_syntax:bool ->
   enable_xhp_class_modifier:bool ->
   disable_xhp_element_mangling:bool ->
+  disallow_hash_comments:bool ->
   filename:Relative_path.t ->
   text:string ->
   string option
@@ -34,6 +35,7 @@ val from_text :
   disable_legacy_attribute_syntax:bool ->
   enable_xhp_class_modifier:bool ->
   disable_xhp_element_mangling:bool ->
+  disallow_hash_comments:bool ->
   filename:Relative_path.t ->
   text:string ->
   Facts.facts option

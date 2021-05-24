@@ -39,7 +39,7 @@ let () =
     Sys.sigint
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
   let init_id = Random_id.short_string () in
-  let command = ClientArgs.parse_args ~init_id in
+  let command = ClientArgs.parse_args () in
   let command_name =
     match command with
     | ClientCommand.CCheck _ -> "Check"
@@ -120,7 +120,7 @@ let () =
       | ClientCommand.CStart env -> Lwt_main.run (ClientStart.main env)
       | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
-      | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
+      | ClientCommand.CLsp args -> Lwt_main.run (ClientLsp.main args ~init_id)
       | ClientCommand.CDebug env ->
         Lwt_main.run (ClientDebug.main env (Option.value_exn local_config))
       | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)

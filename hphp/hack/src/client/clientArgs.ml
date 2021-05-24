@@ -951,7 +951,7 @@ let parse_stop_args () =
   in
   CStop { ClientStop.root; from = !from }
 
-let parse_lsp_args ~(init_id : string) =
+let parse_lsp_args () =
   let usage =
     Printf.sprintf
       "Usage: %s lsp [OPTION]...\nRuns a persistent language service\n"
@@ -959,26 +959,16 @@ let parse_lsp_args ~(init_id : string) =
   in
   let from = ref "" in
   let config = ref [] in
-  let use_ffp_autocomplete = ref false in
-  let use_ranked_autocomplete = ref false in
-  let use_serverless_ide = ref false in
   let verbose = ref false in
   let options =
     [
-      (* Please keep these sorted in the alphabetical order *)
-      ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
-      ( "--ffp-autocomplete",
-        Arg.Set use_ffp_autocomplete,
-        " [experimental] use the full-fidelity parser based autocomplete " );
       Common_argspecs.from from;
       Common_argspecs.config config;
-      ( "--ranked-autocomplete",
-        Arg.Set use_ranked_autocomplete,
-        " [experimental] display ranked autocompletion results" );
-      ( "--serverless-ide",
-        Arg.Set use_serverless_ide,
-        " [experimental] provide IDE services from hh_client instead of hh_server"
-      );
+      (* Please keep these sorted in the alphabetical order *)
+      ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ( "--verbose",
         Arg.Set verbose,
         " verbose logs to stderr and `hh --ide-logname` and `--lsp-logname`" );
@@ -987,17 +977,7 @@ let parse_lsp_args ~(init_id : string) =
   in
   let args = parse_without_command options usage "lsp" in
   match args with
-  | [] ->
-    CLsp
-      {
-        ClientLsp.from = !from;
-        config = !config;
-        use_ffp_autocomplete = !use_ffp_autocomplete;
-        use_ranked_autocomplete = !use_ranked_autocomplete;
-        use_serverless_ide = !use_serverless_ide;
-        verbose = !verbose;
-        init_id;
-      }
+  | [] -> CLsp { ClientLsp.from = !from; config = !config; verbose = !verbose }
   | _ ->
     Printf.printf "%s\n" usage;
     exit 2
@@ -1200,14 +1180,14 @@ invocations of `hh` faster.|}
       replay_token = !replay_token;
     }
 
-let parse_args ~(init_id : string) : command =
+let parse_args () : command =
   match parse_command () with
   | (CKNone | CKCheck) as cmd -> parse_check_args cmd
   | CKStart -> parse_start_args ()
   | CKStop -> parse_stop_args ()
   | CKRestart -> parse_restart_args ()
   | CKDebug -> parse_debug_args ()
-  | CKLsp -> parse_lsp_args ~init_id
+  | CKLsp -> parse_lsp_args ()
   | CKRage -> parse_rage_args ()
   | CKDownloadSavedState -> parse_download_saved_state_args ()
 

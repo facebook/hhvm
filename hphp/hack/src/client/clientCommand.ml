@@ -12,7 +12,7 @@ type command =
   | CStart of ClientStart.env
   | CStop of ClientStop.env
   | CRestart of ClientStart.env
-  | CLsp of ClientLsp.env
+  | CLsp of ClientLsp.args
   | CDebug of ClientDebug.env
   | CDownloadSavedState of ClientDownloadSavedState.env
   | CRage of ClientRage.env

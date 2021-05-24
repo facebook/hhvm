@@ -447,6 +447,12 @@ type t = {
   trace_parsing: bool;
   prechecked_files: bool;
   enable_type_check_filter_files: bool;
+  (* whether clientLsp should use serverless-ide *)
+  ide_serverless: bool;
+  (* whether clientLsp should use ranked autocomplete *)
+  ide_ranked_autocomplete: bool;
+  (* whether clientLsp should use ffp-autocomplete *)
+  ide_ffp_autocomplete: bool;
   (* Let the user configure which files to type check and
    * which files to ignore. This flag is not expected to be
    * rolled out broadly, rather it is meant to be used by
@@ -591,6 +597,9 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
+    ide_serverless = false;
+    ide_ranked_autocomplete = false;
+    ide_ffp_autocomplete = false;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     longlived_workers = false;
@@ -970,6 +979,21 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  (* ide_serverless CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
+  let ide_serverless =
+    bool_ "ide_serverless" ~default:default.ide_serverless config
+  in
+  (* ide_ranked_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
+  let ide_ranked_autocomplete =
+    bool_
+      "ide_ranked_autocomplete"
+      ~default:default.ide_ranked_autocomplete
+      config
+  in
+  (* ide_ffp_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
+  let ide_ffp_autocomplete =
+    bool_ "ide_ffp_autocomplete" ~default:default.ide_ffp_autocomplete config
+  in
   let predeclare_ide =
     bool_if_min_version
       "predeclare_ide"
@@ -1254,6 +1278,9 @@ let load_ fn ~silent ~current_version overrides =
     trace_parsing;
     prechecked_files;
     enable_type_check_filter_files;
+    ide_serverless;
+    ide_ranked_autocomplete;
+    ide_ffp_autocomplete;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     longlived_workers;

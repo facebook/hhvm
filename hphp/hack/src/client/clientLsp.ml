@@ -14,14 +14,18 @@ open Hh_json_helpers
 
 (* All hack-specific code relating to LSP goes in here. *)
 
-type env = {
+type args = {
   from: string;
   config: (string * string) list;
+  verbose: bool;
+}
+
+type env = {
+  args: args;
+  init_id: string;
+  use_serverless_ide: bool;
   use_ffp_autocomplete: bool;
   use_ranked_autocomplete: bool;
-  use_serverless_ide: bool;
-  verbose: bool;
-  init_id: string;
 }
 
 (** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
@@ -1161,7 +1165,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
       save_64bit = None;
       dynamic_view = !cached_toggle_state;
       prechecked = None;
-      config = env.config;
+      config = env.args.config;
       custom_telemetry_data = [];
       allow_non_opt_build = false;
     }
@@ -1211,7 +1215,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
         and doesn't provide benefits in serverless-ide. *)
         use_priority_pipe = not env.use_serverless_ide;
         prechecked = None;
-        config = env.config;
+        config = env.args.config;
         custom_telemetry_data = [];
         allow_non_opt_build = false;
       }
@@ -1551,7 +1555,7 @@ let run_ide_service
       ~root
       ~naming_table_load_info
       ~use_ranked_autocomplete:env.use_ranked_autocomplete
-      ~config:env.config
+      ~config:env.args.config
       ~open_files
   in
   log_debug "initialize_from_saved_state.done";
@@ -1604,7 +1608,7 @@ let on_status_restart_action
     let ide_args =
       {
         ClientIdeMessage.init_id = env.init_id;
-        verbose_to_stderr = env.verbose;
+        verbose_to_stderr = env.args.verbose;
         verbose_to_file = !verbose_to_file;
       }
     in
@@ -3963,7 +3967,7 @@ let handle_client_message
         (not
            initialize_params.client_capabilities.textDocument.declaration
              .declarationLinkSupport)
-        && String.equal env.from "vscode"
+        && String.equal env.args.from "vscode"
       then begin
         from := "vscode_pre314";
         HackEventLogger.set_from !from
@@ -3973,7 +3977,7 @@ let handle_client_message
       let server_args =
         ServerArgs.default_options ~root:(Path.to_string root)
       in
-      let server_args = ServerArgs.set_config server_args env.config in
+      let server_args = ServerArgs.set_config server_args env.args.config in
       let local_config =
         snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
       in
@@ -4758,12 +4762,35 @@ let handle_tick
     ~terminate_on_failure:false;
   Lwt.return_none
 
-let main (env : env) : Exit_status.t Lwt.t =
+let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
-  from := env.from;
+  from := args.from;
   HackEventLogger.set_from !from;
 
-  if env.verbose then begin
+  (* The hh.conf can't fully be loaded without root, since it has flags like "foo=^4.53" that
+  depend on the version= line we read from root/.hhconfig. But nevertheless we need right now
+  a few hh.conf flags that control clientLsp and which aren't done that way. So we'll read
+  those flags right now. *)
+  let versionless_local_config =
+    ServerLocalConfig.load
+      ~silent:true
+      ~current_version:(Config_file.parse_version None)
+      (SMap.of_list args.config)
+  in
+  let env =
+    {
+      args;
+      init_id;
+      use_ffp_autocomplete =
+        versionless_local_config.ServerLocalConfig.ide_ffp_autocomplete;
+      use_ranked_autocomplete =
+        versionless_local_config.ServerLocalConfig.ide_ranked_autocomplete;
+      use_serverless_ide =
+        versionless_local_config.ServerLocalConfig.ide_serverless;
+    }
+  in
+
+  if env.args.verbose then begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
   end else begin
@@ -4782,8 +4809,8 @@ let main (env : env) : Exit_status.t Lwt.t =
            (ClientIdeService.make
               {
                 ClientIdeMessage.init_id = env.init_id;
-                verbose_to_stderr = env.verbose;
-                verbose_to_file = env.verbose;
+                verbose_to_stderr = env.args.verbose;
+                verbose_to_file = env.args.verbose;
               }))
     else
       None

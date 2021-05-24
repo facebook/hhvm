@@ -13,7 +13,9 @@ class TypeErrorAtPosDriver(CommonTestDriver):
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
     repo_dir = "hphp/hack/test/integration/data/holes"
 
-    def write_load_config(self, use_saved_state: bool = False) -> None:
+    def write_load_config(
+        self, use_serverless_ide: bool = False, use_saved_state: bool = False
+    ) -> None:
         with open(os.path.join(self.repo_dir, ".hhconfig"), "w") as f:
             f.write(
                 """

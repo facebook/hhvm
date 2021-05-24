@@ -12,7 +12,9 @@ from hh_paths import hh_client
 
 
 class FreshInitTestDriver(common_tests.CommonTestDriver):
-    def write_load_config(self, use_saved_state: bool = False) -> None:
+    def write_load_config(
+        self, use_serverless_ide: bool = False, use_saved_state: bool = False
+    ) -> None:
         # Fresh init tests don't care about which files changed, so we can
         # just use the default .hhconfig in the template repo
         pass

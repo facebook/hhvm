@@ -61,12 +61,8 @@ class LspCommandProcessor:
 
     @classmethod
     @contextlib.contextmanager
-    def create(
-        cls: Type[U], env: Mapping[str, str], use_serverless_ide: bool
-    ) -> Iterator[U]:
+    def create(cls: Type[U], env: Mapping[str, str]) -> Iterator[U]:
         args = ["--enhanced-hover", "--verbose"]
-        if use_serverless_ide:
-            args.append("--serverless-ide")
         proc = subprocess.Popen(
             [hh_client, "lsp"] + args,
             stdin=subprocess.PIPE,

@@ -18,7 +18,7 @@ val array_get :
   locl_ty ->
   pos * Nast.expr_ ->
   locl_ty ->
-  Typing_env_types.env * locl_ty
+  Typing_env_types.env * locl_ty * (locl_ty * locl_ty) option
 
 val assign_array_append_with_err :
   array_pos:pos ->
@@ -38,4 +38,7 @@ val assign_array_get_with_err :
   pos * (pos, Nast.func_body_ann, unit, unit) expr_ ->
   locl_ty ->
   locl_ty ->
-  Typing_env_types.env * locl_ty * (locl_ty * locl_ty) option
+  Typing_env_types.env
+  * locl_ty
+  * (locl_ty * locl_ty) option
+  * (locl_ty * locl_ty) option

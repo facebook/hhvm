@@ -1,0 +1,39 @@
+Errors:
+  [6:3-16] Invalid index type for this Map
+  [4:9-15] Expected `arraykey` because type parameter `Tk` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+  [3:37-42] But got `mixed`
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:50-54], (Hprim Tvoid)))); 
+        f_name = ([3:10-36], "\\assign_array_get_index_map"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:43-47], mixed); param_type_hint = ((mixed), (Some ([3:37-42], Hmixed))); 
+           param_is_variadic = false; param_pos = [3:43-47]; param_name = "$idx"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-16],
+            (Expr (([4:3-15], Map<nothing, int>), (Binop ((Eq None), (([4:3-6], Map<nothing, int>), (Lvar ([4:3-6], $xs))), (([4:9-15], Map<nothing, int>), (KeyValCollection (Map, None, []))))))));
+            ([6:3-17],
+             (Expr
+                (([6:3-16], int),
+                 (Binop ((Eq None),
+                    (([6:3-12], int),
+                     (Array_get ((([6:3-6], Map<nothing, int>), (Lvar ([6:3-6], $xs))), (Some (
+                        ([6:7-11], mixed), (Hole ((([6:7-11], mixed), (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
+                    (([6:15-16], int), (Int "1")))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

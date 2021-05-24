@@ -424,6 +424,15 @@ let run_on_intersection_res env ~f tyl =
   let (res, errs) = List.unzip pairs in
   (env, res, errs)
 
+let run_on_intersection_key_value_res env ~f tyl =
+  let g env ty =
+    let (env, a, b, c) = f env ty in
+    (env, (a, b, c))
+  in
+  let (env, triples) = run_on_intersection env ~f:g tyl in
+  let (res, key_errs, errs) = List.unzip3 triples in
+  (env, res, key_errs, errs)
+
 (*****************************************************************************)
 (* Dynamicism  *)
 (*****************************************************************************)

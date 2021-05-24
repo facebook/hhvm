@@ -3319,7 +3319,7 @@ and expr_
     let (env, te2, ty2) = expr env e2 in
     let env = might_throw env in
     let is_lvalue = phys_equal valkind `lvalue in
-    let (env, ty) =
+    let (env, ty, key_err_opt) =
       Typing_array_access.array_get
         ~array_pos:(fst e1)
         ~expr_pos:p
@@ -3330,7 +3330,11 @@ and expr_
         e2
         ty2
     in
-    make_result env p (Aast.Array_get (te1, Some te2)) ty
+    make_result
+      env
+      p
+      (Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te2)))
+      ty
   | Call ((pos_id, Id ((_, s) as id)), [], el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
@@ -5312,7 +5316,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (env, te, ty) = expr env e ~allow_awaitable in
       let env = might_throw env in
-      let (env, ty1', err_opt) =
+      let (env, ty1', key_err_opt, err_opt) =
         Typing_array_access.assign_array_get_with_err
           ~array_pos:(fst e1)
           ~expr_pos:p
@@ -5332,7 +5336,11 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
           in
           (env, te1)
       in
-      (env, ((pos, ty2), Aast.Array_get (te1, Some te)), ty2, err_opt)
+      ( env,
+        ( (pos, ty2),
+          Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te)) ),
+        ty2,
+        err_opt )
     | _ -> assign_simple p ur env e1 ty2)
 
 and assign_simple pos ur env e1 ty2 =

@@ -1,0 +1,35 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-9:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid)))); 
+        f_name = ([3:10-41], "\\array_get_index_keyed_container"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([4:31-34], KeyedContainer<string, int>);
+           param_type_hint = ((KeyedContainer<string, int>), (Some ([4:3-30], (Happly (([4:3-17], "\\HH\\KeyedContainer"), [([4:18-24], (Hprim Tstring)); ([4:26-29], (Hprim Tint))])))));
+           param_is_variadic = false; param_pos = [4:31-34]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([5:9-13], mixed); param_type_hint = ((mixed), (Some ([5:3-8], Hmixed))); 
+            param_is_variadic = false; param_pos = [5:9-13]; param_name = "$idx"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([8:3-13],
+            (Expr
+               (([8:3-12], int),
+                (Array_get ((([8:3-6], KeyedContainer<string, int>), (Lvar ([8:3-6], $xs))),
+                   (Some (([8:7-11], mixed), (Hole ((([8:7-11], mixed), (Lvar ([8:7-11], $idx))), (mixed), (arraykey), Typing)))))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

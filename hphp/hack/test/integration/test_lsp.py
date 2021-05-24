@@ -6147,8 +6147,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_status_stopped(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("hover.php"))
+        self.prepare_server_environment()
+        variables = self.setup_php_file("hover.php")
         self.test_driver.stop_hh_server()
 
         spec = (
@@ -6173,8 +6173,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_status_running(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("hover.php"))
+        self.prepare_server_environment()
+        variables = self.setup_php_file("hover.php")
 
         spec = (
             self.initialize_spec(

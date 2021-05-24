@@ -3456,6 +3456,9 @@ let subtype_funs
 let sub_type_or_fail env ty1 ty2 fail =
   sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())
 
+let sub_type_or_fail_res env ty1 ty2 fail =
+  sub_type_res env ty1 ty2 (fun ?code:_ _ -> fail ())
+
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;
   Typing_utils.sub_type_res_ref := sub_type_res;

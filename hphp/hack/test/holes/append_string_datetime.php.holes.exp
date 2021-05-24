@@ -1,0 +1,36 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((string), (Some ([3:58-64], (Hprim Tstring)))); 
+        f_name = ([3:10-32], "\\append_string_datetime"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = ([3:40-42], string); param_type_hint = ((string), (Some ([3:33-39], (Hprim Tstring)))); 
+           param_is_variadic = false; param_pos = [3:40-42]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = ([3:53-55], DateTime); param_type_hint = ((DateTime), (Some ([3:44-52], (Happly (([3:44-52], "\\DateTime"), []))))); 
+            param_is_variadic = false; param_pos = [3:53-55]; param_name = "$y"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-16],
+            (Return
+               (Some (([5:10-15], string),
+                      (Binop (Dot, (([5:10-12], string), (Lvar ([5:10-12], $x))),
+                         (([5:13-15], DateTime),
+                          (Hole ((([5:13-15], DateTime), (Lvar ([5:13-15], $y))), (DateTime), (?(dynamic | bool | float | resource | arraykey | HH\FormatString<nothing>)), Typing)))
+                         ))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

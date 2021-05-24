@@ -54,6 +54,10 @@ val sub_type :
  *)
 val sub_type_or_fail : env -> locl_ty -> locl_ty -> (unit -> unit) -> env
 
+(** As above but with a `result` type indicating if subtyping failed *)
+val sub_type_or_fail_res :
+  env -> locl_ty -> locl_ty -> (unit -> unit) -> (env, env) result
+
 (**
  * As above but only return the modified environment as [Ok] when the assertion
  * is satisfiable and the original environment as [Err] otherwise.

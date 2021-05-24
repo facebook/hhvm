@@ -277,7 +277,7 @@ let global_naming_end _ _ = ()
 
 let run_search_end _ = ()
 
-let update_search_end _ = ()
+let update_search_end _ _ = ()
 
 let naming_from_saved_state_end _ = ()
 

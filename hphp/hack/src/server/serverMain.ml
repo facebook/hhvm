@@ -1242,6 +1242,7 @@ let program_init genv env =
     }
   in
   Hh_logger.log "Waiting for daemon(s) to be ready...";
+  ServerProgress.send_progress "wrapping up init...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   let informant_use_xdb =

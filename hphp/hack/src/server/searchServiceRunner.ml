@@ -31,18 +31,25 @@ module SearchServiceRunner = struct
         iter (x :: acc) (n - 1)
     in
     let fast = iter [] num_files in
-    let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:fast in
-
-    if List.length fast > 0 then (
-      let str =
-        Printf.sprintf
-          "Updated search index for symbols in %d files:"
-          (List.length fast)
+    let len = List.length fast in
+    if len = 0 then
+      sienv
+    else begin
+      Hh_logger.log "UPDATE_SEARCH start";
+      if len > 10 then ServerProgress.send_progress "indexing %d files" len;
+      let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:fast in
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"files" ~value:len
+        |> Telemetry.int_ ~key:"remaining" ~value:(Queue.length queue)
       in
-      ignore (Hh_logger.log_duration str t);
-      if Queue.is_empty queue then Hh_logger.log "Done updating search index"
-    );
-    sienv
+      Hh_logger.log
+        "UPDATE_SEARCH_END %fs %s"
+        (Unix.gettimeofday () -. t)
+        (Telemetry.to_string telemetry);
+      HackEventLogger.update_search_end t telemetry;
+      sienv
+    end
 
   (* Completely clears the queue *)
   let run_completely (ctx : Provider_context.t) (sienv : SearchUtils.si_env) :

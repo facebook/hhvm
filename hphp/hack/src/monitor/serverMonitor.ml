@@ -27,6 +27,14 @@ open ServerMonitorUtils
 let log s ~tracker =
   Hh_logger.log ("[%s] " ^^ s) (Connection_tracker.log_id tracker)
 
+(** If you try to Unix.close the same FD twice, you get EBADF the second time.
+Ocaml doesn't have a linear type system, so it's too hard to be crisp about
+when we hand off responsibility for closing the FD. Therefore: we call this
+method to ensure an FD is closed, and we just silently gobble up the EBADF
+if someone else already closed it. *)
+let ensure_fd_closed (fd : Unix.file_descr) : unit =
+  (try Unix.close fd with Unix.Unix_error (Unix.EBADF, _, _) -> ())
+
 (** This module is to help using Unix "sendmsg" to handoff the client FD
 to the server. It's not entirely clear whether it's safe for us in the
 monitor to close the FD immediately after calling sendmsg, or whether
@@ -90,7 +98,7 @@ module Sent_fds_collector = struct
     match fd_close_time with
     | Fd_close_immediate ->
       log "closing client fd immediately after handoff" ~tracker;
-      Unix.close fd
+      ensure_fd_closed fd
     | _ ->
       handed_off_fds_to_close :=
         { fd_close_time; tracker; fd; m2s_sequence_number }
@@ -123,7 +131,7 @@ module Sent_fds_collector = struct
             true
           | _ -> false)
     in
-    List.iter ready ~f:(fun { fd; _ } -> Unix.close fd);
+    List.iter ready ~f:(fun { fd; _ } -> ensure_fd_closed fd);
     handed_off_fds_to_close := notready;
     ()
 end
@@ -419,7 +427,7 @@ struct
             ~tracker
             "Sending Monitor_failed_to_handoff to client, and closing FD";
           msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
-          Unix.close client_fd)
+          ensure_fd_closed client_fd)
 
   (* Does not return. *)
   let client_out_of_date_ client_fd mismatch_info =
@@ -867,19 +875,21 @@ struct
         let (fd, _) = Unix.accept socket in
         try ack_and_handoff_client env fd with
         | Exit_status.Exit_with _ as e -> raise e
-        | e ->
-          let e = Exception.wrap e in
+        | exn ->
+          let e = Exception.wrap exn in
           Hh_logger.log
             "Ack_and_handoff failure; closing client FD: %s"
             (Exception.get_ctor_string e);
-          Unix.close fd;
+          ensure_fd_closed fd;
           env
       with
       | Exit_status.Exit_with _ as e -> raise e
-      | e ->
+      | exn ->
+        let e = Exception.wrap exn in
         HackEventLogger.accepting_on_socket_exception e;
         Hh_logger.log
-          "Accepting on socket failed. Ignoring client connection attempt.";
+          "ACCEPTING_ON_SOCKET_EXCEPTION; closing client FD. %s"
+          (Exception.to_string e |> Exception.clean_stack);
         env
 
   let check_and_run_loop_once (env, monitor_config, socket) =

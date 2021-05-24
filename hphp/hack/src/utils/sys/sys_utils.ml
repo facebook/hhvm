@@ -706,16 +706,14 @@ let protected_read_exn (filename : string) : string =
 let protected_write_exn (filename : string) (content : string) : unit =
   if String.is_empty content then failwith "Empty content not supported.";
   with_umask 0o000 (fun () ->
-      let fd =
-        Unix.openfile filename [Unix.O_RDWR; Unix.O_CREAT; Unix.O_TRUNC] 0o666
-      in
+      let fd = Unix.openfile filename [Unix.O_RDWR; Unix.O_CREAT] 0o666 in
       Utils.try_finally
         ~f:(fun () ->
           Unix.lockf fd Unix.F_LOCK 0;
           let _written =
             Unix.write_substring fd content 0 (String.length content)
           in
-          ())
+          Unix.ftruncate fd (String.length content))
         ~finally:(fun () -> Unix.close fd))
 
 let redirect_stdout_and_stderr_to_file (filename : string) : unit =

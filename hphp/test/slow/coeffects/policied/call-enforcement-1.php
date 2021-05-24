@@ -36,6 +36,10 @@ function globals($fn)[globals] {
   if ($fn) $fn(null);
 }
 
+function write_props($fn)[write_props] {
+  if ($fn) $fn(null);
+}
+
 function pure($fn)[] {
   if ($fn) $fn(null);
 }
@@ -52,6 +56,7 @@ function main()[policied_of_local] {
     'policied_of',
     'globals',
     'read_globals',
+    'write_props',
     'pure'
   ];
   foreach ($functions as $caller) {

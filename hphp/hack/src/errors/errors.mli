@@ -1040,6 +1040,15 @@ val bad_decl_override :
   (Pos_or_decl.t * string) list ->
   unit
 
+val method_import_via_diamond :
+  Pos.t ->
+  string ->
+  Pos_or_decl.t ->
+  string ->
+  (Pos_or_decl.t * string) list ->
+  (Pos_or_decl.t * string) list ->
+  unit
+
 val bad_method_override :
   Pos_or_decl.t ->
   string ->

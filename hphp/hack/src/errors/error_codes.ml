@@ -633,6 +633,7 @@ module Typing = struct
     | UnresolvedTypeVariableProjection [@value 4436]
     | FunctionPointerWithAtom [@value 4437]
     | InvalidEchoArgument [@value 4438]
+    | DiamondTraitMethod [@value 4439]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

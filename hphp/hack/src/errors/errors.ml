@@ -2242,6 +2242,25 @@ let bad_decl_override parent_pos parent_name pos name msgl =
   (* This is a cascading error message *)
   add_list (Typing.err_code Typing.BadDeclOverride) msg1 (msg2 :: msgl)
 
+let method_import_via_diamond
+    pos class_name method_pos method_name trace1 trace2 =
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+  let method_name = Markdown_lite.md_codify (strip_ns method_name) in
+  let msg1 =
+    ( pos,
+      "Class "
+      ^ class_name
+      ^ " inherits trait method "
+      ^ method_name
+      ^ " via multiple traits.  Remove the multiple paths or override the method"
+    )
+  in
+  let msg2 = (method_pos, "Trait method is defined here") in
+  add_list
+    (Typing.err_code Typing.DiamondTraitMethod)
+    msg1
+    ((msg2 :: trace1) @ trace2)
+
 let bad_method_override
     pos member_name msgl (on_error : error_from_reasons_callback) =
   let msg =

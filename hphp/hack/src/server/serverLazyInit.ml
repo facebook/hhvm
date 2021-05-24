@@ -1249,7 +1249,13 @@ let post_saved_state_initialization
   @@ fun () -> Fixme_provider.remove_batch parsing_files );
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   (* Parse dirty files only *)
-  let next = MultiWorker.next genv.workers parsing_files_list in
+  let max_size =
+    if genv.local_config.ServerLocalConfig.small_buckets_for_dirty_names then
+      Some 1
+    else
+      None
+  in
+  let next = MultiWorker.next genv.workers parsing_files_list ?max_size in
   let (env, t) =
     parsing
       genv

@@ -18,6 +18,7 @@ type rollout_flags = {
   monitor_fd_close_delay: int;
   monitor_backpressure: bool;
   enable_devx_dependency_graph: bool;
+  small_buckets_for_dirty_names: bool;
 }
 
 let flush () = ()

@@ -157,35 +157,28 @@ let read_and_process_job ic oc : job_outcome =
 
   try
     Measure.push_global ();
-    match
+    let request : request =
       Measure.time "worker_read_request" (fun () ->
           Marshal_tools.from_fd_with_preamble infd)
-    with
-    | exception End_of_file ->
-      (* We will end up here when the controller has died. When that is
-         the case the input channel becomes readable (so that the read
-         can notify of the end of file), and we get End_of_file when
-         reading. *)
-      `Controller_has_died
-    | Request (do_process, { log_globals }) ->
-      let tm = Unix.times () in
-      let gc = Gc.quick_stat () in
-      Sys_utils.start_gc_profiling ();
-      start_user_time := tm.Unix.tms_utime +. tm.Unix.tms_cutime;
-      start_system_time := tm.Unix.tms_stime +. tm.Unix.tms_cstime;
-      start_minor_words := gc.Gc.minor_words;
-      start_promoted_words := gc.Gc.promoted_words;
-      start_major_words := gc.Gc.major_words;
-      start_minor_collections := gc.Gc.minor_collections;
-      start_major_collections := gc.Gc.major_collections;
-      start_wall_time := Unix.gettimeofday ();
-      start_proc_fs_status :=
-        ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
-      HackEventLogger.deserialize_globals log_globals;
-      Mem_profile.start ();
-
-      do_process { send = send_result };
-      `Success
+    in
+    let (Request (do_process, { log_globals })) = request in
+    let tm = Unix.times () in
+    let gc = Gc.quick_stat () in
+    Sys_utils.start_gc_profiling ();
+    start_user_time := tm.Unix.tms_utime +. tm.Unix.tms_cutime;
+    start_system_time := tm.Unix.tms_stime +. tm.Unix.tms_cstime;
+    start_minor_words := gc.Gc.minor_words;
+    start_promoted_words := gc.Gc.promoted_words;
+    start_major_words := gc.Gc.major_words;
+    start_minor_collections := gc.Gc.minor_collections;
+    start_major_collections := gc.Gc.major_collections;
+    start_wall_time := Unix.gettimeofday ();
+    start_proc_fs_status :=
+      ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+    HackEventLogger.deserialize_globals log_globals;
+    Mem_profile.start ();
+    do_process { send = send_result };
+    `Success
   with
   | WorkerCancel.Worker_should_exit -> `Worker_cancelled
   | SharedMem.Out_of_shared_memory -> `Error Exit_status.Out_of_shared_memory
@@ -200,20 +193,40 @@ let read_and_process_job ic oc : job_outcome =
         | 21 -> Exit_status.Sql_misuse
         | _ -> Exit_status.Sql_assertion_failure
       end
-  | e ->
-    let e_backtrace = Caml.Printexc.get_backtrace () in
-    let e_str = Caml.Printexc.to_string e in
-    let pid = Unix.getpid () in
-    Printf.printf "Worker subprocess %d exception: %s\n%!" pid e_str;
+  | End_of_file ->
+    (* This happens in the expected graceful shutdown path of our unit tests:
+    the controller shuts down its end of the pipe, and therefore when we
+    call [from_fd_with_preamble] above to get the next work-item, we get End_of_file.
+    We're catching it here, rather than solely around [from_fd_with_preamble],
+    because it's easier. This is fine because workers do no reading other than from
+    the server. *)
+    `Controller_has_died
+  | Unix.Unix_error (Unix.EPIPE, _, _) ->
+    (* This happens in the expected abrupt shutdown path of hh_server:
+    the controller process shuts down, and therefore when we finish our batch
+    of work and try to write the answer in [send_result] above, we get EPIPE.
+    We're catching it here, rather than solely around [send_result], because
+    it's easier. This is fine because workers have no other pipes other than
+    to the server. We do log to the server-log, though, which is fair since
+    it was an abrupt shutdown. *)
+    (* Note: there are other manifestations of server shutdown, e.g.
+    Marshal_tools.Reading_Preamble_Exception. I'm not confident I know all
+    of them, nor can tell which ones are expected vs unexpected, so I'll
+    leave them all to the catch-all handler below. *)
+    Hh_logger.log "Worker got EPIPE due to server shutdown";
+    `Controller_has_died
+  | exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.log
+      "WORKER_EXCEPTION %s"
+      (Exception.to_string e |> Exception.clean_stack);
     EventLogger.log_if_initialized (fun () ->
-        EventLogger.worker_exception e_str);
-    Printf.printf
-      "Worker subprocess %d Potential backtrace:\n%s\n%!"
-      pid
-      e_backtrace;
-    (* Not quite a type error... But it so happens that
-       Exit_status.Type_error is bound to return code 2,
-       which is what is used in this case. *)
+        HackEventLogger.worker_exception e);
+    (* What exit code should we emit for an uncaught exception?
+    The ocaml runtime emits exit code 2 for uncaught exceptions.
+    We should really pick our own different code here, but (history) we don't.
+    How can we convey exit code 2? By unfortunate accident, Exit_status.Type_error
+    gets turned into "2". So that's how we're going to return exit code 2. Yuck. *)
     `Error Exit_status.Type_error
 
 (*****************************************************************************

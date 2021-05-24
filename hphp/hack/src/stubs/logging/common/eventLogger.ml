@@ -33,8 +33,6 @@ let set_init_type _ = ()
 
 let log_if_initialized _ = ()
 
-let worker_exception _ = ()
-
 let sharedmem_gc_ran _ _ _ _ = ()
 
 let sharedmem_init_done _ = ()

@@ -422,7 +422,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~globalrev:None
       ~gleanopt
       ~namespace_map:(GlobalOptions.po_auto_namespace_map tcopt)
-      ~provider_name:local_config.ServerLocalConfig.symbolindex_search_provider
+      ~provider_name:
+        local_config.ServerLocalConfig.ide_symbolindex_search_provider
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
       ~ignore_hh_version:false
       ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file

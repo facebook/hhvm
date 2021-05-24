@@ -453,6 +453,8 @@ type t = {
   ide_ranked_autocomplete: bool;
   (* whether clientLsp should use ffp-autocomplete *)
   ide_ffp_autocomplete: bool;
+  (* like [symbolindex_search_provider] but for IDE *)
+  ide_symbolindex_search_provider: string;
   (* Let the user configure which files to type check and
    * which files to ignore. This flag is not expected to be
    * rolled out broadly, rather it is meant to be used by
@@ -521,7 +523,7 @@ type t = {
   enable_naming_table_fallback: bool;
   (* Download dependency graph from DevX infra. *)
   enable_devx_dependency_graph: bool;
-  (* Selects a search provider for autocomplete and symbol search *)
+  (* Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_search_provider: string;
   symbolindex_quiet: bool;
   symbolindex_file: string option;
@@ -632,6 +634,9 @@ let default =
     enable_naming_table_fallback = false;
     enable_devx_dependency_graph = false;
     symbolindex_search_provider = "SqliteIndex";
+    (* the code actually doesn't use this default for ide_symbolindex_search_provider;
+    it defaults to whatever was computed for symbolindex_search_provider. *)
+    ide_symbolindex_search_provider = "SqliteIndex";
     symbolindex_quiet = false;
     symbolindex_file = None;
     tico_invalidate_files = false;
@@ -1154,6 +1159,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.symbolindex_search_provider
       config
   in
+  let ide_symbolindex_search_provider =
+    string_
+      "ide_symbolindex_search_provider"
+      ~default:symbolindex_search_provider
+      config
+  in
   let symbolindex_quiet =
     bool_if_min_version
       "symbolindex_quiet"
@@ -1281,6 +1292,7 @@ let load_ fn ~silent ~current_version overrides =
     ide_serverless;
     ide_ranked_autocomplete;
     ide_ffp_autocomplete;
+    ide_symbolindex_search_provider;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     longlived_workers;
@@ -1345,4 +1357,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       monitor_backpressure = options.monitor_backpressure;
       enable_devx_dependency_graph = options.enable_devx_dependency_graph;
       small_buckets_for_dirty_names = options.small_buckets_for_dirty_names;
+      symbolindex_search_provider = options.symbolindex_search_provider;
     }

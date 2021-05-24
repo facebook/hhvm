@@ -15,7 +15,6 @@ let check_exit_status proc_stat process monitor_config =
   | Unix.WEXITED 0 -> ()
   | _ ->
     let (exit_kind, exit_code) = Exit_status.unpack proc_stat in
-    Hh_logger.log "typechecker %s with exit code %d\n" exit_kind exit_code;
     let is_oom =
       match proc_stat with
       | Unix.WEXITED i when i = Exit_status.exit_code Exit_status.Worker_oomed
@@ -29,8 +28,13 @@ let check_exit_status proc_stat process monitor_config =
       try Sys_utils.check_dmesg_for_oom process.pid "hh_server"
       with _ -> false
     in
+    Hh_logger.log
+      "TYPECHECKER_EXIT exit_kind=%s exit_code=%d is_oom=%b"
+      exit_kind
+      exit_code
+      is_oom;
     let time_taken = Unix.time () -. process.start_t in
-    HackEventLogger.bad_exit
+    HackEventLogger.typechecker_exit
       time_taken
       proc_stat
       (monitor_config.server_log_file, monitor_config.monitor_log_file)

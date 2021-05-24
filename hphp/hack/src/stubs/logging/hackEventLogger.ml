@@ -40,7 +40,7 @@ let set_hhconfig_version _ = ()
 
 let set_rollout_flags _ = ()
 
-let bad_exit _ _ _ ~is_oom:_ = ()
+let typechecker_exit _ _ _ ~is_oom:_ = ()
 
 let init
     ~root:_

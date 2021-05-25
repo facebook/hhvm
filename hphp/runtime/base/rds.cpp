@@ -114,7 +114,7 @@ FreeLists s_persistent_free_lists;
 
 #if RDS_FIXED_PERSISTENT_BASE
 // Allocate 2M from low memory each time.
-constexpr size_t kPersistentChunkSize = 16u << 10;
+constexpr size_t kPersistentChunkSize = 1u << 20;
 #endif
 }
 

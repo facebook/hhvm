@@ -29,6 +29,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ArrayData;
 struct RepoAutoloadMapBuilder;
 struct RepoGlobalData;
 struct SHA1;
@@ -152,7 +153,7 @@ struct RepoFile {
    * If "lazyLitstr" is true, the literal strings are not actually
    * loaded, and will be loaded on demand.
    */
-  static void loadGlobalTables(bool lazyLitstr);
+  static void loadGlobalTables(bool lazyLiterals);
 
   /*
    * Query functions:
@@ -164,6 +165,10 @@ struct RepoFile {
   // Load a literal string on-demand. The given index is the literal's
   // position in the literal string table.
   static StringData* loadLitstr(size_t);
+
+  // Load a literal array on-demand. The given index is the literal's
+  // position in the literal array table.
+  static ArrayData* loadLitarray(size_t);
 
   // Return the paths corresponding to all UnitEmitters in the repo
   // file.

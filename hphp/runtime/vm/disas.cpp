@@ -945,8 +945,9 @@ void print_unit_metadata(Output& out, const Unit* unit) {
     }
   }
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
-    auto const ad = unit->lookupArrayId(i);
-    out.fmtln(".adata A_{} = {};", i, escaped_long(ad));
+    auto const unitId = encodeUnitId(i);
+    auto const ad = unit->lookupArrayId(unitId);
+    out.fmtln(".adata A_{} = {};", unitId, escaped_long(ad));
   }
   out.nl();
 }

@@ -92,6 +92,7 @@ void ProcessInit() {
 
   if (RuntimeOption::RepoAuthoritative) {
     LitstrTable::init();
+    LitarrayTable::init();
     RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
     RepoFile::globalData().load();
   }

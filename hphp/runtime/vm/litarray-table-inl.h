@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LITSTR_TABLE_INL_H_
-#error "litstr-table-inl.h should only be included by litstr-table.h"
+#ifndef incl_HPHP_LITARRAY_TABLE_INL_H_
+#error "litarray-table-inl.h should only be included by litarray-table.h"
 #endif
 
 #include "hphp/util/alloc.h"
@@ -23,78 +23,69 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void LitstrTable::init() {
-  assertx(!LitstrTable::s_litstrTable);
-  LitstrTable::s_litstrTable =
-    new (vm_malloc(sizeof(LitstrTable))) LitstrTable();
+inline void LitarrayTable::init() {
+  assertx(!LitarrayTable::s_litarrayTable);
+  LitarrayTable::s_litarrayTable =
+    new (vm_malloc(sizeof(LitarrayTable))) LitarrayTable();
 }
 
-inline void LitstrTable::fini() {
-  assertx(LitstrTable::s_litstrTable);
-  vm_free(LitstrTable::s_litstrTable);
-  LitstrTable::s_litstrTable = nullptr;
+inline void LitarrayTable::fini() {
+  assertx(LitarrayTable::s_litarrayTable);
+  vm_free(LitarrayTable::s_litarrayTable);
+  LitarrayTable::s_litarrayTable = nullptr;
 }
 
-inline LitstrTable& LitstrTable::get() {
-  return *LitstrTable::s_litstrTable;
+inline LitarrayTable& LitarrayTable::get() {
+  assertx(LitarrayTable::s_litarrayTable);
+  return *LitarrayTable::s_litarrayTable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Main API.
 
-inline size_t LitstrTable::numLitstrs() const {
+inline size_t LitarrayTable::numLitarrays() const {
   assertx(m_safeToRead);
-  return m_namedInfo.size();
+  return m_arrays.size();
 }
 
-inline bool LitstrTable::contains(Id id) const {
+inline bool LitarrayTable::contains(Id id) const {
   return m_safeToRead
-    ? m_namedInfo.contains(id)
-    : 0 < id && id < m_nextId.load(std::memory_order_relaxed);
+    ? 0 <= id && id < m_arrays.size()
+    : 0 <= id && id < m_nextId.load(std::memory_order_relaxed);
 }
 
-inline StringData* LitstrTable::lookupLitstrId(Id id) const {
+inline ArrayData* LitarrayTable::lookupLitarrayId(Id id) const {
   assertx(m_safeToRead);
-  if (auto ret = m_namedInfo.lookupLitstr(id)) {
-    return ret;
+  if (auto const ret = m_arrays[id].get()) {
+    return const_cast<ArrayData*>(ret);
   }
-  return loadLitstrById(id);
-}
-
-inline const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
-  assertx(m_safeToRead);
-  return m_namedInfo.lookupNamedEntity(id);
-}
-
-inline NamedEntityPair LitstrTable::lookupNamedEntityPairId(Id id) const {
-  assertx(m_safeToRead);
-  return m_namedInfo.lookupNamedEntityPair(id);
+  return loadLitarrayById(id);
 }
 
 inline
-void LitstrTable::setNamedEntityPairTable(NamedEntityPairTable&& namedInfo) {
-  assertx(m_namedInfo.empty());
-  m_namedInfo = std::move(namedInfo);
+void LitarrayTable::setTable(LitarrayTableData&& arrays) {
+  assertx(m_arrays.empty());
+  m_arrays = std::move(arrays);
 }
 
 inline
-void LitstrTable::setLitstr(Id id, const StringData* str) {
+void LitarrayTable::setLitarray(Id id, const ArrayData* arr) {
   assertx(contains(id));
-  auto& elem = m_namedInfo[id];
+  auto& elem = m_arrays[id];
   elem.lock_for_update();
   if (DEBUG_ONLY auto const curr = elem.get()) {
-    assertx(str == curr);
+    assertx(arr == curr);
     elem.unlock();
   } else {
-    elem.update_and_unlock(LowStringPtr{str});
+    elem.update_and_unlock(std::move(arr));
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Concurrency control.
 
-inline void LitstrTable::setWriting() {
-  always_assert(!m_litstr2id.size());
+inline void LitarrayTable::setWriting() {
+  always_assert(!m_litarray2id.size());
   m_safeToRead = false;
 }
 

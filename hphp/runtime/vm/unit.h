@@ -695,7 +695,6 @@ private:
   int64_t m_sn{-1};             // Note: could be 32-bit
   SHA1 m_sha1;
   SHA1 m_bcSha1;
-  VMFixedVector<const ArrayData*> m_arrays;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
@@ -713,6 +712,7 @@ struct UnitExtended : Unit {
   UnitExtended() { m_extended = true; }
 
   NamedEntityPairTable m_namedInfo;
+  VMFixedVector<const ArrayData*> m_arrays;
   ArrayTypeTable m_arrayTypeTable;
 
   // Used by Unit prefetcher:
@@ -728,6 +728,21 @@ struct UnitExtended : Unit {
   std::atomic<int64_t> m_lastTouchRequest{0};
   std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// ID helpers.
+
+/*
+ * Unit litstr Id's are all above this mark.
+ */
+constexpr int kUnitIdOffset = 0x40000000;
+
+/*
+ * Functions for differentiating unit-local Id's from global Id's.
+ */
+bool isUnitId(Id id);
+Id encodeUnitId(Id id);
+Id decodeUnitId(Id id);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

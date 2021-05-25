@@ -110,6 +110,7 @@ struct FuncChecker {
   bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
+  bool checkArray(PC pc, Id id);
   bool checkString(PC pc, Id id);
   bool checkExnEdge(State cur, Op op, Block* b);
   bool checkItersDead(const State& cur, Op op, Block* b, const char* info);
@@ -472,11 +473,19 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC /*pc*/, Id id) {
-  if (!isUnitLitstrId(id)) {
+  if (!isUnitId(id)) {
     return LitstrTable::get().contains(id);
   }
-  auto unitID = decodeUnitLitstrId(id);
+  auto unitID = decodeUnitId(id);
   return unitID < unit()->numLitstrs();
+}
+
+bool FuncChecker::checkArray(PC /*pc*/, Id id) {
+  if (!isUnitId(id)) {
+    return LitarrayTable::get().contains(id);
+  }
+  auto unitID = decodeUnitId(id);
+  return unitID < unit()->numArrays();
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -564,7 +573,7 @@ bool FuncChecker::checkImmSA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmAA(PC& pc, PC const /*instr*/) {
   auto const id = decodeId(&pc);
-  if (id < 0 || id >= (Id)unit()->numArrays()) {
+  if (!checkArray(pc, id)) {
     error("invalid array id %d\n", id);
     return false;
   }
@@ -1228,10 +1237,13 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     #define O(name) \
     case Op::name: { \
       auto const id = getImm(pc, 0).u_AA; \
-      if (id < 0 || id >= unit()->numArrays()) { \
+      if (!checkArray(pc, id)) { \
         ferror("{} references array data that is not a \n", \
                 #name, #name); \
         return false; \
+      } \
+      if (!LitarrayTable::canRead()) { \
+        break; \
       } \
       auto const dt = unit()->lookupArray(id)->toDataType(); \
       if (dt != KindOf##name) { \
@@ -1416,9 +1428,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         auto const prev_op = peek_op(prev_pc);
         if (prev_op == Op::Vec) {
           auto const id = getImm(prev_pc, 0).u_AA;
-          if (id < 0 || id >= unit()->numArrays()) {
+          if (!checkArray(prev_pc, id)) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
             return false;
+          }
+          if (!LitarrayTable::canRead()) {
+            break;
           }
           auto const arr = unit()->lookupArray(id);
           if (doesTypeStructureContainTUnresolved(arr)) {

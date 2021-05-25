@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -194,18 +195,18 @@ inline size_t Unit::numLitstrs() const {
 }
 
 inline bool Unit::isLitstrId(Id id) const {
-  if (!isUnitLitstrId(id)) {
+  if (!isUnitId(id)) {
     return LitstrTable::get().contains(id);
   }
-  auto unitID = decodeUnitLitstrId(id);
+  auto unitID = decodeUnitId(id);
   return m_extended && getExtended()->m_namedInfo.contains(unitID);
 }
 
 inline StringData* Unit::lookupLitstrId(Id id) const {
-  if (!isUnitLitstrId(id)) {
+  if (!isUnitId(id)) {
     return LitstrTable::get().lookupLitstrId(id);
   }
-  auto unitID = decodeUnitLitstrId(id);
+  auto unitID = decodeUnitId(id);
   return getExtended()->m_namedInfo.lookupLitstr(unitID);
 }
 
@@ -214,10 +215,10 @@ inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
 }
 
 inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
-  if (!isUnitLitstrId(id)) {
+  if (!isUnitId(id)) {
     return LitstrTable::get().lookupNamedEntityPairId(id);
   }
-  auto unitID = decodeUnitLitstrId(id);
+  auto unitID = decodeUnitId(id);
   return getExtended()->m_namedInfo.lookupNamedEntityPair(unitID);
 }
 
@@ -225,12 +226,17 @@ inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
 // Arrays.
 
 inline size_t Unit::numArrays() const {
-  return m_arrays.size();
+  if (!m_extended) return 0;
+  return getExtended()->m_arrays.size();
 }
 
 inline const ArrayData* Unit::lookupArrayId(Id id) const {
-  assertx(id < m_arrays.size());
-  return m_arrays[id];
+  if (!isUnitId(id)) {
+    return LitarrayTable::get().lookupLitarrayId(id);
+  }
+  auto unitID = decodeUnitId(id);
+  assertx(unitID < getExtended()->m_arrays.size());
+  return getExtended()->m_arrays[unitID];
 }
 
 inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
@@ -376,6 +382,21 @@ inline void Unit::setInterpretOnly() {
 
 inline UserAttributeMap Unit::metaData() const {
   return m_metaData;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ID helpers.
+
+inline bool isUnitId(Id id) {
+  return id >= kUnitIdOffset;
+}
+
+inline Id encodeUnitId(Id id) {
+  return id + kUnitIdOffset;
+}
+
+inline Id decodeUnitId(Id id) {
+  return id - kUnitIdOffset;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

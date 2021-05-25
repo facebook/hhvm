@@ -2007,6 +2007,7 @@ static int execute_program_impl(int argc, char** argv) {
     always_assert(RO::RepoAuthoritative);
     init_repo_file();
     LitstrTable::init();
+    LitarrayTable::init();
     RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
     RepoFile::globalData().load();
     return 0;

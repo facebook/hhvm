@@ -85,6 +85,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Option::WholeProgram = false;
 
   LitstrTable::init();
+  LitarrayTable::init();
   RepoFile::loadGlobalTables(false);
   RepoFile::globalData().load();
 

@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/litstr-table.h"
+#include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -93,17 +94,21 @@ UnitEmitter::~UnitEmitter() {
 // Litstrs and Arrays.
 
 const StringData* UnitEmitter::lookupLitstr(Id id) const {
-  if (!isUnitLitstrId(id)) {
+  if (!isUnitId(id)) {
     return LitstrTable::get().lookupLitstrId(id);
   }
-  auto unitId = decodeUnitLitstrId(id);
+  auto unitId = decodeUnitId(id);
   assertx(unitId < m_litstrs.size());
   return m_litstrs[unitId];
 }
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
-  assertx(id < m_arrays.size());
-  return m_arrays[id];
+  if (!isUnitId(id)) {
+    return LitarrayTable::get().lookupLitarrayId(id);
+  }
+  auto unitId = decodeUnitId(id);
+  assertx(unitId < m_arrays.size());
+  return m_arrays[unitId];
 }
 
 const RepoAuthType::Array* UnitEmitter::lookupArrayType(Id id) const {
@@ -121,7 +126,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   if (m_useGlobalIds) {
     return LitstrTable::get().mergeLitstr(litstr);
   }
-  return encodeUnitLitstrId(mergeUnitLitstr(litstr));
+  return encodeUnitId(mergeUnitLitstr(litstr));
 }
 
 Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
@@ -138,6 +143,14 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
+  assertx(a->isStatic());
+  if (m_useGlobalIds) {
+    return LitarrayTable::get().mergeLitarray(a);
+  }
+  return encodeUnitId(mergeUnitArray(a));
+}
+
+Id UnitEmitter::mergeUnitArray(const ArrayData* a) {
   assertx(a->isStatic());
   auto const id = static_cast<Id>(m_arrays.size());
   m_array2id.emplace(a, id);
@@ -401,7 +414,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   std::unique_ptr<Unit> u {
     RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
-      m_litstrs.empty() && m_arrayTypeTable.empty() ?
+      m_litstrs.empty() && m_arrayTypeTable.empty() && m_arrays.empty() ?
     new Unit : new UnitExtended
   };
 
@@ -415,7 +428,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_origFilepath = m_filepath;
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
-  u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
@@ -443,6 +455,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     for (auto s : m_litstrs) {
       ux->m_namedInfo.emplace_back(LowStringPtr{s});
     }
+    ux->m_arrays = m_arrays;
     ux->m_arrayTypeTable = m_arrayTypeTable;
 
     // If prefetching is enabled, store the symbol refs in the Unit so
@@ -562,7 +575,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       assertx(v.isArray());
       auto ad = v.detach().m_data.parr;
       ArrayData::GetScalarArray(&ad);
-      auto const id DEBUG_ONLY = mergeArray(ad);
+      auto const id DEBUG_ONLY = mergeUnitArray(ad);
       assertx(id == i);
     },
     [&] (auto& sd, const ArrayData* a) {
@@ -1064,7 +1077,7 @@ void UnitRepoProxy::GetUnitArraysStmt
       assertx(v.isArray());
       ArrayData* ad = v.detach().m_data.parr;
       ArrayData::GetScalarArray(&ad);
-      Id id DEBUG_ONLY = ue.mergeArray(ad);
+      Id id DEBUG_ONLY = ue.mergeUnitArray(ad);
       assertx(id == arrayId);
     }
   } while (!query.done());

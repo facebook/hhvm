@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/autoload-handler.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 
 #include "hphp/util/build-info.h"
@@ -227,6 +228,7 @@ constexpr uint16_t kCurrentVersion = 1;
 constexpr size_t kGlobalDataSizeLimit        = 1ull << 28;
 constexpr size_t kUnitEmittersIndexSizeLimit = 1ull << 32;
 constexpr size_t kAutoloadMapSizeLimit       = 1ull << 32;
+constexpr size_t kArrayTableSizeLimit        = 1ull << 33;
 constexpr size_t kArrayTypesSizeLimit        = 1ull << 28;
 constexpr size_t kLiteralTableSizeLimit      = 1ull << 33;
 constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
@@ -241,6 +243,7 @@ struct SizeHeader {
   uint64_t unitEmittersIndexSize = 0;
   uint64_t globalDataSize        = 0;
   uint64_t autoloadMapSize       = 0;
+  uint64_t arrayTableSize        = 0;
   uint64_t arrayTypesSize        = 0;
   uint64_t literalTableSize      = 0;
 
@@ -249,6 +252,7 @@ struct SizeHeader {
     sizeof(unitEmittersIndexSize) +
     sizeof(globalDataSize) +
     sizeof(autoloadMapSize) +
+    sizeof(arrayTableSize) +
     sizeof(arrayTypesSize) +
     sizeof(literalTableSize);
 
@@ -257,6 +261,7 @@ struct SizeHeader {
     writeInt(fd, unitEmittersIndexSize);
     writeInt(fd, globalDataSize);
     writeInt(fd, autoloadMapSize);
+    writeInt(fd, arrayTableSize);
     writeInt(fd, arrayTypesSize);
     writeInt(fd, literalTableSize);
   }
@@ -266,6 +271,7 @@ struct SizeHeader {
     unitEmittersIndexSize = readInt<decltype(unitEmittersIndexSize)>(fd);
     globalDataSize        = readInt<decltype(globalDataSize)>(fd);
     autoloadMapSize       = readInt<decltype(autoloadMapSize)>(fd);
+    arrayTableSize        = readInt<decltype(arrayTableSize)>(fd);
     arrayTypesSize        = readInt<decltype(arrayTypesSize)>(fd);
     literalTableSize      = readInt<decltype(literalTableSize)>(fd);
   }
@@ -385,7 +391,41 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
     m_data->fd.write(encoder.data(), encoder.size());
     m_data->sizes.autoloadMapSize = encoder.size();
     always_assert(m_data->sizes.autoloadMapSize <= kAutoloadMapSizeLimit);
-   }
+  }
+
+  // Literal array table
+  {
+    MemoryManager::SuppressOOM so(*tl_heap);
+
+    auto& litarrayTable = LitarrayTable::get();
+    litarrayTable.setReading();
+
+    BlobEncoder encoder{true};
+
+    auto const numLitarrays = litarrayTable.numLitarrays();
+    always_assert(
+      numLitarrays <= std::numeric_limits<uint32_t>::max()
+    );
+    encoder((uint32_t)numLitarrays);
+    DEBUG_ONLY int next = 0;
+    LitarrayTable::get().forEachLitarray(
+      [&] (int i, const ArrayData* arr) {
+        assertx(i == next);
+        auto const str = [&]{
+          VariableSerializer vs{VariableSerializer::Type::Internal};
+          return
+            vs.serializeValue(VarNR(const_cast<ArrayData*>(arr)), false)
+            .toCppString();
+        }();
+        encoder(str);
+        ++next;
+      }
+    );
+    assertx(next == numLitarrays);
+    m_data->fd.write(encoder.data(), encoder.size());
+    m_data->sizes.arrayTableSize = encoder.size();
+    always_assert(m_data->sizes.arrayTableSize <= kArrayTableSizeLimit);
+  }
 
   // Global array type table
   {
@@ -490,6 +530,7 @@ struct RepoFileData {
   uint64_t unitEmittersIndexOffset = 0;
   uint64_t globalDataOffset = 0;
   uint64_t autoloadMapOffset = 0;
+  uint64_t arrayTableOffset = 0;
   uint64_t arrayTypesOffset = 0;
   uint64_t literalTableOffset = 0;
 
@@ -499,8 +540,10 @@ struct RepoFileData {
   std::vector<UnitInfo> unitInfo;
 
   std::vector<Bounds> literals;
+  std::vector<Bounds> arrays;
 
   std::atomic<bool> loadedLitstrTable{false};
+  std::atomic<bool> loadedLitarrayTable{false};
   std::atomic<bool> loadedUnitEmitterIndices{false};
 };
 
@@ -661,6 +704,10 @@ void RepoFile::init(const std::string& path) {
     data.autoloadMapOffset = offset;
     offset += data.sizes.autoloadMapSize;
 
+    check("arrays", data.sizes.arrayTableSize, kArrayTableSizeLimit);
+    data.arrayTableOffset = offset;
+    offset += data.sizes.arrayTableSize;
+
     check("array-types", data.sizes.arrayTypesSize, kArrayTypesSizeLimit);
     data.arrayTypesOffset = offset;
     offset += data.sizes.arrayTypesSize;
@@ -708,9 +755,10 @@ const RepoGlobalData& RepoFile::globalData() {
   return s_repoFileData->globalData;
 }
 
-void RepoFile::loadGlobalTables(bool lazyLitstr) {
+void RepoFile::loadGlobalTables(bool lazyLiterals) {
   assertx(s_repoFileData);
   assertx(!s_repoFileData->loadedLitstrTable.load());
+  assertx(!s_repoFileData->loadedLitarrayTable.load());
   assertx(!s_repoFileData->loadedUnitEmitterIndices.load());
 
   auto& data = *s_repoFileData;
@@ -740,7 +788,7 @@ void RepoFile::loadGlobalTables(bool lazyLitstr) {
 
     for (size_t id = 1; id < numLitstrs; ++id) {
       auto const offset = blob.decoder.advanced();
-      if (!lazyLitstr) {
+      if (!lazyLiterals) {
         const StringData* litstr;
         blob.decoder(litstr);
         table.setLitstr(id, litstr);
@@ -753,6 +801,57 @@ void RepoFile::loadGlobalTables(bool lazyLitstr) {
     }
     blob.decoder.assertDone();
     data.loadedLitstrTable.store(true);
+  }
+
+  // Arrays
+  {
+    auto blob = loadBlob(
+      data.fd,
+      data.arrayTableOffset,
+      data.sizes.arrayTableSize,
+      true
+    );
+
+    auto& table = LitarrayTable::get();
+    assertx(table.numLitarrays() == 0);
+
+    uint32_t numLitarrays;
+    blob.decoder(numLitarrays);
+
+    assertx(data.arrays.empty());
+    data.arrays.reserve(numLitarrays);
+
+    LitarrayTableData tableData;
+    tableData.resize(numLitarrays, nullptr);
+    table.setTable(std::move(tableData));
+
+    for (size_t id = 0; id < numLitarrays; ++id) {
+      auto const offset = blob.decoder.advanced();
+      if (!lazyLiterals) {
+        std::string str;
+        blob.decoder(str);
+
+        auto v = [&]{
+          VariableUnserializer vu{
+            str.data(),
+            str.size(),
+            VariableUnserializer::Type::Internal
+          };
+          return vu.unserialize();
+        }();
+        assertx(v.isArray());
+        auto arr = v.detach().m_data.parr;
+        ArrayData::GetScalarArray(&arr);
+        table.setLitarray(id, arr);
+      } else {
+        blob.decoder.skipStdString();
+      }
+      auto const post = blob.decoder.advanced();
+      assertx(post >= offset);
+      data.arrays.emplace_back(Bounds{offset, post - offset});
+    }
+    blob.decoder.assertDone();
+    data.loadedLitarrayTable.store(true);
   }
 
   // Unit emitter indices
@@ -876,6 +975,42 @@ StringData* RepoFile::loadLitstr(size_t id) {
   blob.decoder.assertDone();
   LitstrTable::get().setLitstr(id, litstr);
   return const_cast<StringData*>(litstr);
+}
+
+ArrayData* RepoFile::loadLitarray(size_t id) {
+  assertx(s_repoFileData);
+  assertx(s_repoFileData->loadedLitarrayTable.load());
+
+  auto const& data = *s_repoFileData;
+
+  if (id < 0 || id >= data.arrays.size()) return nullptr;
+
+  MemoryManager::SuppressOOM so(*tl_heap);
+
+  auto const& index = data.arrays[id];
+  auto blob = loadBlob(
+    data.fd,
+    data.arrayTableOffset + index.offset,
+    index.size,
+    true
+  );
+  std::string str;
+  blob.decoder(str);
+  blob.decoder.assertDone();
+
+  auto v = [&]{
+    VariableUnserializer vu{
+      str.data(),
+      str.size(),
+      VariableUnserializer::Type::Internal
+    };
+    return vu.unserialize();
+  }();
+  assertx(v.isArray());
+  auto arr = v.detach().m_data.parr;
+  ArrayData::GetScalarArray(&arr);
+  LitarrayTable::get().setLitarray(id, arr);
+  return arr;
 }
 
 std::unique_ptr<UnitEmitter>

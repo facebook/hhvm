@@ -154,6 +154,11 @@ struct UnitEmitter {
   Id mergeArray(const ArrayData* a);
 
   /*
+   * Merge a scalar array into the table for the Unit.
+   */
+  Id mergeUnitArray(const ArrayData* a);
+
+  /*
    * Clear and rebuild the array type table from the builder.
    */
   void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);

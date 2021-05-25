@@ -492,6 +492,7 @@ int main(int argc, char** argv) try {
 
   hphp_process_init();
   LitstrTable::get().setWriting();
+  LitarrayTable::get().setWriting();
   SCOPE_EXIT { hphp_process_exit(); };
 
   // When running hhbbc, these option is loaded from GD, and will override CLI.

@@ -114,7 +114,7 @@ bool UnitChecker::checkLiteral(size_t id,
 bool UnitChecker::checkStrings() {
   bool ok = true;
   for (size_t i = 0, n = m_unit->numLitstrs(); i < n; ++i) {
-    ok &= checkLiteral(i, m_unit->lookupLitstr(encodeUnitLitstrId(i)), "string");
+    ok &= checkLiteral(i, m_unit->lookupLitstr(encodeUnitId(i)), "string");
   }
   return ok;
   // Notes
@@ -135,7 +135,7 @@ bool UnitChecker::checkStrings() {
 bool UnitChecker::checkArrays() {
   bool ok = true;
   for (size_t i = 0, n = m_unit->numArrays(); i < n; ++i) {
-    ok &= checkLiteral(i, m_unit->lookupArray(i), "array");
+    ok &= checkLiteral(i, m_unit->lookupArray(encodeUnitId(i)), "array");
   }
   return ok;
 }

@@ -610,6 +610,18 @@ struct BlobDecoder {
     return *this;
   }
 
+  /*
+   * Skip over an encoded std::string
+   */
+  BlobDecoder& skipStdString() {
+    uint32_t sz;
+    decode(sz);
+    if (sz < 1) return *this;
+    assertx(remaining() >= sz);
+    advance(sz);
+    return *this;
+  }
+
   void setUseGlobalIds(bool b) { m_useGlobalIds = b; }
 
 private:

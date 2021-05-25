@@ -16,30 +16,30 @@
 
 #pragma once
 
-#include "hphp/runtime/base/string-functors.h"
-#include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/named-entity-pair-table.h"
-#include "hphp/util/alloc.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/vm/containers.h"
 
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 
+using LitarrayTableData = VMCompactVector<UnsafeLockFreePtrWrapper<const ArrayData*>>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Singleton global table of literal strings and NamedEntitys.
+ * Singleton global table of literal arrays
  *
  * This can only be safely used when the repo is built in WholeProgram mode and
  * run in RepoAuthoritative mode.
  */
-struct LitstrTable {
+struct LitarrayTable {
 
   /////////////////////////////////////////////////////////////////////////////
   // Singleton init and get.                                           [static]
 
   /*
-   * Create the singleton LitstrTable.
+   * Create the singleton LitarrayTable.
    *
    * Must not be called in concurrent contexts---the table pointer is not
    * atomic, and init() does not check if a table already exists.
@@ -47,7 +47,7 @@ struct LitstrTable {
   static void init();
 
   /*
-   * Destroy the singleton LitstrTable.
+   * Destroy the singleton LitarrayTable.
    *
    * Must not be called in concurrent contexts---the table pointer is not
    * atomic.
@@ -55,9 +55,9 @@ struct LitstrTable {
   static void fini();
 
   /*
-   * Get the singleton LitstrTable.
+   * Get the singleton LitarrayTable.
    */
-  static LitstrTable& get();
+  static LitarrayTable& get();
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -66,51 +66,46 @@ struct LitstrTable {
   /*
    * Size of the table.
    */
-  size_t numLitstrs() const;
+  size_t numLitarrays() const;
 
-  /*
-   * Dispatch to corresponding NamedEntityPairTable methods, sans `Id' suffix.
-   */
   bool contains(Id id) const;
-  StringData* lookupLitstrId(Id id) const;
-  const NamedEntity* lookupNamedEntityId(Id id) const;
-  NamedEntityPair lookupNamedEntityPairId(Id id) const;
+  ArrayData* lookupLitarrayId(Id id) const;
 
   static bool canRead() {
-    return !s_litstrTable || s_litstrTable->m_safeToRead;
+    return !s_litarrayTable || s_litarrayTable->m_safeToRead;
   }
 
   /*
-   * Set up the named info table.  Not thread-safe.
+   * Set up the table.  Not thread-safe.
    */
-  void setNamedEntityPairTable(NamedEntityPairTable&& namedInfo);
+  void setTable(LitarrayTableData&& arrays);
 
   /*
    * Set an entry, used for lazy loading.
    */
-  void setLitstr(Id id, const StringData* str);
+  void setLitarray(Id id, const ArrayData* str);
 
   /*
-   * Add an entry for `litstr' to the table.
+   * Add an entry for `litarray' to the table.
    *
    * The "merge" terminology is inherited from Unit.
    */
-  Id mergeLitstr(const StringData* litstr);
+  Id mergeLitarray(const ArrayData* litarray);
 
   /*
    * Call onItem() for each item in the table.
    */
-  void forEachLitstr(
-    std::function<void (int i, const StringData* name)> onItem);
+  void forEachLitarray(
+    std::function<void (int i, const ArrayData* ad)> onItem);
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Concurrency control.
 
   /*
-   * LitstrTable reader/writer state.
+   * LitarrayTable reader/writer state.
    *
-   * Setting the reader state will update m_namedInfo from m_litstr2id.
+   * Setting the reader state will update m_namedInfo from m_litarray2id.
    */
   void setReading();
   void setWriting();
@@ -120,38 +115,37 @@ struct LitstrTable {
   // Private constructor.
 
 private:
-  LitstrTable() {}
+  LitarrayTable() {}
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 private:
-  static LitstrTable* s_litstrTable;
+  static LitarrayTable* s_litarrayTable;
 
-  using LitstrMap = tbb::concurrent_hash_map<
-    const StringData*,
+  using LitarrayMap = tbb::concurrent_hash_map<
+    const ArrayData*,
     Id,
-    StringDataHashCompare,
-    VMAllocator<char>
+    pointer_hash<ArrayData>
   >;
 
-  NamedEntityPairTable m_namedInfo;
-  LitstrMap m_litstr2id;
+  LitarrayMap m_litarray2id;
+  LitarrayTableData m_arrays;
 
-  std::atomic<Id> m_nextId{1};
+  std::atomic<Id> m_nextId{0};
   std::atomic<bool> m_safeToRead{true};
 };
 
 /*
  * Lazy load helper that is safe to call concurrently.
  */
-StringData* loadLitstrById(Id id);
+ArrayData* loadLitarrayById(Id id);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#define incl_HPHP_LITSTR_TABLE_INL_H_
-#include "hphp/runtime/vm/litstr-table-inl.h"
-#undef incl_HPHP_LITSTR_TABLE_INL_H_
+#define incl_HPHP_LITARRAY_TABLE_INL_H_
+#include "hphp/runtime/vm/litarray-table-inl.h"
+#undef incl_HPHP_LITARRAY_TABLE_INL_H_
 

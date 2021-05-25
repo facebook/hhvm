@@ -589,6 +589,8 @@ int process(const CompilerOptions &po) {
 
   LitstrTable::init();
   LitstrTable::get().setWriting();
+  LitarrayTable::init();
+  LitarrayTable::get().setWriting();
 
   {
     Timer timer2(Timer::WallTime, "parsing inputs");

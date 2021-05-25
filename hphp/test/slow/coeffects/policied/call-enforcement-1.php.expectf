@@ -52,9 +52,7 @@ policied_shallow -> globals:
 Warning: Call to globals() requires [globals] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
  ok
 policied_shallow -> read_globals: ok
-policied_shallow -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
- ok
+policied_shallow -> write_props: ok
 policied_shallow -> pure: ok
 policied -> non_policied:
 Warning: Call to non_policied() requires [defaults] coeffects but policied() provided [policied] in %s on line 16
@@ -79,9 +77,7 @@ policied -> globals:
 Warning: Call to globals() requires [globals] coeffects but policied() provided [policied] in %s on line 16
  ok
 policied -> read_globals: ok
-policied -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but policied() provided [policied] in %s on line 16
- ok
+policied -> write_props: ok
 policied -> pure: ok
 policied_of_local -> non_policied: ok
 policied_of_local -> policied_local: ok
@@ -107,9 +103,7 @@ policied_of_shallow -> globals:
 Warning: Call to globals() requires [globals] coeffects but policied_of_shallow() provided [policied_of_shallow] in %s on line 24
  ok
 policied_of_shallow -> read_globals: ok
-policied_of_shallow -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but policied_of_shallow() provided [policied_of_shallow] in %s on line 24
- ok
+policied_of_shallow -> write_props: ok
 policied_of_shallow -> pure: ok
 policied_of -> non_policied:
 Warning: Call to non_policied() requires [defaults] coeffects but policied_of() provided [policied_of] in %s on line 28
@@ -132,9 +126,7 @@ policied_of -> globals:
 Warning: Call to globals() requires [globals] coeffects but policied_of() provided [policied_of] in %s on line 28
  ok
 policied_of -> read_globals: ok
-policied_of -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but policied_of() provided [policied_of] in %s on line 28
- ok
+policied_of -> write_props: ok
 policied_of -> pure: ok
 globals -> non_policied:
 Warning: Call to non_policied() requires [defaults] coeffects but globals() provided [globals] in %s on line 36

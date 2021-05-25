@@ -54,8 +54,7 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
 #define RX_COEFFECTS \
   X(rx_local)        \
   X(rx_shallow)      \
-  X(rx)              \
-  X(write_props)
+  X(rx)
 
 #define POLICIED_COEFFECTS \
   X(policied_of_local)     \
@@ -65,7 +64,8 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(policied_shallow)      \
   X(policied)              \
   X(globals)               \
-  X(read_globals)
+  X(read_globals)          \
+  X(write_props)
 
 #define COEFFECTS    \
   RX_COEFFECTS       \
@@ -162,12 +162,11 @@ void initCapabilityGraphs() {
   auto rx_pure = createNode(Cap::s_rx_pure);
   addEdges(createNode(Cap::s_rx_defaults, false, true),
            addEdges(createNode(Cap::s_rx, true),
-                    rx_pure),
-           addEdges(createNode(Cap::s_write_props),
                     rx_pure));
 
   auto policied = createNode(Cap::s_policied, true);
   auto read_globals = createNode(Cap::s_read_globals);
+  auto policied_maybe = createNode(Cap::s_policied_maybe);
   addEdges(createNode(Cap::s_policied_unreachable, false, true),
            addEdges(createNode(Cap::s_policied_defaults),
                     addEdges(createNode(Cap::s_globals),
@@ -175,8 +174,10 @@ void initCapabilityGraphs() {
                     policied),
            addEdges(createNode(Cap::s_policied_of, true),
                     addEdges(policied,
+                             addEdges(createNode(Cap::s_write_props),
+                                      policied_maybe),
                              addEdges(read_globals,
-                                      createNode(Cap::s_policied_maybe)))));
+                                      policied_maybe))));
 }
 
 } //namespace
@@ -196,16 +197,12 @@ void CoeffectsConfig::initEnforcementLevel(
   // enforcement otherwise the whole coeffect system breaks
   s_instance->m_pureLevel = 0;
   s_instance->m_rxLevel = 0;
-  s_instance->m_writePropsLevel = 0;
   s_instance->m_policiedLevel = 0;
   for (auto const [name, level] : map) {
     if (name == C::s_rx) s_instance->m_rxLevel = level;
-    else if (name == C::s_write_props) s_instance->m_writePropsLevel = level;
     else if (name == C::s_policied) s_instance->m_policiedLevel = level;
     s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);
   }
-  s_instance->m_writePropsLevel = std::max(s_instance->m_writePropsLevel,
-                                           s_instance->m_rxLevel);
 }
 
 void CoeffectsConfig::initCapabilities() {
@@ -301,9 +298,6 @@ void CoeffectsConfig::initCapabilities() {
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
       warningMask = (rxPure | policiedMaybe);
     } else {
-      if (CoeffectsConfig::writePropsEnforcementLevel() == 1) {
-        warningMask |= rxPure;
-      }
       if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
         warningMask |= policiedMaybe;
       }
@@ -319,7 +313,6 @@ std::string CoeffectsConfig::mangle() {
   return folly::to<std::string>(
     C::s_pure, std::to_string(s_instance->m_pureLevel),
     C::s_rx, std::to_string(s_instance->m_rxLevel),
-    C::s_write_props, std::to_string(s_instance->m_writePropsLevel),
     C::s_policied, std::to_string(s_instance->m_policiedLevel)
   );
 }
@@ -339,12 +332,9 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
   if (!CoeffectsConfig::enabled()) return StaticCoeffects::none();
 
   if (!CoeffectsConfig::rxEnforcementLevel()) {
-    if (!CoeffectsConfig::writePropsEnforcementLevel() ||
-        coeffect != C::s_write_props) {
 #define X(x) if (coeffect == C::s_##x) return StaticCoeffects::defaults();
   RX_COEFFECTS
 #undef X
-    }
   }
 
   if (!CoeffectsConfig::policiedEnforcementLevel()) {

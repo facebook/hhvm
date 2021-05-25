@@ -1,1 +1,3 @@
--vEval.CoeffectEnforcementLevels.rx=2 -vEval.CoeffectEnforcementLevels.pure=2
+-vEval.CoeffectEnforcementLevels.rx=2
+-vEval.CoeffectEnforcementLevels.policied=2
+-vEval.CoeffectEnforcementLevels.pure=2

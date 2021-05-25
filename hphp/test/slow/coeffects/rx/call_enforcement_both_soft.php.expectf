@@ -44,10 +44,10 @@ Warning: Call to write_props() requires [write_props] coeffects but rx() provide
 rx -> write_props: ok
 rx -> write_props_rx: ok
 
-Warning: Call to write_props_rx_shallow() requires [rx_shallow, write_props] coeffects but rx() provided [rx] in %s on line 16
+Warning: Call to write_props_rx_shallow() requires [write_props] coeffects but rx() provided [rx] in %s on line 16
 rx -> write_props_rx_shallow: ok
 
-Warning: Call to write_props_rx_local() requires [rx_shallow, write_props] coeffects but rx() provided [rx] in %s on line 16
+Warning: Call to write_props_rx_local() requires [write_props] coeffects but rx() provided [rx] in %s on line 16
 rx -> write_props_rx_local: ok
 rx -> pure: ok
 
@@ -68,42 +68,42 @@ write_props -> write_props_rx_shallow: ok
 write_props -> write_props_rx_local: ok
 write_props -> pure: ok
 
-Warning: Call to non_rx() requires [defaults] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to non_rx() requires [defaults] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> non_rx: ok
 
-Warning: Call to rx_local() requires [rx_shallow] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to rx_local() requires [rx_shallow] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> rx_local: ok
 
-Warning: Call to rx_shallow() requires [rx_shallow] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to rx_shallow() requires [rx_shallow] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> rx_shallow: ok
 
-Warning: Call to rx() requires [rx] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to rx() requires [rx] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> rx: ok
 
-Warning: Call to write_props() requires [write_props] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to write_props() requires [write_props] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> write_props: ok
 write_props_rx -> write_props_rx: ok
 
-Warning: Call to write_props_rx_shallow() requires [rx_shallow, write_props] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to write_props_rx_shallow() requires [write_props] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> write_props_rx_shallow: ok
 
-Warning: Call to write_props_rx_local() requires [rx_shallow, write_props] coeffects but write_props_rx() provided [rx, write_props] in %s on line 24
+Warning: Call to write_props_rx_local() requires [write_props] coeffects but write_props_rx() provided [write_props] in %s on line 24
 write_props_rx -> write_props_rx_local: ok
 write_props_rx -> pure: ok
 
-Warning: Call to non_rx() requires [defaults] coeffects but write_props_rx_shallow() provided [rx_shallow, write_props] in %s on line 28
+Warning: Call to non_rx() requires [defaults] coeffects but write_props_rx_shallow() provided [write_props] in %s on line 28
 write_props_rx_shallow -> non_rx: ok
 
-Warning: Call to rx_local() requires [rx_shallow] coeffects but write_props_rx_shallow() provided [rx_shallow, write_props] in %s on line 28
+Warning: Call to rx_local() requires [rx_shallow] coeffects but write_props_rx_shallow() provided [write_props] in %s on line 28
 write_props_rx_shallow -> rx_local: ok
 
-Warning: Call to rx_shallow() requires [rx_shallow] coeffects but write_props_rx_shallow() provided [rx_shallow, write_props] in %s on line 28
+Warning: Call to rx_shallow() requires [rx_shallow] coeffects but write_props_rx_shallow() provided [write_props] in %s on line 28
 write_props_rx_shallow -> rx_shallow: ok
 
-Warning: Call to rx() requires [rx] coeffects but write_props_rx_shallow() provided [rx_shallow, write_props] in %s on line 28
+Warning: Call to rx() requires [rx] coeffects but write_props_rx_shallow() provided [write_props] in %s on line 28
 write_props_rx_shallow -> rx: ok
 
-Warning: Call to write_props() requires [write_props] coeffects but write_props_rx_shallow() provided [rx_shallow, write_props] in %s on line 28
+Warning: Call to write_props() requires [write_props] coeffects but write_props_rx_shallow() provided [write_props] in %s on line 28
 write_props_rx_shallow -> write_props: ok
 write_props_rx_shallow -> write_props_rx: ok
 write_props_rx_shallow -> write_props_rx_shallow: ok
@@ -142,12 +142,12 @@ pure -> rx: ok
 Warning: Call to write_props() requires [write_props] coeffects but pure() provided [] in %s on line 36
 pure -> write_props: ok
 
-Warning: Call to write_props_rx() requires [rx, write_props] coeffects but pure() provided [] in %s on line 36
+Warning: Call to write_props_rx() requires [write_props] coeffects but pure() provided [] in %s on line 36
 pure -> write_props_rx: ok
 
-Warning: Call to write_props_rx_shallow() requires [rx_shallow, write_props] coeffects but pure() provided [] in %s on line 36
+Warning: Call to write_props_rx_shallow() requires [write_props] coeffects but pure() provided [] in %s on line 36
 pure -> write_props_rx_shallow: ok
 
-Warning: Call to write_props_rx_local() requires [rx_shallow, write_props] coeffects but pure() provided [] in %s on line 36
+Warning: Call to write_props_rx_local() requires [write_props] coeffects but pure() provided [] in %s on line 36
 pure -> write_props_rx_local: ok
 pure -> pure: ok

@@ -14,7 +14,7 @@ Warning: Call to f2() requires [defaults] coeffects but pure() provided [] in %s
 in f2
 f2: ok
 
-Warning: Call to f2() requires [write_props] coeffects but pure() provided [] in %s on line 27
+Warning: Call to f2() requires [defaults] coeffects but pure() provided [] in %s on line 27
 in f2
 f2: ok
 
@@ -35,7 +35,7 @@ Warning: Call to f2() requires [defaults] coeffects but rx() provided [rx] in %s
 in f2
 f2: ok
 
-Warning: Call to f2() requires [write_props] coeffects but rx() provided [rx] in %s on line 28
+Warning: Call to f2() requires [defaults] coeffects but rx() provided [rx] in %s on line 28
 in f2
 f2: ok
 

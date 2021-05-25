@@ -43,10 +43,6 @@ struct CoeffectsConfig {
     assertx(s_instance);
     return s_instance->m_rxLevel;
   }
-  static int writePropsEnforcementLevel() {
-    assertx(s_instance);
-    return s_instance->m_writePropsLevel;
-  }
   static int policiedEnforcementLevel() {
     assertx(s_instance);
     return s_instance->m_policiedLevel;
@@ -86,7 +82,6 @@ private:
   RuntimeCoeffects::storage_t m_warningMask;
   int m_pureLevel;
   int m_rxLevel;
-  int m_writePropsLevel;
   int m_policiedLevel;
   int m_numUsedBits;
 };

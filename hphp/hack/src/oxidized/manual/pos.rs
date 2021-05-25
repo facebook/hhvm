@@ -5,6 +5,7 @@
 
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
+use eq_modulo_pos::EqModuloPos;
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
@@ -386,6 +387,12 @@ impl PartialEq for Pos {
 }
 
 impl Eq for Pos {}
+
+impl EqModuloPos for Pos {
+    fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
 
 impl Pos {
     /// Returns a struct implementing Display which produces the same format as

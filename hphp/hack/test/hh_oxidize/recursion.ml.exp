@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 //
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
@@ -18,6 +19,7 @@ use crate::*;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -37,6 +39,7 @@ pub enum IntList {
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,

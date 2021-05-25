@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<972958220c17e0e0f5a707a43bde0726>>
+// @generated SignedSource<<6756569e803c8b7d523498ecd0364456>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -36,6 +37,7 @@ pub type Message<A> = (A, String);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -62,6 +64,7 @@ arena_deserializer::impl_deserialize_in_arena!(Phase);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -85,6 +88,7 @@ arena_deserializer::impl_deserialize_in_arena!(Severity);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -109,6 +113,7 @@ arena_deserializer::impl_deserialize_in_arena!(Format);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -142,6 +147,7 @@ pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -162,6 +168,7 @@ pub type Error = Error_<pos::Pos, pos_or_decl::PosOrDecl>;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -178,6 +185,7 @@ pub struct AppliedFixme(pub pos::Pos, pub isize);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,

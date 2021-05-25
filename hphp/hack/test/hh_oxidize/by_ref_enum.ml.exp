@@ -5,6 +5,7 @@
 //
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -20,6 +21,7 @@ use crate::*;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

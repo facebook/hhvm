@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ef711aec55224fc3a7f14d306c979e3>>
+// @generated SignedSource<<57e6e4da7cee094ae573de4bdbffb39d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -29,6 +30,7 @@ pub type Id_<'a> = str;
     Copy,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -57,6 +59,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -99,6 +102,7 @@ pub use oxidized::ast_defs::FunKind;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -154,6 +158,7 @@ pub use oxidized::ast_defs::Visibility;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

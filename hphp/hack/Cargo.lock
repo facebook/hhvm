@@ -582,6 +582,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "eq_modulo_pos"
+version = "0.0.0"
+dependencies = [
+ "arena_collections",
+ "bstr",
+ "eq_modulo_pos_derive",
+]
+
+[[package]]
+name = "eq_modulo_pos_derive"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "synstructure",
+]
+
+[[package]]
 name = "escaper"
 version = "0.0.0"
 dependencies = [
@@ -2316,6 +2334,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bstr",
+ "eq_modulo_pos",
  "hh_autoimport_rust",
  "itertools",
  "no_pos_hash",
@@ -2336,6 +2355,7 @@ dependencies = [
  "bitflags",
  "bstr",
  "bumpalo",
+ "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_derive",

@@ -6,6 +6,7 @@
 use std::{cmp::Ordering, ops::Range, result::Result::*};
 
 use bumpalo::Bump;
+use eq_modulo_pos::EqModuloPos;
 use serde::{Deserialize, Serialize};
 
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
@@ -430,6 +431,12 @@ impl<'a> Pos<'a> {
     /// `Pos.string` in OCaml.
     pub fn string(&self) -> PosString<'_> {
         PosString(self)
+    }
+}
+
+impl EqModuloPos for Pos<'_> {
+    fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
     }
 }
 

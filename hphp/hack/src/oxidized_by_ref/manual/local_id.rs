@@ -5,6 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
@@ -14,6 +15,7 @@ use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

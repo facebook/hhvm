@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9edc8c0680c9a72f6888bdc9e5331af7>>
+// @generated SignedSource<<8f7d0204c18377ee9c65de61dcf100ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -27,6 +28,7 @@ pub use typing_defs::ConstDecl;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -60,6 +62,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowClassConst<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -88,6 +91,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowTypeconst<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -114,6 +118,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowProp<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -141,6 +146,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -213,6 +219,7 @@ pub type TypedefDecl<'a> = TypedefType<'a>;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

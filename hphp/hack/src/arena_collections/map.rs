@@ -196,16 +196,6 @@ impl<'a, K, V> Map<'a, K, V> {
     pub const fn empty() -> Self {
         Map(None)
     }
-}
-
-impl<'a, K: Ord, V> Map<'a, K, V> {
-    /// Check whether the map is empty.
-    pub fn is_empty(self) -> bool {
-        match self {
-            Map(None) => true,
-            Map(Some(_)) => false,
-        }
-    }
 
     /// Compute the number of entries in a map.
     ///
@@ -215,6 +205,16 @@ impl<'a, K: Ord, V> Map<'a, K, V> {
         match self {
             Map(None) => 0,
             Map(Some(Node(l, _, _, r, _))) => l.count() + 1 + r.count(),
+        }
+    }
+}
+
+impl<'a, K: Ord, V> Map<'a, K, V> {
+    /// Check whether the map is empty.
+    pub fn is_empty(self) -> bool {
+        match self {
+            Map(None) => true,
+            Map(Some(_)) => false,
         }
     }
 }

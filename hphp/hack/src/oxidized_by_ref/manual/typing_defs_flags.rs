@@ -6,10 +6,12 @@
 use std::convert::{TryFrom, TryInto};
 
 use bitflags::bitflags;
+use eq_modulo_pos::EqModuloPos;
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
 bitflags! {
+    #[derive(EqModuloPos)]
     pub struct FunTypeFlags: u16 {
         const RETURN_DISPOSABLE      = 1 << 0;
         const RETURNS_MUTABLE        = 1 << 1;
@@ -32,6 +34,7 @@ bitflags! {
 }
 
 bitflags! {
+    #[derive(EqModuloPos)]
     pub struct FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;

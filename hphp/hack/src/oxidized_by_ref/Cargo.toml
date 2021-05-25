@@ -14,6 +14,7 @@ arena_trait = { path = "../arena_trait" }
 bitflags = "1.2"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
+eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }

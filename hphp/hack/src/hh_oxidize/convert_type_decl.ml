@@ -71,6 +71,7 @@ let default_derives () =
       (None, "PartialEq");
       (None, "PartialOrd");
       (Some "no_pos_hash", "NoPosHash");
+      (Some "eq_modulo_pos", "EqModuloPos");
       (Some "ocamlrep_derive", "ToOcamlRep");
       (Some "serde", "Serialize");
       (Some "serde", "Deserialize");
@@ -91,34 +92,99 @@ let additional_derives ty : (string option * string) list =
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
   | _ -> []
 
-let derive_blacklist ty =
-  let is_by_ref = is_by_ref () in
-  match ty with
-  (* A custom implementation of Ord for Error_ matches the sorting behavior of
+module DeriveSkipLists : sig
+  val skip_derive : ty:string -> trait:string -> bool
+end = struct
+  let skip_list_for_ty ty =
+    let is_by_ref = is_by_ref () in
+    match ty with
+    (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
-  | "errors::Error_" -> ["Ord"; "PartialOrd"]
-  (* GlobalOptions contains a couple floats, which only implement PartialEq
+    | "errors::Error_" -> ["Ord"; "PartialOrd"]
+    (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
-  | "global_options::GlobalOptions" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
-  (* And GlobalOptions is used in Genv which is used in Env. We
-   * don't care about comparison or hashing on environments *)
-  | "typing_env_types::Env" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
-  | "typing_env_types::Genv" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
-  | "ast_defs::Id" when is_by_ref -> ["Debug"]
-  | "errors::Errors" when is_by_ref -> ["Debug"]
-  | "typing_defs_core::Ty" when is_by_ref ->
-    ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-  | "typing_defs_core::Ty_" when is_by_ref -> ["Debug"]
-  | "typing_defs_core::ConstraintType" when is_by_ref ->
-    ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-  | _ -> []
+    | "global_options::GlobalOptions" ->
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    (* And GlobalOptions is used in Genv which is used in Env. We
+     * don't care about comparison or hashing on environments *)
+    | "typing_env_types::Env" ->
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    | "typing_env_types::Genv" ->
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    | "ast_defs::Id" when is_by_ref -> ["Debug"]
+    | "errors::Errors" when is_by_ref -> ["Debug"]
+    | "typing_defs_core::Ty" when is_by_ref ->
+      ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+    | "typing_defs_core::Ty_" when is_by_ref -> ["Debug"]
+    | "typing_defs_core::ConstraintType" when is_by_ref ->
+      ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+    | _ -> []
+
+  let skip_list_for_trait trait =
+    match trait with
+    | "EqModuloPos" ->
+      [
+        "scoured_comments::*";
+        "pos_or_decl::*";
+        "namespace_env::*";
+        "file_info::NameType";
+        "file_info::Pos";
+        "file_info::FileInfo";
+        "file_info::Names";
+        "file_info::SavedNames";
+        "file_info::Saved";
+        "file_info::Diff";
+        "aast::*";
+        "nast::*";
+        "tast::*";
+        "full_fidelity_parser_env::*";
+        "typing_env_types::*";
+        "typing_tyvar_occurrences::*";
+        "typing_per_cont_env::*";
+        "typing_inference_env::*";
+        "typing_kinding_defs::*";
+        "type_parameter_env::*";
+        "typing_fake_members::*";
+        "typing_defs_core::HasMember";
+        "typing_defs_core::Destructure";
+        "typing_defs_core::DestructureKind";
+        "typing_defs_core::ConstraintType_";
+        "typing_defs_core::ConstraintType";
+        "typing_defs_core::InternalType";
+      ]
+    | _ -> []
+
+  let is_in_ty_skip_list ~ty ~trait =
+    List.mem (skip_list_for_ty ty) trait ~equal:String.equal
+
+  let is_in_trait_skip_list ~ty ~trait =
+    let path_ty = String.split ty ~on:':' in
+    List.exists (skip_list_for_trait trait) ~f:(fun skip_ty ->
+        (* if skip_ty is like "SomeTy" then treat it as unqualified
+         * and skip if any type like "some_path::SomeTy" is in the
+         * skip list. Otherwise, just compare the fully qualified types, 
+         * modulo "*". *)
+        match String.split skip_ty ~on:':' with
+        | [skip_ty] ->
+          (match List.last path_ty with
+          | None -> false
+          | Some ty -> String.equal ty skip_ty)
+        | path_skip_ty ->
+          List.equal
+            (fun node skip_node ->
+              String.equal node skip_node || String.equal "*" skip_node)
+            path_ty
+            path_skip_ty)
+
+  let skip_derive ~ty ~trait =
+    is_in_ty_skip_list ~ty ~trait || is_in_trait_skip_list ~ty ~trait
+end
 
 let derived_traits ty =
   let ty = sprintf "%s::%s" (curr_module_name ()) ty in
-  let blacklist = derive_blacklist ty in
   default_derives ()
-  |> List.filter ~f:(fun (_, derive) ->
-         not (List.mem blacklist derive ~equal:String.equal))
+  |> List.filter ~f:(fun (_, trait) ->
+         not (DeriveSkipLists.skip_derive ~ty ~trait))
   |> List.append (additional_derives ty)
 
 let blacklisted_types =

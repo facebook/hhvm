@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a472ababe92c8f3fd9a525cbfca0fb78>>
+// @generated SignedSource<<0fd93c85f2de4655fec24e41d1a4c781>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -35,6 +36,7 @@ pub use oxidized::aast_defs::Visibility;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -63,6 +65,7 @@ pub use oxidized::aast_defs::ImportFlavor;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -92,6 +95,7 @@ pub use oxidized::aast_defs::XhpChildOp;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -115,6 +119,7 @@ pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -136,6 +141,7 @@ arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -157,6 +163,7 @@ arena_deserializer::impl_deserialize_in_arena!(HfParamInfo);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -189,6 +196,7 @@ arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -273,6 +281,7 @@ arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -303,6 +312,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -327,6 +337,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldInfo<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -357,6 +368,7 @@ pub use oxidized::aast_defs::TypedefVisibility;
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -383,6 +395,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enum_<'arena>);
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

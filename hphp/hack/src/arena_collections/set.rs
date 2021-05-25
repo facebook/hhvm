@@ -94,15 +94,15 @@ impl<'a, K> Set<'a, K> {
     pub const fn empty() -> Self {
         Set(Map::empty())
     }
+
+    pub fn count(self) -> usize {
+        self.0.count()
+    }
 }
 
 impl<'a, K: Ord> Set<'a, K> {
     pub fn is_empty(self) -> bool {
         self.0.is_empty()
-    }
-
-    pub fn count(self) -> usize {
-        self.0.count()
     }
 }
 

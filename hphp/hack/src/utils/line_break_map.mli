@@ -30,6 +30,8 @@ val offset_to_file_pos_triple : t -> int -> int * int * int
  *)
 val offset_to_position : t -> int -> int * int
 
+exception Position_not_found
+
 (* Take a one-based (line, column) pair, produce a zero-based offset.
  *
  * By setting existing to true (it's false by default), Not_found is raised for
@@ -39,6 +41,8 @@ val offset_to_position : t -> int -> int * int
  * Setting cyclic_index translates negative line numbers as offsets from the
  * last line in the original string. Without cyclic_index, Invalid_argument is
  * raised with an array-out-of-bounds message.
+ *
+ * Might raise {!Position_not_found}
  *)
 val position_to_offset : ?existing:bool -> t -> int * int -> int
 

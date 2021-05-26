@@ -294,6 +294,7 @@ class ReflectionTypeConstant implements Reflector {
   public function getDeclaringClass()[]: ReflectionClass;
   public function getClass()[]: ReflectionClass;
   public function getAssignedTypeText()[]: ?string;
+  public function getTypeStructure()[]: darray;
 }
 
 class ReflectionTypeAlias implements Reflector {

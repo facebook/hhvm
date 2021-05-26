@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -32,7 +32,7 @@ $args_array = varray[
   varray[2147483649, -2147483647, +2147483640, -2147483640],
   varray[2e5, 2e-5, -2e5, -2e-5],
   varray[0.2E5, -0.2e40, 0.2E-20, 0.2E+20],
-  varray[0x123b, 0xfAb, 0123, 01293],
+  varray[0x123b, 0xfAb, 0123, 012],
   varray[1234.1234, -5678.5678, 2345.2345],
   varray[3.33, 4.44, 1.11, 2.22]
 
@@ -42,7 +42,7 @@ $args_array = varray[
 // and with float values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   var_dump( vsprintf($format, $args_array[$counter-1]) );
   $counter++;
 }

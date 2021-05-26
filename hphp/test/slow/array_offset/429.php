@@ -7,7 +7,7 @@ $a = darray[];
 $a[0] = 1;
 $a[01] = 2;
 $a[007] = 3;
-$a[08] = 4;
+$a[010] = 4;
 $a[0xa] = 5;
 var_dump($a);
 try { var_dump("$a[0]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }

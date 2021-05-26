@@ -31,7 +31,7 @@ $args_array = varray[
   varray[' ', " ", -67, +67],
   varray[97, -97, 98, +98],
   varray[97, -97, 98, +98],
-  varray[0x123b, 0xfAb, 0123, 01293],
+  varray[0x123b, 0xfAb, 0123, 012],
   varray[38, -1234, 2345],
   varray[67, 68, 65, 66]
 

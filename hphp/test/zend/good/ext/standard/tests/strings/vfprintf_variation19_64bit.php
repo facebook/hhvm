@@ -31,7 +31,7 @@ $args_array = varray[
   varray[65, 66, 67],
   varray[2e1, 2e-1, -2e1],
   varray[-11, +22, 33],
-  varray[012, -02394, +02389],
+  varray[012, -023, +023],
   varray[0x11, -0x22, +0x33],
   varray[0x11, -0x22, +0x33],
   varray[2e1, 2e-1, -2e1]
@@ -42,7 +42,7 @@ $args_array = varray[
 $data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation19_64bit.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with non-scientific values from the above $args_array array
 $counter = 1;
@@ -56,6 +56,6 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 echo "===DONE===\n";
 }

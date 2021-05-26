@@ -13,13 +13,13 @@ $format2 = "%o %o";
 $format3 = "%o %o %o";
 $arg1 = varray[021];
 $arg2 = varray[021,0347];
-$arg3 = varray[021,0347,05678];
+$arg3 = varray[021,0347,0567];
 
 /* creating dumping file */
 $data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic8.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 

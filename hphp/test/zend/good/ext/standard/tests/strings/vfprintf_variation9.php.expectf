@@ -11,8 +11,7 @@ a %r\x9f%r b b
 -- Iteration 5 --
 a %r\x9f%r b b
 -- Iteration 6 --
-; %r\xab%r S 
-
+; %r\xab%r S
 -- Iteration 7 --
 %. c
 -- Iteration 8 --

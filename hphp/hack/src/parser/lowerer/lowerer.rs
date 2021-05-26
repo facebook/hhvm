@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{desugar_expression_tree::desugar, modifier};
-use bstr::{BString, ByteSlice, B};
+use bstr::{BString, B};
 use bumpalo::Bump;
 use escaper::*;
 use hash::{HashMap, HashSet};
@@ -15,6 +15,7 @@ use naming_special_names_rust::{
     classes as special_classes, literal, special_functions, special_idents,
     typehints as special_typehints, user_attributes as special_attrs,
 };
+use ocaml_helper::{int_of_string_opt, parse_int, ParseIntError};
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
@@ -51,6 +52,7 @@ use std::{
     matches, mem,
     rc::Rc,
     slice::Iter,
+    str::FromStr,
 };
 
 fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
@@ -728,7 +730,7 @@ where
                         Self::unesc_dbl
                     };
                     let str_ = Self::mk_str(node, env, unescp, &n);
-                    if let Some(_) = ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
+                    if let Some(_) = int_of_string_opt(&str_) {
                         Self::raise_parsing_error(
                             node,
                             env,
@@ -1340,7 +1342,7 @@ where
 
     fn p_expr_lit(
         location: ExprLocation,
-        parent: S<'a, T, V>,
+        _parent: S<'a, T, V>,
         expr: S<'a, T, V>,
         env: &mut Env<'a, TF>,
     ) -> Result<ast::Expr_, Error> {
@@ -1359,21 +1361,46 @@ where
                     (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
                         Ok(E_::String(Self::mk_str(expr, env, Self::unesc_dbl, s)))
                     }
-                    (_, Some(TK::OctalLiteral))
-                        if env.is_typechecker() && !Self::is_num_octal_lit(s) =>
-                    {
-                        Self::raise_parsing_error(
-                            parent,
-                            env,
-                            &syntax_error::invalid_octal_integer,
-                        );
-                        Self::missing_syntax("octal", expr, env)
-                    }
                     (_, Some(TK::DecimalLiteral))
                     | (_, Some(TK::OctalLiteral))
                     | (_, Some(TK::HexadecimalLiteral))
-                    | (_, Some(TK::BinaryLiteral)) => Ok(E_::Int(s.replace("_", ""))),
-                    (_, Some(TK::FloatingLiteral)) => Ok(E_::Float(String::from(s))),
+                    | (_, Some(TK::BinaryLiteral)) => {
+                        let s = s.replace("_", "");
+                        match parse_int(&s) {
+                            Err(ParseIntError::OutOfRange) => {
+                                Self::raise_parsing_error(
+                                    expr,
+                                    env,
+                                    &syntax_error::out_of_int_range(&s),
+                                );
+                            }
+                            Err(ParseIntError::InvalidDigit(int_kind)) => {
+                                Self::raise_parsing_error(
+                                    expr,
+                                    env,
+                                    &syntax_error::invalid_integer_digit(int_kind),
+                                );
+                                Self::missing_syntax(&format!("{}", int_kind), expr, env)?;
+                            }
+                            Err(ParseIntError::Empty) => {
+                                Self::failwith("Unexpected int literal error")?;
+                            }
+                            Ok(_) => {}
+                        }
+                        Ok(E_::Int(s))
+                    }
+                    (_, Some(TK::FloatingLiteral)) => {
+                        // f64::from_str accepts more string than Hacklang, invalid Hack float literal
+                        // is caught in lexer.
+                        if let Err(_) = f64::from_str(s) {
+                            Self::raise_parsing_error(
+                                expr,
+                                env,
+                                &syntax_error::out_of_float_range(&s),
+                            )
+                        }
+                        Ok(E_::Float(s.into()))
+                    }
                     (_, Some(TK::SingleQuotedStringLiteral)) => {
                         Ok(E_::String(Self::mk_str(expr, env, unescape_single, s)))
                     }

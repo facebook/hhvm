@@ -38,10 +38,10 @@ $array_arg = varray[
        darray['' => -0x123, "NULL" => -0xabc, "-ABC" => -0xABC, -0xAB1 => -0xAb1],
 
        // array with positive octal values
-/*9*/  darray[0123 => 0123, "02348" => 02348, '034' => 034, 00 => 00],
+/*9*/  darray[0123 => 0123, "02348" => 0234, '034' => 034, 00 => 00],
 
        // array with negative octal values
-       darray[-0123 => -0123, "-02348" => -02348, '-034' => -034],
+       darray[-0123 => -0123, "-02348" => -0234, '-034' => -034],
 
        // array with null values
 /*11*/ darray['' => NULL, "null" => NULL, "NULL" => NULL]

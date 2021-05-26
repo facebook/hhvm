@@ -1,0 +1,12 @@
+File "number_literal.php", line 13, characters 10-28:
+9223372036854775808 is out of the range of 64-bit float values (Parsing[1002])
+File "number_literal.php", line 14, characters 10-27:
+0x8000000000000000 is out of the range of 64-bit float values (Parsing[1002])
+File "number_literal.php", line 15, characters 10-75:
+0b1000000000000000000000000000000000000000000000000000000000000000 is out of the range of 64-bit float values (Parsing[1002])
+File "number_literal.php", line 16, characters 10-32:
+01000000000000000000000 is out of the range of 64-bit float values (Parsing[1002])
+File "number_literal.php", line 18, characters 10-12:
+Invalid digit for octal integers (Parsing[1002])
+File "number_literal.php", line 19, characters 13-13:
+Encountered unexpected token `2`. (Parsing[1002])

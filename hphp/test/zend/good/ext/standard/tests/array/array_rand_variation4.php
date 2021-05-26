@@ -27,7 +27,7 @@ $asso_arrays = varray[
 /*3*/  darray[0xabc => 2748, 0x12f => '303', 0xff => "255", -0xff => "-255"],
 
        // array with octal values as keys
-       darray[0123 => 83, 0129 => 10, 010 => "8", -0348 => "-28", 0012 => '10'],
+       darray[0123 => 83, 012 => 10, 010 => "8", -034 => "-28", 0012 => '10'],
 
        // array with bool values as keys
        darray[1 => '1', 1 => true, 1 => "TRUE",

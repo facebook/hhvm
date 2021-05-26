@@ -339,7 +339,9 @@ pub const error2066: Error = Cow::Borrowed(concat!(
     "this one."
 ));
 pub const error2068: Error = Cow::Borrowed("`hh` blocks and `php` blocks cannot be mixed.");
-pub const invalid_octal_integer: Error = Cow::Borrowed("Invalid octal integers");
+pub fn invalid_integer_digit(int_kind: ocaml_helper::IntKind) -> Error {
+    Cow::Owned(format!("Invalid digit for {} integers", int_kind))
+}
 pub const prefixed_invalid_string_kind: Error =
     Cow::Borrowed("Only double-quoted strings may be prefixed.");
 pub const illegal_interpolated_brace_with_embedded_dollar_expression: Error =
@@ -1002,3 +1004,17 @@ pub const invalid_atom_location: Error =
 
 pub const as_mut_single_argument: Error =
     Cow::Borrowed("HH\\Readonly\\as_mut takes a single value-typed expression as an argument.");
+
+pub fn out_of_int_range(int: &str) -> Error {
+    Cow::Owned(format!(
+        "{} is out of the range of 64-bit float values",
+        int.to_string(),
+    ))
+}
+
+pub fn out_of_float_range(float: &str) -> Error {
+    Cow::Owned(format!(
+        "{} is out of the range of 64-bit float values",
+        float.to_string(),
+    ))
+}

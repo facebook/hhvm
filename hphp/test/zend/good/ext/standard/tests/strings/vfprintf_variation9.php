@@ -18,7 +18,7 @@ $formats = varray[
   "%lc %Lc, %4c %-4c",
   "%10.4c %-10.4c %04c %04.4c",
   "%'#2c %'2c %'$2c %'_2c",
-  "%c %c %c %c",
+  "%c %c %c",
   "% %%c c%",
   '%3$c %4$c %1$c %2$c'
 ];
@@ -31,7 +31,7 @@ $args_array = varray[
   varray[' ', " ", -67, +67],
   varray[97, -97, 98, +98],
   varray[97, -97, 98, +98],
-  varray[0x123b, 0xfAb, 0123, 01293],
+  varray[0x123b, 0xfAb, 0123, 012],
   varray[38, -1234, 2345],
   varray[67, 68, 65, 66]
 

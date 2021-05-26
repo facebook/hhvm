@@ -56,7 +56,7 @@ fn decode_u32(s: &[u8]) -> Vec<u8> {
     let mut s1: Vec<u8> = Vec::with_capacity(s.len() - 1);
     s1.push(b'0');
     s1.extend_from_slice(&s[2..s.len() - 1]);
-    let n = int_of_string_opt(&s1[..]);
+    let n = int_of_string_opt(&s1);
     match n {
         Some(n) => utf32_to_utf8_alloc(n),
         None => vec![],

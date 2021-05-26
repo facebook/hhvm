@@ -2533,6 +2533,7 @@ dependencies = [
  "bumpalo",
  "itertools",
  "line_break_map",
+ "ocaml_helper",
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",

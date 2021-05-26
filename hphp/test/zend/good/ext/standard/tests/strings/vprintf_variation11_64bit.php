@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -29,10 +29,10 @@ $args_array = varray[
   varray[00],
   varray[-01, 01, +022],
   varray[-020000000000, 020000000000, 017777777777, -017777777777],
-  varray[0123456, 012345678, -01234567, 01234567],
+  varray[0123456, 01234567, -01234567, 01234567],
   varray[0111, 02222, -0333333, -044444444],
-  varray[0x123b, 0xfAb, 0123, 01293],
-  varray[01234, 05678, -01234, 02345],
+  varray[0x123b, 0xfAb, 0123, 012],
+  varray[01234, 0567, -01234, 02345],
   varray[03, 04, 01, 02]
 
 ];
@@ -41,10 +41,10 @@ $args_array = varray[
 // and with octal values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   $result = vprintf($format, $args_array[$counter-1]);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

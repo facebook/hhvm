@@ -4,7 +4,7 @@
 function g() {
 $a = darray[
   '012345678901234567890123456789012345678901234567890123456789' => -"b",
-  'testclass' => 05678,
+  'testclass' => 0567,
   "NaN"=> "Done\n",
   "-0x80001.5"=> -"Instantiating an infoBlob with a lowercase i\n",
   "9223372036854775808"=> 'Warning: ',

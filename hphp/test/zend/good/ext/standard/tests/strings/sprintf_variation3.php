@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 <<__EntryPoint>> function main(): void {
@@ -23,7 +23,7 @@ $valid_ints = varray[
   0x7fffffff,  // max postive integer as hexadecimal
   0x7FFFFFFF,  // max postive integer as hexadecimal
   0123,        // integer as octal
-  01912,       // should be quivalent to octal 1
+  01,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777  // max positive integer as octal
 ];
@@ -34,11 +34,11 @@ $int_formats = varray[
   "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 ];
- 
+
 $count = 1;
 foreach($valid_ints as $int_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $int_value) );
   }

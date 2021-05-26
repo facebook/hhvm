@@ -65,6 +65,7 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(policied)              \
   X(globals)               \
   X(read_globals)          \
+  X(write_this_props)      \
   X(write_props)
 
 #define COEFFECTS    \
@@ -175,7 +176,8 @@ void initCapabilityGraphs() {
            addEdges(createNode(Cap::s_policied_of, true),
                     addEdges(policied,
                              addEdges(createNode(Cap::s_write_props),
-                                      policied_maybe),
+                                      addEdges(createNode(Cap::s_write_this_props),
+                                               policied_maybe)),
                              addEdges(read_globals,
                                       policied_maybe))));
 }

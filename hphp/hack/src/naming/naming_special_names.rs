@@ -736,6 +736,8 @@ pub mod coeffects {
 
     pub const RX: &str = "rx";
 
+    pub const WRITE_THIS_PROPS: &str = "write_this_props";
+
     pub const WRITE_PROPS: &str = "write_props";
 
     pub const POLICIED_LOCAL: &str = "policied_local";

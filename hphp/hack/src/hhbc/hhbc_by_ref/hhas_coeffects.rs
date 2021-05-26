@@ -17,6 +17,7 @@ pub enum Ctx {
     Defaults,
 
     // Shared
+    WriteThisProps,
     WriteProps,
 
     // Rx hierarchy
@@ -47,6 +48,7 @@ impl fmt::Display for Ctx {
             RxLocal => write!(f, "{}", c::RX_LOCAL),
             RxShallow => write!(f, "{}", c::RX_SHALLOW),
             Rx => write!(f, "{}", c::RX),
+            WriteThisProps => write!(f, "{}", c::WRITE_THIS_PROPS),
             WriteProps => write!(f, "{}", c::WRITE_PROPS),
             PoliciedOfLocal => write!(f, "{}", c::POLICIED_OF_LOCAL),
             PoliciedOfShallow => write!(f, "{}", c::POLICIED_OF_SHALLOW),
@@ -149,6 +151,7 @@ impl HhasCoeffects {
                 c::RX_LOCAL => Some(Ctx::RxLocal),
                 c::RX_SHALLOW => Some(Ctx::RxShallow),
                 c::RX => Some(Ctx::Rx),
+                c::WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
                 c::WRITE_PROPS => Some(Ctx::WriteProps),
                 c::POLICIED_OF_LOCAL => Some(Ctx::PoliciedOfLocal),
                 c::POLICIED_OF_SHALLOW => Some(Ctx::PoliciedOfShallow),

@@ -163,7 +163,8 @@ let read_single_message_into_queue_wait (message_queue : queue) :
           (Lwt_unix.of_unix_file_descr message_queue.daemon_in_fd)
       in
       Lwt.return message
-    with End_of_file as e ->
+    with
+    | (End_of_file | Unix.Unix_error (Unix.EBADF, _, _)) as e ->
       (* This is different from when the client hangs up. It handles the case
          that the daemon process exited: for example, if it was killed. *)
       let message = Printexc.to_string e in

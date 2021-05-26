@@ -1169,6 +1169,7 @@ let add_newline contents =
   ^ "\n"
   ^ String.sub contents after_header (String.length contents - after_header)
 
+(* Might raise {!SharedMem.Shared_mem_not_found} *)
 let get_decls defs =
   ( SSet.fold
       (fun x acc -> Decl_heap.Typedefs.find_unsafe x :: acc)
@@ -1984,6 +1985,7 @@ let handle_mode
     if not (List.is_empty errors) then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
+    (* Might raise {!SharedMem.Shared_mem_not_found} *)
     test_decl_compare ctx filename builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;

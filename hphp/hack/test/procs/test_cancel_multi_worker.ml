@@ -80,6 +80,7 @@ let rec run_until_done fd_in workers (acc, iterations) = function
     let unfinished = List.concat unfinished in
     run_until_done fd_in workers (sum acc result, iterations + 1) unfinished
 
+(* Might raise {!SharedMem.Shared_mem_not_found} because of [find_unsafe] *)
 let rec sum_memory acc = function
   | [] -> acc
   | x :: xs -> sum_memory (acc + TestHeap.find_unsafe (string_of_int x)) xs

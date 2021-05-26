@@ -99,6 +99,8 @@ exception Failed_to_use_shm_dir of string
 
 exception C_assertion_failure of string
 
+exception Shared_mem_not_found
+
 let () =
   Callback.register_exception "out_of_shared_memory" Out_of_shared_memory;
   Callback.register_exception "hash_table_full" Hash_table_full;
@@ -1015,7 +1017,7 @@ module New : functor (Raw : Raw) (Key : Key) (Value : Value.Type) -> sig
 
   val get : Key.t -> Value.t option
 
-  val find_unsafe : Key.t -> Value.t
+  val find_unsafe : Key.t -> Value.t (* may throw {!Shared_mem_not_found} *)
 
   val remove : Key.t -> unit
 
@@ -1051,7 +1053,7 @@ functor
 
     let find_unsafe key =
       match get key with
-      | None -> raise Caml.Not_found
+      | None -> raise Shared_mem_not_found
       | Some x -> x
 
     let remove key =
@@ -1137,7 +1139,7 @@ module type NoCache = sig
 
   val remove_old_batch : KeySet.t -> unit
 
-  val find_unsafe : key -> t
+  val find_unsafe : key -> t (* May throw {!Shared_mem_not_found} *)
 
   val get_batch : KeySet.t -> t option KeyMap.t
 
@@ -1211,6 +1213,7 @@ struct
 
   let add x y = New.add (Key.make Value.prefix x) y
 
+  (* Might raise {!Shared_mem_not_found} *)
   let find_unsafe x = New.find_unsafe (Key.make Value.prefix x)
 
   let get x = New.get (Key.make Value.prefix x)
@@ -1676,7 +1679,7 @@ struct
 
   let find_unsafe x =
     match get x with
-    | None -> raise Caml.Not_found
+    | None -> raise Shared_mem_not_found
     | Some x -> x
 
   let mem x =

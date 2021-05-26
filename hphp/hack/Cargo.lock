@@ -87,6 +87,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "arena_deserializer_tests"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bstr",
+ "bumpalo",
+ "oxidized_by_ref",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "arena_trait"
 version = "0.0.0"
 dependencies = [
@@ -140,6 +153,15 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "structopt",
+]
+
+[[package]]
+name = "bincode"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -317,6 +339,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "console"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3993e6445baa160675931ec041a5e03ca84b9c6e32a056150d3aa2bdda0a1f45"
+dependencies = [
+ "encode_unicode",
+ "lazy_static",
+ "libc",
+ "regex",
+ "terminal_size",
+ "unicode-width",
+ "winapi",
+]
+
+[[package]]
 name = "core_utils_rust"
 version = "0.0.0"
 dependencies = [
@@ -457,6 +494,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "decl_provider_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized_by_ref",
+]
+
+[[package]]
 name = "decl_rust"
 version = "0.0.0"
 dependencies = [
@@ -557,6 +601,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dump_saved_state_depgraph"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+ "indicatif",
+ "rusqlite",
+ "structopt",
+]
+
+[[package]]
 name = "either"
 version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -573,6 +627,12 @@ dependencies = [
  "ocamlrep",
  "oxidized",
 ]
+
+[[package]]
+name = "encode_unicode"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 
 [[package]]
 name = "env_logger"
@@ -671,6 +731,15 @@ name = "fallible-streaming-iterator"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
+
+[[package]]
+name = "find_utils"
+version = "0.0.0"
+dependencies = [
+ "lazy_static",
+ "pretty_assertions",
+ "regex",
+]
 
 [[package]]
 name = "flatten_smart_constructors"
@@ -1902,6 +1971,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhbc_by_ref_unique_list_bench"
+version = "0.0.0"
+dependencies = [
+ "hhbc_by_ref_unique_list",
+]
+
+[[package]]
 name = "html_entities"
 version = "0.0.0"
 dependencies = [
@@ -1948,6 +2024,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "indicatif"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7baab56125e25686df467fe470785512329883aab42696d661247aca2a2896e4"
+dependencies = [
+ "console",
+ "lazy_static",
+ "number_prefix",
+ "rayon",
+ "regex",
+]
+
+[[package]]
 name = "itertools"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1985,9 +2074,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.86"
+version = "0.2.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7282d924be3275cec7f6756ff4121987bc6481325397dde6ba3e7802b1a8b1c"
+checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -2002,6 +2091,14 @@ dependencies = [
 [[package]]
 name = "line_break_map"
 version = "0.0.0"
+
+[[package]]
+name = "line_break_map_tests"
+version = "0.0.0"
+dependencies = [
+ "line_break_map",
+ "ocamlrep_ocamlpool",
+]
 
 [[package]]
 name = "linked-hash-map"
@@ -2161,6 +2258,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "naming_attributes_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized",
+]
+
+[[package]]
 name = "naming_special_names_rust"
 version = "0.0.0"
 dependencies = [
@@ -2215,10 +2319,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "number_prefix"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17b02fc0ff9a9e4b35b3342880f48e896ebf69f2967921fe8646bf5b7125956a"
+
+[[package]]
 name = "ocaml_helper"
 version = "0.0.0"
 dependencies = [
  "pretty_assertions",
+]
+
+[[package]]
+name = "ocaml_runtime"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep",
 ]
 
 [[package]]
@@ -2949,6 +3066,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "stats_rust"
+version = "0.0.0"
+
+[[package]]
 name = "strsim"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3048,6 +3169,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb6bfa289a4d7c5766392812c0a1f4c1ba45afa1ad47803c11e1f407d846d75f"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "terminal_size"
+version = "0.1.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "633c1a546cee861a1a6d0dc69ebeca693bf4296661ba7852b9d21d159e0506df"
+dependencies = [
+ "libc",
+ "winapi",
+]
+
+[[package]]
+name = "tests"
+version = "0.0.0"
+dependencies = [
+ "html_entities",
+ "pretty_assertions",
 ]
 
 [[package]]

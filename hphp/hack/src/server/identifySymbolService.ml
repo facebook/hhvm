@@ -259,6 +259,9 @@ let visitor =
       in
       acc + super#on_expr env expr
 
+    method! on_expression_tree env Aast.{ et_virtualized_expr; _ } =
+      self#on_expr env et_virtualized_expr
+
     method! on_class_id env ((p, ty), cid) =
       match cid with
       | Aast.CIexpr expr ->

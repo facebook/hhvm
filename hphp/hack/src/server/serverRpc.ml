@@ -38,6 +38,7 @@ let single_ctx_path env path =
     (Relative_path.create_detect_prefix path)
     (ServerCommandTypes.FileName path)
 
+(* Might raise {!Naming_table.File_info_not_found} *)
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
  fun genv env ~is_stale -> function
   | STATUS { max_errors; _ } ->

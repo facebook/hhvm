@@ -1679,6 +1679,7 @@ let handle_mode
                 "Ancestors of %s and their overridden methods:\n"
                 class_;
               let ancestors =
+                (* Might raise {!Naming_table.File_info_not_found} *)
                 MethodJumps.get_inheritance
                   ctx
                   class_
@@ -1697,6 +1698,7 @@ let handle_mode
                 "Children of %s and the methods they override:\n"
                 class_;
               let children =
+                (* Might raise {!Naming_table.File_info_not_found} *)
                 MethodJumps.get_inheritance
                   ctx
                   class_

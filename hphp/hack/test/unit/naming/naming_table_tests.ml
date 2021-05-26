@@ -744,6 +744,7 @@ let test_naming_table_query_by_dep_hash () =
       let baz_file_info = FileInfo.empty_t in
       let bar_file_info =
         {
+          (* Might raise {!Naming_table.File_info_not_found} *)
           (Naming_table.get_file_info_unsafe
              backed_naming_table
              (Relative_path.from_root "bar.php"))

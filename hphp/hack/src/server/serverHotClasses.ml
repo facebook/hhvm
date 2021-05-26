@@ -64,6 +64,7 @@ let go
              ("classes", JSON_Array classes);
            ])
   in
+  (* Might throw {!Signed_source.Token_not_found} *)
   let result = ServerHotClassesDescription.postprocess (result ^ "\n") in
   let (_ : float) =
     Hh_logger.log_duration "Done generating hot classes file" start_t

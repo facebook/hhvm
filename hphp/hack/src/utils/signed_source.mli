@@ -9,10 +9,12 @@
     Generally, you should put this in a header comment. *)
 val signing_token : string
 
+exception Token_not_found
+
 (** Sign a source file into which you have previously embedded a signing token.
     Signing modifies only the signing token, so the semantics of the file will
     not change if the token is put in a comment.
-    @raise {!Not_found} if no signing token is present. *)
+    @raise {!Token_not_found} if no signing token is present. *)
 val sign_file : string -> string
 
 (** Determine if a file is signed or not. This does NOT verify the signature. *)

@@ -236,8 +236,12 @@ let get_file_info a key =
     | Some Naming_sqlite.Deleted -> None
     | None -> Naming_sqlite.get_file_info db_path key)
 
+exception File_info_not_found
+
 let get_file_info_unsafe a key =
-  Core_kernel.Option.value_exn (get_file_info a key)
+  match get_file_info a key with
+  | Some info -> info
+  | None -> raise File_info_not_found
 
 let get_dep_set_files
     (naming_table : t) (mode : Typing_deps_mode.t) (deps : Typing_deps.DepSet.t)

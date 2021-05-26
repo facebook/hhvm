@@ -127,7 +127,7 @@ let find_child_classes ctx target_class_name naming_table files =
         in
         List.fold_left classes ~init:acc ~f:(fun acc cid ->
             add_if_extends_class ctx target_class_name (snd cid) acc)
-      with Caml.Not_found -> acc)
+      with Naming_table.File_info_not_found -> acc)
 
 let get_origin_class_name ctx class_name member =
   let origin =

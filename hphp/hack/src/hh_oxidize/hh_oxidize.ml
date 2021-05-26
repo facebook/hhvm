@@ -69,7 +69,8 @@ let write_format_and_sign env filename contents =
     failwith ("Could not format Rust output in " ^ filename);
   let contents = read filename in
   let contents =
-    (try Signed_source.sign_file contents with Caml.Not_found -> contents)
+    try Signed_source.sign_file contents
+    with Signed_source.Token_not_found -> contents
   in
   write filename contents
 

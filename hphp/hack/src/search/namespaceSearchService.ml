@@ -41,7 +41,9 @@ let register_namespace ~(sienv : si_env) ~(namespace : string) : unit =
   in
   ()
 
-(* Find the namespace that matches this prefix *)
+exception Match_not_found
+
+(* Find the namespace that matches this prefix. Might throw {!Match_not_found} *)
 let find_exact_match ~(sienv : si_env) ~(namespace : string) : nss_node =
   (* If we're at the root namespace the answer is easy *)
   if namespace = "" || namespace = "\\" then
@@ -58,7 +60,7 @@ let find_exact_match ~(sienv : si_env) ~(namespace : string) : nss_node =
         if leaf_name <> "" then
           match Hashtbl.find_opt current_node.nss_children leaf_name with
           | Some matching_leaf -> matching_leaf
-          | None -> raise Not_found
+          | None -> raise Match_not_found
         else
           current_node)
 
@@ -146,7 +148,7 @@ let register_alias ~(sienv : si_env) ~(alias : string) ~(target : string) : unit
       }
     in
     Hashtbl.add source.nss_children (String.lowercase_ascii name) new_node
-  with Not_found ->
+  with Match_not_found ->
     Hh_logger.log
       "Unable to register namespace map for [%s] -> [%s]"
       alias

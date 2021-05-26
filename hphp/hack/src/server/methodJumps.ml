@@ -107,6 +107,7 @@ let find_extended_classes_in_files
         acc
         classes)
 
+(* Might raise {!Naming_table.File_info_not_found} *)
 let find_extended_classes_in_files_parallel
     ctx workers target_class_name get_method target_class_pos naming_table files
     =
@@ -138,7 +139,8 @@ let find_extended_classes_in_files_parallel
       []
       classes
 
-(* Find child classes *)
+(* Find child classes.
+   Might raise {!Naming_table.File_info_not_found} *)
 let get_child_classes_and_methods ctx cls ~filter naming_table workers =
   (match filter with
   | No_filter -> ()
@@ -198,7 +200,8 @@ let get_ancestor_classes_and_methods ctx cls ~filter acc =
         | _ -> acc)
 
 (*  Returns a list of the ancestor or child
- *  classes and methods for a given class
+ *  classes and methods for a given class.
+ *  Might raise {!Naming_table.File_info_not_found}
  *)
 let get_inheritance ctx class_ ~filter ~find_children naming_table workers =
   let class_ = add_ns class_ in

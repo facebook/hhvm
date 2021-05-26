@@ -4634,6 +4634,7 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               in
               Typing_return.make_return_type (Phase.localize ~ety_env) env ret
           in
+          let ft = { ft with ft_ret = { ft.ft_ret with et_type = hret } } in
           let env =
             Env.set_return
               env

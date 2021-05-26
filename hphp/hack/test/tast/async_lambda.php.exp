@@ -37,7 +37,7 @@
              (Expr
                 (([6:3-8:4], (function(): Awaitable<void>)),
                  (Binop ((Eq None), (([6:3-6], (function(): Awaitable<void>)), (Lvar ([6:3-6], $f0))),
-                    (([6:9-8:4], (function(): Awaitable<_>)),
+                    (([6:9-8:4], (function(): Awaitable<void>)),
                      (Lfun (
                         { f_span = [6:9-8:4]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((Awaitable<void>), None); 

@@ -1,0 +1,74 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-22],
+            (Expr
+               (([5:3-21], (function(string $s): string)),
+                (Lfun (
+                   { f_span = [5:3-21]; f_readonly_this = None; f_annotation = (); 
+                     f_readonly_ret = None; f_ret = ((string), None); 
+                     f_name = ([5:3-21], ";anonymous"); f_tparams = []; 
+                     f_where_constraints = []; f_variadic = FVnonVariadic;
+                     f_params =
+                     [{ param_annotation = ([5:11-13], string); param_type_hint = ((string), (Some ([5:4-10], (Hprim Tstring)))); 
+                        param_is_variadic = false; param_pos = [5:11-13]; 
+                        param_name = "$s"; param_expr = None; param_readonly = None; 
+                        param_callconv = None; param_user_attributes = []; 
+                        param_visibility = None }
+                       ];
+                     f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:19-21], (Return (Some (([5:19-21], string), (Lvar ([5:19-21], $s))))))]; fb_annotation = () }; 
+                     f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+                     f_doc_comment = None },
+                   [])))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [8:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
+         f_name = ([8:16-17], "\\g"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-12:5],
+             (Expr
+                (([10:3-12:4], int),
+                 (Await
+                    (([10:9-12:4], Awaitable<int>),
+                     (Call (
+                        (([10:9-12:4], (function(): Awaitable<int>)),
+                         (Lfun (
+                            { f_span = [10:9-12:4]; f_readonly_this = None; 
+                              f_annotation = (); f_readonly_ret = None; 
+                              f_ret = ((Awaitable<int>), None); f_name = ([10:9-12:4], ";anonymous"); 
+                              f_tparams = []; f_where_constraints = []; 
+                              f_variadic = FVnonVariadic; f_params = []; 
+                              f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([11:5-15], (Return (Some (([11:12-14], int), (Int "42")))))]; fb_annotation = () }; 
+                              f_fun_kind = FAsync; f_user_attributes = []; 
+                              f_external = false; f_doc_comment = None },
+                            []))),
+                        [], [], None)))))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

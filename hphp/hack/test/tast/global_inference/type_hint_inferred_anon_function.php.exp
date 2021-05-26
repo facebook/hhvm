@@ -20,7 +20,7 @@
         { fb_ast =
           [([4:3-40],
             (Expr
-               (([4:3-39], (function(int $x): _)),
+               (([4:3-39], (function(int $x): int)),
                 (Efun (
                    { f_span = [4:3-39]; f_readonly_this = None; f_annotation = (); 
                      f_readonly_ret = None; f_ret = ((int), None); f_name = ([4:3-39], ";anonymous"); 

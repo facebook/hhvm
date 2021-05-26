@@ -434,10 +434,9 @@ let splitext filename =
   (root, ext)
 
 let is_test_mode () =
-  try
-    ignore @@ Sys.getenv "HH_TEST_MODE";
-    true
-  with _ -> false
+  match (Sys.getenv_opt "HH_TEST_MODE", Sys.getenv_opt "BUCK_PROJECT_ROOT") with
+  | (None, None) -> false
+  | _ -> true
 
 let sleep ~seconds = ignore @@ Unix.select [] [] [] seconds
 

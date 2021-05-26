@@ -1,0 +1,6 @@
+File "reified_generic_splice.php", line 14, characters 8-20:
+Typing error (Typing[4110])
+  File "reified_generic_splice.php", line 14, characters 8-20:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  File "reified_generic_splice.php", line 6, characters 33-78:
+  But got `dynamic` because it is an unenforceable type

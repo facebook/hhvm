@@ -60,6 +60,19 @@ class virtual iter =
     method! on_As env e h =
       let env = Env.set_allow_wildcards env in
       super#on_As env e h
+
+    method! on_expression_tree
+        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+      self#on_hint env et_hint;
+      self#on_block env et_splices;
+      let env = Env.set_in_expr_tree env true in
+      self#on_expr env et_virtualized_expr;
+      let env = Env.set_in_expr_tree env false in
+      self#on_expr env et_runtime_expr
+
+    method! on_ET_Splice env e =
+      let env = Env.set_in_expr_tree env false in
+      super#on_ET_Splice env e
   end
 
 class virtual ['state] iter_with_state =
@@ -121,6 +134,20 @@ class virtual ['state] iter_with_state =
     method! on_As (env, state) e h =
       let env = Env.set_allow_wildcards env in
       super#on_As (env, state) e h
+
+    method! on_expression_tree
+        (env, state)
+        Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+      self#on_hint (env, state) et_hint;
+      self#on_block (env, state) et_splices;
+      let env = Env.set_in_expr_tree env true in
+      self#on_expr (env, state) et_virtualized_expr;
+      let env = Env.set_in_expr_tree env false in
+      self#on_expr (env, state) et_runtime_expr
+
+    method! on_ET_Splice (env, state) e =
+      let env = Env.set_in_expr_tree env false in
+      super#on_ET_Splice (env, state) e
   end
 
 class virtual ['a] reduce =
@@ -175,6 +202,22 @@ class virtual ['a] reduce =
     method! on_As env e h =
       let env = Env.set_allow_wildcards env in
       super#on_As env e h
+
+    method! on_expression_tree
+        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+      let et_hint = self#on_hint env et_hint in
+      let et_splices = self#on_block env et_splices in
+      let env = Env.set_in_expr_tree env true in
+      let et_virtualized_expr = self#on_expr env et_virtualized_expr in
+      let env = Env.set_in_expr_tree env false in
+      let et_runtime_expr = self#on_expr env et_runtime_expr in
+      self#plus
+        et_hint
+        (self#plus et_splices (self#plus et_virtualized_expr et_runtime_expr))
+
+    method! on_ET_Splice env e =
+      let env = Env.set_in_expr_tree env false in
+      super#on_ET_Splice env e
   end
 
 class virtual map =
@@ -237,6 +280,21 @@ class virtual map =
     method! on_As env e h =
       let env = Env.set_allow_wildcards env in
       super#on_As env e h
+
+    method! on_expression_tree
+        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+      let et_hint = self#on_hint env et_hint in
+      let et_splices = self#on_block env et_splices in
+      let et_virtualized_expr =
+        let env = Env.set_in_expr_tree env true in
+        self#on_expr env et_virtualized_expr
+      in
+      let et_runtime_expr = self#on_expr env et_runtime_expr in
+      Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr }
+
+    method! on_ET_Splice env e =
+      let env = Env.set_in_expr_tree env false in
+      super#on_ET_Splice env e
   end
 
 class virtual endo =
@@ -301,6 +359,21 @@ class virtual endo =
     method! on_As env e h =
       let env = Env.set_allow_wildcards env in
       super#on_As env e h
+
+    method! on_expression_tree
+        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+      let et_hint = self#on_hint env et_hint in
+      let et_splices = self#on_block env et_splices in
+      let et_virtualized_expr =
+        let env = Env.set_in_expr_tree env true in
+        self#on_expr env et_virtualized_expr
+      in
+      let et_runtime_expr = self#on_expr env et_runtime_expr in
+      Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr }
+
+    method! on_ET_Splice env e =
+      let env = Env.set_in_expr_tree env false in
+      super#on_ET_Splice env e
   end
 
 (** A {!handler} is an {!iter} visitor which is not in control of the iteration

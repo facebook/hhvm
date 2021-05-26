@@ -68,6 +68,10 @@ val get_class : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 val get_class_or_typedef :
   env -> Decl_provider.type_key -> class_or_typedef_result option
 
+val is_in_expr_tree : env -> bool
+
+val set_in_expr_tree : env -> bool -> env
+
 (** Return {true} when in the definition of a static property or method. *)
 val is_static : env -> bool
 

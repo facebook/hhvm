@@ -133,6 +133,18 @@ let handler =
               Errors.reified_function_reference pos
           | _ -> ()
         end
+      | ( (pos, _),
+          FunctionPointer (FP_class_const (((_, ty), CI (_, class_id)), _), _)
+        )
+        when Env.is_in_expr_tree env ->
+        let (_env, ty) = Env.expand_type env ty in
+        begin
+          match get_node ty with
+          (* If we get Tgeneric here, the underlying type was reified *)
+          | Tgeneric (ci, _) when String.equal ci class_id ->
+            Errors.reified_static_method_in_expr_tree pos
+          | _ -> ()
+        end
       | ((pos, fun_ty), FunctionPointer (_, targs)) ->
         begin
           match get_node fun_ty with

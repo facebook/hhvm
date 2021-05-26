@@ -1710,3 +1710,5 @@ val unresolved_type_variable_projection :
   Pos.t -> proj_pos:Pos_or_decl.t -> unit
 
 val function_pointer_with_atom : Pos.t -> Pos_or_decl.t -> unit
+
+val reified_static_method_in_expr_tree : Pos.t -> unit

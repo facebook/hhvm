@@ -5648,6 +5648,12 @@ let function_pointer_with_atom pos fpos =
     (pos, "Function pointer on functions/methods using __Atom is not supported.")
     [(fpos, "__Atom is used here.")]
 
+let reified_static_method_in_expr_tree pos =
+  add
+    (Typing.err_code Typing.ReifiedStaticMethodInExprTree)
+    pos
+    "Static method calls on reified generics are not permitted in Expression Trees."
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

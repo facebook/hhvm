@@ -1007,6 +1007,10 @@ let with_in_expr_tree env in_expr_tree f =
   let env = { env with in_expr_tree = old_in_expr_tree } in
   (env, r1, r2)
 
+let is_in_expr_tree env = env.in_expr_tree
+
+let set_in_expr_tree env b = { env with in_expr_tree = b }
+
 let is_static env = env.genv.static
 
 let get_val_kind env = env.genv.val_kind

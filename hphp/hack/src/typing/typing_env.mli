@@ -157,6 +157,10 @@ val with_origin2 :
 
 val with_in_expr_tree : env -> bool -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
+val is_in_expr_tree : env -> bool
+
+val set_in_expr_tree : env -> bool -> env
+
 val is_static : env -> bool
 
 val get_val_kind : env -> Typing_defs.val_kind

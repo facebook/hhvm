@@ -74,6 +74,10 @@ let get_class_or_typedef env x =
   | Some (Typing_env.TypedefResult td) -> Some (TypedefResult td)
   | None -> None
 
+let is_in_expr_tree = Typing_env.is_in_expr_tree
+
+let set_in_expr_tree = Typing_env.set_in_expr_tree
+
 let is_static = Typing_env.is_static
 
 let is_strict = Typing_env.is_strict

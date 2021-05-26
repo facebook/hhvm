@@ -634,6 +634,7 @@ module Typing = struct
     | FunctionPointerWithAtom [@value 4437]
     | InvalidEchoArgument [@value 4438]
     | DiamondTraitMethod [@value 4439]
+    | ReifiedStaticMethodInExprTree [@value 4440]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

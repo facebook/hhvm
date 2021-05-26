@@ -1,0 +1,1 @@
+{ snippet = "Foo::bar"; addendum = ["Do stuff."]; pos = Some "line 5, character 19 - line 5, character 21" }

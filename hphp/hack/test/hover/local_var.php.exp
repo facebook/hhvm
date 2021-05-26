@@ -1,0 +1,1 @@
+{ snippet = "int"; addendum = []; pos = Some "line 4, character 3 - line 4, character 4" }

@@ -47,7 +47,7 @@ type mode =
   | Linearization
   | Go_to_impl of int * int
   | Dump_glean_deps
-  | Hover of int * int
+  | Hover of (int * int) option
 
 type options = {
   files: string list;
@@ -670,9 +670,12 @@ let parse_options () =
         Arg.Tuple
           [
             Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Hover (!line, column)) ());
+            Arg.Int (fun column -> set_mode (Hover (Some (!line, column))) ());
           ],
         "<pos> Display hover tooltip" );
+      ( "--hover-at-caret",
+        Arg.Unit (fun () -> set_mode (Hover None) ()),
+        " Show the hover information indicated by // ^ hover-at-caret" );
       ( "--require-extends-implements-ancestors",
         Arg.Set require_extends_implements_ancestors,
         " Consider `require extends` and `require implements` as ancestors when checking a class"
@@ -1328,6 +1331,25 @@ let merge_global_inference_env_in_tast gienv tast =
     end
   in
   env_merger#go tast
+
+(* Given source code containing the string "^ hover-at-caret", return
+   the line and column of the position indicated. *)
+let hover_at_caret_pos (src : string) : int * int =
+  let lines = String.split_lines src in
+  match
+    List.findi lines ~f:(fun _ line ->
+        String.is_substring line ~substring:"^ hover-at-caret")
+  with
+  | Some (line_num, line_src) ->
+    let col_num =
+      String.lfindi line_src ~f:(fun _ c ->
+          match c with
+          | '^' -> true
+          | _ -> false)
+    in
+    (line_num, Option.value_exn col_num + 1)
+  | None ->
+    failwith "Could not find any occurrence of ^ hover-at-caret in source code"
 
 (**
  * Compute TASTs for some files, then expand all type variables.
@@ -2194,10 +2216,17 @@ let handle_mode
             List.iter member_linearization ~f:(Printf.printf "  %s\n");
             Printf.printf "Ancestor Linearization %s:\n" classname;
             List.iter ancestor_linearization ~f:(Printf.printf "  %s\n")))
-  | Hover (line, column) ->
+  | Hover pos_given ->
     let filename = expect_single_file () in
     let (ctx, entry) =
       Provider_context.add_entry_if_missing ~ctx ~path:filename
+    in
+    let (line, column) =
+      match pos_given with
+      | Some (line, column) -> (line, column)
+      | None ->
+        let src = Provider_context.read_file_contents_exn entry in
+        hover_at_caret_pos src
     in
     let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     let print result =

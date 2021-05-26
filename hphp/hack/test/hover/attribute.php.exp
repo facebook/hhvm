@@ -1,0 +1,1 @@
+{ snippet = "__Memoize"; addendum = ["Cache the return values from this function/method. Calls with the same arguments will return the cached value.\n\nCaching is per-request and shared between subclasses (see also `__MemoizeLSB`)."]; pos = Some "line 4, character 5 - line 4, character 13" }

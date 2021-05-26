@@ -3859,8 +3859,7 @@ and expr_
       Phase.localize_hint_with_self env ~ignore_errors:false hint
     in
     make_result env p (Aast.Cast (hint, te)) ty
-  | ExpressionTree et ->
-    Typing_env.with_in_expr_tree env true (fun env -> expression_tree env p et)
+  | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
     Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in
@@ -4736,7 +4735,8 @@ and expression_tree env p et =
      }
    *)
   let (env, t_virtualized_expr, ty_virtual) =
-    expr env et.et_virtualized_expr ~allow_awaitable:false
+    Typing_env.with_in_expr_tree env true (fun env ->
+        expr env et.et_virtualized_expr ~allow_awaitable:false)
   in
 
   (* Given the runtime expression:

@@ -158,8 +158,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec final {
-  explicit SrcRec(TCA anchor) : m_anchorTranslation(anchor)
-  {}
+  SrcRec() = default;
 
   /*
    * The top translation is our first target, a translation whose type
@@ -172,11 +171,6 @@ struct SrcRec final {
   TCA getTopTranslation() const {
     return m_topTranslation.get();
   }
-
-  /*
-   * Get the anchor translation for this SrcRec.
-   */
-  TCA getFallbackTranslation() const;
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -208,7 +202,7 @@ struct SrcRec final {
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void smashFallbacksToStub(TCA stub);
-  void replaceOldTranslations();
+  void replaceOldTranslations(TCA retransStub);
   size_t numTrans() const {
     auto srLock = readlock();
     return translations().size();
@@ -240,8 +234,7 @@ private:
 
   // We chain new translations onto the end of the list, so we need to
   // track all the fallback jumps from the "tail" translation so we
-  // can rewrire them to new ones.
-  LowTCA m_anchorTranslation;
+  // can rewire them to new ones.
   GrowableVector<IncomingBranch> m_tailFallbackJumps;
 
   GrowableVector<TransLoc> m_translations;
@@ -283,9 +276,9 @@ struct SrcDB {
     return p ? *p : 0;
   }
 
-  SrcRec* insert(SrcKey sk, TCA anchor) {
+  SrcRec* insert(SrcKey sk) {
     return *m_map.insert(
-      sk.toAtomicInt(), new SrcRec(anchor)
+      sk.toAtomicInt(), new SrcRec()
     );
   }
 

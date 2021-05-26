@@ -696,10 +696,11 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
+template<class Handler>
+TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler) {
   alignCacheLine(cb);
 
-  return vwrap(cb, data, [] (Vout& v) {
+  return vwrap(cb, data, [&] (Vout& v) {
     auto const bcOff = v.makeReg();
     auto const spOff = v.makeReg();
     v << copy{rarg(0), bcOff};
@@ -709,7 +710,7 @@ TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
 
     auto const ret = v.makeReg();
     v << vcall{
-      CallSpec::direct(svcreq::handleRetranslateOpt),
+      CallSpec::direct(handler),
       v.makeVcallArgs({{bcOff, spOff}}),
       v.makeTuple({ret}),
       Fixup::none(),
@@ -723,6 +724,13 @@ TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
 
     v << jmpr{ret, vm_regs_with_sp()};
   });
+}
+
+TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data) {
+  return emitHandleServiceRequest(cb, data, svcreq::handleRetranslate);
+}
+TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
+  return emitHandleServiceRequest(cb, data, svcreq::handleRetranslateOpt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1329,6 +1337,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
   ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
 
+  ADD(handleRetranslate, view, emitHandleRetranslate(cold, data));
   ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt(cold, data));
 
   ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));

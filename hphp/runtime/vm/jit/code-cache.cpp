@@ -36,9 +36,7 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
-// This value should be enough bytes to emit a REQ_RETRANSLATE: lea (4 or 7
-// bytes), movq (10 bytes), and jmp (5 bytes). We then add some extra slack for
-// safety.
+// FIXME: kMinTranslationBytes is probably no longer needed
 static constexpr int kMinTranslationBytes = 32;
 static constexpr size_t kRoundUp = 2ull << 20;
 

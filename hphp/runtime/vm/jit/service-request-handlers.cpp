@@ -291,29 +291,11 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     );
   }
 
-  folly::Optional<TranslationResult> transResult;
-  SrcKey sk;
   auto smashed = false;
-
-  switch (info.req) {
-    case REQ_BIND_JMP:
-    case REQ_BIND_ADDR: {
-      auto const toSmash = info.args[0].tca;
-      sk = SrcKey::fromAtomicInt(info.args[1].sk);
-      transResult =
-        bindJmp(toSmash, sk, liveSpOff(), info.req, info.stub, smashed);
-      break;
-    }
-
-    case REQ_RETRANSLATE: {
-      INC_TPC(retranslate);
-      sk = SrcKey{ liveFunc(), info.args[0].offset, liveResumeMode() };
-      auto const context = getContext(sk, tc::profileFunc(sk.func()));
-      transResult = mcgen::retranslate(TransArgs{sk}, context);
-      SKTRACE(2, sk, "retranslated @%p\n", transResult->addr());
-      break;
-    }
-  }
+  auto const toSmash = info.args[0].tca;
+  auto const sk = SrcKey::fromAtomicInt(info.args[1].sk);
+  auto const transResult =
+    bindJmp(toSmash, sk, liveSpOff(), info.req, info.stub, smashed);
 
   if (smashed && info.stub) {
     auto const stub = info.stub;
@@ -321,8 +303,25 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     Treadmill::enqueue([stub] { tc::freeTCStub(stub); });
   }
 
-  assertx(transResult);
-  return resume(sk, *transResult);
+  return resume(sk, transResult);
+}
+
+TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
+  assert_native_stack_aligned();
+
+  // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
+  // later if we are going to use the resume helper.
+  tl_regState = VMRegState::CLEAN;
+  vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+
+  FTRACE(1, "handleRetranslate {}\n", vmfp()->func()->fullName()->data());
+
+  INC_TPC(retranslate);
+  auto const sk = SrcKey{ liveFunc(), bcOff, liveResumeMode() };
+  auto const context = getContext(sk, tc::profileFunc(sk.func()));
+  auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
+  SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
+  return resume(sk, transResult);
 }
 
 TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept {

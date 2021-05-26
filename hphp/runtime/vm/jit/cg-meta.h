@@ -140,8 +140,8 @@ struct CGMeta {
   std::set<TCA*> codePointers;
 
   /*
-   * Smash targets of fallback{} and fallbackcc{} instructions (e.g.,
-   * REQ_RETRANSLATE service requests).
+   * Smash targets of fallback{} and fallbackcc{} instructions, currently
+   * pointing to the StubType::Retranslate service request stub).
    *
    * These always correspond to the initial SrcKey of the current IR unit---
    * see cgReqRetranslate().

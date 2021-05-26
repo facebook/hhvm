@@ -371,7 +371,7 @@ private:
 
   // Keeps the block to branch to (if any) in case a guard fails.
   // This holds nullptr if the guard failures should perform a service
-  // request (REQ_RETRANSLATE or REQ_BIND_JMP).
+  // request (StubType::Retranslate or REQ_BIND_JMP).
   Block* m_guardFailBlock{nullptr};
 };
 

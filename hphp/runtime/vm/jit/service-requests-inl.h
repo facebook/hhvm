@@ -74,14 +74,6 @@ ArgVec pack_args(Args&&... args) {
 }
 
 /*
- * Return true iff `sr' is a service request that is always ephemeral.
- */
-inline bool is_ephemeral(ServiceRequest sr) {
-  return sr == REQ_BIND_JMP ||
-         sr == REQ_BIND_ADDR;
-}
-
-/*
  * Service request stub emitter.
  *
  * Declared here for use in the templatized stub emitters defined below.
@@ -97,22 +89,6 @@ void emit_svcreq(CodeBlock& cb, DataBlock& data, CGMeta& meta,
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename... Args>
-TCA emit_persistent(CodeBlock& cb,
-                    DataBlock& data,
-                    CGMeta& meta,
-                    SBInvOffset spOff,
-                    ServiceRequest sr,
-                    Args... args) {
-  using namespace detail;
-  assertx(!is_ephemeral(sr));
-
-  auto const start = cb.frontier();
-  emit_svcreq(cb, data, meta, cb.frontier(), true, spOff, sr,
-              pack_args(args...));
-  return start;
-}
-
-template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    CGMeta& meta,
@@ -121,39 +97,9 @@ TCA emit_ephemeral(CodeBlock& cb,
                    ServiceRequest sr,
                    Args... args) {
   using namespace detail;
-  assertx(is_ephemeral(sr) || sr == REQ_RETRANSLATE);
-
   emit_svcreq(cb, data, meta, start, false, spOff, sr,
               pack_args(args...));
   return start;
-}
-
-template<typename... Args>
-TCA emit_persistent(CodeBlock& cb,
-                    DataBlock& data,
-                    SBInvOffset spOff,
-                    ServiceRequest sr,
-                    Args... args) {
-  CGMeta dummy;
-  SCOPE_EXIT {
-    dummy.addressImmediates.clear();
-    assertx(dummy.empty());
-  };
-  return emit_persistent(cb, data, dummy, spOff, sr, args...);
-}
-template<typename... Args>
-TCA emit_ephemeral(CodeBlock& cb,
-                   DataBlock& data,
-                   TCA start,
-                   SBInvOffset spOff,
-                   ServiceRequest sr,
-                   Args... args) {
-  CGMeta dummy;
-  SCOPE_EXIT {
-    dummy.addressImmediates.clear();
-    assertx(dummy.empty());
-  };
-  return emit_ephemeral(cb, data, dummy, start, spOff, sr, args...);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

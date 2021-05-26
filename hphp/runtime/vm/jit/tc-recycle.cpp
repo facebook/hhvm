@@ -331,28 +331,17 @@ void reclaimTranslationSync(TransLoc loc, const SrcRec* freedSr = nullptr) {
 }
 
 /*
- * Reclaim all translations associated with a SrcRec including the anchor
- * translation.
+ * Reclaim all translations associated with a SrcRec.
  */
 void reclaimSrcRecSync(const SrcRec* rec) {
   auto srLock = rec->readlock();
-  ITRACE(1, "Reclaiming SrcRec addr={} anchor={}\n", (void*)rec,
-         rec->getFallbackTranslation());
+  ITRACE(1, "Reclaiming SrcRec addr={}\n", (void*)rec);
 
   Trace::Indent _i;
-
-  auto anchor = rec->getFallbackTranslation();
 
   for (auto& loc : rec->translations()) {
     reclaimTranslationSync(loc, rec);
   }
-
-  // Grabbing the code lock here without releasing the SrcRec lock would be a
-  // rank violation
-  srLock.unlock();
-  auto codeLock = lockCode();
-  code().blockFor(anchor).free(anchor, svcreq::stub_size());
-  clearRange(anchor, svcreq::stub_size(), "Dead SrcRec Anchor");
 }
 
 void reclaimTranslation(TransLoc loc) { enqueueJob(loc); }

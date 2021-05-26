@@ -104,6 +104,14 @@ struct ProfTransRec {
   uint32_t  asmSize()     const { return m_asmSize; }
 
   /*
+   * SP offset at the first BC offset in this translation.
+   */
+  SBInvOffset startSpOff() const {
+    assertx(m_kind == TransKind::Profile);
+    return m_region->entry()->initialSpOffset();
+  }
+
+  /*
    * First BC offset in this translation.
    */
   Offset startBcOff() const {

@@ -78,7 +78,7 @@ bool checkLimit(TransKind kind, const size_t numTrans) {
   return true;
 }
 
-void invalidateSrcKey(SrcKey sk) {
+void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
@@ -90,6 +90,11 @@ void invalidateSrcKey(SrcKey sk) {
     return;
   }
 
+  // Retranslate stub must exist, as createSrcRec() created it.
+  auto const retransStub = svcreq::getOrEmitStub(
+    svcreq::StubType::Retranslate, sk, spOff);
+  always_assert(retransStub);
+
   /*
    * Since previous translations aren't reachable from here, we know we
    * just created some garbage in the TC. We currently have no mechanism
@@ -99,14 +104,15 @@ void invalidateSrcKey(SrcKey sk) {
              "Replacing translations from sk: {} " "to SrcRec addr={}\n",
              showShort(sk), (void*)sr);
   Trace::Indent _i;
-  sr->replaceOldTranslations();
+  sr->replaceOldTranslations(retransStub);
 }
 
 void invalidateFuncProfSrcKeys(const Func* func) {
   assertx(profData());
   auto const funcId = func->getFuncId();
   for (auto tid : profData()->funcProfTransIDs(funcId)) {
-    invalidateSrcKey(profData()->transRec(tid)->srcKey());
+    auto const transRec = profData()->transRec(tid);
+    invalidateSrcKey(transRec->srcKey(), transRec->startSpOff());
   }
 }
 
@@ -536,67 +542,20 @@ SrcRec* findSrcRec(SrcKey sk) {
 bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength) {
   if (srcDB().find(sk)) return true;
 
-  // We put retranslate requests at the end of our slab to more frequently
-  // allow conditional jump fall-throughs
-  auto codeLock = lockCode();
-  if (srcDB().find(sk)) return true;
-  auto codeView = code().view();
-  TCA astart = codeView.main().frontier();
-  TCA coldStart = codeView.cold().frontier();
-  TCA frozenStart = codeView.frozen().frontier();
-  TCA req;
-  auto const stubsize = svcreq::stub_size();
-  if (!RuntimeOption::EvalEnableReusableTC) {
-    if (checkLength && !codeView.cold().canEmit(stubsize)) return false;
-    req = svcreq::emit_persistent(codeView.cold(),
-                                  codeView.data(),
-                                  spOff,
-                                  REQ_RETRANSLATE,
-                                  sk.offset());
-  } else {
-    auto newStart = codeView.cold().allocInner(stubsize);
-    if (!newStart) {
-      newStart = codeView.cold().frontier();
-      if (checkLength && !codeView.cold().canEmit(stubsize)) return false;
-    }
-    // Ensure that the anchor translation is a known size so that it can be
-    // reclaimed when the function is freed
-    req = svcreq::emit_ephemeral(codeView.cold(),
-                                 codeView.data(),
-                                 (TCA)newStart,
-                                 spOff,
-                                 REQ_RETRANSLATE,
-                                 sk.offset());
-  }
-  SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
-          sk.unit(), sk.offset(), req);
+  // invalidateSrcKey() depends on existence of this stub.
+  auto const retransStub = svcreq::getOrEmitStub(
+    svcreq::StubType::Retranslate, sk, spOff);
+  if (checkLength && !retransStub) return false;
+  assertx(retransStub);
 
   auto metaLock = lockMetadata();
-  always_assert(srcDB().find(sk) == nullptr);
-  auto const sr = srcDB().insert(sk, req);
+  if (srcDB().find(sk)) return true;
+
+  SKTRACE(1, sk, "inserting SrcRec\n");
+
+  auto const sr = srcDB().insert(sk);
   if (RuntimeOption::EvalEnableReusableTC) {
     recordFuncSrcRec(sk.func(), sr);
-  }
-
-  size_t asize      = codeView.main().frontier()   - astart;
-  size_t coldSize   = codeView.cold().frontier()   - coldStart;
-  size_t frozenSize = codeView.frozen().frontier() - frozenStart;
-  assertx(asize == 0);
-  if (coldSize && RuntimeOption::EvalDumpTCAnchors) {
-    auto const transID =
-      profData() && transdb::enabled() ? profData()->allocTransID()
-                                       : kInvalidTransID;
-    TransRec tr(sk, transID, TransKind::Anchor,
-                astart, asize, coldStart, coldSize,
-                frozenStart, frozenSize);
-    transdb::addTranslation(tr);
-    FuncOrder::recordTranslation(tr);
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
-      reportTraceletToVtune(sk.unit(), sk.func(), tr);
-    }
-
-    assertx(!transdb::enabled() ||
-            transdb::getTransRec(coldStart)->kind == TransKind::Anchor);
   }
 
   return true;
@@ -716,7 +675,7 @@ folly::Optional<TranslationResult> RegionTranslator::getCached() {
 }
 
 void RegionTranslator::resetCached() {
-  invalidateSrcKey(sk);
+  invalidateSrcKey(sk, spOff);
 }
 
 void RegionTranslator::gen() {

@@ -257,8 +257,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     reusableTC,
     !tc::code().frozen().contains(env.text.frozen().code.base())
   ));
-  auto codeLock = tc::lockCode(reusableTC);
-  auto& frozen = [&] () -> CodeBlock& {
+  auto const frozen = [&] () -> CodeBlock& {
     // This emits directly into the end of frozen.  This helps keep it out of
     // the TransLoc of the translation.  Since the stubs emitted are ephemeral
     // (and may be reused), it is important they aren't part of the TransLoc
@@ -267,7 +266,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       return tc::code().view().frozen();
     }
     return env.text.frozen().code;
-  }();
+  };
 
   TCA stub = nullptr;
 
@@ -275,21 +274,24 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     case Vinstr::bindjmp:
       { auto const& i = p.svcreq.bindjmp_;
         assertx(p.jmp && !p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, env.text.data(), env.meta,
+        auto codeLock = tc::lockCode(reusableTC);
+        stub = svcreq::emit_bindjmp_stub(frozen(), env.text.data(), env.meta,
                                          i.spOff, p.jmp, i.target);
       } break;
 
     case Vinstr::bindjcc:
       { auto const& i = p.svcreq.bindjcc_;
         assertx(!p.jmp && p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, env.text.data(), env.meta,
+        auto codeLock = tc::lockCode(reusableTC);
+        stub = svcreq::emit_bindjmp_stub(frozen(), env.text.data(), env.meta,
                                          i.spOff, p.jcc, i.target);
       } break;
 
     case Vinstr::bindaddr:
       { auto const& i = p.svcreq.bindaddr_;
         assertx(!p.jmp && !p.jcc);
-        stub = svcreq::emit_bindaddr_stub(frozen, env.text.data(), env.meta,
+        auto codeLock = tc::lockCode(reusableTC);
+        stub = svcreq::emit_bindaddr_stub(frozen(), env.text.data(), env.meta,
                                           i.spOff, i.addr.get(), i.target);
         // The bound pointer may not belong to the data segment, as is the case
         // with SSwitchMap (see #10347945)
@@ -303,18 +305,20 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallback_;
         assertx(p.jmp && !p.jcc);
 
-        auto const srcrec = tc::findSrcRec(i.target);
-        always_assert(srcrec);
-        stub = srcrec->getFallbackTranslation();
+        always_assert(tc::findSrcRec(i.target));
+        stub = svcreq::getOrEmitStub(
+          svcreq::StubType::Retranslate, i.target, i.spOff);
+        always_assert(stub);
       } break;
 
     case Vinstr::fallbackcc:
       { auto const& i = p.svcreq.fallbackcc_;
         assertx(!p.jmp && p.jcc);
 
-        auto const srcrec = tc::findSrcRec(i.target);
-        always_assert(srcrec);
-        stub = srcrec->getFallbackTranslation();
+        always_assert(tc::findSrcRec(i.target));
+        stub = svcreq::getOrEmitStub(
+          svcreq::StubType::Retranslate, i.target, i.spOff);
+        always_assert(stub);
       } break;
 
     default: always_assert(false);

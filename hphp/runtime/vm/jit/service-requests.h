@@ -72,18 +72,7 @@ struct CGMeta;
    * request stub and store its address to *addr; someone else has to emit the
    * indirect jump that actually invokes the service request.
    */                     \
-  REQ(BIND_ADDR)          \
-                          \
-  /*
-   * retranslate(Offset off)
-   *
-   * A request to retranslate the current function at bytecode offset `off',
-   * for when no existing translations support the incoming types.
-   *
-   * The smash target(s) of a retranslate is stored in
-   * SrcRec::m_tailFallbackJumps.
-   */                     \
-  REQ(RETRANSLATE)
+  REQ(BIND_ADDR)
 
 /*
  * Service request types.
@@ -97,6 +86,32 @@ enum ServiceRequest : uint32_t {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace svcreq {
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * A service request stub is a tiny routine used to invoke JIT translation
+ * services, used in place of the actual translation. Incoming branches to
+ * service request stubs are smashable and tracked by SrcDB.
+ *
+ * Stubs, first, set up enough context to reconstruct the SrcKey and stack
+ * positions, then, jump to the corresponding unique stub to perform the
+ * requested operation.
+ */
+enum class StubType : uint8_t {
+  // A request to retranslate the code at the given current location.
+  // See svcreq::handleRetranslate() for more details.
+  Retranslate,
+};
+
+/*
+ * Get an existing stub or emit a new one to perform request of the given type
+ * at the given code and stack position. The same stub may be compatible with
+ * multiple different positions.
+ *
+ * Returns nullptr on failure, e.g. when there is no more TC space available.
+ */
+TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -150,9 +165,8 @@ using ArgVec = jit::vector<Arg>;
  * These stubs do some shuffling of arguments before launching into the JIT
  * translator via handleSRHelper().
  *
- * Service request stubs can be either persistent or ephemeral.  The only
- * difference (besides that ephemeral service requests require a stub start
- * address) is that ephemeral requests are padded to stub_size().
+ * Service request stubs are ephemeral.  They require a stub start address
+ * and are padded to stub_size().
  *
  * Since making a service request leaves the TC, we need to sync the current
  * bytecode eval stack pointer, given via `spOff', to vmsp.  In the cases where
@@ -164,33 +178,9 @@ using ArgVec = jit::vector<Arg>;
  * the jump is smashed.
  */
 template<typename... Args>
-TCA emit_persistent(CodeBlock& cb,
-                    DataBlock& data,
-                    CGMeta& meta,
-                    SBInvOffset spOff,
-                    ServiceRequest sr,
-                    Args... args);
-template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
                    CGMeta& meta,
-                   TCA start,
-                   SBInvOffset spOff,
-                   ServiceRequest sr,
-                   Args... args);
-/*
- * These emit service request stubs that may not be relocated.  This distinction
- * is important, because these discard metadata that allows relocation.
- */
-template<typename... Args>
-TCA emit_persistent(CodeBlock& cb,
-                    DataBlock& data,
-                    SBInvOffset spOff,
-                    ServiceRequest sr,
-                    Args... args);
-template<typename... Args>
-TCA emit_ephemeral(CodeBlock& cb,
-                   DataBlock& data,
                    TCA start,
                    SBInvOffset spOff,
                    ServiceRequest sr,

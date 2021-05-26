@@ -100,9 +100,10 @@ class virtual type_validator =
         this#on_enum acc r (pos, name)
       else
         match Env.get_class_or_typedef acc.env name with
-        | Some
-            (Env.TypedefResult
-              { td_pos; td_vis; td_tparams; td_type; td_constraint }) ->
+        | Some (Env.TypedefResult td) ->
+          let { td_pos = _; td_vis = _; td_tparams; td_type; td_constraint } =
+            td
+          in
           if SSet.mem name acc.expanded_typedefs then
             acc
           else
@@ -114,19 +115,15 @@ class virtual type_validator =
             in
             let subst = Decl_instantiate.make_subst td_tparams tyl in
             let td_type = Decl_instantiate.instantiate subst td_type in
-            (match td_vis with
-            | Aast.Opaque
-              when not
-                     (Relative_path.equal
-                        (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
-                        (Env.get_file acc.env)) ->
+            if Env.is_typedef_visible acc.env td then
+              this#on_alias acc r (pos, name) tyl td_type
+            else
               let td_constraint =
                 match td_constraint with
                 | None -> mk (r, Tmixed)
                 | Some ty -> Decl_instantiate.instantiate subst ty
               in
               this#on_newtype acc r (pos, name) tyl td_constraint td_type
-            | _ -> this#on_alias acc r (pos, name) tyl td_type)
         | _ -> this#on_class acc r (pos, name) tyl
 
     (* Use_pos is the primary error position *)

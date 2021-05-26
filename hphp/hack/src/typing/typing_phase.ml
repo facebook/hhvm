@@ -436,12 +436,6 @@ and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
  *)
 and localize_with_kind
     ~ety_env env (dty : decl_ty) (expected_kind : KindDefs.Simple.kind) =
-  let is_newtype typedef =
-    (* FIXME This function should be somewhere else *)
-    match typedef.Typing_defs.td_vis with
-    | Aast_defs.Transparent -> false
-    | Aast_defs.Opaque -> true
-  in
   let (r, dty_) = deref dty in
   let r = Typing_reason.localize r in
   let arity = KindDefs.Simple.get_arity expected_kind in
@@ -464,11 +458,11 @@ and localize_with_kind
           else
             (env, mk (Reason.none, Terr))
         | Some (Env.TypedefResult typedef) ->
-          if is_newtype typedef then
+          if Typing_env.is_typedef_visible env typedef then
+            (env, mk (r, Tunapplied_alias name))
+          else
             (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
             (env, mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))))
-          else
-            (env, mk (r, Tunapplied_alias name))
         | None ->
           (* We are expected to localize a higher-kinded type, but are given an unknown class name.
                 Not much we can do. *)

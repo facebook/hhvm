@@ -264,6 +264,8 @@ val get_enum : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 
 val is_typedef : env -> Decl_provider.type_key -> bool
 
+val is_typedef_visible : env -> Typing_defs.typedef_type -> bool
+
 val get_typedef :
   env -> Decl_provider.type_key -> Decl_provider.typedef_decl option
 

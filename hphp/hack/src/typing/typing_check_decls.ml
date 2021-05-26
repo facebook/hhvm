@@ -376,14 +376,14 @@ let typedef tenv t =
   let env =
     {
       typedef_tparams =
-        ( if equal_typedef_visibility t_vis Transparent then
+        (match t_vis with
+        | Transparent ->
           (* Since type aliases cannot have constraints we shouldn't check
            * if its type params satisfy the constraints of any tapply it
            * references.
            *)
           t.t_tparams
-        else
-          [] );
+        | Opaque -> []);
       tenv;
     }
   in

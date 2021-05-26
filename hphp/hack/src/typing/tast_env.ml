@@ -290,6 +290,8 @@ let is_typedef = Typing_env.is_typedef
 
 let get_typedef = Typing_env.get_typedef
 
+let is_typedef_visible = Typing_env.is_typedef_visible
+
 let is_enum = Typing_env.is_enum
 
 let get_fun = Typing_env.get_fun

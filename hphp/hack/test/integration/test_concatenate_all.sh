@@ -45,6 +45,7 @@ if [ "${HH_SERVER}" != "${HH_SERVER_DIR}/hh_server" ]; then
   exit 1
 fi
 export PATH="${HH_SERVER_DIR}:$PATH"
+export HH_TEST_MODE=1  # avoid writing a bunch of telemetry
 
 NEW_DATA_DIR="$(mktemp -d)"
 cp -Ra "${DATA_DIR}"/{*.hack,*.php,.hhconfig} "${NEW_DATA_DIR}/"

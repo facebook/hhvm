@@ -45,6 +45,7 @@ test -d "$tempdir" || err 20 'cannot create tempdir'
 hh_tmpdir="$(mktemp /tmp/hhtest_hh_tmpdir_XXXX -d)"
 test -d "$hh_tmpdir" || err 23 'cannot create hh_tmpdir'
 export HH_TMPDIR="$hh_tmpdir"
+export HH_TEST_MODE=1  # avoid writing a bunch of telemetry
 
 # write file with gratuitous type error
 cat <<EOF > "$tempdir"/type_error.php

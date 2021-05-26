@@ -7,6 +7,7 @@ NAME=autocomplete
 TEMP_REPO="$(mktemp -d)"
 TEMP_FILE="${TEMP_REPO}/${NAME}.txt"
 touch "${TEMP_FILE}"
+export HH_TEST_MODE=1  # avoid writing a bunch of telemetry
 echo "CHECKING ${TEMP_REPO} ${TEMP_FILE}"
 
 # Build a global index in text

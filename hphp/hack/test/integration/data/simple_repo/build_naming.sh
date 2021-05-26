@@ -14,5 +14,6 @@ INSTALL_DIR=${2/#--install_dir=/}
 OUTPUT=${3/#--output=/}
 WWW=${4/#--www=/}
 BUILDER=${5/#--builder=/}
+export HH_TEST_MODE=1  # avoid writing a bunch of telemetry
 
 "$BUILDER" --www "$FBCODE_DIR/$WWW" --output "$INSTALL_DIR/$OUTPUT"

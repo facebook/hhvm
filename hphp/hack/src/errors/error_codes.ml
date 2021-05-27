@@ -636,6 +636,7 @@ module Typing = struct
     | DiamondTraitMethod [@value 4439]
     | ReifiedStaticMethodInExprTree [@value 4440]
     | InvariantViolated [@value 4441]
+    | RigidTVarEscape [@value 4442]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

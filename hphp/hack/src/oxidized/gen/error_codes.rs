@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e7370b34fc3318cfeb77bae4e949285b>>
+// @generated SignedSource<<9f4ce61a7e2f3e5945109af190c6d0ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -545,6 +545,7 @@ pub enum Typing {
     DiamondTraitMethod = 4439,
     ReifiedStaticMethodInExprTree = 4440,
     InvariantViolated = 4441,
+    RigidTVarEscape = 4442,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

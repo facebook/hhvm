@@ -2668,16 +2668,28 @@ and expr_
     in
     (* Class retrieval always succeeds because we're fetching a
     collection decl from an HHI file. *)
-    let class_ = Option.value_exn (Env.get_class env name) in
-    let ety_env =
-      {
-        (empty_expand_env_with_on_error
-           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
-        with
-        substs = TUtils.make_locl_subst_for_class_tparams class_ tys;
-      }
-    in
-    Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
+    match Env.get_class env name with
+    | Some class_ ->
+      let ety_env =
+        {
+          (empty_expand_env_with_on_error
+             (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
+          with
+          substs = TUtils.make_locl_subst_for_class_tparams class_ tys;
+        }
+      in
+      Phase.check_tparams_constraints
+        ~use_pos:p
+        ~ety_env
+        env
+        (Cls.tparams class_)
+    | None ->
+      let desc = "Missing collection decl during type parameter check" in
+      Telemetry.(create () |> string_ ~key:"class name" ~value:name)
+      |> Errors.invariant_violation p ~desc ~report_to_user:false;
+      (* Continue typechecking without performing the check on a best effort
+      basis. *)
+      env
   in
   match e with
   | Import _

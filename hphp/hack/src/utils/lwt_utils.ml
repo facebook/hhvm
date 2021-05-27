@@ -37,29 +37,44 @@ let select
       in
       Lwt.return (Error exceptional_fds)
   in
-  let read_task =
-    let%lwt readable_fds =
-      make_task
-        ~fds:read_fds
-        ~condition:Lwt_unix.readable
-        ~wait_f:Lwt_unix.wait_read
-    in
-    match readable_fds with
-    | Ok fds -> Lwt.return (fds, [], [])
-    | Error fds -> Lwt.return ([], [], fds)
+  let tasks = [] in
+  (* WRITE TASK *)
+  let tasks =
+    match write_fds with
+    | [] -> tasks
+    | _ ->
+      let write_task =
+        let%lwt writeable_fds =
+          make_task
+            ~fds:write_fds
+            ~condition:Lwt_unix.writable
+            ~wait_f:Lwt_unix.wait_write
+        in
+        match writeable_fds with
+        | Ok fds -> Lwt.return ([], fds, [])
+        | Error fds -> Lwt.return ([], [], fds)
+      in
+      write_task :: tasks
   in
-  let write_task =
-    let%lwt writeable_fds =
-      make_task
-        ~fds:write_fds
-        ~condition:Lwt_unix.writable
-        ~wait_f:Lwt_unix.wait_write
-    in
-    match writeable_fds with
-    | Ok fds -> Lwt.return ([], fds, [])
-    | Error fds -> Lwt.return ([], [], fds)
+  (* READ TASK *)
+  let tasks =
+    match read_fds with
+    | [] -> tasks
+    | _ ->
+      let read_task =
+        let%lwt readable_fds =
+          make_task
+            ~fds:read_fds
+            ~condition:Lwt_unix.readable
+            ~wait_f:Lwt_unix.wait_read
+        in
+        match readable_fds with
+        | Ok fds -> Lwt.return (fds, [], [])
+        | Error fds -> Lwt.return ([], [], fds)
+      in
+      read_task :: tasks
   in
-  let tasks = [read_task; write_task] in
+  (* TIMEOUT TASK *)
   let tasks =
     if Float.(timeout > 0.0) then
       let timeout_task =

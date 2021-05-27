@@ -92,7 +92,7 @@ let check_atom_on_param env pos dty lty =
 
 (** Mostly check constraints on type parameters. *)
 let check_happly ?(is_atom = false) unchecked_tparams env h =
-  let pos = fst h in
+  let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
     List.map
@@ -105,50 +105,63 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
-  match get_node decl_ty with
-  | Tapply _ ->
-    let (env, locl_ty) =
-      Phase.localize_with_self env ~ignore_errors:true decl_ty
-    in
-    let () = if is_atom then check_atom_on_param env pos decl_ty locl_ty in
-    begin
-      match get_node (TUtils.get_base_type env locl_ty) with
-      | Tclass (cls, _, tyl) ->
-        (match Env.get_class env (snd cls) with
-        | Some cls ->
-          let tc_tparams = Cls.tparams cls in
-          (* We want to instantiate the class type parameters with the
-           * type list of the class we are localizing. We do not want to
-           * add any more constraints when we localize the constraints
-           * stored in the class_type since it may lead to infinite
-           * recursion
-           *)
-          let ety_env =
-            { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
-          in
-          iter2_shortest
-            begin
-              fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
-              List.iter cstrl (fun (ck, cstr_ty) ->
-                  let r = Reason.Rwitness_from_decl p in
-                  let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
-                  let (_ : Typing_env_types.env) =
-                    TGenConstraint.check_constraint
-                      env
-                      ck
-                      ty
-                      ~cstr_ty
-                      (fun ?code:_ reasons ->
-                        Reason.explain_generic_constraint (fst h) r x reasons)
-                  in
-                  ())
-            end
-            tc_tparams
-            tyl
-        | _ -> ())
-      | _ -> ()
-    end
-  | _ -> ()
+  let (env, locl_ty) =
+    Phase.localize_with_self env ~ignore_errors:true decl_ty
+  in
+  let () = if is_atom then check_atom_on_param env hint_pos decl_ty locl_ty in
+  match get_node locl_ty with
+  | Tnewtype (type_name, targs, _cstr_ty) ->
+    (match Env.get_typedef env type_name with
+    | None -> ()
+    | Some typedef ->
+      let { td_tparams; _ } = typedef in
+      let ety_env : expand_env =
+        { empty_expand_env with substs = Subst.make_locl td_tparams targs }
+      in
+      let (_ : Typing_env_types.env) =
+        Typing_phase.check_tparams_constraints
+          ~use_pos:hint_pos
+          ~ety_env
+          env
+          td_tparams
+      in
+      ())
+  | _ ->
+    (match get_node (TUtils.get_base_type env locl_ty) with
+    | Tclass (cls, _, tyl) ->
+      (match Env.get_class env (snd cls) with
+      | Some cls ->
+        let tc_tparams = Cls.tparams cls in
+        (* We want to instantiate the class type parameters with the
+         * type list of the class we are localizing. We do not want to
+         * add any more constraints when we localize the constraints
+         * stored in the class_type since it may lead to infinite
+         * recursion
+         *)
+        let ety_env =
+          { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
+        in
+        iter2_shortest
+          begin
+            fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
+            List.iter cstrl (fun (ck, cstr_ty) ->
+                let r = Reason.Rwitness_from_decl p in
+                let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
+                let (_ : Typing_env_types.env) =
+                  TGenConstraint.check_constraint
+                    env
+                    ck
+                    ty
+                    ~cstr_ty
+                    (fun ?code:_ reasons ->
+                      Reason.explain_generic_constraint hint_pos r x reasons)
+                in
+                ())
+          end
+          tc_tparams
+          tyl
+      | None -> ())
+    | _ -> ())
 
 let rec hint ?(is_atom = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)

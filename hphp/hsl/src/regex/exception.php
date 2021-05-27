@@ -13,7 +13,7 @@ namespace HH\Lib\Regex;
 use namespace HH\Lib\Str;
 
 final class Exception extends \Exception {
-  public function __construct(Pattern<mixed> $pattern, int $code)[]: void {
+  public function __construct(Pattern<Match> $pattern, int $code)[]: void {
     $errors = dict[
       \PREG_INTERNAL_ERROR => 'Internal error',
       \PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit error',

@@ -5648,15 +5648,14 @@ let bad_conditional_support_dynamic pos ~child ~parent statement reasons =
       ^ statement )
     reasons
 
-let unresolved_type_variable_projection pos ~proj_pos =
+let unresolved_type_variable_projection pos tname ~proj_pos =
   add_list
     (Typing.err_code Typing.UnresolvedTypeVariableProjection)
-    (pos, "Can't project from an unresolved type")
+    (pos, "Can't access a type constant " ^ tname ^ " from an unresolved type")
     [
-      (proj_pos, "Projection happens here");
+      (proj_pos, "Access happens here");
       ( Pos_or_decl.of_raw_pos pos,
-        "Disambiguate the projected type using explicit type "
-        ^ "annotations here." );
+        "Disambiguate the types using explicit type annotations here." );
     ]
 
 let function_pointer_with_atom pos fpos =

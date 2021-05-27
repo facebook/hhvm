@@ -1,0 +1,12 @@
+File "T78983983.php", line 17, characters 13-17:
+Can't access a type constant Ta from an unresolved type (Typing[4436])
+  File "T78983983.php", line 8, characters 12-13:
+  Access happens here
+  File "T78983983.php", line 17, characters 13-17:
+  Disambiguate the types using explicit type annotations here.
+File "T78983983.php", line 18, characters 13-17:
+Can't access a type constant Ta from an unresolved type (Typing[4436])
+  File "T78983983.php", line 12, characters 12-13:
+  Access happens here
+  File "T78983983.php", line 18, characters 13-17:
+  Disambiguate the types using explicit type annotations here.

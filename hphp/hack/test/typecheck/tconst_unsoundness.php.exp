@@ -4,3 +4,15 @@ Invalid return type (Typing[4110])
   Expected `Tout`
   File "tconst_unsoundness.php", line 14, characters 40-42:
   But got `Tin = Tb::Ta::T`
+File "tconst_unsoundness.php", line 20, characters 10-10:
+Can't access a type constant T from an unresolved type (Typing[4436])
+  File "tconst_unsoundness.php", line 14, characters 68-68:
+  Access happens here
+  File "tconst_unsoundness.php", line 20, characters 10-10:
+  Disambiguate the types using explicit type annotations here.
+File "tconst_unsoundness.php", line 20, characters 10-10:
+Can't access a type constant Ta from an unresolved type (Typing[4436])
+  File "tconst_unsoundness.php", line 14, characters 64-65:
+  Access happens here
+  File "tconst_unsoundness.php", line 20, characters 10-10:
+  Disambiguate the types using explicit type annotations here.

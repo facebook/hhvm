@@ -195,11 +195,24 @@ let bind env var (ty : locl_ty) =
         else
           r)
   in
+  (* Remember the T::Tx involving this variable before we erase that from
+   * the env.
+   *)
+  let tconsts = Env.get_tyvar_type_consts env var in
   (* Update the variance *)
   let env = Env.update_variance_after_bind env var ty in
   (* Unify the variable *)
   let ty = Utils.err_if_var_in_ty env var ty in
   let env = Env.add env var ty in
+  (* Make sure we don't project from this variable if it is bound to
+   * nothing, as it will lead to type holes.
+   *)
+  ( if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
+    let (_, ((proj_pos, name), _)) = SMap.choose tconsts in
+    Errors.unresolved_type_variable_projection
+      (Env.get_tyvar_pos env var)
+      name
+      ~proj_pos );
   env
 
 (* Solve type variable var by assigning it to the union of its lower bounds.

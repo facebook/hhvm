@@ -2,13 +2,15 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Reified<reify T> {}
+interface I {}
+class D implements I {}
 
 function f(Reified<Reified<
   Reified<int>
->> $r) {}
+>> $r) : void {}
 
 function g(): void {
-  $a = 3 as Reified<Reified<
+  $a = new D() as Reified<Reified<
     int
   >>;
 

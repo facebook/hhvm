@@ -28,7 +28,7 @@ let expand_ty ?var_hook ?pos env ty =
     let (_, ety) = Tast_env.expand_type env ty in
     let ety =
       match deref ety with
-      | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
+      | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic | Tneg _)) -> ety
       | (p, Tgeneric (name, args)) -> mk (p, Tgeneric (name, exp_tys args))
       | (p, Tclass (n, e, tyl)) -> mk (p, Tclass (n, e, exp_tys tyl))
       | (p, Tunion tyl) -> mk (p, Tunion (exp_tys tyl))

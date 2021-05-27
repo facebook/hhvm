@@ -1,48 +1,36 @@
 File "and.php", line 8, characters 16-17:
 Invalid argument (Typing[4110])
-File "and.php", line 32, characters 21-23:
-Expected `int`
-File "and.php", line 4, characters 28-33:
-But got `string`
+  File "and.php", line 32, characters 21-23:
+  Expected `int`
+  File "and.php", line 4, characters 28-33:
+  But got `string`
 File "and.php", line 9, characters 19-20:
 Invalid argument (Typing[4110])
-File "and.php", line 33, characters 24-29:
-Expected `string`
-File "and.php", line 4, characters 14-16:
-But got `int`
-File "and.php", line 15, characters 16-17:
-Invalid argument (Typing[4110])
-File "and.php", line 32, characters 21-23:
-Expected `int`
-File "and.php", line 13, characters 12-19:
-But got `arraykey`
-File "and.php", line 16, characters 16-17:
-Invalid argument (Typing[4110])
-File "and.php", line 32, characters 21-23:
-Expected `int`
-File "and.php", line 13, characters 25-32:
-But got `arraykey`
+  File "and.php", line 33, characters 24-29:
+  Expected `string`
+  File "and.php", line 4, characters 14-16:
+  But got `int`
 File "and.php", line 18, characters 19-20:
 Invalid argument (Typing[4110])
-File "and.php", line 33, characters 24-29:
-Expected `string`
-File "and.php", line 13, characters 12-19:
-But got `arraykey`
+  File "and.php", line 33, characters 24-29:
+  Expected `string`
+  File "and.php", line 14, characters 14-19:
+  But got `int` from this `is` expression test
 File "and.php", line 19, characters 16-17:
 Invalid argument (Typing[4110])
-File "and.php", line 32, characters 21-23:
-Expected `int`
-File "and.php", line 13, characters 12-19:
-But got `arraykey`
+  File "and.php", line 32, characters 21-23:
+  Expected `int`
+  File "and.php", line 14, characters 14-19:
+  But got `string`
 File "and.php", line 20, characters 19-20:
 Invalid argument (Typing[4110])
-File "and.php", line 33, characters 24-29:
-Expected `string`
-File "and.php", line 13, characters 25-32:
-But got `arraykey`
+  File "and.php", line 33, characters 24-29:
+  Expected `string`
+  File "and.php", line 13, characters 25-32:
+  But got `arraykey`
 File "and.php", line 21, characters 16-17:
 Invalid argument (Typing[4110])
-File "and.php", line 32, characters 21-23:
-Expected `int`
-File "and.php", line 13, characters 25-32:
-But got `arraykey`
+  File "and.php", line 32, characters 21-23:
+  Expected `int`
+  File "and.php", line 13, characters 25-32:
+  But got `arraykey`

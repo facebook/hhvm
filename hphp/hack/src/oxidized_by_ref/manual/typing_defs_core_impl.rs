@@ -135,6 +135,7 @@ impl std::fmt::Debug for Ty_<'_> {
             TunappliedAlias(name) => write!(f, "TunappliedAlias({:?})", name),
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
+            Tneg(tprim) => write!(f, "Tneg({:?})", tprim),
             Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),
             Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
             Tshape((kind, fields)) => f.debug_tuple("Tshape").field(kind).field(fields).finish(),

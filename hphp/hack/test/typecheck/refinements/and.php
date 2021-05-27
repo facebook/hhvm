@@ -12,8 +12,8 @@ function f(mixed $x): void {
 
 function g(arraykey $x, arraykey $y): void {
   if (!$x is string && !$y is string) {
-    expect_int($x); // TODO error for now
-    expect_int($y); // TODO error for now
+    expect_int($x); // no error
+    expect_int($y); // no error
   } else {
     expect_string($x); // error: $x: int, $y: string works
     expect_int($x);    // error: $x: string, $y: int works

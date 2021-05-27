@@ -528,7 +528,8 @@ let rec array_get
       | Tdependent _
       | Tunion _
       | Tintersection _
-      | Taccess _ ->
+      | Taccess _
+      | Tneg _ ->
         let (env, ty1) = error_array env expr_pos ty1 in
         (env, ty1, Ok ty2)
       (* Type-check array access as though it is the method
@@ -627,7 +628,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
           ( Tnonnull | Tdarray _ | Tvec_or_dict _ | Tvarray_or_darray _
           | Toption _ | Tprim _ | Tvar _ | Tfun _ | Tclass _ | Ttuple _
           | Tshape _ | Tunion _ | Tintersection _ | Tgeneric _ | Tnewtype _
-          | Tdependent _ | Taccess _ ) ) ->
+          | Tdependent _ | Taccess _ | Tneg _ ) ) ->
         let (env, ty) = error_assign_array_append env expr_pos ty1 in
         (env, ty, Ok ty2))
 
@@ -928,7 +929,8 @@ let assign_array_get_with_err ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Tvar _
       | Tfun _
       | Tclass _
-      | Taccess _ ->
+      | Taccess _
+      | Tneg _ ->
         Errors.array_access_write
           expr_pos
           (Reason.to_pos r)

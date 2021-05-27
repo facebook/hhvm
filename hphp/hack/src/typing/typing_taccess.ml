@@ -453,7 +453,8 @@ let rec expand ctx env root : _ * result =
   | Ttuple _
   | Tfun _
   | Tdynamic
-  | Toption _ ->
+  | Toption _
+  | Tneg _ ->
     (env, Missing err)
 
 (** Expands a type constant access like A::T to its definition. *)

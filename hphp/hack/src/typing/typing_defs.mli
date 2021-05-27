@@ -246,6 +246,8 @@ val is_prim : Aast.tprim -> 'a ty -> bool
 
 val is_union : 'a ty -> bool
 
+val is_neg : locl_ty -> bool
+
 val is_constraint_type_union : constraint_type -> bool
 
 val is_has_member : constraint_type -> bool

@@ -112,6 +112,7 @@ let rec truthiness env ty =
   | Tvar _ ->
     Unknown
   | Tnonnull
+  | Tneg _
   | Tvarray _
   | Tdarray _
   | Tvarray_or_darray _
@@ -266,7 +267,8 @@ let rec find_sketchy_types env acc ty =
   | Tvec_or_dict _
   | Tvarray_or_darray _
   | Tunapplied_alias _
-  | Taccess _ ->
+  | Taccess _
+  | Tneg _ ->
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

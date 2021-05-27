@@ -6699,7 +6699,7 @@ and class_get_inner
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
       | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject
-      | Tshape _ | Taccess _ ) ) ->
+      | Tshape _ | Taccess _ | Tneg _ ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -6945,7 +6945,8 @@ and class_expr
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
           | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tnewtype _ | Tdependent _ | Tobject | Tshape _ | Taccess _ ) ) ->
+          | Tnewtype _ | Tdependent _ | Tobject | Tshape _ | Taccess _ | Tneg _
+            ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;

@@ -150,7 +150,7 @@ module ExprDepTy = struct
       | ( _,
           ( Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
           | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Terr ) ) ->
+          | Tfun _ | Tany _ | Tvar _ | Terr | Tneg _ ) ) ->
         (env, ty)
     in
     make env ty

@@ -17,6 +17,11 @@ let class_type r name tyl =
 
 let prim_type r t = mk (r, Tprim t)
 
+let neg r t =
+  match t with
+  | Nast.Tnull -> mk (r, Tnonnull)
+  | _ -> mk (r, Tneg t)
+
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]
 
 let keyed_traversable r kty vty =

@@ -1,6 +1,6 @@
 File "test_ben2.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
-File "test_ben2.php", line 12, characters 25-28:
-Expected `bool`
-File "test_ben2.php", line 12, characters 14-18:
-But got `mixed`
+  File "test_ben2.php", line 12, characters 25-28:
+  Expected `bool`
+  File "test_ben2.php", line 13, characters 13-15:
+  But got `not int` from this `is` expression test

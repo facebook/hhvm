@@ -430,6 +430,11 @@ let is_union t =
   | Tunion _ -> true
   | _ -> false
 
+let is_neg t =
+  match get_node t with
+  | Tneg _ -> true
+  | _ -> false
+
 let is_constraint_type_union t =
   match deref_constraint_type t with
   | (_, TCunion _) -> true
@@ -465,6 +470,7 @@ let is_union_or_inter_type (ty : locl_ty) =
     true
   | Terr
   | Tnonnull
+  | Tneg _
   | Tdynamic
   | Tobject
   | Tany _
@@ -608,6 +614,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tdependent _ -> 202
   | Tobject -> 203
   | Tclass _ -> 204
+  | Tneg _ -> 205
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
@@ -707,6 +714,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | 0 -> String.compare (snd id1) (snd id2)
         | n -> n
       end
+    | (Tneg ty1, Tneg ty2) -> Aast_defs.compare_tprim ty1 ty2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
     | (Tobject, Tobject) -> 0
@@ -715,7 +723,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
         | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
         | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
-        | Tany _ ),
+        | Tany _ | Tneg _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :

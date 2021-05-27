@@ -65,7 +65,8 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Ttuple _
     | Tobject
     | Tshape _
-    | Taccess _ ->
+    | Taccess _
+    | Tneg _ ->
       let (env, type_var) = Env.fresh_type env p in
       let expected_type = MakeType.awaitable r type_var in
       let return_type =
@@ -93,7 +94,8 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Tunion _
         | Tobject
         | Tshape _
-        | Taccess _ ->
+        | Taccess _
+        | Tneg _ ->
           type_var
       in
       let env =

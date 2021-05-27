@@ -1,0 +1,24 @@
+File "neg_enum.php", line 24, characters 19-21:
+Invalid argument (Typing[4110])
+  File "neg_enum.php", line 13, characters 24-29:
+  Expected `string`
+  File "neg_enum.php", line 20, characters 14-16:
+  But got `(not int & ~Es)` from this `is` expression test
+File "neg_enum.php", line 32, characters 19-21:
+Invalid argument (Typing[4110])
+  File "neg_enum.php", line 13, characters 24-29:
+  Expected `string`
+  File "neg_enum.php", line 28, characters 14-16:
+  But got `(not int & ~Ei)` from this `is` expression test
+File "neg_enum.php", line 48, characters 16-18:
+Invalid argument (Typing[4110])
+  File "neg_enum.php", line 11, characters 21-23:
+  Expected `int`
+  File "neg_enum.php", line 44, characters 14-19:
+  But got `(not string & ~Es)` from this `is` expression test
+File "neg_enum.php", line 56, characters 16-18:
+Invalid argument (Typing[4110])
+  File "neg_enum.php", line 11, characters 21-23:
+  Expected `int`
+  File "neg_enum.php", line 52, characters 14-19:
+  But got `(not string & ~Ei)` from this `is` expression test

@@ -1483,7 +1483,8 @@ and get_tyvars_i env (ty : internal_type) =
     | Terr
     | Tdynamic
     | Tobject
-    | Tprim _ ->
+    | Tprim _
+    | Tneg _ ->
       (env, ISet.empty, ISet.empty)
     | Toption ty -> get_tyvars env ty
     | Ttuple tyl

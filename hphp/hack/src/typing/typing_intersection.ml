@@ -24,9 +24,11 @@ for null, nonnull, mixed, nothing, otherwise approximate up or down according to
 return nothing. *)
 let non env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
-  let non_ty =
+  let neg_ty =
     match get_node ty with
     | Tprim Aast.Tnull -> MkType.nonnull r
+    | Tprim tp -> MkType.neg r tp
+    | Tneg tp -> MkType.prim_type r tp
     | Tnonnull -> MkType.null r
     | _ ->
       if Utils.equal_approx approx Utils.ApproxUp then
@@ -34,7 +36,7 @@ let non env r ty ~approx =
       else
         MkType.nothing r
   in
-  (env, non_ty)
+  (env, neg_ty)
 
 (** Decompose types as union of "atomic" elements.
 In this context, "atomic" means: which can't be broken down in a union of smaller
@@ -76,6 +78,24 @@ let recompose_atomic env r tyl =
   in
   let (nullable_r, dynamic_r, tyl) = traverse None None [] tyl in
   Utils.make_union env r tyl nullable_r dynamic_r
+
+(* Destructure an intersection into a list of its sub-types,
+   decending into sub-intersections.
+   *)
+let destruct_inter_list env tyl =
+  let orr r_opt r = Some (Option.value r_opt ~default:r) in
+  let rec dest_inter env ty tyl tyl_res r_inter =
+    let (env, ty) = Env.expand_type env ty in
+    match deref ty with
+    | (r, Tintersection tyl') ->
+      destruct_inter_list env (tyl' @ tyl) tyl_res (orr r_inter r)
+    | _ -> destruct_inter_list env tyl (ty :: tyl_res) r_inter
+  and destruct_inter_list env tyl tyl_res r_union =
+    match tyl with
+    | [] -> (env, (tyl_res, r_union))
+    | ty :: tyl -> dest_inter env ty tyl tyl_res r_union
+  in
+  destruct_inter_list env tyl [] None
 
 (** Number of '&' symbols in an intersection representation. E.g. for (A & B),
 returns 1, for A, returns 0. *)
@@ -172,6 +192,35 @@ let rec intersect env ~r ty1 ty2 =
                 intersect_ty_union env r (mk ty) (r_union, tyl)
               in
               recompose_atomic env r inter_tyl
+            | ((_, Tneg Aast.Tint), (_, Tprim Aast.Tnum))
+            | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tint)) ->
+              (env, MkType.float r)
+            | ((_, Tneg Aast.Tfloat), (_, Tprim Aast.Tnum))
+            | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tfloat)) ->
+              (env, MkType.int r)
+            | ((_, Tneg Aast.Tstring), ty_ak)
+            | (ty_ak, (_, Tneg Aast.Tstring)) ->
+              if
+                (* Ocaml warns about ambiguous or-pattern variables under guard if this is in a when clause*)
+                Typing_utils.is_sub_type_for_union
+                  env
+                  (mk ty_ak)
+                  (MkType.arraykey Typing_reason.Rnone)
+              then
+                intersect env ~r (mk ty_ak) (MkType.int r)
+              else
+                make_intersection env r [ty1; ty2]
+            | ((_, Tneg Aast.Tint), ty_ak)
+            | (ty_ak, (_, Tneg Aast.Tint)) ->
+              if
+                Typing_utils.is_sub_type_for_union
+                  env
+                  (mk ty_ak)
+                  (MkType.arraykey Typing_reason.Rnone)
+              then
+                intersect env ~r (mk ty_ak) (MkType.string r)
+              else
+                make_intersection env r [ty1; ty2]
             | _ -> make_intersection env r [ty1; ty2]
           with Nothing -> (env, MkType.nothing r)
         in

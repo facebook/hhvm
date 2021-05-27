@@ -22,7 +22,7 @@
             (If ((([4:7-16], bool), (Is ((([4:7-9], mixed), (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
                [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (([5:12-14], (mixed & int)), (Lvar ([5:12-14], $x))))))],
                [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
-            ([7:3-19], (Return (Some (([7:10-18], int), (Cast (([7:11-14], (Hprim Tint)), (([7:16-18], mixed), (Lvar ([7:16-18], $x)))))))))];
+            ([7:3-19], (Return (Some (([7:10-18], int), (Cast (([7:11-14], (Hprim Tint)), (([7:16-18], (mixed & not int)), (Lvar ([7:16-18], $x)))))))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

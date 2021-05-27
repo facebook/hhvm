@@ -91,6 +91,14 @@ module List = struct
     let (env, l) = rev_map_env env xs ~f in
     (env, rev_filter_map l ~f:(fun x -> x))
 
+  let rec exists_env env xs ~f =
+    match xs with
+    | [] -> (env, false)
+    | x :: xs ->
+      (match f env x with
+      | (env, true) -> (env, true)
+      | (env, false) -> exists_env env xs ~f)
+
   let rec replicate ~num x =
     match num with
     | 0 -> []

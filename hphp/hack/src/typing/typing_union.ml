@@ -118,6 +118,30 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   in
   (env, ty)
 
+(* Destructure a union into a list of its sub-types, decending into sub-unions,
+   and also pulling out null and dynamic.
+*)
+let dest_union_list env tyl =
+  let orr r_opt r = Some (Option.value r_opt ~default:r) in
+  let rec dest_union env ty tyl tyl_res r_null r_union r_dyn =
+    let (env, ty) = Env.expand_type env ty in
+    match deref ty with
+    | (r, Tunion tyl') ->
+      dest_union_list env (tyl' @ tyl) tyl_res r_null (orr r_union r) r_dyn
+    | (r, Toption ty) ->
+      dest_union env ty tyl tyl_res (orr r_null r) r_union r_dyn
+    | (r, Tprim Aast.Tnull) ->
+      dest_union_list env tyl tyl_res (orr r_null r) r_union r_dyn
+    | (r, Tdynamic) ->
+      dest_union_list env tyl tyl_res r_null r_union (orr r_dyn r)
+    | _ -> dest_union_list env tyl (ty :: tyl_res) r_null r_union r_dyn
+  and dest_union_list env tyl tyl_res r_null r_union r_dyn =
+    match tyl with
+    | [] -> (env, (tyl_res, r_null, r_union, r_dyn))
+    | ty :: tyl -> dest_union env ty tyl tyl_res r_null r_union r_dyn
+  in
+  dest_union_list env tyl [] None None None
+
 (** Constructor for unions and options, taking a list of types and whether the
 result should be nullable. Simplify things like singleton unions or nullable nothing.
 This allows the result of any unioning function from this module to be flattened and normalized,
@@ -199,7 +223,20 @@ let rec union env ty1 ty2 =
   else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, ty1)
   else
-    union_ env ty1 ty2 (union_reason r1 r2)
+    let r = union_reason r1 r2 in
+    let (env, non_ty2) =
+      Typing_intersection.non env Reason.none ty2 Utils.ApproxUp
+    in
+    if Utils.is_sub_type_for_union env non_ty2 ty1 then
+      (env, Typing_make_type.mixed r)
+    else
+      let (env, non_ty1) =
+        Typing_intersection.non env Reason.none ty1 Utils.ApproxUp
+      in
+      if Utils.is_sub_type_for_union env non_ty1 ty2 then
+        (env, Typing_make_type.mixed r)
+      else
+        union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r = union_lists env [ty1] [ty2] r
 
@@ -291,6 +328,10 @@ and simplify_union_ env ty1 ty2 r =
       (env, Some (mk (r, Tfun ft)))
     | ((_, Tunapplied_alias _), _) ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+    | ((_, Tneg tp1), (_, Tprim tp2))
+    | ((_, Tprim tp1), (_, Tneg tp2))
+      when Aast_defs.equal_tprim tp1 tp2 ->
+      (env, Some (MakeType.mixed r))
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
@@ -302,37 +343,87 @@ and simplify_union_ env ty1 ty2 r =
            * types, etc. - so for now we leave it here.
            * TODO improve that. *)
           | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
-          | Taccess _ ) ),
+          | Taccess _ | Tneg _ ) ),
         (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with Dont_simplify -> (env, None)
+
+(* Recognise a pattern t1 | t2 | t3 | (t4 & t5 & t6) which happens frequently
+   at control flow join points, and check for types that drop out of the intersection
+   because they union to mixed with types in the union. Assume that all of the types
+   in tyl1 and tyl2 are not unions, having been processed by decompose in the
+   union_lists function. The semantics are that tyl1 and tyl2 are the union of their
+   elements, and we are building the union of the two lists. Instead of just appending,
+   we look for the special case where one of the elements of tyl1 or tyl2 is itself
+   an intersection, and try to cancel things out. We return the simplified
+   lists for further processing.
+
+   For example if tyl1 = [bool; int; string] represents bool | int | string, and
+   tyl2 = [float; (dynamic & not int & not string)],
+   then to union tyl1 and tyl2, we can remove the not int and not string conjuncts
+   from tyl2 because they union to mixed with elements of tyl1. Thus we end up with
+   a result [bool; int; string], [float; dynamic]
+  *)
+and try_special_union_of_intersection env tyl1 tyl2 r :
+    Typing_env_types.env * locl_ty list * locl_ty list =
+  (* Assume that inter_ty is an intersection type and look for a pairs of a conjunct in
+     inter_ty and an element of tyl that union to mixed. Remove these from the intersection,
+     and return the remaining elements of the intersection,
+     or return None indicating that no pairs were found. *)
+  let simplify_inter env inter_ty tyl : Typing_env_types.env * locl_ty option =
+    let changed = ref false in
+    let (env, (inter_tyl, inter_r)) =
+      Typing_intersection.destruct_inter_list env [inter_ty]
+    in
+    let inter_r = Option.value inter_r ~default:r in
+    let (env, new_inter_tyl) =
+      List.filter_map_env env inter_tyl ~f:(fun env inter_ty ->
+          match
+            List.exists_env env tyl ~f:(fun env ty ->
+                match simplify_union_ env inter_ty ty r with
+                | (env, None) -> (env, false)
+                | (env, Some ty) -> (env, Typing_utils.is_mixed env ty))
+          with
+          | (env, true) ->
+            changed := true;
+            (env, None)
+          | (env, false) -> (env, Some inter_ty))
+    in
+    ( env,
+      if !changed then
+        Some (Typing_make_type.intersection inter_r new_inter_tyl)
+      else
+        None )
+  in
+  let (inter_tyl1, not_inter_tyl1) =
+    List.partition_tf tyl1 ~f:(Typing_utils.is_tintersection env)
+  in
+  let (inter_tyl2, not_inter_tyl2) =
+    List.partition_tf tyl2 ~f:(Typing_utils.is_tintersection env)
+  in
+  let (env, res_tyl1) =
+    match inter_tyl1 with
+    | [inter_ty1] ->
+      (match simplify_inter env inter_ty1 not_inter_tyl2 with
+      | (env, None) -> (env, tyl1)
+      | (env, Some new_inter1) -> (env, new_inter1 :: not_inter_tyl1))
+    | _ -> (env, tyl1)
+  in
+  let (env, res_tyl2) =
+    match inter_tyl2 with
+    | [inter_ty2] ->
+      (match simplify_inter env inter_ty2 not_inter_tyl1 with
+      | (env, None) -> (env, tyl2)
+      | (env, Some new_inter1) -> (env, new_inter1 :: not_inter_tyl2))
+    | _ -> (env, tyl2)
+  in
+  (env, res_tyl1, res_tyl2)
 
 (** Union two lists of types together.
 This has complexity N*M where N, M are the sized of the two lists.
 The two lists are first flattened and null and dynamic are extracted from them,
 then we attempt to simplify each pair of types. *)
 and union_lists env tyl1 tyl2 r =
-  let orr r_opt r = Some (Option.value r_opt ~default:r) in
-  let rec decompose env ty tyl tyl_res r_null r_union r_dyn =
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (r, Tunion tyl') ->
-      decompose_list env (tyl' @ tyl) tyl_res r_null (orr r_union r) r_dyn
-    | (r, Toption ty) ->
-      decompose env ty tyl tyl_res (orr r_null r) r_union r_dyn
-    | (r, Tprim Aast.Tnull) ->
-      decompose_list env tyl tyl_res (orr r_null r) r_union r_dyn
-    | (r, Tdynamic) ->
-      decompose_list env tyl tyl_res r_null r_union (orr r_dyn r)
-    | _ -> decompose_list env tyl (ty :: tyl_res) r_null r_union r_dyn
-  and decompose_list env tyl tyl_res r_null r_union r_dyn =
-    match tyl with
-    | [] -> (env, (tyl_res, r_null, r_union, r_dyn))
-    | ty :: tyl -> decompose env ty tyl tyl_res r_null r_union r_dyn
-  in
-  let decompose env tyl = decompose_list env tyl [] None None None in
-  let (env, (tyl1, r_null1, _r_union1, r_dyn1)) = decompose env tyl1 in
-  let (env, (tyl2, r_null2, _r_union2, r_dyn2)) = decompose env tyl2 in
   let product_ty_tyl env ty1 tyl2 =
     let rec product_ty_tyl env ty1 tyl2 tyl_res =
       match tyl2 with
@@ -354,6 +445,9 @@ and union_lists env tyl1 tyl2 r =
       let (env, tyl2) = product_ty_tyl env ty1 tyl2 in
       product env tyl1 tyl2
   in
+  let (env, (tyl1, r_null1, _r_union1, r_dyn1)) = dest_union_list env tyl1 in
+  let (env, (tyl2, r_null2, _r_union2, r_dyn2)) = dest_union_list env tyl2 in
+  let (env, tyl1, tyl2) = try_special_union_of_intersection env tyl1 tyl2 r in
   let (env, tyl) = product env tyl1 tyl2 in
   let r_null = Option.first_some r_null1 r_null2 in
   let r_dyn = Option.first_some r_dyn1 r_dyn2 in

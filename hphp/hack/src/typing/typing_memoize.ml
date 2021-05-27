@@ -33,7 +33,8 @@ let check_param : env -> Nast.fun_param -> unit =
       | Tnonnull
       | Tany _
       | Terr
-      | Tdynamic ->
+      | Tdynamic
+      | Tneg _ ->
         ()
       | Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
       | Toption ty -> check_memoizable env ty

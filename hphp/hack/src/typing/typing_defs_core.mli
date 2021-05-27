@@ -333,6 +333,7 @@ and _ ty_ =
    * If exact=Nonexact, this also includes subclasses
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
+  | Tneg : Aast.tprim -> locl_phase ty_
 
 and 'phase taccess_type = 'phase ty * pos_id
 

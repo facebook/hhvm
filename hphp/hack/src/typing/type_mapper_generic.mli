@@ -138,6 +138,9 @@ class type ['env] type_mapper_type =
       Typing_defs.pos_id ->
       'env * Typing_defs.locl_ty
 
+    method on_tneg :
+      'env -> Typing_reason.t -> Aast.tprim -> 'env * Typing_defs.locl_ty
+
     method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty
 
     method on_locl_ty_list :

@@ -46,7 +46,8 @@ let rec is_stringish env ty =
   | Tdynamic
   | Tobject
   | Tnonnull
-  | Tprim _ ->
+  | Tprim _
+  | Tneg _ ->
     true
   | Tvarray _
   | Tdarray _

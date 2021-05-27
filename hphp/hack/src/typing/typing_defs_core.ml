@@ -365,6 +365,7 @@ and _ ty_ =
        * If exact=Exact, then this represents instances of *exactly* this class
        * If exact=Nonexact, this also includes subclasses
        *)
+  | Tneg : Aast.tprim -> locl_phase ty_
 
 and 'phase taccess_type = 'phase ty * pos_id
 
@@ -678,6 +679,10 @@ module Pp = struct
            a1);
       Format.fprintf fmt "@,]@]";
       Format.fprintf fmt "@,))@]"
+    | Tneg a0 ->
+      Format.fprintf fmt "(@[<2>Tneg@ ";
+      Aast.pp_tprim fmt a0;
+      Format.fprintf fmt "@])"
 
   and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
    fun fmt tyl ->

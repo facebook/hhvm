@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4584d90512b66eafcf51d2376d14a034>>
+// @generated SignedSource<<e292942894a179f32921c8f7fdfbc9c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -727,6 +727,8 @@ pub enum Ty_<'a> {
     /// If exact=Nonexact, this also includes subclasses
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tclass(&'a (PosId<'a>, Exact, &'a [&'a Ty<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Tneg(&'a aast::Tprim),
 }
 impl<'a> TrivialDrop for Ty_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Ty_<'arena>);

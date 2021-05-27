@@ -227,6 +227,22 @@ let anyfy env r ty =
   in
   anyfyer#go ty
 
+let is_tprim_disjoint tp1 tp2 =
+  let one_side tp1 tp2 =
+    Aast_defs.(
+      match (tp1, tp2) with
+      | (Tnum, Tint)
+      | (Tnum, Tfloat)
+      | (Tarraykey, Tint)
+      | (Tarraykey, Tstring) ->
+        false
+      | ( _,
+          ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
+          | Tresource | Tnoreturn ) ) ->
+        true)
+  in
+  (not (Aast_defs.equal_tprim tp1 tp2)) && one_side tp1 tp2 && one_side tp2 tp1
+
 let find_type_with_exact_negation env tyl =
   let rec find env tyl acc_tyl =
     match tyl with
@@ -234,7 +250,7 @@ let find_type_with_exact_negation env tyl =
     | ty :: tyl' ->
       let (env, non_ty) = TUtils.non env (get_reason ty) ty TUtils.ApproxDown in
       let nothing = MakeType.nothing Reason.none in
-      if ty_equal non_ty nothing then
+      if ty_equal non_ty nothing || is_neg ty || is_neg non_ty then
         find env tyl' (ty :: acc_tyl)
       else
         (env, Some non_ty, tyl' @ acc_tyl)
@@ -312,7 +328,8 @@ let subst_for_dynamic partial_enf_kind (pos, class_name) (ty : internal_type) =
     | Tnewtype _
     | Tdependent _
     | Tobject
-    | Tclass _ ->
+    | Tclass _
+    | Tneg _ ->
       None
   and subst_for_dynamic_locl_list tyl =
     match tyl with
@@ -1188,6 +1205,11 @@ and simplify_subtype_i
                 | Tvarray_or_darray _ | Tvec_or_dict _ | Tany _ | Terr
                 | Taccess _ ) ),
               _ ) ->
+            simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
+          (* This is treating the option as a union, and using the sound, but incomplete,
+             t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
+              *)
+          | ((_, Tneg _), _) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
     | (_r_super, Tdependent (d_sup, bound_sup)) ->
@@ -1308,6 +1330,8 @@ and simplify_subtype_i
             | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
             | Taccess _ ) ) ->
           valid env
+        (* negations always contain null *)
+        | (_, Tneg _) -> invalid_env env
         | _ -> default_subtype env))
     | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -1338,7 +1362,8 @@ and simplify_subtype_i
         | (_, Taccess _)
         | (_, Tunion _)
         | (_, Tintersection _)
-        | (_, Tgeneric _) ->
+        | (_, Tgeneric _)
+        | (_, Tneg _) ->
           default_subtype env
         | (_, Tdarray (_, ty))
         | (_, Tvarray ty)
@@ -1596,6 +1621,29 @@ and simplify_subtype_i
       | LoclType lty ->
         (match deref lty with
         | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
+        | _ -> default_subtype env))
+    | (r_super, Tneg tprim_super) ->
+      (match ety_sub with
+      | ConstraintType _ -> default_subtype env
+      | LoclType ty_sub ->
+        (match deref ty_sub with
+        | (r_sub, Tneg tprim_sub) ->
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            (MakeType.prim_type r_super tprim_super)
+            (MakeType.prim_type r_sub tprim_sub)
+            env
+        | (_, Tprim tprim_sub) ->
+          if is_tprim_disjoint tprim_sub tprim_super then
+            valid env
+          else
+            invalid_env env
+        (* All of these are definitely disjoint from primitive types *)
+        | ( _,
+            ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
+            | Tvarray_or_darray _ | Tobject | Tclass _ ) ) ->
+          valid env
         | _ -> default_subtype env))
     | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
       ->

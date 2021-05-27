@@ -77,7 +77,8 @@ let rec freshen_inside_ty env ty =
   | Terr
   | Tdynamic
   | Tobject
-  | Tprim _ ->
+  | Tprim _
+  | Tneg _ ->
     default ()
   | Tgeneric (name, tyl) ->
     if List.is_empty tyl then

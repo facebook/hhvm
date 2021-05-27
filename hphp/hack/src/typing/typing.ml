@@ -2684,9 +2684,11 @@ and expr_
         env
         (Cls.tparams class_)
     | None ->
-      let desc = "Missing collection decl during type parameter check" in
-      Telemetry.(create () |> string_ ~key:"class name" ~value:name)
-      |> Errors.invariant_violation p ~desc ~report_to_user:false;
+      let is_deferring = Deferred_decl.is_deferring () in
+      ( if not is_deferring then
+        let desc = "Missing collection decl during type parameter check" in
+        Telemetry.(create () |> string_ ~key:"class name" ~value:name)
+        |> Errors.invariant_violation p ~desc ~report_to_user:false );
       (* Continue typechecking without performing the check on a best effort
       basis. *)
       env

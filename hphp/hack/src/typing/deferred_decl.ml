@@ -99,6 +99,8 @@ let add_deferment ~(d : deferment) : unit =
 let get_deferments () : deferment list =
   !state.deferments |> Deferment_set.elements
 
+let is_deferring () = not (get_deferments () |> List.is_empty)
+
 let with_deferred_decls
     ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt f =
   reset ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt;

@@ -45,6 +45,9 @@ val add_deferment : d:deferment -> unit
     before we can get on with our regular typechecking work. *)
 val get_deferments : unit -> deferment list
 
+(** Indicates if typechecking is being deferred. *)
+val is_deferring : unit -> bool
+
 (** Increment the counter of decls needing computing. *)
 val increment_counter : unit -> unit
 

@@ -177,6 +177,15 @@ void createSchema(SQLiteTxn& txn) {
            " attribute_value TEXT NULL,"
            " UNIQUE (typeid, attribute_name, attribute_position)"
            ")");
+
+  txn.exec("CREATE TABLE IF NOT EXISTS method_attributes ("
+           " typeid INTEGER NOT NULL REFERENCES type_details ON DELETE CASCADE,"
+           " method TEXT NOT NULL,"
+           " attribute_name TEXT NOT NULL,"
+           " attribute_position INTEGER NULL,"
+           " attribute_value TEXT NULL,"
+           " UNIQUE (typeid, attribute_name, attribute_position)"
+           ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -211,6 +220,17 @@ void rebuildIndices(SQLiteTxn& txn) {
   txn.exec("CREATE INDEX IF NOT EXISTS "
            "type_attributes__attribute_name__typeid__attribute_position"
            " ON type_attributes (attribute_name, typeid, attribute_position)");
+
+  // method_attributes
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS "
+      "method_attributes__attribute_name__typeid__method__attribute_position"
+      " ON method_attributes ("
+      "  attribute_name,"
+      "  typeid,"
+      "  method,"
+      "  attribute_position"
+      ")");
 }
 
 TypeKind toTypeKind(const std::string_view kind) {
@@ -370,7 +390,7 @@ struct TypeStmts {
             " JOIN all_paths USING (pathid)"
             " WHERE base_name = @base"
             " AND kind = @kind")}
-      , m_insertAttribute{db.prepare(
+      , m_insertTypeAttribute{db.prepare(
             "INSERT OR IGNORE INTO type_attributes ("
             " typeid,"
             " attribute_name,"
@@ -384,18 +404,50 @@ struct TypeStmts {
             "  @attribute_position,"
             "  @attribute_value"
             " )")}
-      , m_getAttributes{db.prepare("SELECT DISTINCT attribute_name"
-                                   " FROM type_attributes"
-                                   "  JOIN type_details USING (typeid)"
-                                   "  JOIN all_paths USING (pathid)"
-                                   " WHERE name=@type AND path = @path")}
-      , m_getAttributeArgs{db.prepare("SELECT attribute_value"
-                                      " FROM type_attributes"
-                                      "  JOIN type_details USING (typeid)"
-                                      "  JOIN all_paths USING (pathid)"
-                                      " WHERE name = @type"
-                                      " AND path = @path"
-                                      " AND attribute_name = @attribute_name")}
+      , m_insertMethodAttribute{db.prepare(
+            "INSERT OR IGNORE INTO method_attributes ("
+            " typeid,"
+            " method,"
+            " attribute_name,"
+            " attribute_position,"
+            " attribute_value"
+            ")"
+            " VALUES ("
+            "  (SELECT typeid FROM type_details JOIN all_paths USING (pathid)"
+            "   WHERE name=@type AND path=@path),"
+            "  @method,"
+            "  @attribute_name,"
+            "  @attribute_position,"
+            "  @attribute_value"
+            " )")}
+      , m_getTypeAttributes{db.prepare("SELECT DISTINCT attribute_name"
+                                       " FROM type_attributes"
+                                       "  JOIN type_details USING (typeid)"
+                                       "  JOIN all_paths USING (pathid)"
+                                       " WHERE name=@type AND path = @path")}
+      , m_getMethodAttributes{db.prepare(
+            "SELECT DISTINCT attribute_name"
+            " FROM method_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name=@type AND method=@method AND path = @path")}
+      , m_getTypeAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM type_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")}
+      , m_getMethodAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM method_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND method = @method"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")}
       , m_getTypesWithAttribute{db.prepare(
             "SELECT name, path from type_details"
             " JOIN all_paths USING (pathid)"
@@ -404,6 +456,12 @@ struct TypeStmts {
             "   WHERE attribute_name = @attribute_name"
             "   AND type_attributes.typeid=type_details.typeid"
             " )")}
+      , m_getMethodsWithAttribute{db.prepare(
+            "SELECT name, method, path"
+            " FROM type_details"
+            "  JOIN method_attributes USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE attribute_name = @attribute_name")}
       , m_getCorrectCase{db.prepare(
             "SELECT name FROM type_details WHERE name=@name")}
       , m_getAll{db.prepare("SELECT name, path from type_details JOIN "
@@ -417,10 +475,14 @@ struct TypeStmts {
   SQLiteStmt m_insertBaseType;
   SQLiteStmt m_getBaseTypes;
   SQLiteStmt m_getDerivedTypes;
-  SQLiteStmt m_insertAttribute;
-  SQLiteStmt m_getAttributes;
-  SQLiteStmt m_getAttributeArgs;
+  SQLiteStmt m_insertTypeAttribute;
+  SQLiteStmt m_insertMethodAttribute;
+  SQLiteStmt m_getTypeAttributes;
+  SQLiteStmt m_getMethodAttributes;
+  SQLiteStmt m_getTypeAttributeArgs;
+  SQLiteStmt m_getMethodAttributeArgs;
   SQLiteStmt m_getTypesWithAttribute;
+  SQLiteStmt m_getMethodsWithAttribute;
   SQLiteStmt m_getCorrectCase;
   SQLiteStmt m_getAll;
 };
@@ -747,7 +809,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       const folly::dynamic* attributeValue) override {
 
     std::string attrValueJson;
-    auto query = txn.query(m_typeStmts.m_insertAttribute);
+    auto query = txn.query(m_typeStmts.m_insertTypeAttribute);
 
     auto const attributeValueKey = "@attribute_value";
     if (attributeValue) {
@@ -772,6 +834,40 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.step();
   }
 
+  void insertMethodAttribute(
+      SQLiteTxn& txn,
+      const folly::fs::path& path,
+      std::string_view type,
+      std::string_view method,
+      std::string_view attributeName,
+      std::optional<int> attributePosition,
+      const folly::dynamic* attributeValue) override {
+
+    auto query = txn.query(m_typeStmts.m_insertMethodAttribute);
+
+    auto const attributeValueKey = "@attribute_value";
+    if (attributeValue) {
+      query.bindString(attributeValueKey, folly::toJson(*attributeValue));
+    } else {
+      query.bindNull(attributeValueKey);
+    }
+
+    auto const attributePositionKey = "@attribute_position";
+    if (attributePosition) {
+      query.bindInt(attributePositionKey, *attributePosition);
+    } else {
+      query.bindNull(attributePositionKey);
+    }
+
+    query.bindString("@type", type);
+    query.bindString("@method", method);
+    query.bindString("@path", path.native());
+    query.bindString("@attribute_name", attributeName);
+
+    FTRACE(5, "Running {}\n", query.sql());
+    query.step();
+  }
+
   void analyze() override {
     m_db.analyze();
   }
@@ -780,7 +876,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       SQLiteTxn& txn,
       const std::string_view type,
       const folly::fs::path& path) override {
-    auto query = txn.query(m_typeStmts.m_getAttributes);
+    auto query = txn.query(m_typeStmts.m_getTypeAttributes);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
@@ -791,25 +887,81 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
-  std::vector<std::pair<std::string, folly::fs::path>> getTypesWithAttribute(
-      SQLiteTxn& txn, const std::string_view attributeName) override {
-    auto query = txn.query(m_typeStmts.m_getTypesWithAttribute);
-    query.bindString("@attribute_name", attributeName);
-    std::vector<std::pair<std::string, folly::fs::path>> results;
+  std::vector<std::string> getAttributesOfMethod(
+      SQLiteTxn& txn,
+      std::string_view type,
+      std::string_view method,
+      const folly::fs::path& path) override {
+    auto query = txn.query(m_typeStmts.m_getMethodAttributes);
+    query.bindString("@type", type);
+    query.bindString("@method", method);
+    query.bindString("@path", path.native());
+    std::vector<std::string> results;
     FTRACE(5, "Running {}\n", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.emplace_back(query.getString(0), std::string{query.getString(1)});
+      results.emplace_back(query.getString(0));
     }
     return results;
   }
 
-  std::vector<folly::dynamic> getAttributeArgs(
+  std::vector<TypeDeclaration> getTypesWithAttribute(
+      SQLiteTxn& txn, const std::string_view attributeName) override {
+    auto query = txn.query(m_typeStmts.m_getTypesWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<TypeDeclaration> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(TypeDeclaration{
+          .m_type = std::string{query.getString(0)},
+          .m_path = folly::fs::path{std::string{query.getString(1)}}});
+    }
+    return results;
+  }
+
+  std::vector<MethodDeclaration> getMethodsWithAttribute(
+      SQLiteTxn& txn, std::string_view attributeName) override {
+    auto query = txn.query(m_typeStmts.m_getMethodsWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<MethodDeclaration> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(MethodDeclaration{
+          .m_type = std::string{query.getString(0)},
+          .m_method = std::string{query.getString(1)},
+          .m_path = folly::fs::path{std::string{query.getString(2)}}});
+    }
+    return results;
+  }
+
+  std::vector<folly::dynamic> getTypeAttributeArgs(
       SQLiteTxn& txn,
       const std::string_view type,
       const std::string_view path,
       const std::string_view attributeName) override {
-    auto query = txn.query(m_typeStmts.m_getAttributeArgs);
+    auto query = txn.query(m_typeStmts.m_getTypeAttributeArgs);
     query.bindString("@type", type);
+    query.bindString("@path", path);
+    query.bindString("@attribute_name", attributeName);
+    FTRACE(5, "Running {}\n", query.sql());
+    std::vector<folly::dynamic> args;
+    for (query.step(); query.row(); query.step()) {
+      auto arg = query.getNullableString(0);
+      if (arg) {
+        args.push_back(folly::parseJson(*arg));
+      }
+    }
+    return args;
+  }
+
+  std::vector<folly::dynamic> getMethodAttributeArgs(
+      SQLiteTxn& txn,
+      std::string_view type,
+      std::string_view method,
+      std::string_view path,
+      std::string_view attributeName) override {
+    auto query = txn.query(m_typeStmts.m_getMethodAttributeArgs);
+    query.bindString("@type", type);
+    query.bindString("@method", method);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
     FTRACE(5, "Running {}\n", query.sql());

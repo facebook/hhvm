@@ -558,7 +558,7 @@ std::vector<folly::dynamic> SymbolMap<S>::getAttributeArgs(
         return *args;
       },
       [&](AutoloadDB& db, SQLiteTxn& txn) -> ArgVec {
-        return db.getAttributeArgs(
+        return db.getTypeAttributeArgs(
             txn, type.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {

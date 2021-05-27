@@ -163,10 +163,20 @@ struct AutoloadDB {
       DeriveKindMask deriveKinds = kDeriveKindAll) = 0;
 
   // Attributes
+
   virtual void insertTypeAttribute(
       SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view type,
+      std::string_view attributeName,
+      std::optional<int> attributePosition,
+      const folly::dynamic* attributeValue) = 0;
+
+  virtual void insertMethodAttribute(
+      SQLiteTxn& txn,
+      const folly::fs::path& path,
+      std::string_view type,
+      std::string_view method,
       std::string_view attributeName,
       std::optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
@@ -180,14 +190,39 @@ struct AutoloadDB {
   virtual std::vector<std::string> getAttributesOfType(
       SQLiteTxn& txn, std::string_view type, const folly::fs::path& path) = 0;
 
-  virtual std::vector<folly::dynamic> getAttributeArgs(
+  virtual std::vector<std::string> getAttributesOfMethod(
+      SQLiteTxn& txn,
+      std::string_view type,
+      std::string_view method,
+      const folly::fs::path& path) = 0;
+
+  virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       SQLiteTxn& txn,
       std::string_view type,
       std::string_view path,
       std::string_view attributeName) = 0;
 
-  virtual std::vector<std::pair<std::string, folly::fs::path>>
+  virtual std::vector<folly::dynamic> getMethodAttributeArgs(
+      SQLiteTxn& txn,
+      std::string_view type,
+      std::string_view method,
+      std::string_view path,
+      std::string_view attributeName) = 0;
+
+  struct TypeDeclaration {
+    std::string m_type;
+    folly::fs::path m_path;
+  };
+  virtual std::vector<TypeDeclaration>
   getTypesWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
+
+  struct MethodDeclaration {
+    std::string m_type;
+    std::string m_method;
+    folly::fs::path m_path;
+  };
+  virtual std::vector<MethodDeclaration>
+  getMethodsWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
 
   virtual std::string
   getTypeCorrectCase(SQLiteTxn& txn, std::string_view type) = 0;

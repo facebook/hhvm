@@ -71,8 +71,8 @@ function Test(): void {
   $mm = new MinMax($twotwo);
   $mm->Add($twothree);
   $mm->Add($fourtwo);
-  echo 'min is ', $mm->GetMin();
-  echo ' and max is ', $mm->GetMax(), "\n";
+  echo 'min is (', $mm->GetMin()->fst->item, ',', $mm->GetMin()->snd->item, ')';
+  echo ' and max is (', $mm->GetMax()->fst->item, ',', $mm->GetMax()->snd->item, ")\n";
 }
 
 // Test();

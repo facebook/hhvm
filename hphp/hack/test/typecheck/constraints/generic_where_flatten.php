@@ -48,7 +48,7 @@ function TestIt():void {
   $ll = Copies(2, $l);
   $r = $ll->Flatten();
   $n = $r->Sum();
-  echo $n;
+  echo (string) $n;
 }
 
 function main(): void {

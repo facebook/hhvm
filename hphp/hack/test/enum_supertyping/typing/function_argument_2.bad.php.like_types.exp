@@ -1,0 +1,12 @@
+File "function_argument_2.bad.php", line 17, characters 8-16:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "function_argument_2.bad.php", line 17, characters 3-6:
+  Expected `arraykey`
+  File "function_argument_2.bad.php", line 13, characters 22-22:
+  But got `dynamic` because it is an unenforceable type
+File "function_argument_2.bad.php", line 17, characters 12-15:
+Invalid argument (Typing[4110])
+  File "function_argument_2.bad.php", line 13, characters 14-14:
+  Expected `G`
+  File "function_argument_2.bad.php", line 4, characters 16-18:
+  But got `int`

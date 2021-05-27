@@ -1712,3 +1712,5 @@ val unresolved_type_variable_projection :
 val function_pointer_with_atom : Pos.t -> Pos_or_decl.t -> unit
 
 val reified_static_method_in_expr_tree : Pos.t -> unit
+
+val invalid_echo_argument_at : Pos.t -> error_from_reasons_callback

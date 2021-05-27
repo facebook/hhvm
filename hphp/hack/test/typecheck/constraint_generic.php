@@ -47,7 +47,7 @@ class X {
 
 
 class Y extends X implements A {
-  
+
   public function test(): Y {
     return $this->foo($this);
   }
@@ -65,7 +65,7 @@ function test(): Vector<B> {
 
 class L<T as A> {
   private ?T $data = null;
-  
+
   public function set(T $x): void { $this->data = $x; }
   public function get(): ?T { return $this->data; }
 }
@@ -85,7 +85,7 @@ function test3(): void {
 
 function test4<T1, T2, T3 as KeyedIterable<T1, T2>>(T3 $x): void {
   foreach($x as $k => $v) {
-    echo $k; echo $v;
+    $k; $v;
   }
 }
 

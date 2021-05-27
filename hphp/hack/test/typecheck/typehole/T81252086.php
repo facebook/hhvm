@@ -15,5 +15,5 @@ class :foo {
 <<__EntryPoint>>
 function ok1(): void {
   $xml = <foo bar="hi">Hello</foo>;
-  echo $xml->:bar;
+  $xml->:bar;
 }

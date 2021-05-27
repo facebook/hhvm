@@ -5576,6 +5576,15 @@ and dispatch_call
       (* Special function `echo` *)
       | echo when String.equal echo SN.SpecialFunctions.echo ->
         let (env, tel, _) = exprs ~accept_using_var:true env el in
+        let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
+        let env =
+          List.fold tel ~init:env ~f:(fun env ((pos, ty), _) ->
+              SubType.sub_type
+                env
+                ty
+                arraykey_ty
+                (Errors.invalid_echo_argument_at pos))
+        in
         make_call_special env id tel (MakeType.void (Reason.Rwitness pos))
       (* `unsafe_cast` *)
       | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast

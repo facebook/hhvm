@@ -1,0 +1,20 @@
+File "acts_as_string.php", line 11, characters 3-13:
+  classname<exact Tr>
+File "acts_as_string.php", line 30, characters 8-9:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "acts_as_string.php", line 30, characters 3-6:
+  Expected `arraykey`
+  File "acts_as_string.php", line 29, characters 26-34:
+  But got `Stringish`
+File "acts_as_string.php", line 39, characters 8-17:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "acts_as_string.php", line 39, characters 3-6:
+  Expected `arraykey`
+  File "acts_as_string.php", line 34, characters 3-14:
+  But got `dynamic` because it is an unenforceable type
+File "acts_as_string.php", line 40, characters 8-13:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "acts_as_string.php", line 40, characters 3-6:
+  Expected `arraykey`
+  File "acts_as_string.php", line 35, characters 3-16:
+  But got `dynamic` because it is an unenforceable type

@@ -9,7 +9,7 @@
  *
  */
 
-class Foo<T> {
+class Foo<T as arraykey> {
   public async function print_if_possible(
     ?Awaitable<T> $blah,
   ): Awaitable<void> {

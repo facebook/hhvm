@@ -39,7 +39,7 @@ function E_name_of<T>(HH\Label<E, Box<T>> $atom): string {
   return E::nameOf($atom);
 }
 
-function E_test<T>(HH\Label<E, Box<T>> $atom) : void {
+function E_test<T as arraykey>(HH\Label<E, Box<T>> $atom) : void {
   echo E_name_of_atom($atom);
   echo "\n";
   echo E_value_of_atom($atom)->x;

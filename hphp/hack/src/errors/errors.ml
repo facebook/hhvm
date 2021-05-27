@@ -5654,6 +5654,19 @@ let reified_static_method_in_expr_tree pos =
     pos
     "Static method calls on reified generics are not permitted in Expression Trees."
 
+let invalid_echo_argument_at pos ?code reasons =
+  let msg =
+    "Invalid "
+    ^ Markdown_lite.md_codify "echo"
+    ^ "/"
+    ^ Markdown_lite.md_codify "print"
+    ^ " argument"
+  in
+  add_list
+    (Option.value code ~default:(Typing.err_code Typing.InvalidEchoArgument))
+    (pos, msg)
+    reasons
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

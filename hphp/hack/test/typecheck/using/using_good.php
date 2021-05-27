@@ -23,7 +23,6 @@ class Another implements IDisposable {
       // fake member
       expect_string($this->str);
     }
-    echo($x);
   }
   public function __dispose(): void { }
 }

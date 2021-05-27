@@ -65,7 +65,7 @@ function iterate(): void {
   foreach (E::getValues() as $key => $elt) {
     echo "$key = ";
     $box = $elt as Box<_>;
-    echo $box->data;
+    echo (string) $box->data;
     echo "\n";
   }
 }

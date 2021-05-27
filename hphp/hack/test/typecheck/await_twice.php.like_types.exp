@@ -1,0 +1,6 @@
+File "await_twice.php", line 23, characters 9-10:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "await_twice.php", line 23, characters 3-11:
+  Expected `arraykey`
+  File "await_twice.php", line 22, characters 8-15:
+  But got `dynamic`

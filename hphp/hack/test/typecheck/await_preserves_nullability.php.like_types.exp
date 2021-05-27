@@ -6,3 +6,9 @@ Invalid argument (Typing[4110])
     via this generic `T`
   File "await_preserves_nullability.php", line 16, characters 10-20:
   But got `?T where T as arraykey`
+File "await_preserves_nullability.php", line 22, characters 13-17:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "await_preserves_nullability.php", line 22, characters 7-17:
+  Expected `arraykey`
+  File "await_preserves_nullability.php", line 20, characters 25-25:
+  But got `dynamic` because it is an unenforceable type

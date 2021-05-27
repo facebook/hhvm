@@ -86,8 +86,8 @@ class Ext extends Base {
 
 function test_constraint(): void {
   $ext = new Ext();
-  echo $ext->get(E::A);
+  echo (string) $ext->get(E::A);
   echo "\n";
-  echo $ext->get(F::C);
+  echo (string) $ext->get(F::C);
   echo "\n";
 }

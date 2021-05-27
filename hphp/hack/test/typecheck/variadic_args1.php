@@ -11,7 +11,7 @@ function test(): void {
 
 function f1<T>(T ...$args): void {
   foreach ($args as $arg) {
-    echo $arg;
+    $arg;
   }
   takes_container($args);
   takes_keyed_container($args);

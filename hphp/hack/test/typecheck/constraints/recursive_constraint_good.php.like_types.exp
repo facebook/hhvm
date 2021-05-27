@@ -1,0 +1,36 @@
+File "recursive_constraint_good.php", line 62, characters 19-37:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 62, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 62, characters 34-37:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+File "recursive_constraint_good.php", line 63, characters 24-42:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 63, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 63, characters 39-42:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+File "recursive_constraint_good.php", line 71, characters 20-43:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 71, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 71, characters 40-43:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+File "recursive_constraint_good.php", line 71, characters 51-74:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 71, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 71, characters 71-74:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+File "recursive_constraint_good.php", line 72, characters 25-48:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 72, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 72, characters 45-48:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+File "recursive_constraint_good.php", line 72, characters 56-79:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "recursive_constraint_good.php", line 72, characters 3-6:
+  Expected `arraykey`
+  File "recursive_constraint_good.php", line 72, characters 76-79:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type

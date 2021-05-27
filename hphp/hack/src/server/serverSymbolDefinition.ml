@@ -206,6 +206,7 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Class, SyntaxKind.ClassishDeclaration)
         | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
+        | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
         | (SymbolDefinition.RecordDef, SyntaxKind.RecordDeclaration)
         | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)

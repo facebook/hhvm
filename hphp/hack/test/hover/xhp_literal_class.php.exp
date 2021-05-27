@@ -1,0 +1,1 @@
+{ snippet = "final class :foo:bar"; addendum = ["docs for :foo:bar"]; pos = Some "line 11, character 4 - line 11, character 10" }

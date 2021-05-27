@@ -18,7 +18,11 @@ enum MyEnum: string as string {
 
 /** :xhp:enum-attribute docblock */
 final class :xhp:enum-attribute implements XHPChild {
-  attribute MyEnum enum-attribute, string name;
+  attribute
+    MyEnum enum-attribute,
+
+    /** :xhp:enum-attribute::name docblock */
+    string name;
 
   public function __construct(
     public darray<string,mixed> $attributes,

@@ -4059,7 +4059,10 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 62, "character": 25},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "public ?string name"}],
+                    "contents": [
+                        {"language": "hack", "value": "public ?string name"},
+                        ":xhp:enum-attribute::name docblock",
+                    ],
                     "range": {
                         "start": {"line": 62, "character": 22},
                         "end": {"line": 62, "character": 26},
@@ -4130,7 +4133,10 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 69, "character": 22},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "public ?string name"}],
+                    "contents": [
+                        {"language": "hack", "value": "public ?string name"},
+                        ":xhp:enum-attribute::name docblock",
+                    ],
                     "range": {
                         "start": {"line": 69, "character": 20},
                         "end": {"line": 69, "character": 24},

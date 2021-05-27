@@ -737,7 +737,7 @@ let log_type_access ~level root (p, type_const_name) (env, result_ty) =
       ] );
   (env, result_ty)
 
-let log_localize ~level (decl_ty : decl_ty) (env, result_ty) =
+let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
   ( log_with_level env "localize" ~level @@ fun () ->
     log_types
       (get_pos result_ty)
@@ -746,6 +746,11 @@ let log_localize ~level (decl_ty : decl_ty) (env, result_ty) =
         Log_head
           ( "Localizing",
             [
+              Log_head
+                ( Printf.sprintf
+                    "expand_visible_newtype: %b"
+                    ety_env.expand_visible_newtype,
+                  [] );
               Log_decl_type ("decl type", decl_ty);
               Log_type ("result", result_ty);
             ] );

@@ -341,6 +341,9 @@ end
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
+  expand_visible_newtype: bool;
+      (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
+          True by default. *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
       (** The type that is substituted for `this` in signatures. It should be
@@ -351,7 +354,8 @@ type expand_env = {
 
 let empty_expand_env =
   {
-    type_expansions = Type_expansions.empty_w_cycle_report ~report_cycle:None;
+    type_expansions = Type_expansions.empty;
+    expand_visible_newtype = true;
     substs = SMap.empty;
     this_ty =
       mk (Reason.none, Tgeneric (Naming_special_names.Typehints.this, []));

@@ -35,7 +35,13 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
         Errors.cyclic_typedef initial_taccess_pos pos);
     (env, (ety_env, MakeType.err r))
   | None ->
-    let should_expand = force_expand || Typing_env.is_typedef_visible env td in
+    let should_expand =
+      force_expand
+      || Typing_env.is_typedef_visible
+           env
+           ~expand_visible_newtype:ety_env.expand_visible_newtype
+           td
+    in
     let ety_env =
       {
         ety_env with
@@ -67,7 +73,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     (env, (ety_env, with_reason expanded_ty r))
 
 let expand_typedef ety_env env r type_name argl =
-  let (env, (_, ty)) = expand_typedef_ ety_env env r type_name argl in
+  let (env, (_ety_env, ty)) = expand_typedef_ ety_env env r type_name argl in
   (env, ty)
 
 (* Expand a typedef, smashing abstraction and collecting a trail

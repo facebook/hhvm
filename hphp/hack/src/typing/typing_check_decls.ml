@@ -105,9 +105,8 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
-  let (env, locl_ty) =
-    Phase.localize_with_self env ~ignore_errors:true decl_ty
-  in
+  let ety_env = { empty_expand_env with expand_visible_newtype = false } in
+  let (env, locl_ty) = Phase.localize env ~ety_env decl_ty in
   let () = if is_atom then check_atom_on_param env hint_pos decl_ty locl_ty in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->

@@ -201,6 +201,9 @@ end
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
+  expand_visible_newtype: bool;
+      (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
+          True by default. *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
   on_error: Errors.error_from_reasons_callback;

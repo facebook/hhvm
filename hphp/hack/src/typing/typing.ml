@@ -1241,10 +1241,9 @@ let safely_refine_class_type
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env =
     {
-      type_expansions = Typing_defs.Type_expansions.empty;
+      empty_expand_env with
       substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
-      on_error = Errors.ignore_error;
     }
   in
   let add_bounds env (t, ty_fresh) =
@@ -3173,10 +3172,9 @@ and expr_
         in
         let ety_env =
           {
-            type_expansions = Typing_defs.Type_expansions.empty;
+            empty_expand_env with
             substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
-            on_error = Errors.ignore_error;
           }
         in
         let r = get_reason ty |> Typing_reason.localize in
@@ -4905,11 +4903,10 @@ and new_object
         | Some ({ ce_type = (lazy ty); _ } as ce) ->
           let ety_env =
             {
-              type_expansions = Typing_defs.Type_expansions.empty;
+              empty_expand_env with
               substs =
                 TUtils.make_locl_subst_for_class_tparams class_info params;
               this_ty = obj_ty;
-              on_error = Errors.ignore_error;
             }
           in
           if get_ce_abstract ce then
@@ -6498,10 +6495,9 @@ and class_get_inner
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
         {
-          type_expansions = Typing_defs.Type_expansions.empty;
+          empty_expand_env with
           this_ty;
           substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
-          on_error = Errors.ignore_error;
         }
       in
       let get_smember_from_constraints env class_info =
@@ -6964,7 +6960,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
   in
   let ety_env =
     {
-      type_expansions = Typing_defs.Type_expansions.empty;
+      empty_expand_env with
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
       on_error = Errors.unify_error_at p;

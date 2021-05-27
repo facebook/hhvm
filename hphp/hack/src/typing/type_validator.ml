@@ -135,13 +135,11 @@ class virtual type_validator =
             env;
             ety_env =
               {
-                type_expansions = Typing_defs.Type_expansions.empty;
-                substs = SMap.empty;
+                Typing_defs.empty_expand_env with
                 this_ty =
                   Option.value
                     (Env.get_self_ty env)
                     ~default:(MakeType.nothing Reason.none);
-                on_error = Errors.ignore_error;
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;

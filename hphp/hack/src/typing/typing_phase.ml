@@ -99,7 +99,7 @@ type method_instantiation = {
 (*****************************************************************************)
 
 let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
-  Typing_log.log_localize ~level:1 dty
+  Typing_log.log_localize ~level:1 ety_env dty
   @@
   let tvar_or_localize ~ety_env env r ty ~i =
     if
@@ -155,7 +155,12 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         in
         begin
           match
-            (localize_targs_by_kind ~ety_env env targs arg_kinds, replace_with)
+            ( localize_targs_by_kind
+                ~ety_env:{ ety_env with expand_visible_newtype = true }
+                env
+                targs
+                arg_kinds,
+              replace_with )
           with
           | ((env, _), Some repl_ty) -> (env, mk (r, repl_ty))
           | ((env, locl_tyargs), None) ->
@@ -365,7 +370,12 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
   | None ->
     (* Without class info, we don't know the kinds of the arguments.
        We assume they are non-HK types. *)
-    let (env, tyl) = List.map_env env tyargs (localize ~ety_env) in
+    let (env, tyl) =
+      List.map_env
+        env
+        tyargs
+        (localize ~ety_env:{ ety_env with expand_visible_newtype = true })
+    in
     (env, mk (r, Tclass (sid, Nonexact, tyl)))
   | Some class_info ->
     (match Cls.enum_type class_info with
@@ -414,7 +424,11 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
             sid
             class_info
         else
-          localize_targs_by_kind ~ety_env env tyargs nkinds
+          localize_targs_by_kind
+            ~ety_env:{ ety_env with expand_visible_newtype = true }
+            env
+            tyargs
+            nkinds
       in
       (env, mk (r, Tclass (sid, Nonexact, tyl))))
 
@@ -424,7 +438,13 @@ and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
   | Some typedef_info ->
     let tparams = typedef_info.Typing_defs.td_tparams in
     let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
-    let (env, tyargs) = localize_targs_by_kind ~ety_env env tyargs nkinds in
+    let (env, tyargs) =
+      localize_targs_by_kind
+        ~ety_env:{ ety_env with expand_visible_newtype = true }
+        env
+        tyargs
+        nkinds
+    in
     TUtils.expand_typedef ety_env env r type_name tyargs
   | None ->
     (* This must be unreachable. We only call localize_typedef_instantiation if we *know* that
@@ -757,7 +777,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
   let c_ty = mk (r, Tclass (sid, Nonexact, tyl)) in
   let ety_env =
     {
-      type_expansions = Typing_defs.Type_expansions.empty;
+      empty_expand_env with
       this_ty = c_ty;
       substs = Subst.make_locl tparams tyl;
       on_error = Errors.unify_error_at Pos.none;
@@ -1015,7 +1035,7 @@ let localize_targs_and_check_constraints
   in
   let ety_env =
     {
-      type_expansions = Typing_defs.Type_expansions.empty;
+      empty_expand_env with
       this_ty;
       substs = Subst.make_locl tparaml targs_tys;
       on_error = Errors.unify_error_at use_pos;

@@ -1,0 +1,12 @@
+File "constraint_newtype_param_local.php--a.php", line 5, characters 25-28:
+Some type constraint(s) here are violated (Typing[4323])
+  File "constraint_newtype_param_local.php--a.php", line 3, characters 11-11:
+  `T` is a constrained type parameter
+  File "constraint_newtype_param_local.php--a.php", line 3, characters 16-23:
+  Some type constraint(s) are violated here
+  File "constraint_newtype_param_local.php--a.php", line 3, characters 11-11:
+  `T` is a constrained type parameter
+  File "constraint_newtype_param_local.php--a.php", line 3, characters 16-23:
+  Expected `arraykey`
+  File "constraint_newtype_param_local.php--a.php", line 5, characters 27-27:
+  But got `T`

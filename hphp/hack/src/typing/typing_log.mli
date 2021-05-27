@@ -92,6 +92,7 @@ val log_type_access :
 
 val log_localize :
   level:int ->
+  Typing_defs.expand_env ->
   Typing_defs.decl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty

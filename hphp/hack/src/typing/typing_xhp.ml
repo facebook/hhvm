@@ -125,10 +125,9 @@ and get_spread_attributes env pos onto_xhp cty =
      * we don't need to perform any substitutions *)
     let ety_env =
       {
-        type_expansions = Typing_defs.Type_expansions.empty;
+        empty_expand_env with
         this_ty = xhp_ty;
         substs = TUtils.make_locl_subst_for_class_tparams xhp_info tparams;
-        on_error = Errors.ignore_error;
       }
     in
     List.map_env

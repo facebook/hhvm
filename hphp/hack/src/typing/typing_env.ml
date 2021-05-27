@@ -730,13 +730,14 @@ let is_typedef env x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
-let is_typedef_visible env td =
+let is_typedef_visible env ?(expand_visible_newtype = true) td =
   let { Typing_defs.td_vis; td_pos; _ } = td in
   match td_vis with
   | Aast.Opaque ->
-    Relative_path.equal
-      (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
-      (get_file env)
+    expand_visible_newtype
+    && Relative_path.equal
+         (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
+         (get_file env)
   | Aast.Transparent -> true
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =

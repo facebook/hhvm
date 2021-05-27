@@ -127,11 +127,10 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
             | Some basety ->
               let ety_env =
                 {
-                  type_expansions = Typing_defs.Type_expansions.empty;
+                  empty_expand_env with
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_info tyl;
                   this_ty = ty;
-                  on_error = Errors.ignore_error;
                 }
               in
               let (env, basety) = Phase.localize ~ety_env env basety in
@@ -285,10 +284,9 @@ let rec obj_get_concrete_ty
   in
   let mk_ety_env class_info paraml =
     {
-      type_expansions = Typing_defs.Type_expansions.empty;
+      empty_expand_env with
       this_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
-      on_error = Errors.ignore_error;
     }
   in
   let read_context = Option.is_none coerce_from_ty in

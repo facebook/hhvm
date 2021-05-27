@@ -1783,12 +1783,11 @@ and simplify_subtype_i
               in
               let ety_env =
                 {
-                  type_expansions = Typing_defs.Type_expansions.empty;
+                  empty_expand_env with
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
                   (* TODO: do we need this? *)
                   this_ty = Option.value this_ty ~default:ty_sub;
-                  on_error = Errors.ignore_error;
                 }
               in
               let up_obj = Cls.get_ancestor class_sub cid_super in

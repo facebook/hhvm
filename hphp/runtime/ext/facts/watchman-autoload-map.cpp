@@ -977,7 +977,7 @@ Array WatchmanAutoloadMap::getBaseTypes(
     addBaseTypes(DeriveKind::RequireImplements);
   }
 
-  return makeVecOfString(filterByAttribute(
+  return makeVecOfString(filterTypesByAttribute(
       filterByKind(std::move(baseTypes), filters.m_kindFilters),
       filters.m_attrFilters));
 }
@@ -1013,7 +1013,7 @@ Array WatchmanAutoloadMap::getDerivedTypes(
     addDerivedTypes(DeriveKind::RequireImplements);
   }
 
-  return makeVecOfString(filterByAttribute(
+  return makeVecOfString(filterTypesByAttribute(
       filterByKind(std::move(derivedTypes), filters.m_kindFilters),
       filters.m_attrFilters));
 }
@@ -1028,7 +1028,7 @@ Array WatchmanAutoloadMap::getTransitiveDerivedTypes(
 
 Array WatchmanAutoloadMap::getTransitiveDerivedTypes(
     const String& baseType, const InheritanceFilterData& filters) {
-  auto derivedTypeInfo = filterByAttribute(
+  auto derivedTypeInfo = filterTypesByAttribute(
       m_map.getTransitiveDerivedTypes(
           *baseType.get(),
           filters.m_kindFilters.toMask(),
@@ -1073,7 +1073,7 @@ Array WatchmanAutoloadMap::getTypeAttributes(const String& type) {
 Array WatchmanAutoloadMap::getTypeAttrArgs(
     const String& type, const String& attribute) {
   return makeVecOfDynamic(
-      m_map.getAttributeArgs(*type.get(), *attribute.get()));
+      m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
 }
 
 Array WatchmanAutoloadMap::getAllTypes() {
@@ -1124,16 +1124,16 @@ WatchmanAutoloadMap::filterByKind(
 }
 
 template <typename T>
-std::vector<T> WatchmanAutoloadMap::filterByAttribute(
+std::vector<T> WatchmanAutoloadMap::filterTypesByAttribute(
     std::vector<T> types, const AttributeFilterData& filter) {
-  return filterByAttribute(
+  return filterTypesByAttribute(
       std::move(types),
       filter,
       [](T type) -> Symbol<StringData, SymKind::Type> { return type; });
 }
 
 template <typename T, typename TypeGetFn>
-std::vector<T> WatchmanAutoloadMap::filterByAttribute(
+std::vector<T> WatchmanAutoloadMap::filterTypesByAttribute(
     std::vector<T> types,
     const AttributeFilterData& filter,
     TypeGetFn typeGetFn) {
@@ -1161,7 +1161,7 @@ std::vector<T> WatchmanAutoloadMap::filterByAttribute(
 
     // Check that each of our argument constraints is satisfied by the
     // attribute's argument.
-    auto args = m_map.getAttributeArgs(type, attr);
+    auto args = m_map.getTypeAttributeArgs(type, attr);
     for (auto const& [i, argFilter] : argFilters) {
       if (i >= args.size() || args[i] != argFilter) {
         return false;

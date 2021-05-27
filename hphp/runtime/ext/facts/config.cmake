@@ -14,6 +14,7 @@ HHVM_DEFINE_EXTENSION(
     watchman.cpp
   HEADERS
     attribute-argument-map.h
+    attribute-map.h
     autoload-db.h
     exception.h
     ext_facts.h
@@ -28,7 +29,6 @@ HHVM_DEFINE_EXTENSION(
     symbol-map.h
     symbol-types.h
     thread-factory.h
-    type-attribute-map.h
     watchman-autoload-map.h
     watchman.h
   SYSTEMLIB

@@ -217,10 +217,10 @@ private:
    * Filter the given `types` down to only those with the given attributes.
    */
   template <typename T>
-  std::vector<T>
-  filterByAttribute(std::vector<T> types, const AttributeFilterData& filter);
+  std::vector<T> filterTypesByAttribute(
+      std::vector<T> types, const AttributeFilterData& filter);
   template <typename T, typename TypeGetFn>
-  std::vector<T> filterByAttribute(
+  std::vector<T> filterTypesByAttribute(
       std::vector<T> types,
       const AttributeFilterData& filter,
       TypeGetFn typeGetFn);

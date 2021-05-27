@@ -88,9 +88,14 @@ constexpr DeriveKindMask kDeriveKindAll =
 
 // Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
 // `{"IAmAnAttribute", vec[0, "Hello", null]}`
-struct TypeAttribute {
+struct Attribute {
   std::string m_name;
   std::vector<folly::dynamic> m_args;
+};
+
+struct MethodDetails {
+  std::string m_name;
+  std::vector<Attribute> m_attributes;
 };
 
 struct TypeDetails {
@@ -103,13 +108,15 @@ struct TypeDetails {
   std::vector<std::string> m_baseTypes;
 
   // List of attributes and their arguments
-  std::vector<TypeAttribute> m_attributes;
+  std::vector<Attribute> m_attributes;
 
   // List of classes or interfaces which this `require extends`
   std::vector<std::string> m_requireExtends;
 
   // List of interfaces which this `require implements`
   std::vector<std::string> m_requireImplements;
+
+  std::vector<MethodDetails> m_methods;
 
   bool isAbstract() const noexcept {
     return m_flags & static_cast<int>(TypeFlag::Abstract);

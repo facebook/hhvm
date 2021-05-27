@@ -68,14 +68,14 @@ std::vector<std::string> move_str_vec(folly::dynamic* stringList) {
   return ret;
 }
 
-std::vector<TypeAttribute> move_attr_vec(folly::dynamic* attrList) {
+std::vector<Attribute> move_attr_vec(folly::dynamic* attrList) {
   if (attrList == nullptr) {
     return {};
   }
 
-  std::vector<TypeAttribute> ret;
+  std::vector<Attribute> ret;
   for (auto& item : attrList->items()) {
-    TypeAttribute attr;
+    Attribute attr;
     attr.m_name = item.first.getString();
     for (auto& arg : std::move(item.second)) {
       attr.m_args.push_back(std::move(arg));

@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/string-ptr.h"
@@ -87,6 +90,10 @@ template <typename S> struct Path {
     return m_path.slice();
   }
 
+  folly::fs::path native() const noexcept {
+    return folly::fs::path{std::string{slice()}};
+  }
+
   const S* get() const noexcept {
     return m_path.get();
   }
@@ -136,6 +143,15 @@ template <typename S, SymKind k> struct Symbol {
 
   const S* get() const noexcept {
     return m_name.get();
+  }
+
+  static std::vector<Symbol<S, k>> from(const std::vector<std::string>& strs) {
+    std::vector<Symbol<S, k>> syms;
+    syms.reserve(strs.size());
+    for (auto const& s : strs) {
+      syms.emplace_back(s);
+    }
+    return syms;
   }
 
   StringPtr<S> m_name;

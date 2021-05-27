@@ -18,6 +18,7 @@
 
 #include <folly/ScopeGuard.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/hash/Hash.h>
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
@@ -80,6 +81,10 @@ getPathSymMap(typename SymbolMap<S>::Data& data) {
 }
 
 } // namespace
+
+template <typename S> bool TypeDecl<S>::operator==(const TypeDecl<S>& o) const {
+  return m_name == o.m_name && m_path == o.m_path;
+}
 
 template <typename S>
 SymbolMap<S>::SymbolMap(
@@ -459,7 +464,7 @@ SymbolMap<S>::getAttributesOfType(Symbol<S, SymKind::Type> type) {
   };
   return readOrUpdate<AttrVec>(
       [&](const Data& data) -> std::optional<AttrVec> {
-        auto const* attrs = data.m_typeAttrs.getAttributesForType(type, path);
+        auto const* attrs = data.m_typeAttrs.getAttributes({type, path});
         if (!attrs) {
           return std::nullopt;
         }
@@ -467,8 +472,8 @@ SymbolMap<S>::getAttributesOfType(Symbol<S, SymKind::Type> type) {
       },
       [&](AutoloadDB& db,
           SQLiteTxn& txn) -> std::vector<Symbol<S, SymKind::Type>> {
-        auto const attrStrs = db.getAttributesOfType(
-            txn, type.slice(), folly::fs::path{std::string{path.slice()}});
+        auto const attrStrs =
+            db.getAttributesOfType(txn, type.slice(), path.native());
         std::vector<Symbol<S, SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -478,8 +483,8 @@ SymbolMap<S>::getAttributesOfType(Symbol<S, SymKind::Type> type) {
       },
       [&](Data& data,
           std::vector<Symbol<S, SymKind::Type>> attrsFromDB) -> AttrVec {
-        return makeVec(data.m_typeAttrs.getAttributesForType(
-            type, path, std::move(attrsFromDB)));
+        return makeVec(data.m_typeAttrs.getAttributes(
+            {type, path}, std::move(attrsFromDB)));
       });
 }
 
@@ -504,23 +509,23 @@ SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(
   };
   auto types = readOrUpdate<TypeVec>(
       [&](const Data& data) -> std::optional<TypeVec> {
-        auto const* attrs = data.m_typeAttrs.getTypesWithAttribute(attr);
+        auto const* attrs = data.m_typeAttrs.getKeysWithAttribute(attr);
         if (!attrs) {
           return std::nullopt;
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db, SQLiteTxn& txn) -> std::vector<TypeAndPath<S>> {
+      [&](AutoloadDB& db, SQLiteTxn& txn) -> std::vector<TypeDecl<S>> {
         auto const typeDefStrs = db.getTypesWithAttribute(txn, attr.slice());
-        std::vector<TypeAndPath<S>> typeDefs;
+        std::vector<TypeDecl<S>> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& [type, path] : typeDefStrs) {
           typeDefs.push_back({Symbol<S, SymKind::Type>{type}, Path<S>{path}});
         }
         return typeDefs;
       },
-      [&](Data& data, std::vector<TypeAndPath<S>> typesFromDB) -> TypeVec {
-        return makeVec(data.m_typeAttrs.getTypesWithAttribute(
+      [&](Data& data, std::vector<TypeDecl<S>> typesFromDB) -> TypeVec {
+        return makeVec(data.m_typeAttrs.getKeysWithAttribute(
             attr, std::move(typesFromDB)));
       });
   // Remove types that are duplicate-defined or missing
@@ -542,7 +547,7 @@ SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(const S& attr) {
 }
 
 template <typename S>
-std::vector<folly::dynamic> SymbolMap<S>::getAttributeArgs(
+std::vector<folly::dynamic> SymbolMap<S>::getTypeAttributeArgs(
     Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attr) {
   auto path = getOnlyPath(type);
   if (path == nullptr) {
@@ -551,7 +556,8 @@ std::vector<folly::dynamic> SymbolMap<S>::getAttributeArgs(
   using ArgVec = std::vector<folly::dynamic>;
   return readOrUpdate<ArgVec>(
       [&](const Data& data) -> std::optional<ArgVec> {
-        auto const* args = data.m_typeAttrs.getAttributeArgs(type, path, attr);
+        auto const* args =
+            data.m_typeAttrs.getAttributeArgs({type, path}, attr);
         if (!args) {
           return std::nullopt;
         }
@@ -563,14 +569,14 @@ std::vector<folly::dynamic> SymbolMap<S>::getAttributeArgs(
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
         return data.m_typeAttrs.getAttributeArgs(
-            type, path, attr, std::move(argsFromDB));
+            {type, path}, attr, std::move(argsFromDB));
       });
 }
 
 template <typename S>
 std::vector<folly::dynamic>
-SymbolMap<S>::getAttributeArgs(const S& type, const S& attribute) {
-  return getAttributeArgs(
+SymbolMap<S>::getTypeAttributeArgs(const S& type, const S& attribute) {
+  return getTypeAttributeArgs(
       Symbol<S, SymKind::Type>{type}, Symbol<S, SymKind::Type>{attribute});
 }
 
@@ -1112,7 +1118,7 @@ void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
 
     types.insert(typeName);
     m_typeKind.setKindAndFlags(typeName, path, type.m_kind, type.m_flags);
-    m_typeAttrs.setTypeAttributes(typeName, path, std::move(type.m_attributes));
+    m_typeAttrs.setAttributes({typeName, path}, std::move(type.m_attributes));
     m_inheritanceInfo.setBaseTypes(
         typeName, path, DeriveKind::Extends, std::move(type.m_baseTypes));
     m_inheritanceInfo.setBaseTypes(
@@ -1159,7 +1165,8 @@ void SymbolMap<S>::Data::removePath(
   auto pathTypes = m_typePath.getPathSymbols(path, std::move(pathTypesFromDB));
   for (auto type : pathTypes) {
     m_inheritanceInfo.removeType(type, path);
-    m_typeAttrs.removeType(db, txn, type, path);
+    m_typeAttrs.removeKey(
+        {type, path}, db.getAttributesOfType(txn, type.slice(), path.native()));
   }
 
   m_typePath.removePath(path);
@@ -1183,3 +1190,16 @@ template <typename S> AutoloadDB& SymbolMap<S>::getDB() const {
 
 } // namespace Facts
 } // namespace HPHP
+
+namespace std {
+
+template <typename S> struct hash<typename HPHP::Facts::TypeDecl<S>> {
+  size_t operator()(const typename HPHP::Facts::TypeDecl<S>& d) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::Symbol<S, HPHP::Facts::SymKind::Type>>{}(
+            d.m_name),
+        std::hash<HPHP::Facts::Path<S>>{}(d.m_path));
+  }
+};
+
+} // namespace std

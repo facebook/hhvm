@@ -1684,18 +1684,18 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
             [&](auto const& attr) { return attr.slice() == "Foo"; }),
         someClassAttrs.end());
     {
-      auto args = m1.getAttributeArgs("SomeClass", "Foo");
+      auto args = m1.getTypeAttributeArgs("SomeClass", "Foo");
       EXPECT_EQ(args.size(), 2);
       EXPECT_EQ(args.at(0), "apple");
       EXPECT_EQ(args.at(1), 38);
     }
     {
-      auto args = m1.getAttributeArgs("SomeClass", "Bar");
+      auto args = m1.getTypeAttributeArgs("SomeClass", "Bar");
       EXPECT_EQ(args.size(), 1);
       EXPECT_EQ(args.at(0), nullptr);
     }
     {
-      auto args = m1.getAttributeArgs("SomeClass", "Baz");
+      auto args = m1.getTypeAttributeArgs("SomeClass", "Baz");
       EXPECT_TRUE(args.empty());
     }
   }
@@ -1737,7 +1737,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
     EXPECT_TRUE(collectionContains(fooTypes, "SomeClass"));
     EXPECT_TRUE(collectionContains(fooTypes, "SomeTypeAlias"));
 
-    auto fooArgs = m2.getAttributeArgs("SomeTypeAlias", "Foo");
+    auto fooArgs = m2.getTypeAttributeArgs("SomeTypeAlias", "Foo");
     EXPECT_EQ(fooArgs.size(), 2);
     EXPECT_EQ(fooArgs.at(0), 42);
     EXPECT_EQ(fooArgs.at(1), "a");
@@ -1759,18 +1759,18 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
         barTypes.end());
   }
   {
-    auto args = m1.getAttributeArgs("SomeClass", "Foo");
+    auto args = m1.getTypeAttributeArgs("SomeClass", "Foo");
     EXPECT_EQ(args.size(), 2);
     EXPECT_EQ(args.at(0), "apple");
     EXPECT_EQ(args.at(1), 38);
   }
   {
-    auto args = m1.getAttributeArgs("SomeClass", "Bar");
+    auto args = m1.getTypeAttributeArgs("SomeClass", "Bar");
     EXPECT_EQ(args.size(), 1);
     EXPECT_EQ(args.at(0), nullptr);
   }
   {
-    auto args = m1.getAttributeArgs("SomeClass", "Baz");
+    auto args = m1.getTypeAttributeArgs("SomeClass", "Baz");
     EXPECT_TRUE(args.empty());
   }
   {

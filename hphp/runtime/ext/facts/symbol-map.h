@@ -31,6 +31,7 @@
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 
+#include "hphp/runtime/ext/facts/attribute-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/inheritance-info.h"
@@ -38,7 +39,6 @@
 #include "hphp/runtime/ext/facts/path-symbols-map.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
-#include "hphp/runtime/ext/facts/type-attribute-map.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
@@ -56,6 +56,16 @@ struct UpdateDBWorkItem {
   std::vector<FileFacts> m_alteredPathFacts;
 };
 
+template <typename S> struct TypeDecl {
+  Symbol<S, SymKind::Type> m_name;
+  Path<S> m_path;
+
+  bool operator==(const TypeDecl<S>& o) const;
+
+  std::vector<Symbol<S, SymKind::Type>>
+  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
+};
+
 /**
  * Stores and updates one PathToSymbolsMap for each kind of symbol.
  *
@@ -67,6 +77,7 @@ struct UpdateDBWorkItem {
  * information the DB doesn't have.
  */
 template <typename S> struct SymbolMap {
+
   explicit SymbolMap(
       folly::fs::path root,
       DBData dbData,
@@ -215,10 +226,10 @@ template <typename S> struct SymbolMap {
    * You can check that the type is defined with `getTypeFile()`, and you can
    * check that the type has the given attribute with `getAttributesOfType()`.
    */
-  std::vector<folly::dynamic> getAttributeArgs(
+  std::vector<folly::dynamic> getTypeAttributeArgs(
       Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
   std::vector<folly::dynamic>
-  getAttributeArgs(const S& type, const S& attribute);
+  getTypeAttributeArgs(const S& type, const S& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -409,7 +420,7 @@ template <typename S> struct SymbolMap {
     /**
      * Maps between types and the attributes that decorate them.
      */
-    TypeAttributeMap<S> m_typeAttrs;
+    AttributeMap<S, TypeDecl<S>> m_typeAttrs;
 
     /**
      * 40-byte hex strings representing the last-known SHA1 checksums of

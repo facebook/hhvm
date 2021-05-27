@@ -1,5 +1,5 @@
 File "gen7.php", line 23, characters 17-20:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "gen7.php", line 21, characters 9-9:
   `T` is a constrained type parameter
   File "gen7.php", line 23, characters 19-19:

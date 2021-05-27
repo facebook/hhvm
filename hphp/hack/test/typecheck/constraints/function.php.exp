@@ -1,8 +1,8 @@
 File "function.php", line 5, characters 14-29:
-Some type constraint(s) here are violated (Typing[4323])
-File "function.php", line 3, characters 22-22:
-`T` is a constrained type parameter
-File "function.php", line 3, characters 27-29:
-Expected `num`
-File "function.php", line 5, characters 25-28:
-But got `?int`
+Some type arguments violate their constraints (Typing[4323])
+  File "function.php", line 3, characters 22-22:
+  `T` is a constrained type parameter
+  File "function.php", line 3, characters 27-29:
+  Expected `num`
+  File "function.php", line 5, characters 25-28:
+  But got `?int`

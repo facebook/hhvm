@@ -1,5 +1,5 @@
 File "type_constant_nast.php", line 8, characters 27-38:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "type_constant_nast.php", line 7, characters 19-19:
   `T` is a constrained type parameter
   File "type_constant_nast.php", line 7, characters 24-25:

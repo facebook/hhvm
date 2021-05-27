@@ -17,7 +17,7 @@ Wrong number of type arguments (expected 0, got 1) (Typing[4101])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Definition is here
 File "primary_error_pos_bug.php", line 24, characters 29-32:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
   File "primary_error_pos_bug.php", line 5, characters 14-16:
@@ -25,7 +25,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "primary_error_pos_bug.php", line 24, characters 31-31:
   But got `T`
 File "primary_error_pos_bug.php", line 32, characters 18-31:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
   File "primary_error_pos_bug.php", line 5, characters 14-16:
@@ -35,7 +35,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "primary_error_pos_bug.php", line 27, characters 20-20:
     via this generic `T`
 File "primary_error_pos_bug.php", line 32, characters 37-50:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
   File "primary_error_pos_bug.php", line 5, characters 14-16:
@@ -45,7 +45,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "primary_error_pos_bug.php", line 29, characters 27-27:
     via this generic `T`
 File "primary_error_pos_bug.php", line 38, characters 7-8:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 20, characters 22-22:
   `T` is a constrained type parameter
   File "primary_error_pos_bug.php", line 20, characters 27-29:
@@ -67,7 +67,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "primary_error_pos_bug.php", line 22, characters 40-40:
     via this generic `T`
 File "primary_error_pos_bug.php", line 40, characters 7-7:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
   File "primary_error_pos_bug.php", line 5, characters 14-16:

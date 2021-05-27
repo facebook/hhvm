@@ -1,5 +1,5 @@
 File "shapes_toarray.php", line 19, characters 4-17:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
   File "hackarray.hhi", line 24, characters 34-41:

@@ -2482,7 +2482,7 @@ let method_variance pos =
     "Covariance or contravariance is not allowed in type parameter of method or function."
 
 let explain_constraint ~(use_pos : Pos.t) ~definition_pos ~param_name reasons =
-  let inst_msg = "Some type constraint(s) here are violated" in
+  let inst_msg = "Some type arguments violate their constraints" in
   let name = strip_ns param_name in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)

@@ -1,6 +1,6 @@
 File "alias_with_implicit_constraints_unsupported2.php", line 18, characters 20-41:
 The type WithImplicitConstraint implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time. (Naming[2047])
-File "alias_with_implicit_constraints_unsupported2.php", line 13, characters 6-27:
-The definition of WithImplicitConstraint is here.
-File "alias_with_implicit_constraints_unsupported2.php", line 11, characters 24-31:
-The definition of WithImplicitConstraint relies on TakesNum and the constraints that TakesNum imposes on its type parameter T1 then become implicit constraints on the type parameter T4 of WithImplicitConstraint.
+  File "alias_with_implicit_constraints_unsupported2.php", line 13, characters 6-27:
+  The definition of WithImplicitConstraint is here.
+  File "alias_with_implicit_constraints_unsupported2.php", line 11, characters 24-31:
+  The definition of WithImplicitConstraint relies on TakesNum and the constraints that TakesNum imposes on its type parameter T1 then become implicit constraints on the type parameter T4 of WithImplicitConstraint.

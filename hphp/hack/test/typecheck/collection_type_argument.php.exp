@@ -1,5 +1,5 @@
 File "collection_type_argument.php", line 19, characters 3-16:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 26, characters 30-30:
   `T` is a constrained type parameter
   File "hackarray.hhi", line 26, characters 35-42:
@@ -11,7 +11,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "collection_type_argument.php", line 19, characters 10-13:
   But got `bool`
 File "collection_type_argument.php", line 23, characters 3-19:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
   File "hackarray.hhi", line 24, characters 34-41:
@@ -23,7 +23,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "collection_type_argument.php", line 23, characters 8-11:
   But got `bool`
 File "collection_type_argument.php", line 27, characters 3-21:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 24, characters 28-29:
   `Tk` is a constrained type parameter
   File "hackarray.hhi", line 24, characters 34-41:
@@ -35,7 +35,7 @@ Some type constraint(s) here are violated (Typing[4323])
   File "collection_type_argument.php", line 27, characters 10-13:
   But got `bool`
 File "collection_type_argument.php", line 31, characters 3-19:
-Some type constraint(s) here are violated (Typing[4323])
+Some type arguments violate their constraints (Typing[4323])
   File "collections/Map.hhi", line 55, characters 17-18:
   `Tk` is a constrained type parameter
   File "collections/Map.hhi", line 55, characters 23-30:

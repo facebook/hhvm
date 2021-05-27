@@ -1,7 +1,7 @@
 === base errors ===
 No errors!
 === changed errors ===
-a.php:2:35,38: Some type constraint(s) here are violated (Typing[4323])
+a.php:2:35,38: Some type arguments violate their constraints (Typing[4323])
   foo.php:2:11,11: `T` is a constrained type parameter
   foo.php:2:16,18: Some type constraint(s) are violated here
   foo.php:2:11,11: `T` is a constrained type parameter

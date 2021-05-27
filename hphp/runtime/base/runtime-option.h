@@ -828,7 +828,7 @@ struct RuntimeOption {
   F(uint32_t, JitTraceletGuardsLimit,  5)                               \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(int64_t, JitMaxRequestTranslationTime, -1)                          \
-  F(uint32_t, JitMaxRegionInstrs,      1347)                            \
+  F(uint32_t, JitMaxRegionInstrs,      2000)                            \
   F(uint32_t, JitMaxLiveRegionInstrs,  50)                              \
   F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \
@@ -897,7 +897,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
   F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
-  F(uint32_t, HHIRInliningMaxDepth,    1000)                            \
+  F(uint32_t, HHIRInliningMaxDepth,    5)                               \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \
   F(double,   HHIRInliningDepthExp, 0)                                  \
@@ -905,7 +905,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMaxReturnLocals, 40)                          \
   F(uint32_t, HHIRInliningMaxInitObjProps, 12)                          \
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
-  F(bool,     HHIRInliningUseStackedCost, true)                         \
+  F(bool,     HHIRInliningUseStackedCost, false)                        \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \

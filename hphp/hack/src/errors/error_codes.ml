@@ -635,6 +635,7 @@ module Typing = struct
     | InvalidEchoArgument [@value 4438]
     | DiamondTraitMethod [@value 4439]
     | ReifiedStaticMethodInExprTree [@value 4440]
+    | InvariantViolated [@value 4441]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

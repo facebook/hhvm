@@ -4744,6 +4744,12 @@ let invalid_arraykey_constraint pos t =
     ^ t
     ^ ", which cannot be used as an arraykey (string | int)" )
 
+let internal_compiler_error_msg =
+  Printf.sprintf
+    "Encountered an internal compiler error while typechecking this. %s %s"
+    Error_message_sentinel.remediation_message
+    Error_message_sentinel.please_file_a_bug_message
+
 let exception_occurred pos e =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
   HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
@@ -4751,13 +4757,24 @@ let exception_occurred pos e =
     "Exception while typechecking at position %s\n%s"
     pos_str
     (Exception.to_string e);
-  add
-    (Typing.err_code Typing.ExceptionOccurred)
-    pos
-    (Printf.sprintf
-       "An exception occurred while typechecking this. Please try %s. %s"
-       (Markdown_lite.md_codify "hh restart")
-       Error_message_sentinel.please_file_a_bug_message)
+  add (Typing.err_code Typing.ExceptionOccurred) pos internal_compiler_error_msg
+
+let invariant_violation ~report_to_user ~desc pos telemetry =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.invariant_violation_bug
+    ~path:(Pos.filename pos)
+    ~pos:pos_str
+    ~desc
+    telemetry;
+  Hh_logger.error
+    "Invariant violation at position %s\n%s"
+    pos_str
+    Telemetry.(telemetry |> string_ ~key:"desc" ~value:desc |> to_string);
+  if report_to_user then
+    add
+      (Typing.err_code Typing.InvariantViolated)
+      pos
+      internal_compiler_error_msg
 
 let redundant_covariant pos msg suggest =
   add

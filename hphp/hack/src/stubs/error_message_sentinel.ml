@@ -7,4 +7,10 @@
  *
  *)
 
-let please_file_a_bug_message = "Please file a bug."
+let remediation_message =
+  Printf.sprintf
+    "Addressing other errors or restarting the typechecker with %s might resolve this error."
+    (Markdown_lite.md_codify "hh restart")
+
+let please_file_a_bug_message =
+  "If remediation attempts don't work, please file a bug report."

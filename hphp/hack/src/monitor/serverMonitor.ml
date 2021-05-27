@@ -104,7 +104,7 @@ module Sent_fds_collector = struct
         { fd_close_time; tracker; fd; m2s_sequence_number }
         :: !handed_off_fds_to_close
 
-  let collect_garbage ~sequence_receipt_high_water_mark =
+  let collect_fds ~sequence_receipt_high_water_mark =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let t_now = Unix.gettimeofday () in
     let (ready, notready) =
@@ -134,6 +134,11 @@ module Sent_fds_collector = struct
     List.iter ready ~f:(fun { fd; _ } -> ensure_fd_closed fd);
     handed_off_fds_to_close := notready;
     ()
+
+  (** This must be called in all paths where the server has died, so that the client can
+  properly see an EOF on its FD. *)
+  let collect_all_fds () =
+    collect_fds ~sequence_receipt_high_water_mark:Int.max_value
 end
 
 exception Malformed_build_id of string
@@ -176,6 +181,12 @@ struct
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
+
+  (** Use this as the only way to change server.
+  It closes all outstanding FDs. That's needed so clients know that they can give up. *)
+  let set_server env new_server =
+    Sent_fds_collector.collect_all_fds ();
+    { env with server = new_server }
 
   let msg_to_channel fd msg =
     (* This FD will be passed to a server process, so avoid using Ocaml's
@@ -233,23 +244,16 @@ struct
       Not_yet_started
     )
 
-  let kill_server_with_check = function
-    | Alive server ->
-      (* Any client FDs we own must be closed, so the clients know their server connection attempt is dead *)
-      Sent_fds_collector.collect_garbage
-        ~sequence_receipt_high_water_mark:Int.max_value;
-      SC.kill_server server
+  let kill_server_with_check (server : server_process) : unit =
+    Sent_fds_collector.collect_all_fds ();
+    match server with
+    | Alive server -> SC.kill_server server
     | _ -> ()
 
   let wait_for_server_exit_with_check server kill_signal_time =
     match server with
     | Alive server -> SC.wait_for_server_exit server kill_signal_time
     | _ -> ()
-
-  let kill_server_and_wait_for_exit env =
-    kill_server_with_check env.server;
-    let kill_signal_time = Unix.gettimeofday () in
-    wait_for_server_exit_with_check env.server kill_signal_time
 
   (* Reads current hhconfig contents from disk and returns true if the
    * version specified in there matches our currently running version. *)
@@ -278,12 +282,16 @@ struct
         env.server_start_options
         exit_status
     in
-    { env with server = new_server; retries = env.retries + 1 }
+    let env = set_server env new_server in
+    { env with retries = env.retries + 1 }
 
   (* Kill the server (if it's running) and restart it - maybe. Obeying the rules
    * of state transitions. See docs on the ServerProcess.server_process ADT for
    * state transitions. *)
   let kill_and_maybe_restart_server ?target_saved_state env exit_status =
+    (* We're going to collect all FDs right here and now. This will be done again below,
+    in [kill_server_with_check], but Informant.reinit might take too long or might throw. *)
+    Sent_fds_collector.collect_all_fds ();
     (* Ideally, all restarts should be triggered by Changed_merge_base notification
      * which generate target mini state. There are other kind of restarts too, mostly
      * related to server crashing - if we just restart and keep going, we risk
@@ -291,7 +299,10 @@ struct
      * for no reason. Re-issuing merge base query here should bring the Monitor and Server
      * understanding of current revision to be the same *)
     if Option.is_none target_saved_state then Informant.reinit env.informant;
-    kill_server_and_wait_for_exit env;
+    kill_server_with_check env.server;
+    let kill_signal_time = Unix.gettimeofday () in
+    wait_for_server_exit_with_check env.server kill_signal_time;
+
     let version_matches = is_config_version_matching env in
     if SC.is_saved_state_precomputed env.server_start_options then begin
       let reason =
@@ -317,7 +328,7 @@ struct
        * See diagram on ServerProcess.server_process docs. *)
       Hh_logger.log
         "Avoiding starting a new server because version in config no longer matches.";
-      { env with server = Died_config_changed }
+      set_server env Died_config_changed
     | (Not_yet_started, true)
     | (Alive _, true)
     | (Died_unexpectedly _, true) ->
@@ -487,7 +498,7 @@ struct
       in
       hand_off_client_connection_wrapper ~tracker env server_fd client_fd;
       server.last_request_handoff := Unix.time ();
-      { env with server = Alive server }
+      env
     | Died_unexpectedly (status, was_oom) ->
       (* Server has died; notify the client *)
       msg_to_channel client_fd (PH.Server_died { PH.status; PH.was_oom });
@@ -678,7 +689,7 @@ struct
           in
           SC.on_server_exit monitor_config;
           ServerProcessTools.check_exit_status proc_stat process monitor_config;
-          { env with server = Died_unexpectedly (proc_stat, was_oom) })
+          set_server env (Died_unexpectedly (proc_stat, was_oom)))
       | Not_yet_started
       | Died_config_changed
       | Died_unexpectedly _ ->
@@ -696,8 +707,6 @@ struct
         (None, Informant_sig.Server_dead)
     in
     (env, exit_status, server_state)
-
-  let server_not_started env = { env with server = Not_yet_started }
 
   let update_status env monitor_config =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
@@ -757,65 +766,52 @@ struct
     in
     let max_watchman_retries = 3 in
     let max_sql_retries = 3 in
-    let env =
-      match (informant_report, env.server) with
-      | (Informant_sig.Move_along, Died_config_changed) -> env
-      | (Informant_sig.Restart_server _, Died_config_changed) ->
-        Hh_logger.log "%s"
-        @@ "Ignoring Informant directed restart - waiting for next client "
-        ^ "connection to verify server version first";
-        env
-      | (Informant_sig.Restart_server target_saved_state, _) ->
-        Hh_logger.log "Informant directed server restart. Restarting server.";
-        HackEventLogger.informant_induced_restart ();
-        kill_and_maybe_restart_server ?target_saved_state env exit_status
-      | (Informant_sig.Move_along, _) ->
-        if
-          (is_watchman_failed || is_watchman_fresh_instance)
-          && env.watchman_retries < max_watchman_retries
+    match (informant_report, env.server) with
+    | (Informant_sig.Move_along, Died_config_changed) -> env
+    | (Informant_sig.Restart_server _, Died_config_changed) ->
+      Hh_logger.log "%s"
+      @@ "Ignoring Informant directed restart - waiting for next client "
+      ^ "connection to verify server version first";
+      env
+    | (Informant_sig.Restart_server target_saved_state, _) ->
+      Hh_logger.log "Informant directed server restart. Restarting server.";
+      HackEventLogger.informant_induced_restart ();
+      kill_and_maybe_restart_server ?target_saved_state env exit_status
+    | (Informant_sig.Move_along, _) ->
+      if
+        (is_watchman_failed || is_watchman_fresh_instance)
+        && env.watchman_retries < max_watchman_retries
+      then (
+        Hh_logger.log
+          "Watchman died. Restarting hh_server (attempt: %d)"
+          (env.watchman_retries + 1);
+        let env = { env with watchman_retries = env.watchman_retries + 1 } in
+        set_server env Not_yet_started
+      ) else if is_decl_heap_elems_bug then (
+        Hh_logger.log "hh_server died due to Decl_heap_elems_bug. Restarting";
+        set_server env Not_yet_started
+      ) else if is_worker_error then (
+        Hh_logger.log "hh_server died due to worker error. Restarting";
+        set_server env Not_yet_started
+      ) else if is_config_changed then (
+        Hh_logger.log "hh_server died from hh config change. Restarting";
+        set_server env Not_yet_started
+      ) else if is_heap_stale then (
+        Hh_logger.log
+          "Several large rebases caused shared heap to be stale. Restarting";
+        set_server env Not_yet_started
+      ) else if is_big_rebase then (
+        Hh_logger.log "Server exited because of big rebase. Restarting";
+        set_server env Not_yet_started
+      ) else if is_sql_assertion_failure && env.sql_retries < max_sql_retries
         then (
-          Hh_logger.log
-            "Watchman died. Restarting hh_server (attempt: %d)"
-            (env.watchman_retries + 1);
-          let env = { env with watchman_retries = env.watchman_retries + 1 } in
-          server_not_started env
-        ) else if is_decl_heap_elems_bug then (
-          Hh_logger.log "hh_server died due to Decl_heap_elems_bug. Restarting";
-          server_not_started env
-        ) else if is_worker_error then (
-          Hh_logger.log "hh_server died due to worker error. Restarting";
-          server_not_started env
-        ) else if is_config_changed then (
-          Hh_logger.log "hh_server died from hh config change. Restarting";
-          server_not_started env
-        ) else if is_heap_stale then (
-          Hh_logger.log
-            "Several large rebases caused shared heap to be stale. Restarting";
-          server_not_started env
-        ) else if is_big_rebase then (
-          Hh_logger.log "Server exited because of big rebase. Restarting";
-          server_not_started env
-        ) else if is_sql_assertion_failure && env.sql_retries < max_sql_retries
-          then (
-          Hh_logger.log
-            "Sql failed. Restarting hh_server in fresh mode (attempt: %d)"
-            (env.sql_retries + 1);
-          let env = { env with sql_retries = env.sql_retries + 1 } in
-          server_not_started env
-        ) else
-          env
-    in
-    (* There has been a wide variety of ways we got here. But no matter how we
-    did, the bottom line is that if the server isn't alive and we have any FDs
-    waiting for receipt-from-server then we must close them. *)
-    begin
-      match env.server with
-      | Alive _ -> ()
-      | _ ->
-        Sent_fds_collector.collect_garbage
-          ~sequence_receipt_high_water_mark:Int.max_value
-    end;
-    env
+        Hh_logger.log
+          "Sql failed. Restarting hh_server in fresh mode (attempt: %d)"
+          (env.sql_retries + 1);
+        let env = { env with sql_retries = env.sql_retries + 1 } in
+        set_server env Not_yet_started
+      ) else
+        env
 
   let rec check_and_run_loop
       ?(consecutive_throws = 0) env monitor_config (socket : Unix.file_descr) =
@@ -872,9 +868,7 @@ struct
     in
     let env = maybe_push_purgatory_clients env in
     (* The first sequence number we send is 1; hence, the default "0" will be a no-op *)
-    let () =
-      Sent_fds_collector.collect_garbage ~sequence_receipt_high_water_mark
-    in
+    let () = Sent_fds_collector.collect_fds ~sequence_receipt_high_water_mark in
     let has_client = sleep_and_check socket in
     let env = update_status env monitor_config in
     if not has_client then

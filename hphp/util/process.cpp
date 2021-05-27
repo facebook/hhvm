@@ -684,7 +684,7 @@ pid_t Process::ForkAndExecve(
     return child;
   }
 
-  char failed_call_buf[16];
+  char failed_call_buf[17]; // 16 + trailing null
   int saved_errno;
   if (sscanf(buf, "%16s %d", failed_call_buf, &saved_errno) != 2) {
     return -999;

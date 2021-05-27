@@ -2483,28 +2483,13 @@ let method_variance pos =
 
 let explain_constraint ~(use_pos : Pos.t) ~definition_pos ~param_name reasons =
   let inst_msg = "Some type constraint(s) here are violated" in
-  (* There may be multiple constraints instantiated at one spot; avoid
-   * duplicating the instantiation message *)
-  let msgl =
-    match reasons with
-    | [] -> []
-    | claim :: reasons ->
-      let (p, msg) = claim in
-      if
-        String.equal msg inst_msg
-        && Pos_or_decl.equal p (Pos_or_decl.of_raw_pos use_pos)
-      then
-        reasons
-      else
-        claim :: reasons
-  in
   let name = strip_ns param_name in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
     (use_pos, inst_msg)
     ( ( definition_pos,
         Markdown_lite.md_codify name ^ " is a constrained type parameter" )
-    :: msgl )
+    :: reasons )
 
 let explain_where_constraint ~in_class ~use_pos ~definition_pos reasons =
   let callsite_ty =

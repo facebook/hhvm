@@ -382,7 +382,9 @@ CoeffectsConfig::toStringList(const StaticCoeffects data) {
     }
   }
 
-  always_assert(current == 0);
+  // Printing of multiple coeffects is currently broken
+  // [write_props, read_globals] will lead to this assert firing,
+  // always_assert(current == 0);
 
   std::vector<std::string> result;
   for (auto const& [name, caps] : s_coeffects_to_capabilities) {

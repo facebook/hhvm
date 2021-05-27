@@ -947,15 +947,3 @@ let compare : type phase. phase t_ -> phase t_ -> int =
     Pos_or_decl.compare (to_raw_pos r1) (to_raw_pos r2)
 
 let none = Rnone
-
-(*****************************************************************************)
-(* When the subtyping fails because of a constraint. *)
-(*****************************************************************************)
-
-let explain_generic_constraint p_inst reason name messages =
-  let pos = to_pos reason in
-  Errors.explain_constraint
-    ~use_pos:p_inst
-    ~definition_pos:pos
-    ~param_name:name
-    messages

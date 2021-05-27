@@ -142,9 +142,9 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
         in
         iter2_shortest
           begin
-            fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
+            fun { tp_name = (param_pos, param_name); tp_constraints = cstrl; _ }
+                ty ->
             List.iter cstrl (fun (ck, cstr_ty) ->
-                let r = Reason.Rwitness_from_decl p in
                 let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
                 let (_ : Typing_env_types.env) =
                   TGenConstraint.check_constraint
@@ -153,7 +153,11 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
                     ty
                     ~cstr_ty
                     (fun ?code:_ reasons ->
-                      Reason.explain_generic_constraint hint_pos r x reasons)
+                      Errors.explain_constraint
+                        ~use_pos:hint_pos
+                        ~definition_pos:param_pos
+                        ~param_name
+                        reasons)
                 in
                 ())
           end

@@ -603,11 +603,9 @@ impl OwnedSlab {
     /// was initialized by slab APIs (e.g., one cloned from a slice returned by
     /// `OwnedSlab::as_slice` or `SlabReader::as_slice`).
     pub unsafe fn from_vec(words: Vec<usize>) -> Result<Self, SlabIntegrityError> {
-        let mut slab =
+        let slab =
             std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words.into_boxed_slice());
-        slab.check_initialized()?;
-        slab.rebase_to(slab.current_address());
-        Ok(Self(slab))
+        Self::from_slab(slab)
     }
 
     /// Copy the given slice into a newly allocated OwnedSlab.
@@ -618,7 +616,11 @@ impl OwnedSlab {
     /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`,
     /// `SlabReader::as_slice`).
     pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
-        let mut slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
+        let slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
+        Self::from_slab(slab)
+    }
+
+    unsafe fn from_slab(mut slab: Box<Slab<'static>>) -> Result<Self, SlabIntegrityError> {
         slab.check_initialized()?;
         slab.rebase_to(slab.current_address());
         Ok(Self(slab))

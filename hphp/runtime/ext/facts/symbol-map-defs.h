@@ -87,6 +87,11 @@ template <typename S> bool TypeDecl<S>::operator==(const TypeDecl<S>& o) const {
 }
 
 template <typename S>
+bool MethodDecl<S>::operator==(const MethodDecl<S>& o) const {
+  return m_type == o.m_type && m_method == o.m_method;
+}
+
+template <typename S>
 SymbolMap<S>::SymbolMap(
     folly::fs::path root, DBData dbData, SQLite::OpenMode dbMode)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
@@ -547,6 +552,116 @@ SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(const S& attr) {
 }
 
 template <typename S>
+std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getAttributesOfMethod(
+    Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Function> method) {
+  auto path = getOnlyPath(type);
+  if (path == nullptr) {
+    return {};
+  }
+  using AttrVec = std::vector<Symbol<S, SymKind::Type>>;
+  auto makeVec = [&](auto const& attrs) -> AttrVec {
+    AttrVec attrVec;
+    attrVec.reserve(attrs.size());
+    for (auto const& attr : attrs) {
+      attrVec.emplace_back(attr);
+    }
+    return attrVec;
+  };
+  return readOrUpdate<AttrVec>(
+      [&](const Data& data) -> std::optional<AttrVec> {
+        auto const* attrs =
+            data.m_methodAttrs.getAttributes({{type, path}, method});
+        if (!attrs) {
+          return std::nullopt;
+        }
+        return makeVec(*attrs);
+      },
+      [&](AutoloadDB& db,
+          SQLiteTxn& txn) -> std::vector<Symbol<S, SymKind::Type>> {
+        auto const attrStrs = db.getAttributesOfMethod(
+            txn,
+            type.slice(),
+            method.slice(),
+            folly::fs::path{std::string{path.slice()}});
+        std::vector<Symbol<S, SymKind::Type>> attrs;
+        attrs.reserve(attrStrs.size());
+        for (auto const& attrStr : attrStrs) {
+          attrs.emplace_back(attrStr);
+        }
+        return attrs;
+      },
+      [&](Data& data,
+          std::vector<Symbol<S, SymKind::Type>> attrsFromDB) -> AttrVec {
+        return makeVec(data.m_methodAttrs.getAttributes(
+            {{type, path}, method}, std::move(attrsFromDB)));
+      });
+}
+
+template <typename S>
+std::vector<Symbol<S, SymKind::Type>>
+SymbolMap<S>::getAttributesOfMethod(const S& type, const S& method) {
+  return getAttributesOfMethod(
+      Symbol<S, SymKind::Type>{type}, Symbol<S, SymKind::Function>{method});
+}
+
+template <typename S>
+std::vector<MethodDecl<S>>
+SymbolMap<S>::getMethodsWithAttribute(Symbol<S, SymKind::Type> attr) {
+  using MethodVec = std::vector<MethodDecl<S>>;
+  auto makeVec = [](auto&& methods) -> MethodVec {
+    MethodVec methodVec;
+    methodVec.reserve(methods.size());
+    for (auto&& method : std::move(methods)) {
+      methodVec.push_back(std::move(method));
+    }
+    return methodVec;
+  };
+  auto methods = readOrUpdate<MethodVec>(
+      [&](const Data& data) -> std::optional<MethodVec> {
+        auto const* attrs = data.m_methodAttrs.getKeysWithAttribute(attr);
+        if (!attrs) {
+          return std::nullopt;
+        }
+        return makeVec(*attrs);
+      },
+      [&](AutoloadDB& db, SQLiteTxn& txn) -> MethodVec {
+        auto const dbMethodDecls =
+            db.getMethodsWithAttribute(txn, attr.slice());
+        MethodVec methodDecls;
+        methodDecls.reserve(dbMethodDecls.size());
+        for (auto const& [type, method, path] : dbMethodDecls) {
+          methodDecls.push_back(MethodDecl<S>{
+              .m_type =
+                  TypeDecl<S>{
+                      .m_name = Symbol<S, SymKind::Type>{type},
+                      .m_path = Path<S>{path}},
+              .m_method = Symbol<S, SymKind::Function>{method}});
+        }
+        return methodDecls;
+      },
+      [&](Data& data, MethodVec methodsFromDB) -> MethodVec {
+        return makeVec(data.m_methodAttrs.getKeysWithAttribute(
+            attr, std::move(methodsFromDB)));
+      });
+  // Remove types that are duplicate-defined or missing
+  methods.erase(
+      std::remove_if(
+          methods.begin(),
+          methods.end(),
+          [this](const MethodDecl<S>& method) {
+            return getOnlyPath(method.m_type.m_name) != method.m_type.m_path;
+          }),
+      methods.end());
+  return methods;
+}
+
+template <typename S>
+std::vector<MethodDecl<S>>
+SymbolMap<S>::getMethodsWithAttribute(const S& attr) {
+  return getMethodsWithAttribute(Symbol<S, SymKind::Type>{attr});
+}
+
+template <typename S>
 std::vector<folly::dynamic> SymbolMap<S>::getTypeAttributeArgs(
     Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attr) {
   auto path = getOnlyPath(type);
@@ -578,6 +693,44 @@ std::vector<folly::dynamic>
 SymbolMap<S>::getTypeAttributeArgs(const S& type, const S& attribute) {
   return getTypeAttributeArgs(
       Symbol<S, SymKind::Type>{type}, Symbol<S, SymKind::Type>{attribute});
+}
+
+template <typename S>
+std::vector<folly::dynamic> SymbolMap<S>::getMethodAttributeArgs(
+    Symbol<S, SymKind::Type> type,
+    Symbol<S, SymKind::Function> method,
+    Symbol<S, SymKind::Type> attr) {
+  auto path = getOnlyPath(type);
+  if (path == nullptr) {
+    return {};
+  }
+  using ArgVec = std::vector<folly::dynamic>;
+  return readOrUpdate<ArgVec>(
+      [&](const Data& data) -> std::optional<ArgVec> {
+        auto const* args =
+            data.m_methodAttrs.getAttributeArgs({{type, path}, method}, attr);
+        if (!args) {
+          return std::nullopt;
+        }
+        return *args;
+      },
+      [&](AutoloadDB& db, SQLiteTxn& txn) -> ArgVec {
+        return db.getMethodAttributeArgs(
+            txn, type.slice(), method.slice(), path.slice(), attr.slice());
+      },
+      [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
+        return data.m_methodAttrs.getAttributeArgs(
+            {{type, path}, method}, attr, std::move(argsFromDB));
+      });
+}
+
+template <typename S>
+std::vector<folly::dynamic> SymbolMap<S>::getMethodAttributeArgs(
+    const S& type, const S& method, const S& attribute) {
+  return getMethodAttributeArgs(
+      Symbol<S, SymKind::Type>{type},
+      Symbol<S, SymKind::Function>{method},
+      Symbol<S, SymKind::Type>{attribute});
 }
 
 template <typename S>
@@ -964,6 +1117,31 @@ void SymbolMap<S>::updateDBPath(
         }
       }
     }
+    for (auto const& methodDetails : type.m_methods) {
+      for (auto const& attribute : methodDetails.m_attributes) {
+        if (attribute.m_args.empty()) {
+          db.insertMethodAttribute(
+              txn,
+              path,
+              type.m_name,
+              methodDetails.m_name,
+              attribute.m_name,
+              std::nullopt,
+              nullptr);
+        } else {
+          for (auto i = 0; i < attribute.m_args.size(); ++i) {
+            db.insertMethodAttribute(
+                txn,
+                path,
+                type.m_name,
+                methodDetails.m_name,
+                attribute.m_name,
+                i,
+                &attribute.m_args[i]);
+          }
+        }
+      }
+    }
   }
 
   for (auto const& function : facts.m_functions) {
@@ -1131,6 +1309,13 @@ void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
         path,
         DeriveKind::RequireImplements,
         std::move(type.m_requireImplements));
+
+    for (auto& [method, attributes] : type.m_methods) {
+      m_methodAttrs.setAttributes(
+          {.m_type = {.m_name = typeName, .m_path = path},
+           .m_method = Symbol<S, SymKind::Function>{method}},
+          std::move(attributes));
+    }
   }
 
   typename PathToSymbolsMap<S, SymKind::Function>::SymbolSet functions;
@@ -1199,6 +1384,15 @@ template <typename S> struct hash<typename HPHP::Facts::TypeDecl<S>> {
         std::hash<HPHP::Facts::Symbol<S, HPHP::Facts::SymKind::Type>>{}(
             d.m_name),
         std::hash<HPHP::Facts::Path<S>>{}(d.m_path));
+  }
+};
+
+template <typename S> struct hash<typename HPHP::Facts::MethodDecl<S>> {
+  size_t operator()(const typename HPHP::Facts::MethodDecl<S>& d) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::TypeDecl<S>>{}(d.m_type),
+        std::hash<HPHP::Facts::Symbol<S, HPHP::Facts::SymKind::Function>>{}(
+            d.m_method));
   }
 };
 

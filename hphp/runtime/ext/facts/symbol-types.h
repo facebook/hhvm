@@ -86,6 +86,10 @@ template <typename S> struct Path {
     return m_path == s;
   }
 
+  template <typename T> bool operator!=(const T& o) const noexcept {
+    return !(operator==(o));
+  }
+
   std::string_view slice() const noexcept {
     return m_path.slice();
   }

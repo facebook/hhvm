@@ -66,6 +66,16 @@ template <typename S> struct TypeDecl {
   getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
+template <typename S> struct MethodDecl {
+  TypeDecl<S> m_type;
+  Symbol<S, SymKind::Function> m_method;
+
+  bool operator==(const MethodDecl<S>& o) const;
+
+  std::vector<Symbol<S, SymKind::Type>>
+  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
+};
+
 /**
  * Stores and updates one PathToSymbolsMap for each kind of symbol.
  *
@@ -203,6 +213,21 @@ template <typename S> struct SymbolMap {
   getTypesAndTypeAliasesWithAttribute(const S& attr);
 
   /**
+   * Return the attributes of a method
+   */
+  std::vector<Symbol<S, SymKind::Type>> getAttributesOfMethod(
+      Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Function> method);
+  std::vector<Symbol<S, SymKind::Type>>
+  getAttributesOfMethod(const S& type, const S& method);
+
+  /**
+   * Return the methods with a given attribute
+   */
+  std::vector<MethodDecl<S>>
+  getMethodsWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<MethodDecl<S>> getMethodsWithAttribute(const S& attr);
+
+  /**
    * Return the argument at the given position of a given type with a given
    * attribute.
    *
@@ -230,6 +255,13 @@ template <typename S> struct SymbolMap {
       Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
   std::vector<folly::dynamic>
   getTypeAttributeArgs(const S& type, const S& attribute);
+
+  std::vector<folly::dynamic> getMethodAttributeArgs(
+      Symbol<S, SymKind::Type> type,
+      Symbol<S, SymKind::Function> method,
+      Symbol<S, SymKind::Type> attribute);
+  std::vector<folly::dynamic>
+  getMethodAttributeArgs(const S& type, const S& method, const S& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -421,6 +453,11 @@ template <typename S> struct SymbolMap {
      * Maps between types and the attributes that decorate them.
      */
     AttributeMap<S, TypeDecl<S>> m_typeAttrs;
+
+    /**
+     * Maps between methods and the attributes that decorate them.
+     */
+    AttributeMap<S, MethodDecl<S>> m_methodAttrs;
 
     /**
      * 40-byte hex strings representing the last-known SHA1 checksums of

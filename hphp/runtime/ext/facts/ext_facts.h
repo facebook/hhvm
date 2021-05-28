@@ -26,13 +26,21 @@ Array HHVM_FUNCTION(
     facts_supertypes, const String& derivedType, const Variant& filters);
 Array HHVM_FUNCTION(facts_types_with_attribute, const String& attr);
 Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const String& attr);
+Array HHVM_FUNCTION(facts_methods_with_attribute, const String& attr);
 Array HHVM_FUNCTION(facts_type_attributes, const String& type);
 Array HHVM_FUNCTION(facts_type_alias_attributes, const String& type);
+Array HHVM_FUNCTION(
+    facts_method_attributes, const String& type, const String& method);
 Array HHVM_FUNCTION(
     facts_type_attribute_parameters, const String& type, const String& attr);
 Array HHVM_FUNCTION(
     facts_type_alias_attribute_parameters,
     const String& typeAlias,
+    const String& attr);
+Array HHVM_FUNCTION(
+    facts_method_attribute_parameters,
+    const String& type,
+    const String& method,
     const String& attr);
 
 Array HHVM_FUNCTION(facts_all_types);

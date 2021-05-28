@@ -110,11 +110,11 @@ function type_name(string $type_name): ?string;
  * class, interface, or trait.
  *
  * If the given type doesn't have a unique definition or isn't a
- * classname<mixed>, return `null`.
+ * classname<nonnull>, return `null`.
  */
 <<__Native>>
 function kind(
-  /* classname<mixed> */ string $type,
+  /* classname<nonnull> */ string $type,
 ): /* ?TypeKind */ mixed;
 
 /**
@@ -122,7 +122,7 @@ function kind(
  */
 <<__Native>>
 function is_abstract(
-  /* classname<mixed> */ string $type,
+  /* classname<nonnull> */ string $type,
 ): bool;
 
 /**
@@ -130,7 +130,7 @@ function is_abstract(
  */
 <<__Native>>
 function is_final(
-  /* classname<mixed> */ string $type,
+  /* classname<nonnull> */ string $type,
 ): bool;
 
 /**
@@ -173,7 +173,7 @@ function transitive_subtypes(
  */
 <<__Native>>
 function supertypes(
-  /* classname<mixed> */ string $derived_type,
+  /* classname<nonnull> */ string $derived_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
 ): vec<string>;
 
@@ -185,7 +185,7 @@ function supertypes(
 <<__Native>>
 function types_with_attribute(
   /* classname<\HH\ClassAttribute> */ string $attribute,
-): vec<string>; /* vec<classname<mixed>> */
+): vec<string>; /* vec<classname<nonnull>> */
 
 /**
  * Get all type aliases matching the given filters.
@@ -198,13 +198,23 @@ function type_aliases_with_attribute(
 ): vec<string>;
 
 /**
+ * Get all methods matching the given filters.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function methods_with_attribute(
+  /* classname<\HH\MethodAttribute> */ string $attribute,
+): vec<string>; /* vec<(classname<nonnull>, string)> */
+
+/**
  * Get all attributes on the given type.
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
 function type_attributes(
-  /* classname<mixed> */ string $type,
+  /* classname<nonnull> */ string $type,
 ): vec<string>; /* vec<classname<\HH\ClassAttribute>> */
 
 /**
@@ -218,6 +228,19 @@ function type_alias_attributes(
 ): vec<string>; /* vec<classname<\HH\TypeAliasAttribute>> */
 
 /**
+ * Get all attributes on the given method.
+ *
+ * Return an empty vec if the method doesn't exist.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function method_attributes(
+  /* classname<nonnull> */ string $type,
+  string $method,
+): vec<string>; /* vec<classname<\HH\MethodAttribute>> */
+
+/**
  * Get all parameters for the given attribute on the given type.
  *
  * Return an empty vec if the type doesn't exist or doesn't have the given
@@ -227,7 +250,7 @@ function type_alias_attributes(
  */
 <<__Native>>
 function type_attribute_parameters(
-  /* classname<mixed> */ string $type,
+  /* classname<nonnull> */ string $type,
   /* classname<\HH\ClassAttribute> */ string $attribute,
 ): vec<dynamic>;
 
@@ -246,6 +269,21 @@ function type_alias_attribute_parameters(
 ): vec<dynamic>;
 
 /**
+ * Get all parameters for the given attribute on the given method.
+ *
+ * Return an empty vec if the method doesn't exist or doesn't have the
+ * given attribute.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function method_attribute_parameters(
+  /* classname<nonnull> */ string $type,
+  string $method,
+  /* classname<\HH\MethodAttribute> */ string $attribute,
+): vec<dynamic>;
+
+/**
  * Return all symbols defined in the repo, as a dict mapping each symbol
  * name to the path where the symbol lives in the repo.
  *
@@ -253,7 +291,7 @@ function type_alias_attribute_parameters(
  * symbol will be chosen in an unspecified manner.
  */
 <<__Native>>
-function all_types(): dict<classname<mixed>, string>;
+function all_types(): dict<classname<nonnull>, string>;
 <<__Native>>
 function all_functions(): dict<string, string>;
 <<__Native>>

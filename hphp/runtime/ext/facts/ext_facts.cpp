@@ -382,15 +382,23 @@ struct Facts final : Extension {
     HHVM_NAMED_FE(
         HH\\Facts\\type_aliases_with_attribute,
         HHVM_FN(facts_type_aliases_with_attribute));
+    HHVM_NAMED_FE(
+        HH\\Facts\\methods_with_attribute,
+        HHVM_FN(facts_methods_with_attribute));
     HHVM_NAMED_FE(HH\\Facts\\type_attributes, HHVM_FN(facts_type_attributes));
     HHVM_NAMED_FE(
         HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));
+    HHVM_NAMED_FE(
+        HH\\Facts\\method_attributes, HHVM_FN(facts_method_attributes));
     HHVM_NAMED_FE(
         HH\\Facts\\type_attribute_parameters,
         HHVM_FN(facts_type_attribute_parameters));
     HHVM_NAMED_FE(
         HH\\Facts\\type_alias_attribute_parameters,
         HHVM_FN(facts_type_alias_attribute_parameters));
+    HHVM_NAMED_FE(
+        HH\\Facts\\method_attribute_parameters,
+        HHVM_FN(facts_method_attribute_parameters));
     HHVM_NAMED_FE(HH\\Facts\\all_types, HHVM_FN(facts_all_types));
     HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
     HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
@@ -406,7 +414,8 @@ struct Facts final : Extension {
     }
 
     if (RuntimeOption::AutoloadDBPath.empty()) {
-      FTRACE(1, "Autoload.DB.Path was empty, not enabling native autoloader.\n");
+      FTRACE(
+          1, "Autoload.DB.Path was empty, not enabling native autoloader.\n");
       return;
     }
 
@@ -771,12 +780,21 @@ Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const String& attr) {
   return Facts::getFactsOrThrow().getTypeAliasesWithAttribute(attr);
 }
 
+Array HHVM_FUNCTION(facts_methods_with_attribute, const String& attr) {
+  return Facts::getFactsOrThrow().getMethodsWithAttribute(attr);
+}
+
 Array HHVM_FUNCTION(facts_type_attributes, const String& type) {
   return Facts::getFactsOrThrow().getTypeAttributes(type);
 }
 
 Array HHVM_FUNCTION(facts_type_alias_attributes, const String& typeAlias) {
   return Facts::getFactsOrThrow().getTypeAttributes(typeAlias);
+}
+
+Array HHVM_FUNCTION(
+    facts_method_attributes, const String& type, const String& method) {
+  return Facts::getFactsOrThrow().getMethodAttributes(type, method);
 }
 
 Array HHVM_FUNCTION(
@@ -789,6 +807,14 @@ Array HHVM_FUNCTION(
     const String& type,
     const String& attr) {
   return Facts::getFactsOrThrow().getTypeAttrArgs(type, attr);
+}
+
+Array HHVM_FUNCTION(
+    facts_method_attribute_parameters,
+    const String& type,
+    const String& method,
+    const String& attr) {
+  return Facts::getFactsOrThrow().getMethodAttrArgs(type, method, attr);
 }
 
 Array HHVM_FUNCTION(facts_all_types) {

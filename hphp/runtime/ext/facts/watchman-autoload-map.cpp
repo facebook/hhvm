@@ -444,6 +444,22 @@ Array makeVecOfString(StringPtrIterable&& vector, Predicate&& predicate) {
   return ret.toArray();
 }
 
+/**
+ * Convert a C++ StringData structure into a Hack `vec<(string, string)>`.
+ */
+Array makeVecOfStringString(const std::vector<MethodDecl<StringData>>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto const& [typeDecl, method] : vector) {
+    auto stringStringTuple = VecInit{2};
+    stringStringTuple.append(
+        make_tv<KindOfPersistentString>(typeDecl.m_name.get()));
+    stringStringTuple.append(make_tv<KindOfPersistentString>(method.get()));
+
+    ret.append(stringStringTuple.toArray());
+  }
+  return ret.toArray();
+}
+
 TypedValue tvFromDynamic(folly::dynamic&& dy) {
   if (dy.isBool()) {
     return make_tv<KindOfBoolean>(std::move(dy).getBool());
@@ -1066,14 +1082,30 @@ Array WatchmanAutoloadMap::getTypeAliasesWithAttribute(const String& attr) {
       });
 }
 
+Array WatchmanAutoloadMap::getMethodsWithAttribute(const String& attr) {
+  return makeVecOfStringString(m_map.getMethodsWithAttribute(*attr.get()));
+}
+
 Array WatchmanAutoloadMap::getTypeAttributes(const String& type) {
   return makeVecOfString(m_map.getAttributesOfType(*type.get()));
+}
+
+Array WatchmanAutoloadMap::getMethodAttributes(
+    const String& type, const String& method) {
+  return makeVecOfString(
+      m_map.getAttributesOfMethod(*type.get(), *method.get()));
 }
 
 Array WatchmanAutoloadMap::getTypeAttrArgs(
     const String& type, const String& attribute) {
   return makeVecOfDynamic(
       m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
+}
+
+Array WatchmanAutoloadMap::getMethodAttrArgs(
+    const String& type, const String& method, const String& attribute) {
+  return makeVecOfDynamic(m_map.getMethodAttributeArgs(
+      *type.get(), *method.get(), *attribute.get()));
 }
 
 Array WatchmanAutoloadMap::getAllTypes() {

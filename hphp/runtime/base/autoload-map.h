@@ -197,17 +197,27 @@ struct FactsStore : public AutoloadMap {
   /**
    * Return all types decorated with the given attribute.
    */
-  virtual Array getTypesWithAttribute(const String& type) = 0;
+  virtual Array getTypesWithAttribute(const String& attr) = 0;
 
   /**
    * Return all type aliases decorated with the given attribute.
    */
-  virtual Array getTypeAliasesWithAttribute(const String& type) = 0;
+  virtual Array getTypeAliasesWithAttribute(const String& attr) = 0;
+
+  /**
+   * Return all methods decorated with the given attribute.
+   */
+  virtual Array getMethodsWithAttribute(const String& attr) = 0;
 
   /**
    * Return all attributes decorating the given type.
    */
   virtual Array getTypeAttributes(const String& type) = 0;
+
+  /**
+   * Return all attributes decorating the given method.
+   */
+  virtual Array getMethodAttributes(const String& type, const String& method) = 0;
 
   /**
    * Return the arguments associated with the given type and attribute, as a
@@ -216,6 +226,15 @@ struct FactsStore : public AutoloadMap {
    * If the given type does not have the given attribute, return an empty vec.
    */
   virtual Array getTypeAttrArgs(const String& type, const String& attr) = 0;
+
+  /**
+   * Return the arguments associated with the given method and attribute, as a
+   * vec.
+   *
+   * If the given method does not have the given attribute, return an empty vec.
+   */
+  virtual Array getMethodAttrArgs(
+      const String& type, const String& method, const String& attr) = 0;
 
   /**
    * Return all symbols defined in the repo, as a dict mapping each symbol

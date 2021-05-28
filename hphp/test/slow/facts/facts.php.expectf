@@ -62,10 +62,14 @@ Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
 Attributes of AppleThenCarrot: {"TwoArgAttr":["apple","carrot"]}
 Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
 Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
+Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
+Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
 
 Getting types with attribute
 Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
+Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
+Methods decorated with TwoArgMethodAttr: ["ClassWithMethodAttrs::methodWithTwoArgAttr"]
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
@@ -102,6 +106,9 @@ BaseClassForAttributeFiltering => attribute-classes.inc
 C1 => types-with-kinds.inc
   Abstract? false
   Final? false
+ClassWithMethodAttrs => attribute-classes.inc
+  Abstract? false
+  Final? false
 ClassWithTwoAttrs => attribute-classes.inc
   Abstract? false
   Final? false
@@ -129,6 +136,9 @@ IimplementsIRequireExtendsBaseClass => derived-class.inc
 NoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+NoArgMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 SomeEnum => base-class.inc
   Abstract? false
   Final? false
@@ -153,6 +163,9 @@ TRequireImplementsIBase => derived-class.inc
 TwoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+TwoArgMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 TypeAliasAttr => type_aliases.inc
   Abstract? false
   Final? false
@@ -164,9 +177,11 @@ Getting all functions
 facts => facts.php
 jsonify_arr => facts.php
 jsonify_filters => facts.php
+print_attr_methods => facts.php
 print_attr_type_aliases => facts.php
 print_attr_types => facts.php
 print_kind => facts.php
+print_method_attrs => facts.php
 print_num_symbols => facts.php
 print_subtypes => facts.php
 print_supertypes => facts.php
@@ -246,10 +261,14 @@ Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
 Attributes of AppleThenCarrot: {"TwoArgAttr":["apple","carrot"]}
 Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
 Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
+Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
+Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
 
 Getting types with attribute
 Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
+Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
+Methods decorated with TwoArgMethodAttr: ["ClassWithMethodAttrs::methodWithTwoArgAttr"]
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
@@ -286,6 +305,9 @@ BaseClassForAttributeFiltering => attribute-classes.inc
 C1 => types-with-kinds.inc
   Abstract? false
   Final? false
+ClassWithMethodAttrs => attribute-classes.inc
+  Abstract? false
+  Final? false
 ClassWithTwoAttrs => attribute-classes.inc
   Abstract? false
   Final? false
@@ -313,6 +335,9 @@ IimplementsIRequireExtendsBaseClass => derived-class.inc
 NoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+NoArgMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 SomeEnum => base-class.inc
   Abstract? false
   Final? false
@@ -337,6 +362,9 @@ TRequireImplementsIBase => derived-class.inc
 TwoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+TwoArgMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 TypeAliasAttr => type_aliases.inc
   Abstract? false
   Final? false
@@ -348,9 +376,11 @@ Getting all functions
 facts => facts.php
 jsonify_arr => facts.php
 jsonify_filters => facts.php
+print_attr_methods => facts.php
 print_attr_type_aliases => facts.php
 print_attr_types => facts.php
 print_kind => facts.php
+print_method_attrs => facts.php
 print_num_symbols => facts.php
 print_subtypes => facts.php
 print_supertypes => facts.php

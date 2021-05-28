@@ -123,8 +123,12 @@ struct WatchmanAutoloadMap final
 
   Array getTypesWithAttribute(const String& attr) override;
   Array getTypeAliasesWithAttribute(const String& attr) override;
+  Array getMethodsWithAttribute(const String& attr) override;
   Array getTypeAttributes(const String& type) override;
+  Array getMethodAttributes(const String& type, const String& method) override;
   Array getTypeAttrArgs(const String& type, const String& attr) override;
+  Array getMethodAttrArgs(
+      const String& type, const String& method, const String& attr) override;
 
   Array getAllTypes() override;
   Array getAllFunctions() override;

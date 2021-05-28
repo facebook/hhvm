@@ -129,6 +129,19 @@ function print_type_alias_attrs(
   print "Attributes of $type_alias: $attrs_json\n";
 }
 
+function print_method_attrs(
+  classname<nonnull> $type,
+  string $method,
+): void {
+  $attrs = dict[];
+  foreach (HH\Facts\method_attributes($type, $method) as $attr) {
+    $attrs[$attr] = HH\Facts\method_attribute_parameters($type, $method, $attr);
+  }
+  \ksort(inout $attrs);
+  $attrs_json = \json_encode($attrs);
+  print "Attributes of $type::$method: $attrs_json\n";
+}
+
 function print_attr_types(
   classname<\HH\ClassAttribute> $attr,
 ): void {
@@ -145,6 +158,19 @@ function print_attr_type_aliases(
   \sort(inout $type_aliases);
   $type_aliases_json = \json_encode($type_aliases);
   print "Type aliases decorated with $attr: $type_aliases_json\n";
+}
+
+function print_attr_methods(
+  classname<\HH\MethodAttribute> $attr,
+): void {
+  $method_tuples = HH\Facts\methods_with_attribute($attr);
+  $methods = vec[];
+  foreach ($method_tuples as list($type, $method)) {
+    $methods[] = "$type::$method";
+  }
+  \sort(inout $methods);
+  $methods_json = \json_encode($methods);
+  print "Methods decorated with $attr: $methods_json\n";
 }
 
 function print_num_symbols(
@@ -407,10 +433,14 @@ function facts(): void {
   print_type_attrs(AppleThenCarrot::class);
   print_type_attrs(ClassWithTwoAttrs::class);
   print_type_alias_attrs(TypeAliasWithAttr::class);
+  print_method_attrs(ClassWithMethodAttrs::class, 'methodWithNoArgAttr');
+  print_method_attrs(ClassWithMethodAttrs::class, 'methodWithTwoArgAttr');
 
   print "\nGetting types with attribute\n";
   print_attr_types(NoArgAttr::class);
   print_attr_types(TwoArgAttr::class);
+  print_attr_methods(NoArgMethodAttr::class);
+  print_attr_methods(TwoArgMethodAttr::class);
 
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);

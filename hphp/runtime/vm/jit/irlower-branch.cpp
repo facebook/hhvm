@@ -352,8 +352,13 @@ void cgLdSSwitchDestFast(IRLS& env, const IRInstruction* inst) {
   // memory, and we're putting bindaddrs in said heap memory.
   new (table) SSwitchMap(extra->numCases);
 
+  std::unordered_map<const StringData*,TCA> map;
   for (int64_t i = 0; i < extra->numCases; ++i) {
-    table->add(extra->cases[i].str, nullptr);
+    map[extra->cases[i].str] = nullptr;
+  }
+  table->addFrom(map.begin(), map.end());
+
+  for (int64_t i = 0; i < extra->numCases; ++i) {
     auto const addr = table->find(extra->cases[i].str);
 
     // The addresses we're passing to bindaddr{} here live in SSwitchMap's heap

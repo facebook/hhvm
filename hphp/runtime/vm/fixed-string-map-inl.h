@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,16 +28,40 @@ namespace FSM {
 
 extern const StringData* null_key;
 
+inline int32_t hashImpl(const StringData* sd, uint32_t c1, uint32_t c2) {
+  auto const intval = reinterpret_cast<int64_t>(sd);
+  auto const hash = hash_int64(intval);
+  return (hash >> c1) ^ (hash >> c2);
+}
+
+inline int32_t hash(const StringData* sd, uint32_t consts, uint32_t size) {
+  assertx(consts);
+  auto const c1 = consts & ((1 << size) - 1);
+  auto const c2 = consts >> size;
+  return hashImpl(sd, c1, c2);
+}
+
 } // FSM
 
 template<class V, class E>
 NEVER_INLINE
 void FixedStringMap<V,E>::clear() {
   if (m_table && m_table != (Elm*)&FSM::null_key + 1) {
-    vm_free(m_table - m_mask - 1);
+    vm_free(m_table - capacity());
   }
+  setMaskAndConsts(0);
   m_table = nullptr;
-  m_mask = 0;
+}
+
+template<class V, class E>
+NEVER_INLINE
+void FixedStringMap<V,E>::setMaskAndConsts(uint32_t mask, uint32_t consts) {
+  auto const perfect = consts != 0;
+  always_assert(mask >> (perfect ? kMaskSizePerfect : kMaskSize) == 0 &&
+                consts >> (kHashConstSize * kNumHashConsts) == 0);
+  m_maskAndConst = mask |
+                   (consts << (perfect ? kMaskSizePerfect : kMaskSize)) |
+                   (perfect << kMaskSize);
 }
 
 template<class V, class E>
@@ -44,7 +69,7 @@ NEVER_INLINE
 void FixedStringMap<V,E>::init(int num, uint32_t numExtraBytes) {
   if (!num && !numExtraBytes) {
     m_table = (Elm*)&FSM::null_key + 1;
-    m_mask = 0;
+    setMaskAndConsts(0, 1); // So that empty table uses perfect hashing
     return;
   }
 
@@ -60,36 +85,99 @@ void FixedStringMap<V,E>::init(int num, uint32_t numExtraBytes) {
   std::memset(ptr, 0, allocSize);
   m_table = (Elm*)ptr + capac;
   assertx(m_table);
-  m_mask = capac - 1;
+  setMaskAndConsts(capac - 1);
 }
 
 template<class V, class E>
 NEVER_INLINE
 void FixedStringMap<V,E>::add(const StringData* sd, const V& v) {
   assertx(sd->isStatic());
+  auto const mask = this->mask();
+  assertx(folly::isPowTwo(capacity()));
 
-  Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
+  if (LIKELY(isPerfectHash())) {
+    // Perfect hashing
+    auto const hash = FSM::hash(sd, hashConsts(), kHashConstSize) & mask;
+    Elm* elm = &m_table[-1 - int32_t(hash)];
+    elm->sd = sd;
+    elm->data = v;
+    return;
+  }
+
+  Elm* elm = &m_table[-1 - int32_t(sd->hash() & mask)];
   UNUSED unsigned numProbes = 0;
   while (elm->sd) {
-    assertx(numProbes++ < m_mask + 1);
+    assertx(numProbes++ < mask + 1);
     // Semantics for multiple insertion: new value wins.
     if (elm->sd == sd || sd->same(elm->sd)) break;
-    if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
+    if (UNLIKELY(++elm == m_table)) elm -= mask + 1;
   }
   elm->sd = sd;
   elm->data = v;
 }
 
 template<class V, class E>
+template<class Iter>
+NEVER_INLINE
+void FixedStringMap<V,E>::addFrom(Iter begin, Iter end) {
+  uint32_t capacity = this->capacity();
+  uint32_t mask = this->mask();
+  assertx(folly::isPowTwo(capacity));
+
+  boost::dynamic_bitset<> bitset(capacity);
+  auto const isPerfectHashFunction = [&](uint32_t consts) {
+    bitset.reset();
+    for (auto it = begin; it != end; ++it) {
+      auto const hash = FSM::hash(it->first, consts, kHashConstSize) & mask;
+      if (bitset.test(hash)) return false;
+      bitset.set(hash);
+    }
+    return true;
+  };
+
+  // If the capacity is too high, dont even try to find perfect hash
+  if (capacity < (1 << kMaskSizePerfect)) {
+    // Try to find a perfect hash function
+    uint32_t consts = 0;
+    auto const limit = 1 << (kNumHashConsts * kHashConstSize);
+    while (consts < limit - 1) {
+      consts++;
+      if (!isPerfectHashFunction(consts)) continue;
+      setMaskAndConsts(mask, consts);
+      break;
+    }
+  }
+
+  for (auto it = begin; it != end; ++it) add(it->first, it->second);
+}
+
+template<class V, class E>
 NEVER_INLINE
 V* FixedStringMap<V,E>::find(const StringData* sd) const {
-  Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
+  auto const mask = this->mask();
+  assertx(folly::isPowTwo(capacity()));
+
+  if (LIKELY(isPerfectHash())) {
+    auto sstr = sd;
+    if (!is_static_string(sd)) {
+      sstr = lookupStaticString(sd);
+      if (UNLIKELY(!sstr)) return nullptr;
+    }
+    // Perfect hashing
+    auto const hash = FSM::hash(sstr, hashConsts(), kHashConstSize) & mask;
+    Elm* elm = &m_table[-1 - int32_t(hash)];
+    if (elm->sd == sstr) return &elm->data;
+    assertx(!elm->sd || !sstr->same(elm->sd));
+    return nullptr;
+  }
+
+  Elm* elm = &m_table[-1 - int32_t(sd->hash() & mask)];
   UNUSED unsigned numProbes = 0;
   for(;;) {
-    assertx(numProbes++ < m_mask + 1);
+    assertx(numProbes++ < mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
     if (elm->sd == sd || sd->same(elm->sd)) return &elm->data;
-    if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
+    if (UNLIKELY(++elm == m_table)) elm -= mask + 1;
   }
 }
 
@@ -132,12 +220,9 @@ inline
 void FixedStringMapBuilder<T,V,E>::create(FSMap& map) {
   map.extra() = size();
   map.init(size(), 0);
-  if (!size()) {
-    return;
-  }
-  for (const_iterator it = begin(); it != end(); ++it) {
-    map.add(it->first, it->second);
-  }
+  if (!size()) return;
+
+  map.addFrom(begin(), end());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -72,11 +72,7 @@ struct IndexedStringMap {
     }
 
     std::copy(b.m_list.begin(), b.m_list.end(), mutableAccessList());
-    for (typename Builder::const_iterator it = b.begin();
-        it != b.end();
-        ++it) {
-      m_map.add(it->first, it->second);
-    }
+    m_map.addFrom(b.begin(), b.end());
   }
 
   const T* accessList() const {

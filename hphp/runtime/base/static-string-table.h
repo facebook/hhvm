@@ -20,13 +20,13 @@
 #include <folly/Range.h>
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/string-data.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 struct Array;
-struct StringData;
 struct String;
 struct TypedValue;
 
@@ -56,6 +56,11 @@ struct TypedValue;
 //////////////////////////////////////////////////////////////////////
 
 extern StringData** precomputed_chars;
+
+inline bool is_static_string(const StringData* s) {
+  if (!use_lowptr) return s->isStatic();
+  return (uint64_t)s < ((1ull << 32) - 1);
+}
 
 /*
  * Attempt to lookup a string (specified in various ways) in the

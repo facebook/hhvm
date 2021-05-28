@@ -32,7 +32,7 @@ namespace HPHP {
 template<class V, class ExtraType = int32_t>
 struct FixedStringMap {
   explicit FixedStringMap(int num) : m_table(nullptr) { init(num); }
-  FixedStringMap() : m_mask(0), m_table(nullptr) {}
+  FixedStringMap() : m_maskAndConst(0), m_table(nullptr) {}
   ~FixedStringMap() { clear(); }
 
   FixedStringMap(const FixedStringMap&) = delete;
@@ -40,8 +40,10 @@ struct FixedStringMap {
 
   void clear();
   void init(int num, uint32_t numExtraBytes = 0);
-  void add(const StringData* s, const V& v);
   V* find(const StringData* s) const;
+
+  template<class Iter>
+  void addFrom(Iter begin, Iter end);
 
   void* extraData() { return m_table; }
   const void* extraData() const { return m_table; }
@@ -59,6 +61,30 @@ struct FixedStringMap {
   static constexpr size_t sizeSize() {
     return sizeof(m_extra);
   }
+
+private:
+  void add(const StringData* s, const V& v);
+
+private:
+  static constexpr uint32_t kHashConstSize = 5;
+  static constexpr uint32_t kNumHashConsts = 2;
+  static constexpr uint32_t kMaskSize = 31;
+  static constexpr uint32_t kMaskSizePerfect =
+    kMaskSize - kNumHashConsts * kHashConstSize;
+
+  bool isPerfectHash() const { return m_maskAndConst >> kMaskSize; }
+  uint32_t mask() const {
+    auto const size = isPerfectHash() ? kMaskSizePerfect : kMaskSize;
+    return m_maskAndConst & ((1u << size) - 1);
+  }
+  uint32_t hashConsts() const {
+    assertx(isPerfectHash());
+    return (m_maskAndConst >> kMaskSizePerfect) &
+           ((1 << (kHashConstSize * kNumHashConsts)) - 1);
+  }
+  void setMaskAndConsts(uint32_t mask, uint32_t consts = 0);
+  uint32_t capacity() const { return mask() + 1; }
+
 private:
   struct Elm {
     LowStringPtr sd;
@@ -66,11 +92,27 @@ private:
   };
 
   /*
+   * There are two different hashing strategy this table employs. Based on the
+   * hashing strategy the way m_maskAndConst is organized shown below.
+   * 1) Perfect hashing
+   * bit 31: 0
+   * bits 30-21: consts
+   * bits 20:0: mask
+   *
+   * 2) Linear probing
+   * bit 31: 1
+   * bits 30-0: mask
+   *
+   * This implies that the capacity of the maps is limited by which hashing
+   * solution we determine.
+   */
+
+  /*
    * The fields we need here are just m_mask and m_table.  This would leave 4
    * byte padding hole, though, which some users (e.g. IndexedStringMap) might
    * have a use for, so we expose it as a slot for our users.
    */
-  uint32_t  m_mask;
+  uint32_t  m_maskAndConst;
   ExtraType m_extra;  // not ours
   Elm*      m_table;
 };

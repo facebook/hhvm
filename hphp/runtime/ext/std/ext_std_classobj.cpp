@@ -402,41 +402,88 @@ DEBUG_ONLY bool meth_caller_has_expected_prop(const Class* cls) {
 }
 
 template<bool isGetClass>
+const StringData* getMethCallerClsOrMethNameFromMethCallerFunc(const Func* f) {
+  assertx(f->isMethCaller());
+  return isGetClass ? f->methCallerClsName() : f->methCallerMethName();
+}
+
+template<bool isGetClass>
+StringData* getMethCallerClsOrMethNameFromMethCallerHelperClass(const char* fn,
+                                                                const ObjectData* obj) {
+  auto const c = obj->getVMClass();
+  assertx(c == SystemLib::s_MethCallerHelperClass);
+  assertx(meth_caller_has_expected_prop(c));
+  if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
+      RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
+    raise_notice("MethCallerHelper is used on %s()", fn);
+  }
+  auto const tv = obj->propRvalAtOffset(
+    isGetClass ? s_cls_idx : s_meth_idx).tv();
+  assertx(isStringType(type(tv)));
+  return val(tv).pstr;
+}
+
+template<bool isGetClass>
+StringData* getMethCallerClsOrMethNameFromDynMethCallerHelperClass(const ObjectData* obj) {
+  auto const c = obj->getVMClass();
+  assertx(c == SystemLib::s_DynMethCallerHelperClass);
+  assertx(meth_caller_has_expected_prop(c));
+  auto const tv = obj->propRvalAtOffset(
+    isGetClass ? s_cls_idx : s_meth_idx).tv();
+  assertx(isStringType(type(tv)));
+  return val(tv).pstr;
+}
+
+template<bool isGetClass>
 String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
   if (tvIsFunc(v)) {
     if (val(v).pfunc->isMethCaller()) {
-      return String::attach(const_cast<StringData*>(isGetClass ?
-        val(v).pfunc->methCallerClsName() :
-        val(v).pfunc->methCallerMethName()));
+      auto const name =
+        getMethCallerClsOrMethNameFromMethCallerFunc<isGetClass>(val(v).pfunc);
+      return String::attach(const_cast<StringData*>(name));
     }
   } else if (tvIsObject(v)) {
-    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
-    auto const dynMcCls = Class::lookup(s_dyn_meth_caller_cls.get());
-    assertx(mcCls);
-    assertx(dynMcCls);
-    if (dynMcCls == val(v).pobj->getVMClass()) {
-      auto const obj = val(v).pobj;
-      assertx(meth_caller_has_expected_prop(obj->getVMClass()));
-      auto const tv = obj->propRvalAtOffset(
-        isGetClass ? s_cls_idx : s_meth_idx).tv();
-      assertx(isStringType(type(tv)));
-      return String(val(tv).pstr);
+    auto const obj = val(v).pobj;
+    auto const cls = obj->getVMClass();
+    if (cls == SystemLib::s_DynMethCallerHelperClass) {
+      return String(getMethCallerClsOrMethNameFromDynMethCallerHelperClass<isGetClass>(obj));
     }
-    if (mcCls == val(v).pobj->getVMClass()) {
-      auto const obj = val(v).pobj;
-      assertx(meth_caller_has_expected_prop(obj->getVMClass()));
-      if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
-          RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
-        raise_notice("MethCallerHelper is used on %s()", fn);
-      }
-      auto const tv = obj->propRvalAtOffset(
-        isGetClass ? s_cls_idx : s_meth_idx).tv();
-      assertx(isStringType(type(tv)));
-      return String(val(tv).pstr);
+    if (cls == SystemLib::s_MethCallerHelperClass) {
+      return String(getMethCallerClsOrMethNameFromMethCallerHelperClass<isGetClass>(fn, obj));
     }
   }
   raise_error("Argument 1 passed to %s() must be a MethCaller", fn);
 }
+
+Func* getFuncFromClsNameAndMethodName(const StringData* clsName,
+                                      const StringData* methodName) {
+  auto const cls = Class::load(clsName);
+  if (!cls) raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  auto const method = cls->lookupMethod(methodName);
+  if (!method) raise_call_to_undefined(methodName, cls);
+  return method;
+}
+} // namespace
+
+Func* getFuncFromMethCallerFunc(const Func* f) {
+  return getFuncFromClsNameAndMethodName(
+    getMethCallerClsOrMethNameFromMethCallerFunc<true>(f),
+    getMethCallerClsOrMethNameFromMethCallerFunc<false>(f)
+  );
+}
+
+Func* getFuncFromMethCallerHelperClass(const ObjectData* o) {
+  return getFuncFromClsNameAndMethodName(
+    getMethCallerClsOrMethNameFromMethCallerHelperClass<true>(__FUNCTION__+5, o),
+    getMethCallerClsOrMethNameFromMethCallerHelperClass<false>(__FUNCTION__+5, o)
+  );
+}
+
+Func* getFuncFromDynMethCallerHelperClass(const ObjectData* o) {
+  return getFuncFromClsNameAndMethodName(
+    getMethCallerClsOrMethNameFromDynMethCallerHelperClass<true>(o),
+    getMethCallerClsOrMethNameFromDynMethCallerHelperClass<false>(o)
+  );
 }
 
 String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v) {

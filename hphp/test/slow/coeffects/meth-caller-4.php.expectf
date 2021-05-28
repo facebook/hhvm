@@ -1,0 +1,1 @@
+Warning: Call to bar() requires [rx] coeffects but main() provided [] in %s on line 11

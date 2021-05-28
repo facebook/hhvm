@@ -1,0 +1,1 @@
+Warning: Function/method pointer to A::foo() contains polymorphic coeffects but is used as a coeffect rule in %s on line 12

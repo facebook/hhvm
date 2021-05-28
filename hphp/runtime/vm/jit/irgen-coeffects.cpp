@@ -157,7 +157,44 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     return cns(env, RuntimeCoeffects::full().value());
   };
 
+  auto const handleFunc = [&](SSATmp* func) {
+    return cond(
+      env,
+      [&] (Block* taken) {
+        auto const data = AttrData { AttrHasCoeffectRules };
+        auto const success = gen(env, FuncHasAttr, data, func);
+        gen(env, JmpNZero, taken, success);
+      },
+      [&] {
+        // Static coeffects
+        return gen(env, LdFuncRequiredCoeffects, func);
+      },
+      [&] {
+        // Rules
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseCoeffectsFunParamCoeffectRulesViolation, func);
+        return cns(env, RuntimeCoeffects::full().value());
+      }
+    );
+  };
+
+  auto const fnFromName = [&](SSATmp* clsName, SSATmp* methodName) {
+    auto const cls = gen(env, LdCls, clsName, cns(env, nullptr));
+    auto const data = OptClassData { nullptr };
+    return gen(env, LdObjMethodD, data, cls, methodName);
+  };
+
   auto const objSuccess = [&](SSATmp* obj) {
+    auto const getClsOrMethod = [&](bool is_cls, bool is_dyn) {
+      auto const cls = is_dyn
+        ? SystemLib::s_DynMethCallerHelperClass : SystemLib::s_MethCallerHelperClass;
+      auto const idx = cls->propSlotToIndex(is_cls ? Slot{0} : Slot{1});
+      auto const prop = gen(
+        env, LdPropAddr, IndexData{idx}, TStr.lval(Ptr::Prop), obj);
+      auto const ret = gen(env, LdMem, TStr, prop);
+      gen(env, IncRef, ret);
+      return ret;
+    };
     auto const cls = gen(env, LdObjClass, obj);
     return cond(
       env,
@@ -188,16 +225,50 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
           }
         );
       },
+      [&] (Block* taken) {
+        auto const success =
+          gen(env, EqCls, cls, cns(env, SystemLib::s_MethCallerHelperClass));
+        gen(env, JmpZero, taken, success);
+      },
+      [&] {
+        return handleFunc(fnFromName(getClsOrMethod(true, false),
+                                     getClsOrMethod(false, false)));
+      },
+      [&] (Block* taken) {
+        auto const success =
+          gen(env, EqCls, cls, cns(env, SystemLib::s_DynMethCallerHelperClass));
+        gen(env, JmpZero, taken, success);
+      },
+      [&] {
+        return handleFunc(fnFromName(getClsOrMethod(true, true),
+                                     getClsOrMethod(false, true)));
+      },
       fail
     );
   };
 
   auto const fnPtrs = [&] {
-    auto const is_any_func_type = [&] (Block* toFail) {
+    auto const isAnyFuncType = [&] (Block* toFail) {
       return cond(
         env,
         [&] (Block* taken) { return gen(env, CheckType, TFunc, taken, tv); },
-        [&] (SSATmp* func) { return func; },
+        [&] (SSATmp* func) {
+          return cond(
+            env,
+            [&] (Block* taken) {
+              auto const success =
+                gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, func);
+              gen(env, JmpZero, taken, success);
+            },
+            [&] {
+              return fnFromName(
+                gen(env, LdMethCallerName, MethCallerData{true}, func),
+                gen(env, LdMethCallerName, MethCallerData{false}, func)
+              );
+            },
+            [&] { return func; }
+          );
+        },
         [&] (Block* taken) { return gen(env, CheckType, TRFunc, taken, tv); },
         [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRFunc, ptr); },
         [&] (Block* taken) { return gen(env, CheckType, TClsMeth, taken, tv); },
@@ -211,27 +282,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
         }
       );
     };
-    auto const handle_func = [&](SSATmp* func) {
-      return cond(
-        env,
-        [&] (Block* taken) {
-          auto const data = AttrData { AttrHasCoeffectRules };
-          auto const success = gen(env, FuncHasAttr, data, func);
-          gen(env, JmpNZero, taken, success);
-        },
-        [&] {
-          // Static coeffects
-          return gen(env, LdFuncRequiredCoeffects, func);
-        },
-        [&] {
-          // Rules
-          hint(env, Block::Hint::Unlikely);
-          gen(env, RaiseCoeffectsFunParamCoeffectRulesViolation, func);
-          return cns(env, RuntimeCoeffects::full().value());
-        }
-      );
-    };
-    return cond(env, is_any_func_type, handle_func, fail);
+    return cond(env, isAnyFuncType, handleFunc, fail);
   };
 
   return cond(

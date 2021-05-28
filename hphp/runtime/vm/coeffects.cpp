@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 #include "hphp/util/trace.h"
 
@@ -241,19 +242,31 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
     return RuntimeCoeffects::full();
   };
   if (tvIsNull(tv))     return RuntimeCoeffects::full();
-  if (tvIsFunc(tv))     return handleFunc(tv->m_data.pfunc);
+  if (tvIsFunc(tv)) {
+    auto const func = tv->m_data.pfunc->isMethCaller()
+      ? getFuncFromMethCallerFunc(tv->m_data.pfunc) : tv->m_data.pfunc;
+    return handleFunc(func);
+  }
   if (tvIsRFunc(tv))    return handleFunc(tv->m_data.prfunc->m_func);
   if (tvIsClsMeth(tv))  return handleFunc(tv->m_data.pclsmeth->getFunc());
   if (tvIsRClsMeth(tv)) return handleFunc(tv->m_data.prclsmeth->m_func);
   if (tvIsObject(tv)) {
     auto const obj = tv->m_data.pobj;
-    auto const closureCls = obj->getVMClass();
-    if (!closureCls->isClosureClass()) return error();
-    if (!closureCls->hasClosureCoeffectsProp()) {
-      assertx(!closureCls->getCachedInvoke()->hasCoeffectRules());
-      return closureCls->getCachedInvoke()->requiredCoeffects();
+    auto const cls = obj->getVMClass();
+    if (cls->isClosureClass()) {
+      if (!cls->hasClosureCoeffectsProp()) {
+        assertx(!cls->getCachedInvoke()->hasCoeffectRules());
+        return cls->getCachedInvoke()->requiredCoeffects();
+      }
+      return c_Closure::fromObject(obj)->getCoeffects();
     }
-    return c_Closure::fromObject(obj)->getCoeffects();
+    if (cls == SystemLib::s_MethCallerHelperClass) {
+      return handleFunc(getFuncFromMethCallerHelperClass(obj));
+    }
+    if (cls == SystemLib::s_DynMethCallerHelperClass) {
+      return handleFunc(getFuncFromDynMethCallerHelperClass(obj));
+    }
+    return error();
   }
   return error();
 }

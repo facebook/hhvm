@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'meth_caller(): class A not found' in %s:7
+%A

@@ -1,1 +1,1 @@
-Warning: Call to A::f() requires [rx] coeffects but MethCaller$A$f() provided [write_props] in %s on line 11
+Warning: Call to A::f() requires [rx] coeffects but main() provided [write_props] in %s on line 11

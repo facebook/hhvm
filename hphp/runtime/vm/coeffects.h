@@ -184,6 +184,7 @@ struct CoeffectRule final {
 
   bool isClosureParentScope() const;
   bool isGeneratorThis() const;
+  bool isCaller() const;
 
   folly::Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;

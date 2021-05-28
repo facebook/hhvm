@@ -302,10 +302,21 @@ void raiseCoeffectsCallViolation(const Func* callee,
       // VM is entering to the first frame
       return String{makeStaticString("[vm-entry]")};
     }
-    return fromLeaf([] (const ActRec* fp, Offset) {
+    String result;
+    walkStack([&] (const ActRec* fp, Offset) {
       assertx(fp);
-      return fp->func()->fullNameWithClosureName();
+      auto const func = fp->func();
+      assertx(func);
+      if (func->hasCoeffectRules() &&
+          func->getCoeffectRules().size() == 1 &&
+          func->getCoeffectRules()[0].isCaller()) {
+        return false; // keep going
+      }
+      result = func->fullNameWithClosureName();
+      return true;
     });
+    assertx(!result.isNull());
+    return result;
   }();
 
   auto const errMsg = folly::sformat(

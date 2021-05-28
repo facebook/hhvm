@@ -334,6 +334,10 @@ bool CoeffectRule::isGeneratorThis() const {
   return m_type == Type::GeneratorThis;
 }
 
+bool CoeffectRule::isCaller() const {
+  return m_type == Type::Caller;
+}
+
 std::string CoeffectRule::getDirectiveString() const {
   auto const typesToString = [&] {
     std::vector<std::string> names;

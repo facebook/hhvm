@@ -410,7 +410,7 @@ const StringData* getMethCallerClsOrMethNameFromMethCallerFunc(const Func* f) {
 template<bool isGetClass>
 StringData* getMethCallerClsOrMethNameFromMethCallerHelperClass(const char* fn,
                                                                 const ObjectData* obj) {
-  auto const c = obj->getVMClass();
+  auto const c UNUSED = obj->getVMClass();
   assertx(c == SystemLib::s_MethCallerHelperClass);
   assertx(meth_caller_has_expected_prop(c));
   if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
@@ -425,7 +425,7 @@ StringData* getMethCallerClsOrMethNameFromMethCallerHelperClass(const char* fn,
 
 template<bool isGetClass>
 StringData* getMethCallerClsOrMethNameFromDynMethCallerHelperClass(const ObjectData* obj) {
-  auto const c = obj->getVMClass();
+  auto const c UNUSED = obj->getVMClass();
   assertx(c == SystemLib::s_DynMethCallerHelperClass);
   assertx(meth_caller_has_expected_prop(c));
   auto const tv = obj->propRvalAtOffset(

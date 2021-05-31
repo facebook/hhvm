@@ -2544,9 +2544,9 @@ end = struct
       let (req_extends, req_implements) =
         List.partition_map c_reqs ~f:(fun (s, extends) ->
             if extends then
-              `Fst s
+              First s
             else
-              `Snd s)
+              Second s)
       in
 
       {

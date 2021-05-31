@@ -8,6 +8,7 @@
 
 open Core_kernel
 open Reordered_argument_collections
+module Unix = Caml_unix
 
 (** HACK: Raised when we encounter a construct in a type declaration which we
     have chosen not to handle (because it occurs in a type declaration which we

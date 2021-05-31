@@ -4,29 +4,29 @@ export OCAML_VERSION=4.09.1
 export OCAML_VARIANT=+fp
 
 export HACK_OPAM_DEPS=(
-  base.v0.12.2
-  base64.3.4.0
+  base.v0.14.1
+  base64.3.5.0
   cmdliner.1.0.4
-  core_kernel.v0.12.3
+  core_kernel.v0.14.1
   dtoa.0.3.2
-  dune.2.6.2
+  dune.2.8.5
   fileutils.0.6.3
   lru.0.3.0
-  lwt.4.5.0
+  lwt.5.4.0
   lwt_log.1.1.1
-  lwt_ppx.2.0.1
-  merlin.3.4.2
+  lwt_ppx.2.0.2
+  merlin.3.5.0
   ocp-indent.1.8.1
-  ounit.2.2.1
-  pcre.7.3.5
-  ppx_deriving.4.5
-  ppx_gen_rec.1.1.0
-  sedlex.2.2
-  sexplib.v0.12.0
+  ounit2.2.2.4
+  pcre.7.4.6
+  ppx_deriving.5.2.1
+  ppx_gen_rec.2.0.0
+  sedlex.2.3
+  sexplib.v0.14.0
   sqlite3.5.0.2
   uchar.0.0.2
   uutf.1.0.2
-  visitors.20200210
+  visitors.20210316
   wtf8.1.0.2
   yojson.1.7.0
 )

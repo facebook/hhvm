@@ -75,9 +75,9 @@ let solve_chunk_group env ?range ?source_text chunk_group =
             (* We consider that split to be within the range when the range
              contains the first character in the chunk. *)
             if Interval.contains range chunk.Chunk.start_char then
-              `Fst rule
+              First rule
             else
-              `Snd rule)
+              Second rule)
       in
       let iset_of_list = List.fold_right ~init:ISet.empty ~f:ISet.add in
       let rules_in_range = iset_of_list rules_in_range in

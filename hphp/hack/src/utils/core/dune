@@ -10,6 +10,7 @@
     (:include config/build-timestamp-opt)))
   (libraries
     base
+    core_kernel.caml_unix
     string
     hh_json
     str

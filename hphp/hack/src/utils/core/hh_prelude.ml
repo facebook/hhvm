@@ -53,3 +53,5 @@ let ( = ) : int -> int -> bool = Int.equal
     string), you can add `open Int.Replace_polymorphic_compare` to the top of
     the file. *)
 let ( <> ) (x : int) (y : int) = not (Int.equal x y)
+
+module Unix = Caml_unix

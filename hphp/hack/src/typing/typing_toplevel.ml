@@ -940,8 +940,8 @@ let rec check_implements_or_extends_unique impl =
         List.partition_map rest (fun (h, ty) ->
             match get_node ty with
             | Tapply ((pos', name'), _) when String.equal name name' ->
-              `Fst pos'
-            | _ -> `Snd (h, ty))
+              First pos'
+            | _ -> Second (h, ty))
       in
       if not (List.is_empty pos_list) then
         Errors.duplicate_interface (fst hint) name pos_list;

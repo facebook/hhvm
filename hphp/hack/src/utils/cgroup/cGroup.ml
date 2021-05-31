@@ -7,6 +7,7 @@
  *)
 
 open Core_kernel
+module Unix = Caml_unix
 open Result.Monad_infix
 
 let spf = Printf.sprintf

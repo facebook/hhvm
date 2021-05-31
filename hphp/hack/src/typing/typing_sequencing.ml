@@ -79,8 +79,8 @@ let unpack_lvals e =
   List.rev (unpack [] e)
 
 let get_lvar = function
-  | (_, Lvar id) -> `Fst id
-  | e -> `Snd e
+  | (_, Lvar id) -> First id
+  | e -> Second e
 
 (* Pass that just collects all the variables used (and not just written to)
  * in fragments of code.

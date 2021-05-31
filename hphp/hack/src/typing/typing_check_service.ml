@@ -902,10 +902,10 @@ module TestMocking = struct
           match computation with
           | Check { path; _ } ->
             if is_cancelled path then
-              `Fst path
+              First path
             else
-              `Snd computation
-          | _ -> `Snd computation)
+              Second computation
+          | _ -> Second computation)
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;

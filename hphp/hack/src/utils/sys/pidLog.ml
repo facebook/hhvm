@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+module Unix = Caml_unix
 
 let log_oc = ref None
 

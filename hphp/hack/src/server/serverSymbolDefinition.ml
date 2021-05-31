@@ -67,9 +67,9 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
     let (consts, abs_consts) =
       List.partition_map c.c_consts (fun cc ->
           if Option.is_some cc.cc_expr then
-            `Fst cc
+            First cc
           else
-            `Snd cc)
+            Second cc)
     in
     let name_matches cc = String.equal (snd cc.cc_id) member_name in
     let res =

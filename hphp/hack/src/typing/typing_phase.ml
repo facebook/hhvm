@@ -307,7 +307,7 @@ and localize_targs_by_kind
 and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     =
   match deref ty with
-  | (r, Tapply ((_, x), _argl)) when String.equal x SN.Typehints.wildcard ->
+  | (r, Tapply ((pos, x), _argl)) when String.equal x SN.Typehints.wildcard ->
     let r = Typing_reason.localize r in
     let (name, kind) = nkind in
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
@@ -323,6 +323,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
            as done below *)
         Env.add_fresh_generic_parameter_by_kind
           env
+          pos
           (snd name)
           full_kind_without_bounds
       in

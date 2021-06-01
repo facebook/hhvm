@@ -148,6 +148,7 @@
     typing_attributes
     typing_check_decls
     typing_debug
+    typing_escape
     typing_extends
     typing_exts
     typing_func_terminality

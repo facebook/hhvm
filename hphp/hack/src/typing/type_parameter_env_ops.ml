@@ -71,7 +71,6 @@ let join env tpenv1 tpenv2 =
     else
       p1
   in
-
   TPEnv.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
       match (info1, info2) with
       | ( Some

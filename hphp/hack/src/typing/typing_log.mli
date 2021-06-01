@@ -37,6 +37,14 @@ val log_with_level :
 val log_types :
   Pos_or_decl.t -> Typing_env_types.env -> log_structure list -> unit
 
+val log_escape :
+  ?level:int ->
+  Pos_or_decl.t ->
+  Typing_env_types.env ->
+  string ->
+  string list ->
+  unit
+
 val log_global_inference_env :
   Pos.t -> Typing_env_types.env -> Typing_inference_env.t_global -> unit
 

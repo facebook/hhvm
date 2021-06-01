@@ -158,6 +158,9 @@ type _ t_ =
   | Rdynamic_partial_enforcement :
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
+  | Rrigid_tvar_escape :
+      Pos.t * string * string * locl_phase t_
+      -> locl_phase t_
 
 type t = locl_phase t_
 
@@ -177,6 +180,8 @@ val to_pos : 'phase t_ -> Pos_or_decl.t
 val expr_display_id_map : int IMap.t ref
 
 val get_expr_display_id : int -> int
+
+val get_expr_display_id_map : unit -> int IMap.t
 
 val to_constructor_string : 'phase t_ -> string
 

@@ -665,6 +665,15 @@ let log_types p env items =
       in
       go items)
 
+let log_escape ?(level = 1) p env msg vars =
+  log_with_level env "escape" level (fun () ->
+      log_pos_or_decl p (fun () ->
+          indentEnv ~color:(Normal Yellow) msg (fun () -> ());
+          if not (List.is_empty vars) then (
+            lnewline ();
+            List.iter vars (lprintf (Normal Green) "%s ")
+          )))
+
 let log_global_inference_env p env global_tvenv =
   log_position p (fun () ->
       log_value env @@ Inf.Log.global_inference_env_as_value global_tvenv)

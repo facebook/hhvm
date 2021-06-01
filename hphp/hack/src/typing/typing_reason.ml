@@ -153,6 +153,9 @@ type _ t_ =
   | Rdynamic_partial_enforcement :
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
+  | Rrigid_tvar_escape :
+      Pos.t * string * string * locl_phase t_
+      -> locl_phase t_
 
 type t = locl_phase t_
 
@@ -598,6 +601,11 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rdynamic_partial_enforcement (p, cn, r_orig) ->
     to_string prefix r_orig
     @ [(p, "while allowing dynamic to flow into " ^ Utils.strip_all_ns cn)]
+  | Rrigid_tvar_escape (p, what, tvar, r_orig) ->
+    let tvar = Markdown_lite.md_codify tvar in
+    ( Pos_or_decl.of_raw_pos p,
+      prefix ^ " because " ^ tvar ^ " escaped from " ^ what )
+    :: to_string ("  where " ^ tvar ^ " originates from") r_orig
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -688,7 +696,8 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ret_boolean p
   | Rhack_arr_dv_arrs p
   | Rconcat_operand p
-  | Rinterp_operand p ->
+  | Rinterp_operand p
+  | Rrigid_tvar_escape (p, _, _, _) ->
     Pos_or_decl.of_raw_pos p
   | Rinvariant_generic (r, _)
   | Rcontravariant_generic (r, _)
@@ -715,6 +724,8 @@ and get_expr_display_id id =
     let n = IMap.cardinal map + 1 in
     expr_display_id_map := IMap.add id n map;
     n
+
+and get_expr_display_id_map () = !expr_display_id_map
 
 and expr_dep_type_reason_string = function
   | ERexpr id ->
@@ -829,6 +840,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rdynamic_coercion _ -> "Rdynamic_coercion"
   | Rsupport_dynamic_type _ -> "Rsupport_dynamic_type"
   | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
+  | Rrigid_tvar_escape _ -> "Rrigid_tvar_escape"
 
 let pp fmt r =
   let pos = to_raw_pos r in

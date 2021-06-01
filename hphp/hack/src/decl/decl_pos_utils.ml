@@ -134,6 +134,8 @@ struct
     | Rsupport_dynamic_type p -> Rsupport_dynamic_type (pos_or_decl p)
     | Rdynamic_partial_enforcement (p, cn, r) ->
       Rdynamic_partial_enforcement (pos_or_decl p, cn, reason r)
+    | Rrigid_tvar_escape (p, v, w, r) ->
+      Rrigid_tvar_escape (pos p, v, w, reason r)
 
   let rec ty t =
     let (p, x) = deref t in

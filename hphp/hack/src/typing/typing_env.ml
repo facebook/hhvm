@@ -501,16 +501,14 @@ let fresh_param_name env prefix : env * string =
 
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
-let add_fresh_generic_parameter_by_kind env prefix (kind : TPEnv.tparam_info) =
+let add_fresh_generic_parameter_by_kind env pos prefix kind =
   let (env, name) = fresh_param_name env prefix in
   let env =
-    env_with_tpenv
-      env
-      (TPEnv.add ~def_pos:Pos_or_decl.none name kind (get_tpenv env))
+    env_with_tpenv env (TPEnv.add ~def_pos:pos name kind (get_tpenv env))
   in
   (env, name)
 
-let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
+let add_fresh_generic_parameter env pos prefix ~reified ~enforceable ~newable =
   let kind =
     KDefs.
       {
@@ -523,7 +521,7 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
         parameters = [];
       }
   in
-  add_fresh_generic_parameter_by_kind env prefix kind
+  add_fresh_generic_parameter_by_kind env pos prefix kind
 
 let is_fresh_generic_parameter name =
   String.contains name '#' && not (DependentKind.is_generic_dep_ty name)
@@ -1405,16 +1403,16 @@ end
 (* Sets up/cleans up the environment when typing anonymous function / lambda *)
 (*****************************************************************************)
 
-let closure lenv env f =
-  (* Setting up the environment. *)
+let closure env f =
+  (* Remember parts of the environment specific to the enclosing function
+     that will be overwritten when typing a lambda *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
   let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
-  let env = { env with lenv } in
   (* Typing *)
   let (env, ret) = f env in
-  (* Cleaning up the environment. *)
+  (* Restore the environment fields that were clobbered *)
   let env = { env with lenv = old_lenv } in
   let env = set_params env old_params in
   let env = set_return env old_return in

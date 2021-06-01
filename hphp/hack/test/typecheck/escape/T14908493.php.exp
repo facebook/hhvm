@@ -1,0 +1,6 @@
+File "T14908493.php", line 49, characters 5-62:
+Rigid type variable escapes its lambda (Typing[4442])
+  File "T14908493.php", line 50, characters 24-24:
+  Rigid type variable `T#1` is escaping
+  File "T14908493.php", line 49, characters 5-62:
+  in the return type of this lambda

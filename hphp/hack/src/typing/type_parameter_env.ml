@@ -47,6 +47,8 @@ let get_with_pos name tpenv = SMap.find_opt name tpenv.tparams
 
 let get name tpenv = Option.map (get_with_pos name tpenv) snd
 
+let get_tparams tpenv = tpenv.tparams
+
 let add ~def_pos name tpinfo tpenv =
   { tpenv with tparams = SMap.add name (def_pos, tpinfo) tpenv.tparams }
 

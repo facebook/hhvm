@@ -110,8 +110,9 @@ impl<'a> Reason<'a> {
             | RconcatOperand(p)
             | RinterpOperand(p)
             | RsupportDynamicType(p)
-            | RdynamicPartialEnforcement((p, _, _)) => Some(p),
-            RhackArrDvArrs(p) => Some(p),
+            | RdynamicPartialEnforcement((p, _, _))
+            | RhackArrDvArrs(p)
+            | RrigidTvarEscape((p, _, _, _)) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

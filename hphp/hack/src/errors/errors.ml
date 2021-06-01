@@ -3501,6 +3501,13 @@ let unify_error ?code claim reasons =
 let unify_error_at : Pos.t -> error_from_reasons_callback =
  (fun pos ?code reasons -> unify_error ?code (pos, "Typing error") reasons)
 
+let rigid_tvar_escape_at : Pos.t -> string -> error_from_reasons_callback =
+ fun pos what ?code:_ reasons ->
+  add_list
+    (Typing.err_code Typing.RigidTVarEscape)
+    (pos, "Rigid type variable escapes its " ^ what)
+    reasons
+
 let invalid_type_hint : Pos.t -> error_from_reasons_callback =
  fun pos ?code reasons ->
   add_list

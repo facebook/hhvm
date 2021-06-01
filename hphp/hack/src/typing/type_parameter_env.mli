@@ -62,6 +62,8 @@ val get_require_dynamic : t -> tparam_name -> bool
 
 val get_tparam_names : t -> tparam_name list
 
+val get_tparams : t -> (Pos_or_decl.t * tparam_info) SMap.t
+
 val is_consistent : t -> bool
 
 (** When we detect that the set of constraints on the type parameters cannot be
@@ -107,10 +109,6 @@ val add_lower_bound :
 (** Add type parameters to environment, initially with no bounds.
     Existing type parameters with the same name will be overridden. *)
 val add_generic_parameters : t -> Typing_defs.decl_tparam list -> t
-
-val remove_lower_bound : t -> tparam_name -> Typing_defs.locl_ty -> t
-
-val remove_upper_bound : t -> tparam_name -> Typing_defs.locl_ty -> t
 
 val remove : t -> tparam_name -> t
 

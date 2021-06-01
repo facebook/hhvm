@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1a04a76a5485b77e38024c28d7abc85>>
+// @generated SignedSource<<2610279d8e12f33c6c1ed9e256c02673>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -899,6 +899,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),
             T_::RsupportDynamicType(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicPartialEnforcement(ref __binding_0) => __binding_0.accept(v),
+            T_::RrigidTvarEscape(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

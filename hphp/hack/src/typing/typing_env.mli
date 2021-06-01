@@ -429,10 +429,11 @@ val get_all_tyvars : env -> Ident.t list
 val fresh_param_name : env -> string -> env * string
 
 val add_fresh_generic_parameter_by_kind :
-  env -> string -> Typing_kinding_defs.kind -> env * string
+  env -> Pos_or_decl.t -> string -> Typing_kinding_defs.kind -> env * string
 
 val add_fresh_generic_parameter :
   env ->
+  Pos_or_decl.t ->
   string ->
   reified:Aast.reify_kind ->
   enforceable:bool ->
@@ -459,7 +460,7 @@ val env_with_locals : env -> Typing_per_cont_env.t -> env
 
 val reinitialize_locals : env -> env
 
-val closure : local_env -> env -> (env -> env * 'a) -> env * 'a
+val closure : env -> (env -> env * 'a) -> env * 'a
 
 val in_try : env -> (env -> env * 'a) -> env * 'a
 

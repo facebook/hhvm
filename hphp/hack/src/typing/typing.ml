@@ -1173,7 +1173,7 @@ let rec condition_isset env = function
       $x is MyClass<A, B>
     then class_info is the class info of MyClass and hint_tyl corresponds
     to A, B. *)
-let generate_fresh_tparams env class_info reason hint_tyl =
+let generate_fresh_tparams env class_info p reason hint_tyl =
   let tparams_len = List.length (Cls.tparams class_info) in
   let hint_tyl = List.take hint_tyl tparams_len in
   let pad_len = tparams_len - List.length hint_tyl in
@@ -1208,6 +1208,7 @@ let generate_fresh_tparams env class_info reason hint_tyl =
       let (env, new_name) =
         Env.add_fresh_generic_parameter
           env
+          (Pos_or_decl.of_raw_pos p)
           tparam_name
           ~reified
           ~enforceable
@@ -1355,7 +1356,7 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       match Env.get_class env cid with
       | Some class_info ->
         let (env, tparams_with_new_names, tyl_fresh) =
-          generate_fresh_tparams env class_info reason tyl
+          generate_fresh_tparams env class_info p reason tyl
         in
         safely_refine_class_type
           env
@@ -1389,6 +1390,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
       let (env, tarrkey_name) =
         Env.add_fresh_generic_parameter
           env
+          (Pos_or_decl.of_raw_pos p)
           "Tk"
           ~reified:Erased
           ~enforceable:false
@@ -1407,6 +1409,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
       let (env, tfresh_name) =
         Env.add_fresh_generic_parameter
           env
+          (Pos_or_decl.of_raw_pos p)
           "T"
           ~reified:Erased
           ~enforceable:false
@@ -4503,230 +4506,242 @@ and closure_bind_opt_param env param : env =
 (* Make a type-checking function for an anonymous function or lambda. *)
 (* Here ret_ty should include Awaitable wrapper *)
 (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
-and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
+and closure_make
+    ?el ?ret_ty ?(check_escapes = true) env lambda_pos f ft idl is_anon =
+  let type_closure f =
+    (* Wrap the function f so that it can freely clobber function-specific
+       parts of the environment; the clobbered parts are restored before
+       returning the result. Additionally, we also prevent type parameters
+       created in the closure from unsoundly leaking into the environment
+       of the enclosing function. *)
+    let snap = Typing_escape.snapshot_env env in
+    let (env, (escaping, (te, hret, ft))) =
+      Env.closure env (fun env ->
+          stash_conts_for_closure env lambda_pos is_anon idl (fun env ->
+              let (env, res) = f env in
+              let escaping = Typing_escape.escaping_from_snapshot snap env in
+              (env, (escaping, res))))
+    in
+    (* After the body of the function is checked, erase all the type parameters
+       created from the env and the return type. *)
+    let (env, hret) =
+      if check_escapes then
+        Typing_escape.refresh_env_and_type
+          ~remove:escaping
+          ~pos:lambda_pos
+          env
+          hret
+      else
+        (env, hret)
+    in
+    (env, (te, hret, ft))
+  in
+  type_closure @@ fun env ->
   let nb = Nast.assert_named_body f.f_body in
-  Env.closure env.lenv env (fun env ->
-      (* Extract capabilities from AAST and add them to the environment *)
-      let (env, capability) =
-        match (f.f_ctxs, f.f_unsafe_ctxs) with
-        | (None, None) ->
-          (* if the closure has no explicit coeffect annotations,
-            do _not_ insert (unsafe) capabilities into the environment;
-            instead, rely on the fact that a capability from an enclosing
-            scope can simply be captured, which has the same semantics
-            as redeclaring and shadowing with another same-typed capability.
-            This avoid unnecessary overhead in the most common case, i.e.,
-            when a closure does not need a different (usually smaller)
-            set of capabilities. *)
-          (env, Env.get_local env Typing_coeffects.local_capability_id)
-        | (_, _) ->
-          let (env, cap_ty, unsafe_cap_ty) =
-            type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
-          in
-          let (env, _) =
-            Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
-          in
-          (env, cap_ty)
+  (* Extract capabilities from AAST and add them to the environment *)
+  let (env, capability) =
+    match (f.f_ctxs, f.f_unsafe_ctxs) with
+    | (None, None) ->
+      (* if the closure has no explicit coeffect annotations,
+         do _not_ insert (unsafe) capabilities into the environment;
+         instead, rely on the fact that a capability from an enclosing
+         scope can simply be captured, which has the same semantics
+         as redeclaring and shadowing with another same-typed capability.
+         This avoid unnecessary overhead in the most common case, i.e.,
+         when a closure does not need a different (usually smaller)
+         set of capabilities. *)
+      (env, Env.get_local env Typing_coeffects.local_capability_id)
+    | (_, _) ->
+      let (env, cap_ty, unsafe_cap_ty) =
+        type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
-      let ft =
-        { ft with ft_implicit_params = { capability = CapTy capability } }
+      let (env, _) =
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
-      stash_conts_for_closure env lambda_pos is_anon idl (fun env ->
-          let env = Env.clear_params env in
-          let make_variadic_arg env varg tyl =
-            let remaining_types =
-              (* It's possible the variadic arg will capture the variadic
-               * parameter of the supplied arity (if arity is Fvariadic)
-               * and additional supplied params.
-               *
-               * For example in cases such as:
-               *  lambda1 = (int $a, string...$c) ==> {};
-               *  lambda1(1, "hello", ...$y); (where $y is a variadic string)
-               *  lambda1(1, "hello", "world");
-               * then ...$c will contain "hello" and everything in $y in the first
-               * example, and "hello" and "world" in the second example.
-               *
-               * To account for a mismatch in arity, we take the remaining supplied
-               * parameters and return a list of all their types. We'll use this
-               * to create a union type when creating the typed variadic arg.
-               *)
-              let remaining_params =
-                List.drop ft.ft_params (List.length f.f_params)
-              in
-              List.map ~f:(fun param -> param.fp_type.et_type) remaining_params
-            in
-            let r = Reason.Rvar_param varg.param_pos in
-            let union = Tunion (tyl @ remaining_types) in
-            let (env, t_param) =
-              closure_bind_variadic env varg (mk (r, union))
-            in
-            (env, Aast.FVvariadicArg t_param)
+      (env, cap_ty)
+  in
+  let ft = { ft with ft_implicit_params = { capability = CapTy capability } } in
+  let env = Env.clear_params env in
+  let make_variadic_arg env varg tyl =
+    let remaining_types =
+      (* It's possible the variadic arg will capture the variadic
+       * parameter of the supplied arity (if arity is Fvariadic)
+       * and additional supplied params.
+       *
+       * For example in cases such as:
+       *  lambda1 = (int $a, string...$c) ==> {};
+       *  lambda1(1, "hello", ...$y); (where $y is a variadic string)
+       *  lambda1(1, "hello", "world");
+       * then ...$c will contain "hello" and everything in $y in the first
+       * example, and "hello" and "world" in the second example.
+       *
+       * To account for a mismatch in arity, we take the remaining supplied
+       * parameters and return a list of all their types. We'll use this
+       * to create a union type when creating the typed variadic arg.
+       *)
+      let remaining_params = List.drop ft.ft_params (List.length f.f_params) in
+      List.map ~f:(fun param -> param.fp_type.et_type) remaining_params
+    in
+    let r = Reason.Rvar_param varg.param_pos in
+    let union = Tunion (tyl @ remaining_types) in
+    let (env, t_param) = closure_bind_variadic env varg (mk (r, union)) in
+    (env, Aast.FVvariadicArg t_param)
+  in
+  let (env, t_variadic) =
+    match (f.f_variadic, ft.ft_arity) with
+    | (FVvariadicArg arg, Fvariadic variadic) ->
+      make_variadic_arg env arg [variadic.fp_type.et_type]
+    | (FVvariadicArg arg, Fstandard) -> make_variadic_arg env arg []
+    | (FVellipsis pos, _) -> (env, Aast.FVellipsis pos)
+    | (_, _) -> (env, Aast.FVnonVariadic)
+  in
+  let params = ref f.f_params in
+  let (env, t_params) =
+    List.fold_left
+      ~f:(closure_bind_param params)
+      ~init:(env, [])
+      (List.map ft.ft_params (fun x -> x.fp_type.et_type))
+  in
+  let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
+  let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
+  let env =
+    match el with
+    | None ->
+      (*iter2_shortest
+              Unify.unify_param_modes
+              ft.ft_params
+              supplied_params; *)
+      env
+    | Some x ->
+      let var_param =
+        match f.f_variadic with
+        | FVellipsis pos ->
+          let param =
+            TUtils.default_fun_param
+              ~pos:(Pos_or_decl.of_raw_pos pos)
+              (mk (Reason.Rvar_param pos, Typing_defs.make_tany ()))
           in
-          let (env, t_variadic) =
-            match (f.f_variadic, ft.ft_arity) with
-            | (FVvariadicArg arg, Fvariadic variadic) ->
-              make_variadic_arg env arg [variadic.fp_type.et_type]
-            | (FVvariadicArg arg, Fstandard) -> make_variadic_arg env arg []
-            | (FVellipsis pos, _) -> (env, Aast.FVellipsis pos)
-            | (_, _) -> (env, Aast.FVnonVariadic)
-          in
-          let params = ref f.f_params in
-          let (env, t_params) =
-            List.fold_left
-              ~f:(closure_bind_param params)
-              ~init:(env, [])
-              (List.map ft.ft_params (fun x -> x.fp_type.et_type))
-          in
-          let env =
-            List.fold_left ~f:closure_bind_opt_param ~init:env !params
-          in
-          let env =
-            List.fold_left ~f:closure_check_param ~init:env f.f_params
-          in
-          let env =
-            match el with
-            | None ->
-              (*iter2_shortest
-                      Unify.unify_param_modes
-                      ft.ft_params
-                      supplied_params; *)
-              env
-            | Some x ->
-              let var_param =
-                match f.f_variadic with
-                | FVellipsis pos ->
-                  let param =
-                    TUtils.default_fun_param
-                      ~pos:(Pos_or_decl.of_raw_pos pos)
-                      (mk (Reason.Rvar_param pos, Typing_defs.make_tany ()))
-                  in
-                  Some param
-                | _ -> None
-              in
-              let rec iter l1 l2 =
-                match (l1, l2, var_param) with
-                | (_, [], _) -> ()
-                | ([], _, None) -> ()
-                | ([], x2 :: rl2, Some def1) ->
-                  param_modes ~is_variadic:true def1 x2;
-                  iter [] rl2
-                | (x1 :: rl1, x2 :: rl2, _) ->
-                  param_modes x1 x2;
-                  iter rl1 rl2
-              in
-              iter ft.ft_params x;
-              wfold_left2 inout_write_back env ft.ft_params x
-          in
-          let env = Env.set_fn_kind env f.f_fun_kind in
-          let decl_ty =
-            Option.map
-              ~f:(Decl_hint.hint env.decl_env)
-              (hint_of_type_hint f.f_ret)
-          in
-          let ret_pos =
-            match snd f.f_ret with
-            | Some (ret_pos, _) -> ret_pos
-            | None -> lambda_pos
-          in
-          let (env, hret) =
-            match decl_ty with
-            | None ->
-              (* Do we have a contextual return type? *)
-              begin
-                match ret_ty with
-                | None ->
-                  let (env, ret_ty) = Env.fresh_type env ret_pos in
-                  (env, Typing_return.wrap_awaitable env ret_pos ret_ty)
-                | Some ret_ty ->
-                  (* We might need to force it to be Awaitable if it is a type variable *)
-                  Typing_return.force_awaitable env ret_pos ret_ty
-              end
-            | Some ret ->
-              (* If a 'this' type appears it needs to be compatible with the
-               * late static type
-               *)
-              let ety_env =
-                empty_expand_env_with_on_error
-                  (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
-              in
-              Typing_return.make_return_type (Phase.localize ~ety_env) env ret
-          in
-          let ft = { ft with ft_ret = { ft.ft_ret with et_type = hret } } in
-          let env =
-            Env.set_return
-              env
-              (Typing_return.make_info
-                 ret_pos
-                 f.f_fun_kind
-                 []
-                 env
-                 ~is_explicit:(Option.is_some ret_ty)
-                 hret
-                 decl_ty)
-          in
-          let local_tpenv = Env.get_tpenv env in
-          (* Outer pipe variables aren't available in closures. Note that
-           * locals are restored by Env.closure after processing the closure
-           *)
-          let env =
-            Env.unset_local
-              env
-              (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
-          in
-          let (env, tb) = block env nb.fb_ast in
-          let has_implicit_return = LEnv.has_next env in
-          let named_body_is_unsafe = Nast.named_body_is_unsafe nb in
-          let env =
-            if (not has_implicit_return) || Nast.named_body_is_unsafe nb then
-              env
-            else
-              fun_implicit_return env lambda_pos hret f.f_fun_kind
-          in
-          let env =
-            Typing_env.set_fun_tast_info
-              env
-              { Tast.has_implicit_return; Tast.named_body_is_unsafe }
-          in
-          let (env, tparams) = List.map_env env f.f_tparams type_param in
-          let (env, user_attributes) =
-            List.map_env env f.f_user_attributes user_attribute
-          in
-          let tfun_ =
-            {
-              Aast.f_annotation = Env.save local_tpenv env;
-              Aast.f_readonly_this = f.f_readonly_this;
-              Aast.f_span = f.f_span;
-              Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
-              Aast.f_readonly_ret = f.f_readonly_ret;
-              Aast.f_name = f.f_name;
-              Aast.f_tparams = tparams;
-              Aast.f_where_constraints = f.f_where_constraints;
-              Aast.f_fun_kind = f.f_fun_kind;
-              Aast.f_user_attributes = user_attributes;
-              Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
-              Aast.f_ctxs = f.f_ctxs;
-              Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
-              Aast.f_params = t_params;
-              Aast.f_variadic = t_variadic;
-              (* TODO TAST: Variadic efuns *)
-              Aast.f_external = f.f_external;
-              Aast.f_doc_comment = f.f_doc_comment;
-            }
-          in
-          let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
-          let te =
-            Tast.make_typed_expr
-              lambda_pos
-              ty
-              ( if is_anon then
-                Aast.Efun (tfun_, idl)
-              else
-                Aast.Lfun (tfun_, idl) )
-          in
-          let env = Env.set_tyvar_variance env ty in
-          (env, (te, hret, ft))
-          (* stash_conts_for_anon *))
-      (* Env.closure *))
+          Some param
+        | _ -> None
+      in
+      let rec iter l1 l2 =
+        match (l1, l2, var_param) with
+        | (_, [], _) -> ()
+        | ([], _, None) -> ()
+        | ([], x2 :: rl2, Some def1) ->
+          param_modes ~is_variadic:true def1 x2;
+          iter [] rl2
+        | (x1 :: rl1, x2 :: rl2, _) ->
+          param_modes x1 x2;
+          iter rl1 rl2
+      in
+      iter ft.ft_params x;
+      wfold_left2 inout_write_back env ft.ft_params x
+  in
+  let env = Env.set_fn_kind env f.f_fun_kind in
+  let decl_ty =
+    Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint f.f_ret)
+  in
+  let ret_pos =
+    match snd f.f_ret with
+    | Some (ret_pos, _) -> ret_pos
+    | None -> lambda_pos
+  in
+  let (env, hret) =
+    match decl_ty with
+    | None ->
+      (* Do we have a contextual return type? *)
+      begin
+        match ret_ty with
+        | None ->
+          let (env, ret_ty) = Env.fresh_type env ret_pos in
+          (env, Typing_return.wrap_awaitable env ret_pos ret_ty)
+        | Some ret_ty ->
+          (* We might need to force it to be Awaitable if it is a type variable *)
+          Typing_return.force_awaitable env ret_pos ret_ty
+      end
+    | Some ret ->
+      (* If a 'this' type appears it needs to be compatible with the
+       * late static type
+       *)
+      let ety_env =
+        empty_expand_env_with_on_error
+          (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+      in
+      Typing_return.make_return_type (Phase.localize ~ety_env) env ret
+  in
+  let ft = { ft with ft_ret = { ft.ft_ret with et_type = hret } } in
+  let env =
+    Env.set_return
+      env
+      (Typing_return.make_info
+         ret_pos
+         f.f_fun_kind
+         []
+         env
+         ~is_explicit:(Option.is_some ret_ty)
+         hret
+         decl_ty)
+  in
+  let local_tpenv = Env.get_tpenv env in
+  (* Outer pipe variables aren't available in closures. Note that
+   * locals are restored by Env.closure after processing the closure
+   *)
+  let env =
+    Env.unset_local env (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
+  in
+  let (env, tb) = block env nb.fb_ast in
+  let has_implicit_return = LEnv.has_next env in
+  let named_body_is_unsafe = Nast.named_body_is_unsafe nb in
+  let env =
+    if (not has_implicit_return) || Nast.named_body_is_unsafe nb then
+      env
+    else
+      fun_implicit_return env lambda_pos hret f.f_fun_kind
+  in
+  let env =
+    Typing_env.set_fun_tast_info
+      env
+      { Tast.has_implicit_return; Tast.named_body_is_unsafe }
+  in
+  let (env, tparams) = List.map_env env f.f_tparams type_param in
+  let (env, user_attributes) =
+    List.map_env env f.f_user_attributes user_attribute
+  in
+  let tfun_ =
+    {
+      Aast.f_annotation = Env.save local_tpenv env;
+      Aast.f_readonly_this = f.f_readonly_this;
+      Aast.f_span = f.f_span;
+      Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
+      Aast.f_readonly_ret = f.f_readonly_ret;
+      Aast.f_name = f.f_name;
+      Aast.f_tparams = tparams;
+      Aast.f_where_constraints = f.f_where_constraints;
+      Aast.f_fun_kind = f.f_fun_kind;
+      Aast.f_user_attributes = user_attributes;
+      Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
+      Aast.f_ctxs = f.f_ctxs;
+      Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
+      Aast.f_params = t_params;
+      Aast.f_variadic = t_variadic;
+      (* TODO TAST: Variadic efuns *)
+      Aast.f_external = f.f_external;
+      Aast.f_doc_comment = f.f_doc_comment;
+    }
+  in
+  let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
+  let te =
+    Tast.make_typed_expr
+      lambda_pos
+      ty
+      ( if is_anon then
+        Aast.Efun (tfun_, idl)
+      else
+        Aast.Lfun (tfun_, idl) )
+  in
+  let env = Env.set_tyvar_variance env ty in
+  (env, (te, hret, ft))
 
 (*****************************************************************************)
 (* End of anonymous functions & lambdas. *)

@@ -524,8 +524,8 @@ type has_member = {
   hm_type: locl_ty;
   hm_class_id: Nast.class_id_;
       (** This is required to check ambiguous object access, where sometimes
-  HHVM would access the private member of a parent class instead of the
-  one from the current class. *)
+          HHVM would access the private member of a parent class instead of the
+          one from the current class. *)
   hm_explicit_targs: Nast.targ list option;
       (* - For a "has-property" constraint, this is `None`
        * - For a "has-method" constraint, this is `Some targs`, where targs

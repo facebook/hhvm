@@ -261,7 +261,7 @@ let (localize_ref : localize ref) =
 let localize x = !localize_ref x
 
 (*****************************************************************************)
-(* Returns true if a type is optional *)
+(* Checking properties of types *)
 (*****************************************************************************)
 
 let is_option env ty =
@@ -279,6 +279,34 @@ let is_nothing_i env ty =
   is_sub_type_for_union_i env ty nothing
 
 let is_nothing env ty = is_nothing_i env (LoclType ty)
+
+let is_dynamic env ty =
+  let dynamic = MakeType.dynamic Reason.Rnone in
+  (is_sub_type_for_union ~coerce:None env dynamic ty && not (is_mixed env ty))
+  || is_sub_type_for_union ~coerce:None env ty dynamic
+     && not (is_nothing env ty)
+
+let rec is_any env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tany _
+  | Terr ->
+    true
+  | Tunion tyl -> List.for_all tyl (is_any env)
+  | Tintersection tyl -> List.exists tyl (is_any env)
+  | _ -> false
+
+let is_tunion env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tunion _ -> true
+  | _ -> false
+
+let is_tintersection env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tintersection _ -> true
+  | _ -> false
 
 (** Simplify unions and intersections of constraint
 types which involve mixed or nothing. *)
@@ -433,45 +461,7 @@ let run_on_intersection_key_value_res env ~f tyl =
   let (res, key_errs, errs) = List.unzip3 triples in
   (env, res, key_errs, errs)
 
-(*****************************************************************************)
-(* Dynamicism  *)
-(*****************************************************************************)
-let is_dynamic env ty =
-  let dynamic = MakeType.dynamic Reason.Rnone in
-  (is_sub_type_for_union ~coerce:None env dynamic ty && not (is_mixed env ty))
-  || is_sub_type_for_union ~coerce:None env ty dynamic
-     && not (is_nothing env ty)
-
-(*****************************************************************************)
-(* Check if type is any or a variant thereof  *)
-(*****************************************************************************)
-
-let rec is_any env ty =
-  let (env, ty) = Env.expand_type env ty in
-  match get_node ty with
-  | Tany _
-  | Terr ->
-    true
-  | Tunion tyl -> List.for_all tyl (is_any env)
-  | Tintersection tyl -> List.exists tyl (is_any env)
-  | _ -> false
-
-let is_tunion env ty =
-  let (_env, ty) = Env.expand_type env ty in
-  match get_node ty with
-  | Tunion _ -> true
-  | _ -> false
-
-let is_tintersection env ty =
-  let (_env, ty) = Env.expand_type env ty in
-  match get_node ty with
-  | Tintersection _ -> true
-  | _ -> false
-
-(*****************************************************************************)
 (* Gets the base type of an abstract type *)
-(*****************************************************************************)
-
 let rec get_base_type env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
@@ -544,7 +534,7 @@ let shape_field_name :
     None
 
 (*****************************************************************************)
-(* *)
+(* Class types *)
 (*****************************************************************************)
 
 let string_of_visibility = function

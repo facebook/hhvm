@@ -743,6 +743,8 @@ val unify_error : typing_error_callback
 
 val unify_error_at : Pos.t -> error_from_reasons_callback
 
+val rigid_tvar_escape_at : Pos.t -> string -> error_from_reasons_callback
+
 val invalid_type_hint : Pos.t -> error_from_reasons_callback
 
 val index_type_mismatch : typing_error_callback

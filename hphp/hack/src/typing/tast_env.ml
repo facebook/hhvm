@@ -206,7 +206,7 @@ let restore_saved_env env saved_env =
       Typing_inference_env.simple_merge
         env.Env.inference_env
         saved_env.Tast.inference_env;
-    Env.global_tpenv = saved_env.Tast.tpenv;
+    Env.tpenv = saved_env.Tast.tpenv;
     Env.fun_tast_info = saved_env.Tast.fun_tast_info;
   }
 

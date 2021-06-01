@@ -348,29 +348,29 @@ let get_tpenv env =
   | None -> TPEnv.empty
   | Some entry -> entry.Typing_per_cont_env.tpenv
 
-let get_global_tpenv env = env.global_tpenv
+let get_global_tpenv env = env.tpenv
 
 let get_pos_and_kind_of_generic env name =
   match TPEnv.get_with_pos name (get_tpenv env) with
   | Some r -> Some r
-  | None -> TPEnv.get_with_pos name env.global_tpenv
+  | None -> TPEnv.get_with_pos name env.tpenv
 
 let get_lower_bounds env name tyargs =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_lower_bounds tpenv name tyargs in
-  let global = TPEnv.get_lower_bounds env.global_tpenv name tyargs in
+  let global = TPEnv.get_lower_bounds env.tpenv name tyargs in
   TySet.union local global
 
 let get_upper_bounds env name tyargs =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_upper_bounds tpenv name tyargs in
-  let global = TPEnv.get_upper_bounds env.global_tpenv name tyargs in
+  let global = TPEnv.get_upper_bounds env.tpenv name tyargs in
   TySet.union local global
 
 let get_reified env name =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_reified tpenv name in
-  let global = TPEnv.get_reified env.global_tpenv name in
+  let global = TPEnv.get_reified env.tpenv name in
   match (local, global) with
   | (Reified, _)
   | (_, Reified) ->
@@ -383,19 +383,19 @@ let get_reified env name =
 let get_enforceable env name =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_enforceable tpenv name in
-  let global = TPEnv.get_enforceable env.global_tpenv name in
+  let global = TPEnv.get_enforceable env.tpenv name in
   local || global
 
 let get_newable env name =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_newable tpenv name in
-  let global = TPEnv.get_newable env.global_tpenv name in
+  let global = TPEnv.get_newable env.tpenv name in
   local || global
 
 let get_require_dynamic env name =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_require_dynamic tpenv name in
-  let global = TPEnv.get_require_dynamic env.global_tpenv name in
+  let global = TPEnv.get_require_dynamic env.tpenv name in
   local || global
 
 (* Get bounds that are both an upper and lower of a given generic *)
@@ -417,39 +417,33 @@ let env_with_tpenv env tpenv =
       };
   }
 
-let env_with_global_tpenv env global_tpenv = { env with global_tpenv }
+let env_with_global_tpenv env tpenv = { env with tpenv }
 
 let add_upper_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match deref ty with
     | (r, Tgeneric (formal_super, [])) ->
-      TPEnv.add_lower_bound
-        env.global_tpenv
-        formal_super
-        (mk (r, Tgeneric (name, [])))
+      TPEnv.add_lower_bound env.tpenv formal_super (mk (r, Tgeneric (name, [])))
     | (_r, Tgeneric (_formal_super, _targs)) ->
       (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env.global_tpenv
-    | _ -> env.global_tpenv
+      env.tpenv
+    | _ -> env.tpenv
   in
-  { env with global_tpenv = TPEnv.add_upper_bound tpenv name ty }
+  { env with tpenv = TPEnv.add_upper_bound tpenv name ty }
 
 let add_lower_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match deref ty with
     | (r, Tgeneric (formal_super, [])) ->
-      TPEnv.add_upper_bound
-        env.global_tpenv
-        formal_super
-        (mk (r, Tgeneric (name, [])))
+      TPEnv.add_upper_bound env.tpenv formal_super (mk (r, Tgeneric (name, [])))
     | (_r, Tgeneric (_formal_super, _targs)) ->
       (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env.global_tpenv
-    | _ -> env.global_tpenv
+      env.tpenv
+    | _ -> env.tpenv
   in
-  { env with global_tpenv = TPEnv.add_lower_bound tpenv name ty }
+  { env with tpenv = TPEnv.add_lower_bound tpenv name ty }
 
 (* Add a single new upper bound [ty] to generic parameter [name] in the local
  * type parameter environment of [env].
@@ -484,10 +478,9 @@ let is_generic_parameter env name =
   TPEnv.mem name (get_tpenv env) || SSet.mem name env.fresh_typarams
 
 let get_generic_parameters env =
-  TPEnv.get_names (TPEnv.union (get_tpenv env) env.global_tpenv)
+  TPEnv.get_tparam_names (TPEnv.union (get_tpenv env) env.tpenv)
 
-let get_tpenv_size env =
-  TPEnv.size (get_tpenv env) + TPEnv.size env.global_tpenv
+let get_tpenv_size env = TPEnv.size (get_tpenv env) + TPEnv.size env.tpenv
 
 let is_consistent env = TPEnv.is_consistent (get_tpenv env)
 
@@ -643,7 +636,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_is_ctor = false;
         file;
       };
-    global_tpenv = TPEnv.empty;
+    tpenv = TPEnv.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
     inference_env = Inf.empty_inference_env;
     allow_wildcards = false;
@@ -1445,7 +1438,7 @@ let save local_tpenv env =
   {
     Tast.tcopt = get_tcopt env;
     Tast.inference_env = env.inference_env;
-    Tast.tpenv = TPEnv.union local_tpenv env.global_tpenv;
+    Tast.tpenv = TPEnv.union local_tpenv env.tpenv;
     Tast.condition_types = env.genv.condition_types;
     Tast.pessimize = env.pessimize;
     Tast.fun_tast_info = env.fun_tast_info;

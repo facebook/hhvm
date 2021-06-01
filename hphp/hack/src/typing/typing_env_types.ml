@@ -61,7 +61,7 @@ type env = {
   in_support_dynamic_type_method_check: bool;
   tracing_info: Decl_counters.tracing_info option;
   (* A set of constraints that are global to a given method *)
-  global_tpenv: Type_parameter_env.t;
+  tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
   allow_wildcards: bool;

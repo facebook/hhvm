@@ -610,7 +610,7 @@ and localize_ft
   in
   (* Grab and store the old tpenvs *)
   let old_tpenv = Env.get_tpenv env in
-  let old_global_tpenv = env.global_tpenv in
+  let old_global_tpenv = env.tpenv in
   (* Always localize tparams so they are available for later Tast check *)
   let (env, tparams) =
     List.map_env env ft.ft_tparams (localize_tparam ~nested:false)

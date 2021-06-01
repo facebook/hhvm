@@ -21,20 +21,6 @@ let intersect_upper_bounds env r ul =
 let union_lower_bounds env r ll =
   Typing_union.union_list env r (TySet.elements ll)
 
-(*
- * Merge two type parameter environments. Given tpenv1 and tpenv2 we want
- * to compute a "merged" environment tpenv such that
- *     tpenv1 |- tpenv
- * and tpenv2 |- tpenv
- *
- * If a type parameter is defined only on one input, we do not include it in tpenv.
- * If it appears in both, supposing we have
- *     l1 <: T <: u1 in tpenv1
- * and l2 <: T <: u2 in tpenv2
- * with multiple lower bounds reduced to a union, and multiple upper bounds
- * reduced to an intersection, then the resulting tpenv will have
- *     l1&l2 <: T <: u1|u2
- *)
 let join_lower_bounds env l1 l2 =
   (* Special case: subset inclusion. Return subset
    * (e.g. if t|u <: T or t <: T then t <: T ) *)
@@ -65,6 +51,19 @@ let join_upper_bounds env u1 u2 =
     let (env, new_upper) = Typing_union.union env inter1 inter2 in
     (env, TySet.singleton new_upper)
 
+(* Merge two type parameter environments. Given tpenv1 and tpenv2 we want
+ * to compute a "merged" environment tpenv such that
+ *     tpenv1 |- tpenv
+ * and tpenv2 |- tpenv
+ *
+ * If a type parameter is defined only on one input, we do not include it in tpenv.
+ * If it appears in both, supposing we have
+ *     l1 <: T <: u1 in tpenv1
+ * and l2 <: T <: u2 in tpenv2
+ * with multiple lower bounds reduced to a union, and multiple upper bounds
+ * reduced to an intersection, then the resulting tpenv will have
+ *     l1&l2 <: T <: u1|u2
+ *)
 let join env tpenv1 tpenv2 =
   let merge_pos p1 p2 =
     if Pos_or_decl.equal p1 Pos_or_decl.none then

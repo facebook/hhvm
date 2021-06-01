@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b32d1df24646e287154d3cf8389b9f8c>>
+// @generated SignedSource<<49d8a0ef793ff8929d24f97746757c10>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -22,6 +22,8 @@ pub use typing_defs::*;
 pub use typing_kinding_defs::*;
 
 pub use crate::typing_set as ty_set;
+
+pub type TparamName<'a> = str;
 
 pub type TparamBounds<'a> = ty_set::TySet<'a>;
 

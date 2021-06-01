@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a444659a3bc48d5ddb76064f307b509>>
+// @generated SignedSource<<5e0c2f067e9a931044363f62972394de>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -77,7 +77,7 @@ pub struct Env<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tracing_info: Option<&'a decl_counters::TracingInfo<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub global_tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
+    pub tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub log_levels: s_map::SMap<'a, isize>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

@@ -1800,7 +1800,7 @@ and simplify_subtype_i
                   let rec try_upper_bounds_on_this up_objs env =
                     match up_objs with
                     | [] ->
-                      (* It's crucial that we don't lose updates to global_tpenv in env that were
+                      (* It's crucial that we don't lose updates to tpenv in env that were
                        * introduced by PHase.localize. TODO: avoid this requirement *)
                       invalid_env env
                     | ub_obj_typ :: up_objs ->

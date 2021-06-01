@@ -18,6 +18,8 @@ open Typing_kinding_defs
 module SN = Naming_special_names
 module TySet = Typing_set
 
+type tparam_name = string
+
 type tparam_bounds = TySet.t
 
 let empty_bounds = TySet.empty
@@ -130,7 +132,7 @@ let get_pos tpenv name =
   | None -> Pos_or_decl.none
   | Some (pos, _) -> pos
 
-let get_names tpenv = SMap.keys tpenv.tparams
+let get_tparam_names tpenv = SMap.keys tpenv.tparams
 
 let is_consistent tpenv = tpenv.consistent
 
@@ -191,8 +193,7 @@ let add_lower_bound_ tpenv name ty =
     in
     add ~def_pos name tpinfo tpenv
 
-(* Add a single new upper bound [ty] to generic parameter [name] in the local
-  * type parameter environment of [env].
+(* Add a single new upper bound [ty] to generic parameter [name].
   * If the optional [intersect] operation is supplied, then use this to avoid
   * adding redundant bounds by merging the type with existing bounds. This makes
   * sense because a conjunction of upper bounds
@@ -245,8 +246,7 @@ let add_upper_bound ?intersect env_tpenv name ty =
       }
       tpenv
 
-(* Add a single new upper lower [ty] to generic parameter [name] in the
- * local type parameter environment [env].
+(* Add a single new upper lower [ty] to generic parameter [name].
  * If the optional [union] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes
  * sense because a conjunction of lower bounds

@@ -4735,18 +4735,24 @@ let internal_compiler_error_msg =
     Error_message_sentinel.remediation_message
     Error_message_sentinel.please_file_a_bug_message
 
-let exception_occurred pos e =
+let exception_occurred ~typechecking_is_deferring pos e =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
-  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
+  HackEventLogger.type_check_exn_bug
+    ~typechecking_is_deferring
+    ~path:(Pos.filename pos)
+    ~pos:pos_str
+    ~e;
   Hh_logger.error
     "Exception while typechecking at position %s\n%s"
     pos_str
     (Exception.to_string e);
   add (Typing.err_code Typing.ExceptionOccurred) pos internal_compiler_error_msg
 
-let invariant_violation ~report_to_user ~desc pos telemetry =
+let invariant_violation
+    ~typechecking_is_deferring ~report_to_user ~desc pos telemetry =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
   HackEventLogger.invariant_violation_bug
+    ~typechecking_is_deferring
     ~path:(Pos.filename pos)
     ~pos:pos_str
     ~desc

@@ -291,9 +291,11 @@ let second_redecl_end _ _ = ()
 
 let type_check_primary_position_bug ~current_file:_ ~message:_ ~stack:_ = ()
 
-let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
+let type_check_exn_bug ~typechecking_is_deferring:_ ~path:_ ~pos:_ ~e:_ = ()
 
-let invariant_violation_bug ~path:_ ~pos:_ ~desc:_ _ = ()
+let invariant_violation_bug
+    ~typechecking_is_deferring:_ ~path:_ ~pos:_ ~desc:_ _ =
+  ()
 
 let type_check_end
     _ ~heap_size:_ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ =

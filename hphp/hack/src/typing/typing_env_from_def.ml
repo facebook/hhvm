@@ -58,7 +58,7 @@ let class_env ?origin ctx c =
     | Ast_defs.Cabstract
     | Ast_defs.Ctrait
     | Ast_defs.Cnormal ->
-      Typing_phase.localize_with_self env ~ignore_errors:true self
+      Typing_phase.localize_no_subst env ~ignore_errors:true self
   in
   let env = Env.set_self env self_id self_ty in
   let env =

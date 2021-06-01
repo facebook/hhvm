@@ -154,7 +154,7 @@ let visitor =
       | As (e, hint, _) ->
         let hint_ty = Env.hint_to_ty env hint in
         let (env, hint_ty) =
-          Env.localize_with_self env ~ignore_errors:true hint_ty
+          Env.localize_no_subst env ~ignore_errors:true hint_ty
         in
         let ctx' =
           if is_awaitable env hint_ty then

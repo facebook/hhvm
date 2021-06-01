@@ -682,7 +682,7 @@ let closure_check_param env param =
   | Some hty ->
     let hint_pos = fst hty in
     let (env, hty) =
-      Phase.localize_hint_with_self env ~ignore_errors:false hty
+      Phase.localize_hint_no_subst env ~ignore_errors:false hty
     in
     let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
     let env =
@@ -747,14 +747,14 @@ let type_capability env ctxs unsafe_ctxs default_pos =
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
   let (env, cap_ty) =
     match cap with
-    | CapTy ty -> Phase.localize_with_self env ~ignore_errors:false ty
+    | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
     | CapDefaults p -> (env, MakeType.default_capability p)
   in
   if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
     Typing_coeffects.validate_capability env decl_pos cap_ty;
   let (env, unsafe_cap_ty) =
     match snd @@ cc env.decl_env unsafe_ctxs default_pos with
-    | CapTy ty -> Phase.localize_with_self env ~ignore_errors:false ty
+    | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
     | CapDefaults p ->
       (* default is no unsafe capabilities *)
       (env, MakeType.mixed (Reason.Rhint p))
@@ -1600,7 +1600,7 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
             ( Pos_or_decl.of_raw_pos param.param_pos,
               SN.Capabilities.accessGlobals )
             []
-          |> Phase.localize_with_self env ~ignore_errors:false
+          |> Phase.localize_no_subst env ~ignore_errors:false
         in
         with_special_coeffects env cap pure @@ fun env ->
         expr ?expected env e ~allow_awaitable:(*?*) false |> triple_to_pair
@@ -2973,7 +2973,7 @@ and expr_
     | None -> make_result env p (Aast.Id id) (Typing_utils.mk_tany env cst_pos)
     | Some const ->
       let (env, ty) =
-        Phase.localize_with_self env ~ignore_errors:true const.cd_type
+        Phase.localize_no_subst env ~ignore_errors:true const.cd_type
       in
       make_result env p (Aast.Id id) ty)
   | Method_id (instance, meth) ->
@@ -3873,7 +3873,7 @@ and expr_
         env
     in
     let (env, ty) =
-      Phase.localize_hint_with_self env ~ignore_errors:false hint
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree env p et
@@ -3892,7 +3892,7 @@ and expr_
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
     let (env, hint_ty) =
-      Phase.localize_hint_with_self env ~ignore_errors:false hint
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -4430,7 +4430,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       (* When creating a closure, the 'this' type will mean the
        * late bound type of the current enclosing class
        *)
-      let (env, h) = Phase.localize_hint_with_self env ~ignore_errors:false h in
+      let (env, h) = Phase.localize_hint_no_subst env ~ignore_errors:false h in
       let env =
         Typing_coercion.coerce_type
           pos
@@ -4468,7 +4468,7 @@ and closure_bind_variadic env vparam variadic_ty =
     | Some hint ->
       let pos = fst hint in
       let (env, h) =
-        Phase.localize_hint_with_self env ~ignore_errors:false hint
+        Phase.localize_hint_no_subst env ~ignore_errors:false hint
       in
       let env =
         Typing_coercion.coerce_type
@@ -5413,7 +5413,7 @@ and arraykey_value
 and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in
   let (env, env_parent) =
-    Phase.localize_with_self env ~ignore_errors:true env_parent
+    Phase.localize_no_subst env ~ignore_errors:true env_parent
   in
   let (env, _tcid, _tal, tel, typed_unpack_element, parent, fty) =
     new_object
@@ -6819,7 +6819,7 @@ and class_expr
            * type of the most concrete class that the trait has
            * "require extend"-ed *)
           let (env, parent_ty) =
-            Phase.localize_with_self env ~ignore_errors:true parent_ty
+            Phase.localize_no_subst env ~ignore_errors:true parent_ty
           in
           make_result env [] Aast.CIparent parent_ty)
       | _ ->
@@ -6831,7 +6831,7 @@ and class_expr
           | Some parent -> parent
         in
         let (env, parent) =
-          Phase.localize_with_self env ~ignore_errors:true parent
+          Phase.localize_no_subst env ~ignore_errors:true parent
         in
         (* parent is still technically the same object. *)
         make_result env [] Aast.CIparent parent)
@@ -6844,7 +6844,7 @@ and class_expr
         | Some parent -> parent
       in
       let (env, parent) =
-        Phase.localize_with_self env ~ignore_errors:true parent
+        Phase.localize_no_subst env ~ignore_errors:true parent
       in
       (* parent is still technically the same object. *)
       make_result env [] Aast.CIparent parent)
@@ -7271,7 +7271,7 @@ and call
               | _ -> dty
             in
             let (env, lty) =
-              Phase.localize_with_self env ~ignore_errors:true dty
+              Phase.localize_no_subst env ~ignore_errors:true dty
             in
             let hi = (pos, lty) in
             let te = (hi, EnumAtom atom_name) in
@@ -7847,7 +7847,7 @@ and condition
     in
     if is_instance_var (Tast.to_nast_expr ivar) then
       let (env, hint_ty) =
-        Phase.localize_hint_with_self env ~ignore_errors:false h
+        Phase.localize_hint_no_subst env ~ignore_errors:false h
       in
       let (env, hint_ty) =
         if not tparamet then
@@ -8030,7 +8030,7 @@ let typedef_def ctx typedef =
     typedef
   in
   let (env, ty) =
-    Phase.localize_hint_with_self
+    Phase.localize_hint_no_subst
       env
       ~ignore_errors:false
       ~report_cycle:(t_pos, t_name)
@@ -8040,7 +8040,7 @@ let typedef_def ctx typedef =
     match tcstr with
     | Some tcstr ->
       let (env, cstr) =
-        Phase.localize_hint_with_self env ~ignore_errors:false tcstr
+        Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
       in
       Typing_ops.sub_type
         t_pos

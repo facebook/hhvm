@@ -124,7 +124,7 @@ let check_param : env -> Nast.fun_param -> unit =
   | Some hint ->
     let (hint_pos, _) = hint in
     let (env, ty) =
-      Typing_phase.localize_hint_with_self env ~ignore_errors:true hint
+      Typing_phase.localize_hint_no_subst env ~ignore_errors:true hint
     in
     check_memoizable env hint_pos ty
 

@@ -799,9 +799,9 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
   in
   (env, tyl)
 
-(* Like localize_with_self, but uses the supplied kind, enabling support
+(* Like localize_no_subst, but uses the supplied kind, enabling support
    for higher-kinded types *)
-let localize_with_self_and_kind env ~on_error ty kind =
+let localize_no_subst_and_kind env ~on_error ty kind =
   let ety_env = empty_expand_env_with_on_error on_error in
   localize_with_kind ~ety_env env ty kind
 
@@ -825,7 +825,7 @@ let localize_targ_with_kind
     let ty = Decl_hint.hint env.decl_env hint in
     if check_well_kinded then Kinding.Simple.check_well_kinded env ty nkind;
     let (env, ty) =
-      localize_with_self_and_kind
+      localize_no_subst_and_kind
         env
         ~on_error:(Errors.invalid_type_hint hint_pos)
         ty
@@ -962,7 +962,7 @@ let localize_targs
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env
  *)
-let localize_with_self_ env ~on_error ?report_cycle ty =
+let localize_no_subst_ env ~on_error ?report_cycle ty =
   let ety_env =
     {
       empty_expand_env with
@@ -973,10 +973,10 @@ let localize_with_self_ env ~on_error ?report_cycle ty =
   in
   localize env ty ~ety_env
 
-let localize_hint_with_self env ~ignore_errors ?report_cycle h =
+let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
   let (pos, _) = h in
   let h = Decl_hint.hint env.decl_env h in
-  localize_with_self_
+  localize_no_subst_
     env
     ~on_error:
       ( if ignore_errors then
@@ -986,12 +986,8 @@ let localize_hint_with_self env ~ignore_errors ?report_cycle h =
     ?report_cycle
     h
 
-let localize_hint ~ety_env env hint =
-  let hint_ty = Decl_hint.hint env.decl_env hint in
-  localize ~ety_env env hint_ty
-
-let localize_with_self env ~ignore_errors ty =
-  localize_with_self_
+let localize_no_subst env ~ignore_errors ty =
+  localize_no_subst_
     env
     ~on_error:
       ( if ignore_errors then
@@ -1001,8 +997,8 @@ let localize_with_self env ~ignore_errors ty =
       )
     ty
 
-let localize_possibly_enforced_with_self env ~ignore_errors ety =
-  let (env, et_type) = localize_with_self env ~ignore_errors ety.et_type in
+let localize_possibly_enforced_no_subst env ~ignore_errors ety =
+  let (env, et_type) = localize_no_subst env ~ignore_errors ety.et_type in
   (env, { ety with et_type })
 
 let localize_targs_and_check_constraints
@@ -1074,8 +1070,8 @@ let localize_and_add_where_constraints ~ety_env (env : env) where_constraints =
 (* Helper functions *)
 
 let sub_type_decl env ty1 ty2 on_error =
-  let (env, ty1) = localize_with_self env ~ignore_errors:true ty1 in
-  let (env, ty2) = localize_with_self env ~ignore_errors:true ty2 in
+  let (env, ty1) = localize_no_subst env ~ignore_errors:true ty1 in
+  let (env, ty2) = localize_no_subst env ~ignore_errors:true ty2 in
   TUtils.sub_type env ty1 ty2 on_error
 
 let add_constraints env constraints on_error =
@@ -1107,6 +1103,6 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
   let env = localize_and_add_where_constraints ~ety_env env where_constraints in
   env
 
-let () = TUtils.localize_with_self_ref := localize_with_self
+let () = TUtils.localize_no_subst_ref := localize_no_subst
 
 let () = TUtils.localize_ref := localize

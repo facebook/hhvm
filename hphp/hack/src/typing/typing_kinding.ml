@@ -205,7 +205,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in
     let (env, locl_ty) =
-      TUtils.localize_with_self env ~ignore_errors:true decl_ty
+      TUtils.localize_no_subst env ~ignore_errors:true decl_ty
     in
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->

@@ -44,7 +44,7 @@ let parameter_type_collector =
       | None -> self#zero
       | Some hint ->
         let (_env, ty) =
-          Phase.localize_hint_with_self tenv ~ignore_errors:true hint
+          Phase.localize_hint_no_subst tenv ~ignore_errors:true hint
         in
         if Typing_defs.equal_locl_ty inferred_hint ty then
           self#zero

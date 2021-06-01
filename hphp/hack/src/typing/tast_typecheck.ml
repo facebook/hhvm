@@ -219,7 +219,7 @@ let localize env hint =
   | Some hint ->
     let pos = fst hint in
     let (_env, ty) =
-      Phase.localize_hint_with_self env ~ignore_errors:false hint
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
     (pos, ty)
 

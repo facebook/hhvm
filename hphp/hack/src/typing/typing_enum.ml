@@ -156,14 +156,12 @@ let enum_class_check env tc consts const_types =
         interface = ty_interface;
       } ->
     let (env, ty_exp) =
-      Phase.localize_with_self env ~ignore_errors:false ty_exp
+      Phase.localize_no_subst env ~ignore_errors:false ty_exp
     in
     let (env, ty_interface) =
       match ty_interface with
       | Some dty ->
-        let (env, lty) =
-          Phase.localize_with_self env ~ignore_errors:false dty
-        in
+        let (env, lty) = Phase.localize_no_subst env ~ignore_errors:false dty in
         (env, Some lty)
       | None -> (env, None)
     in
@@ -182,7 +180,7 @@ let enum_class_check env tc consts const_types =
       match ty_constraint with
       | None -> env
       | Some ty ->
-        let (env, ty) = Phase.localize_with_self env ~ignore_errors:false ty in
+        let (env, ty) = Phase.localize_no_subst env ~ignore_errors:false ty in
         let env =
           enum_check_type
             env

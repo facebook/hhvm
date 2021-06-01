@@ -1415,10 +1415,7 @@ and simplify_subtype_i
                           match c with
                           | Ast_defs.Constraint_as ->
                             let (_env, ty) =
-                              Phase.localize_with_self
-                                env
-                                ~ignore_errors:true
-                                ty
+                              Phase.localize_no_subst env ~ignore_errors:true ty
                             in
                             Some ty
                           | _ -> None)

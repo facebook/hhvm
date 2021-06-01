@@ -51,7 +51,7 @@ module Capabilities = struct
   let mk special_name env =
     let r = Reason.Rnone in
     Typing_make_type.apply r (Reason.to_pos r, special_name) []
-    |> Typing_phase.localize_with_self ~ignore_errors:true env
+    |> Typing_phase.localize_no_subst ~ignore_errors:true env
 end
 
 let enforce_static_property_access =

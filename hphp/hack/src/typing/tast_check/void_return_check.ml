@@ -62,7 +62,7 @@ let validate_state fun_kind env s =
   let ret_type_hint_locl_opt =
     Option.map s.return_type ~f:(fun ty_hint ->
         Tast_env.hint_to_ty env ty_hint
-        |> Tast_env.localize_with_self env ~ignore_errors:true
+        |> Tast_env.localize_no_subst env ~ignore_errors:true
         |> snd)
   in
   let annotated_with_ret_any =

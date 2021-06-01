@@ -595,7 +595,7 @@ let rec obj_get_concrete_ty
           when not is_method ->
           ( if read_context then
             let (env, locl_ty) =
-              Phase.localize_with_self ~ignore_errors:true env ty
+              Phase.localize_no_subst ~ignore_errors:true env ty
             in
             Typing_dynamic.check_property_sound_for_dynamic_read
               ~on_error:Errors.private_property_is_not_dynamic

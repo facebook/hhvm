@@ -306,7 +306,7 @@ let to_collection env shape_ty res return_type =
                       begin
                         match Env.get_const env class_ mid with
                         | Some const ->
-                          Typing_phase.localize_with_self
+                          Typing_phase.localize_no_subst
                             env
                             ~ignore_errors:true
                             const.cc_type

@@ -143,7 +143,7 @@ let make_param_local_ty env decl_hint param =
           env
           ty
       in
-      Phase.localize_with_self env ~ignore_errors:false ty
+      Phase.localize_no_subst env ~ignore_errors:false ty
   in
   let ty =
     match get_node ty with
@@ -389,7 +389,7 @@ let fun_def ctx fd :
           (env, Typing_return.make_default_return ~is_method:false env f.f_name)
         | Some ty ->
           let localize env ty =
-            Phase.localize_with_self env ~ignore_errors:false ty
+            Phase.localize_no_subst env ~ignore_errors:false ty
           in
           Typing_return.make_return_type localize env ty
       in
@@ -1227,7 +1227,7 @@ let typeconst_def
         { c_atc_as_constraint; c_atc_super_constraint; c_atc_default = Some ty }
       ->
       let (env, ty) =
-        Phase.localize_hint_with_self
+        Phase.localize_hint_no_subst
           ~ignore_errors:false
           ~report_cycle:(pos, name)
           env
@@ -1237,7 +1237,7 @@ let typeconst_def
         match c_atc_as_constraint with
         | Some as_ ->
           let (env, as_) =
-            Phase.localize_hint_with_self ~ignore_errors:false env as_
+            Phase.localize_hint_no_subst ~ignore_errors:false env as_
           in
           Type.sub_type
             pos
@@ -1252,7 +1252,7 @@ let typeconst_def
         match c_atc_super_constraint with
         | Some super ->
           let (env, super) =
-            Phase.localize_hint_with_self ~ignore_errors:false env super
+            Phase.localize_hint_no_subst ~ignore_errors:false env super
           in
           Type.sub_type
             pos
@@ -1266,10 +1266,10 @@ let typeconst_def
       env
     | TCPartiallyAbstract { c_patc_constraint = cstr; c_patc_type = ty } ->
       let (env, cstr) =
-        Phase.localize_hint_with_self ~ignore_errors:false env cstr
+        Phase.localize_hint_no_subst ~ignore_errors:false env cstr
       in
       let (env, ty) =
-        Phase.localize_hint_with_self
+        Phase.localize_hint_no_subst
           ~ignore_errors:false
           ~report_cycle:(pos, name)
           env
@@ -1278,7 +1278,7 @@ let typeconst_def
       Type.sub_type pos Reason.URtypeconst_cstr env ty cstr Errors.unify_error
     | TCConcrete { c_tc_type = ty } ->
       let (env, _ty) =
-        Phase.localize_hint_with_self
+        Phase.localize_hint_no_subst
           ~ignore_errors:false
           ~report_cycle:(pos, name)
           env
@@ -1361,7 +1361,7 @@ let class_const_def ~in_enum_class c env cc =
       let ty = Decl_hint.hint env.decl_env h in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
       let (env, ty) =
-        Phase.localize_possibly_enforced_with_self env ~ignore_errors:false ty
+        Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in
       (* Removing the HH\MemberOf wrapper in case of enum classes so the
        * following call to expr_* has the right expected type
@@ -1472,7 +1472,7 @@ let class_var_def ~is_static cls env cv =
     | Some decl_cty ->
       let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
       let (env, cty) =
-        Phase.localize_possibly_enforced_with_self
+        Phase.localize_possibly_enforced_no_subst
           env
           ~ignore_errors:false
           decl_cty
@@ -1690,7 +1690,7 @@ let class_def_ env c tc =
   check_no_generic_static_property env tc;
   let check_where_constraints env ((p, _hint), decl_ty) =
     let (env, locl_ty) =
-      Phase.localize_with_self env ~ignore_errors:false decl_ty
+      Phase.localize_no_subst env ~ignore_errors:false decl_ty
     in
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls, _, tyl) ->
@@ -1746,7 +1746,7 @@ let class_def_ env c tc =
       let env =
         List.fold (extends @ implements) ~init:env ~f:(fun env (_, ty) ->
             let (env, lty) =
-              Phase.localize_with_self env ~ignore_errors:true ty
+              Phase.localize_no_subst env ~ignore_errors:true ty
             in
             match get_node lty with
             | Tclass ((_, name), _, _) ->
@@ -1989,7 +1989,7 @@ let gconst_def ctx cst =
       let ty = Decl_hint.hint env.decl_env hint in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
       let (env, dty) =
-        Phase.localize_possibly_enforced_with_self env ~ignore_errors:false ty
+        Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in
       let (env, te, value_type) =
         let expected =
@@ -2030,9 +2030,7 @@ let gconst_def ctx cst =
 let record_field env f =
   let (id, hint, e) = f in
   let (p, _) = hint in
-  let (env, cty) =
-    Phase.localize_hint_with_self env ~ignore_errors:false hint
-  in
+  let (env, cty) = Phase.localize_hint_no_subst env ~ignore_errors:false hint in
   let expected = ExpectedTy.make p Reason.URhint cty in
   match e with
   | Some e ->

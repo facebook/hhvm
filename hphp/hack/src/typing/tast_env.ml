@@ -44,9 +44,7 @@ let print_error_ty = Typing_print.error
 let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
   match phase_ty with
   | Typing_defs.DeclTy ty ->
-    let (env, ty) =
-      Typing_phase.localize_with_self env ~ignore_errors:true ty
-    in
+    let (env, ty) = Typing_phase.localize_no_subst env ~ignore_errors:true ty in
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
   | Typing_defs.LoclTy ty ->
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
@@ -152,7 +150,7 @@ let hint_to_ty env = Decl_hint.hint env.Typing_env_types.decl_env
 
 let localize env ety_env = Typing_phase.localize ~ety_env env
 
-let localize_with_self = Typing_phase.localize_with_self
+let localize_no_subst = Typing_phase.localize_no_subst
 
 let get_upper_bounds = Typing_env.get_upper_bounds
 

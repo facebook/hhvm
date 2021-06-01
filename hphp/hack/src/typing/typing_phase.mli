@@ -14,41 +14,69 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-(** Transforms a declaration phase type ({!Typing_defs.decl_ty})
-    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
-    Performs no substitutions of generics and initializes the late static bound
-    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
-    {!get_self}).
+(**
+ Take a declaration phase type and use [ety_env] to transform it into a localized type.
 
-    This is mostly provided as legacy support for {!AutocompleteService}, and
-    should not be considered a general mechanism for transforming a {decl_ty} to
-    a {!Tast.ty}. In general you should always ask youself what type parameter
-    substitution to provide, as well as what substitution for [this].
+ - Desugar [Tmixed], [Toption] and [Tlike] types into unions.
 
-    {!ignore_errors} silences errors because those errors have already fired
-    and/or are not appropriate at the time we call localize. *)
-val localize_with_self : env -> ignore_errors:bool -> decl_ty -> env * locl_ty
+ - Transform [Tapply] to [Tclass] (for classish types), or [Tnewtype] (for opaque
+   type defs outside their defining file), else expand aliases or opaque
+   types within their defining file.
 
-(** Transforms a possibly enforced declaration phase type ({!Typing_defs.decl_ty})
-    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
-    Performs no substitutions of generics and initializes the late static bound
-    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
-    {!get_self}).
+ - Replace [Tthis] by [ety_env.this_ty].
 
-    This is mostly provided as legacy support for {!AutocompleteService}, and
-    should not be considered a general mechanism for transforming a {decl_ty} to
-    a {!Tast.ty}. In general you should always ask youself what type parameter
-    substitution to provide, as well as what substitution for [this].
+ - Replace [Tgeneric] by the type specified in [ety_env.substs], if present;
+   otherwise leave as generic.
 
-    {!ignore_errors} silences errors because those errors have already fired
-    and/or are not appropriate at the time we call localize. *)
-val localize_possibly_enforced_with_self :
+ - Expand [Taccess] type constant accesses through concrete classes.
+
+ Use this function to localize types outside the body of the method being
+ type-checked whose generic parameters and [this] type must be instantiated to
+ explicit types or fresh type variables. Use [localize_no_subst] instead for types
+ whose generic parameters and [this] type should be left as is.
+
+ The following errors are detected during localization:
+
+ - Bad type constant access e.g. [AbstractClass::T]
+
+ - Cyclic types
+
+ Errors are handled using [ety_env.on_error]. If you want to ignore errors
+ during localization, set this to [Errors.ignore_error]. *)
+val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+
+(**
+ Transform a declaration phase type into a localized type, with no substitution
+ for generic parameters and [this].
+
+ [ignore_errors] silences errors because those errors have already fired
+ and/or are not appropriate at the time we call localize. *)
+val localize_no_subst : env -> ignore_errors:bool -> decl_ty -> env * locl_ty
+
+(**
+ Transform a declaration phase type with enforcement flag
+ into a localized type, with no substitution for generic parameters and [this].
+
+ [ignore_errors] silences errors because those errors have already fired
+ and/or are not appropriate at the time we call localize. *)
+val localize_possibly_enforced_no_subst :
   env ->
   ignore_errors:bool ->
   decl_possibly_enforced_ty ->
   env * locl_possibly_enforced_ty
 
-val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+(**
+ Transform a type hint into a localized type, with no substitution for generic
+ parameters and [this].
+
+ [ignore_errors] silences errors because those errors have already fired
+ and/or are not appropriate at the time we call localize. *)
+val localize_hint_no_subst :
+  env ->
+  ignore_errors:bool ->
+  ?report_cycle:Pos.t * string ->
+  Aast.hint ->
+  env * locl_ty
 
 val localize_ft :
   ?instantiation:method_instantiation ->
@@ -57,25 +85,6 @@ val localize_ft :
   env ->
   decl_fun_type ->
   env * locl_fun_type
-
-(** Transforms a type hing ({!Aast.hint}) into a localized type
-    ({!Typing_defs.locl_ty} = {!Tast.ty}).
-    Performs no substitutions of generics and initializes the late static bound
-    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
-    {!get_self}).
-
-    This should not be considered a general mechanism for transforming a {decl_ty} to
-    a {!Tast.ty}. In general you should always ask youself what type parameter
-    substitution to provide, as well as what substitution for [this].
-
-    {!ignore_errors} silences errors because those errors have already fired
-    and/or are not appropriate at the time we call localize. *)
-val localize_hint_with_self :
-  env ->
-  ignore_errors:bool ->
-  ?report_cycle:Pos.t * string ->
-  Aast.hint ->
-  env * locl_ty
 
 (** Declare and localize the type arguments to a constructor or function, given
     information about the declared type parameters in `decl_tparam list`. If no
@@ -126,8 +135,6 @@ val localize_targs_and_check_constraints :
 (** Declare and localize a single explicit type argument *)
 val localize_targ :
   check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ
-
-val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
 
 val sub_type_decl :
   env -> decl_ty -> decl_ty -> Errors.error_from_reasons_callback -> env

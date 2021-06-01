@@ -442,7 +442,7 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
 let get_func_details_for env ty =
   let (env, ty) =
     match ty with
-    | DeclTy ty -> Tast_env.localize_with_self env ~ignore_errors:true ty
+    | DeclTy ty -> Tast_env.localize_no_subst env ~ignore_errors:true ty
     | LoclTy ty -> (env, ty)
   in
   match Typing_defs.get_node ty with

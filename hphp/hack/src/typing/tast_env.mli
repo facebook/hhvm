@@ -156,7 +156,7 @@ val localize :
     {!quiet} silences certain errors because those errors have already fired
     and/or are not appropriate at the time we call localize.
     *)
-val localize_with_self :
+val localize_no_subst :
   env -> ignore_errors:bool -> Typing_defs.decl_ty -> env * Tast.ty
 
 (** Get the upper bounds of the type parameter with the given name.

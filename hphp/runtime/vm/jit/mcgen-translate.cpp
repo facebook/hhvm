@@ -55,6 +55,8 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/zend/zend-strtod.h"
+
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace mcgen {
@@ -619,6 +621,7 @@ void checkRetranslateAll(bool force) {
       std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
       s_retranslateAllThread = std::thread([] {
         rds::local::init();
+        zend_get_bigint_data();
         SCOPE_EXIT { rds::local::fini(); };
         retranslateAll();
       });
@@ -629,6 +632,7 @@ void checkRetranslateAll(bool force) {
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
       rds::local::init();
+      zend_get_bigint_data();
       SCOPE_EXIT { rds::local::fini(); };
       retranslateAll();
     });

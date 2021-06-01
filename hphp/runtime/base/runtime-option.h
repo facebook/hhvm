@@ -1113,7 +1113,7 @@ struct RuntimeOption {
    *     sample rate specified by EmitLoggingArraySampleRate. If the    \
    *     sample rate is 0, logging arrays are never constructed.        \
    *     Logging arrays are only created before RTA has begun. */       \
-  F(int32_t, BespokeArrayLikeMode, 0)                                   \
+  F(int32_t, BespokeArrayLikeMode, 2)                                   \
   F(uint64_t, BespokeEscalationSampleRate, 0)                           \
   F(uint64_t, EmitLoggingArraySampleRate, 17)                           \
   F(string, ExportLoggingArrayDataPath, "")                             \

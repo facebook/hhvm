@@ -87,12 +87,21 @@ bool StructDict::checkInvariants() const {
 
 size_t StructLayout::typeOffsetForSlot(Slot slot) const {
   assertx(slot < numFields());
-  return sizeof(StructDict) + numFields() + slot * sizeof(DataType);
+  return sizeof(StructDict) + slot * sizeof(DataType);
 }
 
 size_t StructLayout::valueOffsetForSlot(Slot slot) const {
   assertx(slot < numFields());
   return (m_value_offset_in_values + slot) * sizeof(Value);
+}
+
+size_t StructLayout::positionOffset() const {
+  return sizeof(StructDict) + numFields();
+}
+
+Slot StructLayout::slotForTypeOffset(size_t offset) {
+  static_assert(sizeof(DataType) == 1);
+  return offset - sizeof(StructDict);
 }
 
 // As documented in bespoke/layout.h, bespoke layout bytes are constrained to
@@ -234,12 +243,12 @@ size_t StructDict::numFields() const {
   return m_extra_lo8;
 }
 
-size_t StructDict::positionOffset() {
-  return sizeof(StructDict);
+size_t StructDict::positionOffset() const {
+  return sizeof(StructDict) + numFields();
 }
 
 size_t StructDict::typeOffset() const {
-  return sizeof(StructDict) + numFields();
+  return sizeof(StructDict);
 }
 
 size_t StructDict::valueOffset() const {
@@ -255,7 +264,7 @@ void StructLayout::createColoringHashMap() const {
     auto const color = key->color();
     assertx(color != StringData::kInvalidColor);
     assertx(table[color].str == nullptr);
-    auto const slot = keySlot(key);
+    auto const slot = keySlotNonStatic(key);
     auto const typeOffset = safe_cast<uint16_t>(typeOffsetForSlot(slot));
     auto const valueOffset = safe_cast<uint16_t>(valueOffsetForSlot(slot));
     assertx(slot != kInvalidSlot);
@@ -291,6 +300,7 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   auto fail = false;
   auto const types = result->rawTypes();
   auto const vals = result->rawValues();
+  auto pos = result->rawPositions();
   MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) -> bool {
     if (!tvIsString(k)) {
       fail = true;
@@ -301,7 +311,8 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
       fail = true;
       return true;
     }
-    result->addNextSlot(slot);
+    *pos++ = slot;
+    result->m_size++;
     types[slot] = type(v);
     vals[slot] = val(v);
     tvIncRefGen(v);
@@ -348,9 +359,7 @@ StructDict* StructDict::MakeStructDict(
 
   result->m_size = size;
   auto const positions = result->rawPositions();
-  assertx(uintptr_t(positions) % 8 == 0);
-  assertx(uintptr_t(slots) % 8 == 0);
-  memcpy8(positions, slots, size);
+  memcpy(positions, slots, size);
 
   auto const types = result->rawTypes();
   auto const vals = result->rawValues();

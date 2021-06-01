@@ -46,7 +46,6 @@ struct StructDict : public BespokeArray {
       const uint8_t* slots, const TypedValue* vals);
 
   uint8_t sizeIndex() const;
-  static size_t positionOffset();
   static size_t sizeFromLayout(const StructLayout*);
 
   static const StructDict* As(const ArrayData* ad);
@@ -64,6 +63,7 @@ struct StructDict : public BespokeArray {
   size_t numFields() const;
   size_t typeOffset() const;
   size_t valueOffset() const;
+  size_t positionOffset() const;
 
   const DataType* rawTypes() const;
   DataType* rawTypes();
@@ -124,10 +124,13 @@ struct StructLayout : public ConcreteLayout {
   KeyOrder keyOrder() const { return m_key_order; }
   size_t typeOffset() const { return typeOffsetForSlot(0); }
   size_t valueOffset() const { return valueOffsetForSlot(0); }
+  size_t positionOffset() const;
 
   // Offset of DataType and Value for 'slot' from beginning of a StructDict.
   size_t typeOffsetForSlot(Slot slot) const;
   size_t valueOffsetForSlot(Slot slot) const;
+
+  static Slot slotForTypeOffset(size_t offset);
 
   ArrayLayout appendType(Type val) const override;
   ArrayLayout removeType(Type key) const override;

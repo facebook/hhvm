@@ -465,23 +465,30 @@ void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
-  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const arr = inst->src(0);
+  auto const rarr = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<InitStructPositions>();
   auto& v = vmain(env);
 
-  v << storel{v.cns(extra->numSlots), arr[ArrayData::offsetofSize()]};
+  v << storel{v.cns(extra->numSlots), rarr[ArrayData::offsetofSize()]};
+
+  auto const layout = arr->type().arrSpec().layout();
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
 
   auto constexpr kSlotsPerStore = 8;
-  for (auto i = 0; i < extra->numSlots; i += kSlotsPerStore) {
+  auto const padBytes = slayout->positionOffset() & 0x7;
+  for (auto i = 0; i < extra->numSlots + padBytes; i += kSlotsPerStore) {
     uint64_t slots = 0;
     for (auto j = 0; j < kSlotsPerStore; j++) {
-      auto const index = i + j;
-      auto const slot = index < extra->numSlots
+      auto const index = i + j - padBytes;
+      auto const slot = 0 <= index && index < extra->numSlots
         ? safe_cast<uint8_t>(extra->slots[index])
         : static_cast<uint8_t>(KindOfUninit);
       slots = slots | (safe_cast<uint64_t>(slot) << (j * 8));
     }
-    v << store{v.cns(slots), arr[StructDict::positionOffset() + i]};
+    auto const offset = slayout->positionOffset() + i - padBytes;
+    assertx((offset % kSlotsPerStore) == 0);
+    v << store{v.cns(slots), rarr[offset]};
   }
 }
 

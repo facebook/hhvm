@@ -594,11 +594,13 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
 }
 
 void logBespokeDispatch(const BespokeArray* bad, const char* fn) {
-  DEBUG_ONLY auto const sk = getSrcKey();
-  DEBUG_ONLY auto const layout = Layout::FromIndex(bad->layoutIndex());
-  TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
-            sk.valid() ? sk.getSymbol().data() : "(unknown)",
-            layout->describe().data(), fn);
+  if (Trace::moduleEnabled(Trace::bespoke, 6)) {
+    DEBUG_ONLY auto const sk = getSrcKey();
+    DEBUG_ONLY auto const layout = Layout::FromIndex(bad->layoutIndex());
+    TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
+              sk.valid() ? sk.getSymbol().data() : "(unknown)",
+              layout->describe().data(), fn);
+  }
 }
 
 BespokeArray* maybeMonoify(ArrayData* ad) {

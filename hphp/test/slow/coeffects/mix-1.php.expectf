@@ -1,0 +1,15 @@
+write_props_read_globals -> write_props_read_globals: ok
+write_props_read_globals -> write_props_globals:
+Warning: Call to write_props_globals() requires [write_props] coeffects but write_props_read_globals() provided [write_props] in %s on line 4
+ ok
+write_props_read_globals -> defaults:
+Warning: Call to defaults() requires [defaults] coeffects but write_props_read_globals() provided [write_props] in %s on line 4
+ ok
+write_props_globals -> write_props_read_globals: ok
+write_props_globals -> write_props_globals: ok
+write_props_globals -> defaults:
+Warning: Call to defaults() requires [defaults] coeffects but write_props_globals() provided [write_props] in %s on line 8
+ ok
+defaults -> write_props_read_globals: ok
+defaults -> write_props_globals: ok
+defaults -> defaults: ok

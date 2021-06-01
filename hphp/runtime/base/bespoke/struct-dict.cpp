@@ -196,10 +196,33 @@ uint32_t StructLayout::extraInitializer() const {
   return m_extra_initializer;
 }
 
+Slot StructLayout::keySlotStatic(LayoutIndex index, const StringData* key) {
+  auto const& entry = s_hashTableSet[index.raw][key->color()];
+  auto const DEBUG_ONLY layout = StructLayout::As(Layout::FromIndex(index));
+  if (entry.str == key) {
+    auto const slot = slotForTypeOffset(entry.typeOffset);
+    if (debug) {
+      auto const DEBUG_ONLY it = layout->m_key_to_slot.find(StaticKey{key});
+      assertx(it != layout->m_key_to_slot.end() && it->second == slot);
+    }
+    return slot;
+  } else {
+    assertx(layout->m_key_to_slot.find(StaticKey{key}) == layout->m_key_to_slot.end());
+    return kInvalidSlot;
+  }
+}
+
 Slot StructLayout::keySlot(const StringData* key) const {
   if (!key->isStatic()) return keySlotNonStatic(key);
-  auto const it = m_key_to_slot.find(StaticKey{key});
-  return it == m_key_to_slot.end() ? kInvalidSlot : it->second;
+  return keySlotStatic(index(), key);
+}
+
+Slot StructLayout::keySlot(LayoutIndex index, const StringData* key) {
+  if (!key->isStatic()) {
+    auto const layout = StructLayout::As(Layout::FromIndex(index));
+    return layout->keySlotNonStatic(key);
+  }
+  return keySlotStatic(index, key);
 }
 
 NEVER_INLINE
@@ -475,7 +498,7 @@ NEVER_INLINE
 TypedValue StructDict::NvGetStrNonStatic(
     const StructDict* sad, const StringData* k) {
   auto const structLayout = sad->layout();
-  auto const slot = structLayout->keySlot(k);
+  auto const slot = structLayout->keySlotNonStatic(k);
   if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
   return sad->typedValueUnchecked(slot);
 }
@@ -541,8 +564,7 @@ arr_lval StructDict::LvalInt(StructDict* sad, int64_t k) {
 }
 
 arr_lval StructDict::LvalStr(StructDict* sad, StringData* key) {
-  auto const layout = sad->layout();
-  auto const slot = layout->keySlot(key);
+  auto const slot = StructLayout::keySlot(sad->layoutIndex(), key);
   if (slot == kInvalidSlot) throwOOBArrayKeyException(key, sad);
   auto const& currType = sad->rawTypes()[slot];
   if (currType == KindOfUninit) throwOOBArrayKeyException(key, sad);
@@ -556,8 +578,7 @@ tv_lval StructDict::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
 }
 
 arr_lval StructDict::elemImpl(StringData* k, bool throwOnMissing) {
-  auto const layout = this->layout();
-  auto const slot = layout->keySlot(k);
+  auto const slot = StructLayout::keySlot(layoutIndex(), k);
   if (slot == kInvalidSlot) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
@@ -596,8 +617,7 @@ ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
 ArrayData* StructDict::SetStrMove(StructDict* sadIn,
                                   StringData* k,
                                   TypedValue v) {
-  auto const layout = sadIn->layout();
-  auto const slot = layout->keySlot(k);
+  auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
   if (slot == kInvalidSlot) {
     auto const vad = sadIn->escalateWithCapacity(sadIn->size() + 1, __func__);
     auto const res = MixedArray::SetStrMove(vad, k, v);
@@ -665,8 +685,7 @@ ArrayData* StructDict::RemoveInt(StructDict* sad, int64_t) {
 }
 
 ArrayData* StructDict::RemoveStr(StructDict* sadIn, const StringData* k) {
-  auto const layout = sadIn->layout();
-  auto const slot = layout->keySlot(k);
+  auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
   if (slot == kInvalidSlot) return sadIn;
   auto const& currType = sadIn->rawTypes()[slot];
   if (currType == KindOfUninit) return sadIn;
@@ -793,14 +812,14 @@ ArrayLayout StructLayout::removeType(Type key) const {
 ArrayLayout StructLayout::setType(Type key, Type val) const {
   if (key <= TInt) return ArrayLayout::Vanilla();
   if (!key.hasConstVal(TStr)) return ArrayLayout::Top();
-  auto const slot = keySlot(key.strVal());
+  auto const slot = keySlotStatic(index(), key.strVal());
   return slot == kInvalidSlot ? ArrayLayout::Vanilla() : ArrayLayout(this);
 }
 
 std::pair<Type, bool> StructLayout::elemType(Type key) const {
   if (key <= TInt) return {TBottom, false};
   if (!key.hasConstVal(TStr)) return {TInitCell, false};
-  auto const slot = keySlot(key.strVal());
+  auto const slot = keySlotStatic(index(), key.strVal());
   return slot == kInvalidSlot ? std::pair{TBottom, false}
                               : std::pair{TInitCell, false};
 }

@@ -117,8 +117,12 @@ struct StructLayout : public ConcreteLayout {
   size_t sizeIndex() const;
   uint32_t extraInitializer() const;
 
+  static Slot keySlot(LayoutIndex index, const StringData* key);
+  static Slot keySlotStatic(LayoutIndex index, const StringData* key);
+
   Slot keySlot(const StringData* key) const;
   Slot keySlotNonStatic(const StringData* key) const;
+
   const Field& field(Slot slot) const;
 
   KeyOrder keyOrder() const { return m_key_order; }

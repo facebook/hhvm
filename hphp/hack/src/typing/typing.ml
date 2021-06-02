@@ -879,6 +879,10 @@ let check_class_get env p def_pos cid mid ce e function_pointer =
     Errors.static_synthetic_method classname mid p def_pos
   | _ -> ()
 
+(** Given an identifier for a function, find its function type in the
+ * environment and localise it with the input type parameters. If the function
+ * cannot be found, return [Terr].
+ *)
 let fun_type_of_id env x tal el =
   match Env.get_fun env (snd x) with
   | None ->

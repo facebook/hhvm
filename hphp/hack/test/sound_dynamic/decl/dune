@@ -24,7 +24,10 @@
     --out-extension .typecheck.out
     --expect-extension .typecheck.exp
     --batch
-    --flags --shallow-class-decl --error-format raw
+    --flags
+    --shallow-class-decl
+    --error-format raw
+    --enable-higher-kinded-types
     )))
 
 (alias

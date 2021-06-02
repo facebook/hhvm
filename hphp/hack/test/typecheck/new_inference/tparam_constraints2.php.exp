@@ -6,10 +6,10 @@ Invalid return type (Typing[4336])
   But got `void` because this function does not always return a value
 File "tparam_constraints2.php", line 15, characters 24-34:
 Invalid return type (Typing[4323])
-  File "tparam_constraints2.php", line 3, characters 35-42:
-  Some type constraint(s) are violated here
   File "tparam_constraints2.php", line 3, characters 29-30:
   `Tk` is a constrained type parameter
+  File "tparam_constraints2.php", line 3, characters 35-42:
+  This type constraint is violated
   File "tparam_constraints2.php", line 3, characters 35-42:
   Expected `arraykey`
   File "tparam_constraints2.php", line 10, characters 37-40:

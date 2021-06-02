@@ -1,36 +1,36 @@
 File "generic_method_constraint_bad.php", line 16, characters 13-15:
 Invalid argument (Typing[4323])
-File "generic_method_constraint_bad.php", line 5, characters 30-37:
-Some type constraint(s) are violated here
-File "generic_method_constraint_bad.php", line 5, characters 25-25:
-`T` is a constrained type parameter
-File "generic_method_constraint_bad.php", line 5, characters 30-37:
-Expected `arraykey`
-File "generic_method_constraint_bad.php", line 16, characters 13-15:
-But got `float`
+  File "generic_method_constraint_bad.php", line 5, characters 25-25:
+  `T` is a constrained type parameter
+  File "generic_method_constraint_bad.php", line 5, characters 30-37:
+  This type constraint is violated
+  File "generic_method_constraint_bad.php", line 5, characters 30-37:
+  Expected `arraykey`
+  File "generic_method_constraint_bad.php", line 16, characters 13-15:
+  But got `float`
 File "generic_method_constraint_bad.php", line 17, characters 12-15:
 Invalid argument (Typing[4323])
-File "generic_method_constraint_bad.php", line 6, characters 37-44:
-Some type constraint(s) are violated here
-File "generic_method_constraint_bad.php", line 6, characters 32-32:
-`T` is a constrained type parameter
-File "generic_method_constraint_bad.php", line 6, characters 37-44:
-Expected `arraykey`
-File "generic_method_constraint_bad.php", line 17, characters 12-15:
-But got `bool`
+  File "generic_method_constraint_bad.php", line 6, characters 32-32:
+  `T` is a constrained type parameter
+  File "generic_method_constraint_bad.php", line 6, characters 37-44:
+  This type constraint is violated
+  File "generic_method_constraint_bad.php", line 6, characters 37-44:
+  Expected `arraykey`
+  File "generic_method_constraint_bad.php", line 17, characters 12-15:
+  But got `bool`
 File "generic_method_constraint_bad.php", line 18, characters 7-17:
 A `where` type constraint is violated here (Typing[4323])
-File "generic_method_constraint_bad.php", line 9, characters 19-29:
-This is the method with `where` type constraints
-File "generic_method_constraint_bad.php", line 9, characters 55-62:
-Expected `arraykey`
-File "generic_method_constraint_bad.php", line 15, characters 14-18:
-But got `float`
-File "generic_method_constraint_bad.php", line 9, characters 49-50:
-  via this generic `Td`
+  File "generic_method_constraint_bad.php", line 9, characters 19-29:
+  This is the method with `where` type constraints
+  File "generic_method_constraint_bad.php", line 9, characters 55-62:
+  Expected `arraykey`
+  File "generic_method_constraint_bad.php", line 15, characters 14-18:
+  But got `float`
+  File "generic_method_constraint_bad.php", line 9, characters 49-50:
+    via this generic `Td`
 File "generic_method_constraint_bad.php", line 19, characters 18-21:
 Invalid argument (Typing[4110])
-File "generic_method_constraint_bad.php", line 10, characters 62-69:
-Expected `arraykey`
-File "generic_method_constraint_bad.php", line 19, characters 18-21:
-But got `bool`
+  File "generic_method_constraint_bad.php", line 10, characters 62-69:
+  Expected `arraykey`
+  File "generic_method_constraint_bad.php", line 19, characters 18-21:
+  But got `bool`

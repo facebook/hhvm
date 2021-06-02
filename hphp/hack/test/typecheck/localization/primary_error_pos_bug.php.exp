@@ -48,10 +48,10 @@ File "primary_error_pos_bug.php", line 38, characters 7-8:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 20, characters 22-22:
   `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 20, characters 27-29:
-  Some type constraint(s) are violated here
   File "primary_error_pos_bug.php", line 20, characters 22-22:
   `T` is a constrained type parameter
+  File "primary_error_pos_bug.php", line 20, characters 27-29:
+  This type constraint is violated
   File "primary_error_pos_bug.php", line 20, characters 27-29:
   Expected `num`
   File "primary_error_pos_bug.php", line 38, characters 10-15:
@@ -70,10 +70,10 @@ File "primary_error_pos_bug.php", line 40, characters 7-7:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Some type constraint(s) are violated here
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
+  File "primary_error_pos_bug.php", line 5, characters 14-16:
+  This type constraint is violated
   File "primary_error_pos_bug.php", line 5, characters 14-16:
   Expected `num`
   File "primary_error_pos_bug.php", line 40, characters 9-14:

@@ -6,10 +6,10 @@ Invalid return type (Typing[4110])
   But got `Ty where Ty as Ty1, Ty as Blah`
 File "super_constraint_4.php", line 15, characters 7-18:
 Invalid argument (Typing[4323])
-  File "super_constraint_4.php", line 8, characters 61-64:
-  Some type constraint(s) are violated here
   File "super_constraint_4.php", line 8, characters 54-56:
   `Ty1` is a constrained type parameter
+  File "super_constraint_4.php", line 8, characters 61-64:
+  This type constraint is violated
   File "super_constraint_4.php", line 8, characters 61-64:
   Expected `Blah`
   File "super_constraint_4.php", line 14, characters 36-45:

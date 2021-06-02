@@ -1,10 +1,10 @@
 File "shallow_match_bug.php", line 12, characters 14-18:
 Invalid return type (Typing[4323])
-File "shallow_match_bug.php", line 26, characters 29-36:
-Some type constraint(s) are violated here
-File "shallow_match_bug.php", line 26, characters 23-24:
-`Tk` is a constrained type parameter
-File "shallow_match_bug.php", line 26, characters 29-36:
-Expected `arraykey`
-File "shallow_match_bug.php", line 7, characters 20-28:
-But got `dynamic`
+  File "shallow_match_bug.php", line 26, characters 23-24:
+  `Tk` is a constrained type parameter
+  File "shallow_match_bug.php", line 26, characters 29-36:
+  This type constraint is violated
+  File "shallow_match_bug.php", line 26, characters 29-36:
+  Expected `arraykey`
+  File "shallow_match_bug.php", line 7, characters 20-28:
+  But got `dynamic`

@@ -1,9 +1,9 @@
 File "lambda_bad_pos.php", line 26, characters 34-35:
 Invalid return type (Typing[4323])
-  File "lambda_bad_pos.php", line 6, characters 27-34:
-  Some type constraint(s) are violated here
   File "lambda_bad_pos.php", line 6, characters 21-22:
   `Tv` is a constrained type parameter
+  File "lambda_bad_pos.php", line 6, characters 27-34:
+  This type constraint is violated
   File "lambda_bad_pos.php", line 6, characters 27-34:
   Expected `arraykey`
   File "lambda_bad_pos.php", line 25, characters 22-22:

@@ -1,9 +1,9 @@
 File "typing3.bad.php", line 42, characters 23-27:
 Invalid argument (Typing[4323])
-  File "typing3.bad.php", line 34, characters 39-42:
-  Some type constraint(s) are violated here
   File "typing3.bad.php", line 34, characters 31-34:
   `TBox` is a constrained type parameter
+  File "typing3.bad.php", line 34, characters 39-42:
+  This type constraint is violated
   File "typing3.bad.php", line 34, characters 39-42:
   Expected `IBox`
   File "typing3.bad.php", line 31, characters 4-11:

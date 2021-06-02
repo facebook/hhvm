@@ -1,10 +1,10 @@
 File "generic_subtyping2.php", line 25, characters 7-8:
 Invalid argument (Typing[4323])
-File "generic_subtyping2.php", line 17, characters 19-19:
-Some type constraint(s) are violated here
-File "generic_subtyping2.php", line 17, characters 14-14:
-`T` is a constrained type parameter
-File "generic_subtyping2.php", line 17, characters 19-19:
-Expected `I`
-File "generic_subtyping2.php", line 23, characters 14-27:
-But got `UnrelatedClass`
+  File "generic_subtyping2.php", line 17, characters 14-14:
+  `T` is a constrained type parameter
+  File "generic_subtyping2.php", line 17, characters 19-19:
+  This type constraint is violated
+  File "generic_subtyping2.php", line 17, characters 19-19:
+  Expected `I`
+  File "generic_subtyping2.php", line 23, characters 14-27:
+  But got `UnrelatedClass`

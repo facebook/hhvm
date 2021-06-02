@@ -1,16 +1,16 @@
 File "gen6.php", line 26, characters 3-18:
 Was expecting an object but type is unknown (Typing[4297])
-File "gen6.php", line 25, characters 12-12:
-It is unknown because type parameter `T` of `A` could not be determined. Please add explicit type parameters to the invocation of `A`
-File "gen6.php", line 13, characters 30-30:
-  via this generic `T`
+  File "gen6.php", line 25, characters 12-12:
+  It is unknown because type parameter `T` of `A` could not be determined. Please add explicit type parameters to the invocation of `A`
+  File "gen6.php", line 13, characters 30-30:
+    via this generic `T`
 File "gen6.php", line 26, characters 11-17:
 Invalid argument (Typing[4323])
-File "gen6.php", line 12, characters 14-17:
-Some type constraint(s) are violated here
-File "gen6.php", line 12, characters 9-9:
-`T` is a constrained type parameter
-File "gen6.php", line 12, characters 14-17:
-Expected `A<[unresolved]>`
-File "gen6.php", line 26, characters 15-15:
-But got `Z`
+  File "gen6.php", line 12, characters 9-9:
+  `T` is a constrained type parameter
+  File "gen6.php", line 12, characters 14-17:
+  This type constraint is violated
+  File "gen6.php", line 12, characters 14-17:
+  Expected `A<[unresolved]>`
+  File "gen6.php", line 26, characters 15-15:
+  But got `Z`

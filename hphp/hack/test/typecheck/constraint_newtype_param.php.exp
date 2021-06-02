@@ -10,10 +10,10 @@ File "constraint_newtype_param.php--file2.php", line 2, characters 14-22:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param.php--file1.php", line 3, characters 11-11:
   `T` is a constrained type parameter
-  File "constraint_newtype_param.php--file1.php", line 3, characters 16-18:
-  Some type constraint(s) are violated here
   File "constraint_newtype_param.php--file1.php", line 3, characters 11-11:
   `T` is a constrained type parameter
+  File "constraint_newtype_param.php--file1.php", line 3, characters 16-18:
+  This type constraint is violated
   File "constraint_newtype_param.php--file1.php", line 3, characters 16-18:
   Expected `int`
   File "constraint_newtype_param.php--file2.php", line 2, characters 16-21:

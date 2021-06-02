@@ -2,10 +2,10 @@ File "constraint_newtype_param_type_2.php", line 7, characters 15-21:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_2.php", line 4, characters 11-11:
   `T` is a constrained type parameter
-  File "constraint_newtype_param_type_2.php", line 4, characters 16-23:
-  Some type constraint(s) are violated here
   File "constraint_newtype_param_type_2.php", line 4, characters 11-11:
   `T` is a constrained type parameter
+  File "constraint_newtype_param_type_2.php", line 4, characters 16-23:
+  This type constraint is violated
   File "constraint_newtype_param_type_2.php", line 4, characters 16-23:
   Expected `arraykey`
   File "constraint_newtype_param_type_2.php", line 7, characters 17-20:

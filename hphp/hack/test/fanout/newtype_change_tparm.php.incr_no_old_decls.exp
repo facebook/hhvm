@@ -3,8 +3,8 @@ No errors!
 === changed errors ===
 a.php:2:35,38: Some type arguments violate their constraints (Typing[4323])
   foo.php:2:11,11: `T` is a constrained type parameter
-  foo.php:2:16,18: Some type constraint(s) are violated here
   foo.php:2:11,11: `T` is a constrained type parameter
+  foo.php:2:16,18: This type constraint is violated
   foo.php:2:16,18: Expected `int`
   a.php:2:37,37: But got `T`
 === fanout ===

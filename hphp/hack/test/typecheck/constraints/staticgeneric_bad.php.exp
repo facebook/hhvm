@@ -1,16 +1,16 @@
 File "staticgeneric_bad.php", line 14, characters 14-17:
 Invalid argument (Typing[4323])
-File "staticgeneric_bad.php", line 4, characters 14-21:
-Some type constraint(s) are violated here
-File "staticgeneric_bad.php", line 4, characters 9-9:
-`T` is a constrained type parameter
-File "staticgeneric_bad.php", line 4, characters 14-21:
-Expected `arraykey`
-File "staticgeneric_bad.php", line 14, characters 14-17:
-But got `bool`
+  File "staticgeneric_bad.php", line 4, characters 9-9:
+  `T` is a constrained type parameter
+  File "staticgeneric_bad.php", line 4, characters 14-21:
+  This type constraint is violated
+  File "staticgeneric_bad.php", line 4, characters 14-21:
+  Expected `arraykey`
+  File "staticgeneric_bad.php", line 14, characters 14-17:
+  But got `bool`
 File "staticgeneric_bad.php", line 15, characters 25-29:
 Invalid argument (Typing[4110])
-File "staticgeneric_bad.php", line 13, characters 24-29:
-Expected `string`
-File "staticgeneric_bad.php", line 15, characters 25-29:
-But got `bool`
+  File "staticgeneric_bad.php", line 13, characters 24-29:
+  Expected `string`
+  File "staticgeneric_bad.php", line 15, characters 25-29:
+  But got `bool`

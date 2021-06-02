@@ -1,10 +1,10 @@
 File "static_method_call_classname_with_generics.php", line 16, characters 9-10:
 Invalid argument (Typing[4323])
-File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
-Some type constraint(s) are violated here
-File "static_method_call_classname_with_generics.php", line 8, characters 15-15:
-`T` is a constrained type parameter
-File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
-Expected `I`
-File "static_method_call_classname_with_generics.php", line 14, characters 15-17:
-But got `int`
+  File "static_method_call_classname_with_generics.php", line 8, characters 15-15:
+  `T` is a constrained type parameter
+  File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
+  This type constraint is violated
+  File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
+  Expected `I`
+  File "static_method_call_classname_with_generics.php", line 14, characters 15-17:
+  But got `int`

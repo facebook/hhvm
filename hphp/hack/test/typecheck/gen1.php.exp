@@ -1,9 +1,9 @@
 File "gen1.php", line 23, characters 7-8:
 Invalid argument (Typing[4323])
-  File "gen1.php", line 18, characters 19-19:
-  Some type constraint(s) are violated here
   File "gen1.php", line 18, characters 14-14:
   `T` is a constrained type parameter
+  File "gen1.php", line 18, characters 19-19:
+  This type constraint is violated
   File "gen1.php", line 18, characters 19-19:
   Expected `A`
   File "gen1.php", line 22, characters 23-23:

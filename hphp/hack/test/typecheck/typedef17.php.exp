@@ -1,10 +1,10 @@
 File "typedef17.php", line 23, characters 6-7:
 Invalid argument (Typing[4323])
-File "typedef17.php", line 14, characters 18-23:
-Some type constraint(s) are violated here
-File "typedef17.php", line 14, characters 13-13:
-`T` is a constrained type parameter
-File "typedef17.php", line 14, characters 18-23:
-Expected `string`
-File "typedef17.php", line 22, characters 17-19:
-But got `int`
+  File "typedef17.php", line 14, characters 13-13:
+  `T` is a constrained type parameter
+  File "typedef17.php", line 14, characters 18-23:
+  This type constraint is violated
+  File "typedef17.php", line 14, characters 18-23:
+  Expected `string`
+  File "typedef17.php", line 22, characters 17-19:
+  But got `int`

@@ -1,9 +1,9 @@
 File "reflection.php", line 18, characters 26-37:
 Invalid argument (Typing[4323])
-  File "reflection.hhi", line 57, characters 48-68:
-  Some type constraint(s) are violated here
   File "reflection.hhi", line 57, characters 43-43:
   `T` is a constrained type parameter
+  File "reflection.hhi", line 57, characters 48-68:
+  This type constraint is violated
   File "reflection.hhi", line 57, characters 48-68:
   Expected `HH\ClassLikeAttribute`
   File "reflection.php", line 8, characters 7-11:

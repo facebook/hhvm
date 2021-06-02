@@ -2,10 +2,10 @@ File "tapply_is_newtype.php--file2.php", line 4, characters 18-37:
 Some type arguments violate their constraints (Typing[4323])
   File "tapply_is_newtype.php--file1.php", line 5, characters 23-23:
   `T` is a constrained type parameter
-  File "tapply_is_newtype.php--file1.php", line 5, characters 28-30:
-  Some type constraint(s) are violated here
   File "tapply_is_newtype.php--file1.php", line 5, characters 23-23:
   `T` is a constrained type parameter
+  File "tapply_is_newtype.php--file1.php", line 5, characters 28-30:
+  This type constraint is violated
   File "tapply_is_newtype.php--file1.php", line 5, characters 28-30:
   Expected `num`
   File "tapply_is_newtype.php--file2.php", line 4, characters 32-36:

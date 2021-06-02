@@ -1,9 +1,9 @@
 File "unsatisfiable_refinement.php", line 14, characters 7-9:
 Invalid argument (Typing[4323])
-  File "unsatisfiable_refinement.php", line 7, characters 19-19:
-  Some type constraint(s) are violated here
   File "unsatisfiable_refinement.php", line 7, characters 14-14:
   `T` is a constrained type parameter
+  File "unsatisfiable_refinement.php", line 7, characters 19-19:
+  This type constraint is violated
   File "unsatisfiable_refinement.php", line 7, characters 19-19:
   Expected `I`
   File "unsatisfiable_refinement.php", line 14, characters 7-9:

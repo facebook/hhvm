@@ -1,10 +1,10 @@
 File "4323-bad_type_constraint.php", line 7, characters 16-19:
 Invalid argument (Typing[4323])
-File "4323-bad_type_constraint.php", line 5, characters 28-35:
-Some type constraint(s) are violated here
-File "4323-bad_type_constraint.php", line 5, characters 23-23:
-`T` is a constrained type parameter
-File "4323-bad_type_constraint.php", line 5, characters 28-35:
-Expected `arraykey`
-File "4323-bad_type_constraint.php", line 7, characters 16-19:
-But got `bool`
+  File "4323-bad_type_constraint.php", line 5, characters 23-23:
+  `T` is a constrained type parameter
+  File "4323-bad_type_constraint.php", line 5, characters 28-35:
+  This type constraint is violated
+  File "4323-bad_type_constraint.php", line 5, characters 28-35:
+  Expected `arraykey`
+  File "4323-bad_type_constraint.php", line 7, characters 16-19:
+  But got `bool`

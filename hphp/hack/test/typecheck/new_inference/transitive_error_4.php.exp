@@ -1,10 +1,10 @@
 File "transitive_error_4.php", line 17, characters 6-7:
 Invalid argument (Typing[4323])
-File "transitive_error_4.php", line 10, characters 17-22:
-Some type constraint(s) are violated here
-File "transitive_error_4.php", line 10, characters 12-12:
-`T` is a constrained type parameter
-File "transitive_error_4.php", line 10, characters 17-22:
-Expected `string`
-File "transitive_error_4.php", line 12, characters 17-19:
-But got `int`
+  File "transitive_error_4.php", line 10, characters 12-12:
+  `T` is a constrained type parameter
+  File "transitive_error_4.php", line 10, characters 17-22:
+  This type constraint is violated
+  File "transitive_error_4.php", line 10, characters 17-22:
+  Expected `string`
+  File "transitive_error_4.php", line 12, characters 17-19:
+  But got `int`

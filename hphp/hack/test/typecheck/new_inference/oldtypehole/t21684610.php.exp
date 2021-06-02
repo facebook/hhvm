@@ -1,20 +1,20 @@
 File "t21684610.php", line 23, characters 27-27:
 Invalid argument (Typing[4323])
-File "t21684610.php", line 9, characters 44-48:
-Some type constraint(s) are violated here
-File "t21684610.php", line 9, characters 38-39:
-`Ti` is a constrained type parameter
-File "t21684610.php", line 9, characters 44-48:
-Expected `I1<[unresolved]>`
-File "t21684610.php", line 23, characters 27-27:
-But got `int`
+  File "t21684610.php", line 9, characters 38-39:
+  `Ti` is a constrained type parameter
+  File "t21684610.php", line 9, characters 44-48:
+  This type constraint is violated
+  File "t21684610.php", line 9, characters 44-48:
+  Expected `I1<[unresolved]>`
+  File "t21684610.php", line 23, characters 27-27:
+  But got `int`
 File "t21684610.php", line 27, characters 16-16:
 Invalid argument (Typing[4323])
-File "t21684610.php", line 9, characters 44-48:
-Some type constraint(s) are violated here
-File "t21684610.php", line 9, characters 38-39:
-`Ti` is a constrained type parameter
-File "t21684610.php", line 9, characters 44-48:
-Expected `I1<[unresolved]>`
-File "t21684610.php", line 27, characters 16-16:
-But got `int`
+  File "t21684610.php", line 9, characters 38-39:
+  `Ti` is a constrained type parameter
+  File "t21684610.php", line 9, characters 44-48:
+  This type constraint is violated
+  File "t21684610.php", line 9, characters 44-48:
+  Expected `I1<[unresolved]>`
+  File "t21684610.php", line 27, characters 16-16:
+  But got `int`

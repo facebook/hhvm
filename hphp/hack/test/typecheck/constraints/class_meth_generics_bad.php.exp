@@ -1,40 +1,40 @@
 File "class_meth_generics_bad.php", line 21, characters 12-13:
 Invalid argument (Typing[4323])
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Some type constraint(s) are violated here
-File "class_meth_generics_bad.php", line 4, characters 9-9:
-`T` is a constrained type parameter
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Expected `arraykey`
-File "class_meth_generics_bad.php", line 19, characters 24-27:
-But got `bool`
+  File "class_meth_generics_bad.php", line 4, characters 9-9:
+  `T` is a constrained type parameter
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  This type constraint is violated
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  Expected `arraykey`
+  File "class_meth_generics_bad.php", line 19, characters 24-27:
+  But got `bool`
 File "class_meth_generics_bad.php", line 27, characters 12-13:
 Invalid argument (Typing[4323])
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Some type constraint(s) are violated here
-File "class_meth_generics_bad.php", line 4, characters 9-9:
-`T` is a constrained type parameter
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Expected `arraykey`
-File "class_meth_generics_bad.php", line 25, characters 24-28:
-But got `float`
+  File "class_meth_generics_bad.php", line 4, characters 9-9:
+  `T` is a constrained type parameter
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  This type constraint is violated
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  Expected `arraykey`
+  File "class_meth_generics_bad.php", line 25, characters 24-28:
+  But got `float`
 File "class_meth_generics_bad.php", line 32, characters 12-13:
 Invalid argument (Typing[4323])
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Some type constraint(s) are violated here
-File "class_meth_generics_bad.php", line 4, characters 9-9:
-`T` is a constrained type parameter
-File "class_meth_generics_bad.php", line 4, characters 14-21:
-Expected `arraykey`
-File "class_meth_generics_bad.php", line 30, characters 24-28:
-But got `float`
+  File "class_meth_generics_bad.php", line 4, characters 9-9:
+  `T` is a constrained type parameter
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  This type constraint is violated
+  File "class_meth_generics_bad.php", line 4, characters 14-21:
+  Expected `arraykey`
+  File "class_meth_generics_bad.php", line 30, characters 24-28:
+  But got `float`
 File "class_meth_generics_bad.php", line 32, characters 16-17:
 Invalid argument (Typing[4323])
-File "class_meth_generics_bad.php", line 11, characters 51-58:
-Some type constraint(s) are violated here
-File "class_meth_generics_bad.php", line 11, characters 45-46:
-`Tu` is a constrained type parameter
-File "class_meth_generics_bad.php", line 11, characters 51-58:
-Expected `arraykey`
-File "class_meth_generics_bad.php", line 30, characters 34-41:
-But got `vec<int>`
+  File "class_meth_generics_bad.php", line 11, characters 45-46:
+  `Tu` is a constrained type parameter
+  File "class_meth_generics_bad.php", line 11, characters 51-58:
+  This type constraint is violated
+  File "class_meth_generics_bad.php", line 11, characters 51-58:
+  Expected `arraykey`
+  File "class_meth_generics_bad.php", line 30, characters 34-41:
+  But got `vec<int>`

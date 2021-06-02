@@ -38,6 +38,13 @@ module TySet = Typing_set
    In this particular case, an error is generated.
 *)
 
+(* TODO(T92111151): Adding existential types to Hack locl types might
+   help in simplifying the logic below by harnessing Typing_subtype.
+
+   Namely, elimination of a rigid type T#1 in a type C[T#1] would
+   simply quantify T#1 away (preserving its constraints).
+*)
+
 type rigid_tvar =
   | Rtv_tparam of string
   | Rtv_dependent of Ident.t

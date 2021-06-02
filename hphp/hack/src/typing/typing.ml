@@ -5488,7 +5488,10 @@ and dispatch_call
       None
       ty
   in
-  (* For special functions and pseudofunctions with a definition in hhi. *)
+  (* For special functions and pseudofunctions with a definition in an HHI
+   * file. It is preferred over [make_call_special] because it does not generate
+   * [TAny] for the function type of the call.
+   *)
   let make_call_special_from_def env id tel ty_ =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     let ty =
@@ -5577,8 +5580,12 @@ and dispatch_call
   | Id ((pos, x) as id) when SN.StdlibFunctions.needs_special_dispatch x ->
     begin
       match x with
-      (* Special function `echo` *)
+      (* Special function [echo]. *)
       | echo when String.equal echo SN.SpecialFunctions.echo ->
+        (* TODO(tany): TODO(T92020097):
+         * Add [function print(arraykey ...$args)[io]: void] to an HHI file and
+         * remove special casing of [echo] and [print].
+         *)
         let env = Typing_local_ops.enforce_io pos env in
         let (env, tel, _) = exprs ~accept_using_var:true env el in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in

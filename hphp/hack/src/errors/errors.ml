@@ -2458,22 +2458,20 @@ let unification_cycle pos ty =
     []
 
 let violated_constraint
-    p_cstr
-    (p_tparam, tparam)
-    left
-    right
-    (on_error : error_from_reasons_callback) =
+    violated_constraints reasons (on_error : error_from_reasons_callback) =
+  let msgs =
+    List.concat_map violated_constraints ~f:(fun (p_cstr, (p_tparam, tparam)) ->
+        [
+          (p_cstr, "Some type constraint(s) are violated here");
+          ( p_tparam,
+            Printf.sprintf
+              "%s is a constrained type parameter"
+              (Markdown_lite.md_codify tparam) );
+        ])
+  in
   on_error
     ~code:(Typing.err_code Typing.TypeConstraintViolation)
-    ( [
-        (p_cstr, "Some type constraint(s) are violated here");
-        ( p_tparam,
-          Printf.sprintf
-            "%s is a constrained type parameter"
-            (Markdown_lite.md_codify tparam) );
-      ]
-    @ left
-    @ right )
+    (msgs @ reasons)
 
 let method_variance pos =
   add

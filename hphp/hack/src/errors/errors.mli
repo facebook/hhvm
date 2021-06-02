@@ -266,9 +266,7 @@ val missing_field :
   unit
 
 val violated_constraint :
-  Pos_or_decl.t ->
-  Pos_or_decl.t * string ->
-  (Pos_or_decl.t * string) list ->
+  (Pos_or_decl.t * (Pos_or_decl.t * string)) list ->
   (Pos_or_decl.t * string) list ->
   error_from_reasons_callback ->
   unit

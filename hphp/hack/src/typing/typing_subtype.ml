@@ -86,23 +86,26 @@ module VisitedGoals = struct
 end
 
 type subtype_env = {
-  (* If set, finish as soon as we see a goal of the form T <: t or t <: T for generic parameter T *)
   ignore_generic_params: bool;
-  (* If above is not set, maintain a visited goal set *)
+      (** If set, finish as soon as we see a goal of the form T <: t or t <: T
+        for generic parameter T *)
   visited: VisitedGoals.t;
+      (** If above is not set, maintain a visited goal set *)
   no_top_bottom: bool;
-  (* Coerce indicates whether subtyping should allow
-   * coercion to or from dynamic. For coercion to dynamic, types that implement
-   * dynamic are considered sub-types of dynamic. For coercion from dynamic,
-   * dynamic is treated as a sub-type of all types.
-   *)
   coerce: TL.coercion_direction option;
+      (** Coerce indicates whether subtyping should allow
+          coercion to or from dynamic. For coercion to dynamic, types that implement
+          dynamic are considered sub-types of dynamic. For coercion from dynamic,
+          dynamic is treated as a sub-type of all types. *)
   on_error: Errors.error_from_reasons_callback;
-  (* A flag which, if set, indicates that coeffects are being subtyped.
-     Note: this is a short-term solution to provide pretty-printing of
-     `locl_ty`s that represent coeffects, since there is no good way to
-     tell apart coeffects from regular types *)
+  tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
+      (** This is used for better error reporting to flag violated
+          constraints on type parameters, if any. *)
   is_coeffect: bool;
+      (** A flag which, if set, indicates that coeffects are being subtyped.
+          Note: this is a short-term solution to provide pretty-printing of
+          `locl_ty`s that represent coeffects, since there is no good way to
+          tell apart coeffects from regular types *)
 }
 
 let coercing_from_dynamic se =
@@ -130,6 +133,25 @@ let make_subtype_env
     coerce;
     is_coeffect;
     on_error;
+    tparam_constraints = [];
+  }
+
+let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
+  {
+    subtype_env with
+    tparam_constraints =
+      (match (r_super, r_sub) with
+      | (Reason.Rcstr_on_generics (p, tparam), _)
+      | (_, Reason.Rcstr_on_generics (p, tparam)) ->
+        (match subtype_env.tparam_constraints with
+        | (p_prev, tparam_prev) :: _
+          when Pos_or_decl.equal p p_prev
+               && Typing_defs.equal_pos_id tparam tparam_prev ->
+          (* since tparam_constraints is used for error reporting, it's
+           * unnecessary to add duplicates. *)
+          subtype_env.tparam_constraints
+        | _ -> (p, tparam) :: subtype_env.tparam_constraints)
+      | _ -> subtype_env.tparam_constraints);
   }
 
 (* In typing_coercion.ml we sometimes check t1 <: t2 by adding dynamic
@@ -693,6 +715,12 @@ and simplify_subtype_i
     ty_super;
   let (env, ety_super) = Env.expand_internal_type env ty_super in
   let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+  let subtype_env =
+    possibly_add_violated_constraint
+      subtype_env
+      ~r_sub:(reason ety_sub)
+      ~r_super:(reason ety_super)
+  in
   let ety_sub =
     match subtype_env.coerce with
     | Some (TL.PartialCoerceFromDynamic (pek, cn)) ->
@@ -717,10 +745,12 @@ and simplify_subtype_i
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
     let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in
-    match (r_super, r_sub) with
-    | (Reason.Rcstr_on_generics (p, tparam), _)
-    | (_, Reason.Rcstr_on_generics (p, tparam)) ->
-      Errors.violated_constraint p tparam left right subtype_env.on_error
+    match subtype_env.tparam_constraints with
+    | _ :: _ ->
+      Errors.violated_constraint
+        subtype_env.tparam_constraints
+        (left @ right)
+        subtype_env.on_error
     | _ -> subtype_env.on_error (left @ right)
   in
   let fail () = fail_with_suffix [] in

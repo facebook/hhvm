@@ -997,8 +997,10 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   if (extraHeaders) {
     for (HeaderMap::const_iterator iter = extraHeaders->begin();
          iter != extraHeaders->end(); ++iter) {
-      std::vector<std::string> &values = requestHeaders[iter->first];
-      values.insert(values.end(), iter->second.begin(), iter->second.end());
+      auto& values = requestHeaders[iter->first];
+      for (auto& h : iter->second) {
+        values.push_back(h);
+      }
     }
   }
 

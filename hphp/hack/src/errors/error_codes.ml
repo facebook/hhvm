@@ -637,6 +637,7 @@ module Typing = struct
     | ReifiedStaticMethodInExprTree [@value 4440]
     | InvariantViolated [@value 4441]
     | RigidTVarEscape [@value 4442]
+    | StrictEqValueIncompatibleTypes [@value 4443]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

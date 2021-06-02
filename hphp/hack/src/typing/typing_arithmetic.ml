@@ -372,7 +372,72 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     in
     make_result env te1 err_opt1 te2 err_opt2 result_ty
   | Ast_defs.Eqeq
-  | Ast_defs.Diff
+  | Ast_defs.Diff ->
+    begin
+      let rec strict_allowable_types ty =
+        let open Aast in
+        match get_node ty with
+        | Tdynamic -> true
+        | Tprim prim ->
+          (match prim with
+          | Tint
+          | Tbool
+          | Tfloat
+          | Tstring ->
+            true
+          | _ -> false)
+        | Tclass ((_, name), _, type_args)
+        (* allow vec, keyset, and dict *)
+          when String.equal name SN.Collections.cVec
+               || String.equal name SN.Collections.cKeyset
+               || String.equal name SN.Collections.cDict ->
+          List.for_all type_args strict_allowable_types
+        | _ -> false
+      in
+      let same_type env ty1 ty2 =
+        Typing_subtype.is_sub_type env ty1 ty2
+        && Typing_subtype.is_sub_type env ty2 ty1
+        || is_sub_dynamic env ty1
+        || is_sub_dynamic env ty2
+      in
+      (* Allow value-equating types A, B such that:
+      - [(A <: B and B <: A) or (A and/or B is dynamic)]
+      - AND (A and B are dynamic/primitive)
+      We also allow the basic value container types `vec`, `keyset`, and `dict` to be compared. *)
+      let rec strict_equatable env ty1 ty2 =
+        strict_allowable_types ty1
+        && strict_allowable_types ty2
+        && ( same_type env ty1 ty2
+           ||
+           (* Cover the case where the containers have a dynamic parameter,
+           since `same_type` would evaluate to false.
+           E.g. `vec<dynamic> == vec<int>` should be allowed. *)
+           match (get_node ty1, get_node ty2) with
+           | ( Tclass ((_, name1), _, container_tys1),
+               Tclass ((_, name2), _, container_tys2) )
+             when String.equal name1 name2 ->
+             (match
+                List.for_all2
+                  container_tys1
+                  container_tys2
+                  (strict_equatable env)
+              with
+             | List.Or_unequal_lengths.Ok all_true -> all_true
+             | _ -> false)
+           | _ -> false )
+      in
+      if
+        TypecheckerOptions.strict_value_equality (Env.get_tcopt env)
+        && not (strict_equatable env ty1 ty2)
+      then
+        let tys1 = Typing_print.error env ty1 in
+        let tys2 = Typing_print.error env ty2 in
+        Errors.strict_eq_value_incompatible_types
+          p
+          (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
+          (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
+    end;
+    make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))
   | Ast_defs.Eqeqeq
   | Ast_defs.Diff2 ->
     make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))

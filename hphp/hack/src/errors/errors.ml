@@ -4297,6 +4297,15 @@ let comparison_invalid_types p left right =
     (p, msg)
     (left @ right)
 
+let strict_eq_value_incompatible_types p left right =
+  let msg =
+    "The arguments to this value equality test are not the same types or are not the allowed types (int, bool, float, string, vec, keyset, dict). The behavior for this test is changing and will soon either be universally false or throw an exception."
+  in
+  add_list
+    (Typing.err_code Typing.StrictEqValueIncompatibleTypes)
+    (p, msg)
+    (left @ right)
+
 let void_usage p void_witness =
   let msg = "You are using the return value of a `void` function" in
   add_list (Typing.err_code Typing.VoidUsage) (p, msg) void_witness

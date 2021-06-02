@@ -1200,6 +1200,12 @@ val eq_incompatible_types :
   (Pos_or_decl.t * string) list ->
   unit
 
+val strict_eq_value_incompatible_types :
+  Pos.t ->
+  (Pos_or_decl.t * string) list ->
+  (Pos_or_decl.t * string) list ->
+  unit
+
 val comparison_invalid_types :
   Pos.t ->
   (Pos_or_decl.t * string) list ->

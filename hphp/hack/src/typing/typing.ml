@@ -2633,31 +2633,6 @@ and expr_
       env
     | _ -> Env.forget_members env Reason.(Blame (p, BScall))
   in
-  let check_call
-      ~is_using_clause
-      ~(expected : ExpectedTy.t option)
-      ?in_await
-      env
-      p
-      e
-      explicit_targs
-      el
-      unpacked_element =
-    let (env, te, ty) =
-      dispatch_call
-        ~is_using_clause
-        ~expected
-        ?in_await
-        p
-        env
-        e
-        explicit_targs
-        el
-        unpacked_element
-    in
-    let env = forget_fake_members env p e in
-    (env, te, ty)
-  in
   let check_collection_tparams env name tys =
     (* varrays and darrays are not classes but they share the same
     constraints with vec and dict respectively *)
@@ -3396,16 +3371,20 @@ and expr_
       | _ -> env
     in
     let env = might_throw env in
-    check_call
-      ~is_using_clause
-      ~expected
-      ?in_await
-      env
-      p
-      e
-      explicit_targs
-      el
-      unpacked_element
+    let (env, te, ty) =
+      dispatch_call
+        ~is_using_clause
+        ~expected
+        ?in_await
+        p
+        env
+        e
+        explicit_targs
+        el
+        unpacked_element
+    in
+    let env = forget_fake_members env p e in
+    (env, te, ty)
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in

@@ -3364,12 +3364,6 @@ and expr_
            None ))
       ty
   | Call (e, explicit_targs, el, unpacked_element) ->
-    let env =
-      match snd e with
-      | Id (pos, f) when String.equal f SN.SpecialFunctions.echo ->
-        Typing_local_ops.enforce_io pos env
-      | _ -> env
-    in
     let env = might_throw env in
     let (env, te, ty) =
       dispatch_call
@@ -5585,6 +5579,7 @@ and dispatch_call
       match x with
       (* Special function `echo` *)
       | echo when String.equal echo SN.SpecialFunctions.echo ->
+        let env = Typing_local_ops.enforce_io pos env in
         let (env, tel, _) = exprs ~accept_using_var:true env el in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
         let env =

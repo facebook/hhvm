@@ -97,7 +97,7 @@ RuntimeCoeffects& RuntimeCoeffects::operator&=(const RuntimeCoeffects o) {
   return *this;
 }
 
-StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
+StaticCoeffects& StaticCoeffects::operator&=(const StaticCoeffects o) {
   return (*this = CoeffectsConfig::combine(*this, o));
 }
 

@@ -364,7 +364,7 @@ StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,
   storage_t result = 0;
   for (auto entry : getCapabilityCombinator()) {
     auto const mask = ((1 << entry.size) - 1) << entry.pos;
-    result |= std::max(a.value() & mask, b.value() & mask);
+    result |= std::min(a.value() & mask, b.value() & mask);
   }
   return StaticCoeffects::fromValue(result);
 }

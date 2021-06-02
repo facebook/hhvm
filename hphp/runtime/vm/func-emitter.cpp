@@ -295,9 +295,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   auto const coeffects = [&] {
     if (staticCoeffects.empty()) return StaticCoeffects::defaults();
-    auto coeffects = StaticCoeffects::none();
+    auto coeffects =
+      CoeffectsConfig::fromName(staticCoeffects[0]->toCppString());
     for (auto const& name : staticCoeffects) {
-      coeffects |= CoeffectsConfig::fromName(name->toCppString());
+      coeffects &= CoeffectsConfig::fromName(name->toCppString());
     }
     return coeffects;
   }();

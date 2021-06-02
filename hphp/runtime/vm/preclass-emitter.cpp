@@ -413,9 +413,10 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     if (const_.kind() == ConstModifiers::Kind::Context) {
       auto const coeffects = [&] {
         if (const_.coeffects().empty()) return StaticCoeffects::defaults();
-        auto coeffects = StaticCoeffects::none();
+        auto coeffects =
+          CoeffectsConfig::fromName(const_.coeffects()[0]->toCppString());
         for (auto const& coeffect : const_.coeffects()) {
-          coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
+          coeffects &= CoeffectsConfig::fromName(coeffect->toCppString());
         }
         return coeffects;
       }();

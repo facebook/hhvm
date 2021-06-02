@@ -97,10 +97,11 @@ struct StaticCoeffects {
   static StaticCoeffects none() {
     return StaticCoeffects::fromValue(0);
   }
+
   static StaticCoeffects defaults();
 
-  // This operator is equivalent to & of [coeffectA & coeffectB]
-  StaticCoeffects& operator|=(const StaticCoeffects);
+  // This operator is equivalent to | of [coeffectA | coeffectB]
+  StaticCoeffects& operator&=(const StaticCoeffects);
 
   template<class SerDe>
   void serde(SerDe& sd) {

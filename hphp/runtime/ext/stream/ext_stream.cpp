@@ -325,6 +325,7 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
       // is limited.
       String buf = srcFile->read(0x10000);
 
+      if (buf.size() == 0) break;
       if (destFile->write(buf) != buf.size()) {
         return false;
       }

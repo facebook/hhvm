@@ -68,6 +68,18 @@ let declare_folded_class_in_file
     | None -> err_not_found file name
     | Some (_name, decl_and_members) -> decl_and_members)
 
+let lookup_or_populate_class_cache class_name populate =
+  match Cache.get class_name with
+  | Some _ as result -> result
+  | None ->
+    begin
+      match populate class_name with
+      | None -> None
+      | Some v as result ->
+        Cache.add class_name v;
+        result
+    end
+
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -93,35 +105,23 @@ let get_class
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis ->
     begin
-      match Cache.get class_name with
-      | Some t -> Some (counter, t)
-      | None ->
-        begin
-          match
+      match
+        lookup_or_populate_class_cache class_name (fun class_name ->
             Decl_store.((get ()).get_class class_name)
-            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl
-          with
-          | None -> None
-          | Some v ->
-            Cache.add class_name v;
-            Some (counter, v)
-        end
+            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+      with
+      | None -> None
+      | Some v -> Some (counter, v)
     end
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
-      match Cache.get class_name with
-      | Some t -> Some (counter, t)
-      | None ->
-        begin
-          match
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
-          with
-          | None -> None
-          | Some v ->
-            Cache.add class_name v;
-            Some (counter, v)
-        end
+      match
+        lookup_or_populate_class_cache class_name (fun class_name ->
+            Typing_classes_heap.get ctx class_name declare_folded_class_in_file)
+      with
+      | None -> None
+      | Some v -> Some (counter, v)
     end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     let result : Obj.t option =

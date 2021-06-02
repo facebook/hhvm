@@ -64,3 +64,8 @@ val get_gconst :
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
+
+val lookup_or_populate_class_cache :
+  type_key ->
+  (type_key -> Typing_classes_heap.class_t option) ->
+  Typing_classes_heap.class_t option

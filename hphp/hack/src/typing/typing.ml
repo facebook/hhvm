@@ -971,7 +971,7 @@ let trait_most_concrete_req_class trait env =
           | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Cinterface) ->
             acc
           | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
-            (* this is an error case for which Typing_check_decls spits out
+            (* this is an error case for which Typing_type_wellformedness spits out
              * an error, but does *not* currently remove the offending
              * 'require extends' or 'require implements' *)
             acc
@@ -3944,7 +3944,7 @@ and expr_
       | _ -> assert false
     in
     (* Check type annotations on the lambda *)
-    Typing_check_decls.fun_ env f;
+    Typing_type_wellformedness.fun_ env f;
     (* Check attributes on the lambda *)
     let env =
       attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
@@ -7311,7 +7311,7 @@ and call
            * there is a single upper bound that is an EnumClass.
            * We might want to relax that later (e.g. with  the
            * support for intersections.
-           * See Typing_check_decls.check_atom_on_param.
+           * See Typing_type_wellformedness.check_atom_on_param.
            *)
           if SSet.cardinal upper_bounds = 1 then
             let enum_name = SSet.choose upper_bounds in
@@ -7339,7 +7339,7 @@ and call
               | _ -> None)
           )
         | _ ->
-          (* Already reported, see Typing_check_decls *)
+          (* Already reported, see Typing_type_wellformedness *)
           None
       in
       let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
@@ -7370,7 +7370,7 @@ and call
                 | Some enum_name ->
                   expand_atom_in_enum pos env ~ctor enum_name atom_name)
               | _ ->
-                (* Already reported, see Typing_check_decls *)
+                (* Already reported, see Typing_type_wellformedness *)
                 (env, None))
             | Class_const _ when is_atom ->
               Errors.atom_invalid_argument pos ~is_proj:true;
@@ -8027,7 +8027,7 @@ let typedef_def ctx typedef =
       typedef.t_tparams
       []
   in
-  Typing_check_decls.typedef env typedef;
+  Typing_type_wellformedness.typedef env typedef;
   Typing_variance.typedef env typedef;
   let {
     t_annotation = ();

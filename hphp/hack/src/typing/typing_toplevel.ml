@@ -366,7 +366,7 @@ let fun_def ctx fd :
       let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
-      Typing_check_decls.fun_ env f;
+      Typing_type_wellformedness.fun_ env f;
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
           env
@@ -1955,7 +1955,7 @@ let class_def ctx c =
   let tc = Env.get_class env name in
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc Cls.decl_errors);
-  Typing_check_decls.class_ env c;
+  Typing_type_wellformedness.class_ env c;
   NastInitCheck.class_ env c;
   match tc with
   | None ->

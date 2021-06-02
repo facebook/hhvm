@@ -347,7 +347,7 @@ type expand_env = {
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
       (** The type that is substituted for `this` in signatures. It should be
-       * set to an expression dependent type if appropraite
+       * set to an expression dependent type if appropriate
        *)
   on_error: Errors.error_from_reasons_callback;
 }

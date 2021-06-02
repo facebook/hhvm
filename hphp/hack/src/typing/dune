@@ -146,7 +146,7 @@
     typing_arithmetic
     typing_array_access
     typing_attributes
-    typing_check_decls
+    typing_type_wellformedness
     typing_debug
     typing_escape
     typing_extends

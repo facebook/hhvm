@@ -6,15 +6,19 @@
  *
  *)
 
-(** This module performs some "validity" checks on declared types in
-    function and member signatures, extends, implements, uses, etc.
+(** This module checks wellformedness of type hints in the decls and bodies.
+    Wellformedness checks include:
+    - constraints on type parameters (e.g. C<string> where C requires T as arraykey)
+    - hint well-kinded-ness
     - trivial syntactic errors:
         - writing ?nonnull instead of mixed
         - ?void, ?noreturn, ?mixed
         - Tuple<X, Y> instead of (X, Y))
-    - unsatisfied constraints (e.g. C<bool> where C requires T as arraykey)
-    - check hint well-kinded-ness
-    - check correct usage of __Atom attribute *)
+    - correct usage of __Atom attribute
+
+    NB: this is akin to well-formedness in e.g.
+    "Featherweight Java: A Minimal Core Calculus for Java and GJ", 2002,
+    Igarashi, Pierce, Wadler. *)
 
 val fun_ : Typing_env_types.env -> Nast.fun_ -> unit
 

@@ -16,8 +16,10 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::fmt::{self, Debug};
-use std::mem::{self, MaybeUninit};
+use std::mem;
 use std::sync::atomic::{AtomicUsize, Ordering};
+
+use bytes::buf::UninitSlice;
 
 use crate::block::NO_SCAN_TAG;
 use crate::{
@@ -69,7 +71,9 @@ type Slab<'a> = [OpaqueValue<'a>];
 trait SlabTrait {
     fn from_bytes(bytes: &[u8]) -> &Self;
     fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self;
-    fn from_uninit_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self;
+    // SAFETY: the caller must guarantee that this slab will not be used to read from unitialized
+    // memory.
+    unsafe fn from_uninit_slice_mut(bytes: &mut UninitSlice) -> &mut Self;
 
     // metadata accessors
     fn base(&self) -> usize;
@@ -92,33 +96,31 @@ trait SlabTrait {
 // When embedding a Slab in a byte string, we need to include leading padding
 // bytes so that the Slab is word-aligned.
 #[inline]
-fn leading_padding(bytes: &[impl Byte]) -> usize {
-    let misalignment = bytes.as_ptr() as usize % WORD_SIZE;
+fn leading_padding(ptr: *const u8, len: usize) -> usize {
+    let misalignment = ptr as usize % WORD_SIZE;
     let padding = (WORD_SIZE - misalignment) % WORD_SIZE;
-    std::cmp::min(padding, bytes.len())
+    std::cmp::min(padding, len)
 }
-
-trait Byte {}
-impl Byte for u8 {}
-impl Byte for MaybeUninit<u8> {}
 
 impl<'a> SlabTrait for Slab<'a> {
     fn from_bytes(bytes: &[u8]) -> &Self {
-        let padding = leading_padding(bytes);
+        let padding = leading_padding(bytes.as_ptr(), bytes.len());
         let ptr = bytes[padding..].as_ptr() as *const OpaqueValue<'a>;
         unsafe { std::slice::from_raw_parts(ptr, bytes.len() / WORD_SIZE) }
     }
 
     fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self {
-        let padding = leading_padding(bytes);
+        let padding = leading_padding(bytes.as_ptr(), bytes.len());
         let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
         unsafe { std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE) }
     }
 
-    fn from_uninit_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self {
-        let padding = leading_padding(bytes);
+    unsafe fn from_uninit_slice_mut(bytes: &mut UninitSlice) -> &mut Self {
+        // SAFETY: leading_padding does not read from the pointer (this points at unitialized
+        // memory and should not be read from).
+        let padding = leading_padding(bytes.as_mut_ptr(), bytes.len());
         let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
-        unsafe { std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE) }
+        std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE)
     }
 
     fn base(&self) -> usize {
@@ -485,12 +487,18 @@ pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
 /// # Panics
 ///
 /// This function will panic if `src` and `dest` have different lengths.
-pub fn copy_slab(src: &[u8], dest: &mut [MaybeUninit<u8>]) -> Result<(), SlabIntegrityError> {
-    let dest_addr = dest.as_ptr() as usize;
-    let new_base = dest_addr + leading_padding(dest);
+pub fn copy_slab(src: &[u8], dest: &mut UninitSlice) -> Result<(), SlabIntegrityError> {
+    let dest_addr = dest.as_mut_ptr() as usize;
+
+    // SAFETY: leading_padding does not write from the pointer
+    let new_base = dest_addr + leading_padding(dest.as_mut_ptr(), dest.len());
 
     let src_slab = Slab::from_bytes(src);
-    let dest_slab = Slab::from_uninit_bytes_mut(dest);
+
+    // SAFETY: UninitSlice expects us to not write unitialized Bytes, or use this to read. This
+    // code actually does read, but only after having initialized the memory by copying into the
+    // UninitSlice.
+    let dest_slab = unsafe { Slab::from_uninit_slice_mut(dest) };
 
     src_slab.check_initialized()?;
 
@@ -702,7 +710,8 @@ impl<'a> SlabReader<'a> {
     }
 
     pub fn value_offset_in_bytes(&self) -> usize {
-        leading_padding(self.0) + Slab::from_bytes(self.0).root_value_offset() * WORD_SIZE
+        leading_padding(self.0.as_ptr(), self.0.len())
+            + Slab::from_bytes(self.0).root_value_offset() * WORD_SIZE
     }
 }
 
@@ -773,15 +782,16 @@ mod test {
     fn to_and_from_slice() {
         let tuple_slab = alloc_tuple_42_a();
         let tuple_reader = tuple_slab.as_reader();
-        let mut bytes = vec![MaybeUninit::new(0u8); tuple_reader.size_in_bytes() + WORD_SIZE];
+        let mut bytes = vec![0u8; tuple_reader.size_in_bytes() + WORD_SIZE];
         // Iterate over all possible alignments for our byte slice, embed the
         // slab in the slice (with appropriate padding), and attempt to convert
         // it to a list of usizes and back to an OwnedSlab.
         for offset in 0..WORD_SIZE {
             let bytes = &mut bytes[offset..offset + tuple_reader.size_in_bytes()];
-            copy_slab(tuple_reader.as_bytes(), bytes).unwrap();
+            let slice =
+                unsafe { UninitSlice::from_raw_parts_mut(bytes.as_ptr() as *mut _, bytes.len()) };
+            copy_slab(tuple_reader.as_bytes(), slice).unwrap();
             unsafe {
-                let bytes = &*(bytes as *const [MaybeUninit<u8>] as *const [u8]);
                 let reader = SlabReader::from_bytes(bytes).unwrap();
                 let owned_slab = OwnedSlab::from_slice(reader.as_slice()).unwrap();
                 assert_eq!(

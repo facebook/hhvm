@@ -9,6 +9,23 @@
 open Hh_prelude
 open Reordered_argument_collections
 
+(** How this module is used:
+    - wrap typechecking code with [with_deferred_decls]. This will call [reset]
+      and collect any deferments with [get_deferments] at the end of typechecking
+      and return those deferments as an Error.
+    - during typechecking, whenever a new decl has been constructed (costly operation),
+      call [increment_counter] to increment the counter of constructed decls.
+    - Before constructing a new decl, check whether we've reached the deferment
+      threshold with [raise_if_should_defer]. This raises a [Defer] exception and
+      therefore skips costly decl construction.
+    - This exception is immediately caught by the decl provider which calls [add_deferment]
+      with the decl that has not been constructed and returns None. We don't stop typechecking
+      and instead keep collecting deferments.
+    - At the end of typechecking a file, the file is rescheduled if the list of deferred decls
+      is not empty. A [Declare] job is added to the remaining jobs for each of the collected deferred decls.
+      These [Declare] jobs will be carried out before we retypecheck deferred files.
+    *)
+
 (** A [deferment] is a file which contains a decl that we need to fetch before
     we continue with our scheduled typechecking work. The handler of exception [Defer (d.php, "\\D")]
     will typically call [add_deferment ~d:(d.php, "\\D")]. *)

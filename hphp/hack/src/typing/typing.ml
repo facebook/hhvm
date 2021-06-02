@@ -5704,6 +5704,8 @@ and dispatch_call
           call ~expected p env fty el unpacked_element
         in
         (* but ignore the result and overwrite it with custom return type *)
+        (* TODO: eliminate [x] and use the head of [tel] to instead of
+           typechecking [x] again. *)
         let x = List.hd_exn el in
         let (env, _tx, ty) = expr env x in
         let explain_array_filter ty =

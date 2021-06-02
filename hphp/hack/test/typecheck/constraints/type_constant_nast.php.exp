@@ -3,6 +3,8 @@ Some type arguments violate their constraints (Typing[4323])
   File "type_constant_nast.php", line 7, characters 19-19:
   `T` is a constrained type parameter
   File "type_constant_nast.php", line 7, characters 24-25:
+  This type constraint is violated
+  File "type_constant_nast.php", line 7, characters 24-25:
   Expected `I2`
   File "type_constant_nast.php", line 9, characters 19-20:
   But got `I1`

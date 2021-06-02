@@ -728,13 +728,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
                       ( "check_tparams_constraints: check_tparams_constraint",
                         [Log_type ("cstr_ty", cstr_ty); Log_type ("ty", ty)] );
                   ]));
-          TGenConstraint.check_tparams_constraint
-            env
-            ~use_pos
-            t.tp_name
-            ck
-            ~cstr_ty
-            ty)
+          TGenConstraint.check_tparams_constraint env ~use_pos ck ~cstr_ty ty)
     | None -> env
   in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints

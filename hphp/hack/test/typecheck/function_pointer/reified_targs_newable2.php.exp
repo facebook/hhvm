@@ -2,8 +2,6 @@ File "reified_targs_newable2.php", line 12, characters 8-10:
 Some type arguments violate their constraints (Typing[4323])
   File "reified_targs_newable2.php", line 5, characters 34-34:
   `T` is a constrained type parameter
-  File "reified_targs_newable2.php", line 5, characters 34-34:
-  `T` is a constrained type parameter
   File "reified_targs_newable2.php", line 5, characters 39-47:
   This type constraint is violated
   File "reified_targs_newable2.php", line 5, characters 41-46:

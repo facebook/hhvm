@@ -2479,15 +2479,12 @@ let method_variance pos =
     pos
     "Covariance or contravariance is not allowed in type parameter of method or function."
 
-let explain_constraint ~(use_pos : Pos.t) ~definition_pos ~param_name reasons =
-  let inst_msg = "Some type arguments violate their constraints" in
-  let name = strip_ns param_name in
+let explain_constraint ~(use_pos : Pos.t) : error_from_reasons_callback =
+ fun ?code:_ reasons ->
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
-    (use_pos, inst_msg)
-    ( ( definition_pos,
-        Markdown_lite.md_codify name ^ " is a constrained type parameter" )
-    :: reasons )
+    (use_pos, "Some type arguments violate their constraints")
+    reasons
 
 let explain_where_constraint ~in_class ~use_pos ~definition_pos reasons =
   let callsite_ty =

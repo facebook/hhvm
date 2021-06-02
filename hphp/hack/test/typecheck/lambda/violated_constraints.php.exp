@@ -3,6 +3,8 @@ Some type arguments violate their constraints (Typing[4323])
   File "violated_constraints.php", line 3, characters 9-9:
   `T` is a constrained type parameter
   File "violated_constraints.php", line 3, characters 14-16:
+  This type constraint is violated
+  File "violated_constraints.php", line 3, characters 14-16:
   Expected `num`
   File "violated_constraints.php", line 7, characters 11-16:
   But got `string`
@@ -10,6 +12,8 @@ File "violated_constraints.php", line 7, characters 25-33:
 Some type arguments violate their constraints (Typing[4323])
   File "violated_constraints.php", line 3, characters 9-9:
   `T` is a constrained type parameter
+  File "violated_constraints.php", line 3, characters 14-16:
+  This type constraint is violated
   File "violated_constraints.php", line 3, characters 14-16:
   Expected `num`
   File "violated_constraints.php", line 7, characters 27-32:

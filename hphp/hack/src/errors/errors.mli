@@ -273,12 +273,7 @@ val violated_constraint :
 
 val method_variance : Pos.t -> unit
 
-val explain_constraint :
-  use_pos:Pos.t ->
-  definition_pos:Pos_or_decl.t ->
-  param_name:string ->
-  (Pos_or_decl.t * string) list ->
-  unit
+val explain_constraint : use_pos:Pos.t -> error_from_reasons_callback
 
 val explain_where_constraint :
   in_class:bool ->

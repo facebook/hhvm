@@ -2,8 +2,6 @@ File "generic_constraint_dynamic.bad.php", line 19, characters 12-12:
 Some type arguments violate their constraints (Typing[4323])
   File "generic_constraint_dynamic.bad.php", line 5, characters 9-9:
   `T` is a constrained type parameter
-  File "generic_constraint_dynamic.bad.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
   File "generic_constraint_dynamic.bad.php", line 5, characters 14-20:
   This type constraint is violated
   File "generic_constraint_dynamic.bad.php", line 5, characters 14-20:
@@ -12,8 +10,6 @@ Some type arguments violate their constraints (Typing[4323])
   But got `D`
 File "generic_constraint_dynamic.bad.php", line 20, characters 8-11:
 Some type arguments violate their constraints (Typing[4323])
-  File "generic_constraint_dynamic.bad.php", line 12, characters 15-15:
-  `T` is a constrained type parameter
   File "generic_constraint_dynamic.bad.php", line 12, characters 15-15:
   `T` is a constrained type parameter
   File "generic_constraint_dynamic.bad.php", line 12, characters 20-26:

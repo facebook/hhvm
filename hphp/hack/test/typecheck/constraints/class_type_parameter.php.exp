@@ -3,6 +3,8 @@ Some type arguments violate their constraints (Typing[4323])
   File "class_type_parameter.php", line 3, characters 22-22:
   `T` is a constrained type parameter
   File "class_type_parameter.php", line 3, characters 27-29:
+  This type constraint is violated
+  File "class_type_parameter.php", line 3, characters 27-29:
   Expected `num`
   File "class_type_parameter.php", line 6, characters 45-45:
   But got `T`

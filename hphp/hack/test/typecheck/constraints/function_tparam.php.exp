@@ -3,6 +3,8 @@ Some type arguments violate their constraints (Typing[4323])
   File "function_tparam.php", line 3, characters 22-22:
   `T` is a constrained type parameter
   File "function_tparam.php", line 3, characters 27-29:
+  This type constraint is violated
+  File "function_tparam.php", line 3, characters 27-29:
   Expected `num`
   File "function_tparam.php", line 5, characters 30-34:
   But got `mixed`

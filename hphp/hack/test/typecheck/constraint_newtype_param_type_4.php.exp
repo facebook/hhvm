@@ -2,8 +2,6 @@ File "constraint_newtype_param_type_4.php", line 9, characters 15-21:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_4.php", line 6, characters 11-11:
   `T` is a constrained type parameter
-  File "constraint_newtype_param_type_4.php", line 6, characters 11-11:
-  `T` is a constrained type parameter
   File "constraint_newtype_param_type_4.php", line 6, characters 16-26:
   This type constraint is violated
   File "constraint_newtype_param_type_4.php", line 6, characters 18-25:

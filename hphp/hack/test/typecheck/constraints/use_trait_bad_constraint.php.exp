@@ -2,19 +2,19 @@ File "use_trait_bad_constraint.php", line 10, characters 7-28:
 Some type arguments violate their constraints (Typing[4323])
   File "use_trait_bad_constraint.php", line 4, characters 14-15:
   `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 10, characters 10-17:
-  Expected `this::TA`
   File "use_trait_bad_constraint.php", line 4, characters 20-21:
-    via this generic `Ta`
+  This type constraint is violated
+  File "use_trait_bad_constraint.php", line 4, characters 20-21:
+  Expected `this::TA`
   File "use_trait_bad_constraint.php", line 10, characters 20-27:
   But got `this::TB as A1::TB`
 File "use_trait_bad_constraint.php", line 16, characters 7-20:
 Some type arguments violate their constraints (Typing[4323])
   File "use_trait_bad_constraint.php", line 4, characters 14-15:
   `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 16, characters 10-15:
-  Expected `string`
   File "use_trait_bad_constraint.php", line 4, characters 20-21:
-    via this generic `Ta`
+  This type constraint is violated
+  File "use_trait_bad_constraint.php", line 4, characters 20-21:
+  Expected `string`
   File "use_trait_bad_constraint.php", line 16, characters 17-19:
   But got `int`

@@ -66,13 +66,8 @@ let check_constraint
         ty
         on_error
 
-let check_tparams_constraint (env : env) ~use_pos (pos, name) ck ~cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty (fun ?code:_ reasons ->
-      Errors.explain_constraint
-        ~use_pos
-        ~definition_pos:pos
-        ~param_name:name
-        reasons)
+let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
+  check_constraint env ck ty ~cstr_ty (Errors.explain_constraint ~use_pos)
 
 let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =

@@ -1,12 +1,1 @@
-File "valid_targ_typeconst.php", line 10, characters 21-29:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_typeconst.php", line 10, characters 21-29:
-  This is the late static bound this type, it cannot be used as a reified type argument
-  File "valid_targ_typeconst.php", line 3, characters 15-15:
-  `T` is reified
-File "valid_targ_typeconst.php", line 11, characters 21-32:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_typeconst.php", line 11, characters 21-32:
-  This is the late static bound this type, it cannot be used as a reified type argument
-  File "valid_targ_typeconst.php", line 3, characters 15-15:
-  `T` is reified
+No errors

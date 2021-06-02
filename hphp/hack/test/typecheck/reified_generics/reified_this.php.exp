@@ -1,0 +1,6 @@
+File "reified_this.php", line 7, characters 11-14:
+Invalid reified hint (Typing[4305])
+  File "reified_this.php", line 7, characters 11-14:
+  This is the late static bound this type, it cannot be used as a reified type argument
+  File "reified_this.php", line 2, characters 15-15:
+  `T` is reified

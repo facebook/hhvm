@@ -64,7 +64,10 @@ let validator =
     method! on_taccess acc r (root, ids) =
       let acc =
         match acc.reification with
-        | Unresolved -> this#on_type acc root
+        | Unresolved ->
+          (match get_node root with
+          | Tthis -> { acc with reification = Resolved }
+          | _ -> this#on_type acc root)
         | Resolved -> acc
       in
       super#on_taccess acc r (root, ids)

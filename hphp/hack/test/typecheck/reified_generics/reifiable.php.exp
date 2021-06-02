@@ -1,12 +1,6 @@
-File "reifiable.php", line 10, characters 21-30:
-Invalid reified hint (Typing[4305])
-  File "reifiable.php", line 10, characters 21-30:
-  This is the late static bound this type, it cannot be used as a reified type argument
-  File "reifiable.php", line 3, characters 15-15:
-  `T` is reified
 File "reifiable.php", line 11, characters 21-30:
 Invalid reified hint (Typing[4305])
-  File "reifiable.php", line 11, characters 21-30:
-  This is the late static bound this type, it cannot be used as a reified type argument
+  File "reifiable.php", line 8, characters 23-26:
+  This is an abstract type constant without the __Reifiable attribute, it cannot be used as a reified type argument
   File "reifiable.php", line 3, characters 15-15:
   `T` is reified

@@ -5502,6 +5502,8 @@ and dispatch_call
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel None ty
   in
   let overload_function = overload_function make_call fpos in
+  (* Require [get_idisposable_value()] function calls to be inside a [using]
+     statement. *)
   let check_disposable_in_return env fty =
     if is_return_disposable_fun_type env fty && not is_using_clause then
       Errors.invalid_new_disposable p

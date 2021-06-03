@@ -733,8 +733,8 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_list_item(self, arg0, arg1)
     }
 
-    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_enum_atom_expression(self, arg0, arg1)
+    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_enum_atom_expression(self, arg0, arg1, arg2)
     }
 
 }

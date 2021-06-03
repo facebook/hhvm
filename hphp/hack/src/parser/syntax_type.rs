@@ -189,6 +189,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_intersection_type_specifier(ctx: &C, intersection_left_paren: Self, intersection_types: Self, intersection_right_paren: Self) -> Self;
     fn make_error(ctx: &C, error_error: Self) -> Self;
     fn make_list_item(ctx: &C, list_item: Self, list_separator: Self) -> Self;
-    fn make_enum_atom_expression(ctx: &C, enum_atom_hash: Self, enum_atom_expression: Self) -> Self;
+    fn make_enum_atom_expression(ctx: &C, enum_atom_qualifier: Self, enum_atom_hash: Self, enum_atom_expression: Self) -> Self;
 
 }

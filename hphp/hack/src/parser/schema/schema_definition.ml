@@ -2383,7 +2383,12 @@ let schema : schema_node list =
       description = "enum_atom";
       prefix = "enum_atom";
       aggregates = [Expression];
-      fields = [("hash", Token); ("expression", Token)];
+      fields =
+        [
+          ("qualifier", ZeroOrOne (Aggregate Expression));
+          ("hash", Token);
+          ("expression", Token);
+        ];
     };
   ]
 

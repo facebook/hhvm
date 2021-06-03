@@ -1571,6 +1571,59 @@ let maketree_with_type_param env p expr expected_ty =
 
   rewrite_expr_tree_maketree env expr rewrite_expr
 
+module EnumAtomOps = struct
+  type result =
+    | Success of ((pos * locl_ty) * Tast.expr_) * locl_ty
+    | ClassNotFound
+    | AtomNotFound of ((pos * locl_ty) * Tast.expr_) * locl_ty
+    | Invalid
+    | Skip
+
+  (** Given an [enum_name] and an [label], tries to see if
+      [enum_name] has a constant named [label].
+      In such case, creates the expected typed expression.
+
+      If [label] is not there, it will register and error.
+
+      [ctor] is either `MemberOf` or `Label`
+      [full] describe if the original expression was a full
+      atom, as in E#A, or a short version, as in #A
+  *)
+  let expand pos env ~full ~ctor enum_name atom_name =
+    let cls = Env.get_class env enum_name in
+    match cls with
+    | Some cls ->
+      (match Env.get_const env cls atom_name with
+      | Some const_def ->
+        let dty = const_def.cc_type in
+        (* the enum constant has type MemberOf<X, Y>. If we are
+         * processing a Label argument, we just switch MemberOf for
+         * Label.
+         *)
+        let dty =
+          match deref dty with
+          | (r, Tapply ((p, _), args)) -> mk (r, Tapply ((p, ctor), args))
+          | _ -> dty
+        in
+        let (env, lty) = Phase.localize_no_subst env ~ignore_errors:true dty in
+        let hi = (pos, lty) in
+        let qualifier =
+          if full then
+            Some (pos, enum_name)
+          else
+            None
+        in
+        let te = (hi, EnumAtom (qualifier, atom_name)) in
+        (env, Success (te, lty))
+      | None ->
+        Errors.atom_unknown pos atom_name enum_name;
+        let r = Reason.Rwitness pos in
+        let ty = Typing_utils.terr env r in
+        let te = ((pos, ty), EnumAtom (None, atom_name)) in
+        (env, AtomNotFound (te, ty)))
+    | None -> (env, ClassNotFound)
+end
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -4306,9 +4359,28 @@ and expr_
       (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
-  | EnumAtom s ->
+  | EnumAtom (None, s) ->
     Errors.atom_as_expr p;
-    make_result env p (Aast.EnumAtom s) (mk (Reason.Rwitness p, Terr))
+    make_result env p (Aast.EnumAtom (None, s)) (mk (Reason.Rwitness p, Terr))
+  | EnumAtom ((Some (pos, cname) as e), name) ->
+    let (env, res) =
+      EnumAtomOps.expand pos env ~full:true ~ctor:SN.Classes.cLabel cname name
+    in
+    let error () =
+      make_result env p (Aast.EnumAtom (e, name)) (mk (Reason.Rwitness p, Terr))
+    in
+    (match res with
+    | EnumAtomOps.Success ((_, texpr), lty) -> make_result env p texpr lty
+    | EnumAtomOps.ClassNotFound ->
+      (* Error registered in nast_check/unbound_name_check *)
+      error ()
+    | EnumAtomOps.AtomNotFound _ ->
+      (* Error registered in EnumAtomOps.expand *)
+      error ()
+    | EnumAtomOps.Invalid
+    | EnumAtomOps.Skip ->
+      Errors.atom_as_expr p;
+      error ())
 
 (* let ty = err_witness env cst_pos in *)
 and class_const ?(incl_tc = false) env p (cid, mid) =
@@ -7260,36 +7332,6 @@ and call
         | param :: paraml -> (false, Some param, paraml)
         | [] -> (true, var_param, paraml)
       in
-      let expand_atom_in_enum pos env ~ctor enum_name atom_name =
-        let cls = Env.get_class env enum_name in
-        match cls with
-        | Some cls ->
-          (match Env.get_const env cls atom_name with
-          | Some const_def ->
-            let dty = const_def.cc_type in
-            (* the enum constant has type MemberOf<X, Y>. If we are
-             * processing a Label argument, we just switch MemberOf for
-             * Label.
-             *)
-            let dty =
-              match deref dty with
-              | (r, Tapply ((p, _), args)) -> mk (r, Tapply ((p, ctor), args))
-              | _ -> dty
-            in
-            let (env, lty) =
-              Phase.localize_no_subst env ~ignore_errors:true dty
-            in
-            let hi = (pos, lty) in
-            let te = (hi, EnumAtom atom_name) in
-            (env, Some (te, lty))
-          | None ->
-            Errors.atom_unknown pos atom_name enum_name;
-            let r = Reason.Rwitness pos in
-            let ty = Typing_utils.terr env r in
-            let te = ((pos, ty), EnumAtom atom_name) in
-            (env, Some (te, ty)))
-        | None -> (env, None)
-      in
       let compute_enum_name env lty =
         match get_node lty with
         | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name ->
@@ -7338,7 +7380,6 @@ and call
         | Some param ->
           (* First check if __Atom is used or if the parameter is
            * a HH\Label.
-           * TODO: make sure we do these checks only for the first argument
            *)
           let (env, atom_type) =
             let is_atom = get_fp_is_atom param in
@@ -7350,31 +7391,42 @@ and call
               | _ -> false
             in
             match arg with
-            | EnumAtom atom_name when is_atom || is_label ->
+            | EnumAtom (None, atom_name) when is_atom || is_label ->
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
                      || String.equal name SN.Classes.cLabel ->
                 let ctor = name in
                 (match compute_enum_name env ty_enum with
-                | None -> (env, None)
+                | None -> (env, EnumAtomOps.ClassNotFound)
                 | Some enum_name ->
-                  expand_atom_in_enum pos env ~ctor enum_name atom_name)
+                  EnumAtomOps.expand
+                    pos
+                    env
+                    ~full:false
+                    ~ctor
+                    enum_name
+                    atom_name)
               | _ ->
                 (* Already reported, see Typing_type_wellformedness *)
-                (env, None))
+                (env, EnumAtomOps.Invalid))
+            | EnumAtom (Some _, _) ->
+              (* Full info is here, use normal inference *)
+              (env, EnumAtomOps.Skip)
             | Class_const _ when is_atom ->
               Errors.atom_invalid_argument pos ~is_proj:true;
-              (env, None)
+              (env, EnumAtomOps.Invalid)
             | _ when is_atom ->
               Errors.atom_invalid_argument pos ~is_proj:false;
-              (env, None)
-            | _ -> (env, None)
+              (env, EnumAtomOps.Invalid)
+            | _ -> (env, EnumAtomOps.Skip)
           in
           let (env, te, ty) =
             match atom_type with
-            | Some (te, ty) -> (env, te, ty)
-            | None ->
+            | EnumAtomOps.Success (te, ty)
+            | EnumAtomOps.AtomNotFound (te, ty) ->
+              (env, te, ty)
+            | _ ->
               let expected =
                 ExpectedTy.make_and_allow_coercion_opt
                   env

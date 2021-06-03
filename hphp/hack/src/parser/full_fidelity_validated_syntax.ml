@@ -6517,6 +6517,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         {
           enum_atom_expression = validate_token x.enum_atom_expression;
           enum_atom_hash = validate_token x.enum_atom_hash;
+          enum_atom_qualifier =
+            validate_option_with validate_expression x.enum_atom_qualifier;
         } )
     | s -> validation_fail (Some SyntaxKind.EnumAtomExpression) s
 
@@ -6526,6 +6528,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       Syntax.syntax =
         Syntax.EnumAtomExpression
           {
+            enum_atom_qualifier =
+              invalidate_option_with invalidate_expression x.enum_atom_qualifier;
             enum_atom_hash = invalidate_token x.enum_atom_hash;
             enum_atom_expression = invalidate_token x.enum_atom_expression;
           };

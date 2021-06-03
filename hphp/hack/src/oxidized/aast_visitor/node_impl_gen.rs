@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<50483e90ef08888b6bb51135abdf8a72>>
+// @generated SignedSource<<0ffb169ddd93bb3b9730a73afe0785ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1008,8 +1008,9 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a0.accept(c, v)?;
                 Ok(())
             }
-            Expr_::EnumAtom(a0) => {
-                a0.accept(c, v)?;
+            Expr_::EnumAtom(a) => {
+                a.0.accept(c, v)?;
+                a.1.accept(c, v)?;
                 Ok(())
             }
             Expr_::Any => Ok(()),

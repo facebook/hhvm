@@ -1860,8 +1860,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_atom_expression(_: &C, enum_atom_hash: Self, enum_atom_expression: Self) -> Self {
+    fn make_enum_atom_expression(_: &C, enum_atom_qualifier: Self, enum_atom_hash: Self, enum_atom_expression: Self) -> Self {
         let syntax = SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
+            enum_atom_qualifier,
             enum_atom_hash,
             enum_atom_expression,
         }));
@@ -3219,7 +3220,8 @@ where
                 acc
             },
             SyntaxVariant::EnumAtomExpression(x) => {
-                let EnumAtomExpressionChildren { enum_atom_hash, enum_atom_expression } = *x;
+                let EnumAtomExpressionChildren { enum_atom_qualifier, enum_atom_hash, enum_atom_expression } = *x;
+                let acc = f(enum_atom_qualifier, acc);
                 let acc = f(enum_atom_hash, acc);
                 let acc = f(enum_atom_expression, acc);
                 acc
@@ -4569,9 +4571,10 @@ where
                  list_item: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::EnumAtomExpression, 2) => SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
+             (SyntaxKind::EnumAtomExpression, 3) => SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
                  enum_atom_expression: ts.pop().unwrap(),
                  enum_atom_hash: ts.pop().unwrap(),
+                 enum_atom_qualifier: ts.pop().unwrap(),
                  
              })),
              _ => panic!("from_children called with wrong number of children"),
@@ -5909,6 +5912,7 @@ pub struct ListItemChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct EnumAtomExpressionChildren<T, V> {
+    pub enum_atom_qualifier: Syntax<T, V>,
     pub enum_atom_hash: Syntax<T, V>,
     pub enum_atom_expression: Syntax<T, V>,
 }
@@ -7778,9 +7782,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumAtomExpression(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.enum_atom_hash),
-                    1 => Some(&x.enum_atom_expression),
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.enum_atom_qualifier),
+                    1 => Some(&x.enum_atom_hash),
+                    2 => Some(&x.enum_atom_expression),
                         _ => None,
                     }
                 })

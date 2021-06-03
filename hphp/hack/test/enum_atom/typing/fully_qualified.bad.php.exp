@@ -1,0 +1,4 @@
+File "fully_qualified.bad.php", line 10, characters 8-8:
+Unbound name: `F` (an object type) (Naming[2049])
+File "fully_qualified.bad.php", line 9, characters 8-8:
+Unknown constant B in E (Typing[4394])

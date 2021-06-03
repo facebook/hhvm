@@ -332,6 +332,7 @@
                   "function_call_type_args":{"kind":"missing"},
                   "function_call_enum_atom":{
                     "kind":"enum_atom",
+                    "enum_atom_qualifier":{"kind":"missing"},
                     "enum_atom_hash":{
                       "kind":"token",
                       "token":{
@@ -511,6 +512,7 @@
                   "function_call_type_args":{"kind":"missing"},
                   "function_call_enum_atom":{
                     "kind":"enum_atom",
+                    "enum_atom_qualifier":{"kind":"missing"},
                     "enum_atom_hash":{
                       "kind":"token",
                       "token":{
@@ -693,6 +695,7 @@
                   "function_call_type_args":{"kind":"missing"},
                   "function_call_enum_atom":{
                     "kind":"enum_atom",
+                    "enum_atom_qualifier":{"kind":"missing"},
                     "enum_atom_hash":{
                       "kind":"token",
                       "token":{
@@ -897,6 +900,7 @@
                   },
                   "function_call_enum_atom":{
                     "kind":"enum_atom",
+                    "enum_atom_qualifier":{"kind":"missing"},
                     "enum_atom_hash":{
                       "kind":"token",
                       "token":{

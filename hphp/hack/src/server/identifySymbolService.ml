@@ -239,22 +239,38 @@ let visitor =
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
-        | Aast.EnumAtom atom_name ->
-          let ty = Typing_defs_core.get_node (snd (fst expr)) in
-          (match ty with
-          | Tnewtype (_, [ty_enum_class; _], _) ->
-            (match get_node ty_enum_class with
-            | Tclass ((_, enum_class_name), _, _)
-            | Tgeneric (enum_class_name, _) ->
+        | Aast.EnumAtom (enum_name, atom_name) ->
+          (* We currently only support labels, not HH\Members using
+           * __ViaLabel. TODO(T86724606)
+           *)
+          begin
+            match enum_name with
+            | None ->
+              let ty = Typing_defs_core.get_node (snd (fst expr)) in
+              (match ty with
+              | Tnewtype (_, [ty_enum_class; _], _) ->
+                (match get_node ty_enum_class with
+                | Tclass ((_, enum_class_name), _, _)
+                | Tgeneric (enum_class_name, _) ->
+                  Result_set.singleton
+                    {
+                      (* TODO(T86724606) use "::" for __ViaLabel *)
+                      name = Utils.strip_ns enum_class_name ^ "#" ^ atom_name;
+                      type_ = EnumAtom (enum_class_name, atom_name);
+                      is_declaration = false;
+                      pos;
+                    }
+                | _ -> self#zero)
+              | _ -> self#zero)
+            | Some (_, enum_name) ->
               Result_set.singleton
                 {
-                  name = Utils.strip_ns enum_class_name ^ "::" ^ atom_name;
-                  type_ = EnumAtom (enum_class_name, atom_name);
+                  name = Utils.strip_ns enum_name ^ "#" ^ atom_name;
+                  type_ = EnumAtom (enum_name, atom_name);
                   is_declaration = false;
                   pos;
                 }
-            | _ -> self#zero)
-          | _ -> self#zero)
+          end
         | _ -> self#zero
       in
       acc + super#on_expr env expr

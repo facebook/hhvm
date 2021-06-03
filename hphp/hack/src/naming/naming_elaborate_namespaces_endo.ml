@@ -319,6 +319,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           ( id,
             List.map al ~f:(self#on_xhp_attribute env),
             List.map el ~f:(self#on_expr env) )
+      | EnumAtom (Some sid, name) ->
+        let sid = elaborate_type_name env sid in
+        EnumAtom (Some sid, name)
       | _ -> super#on_expr_ env expr
 
     method! on_hint_ env h =

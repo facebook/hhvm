@@ -895,9 +895,9 @@ where
         Self::R::make_list_item(self.state_mut(), arg0, arg1)
     }
 
-    fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1]);
-        Self::R::make_enum_atom_expression(self.state_mut(), arg0, arg1)
+    fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2]);
+        Self::R::make_enum_atom_expression(self.state_mut(), arg0, arg1, arg2)
     }
 
 }

@@ -1,0 +1,14 @@
+(alias
+    (name autocomplete_enum_atom)
+    (deps %{exe:../../../src/hh_single_complete.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/autocomplete/enum_atom/HH_FLAGS)
+          (glob_files %{project_root}/test/autocomplete/enum_atom/*.php)
+          (glob_files %{project_root}/test/autocomplete/enum_atom/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/autocomplete/enum_atom
+    --program %{exe:../../../src/hh_single_complete.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias autocomplete_enum_atom)))

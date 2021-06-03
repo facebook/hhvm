@@ -2417,7 +2417,9 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc list_item in
         let acc = f acc list_separator in
         acc
-      | EnumAtomExpression { enum_atom_hash; enum_atom_expression } ->
+      | EnumAtomExpression
+          { enum_atom_qualifier; enum_atom_hash; enum_atom_expression } ->
+        let acc = f acc enum_atom_qualifier in
         let acc = f acc enum_atom_hash in
         let acc = f acc enum_atom_expression in
         acc
@@ -4018,8 +4020,9 @@ module WithToken (Token : TokenType) = struct
         [intersection_left_paren; intersection_types; intersection_right_paren]
       | ErrorSyntax { error_error } -> [error_error]
       | ListItem { list_item; list_separator } -> [list_item; list_separator]
-      | EnumAtomExpression { enum_atom_hash; enum_atom_expression } ->
-        [enum_atom_hash; enum_atom_expression]
+      | EnumAtomExpression
+          { enum_atom_qualifier; enum_atom_hash; enum_atom_expression } ->
+        [enum_atom_qualifier; enum_atom_hash; enum_atom_expression]
 
     let children node = children_from_syntax node.syntax
 
@@ -5649,8 +5652,9 @@ module WithToken (Token : TokenType) = struct
       | ErrorSyntax { error_error } -> ["error_error"]
       | ListItem { list_item; list_separator } ->
         ["list_item"; "list_separator"]
-      | EnumAtomExpression { enum_atom_hash; enum_atom_expression } ->
-        ["enum_atom_hash"; "enum_atom_expression"]
+      | EnumAtomExpression
+          { enum_atom_qualifier; enum_atom_hash; enum_atom_expression } ->
+        ["enum_atom_qualifier"; "enum_atom_hash"; "enum_atom_expression"]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
       let open Hh_json in
@@ -7496,9 +7500,10 @@ module WithToken (Token : TokenType) = struct
       | (SyntaxKind.ErrorSyntax, [error_error]) -> ErrorSyntax { error_error }
       | (SyntaxKind.ListItem, [list_item; list_separator]) ->
         ListItem { list_item; list_separator }
-      | (SyntaxKind.EnumAtomExpression, [enum_atom_hash; enum_atom_expression])
-        ->
-        EnumAtomExpression { enum_atom_hash; enum_atom_expression }
+      | ( SyntaxKind.EnumAtomExpression,
+          [enum_atom_qualifier; enum_atom_hash; enum_atom_expression] ) ->
+        EnumAtomExpression
+          { enum_atom_qualifier; enum_atom_hash; enum_atom_expression }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
       | _ ->
@@ -9891,9 +9896,11 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_enum_atom_expression enum_atom_hash enum_atom_expression =
+      let make_enum_atom_expression
+          enum_atom_qualifier enum_atom_hash enum_atom_expression =
         let syntax =
-          EnumAtomExpression { enum_atom_hash; enum_atom_expression }
+          EnumAtomExpression
+            { enum_atom_qualifier; enum_atom_hash; enum_atom_expression }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -1137,6 +1137,7 @@ struct
         list_separator: t;
       }
     | EnumAtomExpression of {
+        enum_atom_qualifier: t;
         enum_atom_hash: t;
         enum_atom_expression: t;
       }
@@ -2561,6 +2562,7 @@ struct
   }
 
   and enum_atom_expression = {
+    enum_atom_qualifier: expression option value;
     enum_atom_hash: Token.t value;
     enum_atom_expression: Token.t value;
   }

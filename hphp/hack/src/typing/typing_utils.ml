@@ -504,7 +504,6 @@ let shape_field_name_ this field =
     match field with
     | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
     | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
-    | (p, EnumAtom name) -> Ok (Ast_defs.SFlit_str (p, name))
     | (_, Class_const ((_, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
     | (_, Class_const ((_, CIself), y)) ->
       (match force this with

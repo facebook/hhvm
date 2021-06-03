@@ -461,7 +461,10 @@ where
             | TokenKind::Require_once => self.parse_inclusion_expression(),
             TokenKind::Isset => self.parse_isset_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
-            TokenKind::Hash => self.parse_atom(),
+            TokenKind::Hash => {
+                let qualifier = S!(make_missing, self, self.pos());
+                self.parse_atom(qualifier)
+            }
             TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
                 let token = self.next_token_non_reserved_as_name();
@@ -1137,9 +1140,10 @@ where
                 self.parse_scope_resolution_expression(type_specifier)
             }
             TokenKind::Hash | TokenKind::LeftParen => {
+                let missing = S!(make_missing, self, self.pos());
                 let enum_atom = match self.peek_token_kind() {
-                    TokenKind::Hash => self.parse_atom(),
-                    _ => S!(make_missing, self, self.pos()),
+                    TokenKind::Hash => self.parse_atom(missing),
+                    _ => missing,
                 };
                 let (left, args, right) = self.parse_expression_list_opt();
                 S!(
@@ -1326,7 +1330,11 @@ where
                         TokenKind::PlusPlus | TokenKind::MinusMinus => {
                             self.parse_postfix_unary(term)
                         }
-                        TokenKind::Hash | TokenKind::LeftParen => self.parse_function_call(term),
+                        TokenKind::Hash => self.parse_function_call_or_enum_atom_expression(term),
+                        TokenKind::LeftParen => {
+                            let missing = S!(make_missing, self, self.pos());
+                            self.parse_function_call(missing, term)
+                        }
                         TokenKind::LeftBracket | TokenKind::LeftBrace => self.parse_subscript(term),
                         TokenKind::Question => {
                             let token = self.assert_token(TokenKind::Question);
@@ -1600,15 +1608,28 @@ where
         S!(make_constructor_call, self, designator, left, args, right)
     }
 
-    fn parse_function_call(&mut self, receiver: S::R) -> S::R {
+    fn parse_function_call_or_enum_atom_expression(&mut self, term: S::R) -> S::R {
+        // SPEC
+        // fully-qualified-atom:
+        //   term '#' name
+        // function-call-with-atom:
+        //   term '#' name '(' ... ')'
+        let hash = self.assert_token(TokenKind::Hash);
+        let atom_name = self.require_name();
+        if self.peek_token_kind() == TokenKind::LeftParen {
+            let missing = S!(make_missing, self, self.pos());
+            let enum_atom = S!(make_enum_atom_expression, self, missing, hash, atom_name);
+            self.parse_function_call(enum_atom, term)
+        } else {
+            S!(make_enum_atom_expression, self, term, hash, atom_name)
+        }
+    }
+
+    fn parse_function_call(&mut self, enum_atom: S::R, receiver: S::R) -> S::R {
         // SPEC
         // function-call-expression:
         //   postfix-expression  (  argument-expression-list-opt  )
         let type_arguments = S!(make_missing, self, self.pos());
-        let enum_atom = match self.peek_token_kind() {
-            TokenKind::Hash => self.parse_atom(),
-            _ => S!(make_missing, self, self.pos()),
-        };
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = true;
         let (left, args, right) = self.parse_expression_list_opt();
@@ -3039,9 +3060,9 @@ where
         S!(make_scope_resolution_expression, self, qualifier, op, name)
     }
 
-    fn parse_atom(&mut self) -> S::R {
+    fn parse_atom(&mut self, qualifier: S::R) -> S::R {
         let hash = self.assert_token(TokenKind::Hash);
         let atom_name = self.require_name();
-        S!(make_enum_atom_expression, self, hash, atom_name)
+        S!(make_enum_atom_expression, self, qualifier, hash, atom_name)
     }
 }

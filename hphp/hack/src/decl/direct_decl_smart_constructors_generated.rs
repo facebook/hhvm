@@ -742,8 +742,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_list_item(self, item, separator)
     }
 
-    fn make_enum_atom_expression(&mut self, hash: Self::R, expression: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_enum_atom_expression(self, hash, expression)
+    fn make_enum_atom_expression(&mut self, qualifier: Self::R, hash: Self::R, expression: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_enum_atom_expression(self, qualifier, hash, expression)
     }
 
 }

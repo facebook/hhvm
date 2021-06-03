@@ -361,8 +361,8 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                 .into_bump_str(),
             ))
         }
-        EnumAtom(s) => Ok(TypedValue::String(
-            bumpalo::collections::String::from_str_in(s, alloc).into_bump_str(),
+        EnumAtom(expr) => Ok(TypedValue::String(
+            bumpalo::collections::String::from_str_in(&expr.1, alloc).into_bump_str(),
         )),
         Float(s) => {
             if s == math::INF {

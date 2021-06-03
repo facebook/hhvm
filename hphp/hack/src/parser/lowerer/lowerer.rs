@@ -1769,9 +1769,13 @@ where
                         // If the function has an enum atom expression, that's
                         // the first argument.
                         if let EnumAtomExpression(e) = &c.enum_atom.children {
+                            assert!(
+                                e.qualifier.is_missing(),
+                                "Parser error: function call with atoms"
+                            );
                             let enum_atom = ast::Expr::new(
                                 Self::p_pos(&c.enum_atom, env),
-                                E_::EnumAtom(Self::pos_name(&e.expression, env)?.1),
+                                E_::mk_enum_atom(None, Self::pos_name(&e.expression, env)?.1),
                             );
                             args.insert(0, enum_atom);
                         }
@@ -2244,7 +2248,32 @@ where
                     Self::failwith("expect xhp open")
                 }
             }
-            EnumAtomExpression(c) => Ok(E_::EnumAtom(Self::pos_name(&c.expression, env)?.1)),
+            EnumAtomExpression(c) => {
+                /* Foo#Bar can be the following:
+                 * - short version: Foo is None/missing and we only have #Bar
+                 * - Foo is a name -> fully qualified Foo#Bar
+                 * - Foo is a function call prefix (can happen during auto completion)
+                 *   $c->foo#Bar or C::foo#Bar
+                 */
+                let ast::Id(atom_pos, atom_name) = Self::pos_name(&c.expression, env)?;
+                if c.qualifier.is_missing() {
+                    Ok(E_::mk_enum_atom(None, atom_name))
+                } else if c.qualifier.is_name() {
+                    let name = Self::pos_name(&c.qualifier, env)?;
+                    Ok(E_::mk_enum_atom(Some(name), atom_name))
+                } else {
+                    /* This can happen during parsing in auto-complete mode */
+                    let recv = Self::p_expr(&c.qualifier, env);
+                    match recv {
+                        Ok(recv) => {
+                            let atom = E_::mk_enum_atom(None, atom_name);
+                            let atom = ast::Expr::new(atom_pos, atom);
+                            Ok(E_::mk_call(recv, vec![], vec![atom], None))
+                        }
+                        Err(err) => Err(err),
+                    }
+                }
+            }
             _ => Self::missing_syntax_(Some(E_::Null), "expression", node, env),
         }
     }

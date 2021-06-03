@@ -1528,6 +1528,7 @@ pub struct ListItemChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct EnumAtomExpressionChildren<'a, T, V> {
+    pub qualifier: Syntax<'a, T, V>,
     pub hash: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
 }

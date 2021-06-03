@@ -1007,6 +1007,7 @@ module type Syntax_S = sig
         list_separator: t;
       }
     | EnumAtomExpression of {
+        enum_atom_qualifier: t;
         enum_atom_hash: t;
         enum_atom_expression: t;
       }
@@ -1417,7 +1418,7 @@ module type Syntax_S = sig
 
   val make_list_item : t -> t -> t
 
-  val make_enum_atom_expression : t -> t -> t
+  val make_enum_atom_expression : t -> t -> t -> t
 
   val position : Relative_path.t -> t -> Pos.t option
 

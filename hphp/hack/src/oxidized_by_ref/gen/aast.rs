@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6107d67b7abc9ea4efab322a094cc5d2>>
+// @generated SignedSource<<86cd079ee684a8e9dcc1a75b038c233c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1006,9 +1006,9 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
     /// Enum atom used for enum classes.
     ///
-    /// #field_name
+    /// enum_name#field_name or #field_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    EnumAtom(&'a str),
+    EnumAtom(&'a (Option<Sid<'a>>, &'a str)),
     /// Placeholder for expressions that aren't understood by parts of
     /// the toolchain.
     ///

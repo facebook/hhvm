@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c39405435ddee902c9917adc211c726>>
+// @generated SignedSource<<763eb1ae6143b29a03cd31c75942da50>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -809,8 +809,8 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
     /// Enum atom used for enum classes.
     ///
-    /// #field_name
-    EnumAtom(String),
+    /// enum_name#field_name or #field_name
+    EnumAtom(Box<(Option<Sid>, String)>),
     /// Placeholder for expressions that aren't understood by parts of
     /// the toolchain.
     ///

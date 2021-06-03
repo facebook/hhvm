@@ -128,6 +128,8 @@ module Fmt = struct
 
   let dbl_colon = const "::"
 
+  let dbl_hash = const "#"
+
   let vbar ppf _ =
     sp ppf ();
     string ppf "|";
@@ -1653,7 +1655,13 @@ end = struct
         ppf
         (targs_opt, (fst, snd))
     | Aast.Hole (expr, _, _, _) -> pp_expr ppf expr
-    | Aast.EnumAtom name -> Fmt.(prefix (const string "#") string) ppf name
+    | Aast.EnumAtom (opt_sid, name) ->
+      begin
+        match opt_sid with
+        | None -> Fmt.(prefix dbl_hash string) ppf name
+        | Some (_, class_name) ->
+          Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
+      end
     | Aast.Efun _
     | Aast.Lfun _
     | Aast.Xml _

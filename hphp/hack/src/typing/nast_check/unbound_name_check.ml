@@ -290,6 +290,17 @@ let handler ctx =
         { env with class_id_allow_typedef = true }
       | Aast.Obj_get (_, (_, Aast.Id (p, name)), _, _) ->
         { env with seen_names = SMap.add name p env.seen_names }
+      | Aast.EnumAtom (Some cname, _) ->
+        let allow_typedef = (* we might reconsider this ? *) false in
+        let () =
+          check_type_name
+            env
+            ~allow_typedef
+            ~allow_generics:false
+            ~kind:Errors.ClassContext
+            cname
+        in
+        env
       | _ -> env
 
     method! at_shape_field_name env sfn =

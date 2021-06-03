@@ -1540,10 +1540,11 @@ SyntaxVariant::ListItem (ListItemChildren{item,separator} ) => {
 ss.serialize_field("list_separator", &self.with(separator))?;
       ss.end()
 } 
-SyntaxVariant::EnumAtomExpression (EnumAtomExpressionChildren{hash,expression} ) => {
-      let mut ss = s.serialize_struct("", 3)?;
+SyntaxVariant::EnumAtomExpression (EnumAtomExpressionChildren{qualifier,hash,expression} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "enum_atom")?;
-      ss.serialize_field("enum_atom_hash", &self.with(hash))?;
+      ss.serialize_field("enum_atom_qualifier", &self.with(qualifier))?;
+ss.serialize_field("enum_atom_hash", &self.with(hash))?;
 ss.serialize_field("enum_atom_expression", &self.with(expression))?;
       ss.end()
 } 

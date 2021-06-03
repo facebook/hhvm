@@ -1866,8 +1866,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_atom_expression(ctx: &C, hash: Self, expression: Self) -> Self {
+    fn make_enum_atom_expression(ctx: &C, qualifier: Self, hash: Self, expression: Self) -> Self {
         let syntax = SyntaxVariant::EnumAtomExpression(ctx.get_arena().alloc(EnumAtomExpressionChildren {
+            qualifier,
             hash,
             expression,
         }));

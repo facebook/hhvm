@@ -971,14 +971,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hh_name_index"
-version = "0.0.0"
-dependencies = [
- "names",
- "structopt",
-]
-
-[[package]]
 name = "hhbc_by_ref_adata_state"
 version = "0.0.0"
 dependencies = [
@@ -2238,20 +2230,6 @@ dependencies = [
  "lazy_static",
  "pretty_assertions",
  "regex",
-]
-
-[[package]]
-name = "names"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "md-5",
- "no_pos_hash",
- "ocamlrep",
- "oxidized",
- "oxidized_by_ref",
- "rusqlite",
- "typing_deps_hash",
 ]
 
 [[package]]

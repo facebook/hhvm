@@ -2,17 +2,18 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod print_env;
+mod context;
+mod special_class_resolver;
 mod write;
+
+pub use context::Context;
+pub use write::{Error, IoWrite, Result, Write};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
-pub use write::{Error, IoWrite, Result, Write};
 
-use context::Context;
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
-use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
@@ -45,116 +46,11 @@ use hhbc_by_ref_runtime::TypedValue;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
-use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
+use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
 use regex::Regex;
 use write::*;
 
 use std::{borrow::Cow, collections::BTreeSet, io::Write as _, path::Path, write};
-
-pub mod context {
-    use crate::write::*;
-    use hhbc_by_ref_env::emitter::Emitter;
-    use oxidized::relative_path::RelativePath;
-
-    /// Indent is an abstraction of indentation. Configurable indentation
-    /// and perf tweaking will be easier.
-    struct Indent(usize);
-
-    impl Indent {
-        pub fn new() -> Self {
-            Self(0)
-        }
-
-        pub fn inc(&mut self) {
-            self.0 += 1;
-        }
-
-        pub fn dec(&mut self) {
-            self.0 -= 1;
-        }
-
-        pub fn write<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
-            Ok(for _ in 0..self.0 {
-                w.write("  ")?;
-            })
-        }
-    }
-
-    pub struct Context<'a> {
-        pub emitter: &'a mut Emitter<'a>,
-        pub path: Option<&'a RelativePath>,
-
-        dump_symbol_refs: bool,
-        pub dump_lambdas: bool,
-        indent: Indent,
-        is_system_lib: bool,
-    }
-
-    impl<'a> Context<'a> {
-        pub fn new(
-            emitter: &'a mut Emitter<'a>,
-            path: Option<&'a RelativePath>,
-            dump_symbol_refs: bool,
-            is_system_lib: bool,
-        ) -> Self {
-            Self {
-                emitter,
-                path,
-                dump_symbol_refs,
-                dump_lambdas: false,
-                indent: Indent::new(),
-                is_system_lib,
-            }
-        }
-
-        pub fn dump_symbol_refs(&self) -> bool {
-            self.dump_symbol_refs
-        }
-
-        /// Insert a newline with indentation
-        pub fn newline<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
-            newline(w)?;
-            self.indent.write(w)
-        }
-
-        /// Start a new indented block
-        pub fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
-        where
-            W: Write,
-            F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
-        {
-            self.indent.inc();
-            let r = f(self, w);
-            self.indent.dec();
-            r
-        }
-
-        pub fn unblock<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
-        where
-            W: Write,
-            F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
-        {
-            self.indent.dec();
-            let r = f(self, w);
-            self.indent.inc();
-            r
-        }
-
-        /// Printing instruction list requies manually control indentation,
-        /// where indent_inc/indent_dec are called
-        pub fn indent_inc(&mut self) {
-            self.indent.inc();
-        }
-
-        pub fn indent_dec(&mut self) {
-            self.indent.dec();
-        }
-
-        pub fn is_system_lib(&self) -> bool {
-            self.is_system_lib
-        }
-    }
-}
 
 struct ExprEnv<'e> {
     pub codegen_env: Option<&'e HhasBodyEnv>,
@@ -267,7 +163,7 @@ fn print_include_region<W: Write>(
         w: &mut W,
         inc: IncludePath,
     ) -> Result<(), W::Error> {
-        let include_roots = ctx.emitter.options().hhvm.include_roots.get();
+        let include_roots = ctx.include_roots;
         match inc.into_doc_root_relative(include_roots) {
             IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p)),
             IncludePath::SearchPathRelative(p) => {
@@ -279,7 +175,7 @@ fn print_include_region<W: Write>(
                 if path_from_cur_dirname.exists() {
                     print_path(w, &path_from_cur_dirname)
                 } else {
-                    let search_paths = ctx.emitter.options().server.include_search_paths.get();
+                    let search_paths = ctx.include_search_paths;
                     for prefix in search_paths.iter() {
                         let path = Path::new(prefix).join(&p);
                         if path.exists() {
@@ -292,7 +188,7 @@ fn print_include_region<W: Write>(
             IncludePath::IncludeRootRelative(v, p) => {
                 if !p.is_empty() {
                     include_roots.get(&v).iter().try_for_each(|ir| {
-                        let doc_root = ctx.emitter.options().doc_root.get();
+                        let doc_root = ctx.doc_root;
                         let resolved = Path::new(doc_root).join(ir).join(&p);
                         print_if_exists(w, &resolved)
                     })?
@@ -300,7 +196,7 @@ fn print_include_region<W: Write>(
                 Ok(())
             }
             IncludePath::DocRootRelative(p) => {
-                let doc_root = ctx.emitter.options().doc_root.get();
+                let doc_root = ctx.doc_root;
                 let resolved = Path::new(doc_root).join(&p);
                 print_if_exists(w, &resolved)
             }
@@ -946,7 +842,7 @@ fn print_pos_as_prov_tag<W: Write>(
     loc: &Option<ast_defs::Pos>,
 ) -> Result<(), W::Error> {
     match loc {
-        Some(l) if ctx.emitter.options().array_provenance() => {
+        Some(l) if ctx.array_provenance => {
             let (line, ..) = l.info_pos();
             let filename = l.filename().to_absolute();
             let filename = match filename.to_str().unwrap() {
@@ -2546,7 +2442,8 @@ fn print_expr<W: Write>(
         id: &'e str,
     ) -> Cow<'e, str> {
         if id == classes::SELF || id == classes::PARENT || id == classes::STATIC {
-            return get_special_class_name(ctx, env, is_class_constant, id);
+            let name = ctx.special_class_resolver.resolve(env, id);
+            return fmt_class_name(is_class_constant, name);
         }
         fn get<'a>(should_format: bool, is_class_constant: bool, id: &'a str) -> Cow<'a, str> {
             if should_format {
@@ -2566,45 +2463,6 @@ fn print_expr<W: Write>(
         } else {
             get(should_format, is_class_constant, id)
         }
-    }
-    fn get_special_class_name<'e>(
-        ctx: &mut Context,
-        env: Option<&'e HhasBodyEnv>,
-        is_class_constant: bool,
-        id: &'e str,
-    ) -> Cow<'e, str> {
-        let class_expr = match env {
-            None => ClassExpr::expr_to_class_expr_(
-                ctx.emitter,
-                true,
-                true,
-                None,
-                None,
-                ast::Expr(
-                    Pos::make_none(),
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
-                ),
-            ),
-            Some(body_env) => ClassExpr::expr_to_class_expr_(
-                ctx.emitter,
-                true,
-                true,
-                body_env
-                    .class_info
-                    .as_ref()
-                    .map(|(k, s)| (k.clone(), s.as_str())),
-                body_env.parent_name.clone(),
-                ast::Expr(
-                    Pos::make_none(),
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
-                ),
-            ),
-        };
-        let name = match class_expr {
-            ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
-            _ => Cow::Borrowed(id),
-        };
-        fmt_class_name(is_class_constant, name)
     }
     fn handle_possible_colon_colon_class_expr<W: Write>(
         ctx: &mut Context,

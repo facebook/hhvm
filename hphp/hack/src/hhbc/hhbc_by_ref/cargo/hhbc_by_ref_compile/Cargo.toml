@@ -12,7 +12,7 @@ aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0"
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
-bytecode_printer = { path = "../bytecode_printer" }
+bytecode_printer = { path = "../../../bytecode_printer" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 hhbc_by_ref_emit_program = { path = "../hhbc_by_ref_emit_program" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }

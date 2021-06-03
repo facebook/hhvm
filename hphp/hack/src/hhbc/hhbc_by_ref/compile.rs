@@ -11,7 +11,7 @@ use aast_parser::{
 };
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
-use bytecode_printer::{context::Context, print_program, Write};
+use bytecode_printer::{print_program, Context, Write};
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_program::HhasProgram;

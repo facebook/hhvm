@@ -45,8 +45,6 @@ let funopt_is_noreturn = function
   | Some { ft_ret = { et_type; _ }; _ } -> is_prim Tnoreturn et_type
   | _ -> false
 
-let raise_exit_if_terminal f = if funopt_is_noreturn f then raise Exit
-
 let static_meth_is_noreturn env ci meth_id =
   let class_name =
     match ci with

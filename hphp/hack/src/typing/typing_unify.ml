@@ -18,11 +18,3 @@ let unify_param_modes param1 param2 on_error =
     ()
   | (FPnormal, FPinout) -> Errors.inoutness_mismatch pos2 pos1 on_error
   | (FPinout, FPnormal) -> Errors.inoutness_mismatch pos1 pos2 on_error
-
-let unify_accept_disposable param1 param2 on_error =
-  let { fp_pos = pos1; _ } = param1 in
-  let { fp_pos = pos2; _ } = param2 in
-  match (get_fp_accept_disposable param1, get_fp_accept_disposable param2) with
-  | (true, false) -> Errors.accept_disposable_invariant pos1 pos2 on_error
-  | (false, true) -> Errors.accept_disposable_invariant pos2 pos1 on_error
-  | (_, _) -> ()

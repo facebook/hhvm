@@ -29,6 +29,9 @@ module Subst = Decl_subst
 module EnvFromDef = Typing_env_from_def
 module Partial = Partial_provider
 module TUtils = Typing_utils
+module TCO = TypecheckerOptions
+module Cls = Decl_provider.Class
+module SN = Naming_special_names
 
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if

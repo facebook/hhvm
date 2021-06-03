@@ -154,30 +154,6 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
     ( Reason.Rshape (shape_pos, fun_name),
       Tshape (Open_shape, TShapeMap.singleton field_name field_ty) )
 
-(* Is a given field required in a given shape?
- *
- * sfn is a required field of shape t iff t is a subtype of
- * shape(sfn => mixed, ...) (or shape(sfn => nonnull, ...) if
- * disable_optional_and_unknonw_shape_fields is enabled, as
- * in that case an option-typed field is considered optional).
- *
- * Note that unlike doing a case analysis on the shape type,
- * expressing this check using subtyping successfully deals
- * with the cases where the shape is unresolved or is abstract
- * (e.g., hidden behind a newtype or given by a constrained
- * generic parameter or type constant).
- *)
-let is_shape_field_required env shape_pos fun_name field_name shape_ty =
-  let field_ty =
-    { sft_optional = false; sft_ty = MakeType.mixed Reason.Rnone }
-  in
-  let super_shape_ty =
-    make_idx_fake_super_shape shape_pos fun_name field_name field_ty
-  in
-  let (env, ty1) = Typing_solver.expand_type_and_solve_eq env shape_ty in
-  let (env, ty2) = Typing_solver.expand_type_and_solve_eq env super_shape_ty in
-  Typing_subtype.is_sub_type_for_coercion env ty1 ty2
-
 (* Typing rules for Shapes::idx
  *
  *     e : ?shape(?sfn => t, ...)

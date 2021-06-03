@@ -14,7 +14,6 @@ open Typing_env_types
 module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
-module ShapeMap = Aast.ShapeMap
 module TySet = Typing_set
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
@@ -107,8 +106,6 @@ let sub_type_with_dynamic_as_bottom_res x =
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
-type is_sub_type_i_type = env -> internal_type -> internal_type -> bool
-
 let (is_sub_type_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type")
 
@@ -116,8 +113,6 @@ let is_sub_type x = !is_sub_type_ref x
 
 let (is_sub_type_for_coercion_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type_for_coercion")
-
-let is_sub_type_for_coercion x = !is_sub_type_for_coercion_ref x
 
 let (is_sub_type_for_union_ref :
       (env ->
@@ -211,8 +206,6 @@ type fold_union = env -> Reason.t -> locl_ty list -> env * locl_ty
 
 let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 
-let fold_union x = !fold_union_ref x
-
 type simplify_unions =
   env ->
   ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
@@ -263,10 +256,6 @@ let localize x = !localize_ref x
 (*****************************************************************************)
 (* Checking properties of types *)
 (*****************************************************************************)
-
-let is_option env ty =
-  let null = MakeType.null Reason.Rnone in
-  is_sub_type_for_union env null ty
 
 let is_mixed_i env ty =
   let mixed = LoclType (MakeType.mixed Reason.Rnone) in

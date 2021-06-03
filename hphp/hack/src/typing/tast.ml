@@ -93,6 +93,8 @@ type fun_def = (Pos.t * ty, unit, saved_env, ty) Aast.fun_def
 
 type fun_param = (Pos.t * ty, unit, saved_env, ty) Aast.fun_param
 
+type fun_variadicity = (Pos.t * ty, unit, saved_env, ty) Aast.fun_variadicity
+
 type func_body = (Pos.t * ty, unit, saved_env, ty) Aast.func_body
 
 type method_ = (Pos.t * ty, unit, saved_env, ty) Aast.method_

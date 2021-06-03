@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47b0250efee3d05f6b91a10624d0c586>>
+// @generated SignedSource<<8fb3de0de4be103be74032163ccbb84c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -125,6 +125,9 @@ pub type FunDef<'a> =
 
 pub type FunParam<'a> =
     aast::FunParam<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+
+pub type FunVariadicity<'a> =
+    aast::FunVariadicity<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;
 
 pub type FuncBody<'a> =
     aast::FuncBody<'a, (&'a pos::Pos<'a>, &'a Ty<'a>), (), &'a SavedEnv<'a>, &'a Ty<'a>>;

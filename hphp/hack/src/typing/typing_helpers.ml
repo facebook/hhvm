@@ -17,14 +17,9 @@ open Common
 open Typing_defs
 open Typing_env_types
 open Aast
-module Reason = Typing_reason
 module Env = Typing_env
 module SN = Naming_special_names
-module TCO = TypecheckerOptions
-module C = Typing_continuations
-module CMap = C.Map
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
 
 module ExpectedTy : sig
   [@@@warning "-32"]

@@ -3665,7 +3665,7 @@ void* takeCtx(NoCtx) {
 
 template<bool dynamic, typename Ctx>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               Ctx&& ctx, bool logAsDynamicCall = true) {
+               Ctx&& ctx, bool logAsDynamicCall = true, bool isCtor = false) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
@@ -3693,7 +3693,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn(),
     Offset(origpc - vmfp()->func()->entry()),
     0,  // generics bitmap not used by interpreter
-    vmfp()->coeffects()
+    vmfp()->providedCoeffectsForCall(isCtor)
   );
 
   doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
@@ -4441,7 +4441,7 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
-  fcallImpl<false>(origpc, pc, fca, func, Object::attach(obj));
+  fcallImpl<false>(origpc, pc, fca, func, Object::attach(obj), true, true);
 }
 
 OPTBLD_INLINE void iopLockObj() {

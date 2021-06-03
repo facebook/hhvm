@@ -47,6 +47,7 @@ struct RuntimeCoeffects {
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
   static RuntimeCoeffects policied_of();
+  static RuntimeCoeffects write_this_props();
 
   // This function is a placeholder to indicate that the correct coeffect needs
   // to be indentified and passed in its place
@@ -99,6 +100,7 @@ struct StaticCoeffects {
   }
 
   static StaticCoeffects defaults();
+  static StaticCoeffects write_this_props();
 
   // This operator is equivalent to | of [coeffectA | coeffectB]
   StaticCoeffects& operator&=(const StaticCoeffects);

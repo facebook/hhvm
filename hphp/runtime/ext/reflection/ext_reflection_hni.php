@@ -645,8 +645,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
 
-  <<__Native, __Pure, __Mutable>>
-  private function __init(mixed $cls_or_obj, string $meth): bool;
+  <<__Native>>
+  private function __init(mixed $cls_or_obj, string $meth)[write_this_props]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.construct.php )

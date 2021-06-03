@@ -33,24 +33,33 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticCoeffects StaticCoeffects::defaults() {
-  static StaticCoeffects defaults = CoeffectsConfig::fromName("defaults");
-  return defaults;
+  static StaticCoeffects c = CoeffectsConfig::fromName("defaults");
+  return c;
+}
+
+StaticCoeffects StaticCoeffects::write_this_props() {
+  static StaticCoeffects c = CoeffectsConfig::fromName("write_this_props");
+  return c;
 }
 
 RuntimeCoeffects RuntimeCoeffects::defaults() {
   return StaticCoeffects::defaults().toAmbient();
 }
 
-RuntimeCoeffects RuntimeCoeffects::pure() {
-  static RuntimeCoeffects pure = CoeffectsConfig::fromName("pure").toAmbient();
-  return pure;
-}
+#define COEFFECTS     \
+  X(pure)             \
+  X(policied_of)      \
+  X(write_this_props) \
 
-RuntimeCoeffects RuntimeCoeffects::policied_of() {
-  static RuntimeCoeffects c =
-    CoeffectsConfig::fromName("policied_of").toAmbient();
-  return c;
+#define X(x)                                                             \
+RuntimeCoeffects RuntimeCoeffects::x() {                                 \
+  static RuntimeCoeffects c = CoeffectsConfig::fromName(#x).toAmbient(); \
+  return c;                                                              \
 }
+  COEFFECTS
+#undef X
+
+#undef COEFFECTS
 
 const std::string RuntimeCoeffects::toString() const {
   // Pretend to be StaticCoeffects, this is safe since RuntimeCoeffects is a

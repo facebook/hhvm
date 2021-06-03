@@ -236,7 +236,9 @@ void FuncEmitter::commit(RepoTxn& txn) {
   }
 }
 
-const StaticString s_DynamicallyCallable("__DynamicallyCallable");
+const StaticString
+  s_construct("__construct"),
+  s_DynamicallyCallable("__DynamicallyCallable");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -299,6 +301,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       CoeffectsConfig::fromName(staticCoeffects[0]->toCppString());
     for (auto const& name : staticCoeffects) {
       coeffects &= CoeffectsConfig::fromName(name->toCppString());
+    }
+    if (preClass && name == s_construct.get()) {
+      coeffects &= StaticCoeffects::write_this_props();
     }
     return coeffects;
   }();

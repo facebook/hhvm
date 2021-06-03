@@ -258,6 +258,7 @@ struct ActRec {
    */
   RuntimeCoeffects coeffects() const;
   RuntimeCoeffects requiredCoeffects() const;
+  RuntimeCoeffects providedCoeffectsForCall(bool isCtor) const;
 
   /*
    * address to teleport the return value after destroying this actrec.

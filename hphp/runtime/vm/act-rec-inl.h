@@ -165,8 +165,14 @@ inline RuntimeCoeffects ActRec::requiredCoeffects() const {
 
 inline RuntimeCoeffects ActRec::coeffects() const {
   auto const shallows = func()->shallowCoeffectsWithLocals();
-  return RuntimeCoeffects::fromValue(requiredCoeffects().value() &
-                                     (~shallows.value()));
+  auto const mask = ~(shallows.value());
+  return RuntimeCoeffects::fromValue(requiredCoeffects().value() & mask);
+}
+
+inline RuntimeCoeffects ActRec::providedCoeffectsForCall(bool isCtor) const {
+  if (!isCtor) return coeffects();
+  auto const mask = RuntimeCoeffects::write_this_props().value();
+  return RuntimeCoeffects::fromValue(coeffects().value() & mask);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

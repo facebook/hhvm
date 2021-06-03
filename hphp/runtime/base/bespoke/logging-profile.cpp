@@ -75,10 +75,19 @@ ARRAY_OPS
   not_reached();
 }
 
+// Some SrcKeys cannot be used as bespoke sources or sinks, because they
+// don't round-trip through serialization. We hit this case for the SrcKeys
+// of eval'd functions, and possibly others.
+bool serializable(SrcKey sk) {
+  assertx(sk.valid());
+  return !sk.unit()->origFilepath()->empty();
+}
+
 // SrcKey includes more information than just the (Func, Offset) pair,
 // but we want all our logging to be grouped by these two fields alone.
 SrcKey canonicalize(SrcKey sk) {
   assertx(sk.valid());
+  assertx(serializable(sk));
   return SrcKey(sk.func(), sk.offset(), ResumeMode::None);
 }
 
@@ -1054,6 +1063,11 @@ bool shouldLogAtSrcKey(SrcKey sk) {
     return false;
   }
 
+  if (!serializable(sk)) {
+    FTRACE(5, "Cannot create bespoke source for non-serializable source.\n");
+    return false;
+  }
+
   // Don't profile static dicts used for TypeStruct tests. Rather than using
   // these dicts, we almost always just do a DataType check on the value.
   if (sk.op() == Op::Dict && sk.advanced().op() == Op::IsTypeStructC) {
@@ -1130,9 +1144,10 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic) {
   return getLoggingProfile(LoggingProfileKey(cls, slot, isStatic));
 }
 
-SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
+SinkProfile* getSinkProfile(TransID id, SrcKey sk) {
   assertx(allowBespokeArrayLikes());
-  auto const key = SinkProfileKey { id, canonicalize(skRaw) };
+  if (!serializable(sk)) return nullptr;
+  auto const key = SinkProfileKey { id, canonicalize(sk) };
   auto const it = s_sinkMap.find(key);
   if (it != s_sinkMap.end()) {
     assertx(it->second->key == key);
@@ -1163,6 +1178,7 @@ SrcKey getSrcKey() {
   }
   return fromLeaf([&](const ActRec* ar, Offset offset) {
     auto const result = SrcKey(ar->func(), offset, ResumeMode::None);
+    if (!serializable(result)) return SrcKey();
     assertx(canonicalize(result) == result);
     return result;
   });

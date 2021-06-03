@@ -1,0 +1,6 @@
+object(HH\Map) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  string(7) "garbage"
+}

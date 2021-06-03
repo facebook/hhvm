@@ -182,6 +182,8 @@ module LocalChanges = struct
     Sqlite3.step insert_stmt |> check_rc db
 
   let update db stmt_cache (local_changes : local_changes) =
+    if Relative_path.Map.cardinal local_changes.file_deltas > 0 then
+      HackEventLogger.naming_sqlite_local_changes_nonempty "update";
     let (local_changes_saved : blob_format) =
       Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
           match delta with
@@ -213,6 +215,8 @@ module LocalChanges = struct
             | Modified saved -> Modified (FileInfo.from_saved path saved)
             | Deleted -> Deleted)
       in
+      if Relative_path.Map.cardinal file_deltas > 0 then
+        HackEventLogger.naming_sqlite_local_changes_nonempty "get";
       { base_content_version; file_deltas }
     | rc ->
       failwith

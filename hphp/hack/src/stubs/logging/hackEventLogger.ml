@@ -283,6 +283,8 @@ let update_search_end _ _ = ()
 
 let naming_from_saved_state_end _ = ()
 
+let naming_sqlite_local_changes_nonempty _ = ()
+
 let type_decl_end _ = ()
 
 let first_redecl_end _ _ = ()

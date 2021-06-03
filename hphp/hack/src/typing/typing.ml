@@ -667,16 +667,19 @@ let xhp_attribute_decl_ty env sid obj attr =
       obj
   in
   let ureason = Reason.URxhp (snd sid, snd namepstr) in
-  let env =
-    Typing_coercion.coerce_type
-      valp
-      ureason
-      env
-      valty
-      (MakeType.unenforced declty)
-      Errors.xhp_attribute_does_not_match_hint
+  let (env, err_opt) =
+    Result.fold
+      ~ok:(fun env -> (env, None))
+      ~error:(fun env -> (env, Some (valty, declty)))
+    @@ Typing_coercion.coerce_type_res
+         valp
+         ureason
+         env
+         valty
+         (MakeType.unenforced declty)
+         Errors.xhp_attribute_does_not_match_hint
   in
-  (env, declty)
+  (env, declty, err_opt)
 
 let closure_check_param env param =
   match hint_of_type_hint param.param_type_hint with
@@ -4412,22 +4415,29 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
 and xhp_spread_attribute env c_onto valexpr sid obj =
   let (p, _) = valexpr in
   let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
-  (* Build the typed attribute node *)
-  let typed_attr = Aast.Xhp_spread te in
   let (env, attr_ptys) =
     match c_onto with
     | None -> (env, [])
     | Some class_info -> Typing_xhp.get_spread_attributes env p class_info valty
   in
-
-  let env =
+  let (env, has_err) =
     List.fold_left
       attr_ptys
-      ~f:(fun env attr ->
-        let (env, _) = xhp_attribute_decl_ty env sid obj attr in
-        env)
-      ~init:env
+      ~f:(fun (env, has_err) attr ->
+        let (env, _, err_opt) = xhp_attribute_decl_ty env sid obj attr in
+        (env, has_err || Option.is_some err_opt))
+      ~init:(env, false)
   in
+  (* If we have a subtyping error for any attribute, the best we can do here
+     is give an expected type of dynamic *)
+  let err_opt =
+    if has_err then
+      Some (valty, MakeType.nothing Reason.Rnone)
+    else
+      None
+  in
+  (* Build the typed attribute node *)
+  let typed_attr = Aast.Xhp_spread (hole_on_err ~err_opt te) in
   (env, typed_attr)
 
 (**
@@ -4440,9 +4450,10 @@ and xhp_simple_attribute env id valexpr sid obj =
   (* This converts the attribute name to a member name. *)
   let name = ":" ^ snd id in
   let attr_pty = ((fst id, name), (p, valty)) in
-  let (env, decl_ty) = xhp_attribute_decl_ty env sid obj attr_pty in
+  let (env, decl_ty, err_opt) = xhp_attribute_decl_ty env sid obj attr_pty in
   let typed_attr =
-    Aast.Xhp_simple { xs_name = id; xs_type = decl_ty; xs_expr = te }
+    Aast.Xhp_simple
+      { xs_name = id; xs_type = decl_ty; xs_expr = hole_on_err ~err_opt te }
   in
   (env, typed_attr)
 

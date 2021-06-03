@@ -505,7 +505,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     then
       let sub_arraykey env p ty =
         let r = Reason.Rconcat_operand p in
-        let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+        let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
         let stringlike =
           MakeType.union
             r

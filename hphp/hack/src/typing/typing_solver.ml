@@ -163,7 +163,7 @@ let rec freshen_inside_ty env ty =
   | Tunapplied_alias _ -> default ()
 
 and freshen_ty env ty =
-  Env.fresh_invariant_type_var env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
+  Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
 
 and freshen_possibly_enforced_ty env ety =
   let (env, et_type) = freshen_ty env ety.et_type in

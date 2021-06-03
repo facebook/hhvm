@@ -133,9 +133,9 @@ let fresh_type env p =
   log_env_change_ "fresh_type" env
   @@ wrap_inference_env_call env (fun env -> Inf.fresh_type env p)
 
-let fresh_invariant_type_var env p =
-  log_env_change_ "fresh_invariant_type_var" env
-  @@ wrap_inference_env_call env (fun env -> Inf.fresh_invariant_type_var env p)
+let fresh_type_invariant env p =
+  log_env_change_ "fresh_type_invariant" env
+  @@ wrap_inference_env_call env (fun env -> Inf.fresh_type_invariant env p)
 
 let new_global_tyvar env ?i r =
   log_env_change_ "new_global_tyvar" env

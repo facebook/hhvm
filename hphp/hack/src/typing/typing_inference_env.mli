@@ -57,7 +57,7 @@ val fresh_type : ?variance:Ast_defs.variance -> t -> Pos.t -> t * locl_ty
 val fresh_type_reason :
   ?variance:Ast_defs.variance -> t -> Pos.t -> Reason.t -> t * locl_ty
 
-val fresh_invariant_type_var : t -> Pos.t -> t * locl_ty
+val fresh_type_invariant : t -> Pos.t -> t * locl_ty
 
 val open_tyvars : t -> Pos.t -> t
 

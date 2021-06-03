@@ -109,7 +109,7 @@ let get_tyvar_type_const env var tconstid ~on_error =
   | Some (_pos, ty) -> (env, ty)
   | None ->
     let var_pos = Env.get_tyvar_pos env var in
-    let (env, tvar) = Env.fresh_invariant_type_var env var_pos in
+    let (env, tvar) = Env.fresh_type_invariant env var_pos in
     Typing_log.log_new_tvar_for_tconst env (var_pos, var) tconstid tvar;
     let env = add_tyvar_type_const env var tconstid tvar ~on_error in
     (env, tvar)

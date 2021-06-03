@@ -7876,7 +7876,7 @@ and string2 env idl =
             (Env.get_tcopt env)
         then
           let r = Reason.Rinterp_operand p in
-          let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+          let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
           let stringlike =
             MakeType.union
               r

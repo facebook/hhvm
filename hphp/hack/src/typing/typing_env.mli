@@ -31,18 +31,48 @@ val get_ctx : env -> Provider_context.t
 
 val get_tracing_info : env -> Decl_counters.tracing_info option
 
+(** Functions related to type variable scopes *)
+
+(**
+  Open a new "type variable" scope and record this in the environment.
+  Within this scope, you can
+  - generate fresh type variables, using [fresh_type_X] functions
+  - query the currently fresh type variables, using [get_current_tyvars]
+  - close the scope
+
+  The usual usage pattern within type inference is:
+
+  1. Open a type variable scope using [open_tyvars] before checking an AST node.
+
+  2. Check the AST node; generate fresh type variables as necessary; make calls
+     to subtyping functions such as [Typing_ops.sub_type] that will record constraints
+     on those type variables.
+
+  3. Call [set_tyvar_variance] on the type of the expression to correctly set the
+     variance of the type variables.
+
+  4. Call [Typing_solver.close_tyvars_and_solve] to solve type variables that can
+     be solved immediately, and close the type variable scope.
+*)
+val open_tyvars : env -> Pos.t -> env
+
+(** Generate a fresh type variable type with variance not yet recorded *)
 val fresh_type : env -> Pos.t -> env * locl_ty
 
-(** Same as fresh_type but takes a specific reason as parameter. *)
+(** Generate a fresh type variable type with optional variance and
+    the given reason information *)
 val fresh_type_reason :
   ?variance:Ast_defs.variance -> env -> Pos.t -> Reason.t -> env * locl_ty
 
-val fresh_invariant_type_var : env -> Pos.t -> env * locl_ty
+(** Generate a fresh type variable type that is assumed to be invariant, so
+    it won't be solved automatically at the end of the scope *)
+val fresh_type_invariant : env -> Pos.t -> env * locl_ty
 
-val open_tyvars : env -> Pos.t -> env
-
+(** What type variables are fresh in the current scope? *)
 val get_current_tyvars : env -> Ident.t list
 
+(** Close the current type variable scope.
+    You might want to call [Typing_solver.close_tyvars_and_solve] instead. *)
 val close_tyvars : env -> env
 
 val add : env -> ?tyvar_pos:Pos.t -> int -> locl_ty -> env

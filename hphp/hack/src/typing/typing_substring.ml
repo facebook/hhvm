@@ -25,7 +25,7 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
    * HH\FormatString<T>).
    *)
   let r = Reason.Rwitness p in
-  let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+  let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
   let tyl =
     [
       MakeType.arraykey r;

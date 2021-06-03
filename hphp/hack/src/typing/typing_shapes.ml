@@ -22,7 +22,7 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
     begin
       match TShapeMap.find_opt field_name fields with
       | None ->
-        let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
+        let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
         let sft = { sft_optional = true; sft_ty = element_ty } in
         ( env,
           Some

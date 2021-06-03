@@ -457,7 +457,7 @@ let fresh_type_reason ?variance env p r =
 let fresh_type ?variance env p =
   fresh_type_reason env p (Reason.Rtype_variable p) ?variance
 
-let fresh_invariant_type_var = fresh_type ~variance:Ast_defs.Invariant
+let fresh_type_invariant = fresh_type ~variance:Ast_defs.Invariant
 
 let new_global_tyvar env ?i r =
   let v =

@@ -72,14 +72,14 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
          || cn = SN.Collections.cAnyArray
          || cn = SN.Collections.cConstVector
          || cn = SN.Collections.cImmVector ->
-    let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
-    let (env, index_ty) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
+    let (env, index_ty) = Env.fresh_type_invariant env expr_pos in
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* The same is true of PHP arrays *)
   | (r, (Tvarray _ | Tdarray _ | Tvec_or_dict _ | Tvarray_or_darray _)) ->
-    let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
-    let (env, index_ty) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
+    let (env, index_ty) = Env.fresh_type_invariant env expr_pos in
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* For tuples, we just freshen the element types *)
@@ -91,7 +91,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
       | (_, Int _) ->
         let (env, params) =
           List.map_env env tyl (fun env _ty ->
-              Env.fresh_invariant_type_var env expr_pos)
+              Env.fresh_type_invariant env expr_pos)
         in
         (env, Some (MakeType.tuple r params))
       | _ -> (env, None)
@@ -109,7 +109,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
         | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
           (env, None)
         | _ ->
-          let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
+          let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
           let upper_fdm =
             TShapeMap.add
               field
@@ -565,12 +565,12 @@ let widen_for_assign_array_append ~expr_pos env ty =
          || String.equal cn SN.Collections.cMap ->
     let (env, params) =
       List.map_env env tyl (fun env _ty ->
-          Env.fresh_invariant_type_var env expr_pos)
+          Env.fresh_type_invariant env expr_pos)
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
   | (r, Tvarray _) ->
-    let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
     (env, Some (mk (r, Tvarray element_ty)))
   | _ -> (env, None)
 
@@ -650,20 +650,20 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
          || cn = SN.Collections.cMap ->
     let (env, params) =
       List.map_env env tyl (fun env _ty ->
-          Env.fresh_invariant_type_var env expr_pos)
+          Env.fresh_type_invariant env expr_pos)
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
   | (r, Tvarray _) ->
-    let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, tv) = Env.fresh_type_invariant env expr_pos in
     (env, Some (mk (r, Tvarray tv)))
   | (r, Tvarray_or_darray _) ->
-    let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
-    let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, tk) = Env.fresh_type_invariant env expr_pos in
+    let (env, tv) = Env.fresh_type_invariant env expr_pos in
     (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
   | (r, Tdarray _) ->
-    let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
-    let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
+    let (env, tk) = Env.fresh_type_invariant env expr_pos in
+    let (env, tv) = Env.fresh_type_invariant env expr_pos in
     (env, Some (mk (r, Tdarray (tk, tv))))
   | (r, Ttuple tyl) ->
     (* requires integer literal *)
@@ -673,7 +673,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
       | (_, Int _) ->
         let (env, params) =
           List.map_env env tyl (fun env _ty ->
-              Env.fresh_invariant_type_var env expr_pos)
+              Env.fresh_type_invariant env expr_pos)
         in
         (env, Some (mk (r, Ttuple params)))
       | _ -> (env, None)

@@ -271,7 +271,7 @@ let rec type_of_result ~ignore_errors ctx env root res =
   let type_with_bound env as_tyvar name ~lower_bounds ~upper_bounds =
     match as_tyvar with
     | Some tyvar_pos ->
-      let (env, tvar) = Env.fresh_invariant_type_var env tyvar_pos in
+      let (env, tvar) = Env.fresh_type_invariant env tyvar_pos in
       Log.log_new_tvar_for_tconst_access env tyvar_pos tvar name ctx.id;
       (env, tvar)
     | None ->

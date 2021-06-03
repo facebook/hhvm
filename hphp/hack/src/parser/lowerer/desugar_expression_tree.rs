@@ -988,14 +988,10 @@ fn rewrite_stmts<TF>(
     let mut virtual_results = Vec::with_capacity(stmts.len());
     let mut desugar_results = Vec::with_capacity(stmts.len());
     for stmt in stmts {
-        match rewrite_stmt(env, stmt, visitor_name)? {
-            Some((virtual_stmt, desugar_expr)) => {
-                virtual_results.push(virtual_stmt);
-                desugar_results.push(desugar_expr);
-            }
-            None => {
-                // Discard empty statements.
-            }
+        let (virtual_stmt, desugared_expr) = rewrite_stmt(env, stmt, visitor_name)?;
+        virtual_results.push(virtual_stmt);
+        if let Some(desugared_expr) = desugared_expr {
+            desugar_results.push(desugared_expr);
         }
     }
     Ok((virtual_results, desugar_results))
@@ -1005,7 +1001,7 @@ fn rewrite_stmt<TF>(
     env: &Env<TF>,
     s: Stmt,
     visitor_name: &str,
-) -> Result<Option<(Stmt, Expr)>, (Pos, String)> {
+) -> Result<(Stmt, Option<Expr>), (Pos, String)> {
     use aast::Stmt_::*;
 
     let Stmt(pos, stmt_) = s;
@@ -1014,7 +1010,7 @@ fn rewrite_stmt<TF>(
     let virtual_desugar = match stmt_ {
         Expr(e) => {
             let (virtual_expr, desugar_expr) = rewrite_expr(env, *e, visitor_name)?;
-            Some((Stmt(pos, Expr(Box::new(virtual_expr))), desugar_expr))
+            (Stmt(pos, Expr(Box::new(virtual_expr))), Some(desugar_expr))
         }
         Return(e) => match *e {
             // Source: MyDsl`return ...;`
@@ -1024,7 +1020,7 @@ fn rewrite_stmt<TF>(
                 let (virtual_expr, desugar_expr) = rewrite_expr(env, e, visitor_name)?;
                 let desugar_expr = v_meth_call("visitReturn", vec![pos_expr, desugar_expr], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_expr))));
-                Some((virtual_stmt, desugar_expr))
+                (virtual_stmt, Some(desugar_expr))
             }
             // Source: MyDsl`return;`
             // Virtualized: return MyDsl::voidType();
@@ -1038,7 +1034,7 @@ fn rewrite_stmt<TF>(
 
                 let virtual_void_expr = static_meth_call(visitor_name, "voidType", vec![], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_void_expr))));
-                Some((virtual_stmt, desugar_expr))
+                (virtual_stmt, Some(desugar_expr))
             }
         },
         // Source: MyDsl`if (...) {...} else {...}`
@@ -1068,7 +1064,7 @@ fn rewrite_stmt<TF>(
                     virtual_else_stmts,
                 ))),
             );
-            Some((virtual_stmt, desugar_expr))
+            (virtual_stmt, Some(desugar_expr))
         }
         // Source: MyDsl`while (...) {...}`
         // Virtualized: while (...->__bool()) {...}
@@ -1087,7 +1083,7 @@ fn rewrite_stmt<TF>(
                 pos,
                 While(Box::new((boolify(virtual_cond), virtual_body_stmts))),
             );
-            Some((virtual_stmt, desugar_expr))
+            (virtual_stmt, Some(desugar_expr))
         }
         // Source: MyDsl`for (...; ...; ...) {...}`
         // Virtualized: for (...; ...->__bool(); ...) {...}
@@ -1125,7 +1121,7 @@ fn rewrite_stmt<TF>(
                     virtual_body_stmts,
                 ))),
             );
-            Some((virtual_stmt, desugar_expr))
+            (virtual_stmt, Some(desugar_expr))
         }
         // Source: MyDsl`break;`
         // Virtualized: break;
@@ -1133,7 +1129,7 @@ fn rewrite_stmt<TF>(
         Break => {
             let desugar_expr = v_meth_call("visitBreak", vec![pos_expr], &pos);
             let virtual_stmt = Stmt(pos, Break);
-            Some((virtual_stmt, desugar_expr))
+            (virtual_stmt, Some(desugar_expr))
         }
         // Source: MyDsl`continue;`
         // Virtualized: continue;
@@ -1141,9 +1137,9 @@ fn rewrite_stmt<TF>(
         Continue => {
             let desugar_expr = v_meth_call("visitContinue", vec![pos_expr], &pos);
             let virtual_stmt = Stmt(pos, Continue);
-            Some((virtual_stmt, desugar_expr))
+            (virtual_stmt, Some(desugar_expr))
         }
-        Noop => None,
+        Noop => (Stmt(pos, Noop), None),
         _ => {
             return Err((
                 pos,

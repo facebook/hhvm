@@ -17,7 +17,12 @@
 # Currently, we are synthesising Hack code only, we will support more
 # languages like C#, Java later on.
 
+import os
 from typing import List
+
+import clingo
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from libfb.py import parutil
 
 # Extract logic rules from file format.
 def extract_logic_rules(lines: List[str]) -> List[str]:
@@ -60,3 +65,19 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 
     rules.append("symbols({}).".format(";".join(sorted(symbols))))
     return rules
+
+
+# Take in a dependency graph and a code generator to emit code
+def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
+    # Logic programs
+    asp_files = os.path.join(
+        parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
+    )
+
+    # Clingo interfaces.
+    ctl = clingo.Control()
+    ctl.load(asp_files + "/dep_graph_reasoning.lp")
+    ctl.add("base", [], "\n".join(additional_programs))
+
+    ctl.ground([("base", [])])
+    ctl.solve(on_model=generator.on_model)

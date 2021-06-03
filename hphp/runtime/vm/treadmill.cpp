@@ -147,7 +147,7 @@ pthread_t getThreadIdToAbort() {
 void checkOldest() {
   int64_t limit =
     RuntimeOption::MaxRequestAgeFactor * RuntimeOption::RequestTimeoutSeconds;
-  if (!limit) return;
+  if (debug || !limit) return;
 
   int64_t ageOldest = getAgeOldestRequest();
   if (ageOldest > limit) {

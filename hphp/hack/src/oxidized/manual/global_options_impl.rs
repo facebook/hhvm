@@ -123,6 +123,7 @@ impl Default for GlobalOptions {
             tco_enable_strict_string_concat_interp: false,
             tco_ignore_unsafe_cast: false,
             tco_readonly: false,
+            tco_enable_modules: false,
             tco_enable_expression_trees: false,
             tco_allowed_expression_tree_visitors: vec![],
             tco_math_new_code: false,

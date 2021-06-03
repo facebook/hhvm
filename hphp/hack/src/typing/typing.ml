@@ -395,6 +395,8 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
           Env.map_tcopt ~f:TypecheckerOptions.enable_ifc env
         | Aast.String s when s = SN.UnstableFeatures.readonly ->
           Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_readonly t true) env
+        | Aast.String s when s = SN.UnstableFeatures.modules ->
+          Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_modules t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
           Env.map_tcopt
             ~f:(fun t ->

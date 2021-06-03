@@ -189,6 +189,10 @@ let set_tco_enable_expression_trees =
 
 let expression_trees_enabled = GlobalOptions.expression_trees_enabled
 
+let enable_modules = GlobalOptions.tco_enable_modules
+
+let set_modules = GlobalOptions.set_tco_enable_modules
+
 let allowed_expression_tree_visitors =
   GlobalOptions.allowed_expression_tree_visitors
 

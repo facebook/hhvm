@@ -295,6 +295,8 @@ type t = {
   tco_readonly: bool;
   (* Enable expression trees via unstable features flag *)
   tco_enable_expression_trees: bool;
+  (* Enable unstable feature: modules *)
+  tco_enable_modules: bool;
   (* Allowed expression tree visitors when not enabled via unstable features flag *)
   tco_allowed_expression_tree_visitors: string list;
   (* Use a new error code for math operations: addition, subtraction,
@@ -428,6 +430,7 @@ val make :
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_readonly:bool ->
   ?tco_enable_expression_trees:bool ->
+  ?tco_enable_modules:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
@@ -698,6 +701,10 @@ val tco_readonly : t -> bool
 val set_tco_readonly : t -> bool -> t
 
 val set_tco_enable_expression_trees : t -> bool -> t
+
+val tco_enable_modules : t -> bool
+
+val set_tco_enable_modules : t -> bool -> t
 
 val expression_trees_enabled : t -> bool
 

@@ -670,14 +670,6 @@ let load_from_sqlite_with_changes_since_baseline
     ctx
     db_path
 
-let load_from_sqlite_for_batch_update
-    (ctx : Provider_context.t) (db_path : string) : t =
-  load_from_sqlite_for_type_checking
-    ~should_update_reverse_entries:false
-    ~custom_local_changes:None
-    ctx
-    db_path
-
 let load_from_sqlite (ctx : Provider_context.t) (db_path : string) : t =
   load_from_sqlite_for_type_checking
     ~should_update_reverse_entries:true

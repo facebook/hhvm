@@ -58,7 +58,8 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
 
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis ->
+    failwith "'invalid attempt to get a shallow class'"
   | Provider_backend.Shared_memory ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt

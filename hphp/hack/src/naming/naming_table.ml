@@ -596,7 +596,6 @@ let choose_local_changes ~local_changes ~changes_since_baseline =
   the local changes.
  *)
 let load_from_sqlite_for_type_checking
-    ~(should_update_reverse_entries : bool)
     ~(changes_since_baseline : Naming_sqlite.local_changes option)
     (ctx : Provider_context.t)
     (db_path : string) : t =
@@ -614,11 +613,8 @@ let load_from_sqlite_for_type_checking
       ~changes_since_baseline
   in
   let t = Hh_logger.log_duration "Loaded local naming table changes" t in
-  if should_update_reverse_entries then begin
-    update_reverse_entries ctx local_changes.Naming_sqlite.file_deltas;
-    let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
-    ()
-  end;
+  update_reverse_entries ctx local_changes.Naming_sqlite.file_deltas;
+  let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
   Backed (local_changes, db_path)
 
 let load_from_sqlite_with_changed_file_infos
@@ -664,18 +660,10 @@ let load_from_sqlite_with_changes_since_baseline
     (ctx : Provider_context.t)
     (changes_since_baseline : Naming_sqlite.local_changes option)
     (db_path : string) : t =
-  load_from_sqlite_for_type_checking
-    ~should_update_reverse_entries:true
-    ~changes_since_baseline
-    ctx
-    db_path
+  load_from_sqlite_for_type_checking ~changes_since_baseline ctx db_path
 
 let load_from_sqlite (ctx : Provider_context.t) (db_path : string) : t =
-  load_from_sqlite_for_type_checking
-    ~should_update_reverse_entries:true
-    ~changes_since_baseline:None
-    ctx
-    db_path
+  load_from_sqlite_for_type_checking ~changes_since_baseline:None ctx db_path
 
 let get_forward_naming_fallback_path a : string option =
   match a with

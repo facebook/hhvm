@@ -547,7 +547,7 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
     return TranslationResult::failTransiently();
   }
 
-  translator.relocate(true);
+  translator.relocate(false);
   return TranslationResult{translator.publish()};
 }
 

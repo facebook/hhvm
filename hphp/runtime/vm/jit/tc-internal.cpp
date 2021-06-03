@@ -633,8 +633,9 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
     }
     CGMeta fixups;
     TransLocMaker maker{*view};
+    const bool align = isPrologue(kind);
     try {
-      view->alignForTranslation(true);
+      view->alignForTranslation(align);
       maker.markStart();
       emitVunit(*vunit, unit.get(), *view, fixups,
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()

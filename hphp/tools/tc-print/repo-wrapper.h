@@ -30,13 +30,14 @@ private:
   typedef std::map<SHA1, Unit*> CacheType;
 
   CacheType unitCache;
+  bool hasRepo;
 
   RepoWrapper(const RepoWrapper& other);
   RepoWrapper& operator=(RepoWrapper other);
 
 public:
   RepoWrapper(const char* repoSchema,
-              const std::string& configFile,
+              const std::string& repoFileName,
               const bool shouldPrint = true);
   ~RepoWrapper();
 

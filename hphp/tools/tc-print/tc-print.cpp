@@ -58,8 +58,8 @@ using namespace HPHP::jit;
 #define MAX_SYM_LEN       10240
 
 std::string     dumpDir("/tmp");
-std::string     configFile;
 std::string     profFileName;
+std::string     repoFileName;
 uint32_t        nTopTrans       = 0;
 uint32_t        nTopFuncs       = 0;
 bool            useJSON         = false;
@@ -124,7 +124,6 @@ std::string toString(T value) {
 void usage() {
   printf("Usage: tc-print [OPTIONS]\n"
     "  Options:\n"
-    "    -c <FILE>       : uses the given config file\n"
     "    -D              : used along with -t, this option sorts the top "
     "translations by density (count / size) of the selected perf event\n"
     "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
@@ -134,9 +133,10 @@ void usage() {
     "    -g <FUNC_ID>    : prints the CFG among the translations for the "
     "given <FUNC_ID>\n"
     "    -p <FILE>       : uses raw profile data from <FILE>\n"
+    "    -r <REPO_FILE>  : specifies the bytecode repo file to use\n"
     "    -s              : prints all translations sorted by creation "
     "order\n"
-    "    -u <SHA1>        : prints all translations from the specified "
+    "    -u <SHA1>       : prints all translations from the specified "
     "unit\n"
     "    -t <NUMBER>     : prints top <NUMBER> translations according to "
     "profiling info\n"
@@ -203,7 +203,7 @@ void parseOptions(int argc, char *argv[]) {
   opterr = 0;
   char* sortByArg = nullptr;
   while ((c = getopt(argc, argv,
-                     "hc:Dd:F:f:G:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jH:x"))
+                     "hDd:F:f:G:g:ip:st:u:S:T:o:r:e:E:bB:v:k:a:A:n:jH:x"))
          != -1) {
     switch (c) {
       case 'A':
@@ -221,9 +221,6 @@ void parseOptions(int argc, char *argv[]) {
       case 'h':
         usage();
         exit(0);
-      case 'c':
-        configFile = optarg;
-        break;
       case 'd':
         dumpDir = optarg;
         break;
@@ -251,6 +248,9 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'p':
         profFileName = optarg;
+        break;
+      case 'r':
+        repoFileName = optarg;
         break;
       case 's':
         creationOrder = true;
@@ -739,8 +739,7 @@ dynamic getTC() {
     translations.push_back(getTrans(t));
   }
 
-  return dynamic::object("configFile", configFile)
-                        ("repoSchema", repoSchemaId().begin())
+  return dynamic::object("repoSchema", repoSchemaId().begin())
                         ("translations", translations);
 }
 }
@@ -1124,7 +1123,7 @@ int main(int argc, char *argv[]) {
                               g_transData->getProfBase(),
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
-  g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile, !useJSON);
+  g_repo = new RepoWrapper(g_transData->getRepoSchema(), repoFileName, !useJSON);
   g_transData->loadTCData(g_repo);
   g_annotations = std::make_unique<AnnotationCache>(dumpDir);
 

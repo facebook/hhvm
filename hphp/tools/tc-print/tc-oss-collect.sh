@@ -48,7 +48,6 @@ fi
 HHVM_BIN=$(readlink /proc/$HHVM_PID/exe)
 CHROOT=$(readlink /proc/$HHVM_PID/root)
 LOCAL_REPO_FILE=$CHROOT$(strings /proc/$HHVM_PID/cmdline | grep "^Repo.Local.Path" | cut -d\= -f2)
-CENTRAL_REPO_FILE=$CHROOT$(strings /proc/$HHVM_PID/cmdline | grep "^Repo.Central.Path" | cut -d\= -f2)
 
 echo "Reading symbols from $HHVM_BIN..."
 nm $HHVM_BIN > $TMPDIR/hhvm.nm
@@ -62,9 +61,6 @@ echo "Collecting TC dump and repo files..."
 cp $DUMP_DIR/tc_* $TMPDIR
 if [ -f "$LOCAL_REPO_FILE" ] ; then
     cp $LOCAL_REPO_FILE $TMPDIR/hhvm.hhbc
-fi
-if [ -f "$CENTRAL_REPO_FILE" ] ; then
-    cp $CENTRAL_REPO_FILE $TMPDIR/hhvm.central.hhbc
 fi
 
 echo "TC dump generated at $TMPDIR"

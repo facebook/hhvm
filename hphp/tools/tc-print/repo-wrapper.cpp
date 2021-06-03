@@ -33,7 +33,7 @@
 namespace HPHP { namespace jit {
 
 RepoWrapper::RepoWrapper(const char* repoSchema,
-                         const std::string& configFile,
+                         const std::string& repoFileName,
                          const bool shouldPrint) {
   if (setenv("HHVM_RUNTIME_REPO_SCHEMA", repoSchema, 1 /* overwrite */)) {
     fprintf(stderr, "Could not set repo schema");
@@ -41,7 +41,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
 
   if (shouldPrint) {
-    printf("# Config file: %s\n", configFile.c_str());
     printf("# Repo schema: %s\n", repoSchemaId().begin());
   }
 
@@ -50,30 +49,11 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   g_context.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  if (!configFile.empty()) {
-    Config::ParseConfigFile(configFile, ini, config);
-    // Disable logging to suppress harmless errors about setrlimit.
-    config["Log"]["Level"] = "None";
-  }
   RuntimeOption::Load(ini, config);
   RuntimeOption::RepoCommit = false;
 
-  {
-    auto const path = [] {
-      if (!RO::RepoLocalPath.empty())   return RO::RepoLocalPath;
-      if (!RO::RepoCentralPath.empty()) return RO::RepoCentralPath;
-      if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
-        std::string p{env};
-        replacePlaceholders(p);
-        return p;
-      }
-      always_assert(
-        false &&
-        "Either Repo.LocalPath or Repo.CentralPath must be set"
-      );
-    }();
-    RepoFile::init(path);
-  }
+  hasRepo = !repoFileName.empty();
+  if (hasRepo) RepoFile::init(repoFileName);
 
   hphp_compiler_init();
 
@@ -86,8 +66,10 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
 
   LitstrTable::init();
   LitarrayTable::init();
-  RepoFile::loadGlobalTables(false);
-  RepoFile::globalData().load();
+  if (hasRepo) {
+    RepoFile::loadGlobalTables(false);
+    RepoFile::globalData().load();
+  }
 
   std::string hhasLib;
   auto const phpLib = get_systemlib(&hhasLib);
@@ -119,6 +101,8 @@ void RepoWrapper::addUnit(Unit* unit) {
 }
 
 Unit* RepoWrapper::getUnit(SHA1 sha1) {
+  if (!hasRepo) return nullptr;
+
   CacheType::const_iterator it = unitCache.find(sha1);
   if (it != unitCache.end()) return it->second;
 
@@ -136,6 +120,8 @@ Unit* RepoWrapper::getUnit(SHA1 sha1) {
 }
 
 Func* RepoWrapper::getFunc(SHA1 sha1, Id funcSn) {
+  if (!hasRepo) return nullptr;
+
   auto const unit = getUnit(sha1);
   if (!unit) {
     return nullptr;

@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-       sc_name = ([3:6-7], "\\A"); sc_tparams = [];
+       sc_module = None; sc_name = ([3:6-7], "\\A"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
        [(Rhint ([3:6-7]),
@@ -30,7 +30,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([5:6-7], "\\B"); sc_tparams = [];
+        sc_module = None; sc_name = ([5:6-7], "\\B"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([5:6-7]),
@@ -63,7 +63,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([7:6-7], "\\C"); sc_tparams = [];
+        sc_module = None; sc_name = ([7:6-7], "\\C"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([7:6-7]),
@@ -89,14 +89,15 @@
         }));
   ("\\N",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [9:9-10]; td_vis = Opaque; td_tparams = [];
+      { Typing_defs.td_module = None; td_pos = [9:9-10]; td_vis = Opaque;
+        td_tparams = [];
         td_constraint = (Some (Rhint ([9:14-22]), (Tprim Tarraykey)));
         td_type = (Rhint ([9:25-28]), (Tprim Tint)) }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([11:6-7], "\\D"); sc_tparams = [];
+        sc_module = None; sc_name = ([11:6-7], "\\D"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([11:6-7]),
@@ -129,7 +130,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([13:6-7], "\\E"); sc_tparams = [];
+        sc_module = None; sc_name = ([13:6-7], "\\E"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([13:6-7]),

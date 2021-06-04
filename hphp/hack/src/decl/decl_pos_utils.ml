@@ -266,6 +266,7 @@ struct
       dc_is_xhp = dc.dc_is_xhp;
       dc_has_xhp_keyword = dc.dc_has_xhp_keyword;
       dc_is_disposable = dc.dc_is_disposable;
+      dc_module = dc.dc_module;
       dc_name = dc.dc_name;
       dc_pos = dc.dc_pos;
       dc_extends = dc.dc_extends;
@@ -309,6 +310,7 @@ struct
 
   and typedef tdef =
     {
+      td_module = tdef.td_module;
       td_pos = pos_or_decl tdef.td_pos;
       td_vis = tdef.td_vis;
       td_tparams = List.map tdef.td_tparams type_param;
@@ -323,6 +325,7 @@ struct
       sc_is_xhp = sc.sc_is_xhp;
       sc_has_xhp_keyword = sc.sc_has_xhp_keyword;
       sc_kind = sc.sc_kind;
+      sc_module = sc.sc_module;
       sc_name = positioned_id sc.sc_name;
       sc_tparams = List.map sc.sc_tparams type_param;
       sc_where_constraints = List.map sc.sc_where_constraints where_constraint;

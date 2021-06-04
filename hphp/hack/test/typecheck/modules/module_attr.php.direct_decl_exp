@@ -1,0 +1,99 @@
+--- legacy
++++ direct decl
+@@ -1,94 +1,94 @@
+ [("\\foo",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = (Some "here");
+        fe_type =
+        (Rwitness_from_decl ([7:10-13]),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [7:10-13]) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([7:16-20]), (Tprim Tvoid)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [7:10-13]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }));
+   ("\\C",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+         sc_module = (Some "there"); sc_name = ([10:7-8], "\\C");
+         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = [];
+         sc_methods =
+         [{ Shallow_decl_defs.sm_name = ([11:19-22], "bar");
+            sm_type =
+            (Rwitness_from_decl ([11:19-22]),
+             (Tfun
+                { ft_arity = (Fstandard ()); ft_tparams = [];
+                  ft_where_constraints = []; ft_params = [];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [11:19-22]) };
+                  ft_ret =
+                  { et_enforced = Typing_defs_core.Unenforced;
+                    et_type = (Rhint ([11:25-29]), (Tprim Tvoid)) };
+                  ft_flags =
+                  (make_ft_flags FSync ~return_disposable:false
+                    ~returns_readonly:false ~readonly_this:false);
+                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           ];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([9:3-11], "__Module");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type = None }));
+   ("\\Talias",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = (Some "here"); td_pos = [15:6-12];
+         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_type = (Rhint ([15:15-18]), (Tprim Tint)) }));
+   ("\\E",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+-        sc_module = (Some "another"); sc_name = ([18:6-7], "\\E");
+-        sc_tparams = []; sc_where_constraints = [];
++        sc_module = None; sc_name = ([18:6-7], "\\E"); sc_tparams = [];
++        sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([18:6-7]),
+           (Tapply (([18:6-7], "\\HH\\BuiltinEnum"),
+              [(Rhint ([18:6-7]), (Tapply (([18:6-7], "\\E"), [])))])))
+           ];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = false;
+            scc_name = ([19:3-4], "A");
+            scc_type = (Rwitness_from_decl ([19:7-8]), (Tprim Tint));
+            scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([17:3-11], "__Module");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base = (Rhint ([18:10-13]), (Tprim Tint));
+                 te_constraint = None; te_includes = []; te_enum_class = false
+                 })
+         }));
+   ("\\Tnew",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = (Some "here"); td_pos = [23:9-13];
+         td_vis = Opaque; td_tparams = []; td_constraint = None;
+         td_type = (Rhint ([23:16-22]), (Tprim Tstring)) }))
+   ]

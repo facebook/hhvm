@@ -285,7 +285,7 @@ let method_ env m =
   in
   let ft = method_type env m in
   let sm_deprecated =
-    Naming_attributes_deprecated.deprecated
+    Naming_attributes_params.deprecated
       ~kind:"method"
       m.m_name
       m.m_user_attributes
@@ -329,6 +329,14 @@ let class_ ctx c =
     let sc_req_extends = List.map ~f:hint req_extends in
     let sc_req_implements = List.map ~f:hint req_implements in
     let sc_implements = List.map ~f:hint c.c_implements in
+    let sc_user_attributes =
+      List.map
+        c.c_user_attributes
+        ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
+    in
+    let sc_module =
+      Naming_attributes_params.get_module_attribute c.c_user_attributes
+    in
     let where_constraints =
       List.map c.c_where_constraints (FunUtils.where_constraint env)
     in
@@ -346,6 +354,7 @@ let class_ ctx c =
       sc_is_xhp = c.c_is_xhp;
       sc_has_xhp_keyword = c.c_has_xhp_keyword;
       sc_kind = c.c_kind;
+      sc_module;
       sc_name = Decl_env.make_decl_posed env c.c_name;
       sc_tparams = List.map c.c_tparams (FunUtils.type_param env);
       sc_where_constraints = where_constraints;
@@ -364,10 +373,7 @@ let class_ ctx c =
       sc_constructor = Option.map ~f:(method_ env) constructor;
       sc_static_methods = List.map ~f:(method_ env) statics;
       sc_methods = List.map ~f:(method_ env) rest;
-      sc_user_attributes =
-        List.map
-          c.c_user_attributes
-          ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env);
+      sc_user_attributes;
       sc_enum_type = Option.map c.c_enum (enum_type hint);
     }
   in

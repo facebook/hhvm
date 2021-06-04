@@ -1,6 +1,6 @@
 [("\\ID",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [3:6-8]; td_vis = Transparent;
+     { Typing_defs.td_module = None; td_pos = [3:6-8]; td_vis = Transparent;
        td_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:9-10], "T"); tp_tparams = []; tp_constraints = [];
@@ -10,7 +10,8 @@
        td_type = (Rhint ([3:14-15]), (Tgeneric ("T", []))) }));
   ("\\Test1",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [5:6-11]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [5:6-11];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([5:12-14], "TC");
@@ -43,7 +44,7 @@
         }));
   ("\\filter",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun

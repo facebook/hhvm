@@ -1,6 +1,6 @@
 [("\\id",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None;
        fe_type =
        (Rwitness_from_decl ([31:10-12]),
         (Tfun
@@ -35,7 +35,7 @@
        fe_support_dynamic_type = false }));
   ("\\other_id",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([35:10-18]),
          (Tfun
@@ -70,7 +70,7 @@
         fe_support_dynamic_type = false }));
   ("\\braced_id",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([39:10-19]),
          (Tfun
@@ -82,7 +82,7 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([39:20-32]),
-                    (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"),
+                    (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"), 
                        [])))
                    };
                  fp_flags =

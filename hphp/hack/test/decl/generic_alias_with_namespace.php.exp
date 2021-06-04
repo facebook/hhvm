@@ -1,6 +1,6 @@
 [("\\Foo",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [3:6-9]; td_vis = Transparent;
+     { Typing_defs.td_module = None; td_pos = [3:6-9]; td_vis = Transparent;
        td_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:10-11], "T"); tp_tparams = []; tp_constraints = [];

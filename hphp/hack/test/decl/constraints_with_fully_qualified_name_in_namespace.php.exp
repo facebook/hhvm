@@ -1,26 +1,28 @@
 [("\\Ta",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [4:8-10]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None; td_type = (Rhint ([4:13-16]), (Tprim Tint)) }));
+     { Typing_defs.td_module = None; td_pos = [4:8-10]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
+       td_type = (Rhint ([4:13-16]), (Tprim Tint)) }));
   ("\\Te",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [5:8-10]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([5:13-19]), (Tprim Tstring))
-        }));
+      { Typing_defs.td_module = None; td_pos = [5:8-10];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([5:13-19]), (Tprim Tstring)) }));
   ("\\NS\\Ta",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [9:8-10]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([9:13-16]), (Tprim Tint)) }));
+      { Typing_defs.td_module = None; td_pos = [9:8-10];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([9:13-16]), (Tprim Tint)) }));
   ("\\NS\\Te",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [10:8-10]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [10:8-10];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([10:13-19]), (Tprim Tstring)) }));
   ("\\NS\\I",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
-        sc_name = ([12:13-14], "\\NS\\I");
+        sc_module = None; sc_name = ([12:13-14], "\\NS\\I");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([13:5-7], "Ta"); tp_tparams = [];

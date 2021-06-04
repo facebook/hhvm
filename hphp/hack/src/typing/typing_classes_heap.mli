@@ -61,6 +61,8 @@ module Api : sig
 
   val name : t -> string
 
+  val get_module : t -> string option
+
   val pos : t -> Pos_or_decl.t
 
   val tparams : t -> decl_tparam list

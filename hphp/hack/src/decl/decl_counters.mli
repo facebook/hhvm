@@ -39,6 +39,7 @@ type subdecl_kind =
   | Kind
   | Is_xhp
   | Name
+  | Module
   | Pos
   | Tparams
   | Where_constraints

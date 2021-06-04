@@ -2,10 +2,10 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-       sc_name = ([3:7-22], "\\DeprecatedClass"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_module = None; sc_name = ([3:7-22], "\\DeprecatedClass");
+       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
@@ -85,6 +85,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo is deprecated: use bar() instead");
+        fe_module = None;
         fe_type =
         (Rwitness_from_decl ([18:10-13]),
          (Tfun
@@ -102,7 +103,7 @@
         fe_support_dynamic_type = false }));
   ("\\bar",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([21:10-13]),
          (Tfun
@@ -120,7 +121,7 @@
         fe_support_dynamic_type = false }));
   ("\\baz",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([24:10-13]),
          (Tfun
@@ -140,6 +141,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo2 is deprecated: use bar2() instead");
+        fe_module = None;
         fe_type =
         (Rwitness_from_decl ([27:10-14]),
          (Tfun

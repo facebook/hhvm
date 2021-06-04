@@ -15,8 +15,7 @@ let deprecated ~kind (_, name) attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   let open Aast in
   match attr with
-  | Some { ua_name = _; ua_params = [msg] }
-  | Some { ua_name = _; ua_params = [msg; _] } ->
+  | Some { ua_name = _; ua_params = msg :: _ } ->
     begin
       match Nast_eval.static_string msg with
       | Ok msg ->
@@ -25,6 +24,18 @@ let deprecated ~kind (_, name) attrs =
           Printf.sprintf "The %s %s is deprecated: " kind name
         in
         Some (deprecated_prefix ^ msg)
+      | Error _ -> None
+    end
+  | _ -> None
+
+let get_module_attribute attrs =
+  let attr = Naming_attributes.find SN.UserAttributes.uaModule attrs in
+  let open Aast in
+  match attr with
+  | Some { ua_name = _; ua_params = name :: _ } ->
+    begin
+      match Nast_eval.static_string name with
+      | Ok name -> Some name
       | Error _ -> None
     end
   | _ -> None

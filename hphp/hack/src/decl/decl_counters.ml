@@ -36,6 +36,7 @@ type subdecl_kind =
   | Kind
   | Is_xhp
   | Name
+  | Module
   | Pos
   | Tparams
   | Where_constraints
@@ -124,6 +125,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Kind
   | Is_xhp
   | Name
+  | Module
   | Pos
   | Tparams
   | Where_constraints

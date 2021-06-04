@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-       sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
+       sc_module = None; sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -12,7 +12,7 @@
        sc_enum_type = None }));
   ("\\returns_readonly",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([6:16-32]),
          (Tfun
@@ -36,7 +36,7 @@
         fe_support_dynamic_type = false }));
   ("\\returns_normal",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([10:16-30]),
          (Tfun
@@ -62,7 +62,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([14:7-10], "\\Bar"); sc_tparams = [];
+        sc_module = None; sc_name = ([14:7-10], "\\Bar"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];

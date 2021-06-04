@@ -1,6 +1,6 @@
 [("\\NS1\\f",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None;
        fe_type =
        (Rwitness_from_decl ([5:10-11]),
         (Tfun
@@ -18,7 +18,7 @@
        fe_support_dynamic_type = false }));
   ("\\NS2\\f",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([9:10-11]),
          (Tfun

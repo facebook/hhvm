@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ccf80603b3b3ff24ba81ced1fb35bcd9>>
+// @generated SignedSource<<aab50a397c2ac841c77d8da4ffa924e0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -173,6 +173,8 @@ pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub deprecated: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
@@ -255,6 +257,8 @@ arena_deserializer::impl_deserialize_in_arena!(RecordFieldReq);
 )]
 pub struct RecordDefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub extends: Option<PosId<'a>>,
@@ -335,6 +339,8 @@ pub struct ClassType<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub is_disposable: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: &'a str,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -576,6 +582,8 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     ToOcamlRep
 )]
 pub struct TypedefType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub vis: oxidized::aast::TypedefVisibility,

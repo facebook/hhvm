@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2610279d8e12f33c6c1ed9e256c02673>>
+// @generated SignedSource<<4afacd48b4e84aae405cb941954f021f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -296,10 +296,11 @@ impl<'a> Node<'a> for FunElt<'a> {
         match self {
             FunElt {
                 deprecated: ref __binding_0,
-                type_: ref __binding_1,
-                pos: ref __binding_2,
-                php_std_lib: ref __binding_3,
-                support_dynamic_type: ref __binding_4,
+                module: ref __binding_1,
+                type_: ref __binding_2,
+                pos: ref __binding_3,
+                php_std_lib: ref __binding_4,
+                support_dynamic_type: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -313,7 +314,10 @@ impl<'a> Node<'a> for FunElt<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                { __binding_4.accept(v) }
+                {
+                    __binding_4.accept(v)
+                }
+                { __binding_5.accept(v) }
             }
         }
     }
@@ -495,11 +499,12 @@ impl<'a> Node<'a> for RecordDefType<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             RecordDefType {
-                name: ref __binding_0,
-                extends: ref __binding_1,
-                fields: ref __binding_2,
-                abstract_: ref __binding_3,
-                pos: ref __binding_4,
+                module: ref __binding_0,
+                name: ref __binding_1,
+                extends: ref __binding_2,
+                fields: ref __binding_3,
+                abstract_: ref __binding_4,
+                pos: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -513,7 +518,10 @@ impl<'a> Node<'a> for RecordDefType<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                { __binding_4.accept(v) }
+                {
+                    __binding_4.accept(v)
+                }
+                { __binding_5.accept(v) }
             }
         }
     }
@@ -553,26 +561,27 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 is_xhp: ref __binding_2,
                 has_xhp_keyword: ref __binding_3,
                 kind: ref __binding_4,
-                name: ref __binding_5,
-                tparams: ref __binding_6,
-                where_constraints: ref __binding_7,
-                extends: ref __binding_8,
-                uses: ref __binding_9,
-                xhp_attr_uses: ref __binding_10,
-                xhp_enum_values: ref __binding_11,
-                req_extends: ref __binding_12,
-                req_implements: ref __binding_13,
-                implements: ref __binding_14,
-                support_dynamic_type: ref __binding_15,
-                consts: ref __binding_16,
-                typeconsts: ref __binding_17,
-                props: ref __binding_18,
-                sprops: ref __binding_19,
-                constructor: ref __binding_20,
-                static_methods: ref __binding_21,
-                methods: ref __binding_22,
-                user_attributes: ref __binding_23,
-                enum_type: ref __binding_24,
+                module: ref __binding_5,
+                name: ref __binding_6,
+                tparams: ref __binding_7,
+                where_constraints: ref __binding_8,
+                extends: ref __binding_9,
+                uses: ref __binding_10,
+                xhp_attr_uses: ref __binding_11,
+                xhp_enum_values: ref __binding_12,
+                req_extends: ref __binding_13,
+                req_implements: ref __binding_14,
+                implements: ref __binding_15,
+                support_dynamic_type: ref __binding_16,
+                consts: ref __binding_17,
+                typeconsts: ref __binding_18,
+                props: ref __binding_19,
+                sprops: ref __binding_20,
+                constructor: ref __binding_21,
+                static_methods: ref __binding_22,
+                methods: ref __binding_23,
+                user_attributes: ref __binding_24,
+                enum_type: ref __binding_25,
             } => {
                 {
                     __binding_0.accept(v)
@@ -646,7 +655,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_23.accept(v)
                 }
-                { __binding_24.accept(v) }
+                {
+                    __binding_24.accept(v)
+                }
+                { __binding_25.accept(v) }
             }
         }
     }
@@ -1054,11 +1066,12 @@ impl<'a> Node<'a> for TypedefType<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             TypedefType {
-                pos: ref __binding_0,
-                vis: ref __binding_1,
-                tparams: ref __binding_2,
-                constraint: ref __binding_3,
-                type_: ref __binding_4,
+                module: ref __binding_0,
+                pos: ref __binding_1,
+                vis: ref __binding_2,
+                tparams: ref __binding_3,
+                constraint: ref __binding_4,
+                type_: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -1072,7 +1085,10 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                { __binding_4.accept(v) }
+                {
+                    __binding_4.accept(v)
+                }
+                { __binding_5.accept(v) }
             }
         }
     }

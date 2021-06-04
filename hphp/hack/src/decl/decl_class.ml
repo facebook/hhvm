@@ -63,6 +63,7 @@ let to_class_type
         dc_is_xhp;
         dc_has_xhp_keyword;
         dc_is_disposable;
+        dc_module;
         dc_name;
         dc_pos;
         dc_tparams;
@@ -173,6 +174,7 @@ let to_class_type
     tc_is_xhp = dc_is_xhp;
     tc_has_xhp_keyword = dc_has_xhp_keyword;
     tc_is_disposable = dc_is_disposable;
+    tc_module = dc_module;
     tc_name = dc_name;
     tc_pos = dc_pos;
     tc_tparams = dc_tparams;

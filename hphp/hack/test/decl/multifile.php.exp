@@ -1,15 +1,16 @@
 File root|multifile.php--A.php
 [("\\A",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [3:6-7]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None; td_type = (Rhint ([3:10-13]), (Tprim Tint)) }))
+     { Typing_defs.td_module = None; td_pos = [3:6-7]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
+       td_type = (Rhint ([3:10-13]), (Tprim Tint)) }))
   ]
 
 File root|multifile.php--B.php
 [("\\B",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [3:6-7]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
+     { Typing_defs.td_module = None; td_pos = [3:6-7]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
        td_type = (Rhint ([3:10-11]), (Tapply (([3:10-11], "\\A"), []))) }))
   ]
 

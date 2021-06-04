@@ -270,6 +270,8 @@ pub mod user_attributes {
 
     pub const SUPPORT_DYNAMIC_TYPE: &str = "__SupportDynamicType";
 
+    pub const MODULE: &str = "__Module";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -303,6 +305,7 @@ pub mod user_attributes {
             INFERFLOWS,
             EXTERNAL,
             SUPPORT_DYNAMIC_TYPE,
+            MODULE,
         ]
         .into_iter()
         .collect();

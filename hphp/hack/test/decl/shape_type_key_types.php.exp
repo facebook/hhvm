@@ -1,7 +1,7 @@
 [("\\Shape",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [3:6-11]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
+     { Typing_defs.td_module = None; td_pos = [3:6-11]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
        td_type =
        (Rhint ([3:14-8:2]),
         (Tshape (Typing_defs_core.Closed_shape,

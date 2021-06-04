@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
-       sc_name = ([6:11-12], "\\I"); sc_tparams = [];
+       sc_module = None; sc_name = ([6:11-12], "\\I"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -14,7 +14,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
-        sc_name = ([7:11-12], "\\J"); sc_tparams = [];
+        sc_module = None; sc_name = ([7:11-12], "\\J"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
@@ -24,7 +24,7 @@
         sc_enum_type = None }));
   ("\\f",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([9:10-11]),
          (Tfun
@@ -60,7 +60,7 @@
         fe_support_dynamic_type = false }));
   ("\\g",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([10:10-11]),
          (Tfun

@@ -95,6 +95,7 @@ type class_elt = {
 
 type fun_elt = {
   fe_deprecated: string option;
+  fe_module: string option;
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
@@ -120,6 +121,7 @@ type record_field_req =
 [@@deriving show]
 
 type record_def_type = {
+  rdt_module: string option;
   rdt_name: pos_id;
   rdt_extends: pos_id option;
   rdt_fields: (pos_id * record_field_req) list;
@@ -160,6 +162,7 @@ and class_type = {
   tc_is_xhp: bool;
   tc_has_xhp_keyword: bool;
   tc_is_disposable: bool;
+  tc_module: string option;
   tc_name: string;
   tc_pos: Pos_or_decl.t;
   tc_tparams: decl_tparam list;
@@ -242,6 +245,7 @@ and enum_type = {
 [@@deriving show]
 
 type typedef_type = {
+  td_module: string option;
   td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
@@ -739,10 +743,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | 0 -> Bool.compare optional1 optional2
     | n -> n
   and user_attribute_compare ua1 ua2 =
-    let { ua_name = name1; ua_classname_params = classname_params1 } = ua1 in
-    let { ua_name = name2; ua_classname_params = classname_params2 } = ua2 in
+    let { ua_name = name1; ua_classname_params = params1 } = ua1 in
+    let { ua_name = name2; ua_classname_params = params2 } = ua2 in
     match String.compare (snd name1) (snd name2) with
-    | 0 -> List.compare String.compare classname_params1 classname_params2
+    | 0 -> List.compare String.compare params1 params2
     | n -> n
   and user_attributes_compare ual1 ual2 =
     List.compare user_attribute_compare ual1 ual2

@@ -1,6 +1,6 @@
 [("\\X\\a",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None;
        fe_type =
        (Rwitness_from_decl ([4:12-13]),
         (Tfun
@@ -18,7 +18,7 @@
        fe_support_dynamic_type = false }));
   ("\\b",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([9:10-11]),
          (Tfun

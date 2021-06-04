@@ -24,7 +24,10 @@ module MakeType = Typing_make_type
 let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   let pos = Reason.to_pos r in
   let td = unsafe_opt @@ Typing_env.get_typedef env x in
-  let { td_pos; td_vis = _; td_tparams; td_type; td_constraint } = td in
+  let { td_pos; td_module = _; td_vis = _; td_tparams; td_type; td_constraint }
+      =
+    td
+  in
   let (ety_env, has_cycle) =
     Typing_defs.add_type_expansion_check_cycles ety_env (td_pos, x)
   in

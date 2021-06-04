@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-       sc_name = ([3:7-8], "\\C");
+       sc_module = None; sc_name = ([3:7-8], "\\C");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:9-11], "Ta"); tp_tparams = []; tp_constraints = [];

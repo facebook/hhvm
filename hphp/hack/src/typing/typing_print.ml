@@ -1714,7 +1714,8 @@ end
 
 module PrintTypedef = struct
   let typedef ctx = function
-    | { td_pos; td_vis = _; td_tparams; td_constraint; td_type } ->
+    | { td_pos; td_module = _; td_vis = _; td_tparams; td_constraint; td_type }
+      ->
       let tparaml_s = PrintClass.tparam_list ctx td_tparams in
       let constr_s =
         match td_constraint with

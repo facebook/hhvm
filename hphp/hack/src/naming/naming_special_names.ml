@@ -319,6 +319,8 @@ module UserAttributes = struct
 
   let uaNoRequireDynamic = "__NoRequireDynamic"
 
+  let uaModule = "__Module"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -358,6 +360,7 @@ module UserAttributes = struct
           (uaAtom, [parameter]);
           (uaSupportDynamicType, [fn; cls; mthd]);
           (uaNoRequireDynamic, [typeparam]);
+          (uaModule, [fn; cls; file; typealias; enum; enumcls]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

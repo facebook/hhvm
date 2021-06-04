@@ -1,11 +1,12 @@
 [("\\MyNamespace\\MyString",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [7:8-16]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None; td_type = (Rhint ([7:19-25]), (Tprim Tstring)) }));
+     { Typing_defs.td_module = None; td_pos = [7:8-16]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
+       td_type = (Rhint ([7:19-25]), (Tprim Tstring)) }));
   ("\\MyArray",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [10:6-13]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [10:6-13];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([10:16-32]),
          (Tvarray_or_darray
@@ -14,7 +15,8 @@
         }));
   ("\\MyArray1",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [11:6-14]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [11:6-14];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([11:15-16], "T"); tp_tparams = []; tp_constraints = [];
@@ -27,7 +29,8 @@
         }));
   ("\\MyArray2",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [12:6-14]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [12:6-14];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([12:15-17], "TK"); tp_tparams = [];
@@ -46,7 +49,8 @@
         }));
   ("\\MyDarray",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [13:6-14]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [13:6-14];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([13:15-17], "TK"); tp_tparams = [];
@@ -65,7 +69,8 @@
         }));
   ("\\MyVarray",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [14:6-14]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [14:6-14];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([14:15-16], "T"); tp_tparams = []; tp_constraints = [];
@@ -78,7 +83,8 @@
         }));
   ("\\MyVarrayOrDarray",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [15:6-22]; td_vis = Transparent;
+      { Typing_defs.td_module = None; td_pos = [15:6-22];
+        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([15:23-25], "TK"); tp_tparams = [];
@@ -97,71 +103,73 @@
         }));
   ("\\MyString",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [16:6-14]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [16:6-14];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([16:17-23]), (Tprim Tstring)) }));
   ("\\MyInt",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [17:6-11]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [17:6-11];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([17:14-17]), (Tprim Tint)) }));
   ("\\MyFloat",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [18:6-13]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [18:6-13];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([18:16-21]), (Tprim Tfloat)) }));
   ("\\MyNum",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [19:6-11]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [19:6-11];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([19:14-17]), (Tprim Tnum)) }));
   ("\\MyBool",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [20:6-12]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [20:6-12];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([20:15-19]), (Tprim Tbool)) }));
   ("\\MyMixed",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [21:6-13]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [21:6-13];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([21:16-21]), Tmixed) }));
   ("\\MyNothing",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [22:6-15]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [22:6-15];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([22:18-25]), (Tunion [])) }));
   ("\\MyNonnull",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [23:6-15]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [23:6-15];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([23:18-25]), Tnonnull) }));
   ("\\MyDynamic",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [24:6-15]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [24:6-15];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([24:18-25]), Tdynamic) }));
   ("\\MyArrayKey",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [25:6-16]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [25:6-16];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([25:19-27]), (Tprim Tarraykey)) }));
   ("\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [27:6-22]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [27:6-22];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([27:25-46]),
          (Tapply (([27:25-46], "\\MyNamespace\\MyString"), [])))
         }));
   ("\\MyNewtype",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [29:9-18]; td_vis = Opaque; td_tparams = [];
+      { Typing_defs.td_module = None; td_pos = [29:9-18]; td_vis = Opaque;
+        td_tparams = [];
         td_constraint = (Some (Rhint ([29:22-25]), (Tprim Tnum)));
         td_type = (Rhint ([29:28-31]), (Tprim Tint)) }));
   ("\\MyNewtypeWithoutConstraint",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [30:9-35]; td_vis = Opaque; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([30:38-41]), (Tprim Tint)) }))
+      { Typing_defs.td_module = None; td_pos = [30:9-35]; td_vis = Opaque;
+        td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([30:38-41]), (Tprim Tint)) }))
   ]
 
 They matched!

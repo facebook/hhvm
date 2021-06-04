@@ -1,6 +1,6 @@
 [("\\f",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None;
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
         (Tfun
@@ -25,7 +25,7 @@
        fe_support_dynamic_type = false }));
   ("\\g",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([7:10-11]),
          (Tfun
@@ -43,7 +43,7 @@
         fe_support_dynamic_type = false }));
   ("\\h",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([13:10-11]),
          (Tfun
@@ -61,7 +61,7 @@
         fe_support_dynamic_type = false }));
   ("\\i",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([19:16-17]),
          (Tfun
@@ -83,7 +83,7 @@
         fe_support_dynamic_type = false }));
   ("\\j",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([26:16-17]),
          (Tfun

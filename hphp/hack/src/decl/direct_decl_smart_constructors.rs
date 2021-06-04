@@ -947,6 +947,7 @@ struct Attributes<'a> {
     atom: bool,
     soft: bool,
     support_dynamic_type: bool,
+    module: Option<&'a str>,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1243,6 +1244,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             atom: false,
             soft: false,
             support_dynamic_type: false,
+            module: None,
         };
 
         let nodes = match node {
@@ -1327,6 +1329,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
+                    }
+                    "__Module" => {
+                        attributes.module = attribute
+                            .string_literal_params
+                            .first()
+                            .map(|&x| self.str_from_utf8(x));
                     }
                     _ => {}
                 }
@@ -2875,6 +2883,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         self.add_record(
             name.1,
             self.alloc(typing_defs::RecordDefType {
+                module: None, // TODO: grab module from attributes
                 name: name.into(),
                 extends: self
                     .expect_name(extends_opt)
@@ -2911,7 +2920,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
     fn make_alias_declaration(
         &mut self,
-        _attributes: Self::R,
+        attributes: Self::R,
         keyword: Self::R,
         name: Self::R,
         generic_params: Self::R,
@@ -2937,7 +2946,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
+        let parsed_attributes = self.to_attributes(attributes);
         let typedef = self.alloc(TypedefType {
+            module: parsed_attributes.module,
             pos,
             vis: match keyword.token_kind() {
                 Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
@@ -3186,6 +3197,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     s.into_bump_str()
                 });
                 let fun_elt = self.alloc(FunElt {
+                    module: parsed_attributes.module,
                     deprecated,
                     type_,
                     pos,
@@ -3741,6 +3753,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let support_dynamic_type = class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
+        let module = class_attributes.module;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -3748,6 +3761,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             is_xhp,
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
+            module,
             name: (pos, name),
             tparams,
             where_constraints,
@@ -4125,6 +4139,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassKind::Cenum,
+            module: None, // TODO: grab module from attributes
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4262,6 +4277,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassKind::Cenum,
+            module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4596,7 +4612,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Module" => true,
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {

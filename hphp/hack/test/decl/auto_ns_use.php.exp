@@ -1,7 +1,7 @@
 [("\\HH\\Lib\\Dict\\MixedDict",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [5:10-19]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
+     { Typing_defs.td_module = None; td_pos = [5:10-19];
+       td_vis = Transparent; td_tparams = []; td_constraint = None;
        td_type =
        (Rhint ([5:22-43]),
         (Tapply (([5:22-26], "\\HH\\dict"),
@@ -11,7 +11,7 @@
        }));
   ("\\make_dict",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([8:12-21]),
          (Tfun
@@ -32,7 +32,7 @@
         fe_support_dynamic_type = false }));
   ("\\get_value",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([12:12-21]),
          (Tfun
@@ -73,8 +73,8 @@
         fe_support_dynamic_type = false }));
   ("\\MyDict",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [16:8-14]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [16:8-14];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([16:17-31]),
          (Tapply (([16:17-31], "\\HH\\Lib\\Dict\\MixedDict"), [])))

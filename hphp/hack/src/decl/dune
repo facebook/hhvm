@@ -79,7 +79,7 @@
     full_fidelity
     naming
     naming_attributes
-    naming_attributes_deprecated
+    naming_attributes_params
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -360,7 +360,7 @@
   (libraries
     decl_defs
     naming_attributes
-    naming_attributes_deprecated
+    naming_attributes_params
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

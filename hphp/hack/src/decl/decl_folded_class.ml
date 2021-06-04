@@ -502,6 +502,7 @@ and class_decl
       dc_is_xhp = c.sc_is_xhp;
       dc_has_xhp_keyword = c.sc_has_xhp_keyword;
       dc_is_disposable = is_disposable;
+      dc_module = c.sc_module;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
       dc_tparams = c.sc_tparams;
@@ -637,6 +638,7 @@ and build_constructor
   in
   let fe =
     {
+      fe_module = None;
       fe_pos = pos;
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
@@ -881,6 +883,7 @@ and method_decl_acc
   in
   let fe =
     {
+      fe_module = None;
       fe_pos = pos;
       fe_deprecated = None;
       fe_type = m.sm_type;

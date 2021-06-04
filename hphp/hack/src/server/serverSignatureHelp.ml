@@ -118,6 +118,7 @@ let get_occurrence_info
         convenience, so that the "display" code below can display
         both class_elt and fun_decl uniformally. *)
                {
+                 fe_module = None;
                  Typing_defs.fe_pos = Lazy.force class_elt.Typing_defs.ce_pos;
                  fe_type = Lazy.force class_elt.Typing_defs.ce_type;
                  fe_deprecated = class_elt.Typing_defs.ce_deprecated;

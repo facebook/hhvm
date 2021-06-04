@@ -1,24 +1,24 @@
 [("\\A",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [8:6-7]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
+     { Typing_defs.td_module = None; td_pos = [8:6-7]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
        td_type = (Rhint ([8:10-13]), (Tapply (([8:10-13], "\\Foo"), []))) }));
   ("\\B",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [9:6-7]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [9:6-7]; td_vis = Transparent;
+        td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([9:10-13]), (Tapply (([9:10-13], "\\UseNS\\Bar"), []))) }));
   ("\\C",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [10:6-7]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [10:6-7];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([10:10-13]), (Tapply (([10:10-13], "\\Baz"), [])))
         }));
   ("\\D",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [11:6-7]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [11:6-7];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([11:10-16]), (Tapply (([11:10-16], "\\UseNS\\NS\\Qux"), [])))
         }))

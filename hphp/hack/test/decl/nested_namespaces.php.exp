@@ -1,53 +1,59 @@
 [("\\MyNamespace\\MyString",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [5:8-16]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None; td_type = (Rhint ([5:19-25]), (Tprim Tstring)) }));
+     { Typing_defs.td_module = None; td_pos = [5:8-16]; td_vis = Transparent;
+       td_tparams = []; td_constraint = None;
+       td_type = (Rhint ([5:19-25]), (Tprim Tstring)) }));
   ("\\MyNamespace\\MyInt",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [6:8-13]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([6:16-19]), (Tprim Tint)) }));
+      { Typing_defs.td_module = None; td_pos = [6:8-13];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([6:16-19]), (Tprim Tint)) }));
   ("\\MyNamespace\\MyFloat",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [7:8-15]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([7:18-23]), (Tprim Tfloat)) }));
+      { Typing_defs.td_module = None; td_pos = [7:8-15];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([7:18-23]), (Tprim Tfloat)) }));
   ("\\MyNamespace\\MyNum",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [8:8-13]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([8:16-19]), (Tprim Tnum)) }));
+      { Typing_defs.td_module = None; td_pos = [8:8-13];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([8:16-19]), (Tprim Tnum)) }));
   ("\\MyNamespace\\MyBool",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [9:8-14]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None; td_type = (Rhint ([9:17-21]), (Tprim Tbool)) }));
+      { Typing_defs.td_module = None; td_pos = [9:8-14];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_type = (Rhint ([9:17-21]), (Tprim Tbool)) }));
   ("\\MyNamespace\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [11:8-24]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [11:8-24];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([11:27-48]),
          (Tapply (([11:27-48], "\\MyNamespace\\MyString"), [])))
         }));
   ("\\MyNamespace\\InnerNamespace\\MyInnerType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [14:10-21]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [14:10-21];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([14:24-30]), (Tprim Tstring)) }));
   ("\\MyNamespace\\InnerNamespace\\MyDoubleNamespacedType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [15:10-32]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [15:10-32];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([15:35-64]),
          (Tapply (([15:35-64], "\\MyNamespace\\MyNamespacedType"), [])))
         }));
   ("\\MyNamespace\\Very\\Inner\\Namespace\\MyVeryInnerNamespaceType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [19:10-34]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [19:10-34];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([19:37-43]), (Tprim Tstring)) }));
   ("\\MyNamespace\\Very\\Inner\\Namespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_module = None;
         sc_name =
         ([20:11-18], "\\MyNamespace\\Very\\Inner\\Namespace\\MyClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
@@ -59,8 +65,8 @@
         sc_enum_type = None }));
   ("\\MyNamespace\\MyVeryInnerNamespaceType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [23:8-32]; td_vis = Transparent;
-        td_tparams = []; td_constraint = None;
+      { Typing_defs.td_module = None; td_pos = [23:8-32];
+        td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([23:35-80]),
          (Tapply (
@@ -73,7 +79,7 @@
       { Typing_defs.cd_pos = [24:3-50];
         cd_type =
         (Rhint ([24:9-33]),
-         (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"),
+         (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), 
             [])))
         }))
   ]

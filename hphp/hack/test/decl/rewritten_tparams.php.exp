@@ -1,6 +1,6 @@
 [("\\f",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None;
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
         (Tfun
@@ -86,7 +86,7 @@
        fe_support_dynamic_type = false }));
   ("\\g",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([10:10-11]),
          (Tfun
@@ -139,7 +139,7 @@
         fe_support_dynamic_type = false }));
   ("\\h",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([14:10-11]),
          (Tfun

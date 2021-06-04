@@ -136,6 +136,7 @@ typing_defs_core::Reactivity
 typing_defs_core::ShapeKind
 typing_defs_core::TshapeFieldName
 typing_defs_core::Ty_
+typing_defs_core::UserAttributeParam
 typing_defs_core::ValKind
 typing_defs_core::XhpAttr
 typing_defs_core::XhpAttrTag

@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-       sc_name = ([8:12-14], "\\EE"); sc_tparams = [];
+       sc_module = None; sc_name = ([8:12-14], "\\EE"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
        [(Rhint ([8:12-14]),
@@ -43,7 +43,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([12:12-14], "\\FF"); sc_tparams = [];
+        sc_module = None; sc_name = ([12:12-14], "\\FF"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([12:12-14]),
@@ -88,7 +88,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_name = ([16:12-15], "\\Foo"); sc_tparams = [];
+        sc_module = None; sc_name = ([16:12-15], "\\Foo"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([16:12-15]),
@@ -131,7 +131,7 @@
         }));
   ("\\ff",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
+      { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_type =
         (Rwitness_from_decl ([20:10-12]),
          (Tfun

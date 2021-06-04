@@ -1,0 +1,10 @@
+File "module_attr_bad.php", line 4, characters 3-18:
+Cannot use unstable feature: `modules` (Parsing[1002])
+File "module_attr_bad.php", line 7, characters 3-19:
+Cannot use unstable feature: `modules` (Parsing[1002])
+File "module_attr_bad.php", line 12, characters 3-18:
+Cannot use unstable feature: `modules` (Parsing[1002])
+File "module_attr_bad.php", line 15, characters 3-21:
+Cannot use unstable feature: `modules` (Parsing[1002])
+File "module_attr_bad.php", line 20, characters 3-18:
+Cannot use unstable feature: `modules` (Parsing[1002])

@@ -221,6 +221,12 @@ module ApiShallow = struct
     | Lazy (sc, _lc) -> get_sealed_whitelist sc
     | Eager c -> c.tc_sealed_whitelist
 
+  let get_module (decl, t) =
+    Decl_counters.count_subdecl decl Decl_counters.Module @@ fun () ->
+    match t with
+    | Lazy (sc, _lc) -> sc.sc_module
+    | Eager c -> c.tc_module
+
   let decl_errors (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Decl_errors @@ fun () ->
     match t with

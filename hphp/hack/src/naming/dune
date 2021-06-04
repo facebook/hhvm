@@ -28,9 +28,9 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name naming_attributes_deprecated)
+  (name naming_attributes_params)
   (modules
-    naming_attributes_deprecated)
+    naming_attributes_params)
   (libraries
     annotated_ast
     naming_attributes

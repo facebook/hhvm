@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Ctrait;
-       sc_name = ([3:7-15], "\\TMyTrait"); sc_tparams = [];
+       sc_module = None; sc_name = ([3:7-15], "\\TMyTrait"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -31,8 +31,8 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Ctrait;
-        sc_name = ([7:7-16], "\\TMyTrait2"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = [];
+        sc_module = None; sc_name = ([7:7-16], "\\TMyTrait2");
+        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses =
         [(Rhint ([8:7-15]), (Tapply (([8:7-15], "\\TMyTrait"), [])))];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
@@ -63,10 +63,10 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Ctrait;
-        sc_name = ([13:7-16], "\\TMyTrait3"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_module = None; sc_name = ([13:7-16], "\\TMyTrait3");
+        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
@@ -93,8 +93,8 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([17:7-24], "\\MyTraitUsingClass"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = [];
+        sc_module = None; sc_name = ([17:7-24], "\\MyTraitUsingClass");
+        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses =
         [(Rhint ([18:7-16]), (Tapply (([18:7-16], "\\TMyTrait2"), [])));
           (Rhint ([19:7-16]), (Tapply (([19:7-16], "\\TMyTrait3"), [])))];

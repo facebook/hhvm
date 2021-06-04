@@ -99,6 +99,7 @@ fn make_86method<'a, 'arena>(
         method_decl_vars,
         method_is_memoize_wrapper,
         method_is_memoize_wrapper_lsb,
+        0,
         vec![],
         vec![],
         params,

@@ -479,6 +479,7 @@ fn make_wrapper<'a, 'arena>(
         decl_vars,
         true,
         args.flags.contains(Flags::WITH_LSB),
+        0,
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
         params,

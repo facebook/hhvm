@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_unique_id_builder::{SMap, SSet, UniqueIdBuilder};
+use hhbc_by_ref_unique_id_builder::{get_unique_id_for_method, SMap, SSet};
 use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
@@ -33,6 +33,7 @@ pub struct GlobalState {
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub functions_with_finally: SSet,
     pub lambda_coeffects_of_scope: SMap<HhasCoeffects>,
+    pub num_closures: SMap<u32>,
 }
 
 impl GlobalState {
@@ -48,7 +49,7 @@ impl GlobalState {
         lazy_static! {
             static ref DEFAULT_HHAS_COEFFECTS: HhasCoeffects = HhasCoeffects::default();
         }
-        let key = UniqueIdBuilder::new().method(class_name, meth_name);
+        let key = get_unique_id_for_method(class_name, meth_name);
         self.lambda_coeffects_of_scope
             .get(&key)
             .unwrap_or(&DEFAULT_HHAS_COEFFECTS)

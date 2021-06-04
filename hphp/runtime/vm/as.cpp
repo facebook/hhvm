@@ -712,6 +712,7 @@ struct AsmState {
     fe = 0;
     labelMap.clear();
     numItersSet = false;
+    numClosuresSet = false;
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
@@ -774,6 +775,7 @@ struct AsmState {
   FuncEmitter* fe{nullptr};
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
+  bool numClosuresSet{false};
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
@@ -1815,6 +1817,20 @@ void parse_numiters(AsmState& as) {
 }
 
 /*
+ * directive-numclosures : integer ';'
+ *                       ;
+ */
+void parse_numclosures(AsmState& as) {
+  if (as.numClosuresSet) {
+    as.error("only one .numclosures directive may appear in a given function");
+  }
+  int32_t count = read_opcode_arg<int32_t>(as);
+  as.numClosuresSet = true;
+  as.fe->setNumClosures(count);
+  as.in.expectWs(';');
+}
+
+/*
  * directive-declvars : var-name* ';'
  *                    ;
  *
@@ -2233,6 +2249,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
       if (word == ".doc") { parse_func_doccomment(as); continue; }
+      if (word == ".numclosures") { parse_numclosures(as); continue; }
       if (word == ".coeffects_static") { parse_coeffects_static(as); continue; }
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }

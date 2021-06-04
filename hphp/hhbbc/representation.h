@@ -318,6 +318,11 @@ struct Func : FuncBase {
   IterId numIters;
 
   /*
+   * The number of closures used within this function.
+   */
+  ClosureId numClosures;
+
+  /*
    * Entry point to the function when the number of passed args is
    * equal to the number of parameters.
    */

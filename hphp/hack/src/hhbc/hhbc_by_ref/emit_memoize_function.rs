@@ -335,6 +335,7 @@ fn make_wrapper_body<'a, 'arena>(
         decl_vars,
         true,   /* is_memoize_wrapper */
         false,  /* is_memoize_wrapper_lsb */
+        0,      /* num closures */
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
         params,

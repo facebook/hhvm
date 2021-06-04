@@ -242,8 +242,8 @@ struct State {
     captured_vars: UniqueList<String>,
     captured_this: bool,
     captured_generics: UniqueList<String>,
-    // Closure classes and hoisted inline classes
-    hoisted_classes: Vec<Class_>,
+    // Closure classes
+    closures: Vec<Class_>,
     /// Hoisted meth_caller functions
     named_hoisted_functions: SMap<FunDef>,
     // The current namespace environment
@@ -265,7 +265,7 @@ impl State {
             captured_vars: UniqueList::new(),
             captured_this: false,
             captured_generics: UniqueList::new(),
-            hoisted_classes: vec![],
+            closures: vec![],
             named_hoisted_functions: SMap::new(),
             current_function_state: PerFunctionState::default(),
             global_state: GlobalState::default(),
@@ -281,6 +281,7 @@ impl State {
         key: String,
         fun: PerFunctionState,
         coeffects_of_scope: HhasCoeffects,
+        num_closures: u32,
     ) {
         if fun.has_finally {
             self.global_state.functions_with_finally.insert(key.clone());
@@ -289,7 +290,10 @@ impl State {
         if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
                 .lambda_coeffects_of_scope
-                .insert(key, coeffects_of_scope);
+                .insert(key.clone(), coeffects_of_scope);
+        }
+        if num_closures > 0 {
+            self.global_state.num_closures.insert(key, num_closures);
         }
     }
 
@@ -306,7 +310,7 @@ impl State {
 }
 
 fn total_class_count(env: &Env, st: &State) -> usize {
-    st.hoisted_classes.len() + env.defined_class_count
+    st.closures.len() + env.defined_class_count
 }
 
 fn should_capture_var(env: &Env, var: &str) -> bool {
@@ -774,6 +778,7 @@ fn convert_lambda<'a>(
         get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
         function_state,
         coeffects_of_scope,
+        0,
     );
     // back to using env instead of lambda_env here
 
@@ -785,7 +790,7 @@ fn convert_lambda<'a>(
         st.captured_generics.add(x.to_string());
     }
 
-    st.hoisted_classes.push(cd);
+    st.closures.push(cd);
     Ok(Expr_::mk_efun(inline_fundef, use_vars))
 }
 
@@ -1102,6 +1107,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             get_unique_id_for_method(cls.get_name_str(), &md.name.1),
             function_state,
             HhasCoeffects::default(),
+            self.state.closure_cnt_per_fun,
         );
         visit_mut(self, &mut env, &mut md.params)
     }
@@ -1131,6 +1137,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     get_unique_id_for_function(&x.fun.name.1),
                     function_state,
                     HhasCoeffects::default(),
+                    self.state.closure_cnt_per_fun,
                 );
                 visit_mut(self, &mut env, &mut x.fun.params)?;
                 visit_mut(self, &mut env, &mut x.fun.user_attributes)
@@ -1761,6 +1768,7 @@ pub fn convert_toplevel_prog<'local_arena, 'arena>(
         get_unique_id_for_main(),
         visitor.state.current_function_state.clone(),
         HhasCoeffects::default(),
+        0,
     );
     hoist_toplevel_functions(&mut new_defs);
     let named_fun_defs = visitor
@@ -1770,7 +1778,7 @@ pub fn convert_toplevel_prog<'local_arena, 'arena>(
         .map(|(_, fd)| Def::mk_fun(fd));
     *defs = named_fun_defs.collect();
     defs.extend(new_defs.drain(..));
-    for class in visitor.state.hoisted_classes.into_iter() {
+    for class in visitor.state.closures.into_iter() {
         defs.push(Def::mk_class(class));
     }
     *e.emit_global_state_mut() = visitor.state.global_state;

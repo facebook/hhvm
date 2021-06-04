@@ -154,12 +154,14 @@ struct FuncEmitter {
   Id numNamedLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
+  Id numClosures() const;
 
   /*
    * Set things.
    */
   void setNumIterators(Id numIterators);
   void setNumLiveIterators(Id id);
+  void setNumClosures(Id numClosures);
 
   /*
    * Check existence of, look up, and allocate named locals.
@@ -407,6 +409,7 @@ private:
   Id m_numLocals;
   int m_numUnnamedLocals;
   Id m_numIterators;
+  Id m_numClosures;
   Id m_nextFreeIterator;
   bool m_ehTabSorted : 1;
 

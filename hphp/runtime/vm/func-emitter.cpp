@@ -67,6 +67,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
   , m_numIterators(0)
+  , m_numClosures(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
 {}
@@ -92,6 +93,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
   , m_numIterators(0)
+  , m_numClosures(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
 {}
@@ -711,6 +713,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (docComment)
     (m_numLocals)
     (m_numIterators)
+    (m_numClosures)
     (maxStackCells)
     (m_repoBoolBitset)
 

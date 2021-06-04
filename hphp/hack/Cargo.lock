@@ -1964,6 +1964,9 @@ dependencies = [
 [[package]]
 name = "hhbc_by_ref_unique_id_builder"
 version = "0.0.0"
+dependencies = [
+ "hhbc_by_ref_ast_scope",
+]
 
 [[package]]
 name = "hhbc_by_ref_unique_list"

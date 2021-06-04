@@ -3,37 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
+
 pub type SMap<T> = std::collections::BTreeMap<String, T>;
 pub type SSet = std::collections::BTreeSet<String>;
-
-/// Builder for creating unique ids; e.g.
-/// the OCaml function
-///    Emit_env.get_unique_id_for_FOO
-/// can be called in Rust via:
-/// ```
-///    UniqueIdBuilder::new().FOO("some_fun")
-/// ```
-pub struct UniqueIdBuilder {
-    id: String,
-}
-impl UniqueIdBuilder {
-    pub fn new() -> UniqueIdBuilder {
-        UniqueIdBuilder { id: "|".to_owned() }
-    }
-    pub fn main(self) -> String {
-        self.id
-    }
-    pub fn function(mut self, fun_name: &str) -> String {
-        self.id.push_str(fun_name);
-        self.id
-    }
-    pub fn method(self, class_name: &str, meth_name: &str) -> String {
-        let mut ret = class_name.to_owned();
-        ret.push_str(&self.id);
-        ret.push_str(meth_name);
-        ret
-    }
-}
 
 pub fn get_unique_id_for_main() -> String {
     String::from("|")
@@ -45,4 +18,16 @@ pub fn get_unique_id_for_method(cls_name: &str, md_name: &str) -> String {
 
 pub fn get_unique_id_for_function(fun_name: &str) -> String {
     format!("|{}", fun_name)
+}
+
+pub fn get_unique_id_for_scope(scope: &Scope) -> String {
+    use ScopeItem::*;
+    match scope.items.as_slice() {
+        [] => get_unique_id_for_main(),
+        [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
+            get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
+        }
+        [.., Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
+        _ => panic!("unexpected scope shape"),
+    }
 }

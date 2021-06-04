@@ -695,6 +695,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isPairGenerator     = fe.isPairGenerator;
   ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
   ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
+  ret->numClosures         = fe.numClosures();
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();

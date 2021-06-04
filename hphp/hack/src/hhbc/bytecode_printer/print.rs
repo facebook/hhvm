@@ -1038,6 +1038,10 @@ fn print_body<W: Write>(
         })?;
         w.write(";")?;
     }
+    if body.num_closures > 0 {
+        ctx.newline(w)?;
+        write!(w, ".numclosures {};", body.num_closures)?;
+    }
     for s in HhasCoeffects::coeffects_to_hhas(&coeffects).iter() {
         ctx.newline(w)?;
         w.write(s)?;

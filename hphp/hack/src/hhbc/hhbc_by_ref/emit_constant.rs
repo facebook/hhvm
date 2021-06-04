@@ -62,6 +62,7 @@ fn emit_constant_cinit<'a, 'arena>(
                 vec![],
                 false,  /* is_memoize_wrapper */
                 false,  /* is_memoize_wrapper_lsb */
+                0,      /* num closures */
                 vec![], /* upper_bounds */
                 vec![], /* shadowed_params */
                 vec![], /* params */

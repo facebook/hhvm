@@ -178,6 +178,14 @@ pub fn emit_body<'b, 'arena>(
     env.jump_targets_gen.reset();
 
     let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
+    let num_closures = match emitter
+        .emit_global_state()
+        .num_closures
+        .get(&get_unique_id_for_scope(&env.scope))
+    {
+        Some(num) => *num,
+        None => 0,
+    };
     let local_gen = emitter.local_gen_mut();
     local_gen.reset(params.len() + decl_vars.len());
     if should_reserve_locals {
@@ -204,6 +212,7 @@ pub fn emit_body<'b, 'arena>(
             decl_vars,
             false, // is_memoize_wrapper
             false, // is_memoize_wrapper_lsb
+            num_closures,
             upper_bounds,
             shadowed_tparams,
             params,
@@ -419,6 +428,7 @@ pub fn make_body<'a, 'arena>(
     decl_vars: Vec<String>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
+    num_closures: u32,
     upper_bounds: Vec<(String, Vec<HhasTypeInfo>)>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<HhasParam<'arena>>,
@@ -463,6 +473,7 @@ pub fn make_body<'a, 'arena>(
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
+        num_closures,
         upper_bounds,
         shadowed_tparams,
         params,
@@ -1202,15 +1213,7 @@ fn set_function_jmp_targets<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
 ) -> bool {
-    use ScopeItem::*;
-    let function_state_key = match env.scope.items.as_slice() {
-        [] => get_unique_id_for_main(),
-        [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
-            get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
-        }
-        [.., Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
-        _ => panic!("unexpected scope shape"),
-    };
+    let function_state_key = get_unique_id_for_scope(&env.scope);
     emitter
         .emit_global_state()
         .functions_with_finally

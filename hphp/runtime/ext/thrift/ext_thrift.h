@@ -139,7 +139,6 @@ struct RpcOptions {
   apache::thrift::RpcOptions rpcOptions;
  private:
   static Class* c_RpcOptions;
-  TYPE_SCAN_IGNORE_ALL;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

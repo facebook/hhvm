@@ -657,6 +657,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tvarray ty, Tvarray ty2) ->
       ty_compare ty ty2
     | (Tdarray (tk, tv), Tdarray (tk2, tv2))
+    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2))
     | (Tvarray_or_darray (tk, tv), Tvarray_or_darray (tk2, tv2)) ->
       begin
         match ty_compare tk tk2 with

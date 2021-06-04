@@ -4390,7 +4390,8 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   let (env, _tal, ce, cty) = class_expr env [] cid in
   let env =
     match get_node cty with
-    | Tclass ((_, n), _, _) when Env.is_enum_class env n ->
+    | Tclass ((_, n), _, _)
+      when Env.is_enum_class env n && String.(SN.Members.mClass <> snd mid) ->
       Typing_local_ops.enforce_enum_class_variant p env
     | _ -> env
   in

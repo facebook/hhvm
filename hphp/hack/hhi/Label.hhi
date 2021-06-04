@@ -20,5 +20,5 @@ namespace HH {
 /**
  * Type of atoms
  */
-newtype Label<-TEnumClass, +TType> = string;
+newtype Label<-TEnumClass, TType> = string;
 }

@@ -75,7 +75,7 @@ type enumname<T> = classname<BuiltinEnum<T>>;
 /**
  * Type of atoms
  */
-newtype Label<-TEnumClass, +TType> = string;
+newtype Label<-TEnumClass, TType> = string;
 
 
 /**
@@ -97,7 +97,7 @@ abstract class BuiltinEnumClass<+T> {
   <<__Native>>
   final public static function getValues()[write_props]: darray<string, T>;
 
-  final public static function nameOf(Label<this, mixed> $atom): string {
+  final public static function nameOf<TType>(Label<this, TType> $atom): string {
     return $atom;
   }
 

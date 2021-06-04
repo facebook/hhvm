@@ -48,30 +48,29 @@ abstract final class X {
 
 enum class XE : IXParam {}
 
-
 abstract class Controller {
   abstract const type TE as XE;
 
   private dict<string, mixed> $data = dict[];
 
-  protected static function key<T>(HH\Label<this::TE, XParam<T>> $atom) : string {
+  protected static function key<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : string {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::nameOf($atom);
   }
 
-  protected static function value<T>(HH\Label<this::TE, XParam<T>> $atom) : HH\MemberOf<this::TE, XParam<T>> {
+  protected static function value<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : HH\MemberOf<this::TE, TParam> {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::valueOf($atom);
   }
 
-  public function set<T>(HH\Label<this::TE, XParam<T>> $atom, T $actual_data) : void {
+  public function set<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom, T $actual_data) : void {
     $key = static::key($atom);
     $this->data[$key] = $actual_data;
   }
 
-  public function get<T>(HH\Label<this::TE, XParam<T>> $atom) : ?T {
+  public function get<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : ?T {
     $key = static::key($atom);
     $definition = static::value($atom);
 
@@ -109,7 +108,7 @@ function main(): void {
   $age = $cont->get#Age();
   $foo = $cont->get#Foo();
 
-  /* $cont->get#XXX(); */
+  // $cont->get#XXX(); // Hack error
 
   if ($name is nonnull) {
     expect_string($name);

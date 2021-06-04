@@ -23,6 +23,12 @@ bitflags! {
     }
 }
 
+impl PropFlags {
+    pub fn is_abstract(&self) -> bool {
+        self.contains(Self::ABSTRACT)
+    }
+}
+
 impl ocamlrep::ToOcamlRep for PropFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
         ocamlrep::OpaqueValue::int(self.bits() as isize)

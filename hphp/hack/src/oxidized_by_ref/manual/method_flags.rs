@@ -21,6 +21,12 @@ bitflags! {
     }
 }
 
+impl MethodFlags {
+    pub fn is_abstract(&self) -> bool {
+        self.contains(Self::ABSTRACT)
+    }
+}
+
 impl ocamlrep::ToOcamlRep for MethodFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
         ocamlrep::OpaqueValue::int(self.bits() as isize)

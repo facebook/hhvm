@@ -74,7 +74,8 @@ let diff_typeconst tc1 tc2 : member_change option =
     | (TCPartiallyAbstract _, TCPartiallyAbstract _)
     | (TCConcrete _, TCConcrete _) ->
       Some Modified
-    | _ -> Some Changed_inheritance
+    | (_, (TCAbstract _ | TCPartiallyAbstract _ | TCConcrete _)) ->
+      Some Changed_inheritance
 
 let diff_prop p1 p2 : member_change option =
   let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in

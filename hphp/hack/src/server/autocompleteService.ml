@@ -511,9 +511,9 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env ((_, ty), cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
-let autocomplete_enum_atom_call env fty pos_atomname =
+let autocomplete_enum_class_label_call env fty pos_labelname =
   ac_env := Some env;
-  autocomplete_identifier := Some pos_atomname;
+  autocomplete_identifier := Some pos_labelname;
   argument_global_type := Some Acclass_get;
   let suggest_members cls =
     match cls with
@@ -539,26 +539,26 @@ let autocomplete_enum_atom_call env fty pos_atomname =
   match get_node fty with
   | Tfun { ft_params = { fp_type = { et_type = t; _ }; fp_flags; _ } :: _; _ }
     ->
-    let is_enum_atom_ty_name name =
+    let is_enum_class_label_ty_name name =
       Typing_defs_flags.(is_set fp_flags_atom fp_flags)
       && String.equal Naming_special_names.Classes.cMemberOf name
       || String.equal Naming_special_names.Classes.cLabel name
     in
     (match get_node t with
     | Tnewtype (ty_name, [enum_ty; _member_ty], _)
-      when is_enum_atom_ty_name ty_name ->
+      when is_enum_class_label_ty_name ty_name ->
       suggest_members_from_ty env enum_ty
     | _ -> ())
   | _ -> ()
 
-let autocomplete_enum_atom_id env id pos_atomname =
+let autocomplete_enum_class_label_id env id pos_labelname =
   let opt_ty = Tast_env.get_fun env id in
   match opt_ty with
   | None -> ()
   | Some fun_elt ->
     let dty = fun_elt.fe_type in
     let (env, lty) = Tast_env.localize_no_subst env ~ignore_errors:true dty in
-    autocomplete_enum_atom_call env lty pos_atomname
+    autocomplete_enum_class_label_call env lty pos_labelname
 
 (* Zip two lists together. If the two lists have different lengths,
    take the shortest. *)
@@ -645,9 +645,9 @@ let visitor =
 
     method! on_Call env f targs args unpack_arg =
       (match args with
-      | ((p, _), Aast.EnumAtom (_, n)) :: _ when is_auto_complete n ->
+      | ((p, _), Aast.EnumClassLabel (_, n)) :: _ when is_auto_complete n ->
         let (_, fty) = fst f in
-        autocomplete_enum_atom_call env fty (p, n)
+        autocomplete_enum_class_label_call env fty (p, n)
       | _ -> ());
 
       super#on_Call env f targs args unpack_arg
@@ -730,9 +730,10 @@ let visitor =
         (match deref recv_ty with
         | (_r, Tfun ft) -> autocomplete_shape_literal_in_call env ft args
         | _ -> ())
-      (* Autocomplete is using ...#AUTO332 so is parsed as an EnumAtom *)
-      | ((p, _), Aast.EnumAtom (Some (_, id), n)) when is_auto_complete n ->
-        autocomplete_enum_atom_id env id (p, n)
+      (* Autocomplete is using ...#AUTO332 so is parsed as an EnumClassLabel *)
+      | ((p, _), Aast.EnumClassLabel (Some (_, id), n)) when is_auto_complete n
+        ->
+        autocomplete_enum_class_label_id env id (p, n)
       | _ -> ());
       super#on_expr env expr
 

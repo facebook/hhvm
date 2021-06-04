@@ -92,5 +92,5 @@ pub enum Operator {
     IncludeOnceOperator,
     AwaitOperator,
     ReadonlyOperator,
-    EnumAtomOperator,
+    EnumClassLabelOperator,
 }

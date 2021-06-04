@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4dd93ff717dfc34e078cb64ca23e10d>>
+// @generated SignedSource<<bd00c1fe5c75465dc4762ed651d74b42>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1008,7 +1008,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a0.accept(c, v)?;
                 Ok(())
             }
-            Expr_::EnumAtom(a) => {
+            Expr_::EnumClassLabel(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 Ok(())

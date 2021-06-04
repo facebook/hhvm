@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e2ff3b746c363a9f13fe8f0012a43005>>
+// @generated SignedSource<<34216162c7cc5c2cc142e95077881c92>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1117,8 +1117,8 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_etsplice(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
-    pub fn mk_enum_atom(p0: Option<Sid>, p1: String) -> Self {
-        Expr_::EnumAtom(Box::new((p0, p1)))
+    pub fn mk_enum_class_label(p0: Option<Sid>, p1: String) -> Self {
+        Expr_::EnumClassLabel(Box::new((p0, p1)))
     }
     pub fn mk_any() -> Self {
         Expr_::Any
@@ -1444,9 +1444,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => false,
         }
     }
-    pub fn is_enum_atom(&self) -> bool {
+    pub fn is_enum_class_label(&self) -> bool {
         match self {
-            Expr_::EnumAtom(..) => true,
+            Expr_::EnumClassLabel(..) => true,
             _ => false,
         }
     }
@@ -1817,9 +1817,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_enum_atom(&self) -> Option<(&Option<Sid>, &String)> {
+    pub fn as_enum_class_label(&self) -> Option<(&Option<Sid>, &String)> {
         match self {
-            Expr_::EnumAtom(p0) => Some((&p0.0, &p0.1)),
+            Expr_::EnumClassLabel(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -2213,9 +2213,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_enum_atom_mut(&mut self) -> Option<(&mut Option<Sid>, &mut String)> {
+    pub fn as_enum_class_label_mut(&mut self) -> Option<(&mut Option<Sid>, &mut String)> {
         match self {
-            Expr_::EnumAtom(p0) => Some((&mut p0.0, &mut p0.1)),
+            Expr_::EnumClassLabel(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -2578,9 +2578,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_enum_atom_into(self) -> Option<(Option<Sid>, String)> {
+    pub fn as_enum_class_label_into(self) -> Option<(Option<Sid>, String)> {
         match self {
-            Expr_::EnumAtom(p0) => Some(((*p0).0, (*p0).1)),
+            Expr_::EnumClassLabel(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

@@ -115,7 +115,7 @@ let expr_name = function
   | A.Smethod_id _ -> "Smethod_id"
   | A.Pair _ -> "Pair"
   | A.ET_Splice _ -> "ET_splice"
-  | A.EnumAtom _ -> "EnumAtom"
+  | A.EnumClassLabel _ -> "EnumClassLabel"
   | A.Any -> "Any"
   | A.ReadonlyExpr _ -> "Readonly"
   | A.Hole _ -> "Hole"

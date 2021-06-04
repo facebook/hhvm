@@ -239,7 +239,7 @@ let visitor =
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
-        | Aast.EnumAtom (enum_name, atom_name) ->
+        | Aast.EnumClassLabel (enum_name, label_name) ->
           (* We currently only support labels, not HH\Members using
            * __ViaLabel. TODO(T86724606)
            *)
@@ -255,8 +255,8 @@ let visitor =
                   Result_set.singleton
                     {
                       (* TODO(T86724606) use "::" for __ViaLabel *)
-                      name = Utils.strip_ns enum_class_name ^ "#" ^ atom_name;
-                      type_ = EnumAtom (enum_class_name, atom_name);
+                      name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
+                      type_ = EnumClassLabel (enum_class_name, label_name);
                       is_declaration = false;
                       pos;
                     }
@@ -265,8 +265,8 @@ let visitor =
             | Some (_, enum_name) ->
               Result_set.singleton
                 {
-                  name = Utils.strip_ns enum_name ^ "#" ^ atom_name;
-                  type_ = EnumAtom (enum_name, atom_name);
+                  name = Utils.strip_ns enum_name ^ "#" ^ label_name;
+                  type_ = EnumClassLabel (enum_name, label_name);
                   is_declaration = false;
                   pos;
                 }

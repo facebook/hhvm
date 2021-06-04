@@ -46,7 +46,7 @@ type kind =
   | Typeconst of string * string
   | GConst
   | Attribute of override_info option
-  | EnumAtom of string * string
+  | EnumClassLabel of string * string
 [@@deriving eq]
 
 type 'a t = {

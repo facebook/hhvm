@@ -506,7 +506,7 @@ and expr_ env acc p e =
   | Method_id _
   | Smethod_id _
   | Method_caller _
-  | EnumAtom _
+  | EnumClassLabel _
   | Id _ ->
     acc
   | Lvar _

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a2a019fad7088db60ad0a9f65887853>>
+// @generated SignedSource<<f6e6e72baa266506c0cf733cf3ccfcff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -767,7 +767,7 @@ impl<'a> Node<'a> for Expr_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAn
             Expr_::SmethodId(ref __binding_0) => __binding_0.accept(v),
             Expr_::Pair(ref __binding_0) => __binding_0.accept(v),
             Expr_::ETSplice(ref __binding_0) => __binding_0.accept(v),
-            Expr_::EnumAtom(ref __binding_0) => __binding_0.accept(v),
+            Expr_::EnumClassLabel(ref __binding_0) => __binding_0.accept(v),
             Expr_::Any => {}
             Expr_::Hole(ref __binding_0) => __binding_0.accept(v),
         }

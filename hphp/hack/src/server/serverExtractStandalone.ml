@@ -1655,7 +1655,7 @@ end = struct
         ppf
         (targs_opt, (fst, snd))
     | Aast.Hole (expr, _, _, _) -> pp_expr ppf expr
-    | Aast.EnumAtom (opt_sid, name) ->
+    | Aast.EnumClassLabel (opt_sid, name) ->
       begin
         match opt_sid with
         | None -> Fmt.(prefix dbl_hash string) ppf name

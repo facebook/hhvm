@@ -387,7 +387,7 @@ pub fn emit_expr<'a, 'arena>(
     let tast::Expr(pos, expr) = expression;
     match expr {
         Expr_::Float(_)
-        | Expr_::EnumAtom(_)
+        | Expr_::EnumClassLabel(_)
         | Expr_::String(_)
         | Expr_::Int(_)
         | Expr_::Null

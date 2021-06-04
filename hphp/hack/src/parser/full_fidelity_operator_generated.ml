@@ -89,7 +89,7 @@ module type Sig = sig
     | IncludeOnceOperator
     | AwaitOperator
     | ReadonlyOperator
-    | EnumAtomOperator
+    | EnumClassLabelOperator
 end
 
 module Impl : Sig = struct
@@ -165,5 +165,5 @@ module Impl : Sig = struct
     | IncludeOnceOperator
     | AwaitOperator
     | ReadonlyOperator
-    | EnumAtomOperator
+    | EnumClassLabelOperator
 end

@@ -1574,11 +1574,11 @@ let maketree_with_type_param env p expr expected_ty =
 
   rewrite_expr_tree_maketree env expr rewrite_expr
 
-module EnumAtomOps = struct
+module EnumClassLabelOps = struct
   type result =
     | Success of ((pos * locl_ty) * Tast.expr_) * locl_ty
     | ClassNotFound
-    | AtomNotFound of ((pos * locl_ty) * Tast.expr_) * locl_ty
+    | LabelNotFound of ((pos * locl_ty) * Tast.expr_) * locl_ty
     | Invalid
     | Skip
 
@@ -1590,13 +1590,13 @@ module EnumAtomOps = struct
 
       [ctor] is either `MemberOf` or `Label`
       [full] describe if the original expression was a full
-      atom, as in E#A, or a short version, as in #A
+      label, as in E#A, or a short version, as in #A
   *)
-  let expand pos env ~full ~ctor enum_name atom_name =
+  let expand pos env ~full ~ctor enum_name label_name =
     let cls = Env.get_class env enum_name in
     match cls with
     | Some cls ->
-      (match Env.get_const env cls atom_name with
+      (match Env.get_const env cls label_name with
       | Some const_def ->
         let dty = const_def.cc_type in
         (* the enum constant has type MemberOf<X, Y>. If we are
@@ -1616,14 +1616,14 @@ module EnumAtomOps = struct
           else
             None
         in
-        let te = (hi, EnumAtom (qualifier, atom_name)) in
+        let te = (hi, EnumClassLabel (qualifier, label_name)) in
         (env, Success (te, lty))
       | None ->
-        Errors.atom_unknown pos atom_name enum_name;
+        Errors.atom_unknown pos label_name enum_name;
         let r = Reason.Rwitness pos in
         let ty = Typing_utils.terr env r in
-        let te = ((pos, ty), EnumAtom (None, atom_name)) in
-        (env, AtomNotFound (te, ty)))
+        let te = ((pos, ty), EnumClassLabel (None, label_name)) in
+        (env, LabelNotFound (te, ty)))
     | None -> (env, ClassNotFound)
 end
 
@@ -4362,26 +4362,40 @@ and expr_
       (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
-  | EnumAtom (None, s) ->
+  | EnumClassLabel (None, s) ->
     Errors.atom_as_expr p;
-    make_result env p (Aast.EnumAtom (None, s)) (mk (Reason.Rwitness p, Terr))
-  | EnumAtom ((Some (pos, cname) as e), name) ->
+    make_result
+      env
+      p
+      (Aast.EnumClassLabel (None, s))
+      (mk (Reason.Rwitness p, Terr))
+  | EnumClassLabel ((Some (pos, cname) as e), name) ->
     let (env, res) =
-      EnumAtomOps.expand pos env ~full:true ~ctor:SN.Classes.cLabel cname name
+      EnumClassLabelOps.expand
+        pos
+        env
+        ~full:true
+        ~ctor:SN.Classes.cLabel
+        cname
+        name
     in
     let error () =
-      make_result env p (Aast.EnumAtom (e, name)) (mk (Reason.Rwitness p, Terr))
+      make_result
+        env
+        p
+        (Aast.EnumClassLabel (e, name))
+        (mk (Reason.Rwitness p, Terr))
     in
     (match res with
-    | EnumAtomOps.Success ((_, texpr), lty) -> make_result env p texpr lty
-    | EnumAtomOps.ClassNotFound ->
+    | EnumClassLabelOps.Success ((_, texpr), lty) -> make_result env p texpr lty
+    | EnumClassLabelOps.ClassNotFound ->
       (* Error registered in nast_check/unbound_name_check *)
       error ()
-    | EnumAtomOps.AtomNotFound _ ->
-      (* Error registered in EnumAtomOps.expand *)
+    | EnumClassLabelOps.LabelNotFound _ ->
+      (* Error registered in EnumClassLabelOps.expand *)
       error ()
-    | EnumAtomOps.Invalid
-    | EnumAtomOps.Skip ->
+    | EnumClassLabelOps.Invalid
+    | EnumClassLabelOps.Skip ->
       Errors.atom_as_expr p;
       error ())
 
@@ -7393,7 +7407,7 @@ and call
           (* First check if __Atom is used or if the parameter is
            * a HH\Label.
            *)
-          let (env, atom_type) =
+          let (env, label_type) =
             let is_atom = get_fp_is_atom param in
             let ety = param.fp_type.et_type in
             let (env, ety) = Env.expand_type env ety in
@@ -7403,40 +7417,40 @@ and call
               | _ -> false
             in
             match arg with
-            | EnumAtom (None, atom_name) when is_atom || is_label ->
+            | EnumClassLabel (None, label_name) when is_atom || is_label ->
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
                      || String.equal name SN.Classes.cLabel ->
                 let ctor = name in
                 (match compute_enum_name env ty_enum with
-                | None -> (env, EnumAtomOps.ClassNotFound)
+                | None -> (env, EnumClassLabelOps.ClassNotFound)
                 | Some enum_name ->
-                  EnumAtomOps.expand
+                  EnumClassLabelOps.expand
                     pos
                     env
                     ~full:false
                     ~ctor
                     enum_name
-                    atom_name)
+                    label_name)
               | _ ->
                 (* Already reported, see Typing_type_wellformedness *)
-                (env, EnumAtomOps.Invalid))
-            | EnumAtom (Some _, _) ->
+                (env, EnumClassLabelOps.Invalid))
+            | EnumClassLabel (Some _, _) ->
               (* Full info is here, use normal inference *)
-              (env, EnumAtomOps.Skip)
+              (env, EnumClassLabelOps.Skip)
             | Class_const _ when is_atom ->
               Errors.atom_invalid_argument pos ~is_proj:true;
-              (env, EnumAtomOps.Invalid)
+              (env, EnumClassLabelOps.Invalid)
             | _ when is_atom ->
               Errors.atom_invalid_argument pos ~is_proj:false;
-              (env, EnumAtomOps.Invalid)
-            | _ -> (env, EnumAtomOps.Skip)
+              (env, EnumClassLabelOps.Invalid)
+            | _ -> (env, EnumClassLabelOps.Skip)
           in
           let (env, te, ty) =
-            match atom_type with
-            | EnumAtomOps.Success (te, ty)
-            | EnumAtomOps.AtomNotFound (te, ty) ->
+            match label_type with
+            | EnumClassLabelOps.Success (te, ty)
+            | EnumClassLabelOps.LabelNotFound (te, ty) ->
               (env, te, ty)
             | _ ->
               let expected =

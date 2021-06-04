@@ -622,7 +622,7 @@ module Visitor_DEPRECATED = struct
 
       method on_markup : 'a -> pstring -> 'a
 
-      method on_enum_atom : 'a -> sid option -> string -> 'a
+      method on_enum_class_label : 'a -> sid option -> string -> 'a
 
       method on_function_ptr_id :
         'a -> (Pos.t, func_body_ann, unit, unit) function_ptr_id -> 'a
@@ -836,7 +836,8 @@ module Visitor_DEPRECATED = struct
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
         | ET_Splice e -> this#on_et_splice acc e
-        | EnumAtom (opt_sid, name) -> this#on_enum_atom acc opt_sid name
+        | EnumClassLabel (opt_sid, name) ->
+          this#on_enum_class_label acc opt_sid name
         | ReadonlyExpr e -> this#on_readonly_expr acc e
         | Hole (e, _, _, _) -> this#on_expr acc e
 
@@ -1212,7 +1213,7 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_enum_atom acc opt_sid name =
+      method on_enum_class_label acc opt_sid name =
         let acc =
           match opt_sid with
           | Some sid -> this#on_id acc sid

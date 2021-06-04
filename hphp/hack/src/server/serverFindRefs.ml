@@ -234,8 +234,8 @@ let get_action symbol (filename, file_content, line, char) =
   | SymbolOccurrence.LocalVar ->
     Some (LocalVar { filename; file_content; line; char })
   | SymbolOccurrence.Attribute _ -> None
-  (* TODO(toyang): find references doesn't work for enum atoms yet *)
-  | SymbolOccurrence.EnumAtom _ -> None
+  (* TODO(toyang): find references doesn't work for enum labels yet *)
+  | SymbolOccurrence.EnumClassLabel _ -> None
 
 let go_from_file_ctx
     ~(ctx : Provider_context.t)

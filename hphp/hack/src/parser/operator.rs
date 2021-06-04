@@ -80,7 +80,7 @@ impl Operator {
             | ReadonlyOperator => 23,
             CloneOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
-            EnumAtomOperator | FunctionCallOperator => 26,
+            EnumClassLabelOperator | FunctionCallOperator => 26,
             NewOperator => 27,
             MemberSelectionOperator | NullSafeMemberSelectionOperator => 28,
             IndexingOperator => 29,
@@ -109,7 +109,7 @@ impl Operator {
             | AdditionOperator | SubtractionOperator | ConcatenationOperator
             | MultiplicationOperator | DivisionOperator | RemainderOperator
             | MemberSelectionOperator | NullSafeMemberSelectionOperator
-            | ScopeResolutionOperator | EnumAtomOperator | FunctionCallOperator | IndexingOperator
+            | ScopeResolutionOperator | EnumClassLabelOperator | FunctionCallOperator | IndexingOperator
             | IncludeOperator | IncludeOnceOperator | RequireOperator
             | RequireOnceOperator | IsOperator | AsOperator | NullableAsOperator
                 // eval
@@ -274,7 +274,7 @@ impl Operator {
             TokenKind::LeftParen => FunctionCallOperator,
             TokenKind::LeftBracket => IndexingOperator,
             TokenKind::LeftBrace => IndexingOperator,
-            TokenKind::Hash => EnumAtomOperator,
+            TokenKind::Hash => EnumClassLabelOperator,
             _ => panic!("not a trailing operator"),
         }
     }

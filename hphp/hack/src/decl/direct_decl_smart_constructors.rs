@@ -1113,7 +1113,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
                         ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Callconv(_)
                         | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
-                        | Darray(_) | Dollardollar(_) | Efun(_) | Eif(_) | EnumAtom(_)
+                        | Darray(_) | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_)
                         | ETSplice(_) | ExpressionTree(_) | FunctionPointer(_) | FunId(_)
                         | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
@@ -5102,7 +5102,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         &mut self,
         _receiver: Self::R,
         _type_args: Self::R,
-        _enum_atom: Self::R,
+        _enum_class_label: Self::R,
         _left_paren: Self::R,
         _argument_list: Self::R,
         _right_paren: Self::R,

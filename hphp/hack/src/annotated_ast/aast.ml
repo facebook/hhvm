@@ -623,10 +623,10 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           expression tree literal (backticks).
 
           ${$foo} *)
-  | EnumAtom of sid option * string
-      (** Enum atom used for enum classes.
+  | EnumClassLabel of sid option * string
+      (** Label used for enum classes.
 
-          enum_name#field_name or #field_name *)
+          enum_name#label_name or #label_name *)
   | Any
       (** Placeholder for expressions that aren't understood by parts of
           the toolchain.

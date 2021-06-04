@@ -727,7 +727,7 @@ module Full = struct
         | ({ type_ = XhpLiteralAttr _; name; _ }, _)
         | ({ type_ = ClassConst _; name; _ }, _)
         | ({ type_ = GConst; name; _ }, _)
-        | ({ type_ = EnumAtom _; name; _ }, _) ->
+        | ({ type_ = EnumClassLabel _; name; _ }, _) ->
           Concat [ty text_strip_ns ISet.empty env x; Space; text_strip_ns name]
         | _ -> ty text_strip_ns ISet.empty env x)
     in

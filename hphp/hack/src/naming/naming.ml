@@ -2233,9 +2233,9 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Import _ -> N.Any
   | Aast.Omitted -> N.Omitted
   | Aast.Callconv (kind, e) -> N.Callconv (kind, expr env e)
-  | Aast.EnumAtom (opt_sid, x) ->
+  | Aast.EnumClassLabel (opt_sid, x) ->
     let () = Option.iter ~f:check_name opt_sid in
-    N.EnumAtom (opt_sid, x)
+    N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
   (* The below were not found on the AST.ml so they are not implemented here *)
   | Aast.ValCollection _

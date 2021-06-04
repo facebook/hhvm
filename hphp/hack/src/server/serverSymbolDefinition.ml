@@ -185,7 +185,7 @@ let go ctx ast result =
           result.SymbolOccurrence.pos
     end
   | SymbolOccurrence.Attribute _ -> None
-  | SymbolOccurrence.EnumAtom (class_name, _member_name) ->
+  | SymbolOccurrence.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
 
 let get_definition_cst_node_from_pos ctx entry kind pos =

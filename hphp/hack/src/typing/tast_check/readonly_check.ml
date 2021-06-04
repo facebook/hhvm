@@ -351,7 +351,7 @@ let check =
       | Omitted
       | Id _
       | Shape _
-      | EnumAtom _
+      | EnumClassLabel _
       | ET_Splice _
       | Darray _
       | Varray _
@@ -786,7 +786,7 @@ let check =
       | (_, Omitted)
       | (_, Id _)
       | (_, Shape _)
-      | (_, EnumAtom _)
+      | (_, EnumClassLabel _)
       | (_, ET_Splice _)
       | (_, Darray _)
       | (_, Varray _)

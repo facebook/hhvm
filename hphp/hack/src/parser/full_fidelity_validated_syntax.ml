@@ -384,8 +384,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_shape_expression (fun x -> ExprShape x) x
     | Syntax.TupleExpression _ ->
       tag validate_tuple_expression (fun x -> ExprTuple x) x
-    | Syntax.EnumAtomExpression _ ->
-      tag validate_enum_atom_expression (fun x -> ExprEnumAtom x) x
+    | Syntax.EnumClassLabelExpression _ ->
+      tag validate_enum_class_label_expression (fun x -> ExprEnumClassLabel x) x
     | s -> aggregation_fail Def.Expression s
 
   and invalidate_expression : expression invalidator =
@@ -460,7 +460,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | ExprXHP thing -> invalidate_xhp_expression (value, thing)
     | ExprShape thing -> invalidate_shape_expression (value, thing)
     | ExprTuple thing -> invalidate_tuple_expression (value, thing)
-    | ExprEnumAtom thing -> invalidate_enum_atom_expression (value, thing)
+    | ExprEnumClassLabel thing ->
+      invalidate_enum_class_label_expression (value, thing)
 
   and validate_specifier : specifier validator =
    fun x ->
@@ -4525,8 +4526,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           function_call_argument_list =
             validate_list_with validate_expression x.function_call_argument_list;
           function_call_left_paren = validate_token x.function_call_left_paren;
-          function_call_enum_atom =
-            validate_option_with validate_expression x.function_call_enum_atom;
+          function_call_enum_class_label =
+            validate_option_with
+              validate_expression
+              x.function_call_enum_class_label;
           function_call_type_args =
             validate_option_with
               validate_type_arguments
@@ -4548,10 +4551,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_type_arguments
                 x.function_call_type_args;
-            function_call_enum_atom =
+            function_call_enum_class_label =
               invalidate_option_with
                 invalidate_expression
-                x.function_call_enum_atom;
+                x.function_call_enum_class_label;
             function_call_left_paren =
               invalidate_token x.function_call_left_paren;
             function_call_argument_list =
@@ -6511,27 +6514,35 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       Syntax.value = v;
     }
 
-  and validate_enum_atom_expression : enum_atom_expression validator = function
-    | { Syntax.syntax = Syntax.EnumAtomExpression x; value = v } ->
+  and validate_enum_class_label_expression :
+      enum_class_label_expression validator = function
+    | { Syntax.syntax = Syntax.EnumClassLabelExpression x; value = v } ->
       ( v,
         {
-          enum_atom_expression = validate_token x.enum_atom_expression;
-          enum_atom_hash = validate_token x.enum_atom_hash;
-          enum_atom_qualifier =
-            validate_option_with validate_expression x.enum_atom_qualifier;
+          enum_class_label_expression =
+            validate_token x.enum_class_label_expression;
+          enum_class_label_hash = validate_token x.enum_class_label_hash;
+          enum_class_label_qualifier =
+            validate_option_with
+              validate_expression
+              x.enum_class_label_qualifier;
         } )
-    | s -> validation_fail (Some SyntaxKind.EnumAtomExpression) s
+    | s -> validation_fail (Some SyntaxKind.EnumClassLabelExpression) s
 
-  and invalidate_enum_atom_expression : enum_atom_expression invalidator =
+  and invalidate_enum_class_label_expression :
+      enum_class_label_expression invalidator =
    fun (v, x) ->
     {
       Syntax.syntax =
-        Syntax.EnumAtomExpression
+        Syntax.EnumClassLabelExpression
           {
-            enum_atom_qualifier =
-              invalidate_option_with invalidate_expression x.enum_atom_qualifier;
-            enum_atom_hash = invalidate_token x.enum_atom_hash;
-            enum_atom_expression = invalidate_token x.enum_atom_expression;
+            enum_class_label_qualifier =
+              invalidate_option_with
+                invalidate_expression
+                x.enum_class_label_qualifier;
+            enum_class_label_hash = invalidate_token x.enum_class_label_hash;
+            enum_class_label_expression =
+              invalidate_token x.enum_class_label_expression;
           };
       Syntax.value = v;
     }

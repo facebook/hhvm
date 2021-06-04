@@ -463,7 +463,7 @@ where
             TokenKind::Eval => self.parse_eval_expression(),
             TokenKind::Hash => {
                 let qualifier = S!(make_missing, self, self.pos());
-                self.parse_atom(qualifier)
+                self.parse_enum_class_label(qualifier)
             }
             TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
@@ -1141,8 +1141,8 @@ where
             }
             TokenKind::Hash | TokenKind::LeftParen => {
                 let missing = S!(make_missing, self, self.pos());
-                let enum_atom = match self.peek_token_kind() {
-                    TokenKind::Hash => self.parse_atom(missing),
+                let enum_class_label = match self.peek_token_kind() {
+                    TokenKind::Hash => self.parse_enum_class_label(missing),
                     _ => missing,
                 };
                 let (left, args, right) = self.parse_expression_list_opt();
@@ -1151,7 +1151,7 @@ where
                     self,
                     term,
                     type_arguments,
-                    enum_atom,
+                    enum_class_label,
                     left,
                     args,
                     right
@@ -1330,7 +1330,9 @@ where
                         TokenKind::PlusPlus | TokenKind::MinusMinus => {
                             self.parse_postfix_unary(term)
                         }
-                        TokenKind::Hash => self.parse_function_call_or_enum_atom_expression(term),
+                        TokenKind::Hash => {
+                            self.parse_function_call_or_enum_class_label_expression(term)
+                        }
                         TokenKind::LeftParen => {
                             let missing = S!(make_missing, self, self.pos());
                             self.parse_function_call(missing, term)
@@ -1608,24 +1610,36 @@ where
         S!(make_constructor_call, self, designator, left, args, right)
     }
 
-    fn parse_function_call_or_enum_atom_expression(&mut self, term: S::R) -> S::R {
+    fn parse_function_call_or_enum_class_label_expression(&mut self, term: S::R) -> S::R {
         // SPEC
-        // fully-qualified-atom:
+        // fully-qualified-label:
         //   term '#' name
-        // function-call-with-atom:
+        // function-call-with-label:
         //   term '#' name '(' ... ')'
         let hash = self.assert_token(TokenKind::Hash);
-        let atom_name = self.require_name();
+        let label_name = self.require_name();
         if self.peek_token_kind() == TokenKind::LeftParen {
             let missing = S!(make_missing, self, self.pos());
-            let enum_atom = S!(make_enum_atom_expression, self, missing, hash, atom_name);
-            self.parse_function_call(enum_atom, term)
+            let enum_class_label = S!(
+                make_enum_class_label_expression,
+                self,
+                missing,
+                hash,
+                label_name
+            );
+            self.parse_function_call(enum_class_label, term)
         } else {
-            S!(make_enum_atom_expression, self, term, hash, atom_name)
+            S!(
+                make_enum_class_label_expression,
+                self,
+                term,
+                hash,
+                label_name
+            )
         }
     }
 
-    fn parse_function_call(&mut self, enum_atom: S::R, receiver: S::R) -> S::R {
+    fn parse_function_call(&mut self, enum_class_label: S::R, receiver: S::R) -> S::R {
         // SPEC
         // function-call-expression:
         //   postfix-expression  (  argument-expression-list-opt  )
@@ -1638,7 +1652,7 @@ where
             self,
             receiver,
             type_arguments,
-            enum_atom,
+            enum_class_label,
             left,
             args,
             right
@@ -3060,9 +3074,15 @@ where
         S!(make_scope_resolution_expression, self, qualifier, op, name)
     }
 
-    fn parse_atom(&mut self, qualifier: S::R) -> S::R {
+    fn parse_enum_class_label(&mut self, qualifier: S::R) -> S::R {
         let hash = self.assert_token(TokenKind::Hash);
-        let atom_name = self.require_name();
-        S!(make_enum_atom_expression, self, qualifier, hash, atom_name)
+        let label_name = self.require_name();
+        S!(
+            make_enum_class_label_expression,
+            self,
+            qualifier,
+            hash,
+            label_name
+        )
     }
 }

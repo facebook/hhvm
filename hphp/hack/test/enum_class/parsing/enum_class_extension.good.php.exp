@@ -1825,7 +1825,7 @@
                   }
                 },
                 "function_call_type_args":{"kind":"missing"},
-                "function_call_enum_atom":{"kind":"missing"},
+                "function_call_enum_class_label":{"kind":"missing"},
                 "function_call_left_paren":{
                   "kind":"token",
                   "token":{

@@ -190,7 +190,7 @@ type t =
   | IntersectionTypeSpecifier
   | ErrorSyntax
   | ListItem
-  | EnumAtomExpression
+  | EnumClassLabelExpression
 [@@deriving show, eq]
 
 let to_string kind =
@@ -367,4 +367,4 @@ let to_string kind =
   | IntersectionTypeSpecifier -> "intersection_type_specifier"
   | ErrorSyntax -> "error"
   | ListItem -> "list_item"
-  | EnumAtomExpression -> "enum_atom"
+  | EnumClassLabelExpression -> "enum_class_label"

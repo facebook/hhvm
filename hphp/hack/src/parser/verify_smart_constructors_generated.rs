@@ -1427,9 +1427,9 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
-    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+    fn make_enum_class_label_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_enum_atom_expression(self, arg0, arg1, arg2);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_enum_class_label_expression(self, arg0, arg1, arg2);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

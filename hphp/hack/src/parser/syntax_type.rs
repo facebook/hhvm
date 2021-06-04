@@ -123,7 +123,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_conditional_expression(ctx: &C, conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self;
     fn make_eval_expression(ctx: &C, eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self;
     fn make_isset_expression(ctx: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self;
-    fn make_function_call_expression(ctx: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_enum_atom: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self;
+    fn make_function_call_expression(ctx: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_enum_class_label: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self;
     fn make_function_pointer_expression(ctx: &C, function_pointer_receiver: Self, function_pointer_type_args: Self) -> Self;
     fn make_parenthesized_expression(ctx: &C, parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self;
     fn make_braced_expression(ctx: &C, braced_expression_left_brace: Self, braced_expression_expression: Self, braced_expression_right_brace: Self) -> Self;
@@ -189,6 +189,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_intersection_type_specifier(ctx: &C, intersection_left_paren: Self, intersection_types: Self, intersection_right_paren: Self) -> Self;
     fn make_error(ctx: &C, error_error: Self) -> Self;
     fn make_list_item(ctx: &C, list_item: Self, list_separator: Self) -> Self;
-    fn make_enum_atom_expression(ctx: &C, enum_atom_qualifier: Self, enum_atom_hash: Self, enum_atom_expression: Self) -> Self;
+    fn make_enum_class_label_expression(ctx: &C, enum_class_label_qualifier: Self, enum_class_label_hash: Self, enum_class_label_expression: Self) -> Self;
 
 }

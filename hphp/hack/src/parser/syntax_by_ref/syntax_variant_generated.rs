@@ -195,7 +195,7 @@ pub enum SyntaxVariant<'a, T, V> {
     IntersectionTypeSpecifier(&'a IntersectionTypeSpecifierChildren<'a, T, V>),
     ErrorSyntax(&'a ErrorSyntaxChildren<'a, T, V>),
     ListItem(&'a ListItemChildren<'a, T, V>),
-    EnumAtomExpression(&'a EnumAtomExpressionChildren<'a, T, V>),
+    EnumClassLabelExpression(&'a EnumClassLabelExpressionChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1032,7 +1032,7 @@ pub struct IssetExpressionChildren<'a, T, V> {
 pub struct FunctionCallExpressionChildren<'a, T, V> {
     pub receiver: Syntax<'a, T, V>,
     pub type_args: Syntax<'a, T, V>,
-    pub enum_atom: Syntax<'a, T, V>,
+    pub enum_class_label: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
@@ -1527,7 +1527,7 @@ pub struct ListItemChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct EnumAtomExpressionChildren<'a, T, V> {
+pub struct EnumClassLabelExpressionChildren<'a, T, V> {
     pub qualifier: Syntax<'a, T, V>,
     pub hash: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,

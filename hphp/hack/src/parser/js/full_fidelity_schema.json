@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-05-26-0001",
+  "version" : "2021-06-02-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1479,7 +1479,7 @@
       "fields" : [
         { "field_name" : "receiver" },
         { "field_name" : "type_args" },
-        { "field_name" : "enum_atom" },
+        { "field_name" : "enum_class_label" },
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
@@ -2102,10 +2102,10 @@
         { "field_name" : "item" },
         { "field_name" : "separator" }
       ] },
-    { "kind_name" : "EnumAtomExpression",
-      "type_name" : "enum_atom_expression",
-      "description" : "enum_atom",
-      "prefix" : "enum_atom",
+    { "kind_name" : "EnumClassLabelExpression",
+      "type_name" : "enum_class_label_expression",
+      "description" : "enum_class_label",
+      "prefix" : "enum_class_label",
       "fields" : [
         { "field_name" : "qualifier" },
         { "field_name" : "hash" },

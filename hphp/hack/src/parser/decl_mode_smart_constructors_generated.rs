@@ -735,8 +735,8 @@ where
         <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_list_item(self, arg0, arg1)
     }
 
-    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_enum_atom_expression(self, arg0, arg1, arg2)
+    fn make_enum_class_label_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_enum_class_label_expression(self, arg0, arg1, arg2)
     }
 
 }

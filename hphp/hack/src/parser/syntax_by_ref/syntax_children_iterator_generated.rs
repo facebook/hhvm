@@ -1082,7 +1082,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(6).and_then(|index| { match index {
                         0 => Some(&x.receiver),
                     1 => Some(&x.type_args),
-                    2 => Some(&x.enum_atom),
+                    2 => Some(&x.enum_class_label),
                     3 => Some(&x.left_paren),
                     4 => Some(&x.argument_list),
                     5 => Some(&x.right_paren),
@@ -1708,7 +1708,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            EnumAtomExpression(x) => {
+            EnumClassLabelExpression(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.qualifier),
                     1 => Some(&x.hash),

@@ -2536,7 +2536,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semicolon;
           Newline;
         ]
-    | Syntax.EnumAtomExpression _ -> transform_simple env node)
+    | Syntax.EnumClassLabelExpression _ -> transform_simple env node)
 
 and when_present node f =
   match Syntax.syntax node with
@@ -2783,7 +2783,7 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
-          function_call_enum_atom = _enum_atom;
+          function_call_enum_class_label = _enum_class_label;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;
@@ -2836,7 +2836,7 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
-          function_call_enum_atom = _enum_atom;
+          function_call_enum_class_label = _enum_class_label;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;

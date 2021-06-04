@@ -1766,18 +1766,18 @@ where
                         };
                         let (mut args, varargs) = split_args_vararg(args, env)?;
 
-                        // If the function has an enum atom expression, that's
+                        // If the function has an enum class label expression, that's
                         // the first argument.
-                        if let EnumAtomExpression(e) = &c.enum_atom.children {
+                        if let EnumClassLabelExpression(e) = &c.enum_class_label.children {
                             assert!(
                                 e.qualifier.is_missing(),
-                                "Parser error: function call with atoms"
+                                "Parser error: function call with enum class labels"
                             );
-                            let enum_atom = ast::Expr::new(
-                                Self::p_pos(&c.enum_atom, env),
+                            let enum_class_label = ast::Expr::new(
+                                Self::p_pos(&c.enum_class_label, env),
                                 E_::mk_enum_atom(None, Self::pos_name(&e.expression, env)?.1),
                             );
-                            args.insert(0, enum_atom);
+                            args.insert(0, enum_class_label);
                         }
 
                         Ok(E_::mk_call(recv, targs, args, varargs))
@@ -2248,26 +2248,26 @@ where
                     Self::failwith("expect xhp open")
                 }
             }
-            EnumAtomExpression(c) => {
+            EnumClassLabelExpression(c) => {
                 /* Foo#Bar can be the following:
                  * - short version: Foo is None/missing and we only have #Bar
                  * - Foo is a name -> fully qualified Foo#Bar
                  * - Foo is a function call prefix (can happen during auto completion)
                  *   $c->foo#Bar or C::foo#Bar
                  */
-                let ast::Id(atom_pos, atom_name) = Self::pos_name(&c.expression, env)?;
+                let ast::Id(label_pos, label_name) = Self::pos_name(&c.expression, env)?;
                 if c.qualifier.is_missing() {
-                    Ok(E_::mk_enum_atom(None, atom_name))
+                    Ok(E_::mk_enum_atom(None, label_name))
                 } else if c.qualifier.is_name() {
                     let name = Self::pos_name(&c.qualifier, env)?;
-                    Ok(E_::mk_enum_atom(Some(name), atom_name))
+                    Ok(E_::mk_enum_atom(Some(name), label_name))
                 } else {
                     /* This can happen during parsing in auto-complete mode */
                     let recv = Self::p_expr(&c.qualifier, env);
                     match recv {
                         Ok(recv) => {
-                            let atom = E_::mk_enum_atom(None, atom_name);
-                            let atom = ast::Expr::new(atom_pos, atom);
+                            let atom = E_::mk_enum_atom(None, label_name);
+                            let atom = ast::Expr::new(label_pos, atom);
                             Ok(E_::mk_call(recv, vec![], vec![atom], None))
                         }
                         Err(err) => Err(err),

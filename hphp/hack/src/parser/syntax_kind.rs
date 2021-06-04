@@ -195,7 +195,7 @@ pub enum SyntaxKind {
     IntersectionTypeSpecifier,
     ErrorSyntax,
     ListItem,
-    EnumAtomExpression,
+    EnumClassLabelExpression,
 
 }
 
@@ -374,7 +374,7 @@ impl SyntaxKind {
             SyntaxKind::IntersectionTypeSpecifier         => "intersection_type_specifier",
             SyntaxKind::ErrorSyntax                       => "error",
             SyntaxKind::ListItem                          => "list_item",
-            SyntaxKind::EnumAtomExpression                => "enum_atom",
+            SyntaxKind::EnumClassLabelExpression          => "enum_class_label",
         }
     }
 
@@ -552,7 +552,7 @@ impl SyntaxKind {
             SyntaxKind::IntersectionTypeSpecifier => 168,
             SyntaxKind::ErrorSyntax => 169,
             SyntaxKind::ListItem => 170,
-            SyntaxKind::EnumAtomExpression => 171,
+            SyntaxKind::EnumClassLabelExpression => 171,
         }
     }
 }

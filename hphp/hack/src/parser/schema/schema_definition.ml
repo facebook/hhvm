@@ -1484,7 +1484,7 @@ let schema : schema_node list =
         [
           ("receiver", Aggregate Expression);
           ("type_args", ZeroOrOne (Just "TypeArguments"));
-          ("enum_atom", ZeroOrOne (Aggregate Expression));
+          ("enum_class_label", ZeroOrOne (Aggregate Expression));
           ("left_paren", Token);
           ("argument_list", ZeroOrMore (Aggregate Expression));
           ("right_paren", Token);
@@ -2377,11 +2377,11 @@ let schema : schema_node list =
       fields = [("item", Just "error"); ("separator", Token)];
     };
     {
-      kind_name = "EnumAtomExpression";
-      type_name = "enum_atom_expression";
-      func_name = "enum_atom_expression";
-      description = "enum_atom";
-      prefix = "enum_atom";
+      kind_name = "EnumClassLabelExpression";
+      type_name = "enum_class_label_expression";
+      func_name = "enum_class_label_expression";
+      description = "enum_class_label";
+      prefix = "enum_class_label";
       aggregates = [Expression];
       fields =
         [

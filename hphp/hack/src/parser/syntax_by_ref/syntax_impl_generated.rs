@@ -194,7 +194,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::IntersectionTypeSpecifier {..} => SyntaxKind::IntersectionTypeSpecifier,
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
-            SyntaxVariant::EnumAtomExpression {..} => SyntaxKind::EnumAtomExpression,
+            SyntaxVariant::EnumClassLabelExpression {..} => SyntaxKind::EnumClassLabelExpression,
         }
     }
 }

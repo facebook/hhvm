@@ -330,10 +330,10 @@
                     }
                   },
                   "function_call_type_args":{"kind":"missing"},
-                  "function_call_enum_atom":{
-                    "kind":"enum_atom",
-                    "enum_atom_qualifier":{"kind":"missing"},
-                    "enum_atom_hash":{
+                  "function_call_enum_class_label":{
+                    "kind":"enum_class_label",
+                    "enum_class_label_qualifier":{"kind":"missing"},
+                    "enum_class_label_hash":{
                       "kind":"token",
                       "token":{
                         "kind":"#",
@@ -347,7 +347,7 @@
                         "line_number":5
                       }
                     },
-                    "enum_atom_expression":{
+                    "enum_class_label_expression":{
                       "kind":"token",
                       "token":{
                         "kind":"name",
@@ -510,10 +510,10 @@
                     }
                   },
                   "function_call_type_args":{"kind":"missing"},
-                  "function_call_enum_atom":{
-                    "kind":"enum_atom",
-                    "enum_atom_qualifier":{"kind":"missing"},
-                    "enum_atom_hash":{
+                  "function_call_enum_class_label":{
+                    "kind":"enum_class_label",
+                    "enum_class_label_qualifier":{"kind":"missing"},
+                    "enum_class_label_hash":{
                       "kind":"token",
                       "token":{
                         "kind":"#",
@@ -527,7 +527,7 @@
                         "line_number":6
                       }
                     },
-                    "enum_atom_expression":{
+                    "enum_class_label_expression":{
                       "kind":"token",
                       "token":{
                         "kind":"name",
@@ -693,10 +693,10 @@
                     }
                   },
                   "function_call_type_args":{"kind":"missing"},
-                  "function_call_enum_atom":{
-                    "kind":"enum_atom",
-                    "enum_atom_qualifier":{"kind":"missing"},
-                    "enum_atom_hash":{
+                  "function_call_enum_class_label":{
+                    "kind":"enum_class_label",
+                    "enum_class_label_qualifier":{"kind":"missing"},
+                    "enum_class_label_hash":{
                       "kind":"token",
                       "token":{
                         "kind":"#",
@@ -710,7 +710,7 @@
                         "line_number":7
                       }
                     },
-                    "enum_atom_expression":{
+                    "enum_class_label_expression":{
                       "kind":"token",
                       "token":{
                         "kind":"name",
@@ -898,10 +898,10 @@
                       }
                     }
                   },
-                  "function_call_enum_atom":{
-                    "kind":"enum_atom",
-                    "enum_atom_qualifier":{"kind":"missing"},
-                    "enum_atom_hash":{
+                  "function_call_enum_class_label":{
+                    "kind":"enum_class_label",
+                    "enum_class_label_qualifier":{"kind":"missing"},
+                    "enum_class_label_hash":{
                       "kind":"token",
                       "token":{
                         "kind":"#",
@@ -915,7 +915,7 @@
                         "line_number":8
                       }
                     },
-                    "enum_atom_expression":{
+                    "enum_class_label_expression":{
                       "kind":"token",
                       "token":{
                         "kind":"name",

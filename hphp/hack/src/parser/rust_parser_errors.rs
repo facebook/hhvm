@@ -5342,7 +5342,9 @@ where
                 }
                 _ => {}
             },
-            EnumAtomExpression(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumAtom),
+            EnumClassLabelExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::EnumAtom)
+            }
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);
                 let has_atom = attributes_string

@@ -1,2 +1,2 @@
 File "atom_missing_attribute.php", line 15, characters 5-6:
-Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
+Enum class labels are not allowed in this position. They are only allowed in function calls) (Typing[4396])

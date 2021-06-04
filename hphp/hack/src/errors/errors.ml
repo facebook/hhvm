@@ -5255,23 +5255,22 @@ let atom_invalid_generic pos name =
       ^ Naming_special_names.UserAttributes.uaAtom )
     []
 
-let atom_unknown pos atom_name class_name =
+let enum_class_label_unknown pos label_name class_name =
   let class_name = strip_ns class_name in
   add_list
-    (Typing.err_code Typing.AtomUnknown)
-    (pos, "Unknown constant " ^ atom_name ^ " in " ^ class_name)
+    (Typing.err_code Typing.EnumClassLabelUnknown)
+    (pos, "Unknown constant " ^ label_name ^ " in " ^ class_name)
     []
 
-let atom_as_expr pos =
+let enum_class_label_as_expr pos =
   add_list
-    (Typing.err_code Typing.AtomAsExpression)
+    (Typing.err_code Typing.EnumClassLabelAsExpression)
     ( pos,
-      "Atoms are not allowed in this position. They are only allowed "
-      ^ "in function call, if the function parameter is annotated with "
-      ^ Naming_special_names.UserAttributes.uaAtom )
+      "Enum class labels are not allowed in this position. They are only allowed "
+      ^ "in function calls)" )
     []
 
-let atom_invalid_argument pos ~is_proj =
+let enum_class_label_invalid_argument pos ~is_proj =
   let msg =
     if is_proj then
       ", not a class constant projection."
@@ -5279,8 +5278,8 @@ let atom_invalid_argument pos ~is_proj =
       "."
   in
   add_list
-    (Typing.err_code Typing.AtomInvalidArgument)
-    (pos, "An atom is required here" ^ msg)
+    (Typing.err_code Typing.EnumClassLabelInvalidArgument)
+    (pos, "An enum class label is required here" ^ msg)
     []
 
 let ifc_internal_error pos reason =

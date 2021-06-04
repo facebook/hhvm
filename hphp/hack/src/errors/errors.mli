@@ -1605,11 +1605,11 @@ val atom_invalid_parameter_in_enum_class : Pos.t -> unit
 
 val atom_invalid_generic : Pos.t -> string -> unit
 
-val atom_unknown : Pos.t -> string -> string -> unit
+val enum_class_label_unknown : Pos.t -> string -> string -> unit
 
-val atom_as_expr : Pos.t -> unit
+val enum_class_label_as_expr : Pos.t -> unit
 
-val atom_invalid_argument : Pos.t -> is_proj:bool -> unit
+val enum_class_label_invalid_argument : Pos.t -> is_proj:bool -> unit
 
 val ifc_internal_error : Pos.t -> string -> unit
 

@@ -5,6 +5,6 @@ This character is invalid. (Parsing[1002])
 File "atom_wrong_place.php", line 9, characters 8-8:
 Unbound name: `#` (a global constant) (Naming[2049])
 File "atom_wrong_place.php", line 8, characters 8-26:
-Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
+Enum class labels are not allowed in this position. They are only allowed in function calls) (Typing[4396])
 File "atom_wrong_place.php", line 9, characters 8-8:
 Unbound global constant (Typing) (Typing[4106])

@@ -1619,7 +1619,7 @@ module EnumClassLabelOps = struct
         let te = (hi, EnumClassLabel (qualifier, label_name)) in
         (env, Success (te, lty))
       | None ->
-        Errors.atom_unknown pos label_name enum_name;
+        Errors.enum_class_label_unknown pos label_name enum_name;
         let r = Reason.Rwitness pos in
         let ty = Typing_utils.terr env r in
         let te = ((pos, ty), EnumClassLabel (None, label_name)) in
@@ -4363,7 +4363,7 @@ and expr_
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
   | EnumClassLabel (None, s) ->
-    Errors.atom_as_expr p;
+    Errors.enum_class_label_as_expr p;
     make_result
       env
       p
@@ -4396,7 +4396,7 @@ and expr_
       error ()
     | EnumClassLabelOps.Invalid
     | EnumClassLabelOps.Skip ->
-      Errors.atom_as_expr p;
+      Errors.enum_class_label_as_expr p;
       error ())
 
 (* let ty = err_witness env cst_pos in *)
@@ -7440,10 +7440,10 @@ and call
               (* Full info is here, use normal inference *)
               (env, EnumClassLabelOps.Skip)
             | Class_const _ when is_atom ->
-              Errors.atom_invalid_argument pos ~is_proj:true;
+              Errors.enum_class_label_invalid_argument pos ~is_proj:true;
               (env, EnumClassLabelOps.Invalid)
             | _ when is_atom ->
-              Errors.atom_invalid_argument pos ~is_proj:false;
+              Errors.enum_class_label_invalid_argument pos ~is_proj:false;
               (env, EnumClassLabelOps.Invalid)
             | _ -> (env, EnumClassLabelOps.Skip)
           in

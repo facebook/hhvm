@@ -1,0 +1,31 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(22) "Undefined variable: c1"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(23) "Promoting null to array"
+
+Warning: Cannot use a scalar value as an array in %s/null_coalesce_assignment_member_op.php on line %d
+bool(true)
+string(1) "A"
+bool(true)
+
+Warning: Cannot use a scalar value as an array in %s/null_coalesce_assignment_member_op.php on line %d
+
+Warning: Cannot use a scalar value as an array in %s/null_coalesce_assignment_member_op.php on line %d
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object created!
+string(24) "Promoting false to array"
+
+Warning: Cannot use a scalar value as an array in %s/null_coalesce_assignment_member_op.php on line %d
+
+Warning: Cannot use a scalar value as an array in %s/null_coalesce_assignment_member_op.php on line %d
+bool(true)
+string(30) "Integer key 2 is out of bounds"

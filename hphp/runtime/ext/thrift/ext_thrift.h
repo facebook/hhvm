@@ -142,4 +142,52 @@ struct RpcOptions {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_TClientBufferedStream("TClientBufferedStream");
+
+struct TClientBufferedStream {
+  TClientBufferedStream() = default;
+  TClientBufferedStream(const TClientBufferedStream&) = delete;
+  TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
+  ~TClientBufferedStream();
+
+  void sweep() { close(true); }
+
+  void close(bool /*sweeping*/ = false) {}
+
+  void init(
+      apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
+      apache::thrift::BufferOptions bufferOptions) {
+    streamBridge_ = std::move(streamBridge);
+    bufferOptions_ = bufferOptions;
+  }
+
+  static Class* PhpClass() {
+    if (!c_TClientBufferedStream) {
+      c_TClientBufferedStream = Class::lookup(s_TClientBufferedStream.get());
+      assert(c_TClientBufferedStream);
+    }
+    return c_TClientBufferedStream;
+  }
+
+  static Object newInstance() { return Object{PhpClass()}; }
+
+  static TClientBufferedStream* GetDataOrThrowException(ObjectData* object_) {
+    if (object_ == nullptr) {
+      throw_null_pointer_exception();
+      not_reached();
+    }
+    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+      raise_error("TClientBufferedStream expected");
+      not_reached();
+    }
+    return Native::data<TClientBufferedStream>(object_);
+  }
+
+ private:
+  apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge_;
+  apache::thrift::BufferOptions bufferOptions_;
+
+  static Class* c_TClientBufferedStream;
+};
 }}

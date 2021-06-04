@@ -32,6 +32,7 @@ Class* InteractionId::PhpClass() {
 }
 
 Class* RpcOptions::c_RpcOptions = nullptr;
+Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
 
 Object HHVM_METHOD(RpcOptions, setChunkBufferSize, int64_t chunk_buffer_size) {
   auto data = RpcOptions::GetDataOrThrowException(this_);

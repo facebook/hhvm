@@ -114,7 +114,7 @@ let coalesce_consistent parent current =
   (* This case is unreachable, because parent would have to be a final class *)
   | FinalClass -> parent
 
-let consistent_construct_kind cls =
+let consistent_construct_kind cls : consistent_kind =
   Shallow_decl_defs.(
     if cls.sc_final then
       FinalClass

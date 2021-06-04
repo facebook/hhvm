@@ -12,8 +12,9 @@
  *)
 open Ppxlib
 
-(* This is identical to the version in ppx_gen_hhi_direct, however it needs to
- * be duplicated as the types are different between ppxlib and ast_mapper *)
+(**
+ Read hhi and hsl files from the file system into memory, as AST nodes,
+ to used by the ppx rewrite to replace [%hhi_contents] with this. *)
 let get_hhi_contents hhi_dir hsl_dir =
   let open Ast_helper in
   Ppx_gen_hhi_common.get_hhis hhi_dir hsl_dir

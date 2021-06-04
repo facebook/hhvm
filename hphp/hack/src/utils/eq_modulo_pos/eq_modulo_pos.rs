@@ -162,6 +162,9 @@ impl_with_iter! {
     <K, V> arena_collections::map::Map<'_, K, V>, count
 }
 impl_with_iter! {
+    <T> std::collections::BTreeSet<T>, len
+}
+impl_with_iter! {
     <K, V> std::collections::BTreeMap<K, V>, len
 }
 impl_with_iter! {

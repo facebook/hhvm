@@ -78,3 +78,5 @@ Requesting 'test_curl_multi_except.php'
 string(%d) "Hello, World!%d:::Exception: oops"
 Requesting 'test_pagelet.php'
 NULL
+Requesting 'test_cookie2.php'
+string(114) " Set-Cookie: Name=value3; path=/asdf Set-Cookie: name=value2 Set-Cookie: name=value4; path=/; domain=.facebook.com"

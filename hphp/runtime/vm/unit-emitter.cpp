@@ -174,11 +174,6 @@ FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* name,
   return new FuncEmitter(*this, m_nextFuncSn++, name, pce);
 }
 
-void UnitEmitter::appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe) {
-  fe->setIds(m_nextFuncSn++, m_fes.size());
-  m_fes.push_back(std::move(fe));
-}
-
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs,
                            int numParams) {

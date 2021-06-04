@@ -42,11 +42,6 @@ inline bool FuncEmitter::useGlobalIds() const {
   return m_ue.useGlobalIds();
 }
 
-inline void FuncEmitter::setIds(int sn, Id id) {
-  m_sn = sn;
-  m_id = id;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
 

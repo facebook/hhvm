@@ -184,11 +184,6 @@ struct UnitEmitter {
   FuncEmitter* newMethodEmitter(const StringData* name, PreClassEmitter* pce);
 
   /*
-   * Add `fe' to the FE vector.
-   */
-  void appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe);
-
-  /*
    * Create a new function for `fe'.
    *
    * This should only be called from fe->create(), and just constructs a new

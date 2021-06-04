@@ -1435,14 +1435,13 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
    * Top level funcs are always defined when the unit is loaded, and
    * don't have a DefFunc bytecode. Process them up front.
    */
-  std::vector<std::unique_ptr<FuncEmitter> > top_fes;
   for (size_t id = 0; id < unit.funcs.size(); ++id) {
     auto const f = unit.funcs[id].get();
     if (const_86cinit_funcs.find(f->name) != const_86cinit_funcs.end()) {
       continue;
     }
-    top_fes.push_back(std::make_unique<FuncEmitter>(*ue, -1, -1, f->name));
-    emit_func(state, *ue, *top_fes.back(), *f);
+    auto fe = ue->newFuncEmitter(f->name);
+    emit_func(state, *ue, *fe, *f);
   }
 
   /*
@@ -1478,10 +1477,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
   for (size_t id = 0; id < unit.records.size(); ++id) {
     emit_record(*ue, *unit.records[id]);
   }
-
-  // Top level funcs need to go after any non-top level funcs. See
-  // Unit::merge for details.
-  for (auto& fe : top_fes) ue->appendTopEmitter(std::move(fe));
 
   return ue;
 }

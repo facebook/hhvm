@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/workload-stats.h"
@@ -524,6 +525,11 @@ Translator::acquireLeaseAndRequisitePaperwork() {
   // Optimized translation yet.
   auto const shouldEmitLiveTranslation = [&] {
     if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
+      // When bespokes are enabled, we can't emit live translations until the
+      // bespoke hierarchy is finalized.
+      if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
+        return false;
+      }
       // Functions that are marked as being profiled or marked as having been
       // optimized are about to have their translations invalidated during the
       // publish phase of retranslate all.  Don't allow live translations to be

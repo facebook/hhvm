@@ -14,6 +14,7 @@ facts_smart_constructors = { path = "../facts_smart_constructors" }
 hex = "0.4"
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 md-5 = "0.8"
+naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }

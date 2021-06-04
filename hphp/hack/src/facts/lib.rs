@@ -7,3 +7,4 @@
 mod facts;
 pub mod facts_parser;
 pub use facts_smart_constructors;
+pub use naming_special_names_rust;

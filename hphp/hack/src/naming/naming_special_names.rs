@@ -271,7 +271,7 @@ pub mod user_attributes {
     pub const SUPPORT_DYNAMIC_TYPE: &str = "__SupportDynamicType";
 
     lazy_static! {
-        static ref AS_SET: HashSet<&'static str> = vec![
+        pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
             CONSISTENT_CONSTRUCT,
             CONST,

@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_by_ref_hhbc_string_utils::mangle_xhp_id;
+use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::parser_env::ParserEnv;
@@ -203,8 +204,7 @@ fn type_info_from_class_body(
                 let attributes = attributes_into_facts(namespace, *attrs);
                 if !attributes.is_empty() {
                     if let FunctionDecl(name) = *header {
-                        if let Some(method_name) = qualified_name(namespace, *name, namespaced_xhp)
-                        {
+                        if let Some(method_name) = qualified_name("", *name, namespaced_xhp) {
                             type_facts
                                 .methods
                                 .insert(method_name, MethodFacts { attributes });
@@ -223,7 +223,20 @@ fn attributes_into_facts(namespace: &str, attributes_node: Node) -> Attributes {
         for node in nodes {
             if let Node::ListItem(item) = node {
                 let (name_node, values_node) = *item;
+                // For now, built-ins are hardcoded to always be in the current namespace
+                if let Name(name) = &name_node {
+                    let name = name.to_string();
+                    if user_attributes::AS_SET.contains(name.as_str()) {
+                        // Skip builtins
+                        continue;
+                    }
+                }
                 if let Some(name) = qualified_name(namespace, name_node, false) {
+                    // Make sure we don't miss a correctly-namespaced built-in like `\__Memoize`
+                    if user_attributes::AS_SET.contains(name.as_str()) {
+                        // Skip builtins
+                        continue;
+                    }
                     attributes.insert(
                         name,
                         if let Node::List(nodes) = values_node {

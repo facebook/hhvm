@@ -703,6 +703,7 @@ dependencies = [
  "hex",
  "hhbc_by_ref_hhbc_string_utils",
  "md-5",
+ "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
  "parser_core_types",

@@ -843,11 +843,13 @@ struct AutoloadDBImpl final : public AutoloadDB {
       std::optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
 
+    std::string attrValueJson;
     auto query = txn.query(m_typeStmts.m_insertMethodAttribute);
 
     auto const attributeValueKey = "@attribute_value";
     if (attributeValue) {
-      query.bindString(attributeValueKey, folly::toJson(*attributeValue));
+      attrValueJson = folly::toJson(*attributeValue);
+      query.bindString(attributeValueKey, attrValueJson);
     } else {
       query.bindNull(attributeValueKey);
     }

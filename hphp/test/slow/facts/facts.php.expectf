@@ -66,10 +66,10 @@ Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
 
 Getting types with attribute
-Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
+Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"]
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
-Methods decorated with TwoArgMethodAttr: ["ClassWithMethodAttrs::methodWithTwoArgAttr"]
+Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
@@ -87,6 +87,9 @@ this/path/does/not/exist.php has 0 type aliases
 Getting all types
 AbstractFinalClass => derived-class.inc
   Abstract? true
+  Final? true
+AnnoyingNS\TerribleClass => attribute-namespace.inc
+  Abstract? false
   Final? true
 AppleThenBanana => attribute-classes.inc
   Abstract? false
@@ -265,10 +268,10 @@ Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
 
 Getting types with attribute
-Types decorated with NoArgAttr: ["ClassWithTwoAttrs"]
+Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"]
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
-Methods decorated with TwoArgMethodAttr: ["ClassWithMethodAttrs::methodWithTwoArgAttr"]
+Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
@@ -286,6 +289,9 @@ this/path/does/not/exist.php has 0 type aliases
 Getting all types
 AbstractFinalClass => derived-class.inc
   Abstract? true
+  Final? true
+AnnoyingNS\TerribleClass => attribute-namespace.inc
+  Abstract? false
   Final? true
 AppleThenBanana => attribute-classes.inc
   Abstract? false

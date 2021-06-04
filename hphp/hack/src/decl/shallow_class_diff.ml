@@ -52,7 +52,7 @@ let diff_members
         diff_member old_member new_member
         |> Option.value_map ~default:diff ~f:(fun ch -> SMap.add diff name ch))
 
-let diff_const c1 c2 : member_change option =
+let diff_const (c1 : shallow_class_const) c2 : member_change option =
   let c1 = Decl_pos_utils.NormalizeSig.shallow_class_const c1 in
   let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
   if equal_shallow_class_const c1 c2 then

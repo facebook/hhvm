@@ -137,7 +137,7 @@ fn shape_field_to_pair<'arena>(
         hint_to_type_constant(alloc, opts, tparams, targ_map, &sfi.hint, false, false)?,
     ));
     Ok((
-        TypedValue::string(name.as_str(), alloc),
+        TypedValue::string(name, alloc),
         TypedValue::Dict(r.into_bump_slice()),
     ))
 }

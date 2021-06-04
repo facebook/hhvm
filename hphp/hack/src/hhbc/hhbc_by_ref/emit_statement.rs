@@ -210,7 +210,7 @@ pub fn emit_stmt<'a, 'arena>(
         a::Stmt_::Block(b) => emit_block(env, e, &b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
-        a::Stmt_::Using(x) => emit_using(e, env, pos, &**x),
+        a::Stmt_::Using(x) => emit_using(e, env, &**x),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
@@ -421,7 +421,6 @@ fn emit_awaitall_multi<'a, 'arena>(
 fn emit_using<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
-    _pos: &Pos,
     using: &tast::UsingStmt,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;

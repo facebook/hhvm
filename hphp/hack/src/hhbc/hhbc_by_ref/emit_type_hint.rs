@@ -15,6 +15,7 @@ use oxidized::{
 };
 use std::borrow::Cow;
 
+#[derive(Eq, PartialEq)]
 pub enum Kind {
     Property,
     Return,
@@ -29,32 +30,30 @@ fn fmt_name_or_prim<'arena>(
     name: &str,
 ) -> Cow<'arena, str> {
     if tparams.contains(&name) || string_utils::is_self(&name) || string_utils::is_parent(&name) {
-        bumpalo::collections::String::from_str_in(name, alloc)
-            .into_bump_str()
-            .into()
+        (alloc.alloc_str(name) as &str).into()
     } else {
         let id: class::Type<'arena> = class::Type::from_ast_name(alloc, &name);
         if string_utils::is_xhp(&string_utils::strip_ns(&name)) {
             id.to_unmangled_str()
         } else {
-            id.to_raw_string().to_owned().into()
+            id.to_raw_string().into()
         }
     }
 }
 
-pub fn prim_to_string(prim: &Tprim) -> Cow<'static, str> {
+pub fn prim_to_string(prim: &Tprim) -> &'static str {
     use Tprim::*;
     match prim {
-        Tnull => typehints::NULL.into(),
-        Tvoid => typehints::VOID.into(),
-        Tint => typehints::INT.into(),
-        Tbool => typehints::BOOL.into(),
-        Tfloat => typehints::FLOAT.into(),
-        Tstring => typehints::STRING.into(),
-        Tresource => typehints::RESOURCE.into(),
-        Tnum => typehints::NUM.into(),
-        Tarraykey => typehints::ARRAYKEY.into(),
-        Tnoreturn => typehints::NORETURN.into(),
+        Tnull => typehints::NULL,
+        Tvoid => typehints::VOID,
+        Tint => typehints::INT,
+        Tbool => typehints::BOOL,
+        Tfloat => typehints::FLOAT,
+        Tstring => typehints::STRING,
+        Tresource => typehints::RESOURCE,
+        Tnum => typehints::NUM,
+        Tarraykey => typehints::ARRAYKEY,
+        Tnoreturn => typehints::NORETURN,
     }
 }
 
@@ -148,17 +147,17 @@ pub fn fmt_hint<'arena>(
 }
 
 #[allow(clippy::needless_lifetimes)]
-fn hint_to_string<'a>(h: &'a Hint_) -> Cow<'a, str> {
+fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
     match h {
         Hprim(p) => prim_to_string(p),
-        Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED.into(),
-        Hnonnull => typehints::NONNULL.into(),
-        Hdarray(_, _) => typehints::DARRAY.into(),
-        Hvarray(_) => typehints::VARRAY.into(),
-        HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY.into(),
-        Hthis => typehints::THIS.into(),
-        Hdynamic => typehints::DYNAMIC.into(),
-        Hnothing => typehints::NOTHING.into(),
+        Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED,
+        Hnonnull => typehints::NONNULL,
+        Hdarray(_, _) => typehints::DARRAY,
+        Hvarray(_) => typehints::VARRAY,
+        HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY,
+        Hthis => typehints::THIS,
+        Hdynamic => typehints::DYNAMIC,
+        Hnothing => typehints::NOTHING,
         _ => panic!("shouldn't invoke this function"),
     }
 }
@@ -286,11 +285,7 @@ fn is_awaitable(s: &str) -> bool {
 }
 
 fn is_typedef(kind: &Kind) -> bool {
-    if let Kind::TypeDef = kind {
-        true
-    } else {
-        false
-    }
+    Kind::TypeDef == *kind
 }
 
 fn make_tc_with_flags_if_non_empty_flags<'arena>(

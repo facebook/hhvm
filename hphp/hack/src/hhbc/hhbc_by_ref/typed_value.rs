@@ -341,10 +341,8 @@ impl<'arena> TypedValue<'arena> {
         }
     }
 
-    pub fn string(s: impl Into<String>, alloc: &'arena bumpalo::Bump) -> Self {
-        Self::String(
-            bumpalo::collections::String::from_str_in(s.into().as_str(), alloc).into_bump_str(),
-        )
+    pub fn string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
+        Self::String(alloc.alloc_str(s.as_ref()))
     }
 
     pub fn float(f: f64) -> Self {

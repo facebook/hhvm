@@ -126,22 +126,22 @@ mod inout_locals {
         }
     }
 
-    pub(super) type AliasInfoMap = HashMap<String, AliasInfo>;
+    pub(super) type AliasInfoMap<'ast> = HashMap<&'ast str, AliasInfo>;
 
-    pub(super) fn new_alias_info_map() -> AliasInfoMap {
+    pub(super) fn new_alias_info_map<'ast>() -> AliasInfoMap<'ast> {
         HashMap::default()
     }
 
-    fn add_write(name: String, i: usize, map: &mut AliasInfoMap) {
-        map.entry(name).or_default().add_write(i as isize);
+    fn add_write<'ast>(name: &'ast str, i: usize, map: &mut AliasInfoMap<'ast>) {
+        map.entry(name.as_ref()).or_default().add_write(i as isize);
     }
 
-    fn add_inout(name: String, i: usize, map: &mut AliasInfoMap) {
-        map.entry(name).or_default().add_inout(i as isize);
+    fn add_inout<'ast>(name: &'ast str, i: usize, map: &mut AliasInfoMap<'ast>) {
+        map.entry(name.as_ref()).or_default().add_inout(i as isize);
     }
 
-    fn add_use(name: String, map: &mut AliasInfoMap) {
-        map.entry(name).or_default().add_use();
+    fn add_use<'ast>(name: &'ast str, map: &mut AliasInfoMap<'ast>) {
+        map.entry(name.as_ref()).or_default().add_use();
     }
 
     // determines if value of a local 'name' that appear in parameter 'i'
@@ -164,10 +164,10 @@ mod inout_locals {
         }
     }
 
-    pub(super) fn collect_written_variables<'a, 'arena>(
-        env: &Env<'a, 'arena>,
-        args: &[tast::Expr],
-    ) -> AliasInfoMap {
+    pub(super) fn collect_written_variables<'ast, 'arena>(
+        env: &Env<'ast, 'arena>,
+        args: &'ast [tast::Expr],
+    ) -> AliasInfoMap<'ast> {
         let mut acc = HashMap::default();
         args.iter()
             .enumerate()
@@ -175,12 +175,12 @@ mod inout_locals {
         acc
     }
 
-    fn handle_arg<'a, 'arena>(
-        env: &Env<'a, 'arena>,
+    fn handle_arg<'ast, 'arena>(
+        env: &Env<'ast, 'arena>,
         is_top: bool,
         i: usize,
-        arg: &tast::Expr,
-        acc: &mut AliasInfoMap,
+        arg: &'ast tast::Expr,
+        acc: &mut AliasInfoMap<'ast>,
     ) {
         use tast::{Expr, Expr_};
         let Expr(_, e) = arg;
@@ -188,17 +188,17 @@ mod inout_locals {
         if let Some((ast_defs::ParamKind::Pinout, Expr(_, Expr_::Lvar(lid)))) = e.as_callconv() {
             let Lid(_, lid) = &**lid;
             if !is_local_this(env, &lid) {
-                add_use(lid.1.to_string(), acc);
+                add_use(&lid.1, acc);
                 return if is_top {
-                    add_inout(lid.1.to_string(), i, acc);
+                    add_inout(lid.1.as_str(), i, acc);
                 } else {
-                    add_write(lid.1.to_string(), i, acc);
+                    add_write(lid.1.as_str(), i, acc);
                 };
             }
         }
         // $v
         if let Some(Lid(_, (_, id))) = e.as_lvar() {
-            return add_use(id.to_string(), acc);
+            return add_use(id.as_str(), acc);
         }
         // dive into argument value
         aast_visitor::visit(
@@ -209,17 +209,16 @@ mod inout_locals {
         .unwrap();
     }
 
-    struct Visitor<'a, 'arena: 'a>(PhantomData<&'arena &'a ()>);
+    struct Visitor<'r, 'arena>(PhantomData<(&'arena (), &'r ())>);
 
-    pub struct Ctx<'a, 'arena: 'a> {
-        // TODO(shiqicao): Change AliasInfoMap to AliasInfoMap<'ast>
-        state: &'a mut AliasInfoMap,
-        env: &'a Env<'a, 'arena>,
+    pub struct Ctx<'r, 'ast: 'r, 'arena: 'r> {
+        state: &'r mut AliasInfoMap<'ast>,
+        env: &'r Env<'ast, 'arena>,
         i: usize,
     }
 
-    impl<'ast, 'a, 'arena: 'a> aast_visitor::Visitor<'ast> for Visitor<'a, 'arena> {
-        type P = aast_visitor::AstParams<Ctx<'a, 'arena>, ()>;
+    impl<'r, 'ast: 'r, 'arena: 'r> aast_visitor::Visitor<'ast> for Visitor<'r, 'arena> {
+        type P = aast_visitor::AstParams<Ctx<'r, 'ast, 'arena>, ()>;
 
         fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
             self
@@ -227,7 +226,7 @@ mod inout_locals {
 
         fn visit_expr_(
             &mut self,
-            c: &mut Ctx<'a, 'arena>,
+            c: &mut Ctx<'r, 'ast, 'arena>,
             p: &'ast tast::Expr_,
         ) -> std::result::Result<(), ()> {
             // f(inout $v) or f(&$v)
@@ -260,23 +259,23 @@ mod inout_locals {
                     // $v
                     tast::Expr_::Lvar(expr) => {
                         let Lid(_, (_, id)) = &**expr;
-                        add_use(id.to_string(), &mut c.state);
+                        add_use(id, &mut c.state);
                     }
                     _ => {}
                 })
             }
         }
-    } // impl<'ast, 'a, 'arena:'a> aast_visitor::Visitor<'ast> for Visitor<'a, 'arena>
+    } // impl<'ast, 'a, 'arena> aast_visitor::Visitor<'ast> for Visitor<'a, 'arena>
 
     // collect lvars on the left hand side of '=' operator
-    fn collect_lvars_hs<'a, 'arena>(ctx: &mut Ctx<'a, 'arena>, expr: &tast::Expr) {
+    fn collect_lvars_hs<'r, 'ast, 'arena>(ctx: &mut Ctx<'r, 'ast, 'arena>, expr: &'ast tast::Expr) {
         let tast::Expr(_, e) = expr;
         match &*e {
             tast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
                 if !is_local_this(&ctx.env, &lid) {
-                    add_use(lid.1.to_string(), &mut ctx.state);
-                    add_write(lid.1.to_string(), ctx.i, &mut ctx.state);
+                    add_use(lid.1.as_str(), &mut ctx.state);
+                    add_write(lid.1.as_str(), ctx.i, &mut ctx.state);
                 }
             }
             tast::Expr_::List(exprs) => exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr)),

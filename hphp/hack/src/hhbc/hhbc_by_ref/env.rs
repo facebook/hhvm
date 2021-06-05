@@ -26,7 +26,7 @@ bitflags! {
 /// `'a` is an AST lifetime, `'arena` the lifetime of the `InstrSeq`
 /// arena.
 #[derive(Clone, Debug)]
-pub struct Env<'a, 'arena: 'a> {
+pub struct Env<'a, 'arena> {
     pub arena: &'arena bumpalo::Bump,
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,

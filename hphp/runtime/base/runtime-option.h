@@ -1508,9 +1508,6 @@ public:
   // SimpleXML options
   static bool SimpleXMLEmptyNamespaceMatchesAll;
 
-  // Cookie options
-  static bool AllowDuplicateCookies;
-
 #ifdef FACEBOOK
   // fb303 server
   static bool EnableFb303Server;

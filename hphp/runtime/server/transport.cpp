@@ -372,23 +372,22 @@ void Transport::removeHeader(const char *name) {
   if (name && *name) {
     m_responseHeaders.erase(name);
     if (strcasecmp(name, "Set-Cookie") == 0) {
-      m_responseCookiesList.clear();
+      m_responseCookies.clear();
     }
   }
 }
 
 void Transport::removeAllHeaders() {
   m_responseHeaders.clear();
-  m_responseCookiesList.clear();
+  m_responseCookies.clear();
 }
 
 void Transport::getResponseHeaders(HeaderMap &headers) {
   headers = m_responseHeaders;
 
   auto& cookies = headers["Set-Cookie"];
-  std::list<std::string> cookies_existing = getCookieLines();
-  for (auto& cookie : cookies_existing) {
-    cookies.push_back(cookie);
+  for (auto& cookie : m_responseCookies) {
+    cookies.push_back(cookie.second);
   }
 }
 
@@ -568,35 +567,10 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
   // last cookie for a given name-domain-path triplet.
   String dedup_key = name + "\n" + domain + "\n" + path;
 
-  m_responseCookiesList.emplace(m_responseCookiesList.end(),
-    dedup_key.data(), cookie);
+  m_responseCookies[dedup_key.data()] = cookie;
 
   return true;
 }
-
-std::list<std::string> Transport::getCookieLines() {
-  std::list<std::string> ret;
-  if (RuntimeOption::AllowDuplicateCookies) {
-    for(CookieList::const_iterator iter = m_responseCookiesList.begin();
-        iter != m_responseCookiesList.end(); ++iter) {
-      ret.push_back(iter->second);
-    }
-  } else {
-    // We will dedupe with last-one-wins semantics by walking backwards and
-    // including only those whose dedupe key we have not seen yet, then
-    // reversing the list
-    std::unordered_set<std::string> already_seen;
-    for(auto iter = m_responseCookiesList.crbegin();
-        iter != m_responseCookiesList.crend(); ++iter) {
-      if (already_seen.find(iter->first) == already_seen.end()) {
-        ret.push_front(iter->second);
-        already_seen.insert(iter->first);
-      }
-    }
-  }
-  return ret;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -610,10 +584,8 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     }
   }
 
-  const std::list<std::string> cookies = getCookieLines();
-  for (std::list<std::string>::const_iterator iter = cookies.begin();
-       iter != cookies.end(); ++iter) {
-    addHeaderImpl("Set-Cookie", iter->c_str());
+  for (auto& cookie : m_responseCookies) {
+    addHeaderImpl("Set-Cookie", cookie.second.c_str());
   }
 
   auto& compressor = getCompressor();

@@ -41,7 +41,7 @@ struct ResponseCompressorManager;
 struct StructuredLogEntry;
 
 using HeaderMap = hphp_fast_string_imap<TinyVector<std::string>>;
-using CookieList = std::vector<std::pair<std::string, std::string>>;
+using CookieMap = hphp_fast_string_map<std::string>;
 
 struct ITransportHeaders {
   enum class Method {
@@ -494,7 +494,7 @@ protected:
   std::string m_firstHeaderFile;
   int m_firstHeaderLine{};
   int m_responseSize{};
-  CookieList m_responseCookiesList;
+  CookieMap m_responseCookies;
   int m_responseTotalSize{}; // including added headers
   int m_responseSentSize{};
   int64_t m_flushTimeUs{};

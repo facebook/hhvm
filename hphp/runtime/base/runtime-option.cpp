@@ -1297,8 +1297,6 @@ bool RuntimeOption::EnablePregErrorLog = true;
 
 bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
-bool RuntimeOption::AllowDuplicateCookies = true;
-
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
@@ -2546,8 +2544,6 @@ void RuntimeOption::Load(
                  "Server.LightProcessStrictUser", false);
     Config::Bind(ForceServerNameToHeader, ini, config,
                  "Server.ForceServerNameToHeader");
-    Config::Bind(AllowDuplicateCookies, ini, config,
-                 "Server.AllowDuplicateCookies", false);
     Config::Bind(PathDebug, ini, config, "Server.PathDebug", false);
     Config::Bind(ServerUser, ini, config, "Server.User", "");
     Config::Bind(AllowRunAsRoot, ini, config, "Server.AllowRunAsRoot", false);

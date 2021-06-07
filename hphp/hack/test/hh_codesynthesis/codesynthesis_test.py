@@ -7,7 +7,7 @@
 
 import unittest
 
-from hphp.hack.src.hh_codesynthesis import hh_codesynthesis
+from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
 
 
 class ExtractLogicRulesTest(unittest.TestCase):
@@ -153,3 +153,44 @@ Type T -> Type A, Type B
             additional_programs=additional_programs, generator=raw_codegen
         )
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_extends_dependency_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class B extends I implements A {}
+class I   {}
+interface A extends T {}
+interface T  {}
+"""
+        rules = [
+            "extends_to(a, b).",
+            "extends_to(i, b).",
+            "extends_to(t, a).",
+            "symbols(a;b;i;t).",
+        ]
+        hack_codegen = hackGenerator.HackCodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=hack_codegen)
+        self.assertEqual(str(hack_codegen), exp)
+
+    def test_extends_dependency_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class B extends I implements A {}
+class I   {}
+interface A extends T {}
+interface T  {}
+"""
+        deps = """\
+Extends A -> Type B
+Extends I -> Type B
+Extends T -> Type A
+Type A -> Type B
+Type I -> Type B
+Type T -> Type A, Type B
+"""
+        hack_codegen = hackGenerator.HackCodeGenerator()
+        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        hh_codesynthesis.do_reasoning(
+            additional_programs=additional_programs, generator=hack_codegen
+        )
+        self.assertEqual(str(hack_codegen), exp)

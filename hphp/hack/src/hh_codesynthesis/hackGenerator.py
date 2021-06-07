@@ -15,9 +15,12 @@
 # _HackClassGenerator maintains each class definition.
 # _HackInterfaceGenerator maintains each interface definition.
 # _HackFunctionGenerator maintains each function definition.
-# HackGenerator extends CodeGenerator combines all _Hack*Generator to emit Hack code on clingo output.
-
+# HackGenerator extends CodeGenerator combines all _Hack*Generator to
+# emit Hack code on clingo output.
 from typing import Set, Dict, Any
+
+import clingo
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 
 
 class _HackInterfaceGenerator(object):
@@ -79,3 +82,56 @@ class _HackClassGenerator(object):
             f"class {self.name} {self._print_extend()} "
             + f"{self._print_implements()} {self._print_body()}"
         )
+
+
+class HackCodeGenerator(CodeGenerator):
+    """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
+
+    def __init__(self) -> None:
+        super(HackCodeGenerator, self).__init__()
+        self.class_objs: Dict[str, _HackClassGenerator] = {}
+        self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
+
+    def _add_class(self, name: str) -> None:
+        self.class_objs[name] = _HackClassGenerator(name)
+
+    def _add_interface(self, name: str) -> None:
+        self.interface_objs[name] = _HackInterfaceGenerator(name)
+
+    def _add_extend(self, name: str, extend: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].set_extend(extend)
+        if name in self.interface_objs:
+            self.interface_objs[name].add_extend(extend)
+
+    def _add_implement(self, name: str, implement: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_implement(implement)
+
+    def __str__(self) -> str:
+        return (
+            "<?hh\n"
+            + "\n".join(str(x) for x in self.class_objs.values())
+            + "\n"
+            + "\n".join(str(x) for x in self.interface_objs.values())
+            + "\n"
+        )
+
+    def on_model(self, m: clingo.Model) -> None:
+        # Separate into 'class(?)', 'interface(?)', 'implements(?, ?)', 'extends(?, ?)'
+        predicates = m.symbols(atoms=True)
+        node_func = {"class": self._add_class, "interface": self._add_interface}
+        edge_func = {"extends": self._add_extend, "implements": self._add_implement}
+        # Two passes,
+        #   First pass creates individual nodes like class, interface.
+        for predicate in predicates:
+            if predicate.name in node_func:
+                node_func[predicate.name](predicate.arguments[0].name.upper())
+
+        #   Second pass creates edge between two nodes.
+        for predicate in predicates:
+            if predicate.name in edge_func:
+                edge_func[predicate.name](
+                    predicate.arguments[0].name.upper(),
+                    predicate.arguments[1].name.upper(),
+                )

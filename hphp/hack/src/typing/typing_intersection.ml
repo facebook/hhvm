@@ -192,8 +192,11 @@ let rec intersect env ~r ty1 ty2 =
                 intersect_ty_union env r (mk ty) (r_union, tyl)
               in
               recompose_atomic env r inter_tyl
-            | ((_, Tneg Aast.Tint), (_, Tprim Aast.Tnum))
-            | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tint)) ->
+            | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
+            | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
+              (env, MkType.int r)
+            | ((_, Tneg (Aast.Tint | Aast.Tarraykey)), (_, Tprim Aast.Tnum))
+            | ((_, Tprim Aast.Tnum), (_, Tneg (Aast.Tint | Aast.Tarraykey))) ->
               (env, MkType.float r)
             | ((_, Tneg Aast.Tfloat), (_, Tprim Aast.Tnum))
             | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tfloat)) ->
@@ -210,8 +213,8 @@ let rec intersect env ~r ty1 ty2 =
                 intersect env ~r (mk ty_ak) (MkType.int r)
               else
                 make_intersection env r [ty1; ty2]
-            | ((_, Tneg Aast.Tint), ty_ak)
-            | (ty_ak, (_, Tneg Aast.Tint)) ->
+            | ((_, Tneg (Aast.Tint | Aast.Tnum)), ty_ak)
+            | (ty_ak, (_, Tneg (Aast.Tint | Aast.Tnum))) ->
               if
                 Typing_utils.is_sub_type_for_union
                   env

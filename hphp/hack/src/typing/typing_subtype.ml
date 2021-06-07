@@ -256,7 +256,8 @@ let is_tprim_disjoint tp1 tp2 =
       | (Tnum, Tint)
       | (Tnum, Tfloat)
       | (Tarraykey, Tint)
-      | (Tarraykey, Tstring) ->
+      | (Tarraykey, Tstring)
+      | (Tarraykey, Tnum) ->
         false
       | ( _,
           ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull

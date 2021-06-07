@@ -332,6 +332,12 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tprim tp1), (_, Tneg tp2))
       when Aast_defs.equal_tprim tp1 tp2 ->
       (env, Some (MakeType.mixed r))
+    | ((_, Tneg Aast.Tnum), (_, Tprim Aast.Tarraykey))
+    | ((_, Tprim Aast.Tarraykey), (_, Tneg Aast.Tnum)) ->
+      (env, Some (MakeType.neg r Aast.Tfloat))
+    | ((_, Tneg Aast.Tarraykey), (_, Tprim Aast.Tnum))
+    | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tarraykey)) ->
+      (env, Some (MakeType.neg r Aast.Tstring))
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _

@@ -229,16 +229,16 @@ void SrcRec::removeIncomingBranchesInRange(TCA start, TCA frontier) {
   m_incomingBranches.setEnd(end);
 }
 
-void SrcRec::replaceOldTranslations(TCA retransStub) {
+void SrcRec::replaceOldTranslations(TCA transStub) {
   auto srLock = writelock();
 
   // Everyone needs to give up on old translations; send them to the provided
-  // retranslate stub.
+  // translate stub.
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
-  patchIncomingBranches(retransStub);
+  patchIncomingBranches(transStub);
 
   // Now that we've smashed all the IBs for these translations they should be
   // unreachable-- to prevent a race we treadmill here and then reclaim their

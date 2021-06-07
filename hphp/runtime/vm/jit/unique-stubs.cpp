@@ -726,6 +726,9 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler) {
   });
 }
 
+TCA emitHandleTranslate(CodeBlock& cb, DataBlock& data) {
+  return emitHandleServiceRequest(cb, data, svcreq::handleTranslate);
+}
 TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequest(cb, data, svcreq::handleRetranslate);
 }
@@ -1337,6 +1340,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
   ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
 
+  ADD(handleTranslate, view, emitHandleTranslate(cold, data));
   ADD(handleRetranslate, view, emitHandleRetranslate(cold, data));
   ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt(cold, data));
 

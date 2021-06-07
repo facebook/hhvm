@@ -40,6 +40,16 @@ namespace svcreq {
 TCA handleServiceRequest(ReqInfo& info) noexcept;
 
 /*
+ * Handle a request to initially translate the code at the given current
+ * location. Reached from translations at other SrcKeys when these translations
+ * are unable or unwilling to continue due to insufficient type information or
+ * to handle cold branches.
+ *
+ * The smash targets of a translate are stored in SrcRec::m_incomingBranches.
+ */
+TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
+
+/*
  * Handle a request to retranslate the code at the given current location.
  * Reached from the last translation at the same SrcKey when no existing
  * translations support the incoming types.

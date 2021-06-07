@@ -180,6 +180,7 @@ folly_concurrent_hash_map_simd<uint64_t, TCA> s_stubMap;
 
 TCA typeToHandler(StubType type) {
   switch (type) {
+    case StubType::Translate:   return tc::ustubs().handleTranslate;
     case StubType::Retranslate: return tc::ustubs().handleRetranslate;
     default:                    not_reached();
   }
@@ -187,6 +188,7 @@ TCA typeToHandler(StubType type) {
 
 std::string typeToName(StubType type) {
   switch (type) {
+    case StubType::Translate:   return "translate";
     case StubType::Retranslate: return "retranslate";
     default:                    not_reached();
   }

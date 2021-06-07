@@ -91,9 +91,9 @@ void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
   }
 
   // Retranslate stub must exist, as createSrcRec() created it.
-  auto const retransStub = svcreq::getOrEmitStub(
-    svcreq::StubType::Retranslate, sk, spOff);
-  always_assert(retransStub);
+  auto const transStub = svcreq::getOrEmitStub(
+    svcreq::StubType::Translate, sk, spOff);
+  always_assert(transStub);
 
   /*
    * Since previous translations aren't reachable from here, we know we
@@ -104,7 +104,7 @@ void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
              "Replacing translations from sk: {} " "to SrcRec addr={}\n",
              showShort(sk), (void*)sr);
   Trace::Indent _i;
-  sr->replaceOldTranslations(retransStub);
+  sr->replaceOldTranslations(transStub);
 }
 
 void invalidateFuncProfSrcKeys(const Func* func) {
@@ -516,10 +516,10 @@ bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength) {
   if (srcDB().find(sk)) return true;
 
   // invalidateSrcKey() depends on existence of this stub.
-  auto const retransStub = svcreq::getOrEmitStub(
-    svcreq::StubType::Retranslate, sk, spOff);
-  if (checkLength && !retransStub) return false;
-  assertx(retransStub);
+  auto const transStub = svcreq::getOrEmitStub(
+    svcreq::StubType::Translate, sk, spOff);
+  if (checkLength && !transStub) return false;
+  assertx(transStub);
 
   auto metaLock = lockMetadata();
   if (srcDB().find(sk)) return true;

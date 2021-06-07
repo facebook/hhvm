@@ -204,7 +204,7 @@ struct SrcRec final {
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void smashFallbacksToStub(TCA stub);
-  void replaceOldTranslations(TCA retransStub);
+  void replaceOldTranslations(TCA transStub);
   size_t numTrans() const {
     auto srLock = readlock();
     return translations().size();

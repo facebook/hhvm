@@ -306,6 +306,20 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   return resume(sk, transResult);
 }
 
+TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
+  assert_native_stack_aligned();
+
+  // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
+  // later if we are going to use the resume helper.
+  tl_regState = VMRegState::CLEAN;
+  vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+
+  FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
+
+  auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
+  return resume(sk, getTranslation(sk));
+}
+
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   assert_native_stack_aligned();
 
@@ -317,7 +331,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   FTRACE(1, "handleRetranslate {}\n", vmfp()->func()->fullName()->data());
 
   INC_TPC(retranslate);
-  auto const sk = SrcKey{ liveFunc(), bcOff, liveResumeMode() };
+  auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
   auto const context = getContext(sk, tc::profileFunc(sk.func()));
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());

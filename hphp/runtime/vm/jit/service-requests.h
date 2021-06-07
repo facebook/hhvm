@@ -99,6 +99,10 @@ namespace svcreq {
  * requested operation.
  */
 enum class StubType : uint8_t {
+  // A request to translate the code at the given current location.
+  // See svcreq::handleTranslate() for more details.
+  Translate,
+
   // A request to retranslate the code at the given current location.
   // See svcreq::handleRetranslate() for more details.
   Retranslate,

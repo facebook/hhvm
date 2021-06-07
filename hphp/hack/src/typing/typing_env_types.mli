@@ -66,4 +66,7 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
+      (** The file containing the top-level definition that we are checking *)
+  this_module: string option;
+      (** The module of the top-level definition that we are checking *)
 }

@@ -8090,6 +8090,11 @@ let stmt env st =
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env =
+    Env.set_module
+      env
+      (Naming_attributes_params.get_module_attribute typedef.t_user_attributes)
+  in
+  let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false

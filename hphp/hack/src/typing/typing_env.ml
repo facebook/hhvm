@@ -633,6 +633,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_kind = Ast_defs.FSync;
         fun_is_ctor = false;
         file;
+        this_module = None;
       };
     tpenv = TPEnv.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
@@ -1048,6 +1049,10 @@ let set_fn_kind env fn_type =
   let genv = env.genv in
   let genv = { genv with fun_kind = fn_type } in
   { env with genv }
+
+let set_module env m = { env with genv = { env.genv with this_module = m } }
+
+let get_module env = env.genv.this_module
 
 let set_self env self_id self_ty =
   let genv = env.genv in

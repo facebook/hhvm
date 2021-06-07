@@ -791,6 +791,19 @@ folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
   assertx(transMeta.hasValue());
   auto& meta = transMeta->fixups;
   for (auto& b : meta.smashableBinds) {
+    // If the target is translated, bind it.
+    if (!b.fallback) {
+      if (auto sr = srcDB().find(b.sk)) {
+        if (sr->getTopTranslation()) {
+          auto srLock = sr->writelock();
+          if (sr->getTopTranslation()) {
+            sr->chainFrom(b.smashable);
+            continue;
+          }
+        }
+      }
+    }
+
     auto const target = [&] {
       if (b.fallback) {
         // We just emitted Nth translation, we don't have N+1th yet.
@@ -798,7 +811,6 @@ folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
           svcreq::StubType::Retranslate, b.sk, b.spOff);
       }
 
-      // TODO: skip stub if we can bind
       auto codeLock = tc::lockCode();
       auto view = tc::code().view(TransKind::Anchor);
       auto const toSmash = b.smashable.toSmash();

@@ -14,9 +14,12 @@ use std::{fs, io};
 
 use depgraph::dep::Dep;
 use depgraph::reader::{DepGraph, DepGraphOpener};
-use depgraph::writer::{DepGraphWriter, HashListIndex};
+use depgraph::writer::{write_hash_list, DepGraphWriter, HashListIndex};
 use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
+
+use crossbeam;
+use crossbeam::crossbeam_channel::{bounded, Receiver, Sender};
 
 struct EdgesDir {
     handles: Vec<BufReader<fs::File>>,
@@ -278,14 +281,41 @@ fn main(
     info!("Registering unique sets of dependents");
     let mut hash_list_indices: HashMap<&[u64], HashListIndex> = HashMap::new();
     let mut lookup_table: HashMap<u64, HashListIndex> = HashMap::new();
-    for m in structured_edges.iter() {
-        for (dependency, dependents) in m.iter() {
-            let hash_list_index = hash_list_indices
-                .entry(dependents)
-                .or_insert_with(|| w.allocate_hash_list(dependents).unwrap());
-            lookup_table.insert(*dependency, *hash_list_index);
+
+    let thread_num = 16;
+    let (tx, rx): (
+        Sender<(&[u64], HashListIndex)>,
+        Receiver<(&[u64], HashListIndex)>,
+    ) = bounded(2 * thread_num);
+
+    let indexer = w.get_indexer();
+    info!("Finished indexer clone");
+    crossbeam::scope(|s| {
+        for _n in 0..thread_num {
+            s.spawn(|_| {
+                let ff = fs::OpenOptions::new().write(true).open(&output).unwrap();
+                let mut ff = BufWriter::new(ff);
+                let thread_rx = rx.clone();
+                for d in thread_rx.iter() {
+                    write_hash_list(&indexer, &mut ff, d.1, &*d.0).unwrap();
+                }
+            });
         }
-    }
+
+        for m in structured_edges.iter() {
+            for (dependency, dependents) in m.iter() {
+                let hash_list_index = hash_list_indices.entry(dependents).or_insert_with(|| {
+                    let h = w.allocate_hash_list(dependents).unwrap();
+                    tx.send((dependents, h)).unwrap();
+                    h
+                });
+                lookup_table.insert(*dependency, *hash_list_index);
+            }
+        }
+        drop(tx);
+    })
+    .unwrap();
+
     let mut w = w.finalize();
 
     info!("Finalizing database");

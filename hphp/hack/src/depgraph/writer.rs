@@ -12,7 +12,7 @@ const PAGE_ALIGN: u32 = 4096;
 
 /// Type-safe hash index wrapper
 #[derive(Copy, Clone)]
-struct HashIndex(u32);
+pub struct HashIndex(u32);
 
 /// Type-safe hash list index wrapper
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -112,6 +112,10 @@ impl<W: Write + Seek> DepGraphWriter<W, Phase1AllocateHashSets> {
         })
     }
 
+    pub fn get_indexer(&self) -> HashMap<u64, HashIndex> {
+        self.state.indexer.clone()
+    }
+
     pub fn allocate_hash_list<H: Copy + Into<u64>>(
         &mut self,
         set: &[H],
@@ -119,13 +123,6 @@ impl<W: Write + Seek> DepGraphWriter<W, Phase1AllocateHashSets> {
         let offset = self.state.next_set_offset;
 
         let len: u32 = set.len().try_into().unwrap();
-        self.state.f.write_all(&len.to_ne_bytes())?;
-        for h in set {
-            let i: HashIndex = *self.state.indexer.get(&(*h).into()).unwrap();
-            let i: u32 = i.0;
-            self.state.f.write_all(&i.to_ne_bytes())?;
-        }
-
         self.state.next_set_offset += 4 + 4 * len;
         Ok(HashListIndex(offset))
     }
@@ -136,6 +133,25 @@ impl<W: Write + Seek> DepGraphWriter<W, Phase1AllocateHashSets> {
             _phase: std::marker::PhantomData,
         }
     }
+}
+
+pub fn write_hash_list<W: Write + Seek>(
+    indexer: &HashMap<u64, HashIndex>,
+    f: &mut W,
+    hash_list_index: HashListIndex,
+    set: &[u64],
+) -> std::io::Result<()> {
+    let len: u32 = set.len().try_into().unwrap();
+    let offset: u32 = hash_list_index.0;
+    f.seek(SeekFrom::Start(offset as u64))?;
+    f.write_all(&len.to_ne_bytes())?;
+    for h in set {
+        let i: HashIndex = *indexer.get(&(*h)).unwrap();
+        let i: u32 = i.0;
+        f.write_all(&i.to_ne_bytes())?;
+    }
+
+    Ok(())
 }
 
 impl<W: Write + Seek> DepGraphWriter<W, Phase2RegisterHashSets> {
@@ -186,6 +202,7 @@ mod tests {
     use crate::reader::DepGraphOpener;
 
     use std::collections::{BTreeSet, HashMap, HashSet};
+    use std::fs;
     use std::iter::FromIterator;
 
     use tempfile::NamedTempFile;
@@ -220,6 +237,10 @@ mod tests {
 
         fn write(&self) -> std::path::PathBuf {
             let (tmpfile, tmpfile_path) = NamedTempFile::new().unwrap().keep().unwrap();
+            let mut tf = fs::OpenOptions::new()
+                .write(true)
+                .open(&tmpfile_path)
+                .unwrap();
 
             let mut all_hashes: HashSet<u64> = HashSet::new();
             self.graph.iter().for_each(|(dependency, dependents)| {
@@ -236,10 +257,13 @@ mod tests {
             let mut lookup_table: HashMap<u64, HashListIndex> = HashMap::new();
             let mut all_sets: HashMap<&BTreeSet<u64>, HashListIndex> = HashMap::new();
             for (dependency, dependents) in self.graph.iter() {
-                let hash_list_index = all_sets.entry(dependents).or_insert_with(|| {
-                    let set_vec: Vec<u64> = dependents.iter().copied().collect();
-                    writer.allocate_hash_list(&set_vec).unwrap()
-                });
+                let set_vec: Vec<u64> = dependents.iter().copied().collect();
+                let hash_list_index = all_sets
+                    .entry(dependents)
+                    .or_insert_with(|| writer.allocate_hash_list(&set_vec).unwrap());
+
+                write_hash_list(&writer.get_indexer(), &mut tf, *hash_list_index, &set_vec)
+                    .unwrap();
                 lookup_table.insert(*dependency, *hash_list_index);
             }
 

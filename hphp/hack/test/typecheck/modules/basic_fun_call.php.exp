@@ -1,0 +1,8 @@
+File "basic_fun_call.php", line 12, characters 22-22:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "basic_fun_call.php", line 6, characters 10-10:
+  This is from module `A`
+File "basic_fun_call.php", line 17, characters 25-25:
+Cannot access an internal element from module `A` outside of a module (Typing[4444])
+  File "basic_fun_call.php", line 6, characters 10-10:
+  This is from module `A`

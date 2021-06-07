@@ -1,7 +1,7 @@
 [("\\f",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = (Some "The function f is deprecated: a");
-       fe_module = None;
+       fe_module = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-11]),
         (Tfun

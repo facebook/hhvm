@@ -893,7 +893,16 @@ let fun_type_of_id env x tal el =
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty, [])
-  | Some { fe_type; fe_pos; fe_deprecated; fe_support_dynamic_type; _ } ->
+  | Some
+      {
+        fe_type;
+        fe_pos;
+        fe_deprecated;
+        fe_support_dynamic_type;
+        fe_internal;
+        fe_module;
+        _;
+      } ->
     (match get_node fe_type with
     | Tfun ft ->
       let ft =
@@ -934,6 +943,15 @@ let fun_type_of_id env x tal el =
           ft
       in
       TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
+      let curr_module = Env.get_module env in
+      begin
+        match fe_module with
+        | Some m
+          when fe_internal
+               && not (Option.equal String.equal fe_module curr_module) ->
+          Errors.module_mismatch (fst x) fe_pos curr_module m
+        | _ -> ()
+      end;
       (env, fty, tal)
     | _ -> failwith "Expected function type")
 

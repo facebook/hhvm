@@ -12,6 +12,7 @@
   ("\\make_dict",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([8:12-21]),
          (Tfun
@@ -33,6 +34,7 @@
   ("\\get_value",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([12:12-21]),
          (Tfun

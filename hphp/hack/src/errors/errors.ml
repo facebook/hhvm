@@ -5684,6 +5684,18 @@ let invalid_echo_argument_at pos ?code reasons =
     (pos, msg)
     reasons
 
+let module_mismatch pos m2_pos m1 m2 =
+  add_list
+    (Typing.err_code Typing.ModuleError)
+    ( pos,
+      Printf.sprintf
+        "Cannot access an internal element from module `%s` %s"
+        m2
+        (match m1 with
+        | Some m -> Printf.sprintf "in module `%s`" m
+        | None -> "outside of a module") )
+    [(m2_pos, Printf.sprintf "This is from module `%s`" m2)]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

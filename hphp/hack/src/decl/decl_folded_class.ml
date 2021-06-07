@@ -640,6 +640,7 @@ and build_constructor
     {
       fe_module = None;
       fe_pos = pos;
+      fe_internal = false;
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
       fe_php_std_lib = false;
@@ -885,6 +886,7 @@ and method_decl_acc
     {
       fe_module = None;
       fe_pos = pos;
+      fe_internal = false;
       fe_deprecated = None;
       fe_type = m.sm_type;
       fe_php_std_lib = false;

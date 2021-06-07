@@ -13,6 +13,7 @@
   ("\\my_partial_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-29]),
          (Tfun

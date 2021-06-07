@@ -96,6 +96,7 @@ type class_elt = {
 type fun_elt = {
   fe_deprecated: string option;
   fe_module: string option;
+  fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;

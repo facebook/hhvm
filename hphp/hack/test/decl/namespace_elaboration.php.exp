@@ -1,6 +1,7 @@
 [("\\id",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([31:10-12]),
         (Tfun
@@ -36,6 +37,7 @@
   ("\\other_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([35:10-18]),
          (Tfun
@@ -71,6 +73,7 @@
   ("\\braced_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([39:10-19]),
          (Tfun

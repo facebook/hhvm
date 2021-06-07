@@ -272,6 +272,8 @@ pub mod user_attributes {
 
     pub const MODULE: &str = "__Module";
 
+    pub const INTERNAL: &str = "__Internal";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,

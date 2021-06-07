@@ -321,6 +321,8 @@ module UserAttributes = struct
 
   let uaModule = "__Module"
 
+  let uaInternal = "__Internal"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -361,6 +363,7 @@ module UserAttributes = struct
           (uaSupportDynamicType, [fn; cls; mthd]);
           (uaNoRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);
+          (uaInternal, [fn; mthd; cls; instProperty; staticProperty]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

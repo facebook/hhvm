@@ -85,6 +85,9 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let fe_module =
     Naming_attributes_params.get_module_attribute f.f_user_attributes
   in
+  let fe_internal =
+    Naming_attributes_params.has_internal_attribute f.f_user_attributes
+  in
   let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
@@ -110,6 +113,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   {
     fe_pos;
     fe_module;
+    fe_internal;
     fe_type;
     fe_deprecated;
     fe_php_std_lib;

@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated =
        (Some "The function single is deprecated: can't write an apostrophe without escaping in single quotes");
-       fe_module = None;
+       fe_module = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-16]),
         (Tfun
@@ -22,7 +22,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function double is deprecated: other escapes like \n and \t available in double quotes");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun

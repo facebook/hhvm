@@ -1,6 +1,7 @@
 [("\\f",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
         (Tfun
@@ -26,6 +27,7 @@
   ("\\g",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-11]),
          (Tfun
@@ -44,6 +46,7 @@
   ("\\h",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([13:10-11]),
          (Tfun
@@ -62,6 +65,7 @@
   ("\\i",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([19:16-17]),
          (Tfun
@@ -84,6 +88,7 @@
   ("\\j",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([26:16-17]),
          (Tfun

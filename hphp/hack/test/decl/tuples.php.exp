@@ -11,6 +11,7 @@
   ("\\takes_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-21]),
          (Tfun
@@ -48,6 +49,7 @@
   ("\\returns_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([9:10-23]),
          (Tfun
@@ -85,6 +87,7 @@
   ("\\generic_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([13:10-23]),
          (Tfun

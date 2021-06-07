@@ -948,6 +948,7 @@ struct Attributes<'a> {
     soft: bool,
     support_dynamic_type: bool,
     module: Option<&'a str>,
+    internal: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1245,6 +1246,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             soft: false,
             support_dynamic_type: false,
             module: None,
+            internal: false,
         };
 
         let nodes = match node {
@@ -1335,6 +1337,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             .string_literal_params
                             .first()
                             .map(|&x| self.str_from_utf8(x));
+                    }
+                    "__Internal" => {
+                        attributes.internal = true;
                     }
                     _ => {}
                 }
@@ -3198,6 +3203,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 });
                 let fun_elt = self.alloc(FunElt {
                     module: parsed_attributes.module,
+                    internal: parsed_attributes.internal,
                     deprecated,
                     type_,
                     pos,

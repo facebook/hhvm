@@ -39,3 +39,6 @@ let get_module_attribute attrs =
       | Error _ -> None
     end
   | _ -> None
+
+let has_internal_attribute attrs =
+  Naming_attributes.mem SN.UserAttributes.uaInternal attrs

@@ -1,6 +1,7 @@
 [("\\a2",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-12]),
         (Tfun
@@ -23,6 +24,7 @@
   ("\\v0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-12]),
          (Tfun
@@ -42,6 +44,7 @@
   ("\\v1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([11:10-12]),
          (Tfun
@@ -63,6 +66,7 @@
   ("\\d0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:10-12]),
          (Tfun
@@ -85,6 +89,7 @@
   ("\\d2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([19:10-12]),
          (Tfun
@@ -107,6 +112,7 @@
   ("\\vd0",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([23:10-13]),
          (Tfun
@@ -130,6 +136,7 @@
   ("\\vd1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([27:10-13]),
          (Tfun
@@ -153,6 +160,7 @@
   ("\\vd2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([31:10-13]),
          (Tfun
@@ -175,6 +183,7 @@
   ("\\vd3",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([35:10-13]),
          (Tfun

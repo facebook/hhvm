@@ -1,9 +1,10 @@
 --- legacy
 +++ direct decl
-@@ -1,82 +1,83 @@
+@@ -1,83 +1,84 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([3:10-13]),
          (Tfun

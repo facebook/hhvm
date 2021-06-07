@@ -1,6 +1,7 @@
 [("\\expect_int",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-20]),
         (Tfun
@@ -30,6 +31,7 @@
   ("\\f",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([6:10-11]),
          (Tfun

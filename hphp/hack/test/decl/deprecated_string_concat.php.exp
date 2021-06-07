@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated =
        (Some "The function singlesingle is deprecated: singlesingle");
-       fe_module = None;
+       fe_module = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-22]),
         (Tfun
@@ -22,7 +22,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function doubledouble is deprecated: doubledouble");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-22]),
          (Tfun
@@ -42,7 +42,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function singledouble is deprecated: singledouble");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([10:10-22]),
          (Tfun
@@ -62,7 +62,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function singledoublesingle is deprecated: singledoublesingle");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([13:10-28]),
          (Tfun
@@ -82,7 +82,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function heredoc is deprecated: single  heredoc");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([19:10-17]),
          (Tfun
@@ -102,7 +102,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function nowdoc is deprecated: single  nowdoc");
-        fe_module = None;
+        fe_module = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([25:10-16]),
          (Tfun

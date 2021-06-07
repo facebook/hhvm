@@ -1,0 +1,4 @@
+File "fun_pointer.php", line 9, characters 8-8:
+Cannot access an internal element from module `A` outside of a module (Typing[4444])
+  File "fun_pointer.php", line 6, characters 10-10:
+  This is from module `A`

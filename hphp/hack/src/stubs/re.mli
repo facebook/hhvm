@@ -6,7 +6,6 @@
  *
  *)
 
-let initialize_lease () = failwith "not implemented"
+val initialize_lease : unit -> unit
 
-let process_file (_ : Relative_path.t) (_ : Typing_deps.Mode.t) =
-  failwith "not implemented"
+val process_file : Relative_path.t -> Typing_deps.Mode.t -> Errors.t

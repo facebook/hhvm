@@ -853,11 +853,18 @@ end = struct
         | _ -> raise UnexpectedDependency))
 
   and add_user_attr_deps ctx env user_attrs =
-    List.iter user_attrs ~f:(fun Aast.{ ua_name = (_, cls); _ } ->
+    List.iter
+      user_attrs
+      ~f:(fun Aast.{ ua_name = (_, cls); ua_params = exprs } ->
         if not @@ String.is_prefix ~prefix:"__" cls then (
           do_add_dep ctx env @@ Typing_deps.Dep.Type cls;
           do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
-        ))
+        );
+        List.iter exprs ~f:(function
+            | (_, Aast.(Class_get ((_, CI (_, cls)), _, _)))
+            | (_, Aast.(Class_const ((_, CI (_, cls)), _))) ->
+              do_add_dep ctx env @@ Typing_deps.Dep.Type cls
+            | _ -> ()))
 
   and add_class_attr_deps
       ctx env Aast.{ c_user_attributes = attrs; c_tparams = tparams; _ } =

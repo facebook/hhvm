@@ -637,10 +637,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
 }
 
 void VariableSerializer::write(const String& v) {
-  if (m_type == Type::APCSerialize &&
-      !(m_option & kAPC_PRIME_SERIALIZE) &&
-      !v.isNull() &&
-      v.get()->isStatic()) {
+  if (m_type == Type::APCSerialize && !v.isNull() && v.get()->isStatic()) {
     union {
       char buf[8];
       StringData *sd;

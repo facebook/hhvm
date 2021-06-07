@@ -55,12 +55,6 @@ struct VariableSerializer {
     Last = PHPOutput,
   };
 
-  /*
-   * Set in m_option for APCSerialize to disable serializing static
-   * datastructures as their address
-   */
-  static constexpr auto kAPC_PRIME_SERIALIZE = 1;
-
   /**
    * Constructor and destructor.
    */

@@ -162,8 +162,10 @@ namespace get_json {
 using folly::dynamic;
 
 dynamic getSSATmp(const SSATmp* tmp) {
-  return dynamic::object("id", tmp->id())
-                        ("type", tmp->type().toString());
+  auto const type = tmp->inst()->is(DefConst)
+    ? tmp->type().constValString()
+    : tmp->type().toString();
+  return dynamic::object("id", tmp->id())("type", type);
 }
 
 dynamic getLabel(const Block* block) {

@@ -5,7 +5,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 open Hh_prelude
 module Cmd = ServerCommandTypes.Extract_standalone
 module SourceText = Full_fidelity_source_text
@@ -1566,7 +1565,9 @@ end = struct
     | Aast.Int str
     | Aast.Float str ->
       Fmt.string ppf str
-    | Aast.String str -> Fmt.(quote string) ppf str
+    | Aast.String str ->
+      Fmt.(quote string) ppf
+      @@ String.substr_replace_all ~pattern:"'" ~with_:"\\'" str
     | Aast.String2 exprs -> Fmt.(quote @@ list ~sep:sp pp_expr) ppf exprs
     | Aast.PrefixedString (pfx, expr) ->
       Fmt.(pair ~sep:nop string @@ quote pp_expr) ppf (pfx, expr)

@@ -204,6 +204,9 @@ function with_expr_in_user_attrs(): void {
   $_ = my_keys(vec[]);
 }
 
+<<MyUserAttr('blah \' blah blah')>>
+type WithEscapedCharInAttr= int;
+
 <<MyUserAttr('blah')>>
 type TransparentWithUserAttr = int;
 
@@ -220,6 +223,8 @@ function enum_with_user_attr(EnumWithUserAttr $x): void {}
 function transparent_with_user_attr(TransparentWithUserAttr $x): void {}
 
 function opaque_with_user_attr(OpaqueWithUserAttr $x): void {}
+
+function with_escaped_char_in_attr(WithEscapedCharInAttr $_): void {}
 
 <<MyUserAttr('blah')>>
 class WithUserAttr {

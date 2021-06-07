@@ -547,8 +547,10 @@ void Vgen::emitVeneers(Venv& env) {
         for (auto& tj : meta.inProgressTailJumps) {
           if (tj.toSmash() == veneer.source) tj.adjust(appendix);
         }
-        for (auto& stub : env.stubs) {
-          if (stub.jcc == veneer.source) stub.jcc = appendix;
+        for (auto& bind : meta.smashableBinds) {
+          if (bind.smashable.toSmash() == veneer.source) {
+            bind.smashable.adjust(appendix);
+          }
         }
       }
     } else {

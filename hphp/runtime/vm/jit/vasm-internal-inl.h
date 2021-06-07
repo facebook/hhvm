@@ -95,7 +95,7 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p);
 /*
  * Emit a service request stub and register a patch point as needed.
  */
-void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
+void emit_svcreq_stub(Venv& env, const CGMeta::BindData& b);
 
 /*
  * Arch-independent emitters.
@@ -318,8 +318,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   Vemit::handleLiterals(env);
 
-  // Emit service request stubs and register patch points.
-  for (auto& p : env.stubs) emit_svcreq_stub(env, p);
+  // Emit service request stubs and patch them.
+  for (auto& p : env.meta.smashableBinds) emit_svcreq_stub(env, p);
 
   // Bind any Vaddrs that correspond to Vlabels.
   for (auto const& p : env.pending_vaddrs) {

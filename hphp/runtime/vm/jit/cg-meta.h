@@ -161,13 +161,23 @@ struct CGMeta {
   jit::fast_map<TCA,PrologueID> smashableCallData;
 
   /*
-   * Extra data kept for smashable binds.  Used to pre-smash bindjmp, bindjcc,
-   * bindaddr, fallback and fallbackcc instructions before code is published.
-   * before code is published.
+   * List of cross-translation smashable binds, populated by bindjmp, bindjcc,
+   * bindaddr, fallback and fallbackcc instructions.
+   *
+   * In vasm_emit(), we lower these service request instructions to their inline
+   * functionality (e.g., a smashable jump), and add a record here so that we
+   * can emit the requisite stub and patch in its address after the rest of the
+   * unit is emitted. These stubs are emitted separately because they are not
+   * truly part of the unit and might be shared across use sites. It is also
+   * impossible to emit a code while emitting a code into the same section.
+   *
+   * Before the code is published, retranslate all uses this list to pre-smash
+   * binds to targets that were also translated.
    */
   struct BindData {
     IncomingBranch smashable;
     SrcKey sk;
+    SBInvOffset spOff;
     bool fallback;
   };
   std::vector<BindData> smashableBinds;

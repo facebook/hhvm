@@ -318,14 +318,17 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   Vemit::handleLiterals(env);
 
-  // Emit service request stubs and patch them.
-  for (auto& p : env.meta.smashableBinds) emit_svcreq_stub(env, p);
-
   // Bind any Vaddrs that correspond to Vlabels.
   for (auto const& p : env.pending_vaddrs) {
     assertx(env.addrs[p.target]);
     env.vaddrs[p.vaddr] = env.addrs[p.target];
   }
+
+  // Retarget smashable binds.
+  Vemit::retargetBinds(env);
+
+  // Emit service request stubs and patch them.
+  for (auto& p : env.meta.smashableBinds) emit_svcreq_stub(env, p);
 
   // Patch up jump targets and friends.
   Vemit::patch(env);

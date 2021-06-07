@@ -72,6 +72,7 @@ struct Vgen {
 
   static void emitVeneers(Venv& env) {}
   static void handleLiterals(Venv& env) {}
+  static void retargetBinds(Venv& env);
   static void patch(Venv& env);
   static void pad(CodeBlock& cb);
 
@@ -405,8 +406,11 @@ bool ccImplies(ConditionCode a, ConditionCode b) {
  * relocator to shrink the first one, and the extra jmp shouldn't matter since
  * we try to only do this to rarely taken jumps.
  */
-void retargetJumps(Venv& env,
-                   const jit::hash_map<TCA, jit::vector<TCA>>& jccs) {
+template<typename Key, typename Hash>
+jit::hash_set<TCA> retargetJumps(
+  Venv& env,
+  const jit::hash_map<Key, jit::vector<TCA>, Hash>& jccs
+) {
   jit::hash_set<TCA> retargeted;
   for (auto& pair : jccs) {
     auto const& jmps = pair.second;
@@ -448,28 +452,61 @@ void retargetJumps(Venv& env,
     }
   }
 
+  return retargeted;
+}
+
+namespace {
+  struct SrcKeyBoolTupleHasher {
+    size_t operator()(std::tuple<SrcKey, bool> v) const {
+      return folly::hash::hash_combine(
+        std::get<0>(v).toAtomicInt(),
+        std::get<1>(v)
+      );
+    }
+  };
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::retargetBinds(Venv& env) {
+  if (RuntimeOption::EvalJitRetargetJumps < 1) return;
+
+  // The target is unique per the SrcKey and the fallback flag.
+  jit::hash_map<
+    std::pair<SrcKey, bool>,
+    jit::vector<TCA>,
+    SrcKeyBoolTupleHasher
+  > binds;
+
+  for (auto const& b : env.meta.smashableBinds) {
+    if (b.smashable.type() == IncomingBranch::Tag::JCC) {
+      binds[std::make_pair(b.sk, b.fallback)]
+        .emplace_back(b.smashable.toSmash());
+    }
+  }
+
+  auto const retargeted = retargetJumps(env, std::move(binds));
+  if (retargeted.empty()) return;
+
   // Finally, remove any retargeted jmps from inProgressTailJumps and
   // smashableBinds.
-  if (!retargeted.empty()) {
-    GrowableVector<IncomingBranch> newTailJumps;
-    for (auto& jmp : env.meta.inProgressTailJumps) {
-      if (retargeted.count(jmp.toSmash()) == 0) {
-        newTailJumps.push_back(jmp);
-      }
+  GrowableVector<IncomingBranch> newTailJumps;
+  for (auto& jmp : env.meta.inProgressTailJumps) {
+    if (retargeted.count(jmp.toSmash()) == 0) {
+      newTailJumps.push_back(jmp);
     }
-    env.meta.inProgressTailJumps.swap(newTailJumps);
-
-    decltype(env.meta.smashableBinds) newBinds;
-    for (auto& bind : env.meta.smashableBinds) {
-      if (retargeted.count(bind.smashable.toSmash()) == 0) {
-        newBinds.push_back(bind);
-      } else {
-        FTRACE(3, "retargetJumps: removed {} from smashableBinds\n",
-               bind.smashable.toSmash());
-      }
-    }
-    env.meta.smashableBinds.swap(newBinds);
   }
+  env.meta.inProgressTailJumps.swap(newTailJumps);
+
+  decltype(env.meta.smashableBinds) newBinds;
+  for (auto& bind : env.meta.smashableBinds) {
+    if (retargeted.count(bind.smashable.toSmash()) == 0) {
+      newBinds.push_back(bind);
+    } else {
+      FTRACE(3, "retargetBinds: removed {} from smashableBinds\n",
+             bind.smashable.toSmash());
+    }
+  }
+  env.meta.smashableBinds.swap(newBinds);
 }
 
 template<class X64Asm>
@@ -486,8 +523,7 @@ void Vgen<X64Asm>::patch(Venv& env) {
     assertx(env.addrs[p.target]);
     X64Asm::patchJcc(
       env.text.toDestAddress(p.instr), p.instr, env.addrs[p.target]);
-    if (optLevel >= 2 ||
-        (optLevel == 1 && p.target >= env.unit.blocks.size())) {
+    if (optLevel >= 2) {
       jccs[env.addrs[p.target]].emplace_back(p.instr);
     }
   }

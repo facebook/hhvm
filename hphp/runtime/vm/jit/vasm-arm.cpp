@@ -220,6 +220,7 @@ struct Vgen {
 
   static void emitVeneers(Venv& env);
   static void handleLiterals(Venv& env);
+  static void retargetBinds(Venv& env);
   static void patch(Venv& env);
 
   static void pad(CodeBlock& cb) {
@@ -612,6 +613,9 @@ void Vgen::handleLiterals(Venv& env) {
   }
 
   env.meta.literalsToPool.swap(notEmitted);
+}
+
+void Vgen::retargetBinds(Venv& env) {
 }
 
 void Vgen::patch(Venv& env) {

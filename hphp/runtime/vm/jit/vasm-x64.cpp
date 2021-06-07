@@ -461,7 +461,8 @@ void retargetJumps(Venv& env,
     }
   }
 
-  // Finally, remove any retargeted jmps from inProgressTailJumps.
+  // Finally, remove any retargeted jmps from inProgressTailJumps and
+  // smashableBinds.
   if (!retargeted.empty()) {
     GrowableVector<IncomingBranch> newTailJumps;
     for (auto& jmp : env.meta.inProgressTailJumps) {
@@ -470,13 +471,17 @@ void retargetJumps(Venv& env,
       }
     }
     env.meta.inProgressTailJumps.swap(newTailJumps);
-  }
-  // If the retarged jumps were smashable, now they aren't anymore, so remove
-  // them from smashableJumpData.
-  for (auto jmp : retargeted) {
-    if (env.meta.smashableJumpData.erase(jmp) > 0) {
-      FTRACE(3, "retargetJumps: removed {} from smashableJumpData\n", jmp);
+
+    decltype(env.meta.smashableBinds) newBinds;
+    for (auto& bind : env.meta.smashableBinds) {
+      if (retargeted.count(bind.smashable.toSmash()) == 0) {
+        newBinds.push_back(bind);
+      } else {
+        FTRACE(3, "retargetJumps: removed {} from smashableBinds\n",
+               bind.smashable.toSmash());
+      }
     }
+    env.meta.smashableBinds.swap(newBinds);
   }
 }
 

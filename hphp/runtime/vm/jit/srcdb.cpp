@@ -55,6 +55,15 @@ void IncomingBranch::patch(TCA dest) {
   }
 }
 
+bool IncomingBranch::optimize() {
+  switch (type()) {
+    case Tag::JMP: return optimizeSmashedJmp(toSmash());
+    case Tag::JCC: return optimizeSmashedJcc(toSmash());
+    case Tag::ADDR: return false;
+  }
+  always_assert(false);
+}
+
 TCA IncomingBranch::target() const {
   switch (type()) {
     case Tag::JMP:
@@ -67,6 +76,18 @@ TCA IncomingBranch::target() const {
       return *reinterpret_cast<TCA*>(toSmash());
   }
   always_assert(false);
+}
+
+std::string IncomingBranch::show() const {
+  auto const typeStr = [&] {
+    switch (type()) {
+      case Tag::JMP: return "jmp";
+      case Tag::JCC: return "jcc";
+      case Tag::ADDR: return "addr";
+    }
+    always_assert(false);
+  }();
+  return folly::sformat("{}@{}", typeStr, toSmash());
 }
 
 TCA TransLoc::entry() const {

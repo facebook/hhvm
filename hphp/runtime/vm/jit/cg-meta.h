@@ -161,15 +161,16 @@ struct CGMeta {
   jit::fast_map<TCA,PrologueID> smashableCallData;
 
   /*
-   * Extra data kept for smashable jumps/jccs.  Used to pre-smash jumps/jccs
+   * Extra data kept for smashable binds.  Used to pre-smash bindjmp, bindjcc,
+   * bindaddr, fallback and fallbackcc instructions before code is published.
    * before code is published.
    */
-  enum class JumpKind { Bindjmp, Bindjcc, Fallback, Fallbackcc };
-  struct JumpData {
-    SrcKey   sk;
-    JumpKind kind;
+  struct BindData {
+    IncomingBranch smashable;
+    SrcKey sk;
+    bool fallback;
   };
-  jit::fast_map<TCA,JumpData> smashableJumpData;
+  std::vector<BindData> smashableBinds;
 
   /*
    * Debug-only map from bytecode to machine code address.

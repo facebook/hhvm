@@ -277,18 +277,14 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedCD.swap(meta.smashableCallData);
 
-  decltype(meta.smashableJumpData) updatedJD;
-  for (auto& jd : meta.smashableJumpData) {
-    if (auto adjusted = rel.adjustedAddressAfter(jd.first)) {
-      updatedJD[adjusted] = jd.second;
+  for (auto& b : meta.smashableBinds) {
+    if (auto adjusted = rel.adjustedAddressAfter(b.smashable.toSmash())) {
       FTRACE_MOD(Trace::mcg, 3,
-                 "adjustMetaDataForRelocation(smashableJumpData): {} => {}\n",
-                 jd.first, adjusted);
-    } else {
-      updatedJD[jd.first] = jd.second;
+                 "adjustMetaDataForRelocation(smashableBinds): {} => {}\n",
+                 b.smashable.toSmash(), adjusted);
+      b.smashable.adjust(adjusted);
     }
   }
-  updatedJD.swap(meta.smashableJumpData);
 
   for (auto& li : meta.literalAddrs) {
     if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {

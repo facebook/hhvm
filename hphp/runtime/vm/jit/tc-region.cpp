@@ -288,20 +288,16 @@ void smashOptCalls(CGMeta& meta,
 }
 
 /*
- * Find the jump target for jumps of kind `jumpKind' within the translation
- * corresponding to `curEntry' going to the SrcRec corresponding to `vec'.
- * `curEntry' is the TCA of the start of the current tracelet.  For prologues
- * this is nullptr.  It is used while smashing retranslations of the same
- * srckey.
+ * Find the jump target for jumps within the translation corresponding to
+ * `curEntry' going to the SrcRec corresponding to `vec'.  `curEntry' is the TCA
+ * of the start of the current tracelet.  For prologues this is nullptr.  It is
+ * used while smashing retranslations of the same srckey.  `isRetrans` indicate
+ * whether this is a fallback jump to the next translation.
  */
 TCA findJumpTarget(TCA curEntry,
                    const jit::vector<TCA>& vec,
-                   CGMeta::JumpKind jumpKind) {
+                   bool isRetrans) {
   always_assert(vec.size() > 0);
-
-  using Kind = CGMeta::JumpKind;
-  const bool isRetrans = jumpKind == Kind::Fallback ||
-                         jumpKind == Kind::Fallbackcc;
 
   // It may seem like !isRetrans should imply that none of the elements in the
   // retranslation chain vector is the curEntry.  In practice self loops may
@@ -332,70 +328,44 @@ TCA findJumpTarget(TCA curEntry,
  * tracked metadata in meta)  going to the optimized translations in
  * `srcKeyTrans'.
  */
-void smashOptJumps(CGMeta& meta,
+void smashOptBinds(CGMeta& meta,
                    TCA entry,  // nullptr for prologues
                    const SrcKeyTransMap& srcKeyTrans) {
-  using Kind = CGMeta::JumpKind;
-
   jit::hash_set<TCA> smashed;
   jit::hash_set<TCA> smashedOldTargets;
-  decltype(meta.smashableJumpData) newSmashableJumpData;
+  decltype(meta.smashableBinds) newBinds;
 
-  for (auto& pair : meta.smashableJumpData) {
-    auto jump = pair.first;
-    auto   sk = pair.second.sk;
-    auto kind = pair.second.kind;
-    auto it = srcKeyTrans.find(sk);
+  for (auto& bind : meta.smashableBinds) {
+    auto it = srcKeyTrans.find(bind.sk);
     if (it == srcKeyTrans.end()) {
-      newSmashableJumpData.emplace(pair);
+      newBinds.emplace_back(bind);
       continue;
     }
     const auto& transVec = it->second;
-    TCA succTCA = findJumpTarget(entry, transVec, kind);
+    TCA succTCA = findJumpTarget(entry, transVec, bind.fallback);
     if (succTCA == nullptr) {
-      newSmashableJumpData.emplace(pair);
+      newBinds.emplace_back(bind);
       continue;
     }
 
-    DEBUG_ONLY auto kindStr = [&] {
-      switch (kind) {
-        case Kind::Bindjmp:    return "bindjmp";
-        case Kind::Bindjcc:    return "bindjcc";
-        case Kind::Fallback:   return "fallback";
-        case Kind::Fallbackcc: return "fallbackcc";
-      }
-      not_reached();
-    }();
-
-    FTRACE(3, "smashOptJumps: found candidate jump @ {}, kind = {}, "
-           "target SrcKey {}\n",
-           jump, kindStr, showShort(sk));
-    assertx(code().inHotOrMainOrColdOrFrozen(jump));
+    FTRACE(3, "smashOptBinds: found candidate bind @ {}, target SrcKey {}, "
+           "fallback = {}\n",
+           bind.smashable.show(), showShort(bind.sk), bind.fallback);
+    // The bound ADDR pointer may not belong to the data segment, as is the case
+    // with SSwitchMap (see #10347945)
+    assertx(code().inHotOrMainOrColdOrFrozen(bind.smashable.toSmash()) ||
+            bind.smashable.type() == IncomingBranch::Tag::ADDR);
     assertx(code().inHotOrMainOrColdOrFrozen(succTCA));
-    TCA prevTarget = nullptr;
-    switch (kind) {
-      case Kind::Bindjmp:
-      case Kind::Fallback: {
-        prevTarget = smashableJmpTarget(jump);
-        smashJmp(jump, succTCA);
-        optimizeSmashedJmp(jump);
-        break;
-      }
-      case Kind::Bindjcc:
-      case Kind::Fallbackcc: {
-        prevTarget = smashableJccTarget(jump);
-        smashJcc(jump, succTCA);
-        optimizeSmashedJcc(jump);
-        break;
-      }
-    }
-    smashed.insert(jump);
+    auto const prevTarget = bind.smashable.target();
+    bind.smashable.patch(succTCA);
+    bind.smashable.optimize();
+    smashed.insert(bind.smashable.toSmash());
     smashedOldTargets.insert(prevTarget);
-    meta.smashableLocations.erase(jump);
+    meta.smashableLocations.erase(bind.smashable.toSmash());
   }
 
   // Remove jumps that were smashed from meta.smashableJumpData.
-  meta.smashableJumpData.swap(newSmashableJumpData);
+  meta.smashableBinds.swap(newBinds);
 
   // If any of the jumps we smashed was a tail jump (i.e. going to a
   // retranslation of the entry SrcKey), then remove it from the set of
@@ -405,7 +375,7 @@ void smashOptJumps(CGMeta& meta,
     if (smashed.count(jump.toSmash()) == 0) {
       newTailJumps.push_back(jump);
     } else {
-      FTRACE(3, "smashOptJumps: removing {} from inProgressTailJumps\n",
+      FTRACE(3, "smashOptBinds: removing {} from inProgressTailJumps\n",
              jump.toSmash());
     }
   }
@@ -418,7 +388,7 @@ void smashOptJumps(CGMeta& meta,
     if (smashedOldTargets.count(tca) == 0) {
       newReusedStubs.push_back(tca);
     } else {
-      FTRACE(3, "smashOptJumps: freeing dead reused stub @ {}\n", tca);
+      FTRACE(3, "smashOptBinds: freeing dead reused stub @ {}\n", tca);
       markStubFreed(tca);
     }
   }
@@ -443,10 +413,10 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
       assertx(code().inHotOrMainOrColdOrFrozen(translator->entry()));
 
       if (isPrologue(translator->kind)) {
-        smashOptJumps(translator->meta(), nullptr, srcKeyTrans);
+        smashOptBinds(translator->meta(), nullptr, srcKeyTrans);
       } else {
         smashOptCalls(translator->meta(), prologueTCAs);
-        smashOptJumps(translator->meta(), translator->entry(), srcKeyTrans);
+        smashOptBinds(translator->meta(), translator->entry(), srcKeyTrans);
       }
     }
   }

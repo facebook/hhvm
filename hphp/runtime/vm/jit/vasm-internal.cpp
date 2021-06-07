@@ -191,7 +191,8 @@ bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   setJmpTransID(env, jmp);
-  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Bindjmp};
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::jmpFrom(jmp), i.target, false /* fallback */});
   return true;
 }
 
@@ -200,7 +201,8 @@ bool emit(Venv& env, const bindjcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   setJmpTransID(env, jcc);
-  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Bindjcc};
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::jccFrom(jcc), i.target, false /* fallback */});
   return true;
 }
 
@@ -208,6 +210,8 @@ bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
   setJmpTransID(env, TCA(i.addr.get()));
   env.meta.codePointers.emplace(i.addr.get());
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::addr(i.addr.get()), i.target, false /* fallback */});
   return true;
 }
 
@@ -215,7 +219,8 @@ bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   registerFallbackJump(env, jmp, CC_None);
-  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Fallback};
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::jmpFrom(jmp), i.target, true /* fallback */});
   return true;
 }
 
@@ -224,7 +229,8 @@ bool emit(Venv& env, const fallbackcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   registerFallbackJump(env, jcc, i.cc);
-  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Fallbackcc};
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::jccFrom(jcc), i.target, true /* fallback */});
   return true;
 }
 

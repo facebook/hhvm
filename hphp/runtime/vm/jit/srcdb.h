@@ -77,7 +77,9 @@ struct IncomingBranch {
     m_ptr.set(m_ptr.tag(), addr);
   }
   void patch(TCA dest);
+  bool optimize();
   TCA target() const;
+  std::string show() const;
 private:
   explicit IncomingBranch(Tag type, TCA toSmash) {
     m_ptr.set(type, toSmash);

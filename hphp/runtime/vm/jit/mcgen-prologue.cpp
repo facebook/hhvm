@@ -112,6 +112,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       UNUSED auto const result = [&] {
         if (auto const res = translator.translate()) return *res;
         if (auto const res = translator.relocate(true)) return *res;
+        if (auto const res = translator.bindOutgoingEdges()) return *res;
         return translator.publish();
       }();
     }
@@ -232,6 +233,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
 
   if (auto const res = translator.translate()) return *res;
   if (auto const res = translator.relocate(true)) return *res;
+  if (auto const res = translator.bindOutgoingEdges()) return *res;
   return translator.publish();
 }
 

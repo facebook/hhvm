@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -248,65 +247,6 @@ bool emit(Venv& env, const jmps& i) {
     env.pending_vaddrs.push_back({i.taken_addr, i.targets[1]});
   }
   return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void emit_svcreq_stub(Venv& env, const CGMeta::BindData& b) {
-  auto const stub = [&]{
-    if (b.fallback) {
-      always_assert(tc::findSrcRec(b.sk));
-      return svcreq::getOrEmitStub(
-        svcreq::StubType::Retranslate, b.sk, b.spOff);
-    }
-
-    auto const reusableTC = RuntimeOption::EvalEnableReusableTC;
-    // Reusable TC must emit code into local TC buffers, and then relocate.
-    assertx(IMPLIES(
-      reusableTC,
-      !tc::code().frozen().contains(env.text.frozen().code.base())
-    ));
-    auto const frozen = [&] () -> CodeBlock& {
-      // This emits directly into the end of frozen.  This helps keep it out of
-      // the TransLoc of the translation.  Since the stubs emitted are ephemeral
-      // (and may be reused), it is important they aren't part of the TransLoc
-      // when running with ReusableTC options enabled.
-      if (reusableTC) {
-        return tc::code().view().frozen();
-      }
-      return env.text.frozen().code;
-    };
-
-    auto codeLock = tc::lockCode(reusableTC);
-    auto const toSmash = b.smashable.toSmash();
-
-    if (b.smashable.type() == IncomingBranch::Tag::ADDR) {
-      auto const stub = svcreq::emit_bindaddr_stub(
-        frozen(), env.text.data(), env.meta, b.spOff, (TCA*)toSmash, b.sk);
-      // The bound pointer may not belong to the data segment, as is the case
-      // with SSwitchMap (see #10347945)
-      auto realAddr = env.text.data().contains(toSmash)
-        ? (TCA*)env.text.data().toDestAddress(toSmash)
-        : (TCA*)b.smashable.toSmash();
-      *realAddr = stub;
-      return stub;
-    } else {
-      return svcreq::emit_bindjmp_stub(
-        frozen(), env.text.data(), env.meta, b.spOff, toSmash, b.sk);
-    }
-  }();
-
-  always_assert(stub != nullptr);
-
-  // Register any necessary patches by creating fake labels for the stubs.
-  if (b.smashable.type() == IncomingBranch::Tag::JMP) {
-    env.jmps.push_back({b.smashable.toSmash(), Vlabel { env.addrs.size() }});
-    env.addrs.push_back(stub);
-  }
-  if (b.smashable.type() == IncomingBranch::Tag::JCC) {
-    env.jccs.push_back({b.smashable.toSmash(), Vlabel { env.addrs.size() }});
-    env.addrs.push_back(stub);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

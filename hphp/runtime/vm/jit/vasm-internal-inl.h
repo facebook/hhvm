@@ -93,11 +93,6 @@ bool is_empty_catch(const Vblock& block);
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p);
 
 /*
- * Emit a service request stub and register a patch point as needed.
- */
-void emit_svcreq_stub(Venv& env, const CGMeta::BindData& b);
-
-/*
  * Arch-independent emitters.
  *
  * Return true if the instruction was supported.
@@ -326,9 +321,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   // Retarget smashable binds.
   Vemit::retargetBinds(env);
-
-  // Emit service request stubs and patch them.
-  for (auto& p : env.meta.smashableBinds) emit_svcreq_stub(env, p);
 
   // Patch up jump targets and friends.
   Vemit::patch(env);

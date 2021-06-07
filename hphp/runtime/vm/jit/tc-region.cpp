@@ -173,6 +173,9 @@ void relocateOptFunc(FuncMetaInfo& info,
       continue;
     }
 
+    translator->bindOutgoingEdges();
+    if (!translator->translateSuccess()) continue;
+
     always_assert(code().inHotOrMain(translator->entry()));
     if (prologueTranslator) {
       const auto pid = PrologueID(func, prologueTranslator->paramIndex());

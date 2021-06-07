@@ -544,6 +544,7 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
 
   if (auto const res = translator.translate()) return *res;
   if (auto const res = translator.relocate(false)) return *res;
+  if (auto const res = translator.bindOutgoingEdges()) return *res;
   return translator.publish();
 }
 

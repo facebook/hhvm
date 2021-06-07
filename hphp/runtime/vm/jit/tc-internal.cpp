@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc-prologue.h"
@@ -783,6 +784,43 @@ folly::Optional<TranslationResult> Translator::relocate(bool alignMain) {
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
+  return folly::none;
+}
+
+folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
+  assertx(transMeta.hasValue());
+  auto& meta = transMeta->fixups;
+  for (auto& b : meta.smashableBinds) {
+    auto const target = [&] {
+      if (b.fallback) {
+        // We just emitted Nth translation, we don't have N+1th yet.
+        return svcreq::getOrEmitStub(
+          svcreq::StubType::Retranslate, b.sk, b.spOff);
+      }
+
+      // TODO: skip stub if we can bind
+      auto codeLock = tc::lockCode();
+      auto view = tc::code().view(TransKind::Anchor);
+      auto const toSmash = b.smashable.toSmash();
+      if (b.smashable.type() == IncomingBranch::Tag::ADDR) {
+        return svcreq::emit_bindaddr_stub(
+          view.frozen(), view.data(), meta, b.spOff, (TCA*)toSmash, b.sk);
+      } else {
+        return svcreq::emit_bindjmp_stub(
+          view.frozen(), view.data(), meta, b.spOff, toSmash, b.sk);
+      }
+    }();
+
+    // We ran out of TC space and couldn't emit the stub.
+    if (target == nullptr) {
+      reset();
+      return TranslationResult::failForProcess();
+    }
+
+    // Smash it.
+    b.smashable.patch(target);
+  }
+
   return folly::none;
 }
 

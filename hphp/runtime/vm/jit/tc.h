@@ -135,6 +135,11 @@ struct Translator {
   // Relocate the generated machine code to its final location.  This may be a
   // no-op if it was initially emitted into the correct location.
   folly::Optional<TranslationResult> relocate(bool alignMain);
+
+  // Bind the outgoing edges either directly to already existing translations,
+  // or to a service request stub requesting a translation.
+  folly::Optional<TranslationResult> bindOutgoingEdges();
+
   // Publish the translation starts, ends etc. into the required metadata
   // structures.  This includes publishing them as debug info, but also caching
   // the translation start in a manner that would be detected in

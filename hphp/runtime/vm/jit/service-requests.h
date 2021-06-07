@@ -180,7 +180,6 @@ using ArgVec = jit::vector<Arg>;
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
-                   CGMeta& meta,
                    TCA start,
                    SBInvOffset spOff,
                    ServiceRequest sr,

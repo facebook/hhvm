@@ -78,9 +78,8 @@ ArgVec pack_args(Args&&... args) {
  *
  * Declared here for use in the templatized stub emitters defined below.
  */
-void emit_svcreq(CodeBlock& cb, DataBlock& data, CGMeta& meta,
-                 TCA start, bool persist, SBInvOffset spOff,
-                 ServiceRequest sr, const ArgVec& argv);
+void emit_svcreq(CodeBlock& cb, DataBlock& data, TCA start, bool persist,
+                 SBInvOffset spOff, ServiceRequest sr, const ArgVec& argv);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -91,14 +90,12 @@ void emit_svcreq(CodeBlock& cb, DataBlock& data, CGMeta& meta,
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
-                   CGMeta& meta,
                    TCA start,
                    SBInvOffset spOff,
                    ServiceRequest sr,
                    Args... args) {
   using namespace detail;
-  emit_svcreq(cb, data, meta, start, false, spOff, sr,
-              pack_args(args...));
+  emit_svcreq(cb, data, start, false, spOff, sr, pack_args(args...));
   return start;
 }
 

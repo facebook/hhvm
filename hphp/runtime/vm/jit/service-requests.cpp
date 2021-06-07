@@ -63,7 +63,6 @@ namespace detail {
  */
 void emit_svcreq(CodeBlock& cb,
                  DataBlock& data,
-                 CGMeta& meta,
                  TCA start,
                  bool persist,
                  SBInvOffset spOff,
@@ -88,6 +87,12 @@ void emit_svcreq(CodeBlock& cb,
   CodeBlock stub;
   auto const realAddr = is_reused ? start : cb.toDestAddress(start);
   stub.init(start, realAddr, stub_size(), "svcreq_stub");
+
+  CGMeta meta;
+  SCOPE_EXIT {
+    meta.addressImmediates.clear();
+    assertx(meta.empty());
+  };
 
   {
     Vauto vasm{stub, stub, data, meta};
@@ -277,7 +282,6 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
-    fixups,
     allocTCStub(cb, &fixups),
     spOff,
     REQ_BIND_JMP,
@@ -297,7 +301,6 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     return emit_ephemeral(
       cb,
       data,
-      fixups,
       allocTCStub(cb, &fixups),
       spOff,
       REQ_BIND_ADDR,
@@ -309,7 +312,6 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
-    fixups,
     allocTCStub(cb, &fixups),
     spOff,
     REQ_BIND_ADDR,

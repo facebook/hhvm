@@ -542,13 +542,9 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
   };
   tracing::Pause _p;
 
-  translator.translate();
-  if (!translator.translateSuccess()) {
-    return TranslationResult::failTransiently();
-  }
-
-  translator.relocate(false);
-  return TranslationResult{translator.publish()};
+  if (auto const res = translator.translate()) return *res;
+  if (auto const res = translator.relocate(false)) return *res;
+  return translator.publish();
 }
 
 bool retranslateOpt(FuncId funcId) {

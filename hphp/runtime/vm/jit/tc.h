@@ -127,13 +127,14 @@ struct Translator {
   TranslationResult::Scope shouldTranslate(bool noSizeLimit = false);
   // Generate and emit machine code into the provided view (if given) otherwise
   // the default view.
-  void translate(folly::Optional<CodeCache::View> view = folly::none);
+  folly::Optional<TranslationResult>
+  translate(folly::Optional<CodeCache::View> view = folly::none);
 
   bool translateSuccess() const;
 
   // Relocate the generated machine code to its final location.  This may be a
   // no-op if it was initially emitted into the correct location.
-  void relocate(bool alignMain);
+  folly::Optional<TranslationResult> relocate(bool alignMain);
   // Publish the translation starts, ends etc. into the required metadata
   // structures.  This includes publishing them as debug info, but also caching
   // the translation start in a manner that would be detected in
@@ -141,7 +142,7 @@ struct Translator {
   // be released, and if the translation isn't properly recorded in the SrcKey
   // database (or other equivalent structure) we may end up with duplicate
   // translations.
-  TCA publish();
+  TranslationResult publish();
   void publishMetaInternal();
   void publishCodeInternal();
   TCA entry() const {

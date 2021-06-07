@@ -168,17 +168,17 @@ void relocateOptFunc(FuncMetaInfo& info,
     // last emitted prologue.
     const bool alignMain = !regionTranslator || nRegions != 1;
     translator->relocate(alignMain);
+    if (!translator->translateSuccess()) {
+      if (failedBytes) *failedBytes += bytes;
+      continue;
+    }
 
-    if (translator->entry()) {
-      always_assert(code().inHotOrMain(translator->entry()));
-      if (prologueTranslator) {
-        const auto pid = PrologueID(func, prologueTranslator->paramIndex());
-        prologueTCAs[pid] = translator->entry();
-      } else if (regionTranslator) {
-        srcKeyTrans[regionTranslator->sk].emplace_back(translator->entry());
-      }
-    } else if (failedBytes) {
-      *failedBytes += bytes;
+    always_assert(code().inHotOrMain(translator->entry()));
+    if (prologueTranslator) {
+      const auto pid = PrologueID(func, prologueTranslator->paramIndex());
+      prologueTCAs[pid] = translator->entry();
+    } else if (regionTranslator) {
+      srcKeyTrans[regionTranslator->sk].emplace_back(translator->entry());
     }
   }
 }

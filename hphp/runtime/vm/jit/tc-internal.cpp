@@ -583,12 +583,13 @@ TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
   return ::HPHP::jit::tc::shouldTranslate(sk, kind);
 }
 
-void Translator::translate(folly::Optional<CodeCache::View> view) {
+folly::Optional<TranslationResult>
+Translator::translate(folly::Optional<CodeCache::View> view) {
   if (isProfiling(kind)) {
     transId = profData()->allocTransID();
   }
 
-  if (!newTranslation()) return;
+  if (!newTranslation()) return TranslationResult::failForProcess();
 
   WorkloadStats::EnsureInit();
   WorkloadStats guard(WorkloadStats::InTrans);
@@ -606,7 +607,8 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
   }
 
   // Check for translation failure.
-  if (!vunit) return;
+  // TODO: categorize failure
+  if (!vunit) return TranslationResult::failTransiently();
 
   Timer timer(Timer::mcg_finishTranslation);
 
@@ -671,7 +673,7 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
         Logger::Warning("TC area %s filled up!", dbFull.name.c_str());
       }
       reset();
-      return;
+      return TranslationResult::failForProcess();
     }
     transMeta.emplace(*view);
     transMeta->fixups = std::move(fixups);
@@ -692,19 +694,21 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
   if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
     logFrames(*vunit);
   }
+
+  return folly::none;
 }
 
 bool Translator::translateSuccess() const {
   return transMeta.has_value();
 }
 
-void Translator::relocate(bool alignMain) {
+folly::Optional<TranslationResult> Translator::relocate(bool alignMain) {
   assertx(transMeta.hasValue());
   // Code emitted directly is relocated during emission (or emitted
   // directly in place).
   if (!transMeta->view.isLocal()) {
     assertx(!RuntimeOption::EvalEnableReusableTC);
-    return;
+    return folly::none;
   }
 
   WorkloadStats::EnsureInit();
@@ -769,7 +773,7 @@ void Translator::relocate(bool alignMain) {
           e.setInt("bytes_dropped", bytes);
         });
         reset();
-        return;
+        return TranslationResult::failForProcess();
       }
       transMeta->range = maker.markEnd();
       transMeta->view = finalView;
@@ -779,15 +783,16 @@ void Translator::relocate(bool alignMain) {
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
+  return folly::none;
 }
 
-TCA Translator::publish() {
+TranslationResult Translator::publish() {
   assertx(transMeta.hasValue());
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
   publishMetaInternal();
   publishCodeInternal();
-  return transMeta->range.loc().entry();
+  return TranslationResult{transMeta->range.loc().entry()};
 }
 
 void Translator::publishMetaInternal() {

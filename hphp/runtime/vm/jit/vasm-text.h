@@ -89,6 +89,9 @@ struct Vtext {
    */
   const jit::vector<Varea>& areas() const { return m_areas; }
 
+  // Get the underlying address backing the code at `a'.
+  CodeAddress toDestAddress(CodeAddress a);
+
 private:
   jit::vector<Varea> m_areas; // indexed by AreaIndex
   DataBlock& m_data;

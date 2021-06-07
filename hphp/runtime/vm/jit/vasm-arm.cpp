@@ -459,11 +459,6 @@ static CodeBlock* getBlock(Venv& env, CodeAddress a) {
   return nullptr;
 }
 
-static CodeAddress toReal(Venv& env, CodeAddress a) {
-  CodeBlock* b = getBlock(env, a);
-  return (b == nullptr) ? a : b->toDestAddress(a);
-}
-
 void Vgen::emitVeneers(Venv& env) {
   auto& meta = env.meta;
   decltype(env.meta.veneers) notEmitted;
@@ -492,7 +487,7 @@ void Vgen::emitVeneers(Venv& env) {
     av.Br(rAsm);
 
     // Update the veneer source instruction to jump/call the veneer.
-    auto const realSource = toReal(env, veneer.source);
+    auto const realSource = env.text.toDestAddress(veneer.source);
     CodeBlock tmpBlock;
     tmpBlock.init(realSource, kInstructionSize, "emitVeneers");
     MacroAssembler at{tmpBlock};
@@ -592,7 +587,7 @@ void Vgen::handleLiterals(Venv& env) {
 
     // Patch the LDR.
     auto const patchAddressActual =
-      Instruction::Cast(toReal(env, pl.patchAddress));
+      Instruction::Cast(env.text.toDestAddress(pl.patchAddress));
     assertx(patchAddressActual->IsLoadLiteral());
     patchAddressActual->SetImmPCOffsetTarget(
       Instruction::Cast(literalAddress),
@@ -635,7 +630,7 @@ void Vgen::patch(Venv& env) {
   };
 
   for (auto const& p : env.jmps) {
-    auto addr = toReal(env, p.instr);
+    auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
     if (env.meta.smashableLocations.count(p.instr)) {
@@ -647,7 +642,7 @@ void Vgen::patch(Venv& env) {
     patch(addr, target);
   }
   for (auto const& p : env.jccs) {
-    auto addr = toReal(env, p.instr);
+    auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
     if (env.meta.smashableLocations.count(p.instr)) {

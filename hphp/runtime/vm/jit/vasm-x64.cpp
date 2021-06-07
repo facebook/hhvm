@@ -398,19 +398,6 @@ bool ccImplies(ConditionCode a, ConditionCode b) {
   always_assert(false);
 }
 
-static CodeAddress toReal(Venv& env, CodeAddress a) {
-  if (env.text.main().code.contains(a)) {
-    return env.text.main().code.toDestAddress(a);
-  }
-  if (env.text.cold().code.contains(a)) {
-    return env.text.cold().code.toDestAddress(a);
-  }
-  if (env.text.frozen().code.contains(a)) {
-    return env.text.frozen().code.toDestAddress(a);
-  }
-  return a;
-}
-
 /*
  * When two jccs go to the same destination, the cc of the first is compatible
  * with the cc of the second, and they're within a one-byte offset of each
@@ -426,7 +413,7 @@ void retargetJumps(Venv& env,
     if (jmps.size() < 2) continue;
 
     for (size_t i = 0; i < jmps.size(); ++i) {
-      DecodedInstruction di(toReal(env, jmps[i]), jmps[i]);
+      DecodedInstruction di(env.text.toDestAddress(jmps[i]), jmps[i]);
       // Don't bother if the jump is already a short jump.
       if (di.size() != 6) continue;
 
@@ -436,7 +423,7 @@ void retargetJumps(Venv& env,
         // dest that's more than a one-byte offset away.
         if (delta < 0 || !deltaFits(delta, sz::byte)) continue;
 
-        DecodedInstruction dj(toReal(env, jmps[j]), jmps[j]);
+        DecodedInstruction dj(env.text.toDestAddress(jmps[j]), jmps[j]);
         if (!ccImplies(di.jccCondCode(), dj.jccCondCode())) continue;
 
         di.setPicAddress(jmps[j]);
@@ -489,14 +476,16 @@ template<class X64Asm>
 void Vgen<X64Asm>::patch(Venv& env) {
   for (auto const& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    X64Asm::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJmp(
+      env.text.toDestAddress(p.instr), p.instr, env.addrs[p.target]);
   }
 
   auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto const& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    X64Asm::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJcc(
+      env.text.toDestAddress(p.instr), p.instr, env.addrs[p.target]);
     if (optLevel >= 2 ||
         (optLevel == 1 && p.target >= env.unit.blocks.size())) {
       jccs[env.addrs[p.target]].emplace_back(p.instr);
@@ -507,7 +496,7 @@ void Vgen<X64Asm>::patch(Venv& env) {
 
   for (auto const& p : env.leas) {
     assertx(env.vaddrs[p.target]);
-    DecodedInstruction di(toReal(env, p.instr), p.instr);
+    DecodedInstruction di(env.text.toDestAddress(p.instr), p.instr);
     assertx(di.hasPicOffset());
     di.setPicAddress(env.vaddrs[p.target]);
   }

@@ -5,6 +5,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the "hack" directory of this source tree.
 
+import os
 import unittest
 
 from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
@@ -57,6 +58,50 @@ Extends I4 -> Type C5,
                Type I14"""
         self.assertListEqual(
             exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        )
+
+    def test_multiple_lines_all(self) -> None:
+        # T92303034 Temporary handle for the multiple lines using replace(",\n", ","),
+        exp = [
+            "extends_to(i1, c1).",
+            "extends_to(i1, c2).",
+            "extends_to(i1, c3).",
+            "extends_to(i1, i2).",
+            "extends_to(i3, c4).",
+            "extends_to(i3, c6).",
+            "extends_to(i3, i5).",
+            "extends_to(i3, i6).",
+            "extends_to(i3, i7).",
+            "extends_to(i3, i8).",
+            "extends_to(i4, c5).",
+            "extends_to(i4, c6).",
+            "extends_to(i4, i9).",
+            "extends_to(i4, i10).",
+            "extends_to(i4, i11).",
+            "extends_to(i4, i12).",
+            "extends_to(i4, i13).",
+            "extends_to(i4, i14).",
+            "symbols(c1;c2;c3;c4;c5;c6;i1;i10;i11;i12;i13;i14;i2;i3;i4;i5;i6;i7;i8;i9).",
+        ]
+        deps = """\
+Extends I1 -> Type C1, Type C2, Type C3, Type I2
+Extends I3 -> Type C4,
+                Type C6,
+                Type I5,
+                Type I6,
+                Type I7,
+                Type I8
+Extends I4 -> Type C5,
+               Type C6,
+               Type I9,
+               Type I10,
+               Type I11,
+               Type I12,
+               Type I13,
+               Type I14"""
+        self.assertListEqual(
+            exp,
+            hh_codesynthesis.extract_logic_rules(deps.replace(",\n", ",").split("\n")),
         )
 
     def test_extends_dependency(self) -> None:
@@ -194,3 +239,60 @@ Type T -> Type A, Type B
             additional_programs=additional_programs, generator=hack_codegen
         )
         self.assertEqual(str(hack_codegen), exp)
+
+
+class ReadFromFileTest(unittest.TestCase):
+    def test_read(self) -> None:
+        exp = [
+            "extends_to(a, b).",
+            "extends_to(i, b).",
+            "extends_to(t, a).",
+            "symbols(a;b;i;t).",
+        ]
+        deps = """\
+Extends A -> Type B
+Extends I -> Type B
+Extends T -> Type A
+Type A -> Type B
+Type I -> Type B
+Type T -> Type A, Type B
+"""
+        test_file = "test_read.in"
+        with open(test_file, "w") as fp:
+            fp.write(deps)
+        self.assertListEqual(
+            exp,
+            hh_codesynthesis.extract_logic_rules(
+                hh_codesynthesis.read_from_file_or_stdin(test_file)
+            ),
+        )
+        os.remove(test_file)
+
+    def test_non_exist(self) -> None:
+        test_file = "non_exist.in"
+        with self.assertRaises(expected_exception=FileNotFoundError):
+            hh_codesynthesis.extract_logic_rules(
+                hh_codesynthesis.read_from_file_or_stdin(test_file)
+            )
+
+
+class WriteToFileTest(unittest.TestCase):
+    def test_hack_output(self) -> None:
+        test_file = "t.php"
+        exp = """\
+<?hh
+class C1   {}
+class C2 extends C1 implements I1 {}
+interface I1  {}
+"""
+        generator = hackGenerator.HackCodeGenerator()
+        generator._add_class("C1")
+        generator._add_class("C2")
+        generator._add_interface("I1")
+        generator._add_extend("C2", "C1")
+        generator._add_implement("C2", "I1")
+        hh_codesynthesis.output_to_file_or_stdout(generator, test_file)
+        with open(test_file) as fp:
+            lines = fp.readlines()
+            self.assertEqual("".join(lines), exp)
+        os.remove(test_file)

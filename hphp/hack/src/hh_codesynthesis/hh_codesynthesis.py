@@ -16,12 +16,14 @@
 #
 # Currently, we are synthesising Hack code only, we will support more
 # languages like C#, Java later on.
-
+import argparse
 import os
-from typing import List
+import sys
+from typing import List, Optional
 
 import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 from libfb.py import parutil
 
 # Extract logic rules from file format.
@@ -67,7 +69,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
     return rules
 
 
-# Take in a dependency graph and a code generator to emit code
+# Take in a dependency graph and a code generator to emit code.
 def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs
     asp_files = os.path.join(
@@ -81,3 +83,57 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
 
     ctl.ground([("base", [])])
     ctl.solve(on_model=generator.on_model)
+
+
+# Read dependency graph from file or stdin.
+def read_from_file_or_stdin(filename: Optional[str] = None) -> List[str]:
+    if filename:
+        with open(filename) as fp:
+            return fp.readlines()
+    # No filename, try stdin.
+    return sys.stdin.readlines()
+
+
+# Write code to file or stdout.
+def output_to_file_or_stdout(
+    generator: CodeGenerator, filename: Optional[str] = None
+) -> int:
+    if filename:
+        with open(filename, "w") as fp:
+            fp.write(str(generator))
+    else:
+        print(generator)
+    return 0
+
+
+def main() -> int:
+    generators = {
+        "raw": CodeGenerator,
+        "hack": HackCodeGenerator,
+    }
+
+    # Parse the arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_file", type=os.path.abspath)
+    parser.add_argument("--target_lang", type=str)
+    parser.add_argument("--output_file", type=os.path.abspath)
+    args: argparse.Namespace = parser.parse_args()
+
+    # Load dependency graph.
+    lines = read_from_file_or_stdin(filename=args.input_file)
+    # T92303034 Temporary handle for the multiple lines like,
+    # Extend A -> Type A,
+    #             Type B,
+    #             Type C,
+    #             Type D
+    graph = "".join(lines).replace(",\n", ",").split("\n")
+
+    # Output target language.
+    generator = generators.get(args.target_lang, CodeGenerator)()
+
+    do_reasoning(extract_logic_rules(graph), generator)
+    return output_to_file_or_stdout(generator=generator, filename=args.output_file)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

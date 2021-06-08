@@ -1319,15 +1319,23 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   in
   let init_id = Random_id.short_string () in
   let pid = Unix.getpid () in
+
+  (* There are three files which are used for IPC.
+  1. server_finale_file - we unlink it now upon startup,
+     and upon clean exit we'll write finale-date to it.
+  2. server_receipt_to_monitor_file - we'll unlink it now upon startup,
+     and upon clean exit we'll unlink it.
+  3. server_progress_file - we write "starting up" to it now upon startup,
+     and upon clean exit we'll write "shutting down" to it.
+  In both case of clean exit and abrupt exit there'll be leftover files.
+  We'll rely upon tmpclean to eventually clean them up. *)
   let server_finale_file = ServerFiles.server_finale_file pid in
   let server_progress_file = ServerFiles.server_progress_file pid in
   let server_receipt_to_monitor_file =
     ServerFiles.server_receipt_to_monitor_file pid
   in
-  Exit.prepare_server_specific_files
-    ~server_finale_file
-    ~server_progress_file
-    ~server_receipt_to_monitor_file;
+  (try Unix.unlink server_finale_file with _ -> ());
+  (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
   ServerCommandTypesUtils.write_progress_file
     ~server_progress_file
     ~server_progress:
@@ -1336,6 +1344,32 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         server_progress = "starting up";
         server_timestamp = Unix.gettimeofday ();
       };
+  Exit.add_hook_upon_clean_exit (fun finale_data ->
+      begin
+        try Unix.unlink server_receipt_to_monitor_file with _ -> ()
+      end;
+      begin
+        try
+          Sys_utils.with_umask 0o000 (fun () ->
+              let oc = Stdlib.open_out_bin server_finale_file in
+              Marshal.to_channel oc finale_data [];
+              Stdlib.close_out oc)
+        with _ -> ()
+      end;
+      begin
+        try
+          ServerCommandTypesUtils.write_progress_file
+            ~server_progress_file
+            ~server_progress:
+              {
+                ServerCommandTypes.server_warning = None;
+                server_progress = "shutting down";
+                server_timestamp = Unix.gettimeofday ();
+              }
+        with _ -> ()
+      end;
+      ());
+
   Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in

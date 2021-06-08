@@ -22,60 +22,25 @@ let show_finale_data (data : finale_data) : string =
     (Option.value data.msg ~default:"")
     (Exception.clean_stack stack)
 
-type server_specific_files = {
-  server_finale_file: string;
-  server_progress_file: string;
-  server_receipt_to_monitor_file: string;
-}
+let hook_upon_clean_exit : (finale_data -> unit) list ref = ref []
 
-let server_specific_files : server_specific_files option ref = ref None
-
-let prepare_server_specific_files
-    ~server_finale_file ~server_progress_file ~server_receipt_to_monitor_file :
-    unit =
-  server_specific_files :=
-    Some
-      {
-        server_finale_file;
-        server_progress_file;
-        server_receipt_to_monitor_file;
-      };
-  (* The progress file was already initialized by the monitor before it launched us. *)
-  (* TODO: probably other two files should also be initialized by the monitor too... *)
-  (try Unix.unlink server_finale_file with _ -> ());
-  (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
-  ()
+let add_hook_upon_clean_exit (hook : finale_data -> unit) : unit =
+  hook_upon_clean_exit := hook :: !hook_upon_clean_exit
 
 let exit
     ?(msg : string option)
     ?(stack : string option)
     (exit_status : Exit_status.t) : 'a =
-  let exit_code = Exit_status.exit_code exit_status in
-  match !server_specific_files with
-  | None -> Stdlib.exit exit_code
-  | Some
-      {
-        server_finale_file;
-        server_progress_file;
-        server_receipt_to_monitor_file;
-      } ->
-    (try Unix.unlink server_progress_file with _ -> ());
-    (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
-    let stack =
-      Option.value
-        ~default:
-          (Exception.get_current_callstack_string 99 |> Exception.clean_stack)
-        stack
-    in
-    let server_finale_data =
-      { exit_status; msg; stack = Utils.Callstack stack }
-    in
-    begin
-      try
-        Sys_utils.with_umask 0o000 (fun () ->
-            let oc = Stdlib.open_out_bin server_finale_file in
-            Marshal.to_channel oc server_finale_data [];
-            Stdlib.close_out oc)
-      with _ -> ()
-    end;
-    Stdlib.exit exit_code
+  let stack =
+    Option.value
+      ~default:
+        (Exception.get_current_callstack_string 99 |> Exception.clean_stack)
+      stack
+  in
+  let server_finale_data =
+    { exit_status; msg; stack = Utils.Callstack stack }
+  in
+  List.iter
+    (fun hook -> (try hook server_finale_data with _ -> ()))
+    !hook_upon_clean_exit;
+  Stdlib.exit (Exit_status.exit_code exit_status)

@@ -208,3 +208,7 @@ let require_extends_implements_ancestors =
   GlobalOptions.tco_require_extends_implements_ancestors
 
 let strict_value_equality = GlobalOptions.tco_strict_value_equality
+
+let enforce_sealed_subclasses = GlobalOptions.tco_enforce_sealed_subclasses
+
+let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping

@@ -278,6 +278,7 @@ let parse_options () =
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
   let print_position = ref true in
+  let enforce_sealed_subclasses = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -684,6 +685,9 @@ let parse_options () =
         Arg.Set strict_value_equality,
         " Emit an error when \"==\" or \"!=\" is used to compare values that are incompatible types."
       );
+      ( "--enable-sealed-subclasses",
+        Arg.Set enforce_sealed_subclasses,
+        " Require all __Sealed arguments to be subclasses" );
     ]
   in
 
@@ -846,6 +850,7 @@ let parse_options () =
       ~tco_require_extends_implements_ancestors:
         !require_extends_implements_ancestors
       ~tco_strict_value_equality:!strict_value_equality
+      ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ()
   in
   Errors.allowed_fixme_codes_strict :=

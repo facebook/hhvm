@@ -3224,6 +3224,24 @@ let extend_sealed child_pos parent_pos parent_name parent_kind verb =
       ^ Markdown_lite.md_codify name )
     [(parent_pos, "Declaration is here")]
 
+let sealed_not_subtype
+    verb parent_pos child_pos parent_name child_name child_kind =
+  let parent_name = strip_ns parent_name in
+  let child_name = strip_ns child_name in
+  add_list
+    (Typing.err_code Typing.SealedNotSubtype)
+    ( parent_pos,
+      child_kind
+      ^ " "
+      ^ Markdown_lite.md_codify child_name
+      ^ " in sealed whitelist for "
+      ^ Markdown_lite.md_codify parent_name
+      ^ ", but does not "
+      ^ verb
+      ^ " "
+      ^ Markdown_lite.md_codify parent_name )
+    [(child_pos, "Definition is here")]
+
 let trait_prop_const_class pos x =
   add
     (Typing.err_code Typing.TraitPropConstClass)

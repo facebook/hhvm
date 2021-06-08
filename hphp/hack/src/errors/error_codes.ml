@@ -639,6 +639,7 @@ module Typing = struct
     | RigidTVarEscape [@value 4442]
     | StrictEqValueIncompatibleTypes [@value 4443]
     | ModuleError [@value 4444]
+    | SealedNotSubtype [@value 4445]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

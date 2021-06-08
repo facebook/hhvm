@@ -669,6 +669,9 @@ val extend_non_abstract_record : string -> Pos.t -> Pos_or_decl.t -> unit
 
 val extend_sealed : Pos.t -> Pos_or_decl.t -> string -> string -> string -> unit
 
+val sealed_not_subtype :
+  string -> Pos.t -> Pos_or_decl.t -> string -> string -> string -> unit
+
 val trait_prop_const_class : Pos.t -> string -> unit
 
 val read_before_write : Pos.t * string -> unit

@@ -887,6 +887,61 @@ let check_parent env class_def class_type =
       Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   | None -> ()
 
+let sealed_subtype ctx (c : Nast.class_) ~is_enum =
+  let parent_name = snd c.c_name in
+  let is_sealed (attr : Nast.user_attribute) =
+    String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
+  in
+  match List.find c.c_user_attributes is_sealed with
+  | None -> ()
+  | Some sealed_attr ->
+    let iter_item (param : Nast.expr) =
+      match snd param with
+      | Class_const (cid, _) ->
+        let klass_name = Nast.class_id_to_str (snd cid) in
+        let klass = Decl_provider.get_class ctx klass_name in
+        (match klass with
+        | None -> ()
+        | Some decl ->
+          let includes_ancestor =
+            if is_enum then
+              match Cls.enum_type decl with
+              | None -> true
+              | Some enum_ty ->
+                let check x =
+                  match get_node x with
+                  | Tapply ((_, name), _) -> String.equal name parent_name
+                  | _ -> true
+                in
+                List.exists enum_ty.te_includes check
+            else
+              Cls.has_ancestor decl parent_name
+          in
+          if not includes_ancestor then
+            let parent_pos = fst param in
+            let child_pos = Cls.pos decl in
+            let child_name = Cls.name decl in
+            let (child_kind, verb) =
+              match Cls.kind decl with
+              | Ast_defs.Cabstract
+              | Ast_defs.Cnormal ->
+                ("Class", "extend")
+              | Ast_defs.Cinterface -> ("Interface", "implement")
+              | Ast_defs.Ctrait -> ("Trait", "use")
+              | Ast_defs.Cenum -> ("Enum", "use")
+            in
+            Errors.sealed_not_subtype
+              verb
+              parent_pos
+              child_pos
+              parent_name
+              child_name
+              child_kind)
+      (* unit below is fine because error cases are handled as Parsing[1002] *)
+      | _ -> ()
+    in
+    List.iter sealed_attr.ua_params iter_item
+
 let check_parent_sealed
     ~(is_enum_class : bool) (child_pos, child_type) parent_type =
   match Cls.sealed_whitelist parent_type with
@@ -1741,6 +1796,13 @@ let class_def_ env c tc =
   let env = List.fold impl ~init:env ~f:check_where_constraints in
   check_parent env c tc;
   check_parents_sealed env c tc;
+  ( if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
+    match c.c_kind with
+    | Ast_defs.Cenum
+      when TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) ->
+      sealed_subtype ctx c ~is_enum:true
+    | Ast_defs.Cenum -> ()
+    | _ -> sealed_subtype ctx c ~is_enum:false );
   let _ =
     if c.c_support_dynamic_type then
       (* Any class that extends a class or implements an interface

@@ -250,6 +250,7 @@ let () =
       ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
+      ignored_flag "--enable-sealed-subclasses";
     ]
     set_file
     usage;

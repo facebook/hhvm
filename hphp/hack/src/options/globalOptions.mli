@@ -311,6 +311,8 @@ type t = {
   tco_require_extends_implements_ancestors: bool;
   (* Emit an error when "==" or "!=" is used to compare values that are incompatible types *)
   tco_strict_value_equality: bool;
+  (* All member of the __Sealed whitelist should be subclasses*)
+  tco_enforce_sealed_subclasses: bool;
 }
 [@@deriving eq, show]
 
@@ -437,6 +439,7 @@ val make :
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
+  ?tco_enforce_sealed_subclasses:bool ->
   unit ->
   t
 
@@ -719,3 +722,5 @@ val tco_meth_caller_only_public_visibility : t -> bool
 val tco_require_extends_implements_ancestors : t -> bool
 
 val tco_strict_value_equality : t -> bool
+
+val tco_enforce_sealed_subclasses : t -> bool

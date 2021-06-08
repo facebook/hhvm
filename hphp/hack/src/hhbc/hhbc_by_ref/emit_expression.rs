@@ -3890,6 +3890,8 @@ fn emit_obj_get<'a, 'arena>(
         total_stack_size
     };
     let final_instr = instr::querym(alloc, num_params, query_op, mk);
+    // Don't pop elems/props from the stack during the lookup for null
+    // coalesce assignment in case we do a write later.
     let querym_n_unpopped = if null_coalesce_assignment {
         Some(total_stack_size)
     } else {
@@ -5319,17 +5321,24 @@ pub fn is_reified_tparam<'a, 'arena>(
 /// The instructions are divided into three sections:
 ///   1. base and element/property expression instructions:
 ///      push non-trivial base and key values on the stack
-///   2. base selector instructions: a sequence of Base/Dim instructions that
+///   2. class instructions: emitted when the base is a static property access.
+///      A sequence of instructions that pushes the property and the class on the
+///      stack to be consumed by a BaseSC. (Foo::$bar)
+///   3. base selector instructions: a sequence of Base/Dim instructions that
 ///      actually constructs the base address from "member keys" that are inlined
 ///      in the instructions, or pulled from the key values that
 ///      were pushed on the stack in section 1.
-///   3. (constructed by the caller) a final accessor e.g. QueryM or setter
+///   4. (constructed by the caller) a final accessor e.g. QueryM or setter
 ///      e.g. SetOpM instruction that has the final key inlined in the
 ///      instruction, or pulled from the key values that were pushed on the
 ///      stack in section 1.
-/// The function returns a triple (base_instrs, base_setup_instrs, stack_size)
-/// where base_instrs is section 1 above, base_setup_instrs is section 2, and
-/// stack_size is the number of values pushed onto the stack by section 1.
+///
+/// The function returns a 5-tuple:
+/// (base_instrs, cls_instrs, base_setup_instrs, base_stack_size, cls_stack_size)
+/// where base_instrs is section 1 above, cls_instrs is section 2, base_setup_instrs
+/// is section 3, stack_size is the number of values pushed on the stack by
+/// section 1, and cls_stack_size is the number of values pushed on the stack by
+/// section 2.
 ///
 /// For example, the r-value expression $arr[3][$ix+2]
 /// will compile to
@@ -5342,7 +5351,7 @@ pub fn is_reified_tparam<'a, 'arena>(
 ///   Dim Warn EI:3
 ///   # Section 3, indexing the array using the value at stack position 0 (EC:0)
 ///   QueryM 1 CGet EC:0
-///)
+///
 fn emit_base<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
@@ -6264,11 +6273,8 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena>(
                         LValOp::Unset => MemberOpMode::Unset,
                         _ => MemberOpMode::Define,
                     };
-                    let (mut elem_instrs, elem_stack_size) =
+                    let (elem_instrs, elem_stack_size) =
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
-                    if null_coalesce_assignment {
-                        elem_instrs = instr::empty(alloc);
-                    }
                     let base_offset = elem_stack_size + rhs_stack_size;
                     let (
                         base_expr_instrs_begin,
@@ -6301,8 +6307,11 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena>(
                         emit_final_member_op(alloc, total_stack_size as usize, op, mk),
                     );
                     (
+                        // Don't emit instructions for elems as these were not popped from
+                        // the stack by the final member op during the lookup of a null
+                        // coalesce assignment.
                         if null_coalesce_assignment {
-                            elem_instrs
+                            instr::empty(alloc)
                         } else {
                             InstrSeq::gather(
                                 alloc,
@@ -6354,7 +6363,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena>(
                     base_offset,
                     rhs_stack_size,
                 )?;
-                let (mk, mut prop_instrs, _) = emit_prop_expr(
+                let (mk, prop_instrs, _) = emit_prop_expr(
                     e,
                     env,
                     nullflavor,
@@ -6362,9 +6371,6 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena>(
                     e2,
                     null_coalesce_assignment,
                 )?;
-                if null_coalesce_assignment {
-                    prop_instrs = instr::empty(alloc);
-                }
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr = emit_pos_then(
                     alloc,
@@ -6372,8 +6378,11 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena>(
                     emit_final_member_op(alloc, total_stack_size as usize, op, mk),
                 );
                 (
+                    // Don't emit instructions for props as these were not popped from
+                    // the stack by the final member op during the lookup of a null
+                    // coalesce assignment.
                     if null_coalesce_assignment {
-                        prop_instrs
+                        instr::empty(alloc)
                     } else {
                         InstrSeq::gather(
                             alloc,

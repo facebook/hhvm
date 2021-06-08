@@ -142,3 +142,7 @@ abstract class TestExtractConstruct {
 
 interface IAsConstraint{}
 abstract class WithTparamConstraint<T as IAsConstraint>{}
+
+class WithPropInConstruct<T> {
+  public function __construct(public T $x)[] {}
+}

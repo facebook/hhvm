@@ -2136,6 +2136,10 @@ end = struct
 
     val is_method : t -> method_name:string -> bool
 
+    val method_props : t -> SSet.t option
+
+    val prop_name : t -> string option
+
     val mk_target_method : Provider_context.t -> Cmd.target -> t
 
     val mk_prop :
@@ -2192,6 +2196,20 @@ end = struct
       | EltXHPAttr { line; _ }
       | EltTargetMethod (line, _) ->
         line
+
+    let method_props = function
+      | EltMethod (_, _, Aast.{ m_params; _ }) ->
+        Some
+          ( SSet.of_list
+          @@ List.filter_map
+               m_params
+               ~f:(fun Aast.{ param_name; param_visibility; _ } ->
+                 Option.map ~f:(fun _ -> param_name) param_visibility) )
+      | _ -> None
+
+    let prop_name = function
+      | EltProp { name; _ } -> Some name
+      | _ -> None
 
     let compare elt1 elt2 = Int.compare (line elt2) (line elt1)
 
@@ -2568,6 +2586,18 @@ end = struct
       elements: Class_elt.t list;
     }
 
+    let filter_constructor_props elts =
+      let ctr_props =
+        Option.value ~default:SSet.empty
+        @@ Option.bind ~f:Class_elt.method_props
+        @@ List.find elts ~f:(fun elt ->
+               Class_elt.is_method elt ~method_name:"__construct")
+      in
+      List.filter elts ~f:(fun elt ->
+          Option.value_map ~default:true ~f:(fun prop_name ->
+              not @@ SSet.mem prop_name ctr_props)
+          @@ Class_elt.prop_name elt)
+
     let of_class Aast.{ c_uses; c_reqs; _ } class_elts =
       let (req_extends, req_implements) =
         List.partition_map c_reqs ~f:(fun (s, extends) ->
@@ -2576,13 +2606,11 @@ end = struct
             else
               Second s)
       in
-
-      {
-        uses = c_uses;
-        req_extends;
-        req_implements;
-        elements = List.sort ~compare:Class_elt.compare class_elts;
-      }
+      let elements =
+        filter_constructor_props
+        @@ List.sort ~compare:Class_elt.compare class_elts
+      in
+      { uses = c_uses; req_extends; req_implements; elements }
 
     let pp_use_extend ppf = function
       | ([], [], []) ->

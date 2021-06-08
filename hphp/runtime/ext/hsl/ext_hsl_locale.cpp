@@ -15,9 +15,13 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/locale.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_icu_ops.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
@@ -27,67 +31,71 @@ namespace {
 
 const StaticString
   s_HSLLocale("HSLLocale"),
-  s_FQHSLLocale("HH\\Lib\\_Private\\_Locale\\Locale");
+  s_FQHSLLocale("HH\\Lib\\_Private\\_Locale\\Locale"),
+  s_InvalidLocaleException("HH\\Lib\\Locale\\InvalidLocaleException");
 
 Class* s_HSLLocaleClass = nullptr;
 
 } // namespace
 
-struct HSLLocale {
-  HSLLocale() = default;
-  explicit HSLLocale(std::shared_ptr<Locale> loc): m_locale(loc) {}
-
-  ~HSLLocale() {
-    sweep();
+HSLLocale::HSLLocale(std::shared_ptr<Locale> loc): m_locale(loc) {
+  if (loc->getCodesetKind() == Locale::CodesetKind::SINGLE_BYTE) {
+    m_ops = new HSLLocaleLibcOps(*loc.get());
+  } else {
+    m_ops = new HSLLocaleICUOps(*loc.get());
   }
+}
 
-  void sweep() {
-    m_locale.reset();
+HSLLocale::~HSLLocale() {
+  sweep();
+}
+
+void HSLLocale::sweep() {
+  delete m_ops;
+  m_locale.reset();
+}
+
+Object HSLLocale::newInstance(std::shared_ptr<Locale> loc) {
+  assertx(s_HSLLocaleClass);
+  Object obj { s_HSLLocaleClass };
+  auto* data = Native::data<HSLLocale>(obj);
+  new (data) HSLLocale(loc);
+  return obj;
+}
+
+Array HSLLocale::__debugInfo() const {
+  if(!m_locale) {
+    raise_fatal_error("Locale is null");
   }
-
-  std::shared_ptr<Locale> get() {
-    return m_locale;
-  }
-
-  static Object newInstance(std::shared_ptr<Locale> loc) {
-    assertx(s_HSLLocaleClass);
-    Object obj { s_HSLLocaleClass };
-    auto* data = Native::data<HSLLocale>(obj);
-    new (data) HSLLocale(loc);
-    return obj;
-  }
-
-  Array __debugInfo() const {
-    if(!m_locale) {
-      raise_fatal_error("Locale is null");
+  Array ret(Array::CreateDict());
+  for (const auto& [category, locale] : m_locale->getAllCategoryLocaleNames()) {
+    if (category == "LC_ALL") {
+      // Misleading; only set as an implementation detail. If it's truly set and
+      // overriding, all the other categories will be set to match anyway.
+      continue;
     }
-    Array ret(Array::CreateDict());
-    for (const auto& [category, locale] : m_locale->getAllCategoryLocaleNames()) {
-      ret.set(
-        String(category.data(), category.size(), CopyString),
-        String(locale.data(), locale.size(), CopyString)
-      );
-    }
-    return ret;
+    ret.set(
+      String(category.data(), category.size(), CopyString),
+      String(locale.data(), locale.size(), CopyString)
+    );
   }
+  return ret;
+}
 
-  static std::shared_ptr<Locale> get(const Object& obj) {
-    if (obj.isNull()) {
-      raise_typehint_error("Expected an HSL Locale, got null");
-    }
-    if (!obj->instanceof(s_FQHSLLocale)) {
-      raise_typehint_error(
-        folly::sformat(
-          "Expected an HSL Locale, got instance of class '{}'",
-          obj->getClassName().c_str()
-        )
-      );
-    }
-    return Native::data<HSLLocale>(obj)->get();
+HSLLocale* HSLLocale::fromObject(const Object& obj) {
+  if (obj.isNull()) {
+    raise_typehint_error("Expected an HSL Locale, got null");
   }
- private:
-  std::shared_ptr<Locale> m_locale;
-};
+  if (!obj->instanceof(s_FQHSLLocale)) {
+    raise_typehint_error(
+      folly::sformat(
+        "Expected an HSL Locale, got instance of class '{}'",
+        obj->getClassName().c_str()
+      )
+    );
+  }
+  return Native::data<HSLLocale>(obj);
+}
 
 namespace {
 
@@ -108,14 +116,20 @@ Object HHVM_FUNCTION(get_request_locale) {
 }
 
 void HHVM_FUNCTION(set_request_locale, const Object& locale) {
-  ThreadSafeLocaleHandler::setRequestLocale(HSLLocale::get(locale));
+  ThreadSafeLocaleHandler::setRequestLocale(HSLLocale::fromObject(locale)->get());
 }
 
 Object HHVM_FUNCTION(newlocale_mask,
                      int64_t mask,
                      const String& locale,
                      const Object& base) {
-  auto loc = HSLLocale::get(base)->newlocale(LocaleCategoryMask, mask, locale.c_str());
+  auto loc = HSLLocale::fromObject(base)->get()->newlocale(LocaleCategoryMask, mask, locale.c_str());
+  if (!loc) {
+    throw_object(
+      s_InvalidLocaleException,
+      make_vec_array(folly::sformat("Invalid locale: '{}'", locale.slice()))
+    );
+  }
   return HSLLocale::newInstance(loc);
 }
 
@@ -123,7 +137,13 @@ Object HHVM_FUNCTION(newlocale_category,
                      int64_t category,
                      const String& locale,
                      const Object& base) {
-  auto loc = HSLLocale::get(base)->newlocale(LocaleCategory, category, locale.c_str());
+  auto loc = HSLLocale::fromObject(base)->get()->newlocale(LocaleCategory, category, locale.c_str());
+  if (!loc) {
+    throw_object(
+      s_InvalidLocaleException,
+      make_vec_array(folly::sformat("Invalid locale: '{}'", locale.slice()))
+    );
+  }
   return HSLLocale::newInstance(loc);
 }
 

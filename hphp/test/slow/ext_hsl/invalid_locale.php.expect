@@ -1,0 +1,9 @@
+--- en_US.UTF-8 ---
+  'LC_COLLATE'	 => 'en_US.UTF-8'
+  'LC_CTYPE'	 => 'en_US.UTF-8'
+  'LC_MESSAGES'	 => 'en_US.UTF-8'
+  'LC_MONETARY'	 => 'en_US.UTF-8'
+  'LC_NUMERIC'	 => 'en_US.UTF-8'
+  'LC_TIME'	 => 'en_US.UTF-8'
+Exception: Invalid locale: 'en_US.UTF-16'
+Exception: Invalid locale: 'xx_XX.UTF-8'

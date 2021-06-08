@@ -15,6 +15,8 @@ HHVM_DEFINE_EXTENSION("hsl_os"
 HHVM_DEFINE_EXTENSION("hsl_locale"
   SOURCES
     ext_hsl_locale.cpp
+    hsl_locale_icu_ops.cpp
+    hsl_locale_libc_ops.cpp
   SYSTEMLIB
     ext_hsl_locale.php
 )
@@ -27,6 +29,13 @@ HHVM_DEFINE_EXTENSION("hsl_random"
   DEPENDS
     libBoost
     libFolly
+)
+
+HHVM_DEFINE_EXTENSION("hsl_str"
+  SOURCES
+    ext_hsl_str.cpp
+  SYSTEMLIB
+    ext_hsl_str.php
 )
 
 HHVM_DEFINE_EXTENSION("hsl_time"

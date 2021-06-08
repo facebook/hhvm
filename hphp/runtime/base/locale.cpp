@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <dlfcn.h>
+#include <langinfo.h>
 
 namespace HPHP {
 
@@ -111,6 +112,41 @@ std::shared_ptr<Locale> Locale::getEnvLocale() {
   return ret;
 }
 
+namespace {
+
+Locale::CodesetKind infer_codeset_kind(locale_t loc) {
+  const char* codeset = nl_langinfo_l(CODESET, loc);
+
+  if (LIKELY(codeset && codeset[1] == 'C' && codeset[2] == 0)) {
+    return Locale::CodesetKind::SINGLE_BYTE;
+  }
+
+  if (codeset && codeset[0]) {
+    if (strcmp(codeset, "UTF-8") == 0 || strcmp(codeset, "utf8") == 0) {
+      return Locale::CodesetKind::UTF8;
+    }
+    return Locale::CodesetKind::SINGLE_BYTE;
+  }
+#if defined(__APPLE__)
+  // If you specify a locale without an encoding, the CODESET is always
+  // null/empty on MacOS. MacOS is UTF-8 first, but uses single-byte for 'C'.
+  //
+  // To distinguish between these, we look at the max number of bytes in a
+  // character
+  if (MB_CUR_MAX_L(loc) <= 1) {
+    return Locale::CodesetKind::SINGLE_BYTE;
+  }
+  return Locale::CodesetKind::UTF8;
+#elif defined(__GLIBC__)
+  // UTF-8 is always explicit, so if we don't have one, it's single-byte.
+  return Locale::CodesetKind::SINGLE_BYTE;
+#else
+#error Unsupported platform
+#endif
+}
+
+}// namespace
+
 Locale::~Locale() {
   freelocale(m_locale);
 }
@@ -119,7 +155,7 @@ locale_t Locale::get() const {
   return m_locale;
 }
 
-const char* Locale::querylocale(LocaleCategoryMode, int category) {
+const char* Locale::querylocale(LocaleCategoryMode, int category) const {
   for (const auto& row: m_map) {
     if (row.category == category) {
       return row.locale_str.c_str();
@@ -128,7 +164,7 @@ const char* Locale::querylocale(LocaleCategoryMode, int category) {
   return nullptr;
 }
 
-const char* Locale::querylocale(LocaleCategoryMaskMode, int mask) {
+const char* Locale::querylocale(LocaleCategoryMaskMode, int mask) const {
   for (const auto& row: m_map) {
     if ((row.category_mask & mask) == row.category_mask) {
       return row.locale_str.c_str();
@@ -139,7 +175,7 @@ const char* Locale::querylocale(LocaleCategoryMaskMode, int mask) {
 
 std::shared_ptr<Locale> Locale::newlocale(LocaleCategoryMode,
                                           int category,
-                                          const char* locale) {
+                                          const char* locale) const {
   for (const auto& row : m_map) {
     if (row.category == category) {
       return newlocale(LocaleCategoryMask, row.category_mask, locale);
@@ -150,7 +186,7 @@ std::shared_ptr<Locale> Locale::newlocale(LocaleCategoryMode,
 
 std::shared_ptr<Locale> Locale::newlocale(LocaleCategoryMaskMode,
                                           int mask,
-                                          const char* locale) {
+                                          const char* locale) const {
   auto env = getEnvLocale();
 
   auto names = m_map;
@@ -176,7 +212,10 @@ std::shared_ptr<Locale> Locale::newlocale(LocaleCategoryMaskMode,
     }
     return nullptr;
   }
-  return std::shared_ptr<Locale>(new Locale(new_locale, names));
+  auto codeset_kind = (mask & LC_CTYPE_MASK) == LC_CTYPE_MASK
+    ? infer_codeset_kind(new_locale)
+    : m_codesetKind;
+  return std::shared_ptr<Locale>(new Locale(new_locale, names, codeset_kind));
 }
 
 std::map<std::string, std::string> Locale::getAllCategoryLocaleNames() {
@@ -188,9 +227,15 @@ std::map<std::string, std::string> Locale::getAllCategoryLocaleNames() {
 }
 
 Locale::Locale(locale_t l,
-               const CategoryAndLocaleMap& m): m_locale(l), m_map(m) {
+               const CategoryAndLocaleMap& m
+): m_locale(l), m_map(m), m_codesetKind(infer_codeset_kind(l)) {
   assertx(l);
 }
 
+Locale::Locale(locale_t l,
+               const CategoryAndLocaleMap& m,
+               CodesetKind ck): m_locale(l), m_map(m), m_codesetKind(ck) {
+  assertx(l);
+}
 
 } // namespace HPHP

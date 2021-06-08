@@ -1,10 +1,9 @@
-<?hh // strict
-
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,36 +13,35 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
- */
+*/
 
-namespace HH\Lib\_Private\_Locale {
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 
-<<__NativeData("HSLLocale")>>
-final class Locale {
-  private function __construct() {}
-  <<__Native>>
-  public function __debugInfo(): dict<string, string>;
+namespace HPHP {
+
+HSLLocaleLibcOps::HSLLocaleLibcOps(
+  const Locale& locale
+) : m_loc(locale.get()) {
 }
 
-<<__Native>>
-function get_c_locale()[]: Locale;
-<<__Native>>
-function get_environment_locale(): Locale;
-<<__Native>>
-function get_request_locale(): Locale;
-<<__Native>>
-function set_request_locale(Locale $loc): void;
-
-/** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
-<<__Native>>
-function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
-/** Take a single category, e.g. `LC_TYPE` */
-<<__Native>>
-function newlocale_category(int $category, string $locale, Locale $base): Locale;
-
-} // namespace _Locale
-
-namespace HH\Lib\Locale {
-  final class InvalidLocaleException extends \Exception {
-  }
+HSLLocaleLibcOps::~HSLLocaleLibcOps() {
 }
+
+int64_t HSLLocaleLibcOps::strlen(const String& str) const {
+  return str.length();
+}
+
+String HSLLocaleLibcOps::uppercase(const String& str) const {
+  return str.forEachByteFast([this](char c) { return toupper_l(c, this->m_loc); });
+}
+
+String HSLLocaleLibcOps::lowercase(const String& str) const {
+  return str.forEachByteFast([this](char c) { return tolower_l(c, this->m_loc); });
+}
+
+String HSLLocaleLibcOps::foldcase(const String& str) const {
+  return lowercase(str);
+}
+
+} // namespace HPHP

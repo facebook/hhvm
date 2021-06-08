@@ -75,34 +75,6 @@ String stringForEachBuffered(uint32_t bufLen, const String& str, Op action) {
   return sb.detach();
 }
 
-template <bool mutate, class Op> ALWAYS_INLINE
-String stringForEach(uint32_t len, const String& str, Op action) {
-  String ret = mutate ? str : String(len, ReserveString);
-
-  auto srcSlice = str.slice();
-
-  const char* src = srcSlice.begin();
-  const char* end = srcSlice.end();
-
-  char* dst = ret.mutableData();
-
-  for (; src != end; ++src, ++dst) {
-    *dst = action(*src);
-  }
-
-  if (!mutate) ret.setSize(len);
-  return ret;
-}
-
-template <class Op> ALWAYS_INLINE
-String stringForEachFast(const String& str, Op action) {
-  if (str.empty()) {
-    return str;
-  }
-
-  return stringForEach<false>(str.size(), str, action);
-}
-
 String HHVM_FUNCTION(addcslashes,
                      const String& str,
                      const String& charlist) {
@@ -424,12 +396,12 @@ String HHVM_FUNCTION(strrev,
 
 String HHVM_FUNCTION(strtolower,
                      const String& str) {
-  return stringForEachFast(str, tolower);
+  return str.forEachByteFast(tolower);
 }
 
 String HHVM_FUNCTION(strtoupper,
                      const String& str) {
-  return stringForEachFast(str, toupper);
+  return str.forEachByteFast(toupper);
 }
 
 template <class OpTo, class OpIs> ALWAYS_INLINE
@@ -467,7 +439,7 @@ String HHVM_FUNCTION(ucwords,
   mask[256] = 1; // special 'start of string' character
 
   int last = 256;
-  return stringForEach<false>(str.size(), str, [&] (char c) {
+  return str.forEachByte([&] (char c) {
       char ret = mask[last] ? toupper(c) : c;
       last = (uint8_t)c;
       return ret;

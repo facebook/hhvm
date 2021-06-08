@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // decl
 
 /*
    +----------------------------------------------------------------------+
@@ -16,34 +16,20 @@
    +----------------------------------------------------------------------+
  */
 
-namespace HH\Lib\_Private\_Locale {
+namespace HH\Lib\_Private\_Str {
 
-<<__NativeData("HSLLocale")>>
-final class Locale {
-  private function __construct() {}
-  <<__Native>>
-  public function __debugInfo(): dict<string, string>;
-}
+use type HH\Lib\_Private\_Locale\Locale;
 
 <<__Native>>
-function get_c_locale()[]: Locale;
+function strlen_l(string $str, ?Locale $loc = null): int;
 <<__Native>>
-function get_environment_locale(): Locale;
+function uppercase_l(string $str, ?Locale $loc = null): string;
 <<__Native>>
-function get_request_locale(): Locale;
+function lowercase_l(string $str, ?Locale $loc = null): string;
 <<__Native>>
-function set_request_locale(Locale $loc): void;
+function titlecase_l(string $str, ?Locale $loc = null): string;
 
-/** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
 <<__Native>>
-function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
-/** Take a single category, e.g. `LC_TYPE` */
-<<__Native>>
-function newlocale_category(int $category, string $locale, Locale $base): Locale;
+function foldcase_l(string $str, ?Locale $loc = null): string;
 
-} // namespace _Locale
-
-namespace HH\Lib\Locale {
-  final class InvalidLocaleException extends \Exception {
-  }
-}
+} // namespace HH\Lib\_Private\_Str

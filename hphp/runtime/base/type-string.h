@@ -411,6 +411,34 @@ public:
    */
   void dump() const;
 
+  template <class Op> ALWAYS_INLINE
+  String forEachByte(Op action) const {
+    String ret = String(size(), ReserveString);
+
+    auto srcSlice = slice();
+
+    const char* src = srcSlice.begin();
+    const char* end = srcSlice.end();
+
+    char* dst = ret.mutableData();
+
+    for (; src != end; ++src, ++dst) {
+      *dst = action(*src);
+    }
+
+    ret.setSize(size());
+    return ret;
+  }
+
+  template <class Op> ALWAYS_INLINE
+  String forEachByteFast(Op action) const {
+    if (this->empty()) {
+      return *this;
+    }
+
+    return forEachByte(action);
+  }
+
  private:
   String rvalImpl(int key) const {
     if (m_str) {

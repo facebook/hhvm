@@ -56,19 +56,33 @@ enum LocaleCategoryMaskMode { LocaleCategoryMask };
  * *very* early, e.g. from static initializers in random C libraries.
  */
 struct Locale final {
+  enum class CodesetKind{
+    SINGLE_BYTE,
+    // UTF-8 is the only multibyte encoding that is portably supported as a C
+    // locale; GB 18030 (a variable-length Chinese standard Unicode encoding) is
+    // also supported by glibc, but not on MacOS, and not on most Windows
+    // systems.
+    //
+    // Encodings like UTF16 can not be supported as a C locale as they include
+    // null bytes, so UTF16 strings can not be 'C strings' - but they can be
+    // byte arrays.
+    UTF8,
+  };
+
   static std::shared_ptr<Locale> getCLocale();
   static std::shared_ptr<Locale> getEnvLocale();
 
   ~Locale();
 
   locale_t get() const;
-  const char* querylocale(LocaleCategoryMode, int category); 
-  const char* querylocale(LocaleCategoryMaskMode, int mask); 
+  const char* querylocale(LocaleCategoryMode, int category) const;
+  const char* querylocale(LocaleCategoryMaskMode, int mask) const;
 
-  std::shared_ptr<Locale> newlocale(LocaleCategoryMode, int category, const char* locale);
-  std::shared_ptr<Locale> newlocale(LocaleCategoryMaskMode, int mask, const char* locale);
+  std::shared_ptr<Locale> newlocale(LocaleCategoryMode, int category, const char* locale) const;
+  std::shared_ptr<Locale> newlocale(LocaleCategoryMaskMode, int mask, const char* locale) const;
 
   std::map<std::string, std::string> getAllCategoryLocaleNames();
+  CodesetKind getCodesetKind() {return m_codesetKind; }
 private:
   struct CategoryAndLocaleRow final {
     int category;
@@ -77,11 +91,13 @@ private:
     std::string locale_str;
   };
   using CategoryAndLocaleMap = std::vector<CategoryAndLocaleRow>;
-  
+
   locale_t m_locale;
   CategoryAndLocaleMap m_map;
+  CodesetKind m_codesetKind;
 
   Locale(locale_t, const CategoryAndLocaleMap&);
+  Locale(locale_t, const CategoryAndLocaleMap&, CodesetKind);
 };
 
 } // namespace HPHP

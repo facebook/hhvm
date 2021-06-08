@@ -8,7 +8,11 @@
  *
  */
 
-namespace HH\Lib\_Private\_Locale;
+namespace HH\Lib\Locale {
+  final class InvalidLocaleException extends \Exception {}
+}
+
+namespace HH\Lib\_Private\_Locale {
 
 final class Locale {
   private function __construct() {}
@@ -45,3 +49,5 @@ const LC_MONETARY_MASK = 0xdeadbeef;
 const LC_NUMERIC_MASK = 0xdeadbeef;
 const LC_TIME_MASK = 0xdeadbeef;
 const LC_MESSAGES_MASK = 0xdeadbeef;
+
+} // namespace HH\Lib\_Private\_Locale

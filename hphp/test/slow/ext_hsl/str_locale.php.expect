@@ -1,0 +1,46 @@
+------ no locale ------
+string(2) "ii"
+string(2) "II"
+string(2) "Ii"
+string(2) "ii"
+int(2)
+----- 'iİıI' - en_US.UTF-8 ----
+input	bytes	chars	lower	upper	title	fold
+iİıI	6	4	ii̇ıi	IİII	Ii̇ıi	ii̇ıi
+----- 'iİıI' - tr_TR.UTF-8 ----
+input	bytes	chars	lower	upper	title	fold
+iİıI	6	4	iiıı	İİII	İiıı	iiıı
+----- '😀 foo 💩' - en_US.UTF-8 ----
+dict(7) {
+  ["input"]=>
+  string(13) "😀 foo 💩"
+  ["bytes"]=>
+  int(13)
+  ["chars"]=>
+  int(7)
+  ["lower"]=>
+  string(13) "😀 foo 💩"
+  ["upper"]=>
+  string(13) "😀 FOO 💩"
+  ["title"]=>
+  string(13) "😀 Foo 💩"
+  ["fold"]=>
+  string(13) "😀 foo 💩"
+}
+----- 'the foo of bar' - en_US.UTF-8 ----
+dict(7) {
+  ["input"]=>
+  string(14) "the foo of bar"
+  ["bytes"]=>
+  int(14)
+  ["chars"]=>
+  int(14)
+  ["lower"]=>
+  string(14) "the foo of bar"
+  ["upper"]=>
+  string(14) "THE FOO OF BAR"
+  ["title"]=>
+  string(14) "The Foo Of Bar"
+  ["fold"]=>
+  string(14) "the foo of bar"
+}

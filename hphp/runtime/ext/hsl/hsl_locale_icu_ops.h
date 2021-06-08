@@ -1,10 +1,9 @@
-<?hh // strict
-
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,36 +13,25 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
- */
+*/
 
-namespace HH\Lib\_Private\_Locale {
+#pragma once
 
-<<__NativeData("HSLLocale")>>
-final class Locale {
-  private function __construct() {}
-  <<__Native>>
-  public function __debugInfo(): dict<string, string>;
-}
+#include "hphp/runtime/ext/hsl/hsl_locale_ops.h"
 
-<<__Native>>
-function get_c_locale()[]: Locale;
-<<__Native>>
-function get_environment_locale(): Locale;
-<<__Native>>
-function get_request_locale(): Locale;
-<<__Native>>
-function set_request_locale(Locale $loc): void;
+#include <unicode/locid.h>
 
-/** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
-<<__Native>>
-function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
-/** Take a single category, e.g. `LC_TYPE` */
-<<__Native>>
-function newlocale_category(int $category, string $locale, Locale $base): Locale;
+namespace HPHP {
+  struct HSLLocaleICUOps final : public HSLLocale::Ops {
+    explicit HSLLocaleICUOps(const Locale& locale);
+    virtual ~HSLLocaleICUOps() override;
 
-} // namespace _Locale
-
-namespace HH\Lib\Locale {
-  final class InvalidLocaleException extends \Exception {
-  }
-}
+    virtual int64_t strlen(const String&) const override;
+    virtual String uppercase(const String&) const override;
+    virtual String lowercase(const String&) const override;
+    virtual String foldcase(const String&) const override;
+    private:
+      icu::Locale m_ctype;
+      uint32_t m_caseFoldFlags;
+  };
+} // namespace HPHP

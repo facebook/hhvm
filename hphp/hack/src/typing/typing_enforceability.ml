@@ -162,8 +162,22 @@ let make_locl_like_type env ty =
   else
     (env, ty)
 
+(* We don't trust that hhvm will enforce things consistent with the .hhi file,
+   outside of hsl *)
+let unenforced_hhi pos_or_decl =
+  match Pos_or_decl.get_raw_pos_or_decl_reference pos_or_decl with
+  | `Decl_ref _ -> false
+  | `Raw p ->
+    let path = Pos.filename p in
+    Relative_path.(is_hhi (prefix path))
+    &&
+    let suffix = Relative_path.suffix path in
+    not
+      ( String.is_prefix suffix ~prefix:"hsl_generated/"
+      || String.is_prefix suffix ~prefix:"hsl/" )
+
 let get_enforced env ~explicitly_untrusted ty =
-  if explicitly_untrusted || (Pos_or_decl.is_hhi @@ get_pos ty) then
+  if explicitly_untrusted || unenforced_hhi (get_pos ty) then
     Unenforced
   else
     get_enforcement env ty

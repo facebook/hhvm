@@ -1,0 +1,6 @@
+File "hhi_enforcement.php", line 6, characters 18-19:
+Invalid argument (Typing[4110])
+  File "NumberFormatter.hhi", line 95, characters 29-31:
+  Expected `int`
+  File "hhi_enforcement.php", line 3, characters 12-18:
+  But got `dynamic`

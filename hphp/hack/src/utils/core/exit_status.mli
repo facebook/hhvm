@@ -30,6 +30,7 @@ type t =
   | Unused_server
   | Lock_stolen
   | Lost_parent_monitor
+  | Server_got_eof_from_monitor
   | Interrupted
   | Worker_oomed
   | Worker_busy

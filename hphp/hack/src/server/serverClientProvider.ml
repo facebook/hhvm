@@ -159,10 +159,18 @@ let sleep_and_check
       Select_nothing
     else
       failwith "sleep_and_check got impossible fd"
-  with exn ->
+  with
+  | End_of_file as exn ->
     let e = Exception.wrap exn in
     HackEventLogger.get_client_channels_exception e;
-    Hh_logger.log "Getting Client FDs failed. Ignoring.";
+    Hh_logger.log "GET_CLIENT_CHANNELS_EXCEPTION End_of_file. Terminating.";
+    Exit.exit Exit_status.Server_got_eof_from_monitor
+  | exn ->
+    let e = Exception.wrap exn in
+    HackEventLogger.get_client_channels_exception e;
+    Hh_logger.log
+      "GET_CLIENT_CHANNELS_EXCEPTION(%s). Ignoring."
+      (Exception.get_ctor_string e);
     Unix.sleepf 0.5;
     Select_nothing
 

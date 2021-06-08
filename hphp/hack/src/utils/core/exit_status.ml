@@ -27,6 +27,7 @@ type t =
   | Unused_server
   | Lock_stolen
   | Lost_parent_monitor
+  | Server_got_eof_from_monitor
   | Interrupted
   | Worker_oomed
   | Worker_busy
@@ -109,6 +110,7 @@ let exit_code = function
   | Input_error -> 10
   | Lock_stolen -> 11
   | Lost_parent_monitor -> 12
+  | Server_got_eof_from_monitor -> 18
   | Shared_mem_assertion_failure -> 14
   | Out_of_shared_memory -> 15
   | Hash_table_full -> 16

@@ -681,11 +681,9 @@ struct
           env
         | (_, Unix.WEXITED 0) ->
           (* "pid<>0, WEXITED 0" means the process had a clean exit *)
-          SC.on_server_exit monitor_config;
           set_server env (Died_unexpectedly (proc_stat, false))
         | (_, _) ->
           (* this case is any kind of unexpected exit *)
-          SC.on_server_exit monitor_config;
           let is_oom =
             match proc_stat with
             | Unix.WEXITED code

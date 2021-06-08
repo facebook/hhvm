@@ -122,9 +122,6 @@ let make_test test =
 
       let get_last_start_server_call () = !last_start_server_call
 
-      let on_server_exit : ServerMonitorUtils.monitor_config -> unit =
-       (fun _ -> ())
-
       let kill_server_count = ref 0
 
       let kill_server _ = kill_server_count := !kill_server_count + 1

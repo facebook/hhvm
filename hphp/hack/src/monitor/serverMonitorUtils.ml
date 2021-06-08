@@ -71,9 +71,6 @@ module type Server_config = sig
 
   val wait_pid : ServerProcess.process_data -> int * Unix.process_status
 
-  (* Callback to run when server exits *)
-  val on_server_exit : monitor_config -> unit
-
   val is_saved_state_precomputed : server_start_options -> bool
 end
 

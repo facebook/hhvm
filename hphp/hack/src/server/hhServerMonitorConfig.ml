@@ -128,34 +128,8 @@ let start_hh_server ~informant_managed options =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
   start_server_daemon ~informant_managed options log_link ServerMain.entry
 
-(*
- * Every server has lazy incremental mode capability, but we want to know
- * whether this particular run actually exercised it.
- *)
-let check_log_for_lazy_incremental monitor_config =
-  let cmd =
-    Printf.sprintf
-      "grep -m 1 %s %s | wc -l"
-      ServerTypeCheck.(check_kind_to_string Lazy_check)
-      monitor_config.ServerMonitorUtils.server_log_file
-  in
-  try
-    match Sys_utils.exec_read cmd with
-    | Some "0" -> ()
-    | Some "1" -> HackEventLogger.set_lazy_incremental ()
-    | Some x -> Hh_logger.log "Unexpected output of command '%s': %s" cmd x
-    | None ->
-      Hh_logger.log "Unexpected output of command '%s': truncated input" cmd
-  with e ->
-    Hh_logger.log
-      "Exception while running command '%s': %s"
-      cmd
-      (Printexc.to_string e)
-
 module HhServerConfig = struct
   type server_start_options = ServerArgs.options
-
-  let on_server_exit = check_log_for_lazy_incremental
 
   let start_server
       ?target_saved_state ~informant_managed ~prior_exit_status options =

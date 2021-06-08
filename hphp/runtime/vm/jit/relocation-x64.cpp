@@ -361,21 +361,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
  * Must not be called until its safe to run the relocated code.
  */
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
-  for (auto addr : fixups.reusedStubs) {
-    /*
-     * The stubs are terminated by a ud2. Check for it.
-     */
-    while (addr[0] != 0x0f || addr[1] != 0x0b) {
-      DecodedInstruction di(addr);
-      if (di.hasPicOffset()) {
-        if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
-          di.setPicAddress(adjusted);
-        }
-      }
-      addr += di.size();
-    }
-  }
-
   for (auto codePtr : fixups.codePointers) {
     if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
       *codePtr = adjusted;

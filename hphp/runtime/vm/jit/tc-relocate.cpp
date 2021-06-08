@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
 

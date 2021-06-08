@@ -420,11 +420,6 @@ void reclaimFunction(const Func* func);
  */
 void reclaimTranslations(GrowableVector<TransLoc>&& trans);
 
-/*
- * Free an ephemeral stub.
- */
-void freeTCStub(TCA stub);
-
 ////////////////////////////////////////////////////////////////////////////////
 
 struct UsageInfo {
@@ -538,23 +533,6 @@ int recordedFuncs();
  * smashed in the process of replaceOldTranslations()
  */
 void recordJump(TCA toSmash, SrcRec* sr);
-
-/*
- * Insert a jump to destSk at toSmash. If no top translation for destSk exists
- * no action is performed. On return, the value of smashed indicated whether a
- * new address was written into the TC.
- */
-TCA bindJmp(TCA toSmash, SrcKey destSk, bool& smashed);
-TCA bindJmpToStub(TCA toSmash, TCA oldTarget, TCA stub,
-                  SrcKey destSk, bool& smashed);
-
-/*
- * Insert the address for branches to destSk at toSmash. Upon return, the value
- * of smashed indicates whether an address was written into the TC.
- */
-TCA bindAddr(TCA toSmash, SrcKey destSk, bool& smashed);
-TCA bindAddrToStub(TCA toSmash, TCA oldTarget, TCA stub,
-                   SrcKey destSk, bool& smashed);
 
 /*
  * Bind a call to start at toSmash, where start is the prologue for callee, when

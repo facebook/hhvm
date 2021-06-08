@@ -31,15 +31,6 @@ struct ReqInfo;
 namespace svcreq {
 
 /*
- * Handle a service request.
- *
- * This often involves looking up or creating a translation, smashing a jmp
- * target or other address in the code, and returning the smashed-in value.
- * This address indicates where the caller should resume execution.
- */
-TCA handleServiceRequest(ReqInfo& info) noexcept;
-
-/*
  * Handle a request to initially translate the code at the given current
  * location. Reached from translations at other SrcKeys when these translations
  * are unable or unwilling to continue due to insufficient type information or

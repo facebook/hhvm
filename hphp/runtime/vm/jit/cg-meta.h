@@ -109,11 +109,6 @@ struct CGMeta {
   std::multimap<TCA,std::pair<Alignment,AlignContext>> alignments;
 
   /*
-   * Addresses of any allocated service request stubs.
-   */
-  std::vector<TCA> reusedStubs;
-
-  /*
    * Address immediates in the generated code.
    *
    * Also contains the addresses of any mcprep{} instructions that were emitted.

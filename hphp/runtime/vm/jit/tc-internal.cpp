@@ -35,7 +35,6 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -390,17 +389,6 @@ bool isProfileCodeAddress(TCA addr) {
 
 bool isHotCodeAddress(TCA addr) {
   return g_code->hot().contains(addr);
-}
-
-void freeTCStub(TCA stub) {
-  // We need to lock the code because s_freeStubs.push() writes to the stub and
-  // the metadata to protect s_freeStubs itself.
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  assertx(code().frozen().contains(stub));
-
-  markStubFreed(stub);
 }
 
 void checkFreeProfData() {

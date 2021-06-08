@@ -36,7 +36,6 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -335,7 +334,6 @@ void smashOptBinds(CGMeta& meta,
                    TCA entry,  // nullptr for prologues
                    const SrcKeyTransMap& srcKeyTrans) {
   jit::hash_set<TCA> smashed;
-  jit::hash_set<TCA> smashedOldTargets;
   decltype(meta.smashableBinds) newBinds;
 
   for (auto& bind : meta.smashableBinds) {
@@ -359,11 +357,9 @@ void smashOptBinds(CGMeta& meta,
     assertx(code().inHotOrMainOrColdOrFrozen(bind.smashable.toSmash()) ||
             bind.smashable.type() == IncomingBranch::Tag::ADDR);
     assertx(code().inHotOrMainOrColdOrFrozen(succTCA));
-    auto const prevTarget = bind.smashable.target();
     bind.smashable.patch(succTCA);
     bind.smashable.optimize();
     smashed.insert(bind.smashable.toSmash());
-    smashedOldTargets.insert(prevTarget);
     meta.smashableLocations.erase(bind.smashable.toSmash());
   }
 
@@ -383,19 +379,6 @@ void smashOptBinds(CGMeta& meta,
     }
   }
   meta.inProgressTailJumps.swap(newTailJumps);
-
-  // If any smashed jumps had corresponding stubs, then remove those stubs from
-  // meta and free their memory.
-  std::vector<TCA> newReusedStubs;
-  for (auto tca : meta.reusedStubs) {
-    if (smashedOldTargets.count(tca) == 0) {
-      newReusedStubs.push_back(tca);
-    } else {
-      FTRACE(3, "smashOptBinds: freeing dead reused stub @ {}\n", tca);
-      markStubFreed(tca);
-    }
-  }
-  meta.reusedStubs.swap(newReusedStubs);
 }
 
 /*

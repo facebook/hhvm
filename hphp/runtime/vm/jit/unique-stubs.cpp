@@ -1059,55 +1059,6 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   });
 }
 
-TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
-  alignCacheLine(cb);
-
-  return vwrap(cb, data, [] (Vout& v) {
-    storeVmfp(v);
-
-    // Combine ServiceRequest and SBInvOffset into one pushable 64-bit reg.
-    static_assert(folly::kIsLittleEndian,
-        "Packing two 32-bit ints into one 64-bit for ReqInfo.");
-    auto const spOffShifted = v.makeReg();
-    auto const reqAndSpOff = v.makeReg();
-    v << shlqi{32, r_svcreq_spoff(), spOffShifted, v.makeReg()};
-    v << orq{r_svcreq_req(), spOffShifted, reqAndSpOff, v.makeReg()};
-
-    // Pack the service request args into a svcreq::ReqInfo on the stack.
-    assertx(!(svcreq::kMaxArgs & 1));
-    for (auto i = svcreq::kMaxArgs; i >= 2; i -= 2) {
-      v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i - 2)};
-    }
-    v << pushp{r_svcreq_stub(), reqAndSpOff};
-
-    // Call mcg->handleServiceRequest(rsp()).
-    auto const sp = v.makeReg();
-    v << copy{rsp(), sp};
-
-    auto const ret = v.makeReg();
-
-    v << vcall{
-      CallSpec::direct(svcreq::handleServiceRequest),
-      v.makeVcallArgs({{sp}}),
-      v.makeTuple({ret}),
-      Fixup::none(),
-      DestType::SSA
-    };
-
-    // Pop the ReqInfo off the stack.
-    auto const reqinfo_sz = static_cast<int>(sizeof(svcreq::ReqInfo));
-    v << lea{rsp()[reqinfo_sz], rsp()};
-
-    // rvmtl() was preserved by the callee, but rvmsp() and rvmfp() might've
-    // changed if we interpreted anything.  Reload them.  Also load the return
-    // regs; if we're not returning, it's a spurious load.
-    loadVMRegs(v);
-    loadReturnRegs(v);
-
-    v << jmpr{ret, php_return_regs()};
-  });
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
@@ -1309,7 +1260,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
       [&] { return emitEnterTCHelper(main, data, *this); }));
 
   // These guys are required by a number of other stubs.
-  ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, hotView(), emitEndCatchHelper(hot(), data, *this));
   EMIT(
     "endCatchStublogueHelpers",

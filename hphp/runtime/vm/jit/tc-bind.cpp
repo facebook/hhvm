@@ -24,15 +24,12 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
-
-#include "hphp/vixl/a64/decoder-a64.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/ringbuffer.h"
@@ -41,124 +38,6 @@
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
-
-TCA bindJmp(TCA toSmash, SrcKey destSk, bool& smashed) {
-  auto const sr = srcDB().find(destSk);
-  always_assert(sr);
-  if (sr->getTopTranslation() == nullptr) return nullptr;
-
-  auto srLock = sr->writelock();
-
-  // Check again now that we have the lock
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
-
-  auto const isJcc = [&] {
-    switch (arch()) {
-      case Arch::X64: {
-        x64::DecodedInstruction di(toSmash);
-        return (di.isBranch() && !di.isJmp());
-      }
-
-      case Arch::ARM: {
-        auto instr = reinterpret_cast<vixl::Instruction*>(toSmash);
-        return instr->IsCondBranchImm();
-      }
-
-    }
-    not_reached();
-  }();
-
-  // Return if already smashed.  Note that smashableXxTarget returns nullptr
-  // when the target was smashed if the XX was able to be optimized in place
-  // (so that it doesn't look like a smashable XX anymore).
-  if (isJcc) {
-    auto const target = smashableJccTarget(toSmash);
-    if (target == nullptr || target == tDest) return tDest;
-    sr->chainFrom(IncomingBranch::jccFrom(toSmash));
-  } else {
-    auto const target = smashableJmpTarget(toSmash);
-    if (target == nullptr || target == tDest) return tDest;
-    sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
-  }
-
-  smashed = true;
-  return tDest;
-}
-
-TCA bindJmpToStub(TCA toSmash, TCA oldTarget, TCA stub,
-                  SrcKey destSk, bool& smashed) {
-  auto const sr = srcDB().find(destSk);
-  always_assert(sr);
-  auto srLock = sr->writelock();
-
-  auto const isJcc = [&] {
-    switch (arch()) {
-      case Arch::X64: {
-        x64::DecodedInstruction di(toSmash);
-        return (di.isBranch() && !di.isJmp());
-      }
-
-      case Arch::ARM: {
-        auto instr = reinterpret_cast<vixl::Instruction*>(toSmash);
-        return instr->IsCondBranchImm();
-      }
-
-    }
-    not_reached();
-  }();
-
-  // Return if already smashed.  Note that smashableXxTarget returns nullptr
-  // when the target was smashed if the XX was able to be optimized in place
-  // (so that it doesn't look like a smashable XX anymore).
-  if (isJcc) {
-    auto const target = smashableJccTarget(toSmash);
-    if (!target || target != oldTarget) return nullptr;
-    smashJcc(toSmash, stub);
-  } else {
-    auto const target = smashableJmpTarget(toSmash);
-    if (!target || target != oldTarget) return nullptr;
-    smashJmp(toSmash, stub);
-  }
-
-  smashed = true;
-  return stub;
-}
-
-TCA bindAddr(TCA toSmash, SrcKey destSk, bool& smashed) {
-  auto const sr = srcDB().find(destSk);
-  always_assert(sr);
-  if (sr->getTopTranslation() == nullptr) return nullptr;
-
-  auto srLock = sr->writelock();
-
-  // Check again now that we have the lock
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
-
-  auto addr = reinterpret_cast<TCA*>(toSmash);
-  if (*addr == tDest) {
-    // Already smashed
-    return tDest;
-  }
-  sr->chainFrom(IncomingBranch::addr(addr));
-  smashed = true;
-  return tDest;
-}
-
-TCA bindAddrToStub(TCA toSmash, TCA oldTarget, TCA stub,
-                   SrcKey destSk, bool& smashed) {
-  auto const sr = srcDB().find(destSk);
-  always_assert(sr);
-  auto srLock = sr->writelock();
-
-  auto addr = reinterpret_cast<TCA*>(toSmash);
-  assert_address_is_atomically_accessible(addr);
-  if (*addr != oldTarget) return nullptr;
-  *addr = stub;
-  smashed = true;
-  return stub;
-}
 
 void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
   // Return if already smashed.  Note that smashableCallTarget returns nullptr

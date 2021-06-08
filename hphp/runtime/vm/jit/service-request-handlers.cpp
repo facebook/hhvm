@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
@@ -176,52 +175,6 @@ TranslationResult getTranslation(SrcKey sk) {
   );
 }
 
-/*
- * Runtime service handler that patches a jmp to the translation of u:dest from
- * toSmash.
- */
-TranslationResult bindJmp(TCA toSmash,
-                          SrcKey destSk,
-                          SBInvOffset spOff,
-                          ServiceRequest req,
-                          TCA oldStub,
-                          bool& smashed) {
-  auto const result = getTranslation(destSk);
-  if (!result.addr()) {
-    if (result.isProcessPersistentFailure()) {
-      // If we couldn't make a new translation, and we won't be able
-      // to make any new translations for the remainder of the process
-      // lifetime, we can just burn in a call to
-      // handleResumeNoTranslate.
-      if (auto const stub = emit_interp_no_translate_stub(spOff, destSk)) {
-        // We still need to create a SrcRec (if one doesn't already
-        // exist) to manage the locking correctly. This can fail.
-        if (!tc::createSrcRec(destSk, liveSpOff())) return result;
-        if (req == REQ_BIND_ADDR) {
-          tc::bindAddrToStub(toSmash, oldStub, stub, destSk, smashed);
-        } else {
-          assertx(req == REQ_BIND_JMP);
-          tc::bindJmpToStub(toSmash, oldStub, stub, destSk, smashed);
-        }
-      }
-    }
-    return result;
-  }
-
-  if (req == REQ_BIND_ADDR) {
-    if (auto const addr = tc::bindAddr(toSmash, destSk, smashed)) {
-      return TranslationResult{addr};
-    }
-  } else {
-    assertx(req == REQ_BIND_JMP);
-    if (auto const addr = tc::bindJmp(toSmash, destSk, smashed)) {
-      return TranslationResult{addr};
-    }
-  }
-
-  return TranslationResult::failTransiently();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -273,37 +226,6 @@ TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
   return start;
 }
 
-}
-
-TCA handleServiceRequest(ReqInfo& info) noexcept {
-  FTRACE(1, "handleServiceRequest {}\n", svcreq::to_name(info.req));
-
-  assert_native_stack_aligned();
-
-  // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
-  // later if we are going to use the resume helper.
-  tl_regState = VMRegState::CLEAN;
-  vmsp() = Stack::anyFrameStackBase(vmfp()) - info.spOff.offset;
-
-  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-    Trace::ringbufferEntry(
-      Trace::RBTypeServiceReq, (uint64_t)info.req, (uint64_t)info.args[0].tca
-    );
-  }
-
-  auto smashed = false;
-  auto const toSmash = info.args[0].tca;
-  auto const sk = SrcKey::fromAtomicInt(info.args[1].sk);
-  auto const transResult =
-    bindJmp(toSmash, sk, liveSpOff(), info.req, info.stub, smashed);
-
-  if (smashed && info.stub) {
-    auto const stub = info.stub;
-    FTRACE(3, "Freeing stub {} on treadmill\n", stub);
-    Treadmill::enqueue([stub] { tc::freeTCStub(stub); });
-  }
-
-  return resume(sk, transResult);
 }
 
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {

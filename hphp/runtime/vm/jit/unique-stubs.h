@@ -381,17 +381,6 @@ struct UniqueStubs {
   TCA throwExceptionWhileUnwinding;
 
   /*
-   * Service request helper.
-   *
-   * Packs service request arguments into a struct on the stack before calling
-   * the C++ service request handler.
-   *
-   * @reached:  jmp from TC
-   * @context:  func body
-   */
-  TCA handleSRHelper;
-
-  /*
    * Handle a request to translate the code at the given current location.
    * See svcreq::handleTranslate() for more details.
    *

@@ -258,12 +258,6 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedAF.swap(meta.alignments);
 
-  for (auto& af : meta.reusedStubs) {
-    if (TCA adjusted = rel.adjustedAddressAfter(af)) {
-      af = adjusted;
-    }
-  }
-
   decltype(meta.smashableCallData) updatedCD;
   for (auto& cd : meta.smashableCallData) {
     if (auto adjusted = rel.adjustedAddressAfter(cd.first)) {

@@ -264,7 +264,6 @@ void CGMeta::process_only(
     inProgressTailJumps.swap(*inProgressTailBranches);
   }
   assertx(inProgressTailJumps.empty());
-  reusedStubs.clear();
 }
 
 void CGMeta::clear() {
@@ -279,7 +278,6 @@ void CGMeta::clear() {
   literalAddrs.clear();
   veneers.clear();
   alignments.clear();
-  reusedStubs.clear();
   addressImmediates.clear();
   fallthru.reset();
   codePointers.clear();
@@ -302,7 +300,6 @@ bool CGMeta::empty() const {
     literalAddrs.empty() &&
     veneers.empty() &&
     alignments.empty() &&
-    reusedStubs.empty() &&
     addressImmediates.empty() &&
     !fallthru.has_value() &&
     codePointers.empty() &&

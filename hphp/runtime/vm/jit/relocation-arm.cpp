@@ -1419,17 +1419,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
  * not be called until its safe to run the relocated code.
  */
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
-  for (auto addr : meta.reusedStubs) {
-    auto start = Instruction::Cast(addr);
-    auto end = start;
-
-    while (end->Mask(ExceptionMask) != BRK) {
-      end = end->NextInstruction();
-    }
-
-    adjustInstructions(rel, start, end, true);
-  }
-
   for (auto codePtr : meta.codePointers) {
     if (auto adjusted = rel.adjustedAddressAfter(*codePtr)) {
       *codePtr = adjusted;

@@ -73,13 +73,6 @@ void dumpEntry(const RingBufferEntry* e) {
       indentDepth += e->type == RBTypeFuncEntry;
       break;
     }
-    case RBTypeServiceReq: {
-      auto& info = e->vmPoint;
-      auto req = static_cast<jit::ServiceRequest>(info.sk);
-      std::cerr << folly::format(msgFormat,
-                                 jit::svcreq::to_name(req), info.data);
-      break;
-    }
     case RBTypeGeneric: {
       auto& info = e->generic;
       std::cerr << folly::format(msgFormat, info.name, info.data);

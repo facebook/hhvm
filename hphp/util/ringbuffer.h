@@ -37,7 +37,6 @@ namespace Trace {
   RBTYPE(FuncExit) \
   RBTYPE(FuncPrologue) \
   RBTYPE(BytecodeStart) \
-  RBTYPE(ServiceReq) \
   RBTYPE(DispatchBB) \
   RBTYPE(InterpOne) \
   RBTYPE(APCHandleEnqueue) \

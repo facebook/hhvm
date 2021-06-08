@@ -21,6 +21,7 @@ let modifiers_to_list ~is_final ~visibility ~is_abstract ~is_static =
     | Public -> [SymbolDefinition.Public]
     | Private -> [SymbolDefinition.Private]
     | Protected -> [SymbolDefinition.Protected]
+    | Internal -> []
   in
   let modifiers =
     if is_final then

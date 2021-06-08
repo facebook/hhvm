@@ -1504,6 +1504,7 @@ module PrintClass = struct
       | Vpublic -> "public"
       | Vprivate _ -> "private"
       | Vprotected _ -> "protected"
+      | Vinternal _ -> "internal"
     in
     let synth =
       if get_ce_synthesized ce then

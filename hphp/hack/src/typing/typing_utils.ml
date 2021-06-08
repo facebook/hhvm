@@ -529,6 +529,7 @@ let string_of_visibility = function
   | Vpublic -> "public"
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
+  | Vinternal _ -> "internal"
 
 let unwrap_class_type ty =
   match deref ty with

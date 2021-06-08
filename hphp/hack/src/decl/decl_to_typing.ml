@@ -35,6 +35,9 @@ let base_visibility origin_class_name = function
   | Public -> Vpublic
   | Private -> Vprivate origin_class_name
   | Protected -> Vprotected origin_class_name
+  | Internal -> Vinternal ""
+
+(* todo: insert module name *)
 
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {

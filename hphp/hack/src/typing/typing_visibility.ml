@@ -121,6 +121,10 @@ let is_visible_for_obj env vis =
     (match Env.get_self_id env with
     | None -> Some "You cannot access this member"
     | Some self_id -> is_protected_visible env x self_id)
+  | Vinternal _ ->
+    (* For now make this always an error since we don't know what module we are
+        in *)
+    Some "You cannot access this member"
 
 (* The only permitted way to access an LSB property is via
    static::, ClassName::, or $class_name:: *)
@@ -142,6 +146,10 @@ let is_lsb_accessible env vis =
     (match Env.get_self_id env with
     | None -> Some "You cannot access this member"
     | Some self_id -> is_protected_visible env x self_id)
+  | Vinternal _ ->
+    (* For now make this always an error since we don't know what module we are
+        in *)
+    Some "You cannot access this member"
 
 let is_lsb_visible_for_class env vis cid =
   match is_lsb_permitted cid with
@@ -169,6 +177,10 @@ let is_visible_for_class env (vis, lsb) cid cty =
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
         | _ -> is_protected_visible env x self_id))
+    | Vinternal _ ->
+      (* For now make this always an error since we don't know what module we are
+        in *)
+      Some "You cannot access this member"
 
 let is_visible env (vis, lsb) cid class_ =
   let msg_opt =

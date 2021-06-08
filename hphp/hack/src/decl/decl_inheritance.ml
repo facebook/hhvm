@@ -135,7 +135,8 @@ let is_private elt =
   | Vprivate _ when get_ce_lsb elt -> false
   | Vprivate _ -> true
   | Vprotected _
-  | Vpublic ->
+  | Vpublic
+  | Vinternal _ ->
     false
 
 let is_private_or_protected elt =
@@ -147,7 +148,9 @@ let is_private_or_protected elt =
   | Vprivate _
   | Vprotected _ ->
     true
-  | Vpublic -> false
+  | Vpublic
+  | Vinternal _ ->
+    false
 
 let chown_private_or_protected child_class_name ancestor_sig =
   let ce_visibility =

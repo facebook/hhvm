@@ -768,6 +768,9 @@ and visibility (cid : string) (visibility : Aast_defs.visibility) :
   | Public -> Vpublic
   | Protected -> Vprotected cid
   | Private -> Vprivate cid
+  | Internal -> Vinternal ""
+
+(* todo: insert module name *)
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)

@@ -3277,7 +3277,9 @@ and expr_
           let use_pos = fst meth in
           TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
           (match ce_visibility with
-          | Vpublic -> make_result env p (Aast.Smethod_id (te, meth)) ty
+          | Vpublic
+          | Vinternal _ ->
+            make_result env p (Aast.Smethod_id (te, meth)) ty
           | Vprivate _ ->
             Errors.private_class_meth ~def_pos ~use_pos;
             expr_error env r outer

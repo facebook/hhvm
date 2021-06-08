@@ -277,6 +277,7 @@ let build_visibility_json (visibility : Aast.visibility) =
     | Private -> 0
     | Protected -> 1
     | Public -> 2
+    | Internal -> 3
   in
   JSON_Number (string_of_int num)
 

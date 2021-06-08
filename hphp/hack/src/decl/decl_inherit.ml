@@ -313,7 +313,8 @@ let filter_privates class_type =
     | Vprivate _ when get_elt_lsb elt -> true
     | Vprivate _ -> false
     | Vpublic
-    | Vprotected _ ->
+    | Vprotected _
+    | Vinternal _ ->
       true
   in
   {
@@ -335,7 +336,8 @@ let chown_private_and_protected owner class_type =
     | Vprotected _ when not (get_elt_synthesized elt) ->
       { elt with elt_visibility = Vprotected owner }
     | Vpublic
-    | Vprotected _ ->
+    | Vprotected _
+    | Vinternal _ ->
       elt
   in
   {

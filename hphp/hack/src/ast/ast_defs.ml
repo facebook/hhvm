@@ -105,6 +105,7 @@ and visibility =
   | Private [@visitors.name "visibility_Private"]
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
+  | Internal [@visitors.name "visibility_Internal"]
 [@@deriving
   show { with_path = false },
     eq,

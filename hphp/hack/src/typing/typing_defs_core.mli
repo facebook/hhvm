@@ -15,6 +15,7 @@ type ce_visibility =
   | Vpublic
   | Vprivate of string
   | Vprotected of string
+  | Vinternal of string
 [@@deriving eq, show]
 
 (* Represents <<Policied()>> or <<InferFlows>> attribute *)

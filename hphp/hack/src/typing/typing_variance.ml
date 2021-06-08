@@ -820,7 +820,8 @@ let class_property : Env.t -> Nast.class_var -> unit =
         match prop.Aast.cv_visibility with
         | Aast.Private -> ()
         | Aast.Public
-        | Aast.Protected ->
+        | Aast.Protected
+        | Aast.Internal ->
           let variance =
             make_variance Rproperty (Ast_defs.get_pos h) Ast_defs.Invariant
           in
@@ -862,7 +863,8 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
        and contravariant type parameters in any position in the type *)
       ()
     | Aast.Public
-    | Aast.Protected ->
+    | Aast.Protected
+    | Aast.Internal ->
       if (class_.Aast.c_final || m_final) && m_static then
         ()
       else

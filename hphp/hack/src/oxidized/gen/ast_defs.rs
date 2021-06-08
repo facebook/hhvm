@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6ccb15b845887e53b5c91f0545ce6b6>>
+// @generated SignedSource<<0dff0ce6ee4704503c2e9aca503515e6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -340,6 +340,7 @@ pub enum Visibility {
     Private,
     Public,
     Protected,
+    Internal,
 }
 impl TrivialDrop for Visibility {}
 arena_deserializer::impl_deserialize_in_arena!(Visibility);

@@ -1224,6 +1224,7 @@ end = struct
     | Ast_defs.Private -> Fmt.string ppf "private"
     | Ast_defs.Public -> Fmt.string ppf "public"
     | Ast_defs.Protected -> Fmt.string ppf "protected"
+    | Ast_defs.Internal -> Fmt.string ppf "internal"
 
   let pp_paramkind ppf =
     Ast_defs.(

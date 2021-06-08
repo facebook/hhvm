@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f52f8164f7f5efcb0299276148c33ae7>>
+// @generated SignedSource<<597bfb31ca818b21f35b237f1bb7f863>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -609,6 +609,9 @@ impl Visibility {
     pub fn mk_protected() -> Self {
         Visibility::Protected
     }
+    pub fn mk_internal() -> Self {
+        Visibility::Internal
+    }
     pub fn is_private(&self) -> bool {
         match self {
             Visibility::Private => true,
@@ -624,6 +627,12 @@ impl Visibility {
     pub fn is_protected(&self) -> bool {
         match self {
             Visibility::Protected => true,
+            _ => false,
+        }
+    }
+    pub fn is_internal(&self) -> bool {
+        match self {
+            Visibility::Internal => true,
             _ => false,
         }
     }

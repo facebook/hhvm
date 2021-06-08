@@ -104,7 +104,7 @@ std::string KeyOrder::toString() const {
   ss << '[';
   for (auto i = 0; i < m_keys->size(); ++i) {
     if (i > 0) ss << ',';
-    ss << '"' << (*m_keys)[i]->data() << '"';
+    ss << '"' << folly::cEscape<std::string>((*m_keys)[i]->data()) << '"';
   }
   ss << ']';
   return ss.str();

@@ -491,3 +491,33 @@ function sodium_crypto_kdf_derive_from_key(
   string $context,
   string $key,
 ): string;
+
+///// Ristretto
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string;
+
+// The range of outputs of random_bytes(SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES)
+// is larger than that of crypto_core_ristretto255_scalar_random().
+function sodium_crypto_core_ristretto255_scalar_random(): string {
+  return sodium_crypto_core_ristretto255_scalar_reduce(random_bytes(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES));
+}
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_invert(string $s): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_negate(string $s): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_complement(string $s): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string;

@@ -1492,6 +1492,167 @@ String HHVM_FUNCTION(sodium_crypto_stream_xor,
   return ciphertext;
 }
 
+#ifdef crypto_core_ristretto255_SCALARBYTES
+const StaticString s_crypto_core_ristretto255_scalar_reduce(
+  "scalar must be CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_reduce,
+                     const String& s) {
+  if (
+    s.size() != crypto_core_ristretto255_NONREDUCEDSCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_reduce);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_reduce(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(s.data())
+  );
+  r.setSize(crypto_core_ristretto255_BYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_invert(
+  "scalar must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_invert,
+                     const String& s) {
+  if (
+    s.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_invert);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  const auto result = crypto_core_ristretto255_scalar_invert(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(s.data())
+  );
+  if (result != 0) {
+    throwSodiumException(s_internal_error);
+  }
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_negate(
+  "scalar must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_negate,
+                     const String& s) {
+  if (
+    s.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_negate);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_negate(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(s.data())
+  );
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_complement(
+  "scalar must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_complement,
+                     const String& s) {
+  if (
+    s.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_complement);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_complement(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(s.data())
+  );
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_add(
+  "scalars must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_add,
+                     const String& x,
+                     const String& y) {
+  if (
+    x.size() != crypto_core_ristretto255_SCALARBYTES ||
+    y.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_add);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_add(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_sub(
+  "scalars must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_sub,
+                     const String& x,
+                     const String& y) {
+  if (
+    x.size() != crypto_core_ristretto255_SCALARBYTES ||
+    y.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_sub);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_sub(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ristretto255_scalar_mul(
+  "scalars must be CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_mul,
+                     const String& x,
+                     const String& y) {
+  if (
+    x.size() != crypto_core_ristretto255_SCALARBYTES ||
+    y.size() != crypto_core_ristretto255_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_scalar_mul);
+  }
+
+  String r(crypto_core_ristretto255_SCALARBYTES, ReserveString);
+  crypto_core_ristretto255_scalar_mul(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ristretto255_SCALARBYTES);
+  return r;
+}
+#endif
+
 #ifdef crypto_kdf_KEYBYTES
 const StaticString
   s_subkey_too_small(
@@ -1887,6 +2048,24 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_kx_seed_keypair);
     HHVM_FE(sodium_crypto_kx_client_session_keys);
     HHVM_FE(sodium_crypto_kx_server_session_keys);
+#endif
+
+#ifdef crypto_core_ristretto255_SCALARBYTES
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES,
+      crypto_core_ristretto255_NONREDUCEDSCALARBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES,
+      crypto_core_ristretto255_SCALARBYTES
+    );
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_reduce);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_invert);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_negate);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_complement);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_add);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_sub);
+    HHVM_FE(sodium_crypto_core_ristretto255_scalar_mul);
 #endif
 
     loadSystemlib();

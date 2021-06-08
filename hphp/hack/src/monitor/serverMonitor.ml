@@ -679,17 +679,45 @@ struct
         | (0, _) ->
           (* "pid=0" means the pid we waited for (i.e. process) hasn't yet died/stopped *)
           env
+        | (_, Unix.WEXITED 0) ->
+          (* "pid<>0, WEXITED 0" means the process had a clean exit *)
+          SC.on_server_exit monitor_config;
+          set_server env (Died_unexpectedly (proc_stat, false))
         | (_, _) ->
-          (* "pid<>0" means the pid has died or received a stop signal *)
-          let oom_code = Exit_status.(exit_code Out_of_shared_memory) in
-          let was_oom =
+          (* this case is any kind of unexpected exit *)
+          SC.on_server_exit monitor_config;
+          let is_oom =
             match proc_stat with
-            | Unix.WEXITED code when code = oom_code -> true
+            | Unix.WEXITED code
+              when (code = Exit_status.(exit_code Out_of_shared_memory))
+                   || code = Exit_status.(exit_code Worker_oomed) ->
+              true
             | _ -> Sys_utils.check_dmesg_for_oom process.pid "hh_server"
           in
-          SC.on_server_exit monitor_config;
-          ServerProcessTools.check_exit_status proc_stat process monitor_config;
-          set_server env (Died_unexpectedly (proc_stat, was_oom)))
+          let (exit_kind, exit_code) = Exit_status.unpack proc_stat in
+          let time_taken = Unix.time () -. process.start_t in
+          ServerCommandTypesUtils.write_progress_file
+            ~server_progress_file:
+              process.server_specific_files
+                .ServerCommandTypes.server_progress_file
+            ~server_progress:
+              ServerCommandTypes.
+                {
+                  server_progress = "writing crash logs";
+                  server_warning = None;
+                  server_timestamp = Unix.gettimeofday ();
+                };
+          Hh_logger.log
+            "TYPECHECKER_EXIT exit_kind=%s exit_code=%d is_oom=%b"
+            exit_kind
+            exit_code
+            is_oom;
+          HackEventLogger.typechecker_exit
+            time_taken
+            proc_stat
+            (monitor_config.server_log_file, monitor_config.monitor_log_file)
+            ~is_oom;
+          set_server env (Died_unexpectedly (proc_stat, is_oom)))
       | Not_yet_started
       | Died_config_changed
       | Died_unexpectedly _ ->

@@ -911,9 +911,21 @@ end = struct
     add_user_attr_deps ctx env attrs
 
   and add_tparam_attr_deps
-      ctx env Aast.{ tp_user_attributes = attrs; tp_parameters = tparams; _ } =
+      ctx
+      env
+      Aast.
+        {
+          tp_user_attributes = attrs;
+          tp_parameters = tparams;
+          tp_constraints = cstrs;
+          _;
+        } =
     add_user_attr_deps ctx env attrs;
-    List.iter tparams ~f:(add_tparam_attr_deps ctx env)
+    List.iter tparams ~f:(add_tparam_attr_deps ctx env);
+    List.iter cstrs ~f:(function
+        | (_, (_, Aast.Happly ((_, cls_name), _))) ->
+          do_add_dep ctx env (Typing_deps.Dep.Type cls_name)
+        | _ -> ())
 
   let add_impls ~ctx ~env ~cls acc ancestor_name =
     let open Typing_deps.Dep in

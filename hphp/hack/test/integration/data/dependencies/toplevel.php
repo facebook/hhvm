@@ -315,3 +315,5 @@ function with_where_constraint(): void {
 
 
 function with_open_shape(shape(...) $x): void {}
+
+function with_tparam_constraint(WithTparamConstraint<IAsConstraint> $_) : void {}

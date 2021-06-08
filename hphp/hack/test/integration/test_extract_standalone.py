@@ -225,6 +225,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\TestExtractConstruct::__construct",
             "\\with_escaped_char_in_attr",
             "\\with_class_name_in_attr",
+            "\\with_tparam_constraint",
         ]
 
         for function_name in function_names:

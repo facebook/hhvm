@@ -1,0 +1,11 @@
+//// toplevel.php
+<?hh
+
+function with_tparam_constraint(WithTparamConstraint<IAsConstraint> $_): void {}
+
+//// classes.php
+<?hh
+
+interface IAsConstraint {}
+
+abstract class WithTparamConstraint<T as \IAsConstraint> {}

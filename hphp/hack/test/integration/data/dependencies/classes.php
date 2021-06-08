@@ -139,3 +139,6 @@ class WithLateInit {
 abstract class TestExtractConstruct {
     public function __construct() {}
 }
+
+interface IAsConstraint{}
+abstract class WithTparamConstraint<T as IAsConstraint>{}

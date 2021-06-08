@@ -791,46 +791,45 @@ folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
   assertx(transMeta.hasValue());
   auto& meta = transMeta->fixups;
   for (auto& b : meta.smashableBinds) {
-    // If the target is translated, bind it.
-    if (!b.fallback) {
-      if (auto sr = srcDB().find(b.sk)) {
-        if (sr->getTopTranslation()) {
-          auto srLock = sr->writelock();
-          if (sr->getTopTranslation()) {
-            sr->chainFrom(b.smashable);
-            continue;
-          }
-        }
+    // We can't bind to fallback translations, so use the stub. they do not
+    // exist yet outside of retranslate all, which has a different mechanism
+    // to achieve that.
+    if (b.fallback) {
+      auto const stub = svcreq::getOrEmitStub(
+        svcreq::StubType::Retranslate, b.sk, b.spOff);
+      if (stub == nullptr) {
+        reset();
+        return TranslationResult::failForProcess();
       }
+      b.smashable.patch(stub);
+      continue;
     }
 
-    auto const target = [&] {
-      if (b.fallback) {
-        // We just emitted Nth translation, we don't have N+1th yet.
-        return svcreq::getOrEmitStub(
-          svcreq::StubType::Retranslate, b.sk, b.spOff);
-      }
-
-      auto codeLock = tc::lockCode();
-      auto view = tc::code().view(TransKind::Anchor);
-      auto const toSmash = b.smashable.toSmash();
-      if (b.smashable.type() == IncomingBranch::Tag::ADDR) {
-        return svcreq::emit_bindaddr_stub(
-          view.frozen(), view.data(), meta, b.spOff, (TCA*)toSmash, b.sk);
-      } else {
-        return svcreq::emit_bindjmp_stub(
-          view.frozen(), view.data(), meta, b.spOff, toSmash, b.sk);
-      }
-    }();
-
-    // We ran out of TC space and couldn't emit the stub.
-    if (target == nullptr) {
+    auto sr = createSrcRec(b.sk, b.spOff);
+    if (sr == nullptr) {
       reset();
       return TranslationResult::failForProcess();
     }
 
-    // Smash it.
-    b.smashable.patch(target);
+    // If the target is translated, bind it.
+    if (sr->getTopTranslation()) {
+      auto srLock = sr->writelock();
+      if (sr->getTopTranslation()) {
+        sr->chainFrom(b.smashable);
+        continue;
+      }
+    }
+
+    // May need a stub, so create it.
+    auto const stub = svcreq::getOrEmitStub(
+      svcreq::StubType::Translate, b.sk, b.spOff);
+    if (stub == nullptr) {
+      reset();
+      return TranslationResult::failForProcess();
+    }
+
+    auto srLock = sr->writelock();
+    sr->chainFrom(b.smashable, stub);
   }
 
   return folly::none;

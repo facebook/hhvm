@@ -196,7 +196,7 @@ TranslationResult bindJmp(TCA toSmash,
       if (auto const stub = emit_interp_no_translate_stub(spOff, destSk)) {
         // We still need to create a SrcRec (if one doesn't already
         // exist) to manage the locking correctly. This can fail.
-        if (!tc::createSrcRec(destSk, liveSpOff(), true)) return result;
+        if (!tc::createSrcRec(destSk, liveSpOff())) return result;
         if (req == REQ_BIND_ADDR) {
           tc::bindAddrToStub(toSmash, oldStub, stub, destSk, smashed);
         } else {

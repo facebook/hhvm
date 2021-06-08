@@ -123,10 +123,11 @@ void TransLoc::setFrozenStart(TCA newStart) {
   m_frozenOff = tc::addrToOffset(newStart);
 }
 
-void SrcRec::chainFrom(IncomingBranch br) {
+void SrcRec::chainFrom(IncomingBranch br, TCA stub) {
   assertx(br.type() == IncomingBranch::Tag::ADDR ||
           tc::isValidCodeAddress(br.toSmash()));
-  TCA destAddr = getTopTranslation();
+  TCA destAddr = getTopTranslation() ? getTopTranslation() : stub;
+  assertx(destAddr);
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
         this,

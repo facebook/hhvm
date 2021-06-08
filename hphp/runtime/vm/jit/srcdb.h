@@ -180,7 +180,7 @@ struct SrcRec final {
    * The following functions are used during creation of new translations.
    * May only be called when holding the lock for this SrcRec.
    */
-  void chainFrom(IncomingBranch br);
+  void chainFrom(IncomingBranch br, TCA stub = nullptr);
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;

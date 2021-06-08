@@ -512,17 +512,16 @@ SrcRec* findSrcRec(SrcKey sk) {
   return srcDB().find(sk);
 }
 
-bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength) {
-  if (srcDB().find(sk)) return true;
+SrcRec* createSrcRec(SrcKey sk, SBInvOffset spOff) {
+  if (auto const sr = srcDB().find(sk)) return sr;
 
   // invalidateSrcKey() depends on existence of this stub.
   auto const transStub = svcreq::getOrEmitStub(
     svcreq::StubType::Translate, sk, spOff);
-  if (checkLength && !transStub) return false;
-  assertx(transStub);
+  if (!transStub) return nullptr;
 
   auto metaLock = lockMetadata();
-  if (srcDB().find(sk)) return true;
+  if (auto const sr = srcDB().find(sk)) return sr;
 
   SKTRACE(1, sk, "inserting SrcRec\n");
 
@@ -531,7 +530,7 @@ bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength) {
     recordFuncSrcRec(sk.func(), sr);
   }
 
-  return true;
+  return sr;
 }
 
 

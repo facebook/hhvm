@@ -319,11 +319,10 @@ void freeProfCode();
 SrcRec* findSrcRec(SrcKey sk);
 
 /*
- * Create a SrcRec for sk with an sp offset of spOff. If checkLength
- * is true, then false will be returned if there's not enough space
- * for any stubs. Otherwise true will be returned.
+ * Create a SrcRec for sk with an sp offset of spOff if it doesn't exist and
+ * return it. If there's not enough TC space for any stubs, return nullptr.
  */
-bool createSrcRec(SrcKey sk, SBInvOffset spOff, bool checkLength = false);
+SrcRec* createSrcRec(SrcKey sk, SBInvOffset spOff);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -91,7 +91,7 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    EnumAtom,
+    EnumClassLabel,
     IFC,
     Readonly,
     Modules,
@@ -105,7 +105,7 @@ impl UnstableFeatures {
             UnstableFeatures::UnionIntersectionTypeHints => Unstable,
             UnstableFeatures::ClassLevelWhere => Unstable,
             UnstableFeatures::ExpressionTrees => Unstable,
-            UnstableFeatures::EnumAtom => Preview,
+            UnstableFeatures::EnumClassLabel => Preview,
             UnstableFeatures::IFC => Unstable,
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
@@ -5360,7 +5360,7 @@ where
                 _ => {}
             },
             EnumClassLabelExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::EnumAtom)
+                self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
             }
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);
@@ -5368,7 +5368,7 @@ where
                     .split(',')
                     .any(|attr| attr.trim() == sn::user_attributes::VIA_LABEL);
                 if has_via_label {
-                    self.check_can_use_feature(node, &UnstableFeatures::EnumAtom)
+                    self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
                 }
             }
             _ => {}

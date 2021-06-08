@@ -1868,7 +1868,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .notification(
-                comment="Add 'call_atom#'",
+                comment="Add 'call_via_label#'",
                 method="textDocument/didChange",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1878,18 +1878,18 @@ class TestLsp(TestCase[LspTestDriver]):
                                 "start": {"line": 35, "character": 0},
                                 "end": {"line": 35, "character": 0},
                             },
-                            "text": "  call_atom#",
+                            "text": "  call_via_label#",
                         }
                     ],
                 },
             )
             .request(
                 line=line(),
-                comment="autocomplete results for 'call_atom#'",
+                comment="autocomplete results for 'call_via_label#'",
                 method="textDocument/completion",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 35, "character": 12},
+                    "position": {"line": 35, "character": 17},
                 },
                 result={
                     "isIncomplete": False,

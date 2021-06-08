@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 class Box<T> {
   public function __construct(public T $x)[] {}
@@ -11,10 +11,10 @@ enum class Foo: mixed {
 
 class UseFoo {
   public function input<T>(
-    <<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $atom, T $x
+    <<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $elt, T $x
   ): void {}
-  public function output<T>(<<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $atom): T {
-    return $atom->x;
+  public function output<T>(<<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $elt): T {
+    return $elt->x;
   }
 }
 

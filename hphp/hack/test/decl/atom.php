@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 /* The file is missing definitions of I and Box on purpose, to make
  * the decl output less noisy

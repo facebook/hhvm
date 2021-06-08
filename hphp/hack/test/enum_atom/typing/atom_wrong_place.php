@@ -1,10 +1,10 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
-#top_level_atom;
+#top_level_label;
 
 
 function f() : void {
-  $x = #atom_alone_is_erro;
+  $x = #label_alone_is_error;
   $y = # not_ok;
 }

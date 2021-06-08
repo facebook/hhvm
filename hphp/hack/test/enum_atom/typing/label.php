@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 interface I {
   public function kind() : string;
@@ -23,30 +23,18 @@ function expect_Member<T>(HH\MemberOf<E, Box<T>> $member) : void {
 function expect_string(string $name) : void {
 }
 
-function E_value_of_atom<T>(HH\Label<E, Box<T>> $atom): HH\MemberOf<E, Box<T>> {
-  return E::valueOf($atom);
+function E_name_of_label<T>(HH\Label<E, Box<T>> $label): string {
+  return E::nameOf($label);
 }
 
-function E_name_of_atom<T>(HH\Label<E, Box<T>> $atom): string {
-  return E::nameOf($atom);
-}
-
-function E_value_of<T>(HH\Label<E, Box<T>> $atom): HH\MemberOf<E, Box<T>> {
-  return E::valueOf($atom);
-}
-
-function E_name_of<T>(HH\Label<E, Box<T>> $atom): string {
-  return E::nameOf($atom);
+function E_value_of_member<T>(HH\Label<E, Box<T>> $label): HH\MemberOf<E, Box<T>> {
+  return E::valueOf($label);
 }
 
 function E_test<T as arraykey>(HH\Label<E, Box<T>> $atom) : void {
-  echo E_name_of_atom($atom);
+  echo E_name_of_label($atom);
   echo "\n";
-  echo E_value_of_atom($atom)->x;
-  echo "\n";
-  echo E_name_of($atom);
-  echo "\n";
-  echo E_value_of($atom)->x;
+  echo E_value_of_member($atom)->x;
   echo "\n";
 }
 
@@ -72,11 +60,11 @@ function testit() : void {
   echo "\n";
 
   echo "[E] 42 = ";
-  echo E_value_of_atom#Age()->x;
+  echo E_value_of_member#Age()->x;
   echo "\n";
 
   echo "[E] Age = ";
-  echo E_name_of_atom#Age();
+  echo E_name_of_label#Age();
   echo "\n";
 
   echo "Testing indirect calls\n";

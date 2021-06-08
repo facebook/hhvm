@@ -7,8 +7,6 @@ Testing labels
 Testing indirect calls
 Name
 zuck
-Name
-zuck
 [F] NAME = NAME
 [F] FOO = FOO
 [F] Foo = Foo

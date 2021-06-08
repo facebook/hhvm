@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 interface IXParam {
 }
@@ -53,26 +53,26 @@ abstract class Controller {
 
   private dict<string, mixed> $data = dict[];
 
-  protected static function key<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : string {
+  protected static function key<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : string {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
-    return $cls::nameOf($atom);
+    return $cls::nameOf($label);
   }
 
-  protected static function value<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : HH\MemberOf<this::TE, TParam> {
+  protected static function value<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : HH\MemberOf<this::TE, TParam> {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
-    return $cls::valueOf($atom);
+    return $cls::valueOf($label);
   }
 
-  public function set<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom, T $actual_data) : void {
-    $key = static::key($atom);
+  public function set<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label, T $actual_data) : void {
+    $key = static::key($label);
     $this->data[$key] = $actual_data;
   }
 
-  public function get<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $atom) : ?T {
-    $key = static::key($atom);
-    $definition = static::value($atom);
+  public function get<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : ?T {
+    $key = static::key($label);
+    $definition = static::value($label);
 
   // TODO: add the logic for defaultValue, but not important for this
   // demonstration

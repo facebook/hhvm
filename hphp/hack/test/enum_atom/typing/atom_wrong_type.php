@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom')>>
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 function f(<<__ViaLabel>>int $x) : void {}
 function g(<<__ViaLabel>>string $x) : void {}

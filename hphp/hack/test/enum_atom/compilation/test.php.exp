@@ -300,6 +300,6 @@
   .const TEnum isType = """D:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"F\";}""";
 }
 
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:9:\"enum_atom\";}""")] ;
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:16:\"enum_class_label\";}""")] ;
 
 # test.php ends here

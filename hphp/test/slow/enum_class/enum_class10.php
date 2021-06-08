@@ -8,7 +8,7 @@ class Box<T> implements IBox {
 enum class E : IBox {
    Box<string> A = new Box("world");
 }
-function f<T>(<<__Atom>> HH\MemberOf<E, Box<T>> $elt) : T {
+function f<T>(<<__ViaLabel>> HH\MemberOf<E, Box<T>> $elt) : T {
   return $elt->data;
 }
 

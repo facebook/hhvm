@@ -139,29 +139,29 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [20:45-47]; fp_name = (Some "$x");
+              [{ fp_pos = [20:49-51]; fp_name = (Some "$x");
                  fp_type =
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
-                   (Rhint ([20:24-44]),
-                    (Tapply (([20:24-35], "\\HH\\MemberOf"),
-                       [(Rhint ([20:36-38]),
-                         (Tapply (([20:36-38], "\\EE"), [])));
-                         (Rhint ([20:40-43]),
-                          (Tapply (([20:40-43], "\\Box"), [])))
+                   (Rhint ([20:28-48]),
+                    (Tapply (([20:28-39], "\\HH\\MemberOf"),
+                       [(Rhint ([20:40-42]),
+                         (Tapply (([20:40-42], "\\EE"), [])));
+                         (Rhint ([20:44-47]),
+                          (Tapply (([20:44-47], "\\Box"), [])))
                          ]
                        )))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:true ~readonly:false);
+                   ~ifc_can_call:false ~via_label:true ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [20:10-12]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([20:51-54]), (Tprim Tint)) };
+                et_type = (Rhint ([20:55-58]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);

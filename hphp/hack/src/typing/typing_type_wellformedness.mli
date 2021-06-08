@@ -14,7 +14,7 @@
         - writing ?nonnull instead of mixed
         - ?void, ?noreturn, ?mixed
         - Tuple<X, Y> instead of (X, Y))
-    - correct usage of __Atom attribute
+    - correct usage of __ViaLabel attribute
 
     NB: this is akin to well-formedness in e.g.
     "Featherweight Java: A Minimal Core Calculus for Java and GJ", 2002,

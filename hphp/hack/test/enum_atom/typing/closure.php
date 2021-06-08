@@ -6,7 +6,7 @@ enum class E : mixed {
   string Name = "zuck";
 }
 
-function with_atom<T>(<<__Atom>>HH\MemberOf<E, T> $e) : T {
+function with_atom<T>(<<__ViaLabel>>HH\MemberOf<E, T> $e) : T {
   return $e;
 }
 
@@ -30,7 +30,7 @@ function bad(): void {
 
   // Typing[4396] Atoms are not allowed in this position. They are only
   // allowed in function call, if the function parameter is annotated with
-  // __Atom
+  // __ViaLabel
   echo $f#Name();
   echo "\n";
 
@@ -38,8 +38,8 @@ function bad(): void {
   $f = ($x ==> with_atom($x));
   // same
   $f = ((HH\MemberOf<E, string> $x) ==> with_atom($x));
-  // more stuble, but wrong. The `__Atom` automatically transform the input
+  // more stuble, but wrong. The `__ViaLabel` automatically transform the input
   // atom into a constant, so the $x with pass to with_atom is wrong too
-  $f = ((<<__Atom>>HH\MemberOf<E, string> $x) ==> with_atom($x));
-  // bottom line, lambdas should use `HH\Label`, not __Atom
+  $f = ((<<__ViaLabel>>HH\MemberOf<E, string> $x) ==> with_atom($x));
+  // bottom line, lambdas should use `HH\Label`, not __ViaLabel
 }

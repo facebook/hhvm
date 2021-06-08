@@ -6,7 +6,7 @@ enum class E : int {
 }
 
 interface I {
-  public function f(<<__Atom>>HH\MemberOf<E, int> $x): int;
+  public function f(<<__ViaLabel>>HH\MemberOf<E, int> $x): int;
 }
 
 class C implements I {
@@ -16,7 +16,7 @@ class C implements I {
 }
 
 class D {
-  public function f(<<__Atom>>HH\MemberOf<E, int> $x): int {
+  public function f(<<__ViaLabel>>HH\MemberOf<E, int> $x): int {
     return $x;
   }
 }

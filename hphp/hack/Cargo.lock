@@ -1448,6 +1448,7 @@ dependencies = [
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_local",
  "hhbc_by_ref_options",
+ "naming_special_names_rust",
  "oxidized",
 ]
 
@@ -2556,6 +2557,7 @@ dependencies = [
  "bumpalo",
  "itertools",
  "line_break_map",
+ "naming_special_names_rust",
  "ocaml_helper",
  "ocamlrep",
  "ocamlrep_derive",

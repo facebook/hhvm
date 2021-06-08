@@ -110,8 +110,8 @@
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                      ~readonly:false);
+                      ~ifc_external:false ~ifc_can_call:false
+                      ~via_label:false ~readonly:false);
                      };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
@@ -120,8 +120,8 @@
                      fp_flags =
                      (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
-                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                       ~readonly:false);
+                       ~ifc_external:false ~ifc_can_call:false
+                       ~via_label:false ~readonly:false);
                       }
                    ];
                  ft_implicit_params =
@@ -224,7 +224,7 @@
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
                            ~ifc_external:false ~ifc_can_call:false
-                           ~is_atom:false ~readonly:false);
+                           ~via_label:false ~readonly:false);
                           };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
@@ -235,7 +235,7 @@
                             ~has_default:false
                             ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false);
+                            ~via_label:false ~readonly:false);
                            };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
@@ -246,7 +246,7 @@
                             ~has_default:false
                             ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false);
+                            ~via_label:false ~readonly:false);
                            };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
@@ -257,7 +257,7 @@
                           (make_fp_flags ~accept_disposable:false
                             ~has_default:true ~mode:Typing_defs_core.FPnormal
                             ~ifc_external:false ~ifc_can_call:false
-                            ~is_atom:false ~readonly:false);
+                            ~via_label:false ~readonly:false);
                            }
                         ];
                       ft_implicit_params =

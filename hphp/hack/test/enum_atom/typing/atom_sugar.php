@@ -10,14 +10,14 @@ enum class EE : I {
    Box A = new Box(42);
 }
 
-function get<T>(<<__Atom>> HH\MemberOf<EE, T> $z) : T {
+function get<T>(<<__ViaLabel>> HH\MemberOf<EE, T> $z) : T {
   return $z;
 }
 
-function set<T>(<<__Atom>> HH\MemberOf<EE, T> $z, T $val): void {}
+function set<T>(<<__ViaLabel>> HH\MemberOf<EE, T> $z, T $val): void {}
 
 class MyClass {
-  public static function foo<T>(<<__Atom>> HH\MemberOf<EE, T> $x): void {}
+  public static function foo<T>(<<__ViaLabel>> HH\MemberOf<EE, T> $x): void {}
 }
 
 <<__EntryPoint>>

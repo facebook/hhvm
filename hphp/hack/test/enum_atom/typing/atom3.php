@@ -11,9 +11,9 @@ enum class Foo: mixed {
 
 class UseFoo {
   public function input<T>(
-    <<__Atom>> HH\MemberOf<Foo, Box<T>> $atom, T $x
+    <<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $atom, T $x
   ): void {}
-  public function output<T>(<<__Atom>> HH\MemberOf<Foo, Box<T>> $atom): T {
+  public function output<T>(<<__ViaLabel>> HH\MemberOf<Foo, Box<T>> $atom): T {
     return $atom->x;
   }
 }

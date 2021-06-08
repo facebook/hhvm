@@ -5241,36 +5241,36 @@ let multiple_inherited_class_member_with_different_case
   in
   add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) claim reasons
 
-let atom_invalid_parameter pos =
+let via_label_invalid_parameter pos =
   add_list
-    (Typing.err_code Typing.AtomInvalidParameter)
+    (Typing.err_code Typing.ViaLabelInvalidParameter)
     ( pos,
       "Attribute "
-      ^ Naming_special_names.UserAttributes.uaAtom
+      ^ Naming_special_names.UserAttributes.uaViaLabel
       ^ " is only allowed on "
       ^ Naming_special_names.Classes.cMemberOf )
     []
 
-let atom_invalid_parameter_in_enum_class pos =
+let via_label_invalid_parameter_in_enum_class pos =
   add_list
-    (Typing.err_code Typing.AtomInvalidParameter)
+    (Typing.err_code Typing.ViaLabelInvalidParameter)
     ( pos,
       "When using "
-      ^ Naming_special_names.UserAttributes.uaAtom
+      ^ Naming_special_names.UserAttributes.uaViaLabel
       ^ ", only type parameters bounded by enum classes and "
       ^ "enum classes are allowed as the first parameters of "
       ^ Naming_special_names.Classes.cMemberOf )
     []
 
-let atom_invalid_generic pos name =
+let via_label_invalid_generic pos name =
   add_list
-    (Typing.err_code Typing.AtomInvalidParameter)
+    (Typing.err_code Typing.ViaLabelInvalidParameter)
     ( pos,
       "The type "
       ^ name
       ^ " must be a type constant or a reified generic "
       ^ "in order to be used with "
-      ^ Naming_special_names.UserAttributes.uaAtom )
+      ^ Naming_special_names.UserAttributes.uaViaLabel )
     []
 
 let enum_class_label_unknown pos label_name class_name =
@@ -5677,11 +5677,15 @@ let unresolved_type_variable_projection pos tname ~proj_pos =
         "Disambiguate the types using explicit type annotations here." );
     ]
 
-let function_pointer_with_atom pos fpos =
+let function_pointer_with_via_label pos fpos =
+  let via_label = Naming_special_names.UserAttributes.uaViaLabel in
   add_list
-    (Typing.err_code Typing.FunctionPointerWithAtom)
-    (pos, "Function pointer on functions/methods using __Atom is not supported.")
-    [(fpos, "__Atom is used here.")]
+    (Typing.err_code Typing.FunctionPointerWithViaLabel)
+    ( pos,
+      "Function pointer on functions/methods using "
+      ^ via_label
+      ^ " is not supported." )
+    [(fpos, via_label ^ " is used here.")]
 
 let reified_static_method_in_expr_tree pos =
   add

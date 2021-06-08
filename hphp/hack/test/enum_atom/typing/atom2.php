@@ -14,7 +14,7 @@ function show(HH\MemberOf<E, C> $enum) : void {
   echo $enum->name;
 }
 
-function show_atom(<<__Atom>>HH\MemberOf<E, C> $enum): void {
+function show_atom(<<__ViaLabel>>HH\MemberOf<E, C> $enum): void {
   echo $enum->name;
 }
 

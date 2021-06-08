@@ -10,6 +10,8 @@ use crate::token_kind::TokenKind;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use std::{borrow::Cow, cmp::Ordering};
 
+use naming_special_names_rust::user_attributes as ua;
+
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
 
@@ -999,8 +1001,12 @@ pub const lambda_effect_polymorphic: Error =
 pub const inst_meth_disabled: Error =
     Cow::Borrowed("`inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead");
 
-pub const invalid_atom_location: Error =
-    Cow::Borrowed("`__Atom` attribute can only appear on the first parameter of a function");
+pub fn invalid_via_label_location() -> Error {
+    Cow::Owned(format!(
+        "`{}` attribute can only appear on the first parameter of a function",
+        ua::VIA_LABEL.to_string()
+    ))
+}
 
 pub const as_mut_single_argument: Error =
     Cow::Borrowed("HH\\Readonly\\as_mut takes a single value-typed expression as an argument.");

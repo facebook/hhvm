@@ -5364,10 +5364,10 @@ where
             }
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);
-                let has_atom = attributes_string
+                let has_via_label = attributes_string
                     .split(',')
-                    .any(|attr| attr.trim() == sn::user_attributes::ATOM);
-                if has_atom {
+                    .any(|attr| attr.trim() == sn::user_attributes::VIA_LABEL);
+                if has_via_label {
                     self.check_can_use_feature(node, &UnstableFeatures::EnumAtom)
                 }
             }

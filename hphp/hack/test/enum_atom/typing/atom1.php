@@ -14,7 +14,7 @@ enum class FF : I extends EE {
    Box C = new Box(0);
 }
 
-function ff(<<__Atom>> HH\MemberOf<EE, Box> $x) : int {
+function ff(<<__ViaLabel>> HH\MemberOf<EE, Box> $x) : int {
   return $x->x;
 }
 
@@ -22,7 +22,7 @@ abstract class Controller {
   abstract const type TEnum as EE;
 
   public static function get(
-    <<__Atom>>HH\MemberOf<this::TEnum, Box> $x): int {
+    <<__ViaLabel>>HH\MemberOf<this::TEnum, Box> $x): int {
     return $x->x;
   }
 

@@ -260,7 +260,7 @@ pub mod user_attributes {
 
     pub const ENUM_CLASS: &str = "__EnumClass";
 
-    pub const ATOM: &str = "__Atom";
+    pub const VIA_LABEL: &str = "__ViaLabel";
 
     pub const POLICIED: &str = "__Policied";
 
@@ -302,7 +302,7 @@ pub mod user_attributes {
             NEVER_INLINE,
             ENABLE_UNSTABLE_FEATURES,
             ENUM_CLASS,
-            ATOM,
+            VIA_LABEL,
             POLICIED,
             INFERFLOWS,
             EXTERNAL,

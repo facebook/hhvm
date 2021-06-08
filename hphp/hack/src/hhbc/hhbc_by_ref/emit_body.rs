@@ -41,6 +41,8 @@ use hhbc_by_ref_runtime::TypedValue;
 use hhbc_by_ref_statement_state::StatementState;
 use hhbc_by_ref_unique_id_builder::*;
 
+use naming_special_names_rust::user_attributes as ua;
+
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
@@ -667,14 +669,14 @@ fn atom_instrs<'a, 'arena>(
     if !param
         .user_attributes
         .iter()
-        .any(|a| a.is(|x| x == "__Atom"))
+        .any(|a| a.is(|x| x == ua::VIA_LABEL))
     {
         return Ok(None); // Not an atom. Nothing to do.
     }
     match &ast_param.type_hint {
         TypeHint(_, None) => Err(raise_fatal_parse(
             &ast_param.pos,
-            "__Atom param type hint unavailable",
+            ua::VIA_LABEL.to_owned() + " param type hint unavailable",
         )),
         TypeHint(_, Some(Hint(_, h))) => {
             let label_done = emitter.label_gen_mut().next_regular();
@@ -844,7 +846,7 @@ fn atom_instrs<'a, 'arena>(
                 }
                 _ => Err(raise_fatal_parse(
                     &ast_param.pos,
-                    "'__Atom' applied to a non-HH\\MemberOf parameter",
+                    "'".to_owned() + ua::VIA_LABEL + "' applied to a non-HH\\MemberOf parameter",
                 )),
             }
         }

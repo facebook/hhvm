@@ -31,7 +31,7 @@ function testing_area_for_lambdas(): void {
 
 }
 
-function call_atom<T>(<<__Atom>> HH\MemberOf<MyEnumClass, T> $m): void {}
+function call_atom<T>(<<__ViaLabel>> HH\MemberOf<MyEnumClass, T> $m): void {}
 function testing_area_for_enum_atom(): void {
 
 }

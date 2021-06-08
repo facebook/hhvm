@@ -23,6 +23,8 @@ use oxidized::{
     pos::Pos,
 };
 
+use naming_special_names_rust::user_attributes as ua;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 
@@ -119,7 +121,7 @@ fn from_ast<'a, 'arena>(
             .flags
             .contains(LangFlags::ENABLE_ENUM_CLASSES)
             && param.user_attributes.iter().any(|a| match &a.name {
-                Id(_, s) => s == "__Atom",
+                Id(_, s) => s == ua::VIA_LABEL,
             })
         {
             Some(Hint(

@@ -24,12 +24,13 @@ let handler =
         let params = fun_ty.ft_params in
         (match
            List.find
-             ~f:(fun fp -> Typing_defs_flags.(is_set fp_flags_atom fp.fp_flags))
+             ~f:(fun fp ->
+               Typing_defs_flags.(is_set fp_flags_via_label fp.fp_flags))
              params
          with
         | Some fp ->
           let fpos = fp.fp_pos in
-          Errors.function_pointer_with_atom pos fpos
+          Errors.function_pointer_with_via_label pos fpos
         | None -> ())
       | _ -> ()
 

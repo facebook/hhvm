@@ -30,10 +30,10 @@ let check_hint_wellkindedness env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
   Typing_kinding.Simple.check_well_kinded_type env decl_ty
 
-(* Check if the __Atom attributes is on the parameter. If that's the case,
+(* Check if the __ViaLabel attributes is on the parameter. If that's the case,
  * we check that it is only involving an enum class or a generic
  *)
-let check_atom_on_param env pos dty lty =
+let check_via_label_on_param env pos dty lty =
   (* If lty is HH\MemberOf<Foo, Bar>, we need to check that Foo is
    * - an enum class
    * - a generic
@@ -44,7 +44,7 @@ let check_atom_on_param env pos dty lty =
    *
    * in both cases, it must be bounded by an enum class
    *
-   * In all cases, we check that the requested atom is part of the
+   * In all cases, we check that the requested label is part of the
    * detected enum class.
    *)
   let check_tgeneric name =
@@ -70,10 +70,10 @@ let check_atom_on_param env pos dty lty =
     if is_taccess_this || is_reified then
       ()
     else
-      Errors.atom_invalid_generic pos name
+      Errors.via_label_invalid_generic pos name
   in
   match get_node lty with
-  (* Uncomment the next line to allow normal enums with __Atom *)
+  (* Uncomment the next line to allow normal enums with __ViaLabel *)
   (* | Tnewtype (enum_name, _, _) when Env.is_enum env enum_name -> () *)
   | Tnewtype (name, [ty_enum; _ty_interface], _)
     when String.equal name SN.Classes.cMemberOf ->
@@ -85,9 +85,9 @@ let check_atom_on_param env pos dty lty =
         Typing_utils.collect_enum_class_upper_bounds env name
       in
       if SSet.cardinal upper_bounds <> 1 then
-        Errors.atom_invalid_parameter_in_enum_class pos
-    | _ -> Errors.atom_invalid_parameter_in_enum_class pos)
-  | _ -> Errors.atom_invalid_parameter pos
+        Errors.via_label_invalid_parameter_in_enum_class pos
+    | _ -> Errors.via_label_invalid_parameter_in_enum_class pos)
+  | _ -> Errors.via_label_invalid_parameter pos
 
 let check_tparams_constraints env use_pos tparams targs =
   let ety_env : expand_env =
@@ -96,7 +96,7 @@ let check_tparams_constraints env use_pos tparams targs =
   Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
 (** Mostly check constraints on type parameters. *)
-let check_happly ?(is_atom = false) unchecked_tparams env h =
+let check_happly ?(via_label = false) unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -112,7 +112,9 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
   let decl_ty = Inst.instantiate subst decl_ty in
   let ety_env = { empty_expand_env with expand_visible_newtype = false } in
   let (env, locl_ty) = Phase.localize env ~ety_env decl_ty in
-  let () = if is_atom then check_atom_on_param env hint_pos decl_ty locl_ty in
+  let () =
+    if via_label then check_via_label_on_param env hint_pos decl_ty locl_ty
+  in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->
     (match Env.get_typedef env type_name with
@@ -128,21 +130,21 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
       | None -> env)
     | _ -> env)
 
-let rec hint ?(is_atom = false) env (p, h) =
+let rec hint ?(via_label = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
-  hint_ ~is_atom env p h
+  hint_ ~via_label env p h
 
-and hint_ ~is_atom env p h_ =
-  let hint env (p, h) = hint_ ~is_atom:false env p h in
+and hint_ ~via_label env p h_ =
+  let hint env (p, h) = hint_ ~via_label:false env p h in
   let () =
-    if is_atom then
-      (* __Atom is only allowed on HH\MemberOf, so we check everything that
+    if via_label then
+      (* __ViaLabel is only allowed on HH\MemberOf, so we check everything that
        * is not a class with this, and make a more refined check for Happly
        *)
       match h_ with
       | Happly _ -> () (* checked in check_happly *)
-      | _ -> Errors.atom_invalid_parameter p
+      | _ -> Errors.via_label_invalid_parameter p
   in
   match h_ with
   | Hany
@@ -200,12 +202,12 @@ and hint_ ~is_atom env p h_ =
       | None -> ()
       | Some (Env.TypedefResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~is_atom env.typedef_tparams env.tenv (p, h)
+          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl (hint env)
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~is_atom env.typedef_tparams env.tenv (p, h)
+          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl (hint env)
     end
@@ -222,10 +224,12 @@ and hint_ ~is_atom env p h_ =
 and contexts env (_, hl) = List.iter ~f:(hint env) hl
 
 let fun_param env param =
-  let is_atom =
-    Naming_attributes.mem SN.UserAttributes.uaAtom param.param_user_attributes
+  let via_label =
+    Naming_attributes.mem
+      SN.UserAttributes.uaViaLabel
+      param.param_user_attributes
   in
-  maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
+  maybe (hint ~via_label) env (hint_of_type_hint param.param_type_hint)
 
 let variadic_param env vparam =
   match vparam with
@@ -293,7 +297,7 @@ let method_ env m =
   List.iter m.m_where_constraints (where_constr env);
   maybe hint env (hint_of_type_hint m.m_ret)
 
-let hint_no_kind_check env (p, h) = hint_ ~is_atom:false env p h
+let hint_no_kind_check env (p, h) = hint_ ~via_label:false env p h
 
 let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in

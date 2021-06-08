@@ -14,7 +14,7 @@ enum class EE : I {
   Crate MemCrate = new Crate("hello");
 }
 
-function get<T>(<<__Atom>> HH\MemberOf<EE, T> $z) : T {
+function get<T>(<<__ViaLabel>> HH\MemberOf<EE, T> $z) : T {
   return $z;
 }
 

@@ -41,32 +41,32 @@
   Print
   .srcloc 64:3,64:12;
   PopC
-  .srcloc 65:3,65:19;
+  .srcloc 65:3,65:31;
   NullUninit
   NullUninit
-  .srcloc 65:17,65:18;
+  .srcloc 65:29,65:30;
   String "A"
-  .srcloc 65:3,65:19;
-  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
-  .srcloc 65:3,65:20;
+  .srcloc 65:3,65:31;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_member_via_label"
+  .srcloc 65:3,65:32;
   PopC
-  .srcloc 66:3,66:19;
+  .srcloc 66:3,66:31;
   NullUninit
   NullUninit
-  .srcloc 66:17,66:18;
+  .srcloc 66:29,66:30;
   String "B"
-  .srcloc 66:3,66:19;
-  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
-  .srcloc 66:3,66:20;
+  .srcloc 66:3,66:31;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_member_via_label"
+  .srcloc 66:3,66:32;
   PopC
-  .srcloc 67:3,67:19;
+  .srcloc 67:3,67:31;
   NullUninit
   NullUninit
-  .srcloc 67:17,67:18;
+  .srcloc 67:29,67:30;
   String "C"
-  .srcloc 67:3,67:19;
-  FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show_atom"
-  .srcloc 67:3,67:20;
+  .srcloc 67:3,67:31;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show_member_via_label"
+  .srcloc 67:3,67:32;
   PopC
   .srcloc 68:2,68:2;
   Null
@@ -249,8 +249,8 @@
     Null
     RetC
   }
-  .method {}{} [public static] (44,49) <"HH\\void" N > show_atom(["__Atom"("""v:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
-    .srcloc 44:5,49:144;
+  .method {}{} [public static] (44,49) <"HH\\void" N > show_member_via_label(["__ViaLabel"("""v:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
+    .srcloc 44:5,49:160;
     Dict @A_2
     VerifyParamTypeTS $enum
     Dict @A_3
@@ -265,7 +265,7 @@
     PopL $enum
     Jmp L1
   L0:
-    .srcloc 45:29,45:32;
+    .srcloc 45:33,45:36;
     String "Type constant does not resolve to a class"
     Fatal Runtime
   L1:

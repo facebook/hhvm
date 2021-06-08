@@ -12,6 +12,7 @@ bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 itertools = "0.8"
 line_break_map = { path = "../../../utils/line_break_map" }
+naming_special_names_rust = { path = "../../../naming" }
 ocaml_helper = { path = "../../../utils/ocaml_helper" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }

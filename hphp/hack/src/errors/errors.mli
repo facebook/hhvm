@@ -1602,11 +1602,11 @@ val multiple_inherited_class_member_with_different_case :
   p2:Pos_or_decl.t ->
   unit
 
-val atom_invalid_parameter : Pos.t -> unit
+val via_label_invalid_parameter : Pos.t -> unit
 
-val atom_invalid_parameter_in_enum_class : Pos.t -> unit
+val via_label_invalid_parameter_in_enum_class : Pos.t -> unit
 
-val atom_invalid_generic : Pos.t -> string -> unit
+val via_label_invalid_generic : Pos.t -> string -> unit
 
 val enum_class_label_unknown : Pos.t -> string -> string -> unit
 
@@ -1727,7 +1727,7 @@ val readonly_invalid_as_mut : Pos.t -> unit
 val unresolved_type_variable_projection :
   Pos.t -> string -> proj_pos:Pos_or_decl.t -> unit
 
-val function_pointer_with_atom : Pos.t -> Pos_or_decl.t -> unit
+val function_pointer_with_via_label : Pos.t -> Pos_or_decl.t -> unit
 
 val reified_static_method_in_expr_tree : Pos.t -> unit
 

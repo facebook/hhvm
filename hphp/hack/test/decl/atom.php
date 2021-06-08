@@ -17,6 +17,6 @@ enum class Foo: mixed {
    Box<string> Str = new Box('zuck');
 }
 
-function ff(<<__Atom>> HH\MemberOf<EE, Box> $x) : int {
+function ff(<<__ViaLabel>> HH\MemberOf<EE, Box> $x) : int {
   return $x->x;
 }

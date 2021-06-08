@@ -18,7 +18,7 @@ File "atom.php", line 17, characters 4-6:
 Unbound name: `Box` (Naming[2049])
 File "atom.php", line 17, characters 26-28:
 Unbound name: `Box` (an object type) (Naming[2049])
-File "atom.php", line 20, characters 40-42:
+File "atom.php", line 20, characters 44-46:
 Unbound name: `Box` (Naming[2049])
 File "atom.php", line 9, characters 7-7:
 Constant does not match the type of the enum it is in (Typing[4328])

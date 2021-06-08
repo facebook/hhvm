@@ -10,7 +10,7 @@ class C {
     echo "YOLO\n";
   }
 
-  public static function g(<<__Atom>>HH\MemberOf<E, int> $_): void {
+  public static function g(<<__ViaLabel>>HH\MemberOf<E, int> $_): void {
     echo "YOLO\n";
   }
 }
@@ -24,7 +24,7 @@ class D extends C {
   }
 }
 
-function h(<<__Atom>>HH\MemberOf<E, int> $_): void {}
+function h(<<__ViaLabel>>HH\MemberOf<E, int> $_): void {}
 
 function bad(): void {
   $d = new D();

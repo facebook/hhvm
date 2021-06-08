@@ -1354,7 +1354,7 @@ module Json = struct
                         ~has_default:false
                         ~ifc_external:false
                         ~ifc_can_call:false
-                        ~is_atom:false
+                        ~via_label:false
                         ~readonly:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;

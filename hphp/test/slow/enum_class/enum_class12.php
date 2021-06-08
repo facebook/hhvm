@@ -9,7 +9,7 @@ enum class E : IBox {
    Box<string> A = new Box("world");
 }
 
-function f<reify X, T>(<<__Atom>> HH\MemberOf<X, Box<T>> $elt) : T {
+function f<reify X, T>(<<__ViaLabel>> HH\MemberOf<X, Box<T>> $elt) : T {
     return $elt->data;
 }
 

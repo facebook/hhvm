@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e28ce75fa320995539cd35f5d444753>>
+// @generated SignedSource<<0236da90b749deb88632ff854a75f277>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -499,7 +499,7 @@ pub enum Typing {
     UnnecessaryAttribute = 4392,
     InheritedMethodCaseDiffers = 4393,
     EnumClassLabelUnknown = 4394,
-    AtomInvalidParameter = 4395,
+    ViaLabelInvalidParameter = 4395,
     EnumClassLabelAsExpression = 4396,
     EnumClassLabelInvalidArgument = 4397,
     IFCInternalError = 4398,
@@ -540,7 +540,7 @@ pub enum Typing {
     ReadonlyInvalidAsMut = 4434,
     InvalidKeysetValue = 4435,
     UnresolvedTypeVariableProjection = 4436,
-    FunctionPointerWithAtom = 4437,
+    FunctionPointerWithViaLabel = 4437,
     InvalidEchoArgument = 4438,
     DiamondTraitMethod = 4439,
     ReifiedStaticMethodInExprTree = 4440,

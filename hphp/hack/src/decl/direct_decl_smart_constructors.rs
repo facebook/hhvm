@@ -944,7 +944,7 @@ struct Attributes<'a> {
     ifc_attribute: IfcFunDecl<'a>,
     external: bool,
     can_call: bool,
-    atom: bool,
+    via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
     module: Option<&'a str>,
@@ -1242,7 +1242,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             ifc_attribute: default_ifc_fun_decl(),
             external: false,
             can_call: false,
-            atom: false,
+            via_label: false,
             soft: false,
             support_dynamic_type: false,
             module: None,
@@ -1323,8 +1323,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     "__CanCall" => {
                         attributes.can_call = true;
                     }
-                    "__Atom" => {
-                        attributes.atom = true;
+                    naming_special_names::user_attributes::VIA_LABEL => {
+                        attributes.via_label = true;
                     }
                     "__Soft" => {
                         attributes.soft = true;
@@ -1605,8 +1605,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if attributes.can_call {
                                 flags |= FunParamFlags::IFC_CAN_CALL
                             }
-                            if attributes.atom {
-                                flags |= FunParamFlags::ATOM
+                            if attributes.via_label {
+                                flags |= FunParamFlags::VIA_LABEL
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY

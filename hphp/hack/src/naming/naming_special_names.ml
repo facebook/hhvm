@@ -313,7 +313,7 @@ module UserAttributes = struct
 
   let uaCanCall = "__CanCall"
 
-  let uaAtom = "__Atom"
+  let uaViaLabel = "__ViaLabel"
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
@@ -359,7 +359,7 @@ module UserAttributes = struct
           (uaInferFlows, [fn; mthd]);
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);
-          (uaAtom, [parameter]);
+          (uaViaLabel, [parameter]);
           (uaSupportDynamicType, [fn; cls; mthd]);
           (uaNoRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);

@@ -105,7 +105,7 @@ let fp_flags_ifc_external      = 1 lsl 3
 
 let fp_flags_ifc_can_call      = 1 lsl 4
 
-let fp_flags_atom              = 1 lsl 5
+let fp_flags_via_label         = 1 lsl 5
 
 (* 6 and 7 are taken by mutability parameters above *)
 let fp_flags_readonly          = 1 lsl 8

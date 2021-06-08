@@ -44,8 +44,8 @@
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                      ~readonly:false);
+                      ~ifc_external:false ~ifc_can_call:false
+                      ~via_label:false ~readonly:false);
                      };
                    { fp_pos = [11:43-45]; fp_name = (Some "$b");
                      fp_type =
@@ -54,8 +54,8 @@
                      fp_flags =
                      (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
-                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                       ~readonly:false);
+                       ~ifc_external:false ~ifc_can_call:false
+                       ~via_label:false ~readonly:false);
                       }
                    ];
                  ft_implicit_params =

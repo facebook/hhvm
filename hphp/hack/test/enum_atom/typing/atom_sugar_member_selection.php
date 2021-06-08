@@ -13,7 +13,7 @@ enum class E : int {
 class MyClass {
   public function __construct() {}
 
-  public function get(<<__Atom>> HH\MemberOf<E, int> $x, int $_): int {
+  public function get(<<__ViaLabel>> HH\MemberOf<E, int> $x, int $_): int {
     return $x;
   }
 }

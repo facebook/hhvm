@@ -540,7 +540,7 @@ let autocomplete_enum_class_label_call env fty pos_labelname =
   | Tfun { ft_params = { fp_type = { et_type = t; _ }; fp_flags; _ } :: _; _ }
     ->
     let is_enum_class_label_ty_name name =
-      Typing_defs_flags.(is_set fp_flags_atom fp_flags)
+      Typing_defs_flags.(is_set fp_flags_via_label fp_flags)
       && String.equal Naming_special_names.Classes.cMemberOf name
       || String.equal Naming_special_names.Classes.cLabel name
     in

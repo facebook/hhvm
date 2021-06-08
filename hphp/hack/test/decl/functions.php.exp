@@ -72,7 +72,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   };
                 { fp_pos = [11:46-51]; fp_name = (Some "$arg2");
                   fp_type =
@@ -81,7 +81,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                    ~ifc_can_call:false ~via_label:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [11:10-28]) };
@@ -119,7 +119,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [14:10-42]) };
@@ -157,7 +157,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
@@ -199,7 +199,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   };
                 { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
                   fp_type =
@@ -208,7 +208,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                    ~ifc_can_call:false ~via_label:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
@@ -264,7 +264,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [33:10-24]) };
@@ -294,7 +294,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPinout ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [35:10-16]) };
@@ -330,7 +330,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   };
                 { fp_pos = [39:24-31]; fp_name = (Some "$unused");
                   fp_type =
@@ -351,7 +351,7 @@
                                ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
                                ~ifc_external:false ~ifc_can_call:false
-                               ~is_atom:false ~readonly:false);
+                               ~via_label:false ~readonly:false);
                               }
                             ];
                           ft_implicit_params =
@@ -367,7 +367,7 @@
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                    ~ifc_can_call:false ~via_label:false ~readonly:false);
                    }
                 ];
               ft_implicit_params = { capability = (CapDefaults [37:10-37]) };
@@ -401,7 +401,7 @@
                                       ~has_default:false
                                       ~mode:Typing_defs_core.FPnormal
                                       ~ifc_external:false ~ifc_can_call:false
-                                      ~is_atom:false ~readonly:false);
+                                      ~via_label:false ~readonly:false);
                                      }
                                    ];
                                  ft_implicit_params =
@@ -421,7 +421,7 @@
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
                            ~ifc_external:false ~ifc_can_call:false
-                           ~is_atom:false ~readonly:false);
+                           ~via_label:false ~readonly:false);
                           }
                         ];
                       ft_implicit_params =
@@ -463,7 +463,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [46:10-28]) };
@@ -521,7 +521,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [52:10-24]) };
@@ -551,7 +551,7 @@
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [56:10-28]) };
@@ -599,7 +599,7 @@
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~is_atom:false ~readonly:false);
+                     ~ifc_can_call:false ~via_label:false ~readonly:false);
                     }
                  ));
               ft_tparams = []; ft_where_constraints = []; ft_params = [];

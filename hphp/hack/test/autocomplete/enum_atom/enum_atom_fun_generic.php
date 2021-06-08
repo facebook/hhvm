@@ -14,7 +14,7 @@ enum class EE : I {
   Crate MemCrate = new Crate("hello");
 }
 
-function get<reify TEnum as EE, T>(<<__Atom>> HH\MemberOf<TEnum, T> $z) : T {
+function get<reify TEnum as EE, T>(<<__ViaLabel>> HH\MemberOf<TEnum, T> $z) : T {
   return $z;
 }
 

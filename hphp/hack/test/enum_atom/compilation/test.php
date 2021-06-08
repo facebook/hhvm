@@ -41,8 +41,8 @@ abstract class Controller {
   }
 
   public static
-    function show_atom<T>(
-      <<__Atom>>HH\MemberOf<this::TEnum, Box<T>> $enum
+    function show_member_via_label<T>(
+      <<__ViaLabel>>HH\MemberOf<this::TEnum, Box<T>> $enum
     ) : void {
     echo static::get($enum);
     echo "\n";
@@ -62,7 +62,7 @@ function main() : void {
   CE::show(E::B);
   CF::show(F::C);
   echo "\n";
-  CE::show_atom(#A);
-  CE::show_atom(#B);
-  CF::show_atom(#C);
+  CE::show_member_via_label(#A);
+  CE::show_member_via_label(#B);
+  CF::show_member_via_label(#C);
 }

@@ -7388,7 +7388,7 @@ and call
            * there is a single upper bound that is an EnumClass.
            * We might want to relax that later (e.g. with  the
            * support for intersections.
-           * See Typing_type_wellformedness.check_atom_on_param.
+           * See Typing_type_wellformedness.check_via_label_on_param.
            *)
           if SSet.cardinal upper_bounds = 1 then
             let enum_name = SSet.choose upper_bounds in
@@ -7422,11 +7422,11 @@ and call
       let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
         match opt_param with
         | Some param ->
-          (* First check if __Atom is used or if the parameter is
+          (* First check if __ViaLabel is used or if the parameter is
            * a HH\Label.
            *)
           let (env, label_type) =
-            let is_atom = get_fp_is_atom param in
+            let via_label = get_fp_via_label param in
             let ety = param.fp_type.et_type in
             let (env, ety) = Env.expand_type env ety in
             let is_label =
@@ -7435,7 +7435,7 @@ and call
               | _ -> false
             in
             match arg with
-            | EnumClassLabel (None, label_name) when is_atom || is_label ->
+            | EnumClassLabel (None, label_name) when via_label || is_label ->
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
@@ -7457,10 +7457,10 @@ and call
             | EnumClassLabel (Some _, _) ->
               (* Full info is here, use normal inference *)
               (env, EnumClassLabelOps.Skip)
-            | Class_const _ when is_atom ->
+            | Class_const _ when via_label ->
               Errors.enum_class_label_invalid_argument pos ~is_proj:true;
               (env, EnumClassLabelOps.Invalid)
-            | _ when is_atom ->
+            | _ when via_label ->
               Errors.enum_class_label_invalid_argument pos ~is_proj:false;
               (env, EnumClassLabelOps.Invalid)
             | _ -> (env, EnumClassLabelOps.Skip)
@@ -7723,7 +7723,7 @@ and call
               ~has_default:false
               ~ifc_external:false
               ~ifc_can_call:false
-              ~is_atom:false
+              ~via_label:false
               ~readonly:false
           in
           {

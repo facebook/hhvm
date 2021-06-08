@@ -1,0 +1,52 @@
+File "via_label.php", line 8, characters 17-17:
+Unbound name: `I` (Naming[2049])
+File "via_label.php", line 8, characters 17-17:
+Unbound name: `I` (an object type) (Naming[2049])
+File "via_label.php", line 9, characters 3-5:
+Unbound name: `Box` (Naming[2049])
+File "via_label.php", line 9, characters 15-17:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "via_label.php", line 12, characters 17-17:
+Unbound name: `I` (Naming[2049])
+File "via_label.php", line 12, characters 17-17:
+Unbound name: `I` (an object type) (Naming[2049])
+File "via_label.php", line 13, characters 3-5:
+Unbound name: `Box` (Naming[2049])
+File "via_label.php", line 13, characters 15-17:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "via_label.php", line 17, characters 4-6:
+Unbound name: `Box` (Naming[2049])
+File "via_label.php", line 17, characters 26-28:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "via_label.php", line 20, characters 44-46:
+Unbound name: `Box` (Naming[2049])
+File "via_label.php", line 9, characters 7-7:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "via_label.php", line 8, characters 17-17:
+  Expected `I`
+  File "via_label.php", line 9, characters 15-17:
+  But got `object`; this class name is unknown to Hack
+File "via_label.php", line 9, characters 7-7:
+Wrong type hint (Typing[4338])
+  File "via_label.php", line 9, characters 3-5:
+  Expected `Box`
+  File "via_label.php", line 9, characters 15-17:
+  But got `object`; this class name is unknown to Hack
+File "via_label.php", line 13, characters 7-7:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "via_label.php", line 12, characters 17-17:
+  Expected `I`
+  File "via_label.php", line 13, characters 15-17:
+  But got `object`; this class name is unknown to Hack
+File "via_label.php", line 13, characters 7-7:
+Wrong type hint (Typing[4338])
+  File "via_label.php", line 13, characters 3-5:
+  Expected `Box`
+  File "via_label.php", line 13, characters 15-17:
+  But got `object`; this class name is unknown to Hack
+File "via_label.php", line 17, characters 16-18:
+Wrong type hint (Typing[4338])
+  File "via_label.php", line 17, characters 4-14:
+  Expected `Box<string>`
+  File "via_label.php", line 17, characters 26-28:
+  But got `object`; this class name is unknown to Hack

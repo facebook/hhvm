@@ -1,10 +1,10 @@
-File "atom_wrong_place.php", line 4, characters 1-17:
+File "enum_class_wrong_place.php", line 4, characters 1-17:
 Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
-File "atom_wrong_place.php", line 9, characters 8-8:
+File "enum_class_wrong_place.php", line 9, characters 8-8:
 This character is invalid. (Parsing[1002])
-File "atom_wrong_place.php", line 9, characters 8-8:
+File "enum_class_wrong_place.php", line 9, characters 8-8:
 Unbound name: `#` (a global constant) (Naming[2049])
-File "atom_wrong_place.php", line 8, characters 8-28:
+File "enum_class_wrong_place.php", line 8, characters 8-28:
 Enum class labels are not allowed in this position. They are only allowed in function calls) (Typing[4396])
-File "atom_wrong_place.php", line 9, characters 8-8:
+File "enum_class_wrong_place.php", line 9, characters 8-8:
 Unbound global constant (Typing) (Typing[4106])

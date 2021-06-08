@@ -1,0 +1,58 @@
+(alias
+    (name enum_class_label)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_class_label/typing/*.php)
+          (glob_files %{project_root}/test/enum_class_label/typing/HH_FLAGS)
+          (glob_files %{project_root}/test/enum_class_label/typing/*.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_class_label/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .php
+    --out-extension .legacy_decl.out
+    --expect-extension .legacy_decl.exp
+    --fallback-expect-extension .exp
+    --flags
+    --error-format raw
+    )))
+
+(alias
+    (name enum_class_label_shallow_decl)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_class_label/typing/*.php)
+          (glob_files %{project_root}/test/enum_class_label/typing/HH_FLAGS)
+          (glob_files %{project_root}/test/enum_class_label/typing/*.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_class_label/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .php
+    --flags
+    --shallow-class-decl
+    --error-format raw
+    )))
+
+(alias
+    (name enum_class_label_lint)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_class_label/typing/*.lint.php)
+          (glob_files %{project_root}/test/enum_class_label/typing/HH_FLAGS)
+          (glob_files %{project_root}/test/enum_class_label/typing/*.lint.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_class_label/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .lint.php
+    --out-extension .lint.out
+    --expect-extension .lint.exp
+    --flags
+    --error-format raw
+    --lint
+    )))
+
+(alias
+    (name runtest)
+    (deps
+        (alias enum_class_label)
+        (alias enum_class_label_lint)
+        (alias enum_class_label_shallow_decl)))

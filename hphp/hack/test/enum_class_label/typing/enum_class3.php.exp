@@ -1,0 +1,12 @@
+File "enum_class3.php", line 22, characters 21-21:
+Invalid argument (Typing[4110])
+  File "enum_class3.php", line 9, characters 8-13:
+  Expected `string`
+  File "enum_class3.php", line 22, characters 21-21:
+  But got `int`
+File "enum_class3.php", line 23, characters 23-26:
+Invalid argument (Typing[4110])
+  File "enum_class3.php", line 21, characters 29-31:
+  Expected `int`
+  File "enum_class3.php", line 9, characters 8-13:
+  But got `string`

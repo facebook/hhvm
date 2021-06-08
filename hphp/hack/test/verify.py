@@ -275,7 +275,6 @@ def run_test_program(
                 stderr=None if no_stderr else subprocess.STDOUT,
                 cwd=test_dir,
                 universal_newlines=True,
-                # pyre-ignore
                 input=test_case.input,
                 timeout=timeout,
                 errors="replace",

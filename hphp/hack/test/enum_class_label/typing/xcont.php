@@ -53,24 +53,24 @@ abstract class Controller {
 
   private dict<string, mixed> $data = dict[];
 
-  protected static function key<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : string {
+  protected static function key<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : string {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::nameOf($label);
   }
 
-  protected static function value<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : HH\MemberOf<this::TE, TParam> {
+  protected static function value<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : HH\MemberOf<this::TE, TParam> {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::valueOf($label);
   }
 
-  public function set<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label, T $actual_data) : void {
+  public function set<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label, T $actual_data) : void {
     $key = static::key($label);
     $this->data[$key] = $actual_data;
   }
 
-  public function get<T, TParam as XParam<T>>(HH\Label<this::TE, TParam> $label) : ?T {
+  public function get<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : ?T {
     $key = static::key($label);
     $definition = static::value($label);
 

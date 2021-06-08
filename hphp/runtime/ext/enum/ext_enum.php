@@ -72,10 +72,13 @@ abstract class BuiltinEnum<+T> {
 }
 
 type enumname<T> = classname<BuiltinEnum<T>>;
+
+namespace EnumClass {
 /**
- * Type of atoms
+ * Type of enum class labels
  */
 newtype Label<-TEnumClass, TType> = string;
+}
 
 
 /**
@@ -97,11 +100,11 @@ abstract class BuiltinEnumClass<+T> {
   <<__Native>>
   final public static function getValues()[write_props]: darray<string, T>;
 
-  final public static function nameOf<TType>(Label<this, TType> $atom): string {
+  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
     return $atom;
   }
 
-  final public static function valueOf<TEnum super this, TType>(Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
+  final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
     return \__SystemLib\get_enum_member_by_label($atom);
   }
 }

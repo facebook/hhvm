@@ -4393,7 +4393,7 @@ and expr_
         pos
         env
         ~full:true
-        ~ctor:SN.Classes.cLabel
+        ~ctor:SN.Classes.cEnumClassLabel
         cname
         name
     in
@@ -7431,7 +7431,8 @@ and call
             let (env, ety) = Env.expand_type env ety in
             let is_label =
               match get_node ety with
-              | Tnewtype (name, _, _) -> String.equal SN.Classes.cLabel name
+              | Tnewtype (name, _, _) ->
+                String.equal SN.Classes.cEnumClassLabel name
               | _ -> false
             in
             match arg with
@@ -7439,7 +7440,7 @@ and call
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
-                     || String.equal name SN.Classes.cLabel ->
+                     || String.equal name SN.Classes.cEnumClassLabel ->
                 let ctor = name in
                 (match compute_enum_name env ty_enum with
                 | None -> (env, EnumClassLabelOps.ClassNotFound)

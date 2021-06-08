@@ -64,7 +64,7 @@ module Classes = struct
 
   let cMemberOf = "\\HH\\MemberOf"
 
-  let cLabel = "\\HH\\Label"
+  let cEnumClassLabel = "\\HH\\EnumClass\\Label"
 
   (* Classes that can be spliced into ExpressionTrees *)
   let cSpliceable = "\\Spliceable"

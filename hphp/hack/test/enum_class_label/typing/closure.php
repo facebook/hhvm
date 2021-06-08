@@ -41,5 +41,5 @@ function bad(): void {
   // more stuble, but wrong. The `__ViaLabel` automatically transform the input
   // label into a constant, so the $x with pass to get_via_label is wrong too
   $f = ((<<__ViaLabel>>HH\MemberOf<E, string> $x) ==> get_via_label($x));
-  // bottom line, lambdas should use `HH\Label`, not __ViaLabel
+  // bottom line, lambdas should use `HH\EnumClass\Label`, not __ViaLabel
 }

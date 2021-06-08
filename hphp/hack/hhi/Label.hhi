@@ -14,11 +14,10 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-namespace HH {
-// TODO: mabe make more namespaces, like HH\Enum\Class
+namespace HH\EnumClass {
 
 /**
- * Type of atoms
+ * Type of enum class labels
  */
 newtype Label<-TEnumClass, TType> = string;
 }

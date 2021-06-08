@@ -23,15 +23,15 @@ function expect_Member<T>(HH\MemberOf<E, Box<T>> $member) : void {
 function expect_string(string $name) : void {
 }
 
-function E_name_of_label<T>(HH\Label<E, Box<T>> $label): string {
+function E_name_of_label<T>(HH\EnumClass\Label<E, Box<T>> $label): string {
   return E::nameOf($label);
 }
 
-function E_value_of_member<T>(HH\Label<E, Box<T>> $label): HH\MemberOf<E, Box<T>> {
+function E_value_of_member<T>(HH\EnumClass\Label<E, Box<T>> $label): HH\MemberOf<E, Box<T>> {
   return E::valueOf($label);
 }
 
-function E_test<T as arraykey>(HH\Label<E, Box<T>> $atom) : void {
+function E_test<T as arraykey>(HH\EnumClass\Label<E, Box<T>> $atom) : void {
   echo E_name_of_label($atom);
   echo "\n";
   echo E_value_of_member($atom)->x;

@@ -6,7 +6,7 @@ enum class E : mixed {
 }
 
 class C {
-  static public function g<T>(HH\Label<E, T> $label) : T {
+  static public function g<T>(HH\EnumClass\Label<E, T> $label) : T {
     return E::valueOf($label);
   }
 }

@@ -5,7 +5,7 @@ enum class EE : int {
   int Bar = 2;
 }
 
-function get<T>(HH\Label<EE, T> $z) : T {
+function get<T>(HH\EnumClass\Label<EE, T> $z) : T {
   return $z;
 }
 

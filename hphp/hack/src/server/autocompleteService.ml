@@ -542,7 +542,7 @@ let autocomplete_enum_class_label_call env fty pos_labelname =
     let is_enum_class_label_ty_name name =
       Typing_defs_flags.(is_set fp_flags_via_label fp_flags)
       && String.equal Naming_special_names.Classes.cMemberOf name
-      || String.equal Naming_special_names.Classes.cLabel name
+      || String.equal Naming_special_names.Classes.cEnumClassLabel name
     in
     (match get_node t with
     | Tnewtype (ty_name, [enum_ty; _member_ty], _)

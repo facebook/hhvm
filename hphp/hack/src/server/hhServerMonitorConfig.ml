@@ -80,6 +80,26 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
   Unix.close child_priority_fd;
   Unix.close child_force_dormant_start_only_force_fd;
   Hh_logger.log "Just started typechecker server with pid: %d." pid;
+
+  (* We'll write an initial progress message to guarantee that the client will
+  certainly be able to read the progress file as soon as it learns the progress filename.
+  There's a benign race as to whether our message is written first, or whether the server
+  started up quickly enough to write its initial message first. It's benign because
+  either message will communicate the right intent to the user, and in any case the server
+  will always have further progress updates to write. *)
+  let server_progress_file = ServerFiles.server_progress_file pid in
+  let server_progress =
+    ServerCommandTypes.
+      {
+        server_progress = "starting hh_server";
+        server_warning = None;
+        server_timestamp = Unix.gettimeofday ();
+      }
+  in
+  ServerCommandTypesUtils.write_progress_file
+    ~server_progress_file
+    ~server_progress;
+
   let server =
     SP.
       {
@@ -88,7 +108,7 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
           {
             ServerCommandTypes.server_finale_file =
               ServerFiles.server_finale_file pid;
-            server_progress_file = ServerFiles.server_progress_file pid;
+            server_progress_file;
           };
         in_fd = Daemon.descr_of_in_channel ic;
         out_fds =

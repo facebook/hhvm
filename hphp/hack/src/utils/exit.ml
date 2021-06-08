@@ -40,8 +40,9 @@ let prepare_server_specific_files
         server_progress_file;
         server_receipt_to_monitor_file;
       };
+  (* The progress file was already initialized by the monitor before it launched us. *)
+  (* TODO: probably other two files should also be initialized by the monitor too... *)
   (try Unix.unlink server_finale_file with _ -> ());
-  (try Unix.unlink server_progress_file with _ -> ());
   (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
   ()
 

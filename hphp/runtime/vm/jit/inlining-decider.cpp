@@ -642,11 +642,12 @@ TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
   auto const offset = callee->getEntryForNumArgs(argTypes.size());
+  auto const sk = SrcKey { callee, offset, ResumeMode::None };
   TransIDSet ret;
   FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
-    if (rec->startBcOff() != offset) continue;
+    if (rec->srcKey() != sk) continue;
     auto const region = rec->region();
 
     auto const isvalid = [&] () {

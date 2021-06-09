@@ -312,9 +312,9 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
     [&](TransID tid1, TransID tid2) -> bool {
       if (regionMode == PGORegionMode::WholeCFG ||
           regionMode == PGORegionMode::HotCFG) {
-        auto bcOff1 = profData->transRec(tid1)->startBcOff();
-        auto bcOff2 = profData->transRec(tid2)->startBcOff();
-        if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
+        auto sk1 = profData->transRec(tid1)->srcKey();
+        auto sk2 = profData->transRec(tid2)->srcKey();
+        if (sk1 != sk2) return sk1.offset() < sk2.offset();
       }
       if (cfg.weight(tid1) != cfg.weight(tid2)) {
         return cfg.weight(tid1) > cfg.weight(tid2);

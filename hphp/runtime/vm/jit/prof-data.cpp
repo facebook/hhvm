@@ -35,22 +35,22 @@ TRACE_SET_MOD(pgo);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ProfTransRec::ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region,
+ProfTransRec::ProfTransRec(SrcKey lastSk, SrcKey sk, RegionDescPtr region,
                            uint32_t asmSize)
     : m_kind(TransKind::Profile)
-    , m_lastBcOff(lastBcOff)
+    , m_asmSize(asmSize)
+    , m_lastSk(lastSk)
     , m_sk(sk)
-    , m_region(region)
-    , m_asmSize(asmSize){
+    , m_region(region) {
   assertx(region != nullptr && !region->empty() && region->start() == sk);
 }
 
 ProfTransRec::ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize)
     : m_kind(TransKind::ProfPrologue)
+    , m_asmSize(asmSize)
     , m_prologueArgs(nArgs)
     , m_sk(sk)
     , m_callers{}
-    , m_asmSize(asmSize)
 {
   m_callers = std::make_unique<CallerRec>();
 }
@@ -121,7 +121,7 @@ void ProfData::addTransProfile(TransID transID,
                                const RegionDescPtr& region,
                                const PostConditions& pconds,
                                uint32_t asmSize) {
-  auto const lastBcOff = region->lastSrcKey().offset();
+  auto const lastSk = region->lastSrcKey();
 
   assertx(region);
   DEBUG_ONLY auto const nBlocks = region->blocks().size();
@@ -148,7 +148,7 @@ void ProfData::addTransProfile(TransID transID,
 
   {
     folly::SharedMutex::WriteHolder lock{m_transLock};
-    m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region,
+    m_transRecs[transID].reset(new ProfTransRec(lastSk, startSk, region,
                                                 asmSize));
   }
 

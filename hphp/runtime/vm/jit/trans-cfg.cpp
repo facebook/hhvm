@@ -239,8 +239,8 @@ void TransCFG::print(std::ostream& out, FuncId funcId,
     auto const w = weight(tid);
     uint32_t coldness  = 255 - (255 * w / maxWeight);
     auto const rec = profData->transRec(tid);
-    auto const bcStart = rec->startBcOff();
-    auto const bcStop  = rec->lastBcOff();
+    auto const bcStart = rec->srcKey().printableOffset();
+    auto const bcStop  = rec->lastSrcKey().printableOffset();
     auto const shape = "box";
     out << folly::sformat(
       "t{} [shape={},label=\"T: {}\\np: {}\\n"

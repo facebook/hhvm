@@ -375,7 +375,7 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
   write_raw(ser, ptr->kind());
   write_srckey(ser, ptr->srcKey());
   if (ptr->kind() == TransKind::Profile) {
-    write_raw(ser, ptr->lastBcOff());
+    write_raw(ser, ptr->lastSrcKey());
     write_region_desc(ser, ptr->region().get());
     write_raw(ser, ptr->asmSize());
   } else {
@@ -403,10 +403,10 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   if (kind == TransKind{}) return nullptr;
   auto const sk = read_srckey(ser);
   if (kind == TransKind::Profile) {
-    auto const lastBcOff = read_raw<Offset>(ser);
+    auto const lastSk = read_srckey(ser);
     auto const region = read_region_desc(ser);
     auto const asmSize = read_raw<uint32_t>(ser);
-    return std::make_unique<ProfTransRec>(lastBcOff, sk, region, asmSize);
+    return std::make_unique<ProfTransRec>(lastSk, sk, region, asmSize);
   }
 
   auto ret = std::make_unique<ProfTransRec>(sk, read_raw<int>(ser), 0);
@@ -703,13 +703,13 @@ void maybe_output_prof_trans_rec_trace(
       }
     }
     folly::dynamic profTransRecProfile = folly::dynamic::object;
-    profTransRecProfile["end_bytecode_offset"] = profTransRec->lastBcOff();
-    profTransRecProfile["end_line_number"] = func->getLineNumber(profTransRec->lastBcOff());
+    profTransRecProfile["end_bytecode_offset"] = profTransRec->lastSrcKey().printableOffset();
+    profTransRecProfile["end_line_number"] = profTransRec->lastSrcKey().lineNumber();
     profTransRecProfile["file_path"] = filePath;
     profTransRecProfile["function_name"] = sk.func()->fullName()->data();
     profTransRecProfile["profile"] = folly::dynamic::object("profileType", "ProfTransRec");
     profTransRecProfile["region"] = folly::dynamic::object("blocks", blocks);
-    profTransRecProfile["start_bytecode_offset"] = profTransRec->startBcOff();
+    profTransRecProfile["start_bytecode_offset"] = profTransRec->srcKey().printableOffset();
     profTransRecProfile["start_line_number"] = profTransRec->region()->start().lineNumber();
     profTransRecProfile["translation_weight"] = translationWeight;
     HPHP::Trace::traceRelease("json:%s\n", folly::toJson(profTransRecProfile).c_str());

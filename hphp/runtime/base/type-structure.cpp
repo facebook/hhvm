@@ -154,8 +154,9 @@ void functionTypeName(const Array& arr, std::string& name,
     sep = ", ";
   }
 
-  if (arr.exists(s_variadic_type)) {
-    auto const variadicType = arr[s_variadic_type].asCArrRef();
+  auto variadic_tv = arr.lookup(s_variadic_type);
+  if (variadic_tv.is_init()) {
+    auto const variadicType = tvAsVariant(variadic_tv).asCArrRef();
     folly::toAppend(sep, fullName(variadicType, type), "...", &name);
   }
 
@@ -211,9 +212,10 @@ void tupleTypeName(const Array& arr, std::string& name,
 
 void genericTypeName(const Array& arr, std::string& name,
                      TypeStructure::TSDisplayType type) {
+  auto args_tv = arr.lookup(s_generic_types);
+  if (!args_tv.is_init()) return;
   name += "<";
-  assertx(arr.exists(s_generic_types));
-  auto const args = arr[s_generic_types].asCArrRef();
+  auto const args = tvAsVariant(args_tv).asCArrRef();
   auto const sz = args.size();
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
@@ -294,9 +296,9 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       assertx(arr[s_opaque].toBoolean());
       name += "opaque:";
     }
-
-    if (arr.exists(s_alias)) {
-      auto const alias = arr[s_alias].asCStrRef();
+    auto tv = arr.lookup(s_alias);
+    if (tv.is_init()) {
+      auto const alias = tvAsVariant(tv).asCStrRef();
       name += alias.toCppString() + ':';
     }
   }
@@ -356,21 +358,15 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       break;
     case TypeStructure::Kind::T_darray:
       name += s_darray;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_varray:
       name += s_varray;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_varray_or_darray:
       name += s_varray_or_darray;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_shape:
       name += forDisplay(type) ? s_shape : s_hh + s_shape;
@@ -378,33 +374,23 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       break;
     case TypeStructure::Kind::T_dict:
       name += s_hh_dict;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_vec:
       name += s_hh_vec;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_keyset:
       name += s_hh_keyset;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_vec_or_dict:
       name += s_hh_vec_or_dict;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_any_array:
       name += s_hh_any_array;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
+      genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_typevar:
       assertx(arr.exists(s_name));
@@ -428,7 +414,7 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
     case TypeStructure::Kind::T_unresolved:
       assertx(arr.exists(s_classname));
       name += arr[s_classname].asCStrRef().toCppString();
-      if (arr.exists(s_generic_types)) genericTypeName(arr, name, type);
+      genericTypeName(arr, name, type);
       break;
   }
 
@@ -582,8 +568,9 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
     // If the TS was resolved before then value field no longer exists, the
     // value is instead flattened.
-    auto valueArr =
-      wrapper.exists(s_value) ? wrapper[s_value].toArray() : wrapper;
+
+    auto tv = wrapper.lookup(s_value);
+    auto valueArr = tv.is_init() ? tvAsVariant(tv).toArray() : wrapper;
     auto value = resolveTS(env, ctx, valueArr);
 
     if (wrapper.exists(s_optional_shape_field)) {
@@ -665,9 +652,9 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       auto const paramsArr = arr[s_param_types].asCArrRef();
       newarr.set(s_param_types, Variant(resolveList(env, ctx, paramsArr)));
 
-      if (arr.exists(s_variadic_type)) {
-        auto const variadicArr = arr[s_variadic_type].asCArrRef();
-        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, variadicArr)));
+      auto tv = arr.lookup(s_variadic_type);
+      if (tv.is_init()) {
+        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, tvAsVariant(tv).asCArrRef())));
       }
 
       break;
@@ -781,7 +768,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         }
         auto tv = cls->clsCnsGet(cnsName.get(), ConstModifiers::Kind::Type,
                                  !env.allow_partial);
-        if (tv.m_type == KindOfUninit) {
+        if (!tv.is_init()) {
           assertx(env.allow_partial);
           throw Exception(
             "Failed to resolve a type constant: %s::%s",
@@ -824,7 +811,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_reifiedtype: {
       assertx(env.tsList != nullptr);
       assertx(arr.exists(s_id));
-      auto id = arr[s_id].toInt64Val();
+      auto id = arr.lookup(s_id).val().num;
       assertx(id < env.tsList->size());
       // Overwrite data in newarr with fields in the reified generics type.
       IterateKV(env.tsList->at(id).get(), [&](auto key, auto val) {
@@ -958,7 +945,6 @@ bool coerceToTypeStructureList(Array& arr, bool shape=false);
 // coerced to a valid, resolved TypeStructure.
 bool coerceTSField(Array& arr, const String& name) {
   assertx(!arr->cowCheck());
-  if (!arr.exists(name)) return false;
   auto field = arr.lookup(name);
   if (!tvIsDict(field)) return false;
   return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
@@ -977,10 +963,19 @@ bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
 
 // Same as above, except that they allow the field to be missing.
 bool coerceOptTSField(Array& arr, const String& name) {
-  return arr.exists(name) ? coerceTSField(arr, name) : true;
+  assertx(!arr->cowCheck());
+  auto field = arr.lookup(name);
+  if (!field.is_init()) return true;
+  if (!tvIsDict(field)) return false;
+  return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
 }
 bool coerceOptTSListField(Array& arr, const String& name, bool shape=false) {
-  return arr.exists(name) ? coerceTSListField(arr, name, shape) : true;
+  assertx(!arr->cowCheck());
+  if (!arr.exists(name)) return true;
+  auto field = arr.lval(name);
+  if (!coerceToVecOrVArray(field)) return false;
+  assertx(tvIsVec(field));
+  return coerceToTypeStructureList(ArrNR(val(field).parr).asArray(), shape);
 }
 
 bool coerceToTypeStructureList(Array& arr, bool shape) {

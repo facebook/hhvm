@@ -34,6 +34,10 @@ namespace HPHP {
 
     virtual int64_t strcoll(const String&, const String&) const override;
     virtual int64_t strcasecmp(const String&, const String&) const override;
+    virtual bool starts_with(const String& str, const String& prefix) const override;
+    virtual bool starts_with_ci(const String& str, const String& prefix) const override;
+    virtual bool ends_with(const String& str, const String& suffix) const override;
+    virtual bool ends_with_ci(const String& str, const String& suffix) const override; 
     private:
       locale_t m_loc;
   };

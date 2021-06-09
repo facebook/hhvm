@@ -18,6 +18,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
+#include "hphp/util/bstring.h"
+#include "hphp/zend/zend-string.h"
 
 #include <strings.h>
 #ifdef __APPLE__
@@ -89,6 +91,40 @@ int64_t HSLLocaleLibcOps::strcasecmp(const String& a, const String& b) const {
     return 1;
   }
   return 0;
+}
+
+bool HSLLocaleLibcOps::starts_with(const String& str, const String& prefix) const {
+  assertx(!str.isNull() & !prefix.isNull());
+  if (str.size() < prefix.size()) {
+    return false;
+  }
+  return string_ncmp(str.data(), prefix.data(), prefix.size()) == 0;
+}
+
+bool HSLLocaleLibcOps::starts_with_ci(const String& str, const String& prefix) const {
+  assertx(!str.isNull() & !prefix.isNull());
+  if (str.size() < prefix.size()) {
+    return false;
+  }
+  return bstrcaseeq(str.data(), prefix.data(), prefix.size());
+}
+
+bool HSLLocaleLibcOps::ends_with(const String& str, const String& suffix) const {
+  assertx(!str.isNull() & !suffix.isNull());
+  if (str.size() < suffix.size()) {
+    return false;
+  }
+  const auto offset = str.size() - suffix.size();
+  return string_ncmp(str.data() + offset, suffix.data(), suffix.size()) == 0;
+}
+
+bool HSLLocaleLibcOps::ends_with_ci(const String& str, const String& suffix) const {
+  assertx(!str.isNull() & !suffix.isNull());
+  if (str.size() < suffix.size()) {
+    return false;
+  }
+  const auto offset = str.size() - suffix.size();
+  return string_ncmp(str.data() + offset, suffix.data(), suffix.size()) == 0;
 }
 
 } // namespace HPHP

@@ -25,8 +25,10 @@
 #include <unicode/errorcode.h>
 #include <unicode/uchar.h>
 #include <unicode/unistr.h>
+#include <unicode/uvernum.h>
 
 #include <functional>
+
 
 namespace HPHP {
 
@@ -53,6 +55,10 @@ int64_t HSLLocaleICUOps::strlen(const String& str) const {
 
 namespace {
 
+ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::String& str) {
+  return icu::StringPiece(str.data(), str.size());
+}
+
 ALWAYS_INLINE String utf8_icu_op(
   const String& utf8_in,
   std::function<void(icu::UnicodeString&)> op
@@ -61,7 +67,7 @@ ALWAYS_INLINE String utf8_icu_op(
     return utf8_in;
   }
 
-  auto mut = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_in.data(), utf8_in.length()));
+  auto mut = icu::UnicodeString::fromUTF8(icu_string_piece(utf8_in));
   op(mut);
   std::string ret;
   mut.toUTF8String(ret);
@@ -93,7 +99,7 @@ String HSLLocaleICUOps::foldcase(const String& str) const {
 
 Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
   assert(chunk_size > 0);
-  auto icustr = icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.length()));
+  auto icustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
   const auto len = icustr.countChar32();
   VecInit ret { (size_t) (len / chunk_size + 1) };
   if (len <= chunk_size) {
@@ -121,25 +127,62 @@ int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
   icu::ErrorCode err;
   auto coll = collator();
   coll->setStrength(icu::Collator::TERTIARY); // accent- and case-sensitive
-  return coll->compareUTF8(
-    icu::StringPiece(a.data(), a.length()),
-    icu::StringPiece(b.data(), b.length()),
-    err
-  );
+  return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
 }
 
 int64_t HSLLocaleICUOps::strcasecmp(const String& a, const String& b) const {
-  assertx(!a.isNull() && !b.isNull());
   assertx(!a.isNull() && !b.isNull());
 
   icu::ErrorCode err;
   auto coll = collator();
   coll->setStrength(icu::Collator::SECONDARY); // accent-sensitive, not case-sensitive
-  return coll->compareUTF8(
-    icu::StringPiece(a.data(), a.length()),
-    icu::StringPiece(b.data(), b.length()),
-    err
-  );
+  return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
+}
+
+bool HSLLocaleICUOps::starts_with(const String& str, const String& prefix) const {
+  assertx(!str.isNull() && !prefix.isNull());
+  if (str.substr(0, prefix.size()) == prefix) {
+    return true;
+  }
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+#if U_ICU_VERSION_MAJOR_NUM >= 60
+  // Normalize prefix first as it might be shorter
+  std::string nprefix;
+  normalizer->normalizeUTF8(0, icu_string_piece(prefix), nprefix, nullptr, err);
+  if (str.substr(0, nprefix.size()) == nprefix) {
+    return true;
+  }
+
+  std::string nstr;
+  normalizer->normalizeUTF8(0, icu_string_piece(str), nstr, nullptr, err);
+  return nstr.substr(0, nprefix.size()) == nprefix;
+#else
+  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto uprefix = icu::UnicodeString::fromUTF8(icu_string_piece(prefix));
+  icu::UnicodeString nprefix;
+  normalizer->normalize(uprefix, nprefix, err);
+  if (ustr.startsWith(nprefix)) {
+    return true;
+  }
+  icu::UnicodeString nstr;
+  normalizer->normalize(ustr, nstr, err);
+  return nstr.startsWith(nprefix);
+#endif
+}
+
+bool HSLLocaleICUOps::ends_with(const String& str, const String& suffix) const {
+  return false;
+}
+
+bool HSLLocaleICUOps::starts_with_ci(const String& str, const String& prefix) const {
+  return false;
+}
+
+bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) const {
+  return false;
 }
 
 icu::Collator* HSLLocaleICUOps::collator() const {
@@ -147,7 +190,7 @@ icu::Collator* HSLLocaleICUOps::collator() const {
   if (m_collator) {
     return m_collator;
   }
-  icu::ErrorCode err;
+  UErrorCode err;
   const_cast<HSLLocaleICUOps*>(this)->m_collator =
     icu::Collator::createInstance(this->m_collate, err);
   return m_collator;

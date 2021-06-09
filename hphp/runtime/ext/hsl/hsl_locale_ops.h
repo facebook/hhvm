@@ -29,5 +29,16 @@ namespace HPHP {
     virtual Array chunk(const String&, int64_t chunk_size) const = 0;
     virtual int64_t strcoll(const String&, const String&) const = 0;
     virtual int64_t strcasecmp(const String&, const String&) const = 0;
+
+    // Special-case each of these instead of adding `substrcoll`/`substrcasecmp`
+    // as:
+    // - these are all that are needed for the HSL
+    // - they can be more performant, especially for the HSL; for example,
+    //   calculating offsets and lengths may require an encoding conversion
+    //   which we're going to have to do here anyway, let's not do it twice
+    virtual bool starts_with(const String& str, const String& prefix) const = 0;
+    virtual bool starts_with_ci(const String& str, const String& prefix) const = 0;
+    virtual bool ends_with(const String& str, const String& prefix) const = 0;
+    virtual bool ends_with_ci(const String& str, const String& prefix) const = 0;
   };
 } // namespace HPHP

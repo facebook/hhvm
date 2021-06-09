@@ -391,7 +391,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           when String.equal name SN.Collections.cVec
                || String.equal name SN.Collections.cKeyset
                || String.equal name SN.Collections.cDict ->
-          List.for_all type_args strict_allowable_types
+          List.for_all type_args ~f:strict_allowable_types
         | _ -> false
       in
       let same_type env ty1 ty2 =
@@ -420,7 +420,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                 List.for_all2
                   container_tys1
                   container_tys2
-                  (strict_equatable env)
+                  ~f:(strict_equatable env)
               with
              | List.Or_unequal_lengths.Ok all_true -> all_true
              | _ -> false)

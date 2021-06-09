@@ -410,7 +410,7 @@ let parse ~parser_env text_source =
   if List.is_empty (SyntaxTree.all_errors tree) then
     tree
   else (
-    List.iter (SyntaxTree.all_errors tree) (print_error source_text);
+    List.iter (SyntaxTree.all_errors tree) ~f:(print_error source_text);
     raise Hackfmt_error.InvalidSyntax
   )
 
@@ -487,7 +487,7 @@ let format_diff_intervals ?config env intervals tree =
 let debug_print ?range ?config text_source =
   let tree = parse ~parser_env:Full_fidelity_parser_env.default text_source in
   let source_text = SyntaxTree.text tree in
-  let range = Option.map range (expand_or_convert_range source_text) in
+  let range = Option.map range ~f:(expand_or_convert_range source_text) in
   let env = Libhackfmt.env_from_config config in
   let doc =
     Hack_format.transform env (SyntaxTransforms.editable_from_positioned tree)
@@ -623,5 +623,5 @@ let () =
       ~file:(text_source_to_filename env.Env.text_source)
       ~root:env.Env.root );
 
-  Option.iter err_msg (eprintf "%s\n");
+  Option.iter err_msg ~f:(eprintf "%s\n");
   exit exit_code

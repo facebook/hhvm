@@ -38,7 +38,7 @@ let check_param : env -> Nast.fun_param -> unit =
         ()
       | Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
       | Toption ty -> check_memoizable env ty
-      | Ttuple tyl -> List.iter tyl (check_memoizable env)
+      | Ttuple tyl -> List.iter tyl ~f:(check_memoizable env)
       (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
       | Tgeneric _ ->
         (* FIXME fun fact:
@@ -57,7 +57,7 @@ let check_param : env -> Nast.fun_param -> unit =
        *)
       | Tunion tyl
       | Tintersection tyl ->
-        List.iter tyl (check_memoizable env)
+        List.iter tyl ~f:(check_memoizable env)
       | Tvarray ty
       | Tdarray (_, ty)
       | Tvec_or_dict (_, ty)
@@ -79,7 +79,7 @@ let check_param : env -> Nast.fun_param -> unit =
             env
             (LoclType ty)
             (LoclType container_type)
-            (Errors.unify_error_at pos)
+            ~on_error:(Errors.unify_error_at pos)
         in
         let (env, prop) =
           SubType.prop_to_env env props (Errors.unify_error_at pos)

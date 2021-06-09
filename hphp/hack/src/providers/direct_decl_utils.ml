@@ -79,7 +79,7 @@ let get_file_contents ctx filename =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) filename
   with
   | Some entry ->
-    let source_text = Ast_provider.compute_source_text entry in
+    let source_text = Ast_provider.compute_source_text ~entry in
     Some (Full_fidelity_source_text.text source_text)
   | None -> File_provider.get_contents filename
 

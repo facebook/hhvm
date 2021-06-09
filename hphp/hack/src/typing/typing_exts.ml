@@ -107,7 +107,9 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
     | None -> (env, [])
   and read_modifier env i class_ i0 : env * locl_fun_params =
     let fname = magic_method_name (get_char s i) in
-    let snippet = String.sub s i0 (min (i + 1) (String.length s) - i0) in
+    let snippet =
+      String.sub s ~pos:i0 ~len:(min (i + 1) (String.length s) - i0)
+    in
     let add_reason =
       List.map ~f:(fun p ->
           let et_type =

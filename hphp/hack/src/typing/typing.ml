@@ -414,7 +414,7 @@ let check_expected_ty_res
   | None -> Ok env
   | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
     Typing_log.(
-      log_with_level env "typing" 1 (fun () ->
+      log_with_level env "typing" ~level:1 (fun () ->
           log_types
             (Pos_or_decl.of_raw_pos p)
             env
@@ -746,7 +746,7 @@ let type_capability env ctxs unsafe_ctxs default_pos =
   (* No need to repeat the following check (saves time) for unsafe_ctx
     because it's synthetic and well-kinded by construction *)
   Option.iter ctxs ~f:(fun (_pos, hl) ->
-      List.iter hl (Typing_kinding.Simple.check_well_kinded_hint env));
+      List.iter hl ~f:(Typing_kinding.Simple.check_well_kinded_hint env));
 
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
@@ -1101,7 +1101,7 @@ let call_param env param (((pos, _) as e), arg_ty) ~is_variadic :
     match snd e with
     | Hole ((_, Lvar _), _, _, _)
     | Lvar _ ->
-      ExprDepTy.make env (CIexpr e) arg_ty
+      ExprDepTy.make env ~cid:(CIexpr e) arg_ty
     | _ -> (env, arg_ty)
   in
   Result.fold
@@ -1187,7 +1187,7 @@ let rec condition_nullity ~nonnull (env : env) te =
         Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) ty
       else
         let r = Reason.Rwitness_from_decl (get_pos ty) in
-        Inter.intersect env r ty (MakeType.null r)
+        Inter.intersect env ~r ty (MakeType.null r)
     in
     refine_lvalue_type env te ~refine
 
@@ -1205,7 +1205,8 @@ let generate_fresh_tparams env class_info p reason hint_tyl =
   let hint_tyl = List.take hint_tyl tparams_len in
   let pad_len = tparams_len - List.length hint_tyl in
   let hint_tyl =
-    List.map hint_tyl (fun x -> Some x) @ List.init pad_len (fun _ -> None)
+    List.map hint_tyl ~f:(fun x -> Some x)
+    @ List.init pad_len ~f:(fun _ -> None)
   in
   let replace_wildcard env hint_ty tp =
     let {
@@ -1305,7 +1306,7 @@ let safely_refine_class_type
       true
     | Tdynamic -> true
     | Toption ty -> might_be_supertype ty
-    | Tunion tyl -> List.for_all tyl might_be_supertype
+    | Tunion tyl -> List.for_all tyl ~f:might_be_supertype
     | _ -> false
   in
   let env =
@@ -1400,7 +1401,7 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
     let (env, tyl) =
-      List.map2_env env ivar_tyl hint_tyl (fun env ivar_ty hint_ty ->
+      List.map2_env env ivar_tyl hint_tyl ~f:(fun env ivar_ty hint_ty ->
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
     in
     (env, MakeType.tuple reason tyl)
@@ -1548,7 +1549,7 @@ let rec rewrite_expr_tree_maketree env expr f =
         | _ -> (env, s)
       in
 
-      let (env, body_ast) = List.map_env env fun_.f_body.fb_ast map_stmt in
+      let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
       let fun_ =
         { fun_ with f_body = { fun_.f_body with fb_ast = body_ast } }
       in
@@ -1715,7 +1716,7 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
       (env, Some te, ty1)
   in
   let (env, user_attributes) =
-    List.map_env env param.param_user_attributes user_attribute
+    List.map_env env param.param_user_attributes ~f:user_attribute
   in
   let tparam =
     {
@@ -1879,7 +1880,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
  *)
 and check_using_clause env has_await using_clauses =
   let (env, pairs) =
-    List.map_env env using_clauses (check_using_expr has_await)
+    List.map_env env using_clauses ~f:(check_using_expr has_await)
   in
   let (typed_using_clauses, vars) = List.unzip pairs in
   (env, typed_using_clauses, List.concat vars)
@@ -2235,7 +2236,9 @@ and stmt_ env pos st =
       List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
           let (env, te2, ty2) = expr env e2 ~allow_awaitable:true in
           let pos2 = fst e2 in
-          let (env, ty2) = Async.overload_extract_from_awaitable env pos2 ty2 in
+          let (env, ty2) =
+            Async.overload_extract_from_awaitable env ~p:pos2 ty2
+          in
           match e1 with
           | Some e1 ->
             let pos = fst e1 in
@@ -2447,7 +2450,7 @@ and expr
       | None -> ()
       | Some ExpectedTy.{ reason = r; ty = { et_type = ty; _ }; _ } ->
         Typing_log.(
-          log_with_level env "typing" 1 (fun () ->
+          log_with_level env "typing" ~level:1 (fun () ->
               log_types
                 (Pos_or_decl.of_raw_pos p)
                 env
@@ -2661,7 +2664,7 @@ and expr_
       in
 
       if
-        List.exists tys (fun ty ->
+        List.exists tys ~f:(fun ty ->
             equal_locl_ty_ (get_node ty) (Typing_utils.tany env))
       then
         (* If one of the values comes from PHP land, we have to be conservative
@@ -2685,7 +2688,7 @@ and expr_
       l
       extract_expr_and_ty =
     let (env, exprs_and_tys) =
-      List.map_env env l (extract_expr_and_ty ~expected)
+      List.map_env env l ~f:(extract_expr_and_ty ~expected)
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let (env, supertype, err_opts) =
@@ -3077,11 +3080,11 @@ and expr_
           Errors.meth_caller_trait pos class_name
       in
       let (env, tvarl) =
-        List.map_env env (Cls.tparams class_) (fun env _ ->
+        List.map_env env (Cls.tparams class_) ~f:(fun env _ ->
             Env.fresh_type env p)
       in
       let params =
-        List.map (Cls.tparams class_) (fun { tp_name = (p, n); _ } ->
+        List.map (Cls.tparams class_) ~f:(fun { tp_name = (p, n); _ } ->
             (* TODO(T69551141) handle type arguments for Tgeneric *)
             MakeType.generic (Reason.Rwitness_from_decl p) n)
       in
@@ -3417,7 +3420,7 @@ and expr_
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
       if String.equal s SN.PseudoFunctions.hh_show then (
-        List.iter tys (Typing_log.hh_show p env);
+        List.iter tys ~f:(Typing_log.hh_show p env);
         env
       ) else if String.equal s SN.PseudoFunctions.hh_show_env then (
         Typing_log.hh_show_env p env;
@@ -3623,7 +3626,7 @@ and expr_
               Tapply ((p_, SN.Classes.cTypename), [tdef]) )
         in
         let (env, tparams) =
-          List.map_env env tparaml (fun env _tp -> Env.fresh_type env p)
+          List.map_env env tparaml ~f:(fun env _tp -> Env.fresh_type env p)
         in
         let ety_env =
           {
@@ -3839,7 +3842,7 @@ and expr_
         e
         ~allow_awaitable:true
     in
-    let (env, ty) = Async.overload_extract_from_awaitable env p rty in
+    let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
     make_result env p (Aast.Await te) ty
   | ReadonlyExpr e ->
     let (env, te, rty) = expr ~is_using_clause ~in_readonly_expr:true env e in
@@ -3945,7 +3948,7 @@ and expr_
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
       let (env, rty) = class_for_refinement env p reason lpos lty rty in
-      Inter.intersect env reason lty rty
+      Inter.intersect env ~r:reason lty rty
     in
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
@@ -4037,7 +4040,7 @@ and expr_
           env
           declared_ft)
     in
-    List.iter idl (check_escaping_var env);
+    List.iter idl ~f:(check_escaping_var env);
 
     (* Ensure lambda arity is not ellipsis in strict mode *)
     begin
@@ -4161,7 +4164,7 @@ and expr_
         (* If all parameters are annotated with explicit types, then type-check
          * the body under those assumptions and pick up the result type *)
         let all_explicit_params =
-          List.for_all f.f_params (fun param ->
+          List.for_all f.f_params ~f:(fun param ->
               Option.is_some (hint_of_type_hint param.param_type_hint))
         in
         if all_explicit_params && explicit_variadic_param_or_non_variadic then (
@@ -4266,7 +4269,7 @@ and expr_
                   (env, { ft_param with fp_type })
                 in
                 let (env, ft_params) =
-                  List.map_env env ft.ft_params freshen_untyped_param
+                  List.map_env env ft.ft_params ~f:freshen_untyped_param
                 in
                 let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
                 (env, { ft with ft_params; ft_ret })
@@ -4697,7 +4700,7 @@ and closure_make
     List.fold_left
       ~f:(closure_bind_param params)
       ~init:(env, [])
-      (List.map ft.ft_params (fun x -> x.fp_type.et_type))
+      (List.map ft.ft_params ~f:(fun x -> x.fp_type.et_type))
   in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
   let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
@@ -4801,9 +4804,9 @@ and closure_make
       env
       { Tast.has_implicit_return; Tast.named_body_is_unsafe }
   in
-  let (env, tparams) = List.map_env env f.f_tparams type_param in
+  let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
   let (env, user_attributes) =
-    List.map_env env f.f_user_attributes user_attribute
+    List.map_env env f.f_user_attributes ~f:user_attribute
   in
   let tfun_ =
     {
@@ -4958,7 +4961,7 @@ and new_object
       | (CI _, _ :: _, Some (_, _, tyl)) -> (env, get_node c_ty, tyl)
       | (_, _, class_type_opt) ->
         let (env, params) =
-          List.map_env env (Cls.tparams class_info) (fun env tparam ->
+          List.map_env env (Cls.tparams class_info) ~f:(fun env tparam ->
               let (env, tvar) =
                 Env.fresh_type_reason
                   env
@@ -4998,7 +5001,7 @@ and new_object
       else if check_parent then
         (env, c_ty)
       else
-        ExprDepTy.make env cid c_ty
+        ExprDepTy.make env ~cid c_ty
     in
     (* Set variance according to type of `new` expression now. Lambda arguments
      * to the constructor might depend on it, and `call_construct` only uses
@@ -5098,7 +5101,7 @@ and new_object
     else if check_parent then
       (env, ty)
     else
-      ExprDepTy.make env cid ty
+      ExprDepTy.make env ~cid ty
   in
   (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
 
@@ -5131,7 +5134,7 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
   let (env, tal, te, classes) =
     class_id_for_new ~exact p env cid explicit_targs
   in
-  List.iter classes (function
+  List.iter classes ~f:(function
       | `Dynamic -> ()
       | `Class ((pos, name), class_info, c_ty) ->
         let pos = Pos_or_decl.unsafe_to_raw_pos pos in
@@ -5855,12 +5858,12 @@ and dispatch_call
             (env, MakeType.varray ~unification r tv)
           | (r, Tunion tyl) ->
             let (env, tyl) =
-              List.map_env env tyl get_array_filter_return_type
+              List.map_env env tyl ~f:get_array_filter_return_type
             in
             Typing_union.union_list env r tyl
           | (r, Tintersection tyl) ->
             let (env, tyl) =
-              List.map_env env tyl get_array_filter_return_type
+              List.map_env env tyl ~f:get_array_filter_return_type
             in
             Inter.intersect_list env r tyl
           | (r, Tany _) -> (env, mk (r, Typing_utils.tany env))
@@ -5980,22 +5983,22 @@ and dispatch_call
           | (r, Terr) -> (env, (fun env _ -> (env, TUtils.terr env r)))
           | (r, Tunion tyl) ->
             let (env, builders) =
-              List.map_env env tyl (build_output_container pos)
+              List.map_env env tyl ~f:(build_output_container pos)
             in
             ( env,
               fun env tr ->
                 let (env, tyl) =
-                  List.map_env env builders (fun env f -> f env tr)
+                  List.map_env env builders ~f:(fun env f -> f env tr)
                 in
                 Typing_union.union_list env r tyl )
           | (r, Tintersection tyl) ->
             let (env, builders) =
-              List.map_env env tyl (build_output_container pos)
+              List.map_env env tyl ~f:(build_output_container pos)
             in
             ( env,
               fun env tr ->
                 let (env, tyl) =
-                  List.map_env env builders (fun env f -> f env tr)
+                  List.map_env env builders ~f:(fun env f -> f env tr)
                 in
                 Typing_intersection.intersect_list env r tyl )
           | (r, _) ->
@@ -6620,7 +6623,7 @@ and class_get_inner
     | None -> (env, (Typing_utils.mk_tany env p, []), dflt_err)
     | Some class_ ->
       (* TODO akenn: Should we move this to the class_get original call? *)
-      let (env, this_ty) = ExprDepTy.make env cid_ this_ty in
+      let (env, this_ty) = ExprDepTy.make env ~cid:cid_ this_ty in
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
         {
@@ -6797,7 +6800,7 @@ and class_get_inner
                     ((env, (MakeType.mixed Reason.Rnone, []), dflt_err), false))
               in
               if succeed then
-                Inter.intersect env (Reason.Rwitness p) member_ty member_ty'
+                Inter.intersect env ~r:(Reason.Rwitness p) member_ty member_ty'
               else
                 (env, member_ty)
             else
@@ -6910,7 +6913,7 @@ and this_for_method env (p, cid) default_ty =
   | CIself
   | CIstatic ->
     let (env, _tal, _te, ty) = class_expr env [] (p, CIstatic) in
-    ExprDepTy.make env CIstatic ty
+    ExprDepTy.make env ~cid:CIstatic ty
   | _ -> (env, default_ty)
 
 (** Resolve class expressions:
@@ -7011,7 +7014,7 @@ and class_expr
             (List.map ~f:snd tal)
         in
         let r = Reason.Rhint (Pos_or_decl.of_raw_pos p) in
-        let type_args = List.map tal fst in
+        let type_args = List.map tal ~f:fst in
         let tgeneric = MakeType.generic ~type_args r id in
         make_result env tal (Aast.CI c) tgeneric
       | None ->
@@ -7053,7 +7056,7 @@ and class_expr
       | (_, Tclass _) ->
         (env, ty)
       | (r, Tunion tyl) ->
-        let (env, tyl) = List.map_env env tyl resolve_ety in
+        let (env, tyl) = List.map_env env tyl ~f:resolve_ety in
         (env, MakeType.union r tyl)
       | (r, Tintersection tyl) ->
         let (env, tyl) = TUtils.run_on_intersection env tyl ~f:resolve_ety in
@@ -7231,7 +7234,7 @@ and call
         Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
       in
       let (env, tel) =
-        List.map_env env el (fun env elt ->
+        List.map_env env el ~f:(fun env elt ->
             (* TODO(sowens): Pass the expected type to expr *)
             let (env, te, e_ty) = expr env elt in
             let env =
@@ -7275,7 +7278,7 @@ and call
         ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
       in
       let (env, tel) =
-        List.map_env env el (fun env elt ->
+        List.map_env env el ~f:(fun env elt ->
             let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
             let (env, err_opt) =
               if TCO.global_inference (Env.get_tcopt env) then
@@ -7326,7 +7329,7 @@ and call
       call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
     | (r, Tunion tyl) ->
       let (env, resl) =
-        List.map_env env tyl (fun env ty ->
+        List.map_env env tyl ~f:(fun env ty ->
             call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
       in
       let retl = List.map resl ~f:(fun (_, _, x) -> x) in
@@ -7570,7 +7573,7 @@ and call
 
       (* First check the non-lambda arguments. For generic functions, this
        * is likely to resolve type variables to concrete types *)
-      let rl = List.map el (fun e -> (e, None)) in
+      let rl = List.map el ~f:(fun e -> (e, None)) in
       let (env, rl, _) = check_args false env rl ft.ft_params in
       (* Now check the lambda arguments, hopefully with type variables resolved *)
       let (env, rl, paraml) = check_args true env rl ft.ft_params in
@@ -7581,7 +7584,7 @@ and call
         | None -> failwith "missing parameter in check_args"
       in
       let (tel, _) =
-        let l = List.map rl (fun (_, opt) -> get_param opt) in
+        let l = List.map rl ~f:(fun (_, opt) -> get_param opt) in
         List.unzip l
       in
       let env = check_implicit_args env in
@@ -7941,7 +7944,7 @@ and condition
       let (env, hint_ty) =
         class_for_refinement env p reason ivar_pos ivar_ty hint_ty
       in
-      let (env, refined_ty) = Inter.intersect env reason ivar_ty hint_ty in
+      let (env, refined_ty) = Inter.intersect env ~r:reason ivar_ty hint_ty in
       (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
     in
     let (env, lset) =
@@ -8003,7 +8006,7 @@ and string2 env idl =
 
 and user_attribute env ua =
   let (env, typed_ua_params) =
-    List.map_env env ua.ua_params (fun env e ->
+    List.map_env env ua.ua_params ~f:(fun env e ->
         let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
         (env, te))
   in
@@ -8015,9 +8018,9 @@ and file_attributes env file_attrs =
   Errors.run_with_span Pos.none @@ fun () ->
   let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in
   let env = attributes_check_def env SN.AttributeKinds.file uas in
-  List.map_env env file_attrs (fun env fa ->
+  List.map_env env file_attrs ~f:(fun env fa ->
       let (env, user_attributes) =
-        List.map_env env fa.fa_user_attributes user_attribute
+        List.map_env env fa.fa_user_attributes ~f:user_attribute
       in
       let env = set_tcopt_unstable_features env fa in
       ( env,
@@ -8031,9 +8034,9 @@ and type_param env t =
     attributes_check_def env SN.AttributeKinds.typeparam t.tp_user_attributes
   in
   let (env, user_attributes) =
-    List.map_env env t.tp_user_attributes user_attribute
+    List.map_env env t.tp_user_attributes ~f:user_attribute
   in
-  let (env, tp_parameters) = List.map_env env t.tp_parameters type_param in
+  let (env, tp_parameters) = List.map_env env t.tp_parameters ~f:type_param in
   ( env,
     {
       Aast.tp_variance = t.tp_variance;
@@ -8174,9 +8177,9 @@ let typedef_def ctx typedef =
       SN.AttributeKinds.typealias
       typedef.t_user_attributes
   in
-  let (env, tparams) = List.map_env env typedef.t_tparams type_param in
+  let (env, tparams) = List.map_env env typedef.t_tparams ~f:type_param in
   let (env, user_attributes) =
-    List.map_env env typedef.t_user_attributes user_attribute
+    List.map_env env typedef.t_user_attributes ~f:user_attribute
   in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;

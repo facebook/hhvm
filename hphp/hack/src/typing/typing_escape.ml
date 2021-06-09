@@ -216,7 +216,7 @@ and refresh_type renv v ty_orig =
       (renvch, { fp with fp_type })
     in
     let (renvch, ft_params) =
-      List.map_env (renv, Unchanged) ft.ft_params ft_param
+      List.map_env (renv, Unchanged) ft.ft_params ~f:ft_param
     in
     let ((renv, changed), ft_ret) = enforced_ty renvch v ft.ft_ret in
     (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed)
@@ -308,16 +308,17 @@ and refresh_type renv v ty_orig =
   | (r, Tnewtype (name, l, bnd)) ->
     let vl =
       match Env.get_typedef env name with
-      | Some { td_tparams; _ } -> List.map td_tparams (fun t -> t.tp_variance)
-      | None -> List.map l (fun _ -> Ast_defs.Invariant)
+      | Some { td_tparams; _ } ->
+        List.map td_tparams ~f:(fun t -> t.tp_variance)
+      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
     in
     let (renv, l, ch) = refresh_types_w_variance renv v vl l in
     (renv, mk (r, Tnewtype (name, l, bnd)), ch)
   | (r, Tclass ((p, cid), e, l)) ->
     let vl =
       match Env.get_class env cid with
-      | None -> List.map l (fun _ -> Ast_defs.Invariant)
-      | Some cls -> List.map (Cls.tparams cls) (fun t -> t.tp_variance)
+      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
+      | Some cls -> List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
     in
     let (renv, l, ch) = refresh_types_w_variance renv v vl l in
     (renv, mk (r, Tclass ((p, cid), e, l)), ch)
@@ -574,7 +575,7 @@ let escaping_from_snapshot snap env =
   ( SMap.keys tpmap,
     function
     | Rtv_tparam name ->
-      Option.map (SMap.find_opt name tpmap) (fun (pos, tpi) ->
+      Option.map (SMap.find_opt name tpmap) ~f:(fun (pos, tpi) ->
           {
             pos;
             upper_bounds = tpi.Typing_kinding_defs.upper_bounds;

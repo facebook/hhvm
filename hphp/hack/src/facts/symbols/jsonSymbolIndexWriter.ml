@@ -81,7 +81,7 @@ let record_in_jsonfiles
           ])
   in
   (* Save schema 1 files by chunk size *)
-  let array_chunk_list = List.chunks_of hackSymbols chunk_size in
+  let array_chunk_list = List.chunks_of hackSymbols ~length:chunk_size in
   let sym_files =
     List.mapi array_chunk_list ~f:(fun chunk_id chunk ->
         record_one_jsonfile path "hack.symbol.1" chunk_id chunk)
@@ -106,7 +106,7 @@ let record_in_jsonfiles
       []
   in
   (* Save schema 1 files by chunk size *)
-  let array_chunk_list = List.chunks_of hackNamespaces chunk_size in
+  let array_chunk_list = List.chunks_of hackNamespaces ~length:chunk_size in
   let ns_files =
     List.mapi array_chunk_list ~f:(fun chunk_id chunk ->
         record_one_jsonfile path "hack.symbolNamespace.1" chunk_id chunk)
@@ -131,7 +131,7 @@ let record_in_jsonfiles
       []
   in
   (* Save schema 1 files by chunk size *)
-  let array_chunk_list = List.chunks_of hackFilepaths chunk_size in
+  let array_chunk_list = List.chunks_of hackFilepaths ~length:chunk_size in
   let filepath_files =
     List.mapi array_chunk_list ~f:(fun chunk_id chunk ->
         record_one_jsonfile path "hack.filename.1" chunk_id chunk)
@@ -151,7 +151,7 @@ let record_in_jsonfiles
     ^ "{\"key\":{\"id\":9,\"name\":\"GlobalConstant\"},\"id\":999909},"
     ^ "{\"key\":{\"id\":10,\"name\":\"XHP\"},\"id\":999910}]}]"
   in
-  Out_channel.write_all kind_fn data;
+  Out_channel.write_all kind_fn ~data;
 
   (* Final results *)
   let results = List.append sym_files ns_files |> List.append filepath_files in

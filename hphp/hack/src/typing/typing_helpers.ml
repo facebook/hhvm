@@ -105,7 +105,7 @@ let add_decl_errors = function
 (* Handling function/method arguments *)
 (*****************************************************************************)
 let param_has_attribute param attr =
-  List.exists param.param_user_attributes (fun { ua_name; _ } ->
+  List.exists param.param_user_attributes ~f:(fun { ua_name; _ } ->
       String.equal attr (snd ua_name))
 
 let has_accept_disposable_attribute param =

@@ -118,9 +118,19 @@ let rec definition_to_json def =
       JSON_Array
         (List.map def.modifiers ~f:(fun x -> JSON_String (string_of_modifier x)))
     in
-    let children = opt_field def.children "children" outline_response_to_json in
-    let params = opt_field def.params "params" outline_response_to_json in
-    let docblock = opt_field def.docblock "docblock" (fun x -> JSON_String x) in
+    let children =
+      opt_field
+        ~v_opt:def.children
+        ~label:"children"
+        ~f:outline_response_to_json
+    in
+    let params =
+      opt_field ~v_opt:def.params ~label:"params" ~f:outline_response_to_json
+    in
+    let docblock =
+      opt_field ~v_opt:def.docblock ~label:"docblock" ~f:(fun x ->
+          JSON_String x)
+    in
     JSON_Object
       ( [
           ("kind", JSON_String (string_of_kind def.kind));
@@ -158,7 +168,7 @@ let find_references_response_to_json = function
   | None -> JSON_Array []
   | Some (symbol_name, references) ->
     let entries =
-      List.map references (fun x ->
+      List.map references ~f:(fun x ->
           Ide_api_types.(
             Hh_json.JSON_Object
               [

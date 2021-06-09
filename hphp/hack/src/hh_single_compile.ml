@@ -80,7 +80,7 @@ let log_peak_mem file action =
   | Some vm_hwm when vm_hwm > !prev_vm_hwm ->
     prev_vm_hwm := vm_hwm;
     Logger.log_peak_mem
-      (Option.value file ~default:"")
+      ~filename:(Option.value file ~default:"")
       (Memory_stats.get_vm_rss () |> Option.value ~default:0)
       vm_hwm
       action
@@ -358,7 +358,7 @@ let print_output
         log_config_json
         || String.is_suffix
              (Relative_path.to_absolute file)
-             "HACKC_LOG_OPTS.php"
+             ~suffix:"HACKC_LOG_OPTS.php"
       then
         ( "config_jsons",
           Hh_json.JSON_Array
@@ -821,7 +821,7 @@ let decl_and_run_mode compiler_options =
             else
               process_single_file output_file
           in
-          List.iter filenames process_fn))
+          List.iter filenames ~f:process_fn))
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in

@@ -153,13 +153,13 @@ let check_and_strip_delimiters s =
     let first = s.[0] in
     if Str.string_match delimiter (String.make 1 first) 0 then
       let closed_delim = complement first in
-      let no_first_delim = String.sub s 1 (length - 1) in
+      let no_first_delim = String.sub s ~pos:1 ~len:(length - 1) in
       match String.rindex_from no_first_delim (length - 2) closed_delim with
       | Some i ->
         let flags =
-          get_global_options (String.sub s (i + 2) (length - i - 2))
+          get_global_options (String.sub s ~pos:(i + 2) ~len:(length - i - 2))
         in
-        let stripped_string = String.sub s 1 i in
+        let stripped_string = String.sub s ~pos:1 ~len:i in
         if not (Char.equal closed_delim first) then
           (check_balanced_delimiters stripped_string first, flags)
         else

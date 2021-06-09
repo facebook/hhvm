@@ -15,10 +15,10 @@ open Ide_api_types
 
 let result_to_json r =
   JSON_Object
-    (List.map (SMap.elements r) (fun (kind, counts) ->
+    (List.map (SMap.elements r) ~f:(fun (kind, counts) ->
          let counts =
            JSON_Object
-             (List.map (CLMap.elements counts) (fun (k, v) ->
+             (List.map (CLMap.elements counts) ~f:(fun (k, v) ->
                   (string_of_level k, int_ v.count)))
          in
          (kind, counts)))
@@ -65,7 +65,7 @@ let print_reasons reasons_stats =
     ()
   else
     let reasons_list =
-      List.map (SMap.elements reasons_stats) (fun (reason, pos_map) ->
+      List.map (SMap.elements reasons_stats) ~f:(fun (reason, pos_map) ->
           ( reason,
             pos_map,
             Pos.Map.fold (fun _ x acc -> acc + x.pos_count) pos_map 0 ))
@@ -73,7 +73,7 @@ let print_reasons reasons_stats =
     let sorted_reasons =
       List.sort ~compare:(fun (_, _, x) (_, _, y) -> y - x) reasons_list
     in
-    List.iter sorted_reasons (fun (r, pos_map, count) ->
+    List.iter sorted_reasons ~f:(fun (r, pos_map, count) ->
         Printf.printf "  Reason %s: %d\n" r count;
         Printf.printf "    Reason position:\n";
         let pos_list =
@@ -82,13 +82,13 @@ let print_reasons reasons_stats =
             (Pos.Map.elements pos_map)
         in
         let pos_list = List.take pos_list Coverage_level.display_limit in
-        List.iter pos_list (fun (p, pos_stats) ->
+        List.iter pos_list ~f:(fun (p, pos_stats) ->
             Printf.printf
               "    %s %d\n"
               (Pos.string (Pos.to_relative_string p))
               pos_stats.pos_count;
             Printf.printf "      Reason samples:\n";
-            List.iter pos_stats.samples (fun p ->
+            List.iter pos_stats.samples ~f:(fun p ->
                 Printf.printf
                   "      %s\n"
                   (Pos.string (Pos.to_relative_string p)))))

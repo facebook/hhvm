@@ -68,7 +68,7 @@ let check_class_elt_visibility parent_class_elt class_elt on_error =
 (* Check that all the required members are implemented *)
 let check_members_implemented
     check_private parent_reason reason (_, parent_members, get_member) =
-  List.iter parent_members (fun (member_name, class_elt) ->
+  List.iter parent_members ~f:(fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
       | Vprivate _ ->
@@ -164,7 +164,7 @@ let check_lsb_overrides
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_lsb member_name parent_pos pos on_error
+    Errors.override_lsb ~member_name ~parent:parent_pos ~child:pos on_error
 
 let check_lateinit parent_class_elt class_elt on_error =
   let lateinit_diff =
@@ -505,7 +505,7 @@ let check_const_override
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
-  List.filter members (fun (_name, class_elt) ->
+  List.filter members ~f:(fun (_name, class_elt) ->
       (not (is_private class_elt)) || is_lsb class_elt)
 
 let check_members
@@ -638,7 +638,7 @@ let check_members
 
 (* Instantiation basically applies the substitution *)
 let instantiate_consts subst consts =
-  List.map consts (fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
+  List.map consts ~f:(fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
 
 let make_all_members ~child_class ~parent_class =
   let wrap_constructor = function
@@ -1163,7 +1163,9 @@ let check_class_implements
     Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
   in
   if Cls.members_fully_known class_ then
-    List.iter memberl (check_members_implemented check_privates parent_pos pos);
+    List.iter
+      memberl
+      ~f:(check_members_implemented check_privates parent_pos pos);
   List.fold ~init:env memberl ~f:(fun env ->
       check_members
         check_privates

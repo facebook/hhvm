@@ -161,7 +161,7 @@ module Mode_export_json = struct
     let tyvar_to_json env var =
       let type_to_json ty = "\"" ^ Typing_print.full_i env ty ^ "\"" in
       let bounds_to_json bounds =
-        "[" ^ (List.map bounds type_to_json |> String.concat ~sep:", ") ^ "]"
+        "[" ^ (List.map bounds ~f:type_to_json |> String.concat ~sep:", ") ^ "]"
       in
       let tyvar_pos = Inf.get_tyvar_pos env.inference_env var in
       let upper_bounds = Inf.get_tyvar_upper_bounds env.inference_env var in

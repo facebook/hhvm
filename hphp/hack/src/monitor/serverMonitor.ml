@@ -110,7 +110,7 @@ module Sent_fds_collector = struct
     let (ready, notready) =
       List.partition_tf
         !handed_off_fds_to_close
-        (fun { fd_close_time; tracker; m2s_sequence_number; _ } ->
+        ~f:(fun { fd_close_time; tracker; m2s_sequence_number; _ } ->
           match fd_close_time with
           | Fd_close_immediate ->
             log
@@ -197,7 +197,7 @@ struct
     Marshal_tools.to_fd_with_preamble fd msg |> ignore
 
   let setup_handler_for_signals handler signals =
-    List.iter signals (fun signal ->
+    List.iter signals ~f:(fun signal ->
         Sys_utils.set_signal signal (Sys.Signal_handle handler))
 
   let setup_autokill_server_on_exit process =
@@ -940,7 +940,7 @@ struct
     (* If the client started the server, it opened an FD before forking, so it
      * can be notified when the monitor socket is ready. The FD number was
      * passed in program args. *)
-    Option.iter waiting_client (fun fd ->
+    Option.iter waiting_client ~f:(fun fd ->
         let oc = Unix.out_channel_of_descr fd in
         try
           Out_channel.output_string oc (ServerMonitorUtils.ready ^ "\n");

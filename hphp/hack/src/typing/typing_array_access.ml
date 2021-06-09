@@ -47,7 +47,7 @@ let error_assign_array_append env p ty =
  *)
 let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   Typing_log.(
-    log_with_level env "typing" 1 (fun () ->
+    log_with_level env "typing" ~level:1 (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos expr_pos)
           env
@@ -90,7 +90,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
       (* Should freshen type variables *)
       | (_, Int _) ->
         let (env, params) =
-          List.map_env env tyl (fun env _ty ->
+          List.map_env env tyl ~f:(fun env _ty ->
               Env.fresh_type_invariant env expr_pos)
         in
         (env, Some (MakeType.tuple r params))
@@ -219,7 +219,7 @@ let rec array_get
       in
       let type_index env p ty_have ty_expect reason =
         Typing_log.(
-          log_with_level env "typing" 1 (fun () ->
+          log_with_level env "typing" ~level:1 (fun () ->
               log_types
                 (Pos_or_decl.of_raw_pos p)
                 env
@@ -564,7 +564,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
          || String.equal cn SN.Collections.cVector
          || String.equal cn SN.Collections.cMap ->
     let (env, params) =
-      List.map_env env tyl (fun env _ty ->
+      List.map_env env tyl ~f:(fun env _ty ->
           Env.fresh_type_invariant env expr_pos)
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
@@ -634,7 +634,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
   Typing_log.(
-    log_with_level env "typing" 1 (fun () ->
+    log_with_level env "typing" ~level:1 (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos expr_pos)
           env
@@ -649,7 +649,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
          || cn = SN.Collections.cDict
          || cn = SN.Collections.cMap ->
     let (env, params) =
-      List.map_env env tyl (fun env _ty ->
+      List.map_env env tyl ~f:(fun env _ty ->
           Env.fresh_type_invariant env expr_pos)
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
@@ -672,7 +672,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
       (* Should freshen type variables *)
       | (_, Int _) ->
         let (env, params) =
-          List.map_env env tyl (fun env _ty ->
+          List.map_env env tyl ~f:(fun env _ty ->
               Env.fresh_type_invariant env expr_pos)
         in
         (env, Some (mk (r, Ttuple params)))

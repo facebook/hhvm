@@ -13,7 +13,7 @@ open Coverage_level_defs
 open Reordered_argument_collections
 
 let combine v1 v2 =
-  SMap.merge ~f:(fun _ cs1 cs2 -> Option.merge cs1 cs2 merge_and_sum) v1 v2
+  SMap.merge ~f:(fun _ cs1 cs2 -> Option.merge cs1 cs2 ~f:merge_and_sum) v1 v2
 
 class count_getter fixme_map =
   object

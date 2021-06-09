@@ -279,7 +279,7 @@ let make_genv options config local_config workers =
 (* useful in testing code *)
 let default_genv =
   {
-    options = ServerArgs.default_options "";
+    options = ServerArgs.default_options ~root:"";
     config = ServerConfig.default_config;
     local_config = ServerLocalConfig.default;
     workers = None;

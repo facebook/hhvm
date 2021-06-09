@@ -109,7 +109,7 @@ let make_sharedmem_config config options local_config =
 let config_list_regexp = Str.regexp "[, \t]+"
 
 let process_experimental sl =
-  match List.map sl String.lowercase with
+  match List.map sl ~f:String.lowercase with
   | ["false"] -> SSet.empty
   | ["true"] -> TypecheckerOptions.experimental_all
   | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
@@ -157,7 +157,7 @@ let maybe_relative_path fn =
   Path.make
     begin
       if Filename.is_relative fn then
-        Relative_path.(to_absolute (from_root fn))
+        Relative_path.(to_absolute (from_root ~suffix:fn))
       else
         fn
     end
@@ -279,7 +279,9 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
     bool_ "warn_on_non_opt_build" ~default:false config
   in
   let formatter_override =
-    Option.map (SMap.find_opt config "formatter_override") maybe_relative_path
+    Option.map
+      (SMap.find_opt config "formatter_override")
+      ~f:maybe_relative_path
   in
   let global_opts =
     GlobalOptions.make

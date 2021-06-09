@@ -378,8 +378,8 @@ and constructor env cstr =
   | None -> S.empty
   | Some cstr ->
     let check_param_initializer e = ignore (expr env S.empty e) in
-    List.iter cstr.m_params (fun p ->
-        Option.iter p.param_expr check_param_initializer);
+    List.iter cstr.m_params ~f:(fun p ->
+        Option.iter p.param_expr ~f:check_param_initializer);
     let b = Nast.assert_named_body cstr.m_body in
     toplevel env S.empty b.fb_ast
 
@@ -441,8 +441,8 @@ and stmt env acc st =
   | Switch (e, cl) ->
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)
-    let cl_body = List.filter cl case_has_body in
-    let cl = List.map cl_body (case acc) in
+    let cl_body = List.filter cl ~f:case_has_body in
+    let cl = List.map cl_body ~f:(case acc) in
     let c = S.inter_list cl in
     S.union acc c
   | Foreach (e, _, _) ->
@@ -451,7 +451,7 @@ and stmt env acc st =
   | Try (b, cl, fb) ->
     let c = block acc b in
     let f = block acc fb in
-    let cl = List.map cl (catch acc) in
+    let cl = List.map cl ~f:(catch acc) in
     let c = S.inter_list (c :: cl) in
     (* the finally block executes even if *none* of try and catch do *)
     let acc = S.union acc f in
@@ -560,7 +560,7 @@ and expr_ env acc p e =
     let el =
       match e with
       | (_, Id (_, fun_name)) when is_whitelisted fun_name ->
-        List.filter el (function
+        List.filter el ~f:(function
             | (_, This) -> false
             | _ -> true)
       | _ -> el
@@ -621,7 +621,7 @@ and expr_ env acc p e =
     (* We don't need to analyze the body of closures *)
     acc
   | Xml (_, l, el) ->
-    let l = List.map l get_xhp_attr_expr in
+    let l = List.map l ~f:get_xhp_attr_expr in
     let acc = exprl acc l in
     exprl acc el
   | Callconv (_, e) -> expr acc e

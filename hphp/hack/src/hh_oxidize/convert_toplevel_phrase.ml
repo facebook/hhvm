@@ -112,7 +112,7 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
   (* A type declaration. The list type_decls will contain multiple items in the
      event of `type ... and`. *)
   | Pstr_type (_, type_decls) ->
-    List.iter type_decls Convert_type_decl.type_declaration;
+    List.iter type_decls ~f:Convert_type_decl.type_declaration;
     env
   (* Convert `open Foo` to `use crate::foo::*;` *)
   | Pstr_open { popen_expr; _ } ->

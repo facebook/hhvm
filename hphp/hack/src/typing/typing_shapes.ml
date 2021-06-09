@@ -49,7 +49,7 @@ let refine_shape field_name pos env shape =
   let sft = { sft_optional = false; sft_ty } in
   Typing_intersection.intersect
     env
-    (Reason.Rwitness pos)
+    ~r:(Reason.Rwitness pos)
     shape
     (mk (Reason.Rnone, Tshape (Open_shape, TShapeMap.singleton field_name sft)))
 
@@ -91,7 +91,7 @@ let rec shrink_shape pos field_name env shape =
     let result = mk (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
     (env, result)
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl (shrink_shape pos field_name) in
+    let (env, tyl) = List.map_env env tyl ~f:(shrink_shape pos field_name) in
     let result = mk (Reason.Rwitness pos, Tunion tyl) in
     (env, result)
   | _ -> (env, shape)
@@ -145,7 +145,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
     (match deref shape_ty with
     | (_, Tshape _) -> refine_type env shape_ty
     | (r, Tunion tyl) ->
-      let (env, tyl) = List.map_env env tyl refine_type in
+      let (env, tyl) = List.map_env env tyl ~f:refine_type in
       Typing_union.union_list env r tyl
     | _ -> (env, shape_ty))
 
@@ -269,7 +269,7 @@ let to_collection env shape_ty res return_type =
         | Closed_shape ->
           let keys = TShapeMap.keys fdm in
           let (env, keys) =
-            List.map_env env keys (fun env key ->
+            List.map_env env keys ~f:(fun env key ->
                 match key with
                 | Typing_defs.TSFlit_int (p, _) ->
                   (env, MakeType.int (Reason.Rwitness_from_decl p))

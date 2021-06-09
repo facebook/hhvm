@@ -735,7 +735,7 @@ let array_like ~cow ~shape ~klass ~tuple ~dynamic ty =
     | Tclass _ when klass -> Some ty
     | Ttuple _ when tuple -> Some ty
     | Tdynamic _ when dynamic -> Some ty
-    | Tinter tys -> List.find_map tys search
+    | Tinter tys -> List.find_map tys ~f:search
     | _ -> None
   in
   search ty
@@ -1022,7 +1022,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     let rec find_element_ty ty =
       match T.get_node ty with
       | T.Tclass (_, _, [element_ty]) -> Some element_ty
-      | T.Tintersection tys -> List.find_map tys find_element_ty
+      | T.Tintersection tys -> List.find_map tys ~f:find_element_ty
       | _ -> None
     in
     let element_pty =
@@ -1064,7 +1064,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     let rec find_key_value_tys ty =
       match T.get_node ty with
       | T.Tclass (_, _, [key_ty; value_ty]) -> Some (key_ty, value_ty)
-      | T.Tintersection tys -> List.find_map tys find_key_value_tys
+      | T.Tintersection tys -> List.find_map tys ~f:find_key_value_tys
       | _ -> None
     in
     let (key_pty, value_pty) =
@@ -2044,7 +2044,7 @@ let analyse_callable
     let end_env = env in
 
     (* Display the analysis results *)
-    if should_print opts.opt_mode Manalyse then begin
+    if should_print ~user_mode:opts.opt_mode ~phase:Manalyse then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
       Format.printf "* Params:@,  %a@." Pp.cont (Env.get_next beg_env);

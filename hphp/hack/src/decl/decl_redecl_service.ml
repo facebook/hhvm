@@ -565,7 +565,10 @@ let redo_type_decl
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout ctx get_classes fnl
+        Shallow_decl_compare.compute_class_fanout
+          ctx
+          ~get_classes_in_file:get_classes
+          fnl
       in
       let changed = DepSet.union changed changed' in
       let to_recheck = DepSet.union to_recheck needs_recheck in

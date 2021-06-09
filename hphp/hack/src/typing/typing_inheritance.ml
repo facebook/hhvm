@@ -29,7 +29,7 @@ let check_override_annotations env cls ~static =
     else
       sc.sc_methods
   in
-  List.iter methods (fun meth ->
+  List.iter methods ~f:(fun meth ->
       if not (sm_override meth) then
         ()
       else
@@ -44,7 +44,7 @@ let check_override_annotations env cls ~static =
         | None -> ()
         | Some meth ->
           let parent_method_exists =
-            List.exists (all_methods_named cls id) (fun parent_meth ->
+            List.exists (all_methods_named cls id) ~f:(fun parent_meth ->
                 String.( <> ) meth.ce_origin parent_meth.ce_origin)
           in
           if not parent_method_exists then
@@ -64,7 +64,7 @@ let check_trait_override_annotations env class_pos cls ~static =
     else
       (Cls.methods, Cls.all_inherited_methods)
   in
-  List.iter (methods cls) (fun (id, meth) ->
+  List.iter (methods cls) ~f:(fun (id, meth) ->
       if not (get_ce_override meth) then
         ()
       else if String.equal meth.ce_origin (Cls.name cls) then
@@ -79,7 +79,7 @@ let check_trait_override_annotations env class_pos cls ~static =
             match meth with
             | { ce_type = (lazy ty); _ } ->
               let parent_method_exists =
-                List.exists (all_methods_named cls id) (fun parent_meth ->
+                List.exists (all_methods_named cls id) ~f:(fun parent_meth ->
                     String.( <> ) meth.ce_origin parent_meth.ce_origin)
               in
               if not parent_method_exists then

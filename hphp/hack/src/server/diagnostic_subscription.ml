@@ -46,7 +46,7 @@ type t = {
           RP.Map.pp
             (fun fmt -> Format.fprintf fmt "%d")
             fmt
-            (RP.Map.map errors List.length)]
+            (RP.Map.map errors ~f:List.length)]
   (* Union of all values in local_errors *)
   sources: Relative_path.Set.t;
   has_new_errors: bool;
@@ -98,7 +98,7 @@ let update
          * itself. There might be more errors that will eventually be reported in
       * this file, but we'll not know them until next full check. *)
         else
-          RP.Map.add acc path (RP.Set.singleton path))
+          RP.Map.add acc ~key:path ~data:(RP.Set.singleton path))
   in
   (* Merge rechecked and reparsed into single collection. *)
   let rechecked = RP.Set.union reparsed rechecked in
@@ -109,7 +109,8 @@ let update
             let file = error_filename e in
             match RP.Map.find_opt acc file with
             | None -> acc (* not an IDE-relevant file *)
-            | Some sources -> RP.Map.add acc file (RP.Set.add sources source)))
+            | Some sources ->
+              RP.Map.add acc ~key:file ~data:(RP.Set.add sources source)))
   in
   (* Remove sources that no longer produce errors in files we care about *)
   let local_errors =
@@ -131,10 +132,12 @@ let update
           match RP.Map.find_opt acc file with
           | Some sources ->
             (* Add a source to already tracked file *)
-            (is_truncated, RP.Map.add acc file (RP.Set.add sources source))
+            ( is_truncated,
+              RP.Map.add acc ~key:file ~data:(RP.Set.add sources source) )
           | None when RP.Map.cardinal acc < errors_limit ->
             (* not an IDE-relevant file, but we still have room for it *)
-            (is_truncated, RP.Map.add acc file (RP.Set.singleton source))
+            ( is_truncated,
+              RP.Map.add acc ~key:file ~data:(RP.Set.singleton source) )
           | None ->
             (* we're at error limit, ignore *)
             (true, acc))
@@ -172,7 +175,7 @@ let pop_errors ds ~global_errors =
   else
     (* Go over tracked files...*)
     let new_pushed_errors =
-      RP.Map.mapi ds.local_errors (fun path sources ->
+      RP.Map.mapi ds.local_errors ~f:(fun path sources ->
           (* ... and sources of errors reported in them... *)
           RP.Set.fold sources ~init:[] ~f:(fun source acc ->
               (* ... and the errors themselves... *)
@@ -207,8 +210,8 @@ let pop_errors ds ~global_errors =
       RP.Map.fold results ~init:SMap.empty ~f:(fun path el acc ->
           SMap.add
             acc
-            (Relative_path.to_absolute path)
-            (List.map el ~f:Errors.to_absolute))
+            ~key:(Relative_path.to_absolute path)
+            ~data:(List.map el ~f:Errors.to_absolute))
     in
     ( { ds with pushed_errors = new_pushed_errors; has_new_errors = false },
       results )

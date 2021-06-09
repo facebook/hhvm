@@ -171,7 +171,7 @@ let empty = Unbacked Relative_path.Map.empty
 
 let filter a ~f =
   match a with
-  | Unbacked a -> Unbacked (Relative_path.Map.filter a f)
+  | Unbacked a -> Unbacked (Relative_path.Map.filter a ~f)
   | Backed (local_changes, db_path) ->
     let file_deltas = local_changes.Naming_sqlite.file_deltas in
     Backed
@@ -467,26 +467,26 @@ let from_saved saved =
          ~init:Relative_path.Map.empty
          ~f:(fun fn saved acc ->
            let file_info = FileInfo.from_saved fn saved in
-           Relative_path.Map.add acc fn file_info))
+           Relative_path.Map.add acc ~key:fn ~data:file_info))
   in
   let _t = Hh_logger.log_duration "Loaded naming table from blob" t in
   naming_table
 
 let to_saved a =
   match a with
-  | Unbacked a -> Relative_path.Map.map a FileInfo.to_saved
+  | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.to_saved
   | Backed _ ->
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi))
 
 let to_fast a =
   match a with
-  | Unbacked a -> Relative_path.Map.map a FileInfo.simplify
+  | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.simplify
   | Backed _ ->
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi))
 
-let saved_to_fast saved = Relative_path.Map.map saved FileInfo.saved_to_names
+let saved_to_fast saved = Relative_path.Map.map saved ~f:FileInfo.saved_to_names
 
 (*****************************************************************************)
 (* Forward naming table creation functions *)

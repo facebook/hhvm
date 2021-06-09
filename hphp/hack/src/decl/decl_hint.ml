@@ -107,7 +107,7 @@ and hint_ p env = function
     Tvec_or_dict (t1, hint env h2)
   | Hprim p -> Tprim p
   | Habstr (x, argl) ->
-    let argl = List.map argl (hint env) in
+    let argl = List.map argl ~f:(hint env) in
     Tgeneric (x, argl)
   | Hoption h ->
     let h = hint env h in
@@ -188,7 +188,7 @@ and hint_ p env = function
       }
   | Happly (id, argl) ->
     let id = Decl_env.make_decl_posed env id in
-    let argl = List.map argl (hint env) in
+    let argl = List.map argl ~f:(hint env) in
     Tapply (id, argl)
   | Haccess ((_, Hvar n), [(_, id)]) -> Tgeneric ("T" ^ n ^ "@" ^ id, [])
   | Haccess (root_ty, ids) ->
@@ -205,13 +205,13 @@ and hint_ p env = function
     in
     translate root_ty ids
   | Htuple hl ->
-    let tyl = List.map hl (hint env) in
+    let tyl = List.map hl ~f:(hint env) in
     Ttuple tyl
   | Hunion hl ->
-    let tyl = List.map hl (hint env) in
+    let tyl = List.map hl ~f:(hint env) in
     Tunion tyl
   | Hintersection hl ->
-    let tyl = List.map hl (hint env) in
+    let tyl = List.map hl ~f:(hint env) in
     Tintersection tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_kind =

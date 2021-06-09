@@ -235,32 +235,34 @@ let remove_decls ~backend ~funs ~classes ~record_defs ~typedefs ~consts =
 (*****************************************************************************)
 
 let make_env_error_if_already_bound ctx fileinfo =
-  List.iter fileinfo.FileInfo.funs (Env.new_fun_error_if_already_bound ctx);
-  List.iter fileinfo.FileInfo.classes (Env.new_class_error_if_already_bound ctx);
-  List.iter
-    fileinfo.FileInfo.record_defs
-    (Env.new_record_decl_error_if_already_bound ctx);
-  List.iter
-    fileinfo.FileInfo.typedefs
-    (Env.new_typedef_error_if_already_bound ctx);
-  List.iter
-    fileinfo.FileInfo.consts
-    (Env.new_global_const_error_if_already_bound ctx)
-
-let make_env_skip_if_already_bound ctx fn fileinfo =
-  List.iter fileinfo.FileInfo.funs (Env.new_fun_skip_if_already_bound ctx fn);
+  List.iter fileinfo.FileInfo.funs ~f:(Env.new_fun_error_if_already_bound ctx);
   List.iter
     fileinfo.FileInfo.classes
-    (Env.new_class_skip_if_already_bound ctx fn);
+    ~f:(Env.new_class_error_if_already_bound ctx);
   List.iter
     fileinfo.FileInfo.record_defs
-    (Env.new_record_decl_skip_if_already_bound ctx fn);
+    ~f:(Env.new_record_decl_error_if_already_bound ctx);
   List.iter
     fileinfo.FileInfo.typedefs
-    (Env.new_typedef_skip_if_already_bound ctx fn);
+    ~f:(Env.new_typedef_error_if_already_bound ctx);
   List.iter
     fileinfo.FileInfo.consts
-    (Env.new_global_const_skip_if_already_bound ctx fn);
+    ~f:(Env.new_global_const_error_if_already_bound ctx)
+
+let make_env_skip_if_already_bound ctx fn fileinfo =
+  List.iter fileinfo.FileInfo.funs ~f:(Env.new_fun_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.classes
+    ~f:(Env.new_class_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.record_defs
+    ~f:(Env.new_record_decl_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.typedefs
+    ~f:(Env.new_typedef_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.consts
+    ~f:(Env.new_global_const_skip_if_already_bound ctx fn);
   ()
 
 (*****************************************************************************)

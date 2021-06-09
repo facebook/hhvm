@@ -437,7 +437,7 @@ and class_decl
       ty :: impl
     | _ -> impl
   in
-  let impl = List.map impl (get_implements env parents) in
+  let impl = List.map impl ~f:(get_implements env parents) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
   let (extends, xhp_attr_deps, ext_strict) =
     get_class_parents_and_traits env c parents
@@ -459,7 +459,7 @@ and class_decl
     || SMap.exists (fun n _ -> is_disposable_class_name n) impl
     || List.exists
          (c.sc_req_extends @ c.sc_req_implements)
-         (is_disposable_type env parents)
+         ~f:(is_disposable_type env parents)
   in
   (* If this class is disposable then we require that any extended class or
    * trait that is used, is also disposable, in order that escape analysis
@@ -482,7 +482,7 @@ and class_decl
         | TCConcrete { tc_type } -> Some tc_type
         | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
         | TCAbstract { atc_default; _ } -> atc_default)
-      (fun x -> SMap.find_opt x impl)
+      ~get_ancestor:(fun x -> SMap.find_opt x impl)
       consts
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
@@ -828,7 +828,7 @@ and typeconst_fold
       if Option.is_some stc.stc_reifiable then
         stc.stc_reifiable
       else
-        Option.bind ptc_opt (fun ptc -> ptc.ttc_reifiable)
+        Option.bind ptc_opt ~f:(fun ptc -> ptc.ttc_reifiable)
     in
     let tc =
       {

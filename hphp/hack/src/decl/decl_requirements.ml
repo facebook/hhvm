@@ -40,7 +40,7 @@ let flatten_parent_class_reqs
       List.rev_map_append
         parent_type.dc_req_ancestors
         req_ancestors
-        (fun (_p, ty) ->
+        ~f:(fun (_p, ty) ->
           let ty = Inst.instantiate subst ty in
           (parent_pos, ty))
     in
@@ -97,10 +97,10 @@ let declared_class_req env class_cache (requirements, req_extends) req_ty =
 let naive_dedup req_extends =
   (* maps class names to type params *)
   let h = Caml.Hashtbl.create 0 in
-  List.rev_filter_map req_extends (fun (parent_pos, ty) ->
+  List.rev_filter_map req_extends ~f:(fun (parent_pos, ty) ->
       match get_node ty with
       | Tapply (name, hl) ->
-        let hl = List.map hl Decl_pos_utils.NormalizeSig.ty in
+        let hl = List.map hl ~f:Decl_pos_utils.NormalizeSig.ty in
         begin
           try
             let hl' = Caml.Hashtbl.find h name in

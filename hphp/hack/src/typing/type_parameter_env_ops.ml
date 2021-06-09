@@ -33,7 +33,7 @@ let join_lower_bounds env l1 l2 =
     let (env, union1) = union_lower_bounds env Reason.Rnone l1 in
     let (env, union2) = union_lower_bounds env Reason.Rnone l2 in
     let (env, new_lower) =
-      Typing_intersection.intersect env Reason.Rnone union1 union2
+      Typing_intersection.intersect env ~r:Reason.Rnone union1 union2
     in
     (env, TySet.singleton new_lower)
 

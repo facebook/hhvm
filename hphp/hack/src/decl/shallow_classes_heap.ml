@@ -77,7 +77,7 @@ module MemberFilters = struct
     | Typing_defs.FinalClass ->
       add_name Naming_special_names.Members.__construct);
 
-    let filter = BloomFilter.create (HashSet.length names) in
+    let filter = BloomFilter.create ~capacity:(HashSet.length names) in
     HashSet.iter names ~f:(fun name ->
         let hashes = BloomFilter.hash name in
         BloomFilter.add filter hashes);

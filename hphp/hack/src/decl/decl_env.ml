@@ -36,13 +36,13 @@ let is_hhi cd = Pos_or_decl.is_hhi cd.dc_pos
 
 let add_wclass env x =
   let dep = Dep.Type x in
-  Option.iter env.droot (fun root ->
+  Option.iter env.droot ~f:(fun root ->
       Typing_deps.add_idep (deps_mode env) root dep);
   ()
 
 let add_extends_dependency env x =
   let deps_mode = deps_mode env in
-  Option.iter env.droot (fun root ->
+  Option.iter env.droot ~f:(fun root ->
       let dep = Dep.Type x in
       Typing_deps.add_idep deps_mode root (Dep.Extends x);
       Typing_deps.add_idep deps_mode root dep);
@@ -56,7 +56,7 @@ let get_class_add_dep env ?(cache : class_cache option) x =
     | Some c -> Some c
     | None -> Decl_store.((get ()).get_class x)
   in
-  Option.iter res (fun cd ->
+  Option.iter res ~f:(fun cd ->
       if not (is_hhi cd) then add_extends_dependency env x);
   res
 
@@ -64,7 +64,7 @@ let get_construct env class_ =
   if not (is_hhi class_) then begin
     add_wclass env class_.dc_name;
     let dep = Dep.Cstr class_.dc_name in
-    Option.iter env.droot (fun root ->
+    Option.iter env.droot ~f:(fun root ->
         Typing_deps.add_idep (deps_mode env) root dep)
   end;
 
@@ -73,5 +73,5 @@ let get_construct env class_ =
 let add_constructor_dependency env class_name =
   add_wclass env class_name;
   let dep = Dep.Cstr class_name in
-  Option.iter env.droot (fun root ->
+  Option.iter env.droot ~f:(fun root ->
       Typing_deps.add_idep (deps_mode env) root dep)

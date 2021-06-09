@@ -376,7 +376,7 @@ and contexts env ctxs =
   (pos, hl)
 
 and hfun env ro hl il variadic_hint ctxs h readonly_ret =
-  let variadic_hint = Option.map variadic_hint (hint env) in
+  let variadic_hint = Option.map variadic_hint ~f:(hint env) in
   let hl = List.map ~f:(hint env) hl in
   let ctxs = Option.map ~f:(contexts env) ctxs in
   N.Hfun
@@ -810,13 +810,13 @@ let targl env _ tal = List.map tal ~f:(targ env)
 
 let add_abstract m = { m with N.m_abstract = true }
 
-let add_abstractl methods = List.map methods add_abstract
+let add_abstractl methods = List.map methods ~f:add_abstract
 
 let interface c constructor methods smethods =
   if not (Ast_defs.is_c_interface c.Aast.c_kind) then
     (constructor, methods, smethods)
   else
-    let constructor = Option.map constructor add_abstract in
+    let constructor = Option.map constructor ~f:add_abstract in
     let methods = add_abstractl methods in
     let smethods = add_abstractl smethods in
     (constructor, methods, smethods)
@@ -855,7 +855,7 @@ let rec class_ ctx c =
     | Some enum -> enum_ env name enum
     | None -> (None, None, false)
   in
-  let parents = List.map c.Aast.c_extends (hint ~allow_retonly:false env) in
+  let parents = List.map c.Aast.c_extends ~f:(hint ~allow_retonly:false env) in
   let parents =
     match enum_bound with
     (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
@@ -901,7 +901,7 @@ let rec class_ ctx c =
   let implements =
     List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
   in
-  let constructor = Option.map constructor (method_ (fst env)) in
+  let constructor = Option.map constructor ~f:(method_ (fst env)) in
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
   in
@@ -1083,7 +1083,7 @@ and enum_ env enum_name e =
   let enum =
     {
       N.e_base = new_base;
-      N.e_constraint = Option.map e.e_constraint (hint env);
+      N.e_constraint = Option.map e.e_constraint ~f:(hint env);
       N.e_includes = List.map ~f:(hint env) e.e_includes;
       N.e_enum_class = is_enum_class;
     }
@@ -1140,13 +1140,13 @@ and type_param ~forbid_this (genv, lenv) t =
   let env = (extend_tparams genv t.Aast.tp_parameters, lenv) in
   let tp_parameters =
     if hk_types_enabled then
-      List.map t.Aast.tp_parameters (type_param ~forbid_this env)
+      List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
     else
       []
   in
   (* Use the env with all nested tparams still in scope *)
   let tp_constraints =
-    List.map t.Aast.tp_constraints (constraint_ ~forbid_this env)
+    List.map t.Aast.tp_constraints ~f:(constraint_ ~forbid_this env)
   in
   {
     N.tp_variance = t.Aast.tp_variance;
@@ -1166,7 +1166,7 @@ and type_where_constraints env locl_cstrl =
     locl_cstrl
 
 and class_prop_expr_is_xhp env cv =
-  let expr = Option.map cv.Aast.cv_expr (expr env) in
+  let expr = Option.map cv.Aast.cv_expr ~f:(expr env) in
   let expr =
     if
       FileInfo.equal_mode (fst env).in_mode FileInfo.Mhhi && Option.is_none expr
@@ -1176,7 +1176,7 @@ and class_prop_expr_is_xhp env cv =
       expr
   in
   let is_xhp =
-    try String.(sub (snd cv.Aast.cv_id) 0 1 = ":")
+    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":")
     with Invalid_argument _ -> false
   in
   (expr, is_xhp)
@@ -1275,7 +1275,7 @@ and check_constant_expr env (pos, e) =
     end
   | Aast.Eif (e1, e2, e3) ->
     check_constant_expr env e1
-    && Option.for_all e2 (check_constant_expr env)
+    && Option.for_all e2 ~f:(check_constant_expr env)
     && check_constant_expr env e3
   | Aast.Darray (_, l) ->
     List.for_all l ~f:(fun (e1, e2) ->
@@ -1334,8 +1334,8 @@ and constant_expr env ~in_enum_class e =
     (fst e, N.Any)
 
 and class_const env ~in_enum_class cc =
-  let h = Option.map cc.Aast.cc_type (hint env) in
-  let e = Option.map cc.Aast.cc_expr (constant_expr env ~in_enum_class) in
+  let h = Option.map cc.Aast.cc_type ~f:(hint env) in
+  let e = Option.map cc.Aast.cc_expr ~f:(constant_expr env ~in_enum_class) in
   {
     N.cc_type = h;
     N.cc_id = cc.Aast.cc_id;
@@ -1463,7 +1463,7 @@ and fun_param env (param : Nast.fun_param) =
   let tyhi =
     Aast.type_hint_option_map param.Aast.param_type_hint ~f:(hint env)
   in
-  let eopt = Option.map param.Aast.param_expr (expr env) in
+  let eopt = Option.map param.Aast.param_expr ~f:(expr env) in
   {
     N.param_annotation = p;
     param_type_hint = tyhi;
@@ -1567,7 +1567,7 @@ and fun_ genv f =
   named_fun
 
 and get_using_vars es =
-  List.concat_map es (fun (_, e) ->
+  List.concat_map es ~f:(fun (_, e) ->
       match e with
       (* Simple assignment to local of form `$lvar = e` *)
       | Aast.Binop (Ast_defs.Eq None, (_, Aast.Lvar (p, lid)), _) ->
@@ -1586,7 +1586,7 @@ and stmt env (pos, st) =
     | Aast.Break -> Aast.Break
     | Aast.Continue -> Aast.Continue
     | Aast.Throw e -> N.Throw (expr env e)
-    | Aast.Return e -> N.Return (Option.map e (expr env))
+    | Aast.Return e -> N.Return (Option.map e ~f:(expr env))
     | Aast.Yield_break -> N.Yield_break
     | Aast.Awaitall (el, b) -> awaitall_stmt env el b
     | Aast.If (e, b1, b2) -> if_stmt env e b1 b2
@@ -1791,19 +1791,19 @@ and expr_obj_get_name env expr_ =
 
 and exprl env l = List.map ~f:(expr env) l
 
-and oexpr env e = Option.map e (expr env)
+and oexpr env e = Option.map e ~f:(expr env)
 
 and expr env (p, e) = (p, expr_ env p e)
 
 and expr_ env p (e : Nast.expr_) =
   match e with
   | Aast.Varray (ta, l) ->
-    N.Varray (Option.map ~f:(targ env) ta, List.map l (expr env))
+    N.Varray (Option.map ~f:(targ env) ta, List.map l ~f:(expr env))
   | Aast.Darray (tap, l) ->
     let nargs =
       Option.map ~f:(fun (t1, t2) -> (targ env t1, targ env t2)) tap
     in
-    N.Darray (nargs, List.map l (fun (e1, e2) -> (expr env e1, expr env e2)))
+    N.Darray (nargs, List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)))
   | Aast.Collection (id, tal, l) ->
     let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
     begin
@@ -1818,7 +1818,7 @@ and expr_ env p (e : Nast.expr_) =
           | None -> None
         in
         N.ValCollection
-          (Nast.get_vc_kind cn, ta, List.map l (afield_value env cn))
+          (Nast.get_vc_kind cn, ta, List.map l ~f:(afield_value env cn))
       | x when Nast.is_kvc_kind x ->
         let ta =
           match tal with
@@ -1829,7 +1829,7 @@ and expr_ env p (e : Nast.expr_) =
           | None -> None
         in
         N.KeyValCollection
-          (Nast.get_kvc_kind cn, ta, List.map l (afield_kvalue env cn))
+          (Nast.get_kvc_kind cn, ta, List.map l ~f:(afield_kvalue env cn))
       | x when String.equal x SN.Collections.cPair ->
         let ta =
           match tal with
@@ -2190,7 +2190,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.New _ -> failwith "ast_to_nast aast.new"
   | Aast.Record (id, l) ->
     let () = check_name id in
-    let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
+    let l = List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)) in
     N.Record (id, l)
   | Aast.Efun (f, idl) ->
     let idl =
@@ -2202,9 +2202,9 @@ and expr_ env p (e : Nast.expr_) =
             id :: acc)
     in
     let idl = List.map ~f:(fun (p, lid) -> (p, Local_id.to_string lid)) idl in
-    let idl' = List.map idl (Env.lvar env) in
+    let idl' = List.map idl ~f:(Env.lvar env) in
     let env = (fst env, Env.empty_local None) in
-    List.iter2_exn idl idl' (Env.add_lvar env);
+    List.iter2_exn idl idl' ~f:(Env.add_lvar env);
     let f = expr_lambda env f in
     N.Efun (f, idl')
   | Aast.Lfun (_, _ :: _) -> assert false
@@ -2330,7 +2330,7 @@ and make_class_id env ((p, x) as cid) =
       let () = check_name cid in
       N.CI cid )
 
-and casel env l = List.map l (case env)
+and casel env l = List.map l ~f:(case env)
 
 and case env c =
   match c with
@@ -2342,7 +2342,7 @@ and case env c =
     let b = branch env b in
     N.Case (e, b)
 
-and catchl env l = List.map l (catch env)
+and catchl env l = List.map l ~f:(catch env)
 
 and catch env ((p1, lid1), (p2, lid2), b) =
   Env.scope env (fun env ->
@@ -2384,7 +2384,7 @@ and attr env at =
     N.Xhp_simple { Aast.xs_name; xs_type; xs_expr = expr env e }
   | Aast.Xhp_spread e -> N.Xhp_spread (expr env e)
 
-and string2 env idl = List.map idl (expr env)
+and string2 env idl = List.map idl ~f:(expr env)
 
 let record_field env rf =
   let (id, h, e) = rf in
@@ -2430,7 +2430,7 @@ let typedef ctx tdef =
       (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
       tdef
   in
-  let tconstraint = Option.map tdef.Aast.t_constraint (hint env) in
+  let tconstraint = Option.map tdef.Aast.t_constraint ~f:(hint env) in
   let tparaml = type_paraml env tdef.Aast.t_tparams in
   let attrs = user_attributes env tdef.Aast.t_user_attributes in
   {
@@ -2458,8 +2458,8 @@ let global_const ctx cst =
       (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
       cst
   in
-  let hint = Option.map cst.Aast.cst_type (hint env) in
-  let e = constant_expr env false cst.Aast.cst_value in
+  let hint = Option.map cst.Aast.cst_type ~f:(hint env) in
+  let e = constant_expr env ~in_enum_class:false cst.Aast.cst_value in
   {
     N.cst_annotation = ();
     cst_mode = cst.Aast.cst_mode;

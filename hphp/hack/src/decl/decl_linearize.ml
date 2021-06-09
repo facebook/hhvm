@@ -216,7 +216,7 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
       []
     else
       let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
-      match List.find c.sc_methods is_to_string with
+      match List.find c.sc_methods ~f:is_to_string with
       | None -> []
       | Some { sm_name = (pos, _); _ } ->
         let ty =

@@ -153,7 +153,7 @@ let typeconst env c tc =
       }
 
 let make_xhp_attr cv =
-  Option.map cv.cv_xhp_attr (fun xai ->
+  Option.map cv.cv_xhp_attr ~f:(fun xai ->
       {
         xa_tag =
           (match xai.xai_tag with
@@ -251,9 +251,9 @@ let method_type env m =
     | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty env p)
     | FVnonVariadic -> Fstandard
   in
-  let tparams = List.map m.m_tparams (FunUtils.type_param env) in
+  let tparams = List.map m.m_tparams ~f:(FunUtils.type_param env) in
   let where_constraints =
-    List.map m.m_where_constraints (FunUtils.where_constraint env)
+    List.map m.m_where_constraints ~f:(FunUtils.where_constraint env)
   in
   {
     ft_arity = arity;
@@ -338,13 +338,13 @@ let class_ ctx c =
       Naming_attributes_params.get_module_attribute c.c_user_attributes
     in
     let where_constraints =
-      List.map c.c_where_constraints (FunUtils.where_constraint env)
+      List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)
     in
     let enum_type hint e =
       {
         te_base = hint e.e_base;
-        te_constraint = Option.map e.e_constraint hint;
-        te_includes = List.map e.e_includes hint;
+        te_constraint = Option.map e.e_constraint ~f:hint;
+        te_includes = List.map e.e_includes ~f:hint;
         te_enum_class = e.e_enum_class;
       }
     in
@@ -356,7 +356,7 @@ let class_ ctx c =
       sc_kind = c.c_kind;
       sc_module;
       sc_name = Decl_env.make_decl_posed env c.c_name;
-      sc_tparams = List.map c.c_tparams (FunUtils.type_param env);
+      sc_tparams = List.map c.c_tparams ~f:(FunUtils.type_param env);
       sc_where_constraints = where_constraints;
       sc_extends;
       sc_uses;
@@ -366,15 +366,15 @@ let class_ ctx c =
       sc_req_implements;
       sc_implements;
       sc_support_dynamic_type = c.c_support_dynamic_type;
-      sc_consts = List.filter_map c.c_consts (class_const env);
-      sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
+      sc_consts = List.filter_map c.c_consts ~f:(class_const env);
+      sc_typeconsts = List.filter_map c.c_typeconsts ~f:(typeconst env c);
       sc_props = List.map ~f:(prop env) vars;
       sc_sprops = List.map ~f:(static_prop env) static_vars;
       sc_constructor = Option.map ~f:(method_ env) constructor;
       sc_static_methods = List.map ~f:(method_ env) statics;
       sc_methods = List.map ~f:(method_ env) rest;
       sc_user_attributes;
-      sc_enum_type = Option.map c.c_enum (enum_type hint);
+      sc_enum_type = Option.map c.c_enum ~f:(enum_type hint);
     }
   in
   if not (Errors.is_empty errs) then (

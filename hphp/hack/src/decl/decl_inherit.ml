@@ -290,7 +290,7 @@ let mark_as_synthesized inh =
           { sc with sc_from_req_extends = true }
         end
         inh.ih_substs;
-    ih_cstr = (Option.map (fst inh.ih_cstr) mark_elt, snd inh.ih_cstr);
+    ih_cstr = (Option.map (fst inh.ih_cstr) ~f:mark_elt, snd inh.ih_cstr);
     ih_props = SMap.map mark_elt inh.ih_props;
     ih_sprops = SMap.map mark_elt inh.ih_sprops;
     ih_methods = SMap.map mark_elt inh.ih_methods;

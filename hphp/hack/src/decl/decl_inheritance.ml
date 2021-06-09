@@ -55,7 +55,7 @@ let get_shallow_classes_and_substs
           | None -> true
           | Some filter -> BloomFilter.mem filter hash)
   in
-  Sequence.filter_map lin (fun mro ->
+  Sequence.filter_map lin ~f:(fun mro ->
       match Shallow_classes_provider.get ctx mro.mro_name with
       | None -> None
       | Some cls ->
@@ -167,7 +167,7 @@ let chown_private_or_protected child_class_name ancestor_sig =
 let filter_or_chown_privates
     (child_class_name : string) (lin : DTT.tagged_elt Sequence.t) :
     (string * class_elt) Sequence.t =
-  Sequence.filter_map lin (fun DTT.{ id; inherit_when_private; elt } ->
+  Sequence.filter_map lin ~f:(fun DTT.{ id; inherit_when_private; elt } ->
       let ancestor_name = elt.ce_origin in
       let is_inherited = String.( <> ) ancestor_name child_class_name in
       if is_private elt && is_inherited && not inherit_when_private then
@@ -266,7 +266,7 @@ let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
                | TCConcrete { tc_type } -> Some tc_type
                | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
                | TCAbstract { atc_default; _ } -> atc_default)
-             get_ancestor) )
+             ~get_ancestor) )
   in
   let consts_and_typeconst_structures =
     lin

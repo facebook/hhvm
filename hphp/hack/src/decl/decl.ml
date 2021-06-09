@@ -70,7 +70,7 @@ let nast_to_decls
     (prog : Nast.program) : Direct_decl_parser.decls =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> []
-  | _ -> name_and_declare_types_program acc None ctx prog
+  | _ -> name_and_declare_types_program acc ~sh:None ctx prog
 
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :

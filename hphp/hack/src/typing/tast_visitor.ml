@@ -459,58 +459,58 @@ let iter_with (handlers : handler list) : iter =
     inherit iter as super
 
     method! on_class_ env x =
-      List.iter handlers (fun v -> v#at_class_ env x);
+      List.iter handlers ~f:(fun v -> v#at_class_ env x);
       super#on_class_ env x
 
     method! on_typedef env x =
-      List.iter handlers (fun v -> v#at_typedef env x);
+      List.iter handlers ~f:(fun v -> v#at_typedef env x);
       super#on_typedef env x
 
     method! on_gconst env x =
-      List.iter handlers (fun v -> v#at_gconst env x);
+      List.iter handlers ~f:(fun v -> v#at_gconst env x);
       super#on_gconst env x
 
     method! on_fun_def env x =
-      List.iter handlers (fun v -> v#at_fun_def env x);
+      List.iter handlers ~f:(fun v -> v#at_fun_def env x);
       super#on_fun_def env x
 
     method! on_method_ env x =
-      List.iter handlers (fun v -> v#at_method_ env x);
+      List.iter handlers ~f:(fun v -> v#at_method_ env x);
       super#on_method_ env x
 
     method! on_expr env x =
-      List.iter handlers (fun v -> v#at_expr env x);
+      List.iter handlers ~f:(fun v -> v#at_expr env x);
       super#on_expr env x
 
     method! on_stmt env x =
-      List.iter handlers (fun v -> v#at_stmt env x);
+      List.iter handlers ~f:(fun v -> v#at_stmt env x);
       super#on_stmt env x
 
     method! on_fun_ env x =
-      List.iter handlers (fun v -> v#at_fun_ env x);
+      List.iter handlers ~f:(fun v -> v#at_fun_ env x);
       super#on_fun_ env x
 
     method! on_Call env e tal el unpacked_element =
-      List.iter handlers (fun v -> v#at_Call env e tal el unpacked_element);
+      List.iter handlers ~f:(fun v -> v#at_Call env e tal el unpacked_element);
       super#on_Call env e tal el unpacked_element
 
     method! on_hint env h =
-      List.iter handlers (fun v -> v#at_hint env h);
+      List.iter handlers ~f:(fun v -> v#at_hint env h);
       super#on_hint env h
 
     method! on_tparam env h =
-      List.iter handlers (fun v -> v#at_tparam env h);
+      List.iter handlers ~f:(fun v -> v#at_tparam env h);
       super#on_tparam env h
 
     method! on_user_attribute env ua =
-      List.iter handlers (fun v -> v#at_user_attribute env ua);
+      List.iter handlers ~f:(fun v -> v#at_user_attribute env ua);
       super#on_user_attribute env ua
 
     method! on_class_typeconst_def env tc =
-      List.iter handlers (fun v -> v#at_class_typeconst_def env tc);
+      List.iter handlers ~f:(fun v -> v#at_class_typeconst_def env tc);
       super#on_class_typeconst_def env tc
 
     method! on_xhp_child env c =
-      List.iter handlers (fun v -> v#at_xhp_child env c);
+      List.iter handlers ~f:(fun v -> v#at_xhp_child env c);
       super#on_xhp_child env c
   end

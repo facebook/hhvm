@@ -151,7 +151,7 @@ let compute_parser_return_and_ast_errors
   } ->
     (parser_return, ast_errors)
   | _ ->
-    let source_text = compute_source_text entry in
+    let source_text = compute_source_text ~entry in
     let (ast_errors, parser_return) = parse popt ~full:true ~source_text in
     entry.Provider_context.ast_errors <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;
@@ -217,7 +217,7 @@ let get_ast_with_error ?(full = false) ctx path =
       a partial one. Our principle is that an ctx entry always indicates that
       the file is open in the IDE, and so will benefit from a full AST at
       some time, so we might as well get it now. *)
-    compute_ast_with_error (Provider_context.get_popt ctx) entry
+    compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
   | (_, (Provider_backend.Analysis | Provider_backend.Shared_memory)) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)

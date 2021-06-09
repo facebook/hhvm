@@ -152,46 +152,46 @@ let iter_with (handlers : handler list) : iter =
     inherit iter as super
 
     method! on_fun_def env x =
-      List.iter handlers (fun v -> v#at_fun_def env x);
+      List.iter handlers ~f:(fun v -> v#at_fun_def env x);
       super#on_fun_def env x
 
     method! on_fun_ env x =
-      List.iter handlers (fun v -> v#at_fun_ env x);
+      List.iter handlers ~f:(fun v -> v#at_fun_ env x);
       super#on_fun_ env x
 
     method! on_class_ env x =
-      List.iter handlers (fun v -> v#at_class_ env x);
+      List.iter handlers ~f:(fun v -> v#at_class_ env x);
       super#on_class_ env x
 
     method! on_method_ env x =
-      List.iter handlers (fun v -> v#at_method_ env x);
+      List.iter handlers ~f:(fun v -> v#at_method_ env x);
       super#on_method_ env x
 
     method! on_record_def env x =
-      List.iter handlers (fun v -> v#at_record_def env x);
+      List.iter handlers ~f:(fun v -> v#at_record_def env x);
       super#on_record_def env x
 
     method! on_expr env x =
-      List.iter handlers (fun v -> v#at_expr env x);
+      List.iter handlers ~f:(fun v -> v#at_expr env x);
       super#on_expr env x
 
     method! on_stmt env x =
-      List.iter handlers (fun v -> v#at_stmt env x);
+      List.iter handlers ~f:(fun v -> v#at_stmt env x);
       super#on_stmt env x
 
     method! on_hint env h =
-      List.iter handlers (fun v -> v#at_hint env h);
+      List.iter handlers ~f:(fun v -> v#at_hint env h);
       super#on_hint env h
 
     method! on_contexts env cl =
-      List.iter handlers (fun v -> v#at_contexts env cl);
+      List.iter handlers ~f:(fun v -> v#at_contexts env cl);
       super#on_contexts env cl
 
     method! on_typedef env t =
-      List.iter handlers (fun v -> v#at_typedef env t);
+      List.iter handlers ~f:(fun v -> v#at_typedef env t);
       super#on_typedef env t
 
     method! on_gconst env gconst =
-      List.iter handlers (fun v -> v#at_gconst env gconst);
+      List.iter handlers ~f:(fun v -> v#at_gconst env gconst);
       super#on_gconst env gconst
   end

@@ -83,19 +83,22 @@ let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
   }
 
 let add_or_overwrite_entry ~(ctx : t) (entry : entry) : t =
-  { ctx with entries = Relative_path.Map.add ctx.entries entry.path entry }
+  {
+    ctx with
+    entries = Relative_path.Map.add ctx.entries ~key:entry.path ~data:entry;
+  }
 
 let add_or_overwrite_entry_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
   let entry = make_entry ~path ~contents:(Provided_contents contents) in
-  (add_or_overwrite_entry ctx entry, entry)
+  (add_or_overwrite_entry ~ctx entry, entry)
 
 let add_entry_if_missing ~(ctx : t) ~(path : Relative_path.t) : t * entry =
   match Relative_path.Map.find_opt ctx.entries path with
   | Some entry -> (ctx, entry)
   | None ->
     let entry = make_entry ~path ~contents:Not_yet_read_from_disk in
-    (add_or_overwrite_entry ctx entry, entry)
+    (add_or_overwrite_entry ~ctx entry, entry)
 
 let get_popt (t : t) : ParserOptions.t = t.popt
 

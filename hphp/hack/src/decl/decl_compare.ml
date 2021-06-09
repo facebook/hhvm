@@ -308,11 +308,21 @@ and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
   let to_recheck =
     DepSet.union where_class_and_subclasses_were_used to_recheck
   in
-  let to_redecl = Typing_deps.get_extend_deps mode trace cid_hash to_redecl in
+  let to_redecl =
+    Typing_deps.get_extend_deps
+      ~mode
+      ~visited:trace
+      ~source_class:cid_hash
+      ~acc:to_redecl
+  in
   (add_changed mode changed dep, to_redecl, to_recheck)
 
 let get_extend_deps mode cid_hash to_redecl =
-  Typing_deps.get_extend_deps mode (VisitedSet.make mode) cid_hash to_redecl
+  Typing_deps.get_extend_deps
+    ~mode
+    ~visited:(VisitedSet.make mode)
+    ~source_class:cid_hash
+    ~acc:to_redecl
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -454,12 +464,20 @@ let get_class_deps
            * but not recheck them.
            *)
           let to_redecl =
-            Typing_deps.get_extend_deps mode trace cid_hash to_redecl
+            Typing_deps.get_extend_deps
+              ~mode
+              ~visited:trace
+              ~source_class:cid_hash
+              ~acc:to_redecl
           in
           (changed, to_redecl, to_recheck)
       else
         let to_redecl =
-          Typing_deps.get_extend_deps mode trace cid_hash to_redecl
+          Typing_deps.get_extend_deps
+            ~mode
+            ~visited:trace
+            ~source_class:cid_hash
+            ~acc:to_redecl
         in
         let to_recheck = DepSet.union to_redecl to_recheck in
         let to_recheck =
@@ -492,7 +510,11 @@ let get_class_deps
        but decl-validation and typechecking happen in the same step. *)
     let to_recheck =
       if is_changed then
-        Typing_deps.get_extend_deps mode trace cid_hash to_recheck
+        Typing_deps.get_extend_deps
+          ~mode
+          ~visited:trace
+          ~source_class:cid_hash
+          ~acc:to_recheck
       else
         to_recheck
     in

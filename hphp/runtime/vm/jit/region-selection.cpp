@@ -171,8 +171,7 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
                                         SBInvOffset spOffset) {
   m_blocks.push_back(
-    std::make_shared<Block>(kInvalidTransID, sk.func(), sk.resumeMode(),
-                            sk.offset(), length, spOffset));
+    std::make_shared<Block>(kInvalidTransID, sk, length, spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
@@ -667,15 +666,11 @@ bool hasTransID(RegionDesc::BlockId blockId) {
 }
 
 RegionDesc::Block::Block(BlockId     id,
-                         const Func* func,
-                         ResumeMode  resumeMode,
-                         Offset      start,
+                         SrcKey      start,
                          int         length,
                          SBInvOffset initSpOff)
-  : m_func(func)
-  , m_resumeMode(resumeMode)
-  , m_start(start)
-  , m_last(kInvalidOffset)
+  : m_start(start)
+  , m_last(SrcKey{})
   , m_length(length)
   , m_initialSpOffset(initSpOff)
   , m_profTransID(kInvalidTransID)
@@ -696,27 +691,23 @@ RegionDesc::Block::Block(BlockId     id,
 
   assertx(length >= 0);
   if (length > 0) {
-    SrcKey sk(func, start, resumeMode);
+    SrcKey sk = start;
     for (unsigned i = 1; i < length; ++i) sk.advance();
-    m_last = sk.offset();
+    m_last = sk;
   }
   checkInstructions();
   checkMetadata();
 }
 
-bool RegionDesc::Block::contains(SrcKey sk) const {
-  return sk >= start() && sk <= last();
-}
-
 void RegionDesc::Block::addInstruction() {
   if (m_length > 0) checkInstruction(last().op());
-  assertx((m_last == kInvalidOffset) == (m_length == 0));
+  assertx((m_last.valid()) == (m_length != 0));
 
   ++m_length;
   if (m_length == 1) {
     m_last = m_start;
   } else {
-    m_last = last().advanced().offset();
+    m_last.advance();
   }
 }
 
@@ -731,7 +722,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   }
   assertx(newLen != -1);
   m_length = newLen;
-  m_last = final.offset();
+  m_last = final;
 
   checkInstructions();
   checkMetadata();
@@ -771,7 +762,7 @@ void RegionDesc::Block::checkInstructions() const {
     if (i != length() - 1) checkInstruction(sk.op());
     sk.advance(func());
   }
-  assertx(sk.offset() == m_last);
+  assertx(sk == m_last);
 }
 
 void RegionDesc::Block::checkInstruction(Op op) const {
@@ -803,7 +794,7 @@ void RegionDesc::Block::checkMetadata() const {
       auto& loc = typedLoc.location;
       switch (loc.tag()) {
         case LTag::Local:
-          assertx(loc.localId() < m_func->numLocals());
+          assertx(loc.localId() < func()->numLocals());
           break;
         case LTag::Stack:
         case LTag::MBase:
@@ -820,7 +811,7 @@ void RegionDesc::Block::checkMetadata() const {
       auto& loc = guardedLoc.location;
       switch (loc.tag()) {
         case LTag::Local:
-          assertx(loc.localId() < m_func->numLocals());
+          assertx(loc.localId() < func()->numLocals());
           break;
         case LTag::Stack:
         case LTag::MBase:
@@ -1238,9 +1229,7 @@ std::string show(const RegionContext& ctx) {
 
 std::string show(const RegionDesc::Block& b) {
   std::string ret{"Block "};
-  folly::toAppend(b.id(), ' ',
-                  b.func()->fullName()->data(), '@', b.start().offset(),
-                  resumeModeShortName(b.start().resumeMode()),
+  folly::toAppend(b.id(), ' ', showShort(b.start()),
                   " length ", b.length(),
                   " initSpOff ", b.initialSpOffset().offset,
                   " profTransID ", b.profTransID(),
@@ -1256,15 +1245,11 @@ std::string show(const RegionDesc::Block& b) {
   }
 
   for (int i = 0; i < b.length(); ++i) {
-    std::string instrString;
-    folly::toAppend(instrToString(b.func()->at(skIter.offset()), b.func()),
-                    &instrString);
-
     folly::toAppend(
       "    ",
-      skIter.offset(),
+      skIter.printableOffset(),
       "  ",
-      instrString,
+      skIter.showInst(),
       "\n",
       &ret
     );

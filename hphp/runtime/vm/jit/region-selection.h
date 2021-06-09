@@ -280,8 +280,7 @@ struct PostConditions {
  */
 struct RegionDesc::Block {
 
-  Block(BlockId id, const Func* func, ResumeMode resumeMode,
-        Offset start, int length, SBInvOffset initSpOff);
+  Block(BlockId id, SrcKey start, int length, SBInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -290,17 +289,12 @@ struct RegionDesc::Block {
    * starting SrcKey of this Block.
    */
   BlockId     id()                const { return m_id; }
-  const Unit* unit()              const { return m_func->unit(); }
-  const Func* func()              const { return m_func; }
-  SrcKey      start()             const {
-    return SrcKey { m_func, m_start, m_resumeMode };
-  }
-  SrcKey      last()              const {
-    return SrcKey { m_func, m_last, m_resumeMode };
-  }
+  const Unit* unit()              const { return m_start.unit(); }
+  const Func* func()              const { return m_start.func(); }
+  SrcKey      start()             const { return m_start; }
+  SrcKey      last()              const { return m_last; }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
-  bool        contains(SrcKey sk) const;
   SBInvOffset initialSpOffset()   const { return m_initialSpOffset; }
   TransID     profTransID()       const { return m_profTransID; }
 
@@ -355,11 +349,9 @@ private:
   void checkMetadata() const;
 
 private:
+  const SrcKey     m_start;
+  SrcKey           m_last;
   BlockId          m_id;
-  const Func*      m_func;
-  const ResumeMode m_resumeMode;
-  const Offset     m_start;
-  Offset           m_last;
   int              m_length;
   SBInvOffset      m_initialSpOffset;
   TransID          m_profTransID;

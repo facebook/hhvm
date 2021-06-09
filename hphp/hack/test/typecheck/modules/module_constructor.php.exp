@@ -1,0 +1,8 @@
+File "module_constructor.php", line 13, characters 12-12:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_constructor.php", line 9, characters 19-29:
+  This member is internal
+File "module_constructor.php", line 23, characters 12-12:
+You cannot access internal members from module `A` in module `B` (Typing[4112])
+  File "module_constructor.php", line 9, characters 19-29:
+  This member is internal

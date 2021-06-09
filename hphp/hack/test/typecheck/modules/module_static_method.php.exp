@@ -1,0 +1,8 @@
+File "module_static_method.php", line 13, characters 6-6:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_static_method.php", line 9, characters 26-26:
+  This member is internal
+File "module_static_method.php", line 23, characters 6-6:
+You cannot access internal members from module `A` in module `B` (Typing[4112])
+  File "module_static_method.php", line 9, characters 26-26:
+  This member is internal

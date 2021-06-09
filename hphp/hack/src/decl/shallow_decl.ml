@@ -54,6 +54,10 @@ let gather_constants =
       CCRSet.add ref acc
   end
 
+let make_visibility attrs = function
+  | Public when Attrs.mem SN.UserAttributes.uaInternal attrs -> Internal
+  | vis -> vis
+
 let class_const env (cc : Nast.class_const) =
   let gather_constants = gather_constants#on_expr CCRSet.empty in
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
@@ -177,11 +181,12 @@ let prop env cv =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
   in
+  let vis = make_visibility cv.cv_user_attributes cv.cv_visibility in
   {
     sp_name = Decl_env.make_decl_posed env cv.cv_id;
     sp_xhp_attr = make_xhp_attr cv;
     sp_type = ty;
-    sp_visibility = cv.cv_visibility;
+    sp_visibility = vis;
     sp_flags =
       PropFlags.make
         ~const
@@ -209,11 +214,12 @@ and static_prop env cv =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
   in
+  let vis = make_visibility cv.cv_user_attributes cv.cv_visibility in
   {
     sp_name = (cv_pos, id);
     sp_xhp_attr = make_xhp_attr cv;
     sp_type = ty;
-    sp_visibility = cv.cv_visibility;
+    sp_visibility = vis;
     sp_flags =
       PropFlags.make
         ~const
@@ -290,12 +296,7 @@ let method_ env m =
       m.m_name
       m.m_user_attributes
   in
-  let vis =
-    match m.m_visibility with
-    | Public when Attrs.mem SN.UserAttributes.uaInternal m.m_user_attributes ->
-      Internal
-    | vis -> vis
-  in
+  let vis = make_visibility m.m_user_attributes m.m_visibility in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
     sm_type = mk (Reason.Rwitness_from_decl pos, Tfun ft);

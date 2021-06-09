@@ -64,12 +64,12 @@ end = struct
     let env = ref env in
     last_call := current;
     callback_list :=
-      List.filter !callback_list (fun callback ->
+      List.filter !callback_list ~f:(fun callback ->
           (match callback with
           | Periodic (seconds_left, _, job)
           | Once (seconds_left, job) ->
             seconds_left := !seconds_left -. delta;
-            if Float.(!seconds_left < 0.0) then env := job !env);
+            if Float.(!seconds_left < 0.0) then env := job ~env:!env);
           match callback with
           | Periodic (seconds_left, period, _) ->
             if Float.(!seconds_left < 0.0) then seconds_left := period;
@@ -194,5 +194,5 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
     ]
   in
-  List.iter jobs (fun (period, cb) ->
+  List.iter jobs ~f:(fun (period, cb) ->
       Periodical.register_callback (Periodic (ref period, period, cb)))

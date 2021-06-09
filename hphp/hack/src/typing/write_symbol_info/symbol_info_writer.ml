@@ -36,7 +36,7 @@ let write_json
     (start_time : float) : unit =
   try
     let (small, large) =
-      List.partition_tf files_info (fun (_, tast, _) ->
+      List.partition_tf files_info ~f:(fun (_, tast, _) ->
           List.length tast <= 2000)
     in
     if List.is_empty large then
@@ -45,7 +45,7 @@ let write_json
     else
       let json_chunks = Symbol_json_builder.build_json ctx small in
       write_file file_dir (List.length small) json_chunks;
-      List.iter large (fun (fp, tast, st) ->
+      List.iter large ~f:(fun (fp, tast, st) ->
           let decl_json_chunks =
             Symbol_json_builder.build_decls_json ctx [(fp, tast, st)]
           in

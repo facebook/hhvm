@@ -29,13 +29,13 @@ let get_fixme_patches codes (env : env) =
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
 let get_lambda_parameter_rewrite_patches ctx files =
-  List.concat_map files (fun file ->
+  List.concat_map files ~f:(fun file ->
       ServerRewriteLambdaParameters.get_patches
         ctx
         (Relative_path.from_root ~suffix:file))
 
 let get_type_params_type_rewrite_patches ctx files =
-  List.concat_map files (fun file ->
+  List.concat_map files ~f:(fun file ->
       ServerRewriteTypeParamsType.get_patches
         ctx
         (Relative_path.from_root ~suffix:file))

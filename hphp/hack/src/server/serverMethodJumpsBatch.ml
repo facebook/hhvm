@@ -47,7 +47,7 @@ let go :
   in
   let results =
     if List.length deduped < 10 then
-      get_ancestors_multiple ctx [] deduped filter
+      get_ancestors_multiple ctx [] deduped ~filter
     else
       parallel_helper ctx workers deduped filter
   in

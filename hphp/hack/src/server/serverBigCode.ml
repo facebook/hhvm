@@ -287,7 +287,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
       |> List.iter ~f:(fun cname ->
              Decl_provider.get_class (Tast_env.get_ctx env) cname
              |> Option.iter ~f:(fun class_ ->
-                    let cid = Option.map cid to_nast_class_id_ in
+                    let cid = Option.map cid ~f:to_nast_class_id_ in
                     self#autocomplete_member ~is_static env class_ cid))
 
     method autocomplete_static_member env ((_, ty), cid) =

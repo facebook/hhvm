@@ -33,7 +33,9 @@ let make_local_server_api
           state_filename
           ~ignore_hh_version
       in
-      HackEventLogger.remote_scheduler_update_dependency_graph_end edges start_t;
+      HackEventLogger.remote_scheduler_update_dependency_graph_end
+        ~edges
+        start_t;
       let (_t : float) =
         Hh_logger.log_duration "Updated dependency graph" start_t
       in

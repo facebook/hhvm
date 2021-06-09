@@ -171,7 +171,7 @@ let user_filter_type_check_files ~to_recheck ~reparsed ~is_ide_file =
       Hh_logger.log
         "An exception occurred while reading %s, retrying in 5s..."
         config_file_path;
-      Sys_utils.sleep 5.;
+      Sys_utils.sleep ~seconds:5.;
       read_config_file ()
   in
   let filters = read_config_file () in

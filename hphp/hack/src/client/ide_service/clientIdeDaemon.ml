@@ -558,7 +558,9 @@ let open_file
       ~path
       ~contents:(Provider_context.Provided_contents contents)
   in
-  let open_files = Relative_path.Map.add files.open_files path entry in
+  let open_files =
+    Relative_path.Map.add files.open_files ~key:path ~data:entry
+  in
   { files with open_files }
 
 (** Changes a file, in response to DidChange event. For future we
@@ -622,7 +624,9 @@ let update_file
         ~path
         ~contents:(Provider_context.Provided_contents contents)
   in
-  let open_files = Relative_path.Map.add files.open_files path entry in
+  let open_files =
+    Relative_path.Map.add files.open_files ~key:path ~data:entry
+  in
   ({ files with open_files }, entry)
 
 (** like [update_file], but for convenience also produces a ctx for

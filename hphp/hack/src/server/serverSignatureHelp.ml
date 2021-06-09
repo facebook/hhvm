@@ -210,7 +210,8 @@ let go_quarantined
         let param_docs =
           match siginfo_documentation with
           | Some siginfo_documentation ->
-            Some (Docblock_parser.get_param_docs siginfo_documentation)
+            Some
+              (Docblock_parser.get_param_docs ~docblock:siginfo_documentation)
           | None -> None
         in
         let ft_params =

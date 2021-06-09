@@ -54,8 +54,8 @@ let go
   in
   let result =
     Hh_json.(
-      let comment = List.map ServerHotClassesDescription.comment string_ in
-      let classes = List.map classes_to_save string_ in
+      let comment = List.map ServerHotClassesDescription.comment ~f:string_ in
+      let classes = List.map classes_to_save ~f:string_ in
       json_to_string ~pretty:true
       @@ JSON_Object
            [

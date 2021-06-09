@@ -472,7 +472,7 @@ let naming_from_saved_state
     | Some _ ->
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)
-      Relative_path.Set.iter parsing_files (fun k ->
+      Relative_path.Set.iter parsing_files ~f:(fun k ->
           match Naming_table.get_file_info old_naming_table k with
           | None ->
             (* If we can't find the file in [old_naming_table] we don't consider that an error, since
@@ -500,7 +500,7 @@ let naming_from_saved_state
     they'll be named by our caller, next). We assume the old naming-table came from a clean
     state, which is why we skip checking for "already bound" conditions. *)
       let old_hack_names =
-        Naming_table.filter old_naming_table (fun k _v ->
+        Naming_table.filter old_naming_table ~f:(fun k _v ->
             not (Relative_path.Set.mem parsing_files k))
       in
       Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
@@ -534,7 +534,7 @@ let get_dirty_fast
           |> Option.map ~f:FileInfo.simplify
         in
         let fast =
-          Option.merge dirty_old_fast dirty_fast FileInfo.merge_names
+          Option.merge dirty_old_fast dirty_fast ~f:FileInfo.merge_names
         in
         match fast with
         | Some fast -> Relative_path.Map.add acc ~key:fn ~data:fast
@@ -581,7 +581,7 @@ let get_files_to_undecl_and_recheck
       ~init:Relative_path.Map.empty
       ~f:(fun path acc ->
         match Relative_path.Map.find_opt dirty_fast path with
-        | Some info -> Relative_path.Map.add acc path info
+        | Some info -> Relative_path.Map.add acc ~key:path ~data:info
         | None -> acc)
   in
   let get_classes path =
@@ -591,9 +591,9 @@ let get_files_to_undecl_and_recheck
     in
     let new_names = Relative_path.Map.find_opt new_fast path in
     let classes_from_names x = x.FileInfo.n_classes in
-    let old_classes = Option.map old_names classes_from_names in
-    let new_classes = Option.map new_names classes_from_names in
-    Option.merge old_classes new_classes SSet.union
+    let old_classes = Option.map old_names ~f:classes_from_names in
+    let new_classes = Option.map new_names ~f:classes_from_names in
+    Option.merge old_classes new_classes ~f:SSet.union
     |> Option.value ~default:SSet.empty
   in
   let dirty_names =
@@ -990,7 +990,7 @@ let write_symbol_info_init
           | Some _ ->
             if
               (exclude_hhi && Relative_path.is_hhi (Relative_path.prefix path))
-              || List.exists ignore_paths (fun ignore ->
+              || List.exists ignore_paths ~f:(fun ignore ->
                      String.equal (Relative_path.S.to_string path) ignore)
             then
               acc
@@ -1052,7 +1052,9 @@ let full_init
         profiling
     in
     if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
+      SearchServiceRunner.update_fileinfo_map
+        env.naming_table
+        ~source:SearchUtils.Init;
     let fast = Naming_table.to_fast env.naming_table in
     let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
     let fast =

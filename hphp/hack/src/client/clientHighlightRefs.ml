@@ -17,7 +17,7 @@ let print_result pos =
   Printf.printf "%s\n" (Ide_api_types.range_to_string_single_line pos)
 
 let print_readable res =
-  List.iter res print_result;
+  List.iter res ~f:print_result;
   print_endline (string_of_int (List.length res) ^ " total results")
 
 let go res ~output_json =

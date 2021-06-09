@@ -14,7 +14,7 @@ open Hh_prelude
 (* we have no alternative but to depend on Sys_error strings *)
 
 let log genv msg_thunk =
-  Option.iter genv.ServerEnv.debug_channels (fun (_ic, oc) ->
+  Option.iter genv.ServerEnv.debug_channels ~f:(fun (_ic, oc) ->
       (* The input is read using input_line, hence we append a trailing
        * newline *)
       (* We use a thunk so that expensive computations don't slow down the

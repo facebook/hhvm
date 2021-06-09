@@ -53,7 +53,9 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       let (is_truncated, count) =
         Diagnostic_subscription.get_pushed_error_length sub
       in
-      let (_sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
+      let (_sub, errors) =
+        Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
+      in
       Printf.sprintf
         ( "client_has_message: %b\nide_needs_parsing: %b\n"
         ^^ "error_count: %d\nerrors_in_client: %d\nis_truncated: %b\n"

@@ -37,7 +37,7 @@ let rec merge_trie x y =
 and merge_trie_children x y =
   SMap.merge ~f:(fun _ x y -> merge_trie_opt x y) x y
 
-and merge_trie_opt x y = Option.merge x y merge_trie
+and merge_trie_opt x y = Option.merge x y ~f:merge_trie
 
 (* Convert a list of (file_name, map of counts) into a trie. Each
  * internal node of the trie has the sum of counts of all its child nodes. *)
@@ -63,7 +63,7 @@ let relativize root path =
     let root = root ^ Filename.dir_sep in
     if string_starts_with path root then
       let root_len = String.length root in
-      Some (String.sub path root_len (String.length path - root_len))
+      Some (String.sub path ~pos:root_len ~len:(String.length path - root_len))
     else
       None
 
@@ -72,7 +72,7 @@ let get_coverage root ctx neutral fnl =
   SharedMem.invalidate_caches ();
   let naming_table = NamingTableStore.load () in
   let file_counts =
-    List.rev_filter_map fnl (fun fn ->
+    List.rev_filter_map fnl ~f:(fun fn ->
         relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
         Naming_table.get_file_info naming_table fn >>= fun defs ->
         let (tast, _) = Typing_check_utils.type_file ctx fn defs in

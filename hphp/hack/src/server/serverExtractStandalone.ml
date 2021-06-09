@@ -568,7 +568,7 @@ end = struct
           let method_ = Nast_helper.get_method_exn ctx class_name method_name in
           method_.Aast.m_span)
     in
-    SourceText.make filename @@ Pos.get_text_from_pos file_content pos
+    SourceText.make filename @@ Pos.get_text_from_pos ~content:file_content pos
 end
 
 (* -- Dependency extraction logic ------------------------------------------- *)
@@ -817,8 +817,9 @@ end = struct
               @@ Nast_helper.get_method ctx cls_name "__construct"
             | _ -> ())
           | Type _ ->
-            List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
-            List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
+            List.iter (Class.all_ancestors cls) ~f:(fun (_, ty) -> add_dep ty);
+            List.iter (Class.all_ancestor_reqs cls) ~f:(fun (_, ty) ->
+                add_dep ty);
             Option.iter
               (Class.enum_type cls)
               ~f:(fun Typing_defs.{ te_base; te_constraint; te_includes; _ } ->
@@ -1087,7 +1088,7 @@ module Grouped : sig
     t list
 end = struct
   let strip_ns obj_name =
-    match String.rsplit2 obj_name '\\' with
+    match String.rsplit2 obj_name ~on:'\\' with
     | Some (_, name) -> name
     | None -> obj_name
 
@@ -1340,7 +1341,7 @@ end = struct
           }) ->
       let hf_param_kinds =
         List.map hf_param_info ~f:(fun i ->
-            Option.bind i (fun i -> i.Aast.hfparam_kind))
+            Option.bind i ~f:(fun i -> i.Aast.hfparam_kind))
       in
       let pp_typed_param ppf kp =
         Fmt.(
@@ -2913,7 +2914,7 @@ end = struct
     if List.is_empty (SyntaxTree.all_errors tree) then
       tree
     else (
-      List.iter (SyntaxTree.all_errors tree) (print_error source_text);
+      List.iter (SyntaxTree.all_errors tree) ~f:(print_error source_text);
       raise Hackfmt_error.InvalidSyntax
     )
 

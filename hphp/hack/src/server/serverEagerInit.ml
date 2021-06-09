@@ -82,7 +82,9 @@ let init
       ~profiling
   in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
+    SearchServiceRunner.update_fileinfo_map
+      env.naming_table
+      ~source:SearchUtils.Init;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
     update_files

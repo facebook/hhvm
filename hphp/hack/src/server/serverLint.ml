@@ -45,7 +45,7 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
 
 let lint_and_filter tcopt code acc fnl =
   let lint_errs = lint tcopt acc fnl in
-  List.filter lint_errs (fun err -> Lint.get_code err = code)
+  List.filter lint_errs ~f:(fun err -> Lint.get_code err = code)
 
 let lint_all genv ctx code =
   let next =
@@ -65,7 +65,7 @@ let lint_all genv ctx code =
       ~neutral:[]
       ~next
   in
-  List.map errs Lint.to_absolute
+  List.map errs ~f:Lint.to_absolute
 
 let create_rp : string -> RP.t = Relative_path.create Relative_path.Root
 

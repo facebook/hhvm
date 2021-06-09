@@ -75,10 +75,10 @@ let log_if_diag_subscribe_changed
     Hh_logger.log "Diag_subscribe: %s - %s!" title disposition
 
 let print_defs prefix defs =
-  List.iter defs (fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)
+  List.iter defs ~f:(fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)
 
 let print_fast_pos fast_pos =
-  SMap.iter fast_pos (fun x (funs, classes) ->
+  SMap.iter fast_pos ~f:(fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
       print_defs "Fun" funs;
       print_defs "Class" classes);
@@ -87,10 +87,10 @@ let print_fast_pos fast_pos =
   ()
 
 let print_fast fast =
-  SMap.iter fast (fun x (funs, classes) ->
+  SMap.iter fast ~f:(fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
-      SSet.iter funs (Printf.printf "  Fun %s\n");
-      SSet.iter classes (Printf.printf "  Class %s\n"));
+      SSet.iter funs ~f:(Printf.printf "  Fun %s\n");
+      SSet.iter classes ~f:(Printf.printf "  Class %s\n"));
   Printf.printf "\n";
   Out_channel.flush stdout;
   ()
@@ -183,7 +183,7 @@ let add_old_decls old_naming_table fast =
 (*****************************************************************************)
 
 let remove_decls env fast_parsed =
-  Relative_path.Map.iter fast_parsed (fun fn _ ->
+  Relative_path.Map.iter fast_parsed ~f:(fun fn _ ->
       match Naming_table.get_file_info env.naming_table fn with
       | None -> ()
       | Some
@@ -315,7 +315,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
 
   SearchServiceRunner.update_fileinfo_map
     (Naming_table.create fast)
-    SearchUtils.TypeChecker;
+    ~source:SearchUtils.TypeChecker;
 
   (* During integration tests, we want to pretend that search is run
     synchronously *)
@@ -364,7 +364,9 @@ let update_naming_table env fast_parsed profiling =
     @@ fun () ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let deps_mode = Provider_context.get_deps_mode ctx in
-    Relative_path.Map.iter fast_parsed (Typing_deps.Files.update_file deps_mode);
+    Relative_path.Map.iter
+      fast_parsed
+      ~f:(Typing_deps.Files.update_file deps_mode);
     Naming_table.update_many env.naming_table fast_parsed
   in
   naming_table
@@ -390,7 +392,7 @@ let declare_names env fast_parsed =
           | None -> acc
           (* this should not happen - failed_naming should be
                          a subset of keys in naming_table *)
-          | Some v -> Relative_path.Map.add acc k v))
+          | Some v -> Relative_path.Map.add acc ~key:k ~data:v))
   in
   remove_decls env fast_parsed;
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -799,7 +801,12 @@ functor
             ~f:
               begin
                 fun acc phase ->
-                Errors.(incremental_update_set acc empty path phase)
+                Errors.(
+                  incremental_update_set
+                    ~old:acc
+                    ~new_:empty
+                    ~rechecked:path
+                    phase)
               end)
 
     type parsing_result = {
@@ -820,7 +827,12 @@ functor
       in
       let errors = env.errorl in
       let errors =
-        Errors.(incremental_update_set errors errorl files_to_parse Parsing)
+        Errors.(
+          incremental_update_set
+            ~old:errors
+            ~new_:errorl
+            ~rechecked:files_to_parse
+            Parsing)
       in
       let errors = clear_failed_parsing errors failed_parsing in
       (env, { parse_errors = errors; failed_parsing; fast_parsed })
@@ -845,7 +857,12 @@ functor
         @@ fun () ->
         let (errorl', failed_naming, fast) = declare_names env fast_parsed in
         let errors =
-          Errors.(incremental_update_map errors errorl' fast Naming)
+          Errors.(
+            incremental_update_map
+              ~old:errors
+              ~new_:errorl'
+              ~rechecked:fast
+              Naming)
         in
         (* failed_naming can be a superset of keys in fast - see comment in
          * Naming_global.ndecl_file *)
@@ -957,7 +974,11 @@ functor
       in
       let errors =
         Errors.(
-          incremental_update_map errors errorl' fast_redecl_phase2_now Decl)
+          incremental_update_map
+            ~old:errors
+            ~new_:errorl'
+            ~rechecked:fast_redecl_phase2_now
+            Decl)
       in
       let needs_phase2_redecl =
         diff_set_and_map_keys
@@ -971,9 +992,9 @@ functor
         Relative_path.Set.union
           to_recheck2
           (CheckKind.get_to_recheck2_approximation
-             to_redecl_phase2_deps
-             env
-             ctx)
+             ~to_redecl_phase2_deps
+             ~env
+             ~ctx)
       in
       {
         errors_after_phase2 = errors;
@@ -1115,7 +1136,12 @@ functor
           Relative_path.Set.empty
       in
       let errors =
-        Errors.(incremental_update_set errors errorl' files_to_check Typing)
+        Errors.(
+          incremental_update_set
+            ~old:errors
+            ~new_:errorl'
+            ~rechecked:files_to_check
+            Typing)
       in
       let (env, _future) : ServerEnv.env * string Future.t option =
         ServerRecheckCapture.update_after_recheck
@@ -1391,10 +1417,10 @@ functor
         else
           CheckKind.get_defs_to_redecl_phase2
             genv
-            fast
-            naming_table
-            to_redecl_phase2
-            env
+            ~decl_defs:fast
+            ~naming_table
+            ~to_redecl_phase2
+            ~env
       in
       let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
       let telemetry =
@@ -1593,7 +1619,7 @@ functor
       let files_to_check =
         remove_failed_parsing_set
           files_to_check
-          stop_at_errors
+          ~stop_at_errors
           env
           failed_parsing
       in
@@ -1724,11 +1750,11 @@ functor
       (* WRAP-UP ***************************************************************)
       let env =
         CheckKind.get_env_after_typing
-          env
-          errors
-          needs_phase2_redecl
-          needs_recheck
-          diag_subscribe
+          ~old_env:env
+          ~errorl:errors
+          ~needs_phase2_redecl
+          ~needs_recheck
+          ~diag_subscribe
       in
 
       (* STATS LOGGING *********************************************************)

@@ -85,6 +85,6 @@ module SearchServiceRunner = struct
       (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =
     let i = ref 0 in
     Naming_table.iter fast ~f:(fun fn info ->
-        internal_ssr_update fn info source;
+        internal_ssr_update fn info ~source;
         i := !i + 1)
 end

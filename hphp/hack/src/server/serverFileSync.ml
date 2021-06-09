@@ -198,13 +198,16 @@ let get_unsaved_changes env =
           match get_file_content_from_disk path with
           | Some disk_contents
             when not (String.equal ide_contents disk_contents) ->
-            Relative_path.Map.add acc path (ide_contents, disk_contents)
+            Relative_path.Map.add
+              acc
+              ~key:path
+              ~data:(ide_contents, disk_contents)
           | Some _ -> acc
           | None ->
             (* If one creates a new file, then there will not be corresponding
           * disk contents, and we should consider there to be unsaved changes in
           * the editor. *)
-            Relative_path.Map.add acc path (ide_contents, "")
+            Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
         end
       | _ -> acc)
 

@@ -39,7 +39,7 @@ let normalize_namespace_body node =
       | Syntax.SyntaxList declarations ->
         begin
           match
-            List.find_mapi declarations (fun i f ->
+            List.find_mapi declarations ~f:(fun i f ->
                 match Syntax.syntax f with
                 | Syntax.NamespaceDeclaration ns ->
                   begin
@@ -124,7 +124,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
   let deps_mode = Provider_context.get_deps_mode ctx in
   let file_filter (path : string) =
     FindUtils.file_filter path
-    && List.exists prefixes (fun prefix ->
+    && List.exists prefixes ~f:(fun prefix ->
            String_utils.string_starts_with path prefix)
   in
   let path_filter (path : Relative_path.t) =
@@ -201,7 +201,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
   in
   let rec sort (visited : Relative_path.t list) (rest : Relative_path.Set.t) =
     let files_without_deps =
-      Relative_path.Set.filter rest (fun path ->
+      Relative_path.Set.filter rest ~f:(fun path ->
           match Relative_path.Map.find_opt recursive_dependencies path with
           | Some deps ->
             (* any dependencies that aren't in `rest` must have already
@@ -218,7 +218,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
       let rest_pretty =
         List.map
           (Relative_path.Set.elements rest)
-          (fun (path : Relative_path.t) ->
+          ~f:(fun (path : Relative_path.t) ->
             let deps =
               Relative_path.Map.find recursive_dependencies path
               |> Relative_path.Set.inter rest

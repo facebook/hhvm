@@ -286,7 +286,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           |> map_env ~f:to_absolute))
   | GO_TO_IMPL go_to_impl_action ->
     Done_or_retry.(
-      ServerGoToImpl.go go_to_impl_action genv env
+      ServerGoToImpl.go ~action:go_to_impl_action ~genv ~env
       |> map_env ~f:ServerFindRefs.to_absolute)
   | IDE_FIND_REFS (labelled_file, line, column, include_defs) ->
     Done_or_retry.(
@@ -373,7 +373,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | SEARCH (query, type_) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let lst = env.ServerEnv.local_symbol_table in
-    (env, ServerSearch.go ctx query type_ lst)
+    (env, ServerSearch.go ctx query ~kind_filter:type_ lst)
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl ->
     let ctx = Provider_utils.ctx_from_server_env env in
@@ -393,7 +393,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let legacy_format_options =
       { Lsp.DocumentFormatting.tabSize = 2; insertSpaces = true }
     in
-    (env, ServerFormat.go content from to_ legacy_format_options)
+    (env, ServerFormat.go ~content from to_ legacy_format_options)
   | AI_QUERY _ -> (env, "Ai_query is deprecated")
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
   | OPEN_FILE (path, contents) ->

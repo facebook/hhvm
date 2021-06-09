@@ -23,7 +23,7 @@ let add_container_decl_fact decl_pred name progress =
 
 let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
   let tparams =
-    List.map clss.c_tparams (build_type_param_json ctx source_map)
+    List.map clss.c_tparams ~f:(build_type_param_json ctx source_map)
   in
   let common_fields =
     [
@@ -43,13 +43,13 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
         (ref :: decl_refs, prog))
   in
   let (req_extends_hints, req_implements_hints) =
-    List.partition_tf clss.c_reqs snd
+    List.partition_tf clss.c_reqs ~f:snd
   in
   let (req_extends, prog) =
-    add_decls (List.map req_extends_hints fst) ClassDeclaration prog
+    add_decls (List.map req_extends_hints ~f:fst) ClassDeclaration prog
   in
   let (req_implements, prog) =
-    add_decls (List.map req_implements_hints fst) InterfaceDeclaration prog
+    add_decls (List.map req_implements_hints ~f:fst) InterfaceDeclaration prog
   in
   let (defn_pred, json_fields, prog) =
     match get_container_kind clss with
@@ -160,7 +160,7 @@ let add_method_decl_fact con_type decl_id name progress =
 
 let add_method_defn_fact ctx source_map meth decl_id progress =
   let tparams =
-    List.map meth.m_tparams (build_type_param_json ctx source_map)
+    List.map meth.m_tparams ~f:(build_type_param_json ctx source_map)
   in
   let json_fact =
     JSON_Object
@@ -239,7 +239,7 @@ let add_type_const_defn_fact ctx source_map tc decl_id progress =
     ]
   in
   let json_fields =
-    (* TODO(T88552052) should the default of an abstract type constant be used 
+    (* TODO(T88552052) should the default of an abstract type constant be used
      * as a value here *)
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
@@ -298,7 +298,7 @@ let add_func_decl_fact name progress =
 let add_func_defn_fact ctx source_map fd decl_id progress =
   let elem = fd.fd_fun in
   let tparams =
-    List.map elem.f_tparams (build_type_param_json ctx source_map)
+    List.map elem.f_tparams ~f:(build_type_param_json ctx source_map)
   in
   let json_fields =
     [
@@ -326,7 +326,7 @@ let add_typedef_decl_fact ctx source_map name elem progress =
     | Opaque -> false
   in
   let tparams =
-    List.map elem.t_tparams (build_type_param_json ctx source_map)
+    List.map elem.t_tparams ~f:(build_type_param_json ctx source_map)
   in
   let json_fields =
     [

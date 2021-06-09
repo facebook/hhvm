@@ -30,7 +30,7 @@ let replace_color input =
   | (Some Partial, str) -> (partial_clr, str)
   | (None, str) -> (default_color, str)
 
-let replace_colors input = List.map input replace_color
+let replace_colors input = List.map input ~f:replace_color
 
 (*****************************************************************************)
 (* The entry point. *)

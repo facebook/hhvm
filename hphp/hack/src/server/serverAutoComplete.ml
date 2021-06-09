@@ -58,7 +58,7 @@ let get_autocomplete_context
       File_content.get_offsets file_content (pos_start, pos)
     in
     let leading_text =
-      String.sub file_content offset_start (offset - offset_start)
+      String.sub file_content ~pos:offset_start ~len:(offset - offset_start)
     in
     (* text is the text from the start of the line up to the caret position *)
     let is_xhp_classname =

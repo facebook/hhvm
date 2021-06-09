@@ -49,7 +49,7 @@ let source_at_span source_text pos =
 let strip_tparams name =
   match String.index name '<' with
   | None -> name
-  | Some i -> String.sub name 0 i
+  | Some i -> String.sub name ~pos:0 ~len:i
 
 (* True if source text ends in a newline *)
 let ends_in_newline source_text =
@@ -87,8 +87,10 @@ let split_name (s : string) : (string * string) option =
   | None -> None
   | Some pos ->
     let name_start = pos + 1 in
-    let name = String.sub s name_start (String.length s - name_start) in
-    let parent_namespace = String.sub s 0 (name_start - 1) in
+    let name =
+      String.sub s ~pos:name_start ~len:(String.length s - name_start)
+    in
+    let parent_namespace = String.sub s ~pos:0 ~len:(name_start - 1) in
     if String.is_empty parent_namespace || String.is_empty name then
       None
     else

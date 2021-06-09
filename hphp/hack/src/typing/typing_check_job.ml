@@ -45,7 +45,7 @@ let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
           Typing_toplevel.fun_def ctx fun_
           |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def ctx f);
+        Option.iter def_opt ~f:(fun (f, _) -> Tast_check.def ctx f);
         def_opt)
   | None -> None
 
@@ -61,7 +61,7 @@ let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
           |> Option.map ~f:(fun (c, global_tvenv) ->
                  (Aast.Class c, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def ctx f);
+        Option.iter def_opt ~f:(fun (f, _) -> Tast_check.def ctx f);
         def_opt)
   | None -> None
 

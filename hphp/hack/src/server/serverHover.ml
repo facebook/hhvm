@@ -43,7 +43,7 @@ let make_hover_const_definition entry def_opt =
   | Some def ->
     [
       Pos.get_text_from_pos
-        (Provider_context.read_file_contents_exn entry)
+        ~content:(Provider_context.read_file_contents_exn entry)
         def.SymbolDefinition.span;
     ]
   | _ -> []

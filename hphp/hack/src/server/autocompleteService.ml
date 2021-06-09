@@ -46,7 +46,10 @@ let (argument_global_type : autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""
 
 let strip_suffix s =
-  String.sub s 0 (String.length s - AutocompleteTypes.autocomplete_token_length)
+  String.sub
+    s
+    ~pos:0
+    ~len:(String.length s - AutocompleteTypes.autocomplete_token_length)
 
 let matches_auto_complete_suffix x =
   String.length x >= AutocompleteTypes.autocomplete_token_length
@@ -54,8 +57,8 @@ let matches_auto_complete_suffix x =
   let suffix =
     String.sub
       x
-      (String.length x - AutocompleteTypes.autocomplete_token_length)
-      AutocompleteTypes.autocomplete_token_length
+      ~pos:(String.length x - AutocompleteTypes.autocomplete_token_length)
+      ~len:AutocompleteTypes.autocomplete_token_length
   in
   String.equal suffix AutocompleteTypes.autocomplete_token
 
@@ -103,7 +106,8 @@ let autocomplete_result_to_json res =
         [
           ("min_arity", Hh_json.int_ fd.min_arity);
           ("return_type", Hh_json.JSON_String fd.return_ty);
-          ("params", Hh_json.JSON_Array (List.map fd.params func_param_to_json));
+          ( "params",
+            Hh_json.JSON_Array (List.map fd.params ~f:func_param_to_json) );
         ]
     | None -> Hh_json.JSON_Null
   in
@@ -325,7 +329,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
         None
     in
     match SMap.find_opt (":" ^ attr_name) enum_values with
-    | Some enum_values -> List.iter enum_values add_enum_value_result
+    | Some enum_values -> List.iter enum_values ~f:add_enum_value_result
     | None -> ()
   end
 
@@ -431,7 +435,7 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
     return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
     min_arity = arity_min ft;
     params =
-      ( List.map ft.ft_params param_to_record
+      ( List.map ft.ft_params ~f:param_to_record
       @
       match ft.ft_arity with
       | Fvariadic p -> [param_to_record ~is_variadic:true p]
@@ -505,7 +509,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
   |> List.iter ~f:(fun cname ->
          Decl_provider.get_class (Tast_env.get_ctx env) cname
          |> Option.iter ~f:(fun class_ ->
-                let cid = Option.map cid to_nast_class_id_ in
+                let cid = Option.map cid ~f:to_nast_class_id_ in
                 autocomplete_member ~is_static env class_ cid mid))
 
 let autocomplete_static_member env ((_, ty), cid) mid =
@@ -783,7 +787,7 @@ let visitor =
           match snd hint with
           | Aast.Happly (sid, params) ->
             autocomplete_trait_only sid;
-            List.iter params (self#on_hint env)
+            List.iter params ~f:(self#on_hint env)
           | _ -> ());
 
       (* If we don't clear out c_uses we'll end up overwriting the trait

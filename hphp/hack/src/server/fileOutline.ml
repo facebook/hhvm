@@ -173,10 +173,14 @@ let summarize_param param =
 let summarize_method class_name m =
   let modifiers = modifier_of_fun_kind [] m.m_fun_kind in
   let modifiers =
-    modifiers_to_list m.m_final m.m_visibility m.m_abstract m.m_static
+    modifiers_to_list
+      ~is_final:m.m_final
+      ~visibility:m.m_visibility
+      ~is_abstract:m.m_abstract
+      ~is_static:m.m_static
     @ modifiers
   in
-  let params = Some (List.map m.m_params summarize_param) in
+  let params = Some (List.map m.m_params ~f:summarize_param) in
   let name = snd m.m_name in
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
@@ -348,7 +352,7 @@ let summarize_typedef tdef =
 let summarize_fun fd =
   let f = fd.fd_fun in
   let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
-  let params = Some (List.map f.f_params summarize_param) in
+  let params = Some (List.map f.f_params ~f:summarize_param) in
   let kind = SymbolDefinition.Function in
   let name = Utils.strip_ns (snd f.f_name) in
   let id = get_symbol_id kind None name in
@@ -411,7 +415,7 @@ let outline_ast ast =
         | Class c -> Some (summarize_class c ~no_children:false)
         | _ -> None)
   in
-  List.map outline SymbolDefinition.to_absolute
+  List.map outline ~f:SymbolDefinition.to_absolute
 
 let should_add_docblock = function
   | Function
@@ -517,20 +521,20 @@ let rec print_def ~short_pos indent def =
   in
   Printf.printf "%s%s\n" indent name;
   Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
-  Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
+  Option.iter id ~f:(fun id -> Printf.printf "%s  id: %s\n" indent id);
   Printf.printf "%s  position: %s\n" indent (print_pos pos);
   Printf.printf "%s  span: %s\n" indent (print_span span);
   Printf.printf "%s  modifiers: " indent;
-  List.iter modifiers (fun x -> Printf.printf "%s " (string_of_modifier x));
+  List.iter modifiers ~f:(fun x -> Printf.printf "%s " (string_of_modifier x));
   Printf.printf "\n";
-  Option.iter params (fun x ->
+  Option.iter params ~f:(fun x ->
       Printf.printf "%s  params:\n" indent;
       print ~short_pos (indent ^ "    ") x);
-  Option.iter docblock (fun x ->
+  Option.iter docblock ~f:(fun x ->
       Printf.printf "%s  docblock:\n" indent;
       Printf.printf "%s\n" x);
   Printf.printf "\n";
-  Option.iter children (fun x -> print ~short_pos (indent ^ "  ") x)
+  Option.iter children ~f:(fun x -> print ~short_pos (indent ^ "  ") x)
 
 and print ~short_pos indent defs =
   List.iter defs ~f:(print_def ~short_pos indent)

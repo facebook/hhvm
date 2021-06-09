@@ -102,10 +102,10 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
   let unchecked_tparams =
     List.map
       unchecked_tparams
-      (Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
+      ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
   let tyl =
-    List.map unchecked_tparams (fun t ->
+    List.map unchecked_tparams ~f:(fun t ->
         mk (Reason.Rwitness_from_decl (fst t.tp_name), Typing_defs.make_tany ()))
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
@@ -174,7 +174,7 @@ and hint_ ~via_label env p h_ =
   | Htuple hl
   | Hunion hl
   | Hintersection hl ->
-    List.iter hl (hint env)
+    List.iter hl ~f:(hint env)
   | Hoption h
   | Hsoft h
   | Hlike h ->
@@ -189,9 +189,9 @@ and hint_ ~via_label env p h_ =
         hf_return_ty = h;
         hf_is_readonly_return = _;
       } ->
-    List.iter hl (hint env);
+    List.iter hl ~f:(hint env);
     hint env h;
-    Option.iter variadic_hint (hint env);
+    Option.iter variadic_hint ~f:(hint env);
     Option.iter ~f:(contexts env) hf_ctxs
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
@@ -204,12 +204,12 @@ and hint_ ~via_label env p h_ =
         let (_ : Typing_env_types.env) =
           check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
-        List.iter hl (hint env)
+        List.iter hl ~f:(hint env)
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
           check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
-        List.iter hl (hint env)
+        List.iter hl ~f:(hint env)
     end
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
@@ -236,7 +236,7 @@ let variadic_param env vparam =
   | FVvariadicArg p -> fun_param env p
   | _ -> ()
 
-let tparam env t = List.iter t.Aast.tp_constraints (fun (_, h) -> hint env h)
+let tparam env t = List.iter t.Aast.tp_constraints ~f:(fun (_, h) -> hint env h)
 
 let where_constr env (h1, _, h2) =
   hint env h1;
@@ -257,8 +257,8 @@ let fun_ tenv f =
   let env = { env with tenv } in
   maybe hint env (hint_of_type_hint f.f_ret);
 
-  List.iter f.f_tparams (tparam env);
-  List.iter f.f_params (fun_param env);
+  List.iter f.f_tparams ~f:(tparam env);
+  List.iter f.f_params ~f:(fun_param env);
   variadic_param env f.f_variadic
 
 let enum env e =
@@ -291,10 +291,10 @@ let method_ env m =
       m.m_where_constraints
   in
   let env = { env with tenv } in
-  List.iter m.m_params (fun_param env);
+  List.iter m.m_params ~f:(fun_param env);
   variadic_param env m.m_variadic;
-  List.iter m.m_tparams (tparam env);
-  List.iter m.m_where_constraints (where_constr env);
+  List.iter m.m_tparams ~f:(tparam env);
+  List.iter m.m_where_constraints ~f:(where_constr env);
   maybe hint env (hint_of_type_hint m.m_ret)
 
 let hint_no_kind_check env (p, h) = hint_ ~via_label:false env p h
@@ -314,17 +314,17 @@ let class_ tenv c =
   let (c_static_vars, c_vars) = split_vars c in
   if not Ast_defs.(equal_class_kind c.c_kind Cinterface) then
     maybe method_ env c_constructor;
-  List.iter c.c_tparams (tparam env);
-  List.iter c.c_where_constraints (where_constr env);
-  List.iter c.c_extends (hint env);
-  List.iter c.c_implements (hint env);
-  List.iter c.c_uses (hint env);
-  List.iter c.c_typeconsts (typeconst (env, c.c_tparams));
-  List.iter c_static_vars (class_var env);
-  List.iter c_vars (class_var env);
-  List.iter c.c_consts (const env);
-  List.iter c_statics (method_ env);
-  List.iter c_methods (method_ env);
+  List.iter c.c_tparams ~f:(tparam env);
+  List.iter c.c_where_constraints ~f:(where_constr env);
+  List.iter c.c_extends ~f:(hint env);
+  List.iter c.c_implements ~f:(hint env);
+  List.iter c.c_uses ~f:(hint env);
+  List.iter c.c_typeconsts ~f:(typeconst (env, c.c_tparams));
+  List.iter c_static_vars ~f:(class_var env);
+  List.iter c_vars ~f:(class_var env);
+  List.iter c.c_consts ~f:(const env);
+  List.iter c_statics ~f:(method_ env);
+  List.iter c_methods ~f:(method_ env);
   maybe enum env c.c_enum
 
 let typedef tenv t =

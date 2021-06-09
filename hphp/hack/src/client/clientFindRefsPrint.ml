@@ -18,7 +18,7 @@ let print_json res =
   print_endline (Hh_json.json_to_string (ServerFindRefs.to_json res))
 
 let print_readable res =
-  List.iter res print_result;
+  List.iter res ~f:print_result;
   print_endline (string_of_int (List.length res) ^ " total results")
 
 (* Versions used by the editor's "references to symbol at position" command *)
@@ -30,6 +30,6 @@ let print_ide_json res =
 let print_ide_readable res =
   Option.iter res ~f:(fun (s, results) ->
       Printf.printf "%s\n" s;
-      List.iter (List.rev results) (fun p ->
+      List.iter (List.rev results) ~f:(fun p ->
           Printf.printf "%s\n" (Pos.string p));
       print_endline (string_of_int (List.length results) ^ " total results"))

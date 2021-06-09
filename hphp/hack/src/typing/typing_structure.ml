@@ -116,11 +116,13 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
             when Env.is_enum env cid ->
             (env, acc_field_with_type fty)
           | (TSFlit_str (_, "elem_types"), _, (r, Ttuple tyl)) ->
-            let (env, tyl) = List.map_env env tyl make_ts in
+            let (env, tyl) = List.map_env env tyl ~f:make_ts in
             (env, acc_field_with_type (mk (r, Ttuple tyl)))
           | (TSFlit_str (_, "param_types"), _, (r, Tfun funty)) ->
-            let tyl = List.map funty.ft_params (fun x -> x.fp_type.et_type) in
-            let (env, tyl) = List.map_env env tyl make_ts in
+            let tyl =
+              List.map funty.ft_params ~f:(fun x -> x.fp_type.et_type)
+            in
+            let (env, tyl) = List.map_env env tyl ~f:make_ts in
             (env, acc_field_with_type (mk (r, Ttuple tyl)))
           | (TSFlit_str (_, "return_type"), _, (r, Tfun funty)) ->
             let (env, ty) = make_ts env funty.ft_ret.et_type in
@@ -148,11 +150,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
           | (TSFlit_str (_, "generic_types"), _, (r, Tdarray (ty1, ty2)))
             when not is_generic ->
             let tyl = [ty1; ty2] in
-            let (env, tyl) = List.map_env env tyl make_ts in
+            let (env, tyl) = List.map_env env tyl ~f:make_ts in
             (env, acc_field_with_type (mk (r, Ttuple tyl)))
           | (TSFlit_str (_, "generic_types"), _, (r, Tclass (_, _, tyl)))
             when List.length tyl > 0 ->
-            let (env, tyl) = List.map_env env tyl make_ts in
+            let (env, tyl) = List.map_env env tyl ~f:make_ts in
             (env, acc_field_with_type (mk (r, Ttuple tyl)))
           | (TSFlit_str (_, ("kind" | "name" | "alias")), _, _) ->
             (env, acc_field_with_type sft_ty)

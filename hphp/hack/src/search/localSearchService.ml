@@ -20,7 +20,7 @@ let strip_first_char char s =
   if String.length s = 0 || not (Char.equal s.[0] char) then
     s
   else
-    String.sub s 1 (String.length s - 1)
+    String.sub s ~pos:1 ~len:(String.length s - 1)
 
 (* Determine a tombstone for a file path *)
 let get_tombstone (path : Relative_path.t) : int64 =

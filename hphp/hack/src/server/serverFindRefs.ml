@@ -16,7 +16,7 @@ open ServerCommandTypes.Done_or_retry
 
 let to_json input =
   let entries =
-    List.map input (fun (name, pos) ->
+    List.map input ~f:(fun (name, pos) ->
         let filename = Pos.filename pos in
         let (line, start, end_) = Pos.info_pos pos in
         Hh_json.JSON_Object
@@ -36,7 +36,7 @@ let add_ns name =
   else
     "\\" ^ name
 
-let strip_ns results = List.map results (fun (s, p) -> (Utils.strip_ns s, p))
+let strip_ns results = List.map results ~f:(fun (s, p) -> (Utils.strip_ns s, p))
 
 let search ctx target include_defs files genv =
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
@@ -184,7 +184,7 @@ let search_localvar ~ctx ~entry ~line ~char =
   | first_pos :: _ ->
     let content = Provider_context.read_file_contents_exn entry in
     let var_text = Pos.get_text_from_pos ~content first_pos in
-    List.map results (fun x -> (var_text, x))
+    List.map results ~f:(fun x -> (var_text, x))
   | [] -> []
 
 let go ctx action include_defs genv env =
@@ -210,7 +210,7 @@ let go ctx action include_defs genv env =
     in
     (env, Done (search_localvar ~ctx ~entry ~line ~char))
 
-let to_absolute res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos))
+let to_absolute res = List.map res ~f:(fun (r, pos) -> (r, Pos.to_absolute pos))
 
 let to_ide symbol_name res =
   Some (symbol_name, List.map ~f:snd (to_absolute res))

@@ -503,7 +503,7 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
     get_array "patterns" (json, keytrace)
     >>= fun (pattern_list, pattern_list_keytrace) ->
     let compiled_patterns =
-      List.mapi pattern_list (fun i json ->
+      List.mapi pattern_list ~f:(fun i json ->
           let keytrace = string_of_int i :: pattern_list_keytrace in
           compile_pattern ~json ~keytrace)
     in

@@ -105,7 +105,14 @@ let range_visitor startl startc endl endc =
     method merge x _ = x
 
     method! on_'ex env (pos, ty) =
-      if Pos.exactly_matches_range pos startl startc endl endc then
+      if
+        Pos.exactly_matches_range
+          pos
+          ~start_line:startl
+          ~start_col:startc
+          ~end_line:endl
+          ~end_col:endc
+      then
         Some (env, ty)
       else
         None

@@ -55,17 +55,19 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
   | Constructor
   | Method
   | Static_method ->
-    List.find c.c_methods (fun m -> String.equal (snd m.m_name) member_name)
+    List.find c.c_methods ~f:(fun m -> String.equal (snd m.m_name) member_name)
     >>= fun m -> Some (FileOutline.summarize_method member_origin m)
   | Property
   | Static_property ->
-    let props = c.c_vars @ List.map c.c_xhp_attrs (fun (_, var, _, _) -> var) in
+    let props =
+      c.c_vars @ List.map c.c_xhp_attrs ~f:(fun (_, var, _, _) -> var)
+    in
     let get_prop_name { cv_id; _ } = snd cv_id in
-    List.find props (fun p -> String.equal (get_prop_name p) member_name)
+    List.find props ~f:(fun p -> String.equal (get_prop_name p) member_name)
     >>= fun p -> Some (FileOutline.summarize_property member_origin p)
   | Class_const ->
     let (consts, abs_consts) =
-      List.partition_map c.c_consts (fun cc ->
+      List.partition_map c.c_consts ~f:(fun cc ->
           if Option.is_some cc.cc_expr then
             First cc
           else
@@ -74,18 +76,19 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
     let name_matches cc = String.equal (snd cc.cc_id) member_name in
     let res =
       Option.first_some
-        (List.find consts name_matches)
-        (List.find abs_consts name_matches)
+        (List.find consts ~f:name_matches)
+        (List.find abs_consts ~f:name_matches)
     in
     Option.map ~f:(FileOutline.summarize_const member_origin) res
   | Typeconst ->
     let tconsts = c.c_typeconsts in
-    List.find tconsts (fun t -> String.equal (snd t.c_tconst_name) member_name)
+    List.find tconsts ~f:(fun t ->
+        String.equal (snd t.c_tconst_name) member_name)
     >>= fun t -> Some (FileOutline.summarize_typeconst member_origin t)
 
 let get_local_var_def ast name p =
   let (line, char, _) = Pos.info_pos p in
-  let def = List.hd (ServerFindLocals.go_from_ast ast line char) in
+  let def = List.hd (ServerFindLocals.go_from_ast ~ast ~line ~char) in
   Option.map def ~f:(FileOutline.summarize_local name)
 
 (* summarize a class, typedef or record *)
@@ -190,12 +193,12 @@ let go ctx ast result =
 
 let get_definition_cst_node_from_pos ctx entry kind pos =
   try
-    let source_text = Ast_provider.compute_source_text entry in
+    let source_text = Ast_provider.compute_source_text ~entry in
     let tree =
       if Ide_parser_cache.is_enabled () then
         Ide_parser_cache.(with_ide_cache @@ fun () -> get_cst source_text)
       else
-        Ast_provider.compute_cst ctx entry
+        Ast_provider.compute_cst ~ctx ~entry
     in
     let (line, start, _) = Pos.info_pos pos in
     let offset = SourceText.position_to_offset source_text (line, start) in

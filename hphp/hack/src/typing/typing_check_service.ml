@@ -712,7 +712,7 @@ let next
       type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
-      return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
+      return_bucket_job (DelegateProgress job) ~current_bucket ~remaining_jobs
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
       out as the size of the entire repo, and we're traversing the entire list. *)
@@ -743,7 +743,8 @@ let next
         begin
           match num_workers with
           (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
-          | 0 -> return_bucket_job Progress [] jobs
+          | 0 ->
+            return_bucket_job Progress ~current_bucket:[] ~remaining_jobs:jobs
           | _ ->
             let bucket_size =
               Bucket.calculate_bucket_size
@@ -754,7 +755,7 @@ let next
             let (current_bucket, remaining_jobs) =
               BigList.split_n jobs bucket_size
             in
-            return_bucket_job Progress current_bucket remaining_jobs
+            return_bucket_job Progress ~current_bucket ~remaining_jobs
         end)
 
 let on_cancelled

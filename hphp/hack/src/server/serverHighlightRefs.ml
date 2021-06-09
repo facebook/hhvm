@@ -33,7 +33,7 @@ let highlight_symbol ctx entry line char symbol =
     match get_target symbol with
     | Some target ->
       let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
-      List.rev (List.map results snd)
+      List.rev (List.map results ~f:snd)
     | None
       when SymbolOccurrence.equal_kind
              symbol.SymbolOccurrence.type_
@@ -41,7 +41,7 @@ let highlight_symbol ctx entry line char symbol =
       ServerFindLocals.go ~ctx ~entry ~line ~char
     | None -> []
   in
-  List.map res Ide_api_types.pos_to_range
+  List.map res ~f:Ide_api_types.pos_to_range
 
 let compare r1 r2 =
   Ide_api_types.(

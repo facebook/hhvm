@@ -212,7 +212,7 @@ let parse_and_name ctx files_contents =
         end
       parsed_files
   in
-  Relative_path.Map.iter files_info (fun fn fileinfo ->
+  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
       let (errors, _failed_naming_fns) =
         Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
       in
@@ -222,7 +222,7 @@ let parse_and_name ctx files_contents =
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
-      Relative_path.Map.iter parsed_files (fun fn _ ->
+      Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.make_env ~sh:SharedMem.Uses ctx fn));
 
@@ -247,7 +247,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
     | [x] -> x
     | _ -> die "Only single file expected"
   in
-  let iter_over_files f : unit = List.iter filenames f in
+  let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
   | NoMode -> die "Exactly one mode must be setup"
   | Autocomplete

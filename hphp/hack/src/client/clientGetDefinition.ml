@@ -14,7 +14,7 @@ let print_json res =
     identify_symbol_response_to_json res |> print_json)
 
 let print_readable ?(short_pos = false) x =
-  List.iter x (function (occurrence, definition) ->
+  List.iter x ~f:(function (occurrence, definition) ->
       SymbolOccurrence.(
         let { name; type_; pos; is_declaration } = occurrence in
         Printf.printf

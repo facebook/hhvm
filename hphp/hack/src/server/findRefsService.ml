@@ -276,7 +276,7 @@ let find_refs
   in
   Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-    List.iter tasts_of_files (fun (file, tast) ->
+    List.iter tasts_of_files ~f:(fun (file, tast) ->
         let fn = Relative_path.to_absolute file in
         let tast = Tast.show_program tast in
         let len = String.length tast in

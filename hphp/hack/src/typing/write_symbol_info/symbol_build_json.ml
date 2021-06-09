@@ -144,7 +144,7 @@ let build_decl_target_json json = JSON_Object [("declaration", json)]
 
 let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
   let lengths =
-    List.map lineLengths (fun len -> JSON_Number (string_of_int len))
+    List.map lineLengths ~f:(fun len -> JSON_Number (string_of_int len))
   in
   JSON_Object
     [
@@ -215,7 +215,7 @@ let build_signature_json ctx source_map params vararg ret_ty =
       p.param_is_variadic
       p.param_user_attributes
   in
-  let parameters = List.map params (fun param -> build_param param) in
+  let parameters = List.map params ~f:(fun param -> build_param param) in
   let parameters =
     match vararg with
     | FVnonVariadic -> parameters
@@ -260,7 +260,7 @@ let build_variance_json variance =
 
 let build_type_param_json ctx source_map tp =
   let (_, name) = tp.tp_name in
-  let constraints = List.map tp.tp_constraints (build_constraint_json ctx) in
+  let constraints = List.map tp.tp_constraints ~f:(build_constraint_json ctx) in
   JSON_Object
     [
       ("name", build_name_json_nested name);

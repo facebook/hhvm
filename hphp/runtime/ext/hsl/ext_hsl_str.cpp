@@ -82,6 +82,18 @@ String HHVM_FUNCTION(foldcase_l, const String& str, const Variant& maybe_loc) {
   return get_locale(maybe_loc)->ops()->foldcase(str);
 }
 
+Array HHVM_FUNCTION(chunk_l,
+                     const String& str,
+                     int64_t chunk_size,
+                     const Variant& maybe_loc) {
+  if (chunk_size < 1) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "chunk size can not be less than 1"
+    );
+  }
+  return get_locale(maybe_loc)->ops()->chunk(str, chunk_size);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -97,6 +109,8 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\lowercase_l, lowercase_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\titlecase_l, titlecase_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\foldcase_l, foldcase_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\chunk_l, chunk_l);
     loadSystemlib();
   }
 

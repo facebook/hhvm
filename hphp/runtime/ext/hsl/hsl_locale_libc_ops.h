@@ -28,6 +28,7 @@ namespace HPHP {
     virtual String uppercase(const String&) const override;
     virtual String lowercase(const String&) const override;
     virtual String foldcase(const String&) const override;
+    virtual Array chunk(const String&, int64_t) const override;
     private:
       locale_t m_loc;
   };

@@ -30,6 +30,7 @@ namespace HPHP {
     virtual String uppercase(const String&) const override;
     virtual String lowercase(const String&) const override;
     virtual String foldcase(const String&) const override;
+    virtual Array chunk(const String&, int64_t) const override;
     private:
       icu::Locale m_ctype;
       uint32_t m_caseFoldFlags;

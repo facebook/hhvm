@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_icu_ops.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -84,6 +85,30 @@ String HSLLocaleICUOps::foldcase(const String& str) const {
     str,
     [this](icu::UnicodeString& mut) { mut.foldCase(this->m_caseFoldFlags); }
   );
+}
+
+Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
+  assert(chunk_size > 0);
+  auto icustr = icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.length()));
+  const auto len = icustr.countChar32();
+  VecInit ret { (size_t) (len / chunk_size + 1) };
+  if (len <= chunk_size) {
+    ret.append(str);
+    return ret.toArray();
+  }
+
+  int next = 0;
+  // i, next, and code_units are count of char16s, but chunk_size is count of
+  // char32s
+  const auto code_units = icustr.length();
+  for (int i = 0; i < code_units; i = next) {
+    next = icustr.moveIndex32(i, chunk_size);
+    std::string buf;
+    icustr.tempSubStringBetween(i, next).toUTF8String(buf);
+    ret.append(buf);
+  }
+
+  return ret.toArray(); 
 }
 
 } // namespace HPHP

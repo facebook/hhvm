@@ -17,5 +17,6 @@ function uppercase_l(string $str, ?Locale $loc = null): string;
 function lowercase_l(string $str, ?Locale $loc = null): string;
 function titlecase_l(string $str, ?Locale $loc = null): string;
 function foldcase_l(string $str, ?Locale $loc = null): string;
+function chunk_l(string $str, int $chunk_size, ?Locale $loc = null): vec<string>;
 
 } // namespace HH\Lib\_Private\_Str

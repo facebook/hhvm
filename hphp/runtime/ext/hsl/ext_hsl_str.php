@@ -32,4 +32,7 @@ function titlecase_l(string $str, ?Locale $loc = null): string;
 <<__Native>>
 function foldcase_l(string $str, ?Locale $loc = null): string;
 
+<<__Native>>
+function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
+
 } // namespace HH\Lib\_Private\_Str

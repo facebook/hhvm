@@ -1,0 +1,153 @@
+dict(3) {
+  ["in"]=>
+  string(16) "ðŸ˜ŽðŸ˜ŽðŸ˜ŽðŸ˜Ž"
+  ["c"]=>
+  vec(16) {
+    string(1) "ð"
+    string(1) "Ÿ"
+    string(1) "˜"
+    string(1) "Ž"
+    string(1) "ð"
+    string(1) "Ÿ"
+    string(1) "˜"
+    string(1) "Ž"
+    string(1) "ð"
+    string(1) "Ÿ"
+    string(1) "˜"
+    string(1) "Ž"
+    string(1) "ð"
+    string(1) "Ÿ"
+    string(1) "˜"
+    string(1) "Ž"
+  }
+  ["en_us.UTF-8"]=>
+  vec(4) {
+    string(4) "ðŸ˜Ž"
+    string(4) "ðŸ˜Ž"
+    string(4) "ðŸ˜Ž"
+    string(4) "ðŸ˜Ž"
+  }
+}
+dict(3) {
+  ["in"]=>
+  string(16) "ðŸ˜ŽðŸ˜ŽðŸ˜ŽðŸ˜Ž"
+  ["c"]=>
+  vec(8) {
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+  }
+  ["en_us.UTF-8"]=>
+  vec(2) {
+    string(8) "ðŸ˜ŽðŸ˜Ž"
+    string(8) "ðŸ˜ŽðŸ˜Ž"
+  }
+}
+dict(3) {
+  ["in"]=>
+  string(20) "ðŸ˜ŽðŸ˜ŽðŸ˜ŽðŸ˜ŽðŸ˜Ž"
+  ["c"]=>
+  vec(10) {
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+    string(2) "ðŸ"
+    string(2) "˜Ž"
+  }
+  ["en_us.UTF-8"]=>
+  vec(3) {
+    string(8) "ðŸ˜ŽðŸ˜Ž"
+    string(8) "ðŸ˜ŽðŸ˜Ž"
+    string(4) "ðŸ˜Ž"
+  }
+}
+vec(44) {
+  string(1) "t"
+  string(1) "h"
+  string(1) "e"
+  string(1) " "
+  string(1) "q"
+  string(1) "u"
+  string(1) "i"
+  string(1) "c"
+  string(1) "k"
+  string(1) " "
+  string(1) "b"
+  string(1) "r"
+  string(1) "o"
+  string(1) "w"
+  string(1) "n"
+  string(1) " "
+  string(1) "f"
+  string(1) "o"
+  string(1) "x"
+  string(1) " "
+  string(1) "j"
+  string(1) "u"
+  string(1) "m"
+  string(1) "p"
+  string(1) "e"
+  string(1) "d"
+  string(1) " "
+  string(1) "o"
+  string(1) "v"
+  string(1) "e"
+  string(1) "r"
+  string(1) " "
+  string(1) "t"
+  string(1) "h"
+  string(1) "e"
+  string(1) " "
+  string(1) "l"
+  string(1) "a"
+  string(1) "z"
+  string(1) "y"
+  string(1) " "
+  string(1) "d"
+  string(1) "o"
+  string(1) "g"
+}
+bool(true)
+vec(22) {
+  string(2) "th"
+  string(2) "e "
+  string(2) "qu"
+  string(2) "ic"
+  string(2) "k "
+  string(2) "br"
+  string(2) "ow"
+  string(2) "n "
+  string(2) "fo"
+  string(2) "x "
+  string(2) "ju"
+  string(2) "mp"
+  string(2) "ed"
+  string(2) " o"
+  string(2) "ve"
+  string(2) "r "
+  string(2) "th"
+  string(2) "e "
+  string(2) "la"
+  string(2) "zy"
+  string(2) " d"
+  string(2) "og"
+}
+bool(true)
+libc with a chunk size of 0:
+  Exception InvalidArgumentException: chunk size can not be less than 1
+icu with a chunk size of 0:
+  Exception InvalidArgumentException: chunk size can not be less than 1
+libc with a chunk size of -1:
+  Exception InvalidArgumentException: chunk size can not be less than 1
+icu with a chunk size of -1:
+  Exception InvalidArgumentException: chunk size can not be less than 1

@@ -939,7 +939,7 @@ To string conversions:
   the value at that address is Uninit. The type param must be a subtype of
   PtrToInitCell.
 
-| LdPairElem, D(Cell), S(Obj) S(Int), NF
+| LdPairElem, D(InitCell), S(Obj) S(Int), NF
 
   Load the element at S1 out of the Pair collection at S0.
 
@@ -1078,7 +1078,7 @@ To string conversions:
   Load the constant 'constantName' for the class 'className'. If not
   initialized, branch to B.
 
-| LookupClsCns, D(Cell), S(Cls) S(Str), NF
+| LookupClsCns, D(InitCell), S(Cls) S(Str), NF
 
   Lookup a class constant. May raise errors if either the class or constant are
   not defined.
@@ -1095,7 +1095,7 @@ To string conversions:
   initialized and it must be loaded using InitSubClsCns. Counted constants will
   never have their slot be initialized and thus always take the slow path.
 
-| InitSubClsCns<constantName,slot>, D(Cell), S(Cls), NF
+| InitSubClsCns<constantName,slot>, D(InitCell), S(Cls), NF
 
   Slow path for LdSubClsCns. Used when LdSubClsCns indicates the slot is
   uninitialized.
@@ -1706,7 +1706,7 @@ To string conversions:
   return control to the asio scheduler (slow path). As with AsyncRetFast, the
   stack must contain exactly one cell containing uninitialied garbage.
 
-| LdRetVal<T>, DParam(Cell), S(FramePtr), NF
+| LdRetVal<T>, DParam(InitCell), S(FramePtr), NF
 
   Load the return value from the already-returned-from ActRec pointed to by S0
   into the dest.  This is used by NativeImpl.  TODO(#7150575): We want to make
@@ -2329,7 +2329,7 @@ To string conversions:
 
   Performs S0 <op>= S1.
 
-| OutlineSetOp<op>, D(Cell), S(Cell) S(Cell), NF
+| OutlineSetOp<op>, D(InitCell), S(Cell) S(Cell), NF
 
   Similar to SetOpTV, but does not write back the result to S0, instead it is
   returned as the dest.  This is useful to handle ops that may require a
@@ -2498,20 +2498,20 @@ To string conversions:
 
   Change the state of the Generator object which has frame pointer S0.
 
-| LdContArValue, DParam(Cell), S(FramePtr), PRc
+| LdContArValue, DParam(InitCell), S(FramePtr), PRc
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
-| StContArValue, ND, S(FramePtr) S(Cell), CRc
+| StContArValue, ND, S(FramePtr) S(InitCell), CRc
 
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| LdContArKey, DParam(Cell), S(FramePtr), PRc
+| LdContArKey, DParam(InitCell), S(FramePtr), PRc
 
   Loads 'key' from the Generator object ActRec of which is S0.
 
-| StContArKey, ND, S(FramePtr) S(Cell), CRc
+| StContArKey, ND, S(FramePtr) S(InitCell), CRc
 
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
@@ -2527,7 +2527,7 @@ To string conversions:
   handle states in ext_asio.h. This instruction has undefined behavior if S0 is
   not a WaitHandle.
 
-| LdWHResult, DParam(Cell), S(Obj), NF
+| LdWHResult, DParam(InitCell), S(Obj), NF
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
@@ -2796,11 +2796,11 @@ fields of that struct for holding intermediate values.
   base. An exception is thrown if the property is ReadOnly when it was
   required to be Mutable.
 
-| CGetProp, D(Cell), S(Obj,LvalToCell) S(Cell), PRc
+| CGetProp, D(InitCell), S(Obj,LvalToCell) S(Cell), PRc
 
   Get property with key S1 from S0.
 
-| CGetPropQ, D(Cell), S(Obj,LvalToCell) S(StaticStr), PRc
+| CGetPropQ, D(InitCell), S(Obj,LvalToCell) S(StaticStr), PRc
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
@@ -2812,11 +2812,11 @@ fields of that struct for holding intermediate values.
 
   Unset an object property.
 
-| SetOpProp<op>, D(Cell), S(Obj,LvalToCell) S(Cell) S(Cell), MProp|PRc
+| SetOpProp<op>, D(InitCell), S(Obj,LvalToCell) S(Cell) S(Cell), MProp|PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecProp<op>, D(Cell), S(Obj,LvalToCell) S(Cell), MProp|PRc
+| IncDecProp<op>, D(InitCell), S(Obj,LvalToCell) S(Cell), MProp|PRc
 
   Increment/decrement property with key S1 in base S0.
 
@@ -2824,7 +2824,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(Cell), S(LvalToCell) S(Cell), NF
+| ElemX, D(InitCell), S(LvalToCell) S(Cell), NF
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.
@@ -2935,11 +2935,11 @@ fields of that struct for holding intermediate values.
   Get string representing character at position S1 from base string S0.  Raises
   a notice if the position is out of bounds.
 
-| MapGet, D(Cell), S(Obj) S(Int,Str), PRc
+| MapGet, D(InitCell), S(Obj) S(Int,Str), PRc
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(Cell), S(LvalToCell) S(Cell), PRc
+| CGetElem, D(InitCell), S(LvalToCell) S(Cell), PRc
 
   Get element with key S1 from S0.
 
@@ -3163,11 +3163,11 @@ fields of that struct for holding intermediate values.
 
   Unsets the element at key S1 in the base S0.
 
-| SetOpElem<op>, D(Cell), S(LvalToCell) S(Cell) S(Cell),  MElem|PRc
+| SetOpElem<op>, D(InitCell), S(LvalToCell) S(Cell) S(Cell),  MElem|PRc
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecElem, D(Cell), S(LvalToCell) S(Cell), MElem|PRc
+| IncDecElem, D(InitCell), S(LvalToCell) S(Cell), MElem|PRc
 
   Increment/decrement element with key S1 in base S0.
 

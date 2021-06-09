@@ -286,7 +286,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset suspendOffset,
 SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
   if (key != nullptr) {
     // Teleport yielded key.
-    auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+    auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
     gen(env, StContArKey, fp(env), key);
     decRef(env, oldKey);
 
@@ -297,7 +297,7 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
     // Increment key.
     if (curFunc(env)->isPairGenerator()) {
       auto const newIdx = gen(env, ContArIncIdx, fp(env));
-      auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+      auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
       gen(env, StContArKey, fp(env), newIdx);
       decRef(env, oldKey);
     } else {
@@ -308,7 +308,7 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
   }
 
   // Teleport yielded value.
-  auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
+  auto const oldValue = gen(env, LdContArValue, TInitCell, fp(env));
   gen(env, StContArValue, fp(env), value);
   decRef(env, oldValue);
 

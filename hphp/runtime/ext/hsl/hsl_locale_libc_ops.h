@@ -20,7 +20,8 @@
 #include "hphp/runtime/ext/hsl/hsl_locale_ops.h"
 
 namespace HPHP {
-  struct HSLLocaleLibcOps final : public HSLLocale::Ops {
+  // Extended by HSLLocaleByteOps for `C` locale
+  struct HSLLocaleLibcOps : public HSLLocale::Ops {
     explicit HSLLocaleLibcOps(const Locale& locale);
     virtual ~HSLLocaleLibcOps() override;
 
@@ -28,7 +29,11 @@ namespace HPHP {
     virtual String uppercase(const String&) const override;
     virtual String lowercase(const String&) const override;
     virtual String foldcase(const String&) const override;
+
     virtual Array chunk(const String&, int64_t) const override;
+
+    virtual int64_t strcoll(const String&, const String&) const override;
+    virtual int64_t strcasecmp(const String&, const String&) const override;
     private:
       locale_t m_loc;
   };

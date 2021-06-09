@@ -94,6 +94,20 @@ Array HHVM_FUNCTION(chunk_l,
   return get_locale(maybe_loc)->ops()->chunk(str, chunk_size);
 }
 
+int64_t HHVM_FUNCTION(strcoll_l,
+                      const String& a,
+                      const String& b,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->strcoll(a, b);
+}
+
+int64_t HHVM_FUNCTION(strcasecmp_l,
+                      const String& a,
+                      const String& b,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->strcasecmp(a, b);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -111,6 +125,9 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\foldcase_l, foldcase_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\chunk_l, chunk_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcoll_l, strcoll_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcasecmp_l, strcasecmp_l);
     loadSystemlib();
   }
 

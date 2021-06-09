@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_byte_ops.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_icu_ops.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 #include "hphp/runtime/vm/native.h"
@@ -39,7 +40,9 @@ Class* s_HSLLocaleClass = nullptr;
 } // namespace
 
 HSLLocale::HSLLocale(std::shared_ptr<Locale> loc): m_locale(loc) {
-  if (loc->getCodesetKind() == Locale::CodesetKind::SINGLE_BYTE) {
+  if (loc == Locale::getCLocale()) {
+    m_ops = new HSLLocaleByteOps();
+  } else if (loc->getCodesetKind() == Locale::CodesetKind::SINGLE_BYTE) {
     m_ops = new HSLLocaleLibcOps(*loc.get());
   } else {
     m_ops = new HSLLocaleICUOps(*loc.get());

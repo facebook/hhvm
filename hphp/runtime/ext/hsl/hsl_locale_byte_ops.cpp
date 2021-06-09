@@ -1,10 +1,9 @@
-<?hh // decl
-
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,30 +13,30 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
- */
+*/
 
-namespace HH\Lib\_Private\_Str {
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_byte_ops.h"
+#include "hphp/util/bstring.h"
+#include "hphp/zend/zend-string.h"
 
-use type HH\Lib\_Private\_Locale\Locale;
+namespace HPHP {
 
-<<__Native>>
-function strlen_l(string $str, ?Locale $loc = null): int;
-<<__Native>>
-function uppercase_l(string $str, ?Locale $loc = null): string;
-<<__Native>>
-function lowercase_l(string $str, ?Locale $loc = null): string;
-<<__Native>>
-function titlecase_l(string $str, ?Locale $loc = null): string;
+HSLLocaleByteOps::HSLLocaleByteOps(
+) : HSLLocaleLibcOps(*Locale::getCLocale()) {
+}
 
-<<__Native>>
-function foldcase_l(string $str, ?Locale $loc = null): string;
+HSLLocaleByteOps::~HSLLocaleByteOps() {
+}
 
-<<__Native>>
-function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
+int64_t HSLLocaleByteOps::strcoll(const String& a, const String& b) const {
+  assertx(!a.isNull() && !b.isNull());
+  return string_strcmp(a.data(), a.size(), b.data(), b.size());
+}
 
-<<__Native>>
-function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
-<<__Native>>
-function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
+int64_t HSLLocaleByteOps::strcasecmp(const String& a, const String& b) const {
+  assertx(!a.isNull() && !b.isNull());
+  return bstrcasecmp(a.data(), a.size(), b.data(), b.size());
+}
 
-} // namespace HH\Lib\_Private\_Str
+} // namespace HPHP

@@ -1,10 +1,9 @@
-<?hh // decl
-
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,30 +13,19 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
- */
+*/
 
-namespace HH\Lib\_Private\_Str {
+#pragma once
 
-use type HH\Lib\_Private\_Locale\Locale;
+#include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 
-<<__Native>>
-function strlen_l(string $str, ?Locale $loc = null): int;
-<<__Native>>
-function uppercase_l(string $str, ?Locale $loc = null): string;
-<<__Native>>
-function lowercase_l(string $str, ?Locale $loc = null): string;
-<<__Native>>
-function titlecase_l(string $str, ?Locale $loc = null): string;
+namespace HPHP {
+  // Special-case some stuff for the "C" locale for performance
+  struct HSLLocaleByteOps final : public HSLLocaleLibcOps {
+    explicit HSLLocaleByteOps();
+    virtual ~HSLLocaleByteOps() override;
 
-<<__Native>>
-function foldcase_l(string $str, ?Locale $loc = null): string;
-
-<<__Native>>
-function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
-
-<<__Native>>
-function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
-<<__Native>>
-function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
-
-} // namespace HH\Lib\_Private\_Str
+    virtual int64_t strcoll(const String&, const String&) const override;
+    virtual int64_t strcasecmp(const String&, const String&) const override;
+  };
+}

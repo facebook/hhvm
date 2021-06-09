@@ -77,7 +77,7 @@ let lastenv =
           ~tcopt:TypecheckerOptions.default
           ~deps_mode:Typing_deps_mode.SQLiteMode)
        Relative_path.default
-       None)
+       ~droot:None)
 
 let iterations : int Pos.Map.t ref = ref Pos.Map.empty
 
@@ -194,7 +194,7 @@ let log_sset s =
   | s :: ss ->
     lprintf (Normal Green) "{";
     lprintf (Normal Green) "%s" s;
-    List.iter ss (fun s -> lprintf (Normal Green) ",%s" s);
+    List.iter ss ~f:(fun s -> lprintf (Normal Green) ",%s" s);
     lprintf (Normal Green) "}"
 
 let rec log_value env value =
@@ -212,7 +212,7 @@ let rec log_value env value =
   | List (v :: vs) ->
     lprintf (Normal Green) "[";
     log_value env v;
-    List.iter vs (fun v ->
+    List.iter vs ~f:(fun v ->
         lprintf (Normal Green) ",";
         log_value env v);
     lprintf (Normal Green) "]"
@@ -647,7 +647,7 @@ let log_with_level env key ~level log_f =
 let log_types p env items =
   log_pos_or_decl p (fun () ->
       let rec go items =
-        List.iter items (fun item ->
+        List.iter items ~f:(fun item ->
             match item with
             | Log_head (message, items) ->
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
@@ -670,12 +670,12 @@ let log_types p env items =
       go items)
 
 let log_escape ?(level = 1) p env msg vars =
-  log_with_level env "escape" level (fun () ->
+  log_with_level env "escape" ~level (fun () ->
       log_pos_or_decl p (fun () ->
           indentEnv ~color:(Normal Yellow) msg (fun () -> ());
           if not (List.is_empty vars) then (
             lnewline ();
-            List.iter vars (lprintf (Normal Green) "%s ")
+            List.iter vars ~f:(lprintf (Normal Green) "%s ")
           )))
 
 let log_global_inference_env p env global_tvenv =
@@ -683,11 +683,11 @@ let log_global_inference_env p env global_tvenv =
       log_value env @@ Inf.Log.global_inference_env_as_value global_tvenv)
 
 let log_prop level p message env prop =
-  log_with_level env "prop" level (fun () ->
+  log_with_level env "prop" ~level (fun () ->
       log_position p (fun () -> log_subtype_prop env message prop))
 
 let log_new_tvar env p tvar message =
-  log_with_level env "prop" 2 (fun () ->
+  log_with_level env "prop" ~level:2 (fun () ->
       log_types
         (Pos_or_decl.of_raw_pos p)
         env
@@ -724,7 +724,7 @@ let log_new_tvar_for_tconst_access env p tvar class_name (_p, tconst) =
   log_new_tvar env p tvar message
 
 let log_intersection ~level env r ty1 ty2 ~inter_ty =
-  log_with_level env "inter" level (fun () ->
+  log_with_level env "inter" ~level (fun () ->
       log_types
         (Reason.to_pos r)
         env

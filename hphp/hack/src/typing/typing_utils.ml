@@ -281,8 +281,8 @@ let rec is_any env ty =
   | Tany _
   | Terr ->
     true
-  | Tunion tyl -> List.for_all tyl (is_any env)
-  | Tintersection tyl -> List.exists tyl (is_any env)
+  | Tunion tyl -> List.for_all tyl ~f:(is_any env)
+  | Tintersection tyl -> List.exists tyl ~f:(is_any env)
   | _ -> false
 
 let is_tunion env ty =

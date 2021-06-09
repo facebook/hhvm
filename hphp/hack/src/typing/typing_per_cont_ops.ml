@@ -62,7 +62,7 @@ let union_opts union_types env ctxopt1 ctxopt2 =
  *)
 let is_sub_entry is_subtype env ctx1 ctx2 =
   LMap.for_all2
-    (fun _k tyopt1 tyopt2 ->
+    ~f:(fun _k tyopt1 tyopt2 ->
       match (tyopt1, tyopt2) with
       | (_, None) -> true
       | (None, Some _) -> false

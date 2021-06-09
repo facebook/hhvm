@@ -139,11 +139,11 @@ let rec intersect env ~r ty1 ty2 =
   else if Utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, ty2)
   else
-    let (env, non_ty2) = non env Reason.none ty2 Utils.ApproxDown in
+    let (env, non_ty2) = non env Reason.none ty2 ~approx:Utils.ApproxDown in
     if Utils.is_sub_type_for_union ~coerce:None env ty1 non_ty2 then
       (env, MkType.nothing r)
     else
-      let (env, non_ty1) = non env Reason.none ty1 Utils.ApproxDown in
+      let (env, non_ty1) = non env Reason.none ty1 ~approx:Utils.ApproxDown in
       if Utils.is_sub_type_for_union ~coerce:None env ty2 non_ty1 then
         (env, MkType.nothing r)
       else
@@ -247,7 +247,7 @@ and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
         | ( (_, Some { sft_optional = opt1; sft_ty = ty1 }),
             (_, Some { sft_optional = opt2; sft_ty = ty2 }) ) ->
           let opt = opt1 && opt2 in
-          let (env, ty) = intersect env r ty1 ty2 in
+          let (env, ty) = intersect env ~r ty1 ty2 in
           (env, Some { sft_optional = opt; sft_ty = ty }))
   in
   let shape_kind =
@@ -286,7 +286,7 @@ and intersect_ty_tyl env r ty tyl =
   intersect_ty_tyl env ty tyl []
 
 and try_intersect env r ty1 ty2 =
-  let (env, ty) = intersect env r ty1 ty2 in
+  let (env, ty) = intersect env ~r ty1 ty2 in
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tintersection _ -> (env, None)
@@ -315,7 +315,7 @@ the result would be
 *)
 and intersect_ty_union env r (ty1 : locl_ty) (r_union, tyl2) =
   let (env, inter_tyl) =
-    List.map_env env tyl2 ~f:(fun env ty2 -> intersect env r ty1 ty2)
+    List.map_env env tyl2 ~f:(fun env ty2 -> intersect env ~r ty1 ty2)
   in
   let zipped = List.zip_exn tyl2 inter_tyl in
   let (collapsed, not_collapsed) =
@@ -394,12 +394,12 @@ let rec intersect_i env r ty1 lty2 =
     let (env, ty) =
       match ty1 with
       | LoclType lty1 ->
-        let (env, ty) = intersect env r lty1 lty2 in
+        let (env, ty) = intersect env ~r lty1 lty2 in
         (env, LoclType ty)
       | ConstraintType cty1 ->
         (match deref_constraint_type cty1 with
         | (r, TCintersection (lty1, cty1)) ->
-          let (env, lty) = intersect env r lty1 lty2 in
+          let (env, lty) = intersect env ~r lty1 lty2 in
           ( env,
             ConstraintType (mk_constraint_type (r, TCintersection (lty, cty1)))
           )
@@ -408,7 +408,7 @@ let rec intersect_i env r ty1 lty2 =
           At the moment local types in TCunion can only be
           unions or intersections involving only null and nonnull,
           so applying distributivity allows for simplifying the types. *)
-          let (env, lty) = intersect env r lty1 lty2 in
+          let (env, lty) = intersect env ~r lty1 lty2 in
           let (env, ty) = intersect_i env r (ConstraintType cty1) lty2 in
           (match ty with
           | LoclType ty ->

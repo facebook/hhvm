@@ -29,6 +29,7 @@ let handler =
       let pos = fst c.c_name in
       if not (TypecheckerOptions.const_attribute (get_tcopt env)) then (
         error_if_const pos c.c_user_attributes;
-        List.iter c.c_vars (fun cv -> error_if_const pos cv.cv_user_attributes)
+        List.iter c.c_vars ~f:(fun cv ->
+            error_if_const pos cv.cv_user_attributes)
       )
   end

@@ -542,7 +542,7 @@ end = struct
     in
     let node_exists_in_graph
         (m2 : Equiv.t) (deps2 : graph) (rep1 : Rep.t) (n1 : node) =
-      let rep2 = get_rep (Rep.id rep1) m2 in
+      let rep2 = get_rep (Rep.id rep1) ~m:m2 in
       match RepMap.find_opt (Rep.id rep2) deps2 with
       | None -> false
       | Some n2 -> node_equal n1 n2 m2
@@ -685,7 +685,7 @@ let nonnull_and_var env v =
   let r = Reason.none in
   let tvar = mk (r, Tvar v) in
   let tnonnull = Typing_make_type.nonnull r in
-  let (env, ty) = Typing_intersection.intersect env r tnonnull tvar in
+  let (env, ty) = Typing_intersection.intersect env ~r tnonnull tvar in
   (env, LoclType ty)
 
 (** Traverse a type a get unsolved type variables appearing in it. *)

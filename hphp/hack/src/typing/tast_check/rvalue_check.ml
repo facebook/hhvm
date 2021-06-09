@@ -60,12 +60,12 @@ let visitor =
         this#disallow_non_returning (fun () -> this#on_expr env e2)
       | Eif (e1, e2, e3) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
-        Option.iter e2 (this#on_expr env);
+        Option.iter e2 ~f:(this#on_expr env);
         this#on_expr env e3
       | Pipe (_, e1, e2) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
-      | List el -> List.iter el (this#on_expr env)
+      | List el -> List.iter el ~f:(this#on_expr env)
       | ExpressionTree
           { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } ->
         this#on_hint env et_hint;

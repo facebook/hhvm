@@ -26,7 +26,7 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
       | _ -> false
     in
     let required_attrs =
-      List.filter (Cls.props c) (compose should_collect snd)
+      List.filter (Cls.props c) ~f:(compose should_collect snd)
     in
     List.fold required_attrs ~init:bag ~f:(fun s (n, elt) ->
         add (n, elt.ce_origin) s)
@@ -36,7 +36,7 @@ let rec collect_attrs_from_ty env set ty =
   match get_node ty with
   | Tunion (ty :: tys) ->
     let collect = collect_attrs_from_ty env SSet.empty in
-    List.fold (List.map tys collect) ~init:(collect ty) ~f:SSet.inter
+    List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
   | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true

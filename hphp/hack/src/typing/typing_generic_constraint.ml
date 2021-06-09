@@ -16,7 +16,7 @@ open Typing_env_types
 let check_constraint
     env ck ty ~cstr_ty (on_error : Errors.error_from_reasons_callback) =
   Typing_log.(
-    log_with_level env "sub" 1 (fun () ->
+    log_with_level env "sub" ~level:1 (fun () ->
         log_types
           (get_pos ty)
           env

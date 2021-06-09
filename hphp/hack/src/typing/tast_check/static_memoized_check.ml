@@ -12,7 +12,7 @@ open Aast
 module SN = Naming_special_names
 
 let attribute_exists x1 attrs =
-  List.exists attrs (fun { ua_name; _ } -> String.equal x1 (snd ua_name))
+  List.exists attrs ~f:(fun { ua_name; _ } -> String.equal x1 (snd ua_name))
 
 let static_memoized_check m =
   if attribute_exists SN.UserAttributes.uaMemoize m.m_user_attributes then
@@ -46,8 +46,8 @@ let handler =
       in
       let (constructor, static_methods, _) = split_methods c in
       if disallow_static_memoized && not c.c_final then (
-        List.iter static_methods static_memoized_check;
-        Option.iter constructor static_memoized_check
+        List.iter static_methods ~f:static_memoized_check;
+        Option.iter constructor ~f:static_memoized_check
       );
-      if c.c_final then List.iter static_methods (unnecessary_memoize_lsb c)
+      if c.c_final then List.iter static_methods ~f:(unnecessary_memoize_lsb c)
   end

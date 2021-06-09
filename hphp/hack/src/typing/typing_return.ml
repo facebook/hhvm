@@ -49,7 +49,7 @@ let enforce_return_not_disposable ret_pos fun_kind env et =
   | None -> ()
 
 let has_attribute attr l =
-  List.exists l (fun { Aast.ua_name; _ } -> String.equal attr (snd ua_name))
+  List.exists l ~f:(fun { Aast.ua_name; _ } -> String.equal attr (snd ua_name))
 
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs

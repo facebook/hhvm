@@ -29,7 +29,7 @@ let check_is_class env (p, h) =
           Errors.requires_non_class
             p
             name
-            (Ast_defs.string_of_class_kind kind is_enum_class))
+            (Ast_defs.string_of_class_kind kind ~is_enum_class))
     end
   | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
   | _ -> Errors.requires_non_class p "This" "an invalid type hint"
@@ -62,7 +62,7 @@ let check_is_trait env (p, h) =
         Errors.uses_non_trait
           p
           name
-          (Ast_defs.string_of_class_kind kind is_enum_class)
+          (Ast_defs.string_of_class_kind kind ~is_enum_class)
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 
@@ -94,11 +94,11 @@ let handler =
 
     method! at_class_ env c =
       let (req_extends, req_implements) = split_reqs c in
-      List.iter c.c_uses (check_is_trait env);
+      List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits c;
-      List.iter req_extends (check_is_class env);
-      List.iter c.c_implements (check_is_interface (env, "implement"));
+      List.iter req_extends ~f:(check_is_class env);
+      List.iter c.c_implements ~f:(check_is_interface (env, "implement"));
       List.iter
         req_implements
-        (check_is_interface (env, "require implementation of"))
+        ~f:(check_is_interface (env, "require implementation of"))
   end

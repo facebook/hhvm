@@ -27,13 +27,13 @@ let is_private_visible env x self_id =
         Typing_make_type.class_type
           Reason.Rnone
           self_id
-          (List.map (Cls.tparams my_class) make_tany)
+          (List.map (Cls.tparams my_class) ~f:make_tany)
       in
       let their_class_ty =
         Typing_make_type.class_type
           Reason.Rnone
           x
-          (List.map (Cls.tparams their_class) make_tany)
+          (List.map (Cls.tparams their_class) ~f:make_tany)
       in
       if
         Typing_utils.is_sub_type env my_class_ty their_class_ty
@@ -60,13 +60,13 @@ let is_protected_visible env x self_id =
         Typing_make_type.class_type
           Reason.Rnone
           self_id
-          (List.map (Cls.tparams my_class) make_tany)
+          (List.map (Cls.tparams my_class) ~f:make_tany)
       in
       let their_class_ty =
         Typing_make_type.class_type
           Reason.Rnone
           x
-          (List.map (Cls.tparams their_class) make_tany)
+          (List.map (Cls.tparams their_class) ~f:make_tany)
       in
       if
         Typing_utils.is_sub_type env my_class_ty their_class_ty

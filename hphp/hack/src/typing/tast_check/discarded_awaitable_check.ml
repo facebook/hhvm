@@ -28,7 +28,7 @@ let rec enforce_not_awaitable env p ty =
   match get_node ety with
   | Tunion tyl
   | Tintersection tyl ->
-    List.iter tyl (enforce_not_awaitable env p)
+    List.iter tyl ~f:(enforce_not_awaitable env p)
   | Tclass ((_, awaitable), _, _)
     when String.equal awaitable SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (get_pos ety)

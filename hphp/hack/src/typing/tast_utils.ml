@@ -41,7 +41,7 @@ let rec type_non_nullable env ty =
     when type_non_nullable env ty ->
     true
   | Tunion tyl when not (List.is_empty tyl) ->
-    List.for_all tyl (type_non_nullable env)
+    List.for_all tyl ~f:(type_non_nullable env)
   | _ -> false
 
 (* Truthiness utilities ******************************************************)
@@ -151,19 +151,19 @@ let rec truthiness env ty =
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
   | Tunion tyl ->
     begin
-      match List.map tyl (truthiness env) with
+      match List.map tyl ~f:(truthiness env) with
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
   | Tintersection tyl ->
-    List.map tyl (truthiness env)
+    List.map tyl ~f:(truthiness env)
     |> List.fold ~init:Possibly_falsy ~f:intersect_truthiness
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes env ty in
     begin
-      match List.map tyl (truthiness env) with
+      match List.map tyl ~f:(truthiness env) with
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end

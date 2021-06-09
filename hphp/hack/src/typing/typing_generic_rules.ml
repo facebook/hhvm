@@ -112,7 +112,7 @@ let apply_rules_with_index_value_errs ?(ignore_type_structure = false) env ty f
       let (env, tys, key_errs, errs) =
         Typing_utils.run_on_intersection_key_value_res
           env
-          (iter ~is_nonnull)
+          ~f:(iter ~is_nonnull)
           tyl
       in
       let err_res = intersect_errs errs

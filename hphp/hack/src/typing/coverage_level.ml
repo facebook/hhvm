@@ -104,10 +104,10 @@ let merge_pos_stats p1 p2 =
 let merge_reason_stats s1 s2 =
   SMap.merge
     (fun _ s1 s2 ->
-      Option.merge s1 s2 (fun s1 s2 ->
+      Option.merge s1 s2 ~f:(fun s1 s2 ->
           Pos.Map.merge
             (fun _ p1 p2 ->
-              Option.merge p1 p2 (fun p1 p2 -> merge_pos_stats p1 p2))
+              Option.merge p1 p2 ~f:(fun p1 p2 -> merge_pos_stats p1 p2))
             s1
             s2))
     s1
@@ -116,7 +116,7 @@ let merge_reason_stats s1 s2 =
 let merge_and_sum cs1 cs2 =
   CLMap.merge
     (fun _ c1 c2 ->
-      Option.merge c1 c2 (fun c1 c2 ->
+      Option.merge c1 c2 ~f:(fun c1 c2 ->
           {
             count = c1.count + c2.count;
             reason_stats = merge_reason_stats c1.reason_stats c2.reason_stats;
@@ -135,8 +135,9 @@ let rec is_tany env ty =
     let (env, r_opt) = is_tany env h in
     (match r_opt with
     | Some r
-      when List.for_all tl (compose Option.is_some (compose snd (is_tany env)))
-      ->
+      when List.for_all
+             tl
+             ~f:(compose Option.is_some (compose snd (is_tany env))) ->
       (env, Some r)
     | _ -> (env, None))
   | _ -> (env, None)

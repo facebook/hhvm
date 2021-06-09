@@ -137,7 +137,7 @@ let check_where_constraints (seen : tparam_info) cstrs =
         | _ -> super#on_hint env (pos, h)
     end
   in
-  List.iter cstrs (fun (h1, _, h2) ->
+  List.iter cstrs ~f:(fun (h1, _, h2) ->
       visitor#on_hint () h1;
       visitor#on_hint () h2)
 

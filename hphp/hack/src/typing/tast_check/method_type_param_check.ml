@@ -16,7 +16,7 @@ let check_tparams tps =
     | Ast_defs.Invariant -> ()
     | _ -> Errors.method_variance (fst tp.tp_name)
   in
-  List.iter tps check_tparam
+  List.iter tps ~f:check_tparam
 
 let handler =
   object

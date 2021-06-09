@@ -49,7 +49,7 @@ module Locl_Inst = struct
     else
       match deref ty with
       | (r, Tgeneric (x, args)) ->
-        let args = List.map args (instantiate subst) in
+        let args = List.map args ~f:(instantiate subst) in
         (match SMap.find_opt x subst with
         | Some x_ty -> merge_hk_type r x x_ty args
         | None -> mk (r, Tgeneric (x, args)))
@@ -75,13 +75,13 @@ module Locl_Inst = struct
       as x ->
       x
     | Ttuple tyl ->
-      let tyl = List.map tyl (instantiate subst) in
+      let tyl = List.map tyl ~f:(instantiate subst) in
       Ttuple tyl
     | Tunion tyl ->
-      let tyl = List.map tyl (instantiate subst) in
+      let tyl = List.map tyl ~f:(instantiate subst) in
       Tunion tyl
     | Tintersection tyl ->
-      let tyl = List.map tyl (instantiate subst) in
+      let tyl = List.map tyl ~f:(instantiate subst) in
       Tintersection tyl
     | Toption ty ->
       let ty = instantiate subst ty in
@@ -103,7 +103,7 @@ module Locl_Inst = struct
           tparams
       in
       let params =
-        List.map ft.ft_params (fun param ->
+        List.map ft.ft_params ~f:(fun param ->
             let ty = instantiate_possibly_enforced_ty subst param.fp_type in
             { param with fp_type = ty })
       in
@@ -116,16 +116,16 @@ module Locl_Inst = struct
       in
       let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
       let tparams =
-        List.map tparams (fun t ->
+        List.map tparams ~f:(fun t ->
             {
               t with
               tp_constraints =
-                List.map t.tp_constraints (fun (ck, ty) ->
+                List.map t.tp_constraints ~f:(fun (ck, ty) ->
                     (ck, instantiate subst ty));
             })
       in
       let where_constraints =
-        List.map ft.ft_where_constraints (fun (ty1, ck, ty2) ->
+        List.map ft.ft_where_constraints ~f:(fun (ty1, ck, ty2) ->
             (instantiate subst ty1, ck, instantiate outer_subst ty2))
       in
       Tfun
@@ -138,11 +138,11 @@ module Locl_Inst = struct
           ft_where_constraints = where_constraints;
         }
     | Tnewtype (x, tyl, bound) ->
-      let tyl = List.map tyl (instantiate subst) in
+      let tyl = List.map tyl ~f:(instantiate subst) in
       let bound = instantiate subst bound in
       Tnewtype (x, tyl, bound)
     | Tclass (x, exact, tyl) ->
-      let tyl = List.map tyl (instantiate subst) in
+      let tyl = List.map tyl ~f:(instantiate subst) in
       Tclass (x, exact, tyl)
     | Tshape (shape_kind, fdm) ->
       let fdm = ShapeFieldMap.map (instantiate subst) fdm in
@@ -218,7 +218,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
         iter2_shortest
           begin
             fun { tp_name = (_p, x); tp_constraints = cstrl; _ } ty ->
-            List.iter cstrl (fun (ck, cstr_ty) ->
+            List.iter cstrl ~f:(fun (ck, cstr_ty) ->
                 let (env, cstr_ty) = TUtils.localize ~ety_env env cstr_ty in
                 let (_ : Typing_env_types.env) =
                   TGenConstraint.check_constraint
@@ -255,7 +255,7 @@ let check_class_usable_as_hk_type use_pos class_info =
   let name = Cls.name class_info in
   let tparams = Cls.tparams class_info in
   let has_tparam_constraints =
-    List.exists tparams (fun tp -> not (List.is_empty tp.tp_constraints))
+    List.exists tparams ~f:(fun tp -> not (List.is_empty tp.tp_constraints))
   in
   if has_tparam_constraints then
     Errors.class_with_constraints_used_as_hk_type use_pos name
@@ -376,7 +376,7 @@ module Simple = struct
     | Ttuple tyl
     | Tunion tyl
     | Tintersection tyl ->
-      List.iter tyl check
+      List.iter tyl ~f:check
     | Taccess (ty, _) ->
       (* Because type constants cannot depend on type parameters,
        we allow Foo::the_type even if Foo has type parameters *)
@@ -384,7 +384,8 @@ module Simple = struct
     | Tshape (_, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
       check_possibly_enforced_ty env ft.ft_ret;
-      List.iter ft.ft_params (fun p -> check_possibly_enforced_ty env p.fp_type)
+      List.iter ft.ft_params ~f:(fun p ->
+          check_possibly_enforced_ty env p.fp_type)
     (* FIXME shall we inspect tparams and where_constraints *)
     (* List.iter ft.ft_where_constraints (fun (ty1, _, ty2) -> check ty1; check ty2 ); *)
     | Tgeneric (name, targs) ->

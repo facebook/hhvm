@@ -37,8 +37,8 @@ let check_class _ c =
       Errors.nonstatic_method_in_abstract_final_class (fst m.m_name)
     in
     let (c_constructor, _, c_methods) = split_methods c in
-    List.iter c_methods err;
-    Option.iter c_constructor err;
+    List.iter c_methods ~f:err;
+    Option.iter c_constructor ~f:err;
 
     let (_, c_instance_vars) = split_vars c in
     c_instance_vars

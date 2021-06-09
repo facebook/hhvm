@@ -51,7 +51,7 @@ let member_type env member_ce =
                | TCAbstract { atc_default = Some t; _ } ->
                  Some t
                | TCAbstract { atc_default = None; _ } -> None)
-             (Cls.get_ancestor tc)
+             ~get_ancestor:(Cls.get_ancestor tc)
          with
         | None -> default_result
         | Some
@@ -145,7 +145,7 @@ let enum_class_check env tc consts const_types =
         | TCAbstract { atc_default = Some t; _ } ->
           Some t
         | TCAbstract { atc_default = None; _ } -> None)
-      (Cls.get_ancestor tc)
+      ~get_ancestor:(Cls.get_ancestor tc)
   in
   match enum_info_opt with
   | Some

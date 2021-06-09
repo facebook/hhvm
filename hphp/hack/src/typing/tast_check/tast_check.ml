@@ -17,7 +17,7 @@ let visitor ctx =
   let makers =
     [Xhp_required_check.make_handler; Redundant_generics_check.make_handler]
   in
-  let handlers = List.map makers (( |> ) ctx) |> List.filter_opt in
+  let handlers = List.map makers ~f:(( |> ) ctx) |> List.filter_opt in
   Tast_visitor.iter_with
     ( handlers
     @ [

@@ -221,7 +221,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         localize_class_instantiation ~ety_env env r cls argl (Some class_info)
       | Some (Env.TypedefResult typedef_info) ->
         localize_typedef_instantiation
-          ety_env
+          ~ety_env
           env
           r
           cid
@@ -230,13 +230,13 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       | None -> localize_class_instantiation ~ety_env env r cls argl None
     end
   | Ttuple tyl ->
-    let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
+    let (env, tyl) = List.map_env env tyl ~f:(localize ~ety_env) in
     (env, mk (r, Ttuple tyl))
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
+    let (env, tyl) = List.map_env env tyl ~f:(localize ~ety_env) in
     (env, mk (r, Tunion tyl))
   | Tintersection tyl ->
-    let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
+    let (env, tyl) = List.map_env env tyl ~f:(localize ~ety_env) in
     (env, mk (r, Tintersection tyl))
   | Taccess (root_ty, id) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
@@ -296,7 +296,7 @@ and localize_targs_by_kind
   let length = min exp_len act_len in
   let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
   let ((env, _), tyl) =
-    List.map2_env (env, ety_env) tyargs nkinds localize_targ_by_kind
+    List.map2_env (env, ety_env) tyargs nkinds ~f:localize_targ_by_kind
   in
   (* Note that we removed superfluous type arguments, because we don't have a kind to localize
     them against.
@@ -375,7 +375,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
       List.map_env
         env
         tyargs
-        (localize ~ety_env:{ ety_env with expand_visible_newtype = true })
+        ~f:(localize ~ety_env:{ ety_env with expand_visible_newtype = true })
     in
     (env, mk (r, Tclass (sid, Nonexact, tyl)))
   | Some class_info ->
@@ -580,7 +580,7 @@ and localize_ft
       if nested then
         (env, [])
       else
-        List.map_env env t.tp_constraints (fun env (ck, ty) ->
+        List.map_env env t.tp_constraints ~f:(fun env (ck, ty) ->
             let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
             let name_str = snd t.tp_name in
             (* In order to access type constants on generics on where clauses,
@@ -600,7 +600,7 @@ and localize_ft
             (env, (ck, ty)))
     in
     let (env, tparams) =
-      List.map_env env t.tp_tparams (localize_tparam ~nested:true)
+      List.map_env env t.tp_tparams ~f:(localize_tparam ~nested:true)
     in
     (env, { t with tp_constraints = cstrl; tp_tparams = tparams })
   in
@@ -614,11 +614,11 @@ and localize_ft
   let old_global_tpenv = env.tpenv in
   (* Always localize tparams so they are available for later Tast check *)
   let (env, tparams) =
-    List.map_env env ft.ft_tparams (localize_tparam ~nested:false)
+    List.map_env env ft.ft_tparams ~f:(localize_tparam ~nested:false)
   in
   (* Localize the 'where' constraints *)
   let (env, where_constraints) =
-    List.map_env env ft.ft_where_constraints localize_where_constraint
+    List.map_env env ft.ft_where_constraints ~f:localize_where_constraint
   in
   (* Remove the constraints we added for localizing where constraints  *)
   let env = Env.env_with_tpenv env old_tpenv in
@@ -657,7 +657,7 @@ and localize_ft
     | Fstandard as x -> (env, x)
   in
   let (env, params) =
-    List.map_env env ft.ft_params (fun env param ->
+    List.map_env env ft.ft_params ~f:(fun env param ->
         let (env, ty) =
           localize_possibly_enforced_ty ~ety_env env param.fp_type
         in
@@ -719,7 +719,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
             localize_cstr_ty ~ety_env env cstr_ty t.tp_name
           in
           Typing_log.(
-            log_with_level env "generics" 1 (fun () ->
+            log_with_level env "generics" ~level:1 (fun () ->
                 log_types
                   (Pos_or_decl.of_raw_pos use_pos)
                   env
@@ -876,7 +876,7 @@ let localize_targs_with_kinds
       env
       targl
       (List.take named_kinds targ_count)
-      (localize_targ_with_kind ~check_well_kinded)
+      ~f:(localize_targ_with_kind ~check_well_kinded)
   in
   (* Generate fresh type variables for the remainder *)
   let (env, implicit_targs) =
@@ -907,7 +907,7 @@ let localize_targs_with_kinds
         Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
         (env, (tvar, wildcard_hint))
     in
-    List.map_env env (List.drop named_kinds targ_count) mk_implicit_targ
+    List.map_env env (List.drop named_kinds targ_count) ~f:mk_implicit_targ
   in
   let check_for_explicit_user_attribute tparam (_, hint) =
     let is_wildcard =
@@ -1047,11 +1047,11 @@ let localize_generic_parameters_with_bounds
     (* TODO(T70068435) This may have to be touched when adding support for constraints on HK
       types *)
     let tparam_ty = mk (Reason.Rwitness_from_decl pos, Tgeneric (name, [])) in
-    List.map_env env cstrl (fun env (ck, cstr) ->
+    List.map_env env cstrl ~f:(fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in
         (env, (tparam_ty, ck, ty)))
   in
-  let (env, cstrss) = List.map_env env tparams localize_bound in
+  let (env, cstrss) = List.map_env env tparams ~f:localize_bound in
   (env, List.concat cstrss)
 
 let localize_and_add_where_constraints ~ety_env (env : env) where_constraints =

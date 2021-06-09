@@ -165,13 +165,13 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
       (env, mk (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
     | (r, Tunion (_ :: _ as tyl)) ->
       let (env, tyl) =
-        List.map_env env tyl (fun env ty ->
+        List.map_env env tyl ~f:(fun env ty ->
             make_nullable_member_type ~is_method env id_pos pos ty)
       in
       Union.union_list env r tyl
     | (r, Tintersection tyl) ->
       let (env, tyl) =
-        List.map_env env tyl (fun env ty ->
+        List.map_env env tyl ~f:(fun env ty ->
             make_nullable_member_type ~is_method env id_pos pos ty)
       in
       Inter.intersect_list env r tyl
@@ -195,14 +195,14 @@ let rec this_appears_covariantly ~contra env ty =
   | Ttuple tyl
   | Tunion tyl
   | Tintersection tyl ->
-    List.exists tyl (this_appears_covariantly ~contra env)
+    List.exists tyl ~f:(this_appears_covariantly ~contra env)
   | Tfun ft ->
     this_appears_covariantly ~contra env ft.ft_ret.et_type
-    || List.exists ft.ft_params (fun fp ->
+    || List.exists ft.ft_params ~f:(fun fp ->
            this_appears_covariantly ~contra:(not contra) env fp.fp_type.et_type)
   | Tshape (_, fm) ->
     let fields = TShapeMap.elements fm in
-    List.exists fields (fun (_, f) ->
+    List.exists fields ~f:(fun (_, f) ->
         this_appears_covariantly ~contra env f.sft_ty)
   | Taccess (ty, _)
   | Tlike ty
@@ -264,7 +264,7 @@ let rec obj_get_concrete_ty
     (id_pos, id_str)
     on_error =
   Typing_log.(
-    log_with_level env "obj_get" 2 (fun () ->
+    log_with_level env "obj_get" ~level:2 (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos id_pos)
           env
@@ -333,7 +333,7 @@ let rec obj_get_concrete_ty
       | Some class_info ->
         let paraml =
           if List.is_empty paraml then
-            List.map (Cls.tparams class_info) (fun _ ->
+            List.map (Cls.tparams class_info) ~f:(fun _ ->
                 Typing_utils.mk_tany env id_pos)
           else
             paraml
@@ -550,7 +550,7 @@ let rec obj_get_concrete_ty
                 in
                 if succeed then
                   let (env, member_ty) =
-                    Inter.intersect env (Reason.Rwitness id_pos) member_ty ty
+                    Inter.intersect env ~r:(Reason.Rwitness id_pos) member_ty ty
                   in
                   (env, (member_ty, tal))
                 else
@@ -771,7 +771,7 @@ and obj_get_inner
     ((id_pos, id_str) as id)
     on_error =
   Typing_log.(
-    log_with_level env "obj_get" 2 (fun () ->
+    log_with_level env "obj_get" ~level:2 (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos id_pos)
           env
@@ -1061,7 +1061,7 @@ let obj_get_with_err
     env
     receiver_ty =
   Typing_log.(
-    log_with_level env "obj_get" 1 (fun () ->
+    log_with_level env "obj_get" ~level:1 (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos obj_pos)
           env

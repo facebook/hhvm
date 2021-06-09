@@ -65,6 +65,6 @@ let handler =
                 | _ -> ()
               end;
               if String.equal tc.ttc_origin (Cls.name cls) then
-                Option.iter tc.ttc_reifiable (check_reifiable env tc)
+                Option.iter tc.ttc_reifiable ~f:(check_reifiable env tc)
           end)
   end

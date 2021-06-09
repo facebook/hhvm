@@ -64,7 +64,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let (_, ety) = Env.expand_type env array_ty in
   match get_node ety with
   | Tunion tyl ->
-    List.iter tyl (fun ty ->
+    List.iter tyl ~f:(fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
   | Tdarray (key_ty, _) -> type_index env index_ty key_ty Reason.index_array
   | Tclass ((_, cn), _, key_ty :: _)

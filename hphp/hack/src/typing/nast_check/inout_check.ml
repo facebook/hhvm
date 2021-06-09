@@ -12,14 +12,14 @@ open Aast
 module SN = Naming_special_names
 
 let check_param _env params p user_attributes name =
-  List.iter params (fun param ->
+  List.iter params ~f:(fun param ->
       match param.param_callconv with
       | Some Ast_defs.Pinout ->
         let pos = param.param_pos in
         if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
       | None -> ());
   let inout =
-    List.find params (fun x ->
+    List.find params ~f:(fun x ->
         Option.equal
           Ast_defs.equal_param_kind
           x.param_callconv

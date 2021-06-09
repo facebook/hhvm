@@ -88,10 +88,10 @@ module Full = struct
       String.compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)
     in
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
-    List.map fields f_field
+    List.map fields ~f:f_field
 
   let rec fun_type ~ty to_doc st env ft =
-    let params = List.map ft.ft_params (fun_param ~ty to_doc st env) in
+    let params = List.map ft.ft_params ~f:(fun_param ~ty to_doc st env) in
     let variadic_param =
       match ft.ft_arity with
       | Fstandard -> None
@@ -357,7 +357,7 @@ module Full = struct
          depending on other parameters *)
       let param_names = Type_parameter_env.get_parameter_names kind in
       let params =
-        List.map param_names (fun name ->
+        List.map param_names ~f:(fun name ->
             Typing_make_type.generic Reason.none name)
       in
       let lower = Env.get_lower_bounds env tparam params in
@@ -365,12 +365,12 @@ module Full = struct
       let equ = Env.get_equal_bounds env tparam params in
       (* If we have an equality we can ignore the other bounds *)
       if not (TySet.is_empty equ) then
-        List.map (TySet.elements equ) (fun ty ->
+        List.map (TySet.elements equ) ~f:(fun ty ->
             (tparam, Ast_defs.Constraint_eq, ty))
       else
-        List.map (TySet.elements lower) (fun ty ->
+        List.map (TySet.elements lower) ~f:(fun ty ->
             (tparam, Ast_defs.Constraint_super, ty))
-        @ List.map (TySet.elements upper) (fun ty ->
+        @ List.map (TySet.elements upper) ~f:(fun ty ->
               (tparam, Ast_defs.Constraint_as, ty))
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
@@ -453,7 +453,7 @@ module Full = struct
         | Some var -> (* Tctx$f *) to_doc ("ctx " ^ var)
         | None ->
           begin
-            match String.rsplit2 s '@' with
+            match String.rsplit2 s ~on:'@' with
             | Some (tvar, cst) ->
               (* T$x@C *) to_doc (String.drop_prefix tvar 1 ^ "::" ^ cst)
             | None ->
@@ -639,7 +639,9 @@ module Full = struct
    *)
   let constraints_for_type to_doc env typ =
     let tparams = SSet.elements (Env.get_tparams env typ) in
-    let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
+    let constraints =
+      List.concat_map tparams ~f:(get_constraints_on_tparam env)
+    in
     let (_, typ) = Env.expand_type env typ in
     match (get_node typ, constraints) with
     | (_, []) -> Nothing
@@ -704,7 +706,7 @@ module Full = struct
             | [] -> Nothing
             (* It looks weird if we line break after a single modifier. *)
             | [m] -> print_mod m
-            | ms -> Concat (List.map ms print_mod) ^^ SplitWith Cost.Base
+            | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
           end)
     in
     let body =
@@ -836,10 +838,10 @@ module ErrorString = struct
 
   and union env l =
     let (null, nonnull) =
-      List.partition_tf l (fun ty ->
+      List.partition_tf l ~f:(fun ty ->
           equal_locl_ty_ (get_node ty) (Tprim Nast.Tnull))
     in
-    let l = List.map nonnull (to_string env) in
+    let l = List.map nonnull ~f:(to_string env) in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
     let l = SSet.elements s in
     if List.is_empty null then
@@ -903,7 +905,7 @@ module Json = struct
    fun env ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
     let kind p k = [("src_pos", Pos_or_decl.json p); ("kind", JSON_String k)] in
-    let args tys = [("args", JSON_Array (List.map tys (from_type env)))] in
+    let args tys = [("args", JSON_Array (List.map tys ~f:(from_type env)))] in
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
     let obj x = JSON_Object x in
@@ -924,7 +926,7 @@ module Json = struct
       @ optional v.sft_optional
       @ typ v.sft_ty
     in
-    let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
+    let fields fl = [("fields", JSON_Array (List.map fl ~f:make_field))] in
     let as_type ty = [("as", from_type env ty)] in
     match (get_pos ty, get_node ty) with
     | (_, Tvar n) ->
@@ -988,7 +990,7 @@ module Json = struct
       let param fp =
         obj @@ callconv (get_fp_mode fp) @ typ fp.fp_type.et_type
       in
-      let params fps = [("params", JSON_Array (List.map fps param))] in
+      let params fps = [("params", JSON_Array (List.map fps ~f:param))] in
       obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
     | (p, Tvarray_or_darray (ty1, ty2)) ->
       obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
@@ -1562,9 +1564,9 @@ module PrintClass = struct
           { atc_as_constraint = a; atc_super_constraint = s; atc_default = d }
         ->
         let m = Option.value_map ~default:"" in
-        let a = m a (fun x -> Printf.sprintf " as %s" (ty x)) in
-        let s = m s (fun x -> Printf.sprintf " super %s" (ty x)) in
-        let d = m d (fun x -> Printf.sprintf " = %s" (ty x)) in
+        let a = m a ~f:(fun x -> Printf.sprintf " as %s" (ty x)) in
+        let s = m s ~f:(fun x -> Printf.sprintf " super %s" (ty x)) in
+        let d = m d ~f:(fun x -> Printf.sprintf " = %s" (ty x)) in
         a ^ s ^ d
     in
     name
@@ -1626,7 +1628,7 @@ module PrintClass = struct
         acc ^ Full.to_string_decl ctx x ^ ", ")
 
   let class_type ctx c =
-    let tenv = Typing_env.empty ctx Relative_path.default None in
+    let tenv = Typing_env.empty ctx Relative_path.default ~droot:None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in

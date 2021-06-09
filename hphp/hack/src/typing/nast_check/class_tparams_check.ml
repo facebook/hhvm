@@ -22,7 +22,7 @@ let visitor =
         | Habstr (tp_name, args) ->
           List.iter
             state.class_tparams
-            (fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
+            ~f:(fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
               if String.equal c_tp_name tp_name then
                 Errors.typeconst_depends_on_external_tparam
                   pos
@@ -41,7 +41,7 @@ let handler =
     method! at_class_ env c =
       let state = { class_tparams = c.c_tparams } in
       let on_hint = visitor#on_hint (env, state) in
-      List.iter c.c_typeconsts (fun t ->
+      List.iter c.c_typeconsts ~f:(fun t ->
           match t.c_tconst_kind with
           | TCAbstract
               {
@@ -49,9 +49,9 @@ let handler =
                 c_atc_super_constraint = s;
                 c_atc_default = d;
               } ->
-            Option.iter a on_hint;
-            Option.iter s on_hint;
-            Option.iter d on_hint
+            Option.iter a ~f:on_hint;
+            Option.iter s ~f:on_hint;
+            Option.iter d ~f:on_hint
           | TCConcrete { c_tc_type = t } -> on_hint t
           | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
             on_hint c;

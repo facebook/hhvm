@@ -119,7 +119,7 @@ let overload_extract_from_awaitable_list env p tyl =
     ~f:
       begin
         fun ty (env, rtyl) ->
-        let (env, rty) = overload_extract_from_awaitable env p ty in
+        let (env, rty) = overload_extract_from_awaitable env ~p ty in
         (env, rty :: rtyl)
       end
     tyl
@@ -129,7 +129,7 @@ let overload_extract_from_awaitable_shape env p fdm =
   TShapeMap.map_env
     begin
       fun env _key (tk, tv) ->
-      let (env, rtv) = overload_extract_from_awaitable env p tv in
+      let (env, rtv) = overload_extract_from_awaitable env ~p tv in
       (env, (tk, rtv))
     end
     env

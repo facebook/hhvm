@@ -234,7 +234,7 @@ let handler =
     method! at_tparam env tparam =
       (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
       if
-        List.exists tparam.tp_user_attributes (fun { ua_name; _ } ->
+        List.exists tparam.tp_user_attributes ~f:(fun { ua_name; _ } ->
             String.equal UA.uaNewable (snd ua_name))
       then
         verify_has_consistent_bound env tparam

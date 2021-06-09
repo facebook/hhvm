@@ -23,7 +23,7 @@ let static_method_check reified_params m =
         | _ -> super#on_hint env (pos, h)
     end
   in
-  List.iter m.m_params (visitor#on_fun_param ());
+  List.iter m.m_params ~f:(visitor#on_fun_param ());
   visitor#on_type_hint () m.m_ret
 
 let handler =
@@ -37,12 +37,12 @@ let handler =
           (Pos.filename c.c_span |> Relative_path.prefix |> Relative_path.is_hhi)
       then
         let reified_params =
-          List.filter_map c.c_tparams (function tp ->
+          List.filter_map c.c_tparams ~f:(function tp ->
               if not (equal_reify_kind tp.tp_reified Erased) then
                 Some (snd tp.tp_name)
               else
                 None)
           |> SSet.of_list
         in
-        List.iter static_methods (static_method_check reified_params)
+        List.iter static_methods ~f:(static_method_check reified_params)
   end

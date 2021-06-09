@@ -16,7 +16,7 @@ let enforce_no_body m =
   | _ -> Errors.abstract_body (fst m.m_name)
 
 let check_interface c =
-  List.iter c.c_uses (fun (p, _) -> Errors.interface_use_trait p);
+  List.iter c.c_uses ~f:(fun (p, _) -> Errors.interface_use_trait p);
 
   let (statics, vars) = split_vars c in
   begin
@@ -36,7 +36,7 @@ let check_interface c =
   end;
 
   (* make sure interfaces do not contain partially abstract type constants *)
-  List.iter c.c_typeconsts (fun tc ->
+  List.iter c.c_typeconsts ~f:(fun tc ->
       match tc.c_tconst_kind with
       | TCPartiallyAbstract _ ->
         Errors.interface_with_partial_typeconst (fst tc.c_tconst_name)

@@ -399,7 +399,7 @@ let rec expand ctx env root : _ * result =
       TySet.elements
         (TySet.diff (Env.get_upper_bounds env s tyargs) ctx.generics_seen)
     in
-    let (env, resl) = List.map_env env upper_bounds (expand ctx) in
+    let (env, resl) = List.map_env env upper_bounds ~f:(expand ctx) in
     let res = intersect_results err resl in
     (env, update_class_name env ctx.id s res)
   | Tdependent (dep_ty, ty) ->
@@ -421,17 +421,17 @@ let rec expand ctx env root : _ * result =
           let (_env, t) = Env.expand_type env t in
           is_tyvar t)
     in
-    let (env, resl) = List.map_env env tyl_nonvars (expand ctx) in
+    let (env, resl) = List.map_env env tyl_nonvars ~f:(expand ctx) in
     let result = intersect_results err resl in
     begin
       match result with
       | Missing _ ->
-        let (env, resl) = List.map_env env tyl_vars (expand ctx) in
+        let (env, resl) = List.map_env env tyl_vars ~f:(expand ctx) in
         (env, intersect_results err resl)
       | _ -> (env, result)
     end
   | Tunion tyl ->
-    let (env, resl) = List.map_env env tyl (expand ctx) in
+    let (env, resl) = List.map_env env tyl ~f:(expand ctx) in
     let result = union_results err resl in
     (env, result)
   | Tvar n ->

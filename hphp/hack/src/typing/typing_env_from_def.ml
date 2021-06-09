@@ -30,7 +30,7 @@ let fun_env ?origin ctx fd =
  * class instantiated at its generic parameters. *)
 let get_self_from_c c =
   let tparams =
-    List.map c.c_tparams (fun { tp_name = (p, s); _ } ->
+    List.map c.c_tparams ~f:(fun { tp_name = (p, s); _ } ->
         mk
           ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
             Tgeneric (s, []) ))

@@ -158,7 +158,7 @@ let detailed_message variance pos stack =
   | [((p, _, _) as r)] -> [(p, reason_to_string ~sign:false r)]
   | _ ->
     (pos, reason_stack_to_string variance stack)
-    :: List.map stack (fun ((p, _, _) as r) ->
+    :: List.map stack ~f:(fun ((p, _, _) as r) ->
            (p, reason_to_string ~sign:true r))
 
 (*****************************************************************************)
@@ -256,7 +256,7 @@ let make_tparam_variance : Nast.tparam -> variance =
 let check_final_this_pos_variance : variance -> Pos.t -> Nast.class_ -> unit =
  fun env_variance rpos class_ ->
   if class_.Aast.c_final then
-    List.iter class_.Aast.c_tparams (fun t ->
+    List.iter class_.Aast.c_tparams ~f:(fun t ->
         match (env_variance, t.Aast.tp_variance) with
         | (Vcontravariant _, (Ast_defs.Covariant | Ast_defs.Contravariant)) ->
           Errors.contravariant_this
@@ -285,7 +285,7 @@ let get_class_variance : Typing_env_types.env -> Ast_defs.id -> _ =
       | None -> []
     in
 
-    List.map tparams make_decl_tparam_variance
+    List.map tparams ~f:make_decl_tparam_variance
 
 let rec get_typarams tenv root env (ty : decl_ty) =
   let empty = (SMap.empty, SMap.empty) in

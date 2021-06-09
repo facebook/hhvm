@@ -484,7 +484,8 @@ module ApiEager = struct
   let all_ancestor_names (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->
     match t with
-    | Lazy (_sc, lc) -> List.map (LSTable.to_list (Lazy.force lc).ancestors) fst
+    | Lazy (_sc, lc) ->
+      List.map (LSTable.to_list (Lazy.force lc).ancestors) ~f:fst
     | Eager c -> SMap.ordered_keys c.tc_ancestors
 
   let all_ancestor_reqs (decl, t) =

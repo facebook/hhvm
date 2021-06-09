@@ -189,8 +189,8 @@ let add_applied_fixme applied_fixmes err_code fn err_line =
   in
   Relative_path.Map.add
     applied_fixmes
-    fn
-    (add_applied_fixme_file file_value err_code err_line)
+    ~key:fn
+    ~data:(add_applied_fixme_file file_value err_code err_line)
 
 let get_unused_fixmes_for codes applied_fixme_map fn acc =
   match get_fixmes fn with

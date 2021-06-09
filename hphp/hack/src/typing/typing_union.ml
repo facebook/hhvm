@@ -22,7 +22,7 @@ exception Dont_simplify
 module Log = struct
   let log_union r ty1 ty2 (env, result) =
     Typing_log.(
-      log_with_level env "union" 1 (fun () ->
+      log_with_level env "union" ~level:1 (fun () ->
           log_types
             (Reason.to_pos r)
             env
@@ -39,7 +39,7 @@ module Log = struct
 
   let log_simplify_union r ty1 ty2 (env, result) =
     Typing_log.(
-      log_with_level env "union" 2 (fun () ->
+      log_with_level env "union" ~level:2 (fun () ->
           log_types
             (Reason.to_pos r)
             env
@@ -58,7 +58,7 @@ module Log = struct
 
   let log_union_list r tyl (env, result) =
     Typing_log.(
-      log_with_level env "union" 1 (fun () ->
+      log_with_level env "union" ~level:1 (fun () ->
           log_types
             (Reason.to_pos r)
             env
@@ -72,7 +72,7 @@ module Log = struct
 
   let log_simplify_unions r ty (env, result) =
     Typing_log.(
-      log_with_level env "union" 1 (fun () ->
+      log_with_level env "union" ~level:1 (fun () ->
           log_types
             (Reason.to_pos r)
             env
@@ -225,13 +225,13 @@ let rec union env ty1 ty2 =
   else
     let r = union_reason r1 r2 in
     let (env, non_ty2) =
-      Typing_intersection.non env Reason.none ty2 Utils.ApproxUp
+      Typing_intersection.non env Reason.none ty2 ~approx:Utils.ApproxUp
     in
     if Utils.is_sub_type_for_union env non_ty2 ty1 then
       (env, Typing_make_type.mixed r)
     else
       let (env, non_ty1) =
-        Typing_intersection.non env Reason.none ty1 Utils.ApproxUp
+        Typing_intersection.non env Reason.none ty1 ~approx:Utils.ApproxUp
       in
       if Utils.is_sub_type_for_union env non_ty1 ty2 then
         (env, Typing_make_type.mixed r)
@@ -494,14 +494,14 @@ and union_newtype env typename tyl1 tyl2 =
   union_tylists_w_variances env tparams tyl1 tyl2
 
 and union_tylists_w_variances env tparams tyl1 tyl2 =
-  let variances = List.map tparams (fun t -> t.tp_variance) in
+  let variances = List.map tparams ~f:(fun t -> t.tp_variance) in
   let variances =
     let adjust_list_length l newlen filler =
       let len = List.length l in
       if len < newlen then
-        l @ List.init (newlen - len) (fun _ -> filler)
+        l @ List.init (newlen - len) ~f:(fun _ -> filler)
       else
-        List.sub l 0 newlen
+        List.sub l ~pos:0 ~len:newlen
     in
     adjust_list_length variances (List.length tyl1) Ast_defs.Invariant
   in
@@ -686,7 +686,7 @@ let rec union_i env r ty1 lty2 =
           let (env, ty) = union_i env r (ConstraintType cty1) lty2 in
           (match ty with
           | LoclType ty ->
-            let (env, ty) = Typing_intersection.intersect env r' lty ty in
+            let (env, ty) = Typing_intersection.intersect env ~r:r' lty ty in
             (env, LoclType ty)
           | ConstraintType cty ->
             ( env,

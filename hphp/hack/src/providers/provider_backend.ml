@@ -90,7 +90,8 @@ module Fixme_store = struct
 
   let get t filename = Relative_path.Map.find_opt !t filename
 
-  let add t filename fixmes = t := Relative_path.Map.add !t filename fixmes
+  let add t filename fixmes =
+    t := Relative_path.Map.add !t ~key:filename ~data:fixmes
 
   let remove t filename = t := Relative_path.Map.remove !t filename
 

@@ -78,7 +78,7 @@ let elaborate_raw_id nsenv kind id =
     | _ ->
       let (prefix, has_bslash) =
         match String.index id '\\' with
-        | Some i -> (String.sub id 0 i, true)
+        | Some i -> (String.sub id ~pos:0 ~len:i, true)
         | None -> (id, false)
       in
       if has_bslash && String.equal prefix "namespace" then

@@ -20,4 +20,4 @@ type t = {
 
 let get_fixme_pos (fixmes : fixmes) (pos : Pos.t) (code : int) : Pos.t option =
   let (line, _, _) = Pos.info_pos pos in
-  Option.bind (IMap.find_opt line fixmes) (IMap.find_opt code)
+  Option.bind (IMap.find_opt line fixmes) ~f:(IMap.find_opt code)

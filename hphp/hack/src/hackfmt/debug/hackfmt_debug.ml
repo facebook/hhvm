@@ -80,7 +80,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
     | None -> (fun id c -> Some (id, c))
     | Some id_list ->
       fun id c ->
-        if List.exists id_list (fun x -> x = id) then
+        if List.exists id_list ~f:(fun x -> x = id) then
           Some (id, c)
         else
           None
@@ -123,7 +123,10 @@ let debug_full_text source_text =
 
 let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n"
-  @@ String.sub (SourceText.text source_text) start_char (end_char - start_char)
+  @@ String.sub
+       (SourceText.text source_text)
+       ~pos:start_char
+       ~len:(end_char - start_char)
 
 let debug env ~range source_text doc chunk_groups =
   if !debug_config.print_doc then ignore (Doc.dump doc);

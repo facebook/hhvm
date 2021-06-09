@@ -43,7 +43,7 @@ let all_requirements ~lin_members =
   |> Sequence.filter ~f:(fun mro ->
          not (is_set mro_xhp_attrs_only mro.mro_flags))
   |> Sequence.filter_map ~f:(fun mro ->
-         Option.map mro.mro_required_at (fun pos ->
+         Option.map mro.mro_required_at ~f:(fun pos ->
              (pos, type_of_mro_element mro)))
 
 let is_disposable ~lin_members =

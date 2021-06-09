@@ -323,7 +323,7 @@ end = struct
     | Some (p, x') when String.equal x x' -> Some (Some p)
     | Some _
     | None ->
-      List.find_map expansions (function
+      List.find_map expansions ~f:(function
           | (_, x') when String.equal x x' -> Some None
           | _ -> None)
 
@@ -1319,8 +1319,8 @@ let error_Tunapplied_alias_in_illegal_context () =
 
 module Attributes = struct
   let mem x xs =
-    List.exists xs (fun { ua_name; _ } -> String.equal x (snd ua_name))
+    List.exists xs ~f:(fun { ua_name; _ } -> String.equal x (snd ua_name))
 
   let find x xs =
-    List.find xs (fun { ua_name; _ } -> String.equal x (snd ua_name))
+    List.find xs ~f:(fun { ua_name; _ } -> String.equal x (snd ua_name))
 end

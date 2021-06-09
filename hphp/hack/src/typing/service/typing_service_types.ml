@@ -74,12 +74,8 @@ let accumulate_job_output
     Measure.deserialize
       (Measure.serialize accumulated_so_far.jobs_finished_early)
   in
-  Measure.merge
-    ~record:acc_finished_to_end
-    ~from:produced_by_job.jobs_finished_to_end;
-  Measure.merge
-    ~record:acc_finished_early
-    ~from:produced_by_job.jobs_finished_early;
+  Measure.merge ~record:acc_finished_to_end produced_by_job.jobs_finished_to_end;
+  Measure.merge ~record:acc_finished_early produced_by_job.jobs_finished_early;
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
     dep_edges =

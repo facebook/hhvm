@@ -29,7 +29,7 @@ let string_of_kind (kind : kind) =
     match k.parameters with
     | [] -> "Type"
     | params ->
-      let parts = List.map params (fun (_, pk) -> stringify false pk) in
+      let parts = List.map params ~f:(fun (_, pk) -> stringify false pk) in
       let res = String.concat ~sep:" -> " parts ^ " -> Type" in
       if toplevel then
         res
@@ -60,7 +60,8 @@ let rec remove_bounds kind =
     kind with
     lower_bounds = TySet.empty;
     upper_bounds = TySet.empty;
-    parameters = List.map kind.parameters (fun (n, k) -> (n, remove_bounds k));
+    parameters =
+      List.map kind.parameters ~f:(fun (n, k) -> (n, remove_bounds k));
   }
 
 module Simple = struct
@@ -127,7 +128,7 @@ module Simple = struct
   (* not public *)
   and named_internal_kinds_of_decl_tparams (tparams : decl_tparam list) :
       named_full_kind list =
-    List.map tparams named_internal_kind_of_decl_tparam
+    List.map tparams ~f:named_internal_kind_of_decl_tparam
 
   (* public *)
   and named_kind_of_decl_tparam decl_tparam : named_kind =
@@ -138,7 +139,7 @@ module Simple = struct
 
   (* public *)
   let named_kinds_of_decl_tparams decl_tparams : named_kind list =
-    List.map decl_tparams named_kind_of_decl_tparam
+    List.map decl_tparams ~f:named_kind_of_decl_tparam
 
   let type_with_params_to_simple_kind ?reified ?enforceable ?newable tparams =
     let (st, _) = fully_applied_type ?reified ?enforceable ?newable () in
@@ -146,7 +147,7 @@ module Simple = struct
       NonLocalized [] )
 
   let get_named_parameter_kinds (kind, _) : named_kind list =
-    List.map kind.parameters (fun (n, fk) -> (n, (fk, NonLocalized [])))
+    List.map kind.parameters ~f:(fun (n, fk) -> (n, (fk, NonLocalized [])))
 
   let from_full_kind fk =
     let wildcard_bounds =

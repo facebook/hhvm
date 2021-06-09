@@ -189,8 +189,12 @@ let type_facts_to_json name tf =
   J.JSON_Object members
 
 let facts_to_json ~md5 ~sha1 facts =
-  let md5sum0 = ("md5sum0", hex_number_to_json (String.sub md5 0 16)) in
-  let md5sum1 = ("md5sum1", hex_number_to_json (String.sub md5 16 16)) in
+  let md5sum0 =
+    ("md5sum0", hex_number_to_json (String.sub md5 ~pos:0 ~len:16))
+  in
+  let md5sum1 =
+    ("md5sum1", hex_number_to_json (String.sub md5 ~pos:16 ~len:16))
+  in
   let sha1sum = ("sha1sum", J.JSON_String sha1) in
   let type_facts_json =
     let elements =

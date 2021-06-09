@@ -204,7 +204,7 @@ let detect_attempting_dynamic_coercion_reason r ty =
 
 let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
   Typing_log.(
-    log_with_level env "sub" level (fun () ->
+    log_with_level env "sub" ~level (fun () ->
         let types =
           [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
         in
@@ -271,7 +271,9 @@ let find_type_with_exact_negation env tyl =
     match tyl with
     | [] -> (env, None, acc_tyl)
     | ty :: tyl' ->
-      let (env, non_ty) = TUtils.non env (get_reason ty) ty TUtils.ApproxDown in
+      let (env, non_ty) =
+        TUtils.non env (get_reason ty) ty ~approx:TUtils.ApproxDown
+      in
       let nothing = MakeType.nothing Reason.none in
       if ty_equal non_ty nothing || is_neg ty || is_neg non_ty then
         find env tyl' (ty :: acc_tyl)
@@ -1292,7 +1294,8 @@ and simplify_subtype_i
           else
             (* TODO(T69931993) Type parameter env must carry variance information *)
             let variance_reifiedl =
-              List.map tyargs_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
+              List.map tyargs_sub ~f:(fun _ ->
+                  (Ast_defs.Invariant, Aast.Erased))
             in
             simplify_subtype_variance
               ~subtype_env
@@ -1442,7 +1445,7 @@ and simplify_subtype_i
                   in
                   ( if require_dynamic then
                     let upper_bounds =
-                      List.filter_map tp.tp_constraints (fun (c, ty) ->
+                      List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
                           match c with
                           | Ast_defs.Constraint_as ->
                             let (_env, ty) =
@@ -1631,7 +1634,8 @@ and simplify_subtype_i
               match td with
               | Some { td_tparams; _ } ->
                 let variance_reifiedl =
-                  List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
+                  List.map td_tparams ~f:(fun t ->
+                      (t.tp_variance, t.tp_reified))
                 in
                 simplify_subtype_variance
                   ~subtype_env
@@ -1738,7 +1742,7 @@ and simplify_subtype_i
                     List.is_empty tyl_super
                     && not (Partial.should_check_error (Env.get_mode env) 4101)
                   then
-                    List.map tyl_sub (fun _ ->
+                    List.map tyl_sub ~f:(fun _ ->
                         mk (r_super, Typing_defs.make_tany ()))
                   else
                     tyl_super
@@ -1748,7 +1752,7 @@ and simplify_subtype_i
                     List.is_empty tyl_sub
                     && not (Partial.should_check_error (Env.get_mode env) 4101)
                   then
-                    List.map tyl_super (fun _ ->
+                    List.map tyl_super ~f:(fun _ ->
                         mk (r_super, Typing_defs.make_tany ()))
                   else
                     tyl_sub
@@ -1770,10 +1774,10 @@ and simplify_subtype_i
                     else
                       match class_def_sub with
                       | None ->
-                        List.map tyl_sub (fun _ ->
+                        List.map tyl_sub ~f:(fun _ ->
                             (Ast_defs.Invariant, Aast.Erased))
                       | Some class_sub ->
-                        List.map (Cls.tparams class_sub) (fun t ->
+                        List.map (Cls.tparams class_sub) ~f:(fun t ->
                             (t.tp_variance, t.tp_reified))
                   in
                   let subtype_env = remove_partial_enforcement subtype_env in
@@ -1804,7 +1808,7 @@ and simplify_subtype_i
                   List.is_empty tyl_sub
                   && not (Partial.should_check_error (Env.get_mode env) 4029)
                 then
-                  List.map (Cls.tparams class_sub) (fun _ ->
+                  List.map (Cls.tparams class_sub) ~f:(fun _ ->
                       mk (r_sub, Typing_defs.make_tany ()))
                 else
                   tyl_sub
@@ -2578,8 +2582,8 @@ and simplify_subtype_funs_attributes
          Errors.readonly_mismatch_on_error
            "Function readonly mismatch"
            p_sub
-           [(p_sub, "This function is not marked readonly")]
-           [(p_super, "This function is marked readonly")]
+           ~reason_sub:[(p_sub, "This function is not marked readonly")]
+           ~reason_super:[(p_super, "This function is marked readonly")]
            subtype_env.on_error)
   |> check_with
        (readonly_subtype
@@ -2590,8 +2594,9 @@ and simplify_subtype_funs_attributes
          Errors.readonly_mismatch_on_error
            "Function readonly return mismatch"
            p_sub
-           [(p_sub, "This function returns a readonly value")]
-           [(p_super, "This function does not return a readonly value")]
+           ~reason_sub:[(p_sub, "This function returns a readonly value")]
+           ~reason_super:
+             [(p_super, "This function does not return a readonly value")]
            subtype_env.on_error)
   |> check_with
        (Bool.equal

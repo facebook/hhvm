@@ -101,11 +101,11 @@ let write_patches_to_buffer buf original_content patch_list =
     else
       let size = j - !i in
       let size = min (- !i + len) size in
-      let str_to_write = String.sub original_content !i size in
+      let str_to_write = String.sub original_content ~pos:!i ~len:size in
       Buffer.add_string buf str_to_write;
       i := !i + size
   in
-  List.iter patch_list (fun res ->
+  List.iter patch_list ~f:(fun res ->
       let pos = get_pos res in
       let (char_start, char_end) = Pos.info_raw pos in
       add_original_content char_start;

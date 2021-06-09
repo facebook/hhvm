@@ -720,7 +720,7 @@ let type_declaration name td =
         should_box_variant name
     in
     let ctors =
-      map_and_concat ctors (variant_constructor_declaration ~box_fields)
+      map_and_concat ctors ~f:(variant_constructor_declaration ~box_fields)
     in
     sprintf
       "%s enum %s {\n%s}%s\n%s"

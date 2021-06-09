@@ -97,14 +97,14 @@ let rec freshen_inside_ty env ty =
     let (env, ty) = freshen_inside_ty env ty in
     (env, mk (r, Toption ty))
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl freshen_inside_ty in
+    let (env, tyl) = List.map_env env tyl ~f:freshen_inside_ty in
     (env, mk (r, Tunion tyl))
   | Tintersection tyl ->
-    let (env, tyl) = List.map_env env tyl freshen_inside_ty in
+    let (env, tyl) = List.map_env env tyl ~f:freshen_inside_ty in
     Inter.intersect_list env r tyl
   (* Tuples are covariant *)
   | Ttuple tyl ->
-    let (env, tyl) = List.map_env env tyl freshen_ty in
+    let (env, tyl) = List.map_env env tyl ~f:freshen_ty in
     (env, mk (r, Ttuple tyl))
   (* Shape data is covariant *)
   | Tshape (shape_kind, fdm) ->
@@ -114,7 +114,7 @@ let rec freshen_inside_ty env ty =
   | Tfun ft ->
     let (env, ft_ret) = freshen_possibly_enforced_ty env ft.ft_ret in
     let (env, ft_params) =
-      List.map_env env ft.ft_params (fun env p ->
+      List.map_env env ft.ft_params ~f:(fun env p ->
           let (env, fp_type) = freshen_possibly_enforced_ty env p.fp_type in
           (env, { p with fp_type }))
     in
@@ -126,7 +126,7 @@ let rec freshen_inside_ty env ty =
       match Env.get_typedef env name with
       | None -> default ()
       | Some td ->
-        let variancel = List.map td.td_tparams (fun t -> t.tp_variance) in
+        let variancel = List.map td.td_tparams ~f:(fun t -> t.tp_variance) in
         let (env, tyl) = freshen_tparams env variancel tyl in
         (env, mk (r, Tnewtype (name, tyl, ty)))
     end
@@ -137,7 +137,9 @@ let rec freshen_inside_ty env ty =
       match Env.get_class env cid with
       | None -> default ()
       | Some cls ->
-        let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in
+        let variancel =
+          List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
+        in
         let (env, tyl) = freshen_tparams env variancel tyl in
         (env, mk (r, Tclass ((p, cid), e, tyl)))
     end
@@ -507,7 +509,7 @@ let solve_tyvar_wrt_variance env r var =
 
 let solve_to_equal_bound_or_wrt_variance env r var =
   Typing_log.(
-    log_with_level env "prop" 2 (fun () ->
+    log_with_level env "prop" ~level:2 (fun () ->
         log_types
           (Reason.to_pos r)
           env
@@ -780,7 +782,7 @@ let rec non_null env pos ty =
   in
   let (env, ty) = make_concrete_super_types_nonnull#on_type env ty in
   let r = Reason.Rwitness_from_decl pos in
-  Inter.intersect env r ty (MakeType.nonnull r)
+  Inter.intersect env ~r ty (MakeType.nonnull r)
 
 let try_bind_to_equal_bound env v =
   (* The reason we pass here doesn't matter since it's used only when `freshen` is true. *)

@@ -65,18 +65,18 @@ let from_text
     ~(disallow_hash_comments : bool)
     ~(filename : Relative_path.t)
     ~(text : string) =
-  Option.bind
-    ( extract_as_json_string
-        ~php5_compat_mode
-        ~hhvm_compat_mode
-        ~disable_nontoplevel_declarations
-        ~disable_legacy_soft_typehints
-        ~allow_new_attribute_syntax
-        ~disable_legacy_attribute_syntax
-        ~enable_xhp_class_modifier
-        ~disable_xhp_element_mangling
-        ~disallow_hash_comments
-        ~filename
-        ~text
-    |> Option.map ~f:Hh_json.json_of_string )
-    facts_from_json
+  let open Option in
+  extract_as_json_string
+    ~php5_compat_mode
+    ~hhvm_compat_mode
+    ~disable_nontoplevel_declarations
+    ~disable_legacy_soft_typehints
+    ~allow_new_attribute_syntax
+    ~disable_legacy_attribute_syntax
+    ~enable_xhp_class_modifier
+    ~disable_xhp_element_mangling
+    ~disallow_hash_comments
+    ~filename
+    ~text
+  |> Option.map ~f:Hh_json.json_of_string
+  >>= facts_from_json

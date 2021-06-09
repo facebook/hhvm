@@ -128,8 +128,8 @@ module Log = struct
 
   let tyvars_stack_as_value tyvars_stack =
     List
-      (List.map tyvars_stack (fun (_p, l) ->
-           List (List.map l (fun i -> Atom (var_as_string i)))))
+      (List.map tyvars_stack ~f:(fun (_p, l) ->
+           List (List.map l ~f:(fun i -> Atom (var_as_string i)))))
 
   let inference_env_as_value env =
     let {
@@ -581,10 +581,10 @@ let get_tyvar_pos env var =
   | Some tvinfo -> tvinfo.tyvar_pos
 
 let get_tyvar_lower_bounds_opt env v =
-  Option.map (get_tyvar_constraints_opt env v) (fun x -> x.lower_bounds)
+  Option.map (get_tyvar_constraints_opt env v) ~f:(fun x -> x.lower_bounds)
 
 let get_tyvar_upper_bounds_opt env v =
-  Option.map (get_tyvar_constraints_opt env v) (fun x -> x.upper_bounds)
+  Option.map (get_tyvar_constraints_opt env v) ~f:(fun x -> x.upper_bounds)
 
 let get_tyvar_lower_bounds env var : ITySet.t =
   match get_solving_info_opt env var with
@@ -723,7 +723,7 @@ let remove_tyvar_upper_bound env var upper_var =
       ITySet.filter
         (fun ty ->
           let (_env, ty) = expand_internal_type env ty in
-          not @@ InternalType.is_var_v ty upper_var)
+          not @@ InternalType.is_var_v ty ~v:upper_var)
         tvconstraints.upper_bounds
     in
     set_tyvar_constraints env var { tvconstraints with upper_bounds }
@@ -738,7 +738,7 @@ let remove_tyvar_lower_bound env var lower_var =
       ITySet.filter
         (fun ty ->
           let (_env, ty) = expand_internal_type env ty in
-          not @@ InternalType.is_var_v ty lower_var)
+          not @@ InternalType.is_var_v ty ~v:lower_var)
         tvconstraints.lower_bounds
     in
     set_tyvar_constraints env var { tvconstraints with lower_bounds }
@@ -1426,13 +1426,13 @@ let replace_var_by_ty_in_prop prop v ty =
     match prop with
     | TL.IsSubtype (ty1, ty2) ->
       let ty1 =
-        if InternalType.is_var_v ty1 v then
+        if InternalType.is_var_v ty1 ~v then
           LoclType ty
         else
           ty1
       in
       let ty2 =
-        if InternalType.is_var_v ty2 v then
+        if InternalType.is_var_v ty2 ~v then
           LoclType ty
         else
           ty2

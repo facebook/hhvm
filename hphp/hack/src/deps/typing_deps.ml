@@ -505,7 +505,7 @@ module SQLiteGraph = struct
             fun obj acc ->
             if Dep.is_class obj then
               let acc = DepSet.add acc obj in
-              get_extend_deps visited obj acc
+              get_extend_deps ~visited ~source_class:obj ~acc
             else
               acc
           end
@@ -519,7 +519,7 @@ module SQLiteGraph = struct
         if not @@ Dep.is_class dep then
           acc
         else
-          get_extend_deps trace dep acc)
+          get_extend_deps ~visited:trace ~source_class:dep ~acc)
 
   let add_typing_deps deps =
     DepSet.fold deps ~init:deps ~f:(fun dep acc ->

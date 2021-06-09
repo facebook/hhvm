@@ -12,7 +12,7 @@ open Hh_prelude
 type result = Pos.absolute Lint.t list
 
 let output_json oc el =
-  let errors_json = List.map el Lint.to_json in
+  let errors_json = List.map el ~f:Lint.to_json in
   let res =
     Hh_json.JSON_Object
       [
@@ -36,5 +36,5 @@ let output_text oc el format =
       | Errors.Highlighted -> Lint.to_highlighted_string
     in
     let sl = List.map el ~f in
-    List.iter sl (fun s -> Printf.fprintf oc "%s\n%!" s) );
+    List.iter sl ~f:(fun s -> Printf.fprintf oc "%s\n%!" s) );
   Out_channel.flush oc

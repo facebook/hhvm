@@ -168,7 +168,7 @@ let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
   | Some opt -> opt
   | None ->
     let opt = Decl_ipc_ffi_externs.get_const_path t.client name in
-    String.Table.add_exn t.gconst_path_cache name opt;
+    String.Table.add_exn t.gconst_path_cache ~key:name ~data:opt;
     if Option.is_none opt then Decls.add (FileInfo.Const, name) None;
     opt
 
@@ -177,7 +177,7 @@ let rpc_get_fun_path (t : t) (name : string) : Relative_path.t option =
   | Some opt -> opt
   | None ->
     let opt = Decl_ipc_ffi_externs.get_fun_path t.client name in
-    String.Table.add_exn t.fun_path_cache name opt;
+    String.Table.add_exn t.fun_path_cache ~key:name ~data:opt;
     if Option.is_none opt then Decls.add (FileInfo.Fun, name) None;
     opt
 
@@ -187,8 +187,8 @@ let rpc_get_type_path_and_kind (t : t) (name : string) :
   | Some opt -> opt
   | None ->
     let opt = Decl_ipc_ffi_externs.get_type_path_and_kind t.client name in
-    String.Table.add_exn t.type_path_and_kind_cache name opt;
-    let kind_opt = Option.map opt snd in
+    String.Table.add_exn t.type_path_and_kind_cache ~key:name ~data:opt;
+    let kind_opt = Option.map opt ~f:snd in
     let ( <> ) a b = not (Option.equal Naming_types.equal_kind_of_type a b) in
     if kind_opt <> Some Naming_types.TClass then
       Decls.add (FileInfo.Class, name) None;
@@ -210,8 +210,10 @@ let parse_and_cache_decls_in
   t.current_file_decls <-
     List.fold decls ~init:SymbolMap.empty ~f:(fun map (name, decl) ->
         match decl with
-        | Class _ -> SymbolMap.add map (FileInfo.Class, name) decl
-        | Fun _ -> SymbolMap.add map (FileInfo.Fun, name) decl
-        | Typedef _ -> SymbolMap.add map (FileInfo.Typedef, name) decl
-        | Record _ -> SymbolMap.add map (FileInfo.RecordDef, name) decl
-        | Const _ -> SymbolMap.add map (FileInfo.Const, name) decl)
+        | Class _ -> SymbolMap.add map ~key:(FileInfo.Class, name) ~data:decl
+        | Fun _ -> SymbolMap.add map ~key:(FileInfo.Fun, name) ~data:decl
+        | Typedef _ ->
+          SymbolMap.add map ~key:(FileInfo.Typedef, name) ~data:decl
+        | Record _ ->
+          SymbolMap.add map ~key:(FileInfo.RecordDef, name) ~data:decl
+        | Const _ -> SymbolMap.add map ~key:(FileInfo.Const, name) ~data:decl)

@@ -61,7 +61,7 @@ module Method_jumps = struct
       readable ^ " " ^ Utils.strip_ns name
 
   let print_readable res ~find_children =
-    List.iter res (fun res ->
+    List.iter res ~f:(fun res ->
         let origin_readable =
           readable_place res.orig_name res.orig_pos res.orig_p_name
         in
@@ -212,7 +212,7 @@ module Symbol_info_service = struct
 
   let fun_call_to_json fun_call_results =
     let open Hh_json in
-    List.map fun_call_results (fun item ->
+    List.map fun_call_results ~f:(fun item ->
         let item_type =
           match item.type_ with
           | Function -> "Function"
@@ -230,7 +230,7 @@ module Symbol_info_service = struct
   let symbol_type_to_json symbol_type_results =
     let open Hh_json in
     Symbol_type.(
-      List.rev_map symbol_type_results (fun item ->
+      List.rev_map symbol_type_results ~f:(fun item ->
           JSON_Object
             [
               ("pos", Pos.json item.pos);

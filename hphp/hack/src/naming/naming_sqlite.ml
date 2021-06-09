@@ -128,7 +128,9 @@ module Common = struct
     fold_sqlite stmt ~init:Relative_path.Set.empty ~f:(fun stmt acc ->
         let prefix_type = column_int64 stmt 0 in
         let suffix = column_str stmt 1 in
-        let relative_path = make_relative_path prefix_type suffix in
+        let relative_path =
+          make_relative_path ~prefix_int:prefix_type ~suffix
+        in
         Relative_path.Set.add acc relative_path)
 end
 
@@ -561,7 +563,7 @@ module TypesTable = struct
       let class_type =
         value_exn (flags >>= Naming_types.kind_of_type_of_enum)
       in
-      Some (make_relative_path prefix_type suffix, class_type)
+      Some (make_relative_path ~prefix_int:prefix_type ~suffix, class_type)
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -669,7 +671,7 @@ module FunsTable = struct
     | Sqlite3.Rc.ROW ->
       let prefix_type = column_int64 get_stmt 0 in
       let suffix = column_str get_stmt 1 in
-      Some (make_relative_path prefix_type suffix)
+      Some (make_relative_path ~prefix_int:prefix_type ~suffix)
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -750,7 +752,7 @@ module ConstsTable = struct
     | Sqlite3.Rc.ROW ->
       let prefix_type = column_int64 get_stmt 0 in
       let suffix = column_str get_stmt 1 in
-      Some (make_relative_path prefix_type suffix)
+      Some (make_relative_path ~prefix_int:prefix_type ~suffix)
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -779,7 +781,7 @@ let get_db_and_stmt_cache (path : db_path) : Sqlite3.db * StatementCache.t =
     (db, stmt_cache)
   | _ ->
     let db = open_db path in
-    let stmt_cache = StatementCache.make db in
+    let stmt_cache = StatementCache.make ~db in
     db_cache := `Cached (Some (path, db, stmt_cache));
     (db, stmt_cache)
 
@@ -897,7 +899,7 @@ let copy_and_update
   let (Db_path existing_path, Db_path new_path) = (existing_db, new_db) in
   FileUtil.cp ~force:(FileUtil.Ask (fun _ -> false)) [existing_path] new_path;
   let new_db = open_db new_db in
-  let stmt_cache = StatementCache.make new_db in
+  let stmt_cache = StatementCache.make ~db:new_db in
   LocalChanges.update new_db stmt_cache local_changes;
   StatementCache.close stmt_cache;
   ()

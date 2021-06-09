@@ -84,10 +84,10 @@ let walk content pos_level_list =
       ()
     else
       let size = j - !i in
-      result := (level_opt, String.sub content !i size) :: !result;
+      result := (level_opt, String.sub content ~pos:!i ~len:size) :: !result;
       i := !i + size
   in
-  List.iter pos_level_list (fun ((char_start, char_end), level) ->
+  List.iter pos_level_list ~f:(fun ((char_start, char_end), level) ->
       add None char_start;
       add (Some level) char_end);
   add None (String.length content);

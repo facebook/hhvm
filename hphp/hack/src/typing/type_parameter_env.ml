@@ -45,7 +45,7 @@ let mem name tpenv = SMap.mem name tpenv.tparams
 
 let get_with_pos name tpenv = SMap.find_opt name tpenv.tparams
 
-let get name tpenv = Option.map (get_with_pos name tpenv) snd
+let get name tpenv = Option.map (get_with_pos name tpenv) ~f:snd
 
 let get_tparams tpenv = tpenv.tparams
 
@@ -367,7 +367,7 @@ let add_generic_parameters tpenv tparaml =
   List.fold_left tparaml ~f:add_top ~init:tpenv
 
 let get_parameter_names tpi =
-  List.map tpi.parameters (fun (name, _) -> snd name)
+  List.map tpi.parameters ~f:(fun (name, _) -> snd name)
 
 let rec pp_tparam_info fmt tpi =
   Format.fprintf fmt "@[<hv 2>{ ";

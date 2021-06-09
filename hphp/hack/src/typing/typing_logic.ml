@@ -79,8 +79,8 @@ let invalid ~fail = Disj (fail, [])
 *)
 let rec is_valid p =
   match p with
-  | Conj ps -> List.for_all ps is_valid
-  | Disj (_, ps) -> List.exists ps is_valid
+  | Conj ps -> List.for_all ps ~f:is_valid
+  | Disj (_, ps) -> List.exists ps ~f:is_valid
   | Coerce _
   | IsSubtype (_, _) ->
     false
@@ -90,8 +90,8 @@ let rec is_valid p =
 *)
 and is_unsat p =
   match p with
-  | Conj ps -> List.exists ps is_unsat
-  | Disj (_, ps) -> List.for_all ps is_unsat
+  | Conj ps -> List.exists ps ~f:is_unsat
+  | Disj (_, ps) -> List.for_all ps ~f:is_unsat
   | Coerce _
   | IsSubtype (_, _) ->
     false

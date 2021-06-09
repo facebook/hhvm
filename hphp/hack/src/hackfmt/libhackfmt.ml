@@ -52,7 +52,7 @@ let text_with_formatted_ranges
   in
   let buf = Buffer.create (end_offset - start_offset + 256) in
   let bytes_seen = ref start_offset in
-  List.iter formatted_ranges (fun ((st, ed), formatted) ->
+  List.iter formatted_ranges ~f:(fun ((st, ed), formatted) ->
       for i = !bytes_seen to st - 1 do
         Buffer.add_char buf text.[i]
       done;
@@ -81,7 +81,7 @@ let format_tree ?config tree =
   let whole_file = [(0, String.length text)] in
   let ranges = Interval.diff_sorted_lists whole_file noformat_ranges in
   let formatted_ranges =
-    List.map ranges (fun range ->
+    List.map ranges ~f:(fun range ->
         (range, Line_splitter.solve env ~range ~source_text:text chunk_groups))
   in
   let buf = text_with_formatted_ranges text formatted_ranges in
@@ -118,7 +118,7 @@ let format_range ?config range tree =
   in
   let ranges = Interval.diff_sorted_lists [range] noformat_ranges in
   let formatted_ranges =
-    List.map ranges (fun range ->
+    List.map ranges ~f:(fun range ->
         (range, Line_splitter.solve env ~range ~source_text:text chunk_groups))
   in
   let buf = text_with_formatted_ranges ~range text formatted_ranges in
@@ -158,7 +158,7 @@ let format_intervals ?config intervals tree =
   in
   let ranges = Interval.diff_sorted_lists ranges noformat_ranges in
   let formatted_ranges =
-    List.map ranges (fun range ->
+    List.map ranges ~f:(fun range ->
         ( range,
           Line_splitter.solve
             env

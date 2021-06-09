@@ -17,7 +17,7 @@ let clear = Hashtbl.clear
 
 let copy = Hashtbl.copy
 
-let add set x = Hashtbl.set set x ()
+let add set x = Hashtbl.set set ~key:x ~data:()
 
 let mem = Hashtbl.mem
 

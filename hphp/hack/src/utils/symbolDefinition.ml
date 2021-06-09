@@ -55,8 +55,8 @@ let rec to_absolute x =
     x with
     pos = Pos.to_absolute x.pos;
     span = Pos.to_absolute x.span;
-    children = Option.map x.children (fun x -> List.map x to_absolute);
-    params = Option.map x.params (fun x -> List.map x to_absolute);
+    children = Option.map x.children ~f:(fun x -> List.map x ~f:to_absolute);
+    params = Option.map x.params ~f:(fun x -> List.map x ~f:to_absolute);
     docblock = x.docblock;
   }
 
@@ -65,8 +65,8 @@ let rec to_relative x =
     x with
     pos = Pos.to_relative x.pos;
     span = Pos.to_relative x.span;
-    children = Option.map x.children (fun x -> List.map x to_relative);
-    params = Option.map x.params (fun x -> List.map x to_relative);
+    children = Option.map x.children ~f:(fun x -> List.map x ~f:to_relative);
+    params = Option.map x.params ~f:(fun x -> List.map x ~f:to_relative);
   }
 
 let string_of_kind = function

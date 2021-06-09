@@ -39,7 +39,7 @@ let is_dot_file path =
 
 let is_hack path =
   (not (is_dot_file path))
-  && List.exists extensions (Filename.check_suffix path)
+  && List.exists extensions ~f:(Filename.check_suffix path)
 
 (* Returns whether one of the ancestral directories of path has the given
  * name. *)

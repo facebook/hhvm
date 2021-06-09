@@ -101,7 +101,7 @@ let format_markdown
 let eat_prefix (prefix : string) (state : parse_state) : parse_state option =
   let { parsed; remaining } = state in
   Option.Monad_infix.(
-    String.chop_prefix remaining prefix >>= fun remaining ->
+    String.chop_prefix remaining ~prefix >>= fun remaining ->
     Some { parsed; remaining })
 
 (* Success if p s fails, returning original s *)

@@ -102,8 +102,8 @@ let files_t_merge ~f x y =
       in
       Relative_path.Map.add
         acc
-        k
-        (PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y)))
+        ~key:k
+        ~data:(PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y)))
 
 let files_t_to_list x =
   files_t_fold x ~f:(fun _ _ x acc -> List.rev_append x acc) ~init:[]
@@ -386,8 +386,12 @@ let set_current_list file_t_map new_list =
   file_t_map :=
     Relative_path.Map.add
       !file_t_map
-      current_file
-      (PhaseMap.add (get_current_file_t !file_t_map) current_phase new_list)
+      ~key:current_file
+      ~data:
+        (PhaseMap.add
+           (get_current_file_t !file_t_map)
+           ~key:current_phase
+           ~data:new_list)
 
 let do_with_context path phase f = run_in_context path phase (fun () -> do_ f)
 
@@ -421,7 +425,7 @@ let to_absolute : error -> finalized_error =
  fun { code; claim; reasons } ->
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
-    List.map reasons (fun (p, s) ->
+    List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
   { code; claim; reasons }
@@ -526,7 +530,7 @@ let to_string ({ code; claim; reasons } : finalized_error) : string =
         error_code
         reason_msg
     end;
-  List.iter reasons (fun (p, w) ->
+  List.iter reasons ~f:(fun (p, w) ->
       let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
       Buffer.add_string buf msg);
   Buffer.contents buf
@@ -797,7 +801,7 @@ and incremental_update :
     in
     match new_phase_map with
     | None -> Relative_path.Map.remove acc path
-    | Some x -> Relative_path.Map.add acc path x
+    | Some x -> Relative_path.Map.add acc ~key:path ~data:x
   in
   (* Replace old errors with new *)
   let res =
@@ -2308,7 +2312,7 @@ let abstract_tconst_not_allowed
     ]
 
 let add_with_trail code claim reasons trail =
-  add_list code claim (reasons @ List.map trail typedef_trail_entry)
+  add_list code claim (reasons @ List.map trail ~f:typedef_trail_entry)
 
 let enum_constant_type_bad pos ty_pos ty trail =
   add_with_trail
@@ -4288,8 +4292,8 @@ let generics_not_allowed p =
 
 let trivial_strict_eq p b left right left_trail right_trail =
   let msg = "This expression is always " ^ b in
-  let left_trail = List.map left_trail typedef_trail_entry in
-  let right_trail = List.map right_trail typedef_trail_entry in
+  let left_trail = List.map left_trail ~f:typedef_trail_entry in
+  let right_trail = List.map right_trail ~f:typedef_trail_entry in
   add_list
     (Typing.err_code Typing.TrivialStrictEq)
     (p, msg)
@@ -4438,14 +4442,14 @@ let local_variable_modified_and_used pos_modified pos_used_l =
     (Typing.err_code Typing.LocalVariableModifedAndUsed)
     ( pos_modified,
       "Unsequenced modification and access to local variable. Modified here" )
-    (List.map pos_used_l used_msg)
+    (List.map pos_used_l ~f:used_msg)
 
 let local_variable_modified_twice pos_modified pos_modified_l =
   let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
   add_list
     (Typing.err_code Typing.LocalVariableModifedTwice)
     (pos_modified, "Unsequenced modifications to local variable. Modified here")
-    (List.map pos_modified_l modified_msg)
+    (List.map pos_modified_l ~f:modified_msg)
 
 let assign_during_case p =
   add
@@ -4543,7 +4547,7 @@ let ambiguous_lambda pos uses =
     (Typing.err_code Typing.AmbiguousLambda)
     (pos, msg1)
     ( (Pos_or_decl.of_raw_pos pos, msg2)
-    :: List.map uses (fun (pos, ty) ->
+    :: List.map uses ~f:(fun (pos, ty) ->
            (pos, "This use has type " ^ Markdown_lite.md_codify ty)) )
 
 let wrong_expression_kind_attribute
@@ -4821,7 +4825,7 @@ let duplicate_interface pos name others =
       Printf.sprintf
         "Interface %s is used more than once in this declaration."
         (strip_ns name |> Markdown_lite.md_codify) )
-    (List.map others (fun pos -> (pos, "Here is another occurrence")))
+    (List.map others ~f:(fun pos -> (pos, "Here is another occurrence")))
 
 let hk_var_description because_nested var_name =
   if because_nested then
@@ -5725,7 +5729,7 @@ let module_mismatch pos m2_pos m1 m2 =
 let to_json (error : finalized_error) =
   let (error_code, msgl) = (get_code error, to_list error) in
   let elts =
-    List.map msgl (fun (p, w) ->
+    List.map msgl ~f:(fun (p, w) ->
         let (line, scol, ecol) = Pos.info_pos p in
         Hh_json.JSON_Object
           [

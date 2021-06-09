@@ -419,7 +419,7 @@ module SpecialIdents = struct
   let tmp_var_prefix = "__tmp$"
 
   let is_tmp_var name =
-    String.length name > 6 && String.(sub name 0 6 = tmp_var_prefix)
+    String.length name > 6 && String.(sub name ~pos:0 ~len:6 = tmp_var_prefix)
 
   let assert_tmp_var name = assert (is_tmp_var name)
 end

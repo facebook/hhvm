@@ -37,7 +37,7 @@ let parse filename =
 let oxidize filename =
   let phrases = parse filename in
   let in_basename = Filename.basename filename in
-  let module_name = String.chop_suffix_exn in_basename ".ml" in
+  let module_name = String.chop_suffix_exn in_basename ~suffix:".ml" in
   let module_name = convert_module_name module_name in
   log "Converting %s" module_name;
   let oxidized_module =
@@ -147,7 +147,7 @@ let parse_extern_types_file filename =
            let name_without_crate =
              String.subo name ~pos:after_coloncolon_idx
            in
-           SMap.add map name_without_crate name
+           SMap.add map ~key:name_without_crate ~data:name
          with _ ->
            if String.(name <> "") then
              failwith

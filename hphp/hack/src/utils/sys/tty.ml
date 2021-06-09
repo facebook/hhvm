@@ -146,7 +146,7 @@ let print_one ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) c s =
   Stdlib.Printf.fprintf out_channel "%s" (apply_color ~color_mode c s)
 
 let cprint ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) strs =
-  List.iter strs (fun (c, s) -> print_one ~color_mode ~out_channel c s)
+  List.iter strs ~f:(fun (c, s) -> print_one ~color_mode ~out_channel c s)
 
 let cprintf ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) c =
   Printf.ksprintf (print_one ~color_mode ~out_channel c)
@@ -196,7 +196,7 @@ let read_choice message choices =
     Stdio.printf
       "%s (%s)%!"
       message
-      (String.concat ~sep:"|" (List.map choices String_utils.string_of_char));
+      (String.concat ~sep:"|" (List.map choices ~f:String_utils.string_of_char));
     let choice = read_char () in
     Stdio.print_endline "";
     if List.mem ~equal:Char.equal choices choice then

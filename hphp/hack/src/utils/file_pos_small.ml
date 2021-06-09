@@ -126,7 +126,10 @@ let to_lexing_pos pos_fname t =
 
 let as_large_pos p =
   let (lnum, col, bol) = line_column_beg p in
-  File_pos_large.of_lnum_bol_cnum lnum bol (bol + col)
+  File_pos_large.of_lnum_bol_cnum
+    ~pos_lnum:lnum
+    ~pos_bol:bol
+    ~pos_cnum:(bol + col)
 
 let of_large_pos : File_pos_large.t -> t option =
  fun { File_pos_large.pos_bol; pos_cnum; pos_lnum } ->

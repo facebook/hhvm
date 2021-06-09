@@ -97,13 +97,13 @@ let strip_ns s =
   if String.length s = 0 || not (Char.equal s.[0] '\\') then
     s
   else
-    String.sub s 1 (String.length s - 1)
+    String.sub s ~pos:1 ~len:(String.length s - 1)
 
 let strip_xhp_ns s =
   if String.length s = 0 || not (Char.equal s.[0] ':') then
     s
   else
-    String.sub s 1 (String.length s - 1)
+    String.sub s ~pos:1 ~len:(String.length s - 1)
 
 let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
@@ -126,7 +126,7 @@ let strip_all_ns s =
   match String.rindex s '\\' with
   | Some pos ->
     let base_name_start = pos + 1 in
-    String.sub s base_name_start (String.length s - base_name_start)
+    String.sub s ~pos:base_name_start ~len:(String.length s - base_name_start)
   | None -> s
 
 (* "\\A\\B\\C" -> ("\\A\\B\\" * "C") *)
@@ -135,9 +135,9 @@ let split_ns_from_name (s : string) : string * string =
   | Some pos ->
     let base_name_start = pos + 1 in
     let name_part =
-      String.sub s base_name_start (String.length s - base_name_start)
+      String.sub s ~pos:base_name_start ~len:(String.length s - base_name_start)
     in
-    let namespace_part = String.sub s 0 base_name_start in
+    let namespace_part = String.sub s ~pos:0 ~len:base_name_start in
     (namespace_part, name_part)
   | None -> ("\\", s)
 
@@ -154,7 +154,7 @@ let expand_namespace (ns_map : (string * string) list) (s : string) : string =
   (* Might need left backslash *)
   let ns = add_ns raw_ns in
   let matching_alias =
-    List.find ns_map (fun (alias, _) ->
+    List.find ns_map ~f:(fun (alias, _) ->
         let fixup = add_ns alias ^ "\\" in
         String.equal fixup ns)
   in

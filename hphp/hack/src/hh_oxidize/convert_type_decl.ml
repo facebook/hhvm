@@ -162,7 +162,7 @@ end = struct
     List.exists (skip_list_for_trait trait) ~f:(fun skip_ty ->
         (* if skip_ty is like "SomeTy" then treat it as unqualified
          * and skip if any type like "some_path::SomeTy" is in the
-         * skip list. Otherwise, just compare the fully qualified types, 
+         * skip list. Otherwise, just compare the fully qualified types,
          * modulo "*". *)
         match String.split skip_ty ~on:':' with
         | [skip_ty] ->
@@ -306,7 +306,7 @@ let should_use_alias_instead_of_tuple_struct ty_name =
 let doc_comment_of_attribute { attr_name; attr_payload; _ } =
   match (attr_name, attr_payload) with
   | ({ txt = "ocaml.doc"; _ }, PStr structure_items) ->
-    List.find_map structure_items (fun structure_item ->
+    List.find_map structure_items ~f:(fun structure_item ->
         match structure_item.pstr_desc with
         | Pstr_eval
             ({ pexp_desc = Pexp_constant (Pconst_string (doc, _)); _ }, _) ->
@@ -408,7 +408,7 @@ let declare_record_arguments ?(pub = false) labels =
     while !idx > 0 && Char.(prefix.[!idx - 1] <> '_') do
       idx := !idx - 1
     done;
-    String.sub prefix 0 !idx
+    String.sub prefix ~pos:0 ~len:!idx
   in
   labels
   |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
@@ -449,7 +449,7 @@ let variant_constructor_declaration ?(box_fields = false) cd =
     (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
        and that all the variants are zero-argument (i.e., assume this is a
        C-like enum and provide custom discriminant values). *)
-    List.find_map cd.pcd_attributes (fun { attr_name; attr_payload; _ } ->
+    List.find_map cd.pcd_attributes ~f:(fun { attr_name; attr_payload; _ } ->
         match (attr_name, attr_payload) with
         | ( { txt = "value"; _ },
             PStr
@@ -705,7 +705,7 @@ let type_declaration name td =
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let all_nullary =
-      List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
+      List.for_all ctors ~f:(fun c -> 0 = ctor_arg_len c.pcd_args)
     in
     let force_derive_copy =
       if is_by_ref () then

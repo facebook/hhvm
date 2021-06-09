@@ -323,19 +323,19 @@ module Select_timeout = struct
     let avail = tic.max - tic.curr in
     if n <= avail then (
       (* There is enough to read in the buffer. *)
-      Bytes.blit tic.buf tic.curr s ofs n;
+      Bytes.blit ~src:tic.buf ~src_pos:tic.curr ~dst:s ~dst_pos:ofs ~len:n;
       tic.curr <- tic.curr + n;
       n
     ) else if avail > 0 then (
       (* Read the rest of the buffer. *)
-      Bytes.blit tic.buf tic.curr s ofs avail;
+      Bytes.blit ~src:tic.buf ~src_pos:tic.curr ~dst:s ~dst_pos:ofs ~len:avail;
       tic.curr <- tic.curr + avail;
       avail
     ) else
       (* No input to read, refill buffer. *)
       let nread = refill ?timeout tic in
       let n = min nread n in
-      Bytes.blit tic.buf tic.curr s ofs n;
+      Bytes.blit ~src:tic.buf ~src_pos:tic.curr ~dst:s ~dst_pos:ofs ~len:n;
       tic.curr <- tic.curr + n;
       n
 
@@ -362,7 +362,12 @@ module Select_timeout = struct
         let pos =
           if tic.curr <> 0 then (
             tic.max <- tic.max - tic.curr;
-            Bytes.blit tic.buf tic.curr tic.buf 0 tic.max;
+            Bytes.blit
+              ~src:tic.buf
+              ~src_pos:tic.curr
+              ~dst:tic.buf
+              ~dst_pos:0
+              ~len:tic.max;
             tic.curr <- 0;
             tic.max
           ) else
@@ -384,7 +389,7 @@ module Select_timeout = struct
       | [] -> buf
       | hd :: tl ->
         let len = Bytes.length hd in
-        Bytes.blit hd 0 buf (pos - len) len;
+        Bytes.blit ~src:hd ~src_pos:0 ~dst:buf ~dst_pos:(pos - len) ~len;
         build_result buf (pos - len) tl
     in
     let rec scan accu len =
@@ -413,7 +418,7 @@ module Select_timeout = struct
         ignore (unsafe_input tic ofs 0 (-n));
         scan (ofs :: accu) (len - n)
     in
-    Bytes.unsafe_to_string (scan [] 0)
+    Bytes.unsafe_to_string ~no_mutation_while_string_reachable:(scan [] 0)
 
   let rec unsafe_really_input ?timeout tic buf ofs len =
     if len = 0 then
@@ -449,7 +454,7 @@ module Select_timeout = struct
     let b4 = int_of_char (input_char ?timeout tic) in
     let len = ((b1 lsl 24) lor (b2 lsl 16) lor (b3 lsl 8) lor b4) + 12 in
     let data = Bytes.create (len + 8) in
-    Bytes.blit magic 0 data 0 4;
+    Bytes.blit ~src:magic ~src_pos:0 ~dst:data ~dst_pos:0 ~len:4;
     Bytes.set data 4 (char_of_int b1);
     Bytes.set data 5 (char_of_int b2);
     Bytes.set data 6 (char_of_int b3);

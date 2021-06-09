@@ -263,13 +263,13 @@ let ast_deregister_attributes_mapper =
     method on_'hi _ (hi : unit) = hi
 
     method ignored_attr env l =
-      List.exists l (fun attr ->
+      List.exists l ~f:(fun attr ->
           List.mem env.ignored_attributes (snd attr.ua_name) ~equal:String.equal)
 
     (* Filter all functions and classes with the user attributes banned *)
     method! on_program env toplevels =
       let toplevels =
-        List.filter toplevels (fun toplevel ->
+        List.filter toplevels ~f:(fun toplevel ->
             match toplevel with
             | Fun f when self#ignored_attr env f.fd_fun.f_user_attributes ->
               false
@@ -281,11 +281,11 @@ let ast_deregister_attributes_mapper =
     method! on_class_ env this =
       (* Filter out class elements which are methods with wrong attributes *)
       let methods =
-        List.filter this.c_methods (fun m ->
+        List.filter this.c_methods ~f:(fun m ->
             not @@ self#ignored_attr env m.m_user_attributes)
       in
       let cvars =
-        List.filter this.c_vars (fun cv ->
+        List.filter this.c_vars ~f:(fun cv ->
             not @@ self#ignored_attr env cv.cv_user_attributes)
       in
       let this = { this with c_methods = methods; c_vars = cvars } in

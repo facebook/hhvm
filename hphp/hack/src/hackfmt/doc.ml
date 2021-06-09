@@ -139,7 +139,7 @@ let rec has_printable_content node =
   | Nest nodes
   | ConditionalNest nodes
   | BlockNest nodes ->
-    List.exists nodes has_printable_content
+    List.exists nodes ~f:has_printable_content
   | WithRule (_, body)
   | WithOverridingParentalRule body ->
     has_printable_content body
@@ -169,7 +169,7 @@ let rec has_split node =
   | Nest nodes
   | ConditionalNest nodes
   | BlockNest nodes ->
-    List.exists nodes has_split
+    List.exists nodes ~f:has_split
   | WithRule (_, body)
   | WithOverridingParentalRule body ->
     has_split body
@@ -190,7 +190,7 @@ let dump ?(ignored = false) node =
   Printf.(
     let rec aux = function
       | Nothing -> ()
-      | Concat nodes -> List.iter nodes aux
+      | Concat nodes -> List.iter nodes ~f:aux
       | Text (text, _) -> print (sprintf "Text \"%s\"" text)
       | Comment (text, _) -> print (sprintf "Comment \"%s\"" text)
       | SingleLineComment (text, _) ->
@@ -206,7 +206,7 @@ let dump ?(ignored = false) node =
       | MultilineString (strings, _) ->
         print "MultilineString [";
         indent := !indent + 2;
-        List.iter strings (fun s -> print (sprintf "\"%s\"" s));
+        List.iter strings ~f:(fun s -> print (sprintf "\"%s\"" s));
         indent := !indent - 2;
         print "]"
       | DocLiteral node -> dump_list "DocLiteral" [node]
@@ -254,7 +254,7 @@ let dump ?(ignored = false) node =
       print "]"
     and dump_list_items nodes =
       indent := !indent + 2;
-      List.iter nodes aux;
+      List.iter nodes ~f:aux;
       indent := !indent - 2
     in
     if is_nothing node then

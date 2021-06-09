@@ -105,7 +105,7 @@ let common_prefix a b =
   let len = min (String.length a) (String.length b) in
   let rec aux i =
     if i = len || not (Char.equal a.[i] b.[i]) then
-      String.sub a 0 i
+      String.sub a ~pos:0 ~len:i
     else
       aux (i + 1)
   in

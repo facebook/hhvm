@@ -50,7 +50,7 @@ let get_files path dir_handle =
 let normalize path =
   let size = String.length path in
   if String.equal (Char.escaped path.[size - 1]) Filename.dir_sep then
-    String.sub path 0 (size - 1)
+    String.sub path ~pos:0 ~len:(size - 1)
   else
     path
 
@@ -87,7 +87,7 @@ let blacklist =
 
 let is_blacklisted path =
   try
-    List.iter blacklist (fun re ->
+    List.iter blacklist ~f:(fun re ->
         if Str.string_match re path 0 then
           raise Exit
         else

@@ -387,7 +387,7 @@ module Make_streamer (Out : Output_stream_intf) = struct
     | [] -> ()
     | elt :: elts ->
       concat_elt buf elt;
-      List.iter elts (fun e ->
+      List.iter elts ~f:(fun e ->
           Out.add_string buf sep;
           concat_elt buf e));
     Out.add_string buf rb
@@ -466,7 +466,7 @@ and json_to_multiline ?(sort_keys = false) json =
     else
       match json with
       | JSON_Array l ->
-        let nl = List.map l (loop (indent ^ "  ")) in
+        let nl = List.map l ~f:(loop (indent ^ "  ")) in
         "[\n"
         ^ indent
         ^ "  "
@@ -483,7 +483,7 @@ and json_to_multiline ?(sort_keys = false) json =
             l
         in
         let nl =
-          List.map l (fun (k, v) ->
+          List.map l ~f:(fun (k, v) ->
               indent
               ^ "  "
               ^ json_to_string ~sort_keys (JSON_String k)
@@ -812,14 +812,14 @@ let json_truncate
     | JSON_Null ->
       json
     | JSON_Object props ->
-      let f (k, v) = (k, truncate (depth + 1) v) in
+      let f (k, v) = (k, truncate ~depth:(depth + 1) v) in
       if depth >=@ max_depth then (
         mark_changed ();
         JSON_Object []
       ) else
         JSON_Object (truncate_children props max_object_child_count ~f)
     | JSON_Array values ->
-      let f v = truncate (depth + 1) v in
+      let f v = truncate ~depth:(depth + 1) v in
       if depth >=@ max_depth then (
         mark_changed ();
         JSON_Array []

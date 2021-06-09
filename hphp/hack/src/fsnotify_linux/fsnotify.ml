@@ -98,7 +98,7 @@ let process_event env events event =
   match event with
   | (_, _, _, None) -> events
   | (watch, type_list, _, Some filename) ->
-    List.iter type_list check_event_type;
+    List.iter type_list ~f:check_event_type;
     let wpath = (try WMap.find watch env.wpaths with _ -> assert false) in
     let path = Filename.concat wpath filename in
     { path; wpath } :: events
@@ -129,16 +129,20 @@ let select env ?(read_fdl = []) ?(write_fdl = []) ~timeout callback =
     List.fold_left write_fdl ~f:make_callback ~init:FDMap.empty
   in
   let (read_ready, write_ready, _) =
-    Unix.select (List.map read_fdl fst) (List.map write_fdl fst) [] timeout
+    Unix.select
+      (List.map read_fdl ~f:fst)
+      (List.map write_fdl ~f:fst)
+      []
+      timeout
   in
-  List.iter write_ready (invoke_callback write_callbacks);
-  List.iter read_ready (invoke_callback read_callbacks)
+  List.iter write_ready ~f:(invoke_callback write_callbacks);
+  List.iter read_ready ~f:(invoke_callback read_callbacks)
 
 (********** DEBUGGING ****************)
 (* Can be useful to see what the event actually is, for debugging *)
 let _string_of inotify_ev =
   let (wd, mask, cookie, s) = inotify_ev in
-  let mask = String.concat ":" (List.map mask Inotify.string_of_event) in
+  let mask = String.concat ":" (List.map mask ~f:Inotify.string_of_event) in
   let s =
     match s with
     | Some s -> s

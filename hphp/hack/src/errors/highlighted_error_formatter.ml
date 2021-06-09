@@ -110,9 +110,9 @@ let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
      zero-width positions. Line_num is 1-indexed, col_num is 0-indexed. *)
   if first_line = last_line then
     first_line = line_num
-    && is_col_okay (fun cn -> first_col <= cn && cn < last_col)
+    && is_col_okay ~f:(fun cn -> first_col <= cn && cn < last_col)
   else if line_num = first_line then
-    is_col_okay (fun cn -> first_col <= cn)
+    is_col_okay ~f:(fun cn -> first_col <= cn)
   else if line_num = last_line then
     (* When only checking for a line's inclusion in a position
       (i.e. when col_num = None), special care must be taken when
@@ -120,7 +120,7 @@ let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
       since the end_column is exclusive, the end_column's value
       must be non-zero signifying there is at least one character
       on it to be highlighted. *)
-    last_col > 0 && is_col_okay (fun cn -> cn < last_col)
+    last_col > 0 && is_col_okay ~f:(fun cn -> cn < last_col)
   else
     first_line < line_num && line_num < last_line
 
@@ -271,7 +271,7 @@ let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
   | lines ->
     let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, Some l)) in
     let original_lines =
-      List.filter numbered_lines (fun (i, _) ->
+      List.filter numbered_lines ~f:(fun (i, _) ->
           i >= start_line - before && i <= end_line + after)
     in
     let additional_line =
@@ -326,7 +326,7 @@ let col_width_for_highlighted (position_groups : position_group list) =
       |> List.concat_no_order
       |> List.map ~f:Pos.end_line
     in
-    List.max_elt line_nums Int.compare
+    List.max_elt line_nums ~compare:Int.compare
     |> Option.value ~default:0
     |> Errors.num_digits
   in
@@ -344,7 +344,7 @@ let col_width_for_highlighted (position_groups : position_group list) =
       |> List.concat
       |> List.map ~f:String.length
     in
-    List.max_elt marker_lens Int.compare |> Option.value ~default:0
+    List.max_elt marker_lens ~compare:Int.compare |> Option.value ~default:0
   in
   (* +1 for the space between them *)
   let col_width = max_marker_prefix_length + 1 + largest_line_length in
@@ -465,10 +465,10 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
       (background_highlighted ":")
   in
   let contexts =
-    List.map position_groups (fun pgl ->
+    List.map position_groups ~f:(fun pgl ->
         (* Each position_groups list (pgl) is for a single file, so separate each with ':' *)
         let fn_pos = format_file_name_and_pos pgl in
-        let ctx_strs = List.map pgl (format_context_highlighted col_width) in
+        let ctx_strs = List.map pgl ~f:(format_context_highlighted col_width) in
         fn_pos ^ "\n" ^ String.concat ~sep ctx_strs)
   in
   String.concat ~sep:"\n\n" contexts ^ "\n\n"
@@ -592,7 +592,7 @@ let to_string (error : Errors.finalized_error) : string =
           error_code
           mm.marker
           (Errors.get_message_str mm.message),
-        List.map msgs format_reason_highlighted )
+        List.map msgs ~f:format_reason_highlighted )
     | [] ->
       failwith "Impossible: an error always has non-empty list of messages"
   in

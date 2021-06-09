@@ -62,6 +62,6 @@ let to_string (error : Errors.finalized_error) : string =
     in
     let to_print = claim @ reasons in
     if Unix.isatty Unix.stdout then
-      List.map to_print (fun (c, s) -> Tty.apply_color c s) |> String.concat
+      List.map to_print ~f:(fun (c, s) -> Tty.apply_color c s) |> String.concat
     else
-      List.map to_print (fun (_, x) -> x) |> String.concat
+      List.map to_print ~f:(fun (_, x) -> x) |> String.concat

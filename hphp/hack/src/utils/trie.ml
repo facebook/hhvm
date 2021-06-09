@@ -24,9 +24,9 @@ let common_prefix (s1 : string) (s2 : string) : int =
 
 let drop s c =
   let l = String.length s in
-  String.sub s c (l - c)
+  String.sub s ~pos:c ~len:(l - c)
 
-let take s c = String.sub s 0 c
+let take s c = String.sub s ~pos:0 ~len:c
 
 let ( |> ) (o : 'a) (f : 'a -> 'b) : 'b = f o
 

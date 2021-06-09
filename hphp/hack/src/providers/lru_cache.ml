@@ -121,7 +121,7 @@ module Cache (Entry : Entry) = struct
         value = Value_wrapper value;
       }
     in
-    Hashtbl.add_exn t.entries (Key key) entry;
+    Hashtbl.add_exn t.entries ~key:(Key key) ~data:entry;
     t.total_size <- t.total_size + entry.size;
     trim_to_memory_limit t;
     entry

@@ -99,8 +99,8 @@ let storage_of_string str =
     let (a, a') = (0, idx) in
     let b = idx + 1 in
     let b' = String.length str - b in
-    let prefix = String.sub str a a' in
-    let content = String.sub str b b' in
+    let prefix = String.sub str ~pos:a ~len:a' in
+    let content = String.sub str ~pos:b ~len:b' in
     let prefix =
       match prefix with
       | "root" -> Root
@@ -177,7 +177,7 @@ let create prefix s =
     Printf.eprintf "%s is not a prefix of %s" prefix_s s;
     assert_false_log_backtrace None
   );
-  (prefix, String.sub s prefix_len (String.length s - prefix_len))
+  (prefix, String.sub s ~pos:prefix_len ~len:(String.length s - prefix_len))
 
 let create_detect_prefix s =
   let file_prefix =
@@ -199,7 +199,7 @@ let strip_root_if_possible s =
   if not (string_starts_with s prefix_s) then
     None
   else
-    Some (String.sub s prefix_len (String.length s - prefix_len))
+    Some (String.sub s ~pos:prefix_len ~len:(String.length s - prefix_len))
 
 let from_root ~(suffix : string) : t = (Root, suffix)
 

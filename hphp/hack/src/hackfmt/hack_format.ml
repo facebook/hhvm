@@ -132,7 +132,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           begin
             match last with
             | Some tok ->
-              wrap_with_literal_type tok (Concat (List.map l (t env)))
+              wrap_with_literal_type tok (Concat (List.map l ~f:(t env)))
             | _ -> failwith "Expected Token"
           end
         | _ -> failwith "Expected Token or SyntaxList"
@@ -1292,7 +1292,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           delimited_nest env left_p right_p [t env expr];
           Space;
-          braced_block_nest env left_b right_b (List.map sections (t env));
+          braced_block_nest env left_b right_b (List.map sections ~f:(t env));
           Newline;
         ]
     | Syntax.SwitchSection
@@ -1486,7 +1486,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present readonly space;
           t env ret_type;
         ]
-    | Syntax.CastExpression _ -> Span (List.map (Syntax.children node) (t env))
+    | Syntax.CastExpression _ ->
+      Span (List.map (Syntax.children node) ~f:(t env))
     | Syntax.MemberSelectionExpression _
     | Syntax.SafeMemberSelectionExpression _ ->
       handle_possible_chaining env node
@@ -2543,16 +2544,17 @@ and when_present node f =
   | Syntax.Missing -> Nothing
   | _ -> f ()
 
-and transform_simple env node = Concat (List.map (Syntax.children node) (t env))
+and transform_simple env node =
+  Concat (List.map (Syntax.children node) ~f:(t env))
 
 and transform_simple_statement env node =
-  Concat (List.map (Syntax.children node) (t env) @ [Newline])
+  Concat (List.map (Syntax.children node) ~f:(t env) @ [Newline])
 
 and braced_block_nest env ?(allow_collapse = true) open_b close_b nodes =
   let nodes = Concat nodes in
   match (allow_collapse, has_printable_content nodes, Syntax.syntax open_b) with
   | (true, false, Syntax.Token ob)
-    when List.for_all (Token.trailing ob) (fun t ->
+    when List.for_all (Token.trailing ob) ~f:(fun t ->
              not (is_trivia_kind_end_of_line (Trivia.kind t))) ->
     Concat [t env open_b; t env close_b]
   | (true, false, Syntax.Missing) -> Concat [t env open_b; t env close_b]
@@ -2704,7 +2706,7 @@ and handle_declarator_list env declarators =
     WithRule
       ( Rule.Parental,
         Nest
-          (List.map xs (fun declarator ->
+          (List.map xs ~f:(fun declarator ->
                Concat [Space; Split; t env declarator])) )
   | _ -> failwith "SyntaxList expected"
 
@@ -2865,7 +2867,7 @@ and handle_possible_chaining env node =
       ]
   | hd :: tl ->
     let transformed_hd = transform_chain hd in
-    let tl = List.map tl transform_chain in
+    let tl = List.map tl ~f:transform_chain in
     let rule_type =
       match hd with
       | (_, trailing, None, None)
@@ -2888,7 +2890,7 @@ and handle_possible_chaining env node =
           *)
           let rev_tl_except_last = List.rev tl |> List.tl_exn in
           let items_except_last = transformed_hd :: rev_tl_except_last in
-          if List.exists items_except_last has_split then
+          if List.exists items_except_last ~f:has_split then
             Rule.Parental
           else
             Rule.Simple Cost.NoCost
@@ -3129,7 +3131,7 @@ and transform_braced_item env left_p item right_p =
   in
   if has_no_surrounding_trivia && not (looks_bad_in_non_parental_braces item)
   then
-    Concat (List.map [left_p; item; right_p] (t env))
+    Concat (List.map [left_p; item; right_p] ~f:(t env))
   else
     delimited_nest env left_p right_p [t env item]
 
@@ -3628,7 +3630,8 @@ and transform_trivia ~is_leading trivia =
           in
           let len = String.length str - start_index in
           let dc =
-            Trivia.create_delimited_comment @@ String.sub str start_index len
+            Trivia.create_delimited_comment
+            @@ String.sub str ~pos:start_index ~len
           in
           Concat
             [

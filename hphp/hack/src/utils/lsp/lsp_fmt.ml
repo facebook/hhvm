@@ -117,15 +117,15 @@ let parse_versionedTextDocumentIdentifier (json : json option) :
   VersionedTextDocumentIdentifier.
     {
       uri = Jget.string_exn json "uri" |> uri_of_string;
-      version = Jget.int_d json "version" 0;
+      version = Jget.int_d json "version" ~default:0;
     }
 
 let parse_textDocumentItem (json : json option) : TextDocumentItem.t =
   TextDocumentItem.
     {
       uri = Jget.string_exn json "uri" |> uri_of_string;
-      languageId = Jget.string_d json "languageId" "";
-      version = Jget.int_d json "version" 0;
+      languageId = Jget.string_d json "languageId" ~default:"";
+      version = Jget.int_d json "version" ~default:0;
       text = Jget.string_exn json "text";
     }
 
@@ -199,16 +199,16 @@ let print_command (command : Command.t) : json =
 let parse_command (json : json option) : Command.t =
   Command.
     {
-      title = Jget.string_d json "title" "";
-      command = Jget.string_d json "command" "";
+      title = Jget.string_d json "title" ~default:"";
+      command = Jget.string_d json "command" ~default:"";
       arguments = Jget.array_d json "arguments" ~default:[] |> List.filter_opt;
     }
 
 let parse_formattingOptions (json : json option) :
     DocumentFormatting.formattingOptions =
   {
-    DocumentFormatting.tabSize = Jget.int_d json "tabSize" 2;
-    insertSpaces = Jget.bool_d json "insertSpaces" true;
+    DocumentFormatting.tabSize = Jget.int_d json "tabSize" ~default:2;
+    insertSpaces = Jget.bool_d json "insertSpaces" ~default:true;
   }
 
 let print_symbolInformation (info : SymbolInformation.t) : json =
@@ -219,7 +219,7 @@ let print_symbolInformation (info : SymbolInformation.t) : json =
         ("name", Some (JSON_String info.name));
         ("kind", Some (print_symbol_kind info.kind));
         ("location", Some (print_location info.location));
-        ("containerName", Option.map info.containerName string_);
+        ("containerName", Option.map info.containerName ~f:string_);
       ])
 
 let parse_codeLens (json : json option) : CodeLens.t =
@@ -428,9 +428,9 @@ let print_diagnostic (diagnostic : PublishDiagnostics.diagnostic) : json =
     Jprint.object_opt
       [
         ("range", Some (print_range diagnostic.range));
-        ("severity", Option.map diagnostic.severity print_diagnosticSeverity);
+        ("severity", Option.map diagnostic.severity ~f:print_diagnosticSeverity);
         ("code", print_diagnosticCode diagnostic.code);
-        ("source", Option.map diagnostic.source string_);
+        ("source", Option.map diagnostic.source ~f:string_);
         ("message", Some (JSON_String diagnostic.message));
         ( "relatedInformation",
           Some
@@ -674,7 +674,8 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
     in
     {
       label = Jget.string_exn params "label";
-      kind = Option.bind (Jget.int_opt params "kind") completionItemKind_of_enum;
+      kind =
+        Option.bind (Jget.int_opt params "kind") ~f:completionItemKind_of_enum;
       detail = Jget.string_opt params "detail";
       inlineDetail = Jget.string_opt params "inlineDetail";
       itemType = Jget.string_opt params "itemType";
@@ -685,7 +686,7 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
       insertTextFormat =
         Option.bind
           (Jget.int_opt params "insertTextFormat")
-          insertTextFormat_of_enum;
+          ~f:insertTextFormat_of_enum;
       textEdits;
       command;
       data = Jget.obj_opt params "data";
@@ -702,11 +703,11 @@ let print_completionItem (item : Completion.completionItem) : json =
       [
         ("label", Some (JSON_String item.label));
         ( "kind",
-          Option.map item.kind (fun x -> int_ @@ completionItemKind_to_enum x)
-        );
-        ("detail", Option.map item.detail string_);
-        ("inlineDetail", Option.map item.inlineDetail string_);
-        ("itemType", Option.map item.itemType string_);
+          Option.map item.kind ~f:(fun x ->
+              int_ @@ completionItemKind_to_enum x) );
+        ("detail", Option.map item.detail ~f:string_);
+        ("inlineDetail", Option.map item.inlineDetail ~f:string_);
+        ("itemType", Option.map item.itemType ~f:string_);
         ( "documentation",
           Option.map item.documentation ~f:(fun doc ->
               JSON_Object
@@ -717,20 +718,20 @@ let print_completionItem (item : Completion.completionItem) : json =
                       (String.strip
                          (List.fold doc ~init:"" ~f:string_of_markedString)) );
                 ]) );
-        ("sortText", Option.map item.sortText string_);
-        ("filterText", Option.map item.filterText string_);
-        ("insertText", Option.map item.insertText string_);
+        ("sortText", Option.map item.sortText ~f:string_);
+        ("filterText", Option.map item.filterText ~f:string_);
+        ("insertText", Option.map item.insertText ~f:string_);
         ( "insertTextFormat",
-          Option.map item.insertTextFormat (fun x ->
+          Option.map item.insertTextFormat ~f:(fun x ->
               int_ @@ insertTextFormat_to_enum x) );
-        ("textEdit", Option.map (List.hd item.textEdits) print_textEdit);
+        ("textEdit", Option.map (List.hd item.textEdits) ~f:print_textEdit);
         ( "additionalTextEdits",
           match List.tl item.textEdits with
           | None
           | Some [] ->
             None
           | Some l -> Some (print_textEdits l) );
-        ("command", Option.map item.command print_command);
+        ("command", Option.map item.command ~f:print_command);
         ("data", item.data);
       ])
 
@@ -791,9 +792,9 @@ let parse_findReferences (params : json option) : FindReferences.params =
     context =
       {
         FindReferences.includeDeclaration =
-          Jget.bool_d context "includeDeclaration" true;
+          Jget.bool_d context "includeDeclaration" ~default:true;
         includeIndirectReferences =
-          Jget.bool_d context "includeIndirectReferences" false;
+          Jget.bool_d context "includeIndirectReferences" ~default:false;
       };
   }
 

@@ -756,7 +756,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         []
     in
     let files =
-      List.map files (fun json ->
+      List.map files ~f:(fun json ->
           let s = Hh_json.get_string_exn json in
           let abs = Filename.concat env.watch_root s in
           abs)
@@ -958,7 +958,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   let get_changes ?deadline instance =
     call_on_instance instance "get_changes" @@ fun env ->
     let timeout =
-      Option.map deadline (fun deadline ->
+      Option.map deadline ~f:(fun deadline ->
           let timeout = deadline -. Unix.time () in
           Explicit_timeout Float.(max timeout 0.0))
     in

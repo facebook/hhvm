@@ -54,7 +54,7 @@ let advance t =
     else
       let replace_with v =
         let canonical = t.is_canonical v in
-        Hashtbl.set t.tbl id (v, canonical);
+        Hashtbl.set t.tbl ~key:id ~data:(v, canonical);
         if canonical then
           Yield (id, v)
         else
@@ -75,7 +75,7 @@ let rec get_from_single_seq t seq result =
   | Some (v, true) -> Some v
   | _ ->
     (match Sequence.next seq with
-    | None -> Option.map result fst
+    | None -> Option.map result ~f:fst
     | Some (v, rest) ->
       let result =
         match result with
@@ -95,7 +95,7 @@ let get t id =
     | Some (v, true) -> Some v
     | (None | Some (_, false)) as result ->
       (match advance t with
-      | Complete -> Option.map result fst
+      | Complete -> Option.map result ~f:fst
       | Yield (id', v) when String.equal id' id -> Some v
       | Skipped
       | Yield _ ->
@@ -109,7 +109,7 @@ let get t id =
     | None -> go ()
     | Some f ->
       let result = get_from_single_seq t (f id) None in
-      Option.iter result (fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
+      Option.iter result ~f:(fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
       result)
 
 let mem t id =
@@ -131,7 +131,7 @@ let mem t id =
     | None -> go ()
     | Some f ->
       let result = get_from_single_seq t (f id) None in
-      Option.iter result (fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
+      Option.iter result ~f:(fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
       Option.is_some result
 
 let rec to_list t =

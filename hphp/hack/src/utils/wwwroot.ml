@@ -41,7 +41,7 @@ let rec guess_root config start ~recursion_limit : Path.t option =
   else if recursion_limit <= 0 then
     None
   else
-    guess_root config (Path.parent start) (recursion_limit - 1)
+    guess_root config (Path.parent start) ~recursion_limit:(recursion_limit - 1)
 
 let get ?(config = ".hhconfig") (path : string option) : Path.t =
   let start_str =

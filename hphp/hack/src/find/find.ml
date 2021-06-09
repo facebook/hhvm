@@ -33,7 +33,7 @@ type dt_kind =
  * and 2 per directory.
  *)
 let hh_readdir path : (string * dt_kind) list =
-  List.filter_map (native_hh_readdir path) (fun (name, kind) ->
+  List.filter_map (native_hh_readdir path) ~f:(fun (name, kind) ->
       match (name, kind) with
       | (".", _) -> None
       | ("..", _) -> None
@@ -80,7 +80,7 @@ let fold_files
         ~init:acc
         files
   in
-  let paths = List.map paths Path.to_string in
+  let paths = List.map paths ~f:Path.to_string in
   List.fold_left paths ~init ~f:(fold 0)
 
 let iter_files ?max_depth ?filter ?file_only paths action =

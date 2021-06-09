@@ -444,7 +444,7 @@ let get_value_from_config_string_array config key =
   let json_opt = get_value_from_config_ config key in
   match json_opt with
   | None -> None
-  | Some (J.JSON_Array fs) -> Some (List.map fs J.get_string_exn)
+  | Some (J.JSON_Array fs) -> Some (List.map fs ~f:J.get_string_exn)
   | _ -> raise (Arg.Bad ("Expected list of strings at " ^ key))
 
 let get_value_from_config_string_to_string_map config key =
@@ -659,7 +659,7 @@ let from_configs_rust ~(jsons : string list) ~(args : string list) : t =
     ~init:default
     (Some (Hh_json.json_of_string merged))
 
-let get_default () = from_configs_rust [] []
+let get_default () = from_configs_rust ~jsons:[] ~args:[]
 
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.

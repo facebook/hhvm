@@ -148,19 +148,19 @@ struct
     | Tvarray_or_darray (ty1, ty2) -> Tvarray_or_darray (ty ty1, ty ty2)
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
-    | Tgeneric (name, args) -> Tgeneric (name, List.map args ty)
-    | Ttuple tyl -> Ttuple (List.map tyl ty)
-    | Tunion tyl -> Tunion (List.map tyl ty)
-    | Tintersection tyl -> Tintersection (List.map tyl ty)
+    | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)
+    | Ttuple tyl -> Ttuple (List.map tyl ~f:ty)
+    | Tunion tyl -> Tunion (List.map tyl ~f:ty)
+    | Tintersection tyl -> Tintersection (List.map tyl ~f:ty)
     | Toption x -> Toption (ty x)
     | Tlike x -> Tlike (ty x)
     | Tfun ft -> Tfun (fun_type ft)
-    | Tapply (sid, xl) -> Tapply (positioned_id sid, List.map xl ty)
+    | Tapply (sid, xl) -> Tapply (positioned_id sid, List.map xl ~f:ty)
     | Taccess (root_ty, id) -> Taccess (ty root_ty, positioned_id id)
     | Tshape (shape_kind, fdm) ->
       Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
 
-  and ty_opt x = Option.map x ty
+  and ty_opt x = Option.map x ~f:ty
 
   and shape_field_name = function
     | Typing_defs.TSFlit_int (p, s) -> Typing_defs.TSFlit_int (pos_or_decl p, s)
@@ -183,8 +183,9 @@ struct
     {
       ft with
       ft_tparams = List.map ~f:type_param ft.ft_tparams;
-      ft_where_constraints = List.map ft.ft_where_constraints where_constraint;
-      ft_params = List.map ft.ft_params fun_param;
+      ft_where_constraints =
+        List.map ft.ft_where_constraints ~f:where_constraint;
+      ft_params = List.map ft.ft_params ~f:fun_param;
       ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
       ft_ret = possibly_enforced_ty ft.ft_ret;
       ft_arity = fun_arity ft.ft_arity;
@@ -236,7 +237,7 @@ struct
       ttc_kind = typeconst tc.ttc_kind;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos_or_decl tc.ttc_enforceable;
-      ttc_reifiable = Option.map tc.ttc_reifiable pos_or_decl;
+      ttc_reifiable = Option.map tc.ttc_reifiable ~f:pos_or_decl;
       ttc_concretized = tc.ttc_concretized;
       ttc_is_ctx = tc.ttc_is_ctx;
     }
@@ -273,10 +274,11 @@ struct
       dc_sealed_whitelist = dc.dc_sealed_whitelist;
       dc_xhp_attr_deps = dc.dc_xhp_attr_deps;
       dc_xhp_enum_values = dc.dc_xhp_enum_values;
-      dc_req_ancestors = List.map dc.dc_req_ancestors requirement;
+      dc_req_ancestors = List.map dc.dc_req_ancestors ~f:requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
-      dc_tparams = List.map dc.dc_tparams type_param;
-      dc_where_constraints = List.map dc.dc_where_constraints where_constraint;
+      dc_tparams = List.map dc.dc_tparams ~f:type_param;
+      dc_where_constraints =
+        List.map dc.dc_where_constraints ~f:where_constraint;
       dc_substs =
         SMap.map
           begin
@@ -293,7 +295,7 @@ struct
       dc_construct = dc.dc_construct;
       dc_ancestors = SMap.map ty dc.dc_ancestors;
       dc_support_dynamic_type = dc.dc_support_dynamic_type;
-      dc_enum_type = Option.map dc.dc_enum_type enum_type;
+      dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = None;
       dc_condition_types = dc.dc_condition_types;
     }
@@ -304,7 +306,7 @@ struct
     {
       te_base = ty te.te_base;
       te_constraint = ty_opt te.te_constraint;
-      te_includes = List.map te.te_includes ty;
+      te_includes = List.map te.te_includes ~f:ty;
       te_enum_class = te.te_enum_class;
     }
 
@@ -313,7 +315,7 @@ struct
       td_module = tdef.td_module;
       td_pos = pos_or_decl tdef.td_pos;
       td_vis = tdef.td_vis;
-      td_tparams = List.map tdef.td_tparams type_param;
+      td_tparams = List.map tdef.td_tparams ~f:type_param;
       td_constraint = ty_opt tdef.td_constraint;
       td_type = ty tdef.td_type;
     }
@@ -327,25 +329,26 @@ struct
       sc_kind = sc.sc_kind;
       sc_module = sc.sc_module;
       sc_name = positioned_id sc.sc_name;
-      sc_tparams = List.map sc.sc_tparams type_param;
-      sc_where_constraints = List.map sc.sc_where_constraints where_constraint;
-      sc_extends = List.map sc.sc_extends ty;
-      sc_uses = List.map sc.sc_uses ty;
-      sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ty;
+      sc_tparams = List.map sc.sc_tparams ~f:type_param;
+      sc_where_constraints =
+        List.map sc.sc_where_constraints ~f:where_constraint;
+      sc_extends = List.map sc.sc_extends ~f:ty;
+      sc_uses = List.map sc.sc_uses ~f:ty;
+      sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ~f:ty;
       sc_xhp_enum_values = sc.sc_xhp_enum_values;
-      sc_req_extends = List.map sc.sc_req_extends ty;
-      sc_req_implements = List.map sc.sc_req_implements ty;
-      sc_implements = List.map sc.sc_implements ty;
+      sc_req_extends = List.map sc.sc_req_extends ~f:ty;
+      sc_req_implements = List.map sc.sc_req_implements ~f:ty;
+      sc_implements = List.map sc.sc_implements ~f:ty;
       sc_support_dynamic_type = sc.sc_support_dynamic_type;
-      sc_consts = List.map sc.sc_consts shallow_class_const;
-      sc_typeconsts = List.map sc.sc_typeconsts shallow_typeconst;
-      sc_props = List.map sc.sc_props shallow_prop;
-      sc_sprops = List.map sc.sc_sprops shallow_prop;
-      sc_constructor = Option.map sc.sc_constructor shallow_method;
-      sc_static_methods = List.map sc.sc_static_methods shallow_method;
-      sc_methods = List.map sc.sc_methods shallow_method;
-      sc_user_attributes = List.map sc.sc_user_attributes user_attribute;
-      sc_enum_type = Option.map sc.sc_enum_type enum_type;
+      sc_consts = List.map sc.sc_consts ~f:shallow_class_const;
+      sc_typeconsts = List.map sc.sc_typeconsts ~f:shallow_typeconst;
+      sc_props = List.map sc.sc_props ~f:shallow_prop;
+      sc_sprops = List.map sc.sc_sprops ~f:shallow_prop;
+      sc_constructor = Option.map sc.sc_constructor ~f:shallow_method;
+      sc_static_methods = List.map sc.sc_static_methods ~f:shallow_method;
+      sc_methods = List.map sc.sc_methods ~f:shallow_method;
+      sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
+      sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
     }
 
   and shallow_class_const scc =
@@ -362,7 +365,7 @@ struct
       stc_name = positioned_id stc.stc_name;
       stc_enforceable =
         (pos_or_decl (fst stc.stc_enforceable), snd stc.stc_enforceable);
-      stc_reifiable = Option.map stc.stc_reifiable pos_or_decl;
+      stc_reifiable = Option.map stc.stc_reifiable ~f:pos_or_decl;
       stc_is_ctx = stc.stc_is_ctx;
     }
 
@@ -370,7 +373,7 @@ struct
     {
       sp_name = positioned_id sp.sp_name;
       sp_xhp_attr = sp.sp_xhp_attr;
-      sp_type = Option.map sp.sp_type ty;
+      sp_type = Option.map sp.sp_type ~f:ty;
       sp_visibility = sp.sp_visibility;
       sp_flags = sp.sp_flags;
     }

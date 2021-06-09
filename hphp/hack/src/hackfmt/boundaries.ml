@@ -15,7 +15,7 @@ let get_line_boundaries text =
   let lines = String_utils.split_on_newlines text in
   let bytes_seen = ref 0 in
   Array.of_list
-  @@ List.map lines (fun line ->
+  @@ List.map lines ~f:(fun line ->
          let line_start = !bytes_seen in
          let line_end = line_start + String.length line + 1 in
          bytes_seen := line_end;

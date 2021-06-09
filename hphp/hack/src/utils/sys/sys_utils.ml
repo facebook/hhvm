@@ -270,9 +270,9 @@ let read_all ?(buf_size = 4096) ic =
   (try
      while true do
        let data = Bytes.create buf_size in
-       let bytes_read = In_channel.input ic data 0 buf_size in
+       let bytes_read = In_channel.input ic ~buf:data ~pos:0 ~len:buf_size in
        if bytes_read = 0 then raise Exit;
-       Buffer.add_subbytes buf data 0 bytes_read
+       Buffer.add_subbytes buf data ~pos:0 ~len:bytes_read
      done
    with Exit -> ());
   Buffer.contents buf
@@ -359,7 +359,7 @@ let read_file file =
   let size = Int64.to_int @@ In_channel.length ic in
   let size = Option.value_exn size in
   let buf = Bytes.create size in
-  Option.value_exn (In_channel.really_input ic buf 0 size);
+  Option.value_exn (In_channel.really_input ic ~buf ~pos:0 ~len:size);
   In_channel.close ic;
   buf
 
@@ -430,7 +430,7 @@ let splitext filename =
   let root_length = String.length root in
   (* -1 because the extension includes the period, e.g. ".foo" *)
   let ext_length = String.length filename - root_length - 1 in
-  let ext = String.sub filename (root_length + 1) ext_length in
+  let ext = String.sub filename ~pos:(root_length + 1) ~len:ext_length in
   (root, ext)
 
 let is_test_mode () =
@@ -529,7 +529,7 @@ let lstat path =
   Unix.lstat
   @@
   if Sys.win32 && String_utils.string_ends_with path Filename.dir_sep then
-    String.sub path 0 (String.length path - 1)
+    String.sub path ~pos:0 ~len:(String.length path - 1)
   else
     path
 
@@ -609,7 +609,7 @@ let find_oom_in_dmesg_output pid name lines =
     Str.regexp
       (Printf.sprintf "Out of memory: Kill process \\([0-9]+\\) (%s)" name)
   in
-  List.exists lines (fun line ->
+  List.exists lines ~f:(fun line ->
       try
         ignore @@ Str.search_forward re line 0;
         let pid_s = Str.matched_group 1 line in

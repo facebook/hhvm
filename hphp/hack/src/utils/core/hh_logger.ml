@@ -203,12 +203,12 @@ end = struct
   let passes_min_level level = passes level ~category:None |> Option.is_some
 
   let log level ?category ?exn fmt =
-    match passes level category with
+    match passes level ~category with
     | Some passes -> print_with_newline_internal ?category ~passes ?exn fmt
     | None -> Printf.ifprintf () fmt
 
   let log_lazy level ?category ?exn s =
-    match passes level category with
+    match passes level ~category with
     | Some passes ->
       print_with_newline_internal ?category ~passes ?exn "%s" (Lazy.force s)
     | None -> ()
@@ -216,7 +216,7 @@ end = struct
   let log_duration level ?category name t =
     let t2 = Unix.gettimeofday () in
     begin
-      match passes level category with
+      match passes level ~category with
       | Some passes ->
         print_with_newline_internal ?category ~passes "%s: %f" name (t2 -. t)
       | None -> ()

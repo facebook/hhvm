@@ -31,10 +31,10 @@ let post_fork_child f =
 (* You should always use this instead of Unix.fork, so that the callbacks get
  * invoked *)
 let fork () =
-  List.iter !pre_fork_callbacks (fun f -> f ());
+  List.iter !pre_fork_callbacks ~f:(fun f -> f ());
   match Unix.fork () with
   | 0 ->
-    List.iter !post_fork_child_callbacks (fun f -> f ());
+    List.iter !post_fork_child_callbacks ~f:(fun f -> f ());
     0
   | i -> i
 

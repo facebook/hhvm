@@ -504,7 +504,7 @@ end) : Key with type userkey = UserKeyType.t = struct
   let new_from_old : old -> t =
    fun x ->
     let module S = String in
-    S.sub x (S.length old_prefix) (S.length x - S.length old_prefix)
+    S.sub x ~pos:(S.length old_prefix) ~len:(S.length x - S.length old_prefix)
 
   let md5 : t -> md5 = Stdlib.Digest.string
 
@@ -1507,7 +1507,7 @@ end
 let invalidate_callback_list = ref []
 
 let invalidate_caches () =
-  List.iter !invalidate_callback_list (fun callback -> callback ())
+  List.iter !invalidate_callback_list ~f:(fun callback -> callback ())
 
 module LocalCache
     (UserKeyType : UserKeyType)

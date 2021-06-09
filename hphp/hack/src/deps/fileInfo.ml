@@ -212,18 +212,21 @@ let to_saved info =
 let from_saved fn saved =
   let { s_names; s_mode; s_hash } = saved in
   let { sn_funs; sn_classes; sn_record_defs; sn_types; sn_consts } = s_names in
-  let funs = List.map (SSet.elements sn_funs) (fun x -> (File (Fun, fn), x)) in
+  let funs =
+    List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x))
+  in
   let classes =
-    List.map (SSet.elements sn_classes) (fun x -> (File (Class, fn), x))
+    List.map (SSet.elements sn_classes) ~f:(fun x -> (File (Class, fn), x))
   in
   let record_defs =
-    List.map (SSet.elements sn_record_defs) (fun x -> (File (RecordDef, fn), x))
+    List.map (SSet.elements sn_record_defs) ~f:(fun x ->
+        (File (RecordDef, fn), x))
   in
   let typedefs =
-    List.map (SSet.elements sn_types) (fun x -> (File (Typedef, fn), x))
+    List.map (SSet.elements sn_types) ~f:(fun x -> (File (Typedef, fn), x))
   in
   let consts =
-    List.map (SSet.elements sn_consts) (fun x -> (File (Const, fn), x))
+    List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x))
   in
   {
     file_mode = s_mode;

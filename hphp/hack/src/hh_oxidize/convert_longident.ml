@@ -65,15 +65,15 @@ let to_string for_open id =
         else if String.equal ty "LoclPossiblyEnforcedTy" then
           "PossiblyEnforcedTy"
         else if SSet.mem ty strip_decl_prefix then
-          String.chop_prefix_exn ty "Decl"
+          String.chop_prefix_exn ty ~prefix:"Decl"
         else
           ty
       in
-      let modules = List.map modules convert_module_name in
+      let modules = List.map modules ~f:convert_module_name in
       ty :: modules |> List.rev |> String.concat ~sep:"::"
     | FLdot (id, assoc_tys) ->
       let id = to_string id in
-      let assoc_tys = List.map assoc_tys convert_type_name in
+      let assoc_tys = List.map assoc_tys ~f:convert_type_name in
       assoc_tys |> List.rev |> List.cons id |> String.concat ~sep:"::"
     | FLapply (ftor :: args) ->
       let ftor = to_string ftor in

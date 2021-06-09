@@ -391,7 +391,7 @@ let builder =
       Doc.(
         match node with
         | Nothing -> ()
-        | Concat nodes -> List.iter nodes this#consume_doc
+        | Concat nodes -> List.iter nodes ~f:this#consume_doc
         | Text (text, width) -> this#add_string text width
         | Comment (text, width) -> this#add_string ~is_trivia:true text width
         | SingleLineComment (text, width) ->
@@ -404,7 +404,7 @@ let builder =
             match strings with
             | hd :: tl ->
               this#add_string hd (String.length hd);
-              List.iter tl (fun s ->
+              List.iter tl ~f:(fun s ->
                   this#advance 1;
                   this#hard_split ();
                   this#add_string ~multiline:true s (String.length s))
@@ -432,19 +432,19 @@ let builder =
         | Space -> this#add_space ()
         | Span nodes ->
           this#start_span ();
-          List.iter nodes this#consume_doc;
+          List.iter nodes ~f:this#consume_doc;
           this#end_span ()
         | Nest nodes ->
           this#nest ();
-          List.iter nodes this#consume_doc;
+          List.iter nodes ~f:this#consume_doc;
           this#unnest ()
         | ConditionalNest nodes ->
           this#nest ~skip_parent:true ();
-          List.iter nodes this#consume_doc;
+          List.iter nodes ~f:this#consume_doc;
           this#unnest ()
         | BlockNest nodes ->
           this#start_block_nest ();
-          List.iter nodes this#consume_doc;
+          List.iter nodes ~f:this#consume_doc;
           this#end_block_nest ()
         | WithRule (rule_kind, body) ->
           this#start_rule_kind ~rule_kind ();

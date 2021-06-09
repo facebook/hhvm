@@ -44,7 +44,7 @@ let rec instantiate subst (ty : decl_ty) =
   else
     match deref ty with
     | (r, Tgeneric (x, args)) ->
-      let args = List.map args (instantiate subst) in
+      let args = List.map args ~f:(instantiate subst) in
       (match SMap.find_opt x subst with
       | Some x_ty -> merge_hk_type r x x_ty args
       | None -> mk (r, Tgeneric (x, args)))
@@ -75,13 +75,13 @@ and instantiate_ subst x =
     x ->
     x
   | Ttuple tyl ->
-    let tyl = List.map tyl (instantiate subst) in
+    let tyl = List.map tyl ~f:(instantiate subst) in
     Ttuple tyl
   | Tunion tyl ->
-    let tyl = List.map tyl (instantiate subst) in
+    let tyl = List.map tyl ~f:(instantiate subst) in
     Tunion tyl
   | Tintersection tyl ->
-    let tyl = List.map tyl (instantiate subst) in
+    let tyl = List.map tyl ~f:(instantiate subst) in
     Tintersection tyl
   | Toption ty ->
     let ty = instantiate subst ty in
@@ -104,7 +104,7 @@ and instantiate_ subst x =
         tparams
     in
     let params =
-      List.map ft.ft_params (fun param ->
+      List.map ft.ft_params ~f:(fun param ->
           let ty = instantiate_possibly_enforced_ty subst param.fp_type in
           { param with fp_type = ty })
     in
@@ -117,16 +117,16 @@ and instantiate_ subst x =
     in
     let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
     let tparams =
-      List.map tparams (fun t ->
+      List.map tparams ~f:(fun t ->
           {
             t with
             tp_constraints =
-              List.map t.tp_constraints (fun (ck, ty) ->
+              List.map t.tp_constraints ~f:(fun (ck, ty) ->
                   (ck, instantiate subst ty));
           })
     in
     let where_constraints =
-      List.map ft.ft_where_constraints (fun (ty1, ck, ty2) ->
+      List.map ft.ft_where_constraints ~f:(fun (ty1, ck, ty2) ->
           (instantiate subst ty1, ck, instantiate outer_subst ty2))
     in
     Tfun
@@ -139,7 +139,7 @@ and instantiate_ subst x =
         ft_where_constraints = where_constraints;
       }
   | Tapply (x, tyl) ->
-    let tyl = List.map tyl (instantiate subst) in
+    let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
   | Tshape (shape_kind, fdm) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
@@ -162,9 +162,9 @@ let instantiate_typeconst subst = function
       { atc_as_constraint = a; atc_super_constraint = s; atc_default = d } ->
     TCAbstract
       {
-        atc_as_constraint = Option.map a (instantiate subst);
-        atc_super_constraint = Option.map s (instantiate subst);
-        atc_default = Option.map d (instantiate subst);
+        atc_as_constraint = Option.map a ~f:(instantiate subst);
+        atc_super_constraint = Option.map s ~f:(instantiate subst);
+        atc_default = Option.map d ~f:(instantiate subst);
       }
   | TCPartiallyAbstract { patc_constraint = a; patc_type = t } ->
     TCPartiallyAbstract

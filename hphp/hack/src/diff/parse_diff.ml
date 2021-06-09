@@ -64,15 +64,16 @@ and start env = function
 (* Parses the content of a line starting with +++ (extracts the filename) *)
 and header env line =
   add_file env;
-  let filename = String.sub line 4 (String.length line - 4) in
+  let filename = String.sub line ~pos:4 ~len:(String.length line - 4) in
   (* Getting rid of the prefix b/ *)
   let filename =
     if String.equal filename Sys_utils.null_path then
       None
     else if
-      String.length filename >= 2 && String.equal (String.sub filename 0 2) "b/"
+      String.length filename >= 2
+      && String.equal (String.sub filename ~pos:0 ~len:2) "b/"
     then
-      Some (String.sub filename 2 (String.length filename - 2))
+      Some (String.sub filename ~pos:2 ~len:(String.length filename - 2))
     else
       Some filename
   in
@@ -83,32 +84,36 @@ and header env line =
 and modified env nbr = function
   | [] -> add_file env
   | line :: lines
-    when String.length line > 4 && String.equal (String.sub line 0 3) "+++" ->
+    when String.length line > 4
+         && String.equal (String.sub line ~pos:0 ~len:3) "+++" ->
     header env line;
     modified env 0 lines
   | line :: lines
-    when String.length line > 2 && String.equal (String.sub line 0 2) "@@" ->
+    when String.length line > 2
+         && String.equal (String.sub line ~pos:0 ~len:2) "@@" ->
     (* Find the position right after '+' in '@@ -line,len +line, len@@' *)
     let _ = Str.search_forward (Str.regexp "[+][0-9]+") line 0 in
     let matched = Str.matched_string line in
-    let matched = String.sub matched 1 (String.length matched - 1) in
+    let matched = String.sub matched ~pos:1 ~len:(String.length matched - 1) in
     let nbr = int_of_string matched in
     modified env nbr lines
   | line :: lines
-    when String.length line >= 1 && String.equal (String.sub line 0 1) "+" ->
+    when String.length line >= 1
+         && String.equal (String.sub line ~pos:0 ~len:1) "+" ->
     (* Adds the line to the list of modified lines *)
     env.line <- env.line + 1;
     env.modified <- nbr :: env.modified;
     modified env (nbr + 1) lines
   | line :: lines
-    when String.length line >= 1 && String.equal (String.sub line 0 1) "-" ->
+    when String.length line >= 1
+         && String.equal (String.sub line ~pos:0 ~len:1) "-" ->
     (* Skips the line (we don't care about removed code) *)
     modified env nbr lines
   | _ :: lines -> modified env (nbr + 1) lines
 
 and add_file env =
   (* Given a list of modified lines => returns a list of intervals *)
-  let lines_modified = List.rev_map env.modified (fun x -> (x, x)) in
+  let lines_modified = List.rev_map env.modified ~f:(fun x -> (x, x)) in
   let lines_modified = normalize_intervals [] lines_modified in
   (* Adds the file to the list of results *)
   match env.file with

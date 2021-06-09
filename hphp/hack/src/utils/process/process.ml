@@ -100,7 +100,9 @@ let rec maybe_consume
             Unix.close fd;
             fd_ref := None
           ) else
-            let chunk = String.sub (Bytes.to_string buffer) 0 bytes_read in
+            let chunk =
+              String.sub (Bytes.to_string buffer) ~pos:0 ~len:bytes_read
+            in
             Stack.push chunk acc;
             let consumed_t = Unix.time () -. start_t in
             let max_time = max_time -. consumed_t in

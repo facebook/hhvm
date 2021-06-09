@@ -59,9 +59,9 @@ let run_daemon (scuba_table, roots) (ic, oc) =
   let t = Unix.gettimeofday () in
   let infd = Daemon.descr_of_in_channel ic in
   let outfd = Daemon.descr_of_out_channel oc in
-  let roots = List.map roots Path.to_string in
+  let roots = List.map roots ~f:Path.to_string in
   let env = DfindEnv.make roots in
-  List.iter roots (DfindAddFile.path env);
+  List.iter roots ~f:(DfindAddFile.path env);
   EventLogger.dfind_ready scuba_table t;
   Marshal_tools.to_fd_with_preamble outfd Ready |> ignore;
   ignore @@ Hh_logger.log_duration "Initialization" t;

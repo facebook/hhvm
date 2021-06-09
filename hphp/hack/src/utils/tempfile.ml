@@ -19,7 +19,7 @@ let mkdtemp ~skip_mocking =
   mkdtemp ~dir:(Path.make Sys_utils.temp_dir_name) ~skip_mocking ~retries:30
 
 let with_tempdir ~skip_mocking g =
-  let dir = mkdtemp skip_mocking in
+  let dir = mkdtemp ~skip_mocking in
   let f () = g dir in
   Utils.try_finally ~f ~finally:(fun () ->
       Sys_utils.rm_dir_tree (Path.to_string dir) ~skip_mocking)

@@ -464,7 +464,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         Errors.empty
     in
     let new_env =
-      { env with diag_subscribe = Some (Diagnostic_subscription.of_id id init) }
+      {
+        env with
+        diag_subscribe = Some (Diagnostic_subscription.of_id ~id ~init);
+      }
     in
     let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in
     (new_env, ())

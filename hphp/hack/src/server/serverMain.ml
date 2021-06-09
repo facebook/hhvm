@@ -89,7 +89,7 @@ module Program = struct
       ~stale_msg:None
       ~output_json:(ServerArgs.json_mode genv.options)
       ~error_list:
-        (List.map (Errors.get_error_list env.errorl) Errors.to_absolute)
+        (List.map (Errors.get_error_list env.errorl) ~f:Errors.to_absolute)
       ~save_state_result
       ~recheck_stats;
 
@@ -119,10 +119,10 @@ module Program = struct
     let root = Path.to_string @@ ServerArgs.root genv.options in
     (* Because of symlinks, we can have updates from files that aren't in
      * the .hhconfig directory *)
-    let updates = SSet.filter updates (fun p -> string_starts_with p root) in
+    let updates = SSet.filter updates ~f:(fun p -> string_starts_with p root) in
     let updates = Relative_path.(relativize_set Root updates) in
     let to_recheck =
-      Relative_path.Set.filter updates (fun update ->
+      Relative_path.Set.filter updates ~f:(fun update ->
           FindUtils.file_filter (Relative_path.to_absolute update))
     in
     let config_in_updates =
@@ -789,7 +789,9 @@ let serve_one_iteration genv env client_provider =
       else if has_pending_disk_changes genv then
         (env, "has_pending_disk_changes")
       else
-        let (sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
+        let (sub, errors) =
+          Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
+        in
         let env = { env with diag_subscribe = Some sub } in
         let id = Diagnostic_subscription.get_id sub in
         let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
@@ -1587,7 +1589,7 @@ let daemon_main
   let default_in_fd = Daemon.descr_of_in_channel default_ic in
 
   (* Restore the root directory and other global states from monitor *)
-  ServerGlobalState.restore state 0;
+  ServerGlobalState.restore state ~worker_id:0;
 
   (* Restore hhi files every time the server restarts
     in case the tmp folder changes *)

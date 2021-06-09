@@ -1099,7 +1099,9 @@ let full_init
     let (env, t) = naming env t ~profile_label:"naming" ~profiling in
     let fnl = Relative_path.Map.keys fast in
     if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
+      SearchServiceRunner.update_fileinfo_map
+        env.naming_table
+        ~source:SearchUtils.Init;
     let type_check_result =
       type_check
         genv
@@ -1272,7 +1274,7 @@ let post_saved_state_initialization
   in
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
-    SearchUtils.TypeChecker;
+    ~source:SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
     update_files
@@ -1427,7 +1429,7 @@ let saved_state_init
       with
       | Error error -> Error error
       | Ok loaded_info ->
-        let changed_while_parsing = get_updates_exn genv root in
+        let changed_while_parsing = get_updates_exn ~genv ~root in
         Ok (loaded_info, changed_while_parsing)
     with exn ->
       let stack = Utils.Callstack (Printexc.get_backtrace ()) in

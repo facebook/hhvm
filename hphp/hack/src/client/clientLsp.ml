@@ -2208,7 +2208,7 @@ let do_didChange
   let lsp_change_to_ide (lsp : DidChange.textDocumentContentChangeEvent) :
       Ide_api_types.text_edit =
     {
-      Ide_api_types.range = Option.map lsp.range lsp_range_to_ide;
+      Ide_api_types.range = Option.map lsp.range ~f:lsp_range_to_ide;
       text = lsp.text;
     }
   in

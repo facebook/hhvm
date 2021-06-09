@@ -84,7 +84,8 @@ let patches_to_json_string patches =
         Hh_json.JSON_Object
           [
             ("filename", Hh_json.JSON_String fn);
-            ("patches", Hh_json.JSON_Array (List.map patch_list patch_to_json));
+            ( "patches",
+              Hh_json.JSON_Array (List.map patch_list ~f:patch_to_json) );
           ]
         :: acc
       end

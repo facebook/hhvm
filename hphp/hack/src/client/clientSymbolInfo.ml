@@ -22,7 +22,7 @@ let go
     | _ -> Str.split (Str.regexp ";") files
   in
   let expand_path_list file_list =
-    List.rev_map file_list (fun file_path -> expand_path file_path)
+    List.rev_map file_list ~f:(fun file_path -> expand_path file_path)
   in
   let command =
     ServerCommandTypes.DUMP_SYMBOL_INFO (expand_path_list file_list)

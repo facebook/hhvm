@@ -31,7 +31,7 @@ let cls_or_mthd_to_json name pos p_name =
 
 let to_json input =
   let entries =
-    List.map input (fun res ->
+    List.map input ~f:(fun res ->
         Hh_json.JSON_Object
           [
             ( "origin",

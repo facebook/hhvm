@@ -70,7 +70,7 @@ let go status output_json from error_format max_errors =
       | Errors.Context -> print_error_contextual
       | Errors.Highlighted -> print_error_highlighted
     in
-    List.iter error_list f;
+    List.iter error_list ~f;
     Option.iter
       (Errors.format_summary error_format error_list dropped_count max_errors)
       ~f:(fun msg -> Printf.printf "%s" msg);

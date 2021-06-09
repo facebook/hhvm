@@ -192,7 +192,7 @@ let rpc
       Lwt.return (result, telemetry))
 
 let parse_positions positions =
-  List.map positions (fun pos ->
+  List.map positions ~f:(fun pos ->
       try
         match Str.split (Str.regexp ":") pos with
         | [filename; line; char] ->
@@ -226,7 +226,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     match args.mode with
     | MODE_LIST_FILES ->
       let%lwt (infol, telemetry) = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS in
-      List.iter infol (Printf.printf "%s\n");
+      List.iter infol ~f:(Printf.printf "%s\n");
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_COLORING file ->
       let file_input =
@@ -451,7 +451,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_TYPE_AT_POS_BATCH positions ->
       let positions =
-        List.map positions (fun pos ->
+        List.map positions ~f:(fun pos ->
             try
               match Str.split (Str.regexp ":") pos with
               | [filename; line; char] ->
@@ -474,7 +474,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (responses, telemetry) =
         rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view)
       in
-      List.iter responses print_endline;
+      List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_TYPE_ERROR_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
@@ -547,7 +547,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (responses, telemetry) =
         rpc args @@ Rpc.FUN_DEPS_BATCH (positions, args.dynamic_view)
       in
-      List.iter responses print_endline;
+      List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
@@ -822,7 +822,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       begin
         match results with
         | Some results ->
-          List.iter results print_endline;
+          List.iter results ~f:print_endline;
           Lwt.return (Exit_status.No_error, telemetry)
         | None -> Lwt.return (Exit_status.Checkpoint_error, telemetry)
       end

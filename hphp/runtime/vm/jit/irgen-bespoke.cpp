@@ -903,7 +903,7 @@ jit::ArrayLayout guardToLayout(
   }
 
   if (sl.sideExit && !RO::EvalBespokeEscalationSampleRate) {
-    checkType(env, loc, target, bcOff(env));
+    checkType(env, loc, target, curSrcKey(env));
     return sl.layout;
   }
 
@@ -913,7 +913,7 @@ jit::ArrayLayout guardToLayout(
     env,
     [&](Block* taken) {
       env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, target, bcOff(env));
+      checkType(env, loc, target, curSrcKey(env));
       env.irb->resetGuardFailBlock();
     },
     [&]{
@@ -984,7 +984,7 @@ void emitLoggingDiamond(
     env,
     [&](Block* taken) {
       env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, TVanillaArrLike, bcOff(env));
+      checkType(env, loc, TVanillaArrLike, curSrcKey(env));
       env.irb->resetGuardFailBlock();
 
       emitVanilla(env);

@@ -242,7 +242,7 @@ void emitGuards(irgen::IRGS& irgs,
     auto const type = preCond.type;
     auto const loc  = preCond.location;
     assertx(IMPLIES(type.arrSpec(), irgs.context.kind == TransKind::Live));
-    irgen::checkType(irgs, loc, type, bcOff);
+    irgen::checkType(irgs, loc, type, sk);
   }
 
   // Finish emitting guards, and emit profiling counters.
@@ -371,7 +371,7 @@ static bool isSimpleOp(Op op) {
       op == Op::IsTypeC ||
       op == Op::Add ||
       op == Op::Sub ||
-      op == Op::Mul || 
+      op == Op::Mul ||
       op == Op::Div ||
       op == Op::Mod ||
       op == Op::Pow ||

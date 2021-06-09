@@ -200,7 +200,7 @@ bool prepareInstruction(Env& env) {
         (loc.tag() != LTag::Local || !fs.localsCleared())) {
       auto const type = getLiveType(env.ctx.liveTypes, loc);
       assert_flog(type <= TCell, "loc = {}: type = {}", show(loc), type);
-      irgen::checkType(env.irgs, loc, type, env.ctx.sk.offset());
+      irgen::checkType(env.irgs, loc, type, env.ctx.sk);
     }
   };
 
@@ -474,7 +474,7 @@ RegionDescPtr form_region(Env& env) {
     if (eager || lt.location.tag() == LTag::MBase) {
       auto t = lt.type;
       assertx(t <= TCell);
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.sk.offset());
+      irgen::checkType(env.irgs, lt.location, t, env.ctx.sk);
     }
   }
   env.irgs.irb->resetGuardFailBlock();

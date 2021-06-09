@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_expression as emit_expression;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -15,17 +16,17 @@ use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
 
-pub fn from_asts<'arena>(
+pub fn from_asts<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     attrs: &[a::UserAttribute],
 ) -> Result<Vec<HhasAttribute<'arena>>> {
     attrs.iter().map(|attr| from_ast(alloc, e, attr)).collect()
 }
 
-pub fn from_ast<'arena>(
+pub fn from_ast<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     attr: &a::UserAttribute,
 ) -> Result<HhasAttribute<'arena>> {
     let arguments = ast_constant_folder::literals_from_exprs(

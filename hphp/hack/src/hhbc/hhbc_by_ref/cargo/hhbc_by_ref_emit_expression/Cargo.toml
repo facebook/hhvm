@@ -10,6 +10,7 @@ path = "../../emit_expression.rs"
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref_ast_class_expr" }
 hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }

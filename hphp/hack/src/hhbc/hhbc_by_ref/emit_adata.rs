@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_adata_state::AdataState;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_adata::{
@@ -14,20 +15,19 @@ use hhbc_by_ref_instruction_sequence::{Error, InstrSeq};
 use hhbc_by_ref_options::HhvmFlags;
 use hhbc_by_ref_runtime::TypedValue;
 
-pub fn rewrite_typed_values<'arena>(
+pub fn rewrite_typed_values<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     instrseq: &mut InstrSeq<'arena>,
 ) -> std::result::Result<(), hhbc_by_ref_instruction_sequence::Error> {
     instrseq.map_result_mut(&mut |instr| rewrite_typed_value(alloc, emitter, instr))
 }
 
-fn rewrite_typed_value<'arena>(
+fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), hhbc_by_ref_instruction_sequence::Error> {
-    //use InstructLitConst::*;
     if let Instruct::ILitConst(InstructLitConst::TypedValue(tv)) = instr {
         *instr = Instruct::ILitConst(match &tv {
             TypedValue::Uninit => {
@@ -85,9 +85,9 @@ fn rewrite_typed_value<'arena>(
     Ok(())
 }
 
-pub fn get_array_identifier<'arena>(
+pub fn get_array_identifier<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     tv: &TypedValue<'arena>,
 ) -> &'arena str {
     if e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE) {
@@ -106,9 +106,9 @@ pub fn get_array_identifier<'arena>(
     }
 }
 
-fn next_adata_id<'arena>(
+fn next_adata_id<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     value: &TypedValue<'arena>,
 ) -> &'arena str {
     let mut state = e.emit_adata_state_mut(alloc);
@@ -121,7 +121,10 @@ fn next_adata_id<'arena>(
     bumpalo::collections::String::from_str_in(id.as_str(), alloc).into_bump_str()
 }
 
-pub fn take<'arena>(alloc: &'arena bumpalo::Bump, e: &mut Emitter<'arena>) -> AdataState<'arena> {
+pub fn take<'arena, 'decl, D: DeclProvider<'decl>>(
+    alloc: &'arena bumpalo::Bump,
+    e: &mut Emitter<'arena, 'decl, D>,
+) -> AdataState<'arena> {
     let state = e.emit_adata_state_mut(alloc);
     std::mem::take(state)
 }
@@ -133,14 +136,17 @@ mod tests {
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
     #[allow(clippy::needless_lifetimes)]
-    fn ref_state_from_emiter<'arena>(e: &Emitter<'arena>) {
+    fn ref_state_from_emiter<'arena, 'decl, D: DeclProvider<'decl>>(e: &Emitter<'arena, 'decl, D>) {
         let _: &AdataState = e.emit_adata_state();
     }
 
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
     #[allow(clippy::needless_lifetimes)]
-    fn mut_state_from_emiter<'arena>(alloc: &'arena bumpalo::Bump, e: &mut Emitter<'arena>) {
+    fn mut_state_from_emiter<'arena, 'decl, D: DeclProvider<'decl>>(
+        alloc: &'arena bumpalo::Bump,
+        e: &mut Emitter<'arena, 'decl, D>,
+    ) {
         let _: &mut AdataState = e.emit_adata_state_mut(alloc);
     }
 }

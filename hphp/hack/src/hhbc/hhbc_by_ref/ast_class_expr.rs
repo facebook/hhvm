@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_ast::SpecialClsRef;
@@ -20,8 +21,8 @@ pub enum ClassExpr<'arena> {
 }
 
 impl<'arena> ClassExpr<'arena> {
-    fn get_original_class_name<'a>(
-        emitter: &Emitter<'arena>,
+    fn get_original_class_name<'a, 'decl, D: DeclProvider<'decl>>(
+        emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
         opt_class_info: Option<(ast_defs::ClassKind, &str)>,
@@ -53,8 +54,8 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    fn get_original_parent_class_name<'a>(
-        emitter: &Emitter<'arena>,
+    fn get_original_parent_class_name<'a, 'decl, D: DeclProvider<'decl>>(
+        emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
         opt_class_info: Option<(ast_defs::ClassKind, &str)>,
@@ -78,8 +79,8 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    fn expr_to_class_expr<'a>(
-        emitter: &Emitter<'arena>,
+    fn expr_to_class_expr<'a, 'decl, D: DeclProvider<'decl>>(
+        emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope<'a>,
@@ -99,8 +100,8 @@ impl<'arena> ClassExpr<'arena> {
         }
     }
 
-    pub fn expr_to_class_expr_(
-        emitter: &Emitter<'arena>,
+    pub fn expr_to_class_expr_<'decl, D: DeclProvider<'decl>>(
+        emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
         opt_class_info: Option<(ast_defs::ClassKind, &str)>,
@@ -141,8 +142,8 @@ impl<'arena> ClassExpr<'arena> {
         }
     }
 
-    pub fn class_id_to_class_expr<'a>(
-        emitter: &Emitter<'arena>,
+    pub fn class_id_to_class_expr<'a, 'decl, D: DeclProvider<'decl>>(
+        emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope<'a>,

@@ -7,6 +7,7 @@
 // unlike formal parameters and return types. We might consider fixing this.
 // Also interestingly, abstract constants are not emitted at all.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_expression as emit_expr;
 use hhbc_by_ref_env::{emitter::Emitter, Env};
@@ -23,8 +24,8 @@ pub struct HhasConstant<'arena> {
     pub is_abstract: bool,
 }
 
-pub fn from_ast<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     id: &'a tast::Id,
     expr: Option<&tast::Expr>,

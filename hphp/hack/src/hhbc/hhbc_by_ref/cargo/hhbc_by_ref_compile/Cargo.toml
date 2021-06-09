@@ -13,6 +13,7 @@ anyhow = "1.0"
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
+decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 hhbc_by_ref_emit_program = { path = "../hhbc_by_ref_emit_program" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }

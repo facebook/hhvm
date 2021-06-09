@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
@@ -28,9 +29,9 @@ fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
     }
 }
 
-fn emit_field<'a, 'arena>(
+fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena>,
+    emitter: &Emitter<'arena, 'decl, D>,
     field: &'a (Sid, Hint, Option<Expr>),
 ) -> Result<RecordField<'a, 'arena>> {
     let (Id(pos, name), hint, expr_opt) = field;
@@ -56,9 +57,9 @@ fn emit_field<'a, 'arena>(
     }
 }
 
-fn emit_record_def<'a, 'arena>(
+fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena>,
+    emitter: &Emitter<'arena, 'decl, D>,
     rd: &'a RecordDef,
 ) -> Result<HhasRecord<'a, 'arena>> {
     fn elaborate<'arena>(alloc: &'arena bumpalo::Bump, Id(_, name): &Id) -> record::Type<'arena> {
@@ -87,9 +88,9 @@ fn emit_record_def<'a, 'arena>(
     })
 }
 
-pub fn emit_record_defs_from_program<'a, 'arena>(
+pub fn emit_record_defs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena>,
+    emitter: &Emitter<'arena, 'decl, D>,
     p: &'a [Def],
 ) -> Result<Vec<HhasRecord<'a, 'arena>>> {
     p.iter()

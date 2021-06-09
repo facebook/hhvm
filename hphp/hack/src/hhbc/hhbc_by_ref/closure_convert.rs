@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_unique_id_builder::*;
-use itertools::{Either, EitherOrBoth::*, Itertools};
 use std::mem;
+use std::path::PathBuf;
 
+use itertools::{Either, EitherOrBoth::*, Itertools};
+
+use decl_provider::DeclProvider;
 use hash::HashSet;
 use hhbc_by_ref_ast_scope::{
     self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
@@ -21,6 +23,7 @@ use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Error, Result};
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
+use hhbc_by_ref_unique_id_builder::*;
 use hhbc_by_ref_unique_list::UniqueList;
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use ocamlrep::rc::RcOc;
@@ -34,7 +37,6 @@ use oxidized::{
     relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
-use std::path::PathBuf;
 
 type Scope<'a> = AstScope<'a>;
 type ScopeItem<'a> = AstScopeItem<'a>;
@@ -1694,9 +1696,9 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog<'local_arena, 'arena>(
+pub fn convert_toplevel_prog<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {

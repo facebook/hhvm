@@ -9,6 +9,7 @@ path = "../../scope.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
 hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }

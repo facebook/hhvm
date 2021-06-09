@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -24,9 +25,9 @@ use oxidized::{ast as T, ast_defs};
 use itertools::Either;
 use std::borrow::Cow;
 
-pub fn from_asts<'a, 'arena>(
+pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     class: &'a T::Class_,
     methods: &'a [T::Method_],
 ) -> Result<Vec<HhasMethod<'arena>>> {
@@ -36,9 +37,9 @@ pub fn from_asts<'a, 'arena>(
         .collect::<Result<Vec<_>>>()
 }
 
-pub fn from_ast<'a, 'arena>(
+pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     class: &'a T::Class_,
     method_: impl Into<Cow<'a, T::Method_>>,
 ) -> Result<HhasMethod<'arena>> {

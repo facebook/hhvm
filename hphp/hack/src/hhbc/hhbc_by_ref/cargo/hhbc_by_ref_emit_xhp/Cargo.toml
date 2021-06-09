@@ -9,6 +9,7 @@ path = "../../emit_xhp.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_emit_method = { path = "../hhbc_by_ref_emit_method" }
 hhbc_by_ref_emit_property = { path = "../hhbc_by_ref_emit_property" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }

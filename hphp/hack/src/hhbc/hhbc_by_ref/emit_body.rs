@@ -11,6 +11,7 @@ use reified_generics_helpers as RGH;
 
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
+use decl_provider::DeclProvider;
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
@@ -80,9 +81,9 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'b, 'arena>(
+pub fn emit_body_with_default_args<'b, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     namespace: RcOc<namespace_env::Env>,
     body: &'b tast::Program,
     return_value: InstrSeq<'arena>,
@@ -111,9 +112,9 @@ pub fn emit_body_with_default_args<'b, 'arena>(
     .map(|r| r.0)
 }
 
-pub fn emit_body<'b, 'arena>(
+pub fn emit_body<'b, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     namespace: RcOc<namespace_env::Env>,
     body: AstBody<'b>,
     return_value: InstrSeq<'arena>,
@@ -227,8 +228,8 @@ pub fn emit_body<'b, 'arena>(
     ))
 }
 
-fn make_body_instrs<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_body_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     params: &[HhasParam<'arena>],
     tparams: &[tast::Tparam],
@@ -279,8 +280,8 @@ fn make_body_instrs<'a, 'arena>(
     Ok(body_instrs)
 }
 
-fn make_header_content<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_header_content<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     params: &[HhasParam<'arena>],
     tparams: &[tast::Tparam],
@@ -313,8 +314,8 @@ fn make_header_content<'a, 'arena>(
     ))
 }
 
-fn make_decl_vars<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_decl_vars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     scope: &Scope<'a>,
     immediate_tparams: &[tast::Tparam],
     params: &[HhasParam<'arena>],
@@ -404,9 +405,9 @@ pub fn make_env<'a, 'arena>(
     env
 }
 
-fn make_params<'a, 'arena>(
+fn make_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     tp_names: &mut Vec<&str>,
     ast_params: &[tast::FunParam],
     scope: &Scope<'a>,
@@ -423,9 +424,9 @@ fn make_params<'a, 'arena>(
     )
 }
 
-pub fn make_body<'a, 'arena>(
+pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     mut body_instrs: InstrSeq<'arena>,
     decl_vars: Vec<String>,
     is_memoize_wrapper: bool,
@@ -485,9 +486,9 @@ pub fn make_body<'a, 'arena>(
     })
 }
 
-fn emit_ast_body<'a, 'arena>(
+fn emit_ast_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &mut Env<'a, 'arena>,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     body: &AstBody,
 ) -> Result<InstrSeq<'arena>> {
     match body {
@@ -496,15 +497,15 @@ fn emit_ast_body<'a, 'arena>(
     }
 }
 
-fn emit_defs<'a, 'arena>(
+fn emit_defs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &mut Env<'a, 'arena>,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     prog: &[tast::Def],
 ) -> Result<InstrSeq<'arena>> {
     use tast::Def;
-    fn emit_def<'a, 'arena>(
+    fn emit_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env: &mut Env<'a, 'arena>,
-        emitter: &mut Emitter<'arena>,
+        emitter: &mut Emitter<'arena, 'decl, D>,
         def: &tast::Def,
     ) -> Result<InstrSeq<'arena>> {
         let alloc = env.arena;
@@ -514,9 +515,9 @@ fn emit_defs<'a, 'arena>(
             _ => Ok(instr::empty(alloc)),
         }
     }
-    fn aux<'a, 'arena>(
+    fn aux<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env: &mut Env<'a, 'arena>,
-        emitter: &mut Emitter<'arena>,
+        emitter: &mut Emitter<'arena, 'decl, D>,
         defs: &[tast::Def],
     ) -> Result<InstrSeq<'arena>> {
         let alloc = env.arena;
@@ -658,8 +659,8 @@ mod atom_helpers {
 ////////////////////////////////////////////////////////////////////////////////
 // atom_instrs
 
-fn atom_instrs<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     param: &HhasParam<'arena>,
     ast_param: &tast::FunParam,
@@ -853,8 +854,8 @@ fn atom_instrs<'a, 'arena>(
     }
 }
 
-pub fn emit_method_prolog<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     params: &[HhasParam<'arena>],
@@ -1040,9 +1041,9 @@ pub fn emit_deprecation_info<'a, 'arena>(
     })
 }
 
-fn set_emit_statement_state<'arena>(
+fn set_emit_statement_state<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     default_return_value: InstrSeq<'arena>,
     params: &[HhasParam<'arena>],
     return_type_info: &HhasTypeInfo,
@@ -1211,8 +1212,8 @@ fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
     unimplemented!() // SF(2021-03-17): I found it like this.
 }
 
-fn set_function_jmp_targets<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn set_function_jmp_targets<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
 ) -> bool {
     let function_state_key = get_unique_id_for_scope(&env.scope);

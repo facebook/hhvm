@@ -9,6 +9,7 @@ path = "../../emit_adata.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_adata_state = { path = "../hhbc_by_ref_adata_state" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhas_adata = { path = "../hhbc_by_ref_hhas_adata" }

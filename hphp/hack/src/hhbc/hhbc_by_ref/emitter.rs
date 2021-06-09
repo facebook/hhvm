@@ -6,13 +6,14 @@
 use hhbc_by_ref_iterator::Iter;
 use hhbc_by_ref_options::Options;
 
+use decl_provider::{DeclProvider, NoDeclProvider};
 use hhbc_by_ref_adata_state::AdataState;
 use hhbc_by_ref_global_state::GlobalState;
 use hhbc_by_ref_statement_state::StatementState;
 use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
 
-#[derive(Debug, Default)]
-pub struct Emitter<'arena> {
+#[derive(Debug)]
+pub struct Emitter<'arena, 'decl, D: DeclProvider<'decl> = NoDeclProvider> {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
     /// systemlib is part of context, changed externally
@@ -29,16 +30,40 @@ pub struct Emitter<'arena> {
     pub symbol_refs_state_: Option<SymbolRefsState>,
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState>,
+
+    pub decl_provider: D,
+
+    __phaton_data: std::marker::PhantomData<&'decl ()>,
 }
 
-impl<'arena> Emitter<'arena> {
-    pub fn new(opts: Options, systemlib: bool, for_debugger_eval: bool) -> Emitter<'arena> {
+impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
+    pub fn new(
+        opts: Options,
+        systemlib: bool,
+        for_debugger_eval: bool,
+        decl_provider: D,
+    ) -> Emitter<'arena, 'decl, D> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
-            ..Default::default()
+            decl_provider,
+
+            label_gen: Default::default(),
+            local_gen: Default::default(),
+            iterator: Default::default(),
+
+            adata_state_: None,
+            statement_state_: None,
+            symbol_refs_state_: None,
+            global_state_: None,
+
+            __phaton_data: std::marker::PhantomData,
         }
+    }
+
+    pub fn decl_provider(&self) -> &D {
+        &self.decl_provider
     }
 
     pub fn options(&self) -> &Options {

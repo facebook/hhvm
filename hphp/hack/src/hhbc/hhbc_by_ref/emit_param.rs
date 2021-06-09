@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -28,9 +29,9 @@ use naming_special_names_rust::user_attributes as ua;
 use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 
-pub fn from_asts<'a, 'arena>(
+pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -83,9 +84,9 @@ fn rename_params<'arena>(mut params: Vec<HhasParam<'arena>>) -> Vec<HhasParam<'a
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'arena>(
+fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -157,6 +158,8 @@ fn from_ast<'a, 'arena>(
         &mut ResolverVisitor {
             phantom_a: PhantomData,
             phantom_b: PhantomData,
+            phantom_c: PhantomData,
+            phantom_d: PhantomData,
         },
         &mut Ctx { emitter, scope },
         &param.expr,
@@ -184,8 +187,8 @@ fn from_ast<'a, 'arena>(
     }))
 }
 
-pub fn emit_param_default_value_setter<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     params: &[HhasParam<'arena>],
@@ -232,26 +235,33 @@ pub fn emit_param_default_value_setter<'a, 'arena>(
     }
 }
 
-//struct ResolverVisitor<'a, 'arena>(PhantomData<&'a ()>);
-struct ResolverVisitor<'a, 'arena: 'a> {
+struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a, D> {
     phantom_a: PhantomData<&'a ()>,
     phantom_b: PhantomData<&'arena ()>,
+    phantom_c: PhantomData<&'decl ()>,
+    phantom_d: PhantomData<D>,
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'arena: 'a> {
-    emitter: &'a mut Emitter<'arena>,
+struct Ctx<'a, 'arena: 'a, 'decl: 'a, D: DeclProvider<'decl>> {
+    emitter: &'a mut Emitter<'arena, 'decl, D>,
     scope: &'a Scope<'a>,
 }
 
-impl<'ast, 'a, 'arena> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena> {
-    type P = AstParams<Ctx<'a, 'arena>, ()>;
+impl<'ast, 'a, 'arena, 'decl, D: DeclProvider<'decl> + 'a> aast_visitor::Visitor<'ast>
+    for ResolverVisitor<'a, 'arena, 'decl, D>
+{
+    type P = AstParams<Ctx<'a, 'arena, 'decl, D>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'a, 'arena>, p: &a::Expr) -> std::result::Result<(), ()> {
+    fn visit_expr(
+        &mut self,
+        c: &mut Ctx<'a, 'arena, 'decl, D>,
+        p: &a::Expr,
+    ) -> std::result::Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }

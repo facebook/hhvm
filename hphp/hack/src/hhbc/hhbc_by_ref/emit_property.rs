@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -31,9 +32,9 @@ pub struct FromAstArgs<'ast> {
     pub is_readonly: bool,
 }
 
-pub fn from_ast<'ast, 'arena>(
+pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     class: &'ast tast::Class_,
     tparams: &[&str],
     class_is_const: bool,

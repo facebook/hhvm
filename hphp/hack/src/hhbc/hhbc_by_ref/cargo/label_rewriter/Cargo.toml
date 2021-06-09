@@ -9,6 +9,7 @@ path = "../../label_rewriter.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }

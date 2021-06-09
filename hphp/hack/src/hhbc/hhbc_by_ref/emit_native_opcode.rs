@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -12,9 +13,9 @@ use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use oxidized::{aast, ast as tast, pos::Pos};
 
-pub fn emit_body<'a, 'arena>(
+pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     scope: &Scope<'a>,
     class_attrs: &[tast::UserAttribute],
     name: &tast::Sid,

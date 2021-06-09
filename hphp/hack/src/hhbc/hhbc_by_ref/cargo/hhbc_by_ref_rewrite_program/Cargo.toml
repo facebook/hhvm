@@ -9,6 +9,7 @@ path = "../../rewrite_program.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_closure_convert = { path = "../hhbc_by_ref_closure_convert" }
 hhbc_by_ref_emit_fatal = { path = "../hhbc_by_ref_emit_fatal" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }

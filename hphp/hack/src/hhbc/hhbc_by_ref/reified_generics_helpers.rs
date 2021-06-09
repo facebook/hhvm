@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_expression::{emit_reified_arg, is_reified_tparam};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_instruction_sequence::*;
@@ -148,8 +149,8 @@ pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint
     }
 }
 
-pub(crate) fn simplify_verify_type<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+pub(crate) fn simplify_verify_type<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     check: InstrSeq<'arena>,

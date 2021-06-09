@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 
 use crate::special_class_resolver::SpecialClassResolver;
 use crate::write::*;
+use decl_provider::DeclProvider;
 use hhbc_by_ref_env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
 
@@ -50,8 +51,8 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new(
-        emitter: &'a Emitter<'a>,
+    pub fn new<'decl, D: DeclProvider<'decl>>(
+        emitter: &'a Emitter<'a, 'decl, D>,
         path: Option<&'a RelativePath>,
         dump_symbol_refs: bool,
         is_system_lib: bool,

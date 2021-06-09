@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../ast_class_expr.rs"
 
 [dependencies]
+decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }

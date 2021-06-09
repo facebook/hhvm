@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use core_utils_rust as utils;
+use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_type_hint::{self as emit_type_hint, Kind};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
@@ -16,8 +17,8 @@ use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::ast as tast;
 
-fn emit_constant_cinit<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     constant: &'a tast::Gconst,
     c: &HhasConstant<'arena>,
@@ -82,8 +83,8 @@ fn emit_constant_cinit<'a, 'arena>(
         .transpose()
 }
 
-fn emit_constant<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+fn emit_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     constant: &'a tast::Gconst,
 ) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
@@ -92,8 +93,8 @@ fn emit_constant<'a, 'arena>(
     Ok((c, f))
 }
 
-pub fn emit_constants_from_program<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+pub fn emit_constants_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     defs: &'a [tast::Def],
 ) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'arena>>)> {

@@ -12,6 +12,7 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
+use decl_provider::{DeclProvider, NoDeclProvider};
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_program::HhasProgram;
@@ -315,6 +316,7 @@ where
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        NoDeclProvider,
     );
     let prog = emit_program::emit_fatal_program(FatalOp::Parse, &Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
@@ -366,6 +368,7 @@ where
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        NoDeclProvider,
     );
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
@@ -428,9 +431,9 @@ where
     }
 }
 
-fn rewrite_and_emit<'p, 'arena, S: AsRef<str>>(
+fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut Tast::Program,
@@ -449,18 +452,18 @@ fn rewrite_and_emit<'p, 'arena, S: AsRef<str>>(
     }
 }
 
-fn rewrite<'p, 'arena>(
+fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     ast: &'p mut Tast::Program,
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
     rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
-fn emit<'p, 'arena, S: AsRef<str>>(
+fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut Tast::Program,
@@ -631,6 +634,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &Tast::Expr) -> S
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        NoDeclProvider,
     );
     let ctx = Context::new(
         &mut emitter,

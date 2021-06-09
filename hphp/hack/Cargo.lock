@@ -230,6 +230,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "core_utils_rust",
+ "decl_provider",
  "escaper",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_emit_type_hint",
@@ -524,6 +525,13 @@ dependencies = [
  "parser_core_types",
  "smart_constructors",
  "syntax_smart_constructors",
+]
+
+[[package]]
+name = "decl_provider"
+version = "0.0.0"
+dependencies = [
+ "oxidized_by_ref",
 ]
 
 [[package]]
@@ -1017,6 +1025,7 @@ dependencies = [
 name = "hhbc_by_ref_ast_class_expr"
 version = "0.0.0"
 dependencies = [
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_ast",
@@ -1031,6 +1040,7 @@ name = "hhbc_by_ref_ast_constant_folder"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_env",
@@ -1058,6 +1068,7 @@ name = "hhbc_by_ref_closure_convert"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_constant_folder",
@@ -1088,6 +1099,7 @@ dependencies = [
  "bitflags",
  "bumpalo",
  "bytecode_printer",
+ "decl_provider",
  "elaborate_namespaces_visitor",
  "hhbc_by_ref_emit_program",
  "hhbc_by_ref_env",
@@ -1123,6 +1135,7 @@ name = "hhbc_by_ref_emit_adata"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_adata",
@@ -1139,6 +1152,7 @@ name = "hhbc_by_ref_emit_attribute"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "escaper",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
@@ -1159,6 +1173,7 @@ dependencies = [
  "bitflags",
  "bstr",
  "bumpalo",
+ "decl_provider",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_class_expr",
@@ -1202,6 +1217,7 @@ name = "hhbc_by_ref_emit_class"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_expression",
@@ -1242,6 +1258,7 @@ name = "hhbc_by_ref_emit_constant"
 version = "0.0.0"
 dependencies = [
  "core_utils_rust",
+ "decl_provider",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_hint",
  "hhbc_by_ref_env",
@@ -1261,6 +1278,7 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
+ "decl_provider",
  "hash",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_constant_folder",
@@ -1304,6 +1322,7 @@ name = "hhbc_by_ref_emit_file_attributes"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_attribute",
@@ -1317,6 +1336,7 @@ name = "hhbc_by_ref_emit_function"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1362,6 +1382,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1393,6 +1414,7 @@ name = "hhbc_by_ref_emit_method"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1419,6 +1441,7 @@ name = "hhbc_by_ref_emit_native_opcode"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_fatal",
@@ -1435,6 +1458,7 @@ name = "hhbc_by_ref_emit_param"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_expression",
@@ -1467,6 +1491,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_adata",
  "hhbc_by_ref_emit_class",
  "hhbc_by_ref_emit_constant",
@@ -1488,6 +1513,7 @@ name = "hhbc_by_ref_emit_property"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_expression",
@@ -1511,6 +1537,7 @@ name = "hhbc_by_ref_emit_record_def"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_emit_type_hint",
@@ -1529,6 +1556,7 @@ name = "hhbc_by_ref_emit_symbol_refs"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_symbol_refs",
  "hhbc_by_ref_hhbc_id",
@@ -1568,6 +1596,7 @@ name = "hhbc_by_ref_emit_typedef"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_constant",
@@ -1587,6 +1616,7 @@ name = "hhbc_by_ref_emit_xhp"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_method",
  "hhbc_by_ref_emit_property",
  "hhbc_by_ref_env",
@@ -1606,6 +1636,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -1694,6 +1725,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_constant"
 version = "0.0.0"
 dependencies = [
+ "decl_provider",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
  "hhbc_by_ref_env",
@@ -1884,6 +1916,7 @@ name = "hhbc_by_ref_label_rewriter"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hash",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_param",
@@ -1929,6 +1962,7 @@ name = "hhbc_by_ref_rewrite_program"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_closure_convert",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_env",
@@ -1943,6 +1977,7 @@ name = "hhbc_by_ref_rewrite_xml"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_emit_symbol_refs",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_id",
@@ -1963,6 +1998,7 @@ name = "hhbc_by_ref_scope"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_iterator",

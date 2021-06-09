@@ -5,6 +5,7 @@
 
 mod emit_memoize_function;
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body::{self as emit_body};
@@ -22,9 +23,9 @@ use oxidized::{ast as tast, ast_defs};
 
 use itertools::Either;
 
-pub fn emit_function<'a, 'arena>(
+pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     fd: &'a tast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
@@ -174,9 +175,9 @@ pub fn emit_function<'a, 'arena>(
     })
 }
 
-pub fn emit_functions_from_program<'a, 'arena>(
+pub fn emit_functions_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena>,
+    e: &mut Emitter<'arena, 'decl, D>,
     tast: &'a [tast::Def],
 ) -> Result<Vec<HhasFunction<'arena>>> {
     Ok(tast

@@ -5,6 +5,7 @@
 
 use std::borrow::Cow;
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBodyEnv;
@@ -14,7 +15,7 @@ pub trait SpecialClassResolver {
     fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv>, id: &'a str) -> Cow<'a, str>;
 }
 
-impl<'arena> SpecialClassResolver for Emitter<'arena> {
+impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'arena, 'decl, D> {
     fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv>, id: &'a str) -> Cow<'a, str> {
         let class_expr = match env {
             None => ClassExpr::expr_to_class_expr_(

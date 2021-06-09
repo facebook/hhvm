@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -42,9 +43,9 @@ use oxidized::{
 
 use std::collections::BTreeMap;
 
-fn add_symbol_refs<'arena>(
+fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     base: &Option<class::Type<'arena>>,
     implements: &[class::Type<'arena>],
     uses: &[&str],
@@ -63,9 +64,9 @@ fn add_symbol_refs<'arena>(
         .for_each(|(x, _)| emit_symbol_refs::add_class(alloc, emitter, *x));
 }
 
-fn make_86method<'a, 'arena>(
+fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     name: method::Type<'arena>,
     params: Vec<HhasParam<'arena>>,
     is_static: bool,
@@ -162,9 +163,9 @@ fn from_includes<'arena>(
         .collect()
 }
 
-fn from_type_constant<'a, 'arena>(
+fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     tc: &'a tast::ClassTypeconstDef,
 ) -> Result<HhasTypeConstant<'arena>> {
     use tast::ClassTypeconst::*;
@@ -234,9 +235,9 @@ fn from_ctx_constant(tc: &tast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
     })
 }
 
-fn from_class_elt_classvars<'a, 'arena>(
+fn from_class_elt_classvars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     ast_class: &'a tast::Class_,
     class_is_const: bool,
     tparams: &[&str],
@@ -278,8 +279,8 @@ fn from_class_elt_classvars<'a, 'arena>(
         .collect::<Result<Vec<_>>>()
 }
 
-fn from_class_elt_constants<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     class_: &'a tast::Class_,
 ) -> Result<Vec<HhasConstant<'arena>>> {
@@ -359,8 +360,8 @@ fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::
     }
 }
 
-fn emit_reified_extends_params<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     ast_class: &'a tast::Class_,
 ) -> Result<InstrSeq<'arena>> {
@@ -389,8 +390,8 @@ fn emit_reified_extends_params<'a, 'arena>(
     Ok(instr::typedvalue(alloc, tv))
 }
 
-fn emit_reified_init_body<'a, 'arena>(
-    e: &mut Emitter<'arena>,
+fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     num_reified: usize,
     ast_class: &'a tast::Class_,
@@ -449,8 +450,8 @@ fn emit_reified_init_body<'a, 'arena>(
     })
 }
 
-fn emit_reified_init_method<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     ast_class: &'a tast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
@@ -495,9 +496,9 @@ fn emit_reified_init_method<'a, 'arena>(
     }
 }
 
-fn make_init_method<'a, 'arena, F>(
+fn make_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>, F>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     properties: &[HhasProperty<'arena>],
     filter: F,
     name: &'static str,
@@ -544,9 +545,9 @@ where
     }
 }
 
-pub fn emit_class<'a, 'arena>(
+pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     ast_class: &'a tast::Class_,
 ) -> Result<HhasClass<'a, 'arena>> {
     let namespace = &ast_class.namespace;
@@ -748,9 +749,9 @@ pub fn emit_class<'a, 'arena>(
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        fn make_cinit_instrs<'arena>(
+        fn make_cinit_instrs<'arena, 'decl, D: DeclProvider<'decl>>(
             alloc: &'arena bumpalo::Bump,
-            e: &mut Emitter<'arena>,
+            e: &mut Emitter<'arena, 'decl, D>,
             default_label: label::Label,
             pos: &Pos,
             consts: &[(&r#const::Type<'arena>, label::Label, &InstrSeq<'arena>)],
@@ -913,9 +914,9 @@ pub fn emit_class<'a, 'arena>(
     })
 }
 
-pub fn emit_classes_from_program<'a, 'arena>(
+pub fn emit_classes_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     tast: &'a [tast::Def],
 ) -> Result<Vec<HhasClass<'a, 'arena>>> {
     tast.iter()

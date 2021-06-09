@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
+use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_adata as emit_adata;
 use hhbc_by_ref_emit_class::emit_classes_from_program;
 use hhbc_by_ref_emit_constant::emit_constants_from_program;
@@ -34,9 +35,9 @@ pub fn emit_fatal_program<'a, 'arena>(
 }
 
 /// This is the entry point from hh_single_compile
-pub fn emit_program<'a, 'arena>(
+pub fn emit_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     tast: &'a Tast::Program,
@@ -48,9 +49,9 @@ pub fn emit_program<'a, 'arena>(
     }
 }
 
-fn emit_program_<'a, 'arena>(
+fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     prog: &'a Tast::Program,

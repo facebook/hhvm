@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -84,8 +85,8 @@ pub fn make_info<'arena>(
     Ok(MemoizeInfo { is_trait, class_id })
 }
 
-pub fn emit_wrapper_methods<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+pub fn emit_wrapper_methods<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
@@ -106,8 +107,8 @@ pub fn emit_wrapper_methods<'a, 'arena>(
 }
 
 // This is cut-and-paste from emit_method, with special casing for wrappers
-fn make_memoize_wrapper_method<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
@@ -176,8 +177,8 @@ fn make_memoize_wrapper_method<'a, 'arena>(
     })
 }
 
-fn emit_memoize_wrapper_body<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn emit_memoize_wrapper_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     args: &mut Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
@@ -201,8 +202,8 @@ fn emit_memoize_wrapper_body<'a, 'arena>(
     emit(emitter, env, hhas_params, return_type_info, args)
 }
 
-fn emit<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn emit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     hhas_params: Vec<HhasParam<'arena>>,
     return_type_info: HhasTypeInfo,
@@ -215,8 +216,8 @@ fn emit<'a, 'arena>(
     make_wrapper(emitter, env, instrs, hhas_params, return_type_info, args)
 }
 
-fn make_memoize_method_code<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_memoize_method_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     hhas_params: &[HhasParam<'arena>],
@@ -230,8 +231,8 @@ fn make_memoize_method_code<'a, 'arena>(
 }
 
 // method is the already-renamed memoize method that must be wrapped
-fn make_memoize_method_with_params_code<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     hhas_params: &[HhasParam<'arena>],
@@ -368,9 +369,9 @@ fn make_memoize_method_with_params_code<'a, 'arena>(
     ))
 }
 
-fn make_memoize_method_no_params_code<'a, 'arena>(
+fn make_memoize_method_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena>,
+    emitter: &mut Emitter<'arena, 'decl, D>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let notfound = emitter.label_gen_mut().next_regular();
@@ -456,8 +457,8 @@ fn make_memoize_method_no_params_code<'a, 'arena>(
 }
 
 // Construct the wrapper function
-fn make_wrapper<'a, 'arena>(
-    emitter: &mut Emitter<'arena>,
+fn make_wrapper<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
     params: Vec<HhasParam<'arena>>,

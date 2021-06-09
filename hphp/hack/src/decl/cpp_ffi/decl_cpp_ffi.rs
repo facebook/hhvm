@@ -8,7 +8,6 @@
 
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
-use decl_rust::direct_decl_parser::parse_decls_and_mode;
 use no_pos_hash::position_insensitive_hash;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser::Decls};
@@ -66,7 +65,13 @@ unsafe extern "C" fn direct_decl_parse<'a>(
         std::ffi::CStr::from_ptr(filename).to_bytes(),
     ));
     let filename = RelativePath::make(Prefix::Root, path);
-    let (decls, _mode) = parse_decls_and_mode(&(*opts), filename, text, &(*arena), None);
+    let decls = decl_rust::direct_decl_parser::parse_decls_without_reference_text(
+        &(*opts),
+        filename,
+        text,
+        &(*arena),
+        None,
+    );
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let (data, len, _cap) = op

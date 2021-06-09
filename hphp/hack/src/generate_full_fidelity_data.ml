@@ -1945,9 +1945,9 @@ use parser_core_types::compact_token::CompactToken;
 use parser_core_types::token_factory::SimpleTokenFactoryImpl;
 use smart_constructors::SmartConstructors;
 
-use crate::{DirectDeclSmartConstructors, Node};
+use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
-impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
+impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
     type State = Self;
     type TF = SimpleTokenFactoryImpl<CompactToken>;
     type R = Node<'src>;

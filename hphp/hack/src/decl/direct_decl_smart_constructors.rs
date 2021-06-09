@@ -61,10 +61,10 @@ type SK = SyntaxKind;
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'a> {
+pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 'a>> {
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
 
-    pub source_text: IndexedSourceText<'a>,
+    pub source_text: IndexedSourceText<'text>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
@@ -77,14 +77,17 @@ pub struct DirectDeclSmartConstructors<'a> {
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
 
     previous_token_kind: TokenKind,
+
+    source_text_allocator: S,
 }
 
-impl<'a> DirectDeclSmartConstructors<'a> {
+impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
     pub fn new(
         opts: &'a DeclParserOptions<'a>,
-        src: &SourceText<'a>,
+        src: &SourceText<'text>,
         file_mode: Mode,
         arena: &'a Bump,
+        source_text_allocator: S,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
@@ -113,6 +116,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             // we would parse a token and the previous token kind would be
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
+            source_text_allocator,
         }
     }
 
@@ -142,7 +146,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         // qualified name in the original source text instead of copying it.
         let source_len = pos.end_cnum() - pos.start_cnum();
         if source_len == len {
-            let qualified_name = self.str_from_utf8(self.source_text_at_pos(pos));
+            let qualified_name: &'a str = self.str_from_utf8(self.source_text_at_pos(pos));
             return Id(pos, qualified_name);
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
@@ -291,6 +295,30 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 }
 
+pub trait SourceTextAllocator<'text, 'target>: Clone {
+    fn alloc(&self, text: &'text str) -> &'target str;
+}
+
+#[derive(Clone)]
+pub struct NoSourceTextAllocator;
+
+impl<'text> SourceTextAllocator<'text, 'text> for NoSourceTextAllocator {
+    #[inline]
+    fn alloc(&self, text: &'text str) -> &'text str {
+        text
+    }
+}
+
+#[derive(Clone)]
+pub struct ArenaSourceTextAllocator<'arena>(pub &'arena bumpalo::Bump);
+
+impl<'text, 'arena> SourceTextAllocator<'text, 'arena> for ArenaSourceTextAllocator<'arena> {
+    #[inline]
+    fn alloc(&self, text: &'text str) -> &'arena str {
+        self.0.alloc_str(text)
+    }
+}
+
 fn prefix_slash<'a>(arena: &'a Bump, name: &str) -> &'a str {
     let mut s = String::with_capacity_in(1 + name.len(), arena);
     s.push('\\');
@@ -310,14 +338,6 @@ fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
     result.push_str(str1);
     result.push_str(str2);
     result.into_bump_str()
-}
-
-fn str_from_utf8<'a>(arena: &'a Bump, slice: &'a [u8]) -> &'a str {
-    if let Ok(s) = std::str::from_utf8(slice) {
-        s
-    } else {
-        String::from_utf8_lossy_in(slice, arena).into_bump_str()
-    }
 }
 
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
@@ -951,7 +971,7 @@ struct Attributes<'a> {
     internal: bool,
 }
 
-impl<'a> DirectDeclSmartConstructors<'a> {
+impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
@@ -982,7 +1002,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         concat(self.arena, str1, str2)
     }
 
-    fn token_bytes(&self, token: &CompactToken) -> &'a [u8] {
+    fn token_bytes(&self, token: &CompactToken) -> &'text [u8] {
         self.source_text
             .source_text()
             .sub(token.start_offset(), token.width())
@@ -991,8 +1011,23 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     // Check that the slice is valid UTF-8. If it is, return a &str referencing
     // the same data. Otherwise, copy the slice into our arena using
     // String::from_utf8_lossy_in, and return a reference to the arena str.
-    fn str_from_utf8(&self, slice: &'a [u8]) -> &'a str {
-        str_from_utf8(self.arena, slice)
+    fn str_from_utf8(&self, slice: &'text [u8]) -> &'a str {
+        if let Ok(s) = std::str::from_utf8(slice) {
+            self.source_text_allocator.alloc(s)
+        } else {
+            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+        }
+    }
+
+    // Check that the slice is valid UTF-8. If it is, return a &str referencing
+    // the same data. Otherwise, copy the slice into our arena using
+    // String::from_utf8_lossy_in, and return a reference to the arena str.
+    fn str_from_utf8_for_bytes_in_arena(&self, slice: &'a [u8]) -> &'a str {
+        if let Ok(s) = std::str::from_utf8(slice) {
+            s
+        } else {
+            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+        }
     }
 
     fn merge(
@@ -1264,7 +1299,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         attributes.deprecated = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8(x));
+                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
@@ -1302,7 +1337,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             attribute
                                 .string_literal_params
                                 .first()
-                                .map(|&x| self.str_from_utf8(x))
+                                .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
                         };
                         // Take the classname param by default
                         attributes.ifc_attribute =
@@ -1336,7 +1371,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         attributes.module = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8(x));
+                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     "__Internal" => {
                         attributes.internal = true;
@@ -1785,7 +1820,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'a [u8] {
+    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
         let start = pos.start_cnum();
         let end = pos.end_cnum();
         self.source_text.source_text().sub(start, end - start)
@@ -2213,7 +2248,9 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
+impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
+    for DirectDeclSmartConstructors<'a, 'text, S>
+{
     type S = Node<'a>;
 
     fn flatten(&self, kind: SyntaxKind, lst: std::vec::Vec<Self::S>) -> Self::S {
@@ -2264,8 +2301,9 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     }
 }
 
-impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
-    for DirectDeclSmartConstructors<'a>
+impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
+    FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a, 'text, S>>
+    for DirectDeclSmartConstructors<'a, 'text, S>
 {
     fn make_token(&mut self, token: CompactToken) -> Self::R {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));

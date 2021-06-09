@@ -36,3 +36,16 @@ pub fn parse_decls<'a>(
 ) -> Decls<'a> {
     parse_decls_and_mode(opts, filename, text, arena, stack_limit).0
 }
+
+pub fn parse_decls_without_reference_text<'a, 'text>(
+    opts: &'a DeclParserOptions<'a>,
+    filename: RelativePath,
+    text: &'text [u8],
+    arena: &'a Bump,
+    stack_limit: Option<&'a StackLimit>,
+) -> Decls<'a> {
+    let text = SourceText::make(RcOc::new(filename), text);
+    let (_, _errors, state, _mode) =
+        direct_decl_parser::parse_script_without_reference_text(opts, &text, arena, stack_limit);
+    state.decls
+}

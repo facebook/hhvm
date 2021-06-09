@@ -614,7 +614,7 @@ and build_constructor
     (method_ : Shallow_decl_defs.shallow_method) :
     (Decl_defs.element * Typing_defs.fun_elt option) option =
   let (_, class_name) = class_.sc_name in
-  let vis = visibility class_name method_.sm_visibility in
+  let vis = visibility class_name class_.sc_module method_.sm_visibility in
   let pos = fst method_.sm_name in
   let cstr =
     {
@@ -698,7 +698,7 @@ and prop_decl
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
-  let vis = visibility (snd c.sc_name) sp.sp_visibility in
+  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
       elt_flags =
@@ -736,7 +736,7 @@ and static_prop_decl
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
-  let vis = visibility (snd c.sc_name) sp.sp_visibility in
+  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
       elt_flags =
@@ -762,15 +762,20 @@ and static_prop_decl
   let acc = SMap.add sp_name (elt, Some ty) acc in
   acc
 
-and visibility (cid : string) (visibility : Aast_defs.visibility) :
-    Typing_defs.ce_visibility =
+and visibility
+    (class_id : string)
+    (module_id : string option)
+    (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
   match visibility with
   | Public -> Vpublic
-  | Protected -> Vprotected cid
-  | Private -> Vprivate cid
-  | Internal -> Vinternal ""
-
-(* todo: insert module name *)
+  | Protected -> Vprotected class_id
+  | Private -> Vprivate class_id
+  | Internal ->
+    begin
+      match module_id with
+      | Some m -> Vinternal m
+      | None -> Vpublic
+    end
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
@@ -862,7 +867,7 @@ and method_decl_acc
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
       ->
       parent_vis
-    | _ -> visibility (snd c.sc_name) m.sm_visibility
+    | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in
   let elt =

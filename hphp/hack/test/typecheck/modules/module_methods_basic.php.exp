@@ -1,0 +1,12 @@
+File "module_methods_basic.php", line 17, characters 9-9:
+You cannot access internal members from module `A` in module `B` (Typing[4112])
+  File "module_methods_basic.php", line 8, characters 19-19:
+  This member is internal
+File "module_methods_basic.php", line 25, characters 30-30:
+You cannot access internal members from module `A` in module `B` (Typing[4112])
+  File "module_methods_basic.php", line 8, characters 19-19:
+  This member is internal
+File "module_methods_basic.php", line 27, characters 33-33:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_methods_basic.php", line 8, characters 19-19:
+  This member is internal

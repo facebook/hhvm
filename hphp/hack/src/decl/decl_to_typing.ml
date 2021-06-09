@@ -31,15 +31,18 @@ type tagged_elt = {
   elt: Typing_defs.class_elt;
 }
 
-let base_visibility origin_class_name = function
+let base_visibility origin_class_name module_name = function
   | Public -> Vpublic
   | Private -> Vprivate origin_class_name
   | Protected -> Vprotected origin_class_name
-  | Internal -> Vinternal ""
+  | Internal ->
+    begin
+      match module_name with
+      | Some m -> Vinternal m
+      | None -> failwith "internal outside of a module"
+    end
 
-(* todo: insert module name *)
-
-let shallow_method_to_class_elt child_class mro subst meth : class_elt =
+let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
   let {
     sm_name = (pos, _);
     sm_type = ty;
@@ -49,7 +52,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   } =
     meth
   in
-  let visibility = base_visibility mro.mro_name sm_visibility in
+  let visibility = base_visibility mro.mro_name mname sm_visibility in
   let ty =
     lazy
       begin
@@ -81,19 +84,19 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
       (* The readonliness of the method is on the type *);
   }
 
-let shallow_method_to_telt child_class mro subst meth : tagged_elt =
+let shallow_method_to_telt child_class mname mro subst meth : tagged_elt =
   {
     id = snd meth.sm_name;
     inherit_when_private = is_set mro_copy_private_members mro.mro_flags;
-    elt = shallow_method_to_class_elt child_class mro subst meth;
+    elt = shallow_method_to_class_elt child_class mname mro subst meth;
   }
 
-let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
+let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
   let { sp_xhp_attr = xhp_attr; sp_name; sp_type; sp_visibility; sp_flags = _ }
       =
     prop
   in
-  let visibility = base_visibility mro.mro_name sp_visibility in
+  let visibility = base_visibility mro.mro_name mname sp_visibility in
   let ty =
     lazy
       begin

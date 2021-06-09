@@ -101,7 +101,12 @@ let methods ~target ~static child_class_name lin =
          |> filter_target ~target ~f:(fun { sm_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
-              ~f:(DTT.shallow_method_to_telt child_class_name mro subst))
+              ~f:
+                (DTT.shallow_method_to_telt
+                   child_class_name
+                   cls.sc_module
+                   mro
+                   subst))
   |> Sequence.concat
 
 (** Given a linearization filtered for property lookup, return a [Sequence.t]
@@ -116,7 +121,12 @@ let props ~target ~static child_class_name lin =
          |> filter_target ~target ~f:(fun { sp_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
-              ~f:(DTT.shallow_prop_to_telt child_class_name mro subst))
+              ~f:
+                (DTT.shallow_prop_to_telt
+                   child_class_name
+                   cls.sc_module
+                   mro
+                   subst))
   |> Sequence.concat
 
 (** Return true if the element is private and not marked with the __LSB
@@ -451,7 +461,12 @@ let constructor_elt child_class_name (mro, cls, subst) =
   let elt =
     Option.map
       cls.sc_constructor
-      ~f:(DTT.shallow_method_to_class_elt child_class_name mro subst)
+      ~f:
+        (DTT.shallow_method_to_class_elt
+           child_class_name
+           cls.sc_module
+           mro
+           subst)
   in
   (elt, consistent)
 

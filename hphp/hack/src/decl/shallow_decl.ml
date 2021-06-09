@@ -290,10 +290,16 @@ let method_ env m =
       m.m_name
       m.m_user_attributes
   in
+  let vis =
+    match m.m_visibility with
+    | Public when Attrs.mem SN.UserAttributes.uaInternal m.m_user_attributes ->
+      Internal
+    | vis -> vis
+  in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
     sm_type = mk (Reason.Rwitness_from_decl pos, Tfun ft);
-    sm_visibility = m.m_visibility;
+    sm_visibility = vis;
     sm_deprecated;
     sm_flags =
       MethodFlags.make

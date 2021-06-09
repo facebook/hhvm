@@ -110,6 +110,19 @@ let is_private_visible_for_class env x self_id cid class_ =
       Some
         "Private members cannot be accessed dynamically. Did you mean to use 'self::'?"
 
+let is_internal_visible env mname =
+  match Env.get_module env with
+  | None -> Some "You cannot access internal members outside of a module"
+  | Some m ->
+    if String.equal m mname then
+      None
+    else
+      Some
+        (Printf.sprintf
+           "You cannot access internal members from module `%s` in module `%s`"
+           mname
+           m)
+
 let is_visible_for_obj env vis =
   match vis with
   | Vpublic -> None
@@ -121,10 +134,7 @@ let is_visible_for_obj env vis =
     (match Env.get_self_id env with
     | None -> Some "You cannot access this member"
     | Some self_id -> is_protected_visible env x self_id)
-  | Vinternal _ ->
-    (* For now make this always an error since we don't know what module we are
-        in *)
-    Some "You cannot access this member"
+  | Vinternal m -> is_internal_visible env m
 
 (* The only permitted way to access an LSB property is via
    static::, ClassName::, or $class_name:: *)
@@ -146,10 +156,7 @@ let is_lsb_accessible env vis =
     (match Env.get_self_id env with
     | None -> Some "You cannot access this member"
     | Some self_id -> is_protected_visible env x self_id)
-  | Vinternal _ ->
-    (* For now make this always an error since we don't know what module we are
-        in *)
-    Some "You cannot access this member"
+  | Vinternal m -> is_internal_visible env m
 
 let is_lsb_visible_for_class env vis cid =
   match is_lsb_permitted cid with
@@ -177,10 +184,7 @@ let is_visible_for_class env (vis, lsb) cid cty =
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
         | _ -> is_protected_visible env x self_id))
-    | Vinternal _ ->
-      (* For now make this always an error since we don't know what module we are
-        in *)
-      Some "You cannot access this member"
+    | Vinternal m -> is_internal_visible env m
 
 let is_visible env (vis, lsb) cid class_ =
   let msg_opt =

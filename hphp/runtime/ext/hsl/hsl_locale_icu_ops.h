@@ -21,6 +21,10 @@
 
 #include <unicode/locid.h>
 
+U_NAMESPACE_BEGIN // namespace icu {
+  class Collator;
+U_NAMESPACE_END // } // namespace icu
+
 namespace HPHP {
   struct HSLLocaleICUOps final : public HSLLocale::Ops {
     explicit HSLLocaleICUOps(const Locale& locale);
@@ -30,9 +34,18 @@ namespace HPHP {
     virtual String uppercase(const String&) const override;
     virtual String lowercase(const String&) const override;
     virtual String foldcase(const String&) const override;
+
     virtual Array chunk(const String&, int64_t) const override;
+
+    virtual int64_t strcoll(const String&, const String&) const override;
+    virtual int64_t strcasecmp(const String&, const String&) const override;
+
     private:
+      icu::Locale m_collate;
       icu::Locale m_ctype;
-      uint32_t m_caseFoldFlags;
+      uint32_t m_caseFoldFlags = 0;
+      icu::Collator* m_collator = nullptr;
+
+      icu::Collator* collator() const;
   };
 } // namespace HPHP

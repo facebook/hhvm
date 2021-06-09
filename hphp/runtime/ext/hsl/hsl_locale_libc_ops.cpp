@@ -19,6 +19,11 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 
+#include <strings.h>
+#ifdef __APPLE__
+#include <xlocale.h>
+#endif
+
 namespace HPHP {
 
 HSLLocaleLibcOps::HSLLocaleLibcOps(
@@ -58,6 +63,32 @@ Array HSLLocaleLibcOps::chunk(const String& str, int64_t chunk_size) const {
     ret.append(str.substr(i, chunk_size));
   }
   return ret.toArray();
+}
+
+int64_t HSLLocaleLibcOps::strcoll(const String& a, const String& b) const {
+  // Overridden  in HSLLocaleByteOps for "C" locale
+  assertx(!a.isNull() && !b.isNull());
+
+  return strcoll_l(a.c_str(), b.c_str(), this->m_loc);
+}
+
+int64_t HSLLocaleLibcOps::strcasecmp(const String& a, const String& b) const {
+  // Overridden  in HSLLocaleByteOps for "C" locale
+  assertx(!a.isNull() && !b.isNull());
+  const auto min_len = MIN(a.size(), b.size());
+  // Defined on FreeBSD, but also an undocumented glibc extension 
+  const auto res = strncasecmp_l(a.data(), b.data(), min_len, this->m_loc);
+  if (res != 0) {
+    return res;
+  }
+
+  if (a.size() < b.size()) {
+    return -1;
+  }
+  if (a.size() > b.size()) {
+    return 1;
+  }
+  return 0;
 }
 
 } // namespace HPHP

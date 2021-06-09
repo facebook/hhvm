@@ -19,4 +19,7 @@ function titlecase_l(string $str, ?Locale $loc = null): string;
 function foldcase_l(string $str, ?Locale $loc = null): string;
 function chunk_l(string $str, int $chunk_size, ?Locale $loc = null): vec<string>;
 
+function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
+function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
+
 } // namespace HH\Lib\_Private\_Str

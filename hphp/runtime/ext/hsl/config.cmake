@@ -15,6 +15,7 @@ HHVM_DEFINE_EXTENSION("hsl_os"
 HHVM_DEFINE_EXTENSION("hsl_locale"
   SOURCES
     ext_hsl_locale.cpp
+    hsl_locale_byte_ops.cpp
     hsl_locale_icu_ops.cpp
     hsl_locale_libc_ops.cpp
   SYSTEMLIB

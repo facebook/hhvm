@@ -27,5 +27,7 @@ namespace HPHP {
     virtual String lowercase(const String&) const = 0;
     virtual String foldcase(const String&) const = 0;
     virtual Array chunk(const String&, int64_t chunk_size) const = 0;
+    virtual int64_t strcoll(const String&, const String&) const = 0;
+    virtual int64_t strcasecmp(const String&, const String&) const = 0;
   };
 } // namespace HPHP

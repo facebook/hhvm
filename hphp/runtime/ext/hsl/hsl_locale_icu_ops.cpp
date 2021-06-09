@@ -21,8 +21,10 @@
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/system/systemlib.h"
 
-#include <unicode/unistr.h>
+#include <unicode/coll.h>
+#include <unicode/errorcode.h>
 #include <unicode/uchar.h>
+#include <unicode/unistr.h>
 
 #include <functional>
 
@@ -30,7 +32,8 @@ namespace HPHP {
 
 HSLLocaleICUOps::HSLLocaleICUOps(
   const Locale& locale
-) : m_ctype(icu::Locale::getRoot()), m_caseFoldFlags(0) {
+) {
+  m_collate = icu::Locale(locale.querylocale(LocaleCategory, LC_COLLATE));
   auto ctype = locale.querylocale(LocaleCategory, LC_CTYPE);
 
   m_ctype = icu::Locale(ctype);
@@ -41,6 +44,7 @@ HSLLocaleICUOps::HSLLocaleICUOps(
 }
 
 HSLLocaleICUOps::~HSLLocaleICUOps() {
+  delete m_collator;
 }
 
 int64_t HSLLocaleICUOps::strlen(const String& str) const {
@@ -109,6 +113,44 @@ Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
   }
 
   return ret.toArray(); 
+}
+
+int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
+  assertx(!a.isNull() && !b.isNull());
+
+  icu::ErrorCode err;
+  auto coll = collator();
+  coll->setStrength(icu::Collator::TERTIARY); // accent- and case-sensitive
+  return coll->compareUTF8(
+    icu::StringPiece(a.data(), a.length()),
+    icu::StringPiece(b.data(), b.length()),
+    err
+  );
+}
+
+int64_t HSLLocaleICUOps::strcasecmp(const String& a, const String& b) const {
+  assertx(!a.isNull() && !b.isNull());
+  assertx(!a.isNull() && !b.isNull());
+
+  icu::ErrorCode err;
+  auto coll = collator();
+  coll->setStrength(icu::Collator::SECONDARY); // accent-sensitive, not case-sensitive
+  return coll->compareUTF8(
+    icu::StringPiece(a.data(), a.length()),
+    icu::StringPiece(b.data(), b.length()),
+    err
+  );
+}
+
+icu::Collator* HSLLocaleICUOps::collator() const {
+  // const is a lie, but only because we're doing lazy initialization
+  if (m_collator) {
+    return m_collator;
+  }
+  icu::ErrorCode err;
+  const_cast<HSLLocaleICUOps*>(this)->m_collator =
+    icu::Collator::createInstance(this->m_collate, err);
+  return m_collator;
 }
 
 } // namespace HPHP

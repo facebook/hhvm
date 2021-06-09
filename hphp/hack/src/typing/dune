@@ -98,7 +98,6 @@
     typing_subtype_tconst
     typing_taccess
     typing_tdef
-    typing_unify
     typing_union
     typing_utils
     typing_variance

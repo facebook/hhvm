@@ -917,6 +917,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
 
   // !(X cmp Y) --> X opposite_cmp Y
   if (auto const negated = negateCmpOp(op)) {
+    if (opcodeMayRaise(op)) return nullptr;
     auto const s0 = inst->src(0);
     auto const s1 = inst->src(1);
     // We can't add new uses to reference counted types without a more

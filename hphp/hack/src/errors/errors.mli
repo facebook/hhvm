@@ -1027,6 +1027,14 @@ val visibility_extends :
   error_from_reasons_callback ->
   unit
 
+val visibility_override_internal :
+  Pos_or_decl.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  error_from_reasons_callback ->
+  unit
+
 val member_not_implemented :
   string -> Pos_or_decl.t -> Pos.t -> Pos_or_decl.t -> unit
 

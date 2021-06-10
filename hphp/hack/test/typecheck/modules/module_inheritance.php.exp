@@ -1,0 +1,12 @@
+File "module_inheritance.php", line 25, characters 19-21:
+This member visibility is: `internal` (Typing[4113])
+  File "module_inheritance.php", line 7, characters 19-21:
+  `public` was expected
+File "module_inheritance.php", line 31, characters 19-21:
+This member visibility is: `internal` (Typing[4113])
+  File "module_inheritance.php", line 7, characters 19-21:
+  `public` was expected
+File "module_inheritance.php", line 40, characters 19-26:
+Cannot override this member in module `B` (Typing[4444])
+  File "module_inheritance.php", line 10, characters 19-26:
+  This member is internal to module `A`

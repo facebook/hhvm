@@ -53,6 +53,11 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
   | (Vprotected _, Vprotected _)
   | (Vprotected _, Vpublic) ->
     ()
+  | (Vinternal parent_m, Vinternal m) ->
+    if String.equal parent_m m then
+      ()
+    else
+      Errors.visibility_override_internal pos parent_pos m parent_m on_error
   | _ ->
     let parent_vis = TUtils.string_of_visibility parent_vis in
     let vis = TUtils.string_of_visibility c_vis in

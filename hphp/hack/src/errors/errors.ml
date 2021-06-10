@@ -2221,6 +2221,17 @@ let visibility_extends
   in
   on_error ~code:(Typing.err_code Typing.VisibilityExtends) [msg1; msg2]
 
+let visibility_override_internal
+    pos parent_pos m parent_m (on_error : error_from_reasons_callback) =
+  let msg1 =
+    (pos, Printf.sprintf "Cannot override this member in module `%s`" m)
+  in
+  let msg2 =
+    ( parent_pos,
+      Printf.sprintf "This member is internal to module `%s`" parent_m )
+  in
+  on_error ~code:(Typing.err_code Typing.ModuleError) [msg1; msg2]
+
 let member_not_implemented member_name parent_pos pos defn_pos =
   let msg1 =
     ( pos,

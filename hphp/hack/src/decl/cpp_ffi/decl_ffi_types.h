@@ -19,5 +19,5 @@ struct bytes {
 struct decl_result {
     size_t hash;
     bytes serialized;
-    decls const* decls;
+    decls const* decl_list;
 };

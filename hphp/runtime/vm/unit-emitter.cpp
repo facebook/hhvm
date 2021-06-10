@@ -313,12 +313,8 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
   }
 }
 
-ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
-  "vm.hhbc-size",
-  {ServiceData::StatsType::AVG,
-   ServiceData::StatsType::SUM,
-   ServiceData::StatsType::COUNT}
-);
+ServiceData::ExportedCounter* g_hhbc_size =
+  ServiceData::createCounter("vm.hhbc-size");
 
 bool UnitEmitter::check(bool verbose) const {
   return Verifier::checkUnit(

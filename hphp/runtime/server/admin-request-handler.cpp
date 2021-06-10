@@ -1063,7 +1063,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
        first = false;
     };
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    appendStat("hhbc-size", g_hhbc_size->getSum());
+    appendStat("hhbc-size", g_hhbc_size->getValue());
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());

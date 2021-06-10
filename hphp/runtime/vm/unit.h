@@ -119,7 +119,7 @@ using FuncTable      = VMCompactVector<const Func*>;
 /*
  * Sum of all Unit::m_bclen
  */
-extern ServiceData::ExportedTimeSeries* g_hhbc_size;
+extern ServiceData::ExportedCounter* g_hhbc_size;
 
 ///////////////////////////////////////////////////////////////////////////////
 

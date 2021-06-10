@@ -126,6 +126,8 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
     | Tclass (cls, _, targs) ->
       (match Env.get_class env (snd cls) with
       | Some cls ->
+        if Cls.internal cls && not (Env.get_internal env) then
+          Errors.module_hint ~use_pos:hint_pos ~def_pos:(Cls.pos cls);
         check_tparams_constraints env hint_pos (Cls.tparams cls) targs
       | None -> env)
     | _ -> env)
@@ -278,7 +280,14 @@ let typeconst (env, _) tconst =
     hint env c_patc_constraint;
     hint env c_patc_type
 
-let class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
+let class_var env cv =
+  let tenv =
+    Env.set_internal
+      env.tenv
+      (Naming_attributes.mem SN.UserAttributes.uaInternal cv.cv_user_attributes)
+  in
+  let env = { env with tenv } in
+  maybe hint env (hint_of_type_hint cv.cv_type)
 
 let method_ env m =
   (* Add method type parameters to environment and localize the bounds
@@ -289,6 +298,11 @@ let method_ env m =
       ~ignore_errors:true
       m.m_tparams
       m.m_where_constraints
+  in
+  let tenv =
+    Env.set_internal
+      tenv
+      (Naming_attributes.mem SN.UserAttributes.uaInternal m.m_user_attributes)
   in
   let env = { env with tenv } in
   List.iter m.m_params ~f:(fun_param env);

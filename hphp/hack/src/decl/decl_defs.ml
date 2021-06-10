@@ -171,6 +171,7 @@ type decl_class_type = {
   dc_final: bool;
   dc_is_disposable: bool;
   dc_const: bool;
+  dc_internal: bool;
   dc_deferred_init_members: SSet.t;
   dc_kind: Ast_defs.class_kind;
   dc_is_xhp: bool;

@@ -386,6 +386,13 @@ let fun_def ctx fd :
           env
           (Naming_attributes_params.get_module_attribute f.f_user_attributes)
       in
+      let env =
+        Env.set_internal
+          env
+          (Naming_attributes.mem
+             SN.UserAttributes.uaInternal
+             f.f_user_attributes)
+      in
       let (return_decl_ty, params_decl_ty, variadicity_decl_ty) =
         merge_decl_header_with_hints
           ~params:f.f_params
@@ -1665,6 +1672,11 @@ let class_def_ env c tc =
     Env.set_module
       env
       (Naming_attributes_params.get_module_attribute c.c_user_attributes)
+  in
+  let env =
+    Env.set_internal
+      env
+      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes)
   in
   let ctx = Env.get_ctx env in
   if

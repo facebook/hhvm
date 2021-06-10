@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85be59df93901cc7822d6b990b5bfe59>>
+// @generated SignedSource<<c6efab7e680170624a2e2d9e2c939356>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -333,6 +333,7 @@ pub struct ClassType<'a> {
     pub abstract_: bool,
     pub final_: bool,
     pub const_: bool,
+    pub internal: bool,
     /// When a class is abstract (or in a trait) the initialization of
     /// a protected member can be delayed
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

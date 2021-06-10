@@ -5733,6 +5733,12 @@ let module_mismatch pos m2_pos m1 m2 =
         | None -> "outside of a module") )
     [(m2_pos, Printf.sprintf "This is from module `%s`" m2)]
 
+let module_hint ~def_pos ~use_pos =
+  add_list
+    (Typing.err_code Typing.ModuleHintError)
+    (use_pos, "You cannot use this type in a public declaration.")
+    [(def_pos, "It is declared as `internal` here")]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

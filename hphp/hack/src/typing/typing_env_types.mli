@@ -69,4 +69,6 @@ and genv = {
       (** The file containing the top-level definition that we are checking *)
   this_module: string option;
       (** The module of the top-level definition that we are checking *)
+  this_internal: bool;
+      (** Is the definition that we are checking marked <<__Internal>>? *)
 }

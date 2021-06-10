@@ -1742,3 +1742,5 @@ val reified_static_method_in_expr_tree : Pos.t -> unit
 val invalid_echo_argument_at : Pos.t -> error_from_reasons_callback
 
 val module_mismatch : Pos.t -> Pos_or_decl.t -> string option -> string -> unit
+
+val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit

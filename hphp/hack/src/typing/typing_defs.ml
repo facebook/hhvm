@@ -156,6 +156,7 @@ and class_type = {
   tc_abstract: bool;
   tc_final: bool;
   tc_const: bool;
+  tc_internal: bool;
   tc_deferred_init_members: SSet.t;
       (** When a class is abstract (or in a trait) the initialization of
        * a protected member can be delayed *)

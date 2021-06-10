@@ -510,6 +510,7 @@ let genv_as_value env genv =
     fun_is_ctor;
     file = _;
     this_module;
+    this_internal;
   } =
     genv
   in
@@ -523,6 +524,7 @@ let genv_as_value env genv =
         ("val_kind", string_as_value (val_kind_to_string val_kind));
         ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
         ("fun_is_ctor", bool_as_value fun_is_ctor);
+        ("this_internal", bool_as_value this_internal);
       ]
     @ (match this_module with
       | Some this_module -> [("this_module", string_as_value this_module)]

@@ -92,4 +92,5 @@ and genv = {
   fun_is_ctor: bool;
   file: Relative_path.t;
   this_module: string option;
+  this_internal: bool;
 }

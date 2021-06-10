@@ -1,0 +1,16 @@
+File "module_internal_class.php", line 16, characters 9-9:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_internal_class.php", line 7, characters 7-7:
+  It is declared as `internal` here
+File "module_internal_class.php", line 20, characters 11-11:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_internal_class.php", line 7, characters 7-7:
+  It is declared as `internal` here
+File "module_internal_class.php", line 24, characters 24-24:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_internal_class.php", line 7, characters 7-7:
+  It is declared as `internal` here
+File "module_internal_class.php", line 28, characters 26-26:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_internal_class.php", line 7, characters 7-7:
+  It is declared as `internal` here

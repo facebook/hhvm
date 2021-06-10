@@ -227,6 +227,13 @@ module ApiShallow = struct
     | Lazy (sc, _lc) -> sc.sc_module
     | Eager c -> c.tc_module
 
+  let internal (decl, t) =
+    Decl_counters.count_subdecl decl Decl_counters.Internal @@ fun () ->
+    match t with
+    | Lazy (sc, _lc) ->
+      Attrs.mem SN.UserAttributes.uaInternal sc.sc_user_attributes
+    | Eager c -> c.tc_internal
+
   let decl_errors (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Decl_errors @@ fun () ->
     match t with

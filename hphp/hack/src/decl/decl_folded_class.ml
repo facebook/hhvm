@@ -362,6 +362,7 @@ and class_decl
     Decl_defs.decl_class_type * Decl_store.class_members =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
+  let internal = Attrs.mem SN.UserAttributes.uaInternal c.sc_user_attributes in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
   let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
@@ -494,6 +495,7 @@ and class_decl
     {
       dc_final = c.sc_final;
       dc_const = const;
+      dc_internal = internal;
       dc_abstract = is_abstract;
       dc_need_init = has_concrete_cstr;
       dc_deferred_init_members = deferred_members;

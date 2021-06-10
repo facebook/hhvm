@@ -100,6 +100,7 @@ and class_type = {
   tc_abstract: bool;
   tc_final: bool;
   tc_const: bool;
+  tc_internal: bool;
   tc_deferred_init_members: SSet.t;
   tc_kind: Ast_defs.class_kind;
   tc_is_xhp: bool;

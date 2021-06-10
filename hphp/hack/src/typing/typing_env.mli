@@ -245,7 +245,11 @@ val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
 val set_module : env -> string option -> env
 
+val set_internal : env -> bool -> env
+
 val get_module : env -> string option
+
+val get_internal : env -> bool
 
 val set_self : env -> string -> locl_ty -> env
 

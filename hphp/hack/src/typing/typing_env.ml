@@ -634,6 +634,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_is_ctor = false;
         file;
         this_module = None;
+        this_internal = false;
       };
     tpenv = TPEnv.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
@@ -1053,6 +1054,10 @@ let set_fn_kind env fn_type =
 let set_module env m = { env with genv = { env.genv with this_module = m } }
 
 let get_module env = env.genv.this_module
+
+let set_internal env b = { env with genv = { env.genv with this_internal = b } }
+
+let get_internal env = env.genv.this_internal
 
 let set_self env self_id self_ty =
   let genv = env.genv in

@@ -38,7 +38,7 @@ use namespace HH\Lib\{File, Network};
  * - `File\open_read_only()`, `File\open_write_only()`, or
  *   `File\open_read_write()`
  * - `IO\pipe()`
- * - `IO\request_input()`, `IO\request_input()`, or `IO\request_error()`; these
+ * - `IO\request_input()`, `IO\request_output()`, or `IO\request_error()`; these
  *   used for all kinds of requests, including both HTTP and CLI requests.
  * - `IO\server_output()`, `IO\server_error()`
  * - `TCP\connect_async()` or `TCP\Server`

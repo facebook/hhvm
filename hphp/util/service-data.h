@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <folly/RWSpinLock.h>
 #include <folly/Synchronized.h>
 #include <folly/stats/Histogram.h>
 #include <folly/stats/MultiLevelTimeSeries.h>
@@ -274,8 +273,7 @@ struct ExportedTimeSeries {
   friend struct detail::FriendDeleter<ExportedTimeSeries>;
   ~ExportedTimeSeries() {}
 
-  folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>,
-                      folly::RWSpinLock > m_timeseries;
+  folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>> m_timeseries;
   const std::vector<ServiceData::StatsType> m_exportTypes;
 };
 
@@ -292,7 +290,7 @@ struct ExportedHistogram {
   friend struct detail::FriendDeleter<ExportedHistogram>;
   ~ExportedHistogram() {}
 
-  folly::Synchronized<folly::Histogram<int64_t>, folly::RWSpinLock> m_histogram;
+  folly::Synchronized<folly::Histogram<int64_t>> m_histogram;
   const std::vector<double> m_exportPercentiles;
 };
 

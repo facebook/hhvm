@@ -40,7 +40,6 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
-#include <folly/RWSpinLock.h>
 #include <folly/Synchronized.h>
 #include <cmath>
 #include <vector>
@@ -333,7 +332,7 @@ Vcost computeTranslationCostSlow(SrcKey at,
   return irlower::computeIRUnitCost(*unit);
 }
 
-folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
+folly::Synchronized<InlineCostCache> s_inlCostCache;
 
 int computeTranslationCost(SrcKey at,
                            const RegionDesc& region,

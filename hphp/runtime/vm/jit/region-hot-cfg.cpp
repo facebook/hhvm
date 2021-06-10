@@ -111,19 +111,15 @@ struct Former {
 
     countPreds(head);
 
-    auto priority = [&] (TransID tid) {
-      if (tid == head) return std::numeric_limits<int64_t>::max();
-      return m_cfg.weight(tid);
-    };
-
     auto cmpPriority = [&] (const TransID& tid1, const TransID& tid2) -> bool {
-      return priority(tid1) < priority(tid2);
+      return m_cfg.weight(tid1) < m_cfg.weight(tid2);
     };
 
     std::priority_queue<TransID, std::vector<TransID>,
                         decltype(cmpPriority)> pqueue(cmpPriority);
     for (auto entry : m_entries) {
-      pqueue.push(entry);
+      if (entry != head) pqueue.push(entry);
+      m_pendingPreds[entry] = 0;
       m_reachable.insert(entry);
     }
 
@@ -133,16 +129,19 @@ struct Former {
            head, m_cfg.weight(head), m_minBlockWeight, m_minArcProb);
     Trace::Indent indent;
 
+    m_visited.insert(head);
+    visit(pqueue, head);
+
+    // If we couldn't add the head block (due to exceeding the bytecode budget),
+    // return an empty region instead of one with a different entry.
+    if (m_region->empty()) return m_region;
+
     while (!pqueue.empty()) {
       auto const tid = pqueue.top();
       pqueue.pop();
       m_visited.insert(tid);
       visit(pqueue, tid);
     }
-
-    // If we couldn't add the head block (due to exceeding the bytecode budget),
-    // return an empty region instead of one with a different entry.
-    if (m_region->empty()) return m_region;
 
     // Add to the region any arc involving the blocks that were added to the
     // region and that satisty the minimum probability (m_minArcProb).

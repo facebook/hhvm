@@ -253,6 +253,10 @@ val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 (* add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 
+module Telemetry : sig
+  val depgraph_delta_num_edges : Mode.t -> int option
+end
+
 module ForTest : sig
   val compute_dep_hash : Mode.hash_mode -> 'a Dep.variant -> int
 

@@ -566,6 +566,10 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_register_discovered_dep_edge"
     [@@noalloc]
 
+  external dep_graph_delta_num_edges : unit -> int
+    = "hh_custom_dep_graph_dep_graph_delta_num_edges"
+    [@@noalloc]
+
   external save_delta : string -> bool -> int = "hh_custom_dep_graph_save_delta"
 
   external load_delta : Mode.t -> string -> int
@@ -815,6 +819,14 @@ module ForTest = struct
   let compute_dep_hash = Dep.make
 
   let combine_hashes = NamingHash.combine_hashes
+end
+
+module Telemetry = struct
+  let depgraph_delta_num_edges mode =
+    match mode with
+    | SQLiteMode -> None
+    | CustomMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
+    | SaveCustomMode _ -> None
 end
 
 type dep_edge = CustomGraph.dep_edge

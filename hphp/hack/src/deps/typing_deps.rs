@@ -206,25 +206,22 @@ impl UnsafeDepGraph {
     }
 }
 
+/// Structure to keep track of the dependency graph delta.
+///
+/// The second field is used to keep track of the number of edges.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DepGraphDelta(BTreeMap<Dep, BTreeSet<Dep>>);
+pub struct DepGraphDelta(BTreeMap<Dep, BTreeSet<Dep>>, usize);
 
 impl DepGraphDelta {
     pub fn new() -> Self {
-        DepGraphDelta(BTreeMap::new())
+        DepGraphDelta(BTreeMap::new(), 0)
     }
 
     pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        self.0
-            .entry(dependency)
-            .and_modify(|depts| {
-                depts.insert(dependent);
-            })
-            .or_insert_with(|| {
-                let mut s = BTreeSet::new();
-                s.insert(dependent);
-                s
-            });
+        let depts = self.0.entry(dependency).or_insert_with(|| BTreeSet::new());
+        if depts.insert(dependent) {
+            self.1 += 1;
+        }
     }
 
     pub fn get(&self, dependency: Dep) -> Option<&BTreeSet<Dep>> {
@@ -240,6 +237,11 @@ impl DepGraphDelta {
                 .iter()
                 .map(move |&dependent| (dependent, dependency))
         })
+    }
+
+    /// Return the number of edges in the dep graph delta.
+    pub fn num_edges(&self) -> usize {
+        self.1
     }
 
     /// Write all edges in the delta to the writer in a custom format.
@@ -313,6 +315,7 @@ impl DepGraphDelta {
 
     pub fn clear(&mut self) {
         self.0.clear();
+        self.1 = 0;
     }
 
     pub fn with_cell<R>(f: impl FnOnce(&Mutex<Self>) -> R) -> R {
@@ -621,6 +624,10 @@ ocaml_ffi! {
         DepGraphDelta::with_mut(move |s| {
             s.insert(dependent, dependency);
         });
+    }
+
+    fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
+        DepGraphDelta::with(|s| s.num_edges())
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {

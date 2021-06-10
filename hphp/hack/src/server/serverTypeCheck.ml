@@ -1702,6 +1702,11 @@ functor
         |> Telemetry.object_
              ~key:"hash"
              ~value:(ServerUtils.log_and_get_sharedmem_load_telemetry ())
+        |> Telemetry.int_opt
+             ~key:"depgraph_delta_num_edges"
+             ~value:
+               (Typing_deps.Telemetry.depgraph_delta_num_edges
+                  (Provider_context.get_deps_mode ctx))
         |> Telemetry.int_ ~key:"typecheck_heap_size" ~value:heap_size
         |> Telemetry.int_
              ~key:"typecheck_to_recheck_count"

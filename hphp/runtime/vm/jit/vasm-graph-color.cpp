@@ -6186,7 +6186,7 @@ size_t process_inst_spills(State& state,
   spiller.dropDead(folded, nullptr, b, instIdx);
 
   // Moving the uses into registers may require us to spill other Vregs (except
-  // the ones we just reloaded).
+  // the ones we're about to use).
   spills |= spiller.spill(
     b, instIdx + 1, results,
     [&] (Vreg) { return block_weight(state, b) * kSpillReloadMultiplier; },
@@ -6229,12 +6229,21 @@ size_t process_inst_spills(State& state,
     assertx(!s->inReg[r] && !s->inMem[r]);
     s->inReg.add(r);
   }
-  // Adding the defs may have caused us to need to spill even more (but not any
-  // uses or defs).
+
+  // Adding the defs may have caused us to need to spill even more We
+  // cannot spill any defs, because they're going to be in physical
+  // registers regardless, and acrosses need to be kept alive across
+  // the defs. However, we can spill the uses here if necessary. It
+  // will require some special handling below.
   spills |= spiller.spill(
     b, instIdx + 1, results,
-    [&] (Vreg) { return block_weight(state, b) * kSpillReloadMultiplier; },
-    defs | acrosses | uses
+    [&] (Vreg r) {
+      // "Spilling" for a reloaded Vreg is free, because we can simply
+      // keep its spill slot alive after the reload.
+      if (reloads[r]) return int64_t{0};
+      return block_weight(state, b) * kSpillReloadMultiplier;
+    },
+    defs | acrosses
   );
 
   // Make sure we can spill.
@@ -6254,13 +6263,16 @@ size_t process_inst_spills(State& state,
 
   // Bail out if we don't need to emit anything (hopefully the common case).
   if (spills.none() && reloads.none()) return 0;
-  // We should either spill or reload a Vreg, not both.
-  assertx((spills & reloads).none());
+
+  // Okay to spill uses, but not defs or acrosses.
+  assertx((spills & (defs | acrosses)).none());
 
   // We always spill/reload a Vreg to itself, so they'll need to be
   // re-SSAized.
   results.ssaize |= spills;
   results.ssaize |= reloads;
+
+  jit::fast_map<Vreg, Vreg> useRewrites;
 
   size_t added = 0;
   vmodify(
@@ -6269,6 +6281,52 @@ size_t process_inst_spills(State& state,
       // First emit the spills (which decreases register pressure).
       for (auto const r : spills) {
         assertx(!r.isPhys());
+
+        // If the Vreg is reloaded, we already have a perfectly valid
+        // spill slot for it, so nothing needs to be done.
+        if (reloads[r]) continue;
+
+        /*
+         * Special case: if we're spilling a Vreg that's used by the
+         * instruction, we need to take special care. We cannot simply
+         * spill it, as it will then not by in a physical register
+         * when the instruction operates. Instead we'll use ssaalias
+         * to make a "copy" of the Vreg, spill the original, and
+         * rewrite the instruction to use the "copy". Copy is in
+         * quotes because ssaalias uses the SSA rewriting to pass to
+         * ensure no actual copy is created.
+         *
+         * For example:
+         *   conjureuse src (where src needs to be spilled)
+         *
+         * Becomes:
+         *   ssaalias src -> src2
+         *   spill src -> src
+         *   conjureuse src2
+         *
+         * After SSA:
+         *   spill src -> src3
+         *   conjureuse src
+         *
+         * At first glance this might appear to be ineffective because
+         * it keeps the original Vreg alive after the spill, and the
+         * whole point is to decrease register pressure. It works
+         * because we'll only spill uses if the register pressure is
+         * exceeded because of defs. In this scheme, the Vreg always
+         * becomes dead immediately after its used (before the defs),
+         * so we'll still lower register pressure where we need to.
+         */
+        if (uses[r]) {
+          auto const d = state.unit.makeReg();
+          auto const& info = reg_info(state, r);
+          set_reg_class_bits(state, d, info.regClass);
+          reg_info_insert(state, d, info);
+          v << ssaalias{r, d};
+          results.ssaize.add(d);
+          useRewrites.emplace(r, d);
+          ++added;
+        }
+
         auto const spillResults = spill_with_remat(
           state,
           v,
@@ -6277,7 +6335,7 @@ size_t process_inst_spills(State& state,
           rematAvail,
           r,
           r,
-          true,
+          !uses[r],
           true
         );
         added += spillResults.added;
@@ -6290,23 +6348,53 @@ size_t process_inst_spills(State& state,
       // possibly with rematerialization.
       for (auto const r : reloads) {
         assertx(!r.isPhys());
+
+        // Destination of the reload. Normally this is the same
+        // Vreg. However if we're both reloading and spilling the
+        // Vreg, we reload it into a fresh Vreg to keep the spill slot
+        // alive (this makes the actual spill a no-op).
+        auto const d = [&] {
+          if (!spills[r]) return r;
+          auto const d = state.unit.makeReg();
+          auto const& info = reg_info(state, r);
+          set_reg_class_bits(state, d, info.regClass);
+          reg_info_insert(state, d, info);
+          useRewrites.emplace(r, d);
+          return d;
+        }();
+
         auto const inst = reload_with_remat(
           state,
           b,
           instIdx,
           rematAvail,
           r,
-          r
+          d
         );
-        if (inst.op != Vinstr::reload) results.rematerialized.add(r);
+        if (inst.op != Vinstr::reload) results.rematerialized.add(d);
         v << inst;
         ++added;
-        rematAvail.add(r);
+        if (r == d) rematAvail.add(r);
       }
 
       return 0;
     }
   );
+
+  // Rewrites any uses of the instruction to match new Vregs created
+  // above. Note: we cannot use "inst" here because the vmodify above
+  // has invalidated the reference.
+  if (!useRewrites.empty()) {
+    visitRegsMutable(
+      unit, unit.blocks[b].code[instIdx + added],
+      [&] (Vreg r) {
+        auto const it = useRewrites.find(r);
+        return (it == useRewrites.end()) ? r : it->second;
+      },
+      [&] (Vreg r) { return r; }
+    );
+    invalidate_cached_operands(unit.blocks[b].code[instIdx + added]);
+  }
   results.changed[b] = true;
 
   return added;

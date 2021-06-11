@@ -3942,15 +3942,13 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
 Block* unreachableBlock(IRUnit& unit, BCContext ctx) {
   auto const unreachableBlock = unit.defBlock(1, Block::Hint::Unused);
   makeInstruction(
-    [&] (IRInstruction* inst) -> SSATmp* {
+    [&] (IRInstruction* inst) -> void {
       unreachableBlock->push_back(unit.clone(inst));
-      return inst->dst(0);
     },
     Unreachable,
     ctx,
     ASSERT_REASON
   );
-
   return unreachableBlock;
 }
 
@@ -4130,6 +4128,7 @@ void simplifyPass(IRUnit& unit) {
   auto const markUnreachable = [&] (Block* block) {
     // Any code that's postdominated by Unreachable is also unreachable, so
     // erase everything else in this block.
+    if (block->back().hasDst()) block->back().setDst(nullptr);
     unit.replace(&block->back(), Unreachable, ASSERT_REASON);
     for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
       auto toErase = it;

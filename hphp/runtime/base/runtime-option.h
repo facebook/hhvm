@@ -828,7 +828,7 @@ struct RuntimeOption {
   F(uint32_t, JitTraceletGuardsLimit,  5)                               \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(int64_t, JitMaxRequestTranslationTime, -1)                          \
-  F(uint32_t, JitMaxRegionInstrs,      2000)                            \
+  F(uint32_t, JitMaxRegionInstrs,      3000)                            \
   F(uint32_t, JitMaxLiveRegionInstrs,  50)                              \
   F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \

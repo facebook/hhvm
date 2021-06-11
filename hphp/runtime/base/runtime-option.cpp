@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-#include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/autoload-handler.h"

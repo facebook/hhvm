@@ -60,7 +60,7 @@ mod tests {
             }
         }
 
-        let expr = Expr((), Expr_::Any);
+        let expr = Expr((), Expr_::Null);
         let mut v: usize = 0;
         v.visit_expr(&mut (), &expr).unwrap();
         assert_eq!(v, 1);
@@ -84,7 +84,7 @@ mod tests {
             }
         }
 
-        let mut expr = Expr((), Expr_::Any);
+        let mut expr = Expr((), Expr_::True);
         let mut v = ();
         v.visit_expr(&mut (), &mut expr).unwrap();
         match expr.1 {
@@ -92,7 +92,7 @@ mod tests {
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
         }
 
-        let mut expr = Expr((), Expr_::Any);
+        let mut expr = Expr((), Expr_::True);
         let mut v = ();
         visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
         match expr.1 {

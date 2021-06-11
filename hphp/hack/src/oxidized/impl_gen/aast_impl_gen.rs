@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34216162c7cc5c2cc142e95077881c92>>
+// @generated SignedSource<<ce2c03960e36a1c6db6c45632516fd8d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1120,9 +1120,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_enum_class_label(p0: Option<Sid>, p1: String) -> Self {
         Expr_::EnumClassLabel(Box::new((p0, p1)))
     }
-    pub fn mk_any() -> Self {
-        Expr_::Any
-    }
     pub fn mk_hole(p0: Expr<Ex, Fb, En, Hi>, p1: Hi, p2: Hi, p3: HoleSource) -> Self {
         Expr_::Hole(Box::new((p0, p1, p2, p3)))
     }
@@ -1447,12 +1444,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_enum_class_label(&self) -> bool {
         match self {
             Expr_::EnumClassLabel(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_any(&self) -> bool {
-        match self {
-            Expr_::Any => true,
             _ => false,
         }
     }

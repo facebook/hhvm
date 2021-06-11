@@ -802,6 +802,49 @@ let targ env (p, t) =
 
 let targl env _ tal = List.map tal ~f:(targ env)
 
+let invalid_expr_ (p : Pos.t) : Nast.expr_ =
+  let throw : Nast.stmt =
+    ( p,
+      Aast.Throw
+        ( p,
+          Aast.New
+            ( (p, Aast.CI (p, "\\Exception")),
+              [],
+              [(p, Aast.String "invalid expression")],
+              None,
+              p ) ) )
+  in
+  Aast.Call
+    ( ( p,
+        Aast.Lfun
+          ( {
+              Aast.f_span = p;
+              f_readonly_this = None;
+              f_annotation = ();
+              f_readonly_ret = None;
+              f_ret = ((), None);
+              f_name = (p, "invalid_expr");
+              f_tparams = [];
+              f_where_constraints = [];
+              f_variadic = Aast.FVnonVariadic;
+              f_params = [];
+              f_ctxs = None;
+              f_unsafe_ctxs = None;
+              f_body = { Aast.fb_ast = [throw]; fb_annotation = Nast.Named };
+              f_fun_kind = Ast_defs.FSync;
+              f_user_attributes = [];
+              f_external = false;
+              f_doc_comment = None;
+            },
+            [] ) ),
+      [],
+      [],
+      None )
+
+let invalid_expr p : Nast.expr = (p, invalid_expr_ p)
+
+let ignored_expr_ p : Nast.expr_ = invalid_expr_ p
+
 (**************************************************************************)
 (* All the methods and static methods of an interface are "implicitly"
  * declared as abstract
@@ -1171,7 +1214,7 @@ and class_prop_expr_is_xhp env cv =
     if
       FileInfo.equal_mode (fst env).in_mode FileInfo.Mhhi && Option.is_none expr
     then
-      Some (fst cv.Aast.cv_id, N.Any)
+      Some (fst cv.Aast.cv_id, ignored_expr_ (fst cv.Aast.cv_id))
     else
       expr
   in
@@ -1331,7 +1374,7 @@ and constant_expr env ~in_enum_class e =
   if valid_constant_expression then
     expr env e
   else
-    (fst e, N.Any)
+    invalid_expr (fst e)
 
 and class_const env ~in_enum_class cc =
   let h = Option.map cc.Aast.cc_type ~f:(hint env) in
@@ -1617,7 +1660,7 @@ and stmt env (pos, st) =
         | []
         | [_] ->
           Errors.naming_too_few_arguments p;
-          N.Expr (cp, N.Any)
+          N.Expr (invalid_expr p)
         | (cond_p, cond) :: el ->
           let violation =
             ( cp,
@@ -1843,17 +1886,17 @@ and expr_ env p (e : Nast.expr_) =
           match l with
           | [] ->
             Errors.naming_too_few_arguments p;
-            N.Any
+            invalid_expr_ p
           | [e1; e2] ->
             let pn = SN.Collections.cPair in
             N.Pair (ta, afield_value env pn e1, afield_value env pn e2)
           | _ ->
             Errors.naming_too_many_arguments p;
-            N.Any
+            invalid_expr_ p
         end
       | _ ->
         Errors.expected_collection p cn;
-        N.Any
+        invalid_expr_ p
     end
   | Aast.Clone e -> N.Clone (expr env e)
   | Aast.Null -> N.Null
@@ -1896,11 +1939,11 @@ and expr_ env p (e : Nast.expr_) =
     N.Class_get (make_class_id env x1, N.CGstring x2, in_parens)
   | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _, _) ->
     ensure_name_not_dynamic env x1;
-    N.Any
+    ignored_expr_ p
   | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGexpr x2, _) ->
     ensure_name_not_dynamic env x1;
     ensure_name_not_dynamic env x2;
-    N.Any
+    ignored_expr_ p
   | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), ((_, str) as x2))
     when String.equal str "class" ->
@@ -1910,7 +1953,8 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
     let x1 = (p, Local_id.to_string lid) in
     N.Class_const (make_class_id env x1, x2)
-  | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
+  | Aast.Class_const _ ->
+    (* TODO: report error in strict mode *) ignored_expr_ p
   | Aast.Call ((_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
@@ -1926,7 +1970,7 @@ and expr_ env p (e : Nast.expr_) =
       match el with
       | [] ->
         Errors.naming_too_few_arguments p;
-        N.Any
+        invalid_expr_ p
       | f :: el -> N.Call (expr env f, targl env p tal, exprl env el, None)
     end
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
@@ -1936,14 +1980,14 @@ and expr_ env p (e : Nast.expr_) =
       match el with
       | [] ->
         Errors.naming_too_few_arguments p;
-        N.Any
+        invalid_expr_ p
       | [(p, Aast.String x)] -> N.Fun_id (p, x)
       | [(p, _)] ->
         Errors.illegal_fun p;
-        N.Any
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
-        N.Any
+        invalid_expr_ p
     end
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.inst_meth ->
@@ -1953,15 +1997,15 @@ and expr_ env p (e : Nast.expr_) =
       | []
       | [_] ->
         Errors.naming_too_few_arguments p;
-        N.Any
+        invalid_expr_ p
       | [instance; (p, Aast.String meth)] ->
         N.Method_id (expr env instance, (p, meth))
       | [(p, _); _] ->
         Errors.illegal_inst_meth p;
-        N.Any
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
-        N.Any
+        invalid_expr_ p
     end
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.meth_caller ->
@@ -1971,7 +2015,7 @@ and expr_ env p (e : Nast.expr_) =
       | []
       | [_] ->
         Errors.naming_too_few_arguments p;
-        N.Any
+        invalid_expr_ p
       | [e1; e2] ->
         begin
           match (expr env e1, expr env e2) with
@@ -1984,11 +2028,11 @@ and expr_ env p (e : Nast.expr_) =
             N.Method_caller (cl, (pm, meth))
           | ((p, _), _) ->
             Errors.illegal_meth_caller p;
-            N.Any
+            invalid_expr_ p
         end
       | _ ->
         Errors.naming_too_many_arguments p;
-        N.Any
+        invalid_expr_ p
     end
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.class_meth ->
@@ -1998,7 +2042,7 @@ and expr_ env p (e : Nast.expr_) =
       | []
       | [_] ->
         Errors.naming_too_few_arguments p;
-        N.Any
+        invalid_expr_ p
       | [e1; e2] ->
         begin
           match (expr env e1, expr env e2) with
@@ -2021,10 +2065,10 @@ and expr_ env p (e : Nast.expr_) =
             | Some (cid, kind, false) ->
               let is_trait = Ast_defs.is_c_trait kind in
               Errors.class_meth_non_final_CLASS p is_trait (snd cid);
-              N.Any
+              invalid_expr_ p
             | None ->
               Errors.illegal_class_meth p;
-              N.Any)
+              invalid_expr_ p)
           | ((_, N.Class_const ((pc, N.CI cl), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
             let () = check_name cl in
@@ -2036,10 +2080,10 @@ and expr_ env p (e : Nast.expr_) =
             | Some (_cid, _, true) -> N.Smethod_id ((pc, N.CIself), (pm, meth))
             | Some (cid, _, false) ->
               Errors.class_meth_non_final_self p (snd cid);
-              N.Any
+              invalid_expr_ p
             | None ->
               Errors.illegal_class_meth p;
-              N.Any)
+              invalid_expr_ p)
           | ( (p, N.Class_const ((pc, N.CIstatic), (_, mem))),
               (pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
@@ -2047,20 +2091,20 @@ and expr_ env p (e : Nast.expr_) =
             | Some (_cid, _, _) -> N.Smethod_id ((pc, N.CIstatic), (pm, meth))
             | None ->
               Errors.illegal_class_meth p;
-              N.Any)
+              invalid_expr_ p)
           | ((p, _), _) ->
             Errors.illegal_class_meth p;
-            N.Any
+            invalid_expr_ p
         end
       | _ ->
         Errors.naming_too_many_arguments p;
-        N.Any
+        invalid_expr_ p
     end
   | Aast.Tuple el ->
     (match el with
     | [] ->
       Errors.naming_too_few_arguments p;
-      N.Any
+      invalid_expr_ p
     | el -> N.Tuple (exprl env el))
   | Aast.Call ((p, Aast.Id f), tal, el, unpacked_element) ->
     N.Call
@@ -2098,7 +2142,7 @@ and expr_ env p (e : Nast.expr_) =
     let x1 = (p, Local_id.to_string lid) in
     N.FunctionPointer
       (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
-  | Aast.FunctionPointer _ -> N.Any
+  | Aast.FunctionPointer _ -> ignored_expr_ p
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
   | Aast.List el -> N.List (exprl env el)
@@ -2230,7 +2274,7 @@ and expr_ env p (e : Nast.expr_) =
           (convert_shape_name env pname, expr env value))
     in
     N.Shape shp
-  | Aast.Import _ -> N.Any
+  | Aast.Import _ -> ignored_expr_ p
   | Aast.Omitted -> N.Omitted
   | Aast.Callconv (kind, e) -> N.Callconv (kind, expr env e)
   | Aast.EnumClassLabel (opt_sid, x) ->
@@ -2248,12 +2292,11 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Method_caller _
   | Aast.Smethod_id _
   | Aast.Pair _
-  | Aast.Any
   | Aast.Hole _ ->
     Errors.internal_error
       p
       "Malformed expr: Expr not found on legacy AST: T39599317";
-    Aast.Any
+    invalid_expr_ p
 
 and expr_lambda env f =
   let h =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5fcc0994184f990f8ec4409c3fdf0bd5>>
+// @generated SignedSource<<14b42234f61d10165227c877456579ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -811,11 +811,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///
     /// enum_name#label_name or #label_name
     EnumClassLabel(Box<(Option<Sid>, String)>),
-    /// Placeholder for expressions that aren't understood by parts of
-    /// the toolchain.
-    ///
-    /// TODO: Remove.
-    Any,
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
     ///

@@ -531,7 +531,6 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             emit_collection(emitter, env, expression, &mk_afvalues(&e), None)?,
         )),
 
-        Expr_::Any => Err(unrecoverable("Cannot codegen from an Any node")),
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }

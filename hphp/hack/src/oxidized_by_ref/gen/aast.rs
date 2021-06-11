@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2fc8f90532ee63701250e31c354e4176>>
+// @generated SignedSource<<5a343b51a9e531352e347f35d740c3ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1009,11 +1009,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     /// enum_name#label_name or #label_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     EnumClassLabel(&'a (Option<Sid<'a>>, &'a str)),
-    /// Placeholder for expressions that aren't understood by parts of
-    /// the toolchain.
-    ///
-    /// TODO: Remove.
-    Any,
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
     ///

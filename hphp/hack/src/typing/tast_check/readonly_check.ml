@@ -339,7 +339,6 @@ let check =
       | ExpressionTree _
       | Xml _
       | Efun _
-      | Any
       | Fun_id _
       | Method_id _
       | Lfun _
@@ -771,7 +770,6 @@ let check =
       | (_, ExpressionTree _)
       | (_, Xml _)
       | (_, Efun _)
-      | (_, Any)
       (* Neither this nor any of the *_id expressions call the function *)
       | (_, Method_caller (_, _))
       | (_, Smethod_id (_, _))

@@ -627,11 +627,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Label used for enum classes.
 
           enum_name#label_name or #label_name *)
-  | Any
-      (** Placeholder for expressions that aren't understood by parts of
-          the toolchain.
-
-          TODO: Remove. *)
   | Hole of ('ex, 'fb, 'en, 'hi) expr * 'hi * 'hi * hole_source
       (** Annotation used to record failure in subtyping or coercion of an
           expression and calls to [unsafe_cast] or [enforced_cast].

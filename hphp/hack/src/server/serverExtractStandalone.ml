@@ -1693,7 +1693,6 @@ end = struct
     | Aast.Method_caller _
     | Aast.Smethod_id _
     | Aast.ET_Splice _
-    | Aast.Any
     | Aast.Omitted ->
       ()
 

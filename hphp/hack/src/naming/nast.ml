@@ -780,7 +780,6 @@ module Visitor_DEPRECATED = struct
 
       method on_expr_ acc e =
         match e with
-        | Any -> acc
         | Darray (tap, fieldl) -> this#on_darray acc tap fieldl
         | Varray (ta, el) -> this#on_varray acc ta el
         | Shape sh -> this#on_shape acc sh

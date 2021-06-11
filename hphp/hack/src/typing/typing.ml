@@ -240,6 +240,11 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
   in
   visitor#on_expr () e
 
+let invalid_expr_ env p : Tast.expr_ =
+  let expr = (p, Naming.invalid_expr_ p) in
+  let ty = TUtils.terr env Reason.Rnone in
+  snd (with_type ty Tast.dummy_saved_env expr)
+
 let expr_error env (r : Reason.t) (e : Nast.expr) =
   let ty = TUtils.terr env r in
   (env, with_type ty Tast.dummy_saved_env e, ty)
@@ -2475,7 +2480,7 @@ and expr
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
     let typechecking_is_deferring = Deferred_decl.is_deferring () in
     Errors.exception_occurred ~typechecking_is_deferring p (Exception.wrap e);
-    make_result env p Aast.Any @@ err_witness env p
+    make_result env p (invalid_expr_ env p) @@ err_witness env p
 
 (* Some (legacy) special functions are allowed in initializers,
   therefore treat them as pure and insert the matching capabilities. *)
@@ -2777,7 +2782,6 @@ and expr_
   | Omitted ->
     let ty = Typing_utils.mk_tany env p in
     make_result env p Aast.Omitted ty
-  | Any -> expr_error env (Reason.Rwitness p) outer
   | Varray (th, el)
   | ValCollection (_, th, el) ->
     let (get_expected_kind, name, subtype_val, make_expr, make_ty) =

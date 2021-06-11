@@ -1146,7 +1146,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         PrefixedString(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         Hole(&(expr, _, _, _)) => expr_to_ty(arena, expr),
-                        Any => Some(TANY_),
 
                         ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Callconv(_)
                         | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)

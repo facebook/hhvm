@@ -1,0 +1,93 @@
+bool(true)
+goes to:
+true
+bool(false)
+goes to:
+false
+NULL
+goes to:
+false
+string(3) "str"
+goes to:
+true
+int(1234)
+goes to:
+true
+float(1234.5)
+goes to:
+true
+string(4) "1234"
+goes to:
+true
+string(6) "1234.5"
+goes to:
+true
+int(42)
+goes to:
+true
+float(42.5)
+goes to:
+true
+string(2) "42"
+goes to:
+true
+string(4) "42.5"
+goes to:
+true
+string(0) ""
+goes to:
+false
+object(Derp) (0) {
+}
+goes to:
+true
+object(Herp) (1) {
+  ["x"]=>
+  string(1) "1"
+}
+goes to:
+true
+object(Herp) (1) {
+  ["x"]=>
+  int(1)
+}
+goes to:
+true
+object(stdClass) (0) {
+}
+goes to:
+true
+int(1)
+goes to:
+true
+int(0)
+goes to:
+false
+string(1) "0"
+goes to:
+false
+resource(1) of type (stream)
+goes to:
+true
+vec(1) {
+  int(1)
+}
+goes to:
+true
+vec(1) {
+  string(1) "1"
+}
+goes to:
+true
+object(HH\Vector) (1) {
+  [0]=>
+  int(1)
+}
+goes to:
+true
+object(HH\Vector) (1) {
+  [0]=>
+  string(1) "1"
+}
+goes to:
+true

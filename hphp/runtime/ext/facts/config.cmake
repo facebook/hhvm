@@ -10,7 +10,7 @@ HHVM_DEFINE_EXTENSION(
     symbol-map-prod.cpp
     symbol-map-unit.cpp
     thread-factory.cpp
-    watchman-autoload-map.cpp
+    facts-store.cpp
     watchman.cpp
   HEADERS
     attribute-argument-map.h
@@ -29,7 +29,7 @@ HHVM_DEFINE_EXTENSION(
     symbol-map.h
     symbol-types.h
     thread-factory.h
-    watchman-autoload-map.h
+    facts-store.h
     watchman.h
   SYSTEMLIB
     ext_facts.php

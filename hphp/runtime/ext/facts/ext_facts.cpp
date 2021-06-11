@@ -47,8 +47,8 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/ext_facts.h"
+#include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
-#include "hphp/runtime/ext/facts/watchman-autoload-map.h"
 #include "hphp/runtime/ext/facts/watchman.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/assertions.h"
@@ -583,25 +583,22 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
         mapKey->m_root.native(),
         mapKey->m_dbData.m_path.native());
     return m_maps
-        .insert(
-            {*mapKey,
-             std::make_shared<WatchmanAutoloadMap>(
-                 mapKey->m_root, mapKey->m_dbData)})
+        .insert({*mapKey, make_trusted_facts(mapKey->m_root, mapKey->m_dbData)})
         .first->second.get();
   }
 
   assertx(mapKey->m_queryExpr.isObject());
-  auto map = std::make_shared<WatchmanAutoloadMap>(
-      mapKey->m_root,
-      mapKey->m_dbData,
-      mapKey->m_queryExpr,
-      s_ext.getWatchmanClient(mapKey->m_root));
 
-  if (RuntimeOption::ServerExecutionMode()) {
-    map->subscribe();
-  }
-
-  return m_maps.insert({*mapKey, std::move(map)}).first->second.get();
+  return m_maps
+      .insert(
+          {*mapKey,
+           make_watchman_facts(
+               mapKey->m_root,
+               mapKey->m_dbData,
+               mapKey->m_queryExpr,
+               s_ext.getWatchmanClient(mapKey->m_root),
+               RuntimeOption::ServerExecutionMode())})
+      .first->second.get();
 }
 
 void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(

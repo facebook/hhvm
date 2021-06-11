@@ -6,6 +6,7 @@
 # LICENSE file in the "hack" directory of this source tree.
 
 import os
+import tempfile
 import unittest
 
 from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
@@ -257,16 +258,15 @@ Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B
 """
-        test_file = "test_read.in"
-        with open(test_file, "w") as fp:
+        with tempfile.NamedTemporaryFile(mode="w") as fp:
             fp.write(deps)
-        self.assertListEqual(
-            exp,
-            hh_codesynthesis.extract_logic_rules(
-                hh_codesynthesis.read_from_file_or_stdin(test_file)
-            ),
-        )
-        os.remove(test_file)
+            fp.flush()
+            self.assertListEqual(
+                exp,
+                hh_codesynthesis.extract_logic_rules(
+                    hh_codesynthesis.read_from_file_or_stdin(fp.name)
+                ),
+            )
 
     def test_non_exist(self) -> None:
         test_file = "non_exist.in"
@@ -278,7 +278,6 @@ Type T -> Type A, Type B
 
 class WriteToFileTest(unittest.TestCase):
     def test_hack_output(self) -> None:
-        test_file = "t.php"
         exp = """\
 <?hh
 class C1   {}
@@ -291,8 +290,7 @@ interface I1  {}
         generator._add_interface("I1")
         generator._add_extend("C2", "C1")
         generator._add_implement("C2", "I1")
-        hh_codesynthesis.output_to_file_or_stdout(generator, test_file)
-        with open(test_file) as fp:
+        with tempfile.NamedTemporaryFile("r") as fp:
+            hh_codesynthesis.output_to_file_or_stdout(generator, fp.name)
             lines = fp.readlines()
             self.assertEqual("".join(lines), exp)
-        os.remove(test_file)

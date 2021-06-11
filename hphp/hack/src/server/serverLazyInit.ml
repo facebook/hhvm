@@ -1438,6 +1438,8 @@ let saved_state_init
   HackEventLogger.saved_state_download_and_load_done
     ~load_state_approach:(show_load_state_approach load_state_approach)
     ~success:(Result.is_ok state_result)
+    ~load_state_natively_64bit:
+      genv.local_config.ServerLocalConfig.load_state_natively_64bit
     t;
   match state_result with
   | Error err -> Error err

@@ -107,7 +107,9 @@ let server_is_ready _ = ()
 
 let load_deptable_end _ = ()
 
-let saved_state_download_and_load_done ~load_state_approach:_ ~success:_ _ = ()
+let saved_state_download_and_load_done
+    ~load_state_approach:_ ~success:_ ~load_state_natively_64bit:_ _ =
+  ()
 
 let tried_to_be_hg_aware_with_precomputed_saved_state_warning _ = ()
 

@@ -8,8 +8,8 @@
  * @return array - A map containing the extension's name, version, info string
  *                 ini settings, constants, functions and classes.
  */
-<<__Native("NoInjection"), __Pure>>
-function hphp_get_extension_info(string $name): darray<string, mixed>;
+<<__Native("NoInjection")>>
+function hphp_get_extension_info(string $name)[]: darray<string, mixed>;
 
 /**
  * hphp_invoke() - Used by ReflectionFunction to invoke a function.

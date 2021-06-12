@@ -350,6 +350,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::shrqi:
     case Vinstr::subq:
     case Vinstr::subqi:
+    case Vinstr::subqim:
     case Vinstr::xorq:
     case Vinstr::xorqi:
     case Vinstr::cmpq:
@@ -386,6 +387,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::roundsd:
     case Vinstr::sqrtsd:
     case Vinstr::crc32q:
+    case Vinstr::prefetch:
       return Width::Quad;
 
     case Vinstr::loadups:

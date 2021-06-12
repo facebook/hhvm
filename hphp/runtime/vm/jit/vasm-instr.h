@@ -208,6 +208,7 @@ struct Vunit;
   O(subli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf))         \
   O(subqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(subqim, I(s0) I(fl), UM(m), D(sf)) \
   O(subsd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))          \
   O(xorbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -338,6 +339,8 @@ struct Vunit;
   O(mulsd, Inone, U(s0) UH(s1,d), DH(d,s1))        \
   O(roundsd, I(dir), U(s), D(d))\
   O(sqrtsd, Inone, U(s), D(d))\
+  /* Generic instructions. */\
+  O(prefetch, Inone, UM(m), Dn)\
   /* x64 instructions */\
   O(cqo, Inone, Un, Dn)\
   O(idiv, I(fl), U(s), D(sf))\
@@ -1027,6 +1030,7 @@ struct subl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct subqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 struct subsd { VregDbl s0, s1, d; };
 // xor: s0 ^ s1 => d, sf
 struct xorb { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
@@ -1209,6 +1213,11 @@ struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sqrtsd { VregDbl s, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Generic intrinsics.
+ */
+struct prefetch { Vptr64 m; Vflags fl; };
 
 /*
  * x64 intrinsics.

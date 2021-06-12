@@ -689,6 +689,7 @@ public:
 
   virtual void push(MemoryRef m)                = 0;
   virtual void pop (MemoryRef m)                = 0;
+  virtual void prefetch(MemoryRef m)            = 0;
   virtual void incq(MemoryRef m)                = 0;
   virtual void incl(MemoryRef m)                = 0;
   virtual void incw(MemoryRef m)                = 0;

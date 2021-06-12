@@ -420,6 +420,7 @@ struct Vgen {
   void emit(const xorqi& i);
 
   // arm intrinsics
+  void emit(const prefetch& /*i*/) { /* ignored */ }
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
@@ -1533,6 +1534,7 @@ Y(addlm, addl, loadl, storel, i.s0, m)
 Y(addwm, addl, loadw, storew, Reg32(i.s0), m)
 Y(addqim, addqi, load, store, i.s0, m)
 Y(andbim, andbi, loadb, storeb, i.s, m)
+Y(subqim, subqi, load, store, i.s0, m)
 Y(orbim, orqi, loadb, storeb, i.s0, m)
 Y(orqim, orqi, load, store, i.s0, m)
 Y(orwim, orqi, loadw, storew, i.s0, m)

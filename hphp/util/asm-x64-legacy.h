@@ -157,7 +157,7 @@ const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500  };
 const X64Instr instr_roundsd = { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
 const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
 const X64Instr instr_crc32 =   { { 0xF1,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x30001 };
-
+const X64Instr instr_prefetch ={ { 0x18,0xF1,0xF1,0x02,0xF1,0xF1 }, 0x0002  };
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -358,6 +358,7 @@ public:
 
   void push(MemoryRef m) { instrM(instr_push, m); }
   void pop (MemoryRef m) { instrM(instr_pop,  m); }
+  void prefetch(MemoryRef m) { instrM(instr_prefetch, m); }
   void incq(MemoryRef m) { instrM(instr_inc,  m); }
   void incl(MemoryRef m) { instrM32(instr_inc, m); }
   void incw(MemoryRef m) { instrM16(instr_inc, m); }

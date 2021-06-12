@@ -407,6 +407,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::pushm:
     case Vinstr::pushp:
     case Vinstr::pushpm:
+    case Vinstr::prefetch:
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:
     case Vinstr::recordstack:
@@ -426,6 +427,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::stubret:
     case Vinstr::stubtophp:
     case Vinstr::stubunwind:
+    case Vinstr::subqim:
     case Vinstr::syncpoint:
     case Vinstr::syncvmret:
     case Vinstr::syncvmrettype:

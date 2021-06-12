@@ -84,6 +84,7 @@ struct Vgen {
   }
 
   // intrinsics
+  void emit(const prefetch& i) { a.prefetch(i.m.mr()); }
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a.int3(); }
@@ -271,6 +272,7 @@ struct Vgen {
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }
   void emit(subqi i) { binary(i); a.subq(i.s0, i.d); }
+  void emit(const subqim& i);
   void emit(subsd i) { noncommute(i); a.subsd(i.s0, i.d); }
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
@@ -835,6 +837,12 @@ template<class X64Asm>
 void Vgen<X64Asm>::emit(const addqim& i) {
   auto mref = i.m.mr();
   a.prefix(mref).addq(i.s0, mref);
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const subqim& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).subq(i.s0, mref);
 }
 
 template<class X64Asm>

@@ -234,6 +234,7 @@ public:
 
   void push(MemoryRef m)      { xedInstrM(XED_ICLASS_PUSH, m); }
   void pop (MemoryRef m)      { xedInstrM(XED_ICLASS_POP, m); }
+  void prefetch(MemoryRef m)  { xedInstrM(XED_ICLASS_PREFETCHT1, m); }
   void incq(MemoryRef m)      { xedInstrM(XED_ICLASS_INC, m); }
   void incl(MemoryRef m)      { xedInstrM(XED_ICLASS_INC, m, sz::dword); }
   void incw(MemoryRef m)      { xedInstrM(XED_ICLASS_INC, m, sz::word); }

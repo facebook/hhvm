@@ -19,7 +19,7 @@ use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 use crossbeam;
-use crossbeam::crossbeam_channel::{bounded, Receiver, Sender};
+use crossbeam::channel::{bounded, Receiver, Sender};
 
 struct EdgesDir {
     handles: Vec<BufReader<fs::File>>,

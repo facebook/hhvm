@@ -9,7 +9,7 @@ path = "../../build.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-crossbeam = "0.7"
+crossbeam = "0.8"
 depgraph = { path = "../../../depgraph" }
 deps_rust = { path = "../../../deps/cargo/deps_rust" }
 env_logger = "0.7"

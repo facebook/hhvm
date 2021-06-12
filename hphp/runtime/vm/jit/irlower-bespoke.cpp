@@ -476,14 +476,19 @@ void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
   auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
 
   auto constexpr kSlotsPerStore = 8;
+  auto const size = extra->numSlots;
   auto const padBytes = slayout->positionOffset() & 0x7;
-  for (auto i = 0; i < extra->numSlots + padBytes; i += kSlotsPerStore) {
+  for (auto i = 0; i < size + padBytes; i += kSlotsPerStore) {
     uint64_t slots = 0;
     for (auto j = 0; j < kSlotsPerStore; j++) {
-      auto const index = i + j - padBytes;
-      auto const slot = 0 <= index && index < extra->numSlots
-        ? safe_cast<uint8_t>(extra->slots[index])
-        : static_cast<uint8_t>(KindOfUninit);
+      // The type array comes before the positions array, and the types should
+      // stay initialized with KindOfUninit. Later positions can be zeroed.
+      auto const index = static_cast<int32_t>(i + j - padBytes);
+      auto const slot = [&]{
+        if (index < 0) return static_cast<uint8_t>(KindOfUninit);
+        if (index < size) return safe_cast<uint8_t>(extra->slots[index]);
+        return static_cast<uint8_t>(0);
+      }();
       slots = slots | (safe_cast<uint64_t>(slot) << (j * 8));
     }
     auto const offset = slayout->positionOffset() + i - padBytes;

@@ -837,18 +837,15 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
   us.resumeHelper = rh.resumeHelper;
   us.resumeHelperNoTranslate = rh.resumeHelperNoTranslate;
 
-  us.interpHelper = vwrap(cb, data, [] (Vout& v) {
-    v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
-  });
-  us.interpHelperSyncedPC = vwrap(cb, data, [&] (Vout& v) {
+  us.interpHelper = vwrap(cb, data, [&] (Vout& v) {
     storeVMRegs(v);
     v << ldimmb{1, rarg(0)};
-    v << jmpi{rh.handleResume, RegSet(rarg(0))};
+    v << jmpi{rh.handleResume, arg_regs(1)};
   });
   us.interpHelperNoTranslate = vwrap(cb, data, [&] (Vout& v) {
     storeVMRegs(v);
     v << ldimmb{1, rarg(0)};
-    v << jmpi{rh.handleResumeNoTranslate, RegSet(rarg(1))};
+    v << jmpi{rh.handleResumeNoTranslate, arg_regs(1)};
   });
 
   return us.resumeHelper;
@@ -1417,8 +1414,8 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
-  v << copy{v.cns(sk.pc()), rarg(0)};
-  v << jmpi{tc::ustubs().interpHelper, arg_regs(1)};
+  v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
+  v << jmpi{tc::ustubs().interpHelper, RegSet{}};
 }
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
@@ -1427,7 +1424,7 @@ void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{tc::ustubs().interpHelperNoTranslate, arg_regs(1)};
+  v << jmpi{tc::ustubs().interpHelperNoTranslate, RegSet{}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

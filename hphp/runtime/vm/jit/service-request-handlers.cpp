@@ -213,7 +213,7 @@ TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
     if (auto const addr = transResult.addr()) return addr;
     vmpc() = sk.pc();
     return transResult.scope() == TranslationResult::Scope::Transient
-      ? tc::ustubs().interpHelperSyncedPC
+      ? tc::ustubs().interpHelper
       : tc::ustubs().interpHelperNoTranslate;
   }();
 

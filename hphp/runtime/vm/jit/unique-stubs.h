@@ -264,16 +264,13 @@ struct UniqueStubs {
    * Like resumeHelper, but interpret a basic block first to ensure we make
    * forward progress.
    *
-   * interpHelper expects the correct value of vmpc to be in the first argument
-   * register and syncs it, whereas interpHelperSyncedPC expects vmpc to be
-   * synced a priori.  Both stubs will sync the vmsp and vmfp registers to
-   * vmRegs before passing control to the interpreter.
+   * Expects vmpc to be synced. Both stubs will sync the vmsp and vmfp registers
+   * to vmRegs before passing control to the interpreter.
    *
    * @reached:  jmp from TC
    * @context:  func body
    */
   TCA interpHelper;
-  TCA interpHelperSyncedPC;
   TCA interpHelperNoTranslate;
 
   /*

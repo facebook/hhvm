@@ -186,6 +186,14 @@ void createSchema(SQLiteTxn& txn) {
            " attribute_value TEXT NULL,"
            " UNIQUE (typeid, attribute_name, attribute_position)"
            ")");
+
+  txn.exec("CREATE TABLE IF NOT EXISTS file_attributes ("
+           " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
+           " attribute_name TEXT NOT NULL,"
+           " attribute_position INTEGER NULL,"
+           " attribute_value TEXT NULL,"
+           " UNIQUE (pathid, attribute_name, attribute_position)"
+           ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -231,6 +239,11 @@ void rebuildIndices(SQLiteTxn& txn) {
       "  method,"
       "  attribute_position"
       ")");
+
+  // file_attributes
+  txn.exec("CREATE INDEX IF NOT EXISTS "
+           "file_attributes__attribute_name__pathid__attribute_position"
+           " ON file_attributes (attribute_name, pathid, attribute_position)");
 }
 
 TypeKind toTypeKind(const std::string_view kind) {
@@ -487,6 +500,44 @@ struct TypeStmts {
   SQLiteStmt m_getAll;
 };
 
+
+struct FileStmts {
+  explicit FileStmts(SQLite& db)
+      : m_insertFileAttribute{db.prepare(
+            "INSERT OR IGNORE INTO file_attributes ("
+            " pathid,"
+            " attribute_name,"
+            " attribute_position,"
+            " attribute_value"
+            ")"
+            " VALUES ("
+            "  (SELECT pathid FROM all_paths WHERE path=@path),"
+            "  @attribute_name,"
+            "  @attribute_position,"
+            "  @attribute_value"
+            " )")}
+      , m_getFileAttributes{db.prepare(
+            "SELECT DISTINCT attribute_name"
+            " FROM file_attributes"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE path = @path")}
+      , m_getFileAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM file_attributes"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE path = @path"
+            " AND attribute_name = @attribute_name")}
+      , m_getFilesWithAttribute{db.prepare(
+            "SELECT path from all_paths"
+            " JOIN file_attributes USING (pathid)"
+            " WHERE attribute_name = @attribute_name")} {
+  }
+  SQLiteStmt m_insertFileAttribute;
+  SQLiteStmt m_getFileAttributes;
+  SQLiteStmt m_getFileAttributeArgs;
+  SQLiteStmt m_getFilesWithAttribute;
+};
+
 struct FunctionStmts {
   explicit FunctionStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -554,6 +605,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       , m_pathStmts{m_db}
       , m_sha1HexStmts{m_db}
       , m_typeStmts{m_db}
+      , m_fileStmts{m_db}
       , m_functionStmts{m_db}
       , m_constantStmts{m_db}
       , m_clockStmts{m_db} {
@@ -870,6 +922,38 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.step();
   }
 
+  void insertFileAttribute(
+      SQLiteTxn& txn,
+      const folly::fs::path& path,
+      std::string_view attributeName,
+      std::optional<int> attributePosition,
+      const folly::dynamic* attributeValue) override {
+
+    std::string attrValueJson;
+    auto query = txn.query(m_fileStmts.m_insertFileAttribute);
+
+    auto const attributeValueKey = "@attribute_value";
+    if (attributeValue) {
+      attrValueJson = folly::toJson(*attributeValue);
+      query.bindString(attributeValueKey, attrValueJson);
+    } else {
+      query.bindNull(attributeValueKey);
+    }
+
+    auto const attributePositionKey = "@attribute_position";
+    if (attributePosition) {
+      query.bindInt(attributePositionKey, *attributePosition);
+    } else {
+      query.bindNull(attributePositionKey);
+    }
+
+    query.bindString("@path", path.native());
+    query.bindString("@attribute_name", attributeName);
+
+    FTRACE(5, "Running {}\n", query.sql());
+    query.step();
+  }
+
   void analyze() override {
     m_db.analyze();
   }
@@ -897,6 +981,19 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getMethodAttributes);
     query.bindString("@type", type);
     query.bindString("@method", method);
+    query.bindString("@path", path.native());
+    std::vector<std::string> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.emplace_back(query.getString(0));
+    }
+    return results;
+  }
+
+  std::vector<std::string> getAttributesOfFile(
+      SQLiteTxn& txn,
+      const folly::fs::path& path) override {
+    auto query = txn.query(m_fileStmts.m_getFileAttributes);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
     FTRACE(5, "Running {}\n", query.sql());
@@ -935,6 +1032,18 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
+  std::vector<folly::fs::path> getFilesWithAttribute(
+      SQLiteTxn& txn, const std::string_view attributeName) override {
+    auto query = txn.query(m_fileStmts.m_getFilesWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<folly::fs::path> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(folly::fs::path{std::string{query.getString(0)}});
+    }
+    return results;
+  }
+
   std::vector<folly::dynamic> getTypeAttributeArgs(
       SQLiteTxn& txn,
       const std::string_view type,
@@ -964,6 +1073,24 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getMethodAttributeArgs);
     query.bindString("@type", type);
     query.bindString("@method", method);
+    query.bindString("@path", path);
+    query.bindString("@attribute_name", attributeName);
+    FTRACE(5, "Running {}\n", query.sql());
+    std::vector<folly::dynamic> args;
+    for (query.step(); query.row(); query.step()) {
+      auto arg = query.getNullableString(0);
+      if (arg) {
+        args.push_back(folly::parseJson(*arg));
+      }
+    }
+    return args;
+  }
+
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      SQLiteTxn& txn,
+      const std::string_view path,
+      const std::string_view attributeName) override {
+    auto query = txn.query(m_fileStmts.m_getFileAttributeArgs);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
     FTRACE(5, "Running {}\n", query.sql());
@@ -1128,6 +1255,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
   PathStmts m_pathStmts;
   Sha1HexStmts m_sha1HexStmts;
   TypeStmts m_typeStmts;
+  FileStmts m_fileStmts;
   hphp_hash_map<std::tuple<TypeKindMask, DeriveKindMask>, SQLiteStmt>
       m_derivedTypeStmts;
   FunctionStmts m_functionStmts;

@@ -181,6 +181,13 @@ struct AutoloadDB {
       std::optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
+  virtual void insertFileAttribute(
+      SQLiteTxn& txn,
+      const folly::fs::path& path,
+      std::string_view attributeName,
+      std::optional<int> attributePosition,
+      const folly::dynamic* attributeValue) = 0;
+
   /**
    * Record stats about the DB's tables and indices:
    * https://sqlite.org/lang_analyze.html
@@ -196,6 +203,9 @@ struct AutoloadDB {
       std::string_view method,
       const folly::fs::path& path) = 0;
 
+  virtual std::vector<std::string> getAttributesOfFile(
+      SQLiteTxn& txn, const folly::fs::path& path) = 0;
+
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       SQLiteTxn& txn,
       std::string_view type,
@@ -206,6 +216,11 @@ struct AutoloadDB {
       SQLiteTxn& txn,
       std::string_view type,
       std::string_view method,
+      std::string_view path,
+      std::string_view attributeName) = 0;
+
+  virtual std::vector<folly::dynamic> getFileAttributeArgs(
+      SQLiteTxn& txn,
       std::string_view path,
       std::string_view attributeName) = 0;
 
@@ -223,6 +238,9 @@ struct AutoloadDB {
   };
   virtual std::vector<MethodDeclaration>
   getMethodsWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
+
+  virtual std::vector<folly::fs::path>
+  getFilesWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
 
   virtual std::string
   getTypeCorrectCase(SQLiteTxn& txn, std::string_view type) = 0;

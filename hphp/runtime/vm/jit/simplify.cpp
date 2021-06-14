@@ -1044,6 +1044,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   switch (opc) {
   case GtBool:
   case GtInt:
+  case GtDbl:
   case GtStr:
   case GtStrInt:
   case GtObj:
@@ -1051,6 +1052,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GtRes: return a > b;
   case GteBool:
   case GteInt:
+  case GteDbl:
   case GteStr:
   case GteStrInt:
   case GteObj:
@@ -1058,6 +1060,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GteRes: return a >= b;
   case LtBool:
   case LtInt:
+  case LtDbl:
   case LtStr:
   case LtStrInt:
   case LtObj:
@@ -1065,6 +1068,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case LtRes: return a < b;
   case LteBool:
   case LteInt:
+  case LteDbl:
   case LteStr:
   case LteStrInt:
   case LteObj:
@@ -1075,6 +1079,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case SameArrLike:
   case EqBool:
   case EqInt:
+  case EqDbl:
   case EqStr:
   case EqStrInt:
   case EqObj:
@@ -1085,6 +1090,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case NSameArrLike:
   case NeqBool:
   case NeqInt:
+  case NeqDbl:
   case NeqStr:
   case NeqStrInt:
   case NeqObj:
@@ -1212,6 +1218,22 @@ SSATmp* cmpIntImpl(State& env,
       }(opc);
       return newInst(newOpc, right, left);
     }
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpDblImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TDbl);
+  assertx(right->type() <= TDbl);
+
+  // Identity optimization is not safe because Nan's compare unequal.
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, cmpOp(opc, left->dblVal(), right->dblVal()));
   }
 
   return nullptr;
@@ -1446,6 +1468,13 @@ X(LteInt, Int)
 X(EqInt, Int)
 X(NeqInt, Int)
 
+X(GtDbl, Dbl)
+X(GteDbl, Dbl)
+X(LtDbl, Dbl)
+X(LteDbl, Dbl)
+X(EqDbl, Dbl)
+X(NeqDbl, Dbl)
+
 X(GtStr, Str)
 X(GteStr, Str)
 X(LtStr, Str)
@@ -1546,6 +1575,17 @@ SSATmp* simplifyCmpInt(State& env, const IRInstruction* inst) {
   assertx(right->type() <= TInt);
   if (left->hasConstVal() && right->hasConstVal()) {
     return cns(env, HPHP::compare(left->intVal(), right->intVal()));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpDbl(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TDbl);
+  assertx(right->type() <= TDbl);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, HPHP::compare(left->dblVal(), right->dblVal()));
   }
   return nullptr;
 }
@@ -3860,6 +3900,13 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(EqInt)
       X(NeqInt)
       X(CmpInt)
+      X(GtDbl)
+      X(GteDbl)
+      X(LtDbl)
+      X(LteDbl)
+      X(EqDbl)
+      X(NeqDbl)
+      X(CmpDbl)
       X(GtStr)
       X(GteStr)
       X(LtStr)

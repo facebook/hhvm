@@ -10,7 +10,7 @@ open Hh_prelude
 open OUnit2
 
 let test_zero_length_bloomfilter _ =
-  let filter = BloomFilter.create 0 in
+  let filter = BloomFilter.create ~capacity:0 in
   let h = BloomFilter.hash "" in
   assert_equal
     ~msg:"A zero length bloom filter should fail membership tests"
@@ -25,7 +25,7 @@ let test_zero_length_bloomfilter _ =
     (BloomFilter.mem filter h)
 
 let test_filter_with_capacity capacity _ =
-  let filter = BloomFilter.create capacity in
+  let filter = BloomFilter.create ~capacity in
   let h1 = BloomFilter.hash "1" in
   let h2 = BloomFilter.hash "2" in
   let h3 = BloomFilter.hash "3" in

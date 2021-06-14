@@ -32,6 +32,13 @@ let test_interrupt_handler () =
   let merge () _ = () in
   let (interrupt_fd1, interrupter_pid1) = run_interrupter (Some 10) in
   let (interrupt_fd2, interrupter_pid2) = run_interrupter (Some 10) in
+  let interrupt =
+    {
+      MultiThreadedCall.handlers =
+        configure_handlers interrupt_fd1 interrupt_fd2;
+      env = (0, 0) (* counting number of times interrupt handlers ran *);
+    }
+  in
   let ((), (x, y), cancelled) =
     MultiWorker.call_with_interrupt
       workers
@@ -39,12 +46,7 @@ let test_interrupt_handler () =
       ~merge
       ~neutral:()
       ~next
-      ~interrupt:
-        {
-          MultiThreadedCall.handlers =
-            configure_handlers interrupt_fd1 interrupt_fd2;
-          env = (0, 0) (* counting number of times interrupt handlers ran *);
-        }
+      ~interrupt
   in
   let (_ : int * Unix.process_status) = Unix.waitpid [] interrupter_pid1 in
   let (_ : int * Unix.process_status) = Unix.waitpid [] interrupter_pid2 in

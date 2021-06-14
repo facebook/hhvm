@@ -70,7 +70,7 @@ let init
       ~longlived_workers:false
       ~saved_state:state
       ~entry
-      ~nbr_procs
+      nbr_procs
       ~gc_control
       ~heap_handle
   in

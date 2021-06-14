@@ -92,7 +92,7 @@ val make :
   longlived_workers:bool ->
   saved_state:'a ->
   entry:'a WorkerController.entry ->
-  nbr_procs:int ->
+  int ->
   gc_control:Gc.control ->
   heap_handle:SharedMem.handle ->
   worker list

@@ -12,7 +12,7 @@ let make_worker ?call_wrapper ~longlived_workers heap_handle =
     ~longlived_workers
     ~saved_state:()
     ~entry
-    ~nbr_procs:num_workers
+    num_workers
     ~gc_control:(Gc.get ())
     ~heap_handle
 
@@ -65,7 +65,7 @@ let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
        i = 17)
 
 let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
-  let workers = make_worker use_clones heap_handle in
+  let workers = make_worker ~longlived_workers:use_clones heap_handle in
   match workers with
   | [] ->
     Printf.eprintf "Failed to create workers";
@@ -84,7 +84,7 @@ let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
        i = 2)
 
 let test_simple_worker_spawn use_clones heap_handle () =
-  let workers = make_worker use_clones heap_handle in
+  let workers = make_worker ~longlived_workers:use_clones heap_handle in
   match workers with
   | [] ->
     Printf.eprintf "Failed to create workers";

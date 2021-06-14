@@ -815,6 +815,6 @@ let test_cases =
     test_realloc_shared_value;
   ]
 
-let main () = List.iter test_cases (fun test -> test ())
+let main () = List.iter test_cases ~f:(fun test -> test ())
 
 let () = main ()

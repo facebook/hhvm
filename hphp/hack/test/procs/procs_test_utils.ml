@@ -21,12 +21,12 @@ let make_workers n =
   let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
     MultiWorker.make
-      (not use_worker_clones) (* longlived_workers *)
-      handle
-      entry
+      ~longlived_workers:(not use_worker_clones)
+      ~saved_state:handle
+      ~entry
       n
-      GlobalConfig.gc_control
-      handle
+      ~gc_control:GlobalConfig.gc_control
+      ~heap_handle:handle
   in
   workers
 
@@ -44,7 +44,7 @@ let run_interrupter limit =
         | _ ->
           let written = Unix.write fd_out (Bytes.of_string "!") 0 1 in
           assert (written = 1);
-          aux (Option.map x (fun x -> x - 1))
+          aux (Option.map x ~f:(fun x -> x - 1))
       in
       aux limit
     | pid -> pid

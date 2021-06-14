@@ -36,6 +36,6 @@ let make ~longlived_workers ~nbr_procs gc_control heap_handle ~logging_init =
     ~saved_state:(ServerGlobalState.save ~logging_init)
     ~entry
     ~longlived_workers
-    ~nbr_procs
+    nbr_procs
     ~gc_control
     ~heap_handle

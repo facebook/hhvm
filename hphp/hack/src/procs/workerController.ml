@@ -234,13 +234,13 @@ let make_one ?call_wrapper controller_fd spawn id =
   worker
 
 (* Make a few workers. When workload is given to a worker (via "call" below),
- * the workload is wrapped in the calL_wrapper. *)
+ * the workload is wrapped in the call_wrapper. *)
 let make
     ?call_wrapper
     ~longlived_workers
     ~saved_state
     ~entry
-    ~nbr_procs
+    nbr_procs
     ~gc_control
     ~heap_handle =
   let setup_controller_fd () =

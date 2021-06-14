@@ -51,7 +51,7 @@ let () =
       ~longlived_workers:false
       ~saved_state:()
       ~entry
-      ~nbr_procs:num_workers
+      num_workers
       ~gc_control:(Gc.get ())
       ~heap_handle:handle
   in

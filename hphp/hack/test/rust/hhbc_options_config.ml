@@ -166,7 +166,7 @@ let check_configs (pair_json_str : string) : bool =
 
 let () =
   let input = Sys_utils.cat "/dev/stdin" in
-  let input = String.sub input 0 (String.length input - 1) in
+  let input = String.sub input ~pos:0 ~len:(String.length input - 1) in
   let pairs = String.split_on_chars ~on:['\x00'] input in
   let total_cnt = List.length pairs in
   let pass_cnt =

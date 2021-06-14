@@ -37,7 +37,7 @@ let rec init_watcher_client ~retries repo =
     match WEWClient.get_status client with
     | Some _ -> client
     | None ->
-      let () = Sys_utils.sleep 1.0 in
+      let () = Sys_utils.sleep ~seconds:1.0 in
       init_watcher_client ~retries:(retries - 1) repo
 
 let create_watcher_socket_file repo =
@@ -92,7 +92,7 @@ let rec poll_client_until_settled ?(retries = 10) client =
     | None -> raise Watcher_connection_disconnected
     | Some Responses.Unknown
     | Some Responses.Mid_update ->
-      let () = Sys_utils.sleep 1.0 in
+      let () = Sys_utils.sleep ~seconds:1.0 in
       poll_client_until_settled ~retries:(retries - 1) client
     | Some Responses.Settled -> ()
 

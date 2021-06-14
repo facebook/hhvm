@@ -64,20 +64,20 @@ let test_local_changes
   in
   let expect_add key value =
     IntHeap.add key value;
-    expect_value key (Some value)
+    expect_value ~name:key (Some value)
   in
   let expect_remove key =
     IntHeap.remove_batch (IntHeap.KeySet.singleton key);
-    expect_value key None
+    expect_value ~name:key None
   in
   let test () =
-    expect_value "Filled" (Some 0);
-    expect_value "Empty" None;
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None;
 
     IntHeap.LocalChanges.push_stack ();
 
-    expect_value "Filled" (Some 0);
-    expect_value "Empty" None;
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None;
 
     (* For local changes we allow overriding values *)
     expect_add "Filled" 1;
@@ -90,8 +90,8 @@ let test_local_changes
     expect_add "Empty" 2;
 
     IntHeap.LocalChanges.pop_stack ();
-    expect_value "Filled" (Some 0);
-    expect_value "Empty" None;
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None;
 
     (* Commit changes are reflected in the shared memory *)
     IntHeap.LocalChanges.push_stack ();
@@ -101,8 +101,8 @@ let test_local_changes
 
     IntHeap.LocalChanges.commit_all ();
     IntHeap.LocalChanges.pop_stack ();
-    expect_value "Filled" (Some 1);
-    expect_value "Empty" (Some 2);
+    expect_value ~name:"Filled" (Some 1);
+    expect_value ~name:"Empty" (Some 2);
 
     IntHeap.LocalChanges.push_stack ();
 
@@ -110,8 +110,8 @@ let test_local_changes
     expect_remove "Empty";
 
     IntHeap.LocalChanges.pop_stack ();
-    expect_value "Filled" (Some 1);
-    expect_value "Empty" (Some 2);
+    expect_value ~name:"Filled" (Some 1);
+    expect_value ~name:"Empty" (Some 2);
 
     IntHeap.LocalChanges.push_stack ();
 
@@ -120,8 +120,8 @@ let test_local_changes
 
     IntHeap.LocalChanges.commit_all ();
     IntHeap.LocalChanges.pop_stack ();
-    expect_value "Filled" None;
-    expect_value "Empty" None;
+    expect_value ~name:"Filled" None;
+    expect_value ~name:"Empty" None;
 
     IntHeap.LocalChanges.push_stack ();
 
@@ -129,12 +129,12 @@ let test_local_changes
     expect_add "Empty" 2;
     IntHeap.LocalChanges.commit_batch (IntHeap.KeySet.singleton "Filled");
     IntHeap.LocalChanges.revert_batch (IntHeap.KeySet.singleton "Empty");
-    expect_value "Filled" (Some 0);
-    expect_value "Empty" None;
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None;
 
     IntHeap.LocalChanges.pop_stack ();
-    expect_value "Filled" (Some 0);
-    expect_value "Empty" None
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None
   in
   IntHeap.add "Filled" 0;
   test ();

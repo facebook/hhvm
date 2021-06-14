@@ -203,7 +203,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:changelist in
-  let n = LocalSearchService.count_local_fileinfos sienv in
+  let n = LocalSearchService.count_local_fileinfos ~sienv in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 
   (* Find one of each major type *)

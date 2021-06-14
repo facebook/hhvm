@@ -334,7 +334,9 @@ let setup_global_test_state () =
   Relative_path.(set_path_prefix Root (Path.make "/tmp"));
   Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
   let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
-  Disk.write_file (Relative_path.to_absolute hhconfig_path) "assume_php = false"
+  Disk.write_file
+    ~file:(Relative_path.to_absolute hhconfig_path)
+    ~contents:"assume_php = false"
 
 let tests =
   [

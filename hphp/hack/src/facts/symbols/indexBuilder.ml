@@ -182,7 +182,7 @@ let init_workers () =
     ~longlived_workers:false
     ~saved_state:()
     ~entry
-    ~nbr_procs
+    nbr_procs
     ~gc_control
     ~heap_handle
 

@@ -14,15 +14,3 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `C`
   File "partial_classes_bad_01.php", line 24, characters 35-38:
   But got `this = C2`
-File "partial_classes_bad_01.php", line 28, characters 40-41:
-No instance method `me` in `PartialC` (Typing[4053])
-  File "partial_classes_bad_01.php", line 28, characters 19-21:
-  Did you mean `foo` instead?
-  File "partial_classes_bad_01.php", line 24, characters 7-14:
-  This is why I think it is an object of type PartialC
-  File "partial_classes_bad_01.php", line 24, characters 7-14:
-  Declaration of `PartialC` is here
-File "partial_classes_bad_01.php", line 28, characters 40-41:
-You cannot access this member (Typing[4112])
-  File "partial_classes_bad_01.php", line 13, characters 20-21:
-  This member is private

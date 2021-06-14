@@ -14,35 +14,36 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
-let is_private_visible env x self_id =
-  if String.equal x self_id then
+(* Is a private member defined on class/trait [origin_id] visible
+ * from code in class/trait [self_id]?
+ *
+ * For almost all circumstances, this is just a case of checking
+ * that they are the same, *except* for the special case of
+ * where-constraints on the this type defined on a trait, for example:
+ *
+ * class C { private static function foo():void { } }
+ * trait TR where this = C {
+ *   ...C::foo...
+ * }
+ *)
+let is_private_visible env origin_id self_id =
+  if String.equal origin_id self_id then
     None
   else
-    let my_class = Env.get_class env self_id in
-    let their_class = Env.get_class env x in
-    match (my_class, their_class) with
-    | (Some my_class, Some their_class) ->
-      let make_tany _ = mk (Reason.Rnone, Typing_defs.make_tany ()) in
-      let my_class_ty =
-        Typing_make_type.class_type
-          Reason.Rnone
-          self_id
-          (List.map (Cls.tparams my_class) ~f:make_tany)
-      in
-      let their_class_ty =
-        Typing_make_type.class_type
-          Reason.Rnone
-          x
-          (List.map (Cls.tparams their_class) ~f:make_tany)
-      in
-      if
-        Typing_utils.is_sub_type env my_class_ty their_class_ty
-        && Typing_utils.is_sub_type env their_class_ty my_class_ty
-      then
-        None
-      else
-        Some "You cannot access this member"
-    | (_, _) -> Some "You cannot access this member"
+    let in_bounds bounds =
+      List.exists bounds (fun t ->
+          match get_node t with
+          | Tapply ((_, name), _) -> String.equal origin_id name
+          | _ -> false)
+    in
+
+    match Env.get_class env self_id with
+    | Some cls
+      when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait)
+           && in_bounds (Cls.upper_bounds_on_this_from_constraints cls)
+           && in_bounds (Cls.lower_bounds_on_this_from_constraints cls) ->
+      None
+    | _ -> Some "You cannot access this member"
 
 let is_protected_visible env x self_id =
   if String.equal x self_id then

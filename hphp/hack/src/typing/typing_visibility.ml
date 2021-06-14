@@ -31,7 +31,7 @@ let is_private_visible env origin_id self_id =
     None
   else
     let in_bounds bounds =
-      List.exists bounds (fun t ->
+      List.exists bounds ~f:(fun t ->
           match get_node t with
           | Tapply ((_, name), _) -> String.equal origin_id name
           | _ -> false)

@@ -399,7 +399,13 @@ function help(): void {
 "   debugging/development tasks.  (Basically shorthands for various\n".
 "   common combinations of RuntimeOption things.)\n".
 "\n".
-"   You might consider adding a bash alias or symlinking it to ~/bin.\n",
+"   You might consider adding a bash alias:\n".
+"\n".
+"      #!/bin/bash\n".
+"      hphp/tools/hhvm_wrapper.php \"$@\"\n".
+"\n".
+"   Note: this alias will only work from repo root. That's intended,\n".
+"   as that's where the script will look for a compiled HHVM binary.\n",
     my_option_map(),
   );
 

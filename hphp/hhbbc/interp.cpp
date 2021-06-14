@@ -1591,21 +1591,29 @@ void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
 void in(ISS& env, const bc::NSame&) { sameImpl<true>(env); }
 
 template<class Fun>
-void binOpBoolImpl(ISS& env, Fun fun, bool checkSameTypes) {
+void binOpBoolImpl(ISS& env, Fun fun) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
-  if (t1 == t2 || !checkSameTypes) {
-    auto const v1 = tv(t1);
-    auto const v2 = tv(t2);
-    if (v1 && v2) {
-      if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
-        constprop(env);
-        return push(env, *r ? TTrue : TFalse);
-      }
+  auto const v1 = tv(t1);
+  auto const v2 = tv(t2);
+  if (t1 == t2 && v1 && v2) {
+    if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
+      constprop(env);
+      return push(env, *r ? TTrue : TFalse);
     }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TBool);
+}
+
+namespace {
+bool areMismatchedNumericStrings(TypedValue t1, TypedValue t2) {
+  if (!tvIsString(t1) || !tvIsString(t2)) return false;
+  int64_t lval; double dval;
+  auto ret1 = t1.m_data.pstr->isNumericWithVal(lval, dval, 0);
+  auto ret2 = t2.m_data.pstr->isNumericWithVal(lval, dval, 0);
+  return ret1 != ret2 && ret1 != KindOfNull && ret2 != KindOfNull;
+}
 }
 
 void in(ISS& env, const bc::Eq&) {
@@ -1615,7 +1623,11 @@ void in(ISS& env, const bc::Eq&) {
     discard(env, 2);
     return push(env, TTrue);
   }
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvEqual(c1, c2); }, false);
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) {
+    // block truthiness of mismatched stringish number types
+    if (areMismatchedNumericStrings(c1, c2)) throw std::exception();
+    return tvEqual(c1, c2);
+  });
 }
 void in(ISS& env, const bc::Neq&) {
   auto rs = resolveSame<false>(env);
@@ -1624,16 +1636,20 @@ void in(ISS& env, const bc::Neq&) {
     discard(env, 2);
     return push(env, TFalse);
   }
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return !tvEqual(c1, c2); }, false);
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) {
+    // block truthiness of mismatched stringish number types
+    if (areMismatchedNumericStrings(c1, c2)) throw std::exception();
+    return !tvEqual(c1, c2);
+  });
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvLess(c1, c2); }, true);
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvLess(c1, c2); });
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvGreater(c1, c2); }, true);
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvGreater(c1, c2); });
 }
-void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual, true); }
-void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual, true); }
+void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual); }
+void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual); }
 
 void in(ISS& env, const bc::Cmp&) {
   auto const t1 = popC(env);
@@ -2113,51 +2129,49 @@ void in(ISS& env, const bc::JmpNZ& op) { jmpImpl(env, op); }
 void in(ISS& env, const bc::JmpZ& op)  { jmpImpl(env, op); }
 
 void in(ISS& env, const bc::Switch& op) {
-  auto v = tv(topC(env));
+  const auto v = tv(topC(env));
 
-  if (v) {
-    auto go = [&] (BlockId blk) {
-      reduce(env, bc::PopC {});
-      return jmp_setdest(env, blk);
-    };
-    auto num_elems = op.targets.size();
-    if (op.subop1 == SwitchKind::Unbounded) {
-      if (v->m_type == KindOfInt64 &&
-          v->m_data.num >= 0 && v->m_data.num < num_elems) {
-        return go(op.targets[v->m_data.num]);
-      }
-    } else {
-      assertx(num_elems > 2);
-      num_elems -= 2;
-      for (auto i = size_t{}; ; i++) {
-        if (i == num_elems) {
-          return go(op.targets.back());
-        }
-        auto match = eval_cell_value([&] {
-            return tvEqual(*v, static_cast<int64_t>(op.arg2 + i));
-        });
-        if (!match) break;
-        if (*match) {
-          return go(op.targets[i]);
-        }
-      }
-    }
+  auto bail = [&] {
+    popC(env);
+    forEachTakenEdge(op, [&] (BlockId id) {
+        env.propagate(id, &env.state);
+    });
+  };
+
+  if (!v || v->m_type != KindOfInt64) return bail();
+
+  auto go = [&] (BlockId blk) {
+    reduce(env, bc::PopC {});
+    return jmp_setdest(env, blk);
+  };
+
+  auto num_elems = op.targets.size();
+  if (op.subop1 == SwitchKind::Unbounded) {
+    if (v->m_data.num < 0 || v->m_data.num >= num_elems) return bail();
+    return go(op.targets[v->m_data.num]);
   }
 
-  popC(env);
-  forEachTakenEdge(op, [&] (BlockId id) {
-      env.propagate(id, &env.state);
-  });
+  assertx(num_elems > 2);
+  num_elems -= 2;
+  auto const i = v->m_data.num - op.arg2;
+  return i >= 0 && i < num_elems ? go(op.targets[i]) : go(op.targets.back());
 }
 
 void in(ISS& env, const bc::SSwitch& op) {
-  auto v = tv(topC(env));
+  const auto t = topC(env);
+  const auto v = tv(t);
 
-  if (v) {
+  if (t.subtypeOf(BStr) && v) {
     for (auto& kv : op.targets) {
       auto match = eval_cell_value([&] {
-        return !kv.first || tvEqual(*v, kv.first);
+        if (!kv.first) return true;
+        if (areMismatchedNumericStrings(
+          *v, make_tv<KindOfPersistentString>(kv.first))) {
+          throw std::exception();
+        }
+        return v->m_data.pstr->equal(kv.first);
       });
+
       if (!match) break;
       if (*match) {
         reduce(env, bc::PopC {});

@@ -118,10 +118,14 @@ let select env ?(read_fdl = []) ?(write_fdl = []) ~timeout callback =
     List.fold_left ~f:make_callback ~init:FDMap.empty write_fdl
   in
   let (read_ready, write_ready, _) =
-    Unix.select (List.map read_fdl fst) (List.map write_fdl fst) [] timeout
+    Unix.select
+      (List.map read_fdl ~f:fst)
+      (List.map write_fdl ~f:fst)
+      []
+      timeout
   in
-  List.iter write_ready (invoke_callback write_callbacks);
-  List.iter read_ready (invoke_callback read_callbacks)
+  List.iter write_ready ~f:(invoke_callback write_callbacks);
+  List.iter read_ready ~f:(invoke_callback read_callbacks)
 
 (** Unused, for compatibility with `fsnotify_linux/fsnotify.mli` only. *)
 

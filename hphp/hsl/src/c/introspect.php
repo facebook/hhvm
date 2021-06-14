@@ -17,7 +17,7 @@ namespace HH\Lib\C;
 /**
  * Returns true if the given predicate returns true for any element of the
  * given Traversable. If no predicate is provided, it defaults to casting the
- * element to bool.
+ * element to bool. If the Traversable is empty, it returns false.
  *
  * If you're looking for `C\none`, use `!C\any`.
  *
@@ -87,7 +87,7 @@ function count(
 /**
  * Returns true if the given predicate returns true for every element of the
  * given Traversable. If no predicate is provided, it defaults to casting the
- * element to bool.
+ * element to bool. If the Traversable is empty, returns true.
  *
  * If you're looking for `C\all`, this is it.
  *

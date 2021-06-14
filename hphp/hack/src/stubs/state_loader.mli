@@ -46,29 +46,30 @@ type verbose_error = {
 }
 [@@deriving show]
 
-let error_string_verbose _ =
-  {
-    message = "";
-    auto_retry = false;
-    stack = Utils.Callstack "";
-    environment = None;
-  }
+val error_string_verbose : error -> verbose_error
 
-let cached_state ~load_64bit:_ ?saved_state_handle:_ ~config_hash:_ ~rev:_ =
-  None
+val cached_state :
+  load_64bit:bool ->
+  ?saved_state_handle:saved_state_handle ->
+  config_hash:string ->
+  rev:Hg.rev ->
+  (Hg.rev * string * ServerMonitorUtils.watchman_mergebase option) option
 
-exception Not_supported
+val fetch_saved_state :
+  load_64bit:bool ->
+  ?cache_limit:int ->
+  config:State_loader_config.timeouts ->
+  config_hash:string ->
+  saved_state_handle ->
+  (string, error) result Future.t
 
-let fetch_saved_state ~load_64bit:_ ?cache_limit:_ ~config:_ ~config_hash:_ _ =
-  raise Not_supported
-
-let mk_state_future
-    ~config:_
-    ~load_64bit:_
-    ?saved_state_handle:_
-    ~config_hash:_
-    ~ignore_hh_version:_
-    ~ignore_hhconfig:_
-    ~use_prechecked_files:_
-    _ =
-  raise Not_supported
+val mk_state_future :
+  config:State_loader_config.timeouts ->
+  load_64bit:bool ->
+  ?saved_state_handle:saved_state_handle ->
+  config_hash:string option ->
+  ignore_hh_version:bool ->
+  ignore_hhconfig:bool ->
+  use_prechecked_files:bool ->
+  Path.t ->
+  (native_load_result, error) result Future.t

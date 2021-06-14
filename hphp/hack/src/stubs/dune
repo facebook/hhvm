@@ -143,6 +143,7 @@
     xdb)
   (libraries
     artifact_store_stubs
+    config_state_loader
     hg
     server_monitor)
   (preprocess

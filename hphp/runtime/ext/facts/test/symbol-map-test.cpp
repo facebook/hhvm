@@ -1851,6 +1851,36 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   testMap(m2);
 }
 
+TEST_F(SymbolMapTest, GetFilesWithAttribute) {
+  auto& m1 = make("/var/www");
+
+  FileFacts ff1{
+      .m_attributes = {{.m_name = "A1", .m_args = {1}}},
+      .m_sha1hex = kSHA};
+  folly::fs::path p1{"some/path1.php"};
+  m1.update("", "1", {p1}, {}, {ff1});
+
+  auto testMap = [&p1](auto& m) {
+    auto files = m.getFilesWithAttribute("A1");
+    ASSERT_EQ(files.size(), 1);
+    EXPECT_EQ(files[0], p1.native());
+
+    auto attrs = m.getAttributesOfFile(Path{p1.native()});
+    ASSERT_EQ(attrs.size(), 1);
+    EXPECT_EQ(attrs[0].slice(), "A1");
+
+    auto args = m.getFileAttributeArgs(Path{p1.native()}, "A1");
+    ASSERT_EQ(args.size(), 1);
+    EXPECT_EQ(args[0], 1);
+  };
+  testMap(m1);
+
+  m1.waitForDBUpdate();
+  auto& m2 = make("/var/www");
+  m2.update("1", "1", {}, {}, {});
+  testMap(m2);
+}
+
 TEST_F(SymbolMapTest, TransitiveSubtypes) {
   auto& m1 = make("/var/www");
 

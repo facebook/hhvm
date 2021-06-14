@@ -228,6 +228,18 @@ template <typename S> struct SymbolMap {
   std::vector<MethodDecl<S>> getMethodsWithAttribute(const S& attr);
 
   /**
+   * Return the attributes of a file
+   */
+  std::vector<Symbol<S, SymKind::Type>> getAttributesOfFile(Path<S> path);
+
+  /**
+   * Return the files with a given attribute
+   */
+  std::vector<Path<S>>
+  getFilesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Path<S>> getFilesWithAttribute(const S& attr);
+
+  /**
    * Return the argument at the given position of a given type with a given
    * attribute.
    *
@@ -262,6 +274,11 @@ template <typename S> struct SymbolMap {
       Symbol<S, SymKind::Type> attribute);
   std::vector<folly::dynamic>
   getMethodAttributeArgs(const S& type, const S& method, const S& attribute);
+
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      Path<S> path,
+      Symbol<S, SymKind::Type> attribute);
+  std::vector<folly::dynamic> getFileAttributeArgs(Path<S> path, const S& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -458,6 +475,11 @@ template <typename S> struct SymbolMap {
      * Maps between methods and the attributes that decorate them.
      */
     AttributeMap<S, MethodDecl<S>> m_methodAttrs;
+
+    /**
+     * Maps between files and the attributes that decorate them.
+     */
+    AttributeMap<S, Path<S>> m_fileAttrs;
 
     /**
      * 40-byte hex strings representing the last-known SHA1 checksums of

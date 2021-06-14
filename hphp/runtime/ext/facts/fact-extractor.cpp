@@ -122,10 +122,11 @@ std::vector<TypeDetails> move_type_vec(folly::dynamic* types) {
 FileFacts make_file_facts(folly::dynamic facts) {
   try {
     return {
-        move_type_vec(facts.get_ptr("types")),
-        move_str_vec(facts.get_ptr("functions")),
-        move_str_vec(facts.get_ptr("constants")),
-        std::move(facts.at("sha1sum")).getString()};
+        .m_types = move_type_vec(facts.get_ptr("types")),
+        .m_functions = move_str_vec(facts.get_ptr("functions")),
+        .m_constants = move_str_vec(facts.get_ptr("constants")),
+        .m_attributes = move_attr_vec(facts.get_ptr("fileAttributes")),
+        .m_sha1hex = std::move(facts.at("sha1sum")).getString()};
   } catch (const folly::TypeError& e) {
     throw FactsExtractionExc{e.what()};
   }

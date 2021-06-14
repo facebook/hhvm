@@ -136,6 +136,7 @@ struct FileFacts {
   std::vector<TypeDetails> m_types;
   std::vector<std::string> m_functions;
   std::vector<std::string> m_constants;
+  std::vector<Attribute> m_attributes;
   std::string m_sha1hex;
 };
 

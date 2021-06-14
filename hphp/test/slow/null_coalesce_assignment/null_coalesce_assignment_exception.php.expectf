@@ -1,0 +1,23 @@
+-------- Dict ---------------------------------------------------
+string(44) "Out of bounds dict access: invalid index "a""
+string(42) "Out of bounds dict access: invalid index 1"
+--------- Vec --------------------------------------------------
+string(41) "Out of bounds vec access: invalid index 1"
+-------- Keyset ------------------------------------------------
+string(27) "Invalid operation on keyset"
+string(44) "Out of bounds keyset access: invalid index 2"
+string(27) "Invalid operation on keyset"
+-------- BaseL -------------------------------------------------
+string(21) "Undefined variable: a"
+string(23) "Promoting null to array"
+------- MutateConstProp ----------------------------------------
+string(60) "Cannot modify const property i of class A after construction"
+string(60) "Cannot modify const property d of class A after construction"
+string(60) "Cannot modify const property d of class A after construction"
+string(60) "Cannot modify const property d of class A after construction"
+string(61) "Cannot modify const property dd of class A after construction"
+------ Dim property does not exist -----------------------------
+string(25) "Undefined property: A::$g"
+string(34) "Setting a property on a non-object"
+----- Dim MW ---------------------------------------------------
+string(57) "Cannot use [] with dicts for reading in an lvalue context"

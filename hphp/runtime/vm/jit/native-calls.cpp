@@ -225,7 +225,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
     {LookupClsMethod,    lookupClsMethodHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {LookupClsRDS,       lookupClsRDS, DSSA, SNone, {{SSA, 0}}},
     {LookupClsCns,       lookupClsCns, DTV, SSync, {{SSA, 0}, {SSA, 1}}},
     {LookupClsCtxCns,    lookupClsCtxCns, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},

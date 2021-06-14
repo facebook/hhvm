@@ -726,7 +726,14 @@ inline Class* Class::lookup(const NamedEntity* ne) {
 }
 
 inline Class* Class::lookup(const StringData* name) {
-  return lookup(NamedEntity::get(name));
+  if (name->isSymbol()) {
+    if (auto const result = name->getCachedClass()) return result;
+  }
+  auto const result = lookup(NamedEntity::get(name));
+  if (name->isSymbol() && result && classHasPersistentRDS(result)) {
+    const_cast<StringData*>(name)->setCachedClass(result);
+  }
+  return result;
 }
 
 inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,

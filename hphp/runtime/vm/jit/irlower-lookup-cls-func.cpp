@@ -101,15 +101,22 @@ const Func* loadUnknownFuncHelper(const StringData* name,
   return func;
 }
 
+const Class* lookupCls(const StringData* sd) {
+  return Class::lookup(sd);
 }
 
-void cgLdCls(IRLS& env, const IRInstruction* inst) {
+void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
 
-  if (!RO::RepoAuthoritative) {
-    return implLdMeta<ClassCache>(env, inst, vmain(env), dst);
-  }
+  auto const fallback = [&](Vout& v, Vreg out) {
+    if (!lookup) return implLdMeta<ClassCache>(env, inst, v, out);
+    auto const args = argGroup(env, inst).ssa(0);
+    cgCallHelper(v, env, CallSpec::direct(lookupCls),
+                 callDest(out), SyncOptions::Sync, args);
+  };
+
+  if (!RO::RepoAuthoritative) return fallback(vmain(env), dst);
 
   auto& v = vmain(env);
   auto& vc = vcold(env);
@@ -138,11 +145,21 @@ void cgLdCls(IRLS& env, const IRInstruction* inst) {
   v << phijmp{done, v.makeTuple({cls1})};
 
   vc = then;
-  implLdMeta<ClassCache>(env, inst, vc, cls2);
+  fallback(vc, cls2);
   vc << phijmp{done, vc.makeTuple({cls2})};
 
   v = done;
   v << phidef{v.makeTuple({dst})};
+}
+
+}
+
+void cgLdCls(IRLS& env, const IRInstruction* inst) {
+  implLdOrLookupCls(env, inst, false);
+}
+
+void cgLookupClsRDS(IRLS& env, const IRInstruction* inst) {
+  implLdOrLookupCls(env, inst, true);
 }
 
 void cgLdFunc(IRLS& env, const IRInstruction* inst) {
@@ -344,8 +361,6 @@ void cgLdRecDescCachedSafe(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->extra<LdRecDescCachedSafe>()->recName;
   implLdCachedSafe<RecordDesc>(env, inst, name);
 }
-
-IMPL_OPCODE_CALL(LookupClsRDS)
 
 ///////////////////////////////////////////////////////////////////////////////
 

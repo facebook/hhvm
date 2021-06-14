@@ -407,9 +407,16 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->inst()->is(LdClsName) ||
-      inst->src(0)->inst()->is(LdLazyCls)) {
-    return inst->src(0)->inst()->src(0);
+  auto const str = inst->src(0);
+  auto const cls = inst->src(1);
+  if (str->inst()->is(LdClsName, LdLazyCls)) {
+    return str->inst()->src(0);
+  }
+  if (str->hasConstVal() && (cls->hasConstVal(TCls) || cls->isA(TNullptr))) {
+    auto const sval = str->strVal();
+    auto const cval = cls->hasConstVal(TCls) ? cls->clsVal() : nullptr;
+    auto const result = Class::lookupUniqueInContext(sval, cval, nullptr);
+    if (result) return cns(env, result);
   }
   return nullptr;
 }
@@ -1662,6 +1669,15 @@ SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
     }
   }
 
+  // If spec2 is an interface and we've assigned it a vtable slot, use that.
+  if (spec2.exact() && isInterface(cls2) && RO::RepoAuthoritative) {
+    auto const slot = cls2->preClass()->ifaceVtableSlot();
+    if (slot != kInvalidSlot) {
+      auto const data = InstanceOfIfaceVtableData{spec2.cls(), true};
+      return gen(env, InstanceOfIfaceVtable, data, ssatmp1);
+    }
+  }
+
   if (!spec1) return nullptr;
   auto const cls1 = spec1.cls();
 
@@ -1759,8 +1775,8 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto const cls2 = Class::lookupUniqueInContext(src2->strVal(),
-                                                     inst->ctx(), nullptr);
+  auto const cls2 = Class::lookupUniqueInContext(
+      src2->strVal(), inst->ctx(), nullptr);
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
@@ -3383,10 +3399,15 @@ SSATmp* simplifyLdLazyClsName(State& env, const IRInstruction* inst) {
     cns(env, src->lclsVal().name()) : nullptr;
 }
 
-SSATmp* simplifyLookupClsRDS(State& /*env*/, const IRInstruction* inst) {
-  auto const name = inst->src(0);
-  if (name->inst()->is(LdClsName)) {
-    return name->inst()->src(0);
+SSATmp* simplifyLookupClsRDS(State& env, const IRInstruction* inst) {
+  auto const str = inst->src(0);
+  if (str->inst()->is(LdClsName, LdLazyCls)) {
+    return str->inst()->src(0);
+  }
+  if (str->hasConstVal()) {
+    auto const sval = str->strVal();
+    auto const result = Class::lookupUniqueInContext(sval, nullptr, nullptr);
+    if (result) return cns(env, result);
   }
   return nullptr;
 }

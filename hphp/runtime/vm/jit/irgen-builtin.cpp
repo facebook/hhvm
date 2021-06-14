@@ -118,46 +118,43 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
-  if (params.size() != 3) return nullptr;
+  auto const nparams = params.size();
+  if (nparams != 2 && nparams != 3) return nullptr;
 
-  auto const allowClass  = params[2].value;
-  auto const cls_        = params[1].value;
-  auto const obj         = params[0].value;
+  auto const obj = params[0].value;
+  auto const cls = params[1].value;
+  auto const allowClass = nparams == 3 ? params[2].value : cns(env, false);
 
-  if (!obj->isA(TObj) ||
-      (!cls_->hasConstVal(TStr) && !cls_->isA(TCls)) ||
+  if (!obj->type().subtypeOfAny(TCls, TObj) ||
+      !cls->type().subtypeOfAny(TCls, TStr) ||
       !allowClass->isA(TBool)) {
     return nullptr;
   }
 
-  auto const objCls = gen(env, LdObjClass, obj);
+  auto const lhs = obj->isA(TObj) ? gen(env, LdObjClass, obj) : obj;
+  auto const rhs = cls->isA(TStr) ? gen(env, LookupClsRDS, cls) : cls;
 
-  SSATmp* testCls = nullptr;
-  if (cls_->isA(TStr)) {
-    auto const cls = lookupUniqueClass(env, cls_->strVal());
-    if (!cls) return nullptr;
-    testCls = cns(env, cls);
-  } else {
-    testCls = cls_;
-  }
-
-  // is_a() finishes here.
-  if (!subclassOnly) return gen(env, InstanceOf, objCls, testCls);
-
-  // is_subclass_of() needs to check that the LHS doesn't have the same class as
-  // as the RHS.
   return cond(
     env,
-    [&] (Block* taken) {
-      auto const eq = gen(env, EqCls, objCls, testCls);
-      gen(env, JmpNZero, taken, eq);
+    [&](Block* taken) {
+      return gen(env, CheckNonNull, taken, rhs);
     },
-    [&] {
-      return gen(env, InstanceOf, objCls, testCls);
+    [&](SSATmp* rhs) {
+      // is_a() finishes here.
+      if (!subclassOnly) return gen(env, InstanceOf, lhs, rhs);
+
+      // is_subclass_of() also needs to check that LHS and RHS don't match.
+      return cond(
+        env,
+        [&](Block* match) {
+          auto const eq = gen(env, EqCls, lhs, rhs);
+          gen(env, JmpNZero, match, eq);
+        },
+        [&]{ return gen(env, InstanceOf, lhs, rhs); },
+        [&]{ return cns(env, false); }
+      );
     },
-    [&] {
-      return cns(env, false);
-    }
+    [&]{ return cns(env, false); }
   );
 }
 

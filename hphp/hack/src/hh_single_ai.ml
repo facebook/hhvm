@@ -231,7 +231,7 @@ let parse_and_name ctx files_contents =
         end
       parsed_files
   in
-  Relative_path.Map.iter files_info (fun fn fileinfo ->
+  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
       let (errors, _failed_naming_fns) =
         Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
       in

@@ -234,7 +234,7 @@ let go
           Typing_deps.DepSet.union fanout_dependencies file_deps
         in
         ( fanout_dependencies,
-          Relative_path.Map.add explanations path explanation ))
+          Relative_path.Map.add explanations ~key:path ~data:explanation ))
   in
 
   (* We have the dependencies -- now traverse the dependency graph to get

@@ -43,7 +43,10 @@ let merge_input
   in
   let () = List.iter merge_worker input in
   let (edges_added : int) =
-    SharedMem.save_dep_table_sqlite db_name Build_id.build_revision false
+    SharedMem.save_dep_table_sqlite
+      db_name
+      Build_id.build_revision
+      ~replace_state_after_saving:false
   in
   Hh_logger.log "Edges added: %d" edges_added
 

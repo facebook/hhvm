@@ -905,7 +905,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
   let is_sealed (attr : Nast.user_attribute) =
     String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
   in
-  match List.find c.c_user_attributes is_sealed with
+  match List.find c.c_user_attributes ~f:is_sealed with
   | None -> ()
   | Some sealed_attr ->
     let iter_item (param : Nast.expr) =
@@ -926,7 +926,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
                   | Tapply ((_, name), _) -> String.equal name parent_name
                   | _ -> true
                 in
-                List.exists enum_ty.te_includes check
+                List.exists enum_ty.te_includes ~f:check
             else
               Cls.has_ancestor decl parent_name
           in
@@ -953,7 +953,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
       (* unit below is fine because error cases are handled as Parsing[1002] *)
       | _ -> ()
     in
-    List.iter sealed_attr.ua_params iter_item
+    List.iter sealed_attr.ua_params ~f:iter_item
 
 let check_parent_sealed
     ~(is_enum_class : bool) (child_pos, child_type) parent_type =

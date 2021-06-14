@@ -195,7 +195,7 @@ let get_state_path ~(env : env) : Path.t =
     state_path
 
 let make_incremental_state ~(env : env) : Incremental.state =
-  let state_path = get_state_path env in
+  let state_path = get_state_path ~env in
   Hh_logger.log "State path: %s" (Path.to_string state_path);
   Incremental.make_reference_implementation state_path
 
@@ -607,7 +607,7 @@ let clean_subcommand =
   let exits = Term.default_exits in
 
   let run env =
-    let state_path = get_state_path env in
+    let state_path = get_state_path ~env in
     Hh_logger.log "Deleting %s" (Path.to_string state_path);
     Sys_utils.rm_dir_tree (Path.to_string state_path)
   in

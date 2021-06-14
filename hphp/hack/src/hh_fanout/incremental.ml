@@ -232,8 +232,8 @@ class cursor ~client_id ~cursor_state =
           HashSet.iter fanout_files_deps ~f:(fun (dependent, dependency) ->
               Typing_deps.add_idep_directly_to_graph
                 self#get_deps_mode
-                dependent
-                dependency);
+                ~dependent
+                ~dependency);
           helper previous
       in
       helper cursor_state
@@ -384,7 +384,7 @@ class state ~state_path ~persistent_state =
 
     method make_client_id (client_config : client_config) : client_id =
       let client_id = Client_id client_config.client_id in
-      Hashtbl.set persistent_state.clients client_id client_config;
+      Hashtbl.set persistent_state.clients ~key:client_id ~data:client_config;
       client_id
 
     method make_default_cursor (client_id : client_id) : (cursor, string) result
@@ -430,7 +430,10 @@ class state ~state_path ~persistent_state =
         make_cursor_id !(persistent_state.max_cursor_id) client_config
       in
       incr persistent_state.max_cursor_id;
-      Hashtbl.set persistent_state.cursors cursor_id (client_id, cursor);
+      Hashtbl.set
+        persistent_state.cursors
+        ~key:cursor_id
+        ~data:(client_id, cursor);
       save_state ~state_path ~persistent_state;
       cursor_id
   end

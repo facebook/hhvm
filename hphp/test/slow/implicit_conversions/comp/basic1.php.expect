@@ -2965,7 +2965,7 @@ Err     Err     Err     Err     Err
 "" cmp object t5:
 Err     Err     Err     Err     Err
 "" cmp object xml:
-F       T       T       F       0
+Err     Err     Err     Err     Err
 "" cmp vector v1:
 Err     Err     Err     Err     Err
 "" cmp vector v2:
@@ -3179,7 +3179,7 @@ Err     Err     Err     Err     Err
 "0" cmp object t5:
 Err     Err     Err     Err     Err
 "0" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "0" cmp vector v1:
 Err     Err     Err     Err     Err
 "0" cmp vector v2:
@@ -3393,7 +3393,7 @@ Err     Err     Err     Err     Err
 "99" cmp object t5:
 Err     Err     Err     Err     Err
 "99" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "99" cmp vector v1:
 Err     Err     Err     Err     Err
 "99" cmp vector v2:
@@ -3607,7 +3607,7 @@ Err     Err     Err     Err     Err
 "-1" cmp object t5:
 Err     Err     Err     Err     Err
 "-1" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "-1" cmp vector v1:
 Err     Err     Err     Err     Err
 "-1" cmp vector v2:
@@ -3821,7 +3821,7 @@ Err     Err     Err     Err     Err
 "0.0" cmp object t5:
 Err     Err     Err     Err     Err
 "0.0" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "0.0" cmp vector v1:
 Err     Err     Err     Err     Err
 "0.0" cmp vector v2:
@@ -4035,7 +4035,7 @@ Err     Err     Err     Err     Err
 "99.0" cmp object t5:
 Err     Err     Err     Err     Err
 "99.0" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "99.0" cmp vector v1:
 Err     Err     Err     Err     Err
 "99.0" cmp vector v2:
@@ -4249,7 +4249,7 @@ Err     Err     Err     Err     Err
 "-1.0" cmp object t5:
 Err     Err     Err     Err     Err
 "-1.0" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "-1.0" cmp vector v1:
 Err     Err     Err     Err     Err
 "-1.0" cmp vector v2:
@@ -4463,7 +4463,7 @@ Err     Err     Err     Err     Err
 "foo" cmp object t5:
 Err     Err     Err     Err     Err
 "foo" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "foo" cmp vector v1:
 Err     Err     Err     Err     Err
 "foo" cmp vector v2:
@@ -4677,7 +4677,7 @@ Err     Err     Err     Err     Err
 "BAZ" cmp object t5:
 Err     Err     Err     Err     Err
 "BAZ" cmp object xml:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 "BAZ" cmp vector v1:
 Err     Err     Err     Err     Err
 "BAZ" cmp vector v2:
@@ -19501,23 +19501,23 @@ Err     Err     Err     Err     Err
 object xml cmp NAN:
 Err     Err     Err     Err     Err
 object xml cmp "":
-F       T       T       F       0
+Err     Err     Err     Err     Err
 object xml cmp "0":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "99":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "-1":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "0.0":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "99.0":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "-1.0":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "foo":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp "BAZ":
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 object xml cmp array arr1:
 Err     Err     Err     Err     Err
 object xml cmp array arr2:

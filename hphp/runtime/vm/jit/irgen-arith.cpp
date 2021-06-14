@@ -434,6 +434,7 @@ SSATmp* emitObjStrCmp(IRGS& env, Op op, SSATmp* obj, SSATmp* str) {
       // object into a string, and then do a string comparison.
       auto const converted = gen(env, ConvObjToStr, obj);
       auto const result = gen(env, toStrCmpOpcode(op), converted, str);
+      handleConvNoticeCmp(env, op, "object", "string");
       decRef(env, converted);
       return result;
     }

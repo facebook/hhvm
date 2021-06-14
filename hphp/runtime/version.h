@@ -12,7 +12,7 @@
 # define HHVM_VERSION_MAJOR 4
 # define HHVM_VERSION_MINOR 114
 # define HHVM_VERSION_PATCH 0
-# define HHVM_VERSION_SUFFIX "-dev"
+# define HHVM_VERSION_SUFFIX ""
 #endif
 
 /* HHVM_VERSION_ID minus the patch number

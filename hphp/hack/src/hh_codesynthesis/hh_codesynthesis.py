@@ -22,9 +22,36 @@ import sys
 from typing import List, Optional
 
 import clingo
+from clingo import Number, Symbol
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 from libfb.py import parutil
+
+
+class ClingoContext:
+    """Context class interact with Python and Clingo."""
+
+    number_of_nodes = 0
+    avg_width = 0
+    min_depth = 1
+    min_classes = 1
+    min_interfaces = 1
+
+    def n(self) -> Symbol:
+        return Number(self.number_of_nodes)
+
+    def w(self) -> Symbol:
+        return Number(self.avg_width)
+
+    def d(self) -> Symbol:
+        return Number(self.min_depth)
+
+    def c(self) -> Symbol:
+        return Number(self.min_classes)
+
+    def i(self) -> Symbol:
+        return Number(self.min_interfaces)
+
 
 # Extract logic rules from file format.
 def extract_logic_rules(lines: List[str]) -> List[str]:
@@ -69,7 +96,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 
 # Take in a dependency graph and a code generator to emit code.
 def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
-    # Logic programs
+    # Logic programs for code synthesis.
     asp_files = os.path.join(
         parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
     )
@@ -79,7 +106,7 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
     ctl.load(asp_files + "/dep_graph_reasoning.lp")
     ctl.add("base", [], "\n".join(additional_programs))
 
-    ctl.ground([("base", [])])
+    ctl.ground([("base", [])], context=ClingoContext())
     ctl.solve(on_model=generator.on_model)
 
 

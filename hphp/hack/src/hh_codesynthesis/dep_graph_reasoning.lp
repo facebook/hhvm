@@ -25,8 +25,8 @@ indirect_extends_to(X, Y) :- extends_to(X, Z), indirect_extends_to(Z, Y).
 
 % Later on, we can adjust these parameters to balance number of the classes
 % and number of interfaces we expect to synthesis.
-#const min_classes = 1.
-#const min_interfaces = 1.
+#const min_classes = @c().
+#const min_interfaces = @i().
 :- #count{X: class(X)} < min_classes.
 :- #count{X: interface(X)} < min_interfaces.
 

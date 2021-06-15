@@ -36,7 +36,6 @@ let is_private_visible env origin_id self_id =
           | Tapply ((_, name), _) -> String.equal origin_id name
           | _ -> false)
     in
-
     match Env.get_class env self_id with
     | Some cls
       when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait)
@@ -45,42 +44,37 @@ let is_private_visible env origin_id self_id =
       None
     | _ -> Some "You cannot access this member"
 
-let is_protected_visible env x self_id =
-  if String.equal x self_id then
+(* Is super_id an ancestor of sub_id, including through requires steps? *)
+let rec has_ancestor_including_req env sub_id super_id =
+  String.equal sub_id super_id
+  ||
+  match Env.get_class env sub_id with
+  | None -> false
+  | Some cls ->
+    Cls.has_ancestor cls super_id
+    ||
+    let bounds = Cls.upper_bounds_on_this cls in
+    List.exists bounds ~f:(fun ty ->
+        match get_node ty with
+        | Tapply ((_, name), _) -> has_ancestor_including_req env name super_id
+        | _ -> false)
+
+let is_protected_visible env origin_id self_id =
+  if has_ancestor_including_req env self_id origin_id then
     None
   else
-    let my_class = Env.get_class env self_id in
-    let their_class = Env.get_class env x in
-    match (my_class, their_class) with
-    | (Some my_class, Some their_class) ->
-      (* Children can call parent's protected methods and
-       * parents can call children's protected methods (like a
-       * constructor) *)
-      let make_tany _ = mk (Reason.Rnone, Typing_defs.make_tany ()) in
-      let my_class_ty =
-        Typing_make_type.class_type
-          Reason.Rnone
-          self_id
-          (List.map (Cls.tparams my_class) ~f:make_tany)
-      in
-      let their_class_ty =
-        Typing_make_type.class_type
-          Reason.Rnone
-          x
-          (List.map (Cls.tparams their_class) ~f:make_tany)
-      in
-      if
-        Typing_utils.is_sub_type env my_class_ty their_class_ty
-        || Cls.extends their_class self_id
-        || (not (Cls.members_fully_known my_class))
-        (* This is for the case where type generics are emitted *)
-        || Cls.has_ancestor my_class x
-      then
+    match Env.get_class env origin_id with
+    | None -> None
+    | Some origin_class ->
+      (* Parents can call direct children's protected methods
+       * (like a constructor)
+       *)
+      if Cls.extends origin_class self_id then
         None
       else
         Some
-          ("Cannot access this protected member, you don't extend " ^ strip_ns x)
-    | (_, _) -> None
+          ( "Cannot access this protected member, you don't extend "
+          ^ strip_ns origin_id )
 
 let is_private_visible_for_class env x self_id cid class_ =
   match cid with

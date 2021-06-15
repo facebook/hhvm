@@ -1,0 +1,1 @@
+Fatal error: D cannot inherit the type constant Ty from %rT|D%r, because it was previously inherited from C in %s/test/slow/constants/trait_type_constant_conflict.php on line 11

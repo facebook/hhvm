@@ -1,0 +1,1 @@
+Fatal error: D cannot inherit the constant X from T, because it was previously inherited from C in %s/test/slow/constants/trait_constant_conflict.php on line 11

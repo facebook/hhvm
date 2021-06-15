@@ -339,6 +339,8 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
+  gd.TraitConstantInterfaceBehavior =
+    RuntimeOption::EvalTraitConstantInterfaceBehavior;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -524,6 +526,7 @@ int main(int argc, char** argv) try {
   RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean it up.
   RO::EvalArrayProvenance                       = false; // TODO(kshaunak): Clean it up.
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
+  RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();

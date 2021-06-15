@@ -2281,28 +2281,54 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
       return;
     }
 
-    // Constants in interfaces implemented by traits don't fatal with constants
-    // in declInterfaces
-    if (isFromInterface) { return; }
+    if (RO::EvalTraitConstantInterfaceBehavior) {
+      if (existingConst.isAbstract()) {
+        // the case where the incoming constant is abstract without a default is covered above
+        // there are two remaining cases:
+        //   - the incoming constant is abstract with a default
+        //   - the incoming constant is concrete
+        // In both situations, the incoming constant should win, and separate bookkeeping will
+        // cover situations where there are multiple competing defaults.
+        existingConst.cls = tConst.cls;
+        existingConst.val = tConst.val;
+        return;
+      } else { // existing is concrete
+        // the existing constant will win over any incoming abstracts and retain a fatal when two
+        // concrete constants collide
+        if (!tConst.isAbstract() && existingConst.cls != tConst.cls) {
+          raise_error("%s cannot inherit the %s %s from %s, because "
+                      "it was previously inherited from %s",
+                      m_preClass->name()->data(),
+                      ConstModifiers::show(tConst.kind()),
+                      tConst.name->data(),
+                      tConst.cls->name()->data(),
+                      existingConst.cls->name()->data());
+        }
+      }
+    } else {
+      // Constants in interfaces implemented by traits don't fatal with constants
+      // in declInterfaces
+      if (isFromInterface) { return; }
 
-    // Type and Context constants in interfaces can be overriden.
-    if (tConst.kind() == ConstModifiers::Kind::Type ||
-        tConst.kind() == ConstModifiers::Kind::Context)  {
-      return;
-    }
-    if (existingConst.cls != tConst.cls) {
+      // Type and Context constants in interfaces can be overriden.
+      if (tConst.kind() == ConstModifiers::Kind::Type ||
+          tConst.kind() == ConstModifiers::Kind::Context)  {
+        return;
+      }
+      if (existingConst.cls != tConst.cls) {
 
-      // Constants in traits conflict with constants in declared interfaces
-      if (existingConst.cls->attrs() & AttrInterface) {
-        for (auto const& interface : m_declInterfaces) {
-          auto iface = existingConst.cls;
-          if (interface.get() == iface) {
-            raise_error("%s cannot inherit the %s %s, because "
-                        "it was previously inherited from %s",
-                        m_preClass->name()->data(),
-                        ConstModifiers::show(tConst.kind()),
-                        tConst.name->data(),
-                        existingConst.cls->name()->data());
+        // Constants in traits conflict with constants in declared interfaces
+        if (existingConst.cls->attrs() & AttrInterface) {
+          for (auto const& interface : m_declInterfaces) {
+            auto iface = existingConst.cls;
+            if (interface.get() == iface) {
+              raise_error("%s cannot inherit the %s %s, because "
+                          "it was previously inherited from %s",
+                          m_preClass->name()->data(),
+                          ConstModifiers::show(tConst.kind()),
+                          tConst.name->data(),
+                          existingConst.cls->name()->data());
+            }
           }
         }
       }

@@ -161,8 +161,8 @@ struct RepoGlobalData {
   /* Whether implicit coercions for bit ops trigger logs/exceptions */
   int32_t NoticeOnCoerceForBitOp = 0;
 
-  /* New behavior for inheritance of abstract type constants with defaults */
-  bool TypeconstInterfaceInheritanceDefaults = false;
+  /* Constants from traits behave like constants from interfaces (error on conflict) */
+  bool TraitConstantInterfaceBehavior = false;
 
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
@@ -215,7 +215,7 @@ struct RepoGlobalData {
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
       (NoticeOnCoerceForBitOp)
-      (TypeconstInterfaceInheritanceDefaults)
+      (TraitConstantInterfaceBehavior)
       (ConstantFunctions)
       ;
   }

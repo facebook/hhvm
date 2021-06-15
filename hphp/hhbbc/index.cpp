@@ -1708,19 +1708,24 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
         }
       }
 
-      // Constants from traits silently lose
-      if (fromTrait) {
-        removeNoOverride(cns);
-        return true;
+      if (!RO::EvalTraitConstantInterfaceBehavior) {
+        // Constants from traits silently lose
+        if (fromTrait) {
+          removeNoOverride(cns);
+          return true;
+        }
       }
 
-      if ((cns->cls->attrs & (AttrInterface)) && existing->isAbstract) {
+      if ((cns->cls->attrs & AttrInterface ||
+           (RO::EvalTraitConstantInterfaceBehavior && (cns->cls->attrs & AttrTrait))) &&
+          existing->isAbstract) {
         // because existing has val, this covers the case where it is abstract with default
         // allow incoming to win
       } else {
         // A constant from an interface or from an included enum collides
         // with an existing constant.
-        if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass)) {
+        if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass) ||
+            (RO::EvalTraitConstantInterfaceBehavior && (cns->cls->attrs & AttrTrait))) {
           ITRACE(
             2,
             "build_class_constants failed for `{}' because "
@@ -1754,16 +1759,32 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
     }
   }
 
-  for (uint32_t idx = 0; idx < cinfo->cls->constants.size(); ++idx) {
-    auto const cns = ClassInfo::ConstIndex { cinfo->cls, idx };
-    if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns);
-    if (!add(cns, false)) return false;
-  }
-
-  for (auto const trait : cinfo->usedTraits) {
-    for (auto const& cns : trait->clsConstants) {
-      if (!add(cns.second, true)) return false;
+  auto const addShallowConstants = [&]() {
+    for (uint32_t idx = 0; idx < cinfo->cls->constants.size(); ++idx) {
+      auto const cns = ClassInfo::ConstIndex { cinfo->cls, idx };
+      if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns);
+      if (!add(cns, false)) return false;
     }
+    return true;
+  };
+
+  auto const addTraitConstants = [&]() {
+    for (auto const trait : cinfo->usedTraits) {
+      for (auto const& cns : trait->clsConstants) {
+        if (!add(cns.second, true)) return false;
+      }
+    }
+    return true;
+  };
+
+  if (RO::EvalTraitConstantInterfaceBehavior) {
+    // trait constants must be inserted before constants shallowly declared on the class
+    // to match the interface semantics
+    if (!addTraitConstants()) return false;
+    if (!addShallowConstants()) return false;
+  } else {
+    if (!addShallowConstants()) return false;
+    if (!addTraitConstants()) return false;
   }
 
   for (auto const ienum : cinfo->includedEnums) {

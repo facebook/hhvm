@@ -1,0 +1,1 @@
+Fatal error: C cannot inherit the type constant T from T2, because it was previously inherited from I1 in %s/test/slow/constants/trait_interface_equivalence.php on line 13

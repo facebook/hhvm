@@ -3664,8 +3664,9 @@ void* takeCtx(NoCtx) {
 }
 
 template<bool dynamic, typename Ctx>
-void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               Ctx&& ctx, bool logAsDynamicCall = true, bool isCtor = false) {
+TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
+              const Func* func, Ctx&& ctx, bool logAsDynamicCall = true,
+              bool isCtor = false) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
@@ -3699,12 +3700,14 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
           jit::tc::ustubs().retHelper);
   pc = vmpc();
+  return nullptr;
 }
 
 const StaticString s___invoke("__invoke");
 
 // This covers both closures and functors.
-OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncObj(bool retToJit, PC origpc, PC& pc,
+                               const FCallArgs& fca) {
   assertx(tvIsObject(vmStack().topC()));
   auto obj = Object::attach(vmStack().topC()->m_data.pobj);
   vmStack().discard();
@@ -3718,9 +3721,9 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca) {
 
   if (func->isStaticInPrologue()) {
     obj.reset();
-    fcallImpl<false>(origpc, pc, fca, func, cls);
+    return fcallImpl<false>(retToJit, origpc, pc, fca, func, cls);
   } else {
-    fcallImpl<false>(origpc, pc, fca, func, std::move(obj));
+    return fcallImpl<false>(retToJit, origpc, pc, fca, func, std::move(obj));
   }
 }
 
@@ -3735,7 +3738,8 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca) {
  *   array(Class*, Func*),
  *   array(ObjectData*, Func*),
  */
-OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncArr(bool retToJit, PC origpc, PC& pc,
+                               const FCallArgs& fca) {
   assertx(tvIsArrayLike(vmStack().topC()));
   auto arr = Array::attach(vmStack().topC()->m_data.parr);
   vmStack().discard();
@@ -3755,11 +3759,11 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
   arr.reset();
 
   if (thisRC) {
-    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    fcallImpl<true>(origpc, pc, fca, func, cls);
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, cls);
   } else {
-    fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, NoCtx{});
   }
 }
 
@@ -3768,7 +3772,8 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
  *   'func_name'
  *   'class::method'
  */
-OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncStr(bool retToJit, PC origpc, PC& pc,
+                               const FCallArgs& fca) {
   assertx(tvIsString(vmStack().topC()));
   auto str = String::attach(vmStack().topC()->m_data.pstr);
   vmStack().discard();
@@ -3788,15 +3793,16 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
   str.reset();
 
   if (thisRC) {
-    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    fcallImpl<true>(origpc, pc, fca, func, cls);
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, cls);
   } else {
-    fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
+    return fcallImpl<true>(retToJit, origpc, pc, fca, func, NoCtx{});
   }
 }
 
-OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
+                                const FCallArgs& fca) {
   assertx(tvIsFunc(vmStack().topC()));
   auto func = vmStack().topC()->m_data.pfunc;
   vmStack().discard();
@@ -3805,10 +3811,11 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
     raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
+  return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
 }
 
-OPTBLD_INLINE void fcallFuncRFunc(PC origpc, PC& pc, FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
+                                 FCallArgs& fca) {
   assertx(tvIsRFunc(vmStack().topC()));
   auto const rfunc = vmStack().topC()->m_data.prfunc;
   auto const func = rfunc->m_func;
@@ -3816,10 +3823,12 @@ OPTBLD_INLINE void fcallFuncRFunc(PC origpc, PC& pc, FCallArgs& fca) {
   vmStack().pushArrayLike(rfunc->m_arr);
   decRefRFunc(rfunc);
 
-  fcallImpl<false>(origpc, pc, fca.withGenerics(), func, NoCtx{});
+  return
+    fcallImpl<false>(retToJit, origpc, pc, fca.withGenerics(), func, NoCtx{});
 }
 
-OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
+                                   const FCallArgs& fca) {
   assertx(tvIsClsMeth(vmStack().topC()));
   auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
   vmStack().discard();
@@ -3828,10 +3837,11 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   auto const cls = clsMeth->getCls();
   assertx(func && cls);
 
-  fcallImpl<false>(origpc, pc, fca, func, cls);
+  return fcallImpl<false>(retToJit, origpc, pc, fca, func, cls);
 }
 
-OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
+OPTBLD_INLINE TCA fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
+                                    const FCallArgs& fca) {
   assertx(tvIsRClsMeth(vmStack().topC()));
   auto const rclsMeth = vmStack().topC()->m_data.prclsmeth;
   auto const cls = rclsMeth->m_cls;
@@ -3840,7 +3850,7 @@ OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   vmStack().pushArrayLike(rclsMeth->m_arr);
   decRefRClsMeth(rclsMeth);
 
-  fcallImpl<false>(origpc, pc, fca.withGenerics(), func, cls);
+  return fcallImpl<false>(retToJit, origpc, pc, fca.withGenerics(), func, cls);
 }
 
 Func* resolveFuncImpl(Id id) {
@@ -3897,27 +3907,29 @@ OPTBLD_INLINE void iopResolveRFunc(Id id) {
   }
 }
 
-OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
+OPTBLD_INLINE TCA iopFCallFunc(bool retToJit, PC origpc, PC& pc,
+                               FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
-  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca);
-  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca);
-  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca);
-  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca);
-  if (isRFuncType(type)) return fcallFuncRFunc(origpc, pc, fca);
-  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca);
-  if (isRClsMethType(type)) return fcallFuncRClsMeth(origpc, pc, fca);
+  if (isObjectType(type)) return fcallFuncObj(retToJit, origpc, pc, fca);
+  if (isArrayLikeType(type)) return fcallFuncArr(retToJit, origpc, pc, fca);
+  if (isStringType(type)) return fcallFuncStr(retToJit, origpc, pc, fca);
+  if (isFuncType(type)) return fcallFuncFunc(retToJit, origpc, pc, fca);
+  if (isRFuncType(type)) return fcallFuncRFunc(retToJit, origpc, pc, fca);
+  if (isClsMethType(type)) return fcallFuncClsMeth(retToJit, origpc, pc, fca);
+  if (isRClsMethType(type)) return fcallFuncRClsMeth(retToJit, origpc, pc, fca);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+OPTBLD_INLINE TCA iopFCallFuncD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                                Id id) {
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
+  return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
 }
 
 namespace {
@@ -3926,8 +3938,8 @@ const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
 
 template<bool dynamic>
-void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
-                        StringData* methName) {
+TCA fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
+                       StringData* methName) {
   const Func* func;
   LookupResult res;
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -3962,7 +3974,8 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
-  fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj));
+  return
+    fcallImpl<dynamic>(retToJit, origpc, pc, fca, func, Object::attach(obj));
 }
 
 static void raise_resolve_non_object(const char* methodName,
@@ -4018,28 +4031,29 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
 
 } // namespace
 
-OPTBLD_INLINE void
-iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  ObjMethodOp op) {
+OPTBLD_INLINE TCA
+iopFCallObjMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                  const StringData*, ObjMethodOp op) {
   TypedValue* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
 
   StringData* methName = c1->m_data.pstr;
-  if (fcallObjMethodHandleInput(fca, op, methName, true)) return;
+  if (fcallObjMethodHandleInput(fca, op, methName, true)) return nullptr;
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
-  fcallObjMethodImpl<true>(origpc, pc, fca, methName);
+  return fcallObjMethodImpl<true>(retToJit, origpc, pc, fca, methName);
 }
 
-OPTBLD_INLINE void
-iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   ObjMethodOp op, const StringData* methName) {
-  if (fcallObjMethodHandleInput(fca, op, methName, false)) return;
+OPTBLD_INLINE TCA
+iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                   const StringData*, ObjMethodOp op,
+                   const StringData* methName) {
+  if (fcallObjMethodHandleInput(fca, op, methName, false)) return nullptr;
   auto const methNameC = const_cast<StringData*>(methName);
-  fcallObjMethodImpl<false>(origpc, pc, fca, methNameC);
+  return fcallObjMethodImpl<false>(retToJit, origpc, pc, fca, methNameC);
 }
 
 namespace {
@@ -4215,9 +4229,9 @@ OPTBLD_INLINE void iopResolveRClsMethodS(SpecialClsRef ref,
 namespace {
 
 template<bool dynamic>
-void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
-                        StringData* methName, bool forwarding,
-                        bool logAsDynamicCall = true) {
+TCA fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
+                       Class* cls, StringData* methName, bool forwarding,
+                       bool logAsDynamicCall = true) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
     if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
@@ -4251,7 +4265,8 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   }
 
   if (obj) {
-    fcallImpl<dynamic>(origpc, pc, fca, func, Object(obj), logAsDynamicCall);
+    return fcallImpl<dynamic>(
+      retToJit, origpc, pc, fca, func, Object(obj), logAsDynamicCall);
   } else {
     if (forwarding && ctx) {
       /* Propagate the current late bound class if there is one, */
@@ -4262,15 +4277,16 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
         cls = vmfp()->getClass();
       }
     }
-    fcallImpl<dynamic>(origpc, pc, fca, func, cls, logAsDynamicCall);
+    return fcallImpl<dynamic>(
+      retToJit, origpc, pc, fca, func, cls, logAsDynamicCall);
   }
 }
 
 } // namespace
 
-OPTBLD_INLINE void
-iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  IsLogAsDynamicCallOp op) {
+OPTBLD_INLINE TCA
+iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                  const StringData*, IsLogAsDynamicCallOp op) {
   auto const c1 = vmStack().topC();
   if (!isClassType(c1->m_type)) {
     raise_error("Attempting to use non-class in FCallClsMethod");
@@ -4288,14 +4304,13 @@ iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   assertx(cls && methName);
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
     RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
-  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, false,
-                           logAsDynamicCall);
+  return fcallClsMethodImpl<true>(
+    retToJit, origpc, pc, fca, cls, methName, false, logAsDynamicCall);
 }
 
-
-OPTBLD_INLINE void
-iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   Id classId, const StringData* methName) {
+OPTBLD_INLINE TCA
+iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                   const StringData*, Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Class::load(nep.second, nep.first);
@@ -4303,12 +4318,13 @@ iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
   auto const methNameC = const_cast<StringData*>(methName);
-  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, false);
+  return fcallClsMethodImpl<false>(
+    retToJit, origpc, pc, fca, cls, methNameC, false);
 }
 
-OPTBLD_INLINE void
-iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   SpecialClsRef ref) {
+OPTBLD_INLINE TCA
+iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                   const StringData*, SpecialClsRef ref) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4319,16 +4335,19 @@ iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd);
+  return fcallClsMethodImpl<true>(
+    retToJit, origpc, pc, fca, cls, methName, fwd);
 }
 
-OPTBLD_INLINE void
-iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                    SpecialClsRef ref, const StringData* methName) {
+OPTBLD_INLINE TCA
+iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                    const StringData*, SpecialClsRef ref,
+                    const StringData* methName) {
   auto const cls = specialClsRefToCls(ref);
   auto const methNameC = const_cast<StringData*>(methName);
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd);
+  return fcallClsMethodImpl<false>(
+    retToJit, origpc, pc, fca, cls, methNameC, fwd);
 }
 
 namespace {
@@ -4424,8 +4443,8 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   vmStack().pushObjectNoRc(this_);
 }
 
-OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
-                                const StringData*) {
+OPTBLD_INLINE TCA iopFCallCtor(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                               const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -4441,7 +4460,8 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
-  fcallImpl<false>(origpc, pc, fca, func, Object::attach(obj), true, true);
+  return fcallImpl<false>(
+    retToJit, origpc, pc, fca, func, Object::attach(obj), true, true);
 }
 
 OPTBLD_INLINE void iopLockObj() {
@@ -5459,30 +5479,41 @@ namespace {
  * iopWrapReturn() calls a function pointer and forwards its return value if it
  * returns TCA, or nullptr if returns void.
  * Some opcodes need the original PC by value, and some do not. We have wrappers
- * for both flavors.
+ * for both flavors. Some opcodes (FCall*) may want to return to the JIT in the
+ * middle of an instruction, so we pass the breakOnCtlFlow flag. When this flag
+ * is true in control flow instructions such as FCall*, we are guaranteed to
+ * use the returned TCA to return to the JIT and so it is safe to return in
+ * the middle of an instruction.
  */
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(void(fn)(Params...), PC, Args&&... args) {
+OPTBLD_INLINE TCA iopWrapReturn(void(fn)(Params...), bool, PC, Args&&... args) {
   fn(std::forward<Args>(args)...);
   return nullptr;
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(Params...), PC, Args&&... args) {
+OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(Params...), bool, PC, Args&&... args) {
   return fn(std::forward<Args>(args)...);
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
+OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), bool, PC origpc,
                                 Args&&... args) {
   fn(origpc, std::forward<Args>(args)...);
   return nullptr;
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(PC, Params...), PC origpc,
+OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(PC, Params...), bool, PC origpc,
                                 Args&&... args) {
   return fn(origpc, std::forward<Args>(args)...);
+}
+
+template<typename... Params, typename... Args>
+OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(bool, PC, Params...),
+                                bool breakOnCtlFlow, PC origpc,
+                                Args&&... args) {
+  return fn(breakOnCtlFlow, origpc, std::forward<Args>(args)...);
 }
 
 /*
@@ -5552,11 +5583,13 @@ struct litstr_id {
 #define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
 #define O(name, imm, in, out, flags)                                 \
+  template<bool breakOnCtlFlow>                                      \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
-    UNUSED auto const op = Op::name;                                 \
+    UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
-    return iopWrapReturn(iop##name, origpc FLAG_##flags PASS_##imm); \
+    return iopWrapReturn(                                            \
+      iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);    \
   }
 OPCODES
 
@@ -5635,7 +5668,7 @@ OPCODES
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
   assertx(peek_op(pc) == Op::opcode);                                   \
   pc += encoded_op_size(Op::opcode);                                    \
-  auto const retAddr = iopWrap##opcode(pc);                             \
+  auto const retAddr = iopWrap##opcode<true>(pc);                       \
   vmpc() = pc;                                                          \
   COND_STACKTRACE("op"#opcode" post: ");                                \
   condStackTraceSep(Op##opcode);                                        \
@@ -5768,7 +5801,7 @@ TCA dispatchImpl() {
     if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
-    retAddr = iopWrap##name(pc);                              \
+    retAddr = iopWrap##name<breakOnCtlFlow>(pc);              \
     vmpc() = pc;                                              \
     if (isFCallFunc(Op::name) ||                              \
         Op::name == Op::NativeImpl) {                         \
@@ -5991,7 +6024,7 @@ PcPair opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(tl, modes, returnaddr);\
   return run<Op::opcode,true>(returnaddr, modes, tl, nextpc, pc,\
       [](PC& pc) {\
-    return iopWrap##opcode(pc);\
+    return iopWrap##opcode<false>(pc);\
   });\
 }
 OPCODES
@@ -6003,7 +6036,7 @@ PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(tl, modes, returnaddr);\
   return run<Op::opcode,false>(returnaddr, modes, tl, nextpc, pc,\
       [](PC& pc) {\
-    return iopWrap##opcode(pc);\
+    return iopWrap##opcode<false>(pc);\
   });\
 }
 OPCODES

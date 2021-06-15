@@ -126,12 +126,12 @@ class HackCodeGenerator(CodeGenerator):
         #   First pass creates individual nodes like class, interface.
         for predicate in predicates:
             if predicate.name in node_func:
-                node_func[predicate.name](predicate.arguments[0].name.upper())
+                node_func[predicate.name](predicate.arguments[0].string)
 
         #   Second pass creates edge between two nodes.
         for predicate in predicates:
             if predicate.name in edge_func:
                 edge_func[predicate.name](
-                    predicate.arguments[0].name.upper(),
-                    predicate.arguments[1].name.upper(),
+                    predicate.arguments[0].string,
+                    predicate.arguments[1].string,
                 )

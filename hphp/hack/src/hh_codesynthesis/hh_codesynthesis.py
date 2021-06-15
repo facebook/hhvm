@@ -51,7 +51,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         # ToDo: Dict{"lhs[0]": "function to convert"} for later extension.
         if lhs[0] == "Extends":
             # Collecting symbols.
-            symbols.add(lhs[1].lower())
+            symbols.add(f'"{lhs[1]}"')
             # Processing each deps ["Type B", "Type C", "Type D"]
             for dep in rhs.rstrip("\n").split(","):
                 # dep = "Type X"
@@ -60,10 +60,8 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
                     # ToDo: Add logging if we needed to track wrong format on rhs.
                     continue
                 (dep_type, dep_symbol) = dep
-                symbols.add(dep_symbol.lower())
-                rules.append(
-                    "extends_to({}, {}).".format(lhs[1].lower(), dep_symbol.lower())
-                )
+                symbols.add(f'"{dep_symbol}"')
+                rules.append(f'extends_to("{lhs[1]}", "{dep_symbol}").')
 
     rules.append("symbols({}).".format(";".join(sorted(symbols))))
     return rules

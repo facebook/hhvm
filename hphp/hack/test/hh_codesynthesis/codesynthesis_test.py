@@ -15,10 +15,10 @@ from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
 class ExtractLogicRulesTest(unittest.TestCase):
     def test_wrong_format(self) -> None:
         exp = [
-            "extends_to(a, b).",
-            "extends_to(i, b).",
-            "extends_to(t, a).",
-            "symbols(a;b;i;t).",
+            'extends_to("A", "B").',
+            'extends_to("I", "B").',
+            'extends_to("T", "A").',
+            'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B
@@ -33,13 +33,13 @@ Type T -> Type A, Type B"""
 
     def test_multiple_lines(self) -> None:
         exp = [
-            "extends_to(i1, c1).",
-            "extends_to(i1, c2).",
-            "extends_to(i1, c3).",
-            "extends_to(i1, i2).",
-            "extends_to(i3, c4).",
-            "extends_to(i4, c5).",
-            "symbols(c1;c2;c3;c4;c5;i1;i2;i3;i4).",
+            'extends_to("I1", "C1").',
+            'extends_to("I1", "C2").',
+            'extends_to("I1", "C3").',
+            'extends_to("I1", "I2").',
+            'extends_to("I3", "C4").',
+            'extends_to("I4", "C5").',
+            'symbols("C1";"C2";"C3";"C4";"C5";"I1";"I2";"I3";"I4").',
         ]
         deps = """\
 Extends I1 -> Type C1, Type C2, Type C3, Type I2
@@ -64,25 +64,25 @@ Extends I4 -> Type C5,
     def test_multiple_lines_all(self) -> None:
         # T92303034 Temporary handle for the multiple lines using replace(",\n", ","),
         exp = [
-            "extends_to(i1, c1).",
-            "extends_to(i1, c2).",
-            "extends_to(i1, c3).",
-            "extends_to(i1, i2).",
-            "extends_to(i3, c4).",
-            "extends_to(i3, c6).",
-            "extends_to(i3, i5).",
-            "extends_to(i3, i6).",
-            "extends_to(i3, i7).",
-            "extends_to(i3, i8).",
-            "extends_to(i4, c5).",
-            "extends_to(i4, c6).",
-            "extends_to(i4, i9).",
-            "extends_to(i4, i10).",
-            "extends_to(i4, i11).",
-            "extends_to(i4, i12).",
-            "extends_to(i4, i13).",
-            "extends_to(i4, i14).",
-            "symbols(c1;c2;c3;c4;c5;c6;i1;i10;i11;i12;i13;i14;i2;i3;i4;i5;i6;i7;i8;i9).",
+            'extends_to("I1", "C1").',
+            'extends_to("I1", "C2").',
+            'extends_to("I1", "C3").',
+            'extends_to("I1", "I2").',
+            'extends_to("I3", "C4").',
+            'extends_to("I3", "C6").',
+            'extends_to("I3", "I5").',
+            'extends_to("I3", "I6").',
+            'extends_to("I3", "I7").',
+            'extends_to("I3", "I8").',
+            'extends_to("I4", "C5").',
+            'extends_to("I4", "C6").',
+            'extends_to("I4", "I9").',
+            'extends_to("I4", "I10").',
+            'extends_to("I4", "I11").',
+            'extends_to("I4", "I12").',
+            'extends_to("I4", "I13").',
+            'extends_to("I4", "I14").',
+            'symbols("C1";"C2";"C3";"C4";"C5";"C6";"I1";"I10";"I11";"I12";"I13";"I14";"I2";"I3";"I4";"I5";"I6";"I7";"I8";"I9").',
         ]
         deps = """\
 Extends I1 -> Type C1, Type C2, Type C3, Type I2
@@ -107,10 +107,10 @@ Extends I4 -> Type C5,
 
     def test_extends_dependency(self) -> None:
         exp = [
-            "extends_to(a, b).",
-            "extends_to(i, b).",
-            "extends_to(t, a).",
-            "symbols(a;b;i;t).",
+            'extends_to("A", "B").',
+            'extends_to("I", "B").',
+            'extends_to("T", "A").',
+            'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B
@@ -135,30 +135,30 @@ class DoReasoningTest(unittest.TestCase):
 
     def test_extends_dependency(self) -> None:
         exp = [
-            "class(b)",
-            "class(i)",
-            "extends(a,t)",
-            "extends(b,i)",
-            "extends_to(a,b)",
-            "extends_to(i,b)",
-            "extends_to(t,a)",
-            "implements(b,a)",
-            "indirect_extends_to(a,b)",
-            "indirect_extends_to(i,b)",
-            "indirect_extends_to(t,a)",
-            "indirect_extends_to(t,b)",
-            "interface(a)",
-            "interface(t)",
-            "symbols(a)",
-            "symbols(b)",
-            "symbols(i)",
-            "symbols(t)",
+            'class("B")',
+            'class("I")',
+            'extends("A","T")',
+            'extends("B","I")',
+            'extends_to("A","B")',
+            'extends_to("I","B")',
+            'extends_to("T","A")',
+            'implements("B","A")',
+            'indirect_extends_to("A","B")',
+            'indirect_extends_to("I","B")',
+            'indirect_extends_to("T","A")',
+            'indirect_extends_to("T","B")',
+            'interface("A")',
+            'interface("T")',
+            'symbols("A")',
+            'symbols("B")',
+            'symbols("I")',
+            'symbols("T")',
         ]
         rules = [
-            "extends_to(a, b).",
-            "extends_to(i, b).",
-            "extends_to(t, a).",
-            "symbols(a;b;i;t).",
+            'extends_to("A", "B").',
+            'extends_to("I", "B").',
+            'extends_to("T", "A").',
+            'symbols("A";"B";"I";"T").',
         ]
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
@@ -166,24 +166,24 @@ class DoReasoningTest(unittest.TestCase):
 
     def test_extends_dependency_with_rule_extraction(self) -> None:
         exp = [
-            "class(b)",
-            "class(i)",
-            "extends(a,t)",
-            "extends(b,i)",
-            "extends_to(a,b)",
-            "extends_to(i,b)",
-            "extends_to(t,a)",
-            "implements(b,a)",
-            "indirect_extends_to(a,b)",
-            "indirect_extends_to(i,b)",
-            "indirect_extends_to(t,a)",
-            "indirect_extends_to(t,b)",
-            "interface(a)",
-            "interface(t)",
-            "symbols(a)",
-            "symbols(b)",
-            "symbols(i)",
-            "symbols(t)",
+            'class("B")',
+            'class("I")',
+            'extends("A","T")',
+            'extends("B","I")',
+            'extends_to("A","B")',
+            'extends_to("I","B")',
+            'extends_to("T","A")',
+            'implements("B","A")',
+            'indirect_extends_to("A","B")',
+            'indirect_extends_to("I","B")',
+            'indirect_extends_to("T","A")',
+            'indirect_extends_to("T","B")',
+            'interface("A")',
+            'interface("T")',
+            'symbols("A")',
+            'symbols("B")',
+            'symbols("I")',
+            'symbols("T")',
         ]
         deps = """\
 Extends A -> Type B
@@ -209,10 +209,10 @@ interface A extends T {}
 interface T  {}
 """
         rules = [
-            "extends_to(a, b).",
-            "extends_to(i, b).",
-            "extends_to(t, a).",
-            "symbols(a;b;i;t).",
+            'extends_to("A", "B").',
+            'extends_to("I", "B").',
+            'extends_to("T", "A").',
+            'symbols("A";"B";"I";"T").',
         ]
         hack_codegen = hackGenerator.HackCodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=hack_codegen)
@@ -245,10 +245,10 @@ Type T -> Type A, Type B
 class ReadFromFileTest(unittest.TestCase):
     def test_read(self) -> None:
         exp = [
-            "extends_to(a, b).",
-            "extends_to(i, b).",
-            "extends_to(t, a).",
-            "symbols(a;b;i;t).",
+            'extends_to("A", "B").',
+            'extends_to("I", "B").',
+            'extends_to("T", "A").',
+            'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B

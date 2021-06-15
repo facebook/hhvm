@@ -1,12 +1,12 @@
-File "rewritten_tparams.php", line 7, characters 3-12:
+File "rewritten_tparams.php", line 11, characters 3-12:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
-  File "rewritten_tparams.php", line 6, characters 2-16:
+  File "rewritten_tparams.php", line 10, characters 2-16:
   The local (enclosing) context provides the capability set {$v::C, ctx $f}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "rewritten_tparams.php", line 11, characters 10-11:
+File "rewritten_tparams.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
-  File "rewritten_tparams.php", line 10, characters 33-35:
+  File "rewritten_tparams.php", line 14, characters 26-28:
   Expected `int`
-  File "rewritten_tparams.php", line 10, characters 21-22:
-  But got `vec<int>`
+  File "rewritten_tparams.php", line 14, characters 14-15:
+  But got `P`

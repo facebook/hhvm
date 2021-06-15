@@ -1,8 +1,8 @@
-File "inout.php", line 6, characters 11-12:
+File "inout.php", line 8, characters 11-12:
 Invalid assignment to an `inout` parameter (Typing[4337])
-  File "inout.php", line 5, characters 27-28:
-  Expected `~vec<int>` (`inout` parameter)
-  File "inout.php", line 3, characters 18-25:
-  But got `vec<int>`
-File "inout.php", line 6, characters 11-12:
+  File "inout.php", line 7, characters 20-21:
+  Expected `~V` (`inout` parameter)
+  File "inout.php", line 5, characters 18-18:
+  But got `V`
+File "inout.php", line 8, characters 11-12:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

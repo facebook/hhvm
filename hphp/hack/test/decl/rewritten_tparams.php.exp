@@ -1,145 +1,110 @@
-[("\\f",
-  (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_internal = false;
-       fe_type =
-       (Rwitness_from_decl ([3:10-11]),
-        (Tfun
-           { ft_arity = (Fstandard ());
-             ft_tparams =
-             [{ Typing_defs_core.tp_variance = Invariant;
-                tp_name = ([4:16-17], "Tctx$f"); tp_tparams = [];
-                tp_constraints = []; tp_reified = Erased;
-                tp_user_attributes = [] };
-               { Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([5:12-14], "T$v"); tp_tparams = [];
-                 tp_constraints =
-                 [(Constraint_as,
-                   (Rhint ([5:3-11]),
-                    (Tapply (([5:3-6], "\\HH\\vec"),
-                       [(Rhint ([5:7-10]), (Tprim Tint))]))))
-                   ];
-                 tp_reified = Erased; tp_user_attributes = [] };
-               { Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([6:11-16], "T$v@C"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
-               ];
-             ft_where_constraints =
-             [((Rhint ([6:11-16]), (Tgeneric ("T$v@C", []))), Constraint_eq,
-               (Rhint ([6:11-16]),
-                (Taccess
-                   ((Rhint ([6:11-16]), (Tgeneric ("T$v", []))),
-                    [([6:15-16], "C")]))))
-               ];
-             ft_params =
-             [{ fp_pos = [4:26-28]; fp_name = (Some "$f");
-                fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([4:3-25]),
-                   (Tfun
-                      { ft_arity = (Fstandard ()); ft_tparams = [];
-                        ft_where_constraints = []; ft_params = [];
-                        ft_implicit_params =
-                        { capability =
-                          (CapTy (Rhint ([4:16-17]),
-                                  (Tgeneric ("Tctx$f", []))))
-                          };
-                        ft_ret =
-                        { et_enforced = Typing_defs_core.Unenforced;
-                          et_type = (Rhint ([4:20-24]), (Tprim Tvoid)) };
-                        ft_flags =
-                        (make_ft_flags FSync ~return_disposable:false
-                          ~returns_readonly:false ~readonly_this:false);
-                        ft_ifc_decl = FDPolicied {PUBLIC} }))
-                  };
-                fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~via_label:false ~readonly:false);
-                 };
-               { fp_pos = [5:12-14]; fp_name = (Some "$v");
-                 fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([5:12-14]), (Tgeneric ("T$v", []))) };
-                 fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~via_label:false ~readonly:false);
-                  }
-               ];
-             ft_implicit_params =
-             { capability =
-               (CapTy (Rhint ([6:2-17]),
-                       (Tintersection
-                          [(Rhint ([6:3-9]), (Tgeneric ("Tctx$f", [])));
-                            (Rhint ([6:11-16]), (Tgeneric ("T$v@C", [])))])))
-               };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([6:19-23]), (Tprim Tvoid)) };
-             ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [3:10-11]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
-  ("\\g",
+[("\\P",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_module = None; sc_name = ([3:13-14], "\\P"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts =
+       [{ Shallow_decl_defs.stc_name = ([4:13-14], "C");
+          stc_kind =
+          (Typing_defs.TCConcrete
+             { Typing_defs.tc_type = (Rhint ([4:17-19]), (Tintersection []))
+               });
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None;
+          stc_is_ctx = true }
+         ];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None }));
+  ("\\f",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_internal = false;
         fe_type =
-        (Rwitness_from_decl ([10:10-11]),
+        (Rwitness_from_decl ([7:10-11]),
          (Tfun
             { ft_arity = (Fstandard ());
               ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([10:21-23], "T$v"); tp_tparams = [];
-                 tp_constraints =
-                 [(Constraint_as,
-                   (Rhint ([10:12-20]),
-                    (Tapply (([10:12-15], "\\HH\\vec"),
-                       [(Rhint ([10:16-19]), (Tprim Tint))]))))
-                   ];
-                 tp_reified = Erased; tp_user_attributes = [] };
+                 tp_name = ([8:16-17], "Tctx$f"); tp_tparams = [];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([10:25-30], "T$v@C"); tp_tparams = [];
+                  tp_name = ([9:5-7], "T$v"); tp_tparams = [];
+                  tp_constraints =
+                  [(Constraint_as,
+                    (Rhint ([9:3-4]), (Tapply (([9:3-4], "\\P"), []))))];
+                  tp_reified = Erased; tp_user_attributes = [] };
+                { Typing_defs_core.tp_variance = Invariant;
+                  tp_name = ([10:11-16], "T$v@C"); tp_tparams = [];
                   tp_constraints = []; tp_reified = Erased;
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([10:25-30]), (Tgeneric ("T$v@C", []))),
+              [((Rhint ([10:11-16]), (Tgeneric ("T$v@C", []))),
                 Constraint_eq,
-                (Rhint ([10:25-30]),
+                (Rhint ([10:11-16]),
                  (Taccess
-                    ((Rhint ([10:25-30]), (Tgeneric ("T$v", []))),
-                     [([10:29-30], "C")]))))
+                    ((Rhint ([10:11-16]), (Tgeneric ("T$v", []))),
+                     [([10:15-16], "C")]))))
                 ];
               ft_params =
-              [{ fp_pos = [10:21-23]; fp_name = (Some "$v");
+              [{ fp_pos = [8:26-28]; fp_name = (Some "$f");
                  fp_type =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([10:21-23]), (Tgeneric ("T$v", []))) };
+                   et_type =
+                   (Rhint ([8:3-25]),
+                    (Tfun
+                       { ft_arity = (Fstandard ()); ft_tparams = [];
+                         ft_where_constraints = []; ft_params = [];
+                         ft_implicit_params =
+                         { capability =
+                           (CapTy (Rhint ([8:16-17]),
+                                   (Tgeneric ("Tctx$f", []))))
+                           };
+                         ft_ret =
+                         { et_enforced = Typing_defs_core.Unenforced;
+                           et_type = (Rhint ([8:20-24]), (Tprim Tvoid)) };
+                         ft_flags =
+                         (make_ft_flags FSync ~return_disposable:false
+                           ~returns_readonly:false ~readonly_this:false);
+                         ft_ifc_decl = FDPolicied {PUBLIC} }))
+                   };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
                    ~ifc_can_call:false ~via_label:false ~readonly:false);
-                  }
+                  };
+                { fp_pos = [9:5-7]; fp_name = (Some "$v");
+                  fp_type =
+                  { et_enforced = Typing_defs_core.Unenforced;
+                    et_type = (Rhint ([9:5-7]), (Tgeneric ("T$v", []))) };
+                  fp_flags =
+                  (make_fp_flags ~accept_disposable:false ~has_default:false
+                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                    ~ifc_can_call:false ~via_label:false ~readonly:false);
+                   }
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([10:25-30]), (Tgeneric ("T$v@C", [])))) };
+                (CapTy (Rhint ([10:2-17]),
+                        (Tintersection
+                           [(Rhint ([10:3-9]), (Tgeneric ("Tctx$f", [])));
+                             (Rhint ([10:11-16]), (Tgeneric ("T$v@C", [])))])))
+                };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([10:33-36]), (Tprim Tint)) };
+                et_type = (Rhint ([10:19-23]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [10:10-11]; fe_php_std_lib = false;
+        fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
-  ("\\h",
+  ("\\g",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_internal = false;
@@ -149,50 +114,98 @@
             { ft_arity = (Fstandard ());
               ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([15:17-18], "Tctx$f"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] };
+                 tp_name = ([14:14-16], "T$v"); tp_tparams = [];
+                 tp_constraints =
+                 [(Constraint_as,
+                   (Rhint ([14:12-13]), (Tapply (([14:12-13], "\\P"), []))))];
+                 tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([16:13-15], "T$v"); tp_tparams = [];
-                  tp_constraints =
-                  [(Constraint_as,
-                    (Rhint ([16:4-12]),
-                     (Tapply (([16:4-7], "\\HH\\vec"),
-                        [(Rhint ([16:8-11]), (Tprim Tint))]))))
-                    ];
-                  tp_reified = Erased; tp_user_attributes = [] };
-                { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([17:11-16], "T$v@C"); tp_tparams = [];
+                  tp_name = ([14:18-23], "T$v@C"); tp_tparams = [];
                   tp_constraints = []; tp_reified = Erased;
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([17:11-16]), (Tgeneric ("T$v@C", []))),
+              [((Rhint ([14:18-23]), (Tgeneric ("T$v@C", []))),
                 Constraint_eq,
-                (Rhint ([17:11-16]),
+                (Rhint ([14:18-23]),
                  (Taccess
-                    ((Rhint ([17:11-16]), (Tgeneric ("T$v", []))),
-                     [([17:15-16], "C")]))))
+                    ((Rhint ([14:18-23]), (Tgeneric ("T$v", []))),
+                     [([14:22-23], "C")]))))
                 ];
               ft_params =
-              [{ fp_pos = [15:27-29]; fp_name = (Some "$f");
+              [{ fp_pos = [14:14-16]; fp_name = (Some "$v");
+                 fp_type =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([14:14-16]), (Tgeneric ("T$v", []))) };
+                 fp_flags =
+                 (make_fp_flags ~accept_disposable:false ~has_default:false
+                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (CapTy (Rhint ([14:18-23]), (Tgeneric ("T$v@C", [])))) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([14:26-29]), (Tprim Tint)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [14:10-11]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }));
+  ("\\h",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([18:10-11]),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams =
+              [{ Typing_defs_core.tp_variance = Invariant;
+                 tp_name = ([19:17-18], "Tctx$f"); tp_tparams = [];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] };
+                { Typing_defs_core.tp_variance = Invariant;
+                  tp_name = ([20:6-8], "T$v"); tp_tparams = [];
+                  tp_constraints =
+                  [(Constraint_as,
+                    (Rhint ([20:4-5]), (Tapply (([20:4-5], "\\P"), []))))];
+                  tp_reified = Erased; tp_user_attributes = [] };
+                { Typing_defs_core.tp_variance = Invariant;
+                  tp_name = ([21:11-16], "T$v@C"); tp_tparams = [];
+                  tp_constraints = []; tp_reified = Erased;
+                  tp_user_attributes = [] }
+                ];
+              ft_where_constraints =
+              [((Rhint ([21:11-16]), (Tgeneric ("T$v@C", []))),
+                Constraint_eq,
+                (Rhint ([21:11-16]),
+                 (Taccess
+                    ((Rhint ([21:11-16]), (Tgeneric ("T$v", []))),
+                     [([21:15-16], "C")]))))
+                ];
+              ft_params =
+              [{ fp_pos = [19:27-29]; fp_name = (Some "$f");
                  fp_type =
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
-                   (Rhint ([15:3-26]),
+                   (Rhint ([19:3-26]),
                     (Toption
-                       (Rhint ([15:4-26]),
+                       (Rhint ([19:4-26]),
                         (Tfun
                            { ft_arity = (Fstandard ()); ft_tparams = [];
                              ft_where_constraints = []; ft_params = [];
                              ft_implicit_params =
                              { capability =
-                               (CapTy (Rhint ([15:17-18]),
+                               (CapTy (Rhint ([19:17-18]),
                                        (Tgeneric ("Tctx$f", []))))
                                };
                              ft_ret =
                              { et_enforced = Typing_defs_core.Unenforced;
-                               et_type = (Rhint ([15:21-25]), (Tprim Tvoid))
+                               et_type = (Rhint ([19:21-25]), (Tprim Tvoid))
                                };
                              ft_flags =
                              (make_ft_flags FSync ~return_disposable:false
@@ -204,12 +217,12 @@
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
                    ~ifc_can_call:false ~via_label:false ~readonly:false);
                   };
-                { fp_pos = [16:13-15]; fp_name = (Some "$v");
+                { fp_pos = [20:6-8]; fp_name = (Some "$v");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type =
-                    (Rhint ([16:3-12]),
-                     (Toption (Rhint ([16:13-15]), (Tgeneric ("T$v", [])))))
+                    (Rhint ([20:3-5]),
+                     (Toption (Rhint ([20:6-8]), (Tgeneric ("T$v", [])))))
                     };
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -219,19 +232,19 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([17:2-17]),
+                (CapTy (Rhint ([21:2-17]),
                         (Tintersection
-                           [(Rhint ([17:3-9]), (Tgeneric ("Tctx$f", [])));
-                             (Rhint ([17:11-16]), (Tgeneric ("T$v@C", [])))])))
+                           [(Rhint ([21:3-9]), (Tgeneric ("Tctx$f", [])));
+                             (Rhint ([21:11-16]), (Tgeneric ("T$v@C", [])))])))
                 };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([17:19-23]), (Tprim Tvoid)) };
+                et_type = (Rhint ([21:19-23]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [14:10-11]; fe_php_std_lib = false;
+        fe_pos = [18:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))
   ]
 

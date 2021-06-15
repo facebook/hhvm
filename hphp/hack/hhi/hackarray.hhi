@@ -17,7 +17,7 @@ namespace HH {
  */
 <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
 abstract class AnyArray<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {
-  const ctx CMut = [];
+
 }
 
 <<__SupportDynamicType>>

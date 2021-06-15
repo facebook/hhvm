@@ -1,12 +1,16 @@
 <?hh
 
+final class P {
+  const ctx C = [];
+}
+
 function f(
   (function ()[_]: void) $f,
-  vec<int> $v
+  P $v
 )[ctx $f, $v::C]: void {
   print "hi";
 }
 
-function g(vec<int> $v)[$v::C]: int {
+function g(P $v)[$v::C]: int {
   return $v;
 }

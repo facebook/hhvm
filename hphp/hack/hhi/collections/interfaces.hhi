@@ -14,7 +14,7 @@ namespace {
  */
 <<__Sealed(Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection<+Te> extends HH\Rx\Countable {
-  const ctx CMut = [write_props];
+
   /**
    * Is the collection empty?
    *

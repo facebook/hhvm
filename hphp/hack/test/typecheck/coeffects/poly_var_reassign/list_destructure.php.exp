@@ -1,2 +1,2 @@
-File "list_destructure.php", line 4, characters 3-19:
+File "list_destructure.php", line 6, characters 3-25:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

@@ -1,2 +1,2 @@
-File "catch.php", line 6, characters 22-23:
+File "catch.php", line 8, characters 22-23:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

@@ -25,20 +25,22 @@ function fun_improper_form(
   ctx $j
 ]: void {}
 
+abstract class V { abstract const ctx C; }
+
 function var_improper_form(
   shape() $x,
-  vec<int> ...$y
+  V ...$y
 )[
   $x::C,
   $y::C
 ]: void {}
 
 <<__Memoize>>
-function memo(vec<int> $v)[$v::C]: void {}
+function memo(V $v)[$v::C]: void {}
 
 class C {
   <<__Memoize>>
-  public function memo(vec<int> $v)[$v::C]: void {}
+  public function memo(V $v)[$v::C]: void {}
 }
 
 function lambdas(): void {

@@ -43,7 +43,7 @@ namespace HH {
   \HH\Rx\Traversable::class
 )>>
 interface Traversable<+Tv> {
-  abstract const ctx C = [defaults];
+
 }
 
 /**
@@ -91,8 +91,8 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  */
 <<__Sealed(KeyedContainer::class)>>
 interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {
-  const ctx C = [];
-  abstract const ctx CMut;
+
+
 }
 
 /**

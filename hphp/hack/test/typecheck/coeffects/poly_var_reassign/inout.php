@@ -1,7 +1,9 @@
 <?hh
 
-function i(inout vec<int> $v)[]: void {}
+abstract class V { abstract const ctx C; }
 
-function f(inout vec<int> $v)[$v::C]: void {
+function i(inout V $v)[]: void {}
+
+function f(inout V $v)[$v::C]: void {
   i(inout $v);
 }

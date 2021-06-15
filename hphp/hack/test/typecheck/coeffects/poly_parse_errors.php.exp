@@ -14,17 +14,17 @@ File "poly_parse_errors.php", line 19, characters 15-16:
 Type hint for parameter $h used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
 File "poly_parse_errors.php", line 20, characters 16-23:
 Type hint for parameter $j used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
-File "poly_parse_errors.php", line 29, characters 3-9:
+File "poly_parse_errors.php", line 31, characters 3-9:
 Type hint for parameter $x used for dependent context must be a class or a generic (Parsing[1002])
-File "poly_parse_errors.php", line 30, characters 15-16:
+File "poly_parse_errors.php", line 32, characters 8-9:
 Parameter $y used for dependent context cannot be variadic (Parsing[1002])
-File "poly_parse_errors.php", line 36, characters 3-11:
+File "poly_parse_errors.php", line 38, characters 3-11:
 This function cannot be memoized because it has a polymorphic context (Parsing[1002])
-File "poly_parse_errors.php", line 40, characters 5-13:
+File "poly_parse_errors.php", line 42, characters 5-13:
 This method cannot be memoized because it has a polymorphic context (Parsing[1002])
-File "poly_parse_errors.php", line 45, characters 12-19:
+File "poly_parse_errors.php", line 47, characters 12-19:
 A lambda cannot have polymorphic context (Parsing[1002])
-File "poly_parse_errors.php", line 46, characters 12-18:
+File "poly_parse_errors.php", line 48, characters 12-18:
 A lambda cannot have polymorphic context (Parsing[1002])
 File "poly_parse_errors.php", line 9, characters 3-4:
 Was expecting a type hint (Typing[4032])

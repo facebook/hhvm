@@ -372,15 +372,6 @@ let fun_def ctx fd :
       let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
-      Typing_type_wellformedness.fun_ env f;
-      let env =
-        Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-          env
-          ~ignore_errors:false
-          f.f_tparams
-          f.f_where_constraints
-      in
-      let env = Env.set_fn_kind env f.f_fun_kind in
       let env =
         Env.set_module
           env
@@ -393,6 +384,15 @@ let fun_def ctx fd :
              SN.UserAttributes.uaInternal
              f.f_user_attributes)
       in
+      Typing_type_wellformedness.fun_ env f;
+      let env =
+        Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+          env
+          ~ignore_errors:false
+          f.f_tparams
+          f.f_where_constraints
+      in
+      let env = Env.set_fn_kind env f.f_fun_kind in
       let (return_decl_ty, params_decl_ty, variadicity_decl_ty) =
         merge_decl_header_with_hints
           ~params:f.f_params
@@ -1668,16 +1668,6 @@ let class_def_ env c tc =
     Typing.attributes_check_def env kind c.c_user_attributes
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
-  let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute c.c_user_attributes)
-  in
-  let env =
-    Env.set_internal
-      env
-      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes)
-  in
   let ctx = Env.get_ctx env in
   if
     (not Ast_defs.(equal_class_kind c.c_kind Ctrait))
@@ -2048,6 +2038,16 @@ let class_def ctx c =
   let tc = Env.get_class env name in
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
+  let env =
+    Env.set_module
+      env
+      (Naming_attributes_params.get_module_attribute c.c_user_attributes)
+  in
+  let env =
+    Env.set_internal
+      env
+      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes)
+  in
   Typing_type_wellformedness.class_ env c;
   NastInitCheck.class_ env c;
   match tc with

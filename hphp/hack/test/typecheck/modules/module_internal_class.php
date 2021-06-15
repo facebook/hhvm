@@ -29,3 +29,11 @@ implements I {
   // Goood
   <<__Internal>> public function good3():C { return new C(); }
 }
+
+<<__Module('here'), __Internal>>
+class E extends C {} // Ok!
+
+<<__Module('there')>>
+class F extends C {} // Bad!
+
+class G extends C {} // Bad!

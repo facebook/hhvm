@@ -880,7 +880,7 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
     rl_mergedUnits->emplace(this);
   }
 
-  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealieses, {} classes, {} records)\n",
+  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} records)\n",
          this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
          m_preClasses.size(), m_preRecords.size());
 

@@ -16,7 +16,7 @@ function prefetch($files) {
   }
   // Advisory and prefetching isn't enabled, so this won't do
   // anything.
-  hh\prefetch_units($f, true);
+  HH\prefetch_units($f, true);
 }
 
 <<__EntryPoint>>

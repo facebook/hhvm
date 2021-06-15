@@ -21,5 +21,5 @@ function go() {
 <<__EntryPoint>>
 function main_concat_dtor() {
   go();
-  var_dump(hh\objprof_get_data());
+  var_dump(HH\objprof_get_data());
 }

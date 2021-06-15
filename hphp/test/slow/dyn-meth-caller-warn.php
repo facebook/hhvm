@@ -8,10 +8,10 @@ class Foo {
 
 <<__EntryPoint>>
 function main() {
-  $z = hh\dynamic_meth_caller(Foo::class, 'inst_dyn');
-  $a = hh\dynamic_meth_caller(Foo::class, 'inst_meth');
-  $b = hh\dynamic_meth_caller(Foo::class, 'static_meth');
-  $c = hh\dynamic_meth_caller(Foo::class, 'not_a_meth');
+  $z = HH\dynamic_meth_caller(Foo::class, 'inst_dyn');
+  $a = HH\dynamic_meth_caller(Foo::class, 'inst_meth');
+  $b = HH\dynamic_meth_caller(Foo::class, 'static_meth');
+  $c = HH\dynamic_meth_caller(Foo::class, 'not_a_meth');
 
   var_dump($z, $a, $b, $c);
   try { $z(new Foo); } catch (Exception $e) { var_dump($e->getMessage()); }

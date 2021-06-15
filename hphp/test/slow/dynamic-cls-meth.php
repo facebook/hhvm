@@ -11,7 +11,7 @@ function wrap($f) {
 trait T {
   private function point($v) {
     wrap(() ==>
-      hh\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($v))
+      HH\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($v))
     );
   }
 
@@ -50,12 +50,12 @@ function main() {
   echo "In main\n";
   foreach (varray['f', 'g', 'h', 'i'] as $f) {
     wrap(() ==>
-      hh\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($f))
+      HH\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($f))
     );
   }
   foreach (varray['f', 'g', 'h', 'i', 'j'] as $f) {
     wrap(() ==>
-      hh\dynamic_class_meth(A::class, __hhvm_intrinsics\launder_value($f))
+      HH\dynamic_class_meth(A::class, __hhvm_intrinsics\launder_value($f))
     );
   }
 }

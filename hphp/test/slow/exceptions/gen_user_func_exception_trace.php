@@ -6,7 +6,7 @@ function child_main(...$args): void {
 }
 
 <<__EntryPoint>>
-function main(): void { if (hh\execution_context() === "xbox") return;
+function main(): void { if (HH\execution_context() === "xbox") return;
   HH\Asio\join(async {
     await fb_gen_user_func_array(
       __FILE__,

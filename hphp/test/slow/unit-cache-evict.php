@@ -28,9 +28,9 @@ EOT;
   require($file);
   if (hello(1, 2) !== 3) echo "ERROR!\n";
 
-  $loaded = implode(hh\get_compiled_units(1), ', ');
-  $compiled = implode(hh\get_compiled_units(0), ', ');
-  $evicted  = implode(hh\get_compiled_units(-1), ', ');
+  $loaded = implode(HH\get_compiled_units(1), ', ');
+  $compiled = implode(HH\get_compiled_units(0), ', ');
+  $evicted  = implode(HH\get_compiled_units(-1), ', ');
 
   if ($iter !== 0) {
     echo "Iter $iter: LOADED($loaded) COMPILED($compiled) EVICTED($evicted)\n";

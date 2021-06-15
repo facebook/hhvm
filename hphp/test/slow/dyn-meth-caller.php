@@ -7,9 +7,9 @@ class Foo {
 
 <<__EntryPoint>>
 function main() {
-  $a = hh\dynamic_meth_caller(Foo::class, 'inst_meth');
-  $b = hh\dynamic_meth_caller(Foo::class, 'static_meth');
-  $c = hh\dynamic_meth_caller(Foo::class, 'not_a_meth');
+  $a = HH\dynamic_meth_caller(Foo::class, 'inst_meth');
+  $b = HH\dynamic_meth_caller(Foo::class, 'static_meth');
+  $c = HH\dynamic_meth_caller(Foo::class, 'not_a_meth');
 
   var_dump($a, $b, $c);
   try { $a(new Foo); } catch (Exception $e) { var_dump($e->getMessage()); }

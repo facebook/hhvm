@@ -52,12 +52,12 @@ function main() {
   cover_me1();      cover_me1();       // opt
   cover_me2(false); cover_me2(false);  // partial opt
   cover_me3();                         // profile
-  hh\enable_per_file_coverage(keyset[__FILE__]);
+  HH\enable_per_file_coverage(keyset[__FILE__]);
   cover_me1();
   cover_me2(true);
   cover_me3();
   cover_me4();
-  $map = hh\get_coverage_for_file(__FILE__);
-  hh\disable_all_coverage();
+  $map = HH\get_coverage_for_file(__FILE__);
+  HH\disable_all_coverage();
   print_cover_map($map, 48);
 }

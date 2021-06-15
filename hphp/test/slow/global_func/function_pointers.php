@@ -88,7 +88,7 @@ function main_entry(): void {
   var_export($f);
   var_dump($f);
   var_dump(json_encode($f));
-  $ser = serialize(hh\fun_get_function($f));
+  $ser = serialize(HH\fun_get_function($f));
   var_dump($ser);
   var_dump(unserialize($ser));
 }

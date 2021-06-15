@@ -7,7 +7,7 @@ function main() {
     file_put_contents($f, "<?hh function hello() { echo \"hello $f!\\n\"; }");
     include $f;
     hello();
-    var_dump(array_key_exists($f, hh\get_compiled_units()));
+    var_dump(array_key_exists($f, HH\get_compiled_units()));
   } finally {
     if (isset($f)) unlink($f);
   }

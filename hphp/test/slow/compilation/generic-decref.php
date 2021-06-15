@@ -20,5 +20,5 @@ function main_generic_decref() {
   for ($i = 0; $i < 101; $i++) {
     test();
   }
-  var_dump(hh\objprof_get_data());
+  var_dump(HH\objprof_get_data());
 }

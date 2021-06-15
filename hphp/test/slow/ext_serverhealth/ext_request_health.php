@@ -2,8 +2,8 @@
 
 <<__EntryPoint>>
 function main() {
-  invariant(hh\jumpstart_source_host() !== null, "");
-  var_dump(hh\get_request_health()["jit_maturity"]);
-  var_dump(hh\jit_jumpstarted());
-  var_dump(hh\jumpstart_prof_tag());
+  invariant(HH\jumpstart_source_host() !== null, "");
+  var_dump(HH\get_request_health()["jit_maturity"]);
+  var_dump(HH\jit_jumpstarted());
+  var_dump(HH\jumpstart_prof_tag());
 }

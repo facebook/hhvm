@@ -7,7 +7,7 @@ function main() {
   $c = __hhvm_intrinsics\launder_value('Foo');
   $m = __hhvm_intrinsics\launder_value('bar');
 
-  $mc = hh\dynamic_meth_caller_force($c, $m);
+  $mc = HH\dynamic_meth_caller_force($c, $m);
   $mc(new Foo);
 
   $mc2 = __hhvm_intrinsics\launder_value($mc);

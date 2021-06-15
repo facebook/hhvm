@@ -47,7 +47,7 @@ function is_functions_dynamic() {
   $m = LV(class_meth(Foo::class, 'bar'));
 
   echo 'HH\is_php_array($m):'        ;C(HH\is_php_array($m));
-  echo 'HH\is_any_array($m):' ;C(hh\is_any_array($m));
+  echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
   echo 'HH\is_varray($m):'       ;C(HH\is_varray($m));
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
   echo 'HH\is_vec_or_varray($m):'       ;C(HH\is_vec_or_varray($m));

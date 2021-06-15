@@ -10,7 +10,7 @@ main
 
 )
 {
-  $x 
+  $x
 
 
     = 10;
@@ -46,10 +46,10 @@ main
     "$ret\n";
 
   var_dump(
-    hh\
+    HH\
       get_executable_lines(
         __FILE__
-       , 
+       ,
       )
   )
   ;

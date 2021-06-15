@@ -5,6 +5,6 @@ class :my:xhp-class {}
 
 <<__EntryPoint>>
 function test_xhp() {
-  $facts = hh\facts_parse("/", varray[__FILE__], true, false);
+  $facts = HH\facts_parse("/", varray[__FILE__], true, false);
   var_dump(vec($facts[__FILE__]));
 }

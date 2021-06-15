@@ -3,7 +3,7 @@
 class C {
   const type Tnonexistent = int;
   function is_nonexistent(mixed $x): void {
-    $result = hh\type_structure_no_throw(static::class, 'Tnonexistent');
+    $result = HH\type_structure_no_throw(static::class, 'Tnonexistent');
     return $result;
   }
 }

@@ -28,7 +28,7 @@ function thread_main() {
 }
 
 <<__EntryPoint>>
-function main() { if (hh\execution_context() === "xbox") return;
+function main() { if (HH\execution_context() === "xbox") return;
   echo "In main\n";
 
   require_once('apc-locking.inc'); // defnie Foo

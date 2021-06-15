@@ -4,13 +4,13 @@
 <<__EntryPoint>>
 function main() {
   try {
-    hh\prefetch_units(vec[], false);
+    HH\prefetch_units(vec[], false);
   } catch (Exception $e) {
     echo "Caught exception... " . $e->getMessage() . "\n";
   }
 
   try {
-    hh\prefetch_units(keyset['a', 'b', 3, 'c'], false);
+    HH\prefetch_units(keyset['a', 'b', 3, 'c'], false);
   } catch (Exception $e) {
     echo "Caught exception... " . $e->getMessage() . "\n";
   }

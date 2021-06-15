@@ -37,7 +37,7 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 
 <<__EntryPoint>>
 function main() {
-  hh\autoload_set_paths(
+  HH\autoload_set_paths(
     darray[
       'class' => varray[],
       'function' => darray['a_foo' => __DIR__.'/multi-file-a.inc'],
@@ -50,12 +50,12 @@ function main() {
 
   A_foo(false); A_foo(false);
   B_foo();      B_foo();
-  hh\enable_per_file_coverage(keyset[
+  HH\enable_per_file_coverage(keyset[
     __DIR__.'/multi-file-a.inc',
     __DIR__.'/multi-file-c.inc'
   ]);
   A_foo(12); A_foo(12);
   B_foo();   B_foo();
   C_foo();   C_foo();
-  print_cover_maps(hh\get_all_coverage_data());
+  print_cover_maps(HH\get_all_coverage_data());
 }

@@ -9,7 +9,7 @@ function foo() {
 
 <<__EntryPoint>>
 function main() {
-  if (hh\execution_context() === "xbox") {
+  if (HH\execution_context() === "xbox") {
     return;
   }
   echo "main\n";

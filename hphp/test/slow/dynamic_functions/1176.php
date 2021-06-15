@@ -6,7 +6,7 @@ function t($a, $b = 'k', $c = 'm') {
 
  <<__EntryPoint>>
 function main_1176() {
-$a = 'T';
+$a = 't';
  $a('o');
  $a('o', 'p');
  $a('o', 'p', 'q');

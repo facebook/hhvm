@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main(): void {
 
-  if (hh\execution_context() === "xbox") return;
+  if (HH\execution_context() === "xbox") return;
 
   $a = vec[];
   $a[] = fb_gen_user_func_array(

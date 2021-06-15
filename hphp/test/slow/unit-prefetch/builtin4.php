@@ -16,7 +16,7 @@ function prefetch($files) {
   }
   // Advisory, but prefetching is enabled. Wait for the prefetcher to
   // finish.
-  hh\prefetch_units($f, true);
+  HH\prefetch_units($f, true);
   __hhvm_intrinsics\drain_unit_prefetcher();
 }
 

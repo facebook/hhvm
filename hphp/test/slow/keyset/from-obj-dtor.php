@@ -22,7 +22,7 @@ function test() {
   for ($i = 0; $i < 10; $i++) {
     echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
     from_obj(new Cls($i));
-    var_dump(hh\objprof_get_data());
+    var_dump(HH\objprof_get_data());
     echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
   }
 }

@@ -12,12 +12,12 @@ class Foo {
 
   static function go_foo() {
     return vec[
-      hh\dynamic_meth_caller(LV(Foo::class), LV('pub')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('pub2')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('prot')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('prot2')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('priv')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('priv2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('pub')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('pub2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('prot')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('prot2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('priv')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('priv2')),
     ];
   }
 }
@@ -30,12 +30,12 @@ class Bar extends Foo {
 
   static function go_bar() {
     return vec[
-      hh\dynamic_meth_caller(LV(Foo::class), LV('pub')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('pub2')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('prot')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('prot2')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('priv')),
-      hh\dynamic_meth_caller(LV(Foo::class), LV('priv2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('pub')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('pub2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('prot')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('prot2')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('priv')),
+      HH\dynamic_meth_caller(LV(Foo::class), LV('priv2')),
     ];
   }
 }

@@ -2,5 +2,5 @@
 
 <<__EntryPoint>>
 function main() {
-  echo hh\get_request_count()."\n";
+  echo HH\get_request_count()."\n";
 }

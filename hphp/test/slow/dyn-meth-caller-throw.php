@@ -8,10 +8,10 @@ class Foo {
 
 <<__EntryPoint>>
 function main() {
-  try { $z = hh\dynamic_meth_caller(Foo::class, 'inst_dyn'); } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { $a = hh\dynamic_meth_caller(Foo::class, 'inst_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { $b = hh\dynamic_meth_caller(Foo::class, 'static_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { $c = hh\dynamic_meth_caller(Foo::class, 'not_a_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $z = HH\dynamic_meth_caller(Foo::class, 'inst_dyn'); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $a = HH\dynamic_meth_caller(Foo::class, 'inst_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $b = HH\dynamic_meth_caller(Foo::class, 'static_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $c = HH\dynamic_meth_caller(Foo::class, 'not_a_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
 
   try { var_dump($z);} catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump($a);} catch (Exception $e) { var_dump($e->getMessage()); }

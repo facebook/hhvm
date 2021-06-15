@@ -14,7 +14,7 @@ function prefetch($files) {
   foreach ($files as $v) {
     $f[] = __DIR__ . '/' . $v;
   }
-  hh\prefetch_units($f, false);
+  HH\prefetch_units($f, false);
 }
 
 <<__EntryPoint>>

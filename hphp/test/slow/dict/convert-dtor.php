@@ -72,5 +72,5 @@ function main() {
 <<__EntryPoint>>
 function main_convert_dtor() {
   main();
-  var_dump(hh\objprof_get_data());
+  var_dump(HH\objprof_get_data());
 }

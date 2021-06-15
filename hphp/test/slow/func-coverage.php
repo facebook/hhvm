@@ -38,23 +38,23 @@ class C extends P {
 <<__EntryPoint>>
 function main() {
   a();
-  hh\enable_function_coverage();
+  HH\enable_function_coverage();
   echo ">>>>>> COVERAGE_START\n";
   b();
   __hhvm_intrinsics\launder_value('c')();
   echo ">>>>>> COVERAGE_STOP\n";
-  var_dump(hh\collect_function_coverage());
+  var_dump(HH\collect_function_coverage());
 
   T::i();
   C::s();
 
-  hh\enable_function_coverage();
+  HH\enable_function_coverage();
   echo ">>>>>> COVERAGE_START\n";
   C::j(); T::k();
   P::q(); P::m();
   C::q(); C::m();
   echo ">>>>>> COVERAGE_STOP\n";
-  var_dump(hh\collect_function_coverage());
+  var_dump(HH\collect_function_coverage());
 
   $a = new C;
   $b = __hhvm_intrinsics\launder_value(new P);
@@ -62,14 +62,14 @@ function main() {
   $a->y();
   $a->h();
 
-  hh\enable_function_coverage();
+  HH\enable_function_coverage();
   echo ">>>>>> COVERAGE_START\n";
   $a->x(); $a->z(); $a->n(); $a->f(); $a->g();
   $b->x();
   echo ">>>>>> COVERAGE_STOP\n";
-  var_dump(hh\collect_function_coverage());
+  var_dump(HH\collect_function_coverage());
 
-  hh\enable_function_coverage();
+  HH\enable_function_coverage();
   echo ">>>>>> COVERAGE_START\n";
   a(); b(); c();
   T::i(); T::j(); T::k();
@@ -79,5 +79,5 @@ function main() {
   (new C)->x(); (new C)->y(); (new C)->z(); (new C)->n();
   (new C)->f(); (new C)->g(); (new C)->h();
   echo ">>>>>> COVERAGE_STOP\n";
-  var_dump(hh\collect_function_coverage());
+  var_dump(HH\collect_function_coverage());
 }

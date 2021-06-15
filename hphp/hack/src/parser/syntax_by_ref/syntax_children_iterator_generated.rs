@@ -222,6 +222,20 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ContextAliasDeclaration(x) => {
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.keyword),
+                    2 => Some(&x.name),
+                    3 => Some(&x.generic_parameter),
+                    4 => Some(&x.as_constraint),
+                    5 => Some(&x.equal),
+                    6 => Some(&x.context),
+                    7 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
             PropertyDeclaration(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

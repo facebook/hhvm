@@ -1,0 +1,1 @@
+(4,1)-(4,5) A type alias declaration cannot both use `type` and have a constraint. Did you mean `newtype`?

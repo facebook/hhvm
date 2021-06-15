@@ -44,6 +44,7 @@ pub enum SyntaxVariant<'a, T, V> {
     RecordDeclaration(&'a RecordDeclarationChildren<'a, T, V>),
     RecordField(&'a RecordFieldChildren<'a, T, V>),
     AliasDeclaration(&'a AliasDeclarationChildren<'a, T, V>),
+    ContextAliasDeclaration(&'a ContextAliasDeclarationChildren<'a, T, V>),
     PropertyDeclaration(&'a PropertyDeclarationChildren<'a, T, V>),
     PropertyDeclarator(&'a PropertyDeclaratorChildren<'a, T, V>),
     NamespaceDeclaration(&'a NamespaceDeclarationChildren<'a, T, V>),
@@ -339,6 +340,18 @@ pub struct AliasDeclarationChildren<'a, T, V> {
     pub constraint: Syntax<'a, T, V>,
     pub equal: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextAliasDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub generic_parameter: Syntax<'a, T, V>,
+    pub as_constraint: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub context: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

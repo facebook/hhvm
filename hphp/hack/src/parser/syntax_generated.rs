@@ -223,6 +223,21 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_context_alias_declaration(_: &C, ctx_alias_attribute_spec: Self, ctx_alias_keyword: Self, ctx_alias_name: Self, ctx_alias_generic_parameter: Self, ctx_alias_as_constraint: Self, ctx_alias_equal: Self, ctx_alias_context: Self, ctx_alias_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ContextAliasDeclaration(Box::new(ContextAliasDeclarationChildren {
+            ctx_alias_attribute_spec,
+            ctx_alias_keyword,
+            ctx_alias_name,
+            ctx_alias_generic_parameter,
+            ctx_alias_as_constraint,
+            ctx_alias_equal,
+            ctx_alias_context,
+            ctx_alias_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_property_declaration(_: &C, property_attribute_spec: Self, property_modifiers: Self, property_type: Self, property_declarators: Self, property_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PropertyDeclaration(Box::new(PropertyDeclarationChildren {
             property_attribute_spec,
@@ -2035,6 +2050,18 @@ where
                 let acc = f(alias_semicolon, acc);
                 acc
             },
+            SyntaxVariant::ContextAliasDeclaration(x) => {
+                let ContextAliasDeclarationChildren { ctx_alias_attribute_spec, ctx_alias_keyword, ctx_alias_name, ctx_alias_generic_parameter, ctx_alias_as_constraint, ctx_alias_equal, ctx_alias_context, ctx_alias_semicolon } = *x;
+                let acc = f(ctx_alias_attribute_spec, acc);
+                let acc = f(ctx_alias_keyword, acc);
+                let acc = f(ctx_alias_name, acc);
+                let acc = f(ctx_alias_generic_parameter, acc);
+                let acc = f(ctx_alias_as_constraint, acc);
+                let acc = f(ctx_alias_equal, acc);
+                let acc = f(ctx_alias_context, acc);
+                let acc = f(ctx_alias_semicolon, acc);
+                acc
+            },
             SyntaxVariant::PropertyDeclaration(x) => {
                 let PropertyDeclarationChildren { property_attribute_spec, property_modifiers, property_type, property_declarators, property_semicolon } = *x;
                 let acc = f(property_attribute_spec, acc);
@@ -3253,6 +3280,7 @@ where
             SyntaxVariant::RecordDeclaration {..} => SyntaxKind::RecordDeclaration,
             SyntaxVariant::RecordField {..} => SyntaxKind::RecordField,
             SyntaxVariant::AliasDeclaration {..} => SyntaxKind::AliasDeclaration,
+            SyntaxVariant::ContextAliasDeclaration {..} => SyntaxKind::ContextAliasDeclaration,
             SyntaxVariant::PropertyDeclaration {..} => SyntaxKind::PropertyDeclaration,
             SyntaxVariant::PropertyDeclarator {..} => SyntaxKind::PropertyDeclarator,
             SyntaxVariant::NamespaceDeclaration {..} => SyntaxKind::NamespaceDeclaration,
@@ -3536,6 +3564,17 @@ where
                  alias_name: ts.pop().unwrap(),
                  alias_keyword: ts.pop().unwrap(),
                  alias_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ContextAliasDeclaration, 8) => SyntaxVariant::ContextAliasDeclaration(Box::new(ContextAliasDeclarationChildren {
+                 ctx_alias_semicolon: ts.pop().unwrap(),
+                 ctx_alias_context: ts.pop().unwrap(),
+                 ctx_alias_equal: ts.pop().unwrap(),
+                 ctx_alias_as_constraint: ts.pop().unwrap(),
+                 ctx_alias_generic_parameter: ts.pop().unwrap(),
+                 ctx_alias_name: ts.pop().unwrap(),
+                 ctx_alias_keyword: ts.pop().unwrap(),
+                 ctx_alias_attribute_spec: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::PropertyDeclaration, 5) => SyntaxVariant::PropertyDeclaration(Box::new(PropertyDeclarationChildren {
@@ -4724,6 +4763,18 @@ pub struct AliasDeclarationChildren<T, V> {
     pub alias_equal: Syntax<T, V>,
     pub alias_type: Syntax<T, V>,
     pub alias_semicolon: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextAliasDeclarationChildren<T, V> {
+    pub ctx_alias_attribute_spec: Syntax<T, V>,
+    pub ctx_alias_keyword: Syntax<T, V>,
+    pub ctx_alias_name: Syntax<T, V>,
+    pub ctx_alias_generic_parameter: Syntax<T, V>,
+    pub ctx_alias_as_constraint: Syntax<T, V>,
+    pub ctx_alias_equal: Syntax<T, V>,
+    pub ctx_alias_context: Syntax<T, V>,
+    pub ctx_alias_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5941,6 +5992,7 @@ pub enum SyntaxVariant<T, V> {
     RecordDeclaration(Box<RecordDeclarationChildren<T, V>>),
     RecordField(Box<RecordFieldChildren<T, V>>),
     AliasDeclaration(Box<AliasDeclarationChildren<T, V>>),
+    ContextAliasDeclaration(Box<ContextAliasDeclarationChildren<T, V>>),
     PropertyDeclaration(Box<PropertyDeclarationChildren<T, V>>),
     PropertyDeclarator(Box<PropertyDeclaratorChildren<T, V>>),
     NamespaceDeclaration(Box<NamespaceDeclarationChildren<T, V>>),
@@ -6291,6 +6343,20 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     5 => Some(&x.alias_equal),
                     6 => Some(&x.alias_type),
                     7 => Some(&x.alias_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ContextAliasDeclaration(x) => {
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.ctx_alias_attribute_spec),
+                    1 => Some(&x.ctx_alias_keyword),
+                    2 => Some(&x.ctx_alias_name),
+                    3 => Some(&x.ctx_alias_generic_parameter),
+                    4 => Some(&x.ctx_alias_as_constraint),
+                    5 => Some(&x.ctx_alias_equal),
+                    6 => Some(&x.ctx_alias_context),
+                    7 => Some(&x.ctx_alias_semicolon),
                         _ => None,
                     }
                 })

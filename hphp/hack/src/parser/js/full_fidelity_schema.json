@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-06-04-0001",
+  "version" : "2021-06-09-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -614,6 +614,20 @@
         { "field_name" : "constraint" },
         { "field_name" : "equal" },
         { "field_name" : "type" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "ContextAliasDeclaration",
+      "type_name" : "context_alias_declaration",
+      "description" : "context_alias_declaration",
+      "prefix" : "ctx_alias",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "generic_parameter" },
+        { "field_name" : "as_constraint" },
+        { "field_name" : "equal" },
+        { "field_name" : "context" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "PropertyDeclaration",

@@ -138,6 +138,10 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_alias_declaration(self, attribute_spec, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
     }
 
+    fn make_context_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, as_constraint: Self::R, equal: Self::R, context: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_context_alias_declaration(self, attribute_spec, keyword, name, generic_parameter, as_constraint, equal, context, semicolon)
+    }
+
     fn make_property_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, type_: Self::R, declarators: Self::R, semicolon: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_property_declaration(self, attribute_spec, modifiers, type_, declarators, semicolon)
     }

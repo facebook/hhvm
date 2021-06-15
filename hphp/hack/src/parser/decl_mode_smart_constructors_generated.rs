@@ -131,6 +131,10 @@ where
         <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_alias_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     }
 
+    fn make_context_alias_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_context_alias_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+    }
+
     fn make_property_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_property_declaration(self, arg0, arg1, arg2, arg3, arg4)
     }

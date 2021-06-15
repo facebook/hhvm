@@ -262,6 +262,16 @@ struct
         alias_type: t;
         alias_semicolon: t;
       }
+    | ContextAliasDeclaration of {
+        ctx_alias_attribute_spec: t;
+        ctx_alias_keyword: t;
+        ctx_alias_name: t;
+        ctx_alias_generic_parameter: t;
+        ctx_alias_as_constraint: t;
+        ctx_alias_equal: t;
+        ctx_alias_context: t;
+        ctx_alias_semicolon: t;
+      }
     | PropertyDeclaration of {
         property_attribute_spec: t;
         property_modifiers: t;
@@ -1163,6 +1173,7 @@ struct
     | TLDEnumClass of enum_class_declaration
     | TLDRecord of record_declaration
     | TLDAlias of alias_declaration
+    | TLDContextAlias of context_alias_declaration
     | TLDNamespace of namespace_declaration
     | TLDNamespaceDeclarationHeader of namespace_declaration_header
     | TLDNamespaceUse of namespace_use_declaration
@@ -1537,6 +1548,17 @@ struct
     alias_equal: Token.t option value;
     alias_type: specifier value;
     alias_semicolon: Token.t value;
+  }
+
+  and context_alias_declaration = {
+    ctx_alias_attribute_spec: attribute_specification option value;
+    ctx_alias_keyword: Token.t value;
+    ctx_alias_name: Token.t option value;
+    ctx_alias_generic_parameter: type_parameters option value;
+    ctx_alias_as_constraint: context_constraint option value;
+    ctx_alias_equal: Token.t option value;
+    ctx_alias_context: specifier value;
+    ctx_alias_semicolon: Token.t value;
   }
 
   and property_declaration = {

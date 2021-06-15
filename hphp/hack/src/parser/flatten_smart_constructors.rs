@@ -195,6 +195,14 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_context_alias_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) {
+          Self::zero(SyntaxKind::ContextAliasDeclaration)
+        } else {
+          self.flatten(SyntaxKind::ContextAliasDeclaration, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
+        }
+    }
+
     fn make_property_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero(SyntaxKind::PropertyDeclaration)

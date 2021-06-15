@@ -229,6 +229,21 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_context_alias_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, generic_parameter: Self, as_constraint: Self, equal: Self, context: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ContextAliasDeclaration(ctx.get_arena().alloc(ContextAliasDeclarationChildren {
+            attribute_spec,
+            keyword,
+            name,
+            generic_parameter,
+            as_constraint,
+            equal,
+            context,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_property_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, type_: Self, declarators: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PropertyDeclaration(ctx.get_arena().alloc(PropertyDeclarationChildren {
             attribute_spec,

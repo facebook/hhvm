@@ -39,6 +39,7 @@ type t =
   | RecordDeclaration
   | RecordField
   | AliasDeclaration
+  | ContextAliasDeclaration
   | PropertyDeclaration
   | PropertyDeclarator
   | NamespaceDeclaration
@@ -216,6 +217,7 @@ let to_string kind =
   | RecordDeclaration -> "record_declaration"
   | RecordField -> "record_field"
   | AliasDeclaration -> "alias_declaration"
+  | ContextAliasDeclaration -> "context_alias_declaration"
   | PropertyDeclaration -> "property_declaration"
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"

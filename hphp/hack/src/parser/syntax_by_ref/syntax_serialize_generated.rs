@@ -205,6 +205,19 @@ ss.serialize_field("alias_type", &self.with(type_))?;
 ss.serialize_field("alias_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
+SyntaxVariant::ContextAliasDeclaration (ContextAliasDeclarationChildren{attribute_spec,keyword,name,generic_parameter,as_constraint,equal,context,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 9)?;
+      ss.serialize_field("kind", "context_alias_declaration")?;
+      ss.serialize_field("ctx_alias_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("ctx_alias_keyword", &self.with(keyword))?;
+ss.serialize_field("ctx_alias_name", &self.with(name))?;
+ss.serialize_field("ctx_alias_generic_parameter", &self.with(generic_parameter))?;
+ss.serialize_field("ctx_alias_as_constraint", &self.with(as_constraint))?;
+ss.serialize_field("ctx_alias_equal", &self.with(equal))?;
+ss.serialize_field("ctx_alias_context", &self.with(context))?;
+ss.serialize_field("ctx_alias_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
 SyntaxVariant::PropertyDeclaration (PropertyDeclarationChildren{attribute_spec,modifiers,type_,declarators,semicolon} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "property_declaration")?;

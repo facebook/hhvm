@@ -138,6 +138,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_record_declaration (fun x -> TLDRecord x) x
     | Syntax.AliasDeclaration _ ->
       tag validate_alias_declaration (fun x -> TLDAlias x) x
+    | Syntax.ContextAliasDeclaration _ ->
+      tag validate_context_alias_declaration (fun x -> TLDContextAlias x) x
     | Syntax.NamespaceDeclaration _ ->
       tag validate_namespace_declaration (fun x -> TLDNamespace x) x
     | Syntax.NamespaceDeclarationHeader _ ->
@@ -214,6 +216,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | TLDEnumClass thing -> invalidate_enum_class_declaration (value, thing)
     | TLDRecord thing -> invalidate_record_declaration (value, thing)
     | TLDAlias thing -> invalidate_alias_declaration (value, thing)
+    | TLDContextAlias thing ->
+      invalidate_context_alias_declaration (value, thing)
     | TLDNamespace thing -> invalidate_namespace_declaration (value, thing)
     | TLDNamespaceDeclarationHeader thing ->
       invalidate_namespace_declaration_header (value, thing)
@@ -1793,6 +1797,62 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             alias_equal = invalidate_option_with invalidate_token x.alias_equal;
             alias_type = invalidate_specifier x.alias_type;
             alias_semicolon = invalidate_token x.alias_semicolon;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_context_alias_declaration : context_alias_declaration validator =
+    function
+    | { Syntax.syntax = Syntax.ContextAliasDeclaration x; value = v } ->
+      ( v,
+        {
+          ctx_alias_semicolon = validate_token x.ctx_alias_semicolon;
+          ctx_alias_context = validate_specifier x.ctx_alias_context;
+          ctx_alias_equal =
+            validate_option_with validate_token x.ctx_alias_equal;
+          ctx_alias_as_constraint =
+            validate_option_with
+              validate_context_constraint
+              x.ctx_alias_as_constraint;
+          ctx_alias_generic_parameter =
+            validate_option_with
+              validate_type_parameters
+              x.ctx_alias_generic_parameter;
+          ctx_alias_name = validate_option_with validate_token x.ctx_alias_name;
+          ctx_alias_keyword = validate_token x.ctx_alias_keyword;
+          ctx_alias_attribute_spec =
+            validate_option_with
+              validate_attribute_specification
+              x.ctx_alias_attribute_spec;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ContextAliasDeclaration) s
+
+  and invalidate_context_alias_declaration :
+      context_alias_declaration invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ContextAliasDeclaration
+          {
+            ctx_alias_attribute_spec =
+              invalidate_option_with
+                invalidate_attribute_specification
+                x.ctx_alias_attribute_spec;
+            ctx_alias_keyword = invalidate_token x.ctx_alias_keyword;
+            ctx_alias_name =
+              invalidate_option_with invalidate_token x.ctx_alias_name;
+            ctx_alias_generic_parameter =
+              invalidate_option_with
+                invalidate_type_parameters
+                x.ctx_alias_generic_parameter;
+            ctx_alias_as_constraint =
+              invalidate_option_with
+                invalidate_context_constraint
+                x.ctx_alias_as_constraint;
+            ctx_alias_equal =
+              invalidate_option_with invalidate_token x.ctx_alias_equal;
+            ctx_alias_context = invalidate_specifier x.ctx_alias_context;
+            ctx_alias_semicolon = invalidate_token x.ctx_alias_semicolon;
           };
       Syntax.value = v;
     }

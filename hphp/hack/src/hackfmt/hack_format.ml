@@ -359,8 +359,19 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           alias_generic_parameter = generic;
           alias_constraint = type_constraint;
           alias_equal = eq_kw;
-          alias_type;
+          alias_type = ty;
           alias_semicolon = semi;
+        }
+    | Syntax.ContextAliasDeclaration
+        {
+          ctx_alias_attribute_spec = attr;
+          ctx_alias_keyword = kw;
+          ctx_alias_name = name;
+          ctx_alias_generic_parameter = generic;
+          ctx_alias_as_constraint = type_constraint;
+          ctx_alias_equal = eq_kw;
+          ctx_alias_context = ty;
+          ctx_alias_semicolon = semi;
         } ->
       (* TODO: revisit this for long names *)
       Concat
@@ -377,7 +388,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env eq_kw;
           Space;
           SplitWith Cost.Base;
-          Nest [t env alias_type];
+          Nest [t env ty];
           t env semi;
           Newline;
         ]

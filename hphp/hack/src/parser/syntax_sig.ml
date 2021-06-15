@@ -132,6 +132,16 @@ module type Syntax_S = sig
         alias_type: t;
         alias_semicolon: t;
       }
+    | ContextAliasDeclaration of {
+        ctx_alias_attribute_spec: t;
+        ctx_alias_keyword: t;
+        ctx_alias_name: t;
+        ctx_alias_generic_parameter: t;
+        ctx_alias_as_constraint: t;
+        ctx_alias_equal: t;
+        ctx_alias_context: t;
+        ctx_alias_semicolon: t;
+      }
     | PropertyDeclaration of {
         property_attribute_spec: t;
         property_modifiers: t;
@@ -1108,6 +1118,8 @@ module type Syntax_S = sig
 
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
 
+  val make_context_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+
   val make_property_declaration : t -> t -> t -> t -> t -> t
 
   val make_property_declarator : t -> t -> t
@@ -1463,6 +1475,8 @@ module type Syntax_S = sig
   val is_record_field : t -> bool
 
   val is_alias_declaration : t -> bool
+
+  val is_context_alias_declaration : t -> bool
 
   val is_property_declaration : t -> bool
 

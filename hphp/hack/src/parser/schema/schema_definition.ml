@@ -290,6 +290,25 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "ContextAliasDeclaration";
+      type_name = "context_alias_declaration";
+      func_name = "context_alias_declaration";
+      description = "context_alias_declaration";
+      prefix = "ctx_alias";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("keyword", Token);
+          ("name", ZeroOrOne Token);
+          ("generic_parameter", ZeroOrOne (Just "TypeParameters"));
+          ("as_constraint", ZeroOrOne (Just "ContextConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("context", Aggregate Specifier);
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "PropertyDeclaration";
       type_name = "property_declaration";
       func_name = "property_declaration";

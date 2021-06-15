@@ -33,6 +33,8 @@ pub enum Ctx {
     PoliciedShallow,
     Policied,
 
+    Controlled,
+
     ReadGlobals,
     Globals,
 
@@ -57,6 +59,7 @@ impl fmt::Display for Ctx {
             PoliciedShallow => write!(f, "{}", c::POLICIED_SHALLOW),
             Policied => write!(f, "{}", c::POLICIED),
             Pure => write!(f, "{}", c::PURE),
+            Controlled => write!(f, "{}", c::CONTROLLED),
             ReadGlobals => write!(f, "{}", c::READ_GLOBALS),
             Globals => write!(f, "{}", c::GLOBALS),
         }
@@ -159,6 +162,9 @@ impl HhasCoeffects {
                 c::POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
                 c::POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
                 c::POLICIED => Some(Ctx::Policied),
+                c::CONTROLLED => Some(Ctx::Controlled),
+                c::GLOBALS => Some(Ctx::Globals),
+                c::READ_GLOBALS => Some(Ctx::ReadGlobals),
                 _ => None,
             },
             _ => None,

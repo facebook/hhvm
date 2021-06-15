@@ -28,6 +28,10 @@ function policied_of($fn)[policied_of] {
   if ($fn) $fn(null);
 }
 
+function controlled($fn)[controlled] {
+  if ($fn) $fn(null);
+}
+
 function read_globals($fn)[read_globals] {
   if ($fn) $fn(null);
 }
@@ -58,6 +62,7 @@ function main()[policied_of_local] {
     'policied_of_local',
     'policied_of_shallow',
     'policied_of',
+    'controlled',
     'globals',
     'read_globals',
     'write_props',

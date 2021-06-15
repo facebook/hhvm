@@ -202,6 +202,9 @@ let simple_variadic_splat r ty =
 
 let default_capability p : locl_ty = nothing (Reason.Rdefault_capability p)
 
+let write_property_capability r : locl_ty =
+  class_type r SN.Capabilities.writeProperty []
+
 (* ^ TODO(coeffects) after implementing lower bounds on const ctx/type, do:
   intersection
     Reason.Rnone

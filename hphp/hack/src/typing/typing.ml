@@ -1832,7 +1832,7 @@ and has_dispose_method env has_await p e ty =
       env
       ty
   in
-  let (env, (_tel, _typed_unpack_element, _ty)) =
+  let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
     call ~expected:None p env tfty [] None
   in
   env
@@ -2706,21 +2706,6 @@ and expr_
         err_opts,
       supertype )
   in
-  let forget_fake_members env p callexpr =
-    (* Some functions are well known to not change the types of members, e.g.
-     * `is_null`.
-     * There are a lot of usages like
-     *   if (!is_null($x->a) && !is_null($x->a->b))
-     * where the second is_null call invalidates the first condition.
-     * This function is a bit best effort. Add stuff here when you want
-     * To avoid adding too many undue HH_FIXMEs. *)
-    match callexpr with
-    | (_, Id (_, func))
-      when String.equal func SN.StdlibFunctions.is_null
-           || String.equal func SN.PseudoFunctions.isset ->
-      env
-    | _ -> Env.forget_members env Reason.(Blame (p, BScall))
-  in
   let check_collection_tparams env name tys =
     (* varrays and darrays are not classes but they share the same
     constraints with vec and dict respectively *)
@@ -2958,7 +2943,7 @@ and expr_
         env
         ty
     in
-    let (env, (_tel, _typed_unpack_element, _ty)) =
+    let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
       call ~expected:None p env tfty [] None
     in
     make_result env p (Aast.Clone te) ty
@@ -3454,7 +3439,7 @@ and expr_
       ty
   | Call (e, explicit_targs, el, unpacked_element) ->
     let env = might_throw env in
-    let (env, te, ty) =
+    let ((env, te, ty), should_forget_fakes) =
       dispatch_call
         ~is_using_clause
         ~expected
@@ -3466,7 +3451,12 @@ and expr_
         el
         unpacked_element
     in
-    let env = forget_fake_members env p e in
+    let env =
+      if should_forget_fakes then
+        Env.forget_members env Reason.(Blame (p, BScall))
+      else
+        env
+    in
     (env, te, ty)
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
@@ -3853,7 +3843,14 @@ and expr_
     make_result env p (Aast.ReadonlyExpr te) rty
   | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
     let env = might_throw env in
-    let (env, tc, tal, tel, typed_unpack_element, ty, ctor_fty) =
+    let ( env,
+          tc,
+          tal,
+          tel,
+          typed_unpack_element,
+          ty,
+          ctor_fty,
+          should_forget_fakes ) =
       new_object
         ~expected
         ~is_using_clause
@@ -3866,7 +3863,12 @@ and expr_
         el
         unpacked_element
     in
-    let env = Env.forget_members env Reason.(Blame (p, BScall)) in
+    let env =
+      if should_forget_fakes then
+        Env.forget_members env Reason.(Blame (p, BScall))
+      else
+        env
+    in
     make_result
       env
       p
@@ -4943,7 +4945,9 @@ and new_object
     | ((_, ty), Aast.CI (_, tn)) -> is_generic_equal_to tn ty
     | _ -> false
   in
-  let gather (env, _tel, _typed_unpack_element) (cname, class_info, c_ty) =
+  let gather
+      (env, _tel, _typed_unpack_element, should_forget_fakes_acc)
+      (cname, class_info, c_ty) =
     if
       check_not_abstract
       && Cls.abstract class_info
@@ -5011,9 +5015,12 @@ and new_object
      * to the constructor might depend on it, and `call_construct` only uses
      * `ctor_fty` to set the variance which has void return type *)
     let env = Env.set_tyvar_variance env new_ty in
-    let (env, tel, typed_unpack_element, ctor_fty) =
+    let (env, tel, typed_unpack_element, ctor_fty, should_forget_fakes) =
       let env = check_expected_ty "New" env new_ty expected in
       call_construct p env class_info params el unpacked_element cid new_ty
+    in
+    let should_forget_fakes_acc =
+      should_forget_fakes_acc || should_forget_fakes
     in
     ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
       match cid with
@@ -5042,11 +5049,13 @@ and new_object
           (env, ctor_fty)
         | None -> (env, ctor_fty)
       in
-      ((env, tel, typed_unpack_element), (obj_ty, ctor_fty))
+      ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
+        (obj_ty, ctor_fty) )
     | CIstatic
     | CI _
     | CIself ->
-      ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
+      ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
+        (c_ty, ctor_fty) )
     | CIexpr _ ->
       (* When constructing from a (classname) variable, the variable
        * dictates what the constructed object is going to be. This allows
@@ -5056,7 +5065,8 @@ and new_object
       let env =
         Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
       in
-      ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
+      ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
+        (c_ty, ctor_fty) )
   in
   let (had_dynamic, classes) =
     List.fold classes ~init:(false, []) ~f:(fun (seen_dynamic, classes) ->
@@ -5065,8 +5075,9 @@ and new_object
       | `Class (cname, class_info, c_ty) ->
         (seen_dynamic, (cname, class_info, c_ty) :: classes))
   in
-  let ((env, tel, typed_unpack_element), class_types_and_ctor_types) =
-    List.fold_map classes ~init:(env, [], None) ~f:gather
+  let ( (env, tel, typed_unpack_element, should_forget_fakes),
+        class_types_and_ctor_types ) =
+    List.fold_map classes ~init:(env, [], None, false) ~f:gather
   in
   let class_types_and_ctor_types =
     let r = Reason.Rdynamic_construct p in
@@ -5107,7 +5118,14 @@ and new_object
     else
       ExprDepTy.make env ~cid ty
   in
-  (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
+  ( env,
+    tcid,
+    tal,
+    tel,
+    typed_unpack_element,
+    new_ty,
+    ctor_fty,
+    should_forget_fakes )
 
 and attributes_check_def env kind attrs =
   (* TODO(coeffects) change to mixed after changing those constructors to pure *)
@@ -5537,7 +5555,14 @@ and check_parent_construct pos env el unpacked_element env_parent =
   let (env, env_parent) =
     Phase.localize_no_subst env ~ignore_errors:true env_parent
   in
-  let (env, _tcid, _tal, tel, typed_unpack_element, parent, fty) =
+  let ( env,
+        _tcid,
+        _tal,
+        tel,
+        typed_unpack_element,
+        parent,
+        fty,
+        should_forget_fakes ) =
     new_object
       ~expected:None
       ~check_parent:true
@@ -5562,7 +5587,8 @@ and check_parent_construct pos env el unpacked_element env_parent =
     typed_unpack_element,
     MakeType.void (Reason.Rwitness pos),
     parent,
-    fty )
+    fty,
+    should_forget_fakes )
 
 and call_parent_construct pos env el unpacked_element =
   match Env.get_parent_ty env with
@@ -5570,7 +5596,8 @@ and call_parent_construct pos env el unpacked_element =
   | None ->
     (* continue here *)
     let ty = Typing_utils.mk_tany env pos in
-    let default = (env, [], None, ty, ty, ty) in
+    let should_invalidate_fake_members = true in
+    let default = (env, [], None, ty, ty, ty, should_invalidate_fake_members) in
     (match Env.get_self_id env with
     | Some self ->
       (match Env.get_class env self with
@@ -5592,7 +5619,7 @@ and call_parent_construct pos env el unpacked_element =
     | None ->
       Errors.parent_outside_class pos;
       let ty = err_witness env pos in
-      (env, [], None, ty, ty, ty))
+      (env, [], None, ty, ty, ty, should_invalidate_fake_members))
 
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
@@ -5646,16 +5673,19 @@ and dispatch_call
   let dispatch_id env id =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty)) =
+    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected p env fty el unpacked_element
     in
-    make_call
-      env
-      (Tast.make_typed_expr fpos fty (Aast.Id id))
-      tal
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr fpos fty (Aast.Id id))
+        tal
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
   in
   let dispatch_class_const env ((pos, e1_) as e1) m =
     let (env, _tal, tcid, ty1) = class_expr env [] e1 in
@@ -5700,16 +5730,19 @@ and dispatch_call
           e1
     in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty)) =
+    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected p env fty el unpacked_element
     in
-    make_call
-      env
-      (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
-      tal
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
+        tal
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
   in
   match fun_expr with
   (* Special top-level function *)
@@ -5733,39 +5766,45 @@ and dispatch_call
                 arraykey_ty
                 (Errors.invalid_echo_argument_at pos))
         in
-        make_call_special env id tel (MakeType.void (Reason.Rwitness pos))
+        let should_forget_fakes = false in
+        ( make_call_special env id tel (MakeType.void (Reason.Rwitness pos)),
+          should_forget_fakes )
       (* `unsafe_cast` *)
       | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
         ->
-        if
-          Int.(List.length el = 1)
-          && TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env)
-        then
-          let original_expr = List.hd_exn el in
-          expr env original_expr
-        else (
-          Errors.unsafe_cast p;
-          (* first type the `unsafe_cast` as a call, handling arity errors *)
-          let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
-          check_disposable_in_return env fty;
-          let (env, (tel, _, ty)) =
-            call ~expected p env fty el unpacked_element
-          in
-          (* construct the `Hole` using default value and type arguments
+        let result =
+          if
+            Int.(List.length el = 1)
+            && TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env)
+          then
+            let original_expr = List.hd_exn el in
+            expr env original_expr
+          else (
+            Errors.unsafe_cast p;
+            (* first type the `unsafe_cast` as a call, handling arity errors *)
+            let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
+            check_disposable_in_return env fty;
+            let (env, (tel, _, ty, _should_forget_fakes)) =
+              call ~expected p env fty el unpacked_element
+            in
+            (* construct the `Hole` using default value and type arguments
              if necessary *)
-          let dflt_ty = MakeType.err Reason.none in
-          let el =
-            Option.value
-              (List.hd tel)
-              ~default:(Tast.make_typed_expr fpos dflt_ty Aast.Null)
-          and (ty_from, ty_to) =
-            match tal with
-            | (ty_from, _) :: (ty_to, _) :: _ -> (ty_from, ty_to)
-            | (ty, _) :: _ -> (ty, ty)
-            | _ -> (dflt_ty, dflt_ty)
-          in
-          make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
-        )
+            let dflt_ty = MakeType.err Reason.none in
+            let el =
+              Option.value
+                (List.hd tel)
+                ~default:(Tast.make_typed_expr fpos dflt_ty Aast.Null)
+            and (ty_from, ty_to) =
+              match tal with
+              | (ty_from, _) :: (ty_to, _) :: _ -> (ty_from, ty_to)
+              | (ty, _) :: _ -> (ty, ty)
+              | _ -> (dflt_ty, dflt_ty)
+            in
+            make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
+          )
+        in
+        let should_forget_fakes = false in
+        (result, should_forget_fakes)
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->
         let (env, tel, _) =
@@ -5773,7 +5812,9 @@ and dispatch_call
         in
         if Option.is_some unpacked_element then
           Errors.unpacking_disallowed_builtin_function p isset;
-        make_call_special_from_def env id tel MakeType.bool
+        let should_forget_fakes = false in
+        let result = make_call_special_from_def env id tel MakeType.bool in
+        (result, should_forget_fakes)
       (* Special function `unset` *)
       | unset when String.equal unset SN.PseudoFunctions.unset ->
         let (env, tel, _) = exprs env el in
@@ -5822,11 +5863,15 @@ and dispatch_call
             checked_unset_error p [];
             env
         in
-        (match el with
-        | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
-          Errors.nullsafe_property_write_context p;
-          make_call_special_from_def env id tel (TUtils.terr env)
-        | _ -> make_call_special_from_def env id tel MakeType.void)
+        let should_forget_fakes = false in
+        let result =
+          match el with
+          | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
+            Errors.nullsafe_property_write_context p;
+            make_call_special_from_def env id tel (TUtils.terr env)
+          | _ -> make_call_special_from_def env id tel MakeType.void
+        in
+        (result, should_forget_fakes)
       (* Special function `array_filter` *)
       | array_filter
         when String.equal array_filter SN.StdlibFunctions.array_filter
@@ -5834,7 +5879,7 @@ and dispatch_call
              && Option.is_none unpacked_element ->
         (* dispatch the call to typecheck the arguments *)
         let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
-        let (env, (tel, typed_unpack_element, res)) =
+        let (env, (tel, typed_unpack_element, res, _should_forget_fakes)) =
           call ~expected p env fty el unpacked_element
         in
         (* but ignore the result and overwrite it with custom return type *)
@@ -5922,18 +5967,23 @@ and dispatch_call
               | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced rty }
               | ty -> ty)
         in
-        make_call
-          env
-          (Tast.make_typed_expr fpos fty (Aast.Id id))
-          tal
-          tel
-          typed_unpack_element
-          rty
+        let should_forget_fakes = false in
+        let result =
+          make_call
+            env
+            (Tast.make_typed_expr fpos fty (Aast.Id id))
+            tal
+            tel
+            typed_unpack_element
+            rty
+        in
+        (result, should_forget_fakes)
       (* Special function `type_structure` *)
       | type_structure
         when String.equal type_structure SN.StdlibFunctions.type_structure
              && Int.equal (List.length el) 2
              && Option.is_none unpacked_element ->
+        let should_forget_fakes = false in
         (match el with
         | [e1; e2] ->
           (match e2 with
@@ -5947,10 +5997,12 @@ and dispatch_call
                 cid
               | _ -> (fst e1, CIexpr e1)
             in
-            class_const ~incl_tc:true env p (cid, (p, cst))
+            let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
+            (result, should_forget_fakes)
           | _ ->
             Errors.illegal_type_structure pos "second argument is not a string";
-            expr_error env (Reason.Rwitness pos) e)
+            let result = expr_error env (Reason.Rwitness pos) e in
+            (result, should_forget_fakes))
         | _ -> assert false)
       (* Special function `array_map` *)
       | array_map
@@ -6076,16 +6128,20 @@ and dispatch_call
             end
           | _ -> (env, fty)
         in
-        let (env, (tel, typed_unpack_element, ty)) =
+        let (env, (tel, typed_unpack_element, ty, _should_forget_fakes)) =
           call ~expected p env fty el None
         in
-        make_call
-          env
-          (Tast.make_typed_expr fpos fty (Aast.Id id))
-          tal
-          tel
-          typed_unpack_element
-          ty
+        let should_forget_fakes = false in
+        let result =
+          make_call
+            env
+            (Tast.make_typed_expr fpos fty (Aast.Id id))
+            tal
+            tel
+            typed_unpack_element
+            ty
+        in
+        (result, should_forget_fakes)
       | _ -> dispatch_id env id
     end
   (* Special Shapes:: function *)
@@ -6240,19 +6296,23 @@ and dispatch_call
   (* Special function `parent::__construct` *)
   | Class_const ((pos, CIparent), ((_, construct) as id))
     when String.equal construct SN.Members.__construct ->
-    let (env, tel, typed_unpack_element, ty, pty, ctor_fty) =
+    let (env, tel, typed_unpack_element, ty, pty, ctor_fty, should_forget_fakes)
+        =
       call_parent_construct p env el unpacked_element
     in
-    make_call
-      env
-      (Tast.make_typed_expr
-         fpos
-         ctor_fty
-         (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
-      [] (* tal: no type arguments to constructor *)
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr
+           fpos
+           ctor_fty
+           (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
+        [] (* tal: no type arguments to constructor *)
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
   (* Calling parent / class method *)
   | Class_const (class_id, m) -> dispatch_class_const env class_id m
   (* Call instance method *)
@@ -6280,23 +6340,26 @@ and dispatch_call
         ty1
     in
     check_disposable_in_return env tfty;
-    let (env, (tel, typed_unpack_element, ty)) =
+    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~nullsafe ~expected p env tfty el unpacked_element
     in
-    make_call
-      env
-      (Tast.make_typed_expr
-         fpos
-         tfty
-         (Aast.Obj_get
-            ( te1,
-              Tast.make_typed_expr pos_id tfty (Aast.Id m),
-              nullflavor,
-              false )))
-      tal
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr
+           fpos
+           tfty
+           (Aast.Obj_get
+              ( te1,
+                Tast.make_typed_expr pos_id tfty (Aast.Id m),
+                nullflavor,
+                false )))
+        tal
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
   (* Call instance method using new method call inference *)
   | Obj_get (receiver, (pos_id, Id meth), nullflavor, false) ->
     (*****
@@ -6365,7 +6428,8 @@ and dispatch_call
       List.map_env env ~f:(localize_targ ~check_well_kinded:true) explicit_targs
     in
     check_disposable_in_return env method_ty;
-    let (env, (typed_params, typed_unpack_element, ret_ty)) =
+    let (env, (typed_params, typed_unpack_element, ret_ty, should_forget_fakes))
+        =
       call ~nullsafe ~expected ?in_await p env method_ty el unpacked_element
     in
     (* If the call is nullsafe AND the receiver is nullable,
@@ -6382,34 +6446,40 @@ and dispatch_call
       else
         (env, ret_ty)
     in
-    make_call
-      env
-      (Tast.make_typed_expr
-         fpos
-         method_ty
-         (Aast.Obj_get
-            ( typed_receiver,
-              Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
-              nullflavor,
-              false )))
-      typed_targs
-      typed_params
-      typed_unpack_element
-      ret_ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr
+           fpos
+           method_ty
+           (Aast.Obj_get
+              ( typed_receiver,
+                Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
+                nullflavor,
+                false )))
+        typed_targs
+        typed_params
+        typed_unpack_element
+        ret_ty
+    in
+    (result, should_forget_fakes)
   (* Function invocation *)
   | Fun_id x ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty)) =
+    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected p env fty el unpacked_element
     in
-    make_call
-      env
-      (Tast.make_typed_expr fpos fty (Aast.Fun_id x))
-      tal
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        (Tast.make_typed_expr fpos fty (Aast.Fun_id x))
+        tal
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
   | Id id -> dispatch_id env id
   | _ ->
     let (env, te, fty) = expr env e in
@@ -6421,17 +6491,20 @@ and dispatch_call
         fty
     in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty)) =
+    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected p env fty el unpacked_element
     in
-    make_call
-      env
-      te
-      (* tal: no type arguments to function values, as they are non-generic *)
-      []
-      tel
-      typed_unpack_element
-      ty
+    let result =
+      make_call
+        env
+        te
+        (* tal: no type arguments to function values, as they are non-generic *)
+        []
+        tel
+        typed_unpack_element
+        ty
+    in
+    (result, should_forget_fakes)
 
 and class_get_res
     ~is_method
@@ -7125,7 +7198,8 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     then
       Errors.constructor_no_args p;
     let (env, tel, _tyl) = exprs env el ~allow_awaitable:(*?*) false in
-    (env, tel, None, TUtils.terr env Reason.Rnone)
+    let should_forget_fakes = true in
+    (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
   | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
     let def_pos = get_pos m in
     TVis.check_obj_access ~use_pos:p ~def_pos env vis;
@@ -7173,10 +7247,10 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
         let ty = TUtils.terr env r in
         (env, ty)
     in
-    let (env, (tel, typed_unpack_element, _ty)) =
+    let (env, (tel, typed_unpack_element, _ty, should_forget_fakes)) =
       call ~expected:None p env m el unpacked_element
     in
-    (env, tel, typed_unpack_element, m)
+    (env, tel, typed_unpack_element, m, should_forget_fakes)
 
 and inout_write_back env { fp_type; _ } (_, e) =
   match e with
@@ -7197,7 +7271,10 @@ and inout_write_back env { fp_type; _ } (_, e) =
   | _ -> env
 
 (** Typechecks a call.
-Returns in this order the typed expressions for the arguments, for the variadic arguments, and the return type. *)
+ * Returns in this order the typed expressions for the arguments, for the
+ * variadic arguments, the return type, and a boolean indicating whether fake
+ * members should be forgotten.
+ *)
 and call
     ~(expected : ExpectedTy.t option)
     ?(nullsafe : Pos.t option = None)
@@ -7207,14 +7284,15 @@ and call
     fty
     (el : Nast.expr list)
     (unpacked_element : Nast.expr option) :
-    env * (Tast.expr list * Tast.expr option * locl_ty) =
+    env * (Tast.expr list * Tast.expr option * locl_ty * bool) =
   let expr = expr ~allow_awaitable:(*?*) false in
   let exprs = exprs ~allow_awaitable:(*?*) false in
   let (env, tyl) = TUtils.get_concrete_supertypes env fty in
   if List.is_empty tyl then begin
     bad_call env pos fty;
     let env = call_untyped_unpack env (get_pos fty) unpacked_element in
-    (env, ([], None, err_witness env pos))
+    let should_forget_fakes = true in
+    (env, ([], None, err_witness env pos, should_forget_fakes))
   end else
     let (env, fty) =
       Typing_intersection.intersect_list env (get_reason fty) tyl
@@ -7272,7 +7350,8 @@ and call
             (env, hole_on_err ~err_opt te))
       in
       let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
-      (env, (tel, None, ty))
+      let should_forget_fakes = true in
+      (env, (tel, None, ty, should_forget_fakes))
     | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
       when match ty with
            | Tprim Tnull -> Option.is_some nullsafe
@@ -7331,7 +7410,8 @@ and call
         | _ (* _ should not happen! *) ->
           mk (r, Tunion [])
       in
-      (env, (tel, None, ty))
+      let should_forget_fakes = true in
+      (env, (tel, None, ty, should_forget_fakes))
     | (_, Tunion [ty]) ->
       call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
     | (r, Tunion tyl) ->
@@ -7339,7 +7419,10 @@ and call
         List.map_env env tyl ~f:(fun env ty ->
             call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
       in
-      let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+      let should_forget_fakes =
+        List.exists resl ~f:(fun (_, _, _, forget) -> forget)
+      in
+      let retl = List.map resl ~f:(fun (_, _, x, _) -> x) in
       let (env, ty) = Union.union_list env r retl in
       (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
        * depend on the types inferred. Here's we're preserving legacy behaviour
@@ -7347,14 +7430,17 @@ and call
        * TODO: don't do this, instead use subtyping to push unions
        * through function types
        *)
-      let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
-      (env, (tel, typed_unpack_element, ty))
+      let (tel, typed_unpack_element, _, _) = List.hd_exn (List.rev resl) in
+      (env, (tel, typed_unpack_element, ty, should_forget_fakes))
     | (r, Tintersection tyl) ->
       let (env, resl) =
         TUtils.run_on_intersection env tyl ~f:(fun env ty ->
             call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
       in
-      let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+      let should_forget_fakes =
+        List.for_all resl ~f:(fun (_, _, _, forget) -> forget)
+      in
+      let retl = List.map resl ~f:(fun (_, _, x, _) -> x) in
       let (env, ty) = Inter.intersect_list env r retl in
       (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
        * depend on the types inferred. Here we're preserving legacy behaviour
@@ -7362,8 +7448,8 @@ and call
        * TODO: don't do this, instead use subtyping to push intersections
        * through function types
        *)
-      let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
-      (env, (tel, typed_unpack_element, ty))
+      let (tel, typed_unpack_element, _, _) = List.hd_exn (List.rev resl) in
+      (env, (tel, typed_unpack_element, ty, should_forget_fakes))
     | (r2, Tfun ft) ->
       (* Typing of format string functions. It is dependent on the arguments (el)
        * so it cannot be done earlier.
@@ -7577,6 +7663,17 @@ and call
                 ~required_pos:(Typing_defs.get_pos capability)
                 ~required:(Typing_print.coeffects env capability))
       in
+      let should_forget_fakes =
+        (* If the function doesn't have write priveleges to properties, fake
+        members cannot be reassigned, so their refinements stand. *)
+        let capability =
+          Typing_coeffects.get_type ft.ft_implicit_params.capability
+        in
+        SubType.is_sub_type
+          env
+          capability
+          (MakeType.write_property_capability Reason.Rnone)
+      in
 
       (* First check the non-lambda arguments. For generic functions, this
        * is likely to resolve type variables to concrete types *)
@@ -7709,7 +7806,7 @@ and call
       let () = check_arity ~did_unpack pos pos_def ft arity in
       (* Variadic params cannot be inout so we can stop early *)
       let env = wfold_left2 inout_write_back env ft.ft_params el in
-      (env, (tel, typed_unpack_element, ft.ft_ret.et_type))
+      (env, (tel, typed_unpack_element, ft.ft_ret.et_type, should_forget_fakes))
     | (r, Tvar _)
       when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
       (*
@@ -7802,11 +7899,13 @@ and call
       let env =
         Type.sub_type pos Reason.URnone env efty fun_type Errors.unify_error
       in
-      (env, (typed_el, typed_unpacked_element, return_ty))
+      let should_forget_fakes = true in
+      (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
     | _ ->
       bad_call env pos efty;
       let env = call_untyped_unpack env (get_pos efty) unpacked_element in
-      (env, ([], None, err_witness env pos))
+      let should_forget_fakes = true in
+      (env, ([], None, err_witness env pos, should_forget_fakes))
 
 and call_untyped_unpack env f_pos unpacked_element =
   match unpacked_element with
@@ -8070,7 +8169,7 @@ and overload_function
       method_id
       class_id
   in
-  let (env, (tel, typed_unpack_element, res)) =
+  let (env, (tel, typed_unpack_element, res, should_forget_fakes)) =
     call ~expected:None p env fty el unpacked_element
   in
   let (env, ty) = f env fty res el in
@@ -8081,7 +8180,7 @@ and overload_function
         | ty -> ty)
   in
   let te = Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id)) in
-  make_call env te tal tel typed_unpack_element ty
+  (make_call env te tal tel typed_unpack_element ty, should_forget_fakes)
 
 and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
   match valkind with

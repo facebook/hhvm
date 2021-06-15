@@ -83,7 +83,7 @@ val call :
   Nast.expr list ->
   Nast.expr option ->
   Typing_env_types.env
-  * (Tast.expr list * Tast.expr option * Typing_defs.locl_ty)
+  * (Tast.expr list * Tast.expr option * Typing_defs.locl_ty * bool)
 
 val with_special_coeffects :
   Typing_env_types.env ->

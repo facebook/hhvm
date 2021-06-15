@@ -18,7 +18,7 @@ val check_def :
   'b list ->
   Nast.expr list ->
   'c option ->
-  Typing_env_types.env * 'l * 'm * 'n * 'o * 'p * 'q) ->
+  Typing_env_types.env * 'l * 'm * 'n * 'o * 'p * 'q * 'r) ->
   string ->
   Nast.user_attribute list ->
   Typing_env_types.env

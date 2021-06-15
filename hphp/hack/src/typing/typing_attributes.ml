@@ -91,7 +91,7 @@ let check_implements
           (Cls.name intf_class);
         env
       ) else
-        let (env, _, _, _, _, _, _) =
+        let (env, _, _, _, _, _, _, _) =
           check_new_object
             ~expected:None
             ~check_parent:false

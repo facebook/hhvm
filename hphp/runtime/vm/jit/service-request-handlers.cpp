@@ -345,9 +345,16 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
   }
 }
 
-TCA handleResume(bool interpFirst) {
+std::string ResumeFlags::show() const {
+  std::vector<std::string> flags;
+  if (m_noTranslate) flags.emplace_back("noTranslate");
+  if (m_interpFirst) flags.emplace_back("interpFirst");
+  return folly::join(", ", flags);
+}
+
+TCA handleResume(ResumeFlags flags) {
   assert_native_stack_aligned();
-  FTRACE(1, "handleResume({})\n", interpFirst);
+  FTRACE(1, "handleResume({})\n", flags.show());
 
   if (!vmRegsUnsafe().pc) return tc::ustubs().callToExit;
 
@@ -356,16 +363,28 @@ TCA handleResume(bool interpFirst) {
   auto sk = liveSK();
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 
-  TCA start;
-  if (interpFirst) {
-    start = nullptr;
-    INC_TPC(interp_bb_force);
-  } else {
-    auto const trans = getTranslation(sk);
-    start = trans.isRequestPersistentFailure()
-      ? tc::ustubs().interpHelperNoTranslate
-      : trans.addr();
-  }
+  auto const findOrTranslate = [&] () -> TCA {
+    if (!flags.m_noTranslate) {
+      auto const trans = getTranslation(sk);
+      return trans.isRequestPersistentFailure()
+        ? tc::ustubs().interpHelperNoTranslate
+        : trans.addr();
+    }
+
+    if (auto const sr = tc::findSrcRec(sk)) {
+      if (auto const tca = sr->getTopTranslation()) {
+        if (LIKELY(RID().getJit())) {
+          SKTRACE(2, sk, "handleResume: found %p\n", tca);
+          return tca;
+        }
+      }
+    }
+    return nullptr;
+  };
+
+  TCA start = nullptr;
+  if (!flags.m_interpFirst) start = findOrTranslate();
+  if (!flags.m_noTranslate && flags.m_interpFirst) INC_TPC(interp_bb_force);
 
   vmJitReturnAddr() = nullptr;
   vmJitCalledFrame() = vmfp();
@@ -376,68 +395,8 @@ TCA handleResume(bool interpFirst) {
   // created, if the lease holder dropped it).
   if (!start) {
     WorkloadStats guard(WorkloadStats::InInterp);
-
     tracing::BlockNoTrace _{"dispatch-bb"};
 
-    while (!start) {
-      INC_TPC(interp_bb);
-      if (auto const retAddr = HPHP::dispatchBB()) {
-        start = retAddr;
-        break;
-      }
-
-      assertx(vmpc());
-      sk = liveSK();
-
-      auto const trans = getTranslation(sk);
-      start = trans.isRequestPersistentFailure()
-        ? tc::ustubs().interpHelperNoTranslate
-        : trans.addr();
-    }
-  }
-
-  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
-    Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
-  }
-
-  tl_regState = VMRegState::DIRTY;
-  return start;
-}
-
-TCA handleResumeNoTranslate(bool interpFirst) {
-  assert_native_stack_aligned();
-  FTRACE(1, "handleResumeNoTranslate({})\n", interpFirst);
-
-  if (!vmRegsUnsafe().pc) return tc::ustubs().callToExit;
-
-  tl_regState = VMRegState::CLEAN;
-
-  auto sk = liveSK();
-  FTRACE(2, "handleResumeNoTranslate: sk: {}\n", showShort(sk));
-
-  auto const find = [&] () -> TCA {
-    if (auto const sr = tc::findSrcRec(sk)) {
-      if (auto const tca = sr->getTopTranslation()) {
-        if (LIKELY(RID().getJit())) {
-          SKTRACE(2, sk, "handleResumeNoTranslate: found %p\n", tca);
-          return tca;
-        }
-      }
-    }
-    return nullptr;
-  };
-
-  TCA start = nullptr;
-  if (!interpFirst) start = find();
-
-  vmJitReturnAddr() = nullptr;
-  vmJitCalledFrame() = vmfp();
-  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
-
-  if (!start) {
-    WorkloadStats guard(WorkloadStats::InInterp);
-    tracing::BlockNoTrace _{"dispatch-bb"};
     do {
       INC_TPC(interp_bb);
       if (auto const retAddr = HPHP::dispatchBB()) {
@@ -445,7 +404,7 @@ TCA handleResumeNoTranslate(bool interpFirst) {
       } else {
         assertx(vmpc());
         sk = liveSK();
-        start = find();
+        start = findOrTranslate();
       }
     } while (!start);
   }

@@ -779,25 +779,19 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
 
 struct ResumeHelperEntryPoints {
   TCA resumeHelper;
-  TCA handleResume;
   TCA reenterTC;
-  TCA resumeHelperNoTranslate;
-  TCA handleResumeNoTranslate;
 };
 
-ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
-  ResumeHelperEntryPoints rh;
+TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
+                      ResumeHelperEntryPoints& rh) {
+  alignCacheLine(cb);
 
-  rh.resumeHelper = vwrap(cb, data, [] (Vout& v) {
-    v << ldimmb{0, rarg(0)};
-    v << fallthru{arg_regs(1)};
-  });
-
-  rh.handleResume = vwrap(cb, data, [] (Vout& v) {
+  auto const handleResume = vwrap(cb, data, [] (Vout& v) {
     loadVmfp(v);
 
     auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
     v << call{handler, arg_regs(1)};
+    v << fallthru{RegSet{rret()}};
   });
 
   rh.reenterTC = vwrap(cb, data, [] (Vout& v) {
@@ -811,44 +805,24 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
     v << jmpr{target, php_return_regs()};
   });
 
-  rh.resumeHelperNoTranslate = vwrap(cb, data, [] (Vout& v) {
-    v << ldimmb{0, rarg(0)};
-    v << fallthru{arg_regs(1)};
-  });
+  auto const emitOne = [&] (svcreq::ResumeFlags flags, bool syncVMRegs) {
+    return vwrap(cb, data, [&] (Vout& v) {
+      if (syncVMRegs) storeVMRegs(v);
+      v << ldimmb{flags.m_asByte, rarg(0)};
+      v << jmpi{handleResume, arg_regs(1)};
+    });
+  };
 
-  rh.handleResumeNoTranslate = vwrap(cb, data, [&] (Vout& v) {
-    loadVmfp(v);
+  us.resumeHelper = rh.resumeHelper = emitOne(
+    svcreq::ResumeFlags(), false);
+  us.resumeHelperNoTranslate = emitOne(
+    svcreq::ResumeFlags().noTranslate(), false);
+  us.interpHelper = emitOne(
+     svcreq::ResumeFlags().interpFirst(), true);
+  us.interpHelperNoTranslate = emitOne(
+     svcreq::ResumeFlags().noTranslate().interpFirst(), true);
 
-    auto const handler =
-      reinterpret_cast<TCA>(svcreq::handleResumeNoTranslate);
-    v << call{handler};
-    v << jmpi{rh.reenterTC, RegSet{rret()}};
-  });
-
-  return rh;
-}
-
-TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
-                            ResumeHelperEntryPoints& rh) {
-  alignCacheLine(cb);
-
-  rh = emitResumeHelpers(cb, data);
-
-  us.resumeHelper = rh.resumeHelper;
-  us.resumeHelperNoTranslate = rh.resumeHelperNoTranslate;
-
-  us.interpHelper = vwrap(cb, data, [&] (Vout& v) {
-    storeVMRegs(v);
-    v << ldimmb{1, rarg(0)};
-    v << jmpi{rh.handleResume, arg_regs(1)};
-  });
-  us.interpHelperNoTranslate = vwrap(cb, data, [&] (Vout& v) {
-    storeVMRegs(v);
-    v << ldimmb{1, rarg(0)};
-    v << jmpi{rh.handleResumeNoTranslate, arg_regs(1)};
-  });
-
-  return us.resumeHelper;
+  return handleResume;
 }
 
 TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
@@ -1305,9 +1279,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ResumeHelperEntryPoints rh;
   EMIT(
-    "resumeInterpHelpers",
+    "resumeHelpers",
     hotView(),
-    [&] { return emitResumeInterpHelpers(hot(), data, *this, rh); }
+    [&] { return emitResumeHelpers(hot(), data, *this, rh); }
   );
   emitInterpOneCFHelpers(cold, data, *this, view, rh, code, dbg);
 

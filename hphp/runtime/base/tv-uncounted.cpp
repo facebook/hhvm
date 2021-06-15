@@ -151,7 +151,9 @@ ArrayData* MakeUncountedArray(
   }
 
   auto const result = in->makeUncounted(env, hasApcTv);
-  if (seenArr) *seenArr = result;
+  // NOTE: We may have mutated env.seen in makeUncounted, so we must redo
+  // the hash table lookup here. We only use seenArr to test for presence.
+  if (seenArr) (*env.seen)[in] = result;
   return result;
 }
 

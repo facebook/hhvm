@@ -1,0 +1,4 @@
+string(5) "hello"
+string(4) "main"
+
+Catchable fatal error: Argument 1 passed to fooObj() must implement interface StringishObject, class given in %s/class-stringish.php on line 17

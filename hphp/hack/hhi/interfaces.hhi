@@ -849,6 +849,13 @@ interface Stringish extends XHPChild {
   public function __toString(): string;
 }
 
+/**
+ * StringishObject represents values of Stringish that are specifically objects
+ */
+interface StringishObject extends Stringish {
+  public function __toString(): string;
+}
+
 } // namespace
 
 namespace HH {

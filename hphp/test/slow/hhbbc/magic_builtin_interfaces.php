@@ -8,6 +8,7 @@ function instance_of_test(varray $x) {
   var_dump($x is Container);   // autoimported
   var_dump($x is XHPChild);
   var_dump($x is Stringish);
+  var_dump($x is StringishObject);
   var_dump($x is \HH\KeyedTraversable);
   var_dump($x is KeyedTraversable); // autoimported
   var_dump($x is \HH\KeyedContainer);
@@ -31,6 +32,13 @@ function type_hint_stringish(Stringish $x) {
   var_dump(is_string($x));
 }
 
+function type_hint_stringishObject(StringishObject $x) {
+  echo '==================== ', __FUNCTION__,' ====================', "\n";
+  var_dump($x is StringishObject);
+  var_dump($x is XHPChild);
+  var_dump(is_string($x));
+}
+
 class C {
   public function __toString() {
     return 'C';
@@ -44,6 +52,7 @@ function main() {
 
   $c = new C();
   type_hint_stringish($c);
+  type_hint_stringishObject($c);
 }
 
 <<__EntryPoint>>

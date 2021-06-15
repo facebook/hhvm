@@ -1,10 +1,10 @@
 <?hh
 
-class A implements Stringish {
+class A implements StringishObject{
   function __toString() { return "I'M A"; }
 }
 
-class B implements Stringish {
+class B implements StringishObject{
   function __toString() { return "I'M B"; }
 }
 

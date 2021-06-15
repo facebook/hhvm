@@ -9,7 +9,7 @@
  *
  */
 
-class CExplicit implements Stringish {
+class CExplicit implements StringishObject{
   public function __toString(): string {
     return __CLASS__;
   }
@@ -55,7 +55,7 @@ trait TStringish {
 }
 
 trait TReq {
-  require implements Stringish;
+  require implements StringishObject;
 
   private function foo(): void {
     echo 'foo'.$this;

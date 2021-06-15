@@ -56,7 +56,7 @@ type state =
           (** [synths] accumulates synthesized ancestors that we determined we needed during
               the linearization. These are emitted at the end of the linearization
               in Synthesized_elts, after all ancestors have been dealt with. For
-              Ancestor_types linearization, this is only ever Stringish (if we encounter a
+              Ancestor_types linearization, this is only ever StringishObject (if we encounter a
               method named to_string). For Member_resolution, it consists of all ancestors
               reachable through a require-extends clause. *)
     }
@@ -207,12 +207,15 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
     Aast.enum_includes_map c.sc_enum_type ~f:(fun enum_type ->
         get_ancestors IncludedEnum enum_type.te_includes)
   in
-  (* HHVM implicitly adds the Stringish interface to every class, interface, and
-     trait with a __toString method. The primitive type `string` is considered
-     to also implement this interface. *)
+  (* HHVM implicitly adds the StringishObject interface to every class, interface, and
+     trait with a __toString method. StringishObject <: Stringish, which the
+     primitive type `string` is considered to also implement. *)
   let stringish_interface c =
     let module SN = Naming_special_names in
-    if String.equal (snd c.sc_name) SN.Classes.cStringish then
+    if
+      String.equal (snd c.sc_name) SN.Classes.cStringish
+      || String.equal (snd c.sc_name) SN.Classes.cStringishObject
+    then
       []
     else
       let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
@@ -220,7 +223,9 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
       | None -> []
       | Some { sm_name = (pos, _); _ } ->
         let ty =
-          mk (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
+          mk
+            ( Typing_reason.Rhint pos,
+              Tapply ((pos, SN.Classes.cStringishObject), []) )
         in
         [ancestor_from_ty Interface ty]
   in
@@ -242,8 +247,8 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
          of a class, which is used in subtyping), we need to build the
          linearization in the order [extends; implements; uses]. Require-extends
          and require-implements relationships need to be included only to
-         support Stringish (and can be removed here if we remove support for the
-         magic Stringish type, or require it to be explicitly implemented). *)
+         support StringishObject (and can be removed here if we remove support for the
+         magic StringishObject type, or require it to be explicitly implemented). *)
     List.concat
       [
         extends c;
@@ -491,12 +496,13 @@ and next_state
           | Ancestor_types ->
             (* For ancestor types, we don't care about require-extends or
              require-implements relationships, except for the fact that we want
-             Stringish as an ancestor if we have some ancestor which requires
+             StringishObject as an ancestor if we have some ancestor which requires
              it. *)
             let should_skip =
               ( is_set mro_via_req_extends next.mro_flags
               || is_set mro_via_req_impl next.mro_flags )
               && String.( <> ) next.mro_name SN.Classes.cStringish
+              && String.( <> ) next.mro_name SN.Classes.cStringishObject
             in
             let next =
               if should_skip then

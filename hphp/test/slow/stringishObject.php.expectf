@@ -1,12 +1,16 @@
 ********** static string **********
-true, false, string(15) "a boring string"
+Handled 2: Argument 1 to f1() must be of type @?StringishObject, string given
+false, false, string(15) "a boring string"
 
-true, false, string(15) "a boring string"
+Handled 2: Argument 1 to f2() must be of type @StringishObject, string given
+false, false, string(15) "a boring string"
 
 ********** dynamic string **********
-true, false, string(11) "hello world"
+Handled 2: Argument 1 to f1() must be of type @?StringishObject, string given
+false, false, string(11) "hello world"
 
-true, false, string(11) "hello world"
+Handled 2: Argument 1 to f2() must be of type @StringishObject, string given
+false, false, string(11) "hello world"
 
 ********** explicit implements **********
 true, true, object(CExplicit) (0) {
@@ -32,18 +36,18 @@ true, true, object(CThruTrait) (0) {
 ********** null **********
 false, false, NULL
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, null given
+Handled 2: Argument 1 to f2() must be of type @StringishObject, null given
 false, false, NULL
 
 ********** array **********
-Handled 2: Argument 1 to f1() must be of type @?Stringish, HH\vec given
+Handled 2: Argument 1 to f1() must be of type @?StringishObject, HH\vec given
 false, false, vec(3) {
   int(1)
   int(2)
   int(3)
 }
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, HH\vec given
+Handled 2: Argument 1 to f2() must be of type @StringishObject, HH\vec given
 false, false, vec(3) {
   int(1)
   int(2)
@@ -51,16 +55,16 @@ false, false, vec(3) {
 }
 
 ********** number **********
-Handled 2: Argument 1 to f1() must be of type @?Stringish, int given
+Handled 2: Argument 1 to f1() must be of type @?StringishObject, int given
 false, false, int(10)
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, int given
+Handled 2: Argument 1 to f2() must be of type @StringishObject, int given
 false, false, int(10)
 
-Handled 2: Argument 1 to f1() must be of type @?Stringish, float given
+Handled 2: Argument 1 to f1() must be of type @?StringishObject, float given
 false, false, float(-4.2)
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, float given
+Handled 2: Argument 1 to f2() must be of type @StringishObject, float given
 false, false, float(-4.2)
 
 
@@ -72,10 +76,12 @@ bool(true)
 bool(false)
 bool(true)
 vec(3) {
+  string(15) "StringishObject"
   string(9) "Stringish"
   string(8) "XHPChild"
-  string(15) "StringishObject"
 }
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 vec(3) {
@@ -85,11 +91,15 @@ vec(3) {
 }
 bool(true)
 bool(true)
+bool(true)
+bool(true)
 vec(3) {
   string(15) "StringishObject"
   string(9) "Stringish"
   string(8) "XHPChild"
 }
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 vec(3) {
@@ -99,10 +109,14 @@ vec(3) {
 }
 bool(false)
 bool(false)
+bool(false)
+bool(false)
 vec(3) {
   string(15) "StringishObject"
   string(9) "Stringish"
   string(8) "XHPChild"
 }
+bool(true)
+bool(true)
 bool(true)
 bool(true)

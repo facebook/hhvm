@@ -423,17 +423,18 @@ and class_decl
           String.equal (snd sm.sm_name) SN.Members.__toString)
     with
     | Some { sm_name = (pos, _); _ }
-      when String.( <> ) cls_name SN.Classes.cStringish ->
-      (* HHVM implicitly adds Stringish interface for every class/iface/trait
+      when String.( <> ) cls_name SN.Classes.cStringishObject
+           && String.( <> ) cls_name SN.Classes.cStringish ->
+      (* HHVM implicitly adds StringishObject interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
-      (* Declare Stringish and parents if not already declared *)
+      (* Declare StringishObject and parents if not already declared *)
       let class_env = { ctx; stack = SSet.empty } in
       let (_ : _ option) =
-        (* Ensure stringish is declared. *)
-        class_decl_if_missing ~sh class_env SN.Classes.cStringish
+        (* Ensure stringishObject is declared. *)
+        class_decl_if_missing ~sh class_env SN.Classes.cStringishObject
       in
       let ty =
-        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
+        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
       in
       ty :: impl
     | _ -> impl

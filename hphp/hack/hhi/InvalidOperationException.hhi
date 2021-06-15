@@ -9,4 +9,4 @@
  */
 
 class InvalidOperationException extends RuntimeException
-  implements Stringish {}
+  implements StringishObject{}

@@ -53,6 +53,8 @@ pub mod classes {
 
     pub const STRINGISH: &str = "\\Stringish";
 
+    pub const STRINGISH_OBJECT: &str = "\\StringishObject";
+
     pub const XHP_CHILD: &str = "\\XHPChild";
 
     pub const IMEMOIZE_PARAM: &str = "\\HH\\IMemoizeParam";

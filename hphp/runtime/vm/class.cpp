@@ -3578,6 +3578,7 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 }
 
 const StaticString s_Stringish("Stringish");
+const StaticString s_StringishObject("StringishObject");
 const StaticString s_XHPChild("XHPChild");
 
 void Class::setInterfaces() {
@@ -3626,22 +3627,24 @@ void Class::setInterfaces() {
   addInterfacesFromUsedTraits(interfacesBuilder);
 
   if (m_toString) {
-    if (!interfacesBuilder.contains(s_Stringish.get()) &&
+    if ((!interfacesBuilder.contains(s_StringishObject.get()) ||
+         !interfacesBuilder.contains(s_Stringish.get())) &&
         (!(attrs() & AttrInterface) ||
-         !m_preClass->name()->isame(s_Stringish.get()))) {
-      // Add Stringish
-      Class* stringish = Class::lookup(s_Stringish.get());
-      assertx(stringish != nullptr);
-      assertx((stringish->attrs() & AttrInterface));
-      interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
+         (!m_preClass->name()->isame(s_StringishObject.get()) &&
+          !m_preClass->name()->isame(s_Stringish.get())))) {
 
-      if (!m_preClass->name()->isame(s_XHPChild.get()) &&
-          !interfacesBuilder.contains(s_XHPChild.get())) {
-        // All Stringish are also XHPChild
-        Class* xhpChild = Class::lookup(s_XHPChild.get());
-        assertx(xhpChild != nullptr);
-        assertx((xhpChild->attrs() & AttrInterface));
-        interfacesBuilder.add(xhpChild->name(), LowPtr<Class>(xhpChild));
+      // Add Stringish & XHP child (All StringishObjects are also XHPChild)
+      const auto maybe_add = [&](StaticString name) {
+        if (interfacesBuilder.contains(name.get())) return;
+        Class* cls = Class::lookup(name.get());
+        assertx(cls != nullptr);
+        assertx(cls->attrs() & AttrInterface);
+        interfacesBuilder.add(cls->name(), LowPtr<Class>(cls));
+      };
+      maybe_add(s_StringishObject);
+      maybe_add(s_Stringish);
+      if (!m_preClass->name()->isame(s_XHPChild.get())) {
+        maybe_add(s_XHPChild);
       }
     }
   }

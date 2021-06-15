@@ -33,7 +33,7 @@ class DerivedImplementing extends Implementing implements SimpleInterface {
 
 function with_requiring_trait(DerivedImplementing $arg): void {}
 
-class ImplementsBuiltin implements Stringish {
+class ImplementsBuiltin implements StringishObject {
   public function __toString(): string {
     return "";
   }

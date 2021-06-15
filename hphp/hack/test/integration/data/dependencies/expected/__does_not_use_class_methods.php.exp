@@ -1,6 +1,6 @@
 <?hh
 
-class ImplementsBuiltin implements \Stringish {
+class ImplementsBuiltin implements \StringishObject {
   public function __toString(): string {
     throw new \Exception();
   }

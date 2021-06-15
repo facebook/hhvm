@@ -2,7 +2,7 @@
 
 class CNonStringish {}
 
-class CExplicit implements Stringish {
+class CExplicit implements StringishObject{
   public function __toString(): string {
     return __CLASS__;
   }
@@ -39,7 +39,7 @@ class CImplicitTuse {
 }
 
 trait TReq {
-  require implements Stringish;
+  require implements StringishObject;
 
   private function foo(): string {
     return (string) $this;

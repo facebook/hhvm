@@ -8,4 +8,4 @@
  *
  */
 
-class ImagickException extends RuntimeException implements Stringish {}
+class ImagickException extends RuntimeException implements StringishObject{}

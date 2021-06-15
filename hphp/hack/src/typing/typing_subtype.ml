@@ -552,7 +552,24 @@ and default_subtype
             default env
           else
             valid env
-        | (_, Tvar _) -> default env
+        | (_, Tvar id) ->
+          (* For subtyping queries of the form
+           *
+           *   Tvar #id <: (Tvar #id | ...)
+           *
+           * `remove_tyvar_from_upper_bound` simplifies the union to
+           * `mixed`. This indicates that the query is discharged. If we find
+           * any other upper bound, we leave the subtyping query as it is.
+           *)
+          let (env, simplified_super_ty) =
+            Typing_solver_utils.remove_tyvar_from_upper_bound env id ty_super
+          in
+          let mixed = MakeType.mixed Reason.none in
+          (match simplified_super_ty with
+          | LoclType simplified_super_ty when ty_equal simplified_super_ty mixed
+            ->
+            valid env
+          | _ -> default env)
         | (r_sub, Tintersection tyl) ->
           (* A & B <: C iif A <: C | !B *)
           (match find_type_with_exact_negation env tyl with

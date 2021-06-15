@@ -1077,7 +1077,8 @@ let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =
   Int.equal (constraint_ty_compare ~normalize_lists ty1 ty2) 0
 
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
-  Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)
+  phys_equal (get_node ty1) (get_node ty2)
+  || Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)
 
 let equal_internal_type ty1 ty2 =
   match (ty1, ty2) with

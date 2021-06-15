@@ -118,7 +118,7 @@ void checkReifiedGenericMismatchHelper(
   const StringData* name,
   const ArrayData* reified_generics
 ) {
-  auto const generics = info.m_typeParamInfo;
+  auto const& generics = info.m_typeParamInfo;
   auto const len = generics.size();
   if (len != reified_generics->size()) {
     if (reified_generics->size() == 0) {

@@ -1,0 +1,672 @@
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(1) "a"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(1) "A"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(1) "c"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(1) "C"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(2) "ab"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "abc"
+  ["needle"]=>
+  string(2) "bc"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(8) "αλφα"
+  ["needle"]=>
+  string(8) "Αλφα"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "iab"
+  ["needle"]=>
+  string(1) "i"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "iab"
+  ["needle"]=>
+  string(1) "I"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "iab"
+  ["needle"]=>
+  string(2) "ı"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(3) "iab"
+  ["needle"]=>
+  string(2) "İ"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(0) ""
+  ["needle"]=>
+  string(0) ""
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(0) ""
+  ["needle"]=>
+  string(1) "a"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(1) "a"
+  ["needle"]=>
+  string(0) ""
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(true)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(1) "a"
+  ["needle"]=>
+  string(27) "needle longer than haystack"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(false)
+    ["tr_TR.UTF-8"]=>
+    bool(false)
+  }
+}
+dict(6) {
+  ["haystack"]=>
+  string(6) "دِّ"
+  ["needle"]=>
+  string(6) "دِّ"
+  ["starts_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["starts_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+  ["ends_with_ci"]=>
+  dict(3) {
+    ["c"]=>
+    bool(false)
+    ["en_US.UTF-8"]=>
+    bool(true)
+    ["tr_TR.UTF-8"]=>
+    bool(true)
+  }
+}

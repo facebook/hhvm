@@ -23,10 +23,13 @@
 
 #include <unicode/coll.h>
 #include <unicode/errorcode.h>
+#include <unicode/normalizer2.h>
 #include <unicode/uchar.h>
 #include <unicode/unistr.h>
+#include <unicode/uvernum.h>
 
 #include <functional>
+
 
 namespace HPHP {
 
@@ -53,6 +56,10 @@ int64_t HSLLocaleICUOps::strlen(const String& str) const {
 
 namespace {
 
+ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::String& str) {
+  return icu::StringPiece(str.data(), str.size());
+}
+
 ALWAYS_INLINE String utf8_icu_op(
   const String& utf8_in,
   std::function<void(icu::UnicodeString&)> op
@@ -61,7 +68,7 @@ ALWAYS_INLINE String utf8_icu_op(
     return utf8_in;
   }
 
-  auto mut = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_in.data(), utf8_in.length()));
+  auto mut = icu::UnicodeString::fromUTF8(icu_string_piece(utf8_in));
   op(mut);
   std::string ret;
   mut.toUTF8String(ret);
@@ -93,7 +100,7 @@ String HSLLocaleICUOps::foldcase(const String& str) const {
 
 Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
   assert(chunk_size > 0);
-  auto icustr = icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.length()));
+  auto icustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
   const auto len = icustr.countChar32();
   VecInit ret { (size_t) (len / chunk_size + 1) };
   if (len <= chunk_size) {
@@ -121,25 +128,102 @@ int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
   icu::ErrorCode err;
   auto coll = collator();
   coll->setStrength(icu::Collator::TERTIARY); // accent- and case-sensitive
-  return coll->compareUTF8(
-    icu::StringPiece(a.data(), a.length()),
-    icu::StringPiece(b.data(), b.length()),
-    err
-  );
+  return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
 }
 
 int64_t HSLLocaleICUOps::strcasecmp(const String& a, const String& b) const {
-  assertx(!a.isNull() && !b.isNull());
   assertx(!a.isNull() && !b.isNull());
 
   icu::ErrorCode err;
   auto coll = collator();
   coll->setStrength(icu::Collator::SECONDARY); // accent-sensitive, not case-sensitive
-  return coll->compareUTF8(
-    icu::StringPiece(a.data(), a.length()),
-    icu::StringPiece(b.data(), b.length()),
-    err
-  );
+  return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
+}
+
+bool HSLLocaleICUOps::starts_with(const String& str, const String& prefix) const {
+  assertx(!str.isNull() && !prefix.isNull());
+  if (str.substr(0, prefix.size()) == prefix) {
+    return true;
+  }
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto uprefix = icu::UnicodeString::fromUTF8(icu_string_piece(prefix));
+  icu::UnicodeString nprefix;
+  normalizer->normalize(uprefix, nprefix, err);
+  if (ustr.startsWith(nprefix)) {
+    return true;
+  }
+  icu::UnicodeString nstr;
+  normalizer->normalize(ustr, nstr, err);
+  return nstr.startsWith(nprefix);
+}
+
+bool HSLLocaleICUOps::ends_with(const String& str, const String& suffix) const {
+  assertx(!str.isNull() && !suffix.isNull());
+  int64_t off = str.size() - suffix.size();
+  if (off >= 0 && str.substr((int) off, suffix.size()) == suffix) {
+    return true;
+  }
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto usuffix = icu::UnicodeString::fromUTF8(icu_string_piece(suffix));
+  icu::UnicodeString nsuffix;
+  normalizer->normalize(usuffix, nsuffix, err);
+  if (ustr.endsWith(nsuffix)) {
+    return true;
+  }
+  icu::UnicodeString nstr;
+  normalizer->normalize(ustr, nstr, err);
+  return nstr.endsWith(nsuffix);
+}
+
+bool HSLLocaleICUOps::starts_with_ci(const String& str, const String& prefix) const {
+  assertx(!str.isNull() && !prefix.isNull());
+  if (str.substr(0, prefix.size()) == prefix) {
+    return true;
+  }
+  auto uprefix = icu::UnicodeString::fromUTF8(icu_string_piece(prefix));
+  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+
+  uprefix.foldCase(m_caseFoldFlags);
+  ustr.foldCase(m_caseFoldFlags);
+
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  icu::UnicodeString nprefix;
+  icu::UnicodeString nstr;
+  normalizer->normalize(uprefix, nprefix, err);
+  normalizer->normalize(ustr, nstr, err);
+  return nstr.startsWith(nprefix);
+}
+
+bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) const {
+  assertx(!str.isNull() && !suffix.isNull());
+  int64_t off = str.size() - suffix.size();
+  if (off >= 0 && str.substr(off, suffix.size()) == suffix) {
+    return true;
+  }
+  auto usuffix = icu::UnicodeString::fromUTF8(icu_string_piece(suffix));
+  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+
+  usuffix.foldCase(m_caseFoldFlags);
+  ustr.foldCase(m_caseFoldFlags);
+
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  icu::UnicodeString nsuffix;
+  icu::UnicodeString nstr;
+  normalizer->normalize(usuffix, nsuffix, err);
+  normalizer->normalize(ustr, nstr, err);
+  return nstr.endsWith(nsuffix);
 }
 
 icu::Collator* HSLLocaleICUOps::collator() const {
@@ -150,6 +234,14 @@ icu::Collator* HSLLocaleICUOps::collator() const {
   icu::ErrorCode err;
   const_cast<HSLLocaleICUOps*>(this)->m_collator =
     icu::Collator::createInstance(this->m_collate, err);
+  if (err.isFailure()) {
+    SystemLib::throwErrorObject(
+      folly::sformat(
+        "Failed to create a collator: {}",
+        err.errorName()
+      )
+    );
+  }
   return m_collator;
 }
 

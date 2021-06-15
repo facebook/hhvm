@@ -39,5 +39,13 @@ function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
 function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
 <<__Native>>
 function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
+<<__Native>>
+function starts_with_l(string $str, string $prefix, ?Locale $loc = null): bool;
+<<__Native>>
+function starts_with_ci_l(string $str, string $prefix, ?Locale $loc = null): bool;
+<<__Native>>
+function ends_with_l(string $str, string $suffix, ?Locale $loc = null): bool;
+<<__Native>>
+function ends_with_ci_l(string $str, string $suffix, ?Locale $loc = null): bool;
 
 } // namespace HH\Lib\_Private\_Str

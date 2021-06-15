@@ -21,5 +21,9 @@ function chunk_l(string $str, int $chunk_size, ?Locale $loc = null): vec<string>
 
 function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
 function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
+function starts_with_l(string $str, string $prefix, ?Locale $loc = null): bool;
+function starts_with_ci_l(string $str, string $prefix, ?Locale $loc = null): bool;
+function ends_with_l(string $str, string $suffix, ?Locale $loc = null): bool;
+function ends_with_ci_l(string $str, string $suffix, ?Locale $loc = null): bool;
 
 } // namespace HH\Lib\_Private\_Str

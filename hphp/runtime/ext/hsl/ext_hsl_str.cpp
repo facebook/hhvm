@@ -108,6 +108,34 @@ int64_t HHVM_FUNCTION(strcasecmp_l,
   return get_locale(maybe_loc)->ops()->strcasecmp(a, b);
 }
 
+bool HHVM_FUNCTION(starts_with_l,
+                   const String& string,
+                   const String& prefix,
+                   const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->starts_with(string, prefix);
+}
+
+bool HHVM_FUNCTION(starts_with_ci_l,
+                   const String& string,
+                   const String& prefix,
+                   const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->starts_with_ci(string, prefix);
+}
+
+bool HHVM_FUNCTION(ends_with_l,
+                   const String& string,
+                   const String& suffix,
+                   const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->ends_with(string, suffix);
+}
+
+bool HHVM_FUNCTION(ends_with_ci_l,
+                   const String& string,
+                   const String& suffix,
+                   const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->ends_with_ci(string, suffix);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -128,6 +156,10 @@ struct HSLStrExtension final : Extension {
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcoll_l, strcoll_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcasecmp_l, strcasecmp_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\starts_with_l, starts_with_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\starts_with_ci_l, starts_with_ci_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\ends_with_l, ends_with_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\ends_with_ci_l, ends_with_ci_l);
     loadSystemlib();
   }
 

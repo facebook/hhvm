@@ -1,0 +1,6 @@
+File "fake_member_intersection_on_property_assignment.php", line 10, characters 3-14:
+Invalid assignment (Typing[4110])
+  File "fake_member_intersection_on_property_assignment.php", line 4, characters 10-12:
+  Expected `int`
+  File "fake_member_intersection_on_property_assignment.php", line 10, characters 11-14:
+  But got `bool`

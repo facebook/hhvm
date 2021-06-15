@@ -5343,7 +5343,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
         expr ~accept_using_var:true env obj ~allow_awaitable
       in
       let env = might_throw env in
-      let (env, (result, _tal), err_opt) =
+      let (env, (declared_ty, _tal), err_opt) =
         TOG.obj_get_with_err
           ~obj_pos:(fst obj)
           ~is_method:false
@@ -5361,23 +5361,23 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
       let te1 =
         Tast.make_typed_expr
           pobj
-          result
+          declared_ty
           (Aast.Obj_get
              ( tobj,
-               Tast.make_typed_expr pm result (Aast.Id m),
+               Tast.make_typed_expr pm declared_ty (Aast.Id m),
                nullflavor,
                in_parens ))
       in
       let env = { env with lenv } in
       begin
         match obj with
-        | (_, This) ->
-          let (env, local) = Env.FakeMembers.make env obj member_name p in
-          let env = set_valid_rvalue p env local ty2 in
-          (env, te1, ty2, err_opt)
+        | (_, This)
         | (_, Lvar _) ->
           let (env, local) = Env.FakeMembers.make env obj member_name p in
-          let env = set_valid_rvalue p env local ty2 in
+          let (env, refined_ty) =
+            Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
+          in
+          let env = set_valid_rvalue p env local refined_ty in
           (env, te1, ty2, err_opt)
         | _ -> (env, te1, ty2, err_opt)
       end
@@ -5411,7 +5411,7 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
       (* This defers the coercion check to class_get, which looks up the appropriate target type *)
       let (env, _tal, _, cty) = class_expr env [] cid in
       let env = might_throw env in
-      let (env, _, err_opt) =
+      let (env, (declared_ty, _), err_opt) =
         class_get_err
           ~is_method:false
           ~is_const:false
@@ -5422,7 +5422,10 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
           cid
       in
       let (env, local) = Env.FakeMembers.make_static env x y p in
-      let env = set_valid_rvalue p env local ty2 in
+      let (env, refined_ty) =
+        Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
+      in
+      let env = set_valid_rvalue p env local refined_ty in
       (env, te1, ty2, err_opt)
     | (pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in

@@ -261,10 +261,12 @@ void serialize(ProfDataSerializer& ser) {
   s_blockCounters.serialize(ser);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 void deserialize(ProfDataDeserializer& des) {
   s_blockCounters.deserialize(des);
+}
+
+void free() {
+  s_blockCounters.freeCounters();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

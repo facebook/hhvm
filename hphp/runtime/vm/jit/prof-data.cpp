@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
@@ -267,6 +268,7 @@ void discardProfData() {
     }
     Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(data)});
   }
+  Treadmill::enqueue(VasmBlockCounters::free);
 }
 
 void ProfData::maybeResetCounters() {

@@ -51,9 +51,10 @@ void serialize(ProfDataSerializer& ser);
 
 void deserialize(ProfDataDeserializer& des);
 
+void free();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 } }
-

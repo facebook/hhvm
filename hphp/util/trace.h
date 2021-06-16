@@ -187,6 +187,7 @@ namespace Trace {
       TM(statgroups)    \
       TM(stats)         \
       TM(strobelight)   \
+      TM(taint)         \
       TM(targetcache)   \
       TM(tcspace)       \
       TM(trans)         \
@@ -527,4 +528,3 @@ class FormatValue<Val,
   const Val& m_val;
 };
 }
-

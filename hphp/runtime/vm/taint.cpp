@@ -24,7 +24,7 @@
 namespace HPHP {
 namespace taint {
 
-TRACE_SET_MOD(bcinterp);
+TRACE_SET_MOD(taint);
 
 #define O(name, imm, in, out, flags) \
   void iop##name() {                 \

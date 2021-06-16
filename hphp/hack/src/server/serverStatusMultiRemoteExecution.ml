@@ -16,7 +16,9 @@ let go (filenames : string list) ctx =
   Typing_deps.add_dependency_callback
     "multi_remote_execution_trace"
     multi_remote_execution_trace;
-  let paths = List.map ~f:Relative_path.create_detect_prefix filenames in
+  (* filter out non-existent files *)
+  let paths = List.filter_map filenames ~f:Sys_utils.realpath in
+  let paths = List.map ~f:Relative_path.create_detect_prefix paths in
   let errors =
     List.fold_left paths ~init:Errors.empty ~f:(fun acc path ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

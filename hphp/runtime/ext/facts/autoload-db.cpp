@@ -184,7 +184,7 @@ void createSchema(SQLiteTxn& txn) {
            " attribute_name TEXT NOT NULL,"
            " attribute_position INTEGER NULL,"
            " attribute_value TEXT NULL,"
-           " UNIQUE (typeid, attribute_name, attribute_position)"
+           " UNIQUE (typeid, method, attribute_name, attribute_position)"
            ")");
 
   txn.exec("CREATE TABLE IF NOT EXISTS file_attributes ("

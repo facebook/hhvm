@@ -118,6 +118,17 @@ let is_internal_visible env mname =
            mname
            m)
 
+let check_classname_access ~use_pos ~in_signature env cls =
+  if Cls.internal cls then
+    let cur_module = Env.get_module env in
+    let cls_module = Cls.get_module cls in
+    match cls_module with
+    | Some m when not (Option.equal String.equal cls_module cur_module) ->
+      Errors.module_mismatch use_pos (Cls.pos cls) cur_module m
+    | _ ->
+      if in_signature && not (Env.get_internal env) then
+        Errors.module_hint ~use_pos ~def_pos:(Cls.pos cls)
+
 let is_visible_for_obj env vis =
   match vis with
   | Vpublic -> None

@@ -37,3 +37,11 @@ val is_visible :
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool
+
+(* Can the class in a type hint be accessed from code or signature checked under [env]?
+ *   If class is public, then yes
+ *   If class is internal, then only if modules match, and in the case that
+ *     we are in a signature, the signature had better be internal too.
+ *)
+val check_classname_access :
+  use_pos:Pos.t -> in_signature:bool -> env -> Decl_provider.class_decl -> unit

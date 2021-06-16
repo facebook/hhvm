@@ -126,15 +126,11 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
     | Tclass (cls, _, targs) ->
       (match Env.get_class env (snd cls) with
       | Some cls ->
-        ( if Cls.internal cls then
-          let cur_module = Env.get_module env in
-          let cls_module = Cls.get_module cls in
-          match cls_module with
-          | Some m when not (Option.equal String.equal cls_module cur_module) ->
-            Errors.module_mismatch hint_pos (Cls.pos cls) cur_module m
-          | _ when not (Env.get_internal env) ->
-            Errors.module_hint ~use_pos:hint_pos ~def_pos:(Cls.pos cls)
-          | _ -> () );
+        Typing_visibility.check_classname_access
+          ~use_pos:hint_pos
+          ~in_signature:true
+          env
+          cls;
         check_tparams_constraints env hint_pos (Cls.tparams cls) targs
       | None -> env)
     | _ -> env)

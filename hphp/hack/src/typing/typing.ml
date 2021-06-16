@@ -7103,6 +7103,7 @@ and class_expr
         (match class_ with
         | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
         | Some class_ ->
+          TVis.check_classname_access ~use_pos:p ~in_signature:false env class_;
           let (env, ty, tal) =
             List.map ~f:snd tal
             |> Phase.localize_targs_and_check_constraints

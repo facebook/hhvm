@@ -1,0 +1,12 @@
+File "module_class_expr.php", line 10, characters 15-15:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_class_expr.php", line 25, characters 7-7:
+  This is from module `there`
+File "module_class_expr.php", line 11, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_class_expr.php", line 25, characters 7-7:
+  This is from module `there`
+File "module_class_expr.php", line 12, characters 5-5:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_class_expr.php", line 25, characters 7-7:
+  This is from module `there`

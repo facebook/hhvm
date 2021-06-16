@@ -118,6 +118,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/taint.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -5582,9 +5583,17 @@ struct litstr_id {
 #define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
 #define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
+#ifdef HHVM_TAINT
+#define TAINT(name, imm, in, out, flags)                             \
+  HPHP::taint::iop##name();
+#else
+#define TAINT(name, imm, in, out, flags) ;
+#endif
+
 #define O(name, imm, in, out, flags)                                 \
   template<bool breakOnCtlFlow>                                      \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
+    TAINT(name, imm, in, out, flags);                                \
     UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \

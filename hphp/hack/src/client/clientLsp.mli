@@ -6,7 +6,7 @@
  *
  *)
 
-(* The command-line arguments for "hh_client lsp" *)
+(** The command-line arguments for "hh_client lsp" *)
 type args = {
   from: string;
       (** The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
@@ -15,6 +15,6 @@ type args = {
       (** Extra logging, including logs per LSP message (voluminous!) *)
 }
 
-(* main: this is the main loop for processing incoming Lsp client requests,
-   and incoming server notifications. Never returns. *)
+(** This is the main loop for processing incoming Lsp client requests,
+    and incoming server notifications. Never returns. *)
 val main : args -> init_id:string -> Exit_status.t Lwt.t

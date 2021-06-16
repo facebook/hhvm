@@ -18,28 +18,27 @@ type errors = Errors.error list
 
 type t = {
   id: int;
-  (* Hack server indexes (in ServerEnv.errorl) errors based on where they were
-   * GENERATED: for example A -> decl -> e means that error e is uncovered
-   * during declaration of A. But the error itself can be reported in completely
-   * different file (like As parent C).
-   *
-   * Things like IDE don't want this mapping - when asking about A they want to
-   * get all errors REPORTED, not GENERATED in A. local_errors maintains reverse
-   * mapping from files with reported errors to files that cause them to be
-   * reported, i.e A -> [A, C] means that A is a file that IDE cares about and
-   * to get its error list we need to analyse A and C.
-   *
-   * To keep things responsive, we'll keep
-   *
-   * |local_errors| < max (errors_limit , |priority_files| + |pushed_errors|)
-   *
-   * i.e we always report things in priority_files, and if we reported some
-   * errors in a file, we'll keep them fresh until they are fixed. If after
-   * that we still report errors in less than errors_limit files, we'll "top up"
-   * with errors from some arbitrary files *)
+      (** Unique ID used by users of this module to distinguish multiple subscriptions. *)
   local_errors: RP.Set.t RP.Map.t;
-  (* Copy of errors most recently pushed to subscribers, used to avoid pushing
-   * no-op duplicates *)
+      (** Hack server indexes (in ServerEnv.errorl) errors based on where they were
+          GENERATED: for example A -> decl -> e means that error e is uncovered
+          during declaration of A. But the error itself can be reported in completely
+          different file (like As parent C).
+
+          Things like IDE don't want this mapping - when asking about A they want to
+          get all errors REPORTED, not GENERATED in A. local_errors maintains reverse
+          mapping from files with reported errors to files that cause them to be
+          reported, i.e A -> {A, C} means that A is a file that IDE cares about and
+          to get its error list we need to analyse A and C.
+
+          To keep things responsive, we'll keep
+
+          |local_errors| < max (errors_limit , |priority_files| + |pushed_errors|)
+
+          i.e we always report things in priority_files, and if we reported some
+          errors in a file, we'll keep them fresh until they are fixed. If after
+          that we still report errors in less than errors_limit files, we'll "top up"
+          with errors from some arbitrary files *)
   pushed_errors: errors RP.Map.t;
       [@printer
         fun fmt errors ->
@@ -47,14 +46,17 @@ type t = {
             (fun fmt -> Format.fprintf fmt "%d")
             fmt
             (RP.Map.map errors ~f:List.length)]
-  (* Union of all values in local_errors *)
-  sources: Relative_path.Set.t;
+      (** Copy of errors most recently pushed to subscribers, used to avoid pushing
+          no-op duplicates *)
+  sources: Relative_path.Set.t;  (** Union of all values in local_errors *)
   has_new_errors: bool;
   is_truncated: bool;
-      (* was 'local_errors' truncated with respect to all the errors? *)
+      (** was 'local_errors' truncated with respect to all the errors? *)
 }
 [@@deriving show]
 
+(** Filter values in map of sets according to predicate [f], then remove entries
+    with empty sets. *)
 let filter_filter map_map ~f =
   RP.Map.map map_map ~f:(fun v -> RP.Set.filter v ~f:(fun e -> f e))
   |> RP.Map.filter ~f:(fun _ v -> not @@ RP.Set.is_empty v)
@@ -65,8 +67,8 @@ let get_id ds = ds.id
 
 let error_sources ds = ds.sources
 
-(* Update diagnostics subscription based on an incremental recheck that
- * was done. *)
+(** Update diagnostics subscription based on an incremental recheck that
+    was done. *)
 let update
     ds
     ~(* to keep things responsive in a scenario with thousands of errors,
@@ -76,10 +78,10 @@ let update
       * in this set, but not in global_errors, it means that it doesn't have
       * errors any more *)
     reparsed
-    ~(* rechecked is used exactly the same as reparsed. It's split in two
-      * arguments because those collections are stored as two different
-      * structures in ServerTypeCheck and we don't want to force the caller
-      * to merge them. *)
+    ~(* rechecked is used exactly the same as reparsed.
+      * We use both [reparsed] and [rechecked] because those collections
+      * are stored as two different structures in ServerTypeCheck
+      * and we don't want to force the caller to merge them. *)
     rechecked
     ~(* new set of errors after incremental recheck *)
     global_errors
@@ -88,7 +90,8 @@ let update
       * subset to be union of priority_files and Diagnsotic_subscription.sources
       *)
     full_check_done =
-  (* Update local_errors with possibly changed priority_files *)
+  (* Update local_errors with possibly changed priority_files.
+   * For each A in priority_files, add A -> {A} to local_errors *)
   let local_errors =
     RP.Set.fold priority_files ~init:ds.local_errors ~f:(fun path acc ->
         (* We already track this file. *)
@@ -96,7 +99,7 @@ let update
           acc
         (* Initially the only known source of errors in a file is that file
          * itself. There might be more errors that will eventually be reported in
-      * this file, but we'll not know them until next full check. *)
+         * this file, but we'll not know them until next full check. *)
         else
           RP.Map.add acc ~key:path ~data:(RP.Set.singleton path))
   in
@@ -105,6 +108,7 @@ let update
   (* Look through rechecked files for more sources of tracked files *)
   let local_errors =
     RP.Set.fold rechecked ~init:local_errors ~f:(fun source acc ->
+        (* For each new error that is in a rechecked file... *)
         Errors.fold_errors_in global_errors ~source ~init:acc ~f:(fun e acc ->
             let file = error_filename e in
             match RP.Map.find_opt acc file with
@@ -118,8 +122,8 @@ let update
         Errors.fold_errors_in global_errors ~source ~init:false ~f:(fun e acc ->
             acc || RP.Map.mem local_errors (error_filename e)))
   in
-  (* If we've done a full check, that it's safe to look through all of the
-   * errors in global_errors, no only those that were just rechecked *)
+  (* If we've done a full check, then it's safe to look through all of the
+   * errors in global_errors, not only those that were just rechecked *)
   let (is_truncated, local_errors) =
     if not full_check_done then
       (false, local_errors)
@@ -167,7 +171,7 @@ let of_id ~id ~init =
     ~global_errors:init
     ~full_check_done:true
 
-(** Return and record errors as send to subscriber. [ds] is current diagnostics
+(** Return and record errors to send to subscriber. [ds] is current diagnostics
     subscription used to choose which errors from global error list to push. *)
 let pop_errors ds ~global_errors =
   if not ds.has_new_errors then

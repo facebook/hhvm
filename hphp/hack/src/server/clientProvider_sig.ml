@@ -12,7 +12,7 @@ module type S = sig
 
   type client
 
-  (** What client to select next. *)
+  (** Outcome of the POSIX [select] system call. *)
   type select_outcome =
     | Select_persistent
     | Select_new of client
@@ -64,6 +64,7 @@ module type S = sig
 
   val priority_to_string : client -> string
 
+  (** Shutdown socket connection to client *)
   val shutdown_client : client -> unit
 
   val ping : client -> unit

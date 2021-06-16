@@ -821,7 +821,7 @@ let process_in_parallel
     ~(longlived_workers : bool)
     ~(remote_execution : bool)
     ~(check_info : check_info) :
-    typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
+    typing_result * Delegate.state * Telemetry.t * _ * Relative_path.t list =
   let record = Measure.create () in
   (* [record] is used by [next] *)
   let delegate_state = ref delegate_state in
@@ -983,7 +983,7 @@ let go_with_interrupt
     ~(remote_execution : bool)
     ~(check_info : check_info)
     ~(profiling : CgroupProfiler.Profiling.t) :
-    (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
+    (Errors.t, Delegate.state, Telemetry.t, _) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in

@@ -11,10 +11,14 @@ open Reordered_argument_collections
 
 type t [@@deriving show]
 
+(** Makes a diagnostic subscription with ID [id]. The ID is used
+    by callers to distinguish multiple subscriptions. *)
 val of_id : id:int -> init:Errors.t -> t
 
 val get_id : t -> int
 
+(** Update diagnostics subscription based on an incremental recheck that
+    was done. *)
 val update :
   t ->
   priority_files:Relative_path.Set.t ->
@@ -26,7 +30,7 @@ val update :
 
 val error_sources : t -> Relative_path.Set.t
 
-(* Errors ready for sending to client *)
+(** Pop errors ready for sending to client *)
 val pop_errors :
   t -> global_errors:Errors.t -> t * Errors.finalized_error list SMap.t
 

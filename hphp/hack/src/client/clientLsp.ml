@@ -81,12 +81,12 @@ type incoming_metadata = {
 }
 
 (** A push message from the server might come while we're waiting for a server-rpc
-   response, or while we're free. The current architecture allows us to have
-   arbitrary responses to push messages while we're free, but only a limited set
-   of responses while we're waiting for a server-rpc - e.g. we can update our
-   notion of the server_state, or send a message to the client, but we can't
-   update our own state monad. The has_* fields are ad-hoc push-specific indicators
-   of whether we've done some part of the response during the rpc. *)
+    response, or while we're free. The current architecture allows us to have
+    arbitrary responses to push messages while we're free, but only a limited set
+    of responses while we're waiting for a server-rpc - e.g. we can update our
+    notion of the server_state, or send a message to the client, but we can't
+    update our own state monad. The has_* fields are ad-hoc push-specific indicators
+    of whether we've done some part of the response during the rpc. *)
 type server_message = {
   push: ServerCommandTypes.push;
   has_updated_server_state: bool;
@@ -942,9 +942,9 @@ let (_ : 'a -> 'b) = request_showMessage
 
 and (_ : 'c -> 'd) = dismiss_showMessageRequest
 
-(** dismiss_diagnostics: dismisses all diagnostics from a state,
-both the error diagnostics in Main_loop and the hh_server_status
-diagnostics in In_init and Lost_server. *)
+(** Dismiss all diagnostics from a state,
+    both the error diagnostics in Main_loop and the hh_server_status
+    diagnostics in In_init and Lost_server. *)
 let dismiss_diagnostics (state : state) : state =
   let dismiss_one ~isStatusFB uri =
     let params = { PublishDiagnostics.uri; diagnostics = []; isStatusFB } in
@@ -1070,9 +1070,9 @@ let hack_errors_to_lsp_diagnostic
     (filename : string) (errors : Errors.finalized_error list) :
     PublishDiagnostics.params =
   let open Lsp.Location in
-  let location_message (error : Pos.absolute * string) : Lsp.Location.t * string
-      =
-    let (pos, message) = error in
+  let location_message (message : Pos.absolute * string) :
+      Lsp.Location.t * string =
+    let (pos, message) = message in
     let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
     ({ Location.uri; range }, Markdown_lite.render message)
   in
@@ -1083,7 +1083,15 @@ let hack_errors_to_lsp_diagnostic
       | hd :: tl -> (hd, tl)
       | [] -> failwith "Expected at least one error in the error list"
     in
-    let ({ range; _ }, message) = first_message in
+    let ( {
+            range;
+            uri =
+              (* This is the file of the first message of the error which is supposed to correspond to [filename] *)
+              _;
+          },
+          message ) =
+      first_message
+    in
     let relatedInformation =
       additional_messages
       |> List.map ~f:(fun (location, message) ->
@@ -1107,9 +1115,9 @@ let hack_errors_to_lsp_diagnostic
       relatedLocations = relatedInformation (* legacy FB extension *);
     }
   in
-  (* The caller is required to give us a non-empty filename. If it is empty,  *)
-  (* the following path_to_lsp_uri will fall back to the default path - which *)
-  (* is also empty - and throw, logging appropriate telemetry.                *)
+  (* The caller is required to give us a non-empty filename. If it is empty,
+     the following path_to_lsp_uri will fall back to the default path - which
+     is also empty - and throw, logging appropriate telemetry. *)
   {
     Lsp.PublishDiagnostics.uri = path_to_lsp_uri filename ~default_path:"";
     isStatusFB = false;
@@ -1233,11 +1241,11 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       can_autostart_after_mismatch := false;
       connect_client ~env root ~autostart:true)
 
-(* connect: this method either connects to the monitor and leaves in an       *)
-(* In_init state waiting for the server hello, or it fails to connect and     *)
-(* leaves in a Lost_server state. You might call this from Pre_init or        *)
-(* Lost_server states, obviously. But you can also call it from In_init state *)
-(* if you want to give up on the prior attempt at connection and try again.   *)
+(** Either connect to the monitor and leave in an
+    In_init state waiting for the server hello, or fail to connect and
+    leave in a Lost_server state. You might call this from Pre_init or
+    Lost_server states, obviously. But you can also call it from In_init state
+    if you want to give up on the prior attempt at connection and try again.   *)
 let rec connect ~(env : env) (state : state) : state Lwt.t =
   begin
     match state with
@@ -1810,11 +1818,11 @@ let hh_server_status_to_diagnostic
           ];
       }
 
-(** Manages the state of which diagnostics have been shown to the user
-about hh_server status: removes the old one if necessary, and adds a new one
-if necessary. Note that we only display hh_server_status diagnostics
-during In_init and Lost_server states, neither of which have diagnostics
-of their own. *)
+(** Manage the state of which diagnostics have been shown to the user
+    about hh_server status: removes the old one if necessary, and adds a new one
+    if necessary. Note that we only display hh_server_status diagnostics
+    during In_init and Lost_server states, neither of which have diagnostics
+    of their own. *)
 let publish_hh_server_status_diagnostic
     (state : state) (hh_server_status : ShowStatusFB.params option) : state =
   let uri =
@@ -3378,16 +3386,16 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     Main_loop { menv with hh_server_status }
   | _ -> state
 
-(* do_diagnostics: sends notifications for all reported diagnostics; also     *)
-(* returns an updated "uris_with_diagnostics" set of all files for which     *)
-(* our client currently has non-empty diagnostic reports.                     *)
+(** Send notifications for all reported diagnostics; also
+    returns an updated "uris_with_diagnostics" set of all files for which
+    our client currently has non-empty diagnostic reports. *)
 let do_diagnostics
     (uris_with_diagnostics : UriSet.t)
     (file_reports : Errors.finalized_error list SMap.t) : UriSet.t =
-  (* Hack sometimes reports a diagnostic on an empty file when it can't       *)
-  (* figure out which file to report. In this case we'll report on the root.  *)
-  (* Nuclide and VSCode both display this fine, though they obviously don't   *)
-  (* let you click-to-go-to-file on it.                                       *)
+  (* Hack sometimes reports a diagnostic on an empty file when it can't
+     figure out which file to report. In this case we'll report on the root.
+     Nuclide and VSCode both display this fine, though they obviously don't
+     let you click-to-go-to-file on it. *)
   let default_path = get_root_exn () |> Path.to_string in
   let file_reports =
     match SMap.find_opt "" file_reports with

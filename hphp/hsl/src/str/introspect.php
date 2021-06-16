@@ -237,6 +237,50 @@ function search_last(
   return $position;
 }
 
+/** RFC: Future behavior/signature for search_last()
+ *
+ * The `search_last()` behavior is unintuitive:
+ * - if a positive offset is supplied, it's effectively a lower bound; it can
+ *   not lead to a different match, it can only lead to failing to match
+ * - if a negative offset is supplied, the behavior is not as documented; for
+ *   example, `search_last('abab', 'b', -1)`  returns 3 - it does not skip the
+ *   last byte
+ *
+ * RFC: neither current behavior is useful as strrpos/search_last is always a
+ * right-to-left search. A length is useful.
+ *
+ * This would allow straightforward reverse iteration, e.g.:
+ *
+ * ```
+ * $pos = null;
+ * do {
+ *   $pos = Str\search_last_with_length($haystack, $needle, $pos);
+ *   var_dump($pos);
+ * } while ($pos !== null);
+ * ```
+ *
+ * With inputs of `ababab` and `b`, this would print:
+ * - 5
+ * - 3
+ * - 1
+ * - null
+ *
+ * The goal would be to replace the current search_last with this, and remove
+ * the 'with_length' suffix.
+ */
+function search_last_with_length(
+  string $haystack,
+  string $needle,
+  ?int $length
+)[]: ?int {
+  if ($length === null) {
+    return search_last($haystack, $needle);
+  }
+  // TODO: negative, length > actual length, etc.
+  return search_last(Str\slice($haystack, 0, $length), $needle);
+}
+
+
 /**
  * Returns whether the string starts with the given prefix.
  *

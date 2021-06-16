@@ -248,21 +248,36 @@ let autocomplete_member ~is_static env class_ cid id =
 (*
   Autocompletion for XHP attribute names in an XHP literal.
 *)
-let autocomplete_xhp_attributes env class_ cid id =
+let autocomplete_xhp_attributes env class_ cid id attrs =
   (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
   if is_auto_complete (snd id) && Cls.is_xhp class_ then (
     ac_env := Some env;
     autocomplete_identifier := Some id;
     argument_global_type := Some Acprop;
+    let existing_attr_names : SSet.t =
+      attrs
+      |> List.filter_map ~f:(fun attr ->
+             match attr with
+             | Aast.Xhp_simple { Aast.xs_name = id; _ } -> Some (snd id)
+             | Aast.Xhp_spread _ -> None)
+      |> List.filter ~f:(fun name -> not (matches_auto_complete_suffix name))
+      |> SSet.of_list
+    in
     List.iter
       (get_class_elt_types env class_ cid (Cls.props class_))
       ~f:(fun (name, ty) ->
-        add_partial_result
-          name
-          (Phase.decl ty)
-          SearchUtils.SI_Property
-          (Some class_))
+        if
+          not
+            (SSet.exists
+               (fun key -> String.equal (":" ^ key) name)
+               existing_attr_names)
+        then
+          add_partial_result
+            name
+            (Phase.decl ty)
+            SearchUtils.SI_Property
+            (Some class_))
   )
 
 let autocomplete_xhp_bool_value attr_ty id_id env =
@@ -776,7 +791,7 @@ let visitor =
                      autocomplete_xhp_bool_value ty id_id env
                    | _ -> ());
                    if Cls.is_xhp c then
-                     autocomplete_xhp_attributes env c (Some cid) id
+                     autocomplete_xhp_attributes env c (Some cid) id attrs
                    else
                      autocomplete_member ~is_static:false env c (Some cid) id
                  | Aast.Xhp_spread _ -> ()));

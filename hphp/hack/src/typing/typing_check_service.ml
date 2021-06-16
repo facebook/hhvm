@@ -142,13 +142,21 @@ type process_file_results = {
 }
 
 let process_file_remote_execution
-    (_dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
   let deps_mode = Provider_context.get_deps_mode ctx in
   let errors' = Re.process_file fn deps_mode in
+  { errors = Errors.merge errors' errors; deferred_decls = [] }
+
+let process_files_remote_execution
+    (ctx : Provider_context.t)
+    (errors : Errors.t)
+    (files : check_file_computation list) : process_file_results =
+  let fns = List.map files ~f:(fun file -> file.path) in
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  let errors' = Re.process_files fns deps_mode in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
 let process_file
@@ -421,6 +429,7 @@ let process_files
       else
         (false, tally, heap_mb)
     in
+
     match progress.remaining with
     | [] -> (errors, progress, tally, heap_mb, max_heap_mb)
     | _ when exit_now ->
@@ -436,7 +445,7 @@ let process_files
         | Check file ->
           let process_file () =
             if remote_execution then
-              process_file_remote_execution dynamic_view_files ctx errors file
+              process_file_remote_execution ctx errors file
             else
               process_file dynamic_view_files ctx errors file
           in
@@ -489,9 +498,22 @@ let process_files
           Vfs.prefetch paths;
           (errors, [], ProcessFilesTally.incr_prefetches tally)
       in
+      let (fns, check_fns, errors) =
+        if remote_execution then
+          let (check_fns, fns) =
+            List.partition_map fns ~f:(function
+                | Check file -> First file
+                | fn -> Second fn)
+          in
+          let result = process_files_remote_execution ctx errors check_fns in
+          let check_fns = List.map check_fns ~f:(fun f -> Check f) in
+          (fns, check_fns, result.errors)
+        else
+          (fns, [], errors)
+      in
       let progress =
         {
-          completed = fn :: progress.completed;
+          completed = (fn :: check_fns) @ progress.completed;
           remaining = fns;
           deferred = List.concat [deferred; progress.deferred];
         }
@@ -677,8 +699,14 @@ let next
     (delegate_state : Delegate.state ref)
     (files_to_process : file_computation BigList.t ref)
     (files_in_progress : file_computation Hash_set.Poly.t)
-    (record : Measure.record) =
-  let max_size = Bucket.max_size () in
+    (record : Measure.record)
+    (remote_execution : bool) =
+  let max_size =
+    if remote_execution then
+      25000
+    else
+      Bucket.max_size ()
+  in
   let num_workers =
     match workers with
     | Some w -> List.length w
@@ -812,7 +840,13 @@ let process_in_parallel
     ~extra:delegate_progress;
 
   let next =
-    next workers delegate_state files_to_process files_in_progress record
+    next
+      workers
+      delegate_state
+      files_to_process
+      files_in_progress
+      record
+      remote_execution
   in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
@@ -1000,8 +1034,14 @@ let go_with_interrupt
         [] )
     end else begin
       Hh_logger.log "Type checking service will process files in parallel";
+      let num_workers =
+        if remote_execution then
+          Some 1
+        else
+          TypecheckerOptions.num_local_workers opts
+      in
       let workers =
-        match (workers, TypecheckerOptions.num_local_workers opts) with
+        match (workers, num_workers) with
         | (Some workers, Some num_local_workers) ->
           let (workers, _) = List.split_n workers num_local_workers in
           Some workers

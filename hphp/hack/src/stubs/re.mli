@@ -9,3 +9,5 @@
 val initialize_lease : unit -> unit
 
 val process_file : Relative_path.t -> Typing_deps.Mode.t -> Errors.t
+
+val process_files : Relative_path.t list -> Typing_deps.Mode.t -> Errors.t

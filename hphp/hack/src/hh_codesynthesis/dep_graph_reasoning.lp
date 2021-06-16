@@ -44,3 +44,8 @@ interface(Y) :- interface(X), extends_to(Y, X).
 implements(X, Y) :- extends_to(Y, X), class(X), interface(Y).
 extends(X, Y) :- extends_to(Y, X), interface(X), interface(Y).
 extends(X, Y) :- extends_to(Y, X), class(X), class(Y).
+
+#show implements/2.
+#show extends/2.
+#show class/1.
+#show interface/1.

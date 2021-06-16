@@ -4,8 +4,6 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the "hack" directory of this source tree.
-
-import os
 import tempfile
 import unittest
 
@@ -139,20 +137,9 @@ class DoReasoningTest(unittest.TestCase):
             'class("I")',
             'extends("A","T")',
             'extends("B","I")',
-            'extends_to("A","B")',
-            'extends_to("I","B")',
-            'extends_to("T","A")',
             'implements("B","A")',
-            'indirect_extends_to("A","B")',
-            'indirect_extends_to("I","B")',
-            'indirect_extends_to("T","A")',
-            'indirect_extends_to("T","B")',
             'interface("A")',
             'interface("T")',
-            'symbols("A")',
-            'symbols("B")',
-            'symbols("I")',
-            'symbols("T")',
         ]
         rules = [
             'extends_to("A", "B").',
@@ -170,20 +157,9 @@ class DoReasoningTest(unittest.TestCase):
             'class("I")',
             'extends("A","T")',
             'extends("B","I")',
-            'extends_to("A","B")',
-            'extends_to("I","B")',
-            'extends_to("T","A")',
             'implements("B","A")',
-            'indirect_extends_to("A","B")',
-            'indirect_extends_to("I","B")',
-            'indirect_extends_to("T","A")',
-            'indirect_extends_to("T","B")',
             'interface("A")',
             'interface("T")',
-            'symbols("A")',
-            'symbols("B")',
-            'symbols("I")',
-            'symbols("T")',
         ]
         deps = """\
 Extends A -> Type B

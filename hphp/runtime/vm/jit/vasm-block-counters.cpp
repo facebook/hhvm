@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/region-prof-counters.h"
+#include "hphp/runtime/vm/jit/trans-prof-counters.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -42,24 +42,20 @@ namespace VasmBlockCounters {
 namespace {
 
 /*
- * Profile counters for vasm blocks for each optimized JIT region.  Along with
- * the counters, we keep the opcode of the first Vasm instruction in each block
- * as metadata (prior to inserting the profile counters), which is used to
- * validate the profile.
+ * Profile counters for vasm blocks for each optimized JIT region and prologue.
+ * Along with the counters, we keep the opcode of the first Vasm instruction
+ * in each block as metadata (prior to inserting the profile counters), which
+ * is used to validate the profile.
  */
 using VOpRaw = std::underlying_type<Vinstr::Opcode>::type;
-RegionProfCounters<int64_t, VOpRaw> s_blockCounters;
+TransProfCounters<int64_t, VOpRaw> s_blockCounters;
 
 /*
  * Insert profile counters for the blocks in the given unit.
  */
-void insert(Vunit& unit) {
+template <typename T>
+void insert(Vunit& unit, const T& key) {
   assertx(isJitSerializing());
-
-  if (!unit.context) return;
-  auto const regionPtr = unit.context->region;
-  if (!regionPtr) return;
-  const RegionEntryKey regionKey(*regionPtr);
 
   splitCriticalEdges(unit);
 
@@ -71,8 +67,7 @@ void insert(Vunit& unit) {
 
   for (auto b : blocks) {
     auto& block = unit.blocks[b];
-    auto const counterAddr = s_blockCounters.addCounter(regionKey,
-                                                        block.code.front().op);
+    auto const counterAddr = s_blockCounters.addCounter(key, block.code.front().op);
     auto const& live_set = livein[b];
     auto const save_sf = live_set[Vreg(rsf)] ||
                          RuntimeOption::EvalJitPGOVasmBlockCountersForceSaveSF;
@@ -175,16 +170,12 @@ std::string checkProfile(const Vunit& unit,
  * Set the weights of the blocks in the given unit based on profile data, if
  * available.
  */
-void setWeights(Vunit& unit) {
+template <typename T>
+void setWeights(Vunit& unit, const T& key) {
   assertx(isJitDeserializing());
 
-  if (!unit.context) return;
-  auto const regionPtr = unit.context->region;
-  if (!regionPtr) return;
-  const RegionEntryKey regionKey(*regionPtr);
-
   jit::vector<VOpRaw> opcodes;
-  auto counters = s_blockCounters.getCounters(regionKey, opcodes);
+  auto counters = s_blockCounters.getCounters(key, opcodes);
 
   splitCriticalEdges(unit);
 
@@ -241,17 +232,32 @@ folly::Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
   return safe_cast<uint64_t>(*weight);
 }
 
+template <typename T>
+void update(Vunit& unit, const T& key){
+  if (isJitSerializing()) {
+    // Insert block profile counters.
+    insert(unit, key);
+  } else if (isJitDeserializing()) {
+    // Look up the information from the profile, and use it if found.
+    setWeights(unit, key);
+  }
+}
+
 void profileGuidedUpdate(Vunit& unit) {
   if (!RuntimeOption::EvalJitPGOVasmBlockCounters) return;
   if (!unit.context) return;
-  if (unit.context->kind != TransKind::Optimize) return;
+  auto const optimizePrologue = unit.context->kind == TransKind::OptPrologue &&
+    RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;
 
-  if (isJitSerializing()) {
-    // Insert block profile counters.
-    insert(unit);
-  } else if (isJitDeserializing()) {
-    // Look up the information from the profile, and use it if found.
-    setWeights(unit);
+  if (unit.context->kind == TransKind::Optimize) {
+    auto const regionPtr = unit.context->region;
+    if (!regionPtr) return;
+    const RegionEntryKey regionKey(*regionPtr);
+    update(unit, regionKey);
+  } else if (optimizePrologue) {
+    auto const pid = unit.context->pid;
+    if (pid.funcId() == FuncId::Invalid) return;
+    update(unit, pid);
   }
 }
 

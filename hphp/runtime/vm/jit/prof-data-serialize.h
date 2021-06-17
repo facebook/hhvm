@@ -194,6 +194,8 @@ void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth);
 ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser);
 void write_regionkey(ProfDataSerializer& ser, const RegionEntryKey& regionkey);
 RegionEntryKey read_regionkey(ProfDataDeserializer& des);
+void write_prologueid(ProfDataSerializer& ser, const PrologueID& pid);
+PrologueID read_prologueid(ProfDataDeserializer& des);
 void write_srckey(ProfDataSerializer& ser, SrcKey sk);
 SrcKey read_srckey(ProfDataDeserializer& des);
 void write_layout(ProfDataSerializer& ser, ArrayLayout layout);
@@ -211,4 +213,3 @@ bool serializeOptProfEnabled();
 
 //////////////////////////////////////////////////////////////////////
 } }
-

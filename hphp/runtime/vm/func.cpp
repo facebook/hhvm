@@ -1285,6 +1285,13 @@ void Func::EnableCoverage() {
   tl_called_functions.emplace(Array::CreateDict());
 }
 
+std::string show(PrologueID pid) {
+  auto func = pid.func();
+  return folly::sformat("{}(id 0x{:#x}) # of args: {}",
+                        func->fullName()->data(),
+                        pid.funcId().toInt(), pid.nargs());
+}
+
 Array Func::GetCoverage() {
   if (tl_called_functions.isNull()) {
     SystemLib::throwInvalidOperationExceptionObject(

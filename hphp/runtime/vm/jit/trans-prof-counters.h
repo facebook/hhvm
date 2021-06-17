@@ -25,11 +25,13 @@
 
 namespace HPHP { namespace jit {
 
+using Indices = jit::vector<size_t>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * RegionProfCounters keeps a list of counters associated with each given
- * region.
+ * TransProfCounters keeps list of counters associated with each given
+ * region or prologue.
 
  * The intended use of these counters is the following.  When the JIT profile
  * data is going to be serialized, these counters are created and incremented
@@ -38,18 +40,41 @@ namespace HPHP { namespace jit {
  * and used to set weights driving JIT optimizations based on data observed
  * during profiling.
  *
- * RegionProfCounters also keeps a piece of metadata associated with each
+ * TransProfCounters also keeps a piece of metadata associated with each
  * counter, which clients may use as they wish (e.g. to validate the counters).
  */
 template<typename T, typename M>
-struct RegionProfCounters {
+struct TransProfCounters {
+
+  // Helper methods for accessing indices
+  folly::Optional<Indices>
+  findIndices(const PrologueID& pid) const {
+    auto const it = m_prologueIndices.find(pid);
+    if (it == m_prologueIndices.end()) return folly::none;
+    return it->second;
+  }
+  folly::Optional<Indices>
+  findIndices(const RegionEntryKey& regionKey) const {
+    auto const it = m_regionIndices.find(regionKey);
+    if (it == m_regionIndices.end()) return folly::none;
+    return it->second;
+  }
+
+  auto& getIndices(const PrologueID& pid) {
+    return m_prologueIndices[pid];
+  }
+  auto& getIndices(const RegionEntryKey& regionKey) {
+    return m_regionIndices[regionKey];
+  }
+
   /*
-   * Add a new counter associated with the given region and metadata,
-   * and return the counters address.
+   * Add a new counter associated with the given region or prologue,
+   * and metadata, and return the counters address.
    */
-  T* addCounter(const RegionEntryKey& regionKey, const M& meta) {
+  template <typename K>
+  T* addCounter(const K& key, const M& meta) {
     folly::SharedMutex::WriteHolder lock(m_lock);
-    auto& indices = m_regionIndices[regionKey];
+    auto& indices = getIndices(key);
     auto const index = m_meta.size();
     m_meta.push_back(meta);
     indices.push_back(index);
@@ -60,11 +85,12 @@ struct RegionProfCounters {
    * Retrieve the first counter associated with the given region. We typically
    * keep counters sorted by e.g. RPO order, so the first one is for the entry.
    */
-  folly::Optional<T> getFirstCounter(const RegionEntryKey& regionKey) {
+  template <typename K>
+  folly::Optional<T> getFirstCounter(const K& key) {
     folly::SharedMutex::ReadHolder lock(m_lock);
-    auto const it = m_regionIndices.find(regionKey);
-    if (it == m_regionIndices.end()) return folly::none;
-    auto const& indices = it->second;
+    auto const& opt = findIndices(key);
+    if (opt == folly::none) return folly::none;
+    auto const& indices = opt.value();
     if (indices.empty()) return folly::none;
     return m_counters.get(indices[0]);
   }
@@ -74,14 +100,14 @@ struct RegionProfCounters {
    * given region, as well as a vector with the corresponding associated
    * metadata.
    */
-  jit::vector<T> getCounters(const RegionEntryKey& regionKey,
-                             jit::vector<M>& meta) const {
+  template <typename K>
+  jit::vector<T> getCounters(const K& key, jit::vector<M>& meta) const {
     folly::SharedMutex::ReadHolder lock(m_lock);
     meta.clear();
     jit::vector<T> counters;
-    auto const it = m_regionIndices.find(regionKey);
-    if (it == m_regionIndices.end()) return counters;
-    auto const& indices = it->second;
+    auto const& opt = findIndices(key);
+    if (opt == folly::none) return counters;
+    auto const& indices = opt.value();
     for (auto index : indices) {
       counters.push_back(m_counters.get(index));
       meta.push_back(m_meta[index]);
@@ -96,16 +122,13 @@ struct RegionProfCounters {
     folly::SharedMutex::WriteHolder lock(m_lock);
     m_meta.clear();
     m_regionIndices.clear();
+    m_prologueIndices.clear();
     m_counters.clear();
   }
 
   void serialize(ProfDataSerializer& ser) {
     folly::SharedMutex::WriteHolder lock(m_lock);
-    write_raw(ser, m_regionIndices.size());
-    for (auto& it : m_regionIndices) {
-      auto const& regionKey = it.first;
-      auto const& indices   = it.second;
-      write_regionkey(ser, regionKey);
+    auto write_counters = [&](const Indices& indices) {
       write_raw(ser, indices.size());
       for (auto index : indices) {
         // NB: counters currently start at 0 and go down, so flip the sign here
@@ -114,19 +137,30 @@ struct RegionProfCounters {
         write_raw(ser, count);
         write_raw(ser, meta);
       }
+    };
+    write_raw(ser, m_regionIndices.size());
+    for (auto& it : m_regionIndices) {
+      auto const& regionKey = it.first;
+      auto const& indices   = it.second;
+      write_regionkey(ser, regionKey);
+      write_counters(indices);
+    }
+    write_raw(ser, m_prologueIndices.size());
+    for (auto& it : m_prologueIndices) {
+      auto const& pid       = it.first;
+      auto const& indices   = it.second;
+      write_prologueid(ser, pid);
+      write_counters(indices);
     }
   }
 
   void deserialize(ProfDataDeserializer& des) {
     folly::SharedMutex::WriteHolder lock(m_lock);
-    size_t index = 0;
-    size_t nregions;
-    read_raw(des, nregions);
-    while (nregions--) {
-      RegionEntryKey regionKey = read_regionkey(des);
+    auto deserialize_counters = [&]
+      (Indices& indices, size_t& index)
+    {
       size_t nentries;
       read_raw(des, nentries);
-      auto& indices = m_regionIndices[regionKey];
       while (nentries--) {
         T count;
         read_raw(des, count);
@@ -138,6 +172,21 @@ struct RegionProfCounters {
         indices.push_back(index);
         index++;
       }
+    };
+    size_t index = 0;
+    size_t nregions;
+    read_raw(des, nregions);
+    while (nregions--) {
+      RegionEntryKey regionKey = read_regionkey(des);
+      auto& indices = m_regionIndices[regionKey];
+      deserialize_counters(indices, index);
+    }
+    size_t nprologues;
+    read_raw(des, nprologues);
+    while (nprologues--) {
+      PrologueID pid = read_prologueid(des);
+      auto& indices = m_prologueIndices[pid];
+      deserialize_counters(indices, index);
     }
   }
 
@@ -147,8 +196,12 @@ struct RegionProfCounters {
 
   // Maps each region to the vector containing its corresponding indices in
   // m_counters and m_meta.
-  hphp_hash_map<RegionEntryKey,jit::vector<size_t>,
+  hphp_hash_map<RegionEntryKey,Indices,
                 RegionEntryKey::Hash,RegionEntryKey::Eq> m_regionIndices;
+
+  // Map for prologues.
+  hphp_hash_map<PrologueID,Indices,
+                PrologueID::Hasher,PrologueID::Eq> m_prologueIndices;
 
   // This lock protects all concurrent accesses to the vectors and map above.
   mutable folly::SharedMutex m_lock;
@@ -157,4 +210,3 @@ struct RegionProfCounters {
 ///////////////////////////////////////////////////////////////////////////////
 
 } }
-

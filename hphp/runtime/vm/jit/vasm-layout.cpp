@@ -45,10 +45,10 @@
  *     Frozen area.  This method is used when no profiling information is
  *     available.
  *
- *  2) pgoLayout() is enabled for Optimize, PGO-based regions.  This implements
- *     the algorithm described in "Profile Guided Code Positioning" (PLDI'1990)
- *     by Pettis & Hansen (more specifically, Algo2, from section 4.2.1).  This
- *     implementation uses estimated arc weights derived from a combination of
+ *  2) pgoLayout() is enabled for Optimize, PGO-based regions and OptPrologues.
+ *     This implements the algorithm described in "Profile Guided Code Positioning"
+ *     (PLDI'1990) by Pettis & Hansen (more specifically, Algo2, from section 4.2.1).
+ *     This implementation uses estimated arc weights derived from a combination of
  *     profile counters inserted at the bytecode-level blocks (in Profile
  *     translations) and the JIT-time Likely/Unlikely/Unused hints (encoded in
  *     the "area" field of Vblocks).
@@ -635,8 +635,12 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
 
 jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   Timer timer(Timer::vasm_layout);
+  auto const optimizePrologue = unit.context &&
+    unit.context->kind == TransKind::OptPrologue &&
+    RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;
 
-  return unit.context && unit.context->kind == TransKind::Optimize
+  return unit.context &&
+    (unit.context->kind == TransKind::Optimize || optimizePrologue)
     ? layout::pgoLayout(unit)
     : layout::rpoLayout(unit);
 }

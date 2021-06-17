@@ -128,7 +128,8 @@ void PrologueTranslator::gen() {
     0,  // optIndex
     kind,
     sk,
-    nullptr
+    nullptr,
+    PrologueID(func, nPassed),
   };
   tracing::Block _b{
     kind == TransKind::OptPrologue ? "emit-func-prologue-opt"

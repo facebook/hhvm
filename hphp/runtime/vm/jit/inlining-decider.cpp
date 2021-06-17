@@ -314,7 +314,8 @@ Vcost computeTranslationCostSlow(SrcKey at,
     0,  // optIndex
     TransKind::Optimize,
     at,
-    &region
+    &region,
+    PrologueID(),
   };
 
   tracing::Block _{"compute-inline-cost", [&] { return traceProps(ctx); }};

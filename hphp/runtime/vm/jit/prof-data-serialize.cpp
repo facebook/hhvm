@@ -1586,6 +1586,22 @@ RegionEntryKey read_regionkey(ProfDataDeserializer& des) {
   return RegionEntryKey(srcKey, guards);
 }
 
+void write_prologueid(ProfDataSerializer& ser, const PrologueID& pid) {
+  ITRACE(2, "PrologueID>\n");
+  write_func(ser, pid.func());
+  write_raw(ser, safe_cast<uint32_t>(pid.nargs()));
+  ITRACE(2, "PrologueID: {}\n", show(pid));
+}
+
+PrologueID read_prologueid(ProfDataDeserializer& des) {
+  ITRACE(2, "PrologueID>\n");
+  auto const func = read_func(des);
+  auto const nargs = read_raw<uint32_t>(des);
+  auto const pid = PrologueID(func, nargs);
+  ITRACE(2, "PrologueID: {}\n", show(pid));
+  return pid;
+}
+
 void write_srckey(ProfDataSerializer& ser, SrcKey sk) {
   ITRACE(2, "SrcKey>\n");
   if (!sk.func()->wasSerialized()) {

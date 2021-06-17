@@ -1766,6 +1766,13 @@ struct PrologueID {
     return m_funcId == other.m_funcId && m_nargs == other.m_nargs;
   }
 
+  struct Eq {
+    bool operator()(const PrologueID& pid1,
+                    const PrologueID& pid2) const {
+      return pid1 == pid2;
+    }
+  };
+
   struct Hasher {
     size_t operator()(PrologueID pid) const {
       return pid.funcId().toInt() + (size_t(pid.nargs()) << 32);
@@ -1776,6 +1783,8 @@ struct PrologueID {
   FuncId   m_funcId{FuncId::Invalid};
   uint32_t m_nargs{0xffffffff};
 };
+
+std::string show(PrologueID pid);
 
 ///////////////////////////////////////////////////////////////////////////////
 

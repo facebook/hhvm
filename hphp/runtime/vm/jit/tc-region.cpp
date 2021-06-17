@@ -694,7 +694,8 @@ void RegionTranslator::gen() {
     optIndex,
     kind,
     sk,
-    region.get()
+    region.get(),
+    PrologueID(),
   };
   unit = irGenRegion(*region, ctx, pconds);
   assertx(unit);

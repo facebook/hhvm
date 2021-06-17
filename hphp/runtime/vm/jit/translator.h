@@ -117,6 +117,7 @@ struct TransContext {
   TransKind kind{TransKind::Invalid};
   SrcKey initSrcKey;
   const RegionDesc* region{nullptr};
+  PrologueID pid;
 };
 
 inline tracing::Props traceProps(const TransContext& c) {

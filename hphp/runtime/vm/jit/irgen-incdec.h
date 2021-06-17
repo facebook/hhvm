@@ -32,18 +32,16 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
   // non int/double types.
   if (RuntimeOption::EvalWarnOnIncDecInvalidType == 0) {
     if (src->isA(TNull)) {
-      if (RuntimeOption::EvalNoticeOnCoerceForIncDec > 0 && isInc(op)) {
-        auto throws = handleConvNoticeLevel(
-          env,
-          ConvNoticeData {
-            flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec),
-            s_ConvNoticeReasonIncDec.get()
-          },
-          "null",
-          "int");
-        return throws ? cns(env, false) : cns(env, 1);
-      }
-      return isInc(op) ? cns(env, 1) : src;
+      if (!isInc(op)) return src;
+      handleConvNoticeLevel(
+        env,
+        ConvNoticeData {
+          flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec),
+          s_ConvNoticeReasonIncDec.get()
+        },
+        "null",
+        "int");
+      return cns(env, 1);
     }
 
     if (src->type().subtypeOfAny(TBool, TArrLike, TObj, TRes)) {

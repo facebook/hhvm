@@ -932,9 +932,8 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff);
 
 /*
  * Determines correct course of action based on notice_data and acts upon it.
- * Returns true if an exception throw is emitted.
  */
-bool handleConvNoticeLevel(
+void handleConvNoticeLevel(
   IRGS& env,
   const ConvNoticeData& notice_data,
   const char* const from,

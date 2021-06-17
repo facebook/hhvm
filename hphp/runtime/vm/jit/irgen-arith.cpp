@@ -147,12 +147,11 @@ bool isBitOp(Op op) {
 // booleans in arithmetic and bitwise operations get cast to ints
 SSATmp* promoteBool(IRGS& env, SSATmp* src, bool isBitOp) {
   if (!(src->type() <= TBool)) return src;
-  auto throws =
-    handleConvNoticeLevel(env,
-      isBitOp ? getConvNoticeDataForBitOp() : getConvNoticeDataForMath(),
-      "bool",
-      "int");
-  return throws ? cns(env, false) : gen(env, ConvBoolToInt, src);
+  handleConvNoticeLevel(env,
+    isBitOp ? getConvNoticeDataForBitOp() : getConvNoticeDataForMath(),
+    "bool",
+    "int");
+  return gen(env, ConvBoolToInt, src);
 }
 
 Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
@@ -1847,12 +1846,7 @@ void emitBitNot(IRGS& env) {
   }
 
   if (srcType <= TDbl) {
-    auto throws =
-      handleConvNoticeLevel(env, getConvNoticeDataForBitOp(), "double", "int");
-    if (throws) {
-      push(env, cns(env, false));
-      return;
-    }
+    handleConvNoticeLevel(env, getConvNoticeDataForBitOp(), "double", "int");
     auto const src = gen(env, ConvDblToInt, popC(env));
     push(env, gen(env, XorInt, src, cns(env, -1)));
     return;
@@ -1889,9 +1883,8 @@ void emitDiv(IRGS& env) {
   auto toDbl = [&] (SSATmp* x) {
     if (x->isA(TBool)) {
        // say int to match interp due to just using the float version of the int
-      auto throws =
-        handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
-      return throws ? cns(env, false) : gen(env, ConvBoolToDbl, x);
+      handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
+      return gen(env, ConvBoolToDbl, x);
     }
     return x->isA(TInt) ? gen(env, ConvIntToDbl, x) : x;
   };

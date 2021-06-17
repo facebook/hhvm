@@ -294,6 +294,14 @@ let process_typedef_decl ctx source_map elem (all_decls, progress) =
   in
   (all_decls @ [build_typedef_decl_json_ref decl_id], prog)
 
+let process_typedef_xref symbol_def pos (xrefs, progress) =
+  process_xref
+    add_typedef_decl_fact
+    build_typedef_decl_json_ref
+    symbol_def
+    pos
+    (xrefs, progress)
+
 let process_decls ctx (files_info : file_info list) =
   let (source_map, progress) =
     List.fold
@@ -365,6 +373,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                 | Typeconst ->
                   let ref_fun = build_type_const_decl_json_ref in
                   proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
+                | Typedef -> process_typedef_xref sym_def occ.pos (xrefs, prog)
                 | Trait ->
                   let con_kind = parent_decl_predicate TraitContainer in
                   process_container_xref con_kind sym_def occ.pos (xrefs, prog)

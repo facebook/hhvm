@@ -1,0 +1,4 @@
+File "module_interfaces.php", line 20, characters 20-20:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_interfaces.php", line 7, characters 11-11:
+  This is from module `A`

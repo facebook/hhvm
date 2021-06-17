@@ -530,7 +530,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
       Repo::get().commitUnit(ue.get(), unitOrigin, false);
     }
 
-    if (RO::EvalStressUnitSerde) ue = ue->stressSerde();
     unit = ue->create();
     if (BuiltinSymbols::s_systemAr) {
       assertx(ue->m_filepath->data()[0] == '/' &&

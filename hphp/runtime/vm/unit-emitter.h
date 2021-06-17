@@ -98,13 +98,6 @@ struct UnitEmitter {
   template<typename SerDe> void serde(SerDe&, bool lazy);
 
   /*
-   * Serialize this emitter and then deserialize it into a new emitter
-   * and return it. Used to stress-test the serde logic. Only valid if
-   * EvalStressUnitSerde is enabled.
-   */
-  std::unique_ptr<UnitEmitter> stressSerde();
-
-  /*
    * Run the verifier on this unit.
    */
   bool check(bool verbose) const;

@@ -698,21 +698,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
 template void UnitEmitter::serde<>(BlobDecoder&, bool);
 template void UnitEmitter::serde<>(BlobEncoder&, bool);
 
-std::unique_ptr<UnitEmitter> UnitEmitter::stressSerde() {
-  assertx(RO::EvalStressUnitSerde);
-  assertx(!RO::RepoAuthoritative);
-  BlobEncoder encoder{m_useGlobalIds};
-  serde(encoder, false);
-  auto ue = std::make_unique<UnitEmitter>(
-    m_sha1, m_bcSha1, m_nativeFuncs, m_useGlobalIds
-  );
-  BlobDecoder decoder{encoder.data(), encoder.size(), m_useGlobalIds};
-  ue->m_filepath = m_filepath;
-  ue->m_sn = m_sn;
-  ue->serde(decoder, false);
-  return ue;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // UnitRepoProxy.
 
@@ -839,7 +824,6 @@ UnitRepoProxy::load(const folly::StringPiece name, const SHA1& sha1,
                     const Native::FuncTable& nativeFuncs) {
   auto ue = loadEmitter(name, sha1, nativeFuncs);
   if (!ue) return nullptr;
-  if (RO::EvalStressUnitSerde) ue = ue->stressSerde();
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {

@@ -950,10 +950,6 @@ function hhvm_cmd_impl(
       $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
 
-    if (!isset($options['repo'])) {
-      $args[] = '-vEval.StressUnitSerde=true';
-    }
-
     if (isset($options['use-internal-compiler'])) {
       $args[] = '-vEval.HackCompilerUseCompilerPool=false';
     }

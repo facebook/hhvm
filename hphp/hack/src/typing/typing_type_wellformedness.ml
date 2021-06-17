@@ -96,7 +96,7 @@ let check_tparams_constraints env use_pos tparams targs =
   Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
 (** Mostly check constraints on type parameters. *)
-let check_happly ?(via_label = false) unchecked_tparams env h =
+let check_happly ?(via_label = false) ~in_signature unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -128,20 +128,20 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
       | Some cls ->
         Typing_visibility.check_classname_access
           ~use_pos:hint_pos
-          ~in_signature:true
+          ~in_signature
           env
           cls;
         check_tparams_constraints env hint_pos (Cls.tparams cls) targs
       | None -> env)
     | _ -> env)
 
-let rec hint ?(via_label = false) env (p, h) =
+let rec hint ?(via_label = false) ?(in_signature = true) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
-  hint_ ~via_label env p h
+  hint_ ~via_label ~in_signature env p h
 
-and hint_ ~via_label env p h_ =
-  let hint env (p, h) = hint_ ~via_label:false env p h in
+and hint_ ~via_label ~in_signature env p h_ =
+  let hint env (p, h) = hint_ ~via_label:false ~in_signature env p h in
   let () =
     if via_label then
       (* __ViaLabel is only allowed on HH\MemberOf, so we check everything that
@@ -207,12 +207,22 @@ and hint_ ~via_label env p h_ =
       | None -> ()
       | Some (Env.TypedefResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
+          check_happly
+            ~via_label
+            ~in_signature
+            env.typedef_tparams
+            env.tenv
+            (p, h)
         in
         List.iter hl ~f:(hint env)
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
+          check_happly
+            ~via_label
+            ~in_signature
+            env.typedef_tparams
+            env.tenv
+            (p, h)
         in
         List.iter hl ~f:(hint env)
     end
@@ -314,7 +324,8 @@ let method_ env m =
   List.iter m.m_where_constraints ~f:(where_constr env);
   maybe hint env (hint_of_type_hint m.m_ret)
 
-let hint_no_kind_check env (p, h) = hint_ ~via_label:false env p h
+let hint_no_kind_check env (p, h) =
+  hint_ ~via_label:false ~in_signature:true env p h
 
 let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
@@ -335,7 +346,9 @@ let class_ tenv c =
   List.iter c.c_where_constraints ~f:(where_constr env);
   List.iter c.c_extends ~f:(hint env);
   List.iter c.c_implements ~f:(hint env);
-  List.iter c.c_uses ~f:(hint env);
+  (* Use is not a signature from the point of view of modules because the trait
+     being use'd does not need to be seen by users of the class *)
+  List.iter c.c_uses ~f:(hint env ~in_signature:false);
   List.iter c.c_typeconsts ~f:(typeconst (env, c.c_tparams));
   List.iter c_static_vars ~f:(class_var env);
   List.iter c_vars ~f:(class_var env);

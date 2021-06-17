@@ -1,0 +1,12 @@
+File "module_traits.php", line 23, characters 7-8:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_traits.php", line 6, characters 7-8:
+  This is from module `A`
+File "module_traits.php", line 27, characters 7-8:
+Cannot access an internal element from module `A` outside of a module (Typing[4444])
+  File "module_traits.php", line 6, characters 7-8:
+  This is from module `A`
+File "module_traits.php", line 37, characters 21-21:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_traits.php", line 33, characters 7-7:
+  It is declared as `internal` here

@@ -18,7 +18,7 @@ ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
-serde = { version = "=1.0.118", features = ["derive", "rc"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [profile.release]
 incremental = false

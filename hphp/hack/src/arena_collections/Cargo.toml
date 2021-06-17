@@ -13,7 +13,7 @@ arena_trait = { path = "../arena_trait" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
-serde = { version = "=1.0.118", features = ["derive", "rc"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [dev-dependencies]
 quickcheck = "0.9"

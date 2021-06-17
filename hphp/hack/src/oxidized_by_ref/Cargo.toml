@@ -19,7 +19,7 @@ no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
-serde = { version = "=1.0.118", features = ["derive", "rc"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [dev-dependencies]
 pretty_assertions = "0.6"

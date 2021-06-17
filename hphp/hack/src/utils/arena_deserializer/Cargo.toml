@@ -10,7 +10,7 @@ path = "lib.rs"
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-serde = { version = "=1.0.118", features = ["derive", "rc"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [profile.release]
 incremental = false

@@ -14,7 +14,7 @@ bumpalo = { version = "3.2.1", features = ["collections"] }
 full_fidelity_schema_version_number = { path = "../../../schema" }
 parser = { path = "../../../core" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
-serde = { version = "=1.0.118", features = ["derive", "rc"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 stack_limit = { path = "../../../../utils/stack_limit" }
 
 [profile.release]

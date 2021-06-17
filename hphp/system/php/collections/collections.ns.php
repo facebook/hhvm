@@ -1709,7 +1709,7 @@ class LazyConcatIterable implements \HH\Iterable {
 class LazyIterableView implements \HH\Iterable {
   public $iterable;
 
-  public function __construct($iterable) { $this->iterable = $iterable; }
+  public function __construct($iterable)[] { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   <<__ProvenanceSkipFrame>>
   public function toArray() {

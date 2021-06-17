@@ -261,14 +261,21 @@ pcre_cache_entry::~pcre_cache_entry() {
   pcre_free(re);
 }
 
+bool literalOptions(int options) {
+  constexpr int mask =
+    PCRE_ANCHORED | PCRE_CASELESS |
+    PCRE_DOLLAR_ENDONLY | PCRE_NOTEMPTY;
+  return !(options & ~mask);
+}
+
 pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
-  if (coptions & ~PCRE_CASELESS) {
-    return;
-  }
+  if (!literalOptions(coptions)) return;
 
   auto p = pattern;
+  options = coptions;
+
   if (*p == '^') {
-    match_start = true;
+    options |= PCRE_ANCHORED;
     p++;
   }
 
@@ -286,12 +293,11 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
     pattern_buffer += *p++;
   }
   if (*p == '$') {
-    match_end = true;
+    options |= PCRE_DOLLAR_ENDONLY;
     p++;
   }
   if (!*p) {
     /* This is an encoding of a literal string. */
-    case_insensitive = coptions & PCRE_CASELESS;
     literal_str = std::move(pattern_buffer);
   }
 }
@@ -302,8 +308,9 @@ bool pcre_literal_data::isLiteral() const {
 
 bool pcre_literal_data::matches(const StringData* subject,
                                 int pos,
-                                int* offsets) const {
-  assertx(isLiteral());
+                                int* offsets,
+                                int extra_options) const {
+  assertx(isLiteral() && literalOptions(extra_options));
   assertx(pos >= 0);
 
   // Subject must be at least as long as the literal pattern
@@ -313,26 +320,28 @@ bool pcre_literal_data::matches(const StringData* subject,
   }
 
   size_t literal_strlen = literal_str->length();
+  auto const g_empty = (options | extra_options) & PCRE_NOTEMPTY;
+  if (g_empty && !literal_strlen) return false;
   auto const subject_c = subject->data();
   auto const literal_c = literal_str->c_str();
-  if (match_start) {
+  if (match_start()) {
     // Make sure an exact match has the right length.
-    if (pos || (match_end && subject->size() != literal_strlen)) {
+    if (pos || (match_end() && subject->size() != literal_strlen)) {
       return false;
     }
     // If only matching the start (^), compare the strings
     // for the length of the literal pattern.
-    if (case_insensitive ?
+    if (case_insensitive() ?
         bstrcaseeq(subject_c, literal_c, literal_strlen) :
         memcmp(subject_c, literal_c, literal_strlen) == 0) {
       offsets[0] = 0;
       offsets[1] = literal_strlen * sizeof(char);
       return true;
     }
-  } else if (match_end) {
+  } else if (match_end()) {
     // Compare the literal pattern against the tail end of the subject.
     auto const subject_tail = subject_c + (subject->size() - literal_strlen);
-    if (case_insensitive ?
+    if (case_insensitive() ?
         bstrcaseeq(subject_tail, literal_c, literal_strlen) :
         memcmp(subject_tail, literal_c, literal_strlen) == 0) {
       offsets[0] = (subject->size() - literal_strlen) * sizeof(char);
@@ -347,7 +356,7 @@ bool pcre_literal_data::matches(const StringData* subject,
     // Check if the literal pattern occurs as a substring of the subject.
     auto const subject_str = StrNR(subject);
     auto const find_response = subject_str.asString().find(
-      *literal_str, pos, !case_insensitive);
+      *literal_str, pos, !case_insensitive());
     if (find_response >= 0) {
       offsets[0] = find_response * sizeof(char);
       offsets[1] = offsets[0] + literal_strlen * sizeof(char);
@@ -1033,11 +1042,17 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
   for (ArrayIter iter(input); iter; ++iter) {
     String entry = iter.second().toString();
+    int count = 0;
 
-    /* Perform the match */
-    int count = pcre_exec(pce->re, &extra, entry.data(), entry.size(),
-                          0, 0, offsets, size_offsets);
-
+    if (pce->literal_data) {
+      assertx(pce->literal_data->isLiteral());
+      count = pce->literal_data->matches(entry.get(), 0, offsets, 0)
+        ? 1 : PCRE_ERROR_NOMATCH;
+    } else {
+      /* Perform the match */
+      count = pcre_exec(pce->re, &extra, entry.data(), entry.size(),
+                        0, 0, offsets, size_offsets);
+    }
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
@@ -1146,23 +1161,23 @@ static Variant preg_match_impl(StringData* pattern,
   do {
 
     int count = 0;
+    int options = exec_options | g_notempty;
     /*
      * Optimization: If the pattern defines a literal substring,
      * compare the strings directly (i.e. memcmp) instead of performing
      * the full regular expression evaluation.
      * Take the slow path if there are any special compile options.
      */
-    if (pce->literal_data && !global) {
+    if (pce->literal_data && !global && literalOptions(options)) {
       assertx(pce->literal_data->isLiteral());
       /* TODO(t13140878): compare literal against multiple substrings
        * in the preg_match_all (global == true) case. */
-      count = pce->literal_data->matches(subject, start_offset, offsets) ? 1
-        : PCRE_ERROR_NOMATCH;
+      count = pce->literal_data->matches(subject, start_offset, offsets, options)
+        ? 1 : PCRE_ERROR_NOMATCH;
     } else {
       /* Execute the regular expression. */
       count = pcre_exec(pce->re, &extra, subject->data(), subject->size(),
-                        start_offset,
-                        exec_options | g_notempty,
+                        start_offset, options,
                         offsets, size_offsets);
 
       /* The string was already proved to be valid UTF-8 */
@@ -1452,14 +1467,21 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     int g_notempty = 0;   // If the match should not be empty
     int exec_options = 0; // Options passed to pcre_exec
     while (1) {
-      /* Execute the regular expression. */
-      int count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
-                            start_offset,
-                            exec_options | g_notempty,
-                            offsets, size_offsets);
+      int count = 0;
+      int options = exec_options | g_notempty;
+      if (pce->literal_data && literalOptions(options)) {
+        assertx(pce->literal_data->isLiteral());
+        count =
+          pce->literal_data->matches(subject.get(), start_offset, offsets, options)
+          ? 1 : PCRE_ERROR_NOMATCH;
+      } else {
+        /* Execute the regular expression. */
+        count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
+                          start_offset, options, offsets, size_offsets);
 
-      /* The string was already proved to be valid UTF-8 */
-      exec_options |= PCRE_NO_UTF8_CHECK;
+        /* The string was already proved to be valid UTF-8 */
+        exec_options |= PCRE_NO_UTF8_CHECK;
+      }
 
       /* Check for too many substrings condition. */
       if (count == 0) {
@@ -1756,16 +1778,23 @@ Variant preg_split(const String& pattern, const String& subject,
   PCRECache::Accessor bump_accessor;
   const pcre_cache_entry* bump_pce = nullptr; /* instance for empty matches */
   while ((limit == -1 || limit > 1)) {
-    int count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
-                          start_offset, g_notempty | utf8_check,
-                          offsets, size_offsets);
-
-    /* Subsequent calls to pcre_exec don't need to bother with the
-     * utf8 validity check: if the subject isn't valid, the first
-     * call to pcre_exec will have failed, and as long as we only
-     * set start_offset to known character boundaries we won't
-     * supply an invalid offset. */
-    utf8_check = PCRE_NO_UTF8_CHECK;
+    int count = 0;
+    int options = g_notempty | utf8_check;
+    if (pce->literal_data && literalOptions(options)) {
+      assertx(pce->literal_data->isLiteral());
+      count =
+        pce->literal_data->matches(subject.get(), start_offset, offsets, options)
+        ? 1 : PCRE_ERROR_NOMATCH;
+    } else {
+      count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
+                        start_offset, options, offsets, size_offsets);
+      /* Subsequent calls to pcre_exec don't need to bother with the
+      * utf8 validity check: if the subject isn't valid, the first
+      * call to pcre_exec will have failed, and as long as we only
+      * set start_offset to known character boundaries we won't
+      * supply an invalid offset. */
+      utf8_check = PCRE_NO_UTF8_CHECK;
+    }
 
     /* Check for too many substrings condition. */
     if (count == 0) {

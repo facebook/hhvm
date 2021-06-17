@@ -60,12 +60,14 @@ struct pcre_literal_data {
   pcre_literal_data(const char* pattern, int coptions);
 
   bool isLiteral() const;
-  bool matches(const StringData* subject, int pos, int* offsets) const;
+  bool match_start() const { return options & PCRE_ANCHORED; }
+  bool match_end() const { return options & PCRE_DOLLAR_ENDONLY; }
+  bool case_insensitive() const { return options & PCRE_CASELESS; }
+  bool matches(const StringData* subject, int pos, int* offsets,
+               int extra_options) const;
 
   folly::Optional<std::string> literal_str;
-  bool match_start{false};
-  bool match_end{false};
-  bool case_insensitive{false};
+  int options;
 };
 
 struct pcre_cache_entry {
@@ -178,4 +180,3 @@ struct PregWithErrorGuard {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

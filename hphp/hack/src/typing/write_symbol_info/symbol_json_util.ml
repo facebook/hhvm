@@ -96,16 +96,17 @@ let split_name (s : string) : (string * string) option =
     else
       Some (parent_namespace, name)
 
-(* Get the container name and predicate type for a given container kind. *)
-let container_decl_predicate container_type =
-  match container_type with
+(* Get the container name and predicate type for a given parent
+container kind. *)
+let parent_decl_predicate parent_container_type =
+  match parent_container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
   | InterfaceContainer -> ("interface_", InterfaceDeclaration)
   | TraitContainer -> ("trait", TraitDeclaration)
 
-let get_container_kind clss =
+let get_parent_kind clss =
   match clss.c_kind with
-  | Cenum -> raise (Failure "Unexpected enum as container kind")
+  | Cenum -> raise (Failure "Unexpected enum as parent container kind")
   | Cinterface -> InterfaceContainer
   | Ctrait -> TraitContainer
   | _ -> ClassContainer
@@ -134,6 +135,7 @@ let init_progress =
       interfaceDefinition = [];
       methodDeclaration = [];
       methodDefinition = [];
+      namespaceDeclaration = [];
       propertyDeclaration = [];
       propertyDefinition = [];
       traitDeclaration = [];
@@ -141,6 +143,7 @@ let init_progress =
       typeConstDeclaration = [];
       typeConstDefinition = [];
       typedefDeclaration = [];
+      typedefDefinition = [];
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
@@ -273,6 +276,11 @@ let update_json_data predicate json progress =
         progress.resultJson with
         methodDefinition = json :: progress.resultJson.methodDefinition;
       }
+    | NamespaceDeclaration ->
+      {
+        progress.resultJson with
+        namespaceDeclaration = json :: progress.resultJson.namespaceDeclaration;
+      }
     | PropertyDeclaration ->
       {
         progress.resultJson with
@@ -307,6 +315,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         typedefDeclaration = json :: progress.resultJson.typedefDeclaration;
+      }
+    | TypedefDefinition ->
+      {
+        progress.resultJson with
+        typedefDefinition = json :: progress.resultJson.typedefDefinition;
       }
   in
   { resultJson = json; factIds = progress.factIds }

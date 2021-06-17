@@ -43,9 +43,7 @@ let process_decl_loc
 
 let process_container_decl ctx source_map con (all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
-  let (con_type, decl_pred) =
-    container_decl_predicate (get_container_kind con)
-  in
+  let (con_type, decl_pred) = parent_decl_predicate (get_parent_kind con) in
   let (con_decl_id, prog) =
     add_container_decl_fact decl_pred con_name progress
   in
@@ -156,29 +154,34 @@ let process_container_xref
 
 let process_enum_decl ctx source_map enm (all_decls, progress) =
   let (pos, id) = enm.c_name in
-  let (enum_id, prog) = add_enum_decl_fact id progress in
-  let enum_decl_ref = build_enum_decl_json_ref enum_id in
-  let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
-  let (_, prog) = add_decl_span_fact enm.c_span enum_decl_ref prog in
-  let (enumerators, decl_refs, prog) =
-    List.fold_right
-      enm.c_consts
-      ~init:([], [], prog)
-      ~f:(fun enumerator (decls, refs, prog) ->
-        let (pos, id) = enumerator.cc_id in
-        let (decl_id, prog) = add_enumerator_fact enum_id id prog in
-        let ref_json = build_enumerator_decl_json_ref decl_id in
-        let (_, prog) = add_decl_loc_fact pos ref_json prog in
-        let prog =
-          process_doc_comment enumerator.cc_doc_comment ref_json prog
-        in
-        (build_id_json decl_id :: decls, ref_json :: refs, prog))
-  in
-  let (_, prog) =
-    add_enum_defn_fact ctx source_map enm enum_id enumerators prog
-  in
-  let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
-  (all_decls @ (enum_decl_ref :: decl_refs), prog)
+  match enm.c_enum with
+  | None ->
+    Hh_logger.log "WARNING: skipping enum with missing data - %s" id;
+    (all_decls, progress)
+  | Some enum_data ->
+    let (enum_id, prog) = add_enum_decl_fact id progress in
+    let enum_decl_ref = build_enum_decl_json_ref enum_id in
+    let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
+    let (_, prog) = add_decl_span_fact enm.c_span enum_decl_ref prog in
+    let (enumerators, decl_refs, prog) =
+      List.fold_right
+        enm.c_consts
+        ~init:([], [], prog)
+        ~f:(fun enumerator (decls, refs, prog) ->
+          let (pos, id) = enumerator.cc_id in
+          let (decl_id, prog) = add_enumerator_fact enum_id id prog in
+          let ref_json = build_enumerator_decl_json_ref decl_id in
+          let (_, prog) = add_decl_loc_fact pos ref_json prog in
+          let prog =
+            process_doc_comment enumerator.cc_doc_comment ref_json prog
+          in
+          (build_id_json decl_id :: decls, ref_json :: refs, prog))
+    in
+    let (_, prog) =
+      add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators prog
+    in
+    let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
+    (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
 let process_enum_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -263,8 +266,8 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
         (* This includes references to built-in enum methods *)
         | _ -> (xrefs, prog)
       else
-        let con_kind = get_container_kind cls in
-        let (con_type, decl_pred) = container_decl_predicate con_kind in
+        let con_kind = get_parent_kind cls in
+        let (con_type, decl_pred) = parent_decl_predicate con_kind in
         let (con_decl_id, prog) =
           add_container_decl_fact decl_pred con_name prog
         in
@@ -277,11 +280,19 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
 
 let process_typedef_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.t_name in
-  let (decl_id, prog) = add_typedef_decl_fact ctx source_map id elem progress in
-  let ref_json = build_typedef_decl_json_ref decl_id in
-  let (_, prog) = add_decl_loc_fact pos ref_json prog in
-  let (_, prog) = add_decl_span_fact elem.t_span ref_json prog in
-  (all_decls @ [ref_json], prog)
+  let (decl_id, prog) =
+    process_decl_loc
+      add_typedef_decl_fact
+      (add_typedef_defn_fact ctx source_map)
+      build_typedef_decl_json_ref
+      pos
+      (Some elem.t_span)
+      id
+      elem
+      None
+      progress
+  in
+  (all_decls @ [build_typedef_decl_json_ref decl_id], prog)
 
 let process_decls ctx (files_info : file_info list) =
   let (source_map, progress) =
@@ -331,7 +342,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                 let proc_mem = process_member_xref ctx sym_def occ.pos in
                 (match sym_def.kind with
                 | Class ->
-                  let con_kind = container_decl_predicate ClassContainer in
+                  let con_kind = parent_decl_predicate ClassContainer in
                   process_container_xref con_kind sym_def occ.pos (xrefs, prog)
                 | Const ->
                   (match occ.type_ with
@@ -343,7 +354,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                 | Enum -> process_enum_xref sym_def occ.pos (xrefs, prog)
                 | Function -> process_function_xref sym_def occ.pos (xrefs, prog)
                 | Interface ->
-                  let con_kind = container_decl_predicate InterfaceContainer in
+                  let con_kind = parent_decl_predicate InterfaceContainer in
                   process_container_xref con_kind sym_def occ.pos (xrefs, prog)
                 | Method ->
                   let ref_fun = build_method_decl_json_ref in
@@ -355,7 +366,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   let ref_fun = build_type_const_decl_json_ref in
                   proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
                 | Trait ->
-                  let con_kind = container_decl_predicate TraitContainer in
+                  let con_kind = parent_decl_predicate TraitContainer in
                   process_container_xref con_kind sym_def occ.pos (xrefs, prog)
                 | _ -> (xrefs, prog)))
       in
@@ -373,34 +384,36 @@ let progress_to_json progress =
     by id only *)
     [
       ("src.FileLines.1", progress.resultJson.fileLines);
-      ("hack.FileDeclarations.4", progress.resultJson.fileDeclarations);
-      ("hack.FileXRefs.4", progress.resultJson.fileXRefs);
-      ("hack.MethodDefinition.4", progress.resultJson.methodDefinition);
-      ("hack.FunctionDefinition.4", progress.resultJson.functionDefinition);
-      ("hack.EnumDefinition.4", progress.resultJson.enumDefinition);
-      ("hack.ClassConstDefinition.4", progress.resultJson.classConstDefinition);
-      ("hack.PropertyDefinition.4", progress.resultJson.propertyDefinition);
-      ("hack.TypeConstDefinition.4", progress.resultJson.typeConstDefinition);
-      ("hack.ClassDefinition.4", progress.resultJson.classDefinition);
-      ("hack.TraitDefinition.4", progress.resultJson.traitDefinition);
-      ("hack.InterfaceDefinition.4", progress.resultJson.interfaceDefinition);
-      ("hack.GlobalConstDefinition.4", progress.resultJson.globalConstDefinition);
-      ("hack.DeclarationComment.4", progress.resultJson.declarationComment);
-      ("hack.DeclarationLocation.4", progress.resultJson.declarationLocation);
-      ("hack.DeclarationSpan.4", progress.resultJson.declarationSpan);
-      ("hack.MethodDeclaration.4", progress.resultJson.methodDeclaration);
-      ("hack.ClassConstDeclaration.4", progress.resultJson.classConstDeclaration);
-      ("hack.PropertyDeclaration.4", progress.resultJson.propertyDeclaration);
-      ("hack.TypeConstDeclaration.4", progress.resultJson.typeConstDeclaration);
-      ("hack.FunctionDeclaration.4", progress.resultJson.functionDeclaration);
-      ("hack.Enumerator.4", progress.resultJson.enumerator);
-      ("hack.EnumDeclaration.4", progress.resultJson.enumDeclaration);
-      ("hack.ClassDeclaration.4", progress.resultJson.classDeclaration);
-      ("hack.TraitDeclaration.4", progress.resultJson.traitDeclaration);
-      ("hack.InterfaceDeclaration.4", progress.resultJson.interfaceDeclaration);
-      ("hack.TypedefDeclaration.4", progress.resultJson.typedefDeclaration);
-      ( "hack.GlobalConstDeclaration.4",
+      ("hack.FileDeclarations.5", progress.resultJson.fileDeclarations);
+      ("hack.FileXRefs.5", progress.resultJson.fileXRefs);
+      ("hack.MethodDefinition.5", progress.resultJson.methodDefinition);
+      ("hack.FunctionDefinition.5", progress.resultJson.functionDefinition);
+      ("hack.EnumDefinition.5", progress.resultJson.enumDefinition);
+      ("hack.ClassConstDefinition.5", progress.resultJson.classConstDefinition);
+      ("hack.PropertyDefinition.5", progress.resultJson.propertyDefinition);
+      ("hack.TypeConstDefinition.5", progress.resultJson.typeConstDefinition);
+      ("hack.ClassDefinition.5", progress.resultJson.classDefinition);
+      ("hack.TraitDefinition.5", progress.resultJson.traitDefinition);
+      ("hack.InterfaceDefinition.5", progress.resultJson.interfaceDefinition);
+      ("hack.TypedefDefinition.5", progress.resultJson.typedefDefinition);
+      ("hack.GlobalConstDefinition.5", progress.resultJson.globalConstDefinition);
+      ("hack.DeclarationComment.5", progress.resultJson.declarationComment);
+      ("hack.DeclarationLocation.5", progress.resultJson.declarationLocation);
+      ("hack.DeclarationSpan.5", progress.resultJson.declarationSpan);
+      ("hack.MethodDeclaration.5", progress.resultJson.methodDeclaration);
+      ("hack.ClassConstDeclaration.5", progress.resultJson.classConstDeclaration);
+      ("hack.PropertyDeclaration.5", progress.resultJson.propertyDeclaration);
+      ("hack.TypeConstDeclaration.5", progress.resultJson.typeConstDeclaration);
+      ("hack.FunctionDeclaration.5", progress.resultJson.functionDeclaration);
+      ("hack.Enumerator.5", progress.resultJson.enumerator);
+      ("hack.EnumDeclaration.5", progress.resultJson.enumDeclaration);
+      ("hack.ClassDeclaration.5", progress.resultJson.classDeclaration);
+      ("hack.TraitDeclaration.5", progress.resultJson.traitDeclaration);
+      ("hack.InterfaceDeclaration.5", progress.resultJson.interfaceDeclaration);
+      ("hack.TypedefDeclaration.5", progress.resultJson.typedefDeclaration);
+      ( "hack.GlobalConstDeclaration.5",
         progress.resultJson.globalConstDeclaration );
+      ("hack.NamespaceDeclaration.5", progress.resultJson.namespaceDeclaration);
     ]
   in
   let json_array =

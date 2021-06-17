@@ -13,15 +13,39 @@ open Ast_defs
 open Full_fidelity_source_text
 open Hh_json
 open Hh_prelude
+open Namespace_env
 open Symbol_build_json
 open Symbol_builder_types
 open Symbol_json_util
+
+(* Add a namespace fact if the nsenv is non-empty; otherwise,
+return progress unchanged *)
+let add_namespace_decl_fact nsenv progress =
+  match nsenv.ns_name with
+  | None -> progress (* Global namespace *)
+  | Some "" -> progress
+  | Some ns ->
+    let json_fields = [("name", build_namespaceqname_json_nested ns)] in
+    let (_fid, prog) =
+      add_fact NamespaceDeclaration (JSON_Object json_fields) progress
+    in
+    prog
 
 let add_container_decl_fact decl_pred name progress =
   let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact decl_pred json_fact progress
 
+(* Helper function for adding facts for container parents, given
+a context, a list of declarations, a predicate type, and progress state *)
+let add_parent_decls ctx decls pred prog =
+  List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
+      let name = strip_tparams (get_type_from_hint ctx decl) in
+      let (decl_id, prog) = add_container_decl_fact pred name prog in
+      let ref = build_id_json decl_id in
+      (ref :: decl_refs, prog))
+
 let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
+  let prog = add_namespace_decl_fact clss.c_namespace prog in
   let tparams =
     List.map clss.c_tparams ~f:(build_type_param_json ctx source_map)
   in
@@ -33,29 +57,29 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
         build_attributes_json_nested source_map clss.c_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_namespace_decl_json_nested clss.c_namespace
-  in
-  let add_decls decls pred prog =
-    List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
-        let name = strip_tparams (get_type_from_hint ctx decl) in
-        let (decl_id, prog) = add_container_decl_fact pred name prog in
-        let ref = build_id_json decl_id in
-        (ref :: decl_refs, prog))
   in
   let (req_extends_hints, req_implements_hints) =
     List.partition_tf clss.c_reqs ~f:snd
   in
   let (req_extends, prog) =
-    add_decls (List.map req_extends_hints ~f:fst) ClassDeclaration prog
+    add_parent_decls
+      ctx
+      (List.map req_extends_hints ~f:fst)
+      ClassDeclaration
+      prog
   in
   let (req_implements, prog) =
-    add_decls (List.map req_implements_hints ~f:fst) InterfaceDeclaration prog
+    add_parent_decls
+      ctx
+      (List.map req_implements_hints ~f:fst)
+      InterfaceDeclaration
+      prog
   in
   let (defn_pred, json_fields, prog) =
-    match get_container_kind clss with
+    match get_parent_kind clss with
     | InterfaceContainer ->
       let (extends, prog) =
-        add_decls clss.c_extends InterfaceDeclaration prog
+        add_parent_decls ctx clss.c_extends InterfaceDeclaration prog
       in
       let req_fields =
         common_fields
@@ -67,9 +91,11 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
       (InterfaceDefinition, req_fields, prog)
     | TraitContainer ->
       let (impls, prog) =
-        add_decls clss.c_implements InterfaceDeclaration prog
+        add_parent_decls ctx clss.c_implements InterfaceDeclaration prog
       in
-      let (uses, prog) = add_decls clss.c_uses TraitDeclaration prog in
+      let (uses, prog) =
+        add_parent_decls ctx clss.c_uses TraitDeclaration prog
+      in
       let req_fields =
         common_fields
         @ [
@@ -88,9 +114,11 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
       in
       let (class_fields, prog) =
         let (impls, prog) =
-          add_decls clss.c_implements InterfaceDeclaration prog
+          add_parent_decls ctx clss.c_implements InterfaceDeclaration prog
         in
-        let (uses, prog) = add_decls clss.c_uses TraitDeclaration prog in
+        let (uses, prog) =
+          add_parent_decls ctx clss.c_uses TraitDeclaration prog
+        in
         let req_class_fields =
           common_fields
           @ [
@@ -255,31 +283,32 @@ let add_enum_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact EnumDeclaration json_fact progress
 
-let add_enum_defn_fact ctx source_map enm enum_id enumerators progress =
-  let json_fields =
-    let json_fields =
-      [
-        ("declaration", build_id_json enum_id);
-        ("enumerators", JSON_Array enumerators);
-        ( "attributes",
-          build_attributes_json_nested source_map enm.c_user_attributes );
-      ]
-      @ build_namespace_decl_json_nested enm.c_namespace
-    in
-    match enm.c_enum with
-    | None -> json_fields
-    | Some en ->
-      let json_fields =
-        ("enumBase", build_type_json_nested (get_type_from_hint ctx en.e_base))
-        :: json_fields
-      in
-      (match en.e_constraint with
-      | None -> json_fields
-      | Some c ->
-        ("enumConstraint", build_type_json_nested (get_type_from_hint ctx c))
-        :: json_fields)
+let add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators progress
+    =
+  let prog = add_namespace_decl_fact enm.c_namespace progress in
+  let (includes, prog) =
+    add_parent_decls ctx enum_data.e_includes EnumDeclaration prog
   in
-  add_fact EnumDefinition (JSON_Object json_fields) progress
+  let json_fields =
+    [
+      ("declaration", build_id_json enum_id);
+      ( "enumBase",
+        build_type_json_nested (get_type_from_hint ctx enum_data.e_base) );
+      ("enumerators", JSON_Array enumerators);
+      ( "attributes",
+        build_attributes_json_nested source_map enm.c_user_attributes );
+      ("includes", JSON_Array includes);
+      ("isEnumClass", JSON_Bool enum_data.e_enum_class);
+    ]
+  in
+  let json_fields =
+    match enum_data.e_constraint with
+    | None -> json_fields
+    | Some c ->
+      ("enumConstraint", build_type_json_nested (get_type_from_hint ctx c))
+      :: json_fields
+  in
+  add_fact EnumDefinition (JSON_Object json_fields) prog
 
 let add_enumerator_fact decl_id const_name progress =
   let json_fact =
@@ -297,6 +326,7 @@ let add_func_decl_fact name progress =
 
 let add_func_defn_fact ctx source_map fd decl_id progress =
   let elem = fd.fd_fun in
+  let prog = add_namespace_decl_fact fd.fd_namespace progress in
   let tparams =
     List.map elem.f_tparams ~f:(build_type_param_json ctx source_map)
   in
@@ -315,11 +345,15 @@ let add_func_defn_fact ctx source_map fd decl_id progress =
         build_attributes_json_nested source_map elem.f_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_namespace_decl_json_nested fd.fd_namespace
   in
-  add_fact FunctionDefinition (JSON_Object json_fields) progress
+  add_fact FunctionDefinition (JSON_Object json_fields) prog
 
-let add_typedef_decl_fact ctx source_map name elem progress =
+let add_typedef_decl_fact name progress =
+  let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
+  add_fact TypedefDeclaration json_fact progress
+
+let add_typedef_defn_fact ctx source_map elem decl_id progress =
+  let prog = add_namespace_decl_fact elem.t_namespace progress in
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
@@ -330,21 +364,21 @@ let add_typedef_decl_fact ctx source_map name elem progress =
   in
   let json_fields =
     [
-      ("name", build_qname_json_nested name);
+      ("declaration", build_id_json decl_id);
       ("isTransparent", JSON_Bool is_transparent);
       ( "attributes",
         build_attributes_json_nested source_map elem.t_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_namespace_decl_json_nested elem.t_namespace
   in
-  add_fact TypedefDeclaration (JSON_Object json_fields) progress
+  add_fact TypedefDefinition (JSON_Object json_fields) prog
 
 let add_gconst_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact GlobalConstDeclaration json_fact progress
 
 let add_gconst_defn_fact ctx source_map elem decl_id progress =
+  let prog = add_namespace_decl_fact elem.cst_namespace progress in
   let value =
     let ((expr_pos, _), _) = elem.cst_value in
     let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
@@ -354,7 +388,6 @@ let add_gconst_defn_fact ctx source_map elem decl_id progress =
   in
   let req_fields =
     [("declaration", build_id_json decl_id); ("value", JSON_String value)]
-    @ build_namespace_decl_json_nested elem.cst_namespace
   in
   let json_fields =
     match elem.cst_type with
@@ -364,7 +397,7 @@ let add_gconst_defn_fact ctx source_map elem decl_id progress =
       ("type", build_type_json_nested ty) :: req_fields
   in
   let json_fact = JSON_Object json_fields in
-  add_fact GlobalConstDefinition json_fact progress
+  add_fact GlobalConstDefinition json_fact prog
 
 let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in

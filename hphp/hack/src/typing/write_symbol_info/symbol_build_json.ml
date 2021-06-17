@@ -14,15 +14,10 @@ open Aast
 open Ast_defs
 open Hh_json
 open Hh_prelude
-open Namespace_env
 open Symbol_json_util
 
 let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
-
-let build_comment_json_nested comment =
-  let valid_comment = check_utf8 comment in
-  JSON_Object [("key", JSON_String valid_comment)]
 
 let build_file_json_nested filepath =
   JSON_Object [("key", JSON_String filepath)]
@@ -57,20 +52,6 @@ let build_qname_json_nested qname =
       ]
   in
   JSON_Object [("key", JSON_Object fields)]
-
-(* Returns a singleton list containing the JSON field if there
-is a non-empty namespace in the nsenv, or else an empty list *)
-let build_namespace_decl_json_nested nsenv =
-  match nsenv.ns_name with
-  | None -> [] (* Global namespace *)
-  | Some "" -> []
-  | Some ns ->
-    [
-      ( "namespace_",
-        JSON_Object
-          [("key", JSON_Object [("name", build_namespaceqname_json_nested ns)])]
-      );
-    ]
 
 let build_type_json_nested type_name =
   (* Remove namespace slash from type, if present *)
@@ -317,7 +298,7 @@ let build_container_decl_json_ref container_type fact_id =
   JSON_Object [("container", container_json)]
 
 let build_enum_decl_json_ref fact_id =
-  JSON_Object [("enum_", build_id_json fact_id)]
+  build_container_decl_json_ref "enum_" fact_id
 
 let build_enumerator_decl_json_ref fact_id =
   JSON_Object [("enumerator", build_id_json fact_id)]

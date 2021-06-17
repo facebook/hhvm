@@ -13,7 +13,6 @@ type env = {
   client_id: string;
   root: Path.t;
   ignore_hh_version: bool;
-  is_64bit: bool;
   detail_level: Calculate_fanout.Detail_level.t;
   naming_table_path: Path.t option;
   dep_table_path: Path.t option;
@@ -113,7 +112,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
               { root = env.root; sockname = env.watchman_sockname }
           ~ignore_hh_version:env.ignore_hh_version
           ~saved_state_type:
-            (Saved_state_loader.Naming_and_dep_table { is_64bit = env.is_64bit })
+            (Saved_state_loader.Naming_and_dep_table { is_64bit = true })
       in
       (match dep_table_saved_state with
       | Error load_error ->
@@ -139,10 +138,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   in
 
   let deps_mode =
-    if env.is_64bit then
-      Typing_deps_mode.CustomMode (Some (Path.to_string dep_table_path))
-    else
-      Typing_deps_mode.SQLiteMode
+    Typing_deps_mode.CustomMode (Some (Path.to_string dep_table_path))
   in
   let setup_result = set_up_global_environment env ~deps_mode in
 
@@ -444,7 +440,7 @@ let env
     root
     detail_level
     ignore_hh_version
-    is_64bit
+    _is_64bit
     naming_table_path
     dep_table_path
     watchman_sockname
@@ -493,7 +489,6 @@ let env
     client_id;
     root;
     ignore_hh_version;
-    is_64bit;
     detail_level;
     naming_table_path;
     dep_table_path;
@@ -544,7 +539,7 @@ If not provided, defaults to the value for 'from'.
     value & flag & info ["ignore-hh-version"] ~doc
   in
   let is_64bit =
-    let doc = "Use 64bit depgraph." in
+    let doc = "[legacy] ignored]" in
     value & flag & info ["64bit"] ~doc
   in
   let naming_table_path =

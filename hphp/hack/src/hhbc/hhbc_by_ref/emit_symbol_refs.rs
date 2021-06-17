@@ -11,21 +11,6 @@ use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
 
 use std::collections::BTreeSet;
 
-pub fn get_symbol_refs<'a, 'arena: 'a, 'decl, D: DeclProvider<'decl>>(
-    alloc: &'arena bumpalo::Bump,
-    e: &'a mut Emitter<'arena, 'decl, D>,
-) -> &'a HhasSymbolRefs {
-    &e.emit_symbol_refs_state_mut(alloc).symbol_refs
-}
-
-pub fn set_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
-    alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
-    s: HhasSymbolRefs,
-) {
-    e.emit_symbol_refs_state_mut(alloc).symbol_refs = s;
-}
-
 pub fn add_include<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,

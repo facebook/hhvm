@@ -1101,7 +1101,7 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     vec.push_back(std::make_pair(p.first, p.second.second));
   }
   std::sort(vec.begin(), vec.end(), [](const Elem e1, const Elem e2) {
-                                      return compare(e1.first, e1.first);
+                                      return e1.first->compare(e2.first);
                                     });
   StringBuffer sb;
   for (auto const& e : vec) {

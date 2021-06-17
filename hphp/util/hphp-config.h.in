@@ -90,7 +90,7 @@ ${HHVM_COMPILES_DEFINE_STRING}
 #endif
 
 #ifdef USE_CMAKE
-# if ${HHVM_EXTENSION_COUNT} != 96
+# if ${HHVM_EXTENSION_COUNT} != 97
 #  error You need to update the config file for the new builtin extension, and add the define to the FB section
 # endif
 ${HHVM_EXTENSIONS_ENABLED_DEFINE_STRING}
@@ -179,6 +179,7 @@ ${HHVM_EXTENSIONS_ENABLED_DEFINE_STRING}
 # define ENABLE_EXTENSION_STRING 1
 # define ENABLE_EXTENSION_THREAD 1
 # define ENABLE_EXTENSION_THRIFT 1
+# define ENABLE_EXTENSION_UNITFILECACHE 1
 # define ENABLE_EXTENSION_URL 1
 # define ENABLE_EXTENSION_VSDEBUG 1
 # define ENABLE_EXTENSION_WEAKREF 1

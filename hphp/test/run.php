@@ -355,6 +355,10 @@ function verify_hhbc() {
   return bin_root().'/verify.hhbc';
 }
 
+function unit_cache_file() {
+  return Status::getTmpPathFile('unit-cache.sql');
+}
+
 function read_opts_file($file) {
   if ($file === null || !file_exists($file)) {
     return "";
@@ -822,7 +826,7 @@ function mode_cmd($options): varray<string> {
     if (isset($options['force-repo'])) {
       $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
     } else {
-      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=:memory: -vRepo.Commit=0";
+      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=:memory: -vRepo.Commit=0 -vUnitFileCache.Path=".unit_cache_file();
     }
   }
   $interp_args = "$repo_args -vEval.Jit=0";
@@ -1131,6 +1135,7 @@ function hphp_cmd($options, $test, $program): string {
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
     "-vRuntime.Repo.Local.Mode=-- -vRuntime.Repo.Central.Path=".verify_hhbc(),
+    "-vRuntime.UnitFileCache.Path=".unit_cache_file(),
     $extra_args,
     $compiler_args,
     read_opts_file("$test.hphp_opts"),
@@ -1495,6 +1500,10 @@ final class Status {
   // Remember to teach clean_intermediate_files to clean up all the exts you use
   public static function getTestTmpPath(string $test, string $ext): string {
     return self::$tmpdir . '/' . $test . '.' . $ext;
+  }
+
+  public static function getTmpPathFile(string $filename): string {
+    return self::$tmpdir . '/' . $filename;
   }
 
   // Similar to getTestTmpPath, but if we're run with --write-to-checkout

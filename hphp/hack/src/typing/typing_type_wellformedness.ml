@@ -117,6 +117,14 @@ let check_happly ?(via_label = false) ~in_signature unchecked_tparams env h =
   in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->
+    (match Env.get_class env type_name with
+    | Some cls ->
+      Typing_visibility.check_classname_access
+        ~use_pos:hint_pos
+        ~in_signature:true
+        env
+        cls
+    | None -> ());
     (match Env.get_typedef env type_name with
     | None -> env
     | Some typedef ->

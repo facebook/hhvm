@@ -365,7 +365,17 @@ module UserAttributes = struct
           (uaSupportDynamicType, [fn; cls; mthd]);
           (uaNoRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);
-          (uaInternal, [fn; mthd; cls; instProperty; staticProperty]);
+          ( uaInternal,
+            [
+              fn;
+              mthd;
+              cls;
+              instProperty;
+              staticProperty;
+              typealias;
+              enum;
+              enumcls;
+            ] );
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

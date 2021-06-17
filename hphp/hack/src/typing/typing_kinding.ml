@@ -296,6 +296,7 @@ module Simple = struct
 
   let rec check_targs_well_kinded
       ~allow_missing_targs
+      ~in_signature
       ~def_pos
       ~use_pos
       env
@@ -317,9 +318,10 @@ module Simple = struct
       Errors.type_arity use_pos def_pos ~expected:exp_len ~actual:act_len;
     let length = min exp_len act_len in
     let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
-    List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded env)
+    List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded ~in_signature env)
 
-  and check_targ_well_kinded env tyarg (nkind : Simple.named_kind) =
+  and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
+      =
     let kind = snd nkind in
     match get_node tyarg with
     | Tapply ((_, x), _argl) when String.equal x SN.Typehints.wildcard ->
@@ -329,17 +331,24 @@ module Simple = struct
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
         Errors.wildcard_for_higher_kinded_type pos;
-        check_well_kinded env tyarg nkind
+        check_well_kinded ~in_signature env tyarg nkind
       )
-    | _ -> check_well_kinded env tyarg nkind
+    | _ -> check_well_kinded ~in_signature env tyarg nkind
 
-  and check_possibly_enforced_ty env enf_ty =
-    check_well_kinded_type ~allow_missing_targs:false env enf_ty.et_type
+  and check_possibly_enforced_ty ~in_signature env enf_ty =
+    check_well_kinded_type
+      ~allow_missing_targs:false
+      ~in_signature
+      env
+      enf_ty.et_type
 
-  and check_well_kinded_type ~allow_missing_targs env (ty : decl_ty) =
+  and check_well_kinded_type
+      ~allow_missing_targs ~in_signature env (ty : decl_ty) =
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let check = check_well_kinded_type ~allow_missing_targs:false env in
+    let check =
+      check_well_kinded_type ~allow_missing_targs:false ~in_signature env
+    in
     let check_against_tparams def_pos tyargs tparams =
       let kinds = Simple.named_kinds_of_decl_tparams tparams in
 
@@ -380,12 +389,12 @@ module Simple = struct
     | Taccess (ty, _) ->
       (* Because type constants cannot depend on type parameters,
        we allow Foo::the_type even if Foo has type parameters *)
-      check_well_kinded_type ~allow_missing_targs:true env ty
+      check_well_kinded_type ~allow_missing_targs:true ~in_signature env ty
     | Tshape (_, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
-      check_possibly_enforced_ty env ft.ft_ret;
+      check_possibly_enforced_ty ~in_signature env ft.ft_ret;
       List.iter ft.ft_params ~f:(fun p ->
-          check_possibly_enforced_ty env p.fp_type)
+          check_possibly_enforced_ty ~in_signature env p.fp_type)
     (* FIXME shall we inspect tparams and where_constraints *)
     (* List.iter ft.ft_where_constraints (fun (ty1, _, ty2) -> check ty1; check ty2 ); *)
     | Tgeneric (name, targs) ->
@@ -397,6 +406,7 @@ module Simple = struct
           in
           check_targs_well_kinded
             ~allow_missing_targs:false
+            ~in_signature
             ~def_pos
             ~use_pos
             env
@@ -408,21 +418,29 @@ module Simple = struct
       begin
         match Env.get_class_or_typedef env cid with
         | Some (Env.ClassResult class_info) ->
+          Typing_visibility.check_classname_access
+            ~use_pos
+            ~in_signature
+            env
+            class_info;
           let tparams = Cls.tparams class_info in
-          check_against_tparams (Cls.pos class_info) argl tparams
+          check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
         | Some (Env.TypedefResult typedef) ->
-          check_against_tparams typedef.td_pos argl typedef.td_tparams
+          check_against_tparams
+            ~in_signature
+            typedef.td_pos
+            argl
+            typedef.td_tparams
         | None -> ()
       end
 
-  and check_well_kinded env (ty : decl_ty) (expected_nkind : Simple.named_kind)
-      =
+  and check_well_kinded
+      ~in_signature env (ty : decl_ty) (expected_nkind : Simple.named_kind) =
     let (expected_name, expected_kind) = expected_nkind in
     let r = get_reason ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let kind_error actual_kind =
       let (def_pos, tparam_name) = expected_name in
-
       report_kind_error
         ~use_pos
         ~def_pos
@@ -437,7 +455,7 @@ module Simple = struct
     in
 
     if Int.( = ) (Simple.get_arity expected_kind) 0 then
-      check_well_kinded_type ~allow_missing_targs:false env ty
+      check_well_kinded_type ~allow_missing_targs:false ~in_signature env ty
     else
       match get_node ty with
       | Tapply ((_pos, name), []) ->
@@ -473,10 +491,10 @@ module Simple = struct
       | _ -> kind_error (Simple.fully_applied_type ())
 
   (* Export the version that doesn't expose allow_missing_targs *)
-  let check_well_kinded_type env (ty : decl_ty) =
-    check_well_kinded_type ~allow_missing_targs:false env ty
+  let check_well_kinded_type ~in_signature env (ty : decl_ty) =
+    check_well_kinded_type ~allow_missing_targs:false ~in_signature env ty
 
-  let check_well_kinded_hint env hint =
+  let check_well_kinded_hint ~in_signature env hint =
     let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
-    check_well_kinded_type env decl_ty
+    check_well_kinded_type ~in_signature env decl_ty
 end

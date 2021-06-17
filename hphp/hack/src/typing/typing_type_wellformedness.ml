@@ -26,9 +26,9 @@ type env = {
   tenv: Typing_env_types.env;
 }
 
-let check_hint_wellkindedness env hint =
+let check_hint_wellkindedness ~in_signature env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
-  Typing_kinding.Simple.check_well_kinded_type env decl_ty
+  Typing_kinding.Simple.check_well_kinded_type ~in_signature env decl_ty
 
 (* Check if the __ViaLabel attributes is on the parameter. If that's the case,
  * we check that it is only involving an enum class or a generic
@@ -96,7 +96,7 @@ let check_tparams_constraints env use_pos tparams targs =
   Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
 (** Mostly check constraints on type parameters. *)
-let check_happly ?(via_label = false) ~in_signature unchecked_tparams env h =
+let check_happly ?(via_label = false) unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -117,14 +117,6 @@ let check_happly ?(via_label = false) ~in_signature unchecked_tparams env h =
   in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->
-    (match Env.get_class env type_name with
-    | Some cls ->
-      Typing_visibility.check_classname_access
-        ~use_pos:hint_pos
-        ~in_signature:true
-        env
-        cls
-    | None -> ());
     (match Env.get_typedef env type_name with
     | None -> env
     | Some typedef ->
@@ -134,18 +126,13 @@ let check_happly ?(via_label = false) ~in_signature unchecked_tparams env h =
     | Tclass (cls, _, targs) ->
       (match Env.get_class env (snd cls) with
       | Some cls ->
-        Typing_visibility.check_classname_access
-          ~use_pos:hint_pos
-          ~in_signature
-          env
-          cls;
         check_tparams_constraints env hint_pos (Cls.tparams cls) targs
       | None -> env)
     | _ -> env)
 
 let rec hint ?(via_label = false) ?(in_signature = true) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
-  check_hint_wellkindedness env.tenv (p, h);
+  check_hint_wellkindedness ~in_signature env.tenv (p, h);
   hint_ ~via_label ~in_signature env p h
 
 and hint_ ~via_label ~in_signature env p h_ =
@@ -215,22 +202,12 @@ and hint_ ~via_label ~in_signature env p h_ =
       | None -> ()
       | Some (Env.TypedefResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly
-            ~via_label
-            ~in_signature
-            env.typedef_tparams
-            env.tenv
-            (p, h)
+          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl ~f:(hint env)
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly
-            ~via_label
-            ~in_signature
-            env.typedef_tparams
-            env.tenv
-            (p, h)
+          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl ~f:(hint env)
     end
@@ -395,8 +372,11 @@ let typedef tenv t =
      (e.g., arities match up), but no constraint checks. We need to check the
      kinds of typedefs separately, because check_happly replaces all the generic
      parameters of typedefs by Tany, which makes the kind check moot *)
-  maybe check_hint_wellkindedness tenv_with_typedef_tparams t_constraint;
-  check_hint_wellkindedness tenv_with_typedef_tparams t_kind;
+  maybe
+    (check_hint_wellkindedness ~in_signature:true)
+    tenv_with_typedef_tparams
+    t_constraint;
+  check_hint_wellkindedness ~in_signature:true tenv_with_typedef_tparams t_kind;
   let env =
     {
       typedef_tparams =

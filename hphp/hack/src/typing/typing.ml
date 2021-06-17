@@ -751,7 +751,10 @@ let type_capability env ctxs unsafe_ctxs default_pos =
   (* No need to repeat the following check (saves time) for unsafe_ctx
     because it's synthetic and well-kinded by construction *)
   Option.iter ctxs ~f:(fun (_pos, hl) ->
-      List.iter hl ~f:(Typing_kinding.Simple.check_well_kinded_hint env));
+      List.iter
+        hl
+        ~f:
+          (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env));
 
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
@@ -3945,11 +3948,11 @@ and expr_
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
-    Typing_kinding.Simple.check_well_kinded_hint env hint;
+    Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env hint;
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
-    Typing_kinding.Simple.check_well_kinded_hint env hint;
+    Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env hint;
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in

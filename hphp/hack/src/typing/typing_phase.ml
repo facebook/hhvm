@@ -818,7 +818,8 @@ let localize_targ_with_kind
       (env, (ty, hint))
   | (hint_pos, _) ->
     let ty = Decl_hint.hint env.decl_env hint in
-    if check_well_kinded then Kinding.Simple.check_well_kinded env ty nkind;
+    if check_well_kinded then
+      Kinding.Simple.check_well_kinded ~in_signature:false env ty nkind;
     let (env, ty) =
       localize_no_subst_and_kind
         env

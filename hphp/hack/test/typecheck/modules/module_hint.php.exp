@@ -1,0 +1,44 @@
+File "module_hint.php", line 14, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 15, characters 11-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 35, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 16, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 17, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 18, characters 11-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 35, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 19, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 20, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 38, characters 6-6:
+  This is from module `there`
+File "module_hint.php", line 21, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 38, characters 6-6:
+  This is from module `there`
+File "module_hint.php", line 22, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 23, characters 14-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`
+File "module_hint.php", line 24, characters 21-21:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php", line 32, characters 7-7:
+  This is from module `there`

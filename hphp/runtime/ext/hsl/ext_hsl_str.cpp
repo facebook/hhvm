@@ -33,7 +33,7 @@
 namespace HPHP {
 namespace {
 
-RDS_LOCAL(HSLLocale*, c_hsl_locale);
+THREAD_LOCAL(HSLLocale*, c_hsl_locale);
 
 const HSLLocale* get_locale(const Variant& maybe_locale) {
   if (LIKELY(maybe_locale.isNull())) {
@@ -41,7 +41,7 @@ const HSLLocale* get_locale(const Variant& maybe_locale) {
     // - test perf with this default
     // - add runtime option to request vs C locale
     // - go back to this shortly after
-    assertx(c_hsl_locale);
+    assertx(*c_hsl_locale);
     return *c_hsl_locale;
   }
   if (!maybe_locale.isObject()) {
@@ -163,7 +163,7 @@ struct HSLStrExtension final : Extension {
     loadSystemlib();
   }
 
-  void requestInit() override {
+  void threadInit() override {
     *c_hsl_locale.get() = new HSLLocale(Locale::getCLocale());
   }
 } s_hsl_str_extension;

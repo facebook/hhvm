@@ -75,7 +75,8 @@ let build_attributes_json_nested source_map attrs =
           List.fold_right attr.ua_params ~init:[] ~f:(fun ((pos, _), _) acc ->
               let fp = Relative_path.to_absolute (Pos.filename pos) in
               match SMap.find_opt fp source_map with
-              | Some st -> JSON_String (source_at_span st pos) :: acc
+              | Some st ->
+                JSON_String (strip_nested_quotes (source_at_span st pos)) :: acc
               | None -> acc)
         in
         let fields =
@@ -162,7 +163,8 @@ let build_parameter_json
   let fields =
     match def_val with
     | None -> fields
-    | Some expr -> ("defaultValue", JSON_String expr) :: fields
+    | Some expr ->
+      ("defaultValue", JSON_String (strip_nested_quotes expr)) :: fields
   in
   JSON_Object fields
 

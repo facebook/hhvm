@@ -246,7 +246,7 @@ let add_class_const_defn_fact ctx source_map const decl_id progress =
         | Some st -> source_at_span st expr_pos
         | None -> ""
       in
-      ("value", JSON_String value) :: base_fields
+      ("value", JSON_String (strip_nested_quotes value)) :: base_fields
   in
   let json_fields =
     match const.cc_type with
@@ -387,7 +387,10 @@ let add_gconst_defn_fact ctx source_map elem decl_id progress =
     | None -> ""
   in
   let req_fields =
-    [("declaration", build_id_json decl_id); ("value", JSON_String value)]
+    [
+      ("declaration", build_id_json decl_id);
+      ("value", JSON_String (strip_nested_quotes value));
+    ]
   in
   let json_fields =
     match elem.cst_type with

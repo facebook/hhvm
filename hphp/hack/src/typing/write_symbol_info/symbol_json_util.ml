@@ -45,6 +45,15 @@ let source_at_span source_text pos =
   let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
   check_utf8 source_text
 
+(* Values pulled from source code may have quotation marks;
+strip these when present, eg: "\"FOO\"" => "FOO" *)
+let strip_nested_quotes str =
+  let len = String.length str in
+  if len >= 2 && Char.equal '"' str.[0] && Char.equal '"' str.[len - 1] then
+    String.sub str ~pos:1 ~len:(len - 2)
+  else
+    str
+
 (* Convert ContainerName<TParam> to ContainerName *)
 let strip_tparams name =
   match String.index name '<' with

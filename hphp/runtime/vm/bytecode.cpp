@@ -2024,7 +2024,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfClsMeth:
-          tvDecRefClsMeth(val);
           match = SwitchMatch::DEFAULT;
           break;
 

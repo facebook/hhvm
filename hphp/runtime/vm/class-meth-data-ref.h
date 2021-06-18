@@ -29,10 +29,6 @@ struct ClsMethDataRef {
 
   static ClsMethDataRef create(Class* cls, Func* func);
 
-  static void Release(ClsMethDataRef clsMeth) noexcept {
-    clsMeth->release();
-  }
-
   ClsMethData& operator*();
   const ClsMethData& operator*() const;
   ClsMethData* operator->();
@@ -55,22 +51,6 @@ private:
 
   ClsMethData::cls_meth_t m_data;
 };
-
-ALWAYS_INLINE void decRefClsMeth(ClsMethDataRef clsMeth) {
-  clsMeth->decRefAndRelease();
-}
-
-ALWAYS_INLINE void incRefClsMeth(ClsMethDataRef clsMeth) {
-  clsMeth->incRef();
-}
-
-ALWAYS_INLINE bool checkCountClsMeth(ClsMethDataRef clsMeth) {
-  return clsMeth->checkRefCount();
-}
-
-ALWAYS_INLINE bool isRefCountedClsMeth(ClsMethDataRef clsMeth) {
-  return clsMeth->isRefCountedType();
-}
 
 void checkClsMethFuncHelper(const Func* f);
 

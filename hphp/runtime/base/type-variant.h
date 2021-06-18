@@ -351,7 +351,6 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const ClsMethDataRef v) {
     m_type = KindOfClsMeth;
     m_data.pclsmeth = v;
-    incRefClsMeth(v);
   }
 
   /*
@@ -1437,9 +1436,6 @@ private:
       case KindOfDict:
       case KindOfKeyset:
         assertx(m_data.parr->checkCount());
-        return;
-      case KindOfClsMeth:
-        assertx(checkCountClsMeth(m_data.pclsmeth));
         return;
       case KindOfRClsMeth:
         assertx(m_data.prclsmeth->checkCount());

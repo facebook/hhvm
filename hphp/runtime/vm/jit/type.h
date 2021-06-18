@@ -285,26 +285,15 @@ constexpr bool operator>(Mem a, Mem b) {
   c(LazyCls,         bits_t::bit<26>())                                 \
 /**/
 
+#define UNCCOUNTED_INIT_UNION \
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls|kClsMeth
+
+#define INIT_CELL_UNION \
+  kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kRFunc|kRClsMeth
+
 /*
  * This list should be in non-decreasing order of specificity.
  */
-#ifdef USE_LOWPTR
-#define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls| \
-        kClsMeth
-#else
-#define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls
-#endif
-
-#ifdef USE_LOWPTR
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord| \
-                        kRFunc|kRClsMeth
-#else
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord| \
-                        kClsMeth|kRFunc|kRClsMeth
-#endif
-
 #define IRT_PHP_UNIONS(c)                                               \
   c(Null,                kUninit|kInitNull)                             \
   c(PersistentStr,       kStaticStr|kUncountedStr)                      \
@@ -346,15 +335,9 @@ constexpr bool operator>(Mem a, Mem b) {
 /*
  * Cell, Counted, Init, PtrToCell, etc...
  */
-#ifdef USE_LOWPTR
 #define COUNTED_INIT_UNION \
   kCountedStr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes| \
   kRecord|kRFunc|kRClsMeth
-#else
-#define COUNTED_INIT_UNION \
-  kCountedStr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes| \
-  kRecord|kClsMeth|kRFunc|kRClsMeth
-#endif
 
 #define IRT_SPECIAL                                           \
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \

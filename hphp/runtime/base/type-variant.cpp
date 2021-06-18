@@ -130,9 +130,6 @@ RawDestructors computeDestructors() {
   set(KindOfResource, getMethodPtr(&ResourceHdr::release));
   set(KindOfRClsMeth, getMethodPtr(&RClsMethData::release));
   set(KindOfRFunc,    getMethodPtr(&RFuncData::release));
-  if constexpr (!use_lowptr) {
-    set(KindOfClsMeth, getMethodPtr(&ClsMethDataRef::Release));
-  }
 #define DT(name, ...)                                       \
   assertx(IMPLIES(isRefcountedType(KindOf##name),           \
           result[typeToDestrIdx(KindOf##name)] != nullptr));
@@ -651,7 +648,6 @@ void Variant::setEvalScalar() {
       auto const clsMeth = m_data.pclsmeth;
       m_data.parr = clsMethToVecHelper(clsMeth).detach();
       m_type = KindOfPersistentVec;
-      decRefClsMeth(clsMeth);
       do_array();
       return;
   }

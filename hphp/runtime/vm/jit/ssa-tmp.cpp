@@ -106,8 +106,7 @@ Variant SSATmp::variantVal() const {
     case KindOfFunc:
       return Variant{funcVal()};
     case KindOfClsMeth:
-      if (use_lowptr) return Variant{clsmethVal()};
-      // fallthrough
+      return Variant{clsmethVal()};
     case KindOfRClsMeth:
     case KindOfString:
     case KindOfVec:

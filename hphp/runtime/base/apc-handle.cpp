@@ -154,7 +154,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfClsMeth: {
       if (RO::EvalAPCSerializeClsMeth) {
         auto const meth = val(cell).pclsmeth;
-        if (use_lowptr && meth->getCls()->isPersistent()) {
+        if (meth->getCls()->isPersistent()) {
           auto const value = new APCTypedValue(meth);
           return {value->getHandle(), sizeof(APCTypedValue)};
         }
@@ -366,7 +366,6 @@ bool APCHandle::checkInvariants() const {
       return true;
     case APCKind::PersistentClsMeth:
       assertx(m_type == KindOfClsMeth);
-      assertx(use_lowptr);
       return true;
     case APCKind::StaticString:
     case APCKind::UncountedString:

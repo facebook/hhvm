@@ -565,24 +565,8 @@ std::pair<int, double> tvGetSize(
       break;
     }
     case KindOfClsMeth: {
-      if (use_lowptr) {
-        FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
-              (void*)tv.m_data.pclsmeth.get());
-      } else {
-        auto const clsmeth = tv.m_data.pclsmeth;
-        auto const sz = sizeof(*clsmeth);
-        size += sz;
-        if (isRefCountedClsMeth(clsmeth)) {
-          auto ref_count = int{tvGetCount(tv)};
-          FTRACE(3, " ClsMeth tv: clsmeth at {} with ref count {}\n",
-                (void*)clsmeth.get(), ref_count);
-          assertx(ref_count > 0);
-          sized += sz / (double)ref_count;
-        } else {
-          FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
-                (void*)clsmeth.get());
-        }
-      }
+      FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
+            (void*)tv.m_data.pclsmeth.get());
       break;
     }
 

@@ -26,11 +26,7 @@ struct Class;
 struct Func;
 struct String;
 
-struct ClsMethData
-#ifndef USE_LOWPTR
-: Countable, type_scan::MarkScannableCollectable<ClsMethData>
-#endif
-{
+struct ClsMethData {
 #ifdef USE_LOWPTR
   using low_storage_t = uint32_t;
   using cls_meth_t = ClsMethData;
@@ -42,7 +38,6 @@ struct ClsMethData
   ClsMethData() = default;
 
   static cls_meth_t make(Class* cls, Func* func);
-  void release() noexcept;
 
   bool validate() const;
 
@@ -64,37 +59,6 @@ struct ClsMethData
 
   static constexpr ptrdiff_t funcOffset() {
     return offsetof(ClsMethData, m_func);
-  }
-
-  ALWAYS_INLINE bool isRefCountedType() {
-#ifdef USE_LOWPTR
-    return false;
-#else
-    return isRefCounted();
-#endif
-  }
-
-  ALWAYS_INLINE bool checkRefCount() {
-#ifdef USE_LOWPTR
-  return true;
-#else
-  return checkCount();
-#endif
-  }
-
-  ALWAYS_INLINE void incRef() {
-#ifndef USE_LOWPTR
-    incRefCount();
-#endif
-  }
-
-  ALWAYS_INLINE void decRefAndRelease() {
-#ifndef USE_LOWPTR
-    assertx(validate());
-    if (decReleaseCheck()) {
-      release();
-    }
-#endif
   }
 
 private:

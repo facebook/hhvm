@@ -64,7 +64,6 @@ struct APCTypedValue {
 
   explicit APCTypedValue(const ClsMethDataRef ref)
     : m_handle(APCKind::PersistentClsMeth, KindOfClsMeth) {
-    assertx(use_lowptr);
     assertx(ref->getCls()->isPersistent());
     m_data.pclsmeth = ref;
   }

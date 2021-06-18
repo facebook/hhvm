@@ -1930,12 +1930,7 @@ TEST(Type, Unc) {
   EXPECT_TRUE(TDbl.subtypeOf(BInitUnc));
   EXPECT_TRUE(TDbl.subtypeOf(BUnc));
   EXPECT_TRUE(dval(3.0).subtypeOf(BInitUnc));
-
-  if (use_lowptr) {
-    EXPECT_TRUE(TClsMeth.subtypeOf(BInitUnc));
-  } else {
-    EXPECT_FALSE(TClsMeth.subtypeOf(BInitUnc));
-  }
+  EXPECT_TRUE(TClsMeth.subtypeOf(BInitUnc));
 
   const std::initializer_list<std::tuple<Type, Type, bool>> tests{
     { TUnc, TInitUnc, true },
@@ -1950,7 +1945,7 @@ TEST(Type, Unc) {
     { TNum, TUnc, true },
     { TNum, TInitUnc, true },
     { TUncArrKey, TInitUnc, true },
-    { TClsMeth, TInitUnc, use_lowptr },
+    { TClsMeth, TInitUnc, true },
   };
   for (auto const& t : tests) {
     auto const& ty1 = std::get<0>(t);
@@ -3502,8 +3497,7 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(TInitNull.subtypeOf(opt(ival(3))));
   EXPECT_TRUE(!TNull.subtypeOf(opt(ival(3))));
 
-  EXPECT_EQ(intersection_of(TClsMeth, TInitUnc),
-            use_lowptr ? TClsMeth : TBottom);
+  EXPECT_EQ(intersection_of(TClsMeth, TInitUnc), TClsMeth);
 
   auto const test_map_a = MapElems{map_elem(s_A, TDbl), map_elem(s_B, TBool)};
   auto const test_map_b = MapElems{map_elem(s_A, TObj), map_elem(s_B, TRes)};
@@ -4920,8 +4914,6 @@ TEST(Type, LoosenStaticness) {
     test(t, loosen_staticness(t));
   }
 
-  auto const uncClsMeth = use_lowptr ? BClsMeth : BBottom;
-
   auto const test_map1 = MapElems{map_elem(s_A, TInt)};
   auto const test_map2 = MapElems{map_elem_nonstatic(s_A, TInt)};
   auto const test_map3 = MapElems{map_elem_counted(s_A, TInt)};
@@ -4944,9 +4936,9 @@ TEST(Type, LoosenStaticness) {
     { TSKeyset, TKeyset },
     { TUncArrKey, TArrKey },
     { TUnc,
-      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BUninit|uncClsMeth} },
+      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BClsMeth|BUninit} },
     { TInitUnc,
-      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|uncClsMeth} },
+      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BClsMeth} },
     { ival(123), ival(123) },
     { sval(s_test), sval_nonstatic(s_test) },
     { sdict_packedn(TInt), dict_packedn(TInt) },

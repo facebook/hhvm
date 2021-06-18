@@ -86,7 +86,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::PersistentFunc: assertx(m_data.func->isPersistent()); break;
     case APCKind::PersistentClass: assertx(m_data.cls->isPersistent()); break;
     case APCKind::PersistentClsMeth:
-      assertx(use_lowptr);
       assertx(m_data.pclsmeth->getCls()->isPersistent()); break;
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;

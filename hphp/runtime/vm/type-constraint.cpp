@@ -990,7 +990,6 @@ void castClsMeth(tv_lval c, F make) {
     val(c).pclsmeth->getClsStr(),
     val(c).pclsmeth->getFuncStr()
   ).detach();
-  tvDecRefClsMeth(c);
   val(c).parr = a;
   type(c) = a->toDataType();
 }

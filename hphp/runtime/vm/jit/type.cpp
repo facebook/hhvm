@@ -384,7 +384,7 @@ void Type::serialize(ProfDataSerializer& ser) const {
     if (t < TArrLike) {
       return write_array(ser, t.m_arrVal);
     }
-    if (use_lowptr && (t <= TClsMeth)) {
+    if (t <= TClsMeth) {
       return write_clsmeth(ser, t.m_clsmethVal);
     }
     assertx(t.subtypeOfAny(TBool, TInt, TDbl));
@@ -434,7 +434,7 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
         t.m_arrVal = read_array(ser);
         return t;
       }
-      if (use_lowptr && (t <= TClsMeth)) {
+      if (t <= TClsMeth) {
         t.m_clsmethVal = read_clsmeth(ser);
         return t;
       }
@@ -493,7 +493,7 @@ size_t Type::stableHash() const {
           VarNR(const_cast<ArrayData*>(t.m_arrVal))
         ).get()->hash();
       }
-      if (use_lowptr && (t <= TClsMeth)) {
+      if (t <= TClsMeth) {
         auto const cls = t.m_clsmethVal->getCls();
         auto const func = t.m_clsmethVal->getFunc();
         return (cls ? cls->stableHash() : 0 ) ^ (func ? func->stableHash() : 0);

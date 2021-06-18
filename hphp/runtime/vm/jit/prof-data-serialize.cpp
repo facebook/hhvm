@@ -1549,16 +1549,8 @@ void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth) {
     );
   };
   ITRACE(2, "ClsMeth>\n");
-  if (!clsMeth->getCls()->wasSerialized()) {
-    Trace::Indent _i;
-    write_raw(ser, uintptr_t(-1));
-    write_class(ser, clsMeth->getCls());
-  }
-  if (!clsMeth->getFunc()->wasSerialized()) {
-    Trace::Indent _i;
-    write_raw(ser, uintptr_t(-1));
-    write_func(ser, clsMeth->getFunc());
-  }
+  write_class(ser, clsMeth->getCls());
+  write_func(ser, clsMeth->getFunc());
 }
 
 ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser) {

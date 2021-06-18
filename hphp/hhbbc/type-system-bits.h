@@ -30,16 +30,6 @@
 // now).
 #define HHBBC_TYPE_DECL_SINGLE_COUNTED_NO_OPT(X)
 
-// ClsMeth is tricky because it can be counted or uncounted depending
-// on compilation flags.
-#ifdef USE_LOWPTR
-#define HHBBC_CLSMETH_UNCOUNTED(X) X(ClsMeth)
-#define HHBBC_CLSMETH_COUNTED(X)
-#else
-#define HHBBC_CLSMETH_UNCOUNTED(X)
-#define HHBBC_CLSMETH_COUNTED(X) X(ClsMeth)
-#endif
-
 // Uncounted non-union types which do have Opt variants
 #define HHBBC_TYPE_DECL_SINGLE_UNCOUNTED(X)     \
   X(False)                                      \
@@ -49,7 +39,7 @@
   X(Cls)                                        \
   X(LazyCls)                                    \
   X(Func)                                       \
-  HHBBC_CLSMETH_UNCOUNTED(X)                    \
+  X(ClsMeth)                                    \
 
 // Counted non-union types which do have Opt variants
 #define HHBBC_TYPE_DECL_SINGLE_COUNTED(X)       \
@@ -58,7 +48,6 @@
   X(Record)                                     \
   X(RFunc)                                      \
   X(RClsMeth)                                   \
-  HHBBC_CLSMETH_COUNTED(X)                      \
 
 // Types which have both counted and uncounted base types (but not
 // emptiness information), and a union of both. This is just Str, as

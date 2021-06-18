@@ -2025,6 +2025,7 @@ SSATmp* simplifyConvArrLikeToKeyset(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
+  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
@@ -2035,6 +2036,7 @@ SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
+  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
@@ -2046,6 +2048,7 @@ SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
+  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
@@ -3710,6 +3713,28 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyNewClsMeth(State& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0);
+  auto const func = inst->src(1);
+  if (!cls->hasConstVal() && !func->hasConstVal()) return nullptr;
+  auto const clsmeth = ClsMethDataRef::create(
+      const_cast<Class*>(cls->clsVal()),
+      const_cast<Func*>(func->funcVal()));
+  return cns(env, clsmeth);
+}
+
+SSATmp* simplifyLdClsFromClsMeth(State& env, const IRInstruction* inst) {
+  auto const clsmeth = inst->src(0);
+  if (!clsmeth->hasConstVal()) return nullptr;
+  return cns(env, clsmeth->clsmethVal()->getCls());
+}
+
+SSATmp* simplifyLdFuncFromClsMeth(State& env, const IRInstruction* inst) {
+  auto const clsmeth = inst->src(0);
+  if (!clsmeth->hasConstVal()) return nullptr;
+  return cns(env, clsmeth->clsmethVal()->getFunc());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3941,7 +3966,10 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(StrictlyIntegerConv)
       X(RaiseErrorOnInvalidIsAsExpressionType)
       X(LdFrameCls)
+      X(NewClsMeth)
       X(CheckClsMethFunc)
+      X(LdClsFromClsMeth)
+      X(LdFuncFromClsMeth)
       X(StructDictGetWithColor)
 #undef X
       default: break;

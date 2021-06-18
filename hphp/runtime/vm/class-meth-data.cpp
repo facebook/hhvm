@@ -18,10 +18,24 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
 namespace {
+
+#ifndef USE_LOWPTR
+
+using ClsMethDataKey = std::pair<Class*, Func*>;
+
+using ClsMethDataMap = folly_concurrent_hash_map_simd<
+  ClsMethDataKey, ClsMethData*,
+  std::hash<ClsMethDataKey>, std::equal_to<ClsMethDataKey>>;
+
+ClsMethDataMap s_map;
+
+#endif
+
 template <class T>
 static ClsMethData::low_storage_t to_low(T* px) {
   ClsMethData::low_storage_t ones = ~0;
@@ -29,6 +43,7 @@ static ClsMethData::low_storage_t to_low(T* px) {
   always_assert((ptr & ones) == ptr);
   return (ClsMethData::low_storage_t)(ptr);
 }
+
 }
 
 ClsMethData::ClsMethData(Class* cls, Func* func)
@@ -36,33 +51,25 @@ ClsMethData::ClsMethData(Class* cls, Func* func)
   , m_func{to_low(func)} {
   assertx(cls);
   assertx(func);
-#ifndef USE_LOWPTR
-  initHeader_16(HeaderKind::ClsMeth, OneReference, 0);
-#endif
 };
 
 ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
 #ifdef USE_LOWPTR
   return ClsMethData(cls, func);
 #else
-  return new (tl_heap->objMalloc(sizeof(ClsMethData))) ClsMethData(cls, func);
-#endif
-}
-
-void ClsMethData::release() noexcept {
-#ifndef USE_LOWPTR
-  assertx(validate());
-  tl_heap->objFree(this, sizeof(ClsMethData));
-  AARCH64_WALKABLE_FRAME();
+  auto const key = ClsMethDataKey { cls, func };
+  auto const it = s_map.find(key);
+  if (it != s_map.end()) return it->second;
+  auto result = std::unique_ptr<ClsMethData>(new ClsMethData(cls, func));
+  auto const pair = s_map.insert({key, result.get()});
+  if (pair.second) result.release();
+  return pair.first->second;
 #endif
 }
 
 bool ClsMethData::validate() const {
   getCls()->validate();
   getFunc()->validate();
-#ifndef USE_LOWPTR
-  assertx(m_kind == HeaderKind::ClsMeth);
-#endif
   return true;
 }
 

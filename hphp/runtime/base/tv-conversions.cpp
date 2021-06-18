@@ -116,7 +116,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
-        tvDecRefClsMeth(tv);
         b = true;
         continue;
 
@@ -225,7 +224,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         }
         raiseClsMethConvertWarningHelper("double");
         d = 1.0;
-        tvDecRefClsMeth(tv);
         continue;
 
       case KindOfRClsMeth:
@@ -317,7 +315,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         }
         raiseClsMethConvertWarningHelper("int");
         i = 1;
-        tvDecRefClsMeth(tv);
         continue;
 
       case KindOfRClsMeth:
@@ -746,7 +743,6 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
           0, val(tv).pclsmeth->getClsStr(),
           1, val(tv).pclsmeth->getFuncStr()
         ).detach();
-        tvDecRefClsMeth(tv);
         continue;
       }
 
@@ -853,7 +849,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         a = make_vec_array(
           val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
         ).detach();
-        tvDecRefClsMeth(tv);
         continue;
       }
 
@@ -957,7 +952,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         a = make_dict_array(
           0, val(tv).pclsmeth->getClsStr(),
           1, val(tv).pclsmeth->getFuncStr()).detach();
-        tvDecRefClsMeth(tv);
         continue;
       }
 
@@ -1062,7 +1056,6 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
           const_cast<StringData*>(val(tv).pclsmeth->getCls()->name()),
           const_cast<StringData*>(val(tv).pclsmeth->getFunc()->name())
         ).detach();
-        tvDecRefClsMeth(tv);
         continue;
       }
 
@@ -1152,9 +1145,6 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfRecord:
       case KindOfRClsMeth:
         tvDecRefCountable(tv);
-        continue;
-      case KindOfClsMeth:
-        tvDecRefClsMeth(tv);
         continue;
       case KindOfResource:
         // no op, return

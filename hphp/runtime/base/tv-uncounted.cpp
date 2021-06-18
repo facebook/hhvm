@@ -92,7 +92,6 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
     case KindOfClsMeth: {
       if (RO::EvalAPCSerializeClsMeth) {
-        assertx(use_lowptr);
         assertx(data.pclsmeth->getCls()->isPersistent());
         break;
       }

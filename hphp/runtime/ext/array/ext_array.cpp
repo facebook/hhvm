@@ -816,6 +816,7 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     auto const tv = iter.secondValPlus();
+    if (tvIsClsMeth(tv)) continue;
     switch (type(tv)) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
@@ -824,7 +825,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:
@@ -1100,6 +1100,7 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     auto const tv = iter.secondValPlus();
+    if (tvIsClsMeth(tv)) continue;
     switch (type(tv)) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
@@ -1108,7 +1109,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:

@@ -384,7 +384,7 @@ To vec conversions:
 
 | ConvArrLikeToVec,             D(Vec), S(ArrLike),                  PRc|CRc|LP
 
-| ConvClsMethToVec,             D(Vec), S(ClsMeth),                  PRc|CRc
+| ConvClsMethToVec,             D(Vec), S(ClsMeth),                  PRc
 
 | ConvObjToVec,                 D(Vec), S(Obj),                      PRc|CRc
 
@@ -393,7 +393,7 @@ To dict conversions:
 
 | ConvArrLikeToDict,            D(Dict), S(ArrLike),                 PRc|CRc|LP
 
-| ConvClsMethToDict,            D(Dict), S(ClsMeth),                 PRc|CRc
+| ConvClsMethToDict,            D(Dict), S(ClsMeth),                 PRc
 
 | ConvObjToDict,                D(Dict), S(Obj),                     PRc|CRc
 
@@ -402,7 +402,7 @@ To keyset conversions:
 
 | ConvArrLikeToKeyset,          D(Keyset), S(ArrLike),               PRc|CRc|LP
 
-| ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),               PRc|CRc
+| ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),               PRc
 
 | ConvObjToKeyset,              D(Keyset), S(Obj),                   PRc|CRc
 

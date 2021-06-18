@@ -319,17 +319,12 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToDict:
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
+  case ConvClsMethToDict:
+  case ConvClsMethToKeyset:
+  case ConvClsMethToVec:
   case LdOutAddr:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
-
-  case ConvClsMethToDict:
-  case ConvClsMethToKeyset:
-  case ConvClsMethToVec: {
-    bool consumeRef = use_lowptr ? false : inst->consumesReferences();
-    return !opcodeMayRaise(inst->op()) &&
-      (!consumeRef || inst->producesReference());
-  }
 
   case DbgTraceCall:
   case AKExistsObj:

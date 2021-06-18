@@ -153,27 +153,21 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
 ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
   assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("vec");
-  auto a = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
-  return a;
+  return make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
 }
 
 ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth) {
   assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("dict");
-  auto a = make_dict_array(
+  return make_dict_array(
     0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
-  return a;
 }
 
 ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth) {
   assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("keyset");
-  auto a = make_keyset_array(
-    clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
-  return a;
+  return make_keyset_array(
+      clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
 }
 
 double convObjToDblHelper(const ObjectData* o) {

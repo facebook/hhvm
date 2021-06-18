@@ -1358,4 +1358,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       enable_devx_dependency_graph = options.enable_devx_dependency_graph;
       small_buckets_for_dirty_names = options.small_buckets_for_dirty_names;
       symbolindex_search_provider = options.symbolindex_search_provider;
+      require_saved_state = options.require_saved_state;
     }

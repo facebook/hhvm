@@ -40,5 +40,10 @@ namespace HPHP {
     virtual bool starts_with_ci(const String& str, const String& prefix) const = 0;
     virtual bool ends_with(const String& str, const String& prefix) const = 0;
     virtual bool ends_with_ci(const String& str, const String& prefix) const = 0;
+
+    virtual int64_t strpos(const String& haystack, const String& needle, int64_t offset) const = 0;
+    virtual int64_t strrpos(const String& haystack, const String& needle, int64_t offset) const = 0;
+    virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const = 0;
+    virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const = 0;
   };
 } // namespace HPHP

@@ -136,6 +136,38 @@ bool HHVM_FUNCTION(ends_with_ci_l,
   return get_locale(maybe_loc)->ops()->ends_with_ci(string, suffix);
 }
 
+int64_t HHVM_FUNCTION(strpos_l,
+                      const String& haystack,
+                      const String& needle,
+                      int64_t offset,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->strpos(haystack, needle, offset);
+}
+
+int64_t HHVM_FUNCTION(stripos_l,
+                      const String& haystack,
+                      const String& needle,
+                      int64_t offset,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->stripos(haystack, needle, offset);
+}
+
+int64_t HHVM_FUNCTION(strrpos_l,
+                      const String& haystack,
+                      const String& needle,
+                      int64_t offset,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->strrpos(haystack, needle, offset);
+}
+
+int64_t HHVM_FUNCTION(strripos_l,
+                      const String& haystack,
+                      const String& needle,
+                      int64_t offset,
+                      const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->strripos(haystack, needle, offset);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -160,6 +192,11 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\starts_with_ci_l, starts_with_ci_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\ends_with_l, ends_with_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\ends_with_ci_l, ends_with_ci_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strpos_l, strpos_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strrpos_l, strrpos_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\stripos_l, stripos_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strripos_l, strripos_l);
     loadSystemlib();
   }
 

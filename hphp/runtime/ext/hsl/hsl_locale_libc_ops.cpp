@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/bstring.h"
 #include "hphp/zend/zend-string.h"
 
@@ -125,6 +126,62 @@ bool HSLLocaleLibcOps::ends_with_ci(const String& str, const String& suffix) con
   }
   const auto offset = str.size() - suffix.size();
   return bstrcaseeq(str.data() + offset, suffix.data(), suffix.size());
+}
+
+int64_t HSLLocaleLibcOps::strpos(const String& haystack, const String& needle, int64_t offset) const {
+  if (needle.empty() || haystack.empty()) {
+    return -1;
+  }
+  if (offset < 0) {
+    offset += haystack.length();
+    if (offset < 0) {
+      return -1;
+    }
+  }
+  auto pos = HHVM_FN(strpos)(haystack, needle, offset);
+  if (pos.m_type == KindOfBoolean) {
+    return -1;
+  }
+  return pos.m_data.num;
+}
+
+int64_t HSLLocaleLibcOps::strrpos(const String& haystack, const String& needle, int64_t offset) const {
+  if (needle.empty() || haystack.empty()) {
+    return -1;
+  }
+  auto pos = HHVM_FN(strrpos)(haystack, needle, offset);
+  if (pos.m_type == KindOfBoolean) {
+    return -1;
+  }
+  return pos.m_data.num;
+}
+
+int64_t HSLLocaleLibcOps::stripos(const String& haystack, const String& needle, int64_t offset) const {
+  if (needle.empty() || haystack.empty()) {
+    return -1;
+  }
+  if (offset < 0) {
+    offset += haystack.length();
+    if (offset < 0) {
+      return -1;
+    }
+  }
+  auto pos = HHVM_FN(stripos)(haystack, needle, offset);
+  if (pos.m_type == KindOfBoolean) {
+    return -1;
+  }
+  return pos.m_data.num;
+}
+
+int64_t HSLLocaleLibcOps::strripos(const String& haystack, const String& needle, int64_t offset) const {
+  if (needle.empty() || haystack.empty()) {
+    return -1;
+  }
+  auto pos = HHVM_FN(strripos)(haystack, needle, offset);
+  if (pos.m_type == KindOfBoolean) {
+    return -1;
+  }
+  return pos.m_data.num;
 }
 
 } // namespace HPHP

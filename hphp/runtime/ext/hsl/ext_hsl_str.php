@@ -48,4 +48,14 @@ function ends_with_l(string $str, string $suffix, ?Locale $loc = null): bool;
 <<__Native>>
 function ends_with_ci_l(string $str, string $suffix, ?Locale $loc = null): bool;
 
+<<__Native>>
+function strpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
+<<__Native>>
+function strrpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
+<<__Native>>
+function stripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
+<<__Native>>
+function strripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
+
+
 } // namespace HH\Lib\_Private\_Str

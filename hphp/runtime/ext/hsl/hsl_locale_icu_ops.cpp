@@ -60,6 +60,10 @@ ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::String& str) {
   return icu::StringPiece(str.data(), str.size());
 }
 
+ALWAYS_INLINE icu::UnicodeString ustr_from_utf8(const HPHP::String& str) {
+  return icu::UnicodeString::fromUTF8(icu_string_piece(str));
+}
+
 ALWAYS_INLINE String utf8_icu_op(
   const String& utf8_in,
   std::function<void(icu::UnicodeString&)> op
@@ -68,7 +72,7 @@ ALWAYS_INLINE String utf8_icu_op(
     return utf8_in;
   }
 
-  auto mut = icu::UnicodeString::fromUTF8(icu_string_piece(utf8_in));
+  auto mut = ustr_from_utf8(utf8_in);
   op(mut);
   std::string ret;
   mut.toUTF8String(ret);
@@ -100,7 +104,7 @@ String HSLLocaleICUOps::foldcase(const String& str) const {
 
 Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
   assert(chunk_size > 0);
-  auto icustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto icustr = ustr_from_utf8(str);
   const auto len = icustr.countChar32();
   VecInit ret { (size_t) (len / chunk_size + 1) };
   if (len <= chunk_size) {
@@ -149,8 +153,8 @@ bool HSLLocaleICUOps::starts_with(const String& str, const String& prefix) const
   icu::ErrorCode err;
   // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);
-  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
-  auto uprefix = icu::UnicodeString::fromUTF8(icu_string_piece(prefix));
+  auto ustr = ustr_from_utf8(str);
+  auto uprefix = ustr_from_utf8(prefix);
   icu::UnicodeString nprefix;
   normalizer->normalize(uprefix, nprefix, err);
   if (ustr.startsWith(nprefix)) {
@@ -171,8 +175,8 @@ bool HSLLocaleICUOps::ends_with(const String& str, const String& suffix) const {
   icu::ErrorCode err;
   // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);
-  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
-  auto usuffix = icu::UnicodeString::fromUTF8(icu_string_piece(suffix));
+  auto ustr = ustr_from_utf8(str);
+  auto usuffix = ustr_from_utf8(suffix);
   icu::UnicodeString nsuffix;
   normalizer->normalize(usuffix, nsuffix, err);
   if (ustr.endsWith(nsuffix)) {
@@ -188,8 +192,8 @@ bool HSLLocaleICUOps::starts_with_ci(const String& str, const String& prefix) co
   if (str.substr(0, prefix.size()) == prefix) {
     return true;
   }
-  auto uprefix = icu::UnicodeString::fromUTF8(icu_string_piece(prefix));
-  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto uprefix = ustr_from_utf8(prefix);
+  auto ustr = ustr_from_utf8(str);
 
   uprefix.foldCase(m_caseFoldFlags);
   ustr.foldCase(m_caseFoldFlags);
@@ -210,8 +214,8 @@ bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) cons
   if (off >= 0 && str.substr(off, suffix.size()) == suffix) {
     return true;
   }
-  auto usuffix = icu::UnicodeString::fromUTF8(icu_string_piece(suffix));
-  auto ustr = icu::UnicodeString::fromUTF8(icu_string_piece(str));
+  auto usuffix = ustr_from_utf8(suffix);
+  auto ustr = ustr_from_utf8(str);
 
   usuffix.foldCase(m_caseFoldFlags);
   ustr.foldCase(m_caseFoldFlags);
@@ -243,6 +247,102 @@ icu::Collator* HSLLocaleICUOps::collator() const {
     );
   }
   return m_collator;
+}
+
+namespace {
+
+enum class Direction {
+  LEFT_TO_RIGHT,
+  RIGHT_TO_LEFT
+};
+enum class CaseSensitivity {
+  CASE_SENSITIVE,
+  CASE_INSENSITIVE
+};
+
+int64_t strpos_impl(const String& haystack,
+                    const String& needle,
+                    int64_t offset,
+                    Direction dir,
+                    CaseSensitivity ci,
+                    uint32_t caseFoldFlags) {
+  auto uhs = ustr_from_utf8(haystack);
+  auto un = ustr_from_utf8(needle);
+  auto char32_len = uhs.countChar32();
+  if (offset >= char32_len) {
+    return -1;
+  }
+  if (offset >= 0) {
+    char32_len -= offset;
+  } else {
+    if (dir == Direction::LEFT_TO_RIGHT) {
+      offset += char32_len;
+      if (offset < 0) {
+        return -1;
+      }
+    } else {
+      // Match PHP strrpos() behavior for now; RFC for new behavior at
+      // https://github.com/facebook/hhvm/pull/8847
+      char32_len += std::min(offset + un.countChar32(), (int64_t) 0);
+      offset = 0;
+    }
+  }
+
+  if (ci == CaseSensitivity::CASE_INSENSITIVE) {
+    uhs.foldCase(caseFoldFlags);
+    un.foldCase(caseFoldFlags);
+  }
+
+  const auto char16_len = uhs.moveIndex32(0, char32_len);
+  const auto char16_offset = uhs.moveIndex32(0, offset);
+
+  const auto char16_pos = (dir == Direction::LEFT_TO_RIGHT)
+    ? uhs.indexOf(un, char16_offset, char16_len)
+    : uhs.lastIndexOf(un, char16_offset, char16_len);
+
+  if (char16_pos == -1) {
+    return -1;
+  }
+
+  return uhs.countChar32(0, char16_pos);
+}
+
+} // namespace
+
+int64_t HSLLocaleICUOps::strpos(const String& haystack, const String& needle, int64_t offset) const {
+  return strpos_impl(haystack,
+                     needle,
+                     offset,
+                     Direction::LEFT_TO_RIGHT,
+                     CaseSensitivity::CASE_SENSITIVE,
+                     /* n/a: case fold flags */ 0);
+}
+
+int64_t HSLLocaleICUOps::strrpos(const String& haystack, const String& needle, int64_t offset) const {
+  return strpos_impl(haystack,
+                     needle,
+                     offset,
+                     Direction::RIGHT_TO_LEFT,
+                     CaseSensitivity::CASE_SENSITIVE,
+                     /* n/a: case fold flags */ 0);
+}
+
+int64_t HSLLocaleICUOps::stripos(const String& haystack, const String& needle, int64_t offset) const {
+  return strpos_impl(haystack,
+                     needle,
+                     offset,
+                     Direction::LEFT_TO_RIGHT,
+                     CaseSensitivity::CASE_INSENSITIVE,
+                     m_caseFoldFlags);
+}
+
+int64_t HSLLocaleICUOps::strripos(const String& haystack, const String& needle, int64_t offset) const {
+  return strpos_impl(haystack,
+                     needle,
+                     offset,
+                     Direction::RIGHT_TO_LEFT,
+                     CaseSensitivity::CASE_INSENSITIVE,
+                     m_caseFoldFlags);
 }
 
 } // namespace HPHP

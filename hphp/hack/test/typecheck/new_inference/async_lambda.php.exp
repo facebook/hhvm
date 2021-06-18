@@ -9,7 +9,7 @@ Invalid argument (Typing[4323])
   File "async_lambda.php", line 6, characters 11-25:
   But got `Awaitable<int>` (result of an `async` function)
 File "async_lambda.php", line 6, characters 11-25:
-Typing error (Typing[4323])
+Invalid return type (Typing[4323])
   File "collections/Set.hhi", line 195, characters 23-24:
   `Tu` is a constrained type parameter
   File "collections/Set.hhi", line 195, characters 29-36:

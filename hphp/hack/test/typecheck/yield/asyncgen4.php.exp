@@ -2,15 +2,15 @@ File "asyncgen4.php", line 14, characters 5-15:
   nothing
 File "asyncgen4.php", line 15, characters 5-15:
   nothing
-File "asyncgen4.php", line 9, characters 3-16:
-Invalid `yield` (Typing[4110])
 File "asyncgen4.php", line 7, characters 21-48:
-Expected `Generator<int, string, void>`
-File "asyncgen4.php", line 9, characters 3-16:
-But got `AsyncGenerator<int, string, [unresolved]>` (result of `async function` with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "asyncgen4.php", line 7, characters 21-48:
+  Expected `Generator<int, string, void>`
+  File "asyncgen4.php", line 7, characters 21-48:
+  But got `AsyncGenerator<[unresolved], [unresolved], [unresolved]>` (result of `async function` containing a `yield`)
 File "asyncgen4.php", line 13, characters 12-14:
 Invalid `foreach` (Typing[4110])
-File "asyncgen4.php", line 13, characters 12-14:
-Expected `AsyncKeyedIterator<[unresolved], [unresolved]>` because this is used in a `foreach` statement with `await as`
-File "asyncgen4.php", line 7, characters 21-48:
-But got `Generator<int, string, void>`
+  File "asyncgen4.php", line 13, characters 12-14:
+  Expected `AsyncKeyedIterator<[unresolved], [unresolved]>` because this is used in a `foreach` statement with `await as`
+  File "asyncgen4.php", line 7, characters 21-48:
+  But got `Generator<int, string, void>`

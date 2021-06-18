@@ -1,0 +1,12 @@
+File "yield_lambda2.php", line 16, characters 12-14:
+Invalid argument (Typing[4110])
+  File "classes.hhi", line 25, characters 24-26:
+  Expected `null`
+  File "yield_lambda2.php", line 16, characters 12-14:
+  But got `string`
+File "yield_lambda2.php", line 17, characters 12-12:
+Invalid argument (Typing[4110])
+  File "classes.hhi", line 25, characters 24-26:
+  Expected `null`
+  File "yield_lambda2.php", line 17, characters 12-12:
+  But got `int`

@@ -1,0 +1,6 @@
+File "yield_method.php", line 5, characters 24-26:
+Invalid return type (Typing[4110])
+  File "yield_method.php", line 5, characters 24-26:
+  Expected `int`
+  File "yield_method.php", line 5, characters 24-26:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

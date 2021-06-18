@@ -3781,33 +3781,39 @@ and expr_
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
-    let (env, send) = Env.fresh_type env p in
+    let Typing_env_return_info.{ return_type = expected_return; _ } =
+      Env.get_return env
+    in
+    let send =
+      match get_node expected_return.et_type with
+      | Tclass (_, _, _ :: _ :: send :: _) -> send
+      | _ ->
+        Errors.internal_error p "Return type is not a generator";
+        Typing_utils.terr env (Reason.Ryield_send p)
+    in
+    let is_async =
+      match Env.get_fn_kind env with
+      | Ast_defs.FGenerator -> false
+      (* This could also catch sync/async non-generators, but an error would
+       * have already been generated elsewhere *)
+      | _ -> true
+    in
     let (env, key) =
       match (af, opt_key) with
       | (AFvalue (p, _), None) ->
-        begin
-          match Env.get_fn_kind env with
-          | Ast_defs.FSync
-          | Ast_defs.FAsync ->
-            Errors.internal_error p "yield found in non-generator";
-            (env, Typing_utils.mk_tany env p)
-          | Ast_defs.FGenerator -> (env, MakeType.int (Reason.Rwitness p))
-          | Ast_defs.FAsyncGenerator ->
-            let (env, ty) = Env.fresh_type env p in
-            (env, MakeType.nullable_locl (Reason.Ryield_asyncnull p) ty)
-        end
+        if is_async then
+          let (env, ty) = Env.fresh_type env p in
+          (env, MakeType.nullable_locl (Reason.Ryield_asyncnull p) ty)
+        else
+          (env, MakeType.int (Reason.Rwitness p))
       | (_, Some x) -> (env, x)
       | (_, _) -> assert false
     in
     let rty =
-      match Env.get_fn_kind env with
-      | Ast_defs.FGenerator ->
-        MakeType.generator (Reason.Ryield_gen p) key value send
-      | Ast_defs.FAsyncGenerator ->
+      if is_async then
         MakeType.async_generator (Reason.Ryield_asyncgen p) key value send
-      | Ast_defs.FSync
-      | Ast_defs.FAsync ->
-        failwith "Parsing should never allow this"
+      else
+        MakeType.generator (Reason.Ryield_gen p) key value send
     in
     let Typing_env_return_info.{ return_type = expected_return; _ } =
       Env.get_return env
@@ -4762,12 +4768,8 @@ and closure_make
       (* Do we have a contextual return type? *)
       begin
         match ret_ty with
-        | None ->
-          let (env, ret_ty) = Env.fresh_type env ret_pos in
-          (env, Typing_return.wrap_awaitable env ret_pos ret_ty)
-        | Some ret_ty ->
-          (* We might need to force it to be Awaitable if it is a type variable *)
-          Typing_return.force_awaitable env ret_pos ret_ty
+        | None -> Typing_return.make_fresh_return_type env ret_pos
+        | Some ret_ty -> (env, ret_ty)
       end
     | Some ret ->
       (* If a 'this' type appears it needs to be compatible with the
@@ -4778,6 +4780,9 @@ and closure_make
           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
       in
       Typing_return.make_return_type (Phase.localize ~ety_env) env ret
+  in
+  let (env, hret) =
+    Typing_return.force_return_kind ~is_toplevel:false env ret_pos hret
   in
   let ft = { ft with ft_ret = { ft.ft_ret with et_type = hret } } in
   let env =

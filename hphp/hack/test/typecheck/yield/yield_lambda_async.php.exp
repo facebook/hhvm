@@ -1,0 +1,12 @@
+File "yield_lambda_async.php", line 13, characters 12-42:
+Invalid return type (Typing[4110])
+  File "yield_lambda_async.php", line 13, characters 12-42:
+  Expected `AsyncGenerator<null, int, void>`
+  File "yield_lambda_async.php", line 13, characters 12-42:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+File "yield_lambda_async.php", line 20, characters 18-43:
+Invalid return type (Typing[4110])
+  File "yield_lambda_async.php", line 20, characters 18-43:
+  Expected `Generator<null, int, void>`
+  File "yield_lambda_async.php", line 20, characters 18-43:
+  But got `AsyncGenerator<[unresolved], [unresolved], [unresolved]>` (result of `async function` containing a `yield`)

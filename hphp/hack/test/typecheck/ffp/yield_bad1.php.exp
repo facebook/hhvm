@@ -2,9 +2,9 @@ File "yield_bad1.php", line 5, characters 7-13:
 `yield` can only appear as a statement or on the right of an assignment (Parsing[1002])
 File "yield_bad1.php", line 5, characters 3-5:
 Unbound name: `foo` (a global function) (Naming[2049])
-File "yield_bad1.php", line 5, characters 7-13:
-Invalid `yield` (Typing[4110])
 File "yield_bad1.php", line 4, characters 18-21:
-Expected `void`
-File "yield_bad1.php", line 5, characters 7-13:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "yield_bad1.php", line 4, characters 18-21:
+  Expected `void`
+  File "yield_bad1.php", line 4, characters 18-21:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

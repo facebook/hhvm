@@ -2,3 +2,15 @@ File "function_async_lambda_bad.php", line 6, characters 18-20:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "function_async_lambda_bad.php", line 10, characters 26-28:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
+File "function_async_lambda_bad.php", line 6, characters 18-20:
+Invalid return type (Typing[4110])
+  File "function_async_lambda_bad.php", line 6, characters 18-20:
+  Expected `int`
+  File "function_async_lambda_bad.php", line 6, characters 18-20:
+  But got `Awaitable<[unresolved]>` (result of an `async` function)
+File "function_async_lambda_bad.php", line 10, characters 26-28:
+Invalid return type (Typing[4110])
+  File "function_async_lambda_bad.php", line 10, characters 26-28:
+  Expected `int`
+  File "function_async_lambda_bad.php", line 10, characters 26-28:
+  But got `Awaitable<[unresolved]>` (result of an `async` function)

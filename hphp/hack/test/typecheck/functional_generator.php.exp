@@ -1,12 +1,6 @@
-File "functional_generator.php", line 28, characters 3-9:
-Invalid `yield` (Typing[4110])
 File "functional_generator.php", line 27, characters 20-30:
-Expected `Stream<int>`
-File "functional_generator.php", line 28, characters 3-9:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
-File "functional_generator.php", line 29, characters 3-9:
-Invalid `yield` (Typing[4110])
-File "functional_generator.php", line 27, characters 20-30:
-Expected `Stream<int>`
-File "functional_generator.php", line 29, characters 3-9:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "functional_generator.php", line 27, characters 20-30:
+  Expected `Stream<int>`
+  File "functional_generator.php", line 27, characters 20-30:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

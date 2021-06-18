@@ -1,14 +1,14 @@
 File "throw_yield.php", line 5, characters 9-15:
 `yield` can only appear as a statement or on the right of an assignment (Parsing[1002])
-File "throw_yield.php", line 5, characters 9-15:
-Invalid `yield` (Typing[4110])
 File "throw_yield.php", line 4, characters 17-20:
-Expected `void`
-File "throw_yield.php", line 5, characters 9-15:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "throw_yield.php", line 4, characters 17-20:
+  Expected `void`
+  File "throw_yield.php", line 4, characters 17-20:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
 File "throw_yield.php", line 5, characters 9-15:
 Invalid exception (Typing[4110])
-File "throw_yield.php", line 5, characters 9-15:
-Expected `Throwable` because it is used as an exception
-File "throw_yield.php", line 5, characters 9-15:
-But got `?nothing` (`$generator->send()` can always send a `null` back to a `yield`)
+  File "throw_yield.php", line 5, characters 9-15:
+  Expected `Throwable` because it is used as an exception
+  File "throw_yield.php", line 5, characters 9-15:
+  But got `?[unresolved]` (`$generator->send()` can always send a `null` back to a `yield`)

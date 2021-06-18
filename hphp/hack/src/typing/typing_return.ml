@@ -73,23 +73,15 @@ let make_info ret_pos fun_kind attributes env ~is_explicit locl_ty decl_ty =
     return_dynamically_callable = false;
   }
 
-(* For async functions, wrap Awaitable<_> around the return type *)
-let wrap_awaitable env p rty =
-  match Env.get_fn_kind env with
-  | Ast_defs.FSync -> rty
-  | Ast_defs.FGenerator
-  (* Is an error, but caught in Nast_check. *)
-  | Ast_defs.FAsyncGenerator ->
-    TUtils.terr env Reason.Rnone
-  | Ast_defs.FAsync ->
-    MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync)) rty
-
 let make_return_type localize env (ty : decl_ty) =
+  let wrap_awaitable p =
+    MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+  in
   match (Env.get_fn_kind env, deref ty) with
   | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
     when String.equal class_name Naming_special_names.Classes.cAwaitable ->
     let (env, ty) = localize env inner_ty in
-    (env, wrap_awaitable env (get_pos ty) ty)
+    (env, wrap_awaitable (get_pos ty) ty)
   | (Ast_defs.FAsync, (r_like, Tlike ty_like)) ->
     begin
       match get_node ty_like with
@@ -97,31 +89,54 @@ let make_return_type localize env (ty : decl_ty) =
         when String.equal class_name Naming_special_names.Classes.cAwaitable ->
         let ty = mk (r_like, Tlike inner_ty) in
         let (env, ty) = localize env ty in
-        (env, wrap_awaitable env (get_pos ty_like) ty)
+        (env, wrap_awaitable (get_pos ty_like) ty)
       | _ -> localize env ty
     end
   | _ -> localize env ty
 
-let wrap_awaitable env p = wrap_awaitable env (Pos_or_decl.of_raw_pos p)
+(* Create a return type with fresh type variables  *)
+let make_fresh_return_type env p =
+  let (env, rty) = Env.fresh_type env p in
+  let fun_kind = Env.get_fn_kind env in
+  let r = Reason.Rret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
+  match fun_kind with
+  | Ast_defs.FSync -> (env, rty)
+  | Ast_defs.FAsync -> (env, MakeType.awaitable r rty)
+  | Ast_defs.FGenerator ->
+    let (env, key) = Env.fresh_type env p in
+    let (env, send) = Env.fresh_type env p in
+    (env, MakeType.generator r key rty send)
+  | Ast_defs.FAsyncGenerator ->
+    let (env, key) = Env.fresh_type env p in
+    let (env, send) = Env.fresh_type env p in
+    (env, MakeType.async_generator r key rty send)
 
-let force_awaitable env p ty =
+let force_return_kind ?(is_toplevel = true) env p ty =
   let fun_kind = Env.get_fn_kind env in
   let (env, ty) = Env.expand_type env ty in
-  match get_node ty with
-  | Tclass ((_, class_name), _, _)
-    when Ast_defs.(equal_fun_kind fun_kind FAsync)
-         && String.equal class_name Naming_special_names.Classes.cAwaitable ->
+  match (fun_kind, get_node ty) with
+  (* Sync functions can return anything *)
+  | (Ast_defs.FSync, _) -> (env, ty)
+  (* Each other fun kind needs a specific return type *)
+  | (Ast_defs.FAsync, _) when is_toplevel ->
+    (* For toplevel functions, this is already checked in the parser *)
     (env, ty)
-  | Tany _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
-    (env, wrap_awaitable env p ty)
-  | _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
-    let (env, underlying_ty) = Env.fresh_type env p in
-    let wrapped_ty = wrap_awaitable env p underlying_ty in
+  | (Ast_defs.FAsync, Tclass ((_, class_name), _, _))
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+    (* For toplevel functions, this is already checked in the parser *)
+    (env, ty)
+  | (Ast_defs.FGenerator, Tclass ((_, class_name), _, _))
+    when String.equal class_name Naming_special_names.Classes.cGenerator ->
+    (env, ty)
+  | (Ast_defs.FAsyncGenerator, Tclass ((_, class_name), _, _))
+    when String.equal class_name Naming_special_names.Classes.cAsyncGenerator ->
+    (env, ty)
+  | _ ->
+    let (env, wrapped_ty) = make_fresh_return_type env p in
     let env =
-      Typing_ops.sub_type p Reason.URnone env wrapped_ty ty Errors.unify_error
+      Typing_ops.sub_type p Reason.URreturn env wrapped_ty ty Errors.unify_error
     in
     (env, wrapped_ty)
-  | _ -> (env, ty)
 
 let make_default_return ~is_method env name =
   let pos = fst name in

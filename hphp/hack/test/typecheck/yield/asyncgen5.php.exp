@@ -1,6 +1,6 @@
-File "asyncgen5.php", line 8, characters 3-23:
-Invalid `yield` (Typing[4110])
 File "asyncgen5.php", line 7, characters 15-47:
-Expected `AsyncGenerator<int, string, void>`
-File "asyncgen5.php", line 8, characters 3-23:
-But got `Generator<int, string, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "asyncgen5.php", line 7, characters 15-47:
+  Expected `AsyncGenerator<int, string, void>`
+  File "asyncgen5.php", line 7, characters 15-47:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

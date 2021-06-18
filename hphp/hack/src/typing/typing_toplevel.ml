@@ -416,6 +416,9 @@ let fun_def ctx fd :
         | Some (ret_pos, _) -> ret_pos
         | None -> fst f.f_name
       in
+      let (env, return_ty) =
+        Typing_return.force_return_kind env ret_pos return_ty
+      in
       let return =
         Typing_return.make_info
           ret_pos
@@ -757,6 +760,9 @@ let method_def env cls m =
         match snd m.m_ret with
         | Some (ret_pos, _) -> ret_pos
         | None -> fst m.m_name
+      in
+      let (env, locl_ty) =
+        Typing_return.force_return_kind env ret_pos locl_ty
       in
       let return =
         Typing_return.make_info

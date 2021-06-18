@@ -30,10 +30,6 @@ val implicit_return :
   actual:Typing_defs.locl_ty ->
   env
 
-(** For async functions, wrap Awaitable<_> around the return type *)
-val wrap_awaitable :
-  env -> Ast_defs.pos -> Typing_defs.locl_ty -> Typing_defs.locl_ty
-
 val make_return_type :
   (env -> Typing_defs.decl_ty -> env * Typing_defs.locl_ty) ->
   env ->
@@ -47,8 +43,16 @@ val strip_awaitable :
   Typing_defs.locl_possibly_enforced_ty ->
   Typing_defs.locl_possibly_enforced_ty
 
-val force_awaitable :
-  env -> Ast_defs.pos -> Typing_defs.locl_ty -> env * Typing_defs.locl_ty
+val make_fresh_return_type : env -> Ast_defs.pos -> env * Typing_defs.locl_ty
+
+(** Force the return type of a function to adhere to the fun_kind specified in
+    the env *)
+val force_return_kind :
+  ?is_toplevel:bool ->
+  env ->
+  Ast_defs.pos ->
+  Typing_defs.locl_ty ->
+  env * Typing_defs.locl_ty
 
 (** If there is no return type annotation on method, assume `void` for the
 special functions `__construct`, otherwise we can assume type Tany *)

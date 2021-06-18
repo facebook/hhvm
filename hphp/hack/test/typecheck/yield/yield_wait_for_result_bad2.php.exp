@@ -1,14 +1,14 @@
 File "yield_wait_for_result_bad2.php", line 21, characters 9-23:
 Unbound name: `wait_for_result` (a global function) (Naming[2049])
-File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
-Invalid `yield` (Typing[4110])
 File "yield_wait_for_result_bad2.php", line 12, characters 17-30:
-Expected `Awaitable<int>`
-File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
-File "yield_wait_for_result_bad2.php", line 21, characters 3-30:
-Invalid `yield` (Typing[4110])
+Invalid return type (Typing[4110])
+  File "yield_wait_for_result_bad2.php", line 12, characters 17-30:
+  Expected `Awaitable<int>`
+  File "yield_wait_for_result_bad2.php", line 12, characters 17-30:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
 File "yield_wait_for_result_bad2.php", line 20, characters 17-30:
-Expected `Awaitable<int>`
-File "yield_wait_for_result_bad2.php", line 21, characters 3-30:
-But got `Generator<int, _, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "yield_wait_for_result_bad2.php", line 20, characters 17-30:
+  Expected `Awaitable<int>`
+  File "yield_wait_for_result_bad2.php", line 20, characters 17-30:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

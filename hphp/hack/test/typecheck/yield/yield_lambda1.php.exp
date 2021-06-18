@@ -1,0 +1,6 @@
+File "yield_lambda1.php", line 6, characters 10-13:
+Invalid return type (Typing[4110])
+  File "yield_lambda1.php", line 4, characters 17-19:
+  Expected `int`
+  File "yield_lambda1.php", line 5, characters 8-30:
+  But got `Generator<int, string, mixed>` (result of function containing a `yield`)

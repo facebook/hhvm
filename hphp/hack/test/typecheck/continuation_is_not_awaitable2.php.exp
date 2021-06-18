@@ -1,6 +1,6 @@
-File "continuation_is_not_awaitable2.php", line 13, characters 3-11:
-Invalid `yield` (Typing[4110])
 File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
-Expected `Awaitable<int>`
-File "continuation_is_not_awaitable2.php", line 13, characters 3-11:
-But got `Generator<int, int, [unresolved]>` (result of function with `yield` in the body)
+Invalid return type (Typing[4110])
+  File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
+  Expected `Awaitable<int>`
+  File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
+  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)

@@ -276,8 +276,33 @@ let visitor =
       acc + super#on_expr env expr
 
     method! on_expression_tree env Aast.{ et_hint; et_virtualized_expr; _ } =
+      (* We only want to consider completion from the hint and the
+         virtualized expression, not the visitor expression. The
+         visitor expression is unityped, so we can't do much.*)
       let acc = self#on_hint env et_hint in
-      self#plus acc (self#on_expr env et_virtualized_expr)
+
+      let e =
+        match snd et_virtualized_expr with
+        | Aast.Call
+            ( ( _,
+                Aast.Efun
+                  ( {
+                      Aast.f_body =
+                        { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
+                      _;
+                    },
+                    _ ) ),
+              _,
+              _,
+              _ ) ->
+          (* The virtualized expression is wrapped in an invoked
+             lambda to help check unbound variables, which leads to
+             unwanted closure info in hovers. Use the inner
+             expression directly. *)
+          e
+        | _ -> et_virtualized_expr
+      in
+      self#plus acc (self#on_expr env e)
 
     method! on_class_id env ((p, ty), cid) =
       match cid with

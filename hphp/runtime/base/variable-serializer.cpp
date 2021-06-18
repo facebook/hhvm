@@ -823,7 +823,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
   info.first_element = true;
   info.indent_delta = 0;
   info.size = size;
-  info.key = nullptr;
 
   switch (m_type) {
   case Type::DebuggerDump:
@@ -1108,9 +1107,6 @@ void VariableSerializer::writeArrayKey(
   bool const skey = isStringType(keyCell->m_type);
 
   ArrayInfo &info = m_arrayInfos.back();
-
-  auto const log_key = skey && val(keyCell).pstr->isStatic();
-  info.key = log_key ? val(keyCell).pstr : nullptr;
 
   switch (m_type) {
   case Type::DebuggerDump:

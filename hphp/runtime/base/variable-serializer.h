@@ -304,7 +304,6 @@ private:
     bool first_element; // whether this is first array element
     int  indent_delta;  // the extra indent to serialize this object
     int  size;          // the number of elements in the array
-    LowStringPtr key;   // the current element's key, used for HAM logging
   };
   req::vector<ArrayInfo> m_arrayInfos;
 

@@ -12,6 +12,6 @@ function main($a) {
 <<__EntryPoint>>
 function main_unpack_badtype() {
 set_error_handler(handler<>);
-main(new stdclass);
+main(new stdClass);
 echo "OK\n";
 }

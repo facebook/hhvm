@@ -8,5 +8,5 @@ function test($x) {
   return $f($x);
 }
 <<__EntryPoint>> function main(): void {
-var_dump(test(new stdclass));
+var_dump(test(new stdClass));
 }

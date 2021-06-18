@@ -68,7 +68,7 @@ function test1() {
         keyset[],
         keyset[100, 'abc', 200],
         xml_parser_create(),
-        new stdclass(),
+        new stdClass(),
         varray[],
         varray[1, 2, 3],
         darray[],

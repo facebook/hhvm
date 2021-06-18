@@ -3,7 +3,7 @@
 // Source php weakref extension
 <<__EntryPoint>>
 function main_weakref_multiple() {
-$r = new StdClass;
+$r = new stdClass;
 $wr1 = new WeakRef($r);
 var_dump($wr1->valid());
 __hhvm_intrinsics\launder_value($wr1);

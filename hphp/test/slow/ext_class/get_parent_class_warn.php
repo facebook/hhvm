@@ -11,7 +11,7 @@ class GetClassTest extends GetClassTestBase {
     var_dump(get_parent_class("string"));
     var_dump(get_parent_class(GetClassTest::class));
     var_dump(get_parent_class(GetClassTestBase::class));
-    var_dump(get_parent_class(new stdclass()));
+    var_dump(get_parent_class(new stdClass()));
   }
 }
 

@@ -15,7 +15,7 @@ function main_entry(): void {
   $var = 7;
   $var2 = NULL;
 
-  $obj = new StdClass;
+  $obj = new stdClass;
   $obj->boo = 7;
 
   $arr = darray[

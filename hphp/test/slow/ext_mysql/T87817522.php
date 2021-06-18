@@ -1,7 +1,7 @@
 <?hh
 
 function test_mysql_ssl_connect() {
-  $conn = mysql_connect_with_ssl("a", "b", "c", "d", 0, 0, 0, new stdclass, dict[]);
+  $conn = mysql_connect_with_ssl("a", "b", "c", "d", 0, 0, 0, new stdClass, dict[]);
 }
 
 <<__EntryPoint>>

@@ -3,7 +3,7 @@
 // Source php weakref extension
 <<__EntryPoint>>
 function main_weakref_basic_acquire_release() {
-$o = new StdClass;
+$o = new stdClass;
 $wr = new WeakRef($o);
 $wr->acquire();
 $wr->acquire();

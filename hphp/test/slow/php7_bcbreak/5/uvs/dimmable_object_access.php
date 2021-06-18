@@ -5,7 +5,7 @@ function entrypoint_dimmable_object_access(): void {
 
   error_reporting(-1);
 
-  $foo = new stdclass();
+  $foo = new stdClass();
   $foo->someprop = darray['baz' => 'quux'];
 
   $bar = 'someprop';

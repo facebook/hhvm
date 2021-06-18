@@ -53,7 +53,7 @@ function main_ext_variable() {
   VERIFY(is_scalar(123));
   VERIFY(is_scalar("test"));
   VERIFY(!is_scalar(varray[123]));
-  VERIFY(!is_scalar(new stdclass));
+  VERIFY(!is_scalar(new stdClass));
   VERIFY(!is_scalar($valid_res));
   VERIFY(!is_scalar($invalid_res));
 
@@ -61,7 +61,7 @@ function main_ext_variable() {
   VERIFY(!is_array(123));
   VERIFY(!is_array("test"));
   VERIFY(is_array(varray[123]));
-  VERIFY(!is_array(new stdclass));
+  VERIFY(!is_array(new stdClass));
   VERIFY(!is_array($valid_res));
   VERIFY(!is_array($invalid_res));
 
@@ -69,7 +69,7 @@ function main_ext_variable() {
   VERIFY(!is_object(123));
   VERIFY(!is_object("test"));
   VERIFY(!is_object(varray[123]));
-  VERIFY(is_object(new stdclass));
+  VERIFY(is_object(new stdClass));
   VERIFY(!is_object($valid_res));
   VERIFY(!is_object($invalid_res));
 
@@ -77,7 +77,7 @@ function main_ext_variable() {
   VERIFY(!is_resource(123));
   VERIFY(!is_resource("test"));
   VERIFY(!is_resource(varray[123]));
-  VERIFY(!is_resource(new stdclass));
+  VERIFY(!is_resource(new stdClass));
   VERIFY(is_resource($valid_res));
   VERIFY(!is_resource($invalid_res));
 
@@ -86,7 +86,7 @@ function main_ext_variable() {
   VS(gettype("test"), "string");
   VS(gettype("hi"), "string");
   VS(gettype(varray[]), "vec");
-  VS(gettype(new stdclass), "object");
+  VS(gettype(new stdClass), "object");
   VS(gettype($valid_res), "resource");
   VS(gettype($invalid_res), "unknown type");
 
@@ -115,7 +115,7 @@ function main_ext_variable() {
   VS(boolval(varray[]), false);
   VS(boolval(new stdClass), true);
 
-  $obj = new stdclass;
+  $obj = new stdClass;
   $obj->name = "value";
   VS(serialize($obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 

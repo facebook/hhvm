@@ -1,6 +1,6 @@
 <?hh
 
-function test(ConstSet<stdclass> $a) {
+function test(ConstSet<stdClass> $a) {
   var_dump(!$a);
 }
 

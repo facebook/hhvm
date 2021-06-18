@@ -74,7 +74,7 @@ function test_http_build_query() {
      "children%5Bbobby%5D%5Bsex%5D=M&children%5Bsally%5D%5Bage%5D=8&".
      "children%5Bsally%5D%5Bsex%5D=F&flags_0=CEO");
 
-  $obj = new stdclass;
+  $obj = new stdClass;
   $obj->foo = 'bar';
   $obj->baz = 'boom';
   VS(http_build_query($obj), "foo=bar&baz=boom");

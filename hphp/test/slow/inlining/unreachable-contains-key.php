@@ -8,7 +8,7 @@ abstract final class GetValueStatics {
 function get_value() {
   GetValueStatics::$x++;
   if ((GetValueStatics::$x % 2) == 0) return 1;
-  return new stdclass;
+  return new stdClass;
 }
 
 function contains_key(KeyedContainer $c, $k) {

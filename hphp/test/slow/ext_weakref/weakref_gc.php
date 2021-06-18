@@ -41,7 +41,7 @@ $wr = leaker(false);
 $wr2 = leaker(true);
 
 // Test that we don't release if object is marked.
-$a = new StdClass();
+$a = new stdClass();
 $wr3 = new WeakRef($a);
 
 // Test x2 WRs on same object.

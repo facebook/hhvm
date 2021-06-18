@@ -4,7 +4,7 @@ class X {
   private $a;
   private int $b;
   private AnyArray $c;
-  private stdclass $d;
+  private stdClass $d;
 }
 
 function foo($value) {

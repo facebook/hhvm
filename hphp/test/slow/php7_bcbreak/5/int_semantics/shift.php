@@ -105,8 +105,8 @@ function run_tests() {
 
   echo "-\n";
 
-  echo (new stdclass) >> 64, "\n";
-  echo (new stdclass) << 64, "\n";
+  echo (new stdClass) >> 64, "\n";
+  echo (new stdClass) << 64, "\n";
 
   echo "-\n";
 

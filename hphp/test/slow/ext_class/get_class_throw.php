@@ -7,7 +7,7 @@ class GetClassTest {
     try { var_dump(get_class(1)); } catch (Exception $e) { var_dump($e->getMessage()); }
     try { var_dump(get_class(1.1)); } catch (Exception $e) { var_dump($e->getMessage()); }
     try { var_dump(get_class("string")); } catch (Exception $e) { var_dump($e->getMessage()); }
-    var_dump(get_class(new stdclass()));
+    var_dump(get_class(new stdClass()));
   }
 }
 

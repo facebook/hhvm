@@ -4,7 +4,7 @@
 $a = $x ==> $x + 1;
 var_dump($a);
 
-$o = new stdclass;
+$o = new stdClass;
 var_dump($o);
 unset($o);
 

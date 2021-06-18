@@ -7,7 +7,7 @@ class bar {}
 function foo() {
   $bar = new bar;
   echo "----\n";
-  $lol = new stdclass;
+  $lol = new stdClass;
   $bar->x = darray[];
   try {
     $bar->x[$lol] = 2;

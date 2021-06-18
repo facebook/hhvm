@@ -40,7 +40,7 @@ var_dump(get_parent_class("i"));
 var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
-var_dump(get_parent_class(new stdclass));
+var_dump(get_parent_class(new stdClass));
 var_dump(get_parent_class(varray[]));
 var_dump(get_parent_class(1));
 }

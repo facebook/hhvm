@@ -7,7 +7,7 @@ enum IsAssoc: int {
 }
 
 function make_object($d) {
-  $obj = new stdclass;
+  $obj = new stdClass;
   foreach ($d as $k => $v) {
     $obj->$k = $v;
   }

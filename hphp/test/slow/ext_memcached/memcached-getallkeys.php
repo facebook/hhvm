@@ -14,7 +14,7 @@ if ($keys) {
 
 var_dump($m->getAllKeys());
 
-$obj = new stdclass;
+$obj = new stdClass;
 $obj->int = 99;
 $obj->string = 'a simple string';
 $obj->array = varray[11, 22];

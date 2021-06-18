@@ -3,7 +3,7 @@
 // Source php weakref extension
 <<__EntryPoint>>
 function main_weakref_clone_acquire_count() {
-$o = new StdClass;
+$o = new stdClass;
 $wr1 = new WeakRef($o);
 $wr1->acquire();
 $wr2 = clone $wr1;

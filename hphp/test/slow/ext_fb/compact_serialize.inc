@@ -152,8 +152,8 @@ function fb_cs_entrypoint(): void {
     HH\array_mark_legacy(varray[vec["a"], vec[1]]),
     vec[vec["a"], vec[1]],
 
-    HH\array_mark_legacy(varray[new stdclass(), new stdclass()]),
-    HH\array_mark_legacy(darray[42 => new stdclass(), 47 => new stdclass()]),
+    HH\array_mark_legacy(varray[new stdClass(), new stdClass()]),
+    HH\array_mark_legacy(darray[42 => new stdClass(), 47 => new stdClass()]),
   );
 
   // Test list-like darray/dict

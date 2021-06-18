@@ -6,7 +6,7 @@ function foo() {
 function bar() {
   $x = darray(foo());
   $x[123] = 2;
-  $x['asdasdasd'] = new stdclass;
+  $x['asdasdasd'] = new stdClass;
   return $x;
 }
 function main() {

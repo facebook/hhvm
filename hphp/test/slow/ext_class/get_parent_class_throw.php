@@ -11,7 +11,7 @@ class GetClassTest extends GetClassTestBase {
     try { var_dump(get_parent_class("string")); } catch (Exception $e) { var_dump($e->getMessage()); }
     var_dump(get_parent_class(GetClassTest::class));
     var_dump(get_parent_class(GetClassTestBase::class));
-    var_dump(get_parent_class(new stdclass()));
+    var_dump(get_parent_class(new stdClass()));
   }
 }
 

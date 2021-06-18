@@ -2,7 +2,7 @@
 
 function test() {
   $a = IntlTimeZone::createDefault();
-  $a->hasSameRules(new stdclass);
+  $a->hasSameRules(new stdClass);
 }
 
 <<__EntryPoint>>

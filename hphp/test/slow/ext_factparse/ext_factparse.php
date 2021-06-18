@@ -69,9 +69,9 @@ enum E0 : int {
 const CO5 = 1;
 function f6() {
 
-  new stdclass;
-  new stdclass;
-  new stdclass;
+  new stdClass;
+  new stdClass;
+  new stdClass;
 }
 <<__EntryPoint>>
 function entrypoint_ext_factparse(): void {

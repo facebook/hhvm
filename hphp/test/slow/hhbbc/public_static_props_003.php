@@ -2,7 +2,7 @@
 
 class D {
   function go() {
-    static::$boom = new stdclass;
+    static::$boom = new stdClass;
   }
 }
 

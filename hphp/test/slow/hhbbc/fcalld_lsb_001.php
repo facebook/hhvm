@@ -4,7 +4,7 @@ class someJunk { public function __construct(private $blah) {} }
 
 class Foo {
   private static $foo = varray[];
-  protected static function createInstance() { return new stdclass; }
+  protected static function createInstance() { return new stdClass; }
   public static function get($x) {
     self::$foo[] = new someJunk(static::createInstance($x));
   }

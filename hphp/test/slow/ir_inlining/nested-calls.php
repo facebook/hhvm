@@ -12,7 +12,7 @@ function get_local_region() {
 }
 class c {
   public function __construct() {
-    $local1 = new stdclass;
+    $local1 = new stdClass;
     $local2 = varray[];
     get_local_region();
   }

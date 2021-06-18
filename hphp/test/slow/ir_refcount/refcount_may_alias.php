@@ -30,6 +30,6 @@ function go(X $x) {
 <<__EntryPoint>>
 function main_refcount_may_alias() {
 for ($i = 0; $i < 30; ++$i) {
-  go(new X(varray[1,2,new stdclass]));
+  go(new X(varray[1,2,new stdClass]));
 }
 }

@@ -12,7 +12,7 @@ function main() {
 
   echo "replace in using\n";
   try {
-    using ($x = new stdclass) {
+    using ($x = new stdClass) {
       $x = 12.0;
     }
   } catch (Exception $e) {
@@ -20,7 +20,7 @@ function main() {
   }
 
   echo "unset in using\n";
-  $x = new stdclass;
+  $x = new stdClass;
   try {
     using ($x) {
       unset($x);

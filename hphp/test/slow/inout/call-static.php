@@ -40,7 +40,7 @@ function swap(inout $a, inout $b) {
 
 function empty_(inout $t) {
   try {
-    new stdclass;
+    new stdClass;
     return;
   } finally {
     echo "empty_ finally\n";

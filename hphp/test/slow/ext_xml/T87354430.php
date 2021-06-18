@@ -2,7 +2,7 @@
 
 function test1() {
   $a = new XMLReader();
-  $a->expand(new stdclass);
+  $a->expand(new stdClass);
 }
 
 <<__EntryPoint>>

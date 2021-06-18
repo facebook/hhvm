@@ -50,10 +50,10 @@ var_dump($a[0] . g(inout $a));
 
 $a = varray[2];
 var_dump(($a[0] . '') . g(inout $a));
-$a = new stdclass;
+$a = new stdClass;
 $a->prop = 2;
 var_dump($a->prop . k($a));
-$a = new stdclass;
+$a = new stdClass;
 $a->prop = 2;
 var_dump(($a->prop . '') . k($a));
 $i = 0;
@@ -62,13 +62,13 @@ $i = 0;
 var_dump(($i . '') . ++$i);
 f(inout $a, 'test');
 var_dump(($a . 'x') . foo($a = ''));
-$a = new stdclass;
+$a = new stdClass;
 $a->foo = 42;
 var_dump($a->{
 $a = 'foo'}
 );
 var_dump($a);
-$b = new stdclass;
+$b = new stdClass;
 $a = null;
 $a->{
 f(inout $a,$b)}

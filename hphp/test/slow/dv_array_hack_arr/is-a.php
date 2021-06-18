@@ -64,7 +64,7 @@ function test1() {
     123,
     'abc',
     3.14,
-    new stdclass(),
+    new stdClass(),
     xml_parser_create(),
     vec[],
     vec[1, 2, 3],

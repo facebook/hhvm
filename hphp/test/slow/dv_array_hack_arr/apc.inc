@@ -50,14 +50,14 @@ function get_all($values) {
 function launder($v) { return __hhvm_intrinsics\launder_value($v); }
 
 function make_circular_varray() {
-  $x = new stdclass;
+  $x = new stdClass;
   $v = varray[$x];
   $x->foo = $v;
   return $v;
 }
 
 function make_circular_darray() {
-  $x = new stdclass;
+  $x = new stdClass;
   $d = darray[0 => $x];
   $x->foo = $d;
   return $d;

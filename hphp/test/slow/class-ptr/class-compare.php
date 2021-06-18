@@ -13,7 +13,7 @@ function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
 
 function WRAPA($x) { return LV(varray[$x]); }
 function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
+function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 
 <<__NEVER_INLINE>> function print_header($title) {
   echo "$title\n";
@@ -42,8 +42,8 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa);
 
-  $xz = new stdclass; $xz->v = $cm; $vz = new stdclass; $vz->v = $va;
-  $oz = new stdclass; $oz->v = $oa; $fz = new stdclass; $fz->v = $fa;
+  $xz = new stdClass; $xz->v = $cm; $vz = new stdClass; $vz->v = $va;
+  $oz = new stdClass; $oz->v = $oa; $fz = new stdClass; $fz->v = $fa;
 
   print_header('[static] $cm ? VAR');
   begin_row('va');

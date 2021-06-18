@@ -12,7 +12,7 @@ function doh($x, $y) {
 }
 
 function hey() {
-  yield new stdclass;
+  yield new stdClass;
 }
 
 

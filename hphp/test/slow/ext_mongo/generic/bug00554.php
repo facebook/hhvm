@@ -9,7 +9,7 @@ $valid = varray[
 $invalid = varray[
     str_repeat("klsdjf", 4),
     str_repeat("abcdef123456", 2). " ",
-    new stdclass,
+    new stdClass,
 ];
 
 echo "VALID IDs\n";

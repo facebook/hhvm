@@ -7,16 +7,16 @@ function foo($a,$b=null) {
  }
 function test1() {
   if (foo(0)) $a=1;
-  $x = new StdClass;
+  $x = new stdClass;
   return $a;
 }
 function test2() {
   if (foo(0)) $a=1;
-  return $a | new StdClass;
+  return $a | new stdClass;
 }
 function test3() {
   if (foo(0)) $a=1;
-  $x = new StdClass;
+  $x = new stdClass;
   return $a::foo;
 }
 function test($f) {

@@ -10,7 +10,7 @@ function g(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_stdclass() {
+function main_is_expression_stdClass() {
 f(1);
 f(new stdClass());
 f(null);

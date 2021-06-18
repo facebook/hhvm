@@ -28,7 +28,7 @@ function too_few($name, $obj_or_cls, inout $args, $ctx, inout $done) {
 
 function wrong_type($name, $obj_or_cls, inout $args, $ctx, inout $done) {
   var_dump($args, $done);
-  $args = new stdclass;
+  $args = new stdClass;
   $done = $ctx;
 }
 

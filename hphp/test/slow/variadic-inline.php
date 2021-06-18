@@ -7,7 +7,7 @@ function varargs(int $one, bool $two, ...$three) {
 
 <<__NEVER_INLINE>>
 function bar() {
-  echo varargs(2, false, 'alpha', new stdclass, 'gamma', new Exception)."\n";
+  echo varargs(2, false, 'alpha', new stdClass, 'gamma', new Exception)."\n";
 }
 
 <<__EntryPoint>>

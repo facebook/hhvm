@@ -6,16 +6,16 @@ Fatal error: Expected constant expression for initializer in %s/test/slow/consta
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(23613acee8db6e4282e093df21a2b230) : eval()'d code on line 1
 
 ==============================================================
-"const BADARRAY = [new stdclass];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(2254b790ac563cabfd727f751b29c549) : eval()'d code on line 1
+"const BADARRAY = [new stdClass];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(84edf8fa3738eee3a925a9d71d31c417) : eval()'d code on line 1
 
 ==============================================================
 "const BADARRAY = [foobaz()];" ====>
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(3b5198a14e4bce941862c8b00d9eb61c) : eval()'d code on line 1
 
 ==============================================================
-"const BADARRAY = [1, [2, new stdclass], 3];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(ba2675c2ecc7aad1556e5afb291107f8) : eval()'d code on line 1
+"const BADARRAY = [1, [2, new stdClass], 3];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(3cba46c774cfce16c5f7bfa09530f604) : eval()'d code on line 1
 
 ==============================================================
 "const BADARRAY = [1, [2, foobaz()], 3];" ====>
@@ -38,16 +38,16 @@ Fatal error: Expected constant expression for initializer in %s/test/slow/consta
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(c1df4c4ce7f27f00d1d90c200dfa280c) : eval()'d code on line 1
 
 ==============================================================
-"const BADVEC = vec[new stdclass];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(82e0c7f9870dcff771a3239ab554ed2a) : eval()'d code on line 1
+"const BADVEC = vec[new stdClass];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(b183eb6c4dbd3a5d7bc4e46bf9b84630) : eval()'d code on line 1
 
 ==============================================================
 "const BADVEC = vec[foobaz()];" ====>
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(76ece7c583ab444ac7701aa97f6aba48) : eval()'d code on line 1
 
 ==============================================================
-"const BADVEC = vec[1, vec[2, new stdclass], 3];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(e2be6c9366d3fbc558dd9ab46b137658) : eval()'d code on line 1
+"const BADVEC = vec[1, vec[2, new stdClass], 3];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(f37279d131ba705ea0e198699025bfba) : eval()'d code on line 1
 
 ==============================================================
 "const BADVEC = vec[1, vec[2, foobaz()], 3];" ====>
@@ -70,16 +70,16 @@ Fatal error: Expected constant expression for initializer in %s/test/slow/consta
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(d70c73ae5c2946270d9f78cdb8aa743a) : eval()'d code on line 1
 
 ==============================================================
-"const BADDICT = dict[1 => new stdclass];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(ddfe6dd1c32dc1d39865afd470b8fbca) : eval()'d code on line 1
+"const BADDICT = dict[1 => new stdClass];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(052e9a087824ac802e236f761fc2a6d4) : eval()'d code on line 1
 
 ==============================================================
 "const BADDICT = dict[1 => foobaz()];" ====>
 Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(d22849b922cb406e218c1f034e394d4e) : eval()'d code on line 1
 
 ==============================================================
-"const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => new stdclass], 3 => 3];" ====>
-Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(6dc55448aa89bf24f1957d1d33fab71f) : eval()'d code on line 1
+"const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => new stdClass], 3 => 3];" ====>
+Fatal error: Expected constant expression for initializer in %s/test/slow/constant/bad-arrays.php(%d)(e41398657126a9f3b33727093f91d219) : eval()'d code on line 1
 
 ==============================================================
 "const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3];" ====>

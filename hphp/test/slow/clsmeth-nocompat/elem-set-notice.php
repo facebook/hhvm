@@ -26,7 +26,7 @@ function set_static1(): void {
   $dm[0][0] = 12;
   $dm[0][1] = 1.2;
   $om->m[1] = false;
-  $om->m[0] = new stdclass;
+  $om->m[0] = new stdClass;
 
   var_dump($cm, $am, $dm, $om);
 }
@@ -94,7 +94,7 @@ function set_dynamic1(): void {
   $dm[0][0] = 12;
   $dm[0][1] = 1.2;
   $om->m[1] = false;
-  $om->m[0] = new stdclass;
+  $om->m[0] = new stdClass;
 
   var_dump($cm, $am, $dm, $om);
 }

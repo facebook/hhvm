@@ -11,10 +11,10 @@ class X {
 }
 
 function go() {
-  var_dump((new X(varray[new stdclass]))->thing());
-  var_dump((new X(varray[new stdclass]))->thing());
-  var_dump((new X(varray[new stdclass]))->thing());
-  var_dump((new X(varray[new stdclass]))->thing());
+  var_dump((new X(varray[new stdClass]))->thing());
+  var_dump((new X(varray[new stdClass]))->thing());
+  var_dump((new X(varray[new stdClass]))->thing());
+  var_dump((new X(varray[new stdClass]))->thing());
   var_dump((new X("yoyoyo"))->thing());
 }
 

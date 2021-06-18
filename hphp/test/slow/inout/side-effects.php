@@ -101,7 +101,7 @@ function main() {
   var_dump($a[0], $b[0], $c[0]);
 
   /* The following more general syntax is not allowed-
-  $a = new stdclass;
+  $a = new stdClass;
   $a->x = 'one';
   $a->y = 'two';
   $saved = $a;
@@ -125,7 +125,7 @@ function main() {
   );
   var_dump($a, Herp::$derp);
 
-  $a = new stdclass;
+  $a = new stdClass;
   $a->x = 'one';
   $a->y = 'two';
   $saved = $a;
@@ -138,7 +138,7 @@ function main() {
   );
   var_dump($saved, $a);
 
-  $a = new stdclass;
+  $a = new stdClass;
   $a->x = 'one';
   $a->y = 'two';
   $saved = $a;

@@ -19,7 +19,7 @@ function test() {
 
 <<__EntryPoint>>
 function main_1293() {
-$data = new stdclass;
+$data = new stdClass;
 $type = 'OCI-Lob';
 if (is_a($data, $type)) {
   echo 'true';

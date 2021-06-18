@@ -103,7 +103,7 @@ $values = vec[
   keyset[],
   keyset[100, 'abc', 200],
   fopen(__FILE__, 'r'),
-  new stdclass,
+  new stdClass,
   new IterableObj,
   new ThrowIterableObj,
   new AggregateObj,

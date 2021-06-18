@@ -7,7 +7,7 @@ class GetClassTest {
     var_dump(get_class(1));
     var_dump(get_class(1.1));
     var_dump(get_class("string"));
-    var_dump(get_class(new stdclass()));
+    var_dump(get_class(new stdClass()));
   }
 }
 

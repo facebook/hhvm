@@ -13,7 +13,7 @@ function test($x) {
   test(123);
   test(3.141);
   test('abc');
-  test(new stdclass);
+  test(new stdClass);
 
   test(darray[]);
   test(varray[]);

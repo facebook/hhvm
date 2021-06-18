@@ -78,7 +78,7 @@ function main() {
   $vc = 'c'; $pc = __hhvm_intrinsics\launder_value('c');
 
   $v4 = 4; $p4 = __hhvm_intrinsics\launder_value(4);
-  $vo = new stdclass; $po = __hhvm_intrinsics\launder_value(new stdclass);
+  $vo = new stdClass; $po = __hhvm_intrinsics\launder_value(new stdClass);
 
   rfun<Foo, Foo>($v1);
   rfun<Foo, Foo>($p1);

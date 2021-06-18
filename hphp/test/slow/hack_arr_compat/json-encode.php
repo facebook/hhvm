@@ -82,7 +82,7 @@ function test($name, $options) {
     $options
   ));
 
-  $obj = new stdclass();
+  $obj = new stdClass();
   $obj->a = darray(vec[1, 2, 3]);
   $obj->b = vec[1, 2, 3];
   $obj->c = dict['a' => 1, 'b' => 2];

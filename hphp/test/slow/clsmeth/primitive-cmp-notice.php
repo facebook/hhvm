@@ -29,7 +29,7 @@ function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
 
 function WRAPA($x) { return LV(varray[$x]); }
 function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
+function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 
 <<__NEVER_INLINE>> function print_header($title) {
   echo "$title\n";
@@ -96,14 +96,14 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $vy = new Wrapper($va); $dy = new Wrapper($da); $cy = new Wrapper($cp);
   $ey = new Wrapper($ep); $ly = new Wrapper($lp); $qy = new Wrapper($qp);
 
-  $xz = new stdclass; $xz->v = $cm; $nz = new stdclass; $nz->v = $nv;
-  $tz = new stdclass; $tz->v = $tv; $bz = new stdclass; $bz->v = $bv;
-  $iz = new stdclass; $iz->v = $iv; $fz = new stdclass; $fz->v = $fv;
-  $sz = new stdclass; $sz->v = $sv; $rz = new stdclass; $rz->v = $rv;
-  $oz = new stdclass; $oz->v = $ov; $vz = new stdclass; $vz->v = $va;
-  $dz = new stdclass; $dz->v = $da; $cz = new stdclass; $cz->v = $cp;
-  $ez = new stdclass; $ez->v = $ep; $lz = new stdclass; $lz->v = $lp;
-  $qz = new stdclass; $qz->v = $qp;
+  $xz = new stdClass; $xz->v = $cm; $nz = new stdClass; $nz->v = $nv;
+  $tz = new stdClass; $tz->v = $tv; $bz = new stdClass; $bz->v = $bv;
+  $iz = new stdClass; $iz->v = $iv; $fz = new stdClass; $fz->v = $fv;
+  $sz = new stdClass; $sz->v = $sv; $rz = new stdClass; $rz->v = $rv;
+  $oz = new stdClass; $oz->v = $ov; $vz = new stdClass; $vz->v = $va;
+  $dz = new stdClass; $dz->v = $da; $cz = new stdClass; $cz->v = $cp;
+  $ez = new stdClass; $ez->v = $ep; $lz = new stdClass; $lz->v = $lp;
+  $qz = new stdClass; $qz->v = $qp;
 
   print_header('[static] $cm ? VAR');
   begin_row('cm');

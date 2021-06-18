@@ -6,7 +6,7 @@ function test_varray() {
   var_dump(varray[1, 2, 3, 4]);
   var_dump(varray['a', 'b', 'c']);
   var_dump(varray[null, true, false, 'abc', 100, 1.23,
-                  new stdclass, xml_parser_create(),
+                  new stdClass, xml_parser_create(),
                   varray[1, 2], vec[3, 4], dict[1 => 2], keyset['abc']]);
   var_dump(varray[varray[], varray['a', 100, false]]);
   var_dump(varray[darray[], darray[100 => 'a', 'b' => 200]]);
@@ -24,7 +24,7 @@ function test_darray() {
       'key1' => 'abc',
       'key2' => 100,
       'key3' => 1.23,
-      40 => new stdclass,
+      40 => new stdClass,
       50 => xml_parser_create(),
       60 => varray[1, 2],
       'key4' => vec[3, 4],

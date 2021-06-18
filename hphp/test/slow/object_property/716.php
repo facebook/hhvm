@@ -7,5 +7,5 @@ function test($x, $v) {
 
 <<__EntryPoint>>
 function main_716() {
-test(new stdclass, "\0foo");
+test(new stdClass, "\0foo");
 }

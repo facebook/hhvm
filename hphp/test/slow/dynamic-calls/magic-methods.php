@@ -11,7 +11,7 @@ class A {
 
   public function __invoke() { echo "A::__invoke\n"; }
 
-  public static function __set_state($a) { echo "A::__set_state\n"; return new stdclass; }
+  public static function __set_state($a) { echo "A::__set_state\n"; return new stdClass; }
   public function __debugInfo() { echo "A::__debugInfo\n"; return varray[]; }
 
   public function __clone() { echo "A::__clone\n"; }

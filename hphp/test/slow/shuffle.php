@@ -34,6 +34,6 @@ test(123);
 test('abc');
 test(3.14);
 test(fopen(__FILE__, 'r'));
-test(new stdclass);
+test(new stdClass);
 test(Vector{1, 2, 3, 4});
 }

@@ -56,7 +56,7 @@ function get_null() {
   return null;
 }
 function get_obj() {
-  return new stdclass;
+  return new stdClass;
 }
 
 function get_anything() {

@@ -20,5 +20,5 @@ function main() {
   var_dump(is_object($c));
 
   // The type known at compile-time
-  var_dump(is_object(new stdclass));
+  var_dump(is_object(new stdClass));
 }

@@ -3,7 +3,7 @@
 
 <<__EnumClass>>
 class EC {
-    const X = new stdclass;
+    const X = new stdClass;
 }
 
 <<__EnumClass>>

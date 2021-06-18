@@ -4,7 +4,7 @@ class Gronk {
   private $gronks;
 
   function __construct() {
-    $this->gronks = varray[new stdclass, new stdclass, new stdclass];
+    $this->gronks = varray[new stdClass, new stdClass, new stdClass];
   }
 
   public function gronkify(): void {
@@ -19,7 +19,7 @@ class Gronk {
     foreach ($this->gronks as $gronk) {
       if (\HH\global_get('break')) {
         $z = varray[varray[null, null], $gronk];
-        $z[] = new stdclass;
+        $z[] = new stdClass;
         return $z;
       }
     }

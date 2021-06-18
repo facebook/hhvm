@@ -23,7 +23,7 @@ $values = varray[
     FALSE,
     NULL,
     varray[],
-    new StdClass,
+    new stdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")
 ];

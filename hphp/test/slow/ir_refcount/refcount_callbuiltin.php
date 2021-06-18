@@ -1,10 +1,10 @@
 <?hh
 
 function x($x) {
-  $z = new stdclass;
-  $k = new stdclass;
-  $p = new stdclass;
-  $l = new stdclass;
+  $z = new stdClass;
+  $k = new stdClass;
+  $p = new stdClass;
+  $l = new stdClass;
   hash($x, $x);
   return $x;
 }

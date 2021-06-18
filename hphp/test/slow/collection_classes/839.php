@@ -4,7 +4,7 @@
 
 <<__EntryPoint>>
 function main_839() {
-$obj = new stdclass();
+$obj = new stdClass();
 $x0 = Vector {
 1, $obj, "foo", $obj}
 ;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74d71c953804cf70e0a7e39a1ac50593>>
+// @generated SignedSource<<7b563dfdcf9b330554dee4a159a85b2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -94,6 +94,8 @@ pub struct AppliedFixme<'a>(
 );
 impl<'a> TrivialDrop for AppliedFixme<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(AppliedFixme<'arena>);
+
+pub type PerFileErrors<'a> = FileT<'a, &'a Error<'a>>;
 
 #[derive(
     Clone,

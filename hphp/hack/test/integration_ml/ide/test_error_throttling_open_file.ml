@@ -13,7 +13,6 @@
  * throttling errors in other files to avoid overloading the editor.
  *)
 
-open Integration_test_base_types
 open Reordered_argument_collections
 module Test = Integration_test_base
 
@@ -31,12 +30,7 @@ let rec create_foos acc = function
   | 0 -> acc
   | i -> create_foos (create_foo i :: acc) (i - 1)
 
-let get_diagnostics_map loop_output =
-  match loop_output.push_message with
-  | Some (ServerCommandTypes.DIAGNOSTIC (_, s)) -> s
-  | _ ->
-    Test.fail "Expected push diagnostics";
-    assert false
+let get_diagnostics_map = Integration_test_base.get_diagnostics
 
 let get_files_with_errors diagnostics_map =
   SSet.of_list (SMap.keys diagnostics_map)
@@ -58,14 +52,17 @@ let test () =
   let env = Test.setup_disk env disk_contests in
   (* After connecting, errors for 10 of them will be pushed to editor *)
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
+  let env = Test.subscribe_diagnostic ~error_limit:10 env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  let files_with_errors =
-    loop_output |> get_diagnostics_map |> get_files_with_errors
+  let diagnostics_map = get_diagnostics_map loop_output in
+  let files_with_errors = get_files_with_errors diagnostics_map in
+  let error_count =
+    SMap.fold diagnostics_map ~init:0 ~f:(fun _key errors count ->
+        count + List.length errors)
   in
-  let num_errors = SSet.cardinal files_with_errors in
-  if num_errors <> 10 then
-    Test.fail (Printf.sprintf "Expected errors in 10 files, got: %d" num_errors);
+  if error_count <> 10 then
+    Test.fail
+      (Printf.sprintf "Expected no more than 10 errors, got: %d" error_count);
 
   (* f123 will not be one of them *)
   let (f123_name, f123_contents) = create_foo 123 in

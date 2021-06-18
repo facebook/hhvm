@@ -58,9 +58,9 @@ let bar2_contents =
 let diagnostic_subscription_id = 223
 
 let assert_no_push_message loop_outputs =
-  match loop_outputs.push_message with
-  | Some _ -> Test.fail "Unexpected push message"
-  | None -> ()
+  match loop_outputs.push_messages with
+  | _ :: _ -> Test.fail "Unexpected push message"
+  | [] -> ()
 
 let test () =
   let env = Test.setup_server () in

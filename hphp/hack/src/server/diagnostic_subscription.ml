@@ -10,25 +10,20 @@ open Hh_prelude
 open Reordered_argument_collections
 module RP = Relative_path
 
-(* Throttle errors - pause pushing errors after editor is aware of errors in
- * that many files. Resume when user fixes some of them. *)
-let errors_limit = 10
+exception Reached_error_limit of RP.Set.t
 
 type errors = Errors.error list
 
+type id = int [@@deriving show]
+
 type t = {
-  id: int;
+  id: id;
       (** Unique ID used by users of this module to distinguish multiple subscriptions. *)
+  error_limit: int;
   diagnosed_files: RP.Set.t;
       (** Files to send diagnostic for. We don't send diagnostic for all the files with errors
-          for performance reason: to keep things responsive, we'll keep
-
-          |diagnosed_files| < max (errors_limit , |priority_files| + |pushed_errors|
-
-          i.e we always report things in priority_files, and if we reported some
-          errors in a file, we'll keep them fresh until they are fixed. If after
-          that we still report errors in less than errors_limit files, we'll "top up"
-          with errors from some arbitrary files. *)
+          for performance reason: to keep things responsive, we'll keep make sure to push
+          at most [errors_limit] errors. *)
   pushed_errors: errors RP.Map.t;
       [@printer
         fun fmt errors ->
@@ -44,9 +39,16 @@ type t = {
 }
 [@@deriving show]
 
+(** Throttle errors - pause pushing errors after editor is aware of that many errors.
+    Resume when user fixes some of them. *)
+let default_error_limit = 1000
+
 let get_id ds = ds.id
 
 let diagnosed_files ds = ds.diagnosed_files
+
+let set_error_limit : t -> int -> t =
+ (fun diag error_limit -> { diag with error_limit })
 
 (** Update diagnostics subscription based on an incremental recheck that
     was done. *)
@@ -62,10 +64,24 @@ let update
       * subset to be union of priority_files and Diagnsotic_subscription.sources
       *)
     full_check_done =
-  let diagnosed_files = RP.Set.union ds.diagnosed_files priority_files in
+  let { diagnosed_files; error_limit; _ } = ds in
+  let diagnosed_files = RP.Set.union diagnosed_files priority_files in
   (* Remove files which no longer have errors *)
-  let diagnosed_files =
-    RP.Set.filter diagnosed_files ~f:(Errors.file_has_errors global_errors)
+  let (error_count, diagnosed_files) =
+    RP.Set.fold
+      diagnosed_files
+      ~init:(0, RP.Set.empty)
+      ~f:(fun file (count, diagnosed_files) ->
+        let errors = Errors.get_file_errors global_errors file in
+        let n = Errors.per_file_error_count errors in
+        let diagnosed_files =
+          if Int.equal 0 n then
+            diagnosed_files
+          else
+            RP.Set.add diagnosed_files file
+        in
+        let count = n + count in
+        (count, diagnosed_files))
   in
   (* If we've done a full check, then it's safe to look through all of the
    * errors in global_errors, not only those that were just rechecked *)
@@ -73,22 +89,33 @@ let update
     if not full_check_done then
       (false, diagnosed_files)
     else
-      Errors.fold_errors
-        global_errors
-        ~init:(false, diagnosed_files)
-        ~f:(fun source _e (is_truncated, diagnosed_files) ->
-          if is_truncated || RP.Set.cardinal diagnosed_files >= errors_limit
-          then
-            (true, diagnosed_files)
-          else
-            (false, RP.Set.add diagnosed_files source))
+      try
+        let (diagnosed_files, _error_count) =
+          (* Add files to diagnosed_files until we've reached the error limit. *)
+          Errors.fold_per_file
+            global_errors
+            ~init:(diagnosed_files, error_count)
+            ~f:(fun file errors (diagnosed_files, error_count) ->
+              if error_count >= error_limit then
+                raise (Reached_error_limit diagnosed_files)
+              else if RP.Set.mem diagnosed_files file then
+                (diagnosed_files, error_count)
+              else
+                let diagnosed_files = RP.Set.add diagnosed_files file in
+                let n = Errors.per_file_error_count errors in
+                let error_count = error_count + n in
+                (diagnosed_files, error_count))
+        in
+        (false, diagnosed_files)
+      with Reached_error_limit diagnosed_files -> (true, diagnosed_files)
   in
   { ds with diagnosed_files; has_new_errors = true; is_truncated }
 
-let of_id ~id ~init =
+let of_id ?error_limit ~initial_errors id =
   let res =
     {
       id;
+      error_limit = Option.value error_limit ~default:default_error_limit;
       diagnosed_files = RP.Set.empty;
       pushed_errors = RP.Map.empty;
       has_new_errors = false;
@@ -98,7 +125,7 @@ let of_id ~id ~init =
   update
     res
     ~priority_files:Relative_path.Set.empty
-    ~global_errors:init
+    ~global_errors:initial_errors
     ~full_check_done:true
 
 (** Return and record errors to send to subscriber. [ds] is current diagnostics

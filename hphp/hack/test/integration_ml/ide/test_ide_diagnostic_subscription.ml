@@ -42,9 +42,9 @@ File \"/bar.php\", line 2, characters 10-13:
 Was expecting a return type hint (Typing[4030])"
 
 let assert_no_push_message loop_outputs =
-  match loop_outputs.push_message with
-  | Some _ -> Test.fail "Unexpected push message"
-  | None -> ()
+  match loop_outputs.push_messages with
+  | _ :: _ -> Test.fail "Unexpected push message"
+  | [] -> ()
 
 let test () =
   let env = Test.setup_server () in

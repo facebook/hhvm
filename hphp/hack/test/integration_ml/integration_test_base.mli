@@ -61,7 +61,8 @@ val run_loop_once :
 
 (* wrappers around run_loop_once for most common operations *)
 
-val subscribe_diagnostic : ?id:int -> ServerEnv.env -> ServerEnv.env
+val subscribe_diagnostic :
+  ?id:int -> ?error_limit:int -> ServerEnv.env -> ServerEnv.env
 
 val open_file : ServerEnv.env -> ?contents:string -> string -> ServerEnv.env
 
@@ -118,7 +119,7 @@ val print_telemetries : ServerEnv.env -> unit
 
 (* Helpers for asserting things *)
 
-val fail : string -> unit
+val fail : string -> 'noreturn
 
 val assertEqual : string -> string -> unit
 

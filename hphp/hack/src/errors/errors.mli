@@ -161,7 +161,10 @@ val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
-(* The type of collections of errors *)
+(** Type representing the errors for a single file. *)
+type per_file_errors
+
+(** The type of collections of errors *)
 type t [@@deriving eq]
 
 (** Return the list of errors caused by the function passed as parameter
@@ -225,11 +228,19 @@ val get_sorted_error_list : t -> error list
 
 val from_error_list : error list -> t
 
-val file_has_errors : t -> Relative_path.t -> bool
+val per_file_error_count : per_file_errors -> int
 
 val errors_in_file : t -> Relative_path.t -> error list
 
+val get_file_errors : t -> Relative_path.t -> per_file_errors
+
 val iter_error_list : (error -> unit) -> t -> unit
+
+val fold_per_file :
+  t ->
+  init:'acc ->
+  f:(Relative_path.t -> per_file_errors -> 'acc -> 'acc) ->
+  'acc
 
 val fold_errors :
   ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a

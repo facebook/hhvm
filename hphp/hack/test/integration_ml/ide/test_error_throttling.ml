@@ -8,7 +8,6 @@
  *
  *)
 
-open Integration_test_base_types
 open Reordered_argument_collections
 module Test = Integration_test_base
 
@@ -45,12 +44,7 @@ let baz_contents = "<?hh
 
 let create_bar i = (bar_name i, bar_contents i)
 
-let get_diagnostics_map loop_output =
-  match loop_output.push_message with
-  | Some (ServerCommandTypes.DIAGNOSTIC (_, s)) -> s
-  | _ ->
-    Test.fail "Expected push diagnostics";
-    assert false
+let get_diagnostics_map = Integration_test_base.get_diagnostics
 
 let get_files_with_errors diagnostics_map =
   SSet.of_list (SMap.keys diagnostics_map)
@@ -63,12 +57,12 @@ let bar_10_clear_diagnostics = "
 /bar10.php:
 "
 
-let bar_107_diagnostics =
+let bar_106_diagnostics =
   {|
-/bar107.php:
-File "/bar107.php", line 4, characters 10-14:
+/bar106.php:
+File "/bar106.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
-  File "/bar107.php", line 3, characters 21-23:
+  File "/bar106.php", line 3, characters 21-23:
   Expected `int`
   File "/foo.php", line 3, characters 17-22:
   But got `string`
@@ -99,7 +93,7 @@ let test () =
   let disk_contests = create_bars disk_contests 200 in
   let env = Test.setup_disk env disk_contests in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
+  let env = Test.subscribe_diagnostic env ~error_limit:10 in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_errors env;
   Test.assert_no_diagnostics loop_output;
@@ -123,9 +117,13 @@ let test () =
   let files_with_errors = get_files_with_errors diagnostics_map in
   SSet.iter files_with_errors ~f:print_endline;
 
-  (* Make sure that we only got errors for up to 10 global files *)
-  let num_errors = SSet.cardinal files_with_errors in
-  if num_errors <> 9 then Test.fail "Expected to get results for 9 files";
+  let error_count =
+    SMap.fold diagnostics_map ~init:0 ~f:(fun _key errors count ->
+        count + List.length errors)
+  in
+  if error_count > 10 then
+    Test.fail
+    @@ Printf.sprintf "Expected no more than 10 errors but got %d." error_count;
 
   (* Fix one of the remaining errors *)
   let bar_10_name = bar_name 10 in
@@ -137,4 +135,4 @@ let test () =
 
   (* Trigger another global recheck to get more global errors *)
   let (_, loop_output) = Test.full_check_status env in
-  Test.assert_diagnostics loop_output bar_107_diagnostics
+  Test.assert_diagnostics loop_output bar_106_diagnostics

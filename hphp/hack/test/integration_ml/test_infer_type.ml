@@ -336,8 +336,7 @@ let test () =
         | Some (env, ty) -> Tast_env.print_ty env ty
         | None ->
           Test.fail
-            (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
-          failwith "unreachable"
+            (Printf.sprintf "No type inferred at %s:%d:%d" file line col)
       in
       let fmt = Printf.sprintf "%s:%d:%d %s" file line col in
       Test.assertEqual (fmt expected) (fmt ty_str)

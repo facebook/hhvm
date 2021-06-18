@@ -315,6 +315,11 @@ type cst_search_input = {
   files_to_search: string list option; (* if None, search all files *)
 }
 
+type subscribe_diagnostic = {
+  id: int;
+  error_limit: int option;
+}
+
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
@@ -405,7 +410,7 @@ type _ t =
       -> AutocompleteTypes.ide_result t
   | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | DISCONNECT : unit t
-  | SUBSCRIBE_DIAGNOSTIC : int -> unit t
+  | SUBSCRIBE_DIAGNOSTIC : subscribe_diagnostic -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t
@@ -434,6 +439,8 @@ type cmd_metadata = {
   desc: string;
 }
 
+let default_subscribe_diagnostic = { id = 0; error_limit = None }
+
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true
   | _ -> false
@@ -460,11 +467,11 @@ and streamed =
   | LIST_MODES
 
 type push =
-  | DIAGNOSTIC of int * Errors.finalized_error list SMap.t
+  | DIAGNOSTIC of int * (Errors.finalized_error list SMap.t[@opaque])
   | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
-  | FATAL_EXCEPTION of Marshal_tools.remote_exception_data
-  | NONFATAL_EXCEPTION of Marshal_tools.remote_exception_data
+  | FATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])
+  | NONFATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])
 
 and busy_status =
   | Needs_local_typecheck
@@ -481,6 +488,7 @@ and global_typecheck_kind =
   | Blocking
   | Interruptible
   | Remote_blocking of string
+[@@deriving show]
 
 type 'a message_type =
   | Hello

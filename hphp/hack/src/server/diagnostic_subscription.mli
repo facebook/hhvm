@@ -9,13 +9,18 @@
 
 open Reordered_argument_collections
 
+type id = int
+
 type t [@@deriving show]
 
 (** Makes a diagnostic subscription with ID [id]. The ID is used
     by callers to distinguish multiple subscriptions. *)
-val of_id : id:int -> init:Errors.t -> t
+val of_id : ?error_limit:int -> initial_errors:Errors.t -> id -> t
 
 val get_id : t -> int
+
+(** Set a limit on the number of errors to push. Default is 1000. *)
+val set_error_limit : t -> int -> t
 
 (** Update diagnostics subscription based on an incremental recheck that
     was done. *)

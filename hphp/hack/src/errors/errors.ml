@@ -155,6 +155,8 @@ type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq]
 
 type applied_fixme = Pos.t * int [@@deriving eq]
 
+type per_file_errors = error file_t
+
 type t = error files_t * applied_fixme files_t [@@deriving eq]
 
 let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
@@ -942,14 +944,19 @@ let apply_callback_to_errors : t -> error_from_reasons_callback -> unit =
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
-let file_has_errors : t -> Relative_path.t -> bool =
- (fun (errors, _) -> Relative_path.Map.mem errors)
-
 let errors_in_file : t -> Relative_path.t -> _ =
  fun (errors, _) file ->
   Relative_path.Map.find_opt errors file
   |> Option.value ~default:PhaseMap.empty
   |> PhaseMap.fold ~init:[] ~f:(fun _phase errors acc -> errors @ acc)
+
+let per_file_error_count : per_file_errors -> int =
+  PhaseMap.fold ~init:0 ~f:(fun _phase errors count ->
+      List.length errors + count)
+
+let get_file_errors : t -> Relative_path.t -> per_file_errors =
+ fun (errors, _) file ->
+  Relative_path.Map.find_opt errors file |> Option.value ~default:PhaseMap.empty
 
 let iter_error_list f err = List.iter ~f (get_sorted_error_list err)
 
@@ -971,6 +978,13 @@ let fold_errors_in ?phase err ~file ~init ~f =
          match phase with
          | Some x when not (equal_phase x p) -> acc
          | _ -> List.fold_right errors ~init:acc ~f)
+
+let fold_per_file :
+    t ->
+    init:'acc ->
+    f:(Relative_path.t -> per_file_errors -> 'acc -> 'acc) ->
+    'acc =
+ (fun (errors, _fixmes) -> Relative_path.Map.fold errors)
 
 let get_failed_files err phase =
   files_t_fold (fst err) ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->

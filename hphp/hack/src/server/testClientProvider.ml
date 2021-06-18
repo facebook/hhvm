@@ -25,7 +25,7 @@ module type RefsType = sig
 
   val set_persistent_client_response : 'a option -> unit
 
-  val set_push_message : ServerCommandTypes.push option -> unit
+  val push_message : ServerCommandTypes.push -> unit
 
   val get_new_client_type : unit -> connection_type option
 
@@ -39,7 +39,7 @@ module type RefsType = sig
 
   val get_persistent_client_response : unit -> 'a option
 
-  val get_push_message : unit -> ServerCommandTypes.push option
+  val get_push_messages : unit -> ServerCommandTypes.push list
 end
 
 module Refs : RefsType = struct
@@ -57,7 +57,7 @@ module Refs : RefsType = struct
 
   let persistent_client_response = Obj.magic (ref None)
 
-  let push_message = ref None
+  let push_messages : ServerCommandTypes.push list ref = ref []
 
   let set_new_client_type x = new_client_type := x
 
@@ -71,7 +71,9 @@ module Refs : RefsType = struct
 
   let set_persistent_client_response x = persistent_client_response := x
 
-  let set_push_message x = push_message := x
+  let clear_push_messages () = push_messages := []
+
+  let push_message x = push_messages := x :: !push_messages
 
   let get_new_client_type () = !new_client_type
 
@@ -85,7 +87,7 @@ module Refs : RefsType = struct
 
   let get_persistent_client_response () = !persistent_client_response
 
-  let get_push_message () = !push_message
+  let get_push_messages () = !push_messages
 
   let clear () =
     set_new_client_type None;
@@ -95,7 +97,8 @@ module Refs : RefsType = struct
     set_persistent_client_request None;
     set_persistent_client_response None;
     set_persistent_client_response None;
-    set_push_message None
+    clear_push_messages ();
+    ()
 end
 
 let clear = Refs.clear
@@ -127,9 +130,9 @@ let get_client_response = function
   | Non_persistent -> Refs.get_client_response ()
   | Persistent -> Refs.get_persistent_client_response ()
 
-let record_push_message x = Refs.set_push_message (Some x)
+let push_message x = Refs.push_message x
 
-let get_push_message = Refs.get_push_message
+let get_push_messages = Refs.get_push_messages
 
 type t = unit
 
@@ -175,7 +178,7 @@ let send_response_to_client c x =
   else
     record_client_response x c
 
-let send_push_message_to_client _ x = record_push_message x
+let send_push_message_to_client _ x = push_message x
 
 let client_has_message _ = Option.is_some (get_mocked_client_request Persistent)
 

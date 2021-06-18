@@ -41,8 +41,13 @@ let rec create_bars acc = function
   | i -> create_bars (create_bar i :: acc) (i - 1)
 
 let assert_10_diagnostics loop_output =
-  if SMap.cardinal (Test.get_diagnostics loop_output) <> 10 then
-    Test.fail "Expected push diagnostics for 10 files"
+  let error_count =
+    SMap.fold
+      (fun _key errors count -> count + List.length errors)
+      (Test.get_diagnostics loop_output)
+      0
+  in
+  if error_count <> 10 then Test.fail "Expected 10 push diagnostics"
 
 let bar_107_foo_line_3_diagnostics =
   {|
@@ -122,7 +127,7 @@ let test () =
   let disk_contents = create_bars disk_contents 200 in
   let env = Test.setup_disk env disk_contents in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
+  let env = Test.subscribe_diagnostic env ~error_limit:10 in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   (* At the beggining we get errorrs for 10 of them, and foo() is on line 3 *)

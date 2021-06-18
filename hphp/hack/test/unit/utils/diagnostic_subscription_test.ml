@@ -64,7 +64,7 @@ let test_update () =
       ~rechecked:(Relative_path.Set.singleton a_path)
       Errors.Parsing
   in
-  let ds = Diagnostic_subscription.of_id ~id:1 ~init:Errors.empty in
+  let ds = Diagnostic_subscription.of_id 1 ~initial_errors:Errors.empty in
   let priority_files = Relative_path.Set.empty in
   let (ds, diagnostics) =
     Diagnostic_subscription.update
@@ -155,7 +155,7 @@ let test_error_sources () =
         Errors.run_in_context b_path Errors.Typing (fun () ->
             error_in a_path "error from b"))
   in
-  let ds = Diagnostic_subscription.of_id ~id:1 ~init:Errors.empty in
+  let ds = Diagnostic_subscription.of_id 1 ~initial_errors:Errors.empty in
   let priority_files = Relative_path.Set.empty in
   let ds =
     Diagnostic_subscription.update

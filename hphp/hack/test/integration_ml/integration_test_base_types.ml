@@ -31,5 +31,5 @@ type ('a, 'b) loop_outputs = {
   last_actual_total_rechecked_count: int option;
   new_client_response: 'a option;
   persistent_client_response: 'b option;
-  push_message: ServerCommandTypes.push option;
+  push_messages: ServerCommandTypes.push list;
 }

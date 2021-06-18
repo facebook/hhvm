@@ -4629,7 +4629,7 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
           server_conn
           ignore
           ~desc:"connect"
-          (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
+          ServerCommandTypes.(SUBSCRIBE_DIAGNOSTIC default_subscribe_diagnostic)
       in
       (* Extract the list of file changes we're tracking *)
       let editor_open_files =

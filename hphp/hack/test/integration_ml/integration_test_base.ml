@@ -181,7 +181,7 @@ let run_loop_once :
         TestClientProvider.get_client_response Non_persistent;
       persistent_client_response =
         TestClientProvider.get_client_response Persistent;
-      push_message = TestClientProvider.get_push_message ();
+      push_messages = TestClientProvider.get_push_messages ();
     } )
 
 let prepend_root x = root ^ x
@@ -289,13 +289,14 @@ let assertSingleError expected err_list =
     in
     fail msg
 
-let subscribe_diagnostic ?(id = 4) env =
+let subscribe_diagnostic ?(id = 4) ?error_limit env =
   let (env, _) =
     run_loop_once
       env
       {
         default_loop_input with
-        persistent_client_request = Some (Request (SUBSCRIBE_DIAGNOSTIC id));
+        persistent_client_request =
+          Some (Request (SUBSCRIBE_DIAGNOSTIC { id; error_limit }));
       }
   in
   fail_on_none
@@ -448,15 +449,15 @@ let start_initial_full_check env =
   (env, total_rechecked_count - 1)
 
 let assert_no_diagnostics loop_output =
-  match loop_output.push_message with
-  | Some (DIAGNOSTIC _) -> fail "Did not expect to receive push diagnostics."
-  | Some NEW_CLIENT_CONNECTED -> fail "Unexpected push message"
+  match loop_output.push_messages with
+  | DIAGNOSTIC _ :: _ -> fail "Did not expect to receive push diagnostics."
+  | NEW_CLIENT_CONNECTED :: _ -> fail "Unexpected push message"
   | _ -> ()
 
 let assert_has_diagnostics loop_output =
-  match loop_output.push_message with
-  | Some (DIAGNOSTIC _) -> ()
-  | Some (BUSY_STATUS s) ->
+  match loop_output.push_messages with
+  | DIAGNOSTIC _ :: _ -> ()
+  | BUSY_STATUS s :: _ ->
     let msg =
       match s with
       | Needs_local_typecheck -> "Needs_local_typecheck"
@@ -469,17 +470,17 @@ let assert_has_diagnostics loop_output =
       Printf.sprintf "Expected DIAGNOSTIC, but got BUSY_STATUS %s." msg
     in
     fail msg
-  | Some NEW_CLIENT_CONNECTED ->
+  | NEW_CLIENT_CONNECTED :: _ ->
     fail "Expected DIAGNOSTIC, but got NEW_CLIENT_CONNECTED."
-  | Some (FATAL_EXCEPTION e)
-  | Some (NONFATAL_EXCEPTION e) ->
+  | FATAL_EXCEPTION e :: _
+  | NONFATAL_EXCEPTION e :: _ ->
     let msg =
       Printf.sprintf
         "Expected DIAGNOSTIC, but got NON/FATAL_EXCEPTION:\n%s"
         e.Marshal_tools.message
     in
     fail msg
-  | None -> fail "Expected to receive push diagnostics."
+  | [] -> fail "Expected to receive push diagnostics."
 
 let errors_to_string buf x =
   List.iter x ~f:(fun error ->
@@ -704,9 +705,14 @@ let errors_to_string x =
   Buffer.contents buf
 
 let get_diagnostics loop_output =
-  match loop_output.push_message with
-  | Some (DIAGNOSTIC (_, m)) -> m
-  | _ -> fail "Expected push diagnostics"
+  let diags =
+    List.filter_map loop_output.push_messages ~f:(function
+        | DIAGNOSTIC (_, m) -> Some m
+        | _ -> None)
+  in
+  match diags with
+  | m :: _ -> m
+  | [] -> fail "Expected at least one diagnostic message"
 
 let assert_diagnostics loop_output expected =
   let diagnostics = get_diagnostics loop_output in

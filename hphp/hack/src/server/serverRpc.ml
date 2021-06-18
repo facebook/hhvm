@@ -456,8 +456,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         is_complete = true;
       } )
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
-  | SUBSCRIBE_DIAGNOSTIC id ->
-    let init =
+  | SUBSCRIBE_DIAGNOSTIC { id; error_limit } ->
+    let initial_errors =
       if is_full_check_done env.full_check_status then
         env.errorl
       else
@@ -466,7 +466,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let new_env =
       {
         env with
-        diag_subscribe = Some (Diagnostic_subscription.of_id ~id ~init);
+        diag_subscribe =
+          Some (Diagnostic_subscription.of_id id ~initial_errors ?error_limit);
       }
     in
     let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in

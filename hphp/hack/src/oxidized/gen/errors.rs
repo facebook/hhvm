@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6756569e803c8b7d523498ecd0364456>>
+// @generated SignedSource<<e2d069f70bdfaf3485339730d42e014b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -179,6 +179,8 @@ pub type Error = Error_<pos::Pos, pos_or_decl::PosOrDecl>;
     ToOcamlRep
 )]
 pub struct AppliedFixme(pub pos::Pos, pub isize);
+
+pub type PerFileErrors = FileT<Error>;
 
 #[derive(
     Clone,

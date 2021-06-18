@@ -203,8 +203,8 @@ struct AutoloadDB {
       std::string_view method,
       const folly::fs::path& path) = 0;
 
-  virtual std::vector<std::string> getAttributesOfFile(
-      SQLiteTxn& txn, const folly::fs::path& path) = 0;
+  virtual std::vector<std::string>
+  getAttributesOfFile(SQLiteTxn& txn, const folly::fs::path& path) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       SQLiteTxn& txn,
@@ -236,6 +236,10 @@ struct AutoloadDB {
     std::string m_method;
     folly::fs::path m_path;
   };
+
+  virtual std::vector<MethodDeclaration>
+  getPathMethods(SQLiteTxn& txn, std::string_view path) = 0;
+
   virtual std::vector<MethodDeclaration>
   getMethodsWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
 

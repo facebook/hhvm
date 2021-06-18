@@ -21,6 +21,7 @@
 
 #include <folly/experimental/io/FsUtil.h>
 
+#include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 
 namespace HPHP {
@@ -159,6 +160,30 @@ template <typename S, SymKind k> struct Symbol {
   }
 
   StringPtr<S> m_name;
+};
+
+template <typename S> struct TypeDecl {
+  Symbol<S, SymKind::Type> m_name;
+  Path<S> m_path;
+
+  bool operator==(const TypeDecl<S>& o) const {
+    return m_name == o.m_name && m_path == o.m_path;
+  }
+
+  std::vector<Symbol<S, SymKind::Type>>
+  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
+};
+
+template <typename S> struct MethodDecl {
+  TypeDecl<S> m_type;
+  Symbol<S, SymKind::Function> m_method;
+
+  bool operator==(const MethodDecl<S>& o) const {
+    return m_type == o.m_type && m_method == o.m_method;
+  }
+
+  std::vector<Symbol<S, SymKind::Type>>
+  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
 } // namespace Facts

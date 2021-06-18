@@ -1896,6 +1896,58 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   testMap(m2);
 }
 
+TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
+  auto& m1 = make("/var/www");
+
+  // Create method `C1::m1`
+  FileFacts ff1{
+      .m_types = {TypeDetails{
+          .m_name = "C1",
+          .m_methods =
+              {
+                  MethodDetails{
+                      .m_name = "m1",
+                      .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
+              }}},
+      .m_sha1hex = kSHA};
+  folly::fs::path p1{"some/path1.php"};
+  m1.update("", "1", {p1}, {}, {ff1});
+
+  {
+    auto methods = m1.getMethodsWithAttribute("A1");
+    ASSERT_EQ(methods.size(), 1);
+    EXPECT_EQ(methods[0].m_type.m_name.slice(), "C1");
+    EXPECT_EQ(methods[0].m_method.m_name.slice(), "m1");
+  }
+
+  // Flush to the DB so m2 can see `C1::m1`
+  m1.waitForDBUpdate();
+
+  // m2 doesn't have `C1::m1` in its in-memory map but can see it in the DB
+  auto& m2 = make("/var/www");
+
+  // Rename method `C1::m1` to `C1::m2`
+  FileFacts ff2{
+      .m_types = {TypeDetails{
+          .m_name = "C1",
+          .m_methods =
+              {
+                  MethodDetails{
+                      .m_name = "m2",
+                      .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
+              }}},
+      .m_sha1hex = kSHA};
+
+  m2.update("1", "2", {p1}, {}, {ff2});
+
+  {
+    auto methods = m2.getMethodsWithAttribute("A1");
+    ASSERT_EQ(methods.size(), 1);
+    EXPECT_EQ(methods[0].m_type.m_name.slice(), "C1");
+    EXPECT_EQ(methods[0].m_method.m_name.slice(), "m2");
+  }
+}
+
 TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   auto& m1 = make("/var/www");
 

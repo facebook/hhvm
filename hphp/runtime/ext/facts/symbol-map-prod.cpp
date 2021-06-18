@@ -23,8 +23,6 @@
 namespace HPHP {
 namespace Facts {
 
-template struct TypeDecl<StringData>;
-template struct MethodDecl<StringData>;
 template struct SymbolMap<StringData>;
 
 } // namespace Facts

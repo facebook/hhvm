@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/inheritance-info.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
+#include "hphp/runtime/ext/facts/path-methods-map.h"
 #include "hphp/runtime/ext/facts/path-symbols-map.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
@@ -54,26 +55,6 @@ struct UpdateDBWorkItem {
   std::vector<folly::fs::path> m_alteredPaths;
   std::vector<folly::fs::path> m_deletedPaths;
   std::vector<FileFacts> m_alteredPathFacts;
-};
-
-template <typename S> struct TypeDecl {
-  Symbol<S, SymKind::Type> m_name;
-  Path<S> m_path;
-
-  bool operator==(const TypeDecl<S>& o) const;
-
-  std::vector<Symbol<S, SymKind::Type>>
-  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
-};
-
-template <typename S> struct MethodDecl {
-  TypeDecl<S> m_type;
-  Symbol<S, SymKind::Function> m_method;
-
-  bool operator==(const MethodDecl<S>& o) const;
-
-  std::vector<Symbol<S, SymKind::Type>>
-  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
 /**
@@ -409,6 +390,7 @@ template <typename S> struct SymbolMap {
     PathToSymbolsMap<S, SymKind::Type> m_typePath;
     PathToSymbolsMap<S, SymKind::Function> m_functionPath;
     PathToSymbolsMap<S, SymKind::Constant> m_constantPath;
+    PathToMethodsMap<S> m_methodPath;
 
     /**
      * Future chain and queue holding the work that needs to be done before the

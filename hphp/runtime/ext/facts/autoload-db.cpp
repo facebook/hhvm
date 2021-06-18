@@ -187,13 +187,14 @@ void createSchema(SQLiteTxn& txn) {
            " UNIQUE (typeid, method, attribute_name, attribute_position)"
            ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS file_attributes ("
-           " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
-           " attribute_name TEXT NOT NULL,"
-           " attribute_position INTEGER NULL,"
-           " attribute_value TEXT NULL,"
-           " UNIQUE (pathid, attribute_name, attribute_position)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS file_attributes ("
+      " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
+      " attribute_name TEXT NOT NULL,"
+      " attribute_position INTEGER NULL,"
+      " attribute_value TEXT NULL,"
+      " UNIQUE (pathid, attribute_name, attribute_position)"
+      ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -469,6 +470,10 @@ struct TypeStmts {
             "   WHERE attribute_name = @attribute_name"
             "   AND type_attributes.typeid=type_details.typeid"
             " )")}
+      , m_getMethodsInPath{db.prepare(
+            "SELECT name, method, path FROM type_details"
+            " JOIN method_attributes USING (typeid)"
+            " JOIN all_paths USING (pathid) WHERE path = @path")}
       , m_getMethodsWithAttribute{db.prepare(
             "SELECT name, method, path"
             " FROM type_details"
@@ -495,11 +500,11 @@ struct TypeStmts {
   SQLiteStmt m_getTypeAttributeArgs;
   SQLiteStmt m_getMethodAttributeArgs;
   SQLiteStmt m_getTypesWithAttribute;
+  SQLiteStmt m_getMethodsInPath;
   SQLiteStmt m_getMethodsWithAttribute;
   SQLiteStmt m_getCorrectCase;
   SQLiteStmt m_getAll;
 };
-
 
 struct FileStmts {
   explicit FileStmts(SQLite& db)
@@ -516,21 +521,20 @@ struct FileStmts {
             "  @attribute_position,"
             "  @attribute_value"
             " )")}
-      , m_getFileAttributes{db.prepare(
-            "SELECT DISTINCT attribute_name"
-            " FROM file_attributes"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE path = @path")}
+      , m_getFileAttributes{db.prepare("SELECT DISTINCT attribute_name"
+                                       " FROM file_attributes"
+                                       "  JOIN all_paths USING (pathid)"
+                                       " WHERE path = @path")}
       , m_getFileAttributeArgs{db.prepare(
             "SELECT attribute_value"
             " FROM file_attributes"
             "  JOIN all_paths USING (pathid)"
             " WHERE path = @path"
             " AND attribute_name = @attribute_name")}
-      , m_getFilesWithAttribute{db.prepare(
-            "SELECT path from all_paths"
-            " JOIN file_attributes USING (pathid)"
-            " WHERE attribute_name = @attribute_name")} {
+      , m_getFilesWithAttribute{
+            db.prepare("SELECT path from all_paths"
+                       " JOIN file_attributes USING (pathid)"
+                       " WHERE attribute_name = @attribute_name")} {
   }
   SQLiteStmt m_insertFileAttribute;
   SQLiteStmt m_getFileAttributes;
@@ -990,9 +994,8 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
-  std::vector<std::string> getAttributesOfFile(
-      SQLiteTxn& txn,
-      const folly::fs::path& path) override {
+  std::vector<std::string>
+  getAttributesOfFile(SQLiteTxn& txn, const folly::fs::path& path) override {
     auto query = txn.query(m_fileStmts.m_getFileAttributes);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
@@ -1013,6 +1016,21 @@ struct AutoloadDBImpl final : public AutoloadDB {
       results.push_back(TypeDeclaration{
           .m_type = std::string{query.getString(0)},
           .m_path = folly::fs::path{std::string{query.getString(1)}}});
+    }
+    return results;
+  }
+
+  std::vector<MethodDeclaration>
+  getPathMethods(SQLiteTxn& txn, std::string_view path) override {
+    auto query = txn.query(m_typeStmts.m_getMethodsInPath);
+    query.bindString("@path", path);
+    std::vector<MethodDeclaration> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(MethodDeclaration{
+          .m_type = std::string{query.getString(0)},
+          .m_method = std::string{query.getString(1)},
+          .m_path = folly::fs::path{std::string{query.getString(2)}}});
     }
     return results;
   }

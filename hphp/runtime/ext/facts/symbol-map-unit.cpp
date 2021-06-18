@@ -24,8 +24,6 @@
 namespace HPHP {
 namespace Facts {
 
-template struct TypeDecl<std::string>;
-template struct MethodDecl<std::string>;
 template struct SymbolMap<std::string>;
 
 } // namespace Facts

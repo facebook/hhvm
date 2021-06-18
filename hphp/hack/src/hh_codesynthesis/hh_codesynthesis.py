@@ -65,7 +65,10 @@ class ClingoContext:
 def generate_logic_rules() -> List[str]:
     rules: List[str] = []
 
-    if ClingoContext.min_depth > ClingoContext.number_of_nodes:
+    if (
+        ClingoContext.number_of_nodes > 0
+        and ClingoContext.min_depth > ClingoContext.number_of_nodes
+    ):
         raise RuntimeError("Received unreasonable parameters.")
 
     # Creating n symbols.

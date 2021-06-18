@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-open Type_validator
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
@@ -18,7 +17,7 @@ module Nast = Aast
 
 let validator =
   object (this)
-    inherit type_validator as super
+    inherit Type_validator.type_validator as super
 
     method! on_tapply acc r (p, h) tyl =
       if String.equal h SN.Classes.cTypename then
@@ -27,7 +26,7 @@ let validator =
         this#invalid acc r "a classname"
       else if
         String.equal h SN.Typehints.wildcard
-        && not (Env.get_allow_wildcards acc.env)
+        && not (Env.get_allow_wildcards acc.Type_validator.env)
       then
         this#invalid acc r "a wildcard"
       else
@@ -37,7 +36,7 @@ let validator =
       (* Ignoring type aguments: If there were any, then this generic variable isn't allowed to be
         reified anyway *)
       (* TODO(T70069116) actually implement that check *)
-      match Env.get_reified acc.env t with
+      match Env.get_reified acc.Type_validator.env t with
       | Nast.Erased -> this#invalid acc r "not reified"
       | Nast.SoftReified -> this#invalid acc r "soft reified"
       | Nast.Reified -> acc
@@ -63,12 +62,13 @@ let validator =
 
     method! on_taccess acc r (root, ids) =
       let acc =
-        match acc.reification with
-        | Unresolved ->
+        match acc.Type_validator.reification with
+        | Type_validator.Unresolved ->
           (match get_node root with
-          | Tthis -> { acc with reification = Resolved }
+          | Tthis ->
+            { acc with Type_validator.reification = Type_validator.Resolved }
           | _ -> this#on_type acc root)
-        | Resolved -> acc
+        | Type_validator.Resolved -> acc
       in
       super#on_taccess acc r (root, ids)
 

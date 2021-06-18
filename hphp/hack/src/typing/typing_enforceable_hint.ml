@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-open Type_validator
 module Env = Tast_env
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
@@ -17,7 +16,7 @@ module SN = Naming_special_names
 
 let validator =
   object (this)
-    inherit type_validator as super
+    inherit Type_validator.type_validator as super
 
     (* Only comes about because naming has reported an error and left Hany *)
     method! on_tany acc _ = acc
@@ -61,25 +60,28 @@ let validator =
     method! on_tgeneric acc r name _tyargs =
       (* If we allow higher-kinded generics to be enforceable at some point,
          handle type arguments here *)
-      if acc.like_context then
+      if acc.Type_validator.like_context then
         acc
       else
         this#check_generic acc r name
 
     method! on_newtype acc r _ _ _ _ =
-      if acc.like_context then
+      if acc.Type_validator.like_context then
         acc
       else
         this#invalid acc r "a `newtype`"
 
     method! on_tlike acc r ty =
-      if TypecheckerOptions.like_casts (Tast_env.get_tcopt acc.env) then
-        super#on_tlike { acc with like_context = true } r ty
+      if
+        TypecheckerOptions.like_casts
+          (Tast_env.get_tcopt acc.Type_validator.env)
+      then
+        super#on_tlike { acc with Type_validator.like_context = true } r ty
       else
         this#invalid acc r "a like type"
 
     method! on_class acc r cls tyl =
-      match Env.get_class acc.env (snd cls) with
+      match Env.get_class acc.Type_validator.env (snd cls) with
       | Some tc ->
         let tparams = Cls.tparams tc in
         begin
@@ -99,7 +101,7 @@ let validator =
                         acc
                       else if
                         Aast.(equal_reify_kind tparam.tp_reified Reified)
-                        || (acc.like_context && covariant)
+                        || (acc.Type_validator.like_context && covariant)
                       then
                         this#on_type acc targ
                       else
@@ -109,7 +111,7 @@ let validator =
                         let error_message =
                           if
                             TypecheckerOptions.like_casts
-                              (Tast_env.get_tcopt acc.env)
+                              (Tast_env.get_tcopt acc.Type_validator.env)
                           then
                             error_message
                             ^ ", except in a like cast when the corresponding type parameter is covariant"
@@ -132,8 +134,8 @@ let validator =
         && Int.equal (List.length tyl) 1
       then
         let ty = List.hd_exn tyl in
-        this#on_type { acc with like_context = true } ty
-      else if acc.like_context then
+        this#on_type { acc with Type_validator.like_context = true } ty
+      else if acc.Type_validator.like_context then
         super#on_alias acc r id tyl ty
       else
         this#invalid
@@ -142,20 +144,20 @@ let validator =
           "a type with generics, because generics are erased at runtime"
 
     method! on_tvarray acc r tk =
-      if acc.like_context then
+      if acc.Type_validator.like_context then
         this#on_type acc tk
       else
         this#invalid acc r "an array type"
 
     method! on_tdarray acc r tk tv =
-      if acc.like_context then
+      if acc.Type_validator.like_context then
         let acc = this#on_type acc tk in
         this#on_type acc tv
       else
         this#invalid acc r "an array type"
 
     method! on_tvarray_or_darray acc r tk tv =
-      if acc.like_context then
+      if acc.Type_validator.like_context then
         let acc = this#on_type acc tk in
         this#on_type acc tv
       else
@@ -201,7 +203,8 @@ let validator =
         cannot be enforcable *)
       (* TODO(T70069116) implement enforcability check *)
       match
-        (Env.get_reified acc.env name, Env.get_enforceable acc.env name)
+        ( Env.get_reified acc.Type_validator.env name,
+          Env.get_enforceable acc.Type_validator.env name )
       with
       | (Aast.Erased, _) ->
         this#invalid acc r "an erased generic type parameter"

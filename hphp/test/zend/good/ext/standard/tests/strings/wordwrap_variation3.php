@@ -48,7 +48,7 @@ $values =  varray [
   FALSE,
 
   // objects
-  new stdclass(),
+  new stdClass(),
 
   // empty string
   "",

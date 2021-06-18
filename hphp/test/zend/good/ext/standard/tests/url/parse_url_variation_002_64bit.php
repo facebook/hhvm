@@ -52,7 +52,7 @@ $values = varray[
       'string',
 
       // object data
-      new stdclass()
+      new stdClass()
 ];
 
 // loop through each element of the array for url_component

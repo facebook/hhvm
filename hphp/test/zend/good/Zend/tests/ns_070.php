@@ -3,11 +3,11 @@
 namespace foo;
 
 class bar {
-    public function __construct(\stdclass $x = NULL) {
+    public function __construct(\stdClass $x = NULL) {
         \var_dump($x);
     }
 }
 <<__EntryPoint>> function main(): void {
-new bar(new \stdclass);
+new bar(new \stdClass);
 new bar(null);
 }

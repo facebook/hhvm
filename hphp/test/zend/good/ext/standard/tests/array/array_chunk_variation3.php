@@ -44,7 +44,7 @@ $values = varray[
         'string',
 
         // object data
-/*16*/  new stdclass(),
+/*16*/  new stdClass(),
 
 ];
 

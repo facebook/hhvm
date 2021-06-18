@@ -27,7 +27,7 @@ $invalid_args = varray [
   10.5,
   true,
   varray[1,2,3],
-  new stdclass,
+  new stdClass,
 ];
 /* loop to test fputcsv() with different invalid type of args */
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {

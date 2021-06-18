@@ -10,7 +10,7 @@ $scalar_variables = varray[
   -45678,
   0x5FF,  // hexadecimal as integer
   0X566,
-  -0xAAF, 
+  -0xAAF,
   -0XCCF,
   01234,  // octal as integer
   -0126,
@@ -30,8 +30,8 @@ $scalar_variables = varray[
   " ",
   ' ',
   "string",
-  'string', 
-  "0",  // numeric as string  
+  'string',
+  "0",  // numeric as string
   "40",
   "50.696",
   "0x534",
@@ -42,7 +42,7 @@ $scalar_variables = varray[
   true,
   false
 ];
-/* loop through each valid scalar variables in $scalar_variables 
+/* loop through each valid scalar variables in $scalar_variables
    and see the working of is_scalar(), expected output: bool(true)
 */
 $loop_counter = 1;
@@ -53,7 +53,7 @@ foreach($scalar_variables as $scalar) {
 
 echo "\n*** Testing possible variations ***\n";
 
-// resources 
+// resources
 $fp = fopen(__FILE__, "r");
 $dfp = opendir(".");
 
@@ -61,7 +61,7 @@ $variation_array = varray[
   NULL,
   null,
 
-  varray[],  // arrays 
+  varray[],  // arrays
   varray[NULL],
   varray[true],
   varray[0],
@@ -70,10 +70,10 @@ $variation_array = varray[
   $fp,  // resources
   $dfp,
 
-  new stdclass, // object
-];  
+  new stdClass, // object
+];
 
-/* loop through each element of $variation_array to see the 
+/* loop through each element of $variation_array to see the
    working of is_scalar on non-scalar values, expected output: bool(false)
 */
 $loop_counter = 1;
@@ -88,9 +88,9 @@ try { var_dump( is_scalar() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 
 // Arguments more than expected
 try { var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( is_scalar( new stdclass, new stdclass) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_scalar( new stdClass, new stdClass) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-echo "Done\n";  
+echo "Done\n";
 
 // close the resources used
 fclose($fp);

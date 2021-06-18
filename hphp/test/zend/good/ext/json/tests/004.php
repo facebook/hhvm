@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main(): void {
-  $a = new stdclass;
+  $a = new stdClass;
   $a->prop = $a;
 
   var_dump($a);

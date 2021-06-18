@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $a = varray[1,2,3];
 
-$o = new stdclass;
+$o = new stdClass;
 $o->prop = "value";
 
 $c = $o + $a;

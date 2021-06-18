@@ -4,7 +4,7 @@ class foo {
     public $x = varray[];
     public function __construct() {
         $h = varray[];
-        $h[] = new stdclass;
+        $h[] = new stdClass;
         $this->x = $h;
     }
     public function __invoke() {

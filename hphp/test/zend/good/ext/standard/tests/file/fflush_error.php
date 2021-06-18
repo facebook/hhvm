@@ -18,7 +18,7 @@ $filename = __SystemLib\hphp_test_tmppath('fflush_error.tmp');
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
-   
+
 try { var_dump( fflush($file_handle, $file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 fclose($file_handle);
 
@@ -30,7 +30,7 @@ $invalid_args = varray [
   10.5,
   true,
   varray[1,2,3],
-  new stdclass
+  new stdClass
 ];
 
 /* loop to test fflush() with different invalid type of args */

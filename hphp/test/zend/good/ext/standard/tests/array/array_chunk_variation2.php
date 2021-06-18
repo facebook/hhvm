@@ -51,7 +51,7 @@ $values = varray [
         'string',
 
         // object data
-/*21*/  new stdclass(),
+/*21*/  new stdClass(),
 
 ];
 

@@ -79,7 +79,7 @@ $not_bool_types = varray [
   -1E7,
 
   /* objects */
-  new stdclass,
+  new stdClass,
 
   /* resources */
   $fp,

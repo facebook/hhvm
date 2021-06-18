@@ -9,5 +9,5 @@ class bar {
 }
 <<__EntryPoint>> function main(): void {
 new bar(null);
-new bar(new \stdclass);
+new bar(new \stdClass);
 }

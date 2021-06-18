@@ -14,7 +14,7 @@ class C {
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$object = new stdclass();
+$object = new stdClass();
 
 
 //array of values to iterate over

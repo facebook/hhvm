@@ -4,7 +4,7 @@ $ctxs = varray[
 	NULL,
 	'bogus',
 	123,
-	new stdclass,
+	new stdClass,
 	varray['a'],
 	stream_context_create(),
 	stream_context_create(darray[0 => 'file']),

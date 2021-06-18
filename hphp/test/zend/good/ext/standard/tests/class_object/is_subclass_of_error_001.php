@@ -10,7 +10,7 @@ echo "*** Testing is_subclass_of() : error conditions ***\n";
 
 //Test is_subclass_of with one more than the expected number of arguments
 echo "\n-- Testing is_subclass_of() function with more than expected no. of arguments --\n";
-$object = new stdclass();
+$object = new stdClass();
 $class_name = 'string_val';
 $allow_string = false;
 $extra_arg = 10;
@@ -27,7 +27,7 @@ try { var_dump( is_subclass_of($object, $class_name, $object) ); } catch (Except
 
 // Testing is_subclass_of with one less than the expected number of arguments
 echo "\n-- Testing is_subclass_of() function with less than expected no. of arguments --\n";
-$object = new stdclass();
+$object = new stdClass();
 try { var_dump( is_subclass_of($object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";

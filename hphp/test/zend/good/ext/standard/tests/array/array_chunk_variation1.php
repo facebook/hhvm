@@ -50,7 +50,7 @@ $values = varray[
         'string',
 
         // object data
-/*20*/  new stdclass(),
+/*20*/  new stdClass(),
 
 ];
 

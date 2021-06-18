@@ -12,6 +12,6 @@ function error()
     var_dump($a);
 }
 <<__EntryPoint>> function main(): void {
-blah (new StdClass);
+blah (new stdClass);
 echo "ALIVE!\n";
 }

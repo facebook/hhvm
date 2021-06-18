@@ -20,6 +20,6 @@ foreach($regex_array as $regex_value) {
     print "\nArg value is $text\n";
     var_dump(preg_replace($regex_value, $replace, $subject));
 }
-$regex_value = new stdclass(); //Object
+$regex_value = new stdClass(); //Object
 var_dump(preg_replace($regex_value, $replace, $subject));
 }

@@ -53,7 +53,7 @@ $values = darray[
       "''" => '',
 
       // object data
-      "new stdclass()" => new stdclass()
+      "new stdClass()" => new stdClass()
 ];
 
 // loop through each element of the array for info

@@ -13,7 +13,7 @@ echo "\n-- Testing xml_set_object() function with more than expected no. of argu
 
 //WARNING: Unable to initialise parser of type resource
 
-$obj = new stdclass();
+$obj = new stdClass();
 $extra_arg = 10;
 try { var_dump( xml_set_object(null, $obj, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

@@ -7,5 +7,5 @@ class foo {
 <<__EntryPoint>> function main(): void {
 $foo = new foo;
 $foo->bar($foo); // Ok!
-$foo->bar(new \stdclass); // Error, ok!
+$foo->bar(new \stdClass); // Error, ok!
 }

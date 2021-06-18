@@ -11,7 +11,7 @@ $a = varray[
 	NULL,
 	true,
 	false,
-	new stdclass,
+	new stdClass,
 	varray[],
 	-PHP_INT_MAX-1,
 	(string)(-PHP_INT_MAX-1),

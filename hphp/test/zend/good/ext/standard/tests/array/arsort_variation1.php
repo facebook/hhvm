@@ -54,7 +54,7 @@ $unexpected_values = darray [
   18 => 'string',
 
   // object data
-  19 => new stdclass(),
+  19 => new stdClass(),
 
   // resource variable
   20 => $fp

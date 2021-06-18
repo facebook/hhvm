@@ -55,7 +55,7 @@ $values = varray[
       'String',
 
       // object data
-      new stdclass(),
+      new stdClass(),
 
 
 ];

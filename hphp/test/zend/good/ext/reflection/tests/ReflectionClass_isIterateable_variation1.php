@@ -9,7 +9,7 @@ function dump_iterateable($obj)
 }
 <<__EntryPoint>> function main(): void {
 $basicClass = new BasicClass();
-$stdClass = new StdClass();
+$stdClass = new stdClass();
 
 dump_iterateable($basicClass);
 dump_iterateable($stdClass);

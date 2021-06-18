@@ -48,7 +48,7 @@ $values =  varray [
   FALSE,
 
   // objects
-  new stdclass(),
+  new stdClass(),
 
   // Null
   NULL,
@@ -87,7 +87,7 @@ for($index = 0; $index < count($values); $index ++) {
   $counter ++;
 }
 
-// close the resource 
+// close the resource
 fclose($fp);
 
 echo "Done\n";

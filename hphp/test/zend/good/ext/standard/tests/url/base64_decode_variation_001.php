@@ -56,7 +56,7 @@ $values =  darray [
     "''" => '',
 
     // object data
-    "stdClass object" => new stdclass(),
+    "stdClass object" => new stdClass(),
 
 
 

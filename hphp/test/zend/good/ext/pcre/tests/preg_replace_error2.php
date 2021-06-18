@@ -15,7 +15,7 @@ foreach($replace as $value) {
     print "\nArg value is: $text\n";
     var_dump(preg_replace($regex, $value, $subject));
 }
-$value = new stdclass(); //Object
+$value = new stdClass(); //Object
 var_dump(preg_replace($regex, $value, $subject));
 echo "Done";
 }

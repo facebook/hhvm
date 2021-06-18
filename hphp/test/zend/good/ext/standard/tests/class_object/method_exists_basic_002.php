@@ -8,14 +8,14 @@
 echo " ---(Internal classes, using string class name)---\n";
 echo "Does exception::getmessage exist? ";
 var_dump(method_exists("exception", "getMessage"));
-echo "Does stdclass::nonexistent exist? ";
-var_dump(method_exists("stdclass", "nonexistent"));
+echo "Does stdClass::nonexistent exist? ";
+var_dump(method_exists("stdClass", "nonexistent"));
 
 echo "\n ---(Internal classes, using class instance)---\n";
 echo "Does exception::getmessage exist? ";
 var_dump(method_exists(new exception, "getMessage"));
-echo "Does stdclass::nonexistent exist? ";
-var_dump(method_exists(new stdclass, "nonexistent"));
+echo "Does stdClass::nonexistent exist? ";
+var_dump(method_exists(new stdClass, "nonexistent"));
 
 echo "Done";
 }

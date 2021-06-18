@@ -12,7 +12,7 @@ try { var_dump (array_splice()); } catch (Exception $e) { echo "\n".'Warning: '.
 try { var_dump (array_splice(inout $int, )); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump (array_splice(inout $array, )); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump (array_splice(inout $int, $int));
-$obj= new stdclass;
+$obj= new stdClass;
 var_dump (array_splice(inout $obj, 0,1));
 echo "Done\n";
 }

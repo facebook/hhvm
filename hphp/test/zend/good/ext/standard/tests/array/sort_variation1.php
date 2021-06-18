@@ -54,7 +54,7 @@ $unexpected_values = varray [
        'string',
 
        // object data
-/*20*/ new stdclass(),
+/*20*/ new stdClass(),
 
        // resource variable
 /*23*/ $fp

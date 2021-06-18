@@ -11,7 +11,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "\n\nArray containing same object twice:\n";
-$obj = new stdclass;
+$obj = new stdClass;
 $a = darray[];
 $a[0] = $obj;
 $a[1] = $a[0];
@@ -28,8 +28,8 @@ $ua[0] = "a0.changed";
 var_dump($ua);
 
 echo "\n\nObject containing same object twice:";
-$obj = new stdclass;
-$contaner = new stdclass;
+$obj = new stdClass;
+$contaner = new stdClass;
 $contaner->a = $obj;
 $contaner->b = $contaner->a;
 var_dump($contaner);

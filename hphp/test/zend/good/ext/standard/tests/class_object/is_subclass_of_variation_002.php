@@ -13,7 +13,7 @@ set_error_handler(test_error_handler<>);
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$object = new stdclass();
+$object = new stdClass();
 
 
 //array of values to iterate over
@@ -54,7 +54,7 @@ $values = varray[
       '',
 
       // object data
-      new stdclass(),
+      new stdClass(),
 
 
 ];

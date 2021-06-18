@@ -19,7 +19,7 @@ var_dump(filter_var_array(darray["aaa"=>"bbb"], 1000000));
 var_dump(filter_var_array(darray["aaa"=>"bbb"], ""));
 
 echo "-- (4)\n";
-var_dump(filter_var_array(varray[], new stdclass));
+var_dump(filter_var_array(varray[], new stdClass));
 var_dump(filter_var_array(varray[], varray[]));
 var_dump(filter_var_array(varray[], darray["var_name"=>1]));
 var_dump(filter_var_array(varray[], darray["var_name"=>-1]));

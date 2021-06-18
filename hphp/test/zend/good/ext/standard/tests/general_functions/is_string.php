@@ -4,7 +4,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_string() with valid string values ***\n";
-// different valid strings 
+// different valid strings
 
 /* string created using Heredoc (<<<) */
 $heredoc_string = <<<EOT
@@ -14,7 +14,7 @@ EOT;
 /* heredoc string with only numerics */
 $heredoc_numeric_string = <<<EOT
 123456 3993
-4849 string 
+4849 string
 EOT;
 /* null heardoc string */
 $heredoc_empty_string = <<<EOT
@@ -47,7 +47,7 @@ $strings = varray[
   $heredoc_empty_string,
   $heredoc_null_string
 ];
-/* loop to check that is_string() recognizes different 
+/* loop to check that is_string() recognizes different
    strings, expected output bool(true) */
 $loop_counter = 1;
 foreach ($strings as $string ) {
@@ -61,7 +61,7 @@ echo "\n*** Testing is_string() on non string values ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// other types in a array 
+// other types in a array
 $not_strings = varray [
   /* integers */
   0,
@@ -94,7 +94,7 @@ $not_strings = varray [
   -1E7,
 
   /* objects */
-  new stdclass,
+  new stdClass,
 
   /* resources */
   $fp,
@@ -114,7 +114,7 @@ $not_strings = varray [
   varray[1,2,3,4],
   darray[1 => "One", "two" => 2],
 ];
-/* loop through the $not_strings to see working of 
+/* loop through the $not_strings to see working of
    is_string() on non string types, expected output bool(false) */
 $loop_counter = 1;
 foreach ($not_strings as $type ) {
@@ -126,9 +126,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 try { var_dump( is_string() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-//arguments more than expected 
+//arguments more than expected
 try { var_dump( is_string("string", "test") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
- 
+
 echo "Done\n";
 
 // close the resources used

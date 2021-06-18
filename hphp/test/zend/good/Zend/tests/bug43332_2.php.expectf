@@ -1,2 +1,2 @@
 
-Fatal error: Class undefined: foobar\stdclass in %s/bug43332_2.php on line 10
+Fatal error: Class undefined: foobar\stdClass in %s/bug43332_2.php on line 10

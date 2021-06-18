@@ -49,7 +49,7 @@ function main(): void {
 
 
     // object data
-    new stdclass(),
+    new stdClass(),
   ];
 
   // loop through each element of the array for sig

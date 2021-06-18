@@ -10,7 +10,7 @@ echo "*** Testing get_class_vars() : error conditions ***\n";
 
 //Test get_class_vars with one more than the expected number of arguments
 echo "\n-- Testing get_class_vars() function with more than expected no. of arguments --\n";
-$obj = new stdclass();
+$obj = new stdClass();
 $extra_arg = 10;
 try { var_dump(get_class_vars($obj,$extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

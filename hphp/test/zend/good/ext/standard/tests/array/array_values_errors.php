@@ -7,7 +7,7 @@ try { var_dump( array_values(varray[1,2,3], "") ); } catch (Exception $e) { echo
 /* Invalid types */
 var_dump( array_values("") );  // Empty string
 var_dump( array_values(100) );  // Integer
-var_dump( array_values(new stdclass) );  // object
+var_dump( array_values(new stdClass) );  // object
 
 echo "Done\n";
 }

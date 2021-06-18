@@ -5,7 +5,7 @@ class bar {
     public $z;
 
     public function __construct() {
-        $this->z = new stdclass;
+        $this->z = new stdClass;
     }
     public function getZ() {
         return $this->z;

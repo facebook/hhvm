@@ -70,7 +70,7 @@ function main(): void {
   $concreteClass_object = new concreteClass();
 
   $valid_objects = varray[
-    new stdclass,
+    new stdClass,
     new foo,
     new concreteClass,
     new Value,

@@ -64,7 +64,7 @@ $varient_arrays = varray [
   1e5,
 
   /* objects */
-  new stdclass,
+  new stdClass,
 
   /* resources */
   $fp,

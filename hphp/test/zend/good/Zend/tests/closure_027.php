@@ -7,7 +7,7 @@ function test(closure $a) {
 <<__EntryPoint>>
 function main(): void {
   test(function() {
-    return new stdclass;
+    return new stdClass;
   });
 
   test(function() {});
@@ -19,5 +19,5 @@ function main(): void {
     var_dump($e->getMessage());
   }
 
-  test(new stdclass);
+  test(new stdClass);
 }

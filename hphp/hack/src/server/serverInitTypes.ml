@@ -107,20 +107,21 @@ type loaded_info = {
   naming_table_fallback_fn: string option;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
-  mergebase: Hg.hg_rev option Future.t;
+  mergebase: Hg.hg_rev option Future.t; [@opaque]
   (* Files changed between the loaded naming table saved state and current revision. *)
-  dirty_naming_files: Relative_path.Set.t;
+  dirty_naming_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
   (* Files changed between saved state revision and current public merge base *)
-  dirty_master_files: Relative_path.Set.t;
+  dirty_master_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
   (* Files changed between public merge base and current revision *)
-  dirty_local_files: Relative_path.Set.t;
-  old_naming_table: Naming_table.t;
-  old_errors: SaveStateServiceTypes.saved_state_errors;
+  dirty_local_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
+  old_naming_table: Naming_table.t; [@opaque]
+  old_errors: SaveStateServiceTypes.saved_state_errors; [@opaque]
   state_distance: int option;
   (* The manifold path for naming table saved state, to be used by remote type checker
      for downloading the naming table in the case of a saved-state init *)
   naming_table_manifold_path: string option;
 }
+[@@deriving show]
 
 (* Laziness *)
 type lazy_level =

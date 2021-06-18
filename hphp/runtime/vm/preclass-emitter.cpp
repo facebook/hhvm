@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/native.h"
@@ -265,20 +264,6 @@ void PreClassEmitter::addTraitAliasRule(
   m_traitAliasRules.push_back(rule);
 }
 
-void PreClassEmitter::commit(RepoTxn& txn) const {
-  Repo& repo = Repo::get();
-  PreClassRepoProxy& pcrp = repo.pcrp();
-  int repoId = m_ue.m_repoId;
-  int64_t usn = m_ue.m_sn;
-  pcrp.insertPreClass[repoId]
-      .insert(*this, txn, usn, m_id, m_name);
-
-  for (MethodVec::const_iterator it = m_methods.begin();
-       it != m_methods.end(); ++it) {
-    (*it)->commit(txn);
-  }
-}
-
 const StaticString
   s_nativedata("__nativedata"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
@@ -486,81 +471,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     }
 }
 
-//=============================================================================
-// PreClassRepoProxy.
-
-PreClassRepoProxy::PreClassRepoProxy(Repo& repo)
-    : RepoProxy(repo),
-      insertPreClass{InsertPreClassStmt(repo, 0), InsertPreClassStmt(repo, 1)},
-      getPreClasses{GetPreClassesStmt(repo, 0), GetPreClassesStmt(repo, 1)}
-{}
-
-PreClassRepoProxy::~PreClassRepoProxy() {
-}
-
-void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} "
-      "(unitSn INTEGER, preClassId INTEGER, name TEXT, "
-      " extraData BLOB, PRIMARY KEY (unitSn, preClassId));",
-      m_repo.table(repoId, "PreClass"));
-    txn.exec(createQuery);
-  }
-}
-
-void PreClassRepoProxy::InsertPreClassStmt
-                      ::insert(const PreClassEmitter& pce, RepoTxn& txn,
-                               int64_t unitSn, Id preClassId,
-                               const StringData* name) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} "
-      "VALUES(@unitSn, @preClassId, @name, @extraData);",
-      m_repo.table(m_repoId, "PreClass"));
-    txn.prepare(*this, insertQuery);
-  }
-
-  auto const nm = StripIdFromAnonymousClassName(name->slice());
-  BlobEncoder extraBlob{pce.useGlobalIds()};
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindStringPiece("@name", nm);
-  const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
-  query.bindBlob("@extraData", extraBlob, /* static */ true);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassesStmt
-                      ::get(UnitEmitter& ue) {
-  auto txn = RepoTxn{m_repo.begin()};
-  if (!prepared()) {
-    auto selectQuery = folly::sformat(
-      "SELECT preClassId, name, extraData "
-      "FROM {} "
-      "WHERE unitSn == @unitSn ORDER BY preClassId ASC;",
-      m_repo.table(m_repoId, "PreClass"));
-    txn.prepare(*this, selectQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.m_sn);
-  do {
-    query.step();
-    if (query.row()) {
-      Id preClassId;          /**/ query.getId(0, preClassId);
-      std::string name;       /**/ query.getStdString(1, name);
-      BlobDecoder extraBlob = /**/ query.getBlob(2, ue.useGlobalIds());
-      PreClassEmitter* pce = ue.newPreClassEmitter(name);
-      pce->serdeMetaData(extraBlob);
-      if (!SystemLib::s_inited) {
-        assertx(pce->attrs() & AttrPersistent);
-        assertx(pce->attrs() & AttrUnique);
-      }
-      assertx(pce->id() == preClassId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
+template void PreClassEmitter::serdeMetaData<>(BlobDecoder&);
+template void PreClassEmitter::serdeMetaData<>(BlobEncoder&);
 
 } // HPHP

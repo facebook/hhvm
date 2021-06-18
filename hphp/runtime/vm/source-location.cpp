@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/source-location.h"
 
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/functional.h"

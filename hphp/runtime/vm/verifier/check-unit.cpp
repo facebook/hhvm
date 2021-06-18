@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"

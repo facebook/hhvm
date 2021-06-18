@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
 namespace HPHP {

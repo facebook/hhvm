@@ -79,8 +79,8 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -169,8 +169,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Forward declarations.
-
-void initialize_repo();
 
 /*
  * XXX: VM process initialization is handled through a function
@@ -1302,7 +1300,6 @@ int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
     try {
-      initialize_repo();
       ret_code = execute_program_impl(argc, argv);
     } catch (const Exception& e) {
       Logger::Error("Uncaught exception: %s", e.what());
@@ -2115,13 +2112,12 @@ static int execute_program_impl(int argc, char** argv) {
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
     std::string const cliFile = !po.file.empty() ? po.file :
-                                new_argv[0] ? new_argv[0] : "";
+                                 new_argv[0] ? new_argv[0] : "";
     if (po.mode != "debug" && po.mode != "eval" && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
       return 1;
     }
-    Repo::setCliFile(cliFile);
 
     if (po.mode == "eval" && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a command to run with mode eval\n";

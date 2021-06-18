@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/record.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 
 #include <vector>
 
@@ -106,8 +105,6 @@ struct RecordEmitter {
 
   Id id() const { return m_id; }
 
-  void commit(RepoTxn& txn) const; // throws(RepoExc)
-
   PreRecordDesc* create(Unit& unit) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
@@ -142,29 +139,6 @@ struct RecordEmitter {
     Id m_id;
     UserAttributeMap m_userAttributes;
     FieldMap::Builder m_fieldMap;
-};
-
-struct RecordRepoProxy : RepoProxy {
-  friend struct PreRecordDesc;
-  friend struct RecordEmitter;
-
-  explicit RecordRepoProxy(Repo& repo);
-  ~RecordRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-
-  struct InsertRecordStmt : public RepoProxy::Stmt {
-    InsertRecordStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const RecordEmitter& re, RepoTxn& txn, int64_t unitSn,
-                Id recordId, const StringData* name); // throws(RepoExc)
-  };
-
-  struct GetRecordsStmt : public RepoProxy::Stmt {
-    GetRecordsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-
-  InsertRecordStmt insertRecord[RepoIdCount];
-  GetRecordsStmt getRecords[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

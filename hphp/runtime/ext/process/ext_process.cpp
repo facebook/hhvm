@@ -45,8 +45,9 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/extern-compiler.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -197,6 +198,40 @@ int64_t HHVM_FUNCTION(pcntl_alarm,
   return alarm(seconds);
 }
 
+namespace {
+
+static SimpleMutex s_lock;
+
+bool cantPrefork() {
+  if (num_1g_pages() > 0 || RuntimeOption::EvalFileBackedColdArena) {
+    // We put data on shared pages, which won't work with fork().
+    return true;
+  }
+  s_lock.lock();
+  XboxServer::Stop();
+  if (AsyncFuncImpl::count()) {
+    XboxServer::Restart();
+    s_lock.unlock();
+    return true;
+  }
+  folly::SingletonVault::singleton()->destroyInstances();
+  return false;
+}
+
+void postfork(pid_t pid) {
+  folly::SingletonVault::singleton()->reenableInstances();
+  RepoFile::postfork();
+  XboxServer::Restart();
+  if (pid == 0) {
+    Logger::ResetPid();
+    new (&s_lock) SimpleMutex();
+  } else {
+    s_lock.unlock();
+  }
+}
+
+}
+
 void HHVM_FUNCTION(pcntl_exec,
                    const String& path,
                    const Array& args /* = null_array */,
@@ -204,7 +239,7 @@ void HHVM_FUNCTION(pcntl_exec,
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
-  if (Repo::prefork()) {
+  if (cantPrefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;
   }
@@ -246,7 +281,7 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
-  if (Repo::prefork()) {
+  if (cantPrefork()) {
     raise_error("forking is disallowed in multi-threaded mode");
     return -1;
   }
@@ -254,7 +289,7 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
   std::cout.flush();
   std::cerr.flush();
   pid_t pid = fork();
-  Repo::postfork(pid);
+  postfork(pid);
   if (pid == 0) {
     postfork_restart_handler_thread();
     compilers_detach_after_fork();

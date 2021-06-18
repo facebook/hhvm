@@ -45,7 +45,6 @@
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"

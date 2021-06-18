@@ -22,7 +22,7 @@
 
 #include <folly/Format.h>
 
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 

@@ -121,7 +121,6 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
  */
 struct Func final {
   friend struct FuncEmitter;
-  friend struct FuncRepoProxy;
   friend struct UnitEmitter;
 
 #ifndef USE_LOWPTR

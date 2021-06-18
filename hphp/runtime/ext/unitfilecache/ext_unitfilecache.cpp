@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/extern-compiler.h"
 
 #include "hphp/util/build-info.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/sqlite-wrapper.h"
 
 #include <boost/algorithm/string/predicate.hpp>

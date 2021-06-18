@@ -25,8 +25,10 @@
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
@@ -35,8 +37,6 @@
 #include "hphp/util/synchronizable.h"
 
 namespace HPHP {
-
-struct UnitEmitter;
 
 enum class Op : uint16_t;
 struct OpHash {

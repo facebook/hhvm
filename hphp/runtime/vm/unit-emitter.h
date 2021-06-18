@@ -29,8 +29,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/repo-helpers.h"
-#include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -65,8 +63,6 @@ bool needs_extended_line_table();
  * runtime Units.
  */
 struct UnitEmitter {
-  friend struct UnitRepoProxy;
-
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
@@ -78,16 +74,6 @@ struct UnitEmitter {
   ~UnitEmitter();
 
   void setSha1(const SHA1& sha1) { m_sha1 = sha1; }
-  /*
-   * Commit this unit to a repo.
-   */
-  void commit(UnitOrigin unitOrigin, bool usePreAllocatedUnitSn);
-
-  /*
-   * Insert this unit in a repo as part of transaction `txn'.
-   */
-  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn,
-                    bool usePreAllocatedUnitSn);
 
   /*
    * Instatiate a runtime Unit*.
@@ -266,7 +252,6 @@ struct UnitEmitter {
   // Data members.
 
 public:
-  int m_repoId{-1};
   int64_t m_sn{-1};
   const StringData* m_filepath{nullptr};
 
@@ -338,110 +323,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Proxy for converting in-repo unit representations into UnitEmitters.
- */
-struct UnitRepoProxy : public RepoProxy {
-  friend struct Unit;
-  friend struct UnitEmitter;
-
-  explicit UnitRepoProxy(Repo& repo);
-  ~UnitRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  std::unique_ptr<Unit> load(const folly::StringPiece name, const SHA1& sha1,
-                             const Native::FuncTable&);
-  std::unique_ptr<UnitEmitter> loadEmitter(const folly::StringPiece name,
-                                           const SHA1& sha1,
-                                           const Native::FuncTable&);
-
-  struct InsertUnitTypeAliasStmt : public RepoProxy::Stmt {
-    InsertUnitTypeAliasStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const UnitEmitter& ue,
-                RepoTxn& txn,
-                int64_t unitSn,
-                Id typeAliasId,
-                const TypeAliasEmitter& te); // throws(RepoExc)
-  };
-  struct GetUnitTypeAliasesStmt : public RepoProxy::Stmt {
-    GetUnitTypeAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-
-  struct InsertUnitConstantStmt : public RepoProxy::Stmt {
-    InsertUnitConstantStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const UnitEmitter& ue,
-                RepoTxn& txn,
-                int64_t unitSn,
-                Id constantId,
-                const Constant& constant); // throws(RepoExc)
-  };
-  struct GetUnitConstantsStmt : public RepoProxy::Stmt {
-    GetUnitConstantsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-
-  struct InsertUnitStmt : public RepoProxy::Stmt {
-    InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const UnitEmitter& ue,
-                RepoTxn& txn,
-                int64_t& unitSn,
-                const SHA1& sha1,
-                bool usePreAllocatedUnitSn); // throws(RepoExc)
-  };
-  struct GetUnitStmt : public RepoProxy::Stmt {
-    GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(UnitEmitter& ue, const SHA1& sha1);
-  };
-  struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
-    InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
-                const StringData* litstr); // throws(RepoExc)
-  };
-  struct GetUnitLitstrsStmt : public RepoProxy::Stmt {
-    GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-  struct InsertUnitArrayTypeTableStmt : public RepoProxy::Stmt {
-    InsertUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn,
-                const UnitEmitter& ue); // throws(RepoExc)
-  };
-  struct GetUnitArrayTypeTableStmt : public RepoProxy::Stmt {
-    GetUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-  struct InsertUnitArrayStmt : public RepoProxy::Stmt {
-    InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const std::string& array); // throws(RepoExc)
-  };
-  struct GetUnitArraysStmt : public RepoProxy::Stmt {
-    GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-
-#define URP_IOP(o) URP_OP(Insert##o, insert##o)
-#define URP_GOP(o) URP_OP(Get##o, get##o)
-#define URP_OPS \
-  URP_IOP(Unit) \
-  URP_GOP(Unit) \
-  URP_IOP(UnitTypeAlias) \
-  URP_GOP(UnitTypeAliases) \
-  URP_IOP(UnitLitstr) \
-  URP_GOP(UnitLitstrs) \
-  URP_IOP(UnitArrayTypeTable) \
-  URP_GOP(UnitArrayTypeTable) \
-  URP_IOP(UnitArray) \
-  URP_GOP(UnitArrays) \
-  URP_IOP(UnitConstant) \
-  URP_GOP(UnitConstants)
-
-#define URP_OP(c, o) \
-  c##Stmt o[RepoIdCount];
-  URP_OPS
-#undef URP_OP
-};
 
 std::unique_ptr<UnitEmitter> createFatalUnit(
   const StringData* filename,

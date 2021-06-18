@@ -37,7 +37,6 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/extern-compiler.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -604,12 +603,6 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
   // Compile a new Unit from contents
   auto const compileNew = [&] {
     s_unitActualCompiles->increment();
-
-    // Try the repo; if it's not already there, invoke the compiler.
-    if (auto unit = Repo::get().loadUnit(path->slice(), sha1, nativeFuncs)) {
-      flags = FileLoadFlags::kHitDisk;
-      return unit.release();
-    }
 
     LogTimer compileTimer("compile_ms", ent);
     rqtrace::EventGuard trace{"COMPILE_UNIT"};
@@ -1253,7 +1246,6 @@ void logLoad(
     }
     ent.setStr("sha1", u->sha1().toString());
     ent.setStr("repo_sn", folly::to<std::string>(u->sn()));
-    ent.setStr("repo_id", folly::to<std::string>(u->repoID()));
 
     int bclen = 0;
     u->forEachFunc([&](auto const& func) {
@@ -1462,8 +1454,6 @@ void invalidateUnit(StringData* path) {
   };
   erase(s_nonRepoUnitCache);
   for (auto const& p : s_perUserUnitCaches) erase(*p.second);
-
-  Repo::get().forgetUnit(path->data());
 }
 
 String resolveVmInclude(const StringData* path,

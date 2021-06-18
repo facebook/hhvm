@@ -49,6 +49,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -114,7 +115,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -133,6 +133,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
+
 #include "hphp/util/stacktrace-profiler.h"
 
 

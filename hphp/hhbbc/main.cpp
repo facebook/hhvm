@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"

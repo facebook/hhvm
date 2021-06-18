@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"

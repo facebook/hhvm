@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 
 #include <vector>
 
@@ -281,8 +280,6 @@ struct PreClassEmitter {
   }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
 
-  void commit(RepoTxn& txn) const; // throws(RepoExc)
-
   PreClass* create(Unit& unit) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
@@ -327,29 +324,6 @@ struct PreClassEmitter {
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
-};
-
-struct PreClassRepoProxy : RepoProxy {
-  friend struct PreClass;
-  friend struct PreClassEmitter;
-
-  explicit PreClassRepoProxy(Repo& repo);
-  ~PreClassRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-
-  struct InsertPreClassStmt : public RepoProxy::Stmt {
-    InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const PreClassEmitter& pce, RepoTxn& txn, int64_t unitSn,
-                Id preClassId, const StringData* name); // throws(RepoExc)
-  };
-
-  struct GetPreClassesStmt : public RepoProxy::Stmt {
-    GetPreClassesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-
-  InsertPreClassStmt insertPreClass[RepoIdCount];
-  GetPreClassesStmt getPreClasses[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,9 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/extern-compiler.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -491,11 +493,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
   try {
-    UnitOrigin unitOrigin = UnitOrigin::File;
-    if (!filename) {
-      filename = "";
-      unitOrigin = UnitOrigin::Eval;
-    }
+    if (!filename) filename = "";
 
     std::unique_ptr<UnitEmitter> ue;
     // Check if this file contains raw hip hop bytecode instead of
@@ -525,29 +523,11 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
       }
     }
 
-    // NOTE: Repo errors are ignored!
-    if (!RO::RepoAuthoritative) {
-      Repo::get().commitUnit(ue.get(), unitOrigin, false);
-    }
-
     unit = ue->create();
     if (BuiltinSymbols::s_systemAr) {
       assertx(ue->m_filepath->data()[0] == '/' &&
               ue->m_filepath->data()[1] == ':');
       BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-    } else {
-      ue.reset();
-
-      if (unit->sn() == -1 && !RO::RepoAuthoritative && RO::RepoCommit) {
-        // the unit was not committed to the Repo, probably because
-        // another thread did it first. Try to use the winner.
-        auto u = Repo::get().loadUnit(filename ? filename : "",
-                                      sha1,
-                                      nativeFuncs);
-        if (u != nullptr) {
-          return u.release();
-        }
-      }
     }
 
     return unit.release();

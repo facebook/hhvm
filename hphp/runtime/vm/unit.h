@@ -134,7 +134,6 @@ extern ServiceData::ExportedCounter* g_hhbc_size;
 struct Unit {
   friend struct UnitExtended;
   friend struct UnitEmitter;
-  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -184,9 +183,8 @@ public:
   // Basic accessors.                                                   [const]
 
   /*
-   * Repo ID and serial number.
+   * Serial number.
    */
-  int repoID() const;
   int64_t sn() const;
 
   /*
@@ -666,7 +664,6 @@ private:
 private:
   LowStringPtr m_origFilepath{nullptr};
 
-  int8_t m_repoId{-1};
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).

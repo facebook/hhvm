@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/util/arena.h"
 #include <boost/dynamic_bitset.hpp>
@@ -290,4 +290,3 @@ inline LinearBlocks linearBlocks(const Graph* g) {
 }
 
 }} // HPHP::Verifier
-

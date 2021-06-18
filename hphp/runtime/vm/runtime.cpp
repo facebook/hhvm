@@ -25,7 +25,6 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

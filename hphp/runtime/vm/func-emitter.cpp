@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -209,33 +209,6 @@ void FuncEmitter::init(int l1, int l2, Attr attrs_,
 
 void FuncEmitter::finish() {
   sortEHTab();
-}
-
-void FuncEmitter::commit(RepoTxn& txn) {
-  Repo& repo = Repo::get();
-  FuncRepoProxy& frp = repo.frp();
-  int repoId = m_ue.m_repoId;
-  int64_t usn = m_ue.m_sn;
-
-  if (!m_sourceLocTab.empty()) {
-    setLineTable(createLineTable(m_sourceLocTab, m_bclen));
-  }
-
-  frp.insertFunc[repoId].insert(
-    *this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, m_bc.ptr(), m_bclen
-  );
-
-  if (RuntimeOption::RepoDebugInfo) {
-    for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
-      SourceLoc& e = m_sourceLocTab[i].second;
-      Offset endOff = i < m_sourceLocTab.size() - 1
-                          ? m_sourceLocTab[i + 1].first
-                          : m_bclen;
-
-      frp.insertFuncSourceLoc[repoId]
-          .insert(txn, usn, m_sn, endOff, e.line0, e.char0, e.line1, e.char1);
-    }
-  }
 }
 
 const StaticString
@@ -748,6 +721,9 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   }
 }
 
+template void FuncEmitter::serdeMetaData<>(BlobDecoder&);
+template void FuncEmitter::serdeMetaData<>(BlobEncoder&);
+
 template<class SerDe>
 void FuncEmitter::serde(SerDe& sd, bool lazy) {
   assertx(IMPLIES(lazy, RO::RepoAuthoritative));
@@ -835,201 +811,6 @@ size_t FuncEmitter::optDeserializeLineTable(BlobDecoder& decoder,
   auto const size = decoder.peekSize();
   if (size <= decoder.remaining()) deserializeLineTable(decoder, lineTable);
   return size;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// FuncRepoProxy.
-
-FuncRepoProxy::FuncRepoProxy(Repo& repo)
-    : RepoProxy(repo),
-      insertFunc{InsertFuncStmt(repo, 0), InsertFuncStmt(repo, 1)},
-      getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)},
-      insertFuncSourceLoc{InsertFuncSourceLocStmt(repo, 0), InsertFuncSourceLocStmt(repo, 1)},
-      getSourceLocTab{GetSourceLocTabStmt(repo, 0), GetSourceLocTabStmt(repo, 1)}
-{}
-
-FuncRepoProxy::~FuncRepoProxy() {
-}
-
-void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} "
-      "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
-      " bc BLOB, extraData BLOB, lineTable BLOB, PRIMARY KEY (unitSn, funcSn));",
-      m_repo.table(repoId, "Func"));
-    txn.exec(createQuery);
-  }
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} "
-      "(unitSn INTEGER, funcSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
-      " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
-      " PRIMARY KEY (unitSn, funcSn, pastOffset));",
-      m_repo.table(repoId, "FuncSourceLoc"));
-    txn.exec(createQuery);
-  }
-}
-
-void FuncRepoProxy::InsertFuncStmt
-                  ::insert(const FuncEmitter& fe,
-                           RepoTxn& txn, int64_t unitSn, int funcSn,
-                           Id preClassId, const StringData* name,
-                           const unsigned char* bc, size_t bclen) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} "
-      "VALUES(@unitSn, @funcSn, @preClassId, @name, @bc, @extraData, @lineTable);",
-      m_repo.table(m_repoId, "Func"));
-    txn.prepare(*this, insertQuery);
-  }
-
-  BlobEncoder extraBlob{fe.useGlobalIds()};
-  BlobEncoder lineTableBlob{false};
-
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindStaticString("@name", name);
-  query.bindBlob("@bc", (const void*)bc, bclen);
-  const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
-  query.bindBlob("@extraData", extraBlob, /* static */ true);
-
-  lineTableBlob(
-    const_cast<LineTable&>(fe.lineTable()),
-    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
-      return LineEntry {
-        cur.pastOffset() - prev.pastOffset(),
-        cur.val() - prev.val()
-      };
-    }
-  );
-  query.bindBlob("@lineTable", lineTableBlob, /* static */ true);
-
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncsStmt
-                  ::get(UnitEmitter& ue) {
-  auto txn = RepoTxn{m_repo.begin()};
-  if (!prepared()) {
-    auto selectQuery = folly::sformat(
-      "SELECT funcSn, preClassId, name, bc, extraData, lineTable "
-      "FROM {} "
-      "WHERE unitSn == @unitSn ORDER BY funcSn ASC;",
-      m_repo.table(m_repoId, "Func"));
-    txn.prepare(*this, selectQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.m_sn);
-  do {
-    query.step();
-    if (query.row()) {
-      int funcSn;               /**/ query.getInt(0, funcSn);
-      Id preClassId;            /**/ query.getId(1, preClassId);
-      StringData* name;         /**/ query.getStaticString(2, name);
-      const void* bc; size_t bclen; /**/ query.getBlob(3, bc, bclen);
-      BlobDecoder extraBlob =   /**/ query.getBlob(4, ue.useGlobalIds());
-
-      FuncEmitter* fe;
-      if (preClassId < 0) {
-        fe = ue.newFuncEmitter(name);
-      } else {
-        PreClassEmitter* pce = ue.pce(preClassId);
-        fe = ue.newMethodEmitter(name, pce);
-        bool added UNUSED = pce->addMethod(fe);
-        assertx(added);
-      }
-      assertx(fe->sn() == funcSn);
-      fe->setBc(static_cast<const unsigned char*>(bc), bclen);
-      fe->serdeMetaData(extraBlob);
-      if (!SystemLib::s_inited) {
-        assertx(fe->attrs & AttrBuiltin);
-        if (preClassId < 0) {
-          assertx(fe->attrs & AttrPersistent);
-          assertx(fe->attrs & AttrUnique);
-        }
-      }
-
-      BlobDecoder lineTableBlob = query.getBlob(5, false);
-      LineTable lineTable;
-      lineTableBlob(
-        lineTable,
-        [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
-          return LineEntry {
-            delta.pastOffset() + prev.pastOffset(),
-            delta.val() + prev.val()
-          };
-        }
-      );
-      fe->setLineTable(std::move(lineTable));
-
-      fe->setEHTabIsSorted();
-      fe->finish();
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncSourceLocStmt
-                  ::insert(RepoTxn& txn, int64_t unitSn, int64_t funcSn, Offset pastOffset,
-                           int line0, int char0, int line1, int char1) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} "
-      "VALUES(@unitSn, @funcSn, @pastOffset, @line0, @char0, @line1, @char1);",
-      m_repo.table(m_repoId, "FuncSourceLoc"));
-    txn.prepare(*this, insertQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt64("@funcSn", funcSn);
-  query.bindOffset("@pastOffset", pastOffset);
-  query.bindInt("@line0", line0);
-  query.bindInt("@char0", char0);
-  query.bindInt("@line1", line1);
-  query.bindInt("@char1", char1);
-  query.exec();
-}
-
-RepoStatus
-FuncRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn, int64_t funcSn,
-                                        SourceLocTable& sourceLocTab) {
-  try {
-    auto txn = RepoTxn{m_repo.begin()};
-    if (!prepared()) {
-      auto selectQuery = folly::sformat(
-        "SELECT pastOffset, line0, char0, line1, char1 "
-        "FROM {} "
-        "WHERE unitSn == @unitSn AND funcSn = @funcSn "
-        "ORDER BY pastOffset ASC;",
-        m_repo.table(m_repoId, "FuncSourceLoc"));
-      txn.prepare(*this, selectQuery);
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindInt64("@funcSn", funcSn);
-    do {
-      query.step();
-      if (!query.row()) {
-        return RepoStatus::error;
-      }
-      Offset pastOffset;
-      query.getOffset(0, pastOffset);
-      SourceLoc sLoc;
-      query.getInt(1, sLoc.line0);
-      query.getInt(2, sLoc.char0);
-      query.getInt(3, sLoc.line1);
-      query.getInt(4, sLoc.char1);
-      SourceLocEntry entry(pastOffset, sLoc);
-      sourceLocTab.push_back(entry);
-    } while (!query.done());
-    txn.commit();
-  } catch (RepoExc& re) {
-    return RepoStatus::error;
-  }
-  return RepoStatus::success;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

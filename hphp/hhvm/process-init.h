@@ -29,7 +29,6 @@ namespace HPHP {
 extern void (*g_vmProcessInit)();
 void hphp_process_init();
 void ProcessInit();
-void initialize_repo();
 
 /*
  * This must be called before execute_program_impl in an hhvm build.
@@ -47,7 +46,6 @@ inline void register_process_init() {
 inline void init_for_unit_test() {
   HPHP::StaticString::CreateAll();
   register_process_init();
-  initialize_repo();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);

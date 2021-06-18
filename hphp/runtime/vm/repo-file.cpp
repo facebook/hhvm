@@ -19,8 +19,10 @@
 #include "hphp/runtime/base/autoload-handler.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/htonll.h"

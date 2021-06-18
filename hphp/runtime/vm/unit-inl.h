@@ -54,10 +54,6 @@ inline const FatalInfo* Unit::getFatalInfo() const {
   return m_fatalInfo.get();
 }
 
-inline int Unit::repoID() const {
-  return m_repoId;
-}
-
 inline int64_t Unit::sn() const {
   return m_sn;
 }

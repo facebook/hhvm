@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/type-alias.h"
-#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 

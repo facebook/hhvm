@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/type-string.h"
@@ -24,7 +23,6 @@
 #include "hphp/runtime/base/user-attributes.h"
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -39,7 +37,8 @@ struct PreClass;
 struct StringData;
 
 struct PreClassEmitter;
-struct UnitEmitter;
+
+struct BlobDecoder;
 
 namespace Native {
 struct NativeFunctionInfo;
@@ -51,9 +50,6 @@ struct NativeFunctionInfo;
  * Bag of Func's fields used to emit Funcs.
  */
 struct FuncEmitter {
-  friend struct FuncRepoProxy;
-  friend struct UnitRepoProxy;
-
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
@@ -93,11 +89,6 @@ struct FuncEmitter {
   void init(int l1, int l2, Attr attrs_,
             const StringData* docComment_);
   void finish();
-
-  /*
-   * Commit this function to a repo.
-   */
-  void commit(RepoTxn& txn); // throws(RepoExc)
 
   /*
    * Instantiate a runtime Func*.
@@ -426,47 +417,6 @@ private:
 
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
   Func::LineTablePtr m_lineTable;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Proxy for converting in-repo function representations into FuncEmitters.
- */
-struct FuncRepoProxy : public RepoProxy {
-  friend struct Func;
-  friend struct FuncEmitter;
-
-  explicit FuncRepoProxy(Repo& repo);
-  ~FuncRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-
-  struct InsertFuncStmt : public RepoProxy::Stmt {
-    InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const FuncEmitter& fe,
-                RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name, const unsigned char* bc, size_t bclen); // throws(RepoExc)
-  };
-
-  struct GetFuncsStmt : public RepoProxy::Stmt {
-    GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue); // throws(RepoExc)
-  };
-
-  struct InsertFuncSourceLocStmt : public RepoProxy::Stmt {
-    InsertFuncSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, int64_t funcSn, Offset pastOffset, int line0,
-                int char0, int line1, int char1); // throws(RepoExc)
-  };
-  struct GetSourceLocTabStmt : public RepoProxy::Stmt {
-    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(int64_t unitSn, int64_t funcSn, SourceLocTable& sourceLocTab);
-  };
-
-  InsertFuncStmt insertFunc[RepoIdCount];
-  GetFuncsStmt getFuncs[RepoIdCount];
-  InsertFuncSourceLocStmt insertFuncSourceLoc[RepoIdCount];
-  GetSourceLocTabStmt getSourceLocTab[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

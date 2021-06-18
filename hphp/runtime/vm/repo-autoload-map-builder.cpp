@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 
 #include <boost/algorithm/string/predicate.hpp>

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 #include <folly/Range.h>
 

@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/record.h"
-#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 
@@ -63,15 +62,6 @@ void RecordEmitter::init(int line1, int line2, Attr attrs,
   m_attrs = attrs;
   m_parent = parentName;
   m_docComment = docComment;
-}
-
-void RecordEmitter::commit(RepoTxn& txn) const {
-  Repo& repo = Repo::get();
-  RecordRepoProxy& rrp = repo.rrp();
-  int repoId = m_ue.m_repoId;
-  int64_t usn = m_ue.m_sn;
-  rrp.insertRecord[repoId]
-      .insert(*this, txn, usn, m_id, m_name);
 }
 
 PreRecordDesc* RecordEmitter::create(Unit& unit) const {
@@ -153,81 +143,5 @@ template<class SerDe> void RecordEmitter::serdeMetaData(SerDe& sd) {
 
 template void RecordEmitter::serdeMetaData<>(BlobDecoder&);
 template void RecordEmitter::serdeMetaData<>(BlobEncoder&);
-
-//=============================================================================
-// RecordRepoProxy.
-
-RecordRepoProxy::RecordRepoProxy(Repo& repo)
-    : RepoProxy(repo),
-      insertRecord{InsertRecordStmt(repo, 0), InsertRecordStmt(repo, 1)},
-      getRecords{GetRecordsStmt(repo, 0), GetRecordsStmt(repo, 1)}
-{}
-
-RecordRepoProxy::~RecordRepoProxy() {
-}
-
-void RecordRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Record")
-             << "(unitSn INTEGER, recordId INTEGER, name TEXT,"
-                " extraData BLOB,"
-                " PRIMARY KEY (unitSn, recordId));";
-    txn.exec(ssCreate.str());
-  }
-}
-
-void RecordRepoProxy::InsertRecordStmt
-                      ::insert(const RecordEmitter& pce, RepoTxn& txn,
-                               int64_t unitSn, Id recordId,
-                               const StringData* name) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Record")
-             << " VALUES(@unitSn, @recordId, @name, @extraData);";
-    txn.prepare(*this, ssInsert.str());
-  }
-
-  auto const nm = StripIdFromAnonymousClassName(name->slice());
-  BlobEncoder extraBlob(pce.ue().useGlobalIds());
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@recordId", recordId);
-  query.bindStringPiece("@name", nm);
-  const_cast<RecordEmitter&>(pce).serdeMetaData(extraBlob);
-  query.bindBlob("@extraData", extraBlob, /* static */ true);
-  query.exec();
-}
-
-void RecordRepoProxy::GetRecordsStmt
-                    ::get(UnitEmitter& ue) {
-
-  auto txn = RepoTxn{m_repo.begin()};
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT recordId,name,extraData FROM "
-             << m_repo.table(m_repoId, "Record")
-             << " WHERE unitSn == @unitSn ORDER BY recordId ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.m_sn);
-  do {
-    query.step();
-    if (query.row()) {
-      Id recordId;        /**/ query.getId(0, recordId);
-      std::string name;   /**/ query.getStdString(1, name);
-      BlobDecoder extraBlob = /**/ query.getBlob(2, ue.useGlobalIds());
-      RecordEmitter* re = ue.newRecordEmitter(name);
-      re->serdeMetaData(extraBlob);
-      if (!SystemLib::s_inited) {
-        assertx(re->attrs() & AttrPersistent);
-        assertx(re->attrs() & AttrUnique);
-      }
-      assertx(re->id() == recordId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
 
 } // HPHP

@@ -52,7 +52,6 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/runtime/vm/repo.h"
 
 #ifndef _WIN32
 # define MAYBE_WIFEXITED(var) if (WIFEXITED(var)) { var = WEXITSTATUS(var); }

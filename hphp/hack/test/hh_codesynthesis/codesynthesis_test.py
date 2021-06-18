@@ -8,6 +8,134 @@ import tempfile
 import unittest
 
 from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
+from hphp.hack.src.hh_codesynthesis.hh_codesynthesis import ClingoContext
+
+
+class GenerateLogicRulesTest(unittest.TestCase):
+    def test_depth_less_than_nodes(self) -> None:
+        ClingoContext.number_of_nodes = 12
+        ClingoContext.min_depth = 3
+        exp = [
+            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6", 6;"S7", 7;"S8", 8;"S9", 9;"S10", 10;"S11", 11).',
+            'extends_to("S0", "S4").',
+            'extends_to("S4", "S8").',
+        ]
+        self.assertListEqual(exp, hh_codesynthesis.generate_logic_rules())
+
+    def test_depth_more_than_nodes(self) -> None:
+        # In this case, the graph has no way to satisfy the min_depth requirement.
+        # The user, or the higher level wrapper should make sure given proper
+        # parameters. Otherwise, we will create the following output.
+        ClingoContext.number_of_nodes = 3
+        ClingoContext.min_depth = 5
+        with self.assertRaises(
+            expected_exception=RuntimeError, msg="Received unreasonable parameters."
+        ):
+            hh_codesynthesis.generate_logic_rules()
+
+    def test_depth_equals_to_nodes(self) -> None:
+        ClingoContext.number_of_nodes = 7
+        ClingoContext.min_depth = 7
+        exp = [
+            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6", 6).',
+            'extends_to("S0", "S1").',
+            'extends_to("S1", "S2").',
+            'extends_to("S2", "S3").',
+            'extends_to("S3", "S4").',
+            'extends_to("S4", "S5").',
+            'extends_to("S5", "S6").',
+        ]
+        self.assertListEqual(exp, hh_codesynthesis.generate_logic_rules())
+
+    def test_hack_code_gen(self) -> None:
+        ClingoContext.number_of_nodes = 12
+        ClingoContext.min_depth = 3
+        ClingoContext.min_classes = 3
+        ClingoContext.min_interfaces = 4
+        ClingoContext.lower_bound = 1
+        ClingoContext.higher_bound = 5
+        ClingoContext.avg_width = 0
+        exp = """\
+<?hh
+class S9   {}
+class S10   {}
+class S11   {}
+interface S0  {}
+interface S1  {}
+interface S2  {}
+interface S3  {}
+interface S4 extends S0 {}
+interface S5  {}
+interface S6  {}
+interface S7  {}
+interface S8 extends S4 {}
+"""
+
+        hack_codegen = hackGenerator.HackCodeGenerator()
+        hh_codesynthesis.do_reasoning(
+            additional_programs=hh_codesynthesis.generate_logic_rules(),
+            generator=hack_codegen,
+        )
+        self.assertEqual(str(hack_codegen), exp)
+
+    def test_hack_code_gen_with_partial_dependency_graph_given_by_user(self) -> None:
+        ClingoContext.number_of_nodes = 12
+        ClingoContext.min_depth = 3
+        ClingoContext.min_classes = 3
+        ClingoContext.min_interfaces = 4
+        ClingoContext.lower_bound = 1
+        ClingoContext.higher_bound = 5
+        ClingoContext.avg_width = 0
+        deps = """\
+Extends A -> Type B
+Extends I -> Type B
+Extends T -> Type A
+Type A -> Type B
+Type I -> Type B
+Type T -> Type A, Type B"""
+        exp = """\
+<?hh
+class S9   {}
+class S10   {}
+class S11   {}
+interface A extends T {}
+interface B extends A,I {}
+interface I  {}
+interface T  {}
+interface S0  {}
+interface S1  {}
+interface S2  {}
+interface S3  {}
+interface S4 extends S0 {}
+interface S5  {}
+interface S6  {}
+interface S7  {}
+interface S8 extends S4 {}
+"""
+
+        hack_codegen = hackGenerator.HackCodeGenerator()
+        combined_rules = (
+            hh_codesynthesis.generate_logic_rules()
+            + hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        )
+        hh_codesynthesis.do_reasoning(
+            additional_programs=combined_rules,
+            generator=hack_codegen,
+        )
+        self.assertEqual(str(hack_codegen), exp)
+
+    def test_unsatisfiable_parameters(self) -> None:
+        # Given 5 nodes, but asking for 3 classes + 4 interfaces with
+        ClingoContext.number_of_nodes = 5
+        ClingoContext.min_classes = 3
+        ClingoContext.min_interfaces = 4
+        hack_codegen = hackGenerator.HackCodeGenerator()
+
+        with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
+            hh_codesynthesis.do_reasoning(
+                additional_programs=hh_codesynthesis.generate_logic_rules(),
+                generator=hack_codegen,
+            )
 
 
 class ExtractLogicRulesTest(unittest.TestCase):

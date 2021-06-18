@@ -19,7 +19,7 @@
 import argparse
 import os
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import clingo
 from clingo import Number, Symbol
@@ -36,6 +36,8 @@ class ClingoContext:
     min_depth = 1
     min_classes = 1
     min_interfaces = 1
+    lower_bound = 1
+    higher_bound = 10
 
     def n(self) -> Symbol:
         return Number(self.number_of_nodes)
@@ -51,6 +53,40 @@ class ClingoContext:
 
     def i(self) -> Symbol:
         return Number(self.min_interfaces)
+
+    def lb(self) -> Symbol:
+        return Number(self.lower_bound)
+
+    def hb(self) -> Symbol:
+        return Number(self.higher_bound)
+
+
+# Generate logic rules based on given parameters.
+def generate_logic_rules() -> List[str]:
+    rules: List[str] = []
+
+    if ClingoContext.min_depth > ClingoContext.number_of_nodes:
+        raise RuntimeError("Received unreasonable parameters.")
+
+    # Creating n symbols.
+    symbols = []
+    for i in range(ClingoContext.number_of_nodes):
+        # The number part is easier for reasoning to generate the graph. We are
+        # adding a "S" prefix to each symbol to construct a string. So that the
+        # synthesized code will has a valid class/interface name.
+        symbols.append(f'"S{i}", {i}')
+    # The actual rule will be like,
+    # internal_symbols("S0", 0; "S1", 1; "S2", 2).
+    rules.append("internal_symbols({}).".format(";".join(symbols)))
+
+    # Creating backbone hierarchy with minimum depth using normal Distribution.
+    # We separated the below part from "graph_generator.lp" to avoid "grounding bottleneck."
+    # And we are using normal distrubution to create a sequence of extends_to among n nodes.
+    interval = ClingoContext.number_of_nodes // ClingoContext.min_depth or 1
+    for i in range(interval, ClingoContext.number_of_nodes, interval):
+        rules.append(f'extends_to("S{i-interval}", "S{i}").')
+
+    return rules
 
 
 # Extract logic rules from file format.
@@ -103,11 +139,22 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
 
     # Clingo interfaces.
     ctl = clingo.Control()
+
+    # Load LP for code emitting.
     ctl.load(asp_files + "/dep_graph_reasoning.lp")
+    # Load LP for graph generating.
+    with open(asp_files + "/graph_generator.lp") as fp:
+        ctl.add("base", [], fp.read())
+    # Load extra dependency graph given by the user.
     ctl.add("base", [], "\n".join(additional_programs))
 
     ctl.ground([("base", [])], context=ClingoContext())
-    ctl.solve(on_model=generator.on_model)
+    result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
+        on_model=generator.on_model
+    )
+    if isinstance(result, clingo.solving.SolveResult):
+        if result.unsatisfiable:
+            raise RuntimeError("Unsatisfiable.")
 
 
 # Read dependency graph from file or stdin.

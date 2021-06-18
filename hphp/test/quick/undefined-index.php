@@ -6,7 +6,7 @@ try {
   echo $a;
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
-$obj = new stdclass;
+$obj = new stdClass;
 $a = $obj->flubb;
 echo $a;
 }

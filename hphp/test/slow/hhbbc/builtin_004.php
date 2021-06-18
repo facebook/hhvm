@@ -11,5 +11,5 @@ function foo3($x) { if (is_object($x)) return get_class($x); return ""; }
 function main_builtin_004() {
 var_dump(foo(new X));
 var_dump(foo2(new Z));
-var_dump(is_string(foo3(new stdclass)));
+var_dump(is_string(foo3(new stdClass)));
 }

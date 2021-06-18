@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 print "Test begin\n";
 
-$obj = new stdclass;
+$obj = new stdClass;
 unset($obj->doh->re->mi->fa->sol->la->ti);
 var_dump($obj);
 

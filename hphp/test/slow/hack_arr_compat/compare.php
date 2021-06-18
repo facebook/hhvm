@@ -61,7 +61,7 @@ function main_compare() {
     123,
     4.567,
     'abc',
-    new stdclass,
+    new stdClass,
     imagecreate(1, 1),
     varray[1, varray[2, 5], varray[3, 4]],
     darray['a' => varray[], 'c' => varray[1, 2]],

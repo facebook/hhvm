@@ -113,8 +113,8 @@ function compare($a, $b) {
 
   compare(dict['a' => 12345], dict['a' => "12345"]);
 
-  single_compare(dict[0 => new stdclass],
-                 dict[0 => new stdclass]);
+  single_compare(dict[0 => new stdClass],
+                 dict[0 => new stdClass]);
   compare(dict[0 => new ToString('foobaz')],
           dict[0 => 'foobaz']);
   compare(dict["key" => new Thrower],
@@ -129,7 +129,7 @@ function compare($a, $b) {
   compare(dict[], 123);
   compare(dict[], 1.2345);
   compare(dict[], 'abc');
-  compare(dict[], new stdclass);
+  compare(dict[], new stdClass);
   compare(dict[], varray[]);
   compare(dict[], vec[]);
   compare(dict[], keyset[]);

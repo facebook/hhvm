@@ -103,7 +103,7 @@ function compare($a, $b) {
 
   compare(vec[12345], vec["12345"]);
 
-  single_compare(vec[new stdclass], vec[new stdclass]);
+  single_compare(vec[new stdClass], vec[new stdClass]);
   compare(vec[new ToString('foobaz')], vec['foobaz']);
   compare(vec[new Thrower], vec['foobaz']);
   compare(vec[1, new Thrower], vec[2, 'foobaz']);
@@ -113,7 +113,7 @@ function compare($a, $b) {
   compare(vec[], 123);
   compare(vec[], 1.2345);
   compare(vec[], 'abc');
-  compare(vec[], new stdclass);
+  compare(vec[], new stdClass);
   compare(vec[], varray[]);
   compare(vec[], dict[]);
   compare(vec[], keyset[]);

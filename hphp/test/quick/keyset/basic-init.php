@@ -42,7 +42,7 @@ function create($a, $b, $c) {
   create(4, 3, vec[2, 1]);
   create(dict['a' => 1], 'a', 5);
   create(100, keyset['a', 'b'], 200);
-  create('a', new stdclass, 'c');
+  create('a', new stdClass, 'c');
   create(1, Vector{1, 2, 3}, 2);
   create('a', new ToString, 'c');
 

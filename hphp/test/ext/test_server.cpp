@@ -375,7 +375,7 @@ bool TestServer::TestServerVariables() {
 bool TestServer::TestInteraction() {
   // run this twice to test lvalBlackHole
   VSR2("<?hh "
-        "$a[] = new stdclass;"
+        "$a[] = new stdClass;"
         "var_dump(count(array_combine($a, $a)));",
         "");
 

@@ -111,7 +111,7 @@ function test_is_vec($val) {
   test_is_vec(7);
   test_is_vec(1.23);
   test_is_vec("abcd");
-  test_is_vec(new stdclass);
+  test_is_vec(new stdClass);
   test_is_vec(varray[1, 2, 3]);
   test_is_vec(Vector{'a', 'b', 'c'});
   test_is_vec(Map{100 => 'a', 'b' => 200});

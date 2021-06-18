@@ -65,7 +65,7 @@ function write($count) {
   apc_store("val2", dict["a" => 1, "b" => 2, "c" => 3]);
   apc_store("val3", dict[4 => "a", 5 => "b", 6 => "C", 7 => "D"]);
   apc_store("val4", dict[$count => 999, 999 => $count]);
-  apc_store("val5", dict[0 => new stdclass, 1 => new stdclass]);
+  apc_store("val5", dict[0 => new stdClass, 1 => new stdClass]);
 
   $cls = new SomeClass;
   $cls->val = dict[50 => dict[], "50" => dict[100 => $count],

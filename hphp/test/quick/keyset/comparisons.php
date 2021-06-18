@@ -93,7 +93,7 @@ function compare($a, $b) {
   compare(keyset[], 123);
   compare(keyset[], 1.2345);
   compare(keyset[], 'abc');
-  compare(keyset[], new stdclass);
+  compare(keyset[], new stdClass);
   compare(keyset[], varray[]);
   compare(keyset[], vec[]);
   compare(keyset[], dict[]);

@@ -11,6 +11,6 @@ function f(C $c = null) { var_dump($c);}
   f($c);
   f($d);
   f(null);
-  f(new stdclass());
+  f(new stdClass());
   echo "not reached\n";
 }

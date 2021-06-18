@@ -111,7 +111,7 @@ function test_is_dict($val) {
   test_is_dict(7);
   test_is_dict(1.23);
   test_is_dict("abcd");
-  test_is_dict(new stdclass);
+  test_is_dict(new stdClass);
   test_is_dict(varray[1, 2, 3]);
   test_is_dict(Vector{'a', 'b', 'c'});
   test_is_dict(Map{100 => 'a', 'b' => 200});

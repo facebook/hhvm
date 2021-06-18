@@ -161,7 +161,7 @@ test_vec_hint(false);
 test_vec_hint(717);
 test_vec_hint(1.234);
 test_vec_hint("string");
-test_vec_hint(new stdclass);
+test_vec_hint(new stdClass);
 test_vec_hint(varray[]);
 test_vec_hint(varray[1, 2, 3]);
 test_vec_hint(dict[]);

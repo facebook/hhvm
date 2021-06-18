@@ -170,7 +170,7 @@ test_dict_hint(false);
 test_dict_hint(717);
 test_dict_hint(1.234);
 test_dict_hint("string");
-test_dict_hint(new stdclass);
+test_dict_hint(new stdClass);
 test_dict_hint(varray[]);
 test_dict_hint(varray[1, 2, 3]);
 test_dict_hint(vec[]);

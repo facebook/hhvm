@@ -51,7 +51,7 @@ foreach ($c as $k => $v) {
 }
 
 // empty iteration
-$c = new stdclass();
+$c = new stdClass();
 foreach ($c as $k => $v) {
   echo "empty object has properties, oh no\n";
 }

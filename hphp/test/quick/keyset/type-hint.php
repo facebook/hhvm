@@ -151,7 +151,7 @@ test_keyset_hint(false);
 test_keyset_hint(717);
 test_keyset_hint(1.234);
 test_keyset_hint("string");
-test_keyset_hint(new stdclass);
+test_keyset_hint(new stdClass);
 test_keyset_hint(varray[]);
 test_keyset_hint(varray[1, 2, 3]);
 test_keyset_hint(vec[]);

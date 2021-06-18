@@ -27,7 +27,7 @@
     var_dump("Got ".$e->getMessage());
   }
   try {
-    $i = keyset[new stdclass];
+    $i = keyset[new stdClass];
   } catch (Exception $e) {
     var_dump("Got ".$e->getMessage());
   }

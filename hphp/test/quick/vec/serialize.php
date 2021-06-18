@@ -60,7 +60,7 @@ function try_unserialize($val) {
   roundtrip(vec['a', 'b', 100, 200, 'c', 500]);
   roundtrip(vec[1, 1, 1, 'a', 'a', 'a']);
   roundtrip(vec[123, "123"]);
-  roundtrip(vec[new stdclass(), true, false, 1.23, null]);
+  roundtrip(vec[new stdClass(), true, false, 1.23, null]);
   roundtrip(vec[vec[], vec[100, 200], vec["key1", "key2", "key3"]]);
   roundtrip(vec[varray[], varray[111, 222],
                 dict['a' => 50, 'b' => 60, 'c' => 70],
@@ -83,7 +83,7 @@ function try_unserialize($val) {
 
   // Recursive data structures
   try_unserialize("v:1:{O:8:\"stdClass\":1:{s:3:\"val\";v:1:{r:2;}}}");
-  $recursive_obj = new stdclass;
+  $recursive_obj = new stdClass;
   $recursive_vec = vec[$recursive_obj];
   $recursive_obj->val = $recursive_vec;
   roundtrip($recursive_obj);

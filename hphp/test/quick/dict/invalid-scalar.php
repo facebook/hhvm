@@ -25,7 +25,7 @@ try {
   var_dump("Got ".$e->getMessage());
 }
 try {
-  $i = dict[new stdclass => 1];
+  $i = dict[new stdClass => 1];
 } catch (Exception $e) {
   var_dump("Got ".$e->getMessage());
 }

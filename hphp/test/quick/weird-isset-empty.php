@@ -97,7 +97,7 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = new stdclass;
+  $abc = new stdClass;
   $abc->foo = darray['bar' => 'baz'];
   var_dump(isset($abc->foo));
   var_dump(!($abc->foo ?? false));
@@ -109,13 +109,13 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = new stdclass;
+  $abc = new stdClass;
   tst2(inout $abc);  // make $abc a Var
   unset($abc);
 
   echo "**************************\n";
 
-  $abc = darray['foo' => new stdclass];
+  $abc = darray['foo' => new stdClass];
   $abc['foo']->bar = 'baz';
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));
@@ -131,7 +131,7 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = darray['foo' => new stdclass];
+  $abc = darray['foo' => new stdClass];
 
   tst3(inout $abc);  // make $abc a Var
   unset($abc);

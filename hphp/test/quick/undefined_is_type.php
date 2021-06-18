@@ -6,7 +6,7 @@ function foo(): void {
   if (\HH\global_isset('a')) $a = 1;
   if (\HH\global_isset('b')) $a = 1.2;
   if (\HH\global_isset('c')) $a = '1';
-  if (\HH\global_isset('d')) $a = new stdclass;
+  if (\HH\global_isset('d')) $a = new stdClass;
   if (\HH\global_isset('e')) $a = varray[];
   if (\HH\global_isset('f')) $a = false;
   if (\HH\global_isset('g')) $a = null;

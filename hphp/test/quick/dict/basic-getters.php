@@ -109,7 +109,7 @@ function test($v, $description) {
 
 <<__EntryPoint>> function main(): void {
   test(dict[], "empty");
-  test(dict[0 => new stdclass(), 1 => new stdclass(), 2 => new stdclass()],
+  test(dict[0 => new stdClass(), 1 => new stdClass(), 2 => new stdClass()],
        "3 objects");
   test(dict[0 => 100, 1 => 200, 2 => 300, 3 => 400], "4 ints");
   test(dict[0 => false, 1 => true, 2 => false, 3 => true], "4 bools");

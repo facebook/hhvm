@@ -65,7 +65,7 @@ function write($count) {
   apc_store("val2", vec[1, 2, 3]);
   apc_store("val3", vec["a", "b", "C", "D"]);
   apc_store("val4", vec[$count, $count]);
-  apc_store("val5", vec[new stdclass, new stdclass]);
+  apc_store("val5", vec[new stdClass, new stdClass]);
 
   $cls = new SomeClass;
   $cls->val = vec[vec[], vec[$count], vec[$count, $count+1]];

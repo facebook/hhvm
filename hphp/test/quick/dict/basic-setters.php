@@ -9,7 +9,7 @@ function test_append($orig) {
   $v[] = 1.23;
   $v[] = false;
   $v[] = null;
-  $v[] = new stdclass();
+  $v[] = new stdClass();
   $v[] = varray[300, 200, 100];
   $v[] = dict[];
   $v[] = dict['a' => 1, 'b' => 2, 'c' => 3];
@@ -42,7 +42,7 @@ function test_set($orig) {
     |> do_set($$, false, "bool key value")
     |> do_set($$, null, "null key value")
     |> do_set($$, 1.23, "double key value")
-    |> do_set($$, new stdclass(), "object key value")
+    |> do_set($$, new stdClass(), "object key value")
     |> do_set($$, varray[1, 2, 3], "array key value")
     |> do_set($$, vec[1, 2, 3], "vec key value")
     |> do_set($$, dict['a' => 1, 'b' => 2, 'c' => 3], "dict key value")
@@ -74,7 +74,7 @@ function test_setop($orig) {
     |> do_setop($$, false, " + bool key value")
     |> do_setop($$, null, " + null key value")
     |> do_setop($$, 1.23, " + double key value")
-    |> do_setop($$, new stdclass(), " + object key value")
+    |> do_setop($$, new stdClass(), " + object key value")
     |> do_setop($$, varray[1, 2, 3], " + array key value")
     |> do_setop($$, vec[1, 2, 3], " + vec key value")
     |> do_setop($$, dict['a' => 1, 'b' => 2, 'c' => 3], " + dict key value")
@@ -107,7 +107,7 @@ function test_new_setop($orig) {
     |> do_new_setop($$, false, " + bool value")
     |> do_new_setop($$, null, " + null value")
     |> do_new_setop($$, 1.23, " + double value")
-    |> do_new_setop($$, new stdclass(), " + object value")
+    |> do_new_setop($$, new stdClass(), " + object value")
     |> do_new_setop($$, varray[1, 2, 3], " + array value")
     |> do_new_setop($$, vec[1, 2, 3], " + vec value")
     |> do_new_setop($$, dict['a' => 1, 'b' => 2, 'c' => 3], " + dict value")
@@ -145,7 +145,7 @@ function test_unset($orig) {
     |> do_unset($$, false, "false key value")
     |> do_unset($$, null, "null key value")
     |> do_unset($$, 1.23, "double key value")
-    |> do_unset($$, new stdclass(), "object key value")
+    |> do_unset($$, new stdClass(), "object key value")
     |> do_unset($$, varray[1, 2, 3], "array key value")
     |> do_unset($$, vec[1, 2, 3], "vec key value")
     |> do_unset($$, dict['a' => 1, 'b' => 2, 'c' => 3], "dict key value")

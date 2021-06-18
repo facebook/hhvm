@@ -26,7 +26,7 @@ function case1() { foo(); }
 function foo2() {
 
   foreach (AR as $y) {
-    func(12, new stdclass(), mt_rand(), blar($y) ? 1024 : -1);
+    func(12, new stdClass(), mt_rand(), blar($y) ? 1024 : -1);
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
@@ -36,7 +36,7 @@ function case2() { foo2(); }
 function foo3() {
 
   foreach (AR as $y) {
-    func(12, new stdclass(), mt_rand(), func(blar($y)));
+    func(12, new stdClass(), mt_rand(), func(blar($y)));
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
@@ -47,7 +47,7 @@ function case3() { foo3(); }
 function foo4() {
 
   foreach (AR as $y) {
-    func(12, new stdclass(), mt_rand(), func(mt_rand(), blar($y)));
+    func(12, new stdClass(), mt_rand(), func(mt_rand(), blar($y)));
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }

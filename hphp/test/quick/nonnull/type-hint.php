@@ -22,7 +22,7 @@ function main() {
   try_takes_nonnull('abc');
   try_takes_nonnull(true);
   try_takes_nonnull(false);
-  try_takes_nonnull(new StdClass());
+  try_takes_nonnull(new stdClass());
   try_takes_nonnull(null); // nope: null
 }
 <<__EntryPoint>> function main_entry(): void {

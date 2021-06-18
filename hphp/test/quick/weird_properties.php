@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function foo(): void {
-  $k = new stdclass;
-  $k->paths = varray[new stdclass, new stdclass];
+  $k = new stdClass;
+  $k->paths = varray[new stdClass, new stdClass];
   foreach ($k->paths as $path) {
     try {
       echo $path->{0}."\n";

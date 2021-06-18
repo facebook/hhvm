@@ -93,18 +93,18 @@ function convert_to($from) {
 
 <<__EntryPoint>> function main(): void {
   convert_to(varray[]);
-  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
+  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdClass]);
   convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
-              'key4' => new stdclass]);
+              'key4' => new stdClass]);
 
   convert_to(vec[]);
-  convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdclass]);
+  convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdClass]);
 
   convert_to(dict[]);
   convert_to(dict[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
                   10 => null, 15 => true, 'key3' => 1.234,
-                  'key4' => new stdclass]);
+                  'key4' => new stdClass]);
 
   convert_to(keyset[]);
   convert_to(keyset[101, 202, 'val1', 'val2', 303]);
@@ -117,7 +117,7 @@ function convert_to($from) {
   convert_to("abcd");
   convert_to(new IterableObj);
   convert_to(new ThrowIterableObj);
-  convert_to(new stdclass);
+  convert_to(new stdClass);
   convert_to(STDIN);
   convert_to(Vector{1, 2, 3});
   convert_to(Map{'a' => 100, 200 => 'b'});

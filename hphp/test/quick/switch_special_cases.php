@@ -54,7 +54,7 @@ function main() {
     4,
     varray[],
     varray['foo', 'floo'],
-    new stdclass(),
+    new stdClass(),
     new c(),
     $f
   ];

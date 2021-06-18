@@ -6,5 +6,5 @@ function main($o) {
   $o->foo();
 }
 <<__EntryPoint>> function main_entry(): void {
-main(new stdclass);
+main(new stdClass);
 }

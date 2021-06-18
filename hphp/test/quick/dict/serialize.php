@@ -57,7 +57,7 @@ function try_unserialize($val) {
   roundtrip(dict[]);
   roundtrip(dict[1 => 'a', 2 => 'b', 3 => 'c']);
   roundtrip(dict['a' => 1, 'b' => 2, 'c' => 3]);
-  roundtrip(dict['abc' => new stdclass, 'def' => true,
+  roundtrip(dict['abc' => new stdClass, 'def' => true,
                  123 => 1.23, 456 => null,
                  789 => dict['a' => 1, 'b' => 2],
                  'ghi' => keyset[123, "abc"],
@@ -74,7 +74,7 @@ function try_unserialize($val) {
 
   // Recursive data structures
   try_unserialize("D:1:{i:1;O:8:\"stdClass\":1:{s:3:\"val\";a:1:{i:1;r:2;}}}");
-  $recursive_obj = new stdclass;
+  $recursive_obj = new stdClass;
   $recursive_dict = dict[1 => $recursive_obj];
   $recursive_obj->val = $recursive_dict;
   roundtrip($recursive_obj);

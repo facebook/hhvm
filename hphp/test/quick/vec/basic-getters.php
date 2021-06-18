@@ -109,7 +109,7 @@ function test($v, $description) {
 
 <<__EntryPoint>> function main(): void {
   test(vec[], "empty");
-  test(vec[new stdclass(), new stdclass(), new stdclass()],
+  test(vec[new stdClass(), new stdClass(), new stdClass()],
        "3 objects");
   test(vec[100, 200, 300, 400], "4 ints");
   test(vec[false, true, false, true], "4 bools");

@@ -300,28 +300,6 @@ bool handleConvNoticeLevel(
   return false;
 }
 
-// return true if throws
-bool handleConvNoticeCmp(
-    State& env,
-    Block* trace,
-    const char* lhs,
-    const char* rhs) {
-  const auto level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
-  if (LIKELY(level == ConvNoticeLevel::None)) return false;
-  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
-  const auto str = makeStaticString(folly::sformat(
-    "Comparing {} and {} using a relational operator", lhs, rhs));
-  if (level == ConvNoticeLevel::Throw) {
-    gen(env, ThrowInvalidOperation, trace, cns(env, str));
-    return true;
-  }
-  if (level == ConvNoticeLevel::Log) {
-    gen(env, RaiseNotice, trace, cns(env, str));
-  }
-  return false;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1336,13 +1314,7 @@ SSATmp* cmpStrIntImpl(State& env,
         default: always_assert(false);
       }
     }(opc);
-    const auto dblval = gen(env, ConvIntToDbl, right);
-    if (opc != EqStrInt && opc != NeqStrInt) {
-      if (handleConvNoticeCmp(env, inst->taken(), "string", "int")) {
-        return cns(env, TBottom);
-      }
-    }
-    return gen(env, dblOpc, cns(env, sd), dblval);
+    return gen(env, dblOpc, cns(env, sd), gen(env, ConvIntToDbl, right));
   } else {
     auto const intOpc = [](Opcode opcode) {
       switch (opcode) {
@@ -1355,11 +1327,6 @@ SSATmp* cmpStrIntImpl(State& env,
         default: always_assert(false);
       }
     }(opc);
-    if (opc != EqStrInt && opc != NeqStrInt) {
-      if (handleConvNoticeCmp(env, inst->taken(), "string", "int")) {
-        return cns(env, TBottom);
-      }
-    }
     return gen(
       env, intOpc, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
   }
@@ -1631,12 +1598,9 @@ SSATmp* simplifyCmpStrInt(State& env, const IRInstruction* inst) {
   double sd;
   auto const type =
     left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
-  const auto ret = type == KindOfDouble
+  return type == KindOfDouble
     ? gen(env, CmpDbl, cns(env, sd), gen(env, ConvIntToDbl, right))
     : gen(env, CmpInt, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
-  return handleConvNoticeCmp(env, inst->taken(), "string", "int")
-    ? cns(env, TBottom)
-    : ret;
 }
 
 SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {

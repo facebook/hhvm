@@ -58,21 +58,6 @@ void handleConvNotice(const std::string& lhs, const std::string& rhs) {
   if constexpr (!isEqualityOp<Op>()) handleConvNoticeForCmp(lhs.c_str(), rhs.c_str());
 }
 
-std::string typeStringForCoercionLogging(TypedValue tv) {
-  // for consistency with jit
-  if (tvIsObject(tv)) return "object";
-  if (tvIsResource(tv)) return "resource";
-  const auto str = describe_actual_type(&tv); // need to keep str alive
-  if (tvIsArrayLike(tv)) {
-    auto str_view = std::string_view(str);
-    if (str_view.substr(0, 3) == "HH\\") {
-      str_view.remove_prefix(3);
-      return std::string(str_view);
-    }
-  }
-  return str;
-}
-
 template<class Op>
 bool shouldMaybeTriggerConvNotice(DataType d1, DataType d2) {
   if (equivDataTypes(d1, d2)) return false;
@@ -896,7 +881,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   // put it after in case the original comparison throws
   if (shouldMaybeTriggerConvNotice<Op>(c1.m_type, c2.m_type)) {
     handleConvNotice<Op>(
-      typeStringForCoercionLogging(c1), typeStringForCoercionLogging(c2));
+      describe_actual_type(&c1), describe_actual_type(&c2));
   }
   return res;
 }
@@ -1417,7 +1402,7 @@ typename Op::RetType tvRelOp(TypedValue cell, T val) {
       }
       not_reached();
     }();
-    handleConvNotice<Op>(typeStringForCoercionLogging(cell), rhs);
+    handleConvNotice<Op>(describe_actual_type(&cell), rhs);
   }
   return res;
 }

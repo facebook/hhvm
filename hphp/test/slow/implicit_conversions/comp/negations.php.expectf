@@ -28,10 +28,10 @@ Notice: Comparing float and string using a relational operator in %s/negations.p
 
 Notice: Object of class A could not be converted to int in %s/negations.php on line 104
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 104
+Notice: Comparing A and int using a relational operator in %s/negations.php on line 104
 !(new A() < new A(new A()))
 
-Notice: Comparing object and string using a relational operator in %s/negations.php on line 106
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 106
 !(new B() < new C())
 
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 108
@@ -40,10 +40,10 @@ Notice: Comparing object of class B and object of class C using a relational ope
 
 Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 113
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 113
+Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 113
 !(xml < 42)
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 116
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 116
 !(Vector < Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector < 42)
@@ -56,7 +56,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 
 Notice: Object of class Closure$less#5;%s could not be converted to int in %s/negations.php on line 132
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 132
+Notice: Comparing Closure$less#5;%s and int using a relational operator in %s/negations.php on line 132
 !(fun < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun < 'baz')
@@ -89,7 +89,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) < 42)
 
-Notice: Comparing int and resource using a relational operator in %s/negations.php on line 166
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 166
 
 <=
 
@@ -121,10 +121,10 @@ Notice: Comparing float and string using a relational operator in %s/negations.p
 
 Notice: Object of class A could not be converted to int in %s/negations.php on line 193
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 193
+Notice: Comparing A and int using a relational operator in %s/negations.php on line 193
 !(new A() <= new A(new A()))
 
-Notice: Comparing object and string using a relational operator in %s/negations.php on line 195
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 195
 !(new B() <= new C())
 
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 197
@@ -133,10 +133,10 @@ Notice: Comparing object of class B and object of class C using a relational ope
 
 Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 202
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 202
+Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 202
 !(xml <= 42)
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 205
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 205
 !(Vector <= Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector <= 42)
@@ -149,7 +149,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 
 Notice: Object of class Closure$lesseq#5;%s could not be converted to int in %s/negations.php on line 221
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 221
+Notice: Comparing Closure$lesseq#5;%s and int using a relational operator in %s/negations.php on line 221
 !(fun <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <= 'baz')
@@ -182,7 +182,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) <= 42)
 
-Notice: Comparing int and resource using a relational operator in %s/negations.php on line 255
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 255
 
 >
 
@@ -214,10 +214,10 @@ Notice: Comparing float and string using a relational operator in %s/negations.p
 
 Notice: Object of class A could not be converted to int in %s/negations.php on line 282
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 282
+Notice: Comparing A and int using a relational operator in %s/negations.php on line 282
 !(new A() > new A(new A()))
 
-Notice: Comparing object and string using a relational operator in %s/negations.php on line 284
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 284
 !(new B() > new C())
 
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 286
@@ -226,10 +226,10 @@ Notice: Comparing object of class B and object of class C using a relational ope
 
 Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 291
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 291
+Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 291
 !(xml > 42)
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 294
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 294
 !(Vector > Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector > 42)
@@ -242,7 +242,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 
 Notice: Object of class Closure$gt#5;%s could not be converted to int in %s/negations.php on line 310
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 310
+Notice: Comparing Closure$gt#5;%s and int using a relational operator in %s/negations.php on line 310
 !(fun > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun > 'baz')
@@ -275,7 +275,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) > 42)
 
-Notice: Comparing int and resource using a relational operator in %s/negations.php on line 344
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 344
 
 >=
 
@@ -307,10 +307,10 @@ Notice: Comparing float and string using a relational operator in %s/negations.p
 
 Notice: Object of class A could not be converted to int in %s/negations.php on line 371
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 371
+Notice: Comparing A and int using a relational operator in %s/negations.php on line 371
 !(new A() >= new A(new A()))
 
-Notice: Comparing object and string using a relational operator in %s/negations.php on line 373
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 373
 !(new B() >= new C())
 
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 375
@@ -319,10 +319,10 @@ Notice: Comparing object of class B and object of class C using a relational ope
 
 Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 380
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 380
+Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 380
 !(xml >= 42)
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 383
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 383
 !(Vector >= Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector >= 42)
@@ -335,7 +335,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 
 Notice: Object of class Closure$gte#5;%s could not be converted to int in %s/negations.php on line 399
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 399
+Notice: Comparing Closure$gte#5;%s and int using a relational operator in %s/negations.php on line 399
 !(fun >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun >= 'baz')
@@ -368,7 +368,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) >= 42)
 
-Notice: Comparing int and resource using a relational operator in %s/negations.php on line 433
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 433
 
 <=>
 
@@ -400,10 +400,10 @@ Notice: Comparing float and string using a relational operator in %s/negations.p
 
 Notice: Object of class A could not be converted to int in %s/negations.php on line 461
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 461
+Notice: Comparing A and int using a relational operator in %s/negations.php on line 461
 !(new A() <=> new A(new A()))
 
-Notice: Comparing object and string using a relational operator in %s/negations.php on line 463
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 463
 !(new B() <=> new C())
 
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 465
@@ -412,10 +412,10 @@ Notice: Comparing object of class B and object of class C using a relational ope
 
 Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 470
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 470
+Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 470
 !(xml <=> 42)
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 473
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 473
 !(Vector <=> Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector <=> 42)
@@ -428,7 +428,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 
 Notice: Object of class Closure$cmp#5;%s could not be converted to int in %s/negations.php on line 489
 
-Notice: Comparing int and object using a relational operator in %s/negations.php on line 489
+Notice: Comparing Closure$cmp#5;%s and int using a relational operator in %s/negations.php on line 489
 !(fun <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <=> 'baz')
@@ -461,4 +461,4 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) <=> 42)
 
-Notice: Comparing int and resource using a relational operator in %s/negations.php on line 523
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 523

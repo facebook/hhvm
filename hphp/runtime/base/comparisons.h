@@ -147,22 +147,12 @@ inline bool equal(bool v1, const Variant& v2) { return equal(v2, v1); }
 
 inline bool less(bool v1, bool    v2) { return (v1?1:0) < (v2?1:0); }
 inline bool less(bool v1, int     v2) = delete;
-inline bool less(bool v1, int64_t v2) {
-  handleConvNoticeForCmp("bool", "int");
-  return less(v1,(v2 != 0));
-}
-inline bool less(bool v1, double  v2) {
-  handleConvNoticeForCmp("bool", "float");
-  return less(v1,(v2 != 0.0));
-}
+inline bool less(bool v1, int64_t v2) { return less(v1,(v2 != 0)); }
+inline bool less(bool v1, double  v2) { return less(v1,(v2 != 0.0)); }
 inline bool less(bool v1, const StringData *v2) {
-  handleConvNoticeForCmp("bool", "string");
   return less(v1, (v2 ? v2->toBoolean() : false));
 }
-inline bool less(bool v1, const String& v2) {
-  handleConvNoticeForCmp("bool", "string");
-  return less(v1,v2.toBoolean());
-}
+inline bool less(bool v1, const String& v2) { return less(v1,v2.toBoolean()); }
 inline bool less(bool v1, const char* v2) = delete;
 inline bool less(bool v1, const Array& v2) {
   if (v2.isVec()) throw_vec_compare_exception();
@@ -176,22 +166,12 @@ inline bool less(bool v1, const Variant& v2) { return more(v2,v1); }
 
 inline bool more(bool v1, bool    v2) { return (v1?1:0) > (v2?1:0); }
 inline bool more(bool v1, int     v2) = delete;
-inline bool more(bool v1, int64_t v2) {
-  handleConvNoticeForCmp("bool", "int");
-  return more(v1,(v2 != 0));
-}
-inline bool more(bool v1, double  v2) {
-  handleConvNoticeForCmp("bool", "float");
-  return more(v1,(v2 != 0.0));
-}
+inline bool more(bool v1, int64_t v2) { return more(v1,(v2 != 0)); }
+inline bool more(bool v1, double  v2) { return more(v1,(v2 != 0.0)); }
 inline bool more(bool v1, const StringData *v2) {
-  handleConvNoticeForCmp("bool", "string");
   return more(v1, (v2 ? v2->toBoolean() : false));
 }
-inline bool more(bool v1, const String& v2) {
-  handleConvNoticeForCmp("bool", "string");
-  return more(v1,v2.toBoolean());
-}
+inline bool more(bool v1, const String& v2) { return more(v1,v2.toBoolean()); }
 inline bool more(bool v1, const char* v2)  = delete;
 inline bool more(bool v1, const Array& v2) {
   if (v2.isVec()) throw_vec_compare_exception();
@@ -387,13 +367,9 @@ inline bool less(double v1, int     v2) = delete;
 inline bool less(double v1, int64_t v2) { return more(v2, v1); }
 inline bool less(double v1, double  v2) { return v1 < v2; }
 inline bool less(double v1, const StringData *v2) {
-  handleConvNoticeForCmp("float", "string");
   return less(v1, (v2 ? v2->toDouble() : 0.0));
 }
-inline bool less(double v1, const String& v2) {
-  handleConvNoticeForCmp("float", "string");
-  return less(v1,v2.toDouble());
-}
+inline bool less(double v1, const String& v2) { return less(v1,v2.toDouble()); }
 inline bool less(double v1, const char* v2)  = delete;
 inline bool less(double /*v1*/, const Array& v2) {
   if (v2.isVec()) throw_vec_compare_exception();
@@ -412,13 +388,9 @@ inline bool more(double v1, int     v2) = delete;
 inline bool more(double v1, int64_t v2) { return less(v2, v1); }
 inline bool more(double v1, double  v2) { return v1 > v2; }
 inline bool more(double v1, const StringData *v2) {
-  handleConvNoticeForCmp("float", "string");
   return more(v1, (v2 ? v2->toDouble() : 0.0));
 }
-inline bool more(double v1, const String& v2) {
-  handleConvNoticeForCmp("float", "string");
-  return more(v1,v2.toDouble());
-}
+inline bool more(double v1, const String& v2) { return more(v1,v2.toDouble()); }
 inline bool more(double v1, const char* v2)  = delete;
 inline bool more(double /*v1*/, const Array& v2) {
   if (v2.isVec()) throw_vec_compare_exception();

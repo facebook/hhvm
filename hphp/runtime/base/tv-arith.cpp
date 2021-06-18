@@ -342,6 +342,7 @@ again:
     return;
   }
 
+  // This sets the LHS to a num even if the actual op throws :'(
   tvSet(numericConvHelper(*c1), c1);
   assertx(type(c1) == KindOfInt64 || type(c1) == KindOfDouble);
   goto again;

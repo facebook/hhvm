@@ -17,8 +17,11 @@ let go (filenames : string list) ctx =
     "multi_remote_execution_trace"
     multi_remote_execution_trace;
   (* filter out non-existent files *)
-  let paths = List.filter_map filenames ~f:Sys_utils.realpath in
-  let paths = List.map ~f:Relative_path.create_detect_prefix paths in
+  let paths =
+    List.filter_map filenames ~f:(fun file ->
+        Sys_utils.realpath file
+        |> Option.map ~f:Relative_path.create_detect_prefix)
+  in
   let errors =
     List.fold_left paths ~init:Errors.empty ~f:(fun acc path ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

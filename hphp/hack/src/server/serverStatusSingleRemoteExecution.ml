@@ -16,12 +16,15 @@ let go file_name ctx =
     "single_remote_execution_trace"
     single_remote_execution_trace;
   let errors =
-    let path = Relative_path.create_detect_prefix file_name in
-    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-      Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
-    in
-    errors
+    match Sys_utils.realpath file_name with
+    | None -> Errors.empty
+    | _ ->
+      let path = Relative_path.create_detect_prefix file_name in
+      let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+      let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+        Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+      in
+      errors
   in
   let errors = Base64.encode_exn ~pad:false (Marshal.to_string errors []) in
   let dep_edges = HashSet.to_list dep_edges in

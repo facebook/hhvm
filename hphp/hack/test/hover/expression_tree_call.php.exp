@@ -1,0 +1,1 @@
+{ snippet = "async function bar(ExampleContext $_): Awaitable<\n  ExprTree<\n    Code,\n    mixed,\n    (function(ExampleString): ExampleInt)\n  >\n>"; addendum = ["Return type: `Awaitable<ExprTree<Code, mixed, (function(ExampleString): ExampleInt)>>`"]; pos = Some "line 12, character 8 - line 12, character 10" }

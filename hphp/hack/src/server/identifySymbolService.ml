@@ -281,6 +281,10 @@ let visitor =
          visitor expression is unityped, so we can't do much.*)
       let acc = self#on_hint env et_hint in
 
+      (* We're overriding super#on_expression_tree, so we need to
+         update the environment. *)
+      let env = Tast_env.set_in_expr_tree env true in
+
       let e =
         match snd et_virtualized_expr with
         | Aast.Call
@@ -332,6 +336,10 @@ let visitor =
       let ( + ) = self#plus in
       let ea =
         match snd e with
+        | Aast.Call ((_, Aast.Class_const (_, (_, "symbolType"))), _, [arg], _)
+          when Tast_env.is_in_expr_tree env ->
+          (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
+          self#on_expr env arg
         | Aast.Id id -> process_fun_id id
         | Aast.Obj_get ((((_, ty), _) as obj), (_, Aast.Id mid), _, _) ->
           self#on_expr env obj + typed_method env ty mid
